@@ -114,7 +114,7 @@
             div(v-if="isAdmin" class="layer-num") Layer數量： {{config.layers.length}}（Ａdmin User 才看得到）
             div(class="page-control" :style="styles('control')")
               template(v-for="(layer, index) in config.layers")
-                nu-controller(v-if="layer.type !== 'image' || !layer.imgControl"
+                nu-controller(v-if="(currSelectedIndex === -1 || currSelectedIndex === index || layer.type === 'frame') && (layer.type !== 'image' || !layer.imgControl) "
                   data-identifier="controller"
                   :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
                   :layerIndex="index"

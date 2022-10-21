@@ -119,19 +119,22 @@ export default Vue.extend({
     }
   },
   mounted() {
-    const body = this.$refs.body as HTMLElement
-    /**
-     * Prevent the context menu from showing up when right click or Ctrl + left click on controller
-     */
-    body.addEventListener('contextmenu', (e: MouseEvent) => {
-      e.preventDefault()
-    }, false)
-    this.setLastSelectedLayerIndex(this.layerIndex)
-    this.parentId = this.primaryLayer.id as string
+    this.$nextTick(() => {
+      const body = this.$refs.body as HTMLElement
 
-    if (this.type === LayerType.frame && this.config.type === LayerType.image) {
-      body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
-    }
+      /**
+       * Prevent the context menu from showing up when right click or Ctrl + left click on controller
+       */
+      body.addEventListener('contextmenu', (e: MouseEvent) => {
+        e.preventDefault()
+      }, false)
+      this.setLastSelectedLayerIndex(this.layerIndex)
+      this.parentId = this.primaryLayer.id as string
+
+      if (this.type === LayerType.frame && this.config.type === LayerType.image) {
+        body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+      }
+    })
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),

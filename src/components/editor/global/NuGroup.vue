@@ -8,7 +8,7 @@
       :subLayerIndex="index"
       :contentScaleRatio="contentScaleRatio"
       :config="layer"
-      :inGroup="true")
+      :isSubLayer="true")
 </template>
 
 <script lang="ts">

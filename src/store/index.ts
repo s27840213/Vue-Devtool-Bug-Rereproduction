@@ -286,7 +286,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   get3dEnabledPageIndex(state: IEditorState) {
     const { pageIndex, layers } = state.currSelectedInfo
     const layerNum = layers.length
-    return layerNum > 1 && layerNum <= 100 ? pageIndex : -1
+    return layerNum > 1 && layerNum <= 50 ? pageIndex : -1
   }
 }
 

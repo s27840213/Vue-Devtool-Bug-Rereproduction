@@ -14,7 +14,8 @@
       :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
       :contentScaleRatio="contentScaleRatio"
       :primaryLayer="config"
-      :config="layer")
+      :config="layer"
+      :isSubLayer="true")
 </template>
 
 <script lang="ts">

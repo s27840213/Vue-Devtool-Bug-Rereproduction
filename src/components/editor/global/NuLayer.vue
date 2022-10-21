@@ -40,6 +40,7 @@ import SquareLoading from '@/components/global/SqureLoading.vue'
 import frameUtils from '@/utils/frameUtils'
 import { mapGetters } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
+import { ILayer } from '@/interfaces/layer'
 
 export default Vue.extend({
   components: {
@@ -51,7 +52,7 @@ export default Vue.extend({
     layerIndex: Number,
     subLayerIndex: Number,
     imgControl: Boolean,
-    inGroup: {
+    isSubLayer: {
       type: Boolean,
       default: false
     },
@@ -96,7 +97,10 @@ export default Vue.extend({
       isUploadingShadowImg: 'shadow/isUploading',
       isHandling: 'shadow/isHandling',
       isShowPagePanel: 'page/getShowPagePanel'
-    })
+    }),
+    isDragging(): boolean {
+      return (this.config as ILayer).dragging
+    }
   },
   methods: {
     onDrop(e: DragEvent) {
@@ -121,7 +125,8 @@ export default Vue.extend({
         {
           // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
           'pointer-events': 'none',
-          transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
+          transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none',
+          willChange: !this.isSubLayer && this.isDragging ? 'transform' : 'none'
         }
       )
       switch (this.config.type) {
