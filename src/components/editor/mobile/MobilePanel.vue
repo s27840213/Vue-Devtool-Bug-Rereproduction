@@ -255,11 +255,7 @@ export default Vue.extend({
           'row-gap': this.hideDynamicComp ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
-            ? 'initial'
-            : this.isDraggingPanel ? this.panelHeight + 'px' : this.panelHeight + 'px'
-          // height: this.fixSize || this.extraFixSizeCondition
-          //   ? 'initial'
-          //   : this.panelHeight + 'px'
+            ? 'initial' : this.panelHeight + 'px'
         }
       )
     },
@@ -519,7 +515,10 @@ export default Vue.extend({
   },
   mounted() {
     this.panelHeight = this.initHeightPx()
-    this.resizeObserver = new (window as any).ResizeObserver(this.fitPage)
+    this.resizeObserver = new ResizeObserver(() => {
+      this.$emit('panelHeight', (this.$refs.panel as HTMLElement).clientHeight)
+      this.fitPage()
+    })
     this.resizeObserver.observe(this.$refs.panel as Element)
   },
   beforeDestroy() {
@@ -627,7 +626,8 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .mobile-panel {
-  position: relative;
+  position: absolute;
+  bottom: 0;
   width: 100%;
   box-sizing: border-box;
   z-index: setZindex(mobile-panel);

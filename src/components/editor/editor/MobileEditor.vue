@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="mobile-editor")
-    div(class="mobile-editor__top")
+    div(class="mobile-editor__top" :style="topStyle")
       header-tabs(@switchTab="switchTab"
         @showAllPages="showAllPages"
         :currTab="currActivePanel"
@@ -14,11 +14,14 @@
             :showMobilePanel="showMobilePanelAfterTransitoin")
       transition(name="panel-up"
                 @before-enter="beforeEnter"
+                @after-enter="afterEnter"
+                @before-leave="beforeLeave"
                 @after-leave="afterLeave")
         mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
           :currColorEvent="currColorEvent"
-          @switchTab="switchTab")
+          @switchTab="switchTab"
+          @panelHeight="setPanelHeight")
       //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
       //-   :currActivePanel="'color'"
       //-   :currColorEvent="ColorEventType.background"
@@ -68,7 +71,9 @@ export default Vue.extend({
       isLoading: false,
       currColorEvent: '',
       ColorEventType,
-      showMobilePanelAfterTransitoin: false
+      showMobilePanelAfterTransitoin: false,
+      panelAnimating: false,
+      panelHeight: 0
     }
   },
   created() {
@@ -134,6 +139,9 @@ export default Vue.extend({
     }),
     inPagePanel(): boolean {
       return SidebarPanelType.page === this.currPanel
+    },
+    topStyle(): Record<string, string> {
+      return { paddingBottom: this.panelAnimating ? '0' : `${this.panelHeight}px` }
     },
     scaleRatioEditorPos(): { [index: string]: string } {
       return this.inPagePanel ? {
@@ -228,14 +236,34 @@ export default Vue.extend({
         })
       }
     },
+    setPanelHeight(height: number) {
+      this.panelHeight = height
+    },
     beforeEnter() {
       this.showMobilePanelAfterTransitoin = true
+      this.panelAnimating = true
+    },
+    afterEnter() {
+      this.panelAnimating = false
+      this.$nextTick(() => {
+        pageUtils.fitPage()
+      })
+    },
+    beforeLeave() {
+      this.panelAnimating = true
+      this.$nextTick(() => {
+        pageUtils.fitPage()
+      })
     },
     afterLeave() {
       this.setCurrActivePanel('none')
       setTimeout(() => {
         this.showMobilePanelAfterTransitoin = false
       }, 300)
+      this.$nextTick(() => {
+        this.panelHeight = 0
+        this.panelAnimating = false
+      })
     }
   }
 })
@@ -250,11 +278,12 @@ export default Vue.extend({
   grid-template-columns: 1fr;
 
   &__top {
+    box-sizing: border-box;
     height: 100%;
     width: 100%;
     position: relative;
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto 1fr;
     grid-template-columns: 1fr;
     background-color: setColor(gray-5);
   }

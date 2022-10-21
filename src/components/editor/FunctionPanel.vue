@@ -37,6 +37,7 @@
       panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
       panel-photo-setting(v-if="showPhotoSetting" v-on="$listeners")
       panel-shape-setting(v-if="showShapeSetting" v-on="$listeners")
+      panel-img-ctrl(v-if="isImgCtrl" v-on="$listeners")
 </template>
 
 <script lang="ts">
@@ -52,6 +53,7 @@ import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetti
 import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
 import PanelBgRemove from '@/components/editor/panelFunction/PanelBgRemove.vue'
 import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
+import PanelImgCtrl from '@/components/editor/panelFunction/panelImgCtrl.vue'
 import DownloadBtn from '@/components/download/DownloadBtn.vue'
 import { mapGetters, mapState } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
@@ -76,7 +78,8 @@ export default Vue.extend({
     PanelTextEffectSetting,
     DownloadBtn,
     PanelBgRemove,
-    PanelPhotoShadow
+    PanelPhotoShadow,
+    PanelImgCtrl
   },
   data() {
     return {
@@ -87,6 +90,7 @@ export default Vue.extend({
   computed: {
     ...mapState('fontTag', ['tags', 'showMore']),
     ...mapState(['isMoving']),
+    ...mapState('imgControl', ['image']),
     ...mapGetters({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -101,11 +105,11 @@ export default Vue.extend({
       isFontLoading: 'text/getIsFontLoading'
     }),
     functionPanelStyles(): { [index: string]: string } {
-      return this.isShowPagePreview ? {
-        'pointer-events': 'none'
-      } : {
-        'pointer-events': 'auto'
+      const result = {
+        'overflow-y': this.showFont ? 'hidden' : 'auto',
+        'pointer-events': this.isShowPagePreview ? 'none' : 'auto'
       }
+      return result
     },
     isHandleShadow(): boolean {
       return this.isProcessImgShadow || this.isUploadImgShadow
@@ -157,7 +161,10 @@ export default Vue.extend({
     },
     showGeneral(): boolean {
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
-        this.selectedLayerNum !== 0
+        this.selectedLayerNum !== 0 && !this.isImgCtrl
+    },
+    isImgCtrl(): boolean {
+      return this.image !== undefined
     },
     showPageSetting(): boolean {
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
@@ -169,7 +176,7 @@ export default Vue.extend({
     },
     showPhotoSetting(): boolean {
       return (!this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
-        this.targetIs('image') && this.singleTargetType())
+        this.targetIs('image') && this.singleTargetType()) && !this.isImgCtrl
     },
     showShapeSetting(): boolean {
       const { getCurrConfig } = LayerUtils
@@ -305,7 +312,7 @@ export default Vue.extend({
   box-sizing: border-box;
   z-index: setZindex("function-panel");
   box-shadow: 1px 0 4px setColor(blue-1, 0.1);
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
   &__topbar {
     height: 60px;
