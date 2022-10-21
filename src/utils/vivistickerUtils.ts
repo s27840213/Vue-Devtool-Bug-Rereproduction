@@ -118,7 +118,7 @@ class ViviStickerUtils {
   }
 
   appToast(msg: string) {
-    this.sendToIOS('SHOW_TOAST', msg)
+    this.sendToIOS('SHOW_TOAST', { msg })
   }
 
   sendDoneLoading(width: number, height: number, options: string, needCrop = false) {
