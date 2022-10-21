@@ -113,7 +113,8 @@ export default Vue.extend({
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isUploadingShadowImg: 'shadow/isUploading',
       isHandling: 'shadow/isHandling',
-      isShowPagePanel: 'page/getShowPagePanel'
+      isShowPagePanel: 'page/getShowPagePanel',
+      currSelectedPageIndex: 'getCurrSelectedPageIndex'
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
@@ -123,14 +124,15 @@ export default Vue.extend({
     pageStyles(): { [index: string]: string } {
       return {
         width: `${this.config.width * this.contentScaleRatio}px`,
-        height: `${this.config.height * this.contentScaleRatio}px`
+        height: `${this.config.height * this.contentScaleRatio}px`,
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
     stylesWith3DPreserve(): { [index: string]: string } {
       return {
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
-        transformStyle: 'preserve-3d'
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
     layerFilter(): any {
@@ -139,6 +141,9 @@ export default Vue.extend({
         // return layer.type !== LayerType.text
         return layer
       })
+    },
+    hasSelectedLayer(): boolean {
+      return this.currSelectedInfo.layers.length > 0
     }
   },
   mounted() {
@@ -278,7 +283,6 @@ export default Vue.extend({
   position: absolute;
   box-sizing: border-box;
   background-repeat: no-repeat;
-  transform-style: preserve-3d;
 }
 
 .pages-loading {

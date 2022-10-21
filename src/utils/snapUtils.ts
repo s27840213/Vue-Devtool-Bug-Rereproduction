@@ -8,7 +8,10 @@ import LayerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
+import { EventEmitter } from 'events'
 class SnapUtils {
+  id: string
+  event: any
   pageIndex: number
   GUIDELINE_OFFSET: number
   GUIDEANGLE_OFFSET: number
@@ -20,6 +23,8 @@ class SnapUtils {
   closestSnapAngle: number
 
   constructor(pageIndex: number) {
+    this.event = new EventEmitter()
+    this.id = generalUtils.generateRandomString(4)
     this.pageIndex = pageIndex
     this.GUIDELINE_OFFSET = 5
     this.GUIDEANGLE_OFFSET = 1
@@ -32,6 +37,16 @@ class SnapUtils {
 
   get guidelinePos(): { [index: string]: Array<number> } {
     return pageUtils.currFocusPage.guidelines
+  }
+
+  on(type: string, callback: () => void): void {
+    // replace origin event
+    this.event.on(type, callback)
+  }
+
+  off(type: string, callback: () => void): void {
+    // replace origin event
+    this.event.off(type, callback)
   }
 
   getSnaplinePos(): ISnaplinePos {

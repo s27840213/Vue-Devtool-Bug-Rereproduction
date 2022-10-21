@@ -302,7 +302,7 @@ export default Vue.extend({
   position: absolute;
   top: 0;
   left: 50%;
-  transform: translate3d(-50%, 0px, 0);
+  transform: translate(-50%, 0px);
   z-index: setZindex("editor-header");
   pointer-events: none;
 }

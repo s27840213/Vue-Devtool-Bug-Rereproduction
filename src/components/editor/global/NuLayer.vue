@@ -117,10 +117,11 @@ export default Vue.extend({
     },
     layerStyles(): any {
       const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer(), this.contentScaleRatio),
+        CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
         {
           // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
-          'pointer-events': 'none'
+          'pointer-events': 'none',
+          transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
         }
       )
       switch (this.config.type) {
@@ -171,14 +172,14 @@ export default Vue.extend({
       const { zindex } = this.config.styles
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
-      const transform = isImgType ? `scale(${1 / (this.pageScaleRatio())})` : `scale(${1 / (this.compensationRatio())}) translateZ(0)`
+      const transform = isImgType ? `scale(${1 / (this.pageScaleRatio())})` : `scale(${1 / (this.compensationRatio())})`
       /**
       * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
       * And if type is tmp and its zindex value is larger than 0 (default is 0, isn't 0 means its value has been reassigned before), we need to set it to flat too.
       */
       return {
         transform,
-        'transform-style': type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
+        'transform-style': pageUtils._3dEnabledPageIndex !== this.pageIndex ? 'none' : type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
     },
     scaleStyles(): { [index: string]: string } {
@@ -189,7 +190,7 @@ export default Vue.extend({
 
       const styles = {
         transform: isImgType ? `scale(${this.pageScaleRatio()})` : `scale(${scale * (this.contentScaleRatio)}) scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`,
-        'transform-style': type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
+        'transform-style': pageUtils._3dEnabledPageIndex !== this.pageIndex ? 'none' : type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
       return styles
     }
@@ -208,7 +209,6 @@ export default Vue.extend({
   // box-shadow: inset 0px 0px 0px 7px rgba(136, 136, 136, 0.5);
   width: 100px;
   height: 100px;
-  transform-style: preserve-3d;
   &:focus {
     background-color: rgba(168, 218, 220, 1);
   }

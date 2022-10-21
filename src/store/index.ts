@@ -282,6 +282,11 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getContentScaleRatio(state: IEditorState) {
     return state.defaultContentScaleRatio
+  },
+  get3dEnabledPageIndex(state: IEditorState) {
+    const { pageIndex, layers } = state.currSelectedInfo
+    const layerNum = layers.length
+    return layerNum > 1 && layerNum <= 100 ? pageIndex : -1
   }
 }
 

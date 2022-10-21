@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="nu-page"
-      :style="pageMarginStyles"
+      :style="pageRootStyles"
       ref="page")
     div(v-if="!isDetailPage && !isMobile"
       class="page-title text-left pb-10"
@@ -111,6 +111,7 @@
           div(class="scale-container relative"
               :style="scaleContainerStyles")
             page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio")
+            div(v-if="isAdmin" class="layer-num") Layer數量： {{config.layers.length}}（Ａdmin User 才看得到）
             div(class="page-control" :style="styles('control')")
               template(v-for="(layer, index) in config.layers")
                 nu-controller(v-if="layer.type !== 'image' || !layer.imgControl"
@@ -121,9 +122,7 @@
                   :config="layer"
                   :snapUtils="snapUtils"
                   :contentScaleRatio="contentScaleRatio"
-                  @setFocus="setFocus()"
-                  @getClosestSnaplines="getClosestSnaplines"
-                  @clearSnap="clearSnap")
+                  @setFocus="setFocus()")
             dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
             div(v-if="isBackgroundImageControl"
                 class="background-control"
@@ -141,6 +140,7 @@
             div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
                 class="dim-background"
                 :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
+
       div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
         class="page-highlighter"
         :style="wrapperStyles()")
@@ -155,23 +155,12 @@
           :iconName="'move-vertical'" :iconWidth="`${15}px`" :iconColor="'white'")
         div(class="page-resizer__resizer-bar")
         div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{!isResizingPage ? '拖曳調整畫布高度' : `${Math.trunc(config.height)}px`}}
-      div(class="snap-area"
-        :style="wrapperStyles()")
-        div(v-for="line in closestSnaplines.v"
-          class="snap-area__line snap-area__line--vr"
-          :style="snapLineStyles('v', line)")
-        div(v-for="line in closestSnaplines.h"
-          class="snap-area__line snap-area__line--hr"
-          :style="snapLineStyles('h', line)")
-        template(v-if="isShowGuideline && !isDetailPage")
-          div(v-for="(line,index) in guidelines.v"
-            class="snap-area__line snap-area__line--vr"
-            :style="snapLineStyles('v', line,true)"
-            @mouseover="lockGuideline ? null : showGuideline(line,'v',index)")
-          div(v-for="(line,index) in guidelines.h"
-            class="snap-area__line snap-area__line--hr"
-            :style="snapLineStyles('h', line,true)"
-            @mouseover="lockGuideline ? null : showGuideline(line,'h',index)")
+      snap-line-area(
+        :config="config"
+        :pageIndex="pageIndex"
+        :pageScaleRatio="pageScaleRatio"
+        :snapUtils="snapUtils"
+      )
     template(v-else)
       div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
@@ -195,6 +184,7 @@ import layerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import NuImage from '@/components/editor/global/NuImage.vue'
 import DimBackground from '@/components/editor/page/DimBackground.vue'
+import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import rulerUtils from '@/utils/rulerUtils'
 import { IPage } from '@/interfaces/page'
@@ -214,6 +204,7 @@ export default Vue.extend({
     NuBackgroundController,
     PageContent,
     DimBackground,
+    SnapLineArea,
     LazyLoad
   },
   data() {
@@ -259,12 +250,6 @@ export default Vue.extend({
     })
   },
   watch: {
-    guidelines: {
-      handler() {
-        this.getClosestSnaplines()
-      },
-      deep: true
-    },
     isOutOfBound(val) {
       if (val && this.currFunctionPanelType === FunctionPanelType.photoShadow && layerUtils.pageIndex === this.pageIndex) {
         GroupUtils.deselect()
@@ -302,7 +287,8 @@ export default Vue.extend({
       lockGuideline: 'getLockGuideline',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
-      contentScaleRatio: 'getContentScaleRatio'
+      contentScaleRatio: 'getContentScaleRatio',
+      isAdmin: 'user/isAdmin'
     }),
     scaleContainerStyles(): { [index: string]: string } {
       return {
@@ -378,18 +364,16 @@ export default Vue.extend({
     guidelines(): { [index: string]: Array<number> } {
       return (this.config as IPage).guidelines
     },
-    isShowGuideline(): boolean {
-      return rulerUtils.showGuideline
-    },
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
     },
     isDetailPage(): boolean {
       return this.groupType === 1
     },
-    pageMarginStyles(): { [index: string]: string } {
+    pageRootStyles(): { [index: string]: string } {
       return {
-        margin: this.isDetailPage ? '0px auto' : '25px auto'
+        margin: this.isDetailPage ? '0px auto' : '25px auto',
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
       }
     },
     isOutOfBound(): boolean {
@@ -452,13 +436,15 @@ export default Vue.extend({
       } : {
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
-        overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden'
+        overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden',
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
       }
     },
     wrapperStyles() {
       return {
         width: `${this.config.width * (this.scaleRatio / 100)}px`,
-        height: `${this.config.height * (this.scaleRatio / 100)}px`
+        height: `${this.config.height * (this.scaleRatio / 100)}px`,
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
       }
     },
     snapLineStyles(dir: string, pos: number, isGuideline?: string) {
@@ -466,13 +452,13 @@ export default Vue.extend({
       return dir === 'v' ? {
         height: '100%',
         width: '1px',
-        transform: `translate3d(${pos}px,0,50px)`,
+        transform: `translate(${pos}px,0)`,
         'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
       }
         : {
           width: '100%',
           height: '1px',
-          transform: `translate3d(0,${pos}px,50px)`,
+          transform: `translate(0,${pos}px)`,
           'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
         }
     },
@@ -506,22 +492,6 @@ export default Vue.extend({
         const currPage = this.$refs.page as HTMLElement
         currPage.focus()
       })
-    },
-    coordinateHandler(e: MouseEvent) {
-      var rect = this.coordinate.getBoundingClientRect()
-      this.coordinateWidth = e.clientX - rect.left
-      this.coordinateHeight = e.clientY - rect.top
-      this.coordinate.style.width = `${this.coordinateWidth}px`
-      this.coordinate.style.height = `${this.coordinateHeight}px`
-    },
-    getClosestSnaplines() {
-      this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v.map((snapline: ISnapline) => snapline.pos)]
-      this.closestSnaplines.h = [...this.snapUtils.closestSnaplines.h.map((snapline: ISnapline) => snapline.pos)]
-    },
-    clearSnap(): void {
-      this.snapUtils.clear()
-      this.closestSnaplines.v = []
-      this.closestSnaplines.h = []
     },
     addPage() {
       const { getCurrLayer: currLayer, layerIndex, pageIndex } = layerUtils
@@ -708,7 +678,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-page {
   position: relative;
-  transform-style: preserve-3d;
   user-select: none;
 
   &__icons {
@@ -791,7 +760,6 @@ export default Vue.extend({
   position: absolute;
   top: 0px;
   left: 0px;
-  transform-style: preserve-3d;
   // this css property will prevent the page-control div from blocking all the event of page-content
   pointer-events: none;
   :focus {
@@ -821,37 +789,6 @@ export default Vue.extend({
     border-radius: 5px;
     box-sizing: border-box;
     background: setColor(gray-2);
-  }
-}
-
-.snap-area {
-  @include size(100%, 100%);
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  transform-style: preserve-3d;
-  &__line {
-    position: absolute;
-    top: 0;
-    left: 0;
-    background-color: setColor("blue-1");
-    &::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 5px;
-      height: 100%;
-    }
-    &::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 5px;
-      height: 100%;
-    }
   }
 }
 

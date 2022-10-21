@@ -606,8 +606,6 @@ $REULER_SIZE: 20px;
     position: relative;
     flex-direction: column;
     justify-content: center;
-    transform-style: preserve-3d;
-    transform: scale(1);
     padding: 40px;
   }
 

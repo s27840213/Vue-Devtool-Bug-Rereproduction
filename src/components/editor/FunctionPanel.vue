@@ -1,6 +1,9 @@
 <template lang="pug">
   div(class="function-panel scrollbar-gray"
     :style="functionPanelStyles")
+    //- span {{pageUtils._3dEnabledPageIndex}},
+    //- span {{pageUtils.currFocusPageIndex}},
+    //- span {{pageUtils._3dEnabledPageIndex === pageUtils.currFocusPageIndex}}
     div(class="function-panel__topbar")
       svg-icon(:class="{'pointer': !isInFirstStep}"
         :iconName="'undo'"
@@ -24,7 +27,7 @@
         :squared="true"
         class="btn-file rounded full-height"
         @click.native="openFilePopup")
-    div(v-if="!isShowPagePreview && !isMoving" :class="{'p-20': true, 'dim-background': showMore}")
+    div(v-if="!isShowPagePreview" :class="{'p-20': true, 'dim-background': showMore}")
       panel-bg-remove(v-if="showBgRemove")
       panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
       panel-general(v-if="showGeneral")
@@ -58,6 +61,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
 import { FunctionPanelType, LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: {
@@ -76,7 +80,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      isFontsPanelOpened: false
+      isFontsPanelOpened: false,
+      pageUtils
     }
   },
   computed: {

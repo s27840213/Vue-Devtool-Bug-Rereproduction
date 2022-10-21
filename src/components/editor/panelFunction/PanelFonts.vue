@@ -231,9 +231,9 @@ export default Vue.extend({
       const { keyword, pending } = this
       if (pending || !keyword || this.searchResult.length > 0) return ''
       return `${i18n.t('NN0393', {
-          keyword: this.keywordLabel,
-          target: i18n.tc('NN0353', 1)
-        })}`
+        keyword: this.keywordLabel,
+        target: i18n.tc('NN0353', 1)
+      })}`
     }
   },
   methods: {
@@ -365,7 +365,7 @@ export default Vue.extend({
       justify-content: center;
       width: 100%;
       position: absolute;
-      transform: translate3d(0, -100%, 0);
+      transform: translate(0, -100%);
       padding: 12px 0px 8px 0px;
       background-image: linear-gradient(transparent, setColor(white, 0.9) 30%);
       color: setColor(blue-1);

@@ -54,6 +54,10 @@ class PageUtils {
     return store.getters.getCurrFocusPageIndex
   }
 
+  get _3dEnabledPageIndex() {
+    return store.getters.get3dEnabledPageIndex
+  }
+
   get currFocusPage(): IPage {
     return this.getPage(this.currFocusPageIndex)
   }
