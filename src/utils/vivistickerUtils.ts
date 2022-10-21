@@ -19,7 +19,6 @@ import localeUtils from './localeUtils'
 import listApis from '@/apis/list'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import textUtils from './textUtils'
-import themeUtils from './themeUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '1.3',
@@ -116,6 +115,10 @@ class ViviStickerUtils {
     } catch (error) {
       console.log(error)
     }
+  }
+
+  appToast(msg: string) {
+    this.sendToIOS('SHOW_TOAST', msg)
   }
 
   sendDoneLoading(width: number, height: number, options: string, needCrop = false) {
