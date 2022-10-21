@@ -1,5 +1,6 @@
 <template lang="pug">
-  div(class="nu-sub-controller")
+  div(class="nu-sub-controller"
+      :style="transformStyle")
     div(class="nu-sub-controller__wrapper" :style="positionStyles()")
       div(class="nu-sub-controller__wrapper" :style="wrapperStyles()")
         div(class="nu-sub-controller__content"
@@ -149,6 +150,14 @@ export default Vue.extend({
     },
     getPrimaryLayerSubLayerNum(): number {
       return (this.primaryLayer as IGroup | ITmp).layers.length
+    },
+    enalble3dTransform(): boolean {
+      return this.pageIndex === pageUtils._3dEnabledPageIndex
+    },
+    transformStyle(): { [index: string]: string } {
+      return {
+        transformStyle: this.enalble3dTransform ? 'preserve-3d' : 'initial'
+      }
     }
   },
   watch: {
@@ -386,7 +395,8 @@ export default Vue.extend({
           `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})`,
         width: `${this.config.styles.width * this.contentScaleRatio}px`,
         height: `${this.config.styles.height * this.contentScaleRatio}px`,
-        'pointer-events': 'none'
+        'pointer-events': 'none',
+        ...this.transformStyle
       }
     },
     wrapperStyles() {
@@ -398,6 +408,7 @@ export default Vue.extend({
       return {
         transformOrigin: '0px 0px',
         transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
+        ...this.transformStyle,
         outline: this.outlineStyles(),
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
@@ -417,7 +428,7 @@ export default Vue.extend({
       return {
         ...this.sizeStyle(),
         'pointer-events': 'initial',
-        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} translateZ(${zindex}px)`,
+        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`,
         ...TextEffectUtils.convertTextEffect(this.config)
       }
     },
@@ -770,13 +781,11 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-sub-controller {
   touch-action: none;
-  transform-style: preserve-3d;
   &__wrapper {
     top: 0;
     left: 0;
     position: absolute;
     touch-action: none;
-    transform-style: preserve-3d;
   }
   &__content {
     touch-action: none;
