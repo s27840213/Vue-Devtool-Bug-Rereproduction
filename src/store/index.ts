@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame, IImageStyle } from '@/interfaces/layer'
-import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData, ILayerInfo, LayerType } from './types'
+import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
 import { IPage } from '@/interfaces/page'
 import zindexUtils from '@/utils/zindexUtils'
 
@@ -26,7 +26,7 @@ import markers from '@/store/module/markers'
 import mobileEditor from '@/store/module/mobileEditor'
 import brandkit from './module/brandkit'
 import groupUtils from '@/utils/groupUtils'
-import { ICurrSubSelectedInfo } from '@/interfaces/editor'
+import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
 import pageUtils from '@/utils/pageUtils'
 import { getDocumentColor } from '@/utils/colorUtils'
@@ -111,7 +111,8 @@ const getDefaultState = (): IEditorState => ({
   isLargeDesktop: false,
   isGlobalLoading: false,
   useMobileEditor: false,
-  defaultContentScaleRatio: 0.6
+  defaultContentScaleRatio: 0.6,
+  _3dEnabledPageIndex: -1
 })
 
 const state = getDefaultState()
@@ -284,9 +285,7 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.defaultContentScaleRatio
   },
   get3dEnabledPageIndex(state: IEditorState) {
-    const { pageIndex, layers } = state.currSelectedInfo
-    const layerNum = layers.length
-    return layerNum > 1 && layerNum <= 50 ? pageIndex : -1
+    return state._3dEnabledPageIndex
   }
 }
 
@@ -670,8 +669,16 @@ const mutations: MutationTree<IEditorState> = {
   CLEAR_clipboard(state: IEditorState) {
     state.clipboard = []
   },
-  SET_currSelectedInfo(state: IEditorState, data: { index: number, layers: Array<IShape | IText | IImage | IGroup | ITmp | IFrame>, types: Set<string> }) {
+  SET_currSelectedInfo(state: IEditorState, data: ICurrSelectedInfo) {
     Object.assign(state.currSelectedInfo, data)
+
+    const { pageIndex, layers } = state.currSelectedInfo
+    const layerNum = layers.length
+    const _3dEnabledPageIndex = layerNum > 1 && layerNum <= 50 ? pageIndex : -1
+
+    if (_3dEnabledPageIndex !== state._3dEnabledPageIndex) {
+      state._3dEnabledPageIndex = _3dEnabledPageIndex
+    }
   },
   SET_currSubSelectedInfo(state: IEditorState, data: { index: number, type: string }) {
     Object.assign(state.currSubSelectedInfo, data)
@@ -844,6 +851,11 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_useMobileEditor(state: IEditorState, bool: boolean) {
     state.useMobileEditor = bool
+  },
+  SET_3dEnabledPageIndex(state: IEditorState, index: number) {
+    if (index !== state._3dEnabledPageIndex) {
+      state._3dEnabledPageIndex = index
+    }
   },
   ...imgShadowMutations,
   ADD_subLayer

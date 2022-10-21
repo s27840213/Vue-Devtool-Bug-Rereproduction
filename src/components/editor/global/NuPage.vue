@@ -114,7 +114,7 @@
             div(v-if="isAdmin" class="layer-num") Layer數量： {{config.layers.length}}（Ａdmin User 才看得到）
             div(class="page-control" :style="styles('control')")
               template(v-for="(layer, index) in config.layers")
-                nu-controller(v-if="(currSelectedIndex === -1 || currSelectedIndex === index || layer.type === 'frame') && (layer.type !== 'image' || !layer.imgControl) "
+                nu-controller(v-if="(currDraggingIndex === -1 || currDraggingIndex === index || layer.type === 'frame') && (layer.type !== 'image' || !layer.imgControl) "
                   data-identifier="controller"
                   :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
                   :layerIndex="index"
@@ -122,7 +122,8 @@
                   :config="layer"
                   :snapUtils="snapUtils"
                   :contentScaleRatio="contentScaleRatio"
-                  @setFocus="setFocus()")
+                  @setFocus="setFocus()"
+                  @isDragging="handleDraggingController")
             dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
             div(v-if="isBackgroundImageControl"
                 class="background-control"
@@ -233,7 +234,8 @@ export default Vue.extend({
         h: [] as Array<number>
       },
       generalUtils,
-      pageUtils
+      pageUtils,
+      currDraggingIndex: -1
     }
   },
   props: {
@@ -670,6 +672,9 @@ export default Vue.extend({
         e.preventDefault()
         e.stopPropagation()
       }
+    },
+    handleDraggingController(index: number) {
+      this.currDraggingIndex = index
     }
   }
 })
