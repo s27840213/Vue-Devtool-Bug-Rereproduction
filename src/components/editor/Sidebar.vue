@@ -84,7 +84,7 @@ export default Vue.extend({
         }
         if (this.isShowPagePreview) {
           this._setIsShowPagePreview(false)
-          pageUtils.jumpIntoPage(pageUtils.currFocusPageIndex)
+          pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 'auto')
         }
       }
     },

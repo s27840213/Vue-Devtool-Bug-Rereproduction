@@ -2,6 +2,8 @@ import { GetterTree, MutationTree } from 'vuex'
 import { floor } from 'lodash'
 import pageUtils from '@/utils/pageUtils'
 import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
+import Vue from '*.vue'
 
 interface IPageState {
   isShowPagePreview: boolean,
@@ -37,8 +39,17 @@ const mutations: MutationTree<IPageState> = {
   SET_isShowPagePreview(state: IPageState, isShowPagePreview: boolean) {
     state.isShowPagePreview = isShowPagePreview
 
-    pageUtils.fitPage()
-    generalUtils.scrollToCenter(undefined, false, true)
+    if (isShowPagePreview) {
+      groupUtils.deselect()
+    } else {
+      // bcz when switch to page preview, editor-view box size is different
+      // we need to wait it restore to the non-page-preview size then triggering fitPage
+      pageUtils.fitPage()
+      setTimeout(() => {
+        pageUtils.scrollIntoPage(pageUtils.currActivePageIndex, 'auto')
+        generalUtils.scrollToCenter(undefined, false, true)
+      }, 0)
+    }
   },
   SET_PagesPerRow(state: IPageState, pagesPerRow: number) {
     state.pagesPerRow = pagesPerRow

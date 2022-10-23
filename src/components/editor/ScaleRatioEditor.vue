@@ -83,7 +83,6 @@ export default Vue.extend({
     setIsShowPagePreview(show: boolean) {
       this._setIsShowPagePreview(show)
       if (!show) {
-        pageUtils.jumpIntoPage(pageUtils.currFocusPageIndex)
         this._setShowPagePanel(false)
       }
     },

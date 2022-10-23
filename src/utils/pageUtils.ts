@@ -238,15 +238,6 @@ class PageUtils {
     this.findCentralPageIndexInfo()
   }
 
-  jumpIntoPage(pageIndex: number): void {
-    const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
-    currentPage.scrollIntoView({
-      block: 'center',
-      inline: 'center'
-    })
-    this.findCentralPageIndexInfo()
-  }
-
   clearPagesInfo() {
     store.commit('CLEAR_pagesInfo')
   }
@@ -426,15 +417,20 @@ class PageUtils {
     store.commit('SET_pageScaleRatio', val)
   }
 
-  fitPage(scrollToTop = false) {
+  fitPage(scrollToTop = false, minRatioFiRestricttDisable = false) {
     // In these mode, don't fitPage.
+
+    console.log('fit')
     if (editorUtils.mobileAllPageMode || this.isSwitchingToEditor) {
       return
     }
+    console.log('fit')
     // If mobile user zoom in page, don't fitPage.
-    if (generalUtils.isTouchDevice() && pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
+    console.log(generalUtils.isTouchDevice(), pageUtils.mobileMinScaleRatio, pageUtils.scaleRatio)
+    if (generalUtils.isTouchDevice() && !minRatioFiRestricttDisable && pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
       return
     }
+    console.log('fit')
 
     // Get size of target(design) and editor.
     // Target size can be pass by param or get according to situation.

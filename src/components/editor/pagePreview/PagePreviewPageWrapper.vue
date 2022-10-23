@@ -158,7 +158,7 @@ export default Vue.extend({
       this._setmiddlemostPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'panel') {
-        pageUtils.jumpIntoPage(this.index)
+        pageUtils.scrollIntoPage(this.index)
       }
 
       if (generalUtils.isTouchDevice() && clickFocusedPreview) {
@@ -174,7 +174,6 @@ export default Vue.extend({
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'full') {
         this._setIsShowPagePreview(false)
-        pageUtils.jumpIntoPage(pageUtils.currFocusPageIndex)
       }
     },
     handleDragStart(e: DragEvent) {
