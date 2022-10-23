@@ -68,6 +68,7 @@ export default Vue.extend({
     ...mapGetters({
       isInEditor: 'vivisticker/getIsInEditor',
       isCurrentInCategory: 'vivisticker/getIsInCategory',
+      isCurrentShowAllRecently: 'vivisticker/getShowAllRecently',
       currActiveTab: 'vivisticker/getCurrActiveTab',
       isInBgShare: 'vivisticker/getIsInBgShare',
       editorType: 'vivisticker/getEditorType',
@@ -77,6 +78,9 @@ export default Vue.extend({
     }),
     isInCategory(): boolean {
       return this.isCurrentInCategory(this.currActiveTab)
+    },
+    showAllRecently(): boolean {
+      return this.isCurrentShowAllRecently(this.currActiveTab)
     },
     isCropping(): boolean {
       return imageUtils.isImgControl()
@@ -125,7 +129,11 @@ export default Vue.extend({
       } else if (this.isInBgShare) {
         return `${this.$t('NN0214')}`
       } else if (this.isInCategory) {
-        return this.keyword
+        if (this.showAllRecently) {
+          return `${this.$t('NN0024')}`
+        } else {
+          return this.keyword
+        }
       } else {
         return ''
       }
@@ -196,6 +204,7 @@ export default Vue.extend({
       vivistickerUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
     },
     handleEndEditing() {
+      // vivistickerUtils.setShowSaveDesignPopup(true)
       vivistickerUtils.endEditing()
     },
     handleCopy() {
