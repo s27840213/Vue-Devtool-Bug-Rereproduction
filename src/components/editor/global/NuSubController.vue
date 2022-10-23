@@ -417,7 +417,7 @@ export default Vue.extend({
           if (this.config.isFrameImg) {
             return { clipPath: `path("M0,0h${width}v${height}h${-width}z")` }
           } else {
-            return { clipPath: `path('${new SvgPath(clipPath).scale(this.contentScaleRatio).toString()}')` }
+            return { clipPath: clipPath !== undefined ? `path('${new SvgPath(clipPath).scale(this.contentScaleRatio).toString()}')` : clipPath }
           }
         })())
       }

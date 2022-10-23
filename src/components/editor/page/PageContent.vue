@@ -220,9 +220,11 @@ export default Vue.extend({
       }
     },
     togglePageHighlighter(isHover: boolean): void {
+      if (this.isPagePreview) return
       this.pageIsHover = isHover
     },
     pageClickHandler(e: PointerEvent): void {
+      if (this.isPagePreview) return
       groupUtils.deselect()
       // imageUtils.setImgControlDefault(false)
       editorUtils.setInMultiSelectionMode(false)
@@ -234,6 +236,7 @@ export default Vue.extend({
       }
     },
     onRightClick(event: MouseEvent) {
+      if (this.isPagePreview) return
       if (generalUtils.isTouchDevice()) {
         return
       }
@@ -245,6 +248,8 @@ export default Vue.extend({
       popupUtils.openPopup('page', { event })
     },
     pageDblClickHandler(): void {
+      if (this.isPagePreview) return
+
       if (this.isHandleShadow) {
         return
       }

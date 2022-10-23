@@ -45,13 +45,15 @@ class GeneralUtils {
     })
   }
 
-  scrollToCenter(el: HTMLElement, vertical = true, horizontal = true) {
+  scrollToCenter(el?: HTMLElement, vertical = true, horizontal = true) {
+    const target = el !== undefined ? el : document.querySelector('.editor-view')
     Vue.nextTick(() => {
+      if (!target) return
       if (vertical) {
-        el.scrollTop = (el.scrollHeight - el.clientHeight) / 2
+        target.scrollTop = (target.scrollHeight - target.clientHeight) / 2
       }
       if (horizontal) {
-        el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2
+        target.scrollLeft = (target.scrollWidth - target.clientWidth) / 2
       }
     })
   }

@@ -35,6 +35,7 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   data() {
@@ -127,7 +128,11 @@ export default Vue.extend({
     display: block;
     appearance: none;
     outline: none;
-    background: linear-gradient(to right, var(--lower-color) var(--progress), var(--upper-color) var(--progress));
+    background: linear-gradient(
+      to right,
+      var(--lower-color) var(--progress),
+      var(--upper-color) var(--progress)
+    );
     &:focus {
       outline: none;
     }
