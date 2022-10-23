@@ -89,6 +89,8 @@ export default Vue.extend({
   overflow: hidden;
   box-sizing: border-box;
   background-color: setColor(gray-4, 0.5);
+  z-index: setZindex("ruler");
+
   &__body {
     display: grid;
     grid-template-columns: 1fr;
