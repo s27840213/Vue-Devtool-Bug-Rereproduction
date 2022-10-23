@@ -119,9 +119,8 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.$nextTick(() => {
-      const body = this.$refs.body as HTMLElement
-
+    const body = this.$refs.body as HTMLElement
+    if (body) {
       /**
        * Prevent the context menu from showing up when right click or Ctrl + left click on controller
        */
@@ -134,7 +133,7 @@ export default Vue.extend({
       if (this.type === LayerType.frame && this.config.type === LayerType.image) {
         body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
       }
-    })
+    }
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),

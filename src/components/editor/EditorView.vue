@@ -354,13 +354,15 @@ export default Vue.extend({
     handleSelectionData(selectionData: DOMRect) {
       const layers = [...document.querySelectorAll(`.nu-layer--p${pageUtils.currFocusPageIndex}`)]
       const layerIndexs: number[] = []
-      layers.forEach((layer) => {
-        const layerData = layer.getBoundingClientRect()
-        if (((layerData.top <= selectionData.bottom) && (layerData.left <= selectionData.right) &&
-          (layerData.bottom >= selectionData.top) && (layerData.right >= selectionData.left))) {
-          layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
-        }
-      })
+      if (layers.length > 0) {
+        layers.forEach((layer) => {
+          const layerData = layer.getBoundingClientRect()
+          if (((layerData.top <= selectionData.bottom) && (layerData.left <= selectionData.right) &&
+            (layerData.bottom >= selectionData.top) && (layerData.right >= selectionData.left))) {
+            layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
+          }
+        })
+      }
 
       if (layerIndexs.length > 0) {
         GroupUtils.select(pageUtils.currFocusPageIndex, layerIndexs)

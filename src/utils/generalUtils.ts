@@ -45,6 +45,17 @@ class GeneralUtils {
     })
   }
 
+  scrollToCenter(el: HTMLElement, vertical = true, horizontal = true) {
+    Vue.nextTick(() => {
+      if (vertical) {
+        el.scrollTop = (el.scrollHeight - el.clientHeight) / 2
+      }
+      if (horizontal) {
+        el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2
+      }
+    })
+  }
+
   generateAssetId() {
     const date = new Date()
     const year = this.formatStr((date.getFullYear() - 2000).toString(), 2)
