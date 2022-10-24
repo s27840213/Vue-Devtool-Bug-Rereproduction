@@ -32,7 +32,7 @@ export default Vue.extend({
           layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
           break
         case LayerType.frame:
-          frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { imgControl: false })
+          frameUtils.updateFrameLayerProps(pageIndex, layerIndex, Math.max(subLayerIdx, 0), { imgControl: false })
       }
     }
   }
