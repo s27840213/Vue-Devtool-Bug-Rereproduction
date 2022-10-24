@@ -535,7 +535,7 @@ class ViviStickerUtils {
     const editorType = store.getters['vivisticker/getEditorType']
     const controllerHidden = store.getters['vivisticker/getControllerHidden']
     const design = {
-      pages,
+      pages: uploadUtils.prepareJsonToUpload(pages),
       lastSelectedLayerIndex,
       currSelectedInfo,
       editorType,
@@ -564,7 +564,7 @@ class ViviStickerUtils {
       controllerHidden
     } = tempDesign
     this.startEditing(editorType, this.getFetchDesignInitiator(() => {
-      store.commit('SET_pages', pages)
+      store.commit('SET_pages', pageUtils.newPages(pages))
       store.commit('vivisticker/SET_controllerHidden', controllerHidden)
     }), this.getFetchDesignCallback(() => {
       store.commit('SET_lastSelectedLayerIndex', lastSelectedLayerIndex)
