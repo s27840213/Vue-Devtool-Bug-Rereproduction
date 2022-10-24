@@ -229,12 +229,14 @@ class PageUtils {
 
   scrollIntoPage(pageIndex: number, behavior?: 'auto' | 'smooth'): void {
     const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
-    currentPage.scrollIntoView({
-      behavior: behavior ?? 'smooth',
-      block: 'center',
-      inline: 'center'
-    })
-    this.findCentralPageIndexInfo()
+    if (currentPage !== undefined) {
+      currentPage.scrollIntoView({
+        behavior: behavior ?? 'smooth',
+        block: 'center',
+        inline: 'center'
+      })
+      this.findCentralPageIndexInfo()
+    }
   }
 
   clearPagesInfo() {
