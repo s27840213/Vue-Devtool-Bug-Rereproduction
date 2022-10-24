@@ -1,11 +1,12 @@
 import { IAsset } from '@/interfaces/module'
-import { IUserInfo } from '@/interfaces/vivisticker'
+import { IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 
 interface IViviStickerState {
   userInfo: IUserInfo,
+  userSettings: IUserSettings,
   currActiveTab: string,
   isInCategoryDict: {[key: string]: boolean},
   showAllRecentlyDict: {[key: string]: boolean},
@@ -22,7 +23,8 @@ interface IViviStickerState {
   isDuringCopy: boolean,
   isInMyDesign: boolean,
   myDesignTab: string,
-  isInSelectionMode: boolean
+  isInSelectionMode: boolean,
+  showSaveDesignPopup: boolean
 }
 
 const EDITOR_BGS = [
@@ -32,6 +34,7 @@ const EDITOR_BGS = [
 
 const getDefaultState = (): IViviStickerState => ({
   userInfo: vivistickerUtils.getDefaultUserInfo(),
+  userSettings: vivistickerUtils.getDefaultUserSettings(),
   currActiveTab: 'object',
   isInCategoryDict: {
     object: false,
@@ -56,11 +59,18 @@ const getDefaultState = (): IViviStickerState => ({
   isDuringCopy: false,
   isInMyDesign: false,
   myDesignTab: 'text',
-  isInSelectionMode: false
+  isInSelectionMode: false,
+  showSaveDesignPopup: false
 })
 
 const state = getDefaultState()
 const getters: GetterTree<IViviStickerState, unknown> = {
+  getUserInfo(state: IViviStickerState): IUserInfo {
+    return state.userInfo
+  },
+  getUserSettings(state: IViviStickerState): IUserSettings {
+    return state.userSettings
+  },
   getCurrActiveTab(state: IViviStickerState): string {
     return state.currActiveTab
   },
@@ -97,9 +107,6 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getIsStandaloneMode(state: IViviStickerState): boolean {
     return state.isStandaloneMode
   },
-  getUserInfo(state: IViviStickerState): IUserInfo {
-    return state.userInfo
-  },
   getShowTutorial(state: IViviStickerState): boolean {
     return state.showTutorial
   },
@@ -120,10 +127,19 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getIsInSelectionMode(state: IViviStickerState): boolean {
     return state.isInSelectionMode
+  },
+  getShowSaveDesignPopup(state: IViviStickerState): boolean {
+    return state.showSaveDesignPopup
   }
 }
 
 const mutations: MutationTree<IViviStickerState> = {
+  SET_userInfo(state: IViviStickerState, userInfo: IUserInfo) {
+    state.userInfo = userInfo
+  },
+  SET_userSettings(state: IViviStickerState, userSettings: IUserSettings) {
+    state.userSettings = userSettings
+  },
   SET_currActiveTab(state: IViviStickerState, panel: string) {
     state.currActiveTab = panel
   },
@@ -160,9 +176,6 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_isStandaloneMode(state: IViviStickerState, isStandaloneMode: boolean) {
     state.isStandaloneMode = isStandaloneMode
   },
-  SET_userInfo(state: IViviStickerState, userInfo: IUserInfo) {
-    state.userInfo = userInfo
-  },
   SET_showTutorial(state: IViviStickerState, showTutorial: boolean) {
     state.showTutorial = showTutorial
   },
@@ -183,6 +196,14 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_isInSelectionMode(state: IViviStickerState, isInSelectionMode: boolean) {
     state.isInSelectionMode = isInSelectionMode
+  },
+  SET_showSaveDesignPopup(state: IViviStickerState, showSaveDesignPopup: boolean) {
+    state.showSaveDesignPopup = showSaveDesignPopup
+  },
+  UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
+    Object.entries(settings).forEach(([key, value]) => {
+      (state.userSettings as any)[key] = value
+    })
   },
   UPDATE_addRecentlyBgColor(state: IViviStickerState, recentlyBgColor: string) {
     let recently = state.recentlyBgColors

@@ -14,7 +14,7 @@ import editorUtils from './editorUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import textPropUtils from './textPropUtils'
-import { ITempDesign, IUserInfo } from '@/interfaces/vivisticker'
+import { ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import localeUtils from './localeUtils'
 import listApis from '@/apis/list'
 import { IListServiceContentDataItem } from '@/interfaces/api'
@@ -82,6 +82,12 @@ class ViviStickerUtils {
 
   getDefaultUserInfo(): IUserInfo {
     return STANDALONE_USER_INFO
+  }
+
+  getDefaultUserSettings(): IUserSettings {
+    return {
+      autoSave: false
+    }
   }
 
   getEmptyMessage(): {[key: string]: string} {
@@ -242,6 +248,10 @@ class ViviStickerUtils {
     this.showController()
     this.setState('tempDesign', { design: 'none' })
     store.commit('vivisticker/SET_editorType', 'none')
+  }
+
+  setShowSaveDesignPopup(bool: boolean) {
+    store.commit('vivisticker/SET_showSaveDesignPopup', bool)
   }
 
   initLoadingFlags(page: IPage, callback?: () => void) {

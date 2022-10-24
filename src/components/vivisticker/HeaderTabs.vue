@@ -204,8 +204,8 @@ export default Vue.extend({
       vivistickerUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
     },
     handleEndEditing() {
-      // vivistickerUtils.setShowSaveDesignPopup(true)
-      vivistickerUtils.endEditing()
+      vivistickerUtils.setShowSaveDesignPopup(true)
+      // vivistickerUtils.endEditing()
     },
     handleCopy() {
       if (vivistickerUtils.checkVersion('1.3')) {

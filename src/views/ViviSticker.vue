@@ -18,6 +18,8 @@
       :currTab="isInMyDesign ? 'none' : (isInEditor ? currActivePanel : currActiveTab)"
       :inAllPagesMode="false")
     tutorial(v-if="showTutorial")
+    div(v-if="showSaveDesignPopup" class="dim-background")
+      popup-save-design
 </template>
 
 <script lang="ts">
@@ -29,6 +31,7 @@ import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
 import FooterTabs from '@/components/vivisticker/FooterTabs.vue'
 import Tutorial from '@/components/vivisticker/Tutorial.vue'
 import MyDesign from '@/components/vivisticker/MyDesign.vue'
+import PopupSaveDesign from '@/components/popup/PopupSaveDesign.vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import stepsUtils from '@/utils/stepsUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -53,7 +56,8 @@ export default Vue.extend({
     MobilePanel,
     HeaderTabs,
     FooterTabs,
-    Tutorial
+    Tutorial,
+    PopupSaveDesign
   },
   data() {
     return {
@@ -127,7 +131,8 @@ export default Vue.extend({
       showTutorial: 'vivisticker/getShowTutorial',
       userInfo: 'vivisticker/getUserInfo',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
-      isInMyDesign: 'vivisticker/getIsInMyDesign'
+      isInMyDesign: 'vivisticker/getIsInMyDesign',
+      showSaveDesignPopup: 'vivisticker/getShowSaveDesignPopup'
     }),
     isLocked(): boolean {
       return layerUtils.getTmpLayer().locked
@@ -272,6 +277,16 @@ export default Vue.extend({
     overflow: hidden;
     z-index: setZindex("editor-view");
   }
+}
+
+.dim-background {
+  @include size(100%);
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: setColor(gray-1, 0.3);
+  z-index: 1000;
 }
 
 .header-bar {
