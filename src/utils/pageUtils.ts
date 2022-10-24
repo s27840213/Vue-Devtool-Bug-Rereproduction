@@ -169,7 +169,6 @@ class PageUtils {
   addTwentyPages() {
     const arr = new Array(20).fill(this.newPage({}))
 
-    console.log(arr)
     this.addPages(arr)
   }
 
@@ -420,17 +419,13 @@ class PageUtils {
   fitPage(scrollToTop = false, minRatioFiRestricttDisable = false) {
     // In these mode, don't fitPage.
 
-    console.log('fit')
     if (editorUtils.mobileAllPageMode || this.isSwitchingToEditor) {
       return
     }
-    console.log('fit')
     // If mobile user zoom in page, don't fitPage.
-    console.log(generalUtils.isTouchDevice(), pageUtils.mobileMinScaleRatio, pageUtils.scaleRatio)
     if (generalUtils.isTouchDevice() && !minRatioFiRestricttDisable && pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
       return
     }
-    console.log('fit')
 
     // Get size of target(design) and editor.
     // Target size can be pass by param or get according to situation.
