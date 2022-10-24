@@ -274,6 +274,22 @@ export default Vue.extend({
         }
       } else {
         this.setImgConfig(undefined)
+        setTimeout(() => {
+          if (layerUtils.layerIndex === -1) {
+            const isSubLayer = this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined'
+            const targetIdx = isSubLayer ? ((this.config as IImage).parentLayerStyles?.zindex ?? 0) - 1 : this.config.styles.zindex - 1
+            groupUtils.deselect()
+            groupUtils.select(this.pageIndex, [targetIdx])
+            if (isSubLayer) {
+              const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
+              if (this.primaryLayerType() === LayerType.group) {
+                layerUtils.updateLayerProps(pageIndex, layerIndex, { active: true }, subLayerIdx)
+              } else if (this.primaryLayerType() === LayerType.frame) {
+                frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx ?? 0, { active: true })
+              }
+            }
+          }
+        }, 0)
         this.handleDimensionUpdate()
       }
       if (this.forRender) {
