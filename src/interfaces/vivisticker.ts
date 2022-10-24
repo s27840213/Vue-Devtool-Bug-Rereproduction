@@ -7,9 +7,5 @@ export interface IUserInfo {
 
 export interface ITempDesign {
   pages: Array<IPage>,
-  lastSelectedLayerIndex: number,
-  currSelectedInfo: ICurrSelectedInfo,
-  editorBgIndex: number,
-  editorType: string,
-  controllerHidden: boolean
+  editorType: string
 }
