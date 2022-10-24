@@ -56,7 +56,7 @@ export default Vue.extend({
     },
     addSvg() {
       if (!paymentUtils.checkPro(this.item, 'pro-object')) return
-      assetUtils.addAsset(this.item)
+      assetUtils.addAsset(this.item, { db: 'svg' })
     },
     showSvgInfo(evt: Event) {
       const { info = {}, tags } = this.item
