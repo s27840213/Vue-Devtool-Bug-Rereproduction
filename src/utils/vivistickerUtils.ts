@@ -101,7 +101,7 @@ class ViviStickerUtils {
   }
 
   sendToIOS(messageType: string, message: any) {
-    console.log(messageType, message)
+    // console.log(messageType, message)
     try {
       const webkit = (window as any).webkit
       if (!webkit) {
@@ -175,7 +175,7 @@ class ViviStickerUtils {
 
   getAssetInitiator(asset: IAsset): () => Promise<any> {
     return async () => {
-      console.log('start editing', asset)
+      // console.log('start editing', asset)
       if (asset.type === 15) {
         await assetUtils.addAsset(asset)
         return true

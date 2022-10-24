@@ -196,6 +196,17 @@ export default Vue.extend({
       ]
     },
     tabs(): Array<IFooterTab> {
+      const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
+      let targetType = ''
+      if (subLayerIdx !== -1) {
+        // targetType = currLayer.type === LayerType.group ? (currLayer as IGroup).layers[subLayerIdx] : (currLayer as IFrame).clips[subLayerIdx]
+        if (currLayer.type === LayerType.group && (currLayer as IGroup).layers[subLayerIdx].type === LayerType.image) {
+          targetType = LayerType.image
+        }
+        if (currLayer.type === LayerType.frame && (currLayer as IFrame).clips[subLayerIdx].srcObj.type !== 'frame') {
+          targetType = LayerType.image
+        }
+      }
       if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
         /** tmp layer treated as group */
         return this.multiPhotoTabs
@@ -207,15 +218,21 @@ export default Vue.extend({
         return this.multiObjectTabs
       } else if ((this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer)) && !this.singleTargetType()) {
         return this.multiGeneralTabs
-      } else if (this.showPhotoTabs) {
+      } else if (this.showPhotoTabs || targetType === LayerType.image) {
+        console.log(1)
         return this.photoTabs
       } else if (this.showFontTabs) {
         return [...this.fontTabs, ...this.genearlLayerTabs]
-      } else if (this.showShapeSetting) {
-        return this.objectTabs.concat(this.genearlLayerTabs)
-      } else if (this.showSingleFrameTabs) {
+      } else if (this.showMultiFrame) {
         return [...this.frameTabs, ...this.genearlLayerTabs]
+      } else if (this.showSingleFrameTabs) {
+        console.log(2)
+        return [...this.frameTabs, ...this.genearlLayerTabs]
+      } else if (this.showShapeSetting) {
+        console.log(4)
+        return this.objectTabs.concat(this.genearlLayerTabs)
       } else if (this.showGeneralTabs) {
+        console.log(3)
         return [...this.genearlLayerTabs]
       } else if (!this.isInEditor) {
         return this.homeTabs
@@ -302,6 +319,11 @@ export default Vue.extend({
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
         this.selectedLayerNum !== 0 && layerUtils.getCurrLayer.type === LayerType.frame &&
         (layerUtils.getCurrLayer as IFrame).clips.length === 1
+    },
+    showMultiFrame(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
+        this.selectedLayerNum !== 0 && layerUtils.getCurrLayer.type === LayerType.frame &&
+        (layerUtils.getCurrLayer as IFrame).clips.length !== 1
     },
     showShapeSetting(): boolean {
       const { getCurrConfig } = layerUtils
@@ -391,7 +413,7 @@ export default Vue.extend({
                   layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
                   break
                 case 'frame':
-                  index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
+                  index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image' && l.active)
                   if (index >= 0) {
                     frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
                   }
