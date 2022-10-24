@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="ruler-vr"
-    :style="")
+    :style="rulerRootStyles")
   div(class="ruler-vr__body"
     ref="rulerBody"
     :style="rulerBodyStyles")
