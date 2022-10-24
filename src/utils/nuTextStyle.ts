@@ -7,6 +7,7 @@ import layerUtils from './layerUtils'
 import stepsUtils from './stepsUtils'
 import textPropUtils from './textPropUtils'
 import shortcutUtils from './shortcutUtils'
+import { checkAndConvertToHex } from '@/utils/colorUtils'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -121,7 +122,7 @@ export default Extension.create({
             parseHTML: element => {
               const spanStyle = element.style
               if (spanStyle.color === '') return null
-              return tiptapUtils.isValidHexColor(spanStyle.color) ? spanStyle.color : tiptapUtils.rgbToHex(spanStyle.color)
+              return checkAndConvertToHex(spanStyle.color)
             },
             renderHTML: attributes => {
               return {
@@ -401,10 +402,6 @@ export default Extension.create({
       },
       'Mod-x': () => {
         shortcutUtils.textCut()
-        return true
-      },
-      'Mod-v': () => {
-        shortcutUtils.textPaste()
         return true
       },
       'Mod--': () => {

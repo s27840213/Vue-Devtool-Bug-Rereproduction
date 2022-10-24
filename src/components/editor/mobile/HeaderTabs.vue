@@ -8,16 +8,16 @@
           :iconColor="'white'"
           :iconWidth="'20px'")
       div(class="header-bar__feature-icon mr-20"
-          :class="{'click-disabled': stepsUtils.isInFirstStep}"
+          :class="{'click-disabled': stepsUtils.isInFirstStep || isCropping}"
           @pointerdown="undo()")
         svg-icon(:iconName="'undo'"
-          :iconColor="(!stepsUtils.isInFirstStep) ? 'white' : 'gray-2'"
+          :iconColor="(!stepsUtils.isInFirstStep && !isCropping) ? 'white' : 'gray-2'"
           :iconWidth="'20px'")
       div(class="header-bar__feature-icon"
-          :class="{'click-disabled': stepsUtils.isInLastStep}"
+          :class="{'click-disabled': stepsUtils.isInLastStep || isCropping}"
           @pointerdown="redo()")
         svg-icon(:iconName="'redo'"
-          :iconColor="(!stepsUtils.isInLastStep) ? 'white' : 'gray-2'"
+          :iconColor="(!stepsUtils.isInLastStep && !isCropping) ? 'white' : 'gray-2'"
           :iconWidth="'20px'")
     div(class="header-bar__right")
       div(v-for="tab in rightTabs" class="header-bar__feature-icon"
@@ -36,7 +36,9 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import mappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
+import i18n from '@/i18n'
 import backgroundUtils from '@/utils/backgroundUtils'
+import imageUtils from '@/utils/imageUtils'
 
 export default Vue.extend({
   components: {
@@ -71,8 +73,12 @@ export default Vue.extend({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
+      isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode'
     }),
+    isCropping(): boolean {
+      return imageUtils.isImgControl()
+    },
     stepCount(): number {
       return stepsUtils.steps.length
     },
@@ -177,8 +183,19 @@ export default Vue.extend({
       }
     },
     handleIconAction(icon: string) {
+      if (imageUtils.isImgControl()) {
+        imageUtils.setImgControlDefault()
+      }
+
       switch (icon) {
-        case 'download':
+        case 'download': {
+          if (!this.isHandleShadow) {
+            this.$emit('switchTab', icon)
+          } else {
+            Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          }
+          break
+        }
         case 'more': {
           this.$emit('switchTab', icon)
           break
@@ -214,18 +231,6 @@ export default Vue.extend({
         window.dispatchEvent(event)
       } else {
         shotcutUtils.undo()
-        // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
-        // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
-        //   this.$nextTick(() => {
-        //     tiptapUtils.agent(editor => {
-        //       const currLayer = LayerUtils.getCurrLayer as IText
-        //       if (!currLayer.active || currLayer.type !== 'text') return
-        //       editor.chain().sync().focus().run()
-        //       tiptapUtils.prevText = tiptapUtils.getText(editor)
-        //       textPropUtils.updateTextPropsState()
-        //     })
-        //   })
-        // }
       }
     },
     redo() {
@@ -240,18 +245,6 @@ export default Vue.extend({
         window.dispatchEvent(event)
       } else {
         shotcutUtils.redo()
-        // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
-        // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
-        //   this.$nextTick(() => {
-        //     tiptapUtils.agent(editor => {
-        //       const currLayer = LayerUtils.getCurrLayer as IText
-        //       if (!currLayer.active || currLayer.type !== 'text') return
-        //       editor.chain().sync().focus().run()
-        //       tiptapUtils.prevText = tiptapUtils.getText(editor)
-        //       textPropUtils.updateTextPropsState()
-        //     })
-        //   })
-        // }
       }
     }
   }

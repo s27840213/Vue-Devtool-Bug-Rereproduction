@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="nu-page"
-      :style="pageMarginStyles"
+      :style="pageRootStyles"
       ref="page")
     div(v-if="!isDetailPage && !isMobile"
       class="page-title text-left pb-10"
@@ -102,36 +102,46 @@
           @mouseover="togglePageHighlighter(true)"
           @mouseleave="togglePageHighlighter(false)"
           tabindex="0")
-        div(class="scale-container relative"
-            :style="`transform: scale(${scaleRatio/100})`")
-          page-content(:config="config" :pageIndex="pageIndex")
-          div(class="page-control" :style="styles('control')")
-            template(v-for="(layer, index) in config.layers")
-              nu-controller(v-if="layer.type !== 'image' || !layer.imgControl"
-                data-identifier="controller"
-                :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
-                :layerIndex="index"
+        lazy-load(
+            target=".editor-view"
+            :rootMargin="'1500px 0px 1500px 0px'"
+            :minHeight="config.height * (scaleRatio / 100)"
+            :maxHeight="config.height * (scaleRatio / 100)"
+            :threshold="[0,1]")
+          div(class="scale-container relative"
+              :style="scaleContainerStyles")
+            page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio")
+            div(v-if="isAdmin" class="layer-num") Layer數量： {{config.layers.length}}（Ａdmin User 才看得到）
+            div(class="page-control" :style="styles('control')")
+              template(v-for="(layer, index) in config.layers")
+                nu-controller(v-if="(currDraggingIndex === -1 || currDraggingIndex === index || layer.type === 'frame') && (layer.type !== 'image' || !layer.imgControl) "
+                  data-identifier="controller"
+                  :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
+                  :layerIndex="index"
+                  :pageIndex="pageIndex"
+                  :config="layer"
+                  :snapUtils="snapUtils"
+                  :contentScaleRatio="contentScaleRatio"
+                  @setFocus="setFocus()"
+                  @isDragging="handleDraggingController")
+            dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
+            div(v-if="isBackgroundImageControl"
+                class="background-control"
+                :style="backgroundControlStyles()")
+              nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio")
+              nu-background-controller(:config="config.backgroundImage.config"
                 :pageIndex="pageIndex"
-                :config="layer"
-                :snapUtils="snapUtils"
-                @setFocus="setFocus()"
-                @getClosestSnaplines="getClosestSnaplines"
-                @clearSnap="clearSnap")
-          dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio")
-          div(v-if="isBackgroundImageControl"
-              class="background-control"
-              :style="backgroundControlStyles()")
-            nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true")
-            nu-background-controller(:config="config.backgroundImage.config" :pageIndex="pageIndex")
-            div(:style="backgroundContorlClipStyles()")
-              nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true")
-              component(v-for="(elm, idx) in getHalation"
-                :key="idx"
-                :is="elm.tag"
-                v-bind="elm.attrs")
-          div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
-              class="dim-background"
-              :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
+                :contentScaleRatio="contentScaleRatio")
+              div(:style="backgroundContorlClipStyles()")
+                nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
+                component(v-for="(elm, idx) in getHalation"
+                  :key="idx"
+                  :is="elm.tag"
+                  v-bind="elm.attrs")
+            div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
+                class="dim-background"
+                :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
+
       div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
         class="page-highlighter"
         :style="wrapperStyles()")
@@ -146,23 +156,12 @@
           :iconName="'move-vertical'" :iconWidth="`${15}px`" :iconColor="'white'")
         div(class="page-resizer__resizer-bar")
         div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{!isResizingPage ? '拖曳調整畫布高度' : `${Math.trunc(config.height)}px`}}
-      div(class="snap-area"
-        :style="wrapperStyles()")
-        div(v-for="line in closestSnaplines.v"
-          class="snap-area__line snap-area__line--vr"
-          :style="snapLineStyles('v', line)")
-        div(v-for="line in closestSnaplines.h"
-          class="snap-area__line snap-area__line--hr"
-          :style="snapLineStyles('h', line)")
-        template(v-if="isShowGuideline && !isDetailPage")
-          div(v-for="(line,index) in guidelines.v"
-            class="snap-area__line snap-area__line--vr"
-            :style="snapLineStyles('v', line,true)"
-            @mouseover="lockGuideline ? null : showGuideline(line,'v',index)")
-          div(v-for="(line,index) in guidelines.h"
-            class="snap-area__line snap-area__line--hr"
-            :style="snapLineStyles('h', line,true)"
-            @mouseover="lockGuideline ? null : showGuideline(line,'h',index)")
+      snap-line-area(
+        :config="config"
+        :pageIndex="pageIndex"
+        :pageScaleRatio="pageScaleRatio"
+        :snapUtils="snapUtils"
+      )
     template(v-else)
       div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
@@ -174,6 +173,7 @@ import Vue from 'vue'
 import { mapMutations, mapGetters, mapState } from 'vuex'
 import { IShape, IText, IImage, IGroup, ILayer, ITmp, IFrame, IImageStyle } from '@/interfaces/layer'
 import PageContent from '@/components/editor/page/PageContent.vue'
+import LazyLoad from '@/components/LazyLoad.vue'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -185,6 +185,7 @@ import layerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import NuImage from '@/components/editor/global/NuImage.vue'
 import DimBackground from '@/components/editor/page/DimBackground.vue'
+import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import rulerUtils from '@/utils/rulerUtils'
 import { IPage } from '@/interfaces/page'
@@ -203,7 +204,9 @@ export default Vue.extend({
     NuImage,
     NuBackgroundController,
     PageContent,
-    DimBackground
+    DimBackground,
+    SnapLineArea,
+    LazyLoad
   },
   data() {
     return {
@@ -231,7 +234,8 @@ export default Vue.extend({
         h: [] as Array<number>
       },
       generalUtils,
-      pageUtils
+      pageUtils,
+      currDraggingIndex: -1
     }
   },
   props: {
@@ -239,21 +243,15 @@ export default Vue.extend({
     pageIndex: Number,
     pageScaleRatio: Number,
     isAnyBackgroundImageControl: Boolean,
-    editorView: HTMLElement
+    overflowContainer: HTMLElement
   },
   mounted() {
     this.initialPageHeight = (this.config as IPage).height
     this.$nextTick(() => {
-      this.isShownScrollBar = !(this.editorView.scrollHeight === this.editorView.clientHeight)
+      this.isShownScrollBar = !(this.overflowContainer?.scrollHeight === this.overflowContainer?.clientHeight)
     })
   },
   watch: {
-    guidelines: {
-      handler() {
-        this.getClosestSnaplines()
-      },
-      deep: true
-    },
     isOutOfBound(val) {
       if (val && this.currFunctionPanelType === FunctionPanelType.photoShadow && layerUtils.pageIndex === this.pageIndex) {
         GroupUtils.deselect()
@@ -264,7 +262,7 @@ export default Vue.extend({
           if (target) {
             const layerInfo = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
             imageShadowUtils.updateShadowSrc(layerInfo, target.styles.shadow.srcObj)
-            imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+            // imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
           }
         }
       }
@@ -290,8 +288,18 @@ export default Vue.extend({
       groupType: 'getGroupType',
       lockGuideline: 'getLockGuideline',
       currFunctionPanelType: 'getCurrFunctionPanelType',
-      isProcessingShadow: 'shadow/isProcessing'
+      isProcessingShadow: 'shadow/isProcessing',
+      contentScaleRatio: 'getContentScaleRatio',
+      isAdmin: 'user/isAdmin'
     }),
+    scaleContainerStyles(): { [index: string]: string } {
+      return {
+        // transform: `scale(${1})`
+        width: `${this.config.width * this.contentScaleRatio}px`,
+        height: `${this.config.height * this.contentScaleRatio}px`,
+        transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`
+      }
+    },
     getCurrLayer(): ILayer {
       return generalUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
     },
@@ -353,14 +361,10 @@ export default Vue.extend({
       return this.config.backgroundImage.config.imgControl
     },
     isAnyLayerActive(): boolean {
-      return (this.config as IPage).layers.some(l => l.active)
+      return this.currSelectedIndex !== -1
     },
-
     guidelines(): { [index: string]: Array<number> } {
       return (this.config as IPage).guidelines
-    },
-    isShowGuideline(): boolean {
-      return rulerUtils.showGuideline
     },
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
@@ -368,9 +372,10 @@ export default Vue.extend({
     isDetailPage(): boolean {
       return this.groupType === 1
     },
-    pageMarginStyles(): { [index: string]: string } {
+    pageRootStyles(): { [index: string]: string } {
       return {
-        margin: this.isDetailPage ? '0px auto' : '25px auto'
+        margin: this.isDetailPage ? '0px auto' : '25px auto',
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
       }
     },
     isOutOfBound(): boolean {
@@ -397,9 +402,9 @@ export default Vue.extend({
       const { width, height } = this.config
       const { posX, posY } = this.config.backgroundImage
       const position = {
-        width: width / 2,
-        x: -posX + width / 2,
-        y: -posY + height / 2
+        width: width / 2 * this.contentScaleRatio,
+        x: (-posX + width / 2) * this.contentScaleRatio,
+        y: (-posY + height / 2) * this.contentScaleRatio
       }
       return imageAdjustUtil.getHalation(adjust.halation, position)
     },
@@ -423,23 +428,25 @@ export default Vue.extend({
     }),
     styles(type: string) {
       return type === 'content' ? {
-        width: `${this.config.width}px`,
-        height: `${this.config.height}px`,
+        width: `${this.config.width * this.contentScaleRatio}px`,
+        height: `${this.config.height * this.contentScaleRatio}px`,
         backgroundColor: this.config.backgroundColor,
         backgroundImage: `url(${ImageUtils.getSrc(this.config.backgroundImage.config)})`,
         backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
           : `${this.config.backgroundImage.posX}px ${this.config.backgroundImage.posY}px`,
         backgroundSize: `${this.config.backgroundImage.config.styles.imgWidth}px ${this.config.backgroundImage.config.styles.imgHeight}px`
       } : {
-        width: `${this.config.width}px`,
-        height: `${this.config.height}px`,
-        overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden'
+        width: `${this.config.width * this.contentScaleRatio}px`,
+        height: `${this.config.height * this.contentScaleRatio}px`,
+        overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden',
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
       }
     },
     wrapperStyles() {
       return {
         width: `${this.config.width * (this.scaleRatio / 100)}px`,
-        height: `${this.config.height * (this.scaleRatio / 100)}px`
+        height: `${this.config.height * (this.scaleRatio / 100)}px`,
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
       }
     },
     snapLineStyles(dir: string, pos: number, isGuideline?: string) {
@@ -447,13 +454,13 @@ export default Vue.extend({
       return dir === 'v' ? {
         height: '100%',
         width: '1px',
-        transform: `translate3d(${pos}px,0,50px)`,
+        transform: `translate(${pos}px,0)`,
         'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
       }
         : {
           width: '100%',
           height: '1px',
-          transform: `translate3d(0,${pos}px,50px)`,
+          transform: `translate(0,${pos}px)`,
           'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
         }
     },
@@ -487,22 +494,6 @@ export default Vue.extend({
         const currPage = this.$refs.page as HTMLElement
         currPage.focus()
       })
-    },
-    coordinateHandler(e: MouseEvent) {
-      var rect = this.coordinate.getBoundingClientRect()
-      this.coordinateWidth = e.clientX - rect.left
-      this.coordinateHeight = e.clientY - rect.top
-      this.coordinate.style.width = `${this.coordinateWidth}px`
-      this.coordinate.style.height = `${this.coordinateHeight}px`
-    },
-    getClosestSnaplines() {
-      this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v.map((snapline: ISnapline) => snapline.pos)]
-      this.closestSnaplines.h = [...this.snapUtils.closestSnaplines.h.map((snapline: ISnapline) => snapline.pos)]
-    },
-    clearSnap(): void {
-      this.snapUtils.clear()
-      this.closestSnaplines.v = []
-      this.closestSnaplines.h = []
     },
     addPage() {
       const { getCurrLayer: currLayer, layerIndex, pageIndex } = layerUtils
@@ -577,16 +568,16 @@ export default Vue.extend({
     backgroundControlStyles() {
       const backgroundImage = this.config.backgroundImage
       return {
-        width: `${backgroundImage.config.styles.imgWidth}px`,
-        height: `${backgroundImage.config.styles.imgHeight}px`,
-        left: `${backgroundImage.posX}px`,
-        top: `${backgroundImage.posY}px`
+        width: `${backgroundImage.config.styles.imgWidth * this.contentScaleRatio}px`,
+        height: `${backgroundImage.config.styles.imgHeight * this.contentScaleRatio}px`,
+        left: `${backgroundImage.posX * this.contentScaleRatio}px`,
+        top: `${backgroundImage.posY * this.contentScaleRatio}px`
       }
     },
     backgroundContorlClipStyles() {
       const { posX, posY } = this.config.backgroundImage
       return {
-        clipPath: `path('M${-posX},${-posY}h${this.config.width}v${this.config.height}h${-this.config.width}z`,
+        clipPath: `path('M${-posX * this.contentScaleRatio},${-posY * this.contentScaleRatio}h${this.config.width * this.contentScaleRatio}v${this.config.height * this.contentScaleRatio}h${-this.config.width * this.contentScaleRatio}z`,
         'pointer-events': 'none'
       }
     },
@@ -620,25 +611,25 @@ export default Vue.extend({
     pageResizeStart(e: PointerEvent) {
       this.initialPageHeight = (this.config as IPage).height
       this.isResizingPage = true
-      this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
+      this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       eventUtils.addPointerEvent('pointermove', this.pageResizing)
-      this.editorView.addEventListener('scroll', this.scrollUpdate, { capture: true })
+      this.overflowContainer.addEventListener('scroll', this.scrollUpdate, { capture: true })
       eventUtils.addPointerEvent('pointerup', this.pageResizeEnd)
     },
     pageResizing(e: PointerEvent) {
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-      this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
-      const isShownScrollbar = (this.editorView.scrollHeight === this.editorView.clientHeight)
+      this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
+      const isShownScrollbar = (this.overflowContainer.scrollHeight === this.overflowContainer.clientHeight)
 
       if (isShownScrollbar === this.isShownScrollBar) {
-        const multiplier = (this.editorView.scrollHeight === this.editorView.clientHeight) ? 2 : 1
+        const multiplier = isShownScrollbar ? 2 : 1
         const yDiff = (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
         pageUtils.updatePageProps({
           height: Math.max(Math.trunc(this.initialPageHeight + yDiff), 20)
         })
       } else {
-        this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
+        this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
         this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
         this.initialPageHeight = (this.config as IPage).height
       }
@@ -653,7 +644,7 @@ export default Vue.extend({
       StepsUtils.record()
       this.$nextTick(() => {
         eventUtils.removePointerEvent('pointermove', this.pageResizing)
-        this.editorView.removeEventListener('scroll', this.scrollUpdate, { capture: true })
+        this.overflowContainer.removeEventListener('scroll', this.scrollUpdate, { capture: true })
         eventUtils.removePointerEvent('pointerup', this.pageResizeEnd)
       })
       pageUtils.findCentralPageIndexInfo()
@@ -681,6 +672,9 @@ export default Vue.extend({
         e.preventDefault()
         e.stopPropagation()
       }
+    },
+    handleDraggingController(index: number) {
+      this.currDraggingIndex = index
     }
   }
 })
@@ -689,7 +683,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-page {
   position: relative;
-  transform-style: preserve-3d;
   user-select: none;
 
   &__icons {
@@ -747,9 +740,9 @@ export default Vue.extend({
   position: relative;
   box-sizing: content-box;
   outline: none;
-  &:empty {
-    background-color: setColor(gray-4);
-  }
+  // &:empty {
+  //   background-color: setColor(gray-4);
+  // }
 }
 .scale-container {
   width: 0px;
@@ -772,7 +765,6 @@ export default Vue.extend({
   position: absolute;
   top: 0px;
   left: 0px;
-  transform-style: preserve-3d;
   // this css property will prevent the page-control div from blocking all the event of page-content
   pointer-events: none;
   :focus {
@@ -795,44 +787,13 @@ export default Vue.extend({
     position: absolute;
     top: calc(-100% - 15px);
     left: 50%;
-    transform: translate3d(-50%, 0, 0);
+    transform: translate(-50%, 0);
     color: setColor(white);
     font-size: 0.8rem;
     padding: 4px 8px;
     border-radius: 5px;
     box-sizing: border-box;
     background: setColor(gray-2);
-  }
-}
-
-.snap-area {
-  @include size(100%, 100%);
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  transform-style: preserve-3d;
-  &__line {
-    position: absolute;
-    top: 0;
-    left: 0;
-    background-color: setColor("blue-1");
-    &::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 5px;
-      height: 100%;
-    }
-    &::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 5px;
-      height: 100%;
-    }
   }
 }
 
@@ -862,5 +823,11 @@ export default Vue.extend({
 
 .skeleton {
   background-color: setColor(white);
+}
+
+.layer-num {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
 }
 </style>

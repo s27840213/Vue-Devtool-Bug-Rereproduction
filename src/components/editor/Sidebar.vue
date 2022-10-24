@@ -56,7 +56,7 @@ export default Vue.extend({
       const navItems = [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}` },
         { icon: 'photo', text: `${this.$tc('NN0002', 2)}` },
-        { icon: 'shape', text: `${this.$tc('NN0003', 2)}` },
+        { icon: 'objects', text: `${this.$tc('NN0003', 2)}` },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}` },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}` },
         { icon: 'upload', text: `${this.$tc('NN0006')}` }
@@ -84,7 +84,7 @@ export default Vue.extend({
         }
         if (this.isShowPagePreview) {
           this._setIsShowPagePreview(false)
-          pageUtils.jumpIntoPage(pageUtils.currFocusPageIndex)
+          pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 'auto')
         }
       }
     },

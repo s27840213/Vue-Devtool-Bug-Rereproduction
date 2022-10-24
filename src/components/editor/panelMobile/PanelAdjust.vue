@@ -13,7 +13,7 @@
 import Vue from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
 import { IFrame } from '@/interfaces/layer'
@@ -32,6 +32,9 @@ export default Vue.extend({
     Object.assign(this.adjustVal, imageAdjustUtil.getDefaultProps(), backgroundUtils.inBgSettingMode ? this.backgroundAdjust : this.currLayerAdjust)
   },
   computed: {
+    ...mapState('imgControl', {
+      imageControlConfig: 'image'
+    }),
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
@@ -60,7 +63,7 @@ export default Vue.extend({
         }
         return null
       })
-      return { ...imageLayers.find(layer => !!layer) }
+      return { ...imageLayers.find(layer => layer) }
     },
     currLayerAdjust(): any {
       return this.currLayer.styles?.adjust ?? {}

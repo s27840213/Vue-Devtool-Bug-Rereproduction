@@ -1,5 +1,4 @@
 import i18n from '@/i18n'
-import { EventEmitter } from 'events'
 export interface ILocale {
   abbreviation: string,
   code: string,

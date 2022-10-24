@@ -161,6 +161,9 @@ class TextPropUtils {
         if (pStyle.decoration === 'underline') {
           pStyle.decoration = 'none'
         }
+        if (typeof pStyle.size === 'string') {
+          pStyle.size = parseFloat(pStyle.size)
+        }
         p.spanStyle = tiptapUtils.textStyles(pStyle)
       }
       const paragraphStyles = p.styles
@@ -177,6 +180,9 @@ class TextPropUtils {
         span.styles.userId = paragraphStyles.userId as string
         span.styles.assetId = paragraphStyles.assetId as string
         span.styles.fontUrl = paragraphStyles.fontUrl as string
+        if (typeof span.styles.size === 'string') {
+          span.styles.size = parseFloat(span.styles.size)
+        }
       }
     })
   }
@@ -334,8 +340,6 @@ class TextPropUtils {
     // }
     // TextUtils.updateSelection(start, end)
 
-    // Sync updating text effect if the color changed
-    // TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
     return config
   }
 
@@ -440,10 +444,8 @@ class TextPropUtils {
       }
       TextUtils.updateSelection(start, end)
     }
-    // sync updating text effect if the color changed
-    TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
-    if (!sel || isGroupLayer || propName === 'color') return { config, start, end }
 
+    if (!sel || isGroupLayer || propName === 'color') return { config, start, end }
     return { config, start, end }
   }
 
@@ -1042,6 +1044,7 @@ class TextPropUtils {
           l.type === 'text' && this.propAppliedAllText(LayerUtils.layerIndex, idx, 'size', step)
           l.type === 'text' && TextUtils.updateGroupLayerSizeByShape(LayerUtils.pageIndex, this.layerIndex, idx)
         })
+      this.updateTextPropsState()
     }
   }
 
@@ -1053,9 +1056,17 @@ class TextPropUtils {
       const targetLayer = primaryLayer.layers[subLayerIndex] as IText
       const paragraphs = GeneralUtils.deepCopy(targetLayer.paragraphs) as Array<IParagraph>
       paragraphs.forEach(p => {
-        Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = payload)
+        if (prop === 'size') {
+          Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) += payload)
+        } else {
+          Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = payload)
+        }
         p.spans.forEach(s => {
-          Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) += payload)
+          if (prop === 'size') {
+            Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) += payload)
+          } else {
+            Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) = payload)
+          }
         })
       })
       LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs })

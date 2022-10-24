@@ -1,13 +1,15 @@
 <template lang="pug">
-  observer-sentinel(
-    target=".mobile-editor__page-preview"
-    :threshold="[0,1]"
-    :throttle="false"
-    :handleNotIntersecting="true"
-    @callback="handleCallback")
-    div(class="page-preview-page"
+  lazy-load(
+      class="transition"
+      :target="lazyLoadTarget"
+      :threshold="[0,1]"
+      :minHeight="contentWidth"
+      @loaded="handleLoaded")
+    div(v-if="!allPageMode && !isShowPagePreview && !showPagePanel" :style="loadingStyle()")
+    div(v-else class="page-preview-page"
       :style="styles2()"
-      :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`")
+      :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
+      ref="pagePreview")
       div(class="page-preview-page-content pointer"
           :style="styles()"
           @click="clickPage"
@@ -18,14 +20,14 @@
           @mouseenter="handleMouseEnter"
           @mouseleave="handleMouseLeave"
           ref="content")
-        page-content(v-if="inTheTarget"
+        page-content(
           class="click-disabled"
-          :style="contentScaleStyles"
+          :style="contentScaleStyles()"
           :config="config"
           :pageIndex="index"
-          :scaleRatio="scaleRatio"
+          :contentScaleRatio="scaleRatio()"
           :handleSequentially="true"
-          @pushAsyncEvent="pushAsyncEvent")
+          :isPagePreview="true")
         div(class="page-preview-page__highlighter"
           :class="{'focused': currFocusPageIndex === index}"
           :style="hightlighterStyles()")
@@ -51,7 +53,7 @@
           class="page-preview-page-icon")
           span {{index+1}}
       div(class="page-preview-page__background"
-        :style="styles()")
+        :style="styles")
       div(v-if="type === 'full'"
         class="page-preview-page-title")
         span(:style="{'color': currFocusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
@@ -61,13 +63,12 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
-import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import editorUtils from '@/utils/editorUtils'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import LazyLoad from '@/components/LazyLoad.vue'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -81,22 +82,14 @@ export default Vue.extend({
       default: true,
       type: Boolean
     },
-    target: {
+    lazyLoadTarget: {
       type: String,
       default: '.mobile-editor__page-preview'
     }
   },
   components: {
     PageContent: () => import('@/components/editor/page/PageContent.vue'),
-    ObserverSentinel
-  },
-  created() {
-    console.log(this.currFocusPageIndex)
-  },
-  watch: {
-    currActivePageIndex: function(val) {
-      console.warn(val)
-    }
+    LazyLoad
   },
   data() {
     return {
@@ -113,7 +106,6 @@ export default Vue.extend({
       isMouseOver: false,
       isMenuOpen: false,
       contentWidth: 0,
-      inTheTarget: true,
       asyncTaskQueue: [] as unknown as Array<() => Promise<void>>,
       isHandlingAsyncTask: false
     }
@@ -129,43 +121,13 @@ export default Vue.extend({
       middlemostPageIndex: 'getMiddlemostPageIndex',
       currFocusPageIndex: 'getCurrFocusPageIndex',
       getPage: 'getPage',
-      isDragged: 'page/getIsDragged'
-    }),
-    scaleRatio(): number {
-      return this.contentWidth / (this.config as IPage).width
-    },
-    contentScaleStyles(): { [index: string]: string } {
-      return {
-        transform: `scale(${this.scaleRatio})`
-      }
-    }
-  },
-  mounted() {
-    this.contentWidth = (this.$refs.content as HTMLElement).offsetWidth
+      isDragged: 'page/getIsDragged',
+      allPageMode: 'mobileEditor/getMobileAllPageMode',
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      showPagePanel: 'page/getShowPagePanel'
+    })
   },
   methods: {
-    styles() {
-      return {
-        height: `${this.config.height * this.scaleRatio}px`
-      }
-    },
-    styles2() {
-      if (this.type === 'panel' &&
-        this.isDragged && this.index !== pageUtils.currFocusPageIndex) {
-        return {
-          'z-index': '-1'
-        }
-      } else {
-        return {
-        }
-      }
-    },
-    hightlighterStyles() {
-      return {
-        width: `${this.contentWidth + 20}px`,
-        height: `${this.config.height * this.scaleRatio + 20}px`
-      }
-    },
     ...mapMutations({
       _addPageToPos: 'ADD_pageToPos',
       _deletePage: 'DELETE_page',
@@ -187,7 +149,8 @@ export default Vue.extend({
       this.isMouseOver = false
     },
     clickPage() {
-      if (this.index === this.currFocusPageIndex) {
+      const clickFocusedPreview = this.index === this.currFocusPageIndex
+      if (clickFocusedPreview) {
         editorUtils.setMobileAllPageMode(false)
         editorUtils.setCurrCardIndex(this.index)
       }
@@ -195,21 +158,22 @@ export default Vue.extend({
       this._setmiddlemostPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'panel') {
-        pageUtils.jumpIntoPage(this.index)
+        pageUtils.scrollIntoPage(this.index)
       }
 
-      if (GeneralUtils.isTouchDevice()) {
+      if (generalUtils.isTouchDevice() && clickFocusedPreview) {
         this.$nextTick(() => {
+          if (pageUtils.isDetailPage) {
+            pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 'auto')
+          }
           pageUtils.fitPage()
         })
       }
     },
     dbclickPage() {
-      this._setmiddlemostPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'full') {
         this._setIsShowPagePreview(false)
-        pageUtils.jumpIntoPage(pageUtils.currFocusPageIndex)
       }
     },
     handleDragStart(e: DragEvent) {
@@ -247,7 +211,7 @@ export default Vue.extend({
       let page = null
       switch (icon) {
         case 'copy':
-          page = GeneralUtils.deepCopy(this.getPage(this.index))
+          page = generalUtils.deepCopy(this.getPage(this.index))
           page.designId = ''
           this._addPageToPos({
             newPage: page,
@@ -269,26 +233,55 @@ export default Vue.extend({
           break
       }
     },
-    handleCallback(entries: Array<IntersectionObserverEntry>) {
-      this.inTheTarget = entries[0].isIntersecting
+    handleLoaded() {
+      this.$emit('loaded')
+      this.$nextTick(() => {
+        const contentRef = (this.$refs.content as HTMLElement)
+        this.contentWidth = contentRef ? (this.$refs.content as HTMLElement).offsetWidth : 0
+      })
     },
-    pushAsyncEvent(callback: () => Promise<void>) {
-      this.asyncTaskQueue.push(callback)
-
-      if (!this.isHandlingAsyncTask) {
-        this.handleAsyncTask()
-        this.isHandlingAsyncTask = true
+    // computed -> methods
+    pageWidth(): number {
+      return this.config.width
+    },
+    pageHeight(): number {
+      return this.config.height
+    },
+    scaleRatio(): number {
+      return this.contentWidth / this.pageWidth()
+    },
+    contentScaleStyles(): { [index: string]: string } {
+      return {
+        // transform: `scale(${this.scaleRatio()})`
       }
     },
-    handleAsyncTask() {
-      const func = this.asyncTaskQueue.shift()
-      typeof func === 'function' && func()
-      typeof func === 'function' && func().then(() => {
-        console.log('mission complete')
-        if (this.asyncTaskQueue.length === 0) {
-          this.isHandlingAsyncTask = false
+    styles(): { [index: string]: string } {
+      return {
+        height: `${this.pageHeight() * this.scaleRatio()}px`
+      }
+    },
+    styles2(): { [index: string]: string } {
+      if (this.type === 'panel' &&
+        this.isDragged && this.index !== pageUtils.currFocusPageIndex) {
+        return {
+          'z-index': '-1'
         }
-      })
+      } else {
+        return {
+        }
+      }
+    },
+    hightlighterStyles(): { [index: string]: string } {
+      return {
+        width: `${this.contentWidth + 20}px`,
+        height: `${this.pageHeight() * this.scaleRatio() + 20}px`
+      }
+    },
+    loadingStyle(): { [index: string]: string } {
+      return {
+        width: '100%',
+        height: '100%'
+      }
     }
   }
 })
@@ -299,7 +292,6 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: center;
   position: relative;
-  transition: 0.25s ease-in-out;
   max-width: 100%;
   &-content {
     position: relative;
@@ -361,18 +353,19 @@ export default Vue.extend({
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate3d(-50%, -50%, 0);
+    transform: translate(-50%, -50%);
     border-radius: 4px;
     z-index: -1;
   }
   &-title {
     position: absolute;
-    bottom: -24px;
+    bottom: -8px;
+    transform: translate(0, 100%);
+    z-index: 100;
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 30px;
     font-size: 16px;
     font-weight: bold;
   }
@@ -394,7 +387,7 @@ export default Vue.extend({
   &__background {
     position: absolute;
     width: 100%;
-    background: setColor(gray-3);
+    background: setColor(gray-3, 0.3);
     z-index: -1;
   }
 }
@@ -403,5 +396,9 @@ export default Vue.extend({
   color: setColor(blue-1);
   box-sizing: border-box;
   background: linear-gradient(90deg, rgba(#59c3e1, 0.3), rgba(#50a2d8, 0.3));
+}
+
+.transition {
+  transition: 0.25s ease-in-out;
 }
 </style>

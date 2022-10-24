@@ -9,16 +9,19 @@
         :primaryLayer="primaryLayer"
         :imgControl="true"
         :forRender="true"
+        :contentScaleRatio="contentScaleRatio"
         :config="image")
     div
       nu-layer(:layerIndex="layerIndex"
         :pageIndex="pageIndex"
         :primaryLayer="primaryLayer"
         :forRender="true"
+        :contentScaleRatio="contentScaleRatio"
         :config="image")
     div(class="page-control" :style="styles")
       nu-img-controller(:layerIndex="layerIndex"
                         :pageIndex="pageIndex"
+                        :contentScaleRatio="contentScaleRatio"
                         :primaryLayer="primaryLayer"
                         :config="image")
 </template>
@@ -36,7 +39,13 @@ export default Vue.extend({
     return {}
   },
   props: {
-    config: Object
+    config: Object,
+    pageScaleRatio: Number,
+    isAnyBackgroundImageControl: Boolean,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   computed: {
     ...mapState('imgControl', ['image', 'layerInfo', 'primaryLayer']),
@@ -46,15 +55,19 @@ export default Vue.extend({
     styles() {
       const config = this.config as IPage
       return {
-        width: `${config.width}px`,
-        height: `${config.height}px`
+        width: `${config.width * this.contentScaleRatio}px`,
+        height: `${config.height * this.contentScaleRatio}px`
+        // overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden'
       }
     },
     pageIndex(): number {
       return this.layerInfo.pageIndex
     },
     layerIndex(): number {
-      return this.layerInfo.layerIndex
+      return this.layerInfo.subLayerIdx !== -1 ? this.layerInfo.subLayerIdx : this.layerInfo.layerIndex
+    },
+    primaryLayerIndex(): number {
+      return this.layerInfo.subLayerIdx !== -1 ? this.layerInfo.layerIndex : -1
     }
   }
 })

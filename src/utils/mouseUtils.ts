@@ -85,8 +85,8 @@ class MouseUtils {
   onDrop(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }) {
     const layer = this.onDropHandler(e, pageIndex, targetOffset)
     if (layer) {
-      groupUtils.deselect()
       const index = LayerUtils.getObjectInsertionLayerIndex(store.getters.getPage(pageIndex).layers, layer) + 1
+      groupUtils.deselect()
       LayerUtils.addLayersToPos(pageIndex, [layer], index)
       zindexUtils.reassignZindex(pageIndex)
       groupUtils.select(pageIndex, [index])
@@ -98,7 +98,6 @@ class MouseUtils {
     const dropData = e.dataTransfer ? e.dataTransfer.getData('data') : null
     if (dropData === null || typeof dropData !== 'string') return
     const data = JSON.parse(dropData)
-    // const target = e.target as HTMLElement
     const target = document.querySelector(`.nu-page-${pageIndex}`) as HTMLElement
     const targetPos = {
       x: target.getBoundingClientRect().x,
@@ -162,11 +161,11 @@ class MouseUtils {
     })
   }
 
-  clipperHandler(l: IImage, clipPath: string, clipperStyles: IStyle): IImage {
+  clipperHandler(_layer: IImage, clipPath: string, clipperStyles: IStyle): IImage {
     /**
      * If the clipper is already clipped an image, setting the initial size as the layer size.
      */
-    const layer = generalUtils.deepCopy(l) as IImage
+    const layer = generalUtils.deepCopy(_layer) as IImage
     if (typeof clipperStyles.imgX !== 'undefined') {
       clipperStyles.initWidth = clipperStyles.width / clipperStyles.scale
       clipperStyles.initHeight = clipperStyles.height / clipperStyles.scale

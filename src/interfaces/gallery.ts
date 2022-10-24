@@ -16,6 +16,8 @@ export interface RawImage {
 
 export interface GalleryImage extends RawImage {
   preview: RawImage
+  type: number
+  ver: number
 }
 
 export interface RowData {

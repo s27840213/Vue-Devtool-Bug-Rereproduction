@@ -1,12 +1,12 @@
 <template lang="pug">
-  p(class="nu-curve-text__p" :style="pStyle")
-    span(v-if="focus"  class="nu-curve-text__circle" :style="circleStyle")
+  p(class="nu-curve-text__p" :style="pStyle()")
+    span(v-if="focus()"  class="nu-curve-text__circle" :style="circleStyle()")
       svg-icon(iconName="curve-center" :style="curveIconStyle")
-    span(v-for="(span, sIndex) in spans"
+    span(v-for="(span, sIndex) in spans()"
       class="nu-curve-text__span"
       :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
       :key="sIndex",
-      :style="styles(span.styles, sIndex)") {{ span.text }}
+      :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan)") {{ span.text }}
 </template>
 
 <script lang="ts">
@@ -16,14 +16,19 @@ import TextShapeUtils from '@/utils/textShapeUtils'
 import { IGroup, ISpan } from '@/interfaces/layer'
 import tiptapUtils from '@/utils/tiptapUtils'
 import LayerUtils from '@/utils/layerUtils'
-import TextUtils from '@/utils/textUtils'
+import textUtils from '@/utils/textUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 
 export default Vue.extend({
   props: {
     config: Object,
     layerIndex: Number,
     pageIndex: Number,
-    subLayerIndex: Number
+    subLayerIndex: Number,
+    isDuplicated: {
+      type: Boolean,
+      default: false
+    }
   },
   data () {
     return {
@@ -35,9 +40,9 @@ export default Vue.extend({
     }
   },
   created () {
-    this.computeDimensions(this.spans)
-    // TextUtils.loadAllFonts(this.config, 1)
-    TextUtils.loadAllFonts(this.config)
+    this.computeDimensions(this.spans())
+    // textUtils.loadAllFonts(this.config, 1)
+    textUtils.loadAllFonts(this.config)
   },
   destroyed() {
     this.isDestroyed = true
@@ -45,30 +50,54 @@ export default Vue.extend({
     this.resizeObserver = undefined
   },
   mounted() {
-    this.resizeObserver = new ResizeObserver(() => {
-      if (this.isDestroyed) return
+    // this.resizeObserver = new ResizeObserver(() => {
+    //   if (this.isDestroyed) return
 
-      // console.log('resize')
+    //   // console.log('resize')
 
-      if (typeof this.subLayerIndex === 'undefined') {
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
-      } else {
-        const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
-        if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
-        TextUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
-        TextUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
-      }
+    //   if (typeof this.subLayerIndex === 'undefined') {
+    //     LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
+    //   } else {
+    //     const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
+    //     if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
+    //     LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
+    //     textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
+    //     textUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
+    //   }
 
-      this.computeDimensions(this.spans)
+    //   this.computeDimensions(this.spans())
+    // })
+    // this.observeAllSpans()
+    textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
+      setTimeout(() => {
+        this.resizeCallback()
+      }, 100) // for the delay between font loading and dom rendering
     })
-    this.observeAllSpans()
   },
   computed: {
     ...mapState('text', ['fontStore']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
+    duplicatedSpan(): Record<string, string> {
+      const textShadow = textEffectUtils.convertTextEffect(this.config)
+      return this.isDuplicated ? {
+        ...textShadow.duplicatedSpan
+      } : {}
+    }
+  },
+  watch: {
+    'config.paragraphs': {
+      handler(newVal) {
+        this.computeDimensions(this.spans())
+        textUtils.untilFontLoaded(newVal).then(() => {
+          this.computeDimensions(this.spans())
+        })
+      },
+      deep: true
+    }
+  },
+  methods: {
     focus(): boolean {
       const { textShape } = this.config.styles
       return textShape.focus
@@ -89,7 +118,8 @@ export default Vue.extend({
       }
     },
     circleStyle(): any {
-      const { bend, minHeight, scaleRatio } = this
+      const { minHeight, scaleRatio } = this
+      const bend = this.bend()
       const borderWidth = `${1 / (scaleRatio * 0.01)}px`
       const style = {} as any
       const radius = 1000 / Math.pow(Math.abs(bend), 0.6)
@@ -117,24 +147,12 @@ export default Vue.extend({
       }
     },
     transforms(): string[] {
-      return TextShapeUtils.convertTextShape(this.textWidth, this.bend)
-    }
-  },
-  watch: {
-    spans: {
-      handler(newSpans) {
-        this.computeDimensions(newSpans)
-        if (this.resizeObserver) {
-          this.resizeObserver.disconnect()
-          this.observeAllSpans()
-        }
-      },
-      deep: true
-    }
-  },
-  methods: {
+      return TextShapeUtils.convertTextShape(this.textWidth, this.bend())
+    },
     styles(styles: any, idx: number) {
-      const { transforms, bend, textHeight, minHeight } = this
+      const { textHeight, minHeight } = this
+      const bend = this.bend()
+      const transforms = this.transforms()
       const baseline = `${(minHeight - textHeight[idx]) / 2}px`
       const fontStyles = tiptapUtils.textStylesRaw(styles)
       return Object.assign(
@@ -155,6 +173,23 @@ export default Vue.extend({
       this.textWidth = textWidth
       this.textHeight = textHeight
       this.minHeight = minHeight
+    },
+    resizeCallback() {
+      if (this.isDestroyed) return
+
+      // console.log('resize')
+
+      if (typeof this.subLayerIndex === 'undefined') {
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
+      } else {
+        const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
+        if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
+        textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
+        textUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
+      }
+
+      this.computeDimensions(this.spans())
     }
   }
 })

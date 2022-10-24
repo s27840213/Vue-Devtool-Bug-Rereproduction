@@ -18,7 +18,7 @@
                   :ref="`page-${index}`"
                   :key="`page-${index}`"
                   :pageIndex="index"
-                  :editorView="editorView"
+                  :overflowContainer="editorView"
                   :style="{'z-index': `${getPageZIndex(index)}`}"
                   :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
                   @stepChange="handleStepChange")
@@ -272,7 +272,7 @@ export default Vue.extend({
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()
       }
-      if (this.isTyping || this.getInInGestureMode) return
+      if (this.getInInGestureMode) return
       if (imageUtils.isImgControl()) {
         ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
@@ -354,13 +354,15 @@ export default Vue.extend({
     handleSelectionData(selectionData: DOMRect) {
       const layers = [...document.querySelectorAll(`.nu-layer--p${pageUtils.currFocusPageIndex}`)]
       const layerIndexs: number[] = []
-      layers.forEach((layer) => {
-        const layerData = layer.getBoundingClientRect()
-        if (((layerData.top <= selectionData.bottom) && (layerData.left <= selectionData.right) &&
-          (layerData.bottom >= selectionData.top) && (layerData.right >= selectionData.left))) {
-          layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
-        }
-      })
+      if (layers.length > 0) {
+        layers.forEach((layer) => {
+          const layerData = layer.getBoundingClientRect()
+          if (((layerData.top <= selectionData.bottom) && (layerData.left <= selectionData.right) &&
+            (layerData.bottom >= selectionData.top) && (layerData.right >= selectionData.left))) {
+            layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
+          }
+        })
+      }
 
       if (layerIndexs.length > 0) {
         GroupUtils.select(pageUtils.currFocusPageIndex, layerIndexs)
@@ -606,8 +608,6 @@ $REULER_SIZE: 20px;
     position: relative;
     flex-direction: column;
     justify-content: center;
-    transform-style: preserve-3d;
-    transform: scale(1);
     padding: 40px;
   }
 

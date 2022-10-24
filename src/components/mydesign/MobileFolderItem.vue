@@ -5,7 +5,7 @@
       div(v-if="isSelected"
           class="mobile-folder-item__checkbox-checked"
           @click.stop="emitDeselect")
-          svg-icon(iconName="check-large"
+          svg-icon(iconName="done"
                   iconWidth="11.82px"
                   iconHeight="8.71px"
                   iconColor="white")
@@ -159,5 +159,4 @@ export default Vue.extend({
     white-space: nowrap;
   }
 }
-
 </style>

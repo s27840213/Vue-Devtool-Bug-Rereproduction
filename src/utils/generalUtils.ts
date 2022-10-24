@@ -20,7 +20,7 @@ class GeneralUtils {
   }
 
   deepCopy(el: unknown) {
-    return typeof el === 'undefined' ? {} : JSON.parse(JSON.stringify(el))
+    return typeof el === 'undefined' ? {} : _.cloneDeep(el)
   }
 
   objHasOwnProperty(obj: { [index: string]: any }, property: string) {
@@ -42,6 +42,19 @@ class GeneralUtils {
     Vue.nextTick(() => {
       el.scrollLeft = Math.round((scrollCenterX * el.scrollWidth / oldScrollWidth - el.clientWidth) / 2)
       el.scrollTop = Math.round((scrollCenterY * el.scrollHeight / oldScrollHeight - el.clientHeight) / 2)
+    })
+  }
+
+  scrollToCenter(el?: HTMLElement, vertical = true, horizontal = true) {
+    const target = el !== undefined ? el : document.querySelector('.editor-view')
+    Vue.nextTick(() => {
+      if (!target) return
+      if (vertical) {
+        target.scrollTop = (target.scrollHeight - target.clientHeight) / 2
+      }
+      if (horizontal) {
+        target.scrollLeft = (target.scrollWidth - target.clientWidth) / 2
+      }
     })
   }
 
@@ -107,11 +120,6 @@ class GeneralUtils {
     return value.match(/[+-]?\d+(\.\d+)?/)
   }
 
-  isValidHexColor(value: string) {
-    value = value.toUpperCase()
-    return value.match(/^#[0-9A-F]{6}$/)
-  }
-
   boundValue(value: number, min: number, max: number): string {
     if (value < min) return min.toString()
     else if (value > max) return max.toString()
@@ -139,6 +147,18 @@ class GeneralUtils {
       if (a[i] !== b[i]) return false
     }
     return true
+  }
+
+  createGroups(arr: any[], numPerGroupGroups: number) {
+    const numOfArr = arr.length
+    if (numOfArr < numPerGroupGroups) {
+      return [arr.slice(0)]
+    }
+
+    const groupNum = Math.ceil(arr.length / numPerGroupGroups)
+    return new Array(groupNum)
+      .fill('')
+      .map((_, i) => arr.slice(i * numPerGroupGroups, (i + 1) * numPerGroupGroups))
   }
 
   fixSize(size: number) {

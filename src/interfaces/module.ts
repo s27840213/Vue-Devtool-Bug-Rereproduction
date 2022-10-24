@@ -6,17 +6,19 @@ import { IMarker } from '@/interfaces/shape'
 export interface IListModuleState {
   content: Partial<IListServiceContentData>
   categories: IListServiceContentData[]
+  searchResult: Partial<IListServiceContentData>
   keyword: string
   theme: string
   page: number
   nextCategory: number
   nextPage: number | undefined
+  nextSearch: number
   perPage: number
   pending: boolean
-  host: string
-  data: string
-  preview: string
-  preview2?: string
+  // host: string
+  // data: string
+  // preview: string
+  // preview2?: string
   locale: string
   error: string,
   sum?: number
@@ -53,6 +55,7 @@ export interface IAsset {
 }
 
 export interface IAssetProps {
+  db?: string,
   ver?: number,
   pageIndex?: number
   styles?: Partial<IStyle>,
@@ -61,5 +64,10 @@ export interface IAssetProps {
   assetId?: string,
   assetIndex?: number,
   width?: number,
-  height?: number
+  height?: number,
+  panelPreviewSrc?: string,
+  imgSrcSize?: {
+    width: number,
+    height: number
+  }
 }

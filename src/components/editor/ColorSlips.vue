@@ -25,27 +25,28 @@
             :style="colorStyles(color)"
             @click="handleColorEvent(color)")
       template(v-if="!showAllRecentlyColor")
-        //- Brandkit select
-        div(class="relative")
-          brand-selector(theme="mobile-panel")
-          div(class="color-panel__brand-settings pointer"
-              @click="handleOpenSettings")
-            svg-icon(iconName="settings" iconColor="gray-2" iconWidth="24px")
-        //- Brandkit palettes
-        div(v-if="isPalettesLoading" class="color-panel__colors")
-          svg-icon(iconName="loading"
-                  iconWidth="20px"
-                  iconColor="white")
-        div(v-else v-for="palette in currentPalettes"
-            class="color-panel__colors"
-            :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-          div(class="text-left mb-5")
-            span {{getDisplayedPaletteName(palette)}}
-          div
-            div(v-for="color in palette.colors"
-              class="color-panel__color"
-              :style="colorStyles(color.color)"
-              @click="handleColorEvent(color.color)")
+        template(v-if="isBrandkitAvailable")
+          //- Brandkit select
+          div(class="relative")
+            brand-selector(theme="mobile-panel")
+            div(class="color-panel__brand-settings pointer"
+                @click="handleOpenSettings")
+              svg-icon(iconName="settings" iconColor="gray-2" iconWidth="24px")
+          //- Brandkit palettes
+          div(v-if="isPalettesLoading" class="color-panel__colors")
+            svg-icon(iconName="loading"
+                    iconWidth="20px"
+                    iconColor="white")
+          div(v-else v-for="palette in currentPalettes"
+              class="color-panel__colors"
+              :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+            div(class="text-left mb-5")
+              span {{getDisplayedPaletteName(palette)}}
+            div
+              div(v-for="color in palette.colors"
+                class="color-panel__color"
+                :style="colorStyles(color.color)"
+                @click="handleColorEvent(color.color)")
         //- Document colors
         div(class="color-panel__colors"
             :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
@@ -352,7 +353,7 @@ export default Vue.extend({
   &__btn {
     position: absolute;
     top: 0;
-    transform: translate3d(-50%, -100%, 0);
+    transform: translate(-50%, -100%);
   }
   &__colors {
     > div:nth-child(1) {

@@ -6,13 +6,12 @@
       clear
       :defaultKeyword="keyword"
       @search="handleSearch")
-    div(v-if="!pending && !list.length"
+    div(v-if="keyword && !pending && !searchResult.length"
       class="text-white text-left") {{$t('NN0393', {keyword: keyword, target: $tc('NN0002',1)})}}
-    image-gallery(v-else
-      ref="gallery"
-      :images="list"
-      vendor="unsplash"
-      @loadMore="handleLoadMore")
+    //- Search result and main content
+    image-gallery(v-for="item in categoryListArray"
+                  v-show="item.show" :ref="item.key" :key="item.key"
+                  :images="item.content" @loadMore="handleLoadMore" vendor="unsplash")
       template(#pending)
         div(v-if="pending" class="text-center")
           svg-icon(iconName="loading"
@@ -22,13 +21,10 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
 import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
 import generalUtils from '@/utils/generalUtils'
-// import photo from '@/store/module/photo'
-
-const moduleName = 'unsplash'
 
 export default Vue.extend({
   components: {
@@ -37,49 +33,75 @@ export default Vue.extend({
   },
   data() {
     return {
-      scrollTop: 0
+      scrollTop: {
+        mainContent: 0,
+        searchResult: 0
+      }
     }
   },
   computed: {
-    ...mapState(moduleName, [
+    ...mapState('unsplash', [
+      'content',
+      'searchResult',
       'keyword',
-      'list',
       'pending'
-    ])
+    ]),
+    categoryListArray(): any[] {
+      return [{
+        content: this.searchResult,
+        show: this.keyword,
+        key: 'searchResult'
+      }, {
+        content: this.content,
+        show: !this.keyword,
+        key: 'mainContent'
+      }]
+    }
   },
   mounted() {
     generalUtils.panelInit('photo',
       this.handleSearch,
-      this.handleSearch,
-      this.handleSearch
+      () => { /**/ },
+      () => this.getPhotos({ keyword: '' })
     )
   },
   activated() {
-    if (this.$refs.gallery) {
-      const list = (this.$refs.gallery as Vue).$el.children[0]
-      list.scrollTop = this.scrollTop
-    }
+    this.$refs.mainContent[0].$el.children[0].scrollTop = this.scrollTop.mainContent
+    this.$refs.searchResult[0].$el.children[0].scrollTop = this.scrollTop.searchResult
+    this.$refs.mainContent[0].$el.children[0].addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    this.$refs.searchResult[0].$el.children[0].addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+  },
+  deactivated() {
+    this.$refs.mainContent[0].$el.children[0].removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    this.$refs.searchResult[0].$el.children[0].removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   watch: {
-    list(curr, prev) {
-      if (curr.length && !prev.length && this.$refs.gallery) {
-        const list = (this.$refs.gallery as Vue).$el.children[0]
-        list.addEventListener('scroll', (event: Event) => {
-          this.scrollTop = (event.target as HTMLElement).scrollTop
+    keyword(newVal: string) {
+      if (!newVal) {
+        this.$nextTick(() => {
+          // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
+          this.$refs.mainContent[0].$el.children[0].scrollTop = this.scrollTop.mainContent
         })
-      }
-      if (!curr.length && prev.length) {
-        this.scrollTop = 0
       }
     }
   },
   methods: {
-    async handleSearch(keyword?: string) {
-      await this.$store.commit(`${moduleName}/SET_STATE`, { list: [] })
-      this.$store.dispatch(`${moduleName}/getPhotos`, { keyword })
+    ...mapActions('unsplash', [
+      'getPhotos',
+      'getMorePhotos',
+      'resetSearch'
+    ]),
+    handleSearch(keyword?: string) {
+      this.resetSearch()
+      if (keyword) {
+        this.getPhotos({ keyword })
+      }
     },
     handleLoadMore() {
-      !this.pending && this.$store.dispatch(`${moduleName}/getMorePhotos`)
+      !this.pending && this.getMorePhotos()
+    },
+    handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
+      this.scrollTop[key] = (event.target as HTMLElement).scrollTop
     },
     searchBarStyle() {
       if (this.pending) {

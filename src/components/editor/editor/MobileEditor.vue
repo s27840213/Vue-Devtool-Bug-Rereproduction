@@ -1,0 +1,317 @@
+<template lang="pug">
+  div(class="mobile-editor")
+    div(class="mobile-editor__top" :style="topStyle")
+      header-tabs(@switchTab="switchTab"
+        @showAllPages="showAllPages"
+        :currTab="currActivePanel"
+        :inAllPagesMode="inAllPagesMode")
+      div(class="mobile-editor__content")
+        keep-alive
+          component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
+            :currActivePanel="currActivePanel"
+            :isConfigPanelOpen="isConfigPanelOpen"
+            :inAllPagesMode="inAllPagesMode"
+            :showMobilePanel="showMobilePanelAfterTransitoin")
+      transition(name="panel-up"
+                @before-enter="beforeEnter"
+                @after-enter="afterEnter"
+                @before-leave="beforeLeave"
+                @after-leave="afterLeave")
+        mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
+          :currActivePanel="currActivePanel"
+          :currColorEvent="currColorEvent"
+          @switchTab="switchTab"
+          @panelHeight="setPanelHeight")
+      //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
+      //-   :currActivePanel="'color'"
+      //-   :currColorEvent="ColorEventType.background"
+      //-   :isExtraPanel="true"
+      //-   @switchTab="switchTab")
+    footer-tabs(class="mobile-editor__bottom"
+      @switchTab="switchTab"
+      :currTab="currActivePanel"
+      :inAllPagesMode="inAllPagesMode"
+      @showAllPages="showAllPages")
+</template>
+
+<script lang="ts">
+import Vue from 'vue'
+import MobileEditorView from '@/components/editor/mobile/MobileEditorView.vue'
+import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
+import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
+import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { FunctionPanelType, SidebarPanelType, ColorEventType } from '@/store/types'
+import store from '@/store'
+import stepsUtils from '@/utils/stepsUtils'
+import layerUtils from '@/utils/layerUtils'
+import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import { IFooterTabProps } from '@/interfaces/editor'
+import AllPages from '@/components/editor/mobile/AllPages.vue'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import editorUtils from '@/utils/editorUtils'
+import pageUtils from '@/utils/pageUtils'
+import brandkitUtils from '@/utils/brandkitUtils'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+
+export default Vue.extend({
+  name: 'MobileEditor',
+  components: {
+    MobileEditorView,
+    MobilePanel,
+    HeaderTabs,
+    FooterTabs,
+    AllPages
+  },
+  data() {
+    return {
+      FunctionPanelType,
+      isColorPanelOpen: false,
+      isConfigPanelOpen: false,
+      isLoading: false,
+      currColorEvent: '',
+      ColorEventType,
+      showMobilePanelAfterTransitoin: false,
+      panelAnimating: false,
+      panelHeight: 0
+    }
+  },
+  created() {
+    eventUtils.on(PanelEvent.switchTab, this.switchTab)
+  },
+  mounted() {
+    /**
+     * @Note the codes below is used to prevent the zoom in/out effect of mobile phone, especially for the "IOS"
+     * Remember to set passive to "false", or the preventDefault() function won't work.
+     * check the blog below to see some method to prevent this error
+     * https://medium.com/@littleDog/%E5%A6%82%E4%BD%95%E8%A7%A3%E6%B1%BA-user-scalable-no-%E5%B1%AC%E6%80%A7%E8%A2%ABios-safari-ignore-e6a0531050ba
+     */
+
+    stepsUtils.MAX_STORAGE_COUNT = 15
+    document.addEventListener('touchstart', (event: TouchEvent) => {
+      /**
+       * @param nearHrEdge - is used to prevnt the IOS navagation gesture, this is just a workaround
+       */
+      const nearHrEdge = (event as TouchEvent).touches[0].clientX <= 5 || (event as TouchEvent).touches[0].clientX > window.innerWidth - 5
+
+      if (event.touches.length > 1 || nearHrEdge) {
+        event.preventDefault()
+      }
+    }, { passive: false })
+
+    let lastTouchEnd = 0
+    document.addEventListener('touchend', (event) => {
+      const now = (new Date()).getTime()
+      if (now - lastTouchEnd <= 300) {
+        event.preventDefault()
+      }
+      lastTouchEnd = now
+    }, false)
+
+    if (process.env.NODE_ENV === 'development') {
+      // const vconsole = new Vconsole()
+      // vconsole.setSwitchPosition(10, 80)
+    }
+
+    brandkitUtils.fetchBrands(this.fetchBrands)
+  },
+  computed: {
+    ...mapState('mobileEditor', {
+      closeMobilePanelFlag: 'closeMobilePanelFlag',
+      inAllPagesMode: 'mobileAllPageMode',
+      mobilePanel: 'currActivePanel'
+    }),
+    ...mapState('user', [
+      'role',
+      'adminMode',
+      'viewGuide']),
+    ...mapGetters({
+      groupId: 'getGroupId',
+      currSelectedInfo: 'getCurrSelectedInfo',
+      currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      currPanel: 'getCurrSidebarPanelType',
+      groupType: 'getGroupType',
+      isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
+      currActivePanel: 'mobileEditor/getCurrActivePanel',
+      showMobilePanel: 'mobileEditor/getShowMobilePanel'
+    }),
+    inPagePanel(): boolean {
+      return SidebarPanelType.page === this.currPanel
+    },
+    topStyle(): Record<string, string> {
+      return { paddingBottom: this.panelAnimating ? '0' : `${this.panelHeight}px` }
+    },
+    scaleRatioEditorPos(): { [index: string]: string } {
+      return this.inPagePanel ? {
+        right: '2rem'
+      } : {
+        left: '50%',
+        transform: 'translateX(-50%)'
+      }
+    },
+    isLogin(): boolean {
+      return store.getters['user/isLogin']
+    },
+    isAdmin(): boolean {
+      return this.role === 0
+    },
+    isLocked(): boolean {
+      return layerUtils.getTmpLayer().locked
+    },
+    groupTypes(): Set<string> {
+      const groupLayer = this.currSelectedInfo.layers[0] as IGroup
+      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup) => {
+        return layer.type
+      })
+      return new Set(types)
+    },
+    isGroup(): boolean {
+      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
+    },
+    hasSubSelectedLayer(): boolean {
+      return this.currSubSelectedInfo.index !== -1
+    },
+    subLayerType(): string {
+      return this.currSubSelectedInfo.type
+    },
+    showTextSetting(): boolean {
+      return this.isGroup ? (
+        this.hasSubSelectedLayer ? (
+          this.subLayerType === 'text' && !this.isLocked
+        ) : (this.groupTypes.has('text') && !this.isLocked)
+      ) : (this.currSelectedInfo.types.has('text'))
+    }
+  },
+  watch: {
+    closeMobilePanelFlag(newVal) {
+      if (newVal) {
+        this.setCurrActiveSubPanel('none')
+        this.setCloseMobilePanelFlag(false)
+        editorUtils.setShowMobilePanel(false)
+      }
+    },
+    mobilePanel(newVal, oldVal) {
+      if (oldVal === 'photo-shadow') {
+        imageShadowPanelUtils.handleShadowUpload()
+      }
+    }
+  },
+  methods: {
+    ...mapMutations({
+      setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
+      _setAdminMode: 'user/SET_ADMIN_MODE',
+      setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
+      setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
+      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
+    }),
+    ...mapActions({
+      fetchBrands: 'brandkit/fetchBrands'
+    }),
+    switchTab(panelType: string, props?: IFooterTabProps) {
+      if (this.currActivePanel === panelType || panelType === 'none') {
+        editorUtils.setShowMobilePanel(false)
+        editorUtils.setInMultiSelectionMode(false)
+      } else {
+        editorUtils.setShowMobilePanel(true)
+        this.setCurrActivePanel(panelType)
+        if (props) {
+          if (panelType === 'color' && props.currColorEvent) {
+            this.currColorEvent = props.currColorEvent
+          }
+        }
+      }
+
+      if (this.currActivePanel !== 'none' && this.inAllPagesMode) {
+        editorUtils.setMobileAllPageMode(false)
+      }
+    },
+    showAllPages() {
+      editorUtils.setMobileAllPageMode(!this.inAllPagesMode)
+
+      if (!this.inAllPagesMode) {
+        this.$nextTick(() => {
+          pageUtils.fitPage()
+        })
+      }
+    },
+    setPanelHeight(height: number) {
+      this.panelHeight = height
+    },
+    beforeEnter() {
+      this.showMobilePanelAfterTransitoin = true
+      this.panelAnimating = true
+    },
+    afterEnter() {
+      this.panelAnimating = false
+      this.$nextTick(() => {
+        pageUtils.fitPage()
+      })
+    },
+    beforeLeave() {
+      this.panelAnimating = true
+      this.$nextTick(() => {
+        pageUtils.fitPage()
+      })
+    },
+    afterLeave() {
+      this.setCurrActivePanel('none')
+      setTimeout(() => {
+        this.showMobilePanelAfterTransitoin = false
+      }, 300)
+      this.$nextTick(() => {
+        this.panelHeight = 0
+        this.panelAnimating = false
+      })
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.mobile-editor {
+  @include size(100%, 100%);
+  height: 100%;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-columns: 1fr;
+
+  &__top {
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-template-columns: 1fr;
+    background-color: setColor(gray-5);
+  }
+  &__bottom {
+    z-index: setZindex("footer");
+  }
+
+  &__content {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    z-index: setZindex("editor-view");
+
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    z-index: setZindex("editor-view");
+  }
+
+  &__page-preview {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+    z-index: setZindex("pages-preview");
+    background: setColor(gray-6);
+    box-sizing: border-box;
+  }
+}
+</style>

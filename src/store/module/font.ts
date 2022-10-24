@@ -3,7 +3,7 @@ import { captureException } from '@sentry/browser'
 import list from '@/apis/list'
 import { IListServiceData, IListServiceParams } from '@/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
-import listFactory, { SET_STATE } from './listFactory'
+import listFactory from './listFactory'
 
 const SET_MORE_CATEGORY = 'SET_MORE_CATEGORY' as const
 
@@ -18,7 +18,7 @@ actions.getMoreCategory = async ({ commit, getters, state }) => {
   const { nextParams, hasNextPage } = getters
   const { pending } = state
   if (!hasNextPage || pending) { return }
-  commit(SET_STATE, { pending: true })
+  commit('SET_STATE', { pending: true })
   nextParams.keyword = undefined
   try {
     const { data } = await list.getFont(nextParams)

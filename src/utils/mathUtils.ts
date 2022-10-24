@@ -31,7 +31,7 @@ class MathUtils {
     }
   }
 
-  getBounding(layer: ILayer | IGroup | ITmp): IBounding {
+  getBounding(layer: ILayer | IGroup | ITmp | { styles: IStyle }): IBounding {
     const angle = layer.styles.rotate
     const origin = this.getCenter(layer.styles)
     const initStyles = { x: layer.styles.x, y: layer.styles.y, width: layer.styles.width, height: layer.styles.height }

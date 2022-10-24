@@ -28,19 +28,20 @@
 import Vue, { PropType } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
-import colorUtils from '@/utils/colorUtils'
+import colorUtils, { checkAndConvertToHex } from '@/utils/colorUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { mapGetters, mapState } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import textPropUtils from '@/utils/textPropUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
-import { ColorEventType, LayerType } from '@/store/types'
+import { ColorEventType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
 import shapeUtils from '@/utils/shapeUtils'
+import imageShadowUtils from '@/utils/imageShadowUtils'
+import textBgUtils from '@/utils/textBgUtils'
 
 export default Vue.extend({
   data() {
@@ -144,7 +145,7 @@ export default Vue.extend({
       switch (this.currEvent) {
         case ColorEventType.text: {
           if (newColor === this.props.color) return
-          const hex = tiptapUtils.isValidHexColor(newColor) ? newColor : tiptapUtils.rgbToHex(newColor)
+          const hex = checkAndConvertToHex(newColor)
           tiptapUtils.spanStyleHandler('color', hex)
           break
         }
@@ -191,11 +192,19 @@ export default Vue.extend({
         }
 
         case ColorEventType.textEffect: {
-          const { styles } = textEffectUtils.getCurrentLayer()
-          const { textEffect = {} } = styles
+          textEffectUtils.setColor(newColor)
+          break
+        }
 
-          const currentEffect = textEffect.name || 'none'
-          textEffectUtils.setTextEffect(currentEffect, { color: newColor })
+        case ColorEventType.textBg: {
+          textBgUtils.setColor(newColor)
+          break
+        }
+
+        case ColorEventType.photoShadow: {
+          const { styles: { shadow: { currentEffect } } } = layerUtils.getCurrConfig as IImage
+          imageShadowUtils.setEffect(currentEffect, { color: newColor })
+          break
         }
       }
     },

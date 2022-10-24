@@ -1,18 +1,21 @@
 <template lang="pug">
   div(class="nu-frame"
-      :style="styles")
-    div(v-if="shadowSrc" class="shadow__wrapper" :style="shadowWrapperStyles")
+      :style="styles()")
+    div(v-if="shadowSrc()" class="shadow__wrapper" :style="shadowWrapperStyles")
       img(class="shadow__img"
         draggable="false"
-        :src="shadowSrc")
+        :src="shadowSrc()")
     nu-layer(v-for="(layer,index) in layers"
       :key="`layer-${index}`"
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
-      :subLayerIndex="index"
-      :flip="flip"
+      :isFrame="true"
+      :inImageFrame="inImageFrame()"
+      :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
+      :contentScaleRatio="contentScaleRatio"
       :primaryLayer="config"
-      :config="layer")
+      :config="layer"
+      :isSubLayer="true")
 </template>
 
 <script lang="ts">
@@ -26,10 +29,15 @@ import layerFactary from '@/utils/layerFactary'
 import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
+  inheritAttrs: false,
   props: {
     config: Object,
     pageIndex: Number,
-    layerIndex: Number
+    layerIndex: Number,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   async created() {
     if (this.config.needFetch && this.config.designId) {
@@ -111,12 +119,6 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
-    flip() {
-      return {
-        horizontalFlip: this.config.styles.horizontalFlip,
-        verticalFlip: this.config.styles.verticalFlip
-      }
-    },
     layers() {
       const config = this.config as IFrame
       let layers: Array<IImage | IShape> = []
@@ -135,12 +137,35 @@ export default Vue.extend({
       }
       return layers
     },
+    layerIdxOffset(): number {
+      const { config } = this
+      return config.decoration && config.decoration.svg && !config.clips[0].isFrameImg ? 1 : 0
+    },
+    shadowWrapperStyles() {
+      const shadow = this.config.styles.shadow
+      if (shadow && shadow.srcObj?.type) {
+        const { imgWidth, imgHeight, imgX, imgY } = shadow.styles
+        const { horizontalFlip, verticalFlip, scale } = this.config.styles
+        const x = (horizontalFlip ? -imgX : imgX) * scale * this.contentScaleRatio
+        const y = (verticalFlip ? -imgY : imgY) * scale * this.contentScaleRatio
+        return {
+          width: (imgWidth * scale * this.contentScaleRatio).toString() + 'px',
+          height: (imgHeight * scale * this.contentScaleRatio).toString() + 'px',
+          transform: `translate(${x}px, ${y}px)`
+        }
+      }
+      return {}
+    }
+  },
+  methods: {
     styles() {
       const isFrameImg = this.config.clips.length === 1 && this.config.clips[0].isFrameImg
       return {
-        width: isFrameImg ? '' : `${this.config.styles.width / this.config.styles.scale}px`,
-        height: isFrameImg ? '' : `${this.config.styles.height / this.config.styles.scale}px`,
-        pointerEvents: ImageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
+        width: isFrameImg ? '' : `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio}px`,
+        height: isFrameImg ? '' : `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio}px`,
+        pointerEvents: ImageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial',
+        transform: isFrameImg ? '' : `scale(${1 / this.contentScaleRatio})`,
+        transformOrigin: isFrameImg ? '' : 'top left'
       }
     },
     shadowSrc() {
@@ -152,18 +177,8 @@ export default Vue.extend({
       }
       return ''
     },
-    shadowWrapperStyles() {
-      const shadow = this.config.styles.shadow
-      if (shadow && shadow.srcObj.type) {
-        const { imgWidth, imgHeight, imgX, imgY } = shadow.styles
-        const { horizontalFlip, verticalFlip, scale } = this.config.styles
-        return {
-          width: (imgWidth * scale).toString() + 'px',
-          height: (imgHeight * scale).toString() + 'px',
-          transform: `translate(${(horizontalFlip ? -imgX : imgX) * scale}px, ${(verticalFlip ? -imgY : imgY) * scale}px)`
-        }
-      }
-      return {}
+    inImageFrame() {
+      return this.config.clips.length === 1 && this.config.clips[0].isFrameImg
     }
   }
 })
@@ -188,7 +203,7 @@ export default Vue.extend({
   }
   &__img {
     width: 100%;
-    height: 100%
+    height: 100%;
   }
 }
 </style>

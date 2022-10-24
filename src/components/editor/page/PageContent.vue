@@ -1,10 +1,10 @@
 <template lang="pug">
 div(class="overflow-container"
-    :style="styles()")
-  div(:style="Object.assign(styles(), {transformStyle: 'preserve-3d'})")
+    :style="pageStyles")
+  div(:style="stylesWith3DPreserve")
     div(v-if="imgLoaded"
         :class="['page-content']"
-        :style="styles()"
+        :style="pageStyles"
         ref="page-content"
         @drop.prevent="onDrop"
         @dragover.prevent
@@ -18,38 +18,62 @@ div(class="overflow-container"
         :pageIndex="pageIndex"
         :color="this.config.backgroundColor"
         :key="this.config.backgroundImage.id"
-        @mousedown.native.left="pageClickHandler()")
-      nu-layer(v-for="(layer,index) in config.layers"
+        @mousedown.native.left="pageClickHandler()"
+        :contentScaleRatio="contentScaleRatio")
+      //- lazy-load(v-for="(layer,index) in config.layers"
+      //-     :key="layer.id"
+      //-     target=".editor-view"
+      //-     :threshold="[0,1]")
+      nu-layer(
+        v-for="(layer,index) in layerFilter"
         :key="layer.id"
         :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
         :data-index="`${index}`"
         :data-pindex="`${pageIndex}`"
         :layerIndex="index"
         :pageIndex="pageIndex"
-        :config="layer")
+        :config="layer"
+        :currSelectedInfo="currSelectedInfo"
+        :contentScaleRatio="contentScaleRatio"
+        :scaleRatio="scaleRatio"
+        :getCurrFunctionPanelType="getCurrFunctionPanelType"
+        :isUploadingShadowImg="isUploadingShadowImg"
+        :isHandling="isHandling"
+        :isShowPagePanel="isShowPagePanel"
+        :imgSizeMap="imgSizeMap"
+        :userId="userId"
+        :verUni="verUni"
+        :uploadId="uploadId"
+        :handleId="handleId"
+        :uploadShadowImgs="uploadShadowImgs"
+        :isPagePreview="true")
     template(v-else)
       div(class='pages-loading')
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import imageUtils from '@/utils/imageUtils'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { SidebarPanelType } from '@/store/types'
+import { LayerType, SidebarPanelType } from '@/store/types'
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import DragUtils from '@/utils/dragUtils'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import textUtils from '@/utils/textUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
+import LazyLoad from '@/components/LazyLoad.vue'
+import { ILayer } from '@/interfaces/layer'
 
 export default Vue.extend({
-  components: { NuBgImage },
+  components: {
+    NuBgImage,
+    LazyLoad
+  },
   props: {
     config: {
       type: Object,
@@ -66,6 +90,10 @@ export default Vue.extend({
     handleSequentially: {
       type: Boolean,
       default: false
+    },
+    contentScaleRatio: {
+      default: 1,
+      type: Number
     }
   },
   data() {
@@ -79,18 +107,53 @@ export default Vue.extend({
     ...mapGetters({
       setLayersDone: 'file/getSetLayersDone',
       isProcessImgShadow: 'shadow/isProcessing',
-      isUploadImgShadow: 'shadow/isUploading'
+      isUploadImgShadow: 'shadow/isUploading',
+      currSelectedInfo: 'getCurrSelectedInfo',
+      scaleRatio: 'getPageScaleRatio',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+      isUploadingShadowImg: 'shadow/isUploading',
+      isHandling: 'shadow/isHandling',
+      isShowPagePanel: 'page/getShowPagePanel',
+      currSelectedPageIndex: 'getCurrSelectedPageIndex'
     }),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
+    ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     isHandleShadow(): boolean {
       return this.isProcessImgShadow || this.isUploadImgShadow
+    },
+    pageStyles(): { [index: string]: string } {
+      return {
+        width: `${this.config.width * this.contentScaleRatio}px`,
+        height: `${this.config.height * this.contentScaleRatio}px`,
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
+      }
+    },
+    stylesWith3DPreserve(): { [index: string]: string } {
+      return {
+        width: `${this.config.width * this.contentScaleRatio}px`,
+        height: `${this.config.height * this.contentScaleRatio}px`,
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
+      }
+    },
+    layerFilter(): any {
+      return this.config.layers.filter((layer: ILayer) => {
+        // return layer.type !== LayerType.text && layer.type !== LayerType.shape
+        // return layer.type !== LayerType.text
+        return layer
+      })
+    },
+    hasSelectedLayer(): boolean {
+      return this.currSelectedInfo.layers.length > 0
     }
   },
   mounted() {
     if (this.setLayersDone) {
-      this.handleSequentially ? this.$emit('pushAsyncEvent', this.loadLayerImg) : this.loadLayerImg()
+      this.loadLayerImg()
+      // this.handleSequentially ? queueUtils.push(this.loadLayerImg) : this.loadLayerImg()
     }
     if (this.config.isAutoResizeNeeded) {
-      this.handleSequentially ? this.$emit('pushAsyncEvent', this.handleFontLoading) : this.handleFontLoading()
+      this.handleFontLoading()
+      // this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
     }
   },
   watch: {
@@ -98,12 +161,14 @@ export default Vue.extend({
       // When first page mounted, its layers is not ready,
       // so trigger loadLayerImg when uploadUtils call SET_pages.
       if (newVal) {
-        this.handleSequentially ? this.$emit('pushAsyncEvent', this.loadLayerImg) : this.loadLayerImg()
+        this.loadLayerImg()
+        // this.handleSequentially ? queueUtils.push(this.loadLayerImg) : this.loadLayerImg()
       }
     },
     'config.isAutoResizeNeeded'(newVal) {
       if (newVal) {
-        this.handleSequentially ? this.$emit('pushAsyncEvent', this.handleFontLoading) : this.handleFontLoading()
+        this.handleFontLoading()
+        // this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
       }
     }
   },
@@ -154,18 +219,14 @@ export default Vue.extend({
         }
       }
     },
-    styles() {
-      return {
-        width: `${this.config.width}px`,
-        height: `${this.config.height}px`
-      }
-    },
     togglePageHighlighter(isHover: boolean): void {
+      if (this.isPagePreview) return
       this.pageIsHover = isHover
     },
     pageClickHandler(e: PointerEvent): void {
+      if (this.isPagePreview) return
       groupUtils.deselect()
-      imageUtils.setImgControlDefault(false)
+      // imageUtils.setImgControlDefault(false)
       editorUtils.setInMultiSelectionMode(false)
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
@@ -175,6 +236,7 @@ export default Vue.extend({
       }
     },
     onRightClick(event: MouseEvent) {
+      if (this.isPagePreview) return
       if (generalUtils.isTouchDevice()) {
         return
       }
@@ -186,6 +248,8 @@ export default Vue.extend({
       popupUtils.openPopup('page', { event })
     },
     pageDblClickHandler(): void {
+      if (this.isPagePreview) return
+
       if (this.isHandleShadow) {
         return
       }
@@ -199,13 +263,13 @@ export default Vue.extend({
     },
     async handleFontLoading() {
       if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
-        textUtils.untilFontLoadedForPage(this.config).then(() => {
+        textUtils.untilFontLoadedForPage(this.config, true).then(() => {
           setTimeout(() => {
             this.updatePageProps({
               pageIndex: this.pageIndex,
               props: { isAutoResizeNeeded: false }
             })
-          }, 500) // for the delay between font loading and dom rendering
+          }, 100) // for the delay between font loading and dom rendering
         })
       }
     }
@@ -224,7 +288,6 @@ export default Vue.extend({
   position: absolute;
   box-sizing: border-box;
   background-repeat: no-repeat;
-  transform-style: preserve-3d;
 }
 
 .pages-loading {

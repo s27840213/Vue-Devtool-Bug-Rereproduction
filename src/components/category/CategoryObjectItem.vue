@@ -56,7 +56,7 @@ export default Vue.extend({
     },
     addSvg() {
       if (!paymentUtils.checkPro(this.item, 'pro-object')) return
-      assetUtils.addAsset(this.item)
+      assetUtils.addAsset(this.item, { db: 'svg' })
     },
     showSvgInfo(evt: Event) {
       const { info = {}, tags } = this.item
@@ -72,7 +72,7 @@ export default Vue.extend({
       this.$nextTick(() => {
         const el = document.querySelector('.res-info') as HTMLElement
         const { top, left, height } = (evt.target as HTMLElement).getBoundingClientRect()
-        el.style.transform = `translate3d(${left}px, ${top + height + 5}px,0)`
+        el.style.transform = `translate(${left}px, ${top + height + 5}px)`
         el.focus()
       })
     },

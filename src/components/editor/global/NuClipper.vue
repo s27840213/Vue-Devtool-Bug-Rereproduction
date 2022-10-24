@@ -6,31 +6,47 @@
 
 <script lang="ts">
 import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IFrame, IImage, IText } from '@/interfaces/layer'
 import { LayerType } from '@/store/types'
 import cssConverter from '@/utils/cssConverter'
 import frameUtils from '@/utils/frameUtils'
+import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
+import Svgpath from 'svgpath'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number,
     layerIndex: Number,
-    imgControl: Boolean
+    subLayerIndex: Number,
+    imgControl: Boolean,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   data() {
     return {
     }
   },
   computed: {
+    primaryLayer(): unknown | undefined {
+      if (this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined') {
+        return layerUtils.getLayer(this.pageIndex, this.layerIndex)
+      } else {
+        return undefined
+      }
+    }
+  },
+  methods: {
     shapeWidth(): number {
       return (this.config.vSize?.[0] ?? 0) + (this.config.pDiff?.[0])
     },
     shapeHeight(): number {
       return (this.config.vSize?.[1] ?? 0) + (this.config.pDiff?.[1])
-    }
-  },
-  methods: {
+    },
     styles() {
       const { type, imgControl } = this.config
       const { horizontalFlip, verticalFlip } = this.config.styles
@@ -42,21 +58,25 @@ export default Vue.extend({
       switch (type) {
         case 'image':
           if (this.config.isFrame) {
-            clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
-          } else {
-            // clipPath = layerPath
+            // clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
+            clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')`
           }
-          width = `${width}px`
-          height = `${height}px`
+          if (!this.config.isImageFrame && this.primaryLayer && (this.primaryLayer as IFrame).type === LayerType.frame) {
+            width = `${width * this.contentScaleRatio}px`
+            height = `${height * this.contentScaleRatio}px`
+          } else {
+            width = `${width * this.contentScaleRatio}px`
+            height = `${height * this.contentScaleRatio}px`
+          }
           break
         case 'shape':
-          width = `${this.shapeWidth}px`
-          height = `${this.shapeHeight}px`
+          width = `${this.shapeWidth()}px`
+          height = `${this.shapeHeight()}px`
           break
         case 'frame':
           if (frameUtils.isImageFrame(this.config)) {
-            width = `${width}px`
-            height = `${height}px`
+            width = `${width * this.contentScaleRatio}px`
+            height = `${height * this.contentScaleRatio}px`
           } else {
             width = `${width / scale}px`
             height = `${height / scale}px`
@@ -70,7 +90,8 @@ export default Vue.extend({
         width,
         height,
         ...(!this.imgControl && this.config.type === 'image' && this.config.styles.shadow.currentEffect === ShadowEffectType.none && { clipPath }),
-        ...flip
+        ...flip,
+        'transform-style': pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
       }
     }
   }
@@ -79,7 +100,6 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-clipper {
-  transform-style: preserve-3d;
   // overflow: hidden;
 }
 

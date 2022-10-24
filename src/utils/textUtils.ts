@@ -16,6 +16,7 @@ import _ from 'lodash'
 import cssConverter from './cssConverter'
 import stepsUtils from './stepsUtils'
 import textBgUtils from './textBgUtils'
+import { checkAndConvertToHex } from '@/utils/colorUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -24,6 +25,7 @@ class TextUtils {
   get isFontLoading(): boolean { return (store.state as any).text.isFontLoading }
 
   toRecordId: string
+  toSetFlagId: string
   fieldRange: {
     fontSize: { min: number, max: number }
     lineHeight: { min: number, max: number }
@@ -33,6 +35,7 @@ class TextUtils {
 
   constructor() {
     this.toRecordId = ''
+    this.toSetFlagId = ''
     this.fieldRange = {
       fontSize: { min: 6, max: 800 },
       lineHeight: { min: 0.5, max: 2.5 },
@@ -443,7 +446,7 @@ class TextUtils {
             : Math.round(parseFloat(this.getCurrTextProps?.fontSize ?? '0') / (LayerUtils.getCurrLayer as IText).styles.scale),
           decoration: spanEl.style.textDecorationLine,
           style: spanEl.style.fontStyle,
-          color: this.isValidHexColor(spanEl.style.color) ? spanEl.style.color : this.rgbToHex(spanEl.style.color)
+          color: checkAndConvertToHex(spanEl.style.color)
         } as ISpanStyle
 
         if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
@@ -471,17 +474,6 @@ class TextUtils {
       }
     })
     return paragraphs
-  }
-
-  private isValidHexColor = (value: string): boolean => value.match(/^#[0-9A-F]{6}$/) !== null
-  private componentToHex = (c: number) => c.toString(16).length === 1 ? '0' + c.toString(16).toUpperCase() : c.toString(16).toUpperCase()
-  private rgbToHex = (rgb: string) => {
-    const rgbArr = rgb.match(/\d+/g)
-    if (rgbArr && rgbArr.length === 3) {
-      return '#' + this.componentToHex(parseInt(rgbArr[0])) + this.componentToHex(parseInt(rgbArr[1])) + this.componentToHex(parseInt(rgbArr[2]))
-    } else {
-      return rgb
-    }
   }
 
   newPropsHandler(paragraphs: IParagraph[]): IParagraph[] {
@@ -586,7 +578,7 @@ class TextUtils {
     content.paragraphs.forEach(pData => {
       const p = document.createElement('p')
       let fontSize = 0
-      pData.spans.forEach(spanData => {
+      pData.spans.forEach((spanData, index) => {
         const span = document.createElement('span')
         span.textContent = spanData.text
 
@@ -598,8 +590,17 @@ class TextUtils {
               [s.split(':')[0].trim()]: s.split(': ')[1].trim()
             })
           })
-        const textBgSpanEffect = textBgUtils.convertTextSpanEffect(content.styles)
-        Object.assign(span.style, spanStyleObject, textBgSpanEffect)
+        const textBgSpanEffect = textBgUtils.convertTextSpanEffect(content.styles.textBg)
+        const additionalStyle = Object.assign({}, spanStyleObject, textBgSpanEffect as Record<string, string>,
+          index === pData.spans.length - 1 && spanData.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {}
+        )
+        Object.assign(span.style, additionalStyle)
+        // Set CSS var to span
+        for (const [key, value] of Object.entries(additionalStyle)) {
+          if (key.startsWith('--')) {
+            span.style.setProperty(key, value)
+          }
+        }
 
         span.classList.add('nu-text__span')
         p.appendChild(!spanData.text && pData.spans.length === 1 ? document.createElement('br') : span)
@@ -759,7 +760,7 @@ class TextUtils {
       this.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, textHW.height, heightOri, noPush)
       this.fixGroupCoordinates(pageIndex, layerIndex)
     } else {
-      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex, noPush)
+      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex, false, noPush)
     }
   }
 
@@ -1148,6 +1149,7 @@ class TextUtils {
               l.type === 'text' && TextPropUtils.propAppliedAllText(layerIndex, idx, prop, preprocessedValue)
               l.type === 'text' && this.updateGroupLayerSizeByShape(LayerUtils.pageIndex, layerIndex, idx)
             })
+          TextPropUtils.updateTextPropsState({ [prop]: _value })
         } else {
           tiptapUtils.applyParagraphStyle(prop, preprocessedValue, false)
           TextPropUtils.updateTextPropsState({ [prop]: _value })
@@ -1156,7 +1158,12 @@ class TextUtils {
     }
   }
 
-  async untilFontLoadedForPage(page: IPage): Promise<void> {
+  async untilFontLoadedForPage(page: IPage, toSetFlag = false): Promise<void> {
+    const setFlagId = GeneralUtils.generateRandomString(12)
+    if (toSetFlag) {
+      this.toSetFlagId = setFlagId
+      this.setIsFontLoading(true)
+    }
     const textLayers: IText[] = []
     for (const layer of page.layers) {
       if (layer.type === 'text') {
@@ -1168,11 +1175,57 @@ class TextUtils {
         textLayers.push(...((layer as IGroup).layers.filter(l => l.type === 'text') as IText[]))
       }
     }
-    await Promise.all(textLayers.map(l => this.untilFontLoaded(l.paragraphs)))
+    let isError = false
+    try {
+      isError = await Promise.race([
+        Promise.all(textLayers.map(l => this.untilFontLoaded(l.paragraphs))),
+        new Promise<boolean>(resolve => {
+          setTimeout(() => {
+            resolve(true)
+          }, 40000)
+        })
+      ]) === true
+    } catch (error) {
+      // console.log(error)
+      isError = true
+    } finally {
+      if (isError === true) {
+        // console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+      }
+      if (toSetFlag && this.toSetFlagId === setFlagId) {
+        this.setIsFontLoading(false)
+      }
+    }
   }
 
-  async untilFontLoaded(paragraphs: IParagraph[]): Promise<void> {
-    await Promise.all(paragraphs.map(p => this.untilFontLoadedForP(p)))
+  async untilFontLoaded(paragraphs: IParagraph[], toSetFlag = false): Promise<void> {
+    const setFlagId = GeneralUtils.generateRandomString(12)
+    if (toSetFlag) {
+      this.toSetFlagId = setFlagId
+      this.setIsFontLoading(true)
+    }
+
+    let isError = false
+    try {
+      isError = await Promise.race([
+        Promise.all(paragraphs.map(p => this.untilFontLoadedForP(p))),
+        new Promise<boolean>(resolve => {
+          setTimeout(() => {
+            resolve(true)
+          }, 40000)
+        })
+      ]) === true
+    } catch (error) {
+      // console.log(error)
+      isError = true
+    } finally {
+      if (isError === true) {
+        // console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+      }
+      if (toSetFlag && this.toSetFlagId === setFlagId) {
+        this.setIsFontLoading(false)
+      }
+    }
   }
 
   async untilFontLoadedForP(paragraph: IParagraph): Promise<void> {
@@ -1204,19 +1257,24 @@ class TextUtils {
   waitFontLoadingAndRecord(paragraphs: IParagraph[], callback: (() => void) | undefined = undefined) {
     const recordId = GeneralUtils.generateRandomString(12)
     this.toRecordId = recordId
+    this.toSetFlagId = recordId
     this.setIsFontLoading(true)
     const finalCallBack = (isError: boolean | void) => {
-      if (isError) {
+      if (isError === true) {
         console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
-      if (callback) {
-        callback()
-      }
-      if (this.toRecordId === recordId) {
-        // console.log('record')
-        stepsUtils.record()
-        this.setIsFontLoading(false)
-      }
+      setTimeout(() => {
+        if (callback) {
+          callback()
+        }
+        if (this.toRecordId === recordId) {
+          // console.log('record')
+          stepsUtils.record()
+        }
+        if (this.toSetFlagId === recordId) {
+          this.setIsFontLoading(false)
+        }
+      }, 100)
     }
     Promise.race([
       this.untilFontLoaded(paragraphs),
@@ -1234,19 +1292,24 @@ class TextUtils {
   waitGroupFontLoadingAndRecord(group: IGroup, callback: (() => void) | undefined = undefined) {
     const recordId = GeneralUtils.generateRandomString(12)
     this.toRecordId = recordId
+    this.toSetFlagId = recordId
     this.setIsFontLoading(true)
     const finalCallBack = (isError: boolean | void[]) => {
-      if (isError) {
+      if (isError === true) {
         console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
-      if (callback) {
-        callback()
-      }
-      if (this.toRecordId === recordId) {
-        // console.log('record')
-        stepsUtils.record()
-        this.setIsFontLoading(false)
-      }
+      setTimeout(() => {
+        if (callback) {
+          callback()
+        }
+        if (this.toRecordId === recordId) {
+          // console.log('record')
+          stepsUtils.record()
+        }
+        if (this.toSetFlagId === recordId) {
+          this.setIsFontLoading(false)
+        }
+      }, 100)
     }
     Promise.race([
       Promise.all(

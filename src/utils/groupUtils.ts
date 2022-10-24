@@ -139,7 +139,7 @@ class GroupUtils {
         active: true
       })
       LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
-        zindex: -1
+        zindex: 0
       })
       const tmpPageIndex = this.currSelectedInfo.pageIndex
       const tmpIndex = this.currSelectedInfo.index
@@ -170,6 +170,9 @@ class GroupUtils {
           active: true
         })
         const currSelectedLayers = [...MappingUtils.mappingLayers(pageIndex, layerIndexs)]
+        /**
+         * @Note this line make all controller update when select/deselect
+         */
         this.set(pageIndex, layerIndexs[0], currSelectedLayers)
       } else {
         // when we select multiple layer
@@ -340,19 +343,6 @@ class GroupUtils {
     this.select(tmpPageIndex, [...selectedIndexs])
   }
 
-  reset() {
-    store.commit('SET_currSelectedInfo', {
-      pageIndex: -1,
-      index: -1,
-      layers: [],
-      types: new Set<string>()
-    })
-    store.commit('SET_currSubSelectedInfo', {
-      index: -1,
-      type: ''
-    })
-  }
-
   set(currSelectedPageIndex: number, currSelectedIndex: number, currSelectedLayers: Array<IShape | IText | IImage | IGroup | IFrame>) {
     store.commit('SET_currSelectedInfo', {
       pageIndex: currSelectedPageIndex,
@@ -360,6 +350,20 @@ class GroupUtils {
       layers: currSelectedLayers,
       types: this.calcType(currSelectedLayers),
       id: LayerUtils.getLayer(currSelectedPageIndex, currSelectedIndex).id || ''
+    })
+  }
+
+  reset() {
+    store.commit('SET_currSelectedInfo', {
+      pageIndex: -1,
+      index: -1,
+      layers: [],
+      types: new Set<string>(),
+      id: ''
+    })
+    store.commit('SET_currSubSelectedInfo', {
+      index: -1,
+      type: ''
     })
   }
 

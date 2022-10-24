@@ -1,14 +1,13 @@
 <template lang="pug">
   div(class="brand-kit-tab-text" :style="minHeightStyles()")
-    div(v-for="type in Object.keys(MAPPING)"
-      class="brand-kit-tab-text__setting pointer"
-      draggable="true"
-      @dragstart="standardTextDrag($event, type)"
-      @click="handleAddText(type)")
-      span(class="brand-kit-tab-text__title" :class="type" :style="getFontStyles(type)") {{ MAPPING[type] }}
-      br
-      span(class="brand-kit-tab-text__description") {{ `${getFontFamilyName(type)} / ${getFontSize(type)}px` }}
-      span(style="display: none") {{ MAPPING[type] }}
+    div(class="brand-kit-tab-text__styles")
+      div(v-for="type in Object.keys(MAPPING)"
+        class="brand-kit-tab-text__setting pointer"
+        @click="handleAddText(type)")
+        span(class="brand-kit-tab-text__title" :class="type" :style="getFontStyles(type)") {{ MAPPING[type] }}
+        br
+        span(class="brand-kit-tab-text__description") {{ `${getFontFamilyName(type)} / ${getFontSize(type)}px` }}
+        span(style="display: none") {{ MAPPING[type] }}
 </template>
 
 <script lang="ts">
@@ -35,6 +34,10 @@ export default Vue.extend({
     maxheight: {
       default: window.innerHeight * 0.9,
       type: Number
+    },
+    settingmode: {
+      default: false,
+      type: Boolean
     }
   },
   created() {
@@ -101,17 +104,6 @@ export default Vue.extend({
     },
     handleAddText(type: string) {
       assetUtils.addStandardText(type, this.MAPPING[type], this.$i18n.locale, undefined, undefined, this.getSpanStyles(type))
-    },
-    standardTextDrag(e: DragEvent, type: string) {
-      new DragUtils().itemDragStart(e, 'standardText', {
-        textType: type,
-        text: this.MAPPING[type],
-        locale: this.$i18n.locale,
-        spanStyles: this.getSpanStyles(type)
-      }, {
-        offsetX: 20,
-        offsetY: 30
-      })
     }
   }
 })
@@ -119,18 +111,22 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .brand-kit-tab-text {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  &__styles {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
   &__setting {
     text-align: left;
     padding: 0px 16px;
-    background: setColor(gray-2);
+    background: setColor(nav);
     border-radius: 3px;
   }
   &__title {
     font-style: normal;
     --base-stroke: 0px;
+    color: white;
     &.heading {
       font-weight: 800;
       line-height: 40px;

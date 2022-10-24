@@ -1,6 +1,6 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
-import { IImage, IImageStyle } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import Vue from 'vue'
@@ -11,9 +11,12 @@ import generalUtils from './generalUtils'
 import layerFactary from './layerFactary'
 import resizeUtils from './resizeUtils'
 import { throttle } from 'lodash'
+import groupUtils from './groupUtils'
+import { LayerType } from '@/store/types'
 
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
+  get isDetailPage(): boolean { return store.getters.getGroupType === 1 }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get inBgRemoveMode(): boolean { return store.getters['bgRemove/getInBgRemoveMode'] }
   get autoRemoveResult(): IBgRemoveInfo { return store.getters['bgRemove/getAutoRemoveResult'] }
@@ -43,8 +46,16 @@ class PageUtils {
     return store.getters.getCurrActivePageIndex
   }
 
+  get currHoveredPageIndex(): number {
+    return store.getters.getCurrHoveredPageIndex
+  }
+
   get currFocusPageIndex() {
     return store.getters.getCurrFocusPageIndex
+  }
+
+  get _3dEnabledPageIndex() {
+    return store.getters.get3dEnabledPageIndex
   }
 
   get currFocusPage(): IPage {
@@ -64,19 +75,30 @@ class PageUtils {
   topBound: number
   bottomBound: number
   mobileMinScaleRatio: number
+  isSwitchingToEditor: boolean
 
   constructor() {
     this.topBound = -1
     this.bottomBound = Number.MAX_SAFE_INTEGER
     this.mobileMinScaleRatio = 0
+    this.isSwitchingToEditor = false
   }
 
   newPage(pageData: Partial<IPage>) {
     // @TODO The temporarily fetched json has some issue
     // the scale of background will be null
     pageData.backgroundImage && (pageData.backgroundImage.config.styles.scale = 1)
-
-    const defaultPage = {
+    if (pageData.layers) {
+      pageData.layers.forEach(l => {
+        l.id = generalUtils.generateRandomString(8)
+        if (l.type === LayerType.frame) {
+          (l as IFrame).clips.forEach(c => (c.id = generalUtils.generateRandomString(8)))
+        } else if (l.type === LayerType.group) {
+          (l as IGroup).layers.forEach(l => (l.id = generalUtils.generateRandomString(8)))
+        }
+      })
+    }
+    const defaultPage: IPage = {
       width: 1080,
       height: 1080,
       backgroundColor: '#ffffff',
@@ -117,6 +139,37 @@ class PageUtils {
     return pages.map((page: IPage) => {
       return this.newPage(page)
     })
+  }
+
+  addPage(newPage: IPage) {
+    store.commit('ADD_page', newPage)
+  }
+
+  addPages(newPages: Array<IPage>) {
+    store.commit('ADD_pages', newPages)
+  }
+
+  duplicatePage1(times: number) {
+    groupUtils.deselect()
+    const page = generalUtils.deepCopy(this.getPage(0)) as IPage
+
+    const arr = new Array(times).fill({}).map(() => {
+      return this.newPage(page)
+    })
+
+    this.setPages(arr)
+  }
+
+  clearAllPagesContent() {
+    const arr = new Array(this.pageNum).fill(this.newPage({}))
+
+    this.setPages(arr)
+  }
+
+  addTwentyPages() {
+    const arr = new Array(20).fill(this.newPage({}))
+
+    this.addPages(arr)
   }
 
   addPageToPos(newPage: IPage, pos: number) {
@@ -165,7 +218,8 @@ class PageUtils {
     //     }
     //   }
     // })
-    FocusUtils.focusElement(`.nu-page-${this.middlemostPageIndex}`, true)
+    const targetIndex = generalUtils.isTouchDevice() && this.isDetailPage ? this.currActivePageIndex : this.middlemostPageIndex
+    FocusUtils.focusElement(`.nu-page-${targetIndex}`, true)
     return this.middlemostPageIndex
   }
 
@@ -175,21 +229,14 @@ class PageUtils {
 
   scrollIntoPage(pageIndex: number, behavior?: 'auto' | 'smooth'): void {
     const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
-    currentPage.scrollIntoView({
-      behavior: behavior ?? 'smooth',
-      block: 'center',
-      inline: 'center'
-    })
-    this.findCentralPageIndexInfo()
-  }
-
-  jumpIntoPage(pageIndex: number): void {
-    const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
-    currentPage.scrollIntoView({
-      block: 'center',
-      inline: 'center'
-    })
-    this.findCentralPageIndexInfo()
+    if (currentPage !== undefined) {
+      currentPage.scrollIntoView({
+        behavior: behavior ?? 'smooth',
+        block: 'center',
+        inline: 'center'
+      })
+      this.findCentralPageIndexInfo()
+    }
   }
 
   clearPagesInfo() {
@@ -204,7 +251,10 @@ class PageUtils {
       const oriPageName = pagesTmp[index].name
       json.name = oriPageName
       pagesTmp[index] = json
-      store.commit('SET_pages', this.newPages(pagesTmp))
+      store.commit('SET_pageToPos', {
+        newPage: this.newPage(json),
+        pos: index
+      })
     }
   }
 
@@ -264,13 +314,25 @@ class PageUtils {
     store.commit('SET_pages', currentPagesTmp)
   }
 
+  // findCentralPageIndexInfo(preventFocus = false) {
+  //   // console.lg
+  // }
   findCentralPageIndexInfo = throttle(this.findCentralPageIndexInfoHandler, 100)
 
   private findCentralPageIndexInfoHandler(preventFocus = false) {
+    const showMobilePanel = editorUtils.showMobilePanel || editorUtils.mobileAllPageMode
+    const isTouchDevice = generalUtils.isTouchDevice()
+
     // for mobile version
-    if (generalUtils.isTouchDevice()) {
-      store.commit('SET_middlemostPageIndex', this.currCardIndex)
-      return this.currCardIndex
+    if (isTouchDevice) {
+      if (!this.isDetailPage) {
+        store.commit('SET_middlemostPageIndex', this.currCardIndex)
+        return this.currCardIndex
+      } else {
+        if (showMobilePanel) {
+          return this.middlemostPageIndex
+        }
+      }
     }
 
     const pages = [...document.getElementsByClassName('nu-page')].map((page) => {
@@ -280,7 +342,11 @@ class PageUtils {
         bottom: rect.bottom
       }
     })
-    const container = document.getElementsByClassName('content__editor')[0] as HTMLElement
+
+    const targetContainer = this.isDetailPage && isTouchDevice ? 'mobile-editor__content' : 'content__editor'
+
+    const container = document.getElementsByClassName(targetContainer)[0] as HTMLElement
+
     if (container === undefined) {
       return -1
     }
@@ -290,6 +356,10 @@ class PageUtils {
     const minDistance = Number.MAX_SAFE_INTEGER
     const targetIndex = this.searchMiddlemostPageIndex(pages, centerLinePos, minDistance, -1)
     store.commit('SET_middlemostPageIndex', targetIndex)
+    if (isTouchDevice && this.isDetailPage) {
+      store.commit('SET_currActivePageIndex', targetIndex)
+    }
+
     if (!preventFocus) this.activeMiddlemostPage()
     this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
     this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
@@ -315,8 +385,8 @@ class PageUtils {
   }
 
   isOutOfBound(pageIndex: number) {
-    return generalUtils.isTouchDevice() ? (pageIndex <= this.currCardIndex - 2 || pageIndex >= this.currCardIndex + 2)
-      : pageIndex <= this.topBound || pageIndex >= this.bottomBound
+    return generalUtils.isTouchDevice() && !this.isDetailPage ? (pageIndex <= this.currCardIndex - 2 || pageIndex >= this.currCardIndex + 2)
+      : pageIndex <= (this.topBound - 4) || pageIndex >= (this.bottomBound + 4)
   }
 
   // Algorithm: Binary Search
@@ -348,8 +418,14 @@ class PageUtils {
     store.commit('SET_pageScaleRatio', val)
   }
 
-  fitPage(scrollToTop = false) {
-    if (editorUtils.mobileAllPageMode) {
+  fitPage(scrollToTop = false, minRatioFiRestricttDisable = false) {
+    // In these mode, don't fitPage.
+
+    if (editorUtils.mobileAllPageMode || this.isSwitchingToEditor) {
+      return
+    }
+    // If mobile user zoom in page, don't fitPage.
+    if (generalUtils.isTouchDevice() && !minRatioFiRestricttDisable && pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
       return
     }
 
@@ -365,10 +441,10 @@ class PageUtils {
     // Calculate and do resize
     const resizeRatio = Math.min(editorWidth / (targetWidth * (this.scaleRatio / 100)), editorHeight / (targetHeight * (this.scaleRatio / 100))) * 0.8
     const newRatio = Math.max(3, Math.round(this.scaleRatio * resizeRatio))
+
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
       store.commit('SET_pageScaleRatio', 100)
     } else {
-      if (newRatio < 2) return
       store.commit('SET_pageScaleRatio', newRatio)
     }
 
@@ -380,7 +456,17 @@ class PageUtils {
         editorViewBox.scrollTo((editorViewBox.scrollWidth - editorWidth) / 2, 0)
       })
     }
-    pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
+    if (!this.isDetailPage) {
+      pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
+    } else {
+      this.isSwitchingToEditor = true
+      Vue.nextTick(() => {
+        setTimeout(() => {
+          this.scrollIntoPage(this.currFocusPageIndex, 'auto')
+          this.isSwitchingToEditor = false
+        }, 0)
+      })
+    }
   }
 
   fillPage() {

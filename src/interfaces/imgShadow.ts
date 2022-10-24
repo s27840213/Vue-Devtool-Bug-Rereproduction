@@ -77,5 +77,13 @@ export interface IShadowProps {
     layerState?: Partial<IImageStyle>,
     layerSrcObj: SrcObj,
     shadowSrcObj: SrcObj
+  },
+  /**
+   * this prop used for record the previus state of the IShadowProps
+   * it is recorded as change the currentEffect or update the effects
+   */
+  old?: {
+    currentEffect: ShadowEffectType,
+    effects: IShadowEffects
   }
 }

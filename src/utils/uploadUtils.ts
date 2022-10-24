@@ -26,6 +26,7 @@ import brandkitUtils from './brandkitUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import networkUtils from './networkUtils'
 import _ from 'lodash'
+import editorUtils from './editorUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -1199,8 +1200,6 @@ class UploadUtils {
                 store.commit('file/SET_setLayersDone')
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()
-
-                pageUtils.fitPage()
                 break
               }
               case GetDesignType.NEW_DESIGN_TEMPLATE: {
@@ -1211,7 +1210,10 @@ class UploadUtils {
             }
           }).then(() => {
             this.isGettingDesign = false
-            // pageUtils.fitPage()
+            const editorView = document.querySelector('.editor-view') as HTMLElement
+            if (editorUtils) {
+              generalUtils.scrollToCenter(editorView, false)
+            }
           })
         }
       })
@@ -1288,6 +1290,7 @@ class UploadUtils {
     }
     switch (type) {
       case 'image':
+        delete styles.shadow.old
         return {
           ...general,
           imgX: styles.imgX,

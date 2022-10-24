@@ -6,11 +6,14 @@ import TextStyle from '@tiptap/extension-text-style'
 import NuTextStyle from '@/utils/nuTextStyle'
 import cssConveter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
-import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
-import textPropUtils from './textPropUtils'
-import textEffectUtils from './textEffectUtils'
-import generalUtils from './generalUtils'
+import textPropUtils from '@/utils/textPropUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import textBgUtils from '@/utils/textBgUtils'
+import generalUtils from '@/utils/generalUtils'
+import shortcutUtils from './shortcutUtils'
+import { checkAndConvertToHex } from '@/utils/colorUtils'
 
 class TiptapUtils {
   event: any
@@ -39,6 +42,18 @@ class TiptapUtils {
         },
         handleScrollToSelection: () => {
           return this.editor?.storage.nuTextStyle.pasting
+        },
+        handlePaste: (view, event: ClipboardEvent, slice) => {
+          if (!event.clipboardData) return false
+          const items = event.clipboardData.items
+          for (let i = items.length - 1; i >= 0; i--) {
+            if (items[i].kind === 'string' && items[i].type === 'text/plain') {
+              items[i].getAsString(str => {
+                shortcutUtils.textPasteWith(str)
+              })
+            }
+          }
+          return true
         }
       },
       parseOptions: {
@@ -84,21 +99,10 @@ class TiptapUtils {
     this.event.emit('update', toRecord)
   }
 
-  isValidHexColor = (value: string): boolean => value.match(/^#[0-9A-F]{6}$/) !== null
-  componentToHex = (c: number) => c.toString(16).length === 1 ? '0' + c.toString(16).toUpperCase() : c.toString(16).toUpperCase()
-  rgbToHex = (rgb: string) => {
-    const rgbArr = rgb.match(/\d+/g)
-    if (rgbArr && rgbArr.length === 3) {
-      return '#' + this.componentToHex(parseInt(rgbArr[0])) + this.componentToHex(parseInt(rgbArr[1])) + this.componentToHex(parseInt(rgbArr[2]))
-    } else {
-      return rgb
-    }
-  }
-
   textStylesRaw(styles: any): {[key: string]: any} {
     const textStyles = cssConveter.convertFontStyle(styles)
     return Object.assign(textStyles, {
-      '-webkit-text-decoration-line': textStyles['text-decoration']
+      '-webkit-text-decoration-line': textStyles['text-decoration-line']
     })
   }
 
@@ -122,27 +126,38 @@ class TiptapUtils {
         }
         pObj.attrs = attrs
         if (p.spans.length > 1 || p.spans[0].text !== '') {
-          pObj.content = p.spans.map(s => {
-            // To prevent safari tiptap space issue, we need to replace space with
-            // other char. There are five char can work, choose other if something happens.
-            // const newText = s.text
-            // const newText = s.text.replace(' ', '\u2006')
-            const newText = s.text.replace(' ', '\u2009')
-            // const newText = s.text.replace(' ', '\u200A') // 髮寬空格 能用但是寬度非常窄
-            // const newText = s.text.replace(' ', '\u202F')
-            // const newText = s.text.replace(' ', '\u205F')
+          const spans = this.splitLastWhiteSpaces(p.spans)
+          pObj.content = spans.map(s => {
+            const layerStyles = textEffectUtils.getCurrentLayer().styles
+            const textBg = textBgUtils.convertTextSpanEffect(layerStyles.textBg)
             return {
               type: 'text',
-              text: newText,
+              text: s.text,
               marks: [{
                 type: 'textStyle',
-                attrs: this.makeSpanStyle(s.styles)
+                attrs: Object.assign(this.makeSpanStyle(s.styles), textBg)
               }]
             }
           })
         }
         return pObj
       })
+    }
+  }
+
+  splitLastWhiteSpaces(spans: ISpan[]): ISpan[] {
+    const lastSpan = spans[spans.length - 1]
+    if (!lastSpan.text.endsWith(' ')) return spans
+    const copiedSpans = generalUtils.deepCopy(spans)
+    const lastWhiteSpaces = lastSpan.text.match(/ +$/)?.[0] ?? ''
+    const prevText = lastSpan.text.substring(0, lastSpan.text.length - lastWhiteSpaces.length)
+    if (prevText === '') {
+      copiedSpans[copiedSpans.length - 1].styles.pre = true
+      return copiedSpans
+    } else {
+      copiedSpans[copiedSpans.length - 1].text = prevText
+      copiedSpans.push({ text: lastWhiteSpaces, styles: { ...lastSpan.styles, pre: true } })
+      return copiedSpans
     }
   }
 
@@ -160,7 +175,7 @@ class TiptapUtils {
       size: Math.round(parseFloat(spanStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100,
       decoration: spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line'),
       style: spanStyle.fontStyle,
-      color: this.isValidHexColor(spanStyle.color) ? spanStyle.color : this.rgbToHex(spanStyle.color),
+      color: checkAndConvertToHex(spanStyle.color),
       ...fontProps
     } as ISpanStyle
   }
@@ -224,6 +239,10 @@ class TiptapUtils {
         if (span.marks && span.marks.length > 0) {
           const sStyles = this.makeSpanStyle(span.marks[0].attrs)
           if (sStyles.size > largestSize) largestSize = sStyles.size
+          if (sStyles.pre && !span.text.match(/^ +$/)) {
+            sStyles.pre = undefined
+            isSetContentRequired = true
+          }
           spans.push({ text: span.text, styles: sStyles })
         } else {
           isSetContentRequired = true
@@ -234,10 +253,11 @@ class TiptapUtils {
             sStyles = this.generateSpanStyle(defaultStyle)
           }
           if (sStyles.size > largestSize) largestSize = sStyles.size
+          if (sStyles.pre && !span.text.match(/^ +$/)) {
+            sStyles.pre = undefined
+            isSetContentRequired = true
+          }
           spans.push({ text: span.text, styles: sStyles })
-        }
-        if (span.text.includes(' ')) {
-          isSetContentRequired = true
         }
       }
       if (spans.length === 0) {
@@ -269,6 +289,10 @@ class TiptapUtils {
           isSetContentRequired = true
         }
         if (paragraph.attrs.spanStyle) {
+          isSetContentRequired = true
+        }
+        const lastSpanText = spans[spans.length - 1].text
+        if (lastSpanText.endsWith(' ') && !lastSpanText.match(/^ +$/)) {
           isSetContentRequired = true
         }
         result.push({ spans, styles: pStyles })
@@ -365,7 +389,6 @@ class TiptapUtils {
           this.applySpanStyle(updateKey, updateValue)
         }
     }
-    textEffectUtils.refreshColor()
     textPropUtils.updateTextPropsState(item)
   }
 
@@ -405,17 +428,21 @@ class TiptapUtils {
     }
   }
 
+  getParagraphs(): IParagraph[] | undefined {
+    const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
+    if (currLayer.type === 'text') {
+      return (currLayer as IText).paragraphs
+    } else if (subLayerIdx !== -1) {
+      return (currLayer as IGroup).layers[subLayerIdx].paragraphs as IParagraph[]
+    }
+  }
+
   updateHtml(paragraphs?: IParagraph[]) {
     if (this.editor) {
       if (!paragraphs) {
-        const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
-        if (currLayer.type === 'text') {
-          paragraphs = (currLayer as IText).paragraphs
-        } else if (subLayerIdx !== -1) {
-          paragraphs = (currLayer as IGroup).layers[subLayerIdx].paragraphs as IParagraph[]
-        } else {
-          return
-        }
+        const temp = this.getParagraphs()
+        if (temp === undefined) return
+        paragraphs = temp
       }
       this.editor.chain().setContent(this.toJSON(paragraphs)).selectPrevious().run()
     }

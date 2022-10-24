@@ -1,16 +1,12 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle, ILayer, IParagraph } from '@/interfaces/layer'
-import store from '@/store'
 import { LayerProcessType, LayerType } from '@/store/types'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import { STANDARD_TEXT_FONT } from './assetUtils'
-import layerUtils from './layerUtils'
 import localeUtils from './localeUtils'
 import textPropUtils from './textPropUtils'
-import tiptapUtils from './tiptapUtils'
 import ZindexUtils from './zindexUtils'
-import imageShadowUtils from './imageShadowUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import mouseUtils from './mouseUtils'
 
@@ -70,7 +66,8 @@ class LayerFactary {
               }, {})
           },
           srcObj: { type: '', assetId: '', userId: '' },
-          styles: { imgWidth: 0, imgHeight: 0, imgX: 0, imgY: 0 }
+          styles: { imgWidth: 0, imgHeight: 0, imgX: 0, imgY: 0 },
+          old: {}
         }
       }
     }
@@ -216,6 +213,11 @@ class LayerFactary {
       })()) : undefined
     }
     frame.clips.forEach(i => (i.parentLayerStyles = frame.styles))
+    if (frame.decoration && !frame.decoration.svg) {
+      (frame as any).needFetch = true
+    } else if (frame.decorationTop && !frame.decorationTop.svg) {
+      (frame as any).needFetch = true
+    }
     return frame
   }
 
@@ -382,7 +384,9 @@ class LayerFactary {
           return [this.newByLayerType(l) as IShape | IText | IImage]
         })
     }
-    group.layers.forEach(l => l.type === LayerType.image && (l.parentLayerStyles = group.styles))
+    group.layers.forEach(l => {
+      l.type === LayerType.image && (l.parentLayerStyles = group.styles)
+    })
     return group
   }
 

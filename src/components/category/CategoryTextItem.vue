@@ -2,7 +2,7 @@
   img(class="pointer"
     :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
     draggable="true"
-    style="object-fit: contain;"
+    :style="itemStyle"
     @dragstart="dragStart($event)"
     @click="addText"
     @click.right.prevent="openUpdateDesignPopup()"
@@ -16,6 +16,7 @@ import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import DragUtils from '@/utils/dragUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -31,7 +32,18 @@ export default Vue.extend({
   computed: {
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
-    })
+    }),
+    itemStyle(): any {
+      const { width } = this.item.preview || {
+        width: generalUtils.isTouchDevice()
+          ? (window.innerWidth - 54) / 3 - 10 // ([window width] - [padding and gap]) / 3 - [item margin]
+          : 135
+      }
+      return {
+        objectFit: 'contain',
+        width: `${width}px`
+      }
+    }
   },
   methods: {
     handleNotFound(event: Event) {

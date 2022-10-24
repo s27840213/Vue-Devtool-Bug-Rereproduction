@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import frameUtils from '@/utils/frameUtils'
@@ -7,6 +8,7 @@ import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from './rulerUtils'
+import store from '@/store'
 
 class ResizeUtils {
   scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number) {
@@ -60,7 +62,7 @@ class ResizeUtils {
           })
           // const clipPath = `M0,0h${width}v${height}h${-width}z`
           // frameUtils.updateFrameLayerProps(pageIndex, layerIndex, 0, { clipPath })
-          scale = 1
+          // scale = 1
         }
         break
       }
@@ -124,7 +126,7 @@ class ResizeUtils {
     controlUtils.updateLayerPos(pageIndex, layerIndex, trans.x, trans.y)
   }
 
-  scaleAndMoveGuideLines(guidelines: {v: number[], h: number[]}, scale: number, xOffset: number, yOffset: number) {
+  scaleAndMoveGuideLines(guidelines: { v: number[], h: number[] }, scale: number, xOffset: number, yOffset: number) {
     guidelines.v = guidelines.v.map(vl => vl * scale + xOffset)
     guidelines.h = guidelines.h.map(hl => hl * scale + yOffset)
   }
@@ -145,11 +147,11 @@ class ResizeUtils {
     const height = page.backgroundImage.config.styles.imgHeight * scale
     pageUtils.updateBackgroundImageStyles(
       pageIndex, {
-        width,
-        height,
-        imgWidth: width,
-        imgHeight: height
-      }
+      width,
+      height,
+      imgWidth: width,
+      imgHeight: height
+    }
     )
   }
 
@@ -161,11 +163,11 @@ class ResizeUtils {
     pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
     pageUtils.updateBackgroundImageStyles(
       pageIndex, {
-        width,
-        height,
-        imgWidth: width,
-        imgHeight: height
-      }
+      width,
+      height,
+      imgWidth: width,
+      imgHeight: height
+    }
     )
   }
 
@@ -188,6 +190,18 @@ class ResizeUtils {
     }
 
     rulerUtils.removeInvalidGuides(pageIndex, format)
+  }
+
+  testResizeAllPages() {
+    const { getPages: pages } = pageUtils
+
+    pages.forEach((page, index) => {
+      this.resizePage(index, page, { width: 116, height: 116 })
+      store.commit('UPDATE_pageProps', {
+        pageIndex: 0,
+        props: { width: 116, height: 116 }
+      })
+    })
   }
 }
 

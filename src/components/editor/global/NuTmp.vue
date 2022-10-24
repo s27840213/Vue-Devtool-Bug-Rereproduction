@@ -6,13 +6,16 @@
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
       :subLayerIndex="index"
+      :contentScaleRatio="contentScaleRatio"
       :config="layer"
-      :style="subLayerStyles(layer)")
+      :style="subLayerStyles(layer)"
+      :isSubLayer="true")
 </template>
 
 <script lang="ts">
 import { ILayer, ITmp } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
@@ -21,7 +24,11 @@ export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number,
-    layerIndex: Number
+    layerIndex: Number,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   created() {
     for (const [idx, layer] of (this.config as ITmp).layers.entries()) {
@@ -34,13 +41,25 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       getLayer: 'getLayer'
-    })
+    }),
+    transformStyle(): { [index: string]: string } {
+      return {
+        transformStyle: this.enalble3dTransform ? 'preserve-3d' : 'initial'
+      }
+    },
+    enalble3dTransform(): boolean {
+      return this.pageIndex === pageUtils._3dEnabledPageIndex
+    }
   },
   methods: {
     styles() {
       return {
-        width: `${this.config.styles.initWidth}px`,
-        height: `${this.config.styles.initHeight}px`
+        width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
+        height: `${this.config.styles.initHeight * this.contentScaleRatio}px`,
+        transform: `scale(${1 / this.contentScaleRatio})`,
+        transformOrigin: 'top left',
+        ...this.transformStyle
+
       }
     },
     subLayerStyles(layer: ILayer) {
@@ -53,7 +72,6 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-tmp {
-  transform-style: preserve-3d;
   position: absolute;
 }
 </style>

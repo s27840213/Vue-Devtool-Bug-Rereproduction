@@ -58,6 +58,9 @@ window.onerror = function (msg, url, line) {
 const tooltipUtils = new TooltipUtils()
 
 Vue.config.productionTip = false
+if (process.env.NODE_ENV !== 'production') {
+  Vue.config.performance = true
+}
 Vue.use(VueRecyclerviewNew, vueColor)
 Vue.use(Notifications)
 Vue.use(VueMeta)
@@ -145,8 +148,6 @@ if (process.env.NODE_ENV !== 'production') {
 } else {
   requireAll(req)
 }
-
-requireAll(req)
 
 // add temporarily for testing
 if (window.location.href.indexOf('logout') > -1) {
