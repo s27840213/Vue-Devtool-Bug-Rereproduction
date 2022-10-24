@@ -29,6 +29,7 @@ import layerFactary from '@/utils/layerFactary'
 import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
+  inheritAttrs: false,
   props: {
     config: Object,
     pageIndex: Number,

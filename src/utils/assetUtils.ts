@@ -47,9 +47,9 @@ class AssetUtils {
   get getLayers() { return store.getters.getLayers }
   get getPages() { return store.getters.getPages }
 
-  get(item: IListServiceContentDataItem): Promise<IAsset> {
+  get(item: IListServiceContentDataItem, db?: string): Promise<IAsset> {
     const asset = this.getAsset(item.id)
-    return (asset && asset.ver === item.ver) ? Promise.resolve(generalUtils.deepCopy(asset)) : this.fetch(item)
+    return (asset && asset.ver === item.ver) ? Promise.resolve(generalUtils.deepCopy(asset)) : this.fetch(item, db)
   }
 
   // used for api category
@@ -105,9 +105,9 @@ class AssetUtils {
     return STANDARD_TEXT_FONT
   }
 
-  fetch(item: IListServiceContentDataItem): Promise<IAsset> {
+  fetch(item: IListServiceContentDataItem, db?: string): Promise<IAsset> {
     const { id, type, ver, ...attrs } = item
-    const typeCategory = this.getTypeCategory(type)
+    const typeCategory = db ?? this.getTypeCategory(type)
     const asset = {
       id,
       type,
@@ -647,7 +647,7 @@ class AssetUtils {
   async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
     try {
       store.commit('SET_mobileSidebarPanelOpen', false)
-      const asset = await this.get(item) as IAsset
+      const asset = await this.get(item, attrs.db) as IAsset
       // const data = await ImageUtils.getImageSize(ImageUtils.getSrc({
       //   srcObj: {
       //     type: 'background',

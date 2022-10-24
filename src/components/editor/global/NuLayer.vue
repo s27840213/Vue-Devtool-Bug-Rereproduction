@@ -1,5 +1,7 @@
 <template lang="pug">
   div(class="nu-layer" :style="layerStyles()" ref="body"
+      :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
+      :data-p-index="pageIndex"
       @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
       @dragover.prevent
       @dragleave.prevent
@@ -43,6 +45,7 @@ import pageUtils from '@/utils/pageUtils'
 import { ILayer } from '@/interfaces/layer'
 
 export default Vue.extend({
+  inheritAttrs: false,
   components: {
     SquareLoading
   },
@@ -67,6 +70,10 @@ export default Vue.extend({
     isPagePreview: {
       default: false,
       type: Boolean
+    },
+    'data-index': {
+      default: '-1',
+      type: String
     }
     /**
      * @Note Vuex Props

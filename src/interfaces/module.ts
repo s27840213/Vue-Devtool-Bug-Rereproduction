@@ -55,6 +55,7 @@ export interface IAsset {
 }
 
 export interface IAssetProps {
+  db?: string,
   ver?: number,
   pageIndex?: number
   styles?: Partial<IStyle>,

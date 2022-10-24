@@ -213,6 +213,11 @@ class LayerFactary {
       })()) : undefined
     }
     frame.clips.forEach(i => (i.parentLayerStyles = frame.styles))
+    if (frame.decoration && !frame.decoration.svg) {
+      (frame as any).needFetch = true
+    } else if (frame.decorationTop && !frame.decorationTop.svg) {
+      (frame as any).needFetch = true
+    }
     return frame
   }
 
