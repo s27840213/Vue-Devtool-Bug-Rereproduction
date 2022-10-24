@@ -530,16 +530,10 @@ class ViviStickerUtils {
 
   saveDesign() {
     const pages = pageUtils.getPages
-    const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
-    const currSelectedInfo = store.getters.getCurrSelectedInfo
     const editorType = store.getters['vivisticker/getEditorType']
-    const controllerHidden = store.getters['vivisticker/getControllerHidden']
     const design = {
       pages: uploadUtils.prepareJsonToUpload(pages),
-      lastSelectedLayerIndex,
-      currSelectedInfo,
-      editorType,
-      controllerHidden
+      editorType
     } as ITempDesign
     this.setState('tempDesign', { design: JSON.stringify(design) })
   }
@@ -558,18 +552,11 @@ class ViviStickerUtils {
   initWithTempDesign(tempDesign: ITempDesign) {
     const {
       pages,
-      lastSelectedLayerIndex,
-      currSelectedInfo,
-      editorType,
-      controllerHidden
+      editorType
     } = tempDesign
     this.startEditing(editorType, this.getFetchDesignInitiator(() => {
       store.commit('SET_pages', pageUtils.newPages(pages))
-      store.commit('vivisticker/SET_controllerHidden', controllerHidden)
-    }), this.getFetchDesignCallback(() => {
-      store.commit('SET_lastSelectedLayerIndex', lastSelectedLayerIndex)
-      groupUtils.setBySelectedInfo(currSelectedInfo, pages)
-    }))
+    }), this.getEmptyCallback())
   }
 
   getContrastColor(editorBg: string) {
