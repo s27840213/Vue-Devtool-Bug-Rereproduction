@@ -251,8 +251,8 @@ export default Vue.extend({
       dblTabsFlag: false,
       isPointerDownFromSubController: false,
       initCornerRotate: -1,
-      cornerRotaters: undefined,
-      cornerRotaterbaffles: undefined,
+      cornerRotaters: undefined as ReturnType<typeof ControlUtils.getControlPoints>['cornerRotaters'] | undefined,
+      cornerRotaterbaffles: undefined as ReturnType<typeof ControlUtils.getControlPoints>['cornerRotaters'] | undefined,
       eventTarget: null as unknown as HTMLElement,
       isHandleMovingHandler: false
       // currSelectedInfo: {
