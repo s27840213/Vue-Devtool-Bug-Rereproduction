@@ -81,6 +81,7 @@ import i18n from '@/i18n'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import pageUtils from '@/utils/pageUtils'
 import fileUtils from '@/utils/fileUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   props: {
@@ -399,6 +400,7 @@ export default Vue.extend({
       if (this.type === LayerType.frame && this.config.active && this.config.srcObj.type === 'frame' && !hasActualMove) {
         const input = this.$refs.fileInput as HTMLInputElement
         if (input) {
+          vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
           input.click()
         }
       }

@@ -184,6 +184,7 @@ import editorUtils from '@/utils/editorUtils'
 import { AnyTouchEvent } from 'any-touch'
 import textBgUtils from '@/utils/textBgUtils'
 import fileUtils from '@/utils/fileUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -1063,7 +1064,10 @@ export default Vue.extend({
             const primary = this.config as IFrame
             if (primary.clips.length === 1 && primary.clips[0].srcObj.type === 'frame') {
               const fileInput = document.getElementById(`input-${this.layerIndex}-0`) as HTMLInputElement
-              fileInput && fileInput.click()
+              if (fileInput) {
+                vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
+                fileInput.click()
+              }
             }
           }
         }
