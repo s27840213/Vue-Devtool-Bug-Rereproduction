@@ -113,6 +113,7 @@ class MouseUtils {
       shown: false,
       locked: false,
       moved: false,
+      moving: false,
       dragging: false,
       designId: data.designId || '',
       styles: {
