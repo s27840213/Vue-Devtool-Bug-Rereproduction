@@ -7,7 +7,7 @@
             @click.prevent.stop="handleOptionAction(option.action)")
           div(class="panel-vvstk-more__option-icon")
             svg-icon(:iconName="option.icon"
-                      iconWidth="24px"
+                      :iconWidth="option.icon === 'settings' ? '20px' : '24px'"
                       iconColor="gray-2")
           div(class="panel-vvstk-more__option-title") {{ option.text }}
       div(class="horizontal-rule")
@@ -71,6 +71,10 @@ export default Vue.extend({
         icon: 'vivisticker_global',
         action: this.handleLocaleList
       }, {
+        text: `${this.$t('NN0649')}`,
+        icon: 'settings',
+        action: this.handleShowUserSettings
+      }, {
         text: `${this.$t('NN0147')}`,
         icon: 'vivisticker_info',
         action: this.handleOpenInfo
@@ -123,7 +127,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setShowTutorial: 'vivisticker/SET_showTutorial'
+      setShowTutorial: 'vivisticker/SET_showTutorial',
+      setSlideType: 'vivisticker/SET_slideType'
     }),
     handleOptionAction(action?: () => void) {
       if (action) {
@@ -143,6 +148,9 @@ export default Vue.extend({
     },
     handleLocaleList() {
       this.$emit('pushHistory', 'locale')
+    },
+    handleShowUserSettings() {
+      this.setSlideType('slideUserSettings')
     },
     handleOpenInfo() {
       let url = 'https://www.instagram.com/vivisticker/'

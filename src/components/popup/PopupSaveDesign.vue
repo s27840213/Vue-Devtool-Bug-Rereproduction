@@ -11,12 +11,18 @@
           :class="{checked: userSettings.autoSave}"
           @click="handleAutoSaveToggle")
         svg-icon(iconName="done" iconColor="white" iconWidth="20.7px")
+    div(class="popup-save-design__buttons")
+      div(class="popup-save-design__button cancel"
+          :class="{disabled: userSettings.autoSave}"
+          @click.prevent.stop="handleNotSave") {{ $t('STK0011') }}
+      div(class="popup-save-design__button confirm"
+          @click.prevent.stop="handleSave") {{ $t('STK0004') }}
 </template>
 
 <script lang="ts">
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
   data() {
@@ -29,16 +35,25 @@ export default Vue.extend({
     })
   },
   methods: {
-    ...mapMutations({
-      updateUserSettings: 'vivisticker/UPDATE_userSettings'
+    ...mapActions({
+      updateUserSettings: 'vivisticker/updateUserSettings'
     }),
     handleClose() {
       vivistickerUtils.setShowSaveDesignPopup(false)
-      vivistickerUtils.endEditing()
     },
     handleAutoSaveToggle() {
       this.updateUserSettings({
         autoSave: !this.userSettings.autoSave
+      })
+    },
+    handleNotSave() {
+      vivistickerUtils.setShowSaveDesignPopup(false)
+      vivistickerUtils.endEditing()
+    },
+    handleSave() {
+      vivistickerUtils.setShowSaveDesignPopup(false)
+      vivistickerUtils.saveAsMyDesign().then(() => {
+        vivistickerUtils.endEditing()
       })
     }
   }
@@ -101,6 +116,36 @@ export default Vue.extend({
       background: setColor(black-3);
       border: none;
       border-radius: 2px;
+    }
+  }
+  &__buttons {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  &__button {
+    @include btn-SM;
+    width: 120px;
+    height: 32px;
+    border-radius: 10px;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &.cancel {
+      color: setColor(gray-2);
+      background-color: setColor(gray-4);
+      &.disabled {
+        pointer-events: none;
+        color: setColor(black-5);
+      }
+    }
+    &.confirm {
+      color: setColor(gray-7);
+      background-color: setColor(black-2);
     }
   }
 }

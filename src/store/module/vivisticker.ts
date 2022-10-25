@@ -24,7 +24,8 @@ interface IViviStickerState {
   isInMyDesign: boolean,
   myDesignTab: string,
   isInSelectionMode: boolean,
-  showSaveDesignPopup: boolean
+  showSaveDesignPopup: boolean,
+  slideType: string
 }
 
 const EDITOR_BGS = [
@@ -60,7 +61,8 @@ const getDefaultState = (): IViviStickerState => ({
   isInMyDesign: false,
   myDesignTab: 'text',
   isInSelectionMode: false,
-  showSaveDesignPopup: false
+  showSaveDesignPopup: false,
+  slideType: 'none'
 })
 
 const state = getDefaultState()
@@ -130,6 +132,19 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getShowSaveDesignPopup(state: IViviStickerState): boolean {
     return state.showSaveDesignPopup
+  },
+  getSlideType(state: IViviStickerState): string {
+    return state.slideType
+  },
+  getIsSlideShown(state: IViviStickerState): boolean {
+    return state.slideType !== 'none'
+  }
+}
+
+const actions: ActionTree<IViviStickerState, unknown> = {
+  async updateUserSettings({ commit, getters }, settings: Partial<IUserInfo>) {
+    commit('UPDATE_userSettings', settings)
+    await vivistickerUtils.setState('userSettings', getters.getUserSettings)
   }
 }
 
@@ -200,6 +215,9 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_showSaveDesignPopup(state: IViviStickerState, showSaveDesignPopup: boolean) {
     state.showSaveDesignPopup = showSaveDesignPopup
   },
+  SET_slideType(state: IViviStickerState, slideType: string) {
+    state.slideType = slideType
+  },
   UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
     Object.entries(settings).forEach(([key, value]) => {
       (state.userSettings as any)[key] = value
@@ -214,9 +232,6 @@ const mutations: MutationTree<IViviStickerState> = {
   UPDATE_switchBg(state: IViviStickerState) {
     state.editorBgIndex = (state.editorBgIndex + 1) % EDITOR_BGS.length
   }
-}
-
-const actions: ActionTree<IViviStickerState, unknown> = {
 }
 
 export default {

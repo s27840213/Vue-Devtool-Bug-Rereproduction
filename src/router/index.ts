@@ -54,6 +54,10 @@ const routes: Array<RouteConfig> = [
       try {
         if (vivistickerUtils.checkVersion('1.5')) {
           const recentPanel = await vivistickerUtils.getState('recentPanel')
+          const userSettings = await vivistickerUtils.getState('userSettings')
+          if (userSettings) {
+            store.commit('vivisticker/SET_userSettings', userSettings)
+          }
           vivistickerUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
           const tempDesign = await vivistickerUtils.fetchDesign()
           if (tempDesign) {

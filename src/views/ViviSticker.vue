@@ -17,6 +17,8 @@
       @switchMainTab="switchMainTab"
       :currTab="isInMyDesign ? 'none' : (isInEditor ? currActivePanel : currActiveTab)"
       :inAllPagesMode="false")
+    transition(name="slide-left")
+      component(v-if="isSlideShown" :is="slideType" class="vivisticker__slide")
     tutorial(v-if="showTutorial")
     div(v-if="showSaveDesignPopup" class="dim-background")
       popup-save-design
@@ -32,6 +34,7 @@ import FooterTabs from '@/components/vivisticker/FooterTabs.vue'
 import Tutorial from '@/components/vivisticker/Tutorial.vue'
 import MyDesign from '@/components/vivisticker/MyDesign.vue'
 import PopupSaveDesign from '@/components/popup/PopupSaveDesign.vue'
+import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import stepsUtils from '@/utils/stepsUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -57,7 +60,8 @@ export default Vue.extend({
     HeaderTabs,
     FooterTabs,
     Tutorial,
-    PopupSaveDesign
+    PopupSaveDesign,
+    SlideUserSettings
   },
   data() {
     return {
@@ -132,7 +136,9 @@ export default Vue.extend({
       userInfo: 'vivisticker/getUserInfo',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
-      showSaveDesignPopup: 'vivisticker/getShowSaveDesignPopup'
+      showSaveDesignPopup: 'vivisticker/getShowSaveDesignPopup',
+      slideType: 'vivisticker/getSlideType',
+      isSlideShown: 'vivisticker/getIsSlideShown'
     }),
     isLocked(): boolean {
       return layerUtils.getTmpLayer().locked
@@ -277,6 +283,14 @@ export default Vue.extend({
     overflow: hidden;
     z-index: setZindex("editor-view");
   }
+
+  &__slide {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    z-index: setZindex("popup");
+  }
 }
 
 .dim-background {
@@ -287,6 +301,21 @@ export default Vue.extend({
   justify-content: center;
   background-color: setColor(gray-1, 0.3);
   z-index: 1000;
+}
+
+.slide-left {
+  &-leave-active,
+  &-enter-active {
+    transition: transform 0.3s map-get($ease-functions, ease-in-out-quint);
+  }
+  &-leave,
+  &-enter-to {
+    transform: translateX(0);
+  }
+  &-leave-to,
+  &-enter {
+    transform: translateX(100%);
+  }
 }
 
 .header-bar {

@@ -19,12 +19,20 @@ import localeUtils from './localeUtils'
 import listApis from '@/apis/list'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import textUtils from './textUtils'
+import i18n from '@/i18n'
 
 const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '1.3',
   locale: 'us',
   isFirstOpen: false,
   editorBg: ''
+}
+
+const USER_SETTINGS_CONFIG: {[key: string]: {default: any, description: string}} = {
+  autoSave: {
+    default: false,
+    description: `${i18n.t('STK0012')}`
+  }
 }
 
 const MODULE_TYPE_MAPPING: {[key: string]: string} = {
@@ -68,6 +76,10 @@ class ViviStickerUtils {
     return store.getters['vivisticker/getIsStandaloneMode']
   }
 
+  get userSettings(): IUserSettings {
+    return store.getters['vivisticker/getUserSettings']
+  }
+
   registerRouterCallbacks() {
     for (const callbackName of ROUTER_CALLBACKS) {
       (window as any)[callbackName] = (vivistickerUtils as any)[callbackName]
@@ -85,9 +97,15 @@ class ViviStickerUtils {
   }
 
   getDefaultUserSettings(): IUserSettings {
-    return {
-      autoSave: false
+    const res = {} as {[key: string]: any}
+    for (const [key, value] of Object.entries(USER_SETTINGS_CONFIG)) {
+      res[key] = value.default
     }
+    return res as IUserSettings
+  }
+
+  getUserSettingDescription(key: string): string {
+    return USER_SETTINGS_CONFIG[key]?.description ?? ''
   }
 
   getEmptyMessage(): {[key: string]: string} {
@@ -567,6 +585,10 @@ class ViviStickerUtils {
     this.startEditing(editorType, this.getFetchDesignInitiator(() => {
       store.commit('SET_pages', pageUtils.newPages(pages))
     }), this.getEmptyCallback())
+  }
+
+  async saveAsMyDesign(): Promise<void> {
+    console.log('save')
   }
 
   getContrastColor(editorBg: string) {
