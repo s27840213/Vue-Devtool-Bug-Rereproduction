@@ -13,3 +13,10 @@ export interface ITempDesign {
   pages: Array<IPage>,
   editorType: string
 }
+
+export interface IMyDesign {
+  pages: Array<IPage>,
+  type: string,
+  id: string,
+  updateTime: string
+}

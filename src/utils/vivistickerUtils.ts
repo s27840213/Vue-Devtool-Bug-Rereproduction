@@ -14,12 +14,13 @@ import editorUtils from './editorUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import textPropUtils from './textPropUtils'
-import { ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IMyDesign, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import localeUtils from './localeUtils'
 import listApis from '@/apis/list'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import textUtils from './textUtils'
 import i18n from '@/i18n'
+import generalUtils from './generalUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '1.3',
@@ -548,7 +549,7 @@ class ViviStickerUtils {
       height,
       x,
       y,
-      bgColor: store.getters['vivisticker/getEditorBg']
+      bgColor: store.getters['vivisticker/getEditorBg'] // for older app
     }, 'copy-editor')
   }
 
@@ -557,6 +558,7 @@ class ViviStickerUtils {
   }
 
   saveDesign() {
+    if (this.isStandaloneMode) return
     const pages = pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
     const design = {
@@ -588,7 +590,57 @@ class ViviStickerUtils {
   }
 
   async saveAsMyDesign(): Promise<void> {
-    console.log('save')
+    const id = generalUtils.generateAssetId()
+    await Promise.all([
+      this.genThumbnail(id),
+      this.saveDesignJson(id)
+    ])
+  }
+
+  async genThumbnail(id: string): Promise<void> {
+    if (this.isStandaloneMode) return
+    await new Promise<void>((resolve, reject) => {
+      try {
+        Vue.nextTick(() => {
+          this.preCopyEditor()
+          setTimeout(() => {
+            const editorEle = document.querySelector('#vvstk-editor') as HTMLElement
+            const { width, height, x, y } = editorEle.getBoundingClientRect()
+            this.callIOSAsAPI('GEN_THUMB', {
+              type: 'mydesign',
+              id,
+              width,
+              height,
+              x,
+              y,
+              bgColor: store.getters['vivisticker/getEditorBg'] // for older app
+            }, 'gen-thumb').then(() => {
+              this.postCopyEditor()
+              resolve()
+            })
+          }, 500) // wait for soft keyboard to close
+        })
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  thumbDone() {
+    vivistickerUtils.handleCallback('gen-thumb')
+  }
+
+  async saveDesignJson(id: string): Promise<void> {
+    if (this.isStandaloneMode) return
+    const pages = pageUtils.getPages
+    const editorType = store.getters['vivisticker/getEditorType']
+    const json = {
+      pages: uploadUtils.prepareJsonToUpload(pages),
+      type: editorType,
+      id,
+      updateTime: new Date(Date.now()).toISOString()
+    } as IMyDesign
+    await this.addAsset(`mydesign-${editorType}`, json)
   }
 
   getContrastColor(editorBg: string) {
