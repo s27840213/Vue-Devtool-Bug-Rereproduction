@@ -71,8 +71,8 @@ class ShortcutUtils {
           .forEach(l => {
             if (l.type === 'shape') {
               l.className = ShapeUtils.classGenerator()
-              l.id = GeneralUtils.generateRandomString(8)
             }
+            l.id = GeneralUtils.generateRandomString(8)
           })
         break
       case 'tmp':
@@ -80,8 +80,8 @@ class ShortcutUtils {
           .forEach(l => {
             if (l.type === 'shape') {
               l.className = ShapeUtils.classGenerator()
-              l.id = GeneralUtils.generateRandomString(8)
             }
+            l.id = GeneralUtils.generateRandomString(8)
           })
         break
     }

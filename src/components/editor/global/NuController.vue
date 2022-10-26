@@ -289,7 +289,7 @@ export default Vue.extend({
   computed: {
     ...mapState('text', ['sel', 'props']),
     ...mapState('shadow', ['processId', 'handleId']),
-    ...mapState(['isMoving', 'currDraggedPhoto']),
+    ...mapState(['currDraggedPhoto']),
     ...mapGetters('text', ['getDefaultFonts']),
     ...mapGetters({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
@@ -330,6 +330,9 @@ export default Vue.extend({
     },
     contentEditable(): boolean {
       return this.config.contentEditable
+    },
+    isMoving(): boolean {
+      return this.config.moving
     },
     isActive(): boolean {
       return this.config.active
@@ -393,14 +396,15 @@ export default Vue.extend({
     eventUtils.removePointerEvent('pointermove', this.moving)
     this.isControlling = false
     this.setCursorStyle('')
+    LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
     this.setMoving(false)
   },
   methods: {
     ...mapMutations({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
-      setMoving: 'SET_moving',
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
+      setMoving: 'SET_moving',
       setImgConfig: 'imgControl/SET_CONFIG'
     }),
     resizerBarStyles(resizer: IResizer) {
@@ -761,9 +765,6 @@ export default Vue.extend({
 
       switch (this.getLayerType) {
         case 'text': {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-            dragging: true
-          })
           const targetClassList = (event.target as HTMLElement).classList
           const isMoveBar = targetClassList.contains('control-point__move-bar')
           const isMover = targetClassList.contains('control-point__mover')
@@ -879,7 +880,6 @@ export default Vue.extend({
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           dragging: true
         })
-
         this.$emit('isDragging', this.layerIndex)
       }
       if (this.isImgControl) {
@@ -904,6 +904,7 @@ export default Vue.extend({
           y: Math.abs(this.getLayerPos().y - this.initTranslate.y)
         }
         if ((Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: true })
           this.setMoving(true)
         }
       }
@@ -954,7 +955,9 @@ export default Vue.extend({
         return
       }
 
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
       this.setMoving(false)
+
       if (this.isActive) {
         // if (posDiff.x === 0 && posDiff.y === 0 && !this.isLocked()) {
         //   // if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
