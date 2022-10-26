@@ -611,7 +611,7 @@ export default Vue.extend({
     display: grid;
     grid-template-rows: auto;
     grid-auto-flow: column;
-    grid-auto-columns: min-content;
+    grid-auto-columns: 70px;
     column-gap: 20px;
     background-color: setColor(nav);
     padding: 8px 12px;
