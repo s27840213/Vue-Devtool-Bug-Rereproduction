@@ -54,9 +54,7 @@ import { mapState, mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IText, ITmp } from '@/interfaces/layer'
-import { IControlPoints } from '@/interfaces/controller'
+import { IFrame, IGroup, IImage, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
@@ -66,7 +64,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
-import { FunctionPanelType, LayerType, PopupSliderEventType } from '@/store/types'
+import { FunctionPanelType, LayerType } from '@/store/types'
 import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import DragUtils from '@/utils/dragUtils'
@@ -79,7 +77,6 @@ import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import i18n from '@/i18n'
 import imageShadowUtils from '@/utils/imageShadowUtils'
-import pageUtils from '@/utils/pageUtils'
 import fileUtils from '@/utils/fileUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 
@@ -432,6 +429,10 @@ export default Vue.extend({
               // .clipperHandler(imgData as unknown as IImage, this.config.clipPath, this.config.styles).styles
               .clipperHandler(imgData as IImage, clip.clipPath, clip.styles).styles
 
+            if (this.config.srcObj.type === 'local') {
+              URL.revokeObjectURL(this.config.srcObj.assetId)
+            }
+
             FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
               imgWidth,
               imgHeight,
@@ -439,6 +440,7 @@ export default Vue.extend({
               imgY
             })
             FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { ...imgData.srcObj })
+            StepsUtils.record()
           })
         })
     },

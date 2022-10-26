@@ -2075,7 +2075,7 @@ export default Vue.extend({
         if ((this.config.type === LayerType.frame && !(this.config as IFrame).clips[targetIndex].active) ||
           (this.config.type === LayerType.group && !(this.config as IGroup).layers[targetIndex].active)) {
           updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
-          if (this.config.type === LayerType.frame && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame' && !this.controllerHidden) {
+          if (this.config.type === LayerType.frame && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame' && !this.controllerHidden && !this.isPointerDownFromSubController) {
             const fileInput = document.getElementById(`input-${this.layerIndex}-${targetIndex}`) as HTMLInputElement
             if (fileInput) {
               vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
