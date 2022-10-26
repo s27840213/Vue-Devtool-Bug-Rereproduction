@@ -188,6 +188,11 @@ export default Vue.extend({
       }
     })
   },
+  watch: {
+    src(newVal) {
+      console.log(newVal)
+    }
+  },
   beforeDestroy() {
     if (!this.isBgImgControl) {
       if (this.config.inProcess) {
