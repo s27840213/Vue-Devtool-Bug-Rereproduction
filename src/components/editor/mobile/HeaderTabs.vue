@@ -6,19 +6,19 @@
         svg-icon(
           :iconName="'chevron-left'"
           :iconColor="'white'"
-          :iconWidth="'24px'")
+          :iconWidth="'22px'")
       div(class="header-bar__feature-icon mr-20"
           :class="{'click-disabled': stepsUtils.isInFirstStep || isCropping}"
           @pointerdown="undo()")
         svg-icon(:iconName="'undo'"
           :iconColor="(!stepsUtils.isInFirstStep && !isCropping) ? 'white' : 'gray-2'"
-          :iconWidth="'24px'")
+          :iconWidth="'22px'")
       div(class="header-bar__feature-icon"
           :class="{'click-disabled': stepsUtils.isInLastStep || isCropping}"
           @pointerdown="redo()")
         svg-icon(:iconName="'redo'"
           :iconColor="(!stepsUtils.isInLastStep && !isCropping) ? 'white' : 'gray-2'"
-          :iconWidth="'24px'")
+          :iconWidth="'22px'")
     div(class="header-bar__right")
       div(v-for="tab in rightTabs" class="header-bar__feature-icon"
           :class="{'click-disabled': ((tab.disabled || isLocked) && tab.icon !== 'lock')}"
@@ -26,7 +26,7 @@
         svg-icon(
           :iconName="tab.icon"
           :iconColor="iconColor(tab)"
-          :iconWidth="'24px'")
+          :iconWidth="'22px'")
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'

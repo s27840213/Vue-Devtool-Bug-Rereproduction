@@ -9,8 +9,8 @@
           svg-icon(class="mb-5 click-disabled"
             :iconName="tab.icon"
             :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
-            :iconWidth="'24px'")
-          span(class="body-2 no-wrap click-disabled"
+            :iconWidth="'22px'")
+          span(class="body-3 no-wrap click-disabled"
           :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
 <script lang="ts">
@@ -612,7 +612,7 @@ export default Vue.extend({
     grid-template-rows: auto;
     grid-auto-flow: column;
     grid-auto-columns: min-content;
-    column-gap: 20px;
+    column-gap: 16px;
     background-color: setColor(nav);
     padding: 8px 12px;
     @include no-scrollbar;
