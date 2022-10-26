@@ -10,7 +10,7 @@
       div(class="popup-save-design__auto-save-checkbox"
           :class="{checked: userSettings.autoSave}"
           @click="handleAutoSaveToggle")
-        svg-icon(iconName="done" iconColor="white" iconWidth="20.7px")
+        svg-icon(v-if="userSettings.autoSave" iconName="done" iconColor="white" iconWidth="20.7px")
     div(class="popup-save-design__buttons")
       div(class="popup-save-design__button cancel"
           :class="{disabled: userSettings.autoSave}"
@@ -135,6 +135,7 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
     &.cancel {
       color: setColor(gray-2);
       background-color: setColor(gray-4);
