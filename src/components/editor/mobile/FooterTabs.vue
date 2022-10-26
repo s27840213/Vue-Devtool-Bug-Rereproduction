@@ -628,6 +628,7 @@ export default Vue.extend({
     padding: 0px 4px;
     > span {
       transition: background-color 0.2s, color 0.2s;
+      transform: scale(calc(11 / 12));
     }
   }
 }
