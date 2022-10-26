@@ -397,7 +397,7 @@ export default Vue.extend({
         y: Math.abs(this.primaryLayer.styles.y - this.initTranslate.y)
       }
       const hasActualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
-      if (this.type === LayerType.frame && this.config.active && this.config.srcObj.type === 'frame' && !hasActualMove) {
+      if (this.type === LayerType.frame && this.config.active && this.config.srcObj.type === 'frame' && !hasActualMove && !this.controllerHidden) {
         const input = this.$refs.fileInput as HTMLInputElement
         if (input) {
           vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())

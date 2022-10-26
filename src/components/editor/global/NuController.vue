@@ -1060,14 +1060,15 @@ export default Vue.extend({
                 LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: false }, i)
               }
             }
-          } else if (this.config.type === LayerType.frame) {
-            const primary = this.config as IFrame
-            if (primary.clips.length === 1 && primary.clips[0].srcObj.type === 'frame') {
-              const fileInput = document.getElementById(`input-${this.layerIndex}-0`) as HTMLInputElement
-              if (fileInput) {
-                vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
-                fileInput.click()
-              }
+          }
+        }
+        if (this.config.type === LayerType.frame && !hasActualMove) {
+          const primary = this.config as IFrame
+          if (primary.clips.length === 1 && primary.clips[0].srcObj.type === 'frame') {
+            const fileInput = document.getElementById(`input-${this.layerIndex}-0`) as HTMLInputElement
+            if (fileInput) {
+              vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
+              fileInput.click()
             }
           }
         }
@@ -2074,6 +2075,13 @@ export default Vue.extend({
         if ((this.config.type === LayerType.frame && !(this.config as IFrame).clips[targetIndex].active) ||
           (this.config.type === LayerType.group && !(this.config as IGroup).layers[targetIndex].active)) {
           updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
+          if (this.config.type === LayerType.frame && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame' && !this.controllerHidden) {
+            const fileInput = document.getElementById(`input-${this.layerIndex}-${targetIndex}`) as HTMLInputElement
+            if (fileInput) {
+              vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
+              fileInput.click()
+            }
+          }
         }
         LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
       }
