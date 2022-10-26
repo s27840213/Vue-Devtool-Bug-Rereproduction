@@ -337,8 +337,8 @@ export default Vue.extend({
     width: 80px;
     height: 80px;
     margin: 0 5px;
-    object-fit: contain;
-    vertical-align: middle;
+    // object-fit: contain;
+    // vertical-align: middle;
   }
   &__items {
     display: grid;
