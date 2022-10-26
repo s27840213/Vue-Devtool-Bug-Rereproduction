@@ -321,8 +321,6 @@ export default Vue.extend({
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
         this.selectedLayerNum !== 0 && this.editorType === 'object' && layerUtils.getCurrLayer.type === LayerType.frame &&
         (layerUtils.subLayerIdx === -1 || this.controllerHidden)
-      // this.selectedLayerNum !== 0 && layerUtils.getCurrLayer.type === LayerType.frame &&
-      // (layerUtils.getCurrLayer as IFrame).clips.length !== 1
     },
     showShapeSetting(): boolean {
       const { getCurrConfig } = layerUtils

@@ -16,8 +16,9 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import { mapGetters, mapState } from 'vuex'
 import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
-import { IFrame } from '@/interfaces/layer'
+import { IFrame, IImage } from '@/interfaces/layer'
 import backgroundUtils from '@/utils/backgroundUtils'
+import layerUtils from '@/utils/layerUtils'
 export default Vue.extend({
   components: {
     MobileSlider
@@ -39,7 +40,8 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
-      currSelectedLayers: 'getCurrSelectedLayers'
+      currSelectedLayers: 'getCurrSelectedLayers',
+      controllerHidden: 'vivisticker/getControllerHidden'
     }),
     currLayer(): any {
       const layers = this.currSelectedLayers as any[]
@@ -88,7 +90,7 @@ export default Vue.extend({
       }
       if (types.has('frame') || (types.has('group') && type === 'frame')) {
         if (types.has('frame')) {
-          if (index >= 0) {
+          if (index >= 0 && !this.controllerHidden && (layerUtils.getCurrConfig as IImage).srcObj.type !== 'frame') {
             // case 1: one clip in one frame layer, index = clip index
             return frameUtils.updateFrameLayerStyles(
               pageUtils.currFocusPageIndex,
