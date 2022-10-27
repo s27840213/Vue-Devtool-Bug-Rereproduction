@@ -611,7 +611,7 @@ export default Vue.extend({
     display: grid;
     grid-template-rows: auto;
     grid-auto-flow: column;
-    grid-auto-columns: 60px;
+    grid-auto-columns: 56px;
     column-gap: 16px;
     background-color: setColor(nav);
     padding: 8px 12px;
@@ -628,7 +628,7 @@ export default Vue.extend({
     padding: 0px 4px;
     > span {
       transition: background-color 0.2s, color 0.2s;
-      transform: scale(calc(11 / 12));
+      transform: scale(calc(10 / 12));
     }
   }
 }
