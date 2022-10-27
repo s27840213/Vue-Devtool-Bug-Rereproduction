@@ -527,6 +527,7 @@ class ImageUtils {
   }
 
   appendOriginQuery(src: string) {
+    if (!src) return src
     if (src.includes('origin=true')) return src
     if (src.includes('?')) {
       return `${src}&origin=true`
