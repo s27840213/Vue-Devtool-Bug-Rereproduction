@@ -69,8 +69,8 @@ export default Vue.extend({
       default: () => []
     }
   },
-  mounted() {
-    const debugMode = (localStorage.getItem('debugMode') === 'true') ?? false
+  async mounted() {
+    const debugMode = (await vivistickerUtils.getState('debugMode'))?.value ?? false
     this.debugMode = debugMode
   },
   computed: {
@@ -228,7 +228,7 @@ export default Vue.extend({
     },
     toggleDebugMode() {
       this.debugMode = !this.debugMode
-      localStorage.setItem('debugMode', String(this.debugMode))
+      vivistickerUtils.setState('debugMode', { value: this.debugMode })
     },
     switchDomain(domain: string) {
       vivistickerUtils.sendToIOS('SWITCH_DOMAIN', { domain })
