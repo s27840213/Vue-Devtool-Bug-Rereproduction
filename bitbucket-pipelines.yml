@@ -32,7 +32,7 @@ pipelines:
     - parallel:
         - step:
             name: "dev5 Alan"
-            deployment: dev5
+            deployment: stkdev5
             trigger: manual
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -62,7 +62,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "dev4 Gary"
-            deployment: dev4
+            deployment: stkdev4
             trigger: manual
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -92,7 +92,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "dev3 HsingChi"
-            deployment: dev3
+            deployment: stkdev3
             trigger: manual
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -122,7 +122,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "dev2 TingAn"
-            deployment: dev2
+            deployment: stkdev2
             trigger: manual
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -152,7 +152,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "dev1 Nathan"
-            deployment: dev1
+            deployment: stkdev1
             trigger: manual
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -182,7 +182,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "dev0"
-            deployment: dev0
+            deployment: stkdev0
             trigger: manual
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -456,7 +456,7 @@ pipelines:
       - parallel:
           - step:
               name: "dev5 Alan"
-              deployment: dev5
+              deployment: stkdev5
               trigger: manual
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -486,7 +486,7 @@ pipelines:
                     DELETE_FLAG: "true"
           - step:
               name: "dev4 Gary"
-              deployment: dev4
+              deployment: stkdev4
               trigger: manual
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -516,7 +516,7 @@ pipelines:
                     DELETE_FLAG: "true"
           - step:
               name: "dev3 HsingChi"
-              deployment: dev3
+              deployment: stkdev3
               trigger: manual
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -546,7 +546,7 @@ pipelines:
                     DELETE_FLAG: "true"
           - step:
               name: "dev2 TingAn"
-              deployment: dev2
+              deployment: stkdev2
               trigger: manual
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -576,7 +576,7 @@ pipelines:
                     DELETE_FLAG: "true"
           - step:
               name: "dev1 Nathan"
-              deployment: dev1
+              deployment: stkdev1
               trigger: manual
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -606,7 +606,7 @@ pipelines:
                     DELETE_FLAG: "true"
           - step:
               name: "dev0"
-              deployment: dev0
+              deployment: stkdev0
               trigger: manual
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -721,7 +721,7 @@ pipelines:
           #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
       - step:
           name: "deploy test"
-          deployment: stickertest
+          deployment: stkrd
           trigger: manual
           script:
             - pipe: atlassian/aws-s3-deploy:1.1.0
