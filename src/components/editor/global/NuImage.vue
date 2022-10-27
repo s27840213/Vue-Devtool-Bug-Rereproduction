@@ -199,7 +199,7 @@ export default Vue.extend({
   destroyed() {
     this.hasDestroyed = true
     if (this.config.srcObj.type === 'local') {
-      URL.revokeObjectURL(this.config.srcObj.assetId)
+      // URL.revokeObjectURL(this.config.srcObj.assetId)
     }
   },
   data() {

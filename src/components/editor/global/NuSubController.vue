@@ -430,7 +430,7 @@ export default Vue.extend({
               .clipperHandler(imgData as IImage, clip.clipPath, clip.styles).styles
 
             if (this.config.srcObj.type === 'local') {
-              URL.revokeObjectURL(this.config.srcObj.assetId)
+              // URL.revokeObjectURL(this.config.srcObj.assetId)
             }
 
             FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
