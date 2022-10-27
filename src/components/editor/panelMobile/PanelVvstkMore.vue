@@ -138,11 +138,11 @@ export default Vue.extend({
         text: 'test',
         icon: 'vivisticker_global',
         selected: () => {
-          return window.location.hostname === 'stickertest.vivipic.com'
+          return window.location.hostname === 'stkrd.vivipic.com'
         },
-        action: () => { this.switchDomain('stickertest') }
+        action: () => { this.switchDomain('stkrd') }
       }, ...Array(6).fill(1).map((_, index) => {
-        const host = `dev${index}`
+        const host = `stkdev${index}`
         return {
           text: host,
           icon: 'vivisticker_global',
