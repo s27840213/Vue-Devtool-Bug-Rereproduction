@@ -217,9 +217,6 @@ export default Vue.extend({
     }
   },
   watch: {
-    src(newVal) {
-      console.log(newVal)
-    },
     getImgDimension(newVal, oldVal) {
       this.handleDimensionUpdate(newVal, oldVal)
     },
