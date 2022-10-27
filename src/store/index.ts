@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame, IImageStyle } from '@/interfaces/layer'
-import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
+import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData, LayerType } from './types'
 import { IPage } from '@/interfaces/page'
 import zindexUtils from '@/utils/zindexUtils'
 
@@ -759,19 +759,29 @@ const mutations: MutationTree<IEditorState> = {
     }
   },
   DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex }) {
-    state.pages.forEach((page: IPage, index: number) => {
-      page.layers.filter((layer: IShape | IText | IImage | IGroup | IFrame, index: number) => {
-        return layer.type === 'image' && (layer as IImage).srcObj.assetId === assetId && layer.previewSrc
-      }).forEach((layer) => {
-        Vue.delete(layer, 'previewSrc')
-        Object.assign((layer as IImage).srcObj, {
-          type,
-          userId,
-          assetId: uploadUtils.isAdmin ? assetId : assetIndex
-        })
-
-        uploadUtils.uploadDesign()
-      })
+    const handler = (l: IShape | IText | IImage | IGroup | IFrame) => {
+      switch (l.type) {
+        case LayerType.image:
+          if ((l as IImage).srcObj.assetId === assetId && l.previewSrc) {
+            Vue.delete(l, 'previewSrc')
+            Object.assign((l as IImage).srcObj, {
+              type,
+              userId,
+              assetId: uploadUtils.isAdmin ? assetId : assetIndex
+            })
+            uploadUtils.uploadDesign()
+          }
+          break
+        case LayerType.tmp:
+        case LayerType.group:
+          (l as IGroup).layers.forEach(subL => handler(subL))
+          break
+        case LayerType.frame:
+          (l as IFrame).clips.forEach(subL => handler(subL))
+      }
+    }
+    state.pages.forEach(page => {
+      page.layers.forEach(l => handler(l))
     })
   },
   ADD_guideline(state: IEditorState, updateInfo: { pos: number, type: string, pageIndex?: number }) {
