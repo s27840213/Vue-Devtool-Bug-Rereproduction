@@ -827,9 +827,6 @@ const mutations: MutationTree<IEditorState> = {
       path: 'root'
     })
   },
-  SET_documentColors(state: IEditorState, data: { pageIndex: number, colors: Array<{ color: string, count: number }> }) {
-    state.pages[data.pageIndex].documentColors = [...generalUtils.deepCopy(data.colors)]
-  },
   UPDATE_documentColors(state: IEditorState, payload: { pageIndex: number, color: string }) {
     state.pages[payload.pageIndex].documentColors = getDocumentColor(payload.pageIndex, payload.color)
   },

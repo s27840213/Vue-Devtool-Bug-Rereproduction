@@ -531,7 +531,7 @@ class AssetUtils {
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
 
     let srcObj
-    let assetId = '' as string | undefined
+    let assetId = '' as string | number | undefined
     if (typeof url === 'string') {
       const type = ImageUtils.getSrcType(url)
       assetId = isPreview ? previewAssetId : ImageUtils.getAssetId(url, type)
