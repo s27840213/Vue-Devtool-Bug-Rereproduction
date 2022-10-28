@@ -64,7 +64,7 @@ import colorUtils from '@/utils/colorUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
-  name: 'Editor',
+  name: 'DesktopEditor',
   components: {
     Sidebar,
     EditorHeader,

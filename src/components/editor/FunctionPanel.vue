@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="function-panel scrollbar-gray"
+  div(class="function-panel scrollbar-gray-thin"
     :style="functionPanelStyles")
     //- span {{pageUtils._3dEnabledPageIndex}},
     //- span {{pageUtils.currFocusPageIndex}},

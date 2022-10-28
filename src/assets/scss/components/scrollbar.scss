@@ -5,6 +5,10 @@
 	scrollbar-width: thin;
 	overscroll-behavior: contain;
 
+	@include firefoxOnly {
+		scrollbar-color: white transparent;
+	}
+
 	&::-webkit-scrollbar {
 		width: 15px;
 		height: 15px;
@@ -20,6 +24,10 @@
 .scrollbar-gray {
 	scrollbar-width: thin;
 	overscroll-behavior: contain;
+
+	@include firefoxOnly {
+		scrollbar-color: setColor(gray-3) transparent;
+	}
 
 	&::-webkit-scrollbar {
 		width: 15px;
@@ -38,6 +46,10 @@
 	scrollbar-width: thin;
 	overscroll-behavior: contain;
 
+	@include firefoxOnly {
+		scrollbar-color: white transparent;
+	}
+
 	&::-webkit-scrollbar {
 		width: 8px;
 		height: 8px;
@@ -53,6 +65,10 @@
 .scrollbar-gray-thin {
 	scrollbar-width: thin;
 	overscroll-behavior: contain;
+
+	@include firefoxOnly {
+		scrollbar-color: setColor(gray-3) transparent;
+	}
 
 	&::-webkit-scrollbar {
 		width: 8px;
