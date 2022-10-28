@@ -7,17 +7,29 @@
         v-model.number="propsVal"
         :name="name"
         @change="handleChangeStop")
-    input(class="mobile-slider__range-input"
-      :class="inputRange"
-      v-model.number="propsVal"
-      :name="name"
-      :max="max"
-      :min="min"
-      :step="step"
-      v-ratio-change
-      type="range"
-      @pointerdown="$emit('pointerdown', $event)"
-      @pointerup="$emit('pointerup', $event); handleChangeStop();")
+    div(class="mobile-slider__range-input-wrapper")
+      input(class="input__slider--range"
+        :style="{ 'pointer-events': borderTouchArea ? 'none' : 'auto' }"
+        v-model.number="propsVal"
+        :name="name"
+        :max="max"
+        :min="min"
+        :step="step"
+        v-ratio-change
+        type="range"
+        @pointerdown="!borderTouchArea ? $emit('pointerdown', $event) : null"
+        @pointerup="!borderTouchArea ? handlePointerup() : null")
+      input(v-if="borderTouchArea"
+        class="mobile-slider__range-input mobile-slider__range-input-top input-top__slider--range"
+        v-model.number="propsVal"
+        :name="name"
+        :max="max"
+        :min="min"
+        :step="step"
+        v-ratio-change
+        type="range"
+        @pointerdown="$emit('pointerdown', $event)"
+        @pointerup="handlePointerup")
 </template>
 
 <script lang="ts">
@@ -31,8 +43,11 @@ export default Vue.extend({
   },
   props: {
     title: String,
-    type: String,
     name: String,
+    borderTouchArea: {
+      type: Boolean,
+      default: false
+    },
     value: {
       type: [Number, String],
       required: true
@@ -69,14 +84,15 @@ export default Vue.extend({
           this.$emit('update', val, this.name)
         }
       }
-    },
-    inputRange(): string {
-      return this.type === 'top' ? 'input-top__slider--range' : 'input__slider--range'
     }
   },
   methods: {
     handleChangeStop() {
       stepsUtils.record()
+    },
+    handlePointerup(e: Event) {
+      this.$emit('pointerup', e)
+      this.handleChangeStop()
     }
   }
 })
@@ -106,8 +122,14 @@ export default Vue.extend({
     width: 60px;
   }
 
-  &__range-input {
+  &__range-input-wrapper {
     margin-top: 12px;
+    position: relative;
+  }
+
+  &__range-input-top {
+    position: absolute;
+    opacity: 0;
   }
 }
 </style>

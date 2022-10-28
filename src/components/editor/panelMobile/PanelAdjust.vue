@@ -2,13 +2,13 @@
   div(class="panel-adjust")
     div(v-for="field in fields" :key="field.name")
       mobile-slider(:title="`${field.label}`"
+        :borderTouchArea="true"
         :name="field.name"
         :value="adjustVal[field.name] || 0"
         :min="field.min"
         :max="field.max"
         @update="handleField")
       mobile-slider(:title="`${field.label}`"
-        :top="'top'"
         :name="field.name"
         :value="adjustVal[field.name] || 0"
         :min="field.min"

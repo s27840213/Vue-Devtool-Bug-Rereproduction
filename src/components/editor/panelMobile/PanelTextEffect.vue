@@ -39,6 +39,7 @@
             span {{sel.label}}
         //- Option type range
         mobile-slider(v-if="option.type === 'range'"
+          :borderTouchArea="true"
           :title="option.label"
           :name="option.key"
           :value="currentStyle[currCategory.name][option.key]"
