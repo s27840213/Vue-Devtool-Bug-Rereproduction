@@ -243,7 +243,8 @@ export default Vue.extend({
     pageIndex: Number,
     pageScaleRatio: Number,
     isAnyBackgroundImageControl: Boolean,
-    overflowContainer: HTMLElement
+    overflowContainer: HTMLElement,
+    isScaling: Boolean
   },
   mounted() {
     this.initialPageHeight = (this.config as IPage).height
@@ -297,7 +298,8 @@ export default Vue.extend({
         // transform: `scale(${1})`
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
-        transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`
+        transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`,
+        willChange: this.isScaling ? 'transform' : 'none'
       }
     },
     getCurrLayer(): ILayer {
