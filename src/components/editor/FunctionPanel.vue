@@ -28,8 +28,8 @@
         class="btn-file rounded full-height"
         @click.native="openFilePopup")
     div(v-if="!isShowPagePreview"
-        class="function-panel__content scrollbar-gray-thin"
-        :class="{'p-20': true, 'dim-background': showMore}")
+        class="function-panel__content"
+        :class="{'dim-background': showMore}")
       panel-bg-remove(v-if="showBgRemove")
       panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
       panel-general(v-if="showGeneral")
@@ -330,8 +330,20 @@ export default Vue.extend({
     z-index: 20;
   }
   &__content {
-    overflow-y: auto;
-    overflow-x: hidden;
+    @include hide-scrollbar(20px);
+    &:hover {
+      @include firefoxOnly {
+        scrollbar-color: setColor(gray-3) transparent;
+      }
+    }
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    &::-webkit-scrollbar-thumb {
+      border: unset;
+      background-color: setColor(gray-3);;
+    }
+    padding: 20px;
   }
 }
 .dim-background {

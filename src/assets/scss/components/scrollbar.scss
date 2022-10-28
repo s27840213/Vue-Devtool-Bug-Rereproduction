@@ -2,10 +2,10 @@
 @use '@/assets/scss/utils' as *;
 
 .scrollbar-white {
-  scrollbar-width: thin;
   overscroll-behavior: contain;
 
   @include firefoxOnly {
+    scrollbar-width: thin;
     scrollbar-color: white transparent;
   }
 
@@ -22,10 +22,10 @@
 }
 
 .scrollbar-gray {
-  scrollbar-width: thin;
   overscroll-behavior: contain;
 
   @include firefoxOnly {
+    scrollbar-width: thin;
     scrollbar-color: setColor(gray-3) transparent;
   }
 
@@ -43,10 +43,10 @@
 
 
 .scrollbar-white-thin {
-  scrollbar-width: thin;
   overscroll-behavior: contain;
 
   @include firefoxOnly {
+    scrollbar-width: thin;
     scrollbar-color: white transparent;
   }
 
@@ -63,10 +63,10 @@
 }
 
 .scrollbar-gray-thin {
-  scrollbar-width: thin;
   overscroll-behavior: contain;
 
   @include firefoxOnly {
+    scrollbar-width: thin;
     scrollbar-color: setColor(gray-3) transparent;
   }
 
