@@ -515,7 +515,7 @@ export default Vue.extend({
         if (this.currSelectedColorIndex <= decoration.color.length - 1) {
           key = 'decorationColors'
           color = [...decoration.color]
-          color[this.currSelectedIndex] = newColor
+          color[this.currSelectedColorIndex] = newColor
         } else {
           key = 'decorationTopColors'
           color = [...decorationTop.color]

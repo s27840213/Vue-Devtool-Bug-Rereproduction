@@ -322,8 +322,9 @@ class AssetUtils {
   addFrame(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
-    const currentPage = this.getPage(targePageIndex)
-    const resizeRatio = RESIZE_RATIO_FRAME
+    const currentPage = this.getPage(targePageIndex) as IPage
+    const svgRatio = json.width / json.height
+    const resizeRatio = ((svgRatio > 1 ? currentPage.width : currentPage.height) * 0.7) / (svgRatio > 1 ? json.width : json.height)
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
 
