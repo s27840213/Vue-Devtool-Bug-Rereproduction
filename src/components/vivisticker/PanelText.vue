@@ -191,7 +191,6 @@ export default Vue.extend({
       this.handleCategorySearch,
       async () => {
         await this.getRecAndCate('textStock')
-        await this.getContent()
       })
   },
   activated() {
