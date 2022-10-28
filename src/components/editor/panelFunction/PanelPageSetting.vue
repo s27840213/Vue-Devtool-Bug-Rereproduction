@@ -727,7 +727,6 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .page-setting {
-  @include size(100%, 100%);
   text-align: left;
   &__title {
     & span {

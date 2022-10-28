@@ -700,7 +700,6 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .shape-setting {
-  @include size(100%, 100%);
   text-align: center;
   display: grid;
   grid-template-rows: auto auto auto minmax(0, 1fr);
