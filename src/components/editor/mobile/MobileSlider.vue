@@ -7,7 +7,8 @@
         v-model.number="propsVal"
         :name="name"
         @change="handleChangeStop")
-    input(class="mobile-slider__range-input input__slider--range"
+    input(class="mobile-slider__range-input"
+      :class="inputRange"
       v-model.number="propsVal"
       :name="name"
       :max="max"
@@ -30,6 +31,7 @@ export default Vue.extend({
   },
   props: {
     title: String,
+    type: String,
     name: String,
     value: {
       type: [Number, String],
@@ -67,6 +69,9 @@ export default Vue.extend({
           this.$emit('update', val, this.name)
         }
       }
+    },
+    inputRange(): string {
+      return this.type === 'top' ? 'input-top__slider--range' : 'input__slider--range'
     }
   },
   methods: {

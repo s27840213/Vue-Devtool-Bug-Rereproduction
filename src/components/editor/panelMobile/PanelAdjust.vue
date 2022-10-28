@@ -7,6 +7,13 @@
         :min="field.min"
         :max="field.max"
         @update="handleField")
+      mobile-slider(:title="`${field.label}`"
+        :top="'top'"
+        :name="field.name"
+        :value="adjustVal[field.name] || 0"
+        :min="field.min"
+        :max="field.max"
+        @update="handleField")
 </template>
 
 <script lang="ts">
@@ -136,5 +143,10 @@ export default Vue.extend({
   width: 100%;
   overflow: scroll;
   @include no-scrollbar;
+}
+.slider-input {
+  &__top {
+    position: absolute;
+  }
 }
 </style>
