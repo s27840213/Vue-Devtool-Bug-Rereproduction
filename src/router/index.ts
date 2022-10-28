@@ -72,6 +72,7 @@ const routes: Array<RouteConfig> = [
     component: Screenshot,
     beforeEnter: async (to, from, next) => {
       try {
+        store.commit('user/SET_STATE', { userId: 'backendRendering' })
         next()
       } catch (error) {
         console.log(error)

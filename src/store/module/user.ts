@@ -50,7 +50,7 @@ const getDefaultState = (): IUserModule => ({
   token: '',
   uname: '',
   shortName: '',
-  userId: 'backendRendering',
+  userId: '',
   teamId: '',
   role: -1,
   roleRaw: -1,
