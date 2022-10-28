@@ -397,6 +397,7 @@ const mutations: MutationTree<IEditorState> = {
   SET_backgroundColor(state: IEditorState, updateInfo: { pageIndex: number, color: string }) {
     state.pages[updateInfo.pageIndex].backgroundColor = updateInfo.color
     state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.adjust.halation = 0
   },
   SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
     // state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
@@ -836,9 +837,6 @@ const mutations: MutationTree<IEditorState> = {
       parentFolder: '',
       path: 'root'
     })
-  },
-  SET_documentColors(state: IEditorState, data: { pageIndex: number, colors: Array<{ color: string, count: number }> }) {
-    state.pages[data.pageIndex].documentColors = [...generalUtils.deepCopy(data.colors)]
   },
   UPDATE_documentColors(state: IEditorState, payload: { pageIndex: number, color: string }) {
     state.pages[payload.pageIndex].documentColors = getDocumentColor(payload.pageIndex, payload.color)
