@@ -1,5 +1,5 @@
 import { IAsset } from '@/interfaces/module'
-import { IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IMyDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
@@ -25,7 +25,10 @@ interface IViviStickerState {
   myDesignTab: string,
   isInSelectionMode: boolean,
   showSaveDesignPopup: boolean,
-  slideType: string
+  slideType: string,
+  myDesignFiles: {[key: string]: IMyDesign[]},
+  myDesignBuffer: IMyDesign | undefined,
+  editingDesignId: string
 }
 
 const EDITOR_BGS = [
@@ -62,7 +65,10 @@ const getDefaultState = (): IViviStickerState => ({
   myDesignTab: 'text',
   isInSelectionMode: false,
   showSaveDesignPopup: false,
-  slideType: 'none'
+  slideType: 'none',
+  myDesignFiles: vivistickerUtils.getDefaultMyDesignFiles(),
+  myDesignBuffer: undefined,
+  editingDesignId: ''
 })
 
 const state = getDefaultState()
@@ -138,6 +144,17 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getIsSlideShown(state: IViviStickerState): boolean {
     return state.slideType !== 'none'
+  },
+  getMyDesignFileList(state: IViviStickerState): (tab: string) => IMyDesign[] {
+    return (tab: string): IMyDesign[] => {
+      return state.myDesignFiles[tab] ?? []
+    }
+  },
+  getMyDesignBuffer(state: IViviStickerState): IMyDesign | undefined {
+    return state.myDesignBuffer
+  },
+  getEditingDesignId(state: IViviStickerState): string {
+    return state.editingDesignId
   }
 }
 
@@ -217,6 +234,15 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_slideType(state: IViviStickerState, slideType: string) {
     state.slideType = slideType
+  },
+  SET_myDesignFileList(state: IViviStickerState, updateInfo: { tab: string, list: IMyDesign[] }) {
+    state.myDesignFiles[updateInfo.tab] = updateInfo.list
+  },
+  SET_myDesignBuffer(state: IViviStickerState, myDesignBuffer: IMyDesign | undefined) {
+    state.myDesignBuffer = myDesignBuffer
+  },
+  SET_editingDesignId(state: IViviStickerState, editingDesignId) {
+    state.editingDesignId = editingDesignId
   },
   UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
     Object.entries(settings).forEach(([key, value]) => {

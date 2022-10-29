@@ -20,3 +20,8 @@ export interface IMyDesign {
   id: string,
   updateTime: string
 }
+
+export interface IMyDesignTag {
+  name: string,
+  tab: string
+}

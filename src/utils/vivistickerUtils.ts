@@ -14,7 +14,7 @@ import editorUtils from './editorUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import textPropUtils from './textPropUtils'
-import { IMyDesign, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IMyDesign, IMyDesignTag, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import localeUtils from './localeUtils'
 import listApis from '@/apis/list'
 import { IListServiceContentDataItem } from '@/interfaces/api'
@@ -56,6 +56,14 @@ const VVSTK_CALLBACKS = [
   'setStateDone',
   'addAssetDone'
 ]
+
+const MYDESIGN_TAGS = [{
+  name: `${i18n.tc('NN0005', 2)}`,
+  tab: 'text'
+}, {
+  name: `${i18n.tc('NN0003', 2)}`,
+  tab: 'object'
+}] as IMyDesignTag[]
 
 class ViviStickerUtils {
   appLoadedSent = false
@@ -107,6 +115,18 @@ class ViviStickerUtils {
 
   getUserSettingDescription(key: string): string {
     return USER_SETTINGS_CONFIG[key]?.description ?? ''
+  }
+
+  getMyDesignTags(): IMyDesignTag[] {
+    return MYDESIGN_TAGS
+  }
+
+  getDefaultMyDesignFiles(): {[key: string]: IMyDesign[]} {
+    const res = {} as {[key: string]: IMyDesign[]}
+    for (const tag of MYDESIGN_TAGS) {
+      res[tag.tab] = []
+    }
+    return res
   }
 
   getEmptyMessage(): {[key: string]: string} {
@@ -243,7 +263,7 @@ class ViviStickerUtils {
     return (jsonData: any) => {}
   }
 
-  startEditing(editorType: string, initiator: () => Promise<any>, callback: (jsonData: any) => void) {
+  startEditing(editorType: string, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
     const pageWidth = window.innerWidth - 32
     pageUtils.setPages([pageUtils.newPage({
       width: pageWidth,
@@ -251,6 +271,7 @@ class ViviStickerUtils {
       backgroundColor: '#F8F8F8',
       isAutoResizeNeeded: true
     })])
+    store.commit('vivisticker/SET_editingDesignId', designId ?? '')
     initiator().then((jsonData?: any) => {
       if (jsonData) {
         stepsUtils.reset()
@@ -462,18 +483,31 @@ class ViviStickerUtils {
   }
 
   listAssetResult(data: { key: string, assets: any[] }) {
-    if (!['color', 'backgroundColor'].includes(data.key)) {
-      const designIds = data.assets.map(asset => asset.id)
-      listApis.getInfoList(MODULE_TYPE_MAPPING[data.key], designIds).then((response) => {
-        const updateList = response.data.data.content[0].list
-        data.assets = vivistickerUtils.updateAssetContent(data.assets, updateList)
-        assetUtils.setRecentlyUsed(data.key, data.assets)
-        vivistickerUtils.handleCallback(`list-asset-${data.key}`)
-      })
-    } else {
+    if (data.key.startsWith('mydesign')) {
+      vivistickerUtils.processMydesignList(data.key, data.assets)
+      vivistickerUtils.handleCallback(`list-asset-${data.key}`)
+      return
+    }
+    if (['color', 'backgroundColor'].includes(data.key)) {
       assetUtils.setRecentlyUsed(data.key, data.assets)
       vivistickerUtils.handleCallback(`list-asset-${data.key}`)
+      return
     }
+    const designIds = data.assets.map(asset => asset.id)
+    listApis.getInfoList(MODULE_TYPE_MAPPING[data.key], designIds).then((response) => {
+      const updateList = response.data.data.content[0].list
+      data.assets = vivistickerUtils.updateAssetContent(data.assets, updateList)
+      assetUtils.setRecentlyUsed(data.key, data.assets)
+      vivistickerUtils.handleCallback(`list-asset-${data.key}`)
+    })
+  }
+
+  processMydesignList(key: string, assets: any[]) {
+    const type = key.split('-').slice(1).join('-')
+    store.commit('vivisticker/SET_myDesignFileList', {
+      tab: type,
+      list: assets
+    })
   }
 
   updateAssetContent(targetList: any[], updateList: IListServiceContentDataItem[]): any[] {
@@ -590,7 +624,8 @@ class ViviStickerUtils {
   }
 
   async saveAsMyDesign(): Promise<void> {
-    const id = generalUtils.generateAssetId()
+    const editingDesignId = store.getters['vivisticker/getEditingDesignId']
+    const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
     await Promise.all([
       this.genThumbnail(id),
       this.saveDesignJson(id)
@@ -645,6 +680,10 @@ class ViviStickerUtils {
 
   getContrastColor(editorBg: string) {
     return editorBg === '#F4F5F7' ? '#000000' : '#FFFFFF'
+  }
+
+  getThumbSrc(type: string, id: string) {
+    return `vvstk://${type}/${id}`
   }
 }
 

@@ -6,44 +6,87 @@
           @click.prevent.stop="selectTag(tag)")
         span(class="my-design__tag-name") {{ tag.name }}
     div(class="my-design__content")
+      category-list(:list="myDesignList")
+        template(v-slot:my-design-object-item="{ list }")
+          div(class="my-design__objects__items")
+            my-design-object-item(v-for="item in list"
+              class="my-design__objects__item"
+              :key="item.id"
+              :item="item")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-
-type Tag = {
-  name: string,
-  tab: string
-}
+import CategoryList from '@/components/category/CategoryList.vue'
+import MyDesignObjectItem from '@/components/vivisticker/mydesign/MyDesignObjectItem.vue'
+import { IMyDesign, IMyDesignTag } from '@/interfaces/vivisticker'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   name: 'my-design',
   data() {
     return {
-      tags: [{
-        name: `${this.$tc('NN0005', 2)}`,
-        tab: 'text'
-      }, {
-        name: `${this.$tc('NN0003', 2)}`,
-        tab: 'object'
-      }] as Tag[]
+      tags: vivistickerUtils.getMyDesignTags()
     }
+  },
+  components: {
+    CategoryList,
+    MyDesignObjectItem
+  },
+  mounted() {
+    this.refreshDesigns(this.MyDesignTab)
   },
   computed: {
     ...mapGetters({
-      MyDesignTab: 'vivisticker/getMyDesignTab'
-    })
+      isInMyDesign: 'vivisticker/getIsInMyDesign',
+      MyDesignTab: 'vivisticker/getMyDesignTab',
+      MyDesignFileList: 'vivisticker/getMyDesignFileList'
+    }),
+    list(): IMyDesign[] {
+      return this.MyDesignFileList(this.MyDesignTab) as IMyDesign[]
+    },
+    myDesignList(): any[] {
+      if (this.MyDesignTab !== 'object') {
+        return []
+      }
+      const result = new Array(Math.ceil(this.list.length / 3))
+        .fill('')
+        .map((_, idx) => {
+          const rowItems = this.list.slice(idx * 3, idx * 3 + 3)
+          return {
+            id: `result_${rowItems.map(item => item.id).join('_')}`,
+            type: 'my-design-object-item',
+            list: rowItems,
+            size: 90,
+            title: ''
+          }
+        })
+      return result
+    }
+  },
+  watch: {
+    MyDesignTab(newVal) {
+      this.refreshDesigns(newVal)
+    },
+    isInMyDesign(newVal) {
+      if (newVal) {
+        this.refreshDesigns(this.MyDesignTab)
+      }
+    }
   },
   methods: {
     ...mapMutations({
       setMyDesignTab: 'vivisticker/SET_myDesignTab',
       setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode'
     }),
-    checkTagSelected(tag: Tag) {
+    refreshDesigns(tab: string) {
+      vivistickerUtils.listAsset(`mydesign-${tab}`)
+    },
+    checkTagSelected(tag: IMyDesignTag) {
       return this.MyDesignTab === tag.tab
     },
-    selectTag(tag: Tag) {
+    selectTag(tag: IMyDesignTag) {
       this.setMyDesignTab(tag.tab)
       this.setIsInSelectionMode(false)
     }
@@ -61,6 +104,7 @@ export default Vue.extend({
   padding: 24px;
   display: grid;
   grid-template-rows: auto 1fr;
+  gap: 24px;
 
   &__tags {
     display: flex;
@@ -94,6 +138,18 @@ export default Vue.extend({
     height: 100%;
     overflow-y: scroll;
     @include no-scrollbar;
+  }
+
+  &__objects {
+    &__item {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto;
+    }
+    &__items {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
 }
 </style>
