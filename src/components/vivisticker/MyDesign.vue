@@ -22,10 +22,10 @@ export default Vue.extend({
   data() {
     return {
       tags: [{
-        name: `${this.$t('NN0005')}`,
+        name: `${this.$tc('NN0005', 2)}`,
         tab: 'text'
       }, {
-        name: `${this.$t('NN0003')}`,
+        name: `${this.$tc('NN0003', 2)}`,
         tab: 'object'
       }] as Tag[]
     }
