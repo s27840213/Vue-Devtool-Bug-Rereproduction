@@ -28,6 +28,17 @@
                       iconWidth="24px"
                       iconColor="gray-2")
           div(class="panel-vvstk-more__option-title") {{ option.text }}
+    template(v-if="lastHistory === 'domain'")
+      div(class="panel-vvstk-more__options")
+        div(v-for="option in domainOptions"
+            class="panel-vvstk-more__option"
+            :class="{selected: handleOptionSelected(option.selected)}"
+            @click.prevent.stop="handleOptionAction(option.action)")
+          div(class="panel-vvstk-more__option-icon")
+            svg-icon(:iconName="option.icon"
+                      iconWidth="24px"
+                      iconColor="gray-2")
+          div(class="panel-vvstk-more__option-title") {{ option.text }}
 </template>
 
 <script lang="ts">
@@ -48,7 +59,8 @@ export default Vue.extend({
     return {
       debugModeTimer: -1,
       debugModeCounter: 0,
-      domain: window.location.hostname !== 'sticker.vivipic.com' ? `- ${window.location.hostname.replace('.vivipic.com', '')}` : ''
+      domain: window.location.hostname !== 'sticker.vivipic.com' ? `- ${window.location.hostname.replace('.vivipic.com', '')}` : '',
+      debugMode: false
     }
   },
   props: {
@@ -56,6 +68,10 @@ export default Vue.extend({
       type: Array as PropType<string[]>,
       default: () => []
     }
+  },
+  async mounted() {
+    const debugMode = (await vivistickerUtils.getState('debugMode'))?.value ?? false
+    this.debugMode = debugMode
   },
   computed: {
     ...mapGetters({
@@ -82,7 +98,13 @@ export default Vue.extend({
         text: `${this.$t('NN0742')}`,
         icon: 'vivisticker_mail',
         action: this.handleOpenInfo
-      }]
+      }, ...this.debugMode ? [
+        {
+          text: 'domain 選單',
+          icon: 'vivisticker_global',
+          action: this.handleDomainList
+        }
+      ] : []]
     },
     localeOptions(): OptionConfig[] {
       return [{
@@ -107,6 +129,33 @@ export default Vue.extend({
         },
         action: () => { this.handleUpdateLocale('jp') }
       }]
+    },
+    domainOptions(): OptionConfig[] {
+      return [{
+        text: 'production',
+        icon: 'vivisticker_global',
+        selected: () => {
+          return window.location.hostname === 'sticker.vivipic.com'
+        },
+        action: () => { this.switchDomain('sticker') }
+      }, {
+        text: 'test',
+        icon: 'vivisticker_global',
+        selected: () => {
+          return window.location.hostname === 'stkrd.vivipic.com'
+        },
+        action: () => { this.switchDomain('stkrd') }
+      }, ...Array(6).fill(1).map((_, index) => {
+        const host = `stkdev${index}`
+        return {
+          text: host,
+          icon: 'vivisticker_global',
+          selected: () => {
+            return window.location.hostname === `${host}.vivipic.com`
+          },
+          action: () => { this.switchDomain(host) }
+        }
+      })]
     },
     appVersion(): string {
       return this.userInfo.appVer
@@ -152,6 +201,9 @@ export default Vue.extend({
     handleShowUserSettings() {
       this.setSlideType('slideUserSettings')
     },
+    handleDomainList() {
+      this.$emit('pushHistory', 'domain')
+    },
     handleOpenInfo() {
       let url = 'https://www.instagram.com/vivisticker/'
       switch (this.$i18n.locale) {
@@ -171,25 +223,23 @@ export default Vue.extend({
       })
     },
     handleDebugMode() {
-      console.log(this.debugModeCounter)
       if (this.debugModeTimer) {
         clearTimeout(this.debugModeTimer)
       }
       this.debugModeCounter++
       if (this.debugModeCounter === 7) {
-        this.switchDomain()
+        this.toggleDebugMode()
       }
       this.debugModeTimer = setTimeout(() => {
         this.debugModeCounter = 0
       }, 1000)
     },
-    switchDomain() {
-      const host = window.location.hostname
-      if (host === 'stickertest.vivipic.com') {
-        vivistickerUtils.sendToIOS('SWITCH_DOMAIN', { domain: 'sticker' })
-      } else {
-        vivistickerUtils.sendToIOS('SWITCH_DOMAIN', { domain: 'stickertest' })
-      }
+    toggleDebugMode() {
+      this.debugMode = !this.debugMode
+      vivistickerUtils.setState('debugMode', { value: this.debugMode })
+    },
+    switchDomain(domain: string) {
+      vivistickerUtils.sendToIOS('SWITCH_DOMAIN', { domain })
     }
   }
 })

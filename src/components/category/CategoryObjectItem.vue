@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="category-object-item"
-      @click="addSvg")
+      @click="addSvg"
+      v-press="addSvg")
     img(class="category-object-item__img"
       draggable="false"
       :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
@@ -55,6 +56,8 @@ export default Vue.extend({
     height: 100%;
     object-fit: contain;
     vertical-align: middle;
+    -webkit-touch-callout: none;
+    user-select: none;
   }
   &__more {
     position: absolute;

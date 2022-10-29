@@ -333,7 +333,7 @@ class AssetUtils {
     const { pageIndex, styles = {} } = attrs
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     const currentPage = this.getPage(targePageIndex)
-    const resizeRatio = RESIZE_RATIO_FRAME
+    const resizeRatio = 300 / (Math.max(json.width, json.height))
     const width = json.width * resizeRatio
     const height = json.height * resizeRatio
 

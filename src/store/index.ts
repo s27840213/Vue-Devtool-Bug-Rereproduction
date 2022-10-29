@@ -684,7 +684,9 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, primaryLayerIndex, styles } = data
     const layers = state.pages[pageIndex].layers[primaryLayerIndex].clips as IImage[]
     for (const clip of layers) {
-      Object.assign(clip.styles, generalUtils.deepCopy(styles))
+      if (clip.srcObj.type !== 'frame') {
+        Object.assign(clip.styles, generalUtils.deepCopy(styles))
+      }
     }
   },
   SET_subFrameLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, targetIndex: number, styles: any }) {

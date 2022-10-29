@@ -198,6 +198,9 @@ export default Vue.extend({
   },
   destroyed() {
     this.hasDestroyed = true
+    if (this.config.srcObj.type === 'local') {
+      // URL.revokeObjectURL(this.config.srcObj.assetId)
+    }
   },
   data() {
     return {
@@ -1026,7 +1029,7 @@ export default Vue.extend({
         .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
     },
     isAdjustImage(): boolean {
-      const { styles: { adjust = {} } } = this.config
+      const { styles: { adjust = {} }, srcObj } = this.config
       const arr = Object.entries(adjust).filter(([_, v]) => typeof v === 'number' && v !== 0)
       return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
     },

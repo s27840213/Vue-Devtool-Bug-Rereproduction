@@ -47,7 +47,7 @@ class LayerUtils {
       case 'group':
         return subLayerIdx !== -1 ? (currLayer as IGroup).layers[subLayerIdx].styles.opacity : currLayer.styles.opacity
       case 'frame':
-        return subLayerIdx !== -1 ? (currLayer as IFrame).clips[subLayerIdx].styles.opacity : currLayer.styles.opacity
+        return subLayerIdx !== -1 && !store.getters['vivisticker/getControllerHidden'] ? (currLayer as IFrame).clips[subLayerIdx].styles.opacity : currLayer.styles.opacity
       default:
         return this.currSelectedInfo.layers[0].styles.opacity
     }
@@ -489,7 +489,7 @@ class LayerUtils {
       value = 100
     }
     const { getCurrLayer: currLayer, subLayerIdx, layerIndex } = this
-    if (subLayerIdx === -1) {
+    if (subLayerIdx === -1 || store.getters['vivisticker/getControllerHidden']) {
       if (this.currSelectedInfo.layers.length === 1) {
         this.updateLayerStyles(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, {
           opacity: value

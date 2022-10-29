@@ -1,9 +1,10 @@
 <template lang="pug">
-  img(class="pointer"
-    :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
-    :style="itemStyle"
-    @click="addText"
-    @error="handleNotFound")
+  div(class="category-text-item"
+      :style="itemStyle"
+      @click="addText")
+    img(class="category-text-item__img"
+      :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
+      @error="handleNotFound")
 </template>
 
 <script lang="ts">
@@ -37,7 +38,6 @@ export default Vue.extend({
           : 135
       }
       return {
-        objectFit: 'contain',
         width: `${width}px`
       }
     }
@@ -60,4 +60,17 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+.category-text-item {
+  -webkit-touch-callout: none;
+  user-select: none;
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    vertical-align: middle;
+    -webkit-touch-callout: none;
+    user-select: none;
+    pointer-events: none;
+  }
+}
 </style>
