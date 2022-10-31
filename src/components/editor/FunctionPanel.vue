@@ -330,20 +330,12 @@ export default Vue.extend({
     z-index: 20;
   }
   &__content {
-    @include hide-scrollbar(20px);
-    &:hover {
-      @include firefoxOnly {
-        scrollbar-color: setColor(gray-3) transparent;
-      }
-    }
+    @include hover-scrollbar(setColor(gray-3));
     &::-webkit-scrollbar {
       width: 8px;
+      height: 8px;
     }
-    &::-webkit-scrollbar-thumb {
-      border: unset;
-      background-color: setColor(gray-3);;
-    }
-    padding: 20px;
+    padding: 0 12px 0 20px;
   }
 }
 .dim-background {

@@ -79,7 +79,39 @@
   }
 }
 
-$thumb-color: #d9dbe1; // gray-4
+@mixin hover-scrollbar($thumbColor: setColor(gray-4), $showX: false) {
+  overflow-y: scroll;
+  @if $showX == true {
+    overflow-x: scroll;
+  } @else {
+    overflow-x: hidden;
+  }
+
+  // Show scrollbar only when hovering, for Webkit
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background-color: $thumbColor;
+    visibility: hidden;
+  }
+  &:hover::-webkit-scrollbar-thumb {
+    visibility: visible;
+  }
+
+  // Show scrollbar only when hovering, for Firefox
+  @include firefoxOnly {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    &:hover {
+      scrollbar-color: $thumbColor transparent;
+    }
+  }
+}
 
 @mixin hide-scrollbar($padding-right: 11px) {
   // Disable x scrollbar and let y scrollbar appear only when hovering it
@@ -88,6 +120,7 @@ $thumb-color: #d9dbe1; // gray-4
   overflow-y: overlay; // Only for Webkit
   overflow-x: hidden;
   scrollbar-width: none; // Only for Firefox
+  $thumb-color: setColor(gray-4); // gray-4
 
   &::-webkit-scrollbar {
     width: 10px;

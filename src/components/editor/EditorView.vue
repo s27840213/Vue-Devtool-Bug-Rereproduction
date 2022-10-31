@@ -582,25 +582,11 @@ export default Vue.extend({
 $REULER_SIZE: 20px;
 
 .editor-view {
-  @include hide-scrollbar;
-  overflow: auto; // Firefox will use this
+  @include hover-scrollbar(setColor(gray-3), $showX: true);
   overflow: overlay;
-  @include firefoxOnly {
-    scrollbar-width: thin;
-    scrollbar-color: transparent transparent;
-    &:hover {
-      scrollbar-color: setColor(gray-3) transparent;
-    }
-  }
   &::-webkit-scrollbar {
     width: 8px;
-  }
-  &::-webkit-scrollbar-thumb {
-    border: unset;
-    background-color: setColor(gray-3);;
-  }
-  &::-webkit-scrollbar-corner { // Coner of two scrollbars.
-    background-color: transparent;
+    height: 10px;
   }
   position: relative;
   z-index: setZindex("editor-view");
