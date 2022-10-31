@@ -512,7 +512,20 @@ class ViviStickerUtils {
       return
     }
     const editorEle = document.querySelector('#vvstk-editor') as HTMLElement
-    const { width, height, x, y } = editorEle.getBoundingClientRect()
+    const { width: pageWidth, height: pageHeight } = pageUtils.getPageSize(0)
+    let { width, height, x, y } = editorEle.getBoundingClientRect()
+    if (width <= 0) {
+      width = pageWidth
+    }
+    if (height <= 0) {
+      height = pageHeight
+    }
+    if (x <= 0) { // left-padding of editor view
+      x = 16
+    }
+    if (y <= 0) { // top-padding of editor view + height of headerTabs
+      y = 60
+    }
     await this.callIOSAsAPI('SCREENSHOT', {
       params: '',
       action: 'editorCopy',
