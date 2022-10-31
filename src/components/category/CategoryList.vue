@@ -44,13 +44,9 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-  #recycle {// For overwrite vue-recycle setting
-    overflow-y: overlay;
-  }
   .category-list {
     @include push-scrollbar10;
-    @include hide-scrollbar;
-    overflow-x: hidden;
+    @include hover-scrollbar($trackColor: setColor(sidebar-panel));
     &__header {
       line-height: 26px;
       display: flex;

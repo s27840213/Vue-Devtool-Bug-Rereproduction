@@ -330,7 +330,7 @@ export default Vue.extend({
     z-index: 20;
   }
   &__content {
-    @include hover-scrollbar(setColor(gray-3));
+    @include hover-scrollbar(setColor(gray-3), none);
     &::-webkit-scrollbar {
       width: 8px;
       height: 8px;

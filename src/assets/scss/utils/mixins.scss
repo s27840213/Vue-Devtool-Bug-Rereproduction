@@ -46,40 +46,13 @@
   scrollbar-width: none !important;
 }
 
-// For layout which
-//   1. Need push scroll bar to outside. Ex: Categorylist
-//   2. Don't have padding-right originally.
-// Usage: use push-scrollbar10 first, then hide-scrollbar
-//
-// Ex1 (without padding-right):
-// @include push-scrollbar10;
-// @include hide-scrollbar;
-// padding-right: 0;
-//
-// Ex2 (with padding-right):
-// @include hide-scrollbar($padding-right: 20px);
-// padding-right: 20px;
+// Push scroll bar to outside. Ex: Categorylist
 @mixin push-scrollbar10 {
-  margin-right: -10px;
-  padding-right: 10px;
   box-sizing: border-box;
-
-  &:not(:hover),
-  &:hover {
-    @include firefoxOnly {
-      margin-right: -11px;
-      padding-right: 11px;
-    }
-  }
-
-  @include safariOnly {
-    @supports not (-webkit-touch-callout: none) { // Only for not safari mobile, https://stackoverflow.com/a/47818418
-      padding-right: 0;
-    }
-  }
+  margin-right: -10px;
 }
 
-@mixin hover-scrollbar($thumbColor: setColor(gray-4), $showX: false) {
+@mixin hover-scrollbar($thumbColor: setColor(gray-4), $trackColor: white, $showX: false) {
   overflow-y: scroll;
   @if $showX == true {
     overflow-x: scroll;
@@ -98,9 +71,16 @@
     border-radius: 5px;
     background-color: $thumbColor;
     visibility: hidden;
+    @if $trackColor != none {
+      border: 3px solid $trackColor;
+    }
   }
   &:hover::-webkit-scrollbar-thumb {
     visibility: visible;
+  }
+
+  &::-webkit-scrollbar-corner { // Coner of scrollbar x and y.
+    background-color: transparent;
   }
 
   // Show scrollbar only when hovering, for Firefox

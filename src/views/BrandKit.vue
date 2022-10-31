@@ -189,7 +189,6 @@ export default Vue.extend({
 .brand-kit {
   @include size(100%, 100%);
   &__scroll {
-    @include push-scrollbar10;
     @include hide-scrollbar-white;
     box-sizing: border-box;
     width: 100%;

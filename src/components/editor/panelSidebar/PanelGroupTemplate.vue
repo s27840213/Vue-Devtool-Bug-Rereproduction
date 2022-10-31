@@ -117,12 +117,12 @@ export default Vue.extend({
     background: rgba(255, 255, 255, 0.15);
   }
   &__list {
+    @include push-scrollbar10;
+    @include hover-scrollbar($trackColor: setColor(sidebar-panel));
     display: grid;
     grid-template-columns: 145px 145px;
     row-gap: 10px;
     column-gap: 10px;
-    @include push-scrollbar10;
-    @include hide-scrollbar;
   }
   &__close {
     position: absolute;

@@ -148,9 +148,9 @@ export default Vue.extend({
   line-height: 0;
   text-align: left;
   box-sizing: border-box;
-  @include push-scrollbar10;
-  @include hide-scrollbar;
   &__content {
+    @include push-scrollbar10;
+    @include hover-scrollbar($trackColor: setColor(sidebar-panel));
     height: 100%;
   }
   &__row {
