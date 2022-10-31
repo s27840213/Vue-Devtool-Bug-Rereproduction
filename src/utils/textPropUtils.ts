@@ -984,10 +984,10 @@ class TextPropUtils {
                   const itemBefore = GeneralUtils.deepCopy(spans[j])
                   const itemAfter = GeneralUtils.deepCopy(itemBefore)
                   const text = itemBefore.text
-                  const textBefore = text.substring(0, from.textOffset)
+                  const textBefore = (text as string).substring(0, from.textOffset)
                   itemBefore.text = textBefore
                   splitLength = textBefore.length
-                  const textAfter = text.substring(from.textOffset)
+                  const textAfter = (text as string).substring(from.textOffset)
                   itemAfter.text = textAfter
                   const spanAttrsAfter = itemAfter.marks?.[0]?.attrs
                   if (spanAttrsAfter) {

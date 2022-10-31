@@ -182,7 +182,7 @@ export default Vue.extend({
       const { getCurrConfig } = LayerUtils
       const stateCondition = !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked
       const typeConditon = (this.targetIs('shape') && this.singleTargetType()) || getCurrConfig.type === LayerType.frame
-      return stateCondition && typeConditon
+      return stateCondition && typeConditon && !this.isImgCtrl
     },
     isSuperUser(): boolean {
       return generalUtils.isSuperUser

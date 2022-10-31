@@ -316,7 +316,7 @@ export default Vue.extend({
     @include size(100%, calc(100% + 20px));
   }
   &-pc {
-    @include size(100%, calc(100vh + 100px));
+    @include size(100%, calc(100vh - 100px));
   }
   display: flex;
   flex-direction: column;

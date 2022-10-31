@@ -12,6 +12,15 @@
                   iconColor="gray-2")
         div(class="nu-controller__object-hint__text")
           span {{ Math.round(hintAngle) % 360 }}
+      div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
+          class="nu-controller__ctrl-points"
+          :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
+        div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
+            class="control-point__corner-rotate scaler"
+            :key="`corner-rotate-${index}`"
+            :style="Object.assign(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
+            @pointerdown.stop="rotateStart($event, index)"
+            @touchstart="disableTouchEvent")
       div(class="nu-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
@@ -78,20 +87,6 @@
             :style="lockIconStyles()")
           svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
             @click.native="MappingUtils.mappingIconAction('lock')")
-      div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
-          class="nu-controller__ctrl-points"
-          :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
-        div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
-            class="control-point__corner-rotate scaler"
-            :key="`corner-rotate-${index}`"
-            :style="Object.assign(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
-            @pointerdown.stop="rotateStart($event, index)"
-            @touchstart="disableTouchEvent")
-        div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaterbaffles) : []"
-            class="control-point__corner-rotate baffle"
-            :key="`corner-rotate-baffle-${index}`"
-            :style="Object.assign(cornerRotater.styles, { transform: '', borderRadius: '' })"
-            @pointerdown="moveStart")
       div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
             class="nu-controller__ctrl-points"
             :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
@@ -251,8 +246,8 @@ export default Vue.extend({
       dblTabsFlag: false,
       isPointerDownFromSubController: false,
       initCornerRotate: -1,
-      cornerRotaters: undefined,
-      cornerRotaterbaffles: undefined,
+      cornerRotaters: undefined as ReturnType<typeof ControlUtils.getControlPoints>['cornerRotaters'] | undefined,
+      cornerRotaterbaffles: undefined as ReturnType<typeof ControlUtils.getControlPoints>['cornerRotaters'] | undefined,
       eventTarget: null as unknown as HTMLElement,
       isHandleMovingHandler: false
       // currSelectedInfo: {

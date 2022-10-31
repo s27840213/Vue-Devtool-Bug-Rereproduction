@@ -19,8 +19,8 @@ class GeneralUtils {
     return true
   }
 
-  deepCopy(el: unknown) {
-    return typeof el === 'undefined' ? {} : _.cloneDeep(el)
+  deepCopy<T>(el: T): T {
+    return _.cloneDeep(el) ?? {} as T
   }
 
   objHasOwnProperty(obj: { [index: string]: any }, property: string) {
