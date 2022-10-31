@@ -25,8 +25,7 @@
                   select(class="locale-select" v-model="inputLocale")
                     option(v-for="locale in localeOptions" :value="locale") {{locale}}
             editor-view
-            scale-ratio-editor(:style="scaleRatioEditorPos"
-              @toggleSidebarPanel="toggleSidebarPanel")
+            scale-ratio-editor(@toggleSidebarPanel="toggleSidebarPanel")
         div(class="content__panel"
             :style="contentPanelStyles")
           function-panel(@toggleColorPanel="toggleColorPanel")
@@ -145,14 +144,6 @@ export default Vue.extend({
     },
     inPagePanel(): boolean {
       return SidebarPanelType.page === this.currPanel
-    },
-    scaleRatioEditorPos(): { [index: string]: string } {
-      return this.inPagePanel ? {
-        right: '2rem'
-      } : {
-        left: '50%',
-        transform: 'translateX(-50%)'
-      }
     },
     contentPanelStyles(): { [index: string]: string } {
       return this.isColorPanelOpen ? {
@@ -328,11 +319,5 @@ export default Vue.extend({
     box-shadow: 0px 2px 10px setColor(gray-2, 0.1);
     pointer-events: auto;
   }
-}
-
-.scale-ratio-editor::v-deep {
-  position: absolute;
-  bottom: 0px;
-  z-index: setZindex("scale-ratio-editor");
 }
 </style>
