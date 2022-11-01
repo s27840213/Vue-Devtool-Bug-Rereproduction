@@ -1,0 +1,95 @@
+<template lang="pug">
+  div(class="panel-my-design-more")
+    div(class="panel-my-design-more__options")
+      div(class="panel-my-design-more__option"
+          @click.prevent.stop="handleEdit")
+        div(class="panel-my-design-more__option-icon")
+          svg-icon(iconName="pen"
+                    iconWidth="18px"
+                    iconColor="gray-2")
+        div(class="panel-my-design-more__option-title") {{ $t('NN0504') }}
+      div(class="panel-my-design-more__option"
+          @click.prevent.stop="handleDelete")
+        div(class="panel-my-design-more__option-icon")
+          svg-icon(iconName="trash"
+                    iconWidth="18px"
+                    iconColor="gray-2")
+        div(class="panel-my-design-more__option-title") {{ $t('NN0034') }}
+</template>
+
+<script lang="ts">
+import editorUtils from '@/utils/editorUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
+import Vue from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
+
+export default Vue.extend({
+  data() {
+    return {
+    }
+  },
+  destroyed() {
+    this.setMyDesignBuffer(undefined)
+  },
+  props: {
+  },
+  computed: {
+    ...mapGetters({
+      myDesignBuffer: 'vivisticker/getMyDesignBuffer'
+    })
+  },
+  methods: {
+    ...mapMutations({
+      setMyDesignBuffer: 'vivisticker/SET_myDesignBuffer'
+    }),
+    handleEdit() {
+      vivistickerUtils.initWithMyDesign(this.myDesignBuffer)
+      editorUtils.setCloseMobilePanelFlag(true)
+    },
+    handleDelete() {
+      vivistickerUtils.deleteAsset(`mydesign-${this.myDesignBuffer.type}`, this.myDesignBuffer.id, 'mydesign')
+      editorUtils.setCloseMobilePanelFlag(true)
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.panel-my-design-more {
+  padding-bottom: 8px;
+  &__options {
+    display: flex;
+    flex-direction: column;
+  }
+  &__option {
+    height: 40px;
+    padding: 0 24px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: start;
+    &:not(.version):active {
+      background: setColor(black-6);
+    }
+    &.selected {
+      background: setColor(black-6);
+    }
+  }
+  &__option-icon {
+    @include size(24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  &__option-title {
+    @include body-SM;
+    color: setColor(gray-2);
+    &.version {
+      color: setColor(gray-3);
+    }
+  }
+}
+
+.horizontal-rule {
+}
+</style>

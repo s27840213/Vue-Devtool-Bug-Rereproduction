@@ -87,6 +87,7 @@ import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
 import PanelColorPicker from '@/components/editor/panelMobile/PanelColorPicker.vue'
+import PanelMyDesignMore from '@/components/editor/panelMobile/PanelMyDesignMore.vue'
 import Tabs from '@/components/Tabs.vue'
 
 import { mapActions, mapGetters, mapMutations } from 'vuex'
@@ -152,6 +153,7 @@ export default Vue.extend({
     PanelBrandList,
     PanelVvstkMore,
     PanelColorPicker,
+    PanelMyDesignMore,
     Tabs
   },
   data() {
@@ -199,12 +201,13 @@ export default Vue.extend({
         'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
-        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'vvstk-more', 'color-picker']
+        'adjust', 'photo-shadow', 'resize', 'object-adjust',
+        'brand-list', 'vvstk-more', 'color-picker', 'my-design-more']
 
       return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
-      return ['brand-list', 'text', 'vvstk-more'].includes(this.currActivePanel)
+      return ['brand-list', 'text', 'vvstk-more', 'my-design-more'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
       return this.inSelectionState || [

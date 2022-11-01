@@ -54,7 +54,8 @@ const VVSTK_CALLBACKS = [
   'copyDone',
   'thumbDone',
   'setStateDone',
-  'addAssetDone'
+  'addAssetDone',
+  'deleteAssetDone'
 ]
 
 const MYDESIGN_TAGS = [{
@@ -72,6 +73,7 @@ class ViviStickerUtils {
   callbackMap = {} as {[key: string]: (data?: any) => void}
   errorMessageMap = {} as {[key: string]: string}
   editorStateBuffer = {} as {[key: string]: any}
+  designDeletionQueue = [] as { key: string, id: string, thumbType: string }[]
 
   get editorType(): string {
     return store.getters['vivisticker/getEditorType']
@@ -506,7 +508,7 @@ class ViviStickerUtils {
     const type = key.split('-').slice(1).join('-')
     store.commit('vivisticker/SET_myDesignFileList', {
       tab: type,
-      list: assets
+      list: assets.map(asset => Object.assign(asset, { ver: 0 }))
     })
   }
 
@@ -595,9 +597,11 @@ class ViviStickerUtils {
     if (this.isStandaloneMode) return
     const pages = pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
+    const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const design = {
       pages: uploadUtils.prepareJsonToUpload(pages),
-      editorType
+      editorType,
+      id: editingDesignId
     } as ITempDesign
     this.setState('tempDesign', { design: JSON.stringify(design) })
   }
@@ -616,20 +620,36 @@ class ViviStickerUtils {
   initWithTempDesign(tempDesign: ITempDesign) {
     const {
       pages,
-      editorType
+      editorType,
+      id
     } = tempDesign
     this.startEditing(editorType, this.getFetchDesignInitiator(() => {
       store.commit('SET_pages', pageUtils.newPages(pages))
-    }), this.getEmptyCallback())
+    }), this.getEmptyCallback(), id)
+  }
+
+  initWithMyDesign(myDesign: IMyDesign) {
+    const {
+      id,
+      pages,
+      type
+    } = myDesign
+    this.startEditing(type, this.getFetchDesignInitiator(() => {
+      store.commit('SET_pages', pageUtils.newPages(generalUtils.deepCopy(pages)))
+    }), this.getEmptyCallback(), id)
   }
 
   async saveAsMyDesign(): Promise<void> {
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
-    await Promise.all([
+    const editorType = store.getters['vivisticker/getEditorType']
+    const [_, design] = await Promise.all([
       this.genThumbnail(id),
       this.saveDesignJson(id)
     ])
+    if (design) {
+      store.commit('vivisticker/UPDATE_updateMyDesign', { tab: editorType, design })
+    }
   }
 
   async genThumbnail(id: string): Promise<void> {
@@ -665,7 +685,29 @@ class ViviStickerUtils {
     vivistickerUtils.handleCallback('gen-thumb')
   }
 
-  async saveDesignJson(id: string): Promise<void> {
+  async deleteAsset(key: string, id: string, thumbType: string): Promise<void> {
+    this.designDeletionQueue.push({ key, id, thumbType })
+    if (this.designDeletionQueue.length === 1) {
+      this.processDeleteAsset()
+    }
+  }
+
+  async processDeleteAsset() {
+    const deletion = this.designDeletionQueue[0]
+    if (deletion) {
+      const { key, id, thumbType } = deletion
+      await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, 'delete-asset')
+      store.commit('vivisticker/UPDATE_deleteMyDesign', { tab: key.split('-').slice(1).join('-'), id })
+      this.designDeletionQueue.shift()
+      this.processDeleteAsset()
+    }
+  }
+
+  deleteAssetDone() {
+    vivistickerUtils.handleCallback('delete-asset')
+  }
+
+  async saveDesignJson(id: string): Promise<IMyDesign | undefined> {
     if (this.isStandaloneMode) return
     const pages = pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
@@ -676,14 +718,15 @@ class ViviStickerUtils {
       updateTime: new Date(Date.now()).toISOString()
     } as IMyDesign
     await this.addAsset(`mydesign-${editorType}`, json)
+    return json
   }
 
   getContrastColor(editorBg: string) {
     return editorBg === '#F4F5F7' ? '#000000' : '#FFFFFF'
   }
 
-  getThumbSrc(type: string, id: string) {
-    return `vvstk://${type}/${id}`
+  getThumbSrc(type: string, id: string, ver: number) {
+    return `vvstk://${type}/${id}?ver=${ver}`
   }
 }
 

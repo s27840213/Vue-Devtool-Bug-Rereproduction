@@ -13,12 +13,9 @@
 <script lang="ts">
 import Vue from 'vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import paymentUtils from '@/utils/paymentUtils'
-import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import assetUtils from '@/utils/assetUtils'
-import pageUtils from '@/utils/pageUtils'
 import { mapMutations } from 'vuex'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   components: {
@@ -29,12 +26,12 @@ export default Vue.extend({
   },
   computed: {
     src(): string {
-      return vivistickerUtils.getThumbSrc('mydesign', this.item.id)
+      return vivistickerUtils.getThumbSrc('mydesign', this.item.id, this.item.ver)
     }
   },
   methods: {
     ...mapMutations({
-      setMyDesignBuffer: 'SET_myDesignBuffer'
+      setMyDesignBuffer: 'vivisticker/SET_myDesignBuffer'
     }),
     addSvg() {
       // if (!paymentUtils.checkPro(this.item, 'pro-object')) return
@@ -51,6 +48,8 @@ export default Vue.extend({
     // }
     handleMoreActions() {
       this.setMyDesignBuffer(this.item)
+      editorUtils.setCurrActivePanel('my-design-more')
+      editorUtils.setShowMobilePanel(true)
     }
   }
 })

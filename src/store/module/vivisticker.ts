@@ -1,5 +1,6 @@
 import { IAsset } from '@/interfaces/module'
 import { IMyDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
@@ -83,7 +84,7 @@ const getters: GetterTree<IViviStickerState, unknown> = {
     return state.currActiveTab
   },
   getIsInEditor(state: IViviStickerState): boolean {
-    return state.editorType !== 'none' && !state.isInMyDesign
+    return state.editorType !== 'none'
   },
   getIsInCategory(state: IViviStickerState): (tab: string) => boolean {
     return (tab: string): boolean => state.isInCategoryDict[tab] ?? false
@@ -257,6 +258,21 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   UPDATE_switchBg(state: IViviStickerState) {
     state.editorBgIndex = (state.editorBgIndex + 1) % EDITOR_BGS.length
+  },
+  UPDATE_deleteMyDesign(state: IViviStickerState, updateInfo: { tab: string, id: string }) {
+    const list = state.myDesignFiles[updateInfo.tab]
+    if (!list) return
+    const index = list.findIndex(d => d.id === updateInfo.id)
+    if (index < 0) return
+    list.splice(index, 1)
+  },
+  UPDATE_updateMyDesign(state: IViviStickerState, updateInfo: { tab: string, design: IMyDesign }) {
+    const list = state.myDesignFiles[updateInfo.tab]
+    if (!list) return
+    const design = list.find(d => d.id === updateInfo.design.id)
+    if (!design) return
+    Object.assign(design, updateInfo.design)
+    design.ver += 1
   }
 }
 

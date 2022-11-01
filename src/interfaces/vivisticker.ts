@@ -11,14 +11,16 @@ export interface IUserSettings {
 
 export interface ITempDesign {
   pages: Array<IPage>,
-  editorType: string
+  editorType: string,
+  id: string
 }
 
 export interface IMyDesign {
   pages: Array<IPage>,
   type: string,
   id: string,
-  updateTime: string
+  updateTime: string,
+  ver: number
 }
 
 export interface IMyDesignTag {

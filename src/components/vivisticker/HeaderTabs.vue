@@ -20,7 +20,7 @@
                   :iconWidth="`${tab.width}px`"
                   :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
                   :iconColor="tab.disabled ? 'gray-2' : 'white'")
-      div(v-if="isInMyDesign" class="header-bar__right-text" @click.stop.prevent="handleSelectDesign") {{ isInSelectionMode ? $t('NN0203') : $t('STK0007') }}
+      div(v-if="isInMyDesign && !isInEditor" class="header-bar__right-text" @click.stop.prevent="handleSelectDesign") {{ isInSelectionMode ? $t('NN0203') : $t('STK0007') }}
 </template>
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
@@ -86,15 +86,15 @@ export default Vue.extend({
       return imageUtils.isImgControl()
     },
     leftTabs(): TabConfig[] {
-      if (this.isInMyDesign) {
-        return [
-          { icon: 'chevron-left', width: 24, action: this.leaveMyDesign }
-        ]
-      } else if (this.isInEditor) {
+      if (this.isInEditor) {
         return this.stepCount > 1 ? [
           { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: shortcutUtils.undo },
           { icon: 'redo', disabled: stepsUtils.isInLastStep || this.isCropping, width: 24, action: shortcutUtils.redo }
         ] : []
+      } else if (this.isInMyDesign) {
+        return [
+          { icon: 'chevron-left', width: 24, action: this.leaveMyDesign }
+        ]
       } else if (this.isInBgShare) {
         return [
           { icon: 'chevron-left', width: 24, action: this.clearBgShare }
@@ -122,10 +122,10 @@ export default Vue.extend({
       return ''
     },
     centerTitle(): string {
-      if (this.isInMyDesign) {
-        return `${this.$t('NN0080')}`
-      } else if (this.isInEditor) {
+      if (this.isInEditor) {
         return ''
+      } else if (this.isInMyDesign) {
+        return `${this.$t('NN0080')}`
       } else if (this.isInBgShare) {
         return `${this.$t('NN0214')}`
       } else if (this.isInCategory) {
@@ -139,15 +139,15 @@ export default Vue.extend({
       }
     },
     rightTabs(): TabConfig[] {
-      if (this.isInMyDesign) {
-        return []
-      } else if (this.isInEditor) {
+      if (this.isInEditor) {
         return [
           { icon: 'bg', width: 24, action: this.handleSwitchBg },
           ...(this.editorType === 'text' ? [{ icon: 'trash', width: 24, action: shortcutUtils.del }] : []),
           { icon: 'copy', width: 24, action: this.handleCopy },
           { icon: 'vivisticker_close', width: 24, action: this.handleEndEditing }
         ]
+      } else if (this.isInMyDesign) {
+        return []
       } else if (this.isInCategory || this.isInBgShare) {
         return []
       } else {

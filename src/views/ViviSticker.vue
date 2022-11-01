@@ -4,7 +4,7 @@
       header-tabs(v-show="currActivePanel !== 'text'" :style="headerStyles()")
       div(class="vivisticker__content"
           @pointerdown="outerClick")
-        my-design(v-show="isInMyDesign")
+        my-design(v-show="isInMyDesign && !isInEditor")
         vvstk-editor(v-show="isInEditor")
         main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
       transition(name="panel-up")
@@ -15,7 +15,7 @@
     footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
       @switchTab="switchTab"
       @switchMainTab="switchMainTab"
-      :currTab="isInMyDesign ? 'none' : (isInEditor ? currActivePanel : currActiveTab)"
+      :currTab="isInEditor ? currActivePanel : (isInMyDesign ? 'none' : currActiveTab)"
       :inAllPagesMode="false")
     transition(name="slide-left")
       component(v-if="isSlideShown" :is="slideType" class="vivisticker__slide")

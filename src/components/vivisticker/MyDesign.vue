@@ -22,6 +22,7 @@ import CategoryList from '@/components/category/CategoryList.vue'
 import MyDesignObjectItem from '@/components/vivisticker/mydesign/MyDesignObjectItem.vue'
 import { IMyDesign, IMyDesignTag } from '@/interfaces/vivisticker'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   name: 'my-design',
@@ -72,6 +73,8 @@ export default Vue.extend({
     isInMyDesign(newVal) {
       if (newVal) {
         this.refreshDesigns(this.MyDesignTab)
+      } else {
+        editorUtils.setCloseMobilePanelFlag(true)
       }
     }
   },
