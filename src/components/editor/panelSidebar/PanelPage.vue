@@ -71,10 +71,9 @@ export default Vue.extend({
   }
 
   &-items {
-    @include hide-scrollbar($padding-right: 20px);
-    margin-right: -10px;
-    box-sizing: border-box;
-    padding: 0 20px 20px 20px;
+    @include hover-scrollbar($trackColor: setColor(sidebar-panel));
+    @include push-scrollbar10;
+    padding: 0 10px 20px 20px; // padding-right: 20 - 10(scrollbar width)
   }
   &__plus {
     z-index: 2;

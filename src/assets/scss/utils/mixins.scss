@@ -93,50 +93,6 @@
   }
 }
 
-@mixin hide-scrollbar($padding-right: 11px) {
-  // Disable x scrollbar and let y scrollbar appear only when hovering it
-  // If element height <= parent height, y scrollbar will never appear.
-  overflow-y: auto; // Firefox will use this
-  overflow-y: overlay; // Only for Webkit
-  overflow-x: hidden;
-  scrollbar-width: none; // Only for Firefox
-  $thumb-color: setColor(gray-4); // gray-4
-
-  &::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-    background-color: unset;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    border-radius: 5px;
-    visibility: hidden;
-    background-color: $thumb-color;
-    border: 3px solid setColor(sidebar-panel);
-  }
-
-  &:hover {
-    &::-webkit-scrollbar-thumb {
-      visibility: visible;
-    }
-
-    @include firefoxOnly {
-      overflow-y: scroll;
-      padding-right: calc(#{$padding-right} - 11px);
-      scrollbar-width: thin;
-      scrollbar-color: $thumb-color transparent;
-    }
-  }
-}
-
-@mixin hide-scrollbar-white($padding-right: 11px) {
-  @include hide-scrollbar($padding-right);
-
-  &::-webkit-scrollbar-thumb {
-    border: 3px solid white;
-  }
-}
-
 @mixin popup-window {
   position: fixed;
   top: 0;
