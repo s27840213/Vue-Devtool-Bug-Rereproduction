@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="function-panel scrollbar-gray"
+  div(class="function-panel"
     :style="functionPanelStyles")
     //- span {{pageUtils._3dEnabledPageIndex}},
     //- span {{pageUtils.currFocusPageIndex}},
@@ -27,7 +27,9 @@
         :squared="true"
         class="btn-file rounded full-height"
         @click.native="openFilePopup")
-    div(v-if="!isShowPagePreview" :class="{'p-20': true, 'dim-background': showMore}")
+    div(v-if="!isShowPagePreview"
+        class="function-panel__content"
+        :class="{'dim-background': showMore}")
       panel-bg-remove(v-if="showBgRemove")
       panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
       panel-general(v-if="showGeneral")
@@ -304,6 +306,8 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .function-panel {
+  display: grid;
+  grid-template-rows: auto 1fr;
   position: relative;
   @include size(300px, 100%);
   @media (max-width: 1260px) {
@@ -312,8 +316,6 @@ export default Vue.extend({
   box-sizing: border-box;
   z-index: setZindex("function-panel");
   box-shadow: 1px 0 4px setColor(blue-1, 0.1);
-  overflow-y: auto;
-  overflow-x: hidden;
   &__topbar {
     height: 60px;
     box-sizing: border-box;
@@ -326,6 +328,10 @@ export default Vue.extend({
     pointer-events: auto;
     position: relative;
     z-index: 20;
+  }
+  &__content {
+    @include hover-scrollbar(light);
+    padding: 20px 8px 20px 20px; // padding-right: 20 - 12(scrollbar width)
   }
 }
 .dim-background {

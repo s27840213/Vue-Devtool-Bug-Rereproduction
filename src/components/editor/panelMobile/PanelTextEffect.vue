@@ -255,6 +255,7 @@ export default Vue.extend({
   }
 
   &__form {
+    @include no-scrollbar;
     display: flex;
     flex-direction: column;
     overflow-y: scroll;

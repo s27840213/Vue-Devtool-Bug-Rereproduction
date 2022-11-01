@@ -327,16 +327,20 @@ input {
 }
 
 .wrapper {
-  @include hide-scrollbar;
-  &:hover {
-    scrollbar-color: setColor(gray-4) setColor(sidebar-panel); // Only for firefox
-    &::-webkit-scrollbar {
-      background-color: setColor(sidebar-panel);
-      width: 10px;
+  @include hover-scrollbar(light);
+  @include firefoxOnly {
+    scrollbar-width: none;
+    &:hover {
+      scrollbar-width: thin;
+      scrollbar-color: setColor(gray-3) white; // Only for firefox
     }
   }
   &::-webkit-scrollbar {
     width: 0;
+  }
+  &:hover::-webkit-scrollbar {
+    background-color: white;
+    width: 12px;
   }
   box-sizing: border-box;
   width: min(792px, 90vw);

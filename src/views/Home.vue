@@ -151,8 +151,7 @@ export default Vue.extend({
   height: 100%;
 }
 .home-content {
-  @include push-scrollbar10;
-  @include hide-scrollbar-white;
+  @include hover-scrollbar();
   display: flex;
   flex-direction: column;
   align-items: center;

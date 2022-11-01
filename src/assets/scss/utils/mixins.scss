@@ -46,81 +46,62 @@
   scrollbar-width: none !important;
 }
 
-// For layout which
-//   1. Need push scroll bar to outside. Ex: Categorylist
-//   2. Don't have padding-right originally.
-// Usage: use push-scrollbar10 first, then hide-scrollbar
-//
-// Ex1 (without padding-right):
-// @include push-scrollbar10;
-// @include hide-scrollbar;
-// padding-right: 0;
-//
-// Ex2 (with padding-right):
-// @include hide-scrollbar($padding-right: 20px);
-// padding-right: 20px;
+// Push scroll bar to outside. Ex: Categorylist
 @mixin push-scrollbar10 {
-  margin-right: -10px;
-  padding-right: 10px;
   box-sizing: border-box;
-
-  &:not(:hover),
-  &:hover {
-    @include firefoxOnly {
-      margin-right: -11px;
-      padding-right: 11px;
-    }
-  }
-
-  @include safariOnly {
-    @supports not (-webkit-touch-callout: none) { // Only for not safari mobile, https://stackoverflow.com/a/47818418
-      padding-right: 0;
-    }
-  }
+  margin-right: -10px;
 }
 
-$thumb-color: #d9dbe1; // gray-4
+@mixin hover-scrollbar($theme: light, $showX: false) {
+  // $theme == light (default theme)
+  $thumbColor: setColor(gray-3);
+  $trackColor: white;
+  $scrollbarWidth: 12px;
+  $borderRadius: 6px;
+  @if $theme == dark {
+    $thumbColor: setColor(gray-4);
+    $trackColor: setColor(sidebar-panel);
+    $scrollbarWidth : 10px;
+    $borderRadius: 5px;
+  }
+  
+  overflow-y: scroll;
+  @if $showX == true {
+    overflow-x: scroll;
+  } @else {
+    overflow-x: hidden;
+  }
 
-@mixin hide-scrollbar($padding-right: 11px) {
-  // Disable x scrollbar and let y scrollbar appear only when hovering it
-  // If element height <= parent height, y scrollbar will never appear.
-  overflow-y: auto; // Firefox will use this
-  overflow-y: overlay; // Only for Webkit
-  overflow-x: hidden;
-  scrollbar-width: none; // Only for Firefox
-
+  // Show scrollbar only when hovering, for Webkit
   &::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-    background-color: unset;
+    width: $scrollbarWidth;
+    height: $scrollbarWidth;
+    background-color: transparent;
   }
 
   &::-webkit-scrollbar-thumb {
-    border-radius: 5px;
+    border-radius: $borderRadius;
+    background-color: $thumbColor;
     visibility: hidden;
-    background-color: $thumb-color;
-    border: 3px solid setColor(sidebar-panel);
-  }
-
-  &:hover {
-    &::-webkit-scrollbar-thumb {
-      visibility: visible;
-    }
-
-    @include firefoxOnly {
-      overflow-y: scroll;
-      padding-right: calc(#{$padding-right} - 11px);
-      scrollbar-width: thin;
-      scrollbar-color: $thumb-color transparent;
+    @if $trackColor != none {
+      border: 3px solid $trackColor;
     }
   }
-}
+  &:hover::-webkit-scrollbar-thumb {
+    visibility: visible;
+  }
 
-@mixin hide-scrollbar-white($padding-right: 11px) {
-  @include hide-scrollbar($padding-right);
+  &::-webkit-scrollbar-corner { // Coner of scrollbar x and y.
+    background-color: transparent;
+  }
 
-  &::-webkit-scrollbar-thumb {
-    border: 3px solid white;
+  // Show scrollbar only when hovering, for Firefox
+  @include firefoxOnly {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    &:hover {
+      scrollbar-color: $thumbColor transparent;
+    }
   }
 }
 
