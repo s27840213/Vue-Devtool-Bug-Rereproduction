@@ -129,13 +129,12 @@ class TiptapUtils {
           const spans = this.splitLastWhiteSpaces(p.spans)
           pObj.content = spans.map(s => {
             const layerStyles = textEffectUtils.getCurrentLayer().styles
-            const textBg = textBgUtils.convertTextSpanEffect(layerStyles.textBg)
             return {
               type: 'text',
               text: s.text,
               marks: [{
                 type: 'textStyle',
-                attrs: Object.assign(this.makeSpanStyle(s.styles), textBg)
+                attrs: this.makeSpanStyle(s.styles)
               }]
             }
           })

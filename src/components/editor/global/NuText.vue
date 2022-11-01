@@ -22,7 +22,7 @@
           class="nu-text__span"
           :data-sindex="sIndex"
           :key="span.id"
-          :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan)") {{ span.text }}
+          :style="Object.assign(spanStyle(p.spans, sIndex), text.extraSpan)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
     div(v-if="!isCurveText" class="nu-text__observee")
       span(v-for="(span, sIndex) in spans()"
@@ -103,9 +103,6 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer'
     }),
-    spanEffect(): Record<string, unknown> {
-      return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
-    },
     isCurveText(): any {
       const { textShape } = this.config.styles
       return textShape && textShape.name === 'curve'
@@ -128,14 +125,7 @@ export default Vue.extend({
         extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody),
         extraSpan: textShadow.duplicatedSpan
       }
-      // const textBgSpan = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
-      // const duplicatedTextBgSpan = textBgSpan.duplicatedBody || textBgSpan.duplicatedSpan
-      // const textBgSpanCss = {
-      //   extraBody: Object.assign(duplicatedBodyBasicCss, textBgSpan.duplicatedBody),
-      //   extraSpan: textBgSpan.duplicatedSpan
-      // }
       return [
-        // ...(duplicatedTextBgSpan ? [textBgSpanCss] : []),
         ...(duplicatedTextShadow ? [textShadowCss] : []),
         {} // Original text, don't have extra css
       ]

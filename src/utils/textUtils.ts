@@ -590,8 +590,7 @@ class TextUtils {
               [s.split(':')[0].trim()]: s.split(': ')[1].trim()
             })
           })
-        const textBgSpanEffect = textBgUtils.convertTextSpanEffect(content.styles.textBg)
-        const additionalStyle = Object.assign({}, spanStyleObject, textBgSpanEffect as Record<string, string>,
+        const additionalStyle = Object.assign({}, spanStyleObject,
           index === pData.spans.length - 1 && spanData.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {}
         )
         Object.assign(span.style, additionalStyle)

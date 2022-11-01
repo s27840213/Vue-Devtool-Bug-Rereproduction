@@ -399,10 +399,6 @@ class TextBg {
     if (!isITextBox(effect)) return {}
   }
 
-  convertTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> { // to-delete
-    return {}
-  }
-
   drawSvgBg(config: IText, bodyHtml: Element[]) {
     const textBg = config.styles.textBg
     if (textBg.name === 'none') return null
