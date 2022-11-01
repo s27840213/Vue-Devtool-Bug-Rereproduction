@@ -59,7 +59,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .brand-kit-tab-color {
   @include push-scrollbar10;
-  @include hover-scrollbar(setColor(sidebar-panel));
+  @include hover-scrollbar(dark);
   display: flex;
   flex-direction: column;
   gap: 16px;

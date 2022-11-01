@@ -330,12 +330,8 @@ export default Vue.extend({
     z-index: 20;
   }
   &__content {
-    @include hover-scrollbar(none, setColor(gray-3));
-    &::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    padding: 20px 12px 20px 20px; // padding-right: 20 - 8(scrollbar width)
+    @include hover-scrollbar(light);
+    padding: 20px 8px 20px 20px; // padding-right: 20 - 12(scrollbar width)
   }
 }
 .dim-background {

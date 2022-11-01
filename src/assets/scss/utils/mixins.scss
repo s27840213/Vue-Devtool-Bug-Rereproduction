@@ -52,7 +52,19 @@
   margin-right: -10px;
 }
 
-@mixin hover-scrollbar($trackColor: white, $thumbColor: setColor(gray-4), $showX: false) {
+@mixin hover-scrollbar($theme: light, $showX: false) {
+  // $theme == light (default theme)
+  $thumbColor: setColor(gray-3);
+  $trackColor: white;
+  $scrollbarWidth: 12px;
+  $borderRadius: 6px;
+  @if $theme == dark {
+    $thumbColor: setColor(gray-4);
+    $trackColor: setColor(sidebar-panel);
+    $scrollbarWidth : 10px;
+    $borderRadius: 5px;
+  }
+  
   overflow-y: scroll;
   @if $showX == true {
     overflow-x: scroll;
@@ -62,13 +74,13 @@
 
   // Show scrollbar only when hovering, for Webkit
   &::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: $scrollbarWidth;
+    height: $scrollbarWidth;
     background-color: transparent;
   }
 
   &::-webkit-scrollbar-thumb {
-    border-radius: 5px;
+    border-radius: $borderRadius;
     background-color: $thumbColor;
     visibility: hidden;
     @if $trackColor != none {

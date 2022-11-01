@@ -150,7 +150,7 @@ export default Vue.extend({
   box-sizing: border-box;
   &__content {
     @include push-scrollbar10;
-    @include hover-scrollbar(setColor(sidebar-panel));
+    @include hover-scrollbar(dark);
     height: 100%;
   }
   &__row {

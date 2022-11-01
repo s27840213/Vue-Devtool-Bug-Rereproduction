@@ -118,7 +118,7 @@ export default Vue.extend({
   }
   &__list {
     @include push-scrollbar10;
-    @include hover-scrollbar(setColor(sidebar-panel));
+    @include hover-scrollbar(dark);
     display: grid;
     grid-template-columns: 145px 145px;
     row-gap: 10px;

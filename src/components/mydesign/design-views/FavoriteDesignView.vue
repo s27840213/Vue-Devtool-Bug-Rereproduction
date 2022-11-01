@@ -62,7 +62,7 @@ export default Vue.extend({
 .favorite-design-view {
   @include hover-scrollbar();
   box-sizing: border-box;
-  padding: 0 45px 0 55px; // padding-right: 55 - 10(scrollbar width)
+  padding: 0 43px 0 55px; // padding-right: 55 - 12(scrollbar width)
   text-align: left;
   &__folder-name {
     margin-top: 94px;

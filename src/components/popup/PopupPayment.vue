@@ -327,7 +327,7 @@ input {
 }
 
 .wrapper {
-  @include hover-scrollbar(white, setColor(gray-3));
+  @include hover-scrollbar(light);
   @include firefoxOnly {
     scrollbar-width: none;
     &:hover {

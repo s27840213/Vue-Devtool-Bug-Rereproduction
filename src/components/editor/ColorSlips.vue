@@ -330,7 +330,7 @@ export default Vue.extend({
   box-sizing: border-box;
   filter: drop-shadow(0px -1px 5px setColor(white, 0.2));
   &__scroll {
-    @include hover-scrollbar(setColor(sidebar-panel));
+    @include hover-scrollbar(dark);
     box-sizing: border-box;
     height: 100%;
     padding: 20px 4px 20px 14px; // padding-right: 14 - 10(scrollbar width)
