@@ -58,6 +58,8 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .brand-kit-tab-color {
+  @include push-scrollbar10;
+  @include hover-scrollbar(dark);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -65,8 +67,6 @@ export default Vue.extend({
   line-height: 0;
   text-align: left;
   box-sizing: border-box;
-  @include push-scrollbar10;
-  @include hide-scrollbar;
 }
 
 .loading {

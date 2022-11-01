@@ -14,6 +14,7 @@
     div(class="photo-shadow__attrs" :style="shadowAttrsStyles")
       div(v-for="field in shadowFields" :key="field")
         mobile-slider(:title="`${$t(shadowPropI18nMap[currentEffect][field])}`"
+          :borderTouchArea="true"
           :name="field"
           :value="getFieldValue(field)"
           :max="fieldRange[currentEffect][field].max"

@@ -36,7 +36,7 @@ const getters: GetterTree<IImgControlState, IEditorState> = {
 }
 
 const mutations: MutationTree<IImgControlState> = {
-  [SET_CONFIG] (state, layerInfo?: ILayerInfo | 'reset') {
+  [SET_CONFIG](state, layerInfo?: ILayerInfo | 'reset') {
     if (layerInfo === 'reset') {
       state.image = undefined
       state.image_ori = undefined
@@ -74,11 +74,11 @@ const mutations: MutationTree<IImgControlState> = {
       layer = layerUtils.getLayer(pageIndex, layerIndex) as IImage
     }
 
-    state.image = layerMapping(state.primaryLayer, generalUtils.deepCopy(layer)) as IImage
+    state.image = layerMapping(state.primaryLayer, generalUtils.deepCopy(layer) as IImage) as IImage
     state.image_ori = generalUtils.deepCopy(state.image)
     state.layerInfo = { pageIndex, layerIndex, subLayerIdx }
   },
-  [UPDATE_CONFIG] (state, styles: Partial<IImageStyle>) {
+  [UPDATE_CONFIG](state, styles: Partial<IImageStyle>) {
     const { image } = state
     if (image) {
       Object.entries(styles)

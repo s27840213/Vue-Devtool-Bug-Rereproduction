@@ -68,7 +68,7 @@ export interface IParagraphStyle {
 }
 
 export interface ISpanStyle {
-  [key: string]: number | string | undefined,
+  [key: string]: number | string | boolean | undefined,
   font: string,
   type: string,
   userId: string,

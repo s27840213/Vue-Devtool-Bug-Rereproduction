@@ -582,8 +582,7 @@ body {
 <style lang="scss" scoped>
 .template-center {
   @include size(100%, 100%);
-  @include push-scrollbar10;
-  @include hide-scrollbar-white;
+  @include hover-scrollbar();
   min-height: 100%;
   @media screen and (max-width: 540px) {
     overflow-x: hidden;

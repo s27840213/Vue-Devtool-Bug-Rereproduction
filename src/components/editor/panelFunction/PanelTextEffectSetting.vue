@@ -99,7 +99,7 @@ export default Vue.extend({
   },
   computed: {
     currCategory():IEffectCategory {
-      return _.find(this.textEffects, ['name', this.currTab])
+      return _.find(this.textEffects, ['name', this.currTab]) as IEffectCategory
     },
     currentStyle(): { shadow: ITextEffect, bg: ITextBgEffect, shape: ITextShape } {
       const { styles } = textEffectUtils.getCurrentLayer()

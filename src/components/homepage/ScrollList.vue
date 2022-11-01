@@ -65,6 +65,7 @@ import ProItem from '@/components/payment/ProItem.vue'
 import themeUtils from '@/utils/themeUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import { IAssetTemplate } from '@/interfaces/api'
+import { Itheme } from '@/interfaces/theme'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import generalUtils from '@/utils/generalUtils'
 
@@ -91,7 +92,7 @@ export default Vue.extend({
       title: '',
       moreLink: '',
       fallbackSrc: require('@/assets/img/svg/image-preview.svg'),
-      themeData: [],
+      themeData: [] as Itheme[],
       templateData: [] as IAssetTemplate[],
       templateTitle: {
         '1,2': i18n.t('NN0368'),
