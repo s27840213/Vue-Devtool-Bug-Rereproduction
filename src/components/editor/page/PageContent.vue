@@ -25,7 +25,7 @@ div(class="overflow-container"
       //-     target=".editor-view"
       //-     :threshold="[0,1]")
       nu-layer(
-        v-for="(layer,index) in layerFilter"
+        v-for="(layer,index) in config.layers"
         :key="layer.id"
         :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
         :data-index="`${index}`"

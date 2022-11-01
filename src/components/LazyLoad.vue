@@ -3,7 +3,11 @@
       :style="styles"
       ref="observer")
     transition(name="fade-in")
-      slot(v-if="shoudBeRendered")
+      div(v-if="vIfConfition"
+          :style="styles")
+        div(v-show="shoudBeRendered"
+          :style="styles")
+          slot
 </template>
 
 <script lang="ts">
@@ -38,6 +42,10 @@ export default Vue.extend({
     unrenderDelay: {
       type: Number,
       default: 2000
+    },
+    vShowFlag: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -48,7 +56,7 @@ export default Vue.extend({
       renderTimer: -1,
       unrenderEventId: '',
       renderEventId: '',
-      loadedFlag: false
+      firstRender: false
     }
   },
   mounted() {
@@ -80,7 +88,7 @@ export default Vue.extend({
                 this.handleLoaded()
               })
             },
-            this.handleUnrender ? 150 : 0
+            this.handleUnrender ? 200 : 0
           )
 
           // this.renderTimer = setTimeout(
@@ -111,6 +119,10 @@ export default Vue.extend({
       }, options
     )
     this.intersectionObserver.observe(this.$refs.observer as Element)
+
+    if (this.vShowFlag) {
+      this.firstRender = true
+    }
   },
   computed: {
     styles(): { [index: string]: string } {
@@ -118,6 +130,9 @@ export default Vue.extend({
         minHeight: `${this.minHeight}px`,
         ...(this.maxHeight && { maxHeight: `${this.maxHeight}px` })
       }
+    },
+    vIfConfition(): boolean {
+      return this.vShowFlag ? this.firstRender : this.shoudBeRendered
     }
   },
   methods: {

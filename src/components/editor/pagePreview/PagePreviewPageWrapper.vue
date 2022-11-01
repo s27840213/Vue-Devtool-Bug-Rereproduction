@@ -388,7 +388,6 @@ export default Vue.extend({
     position: absolute;
     width: 100%;
     background: setColor(gray-3, 0.3);
-    z-index: -1;
   }
 }
 .focused {
