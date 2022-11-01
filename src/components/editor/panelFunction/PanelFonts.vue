@@ -316,19 +316,14 @@ export default Vue.extend({
   display: grid;
   grid-auto-columns: 100%;
   &__title {
-    text-align: center;
     position: relative;
+    text-align: center;
     margin-bottom: 30px;
     background: white;
-    width: 285px;
     height: 30px;
-    left: -20px;
   }
-  > div {
+  > * + div{
     margin-top: 15px;
-    &:nth-child(1) {
-      margin-top: 0px;
-    }
   }
   &__close {
     position: absolute;

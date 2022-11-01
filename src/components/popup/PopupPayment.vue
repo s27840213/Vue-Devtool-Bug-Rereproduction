@@ -340,7 +340,7 @@ input {
   }
   &:hover::-webkit-scrollbar {
     background-color: white;
-    width: 10px;
+    width: 12px;
   }
   box-sizing: border-box;
   width: min(792px, 90vw);
