@@ -276,12 +276,7 @@ export default Vue.extend({
     height: 100%;
     width: 100%;
     z-index: setZindex("editor-view");
-
-    position: relative;
-    height: 100%;
-    width: 100%;
     overflow: hidden;
-    z-index: setZindex("editor-view");
     transition: transform 0.3s map-get($ease-functions, ease-in-out-quint);
   }
 
