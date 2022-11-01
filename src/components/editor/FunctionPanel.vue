@@ -335,7 +335,7 @@ export default Vue.extend({
       width: 8px;
       height: 8px;
     }
-    padding: 0 12px 0 20px; // padding-right: 20 - 8(scrollbar width)
+    padding: 20px 12px 20px 20px; // padding-right: 20 - 8(scrollbar width)
   }
 }
 .dim-background {
