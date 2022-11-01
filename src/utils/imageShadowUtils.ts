@@ -11,7 +11,6 @@ import logUtils from './logUtils'
 import mathUtils from './mathUtils'
 import pageUtils from './pageUtils'
 import { imageDataAChannel, imageDataRGBA } from './stackblur'
-import _ from 'lodash'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IImageMatchedEffect | IFloatingEffect
 
