@@ -582,7 +582,7 @@ export default Vue.extend({
 $REULER_SIZE: 20px;
 
 .editor-view {
-  @include hover-scrollbar(setColor(gray-3), none, $showX: true);
+  @include hover-scrollbar(none, setColor(gray-3), $showX: true);
   overflow: overlay;
   &::-webkit-scrollbar {
     width: 8px;

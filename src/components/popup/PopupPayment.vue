@@ -327,7 +327,7 @@ input {
 }
 
 .wrapper {
-  @include hover-scrollbar($trackColor: setColor(sidebar-panel));
+  @include hover-scrollbar(setColor(sidebar-panel));
   @include firefoxOnly {
     scrollbar-width: none;
     &:hover {

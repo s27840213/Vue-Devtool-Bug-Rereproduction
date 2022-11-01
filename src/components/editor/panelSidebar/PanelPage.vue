@@ -71,7 +71,7 @@ export default Vue.extend({
   }
 
   &-items {
-    @include hover-scrollbar($trackColor: setColor(sidebar-panel));
+    @include hover-scrollbar(setColor(sidebar-panel));
     @include push-scrollbar10;
     padding: 0 10px 20px 20px; // padding-right: 20 - 10(scrollbar width)
   }

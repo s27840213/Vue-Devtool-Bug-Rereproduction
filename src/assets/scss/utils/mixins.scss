@@ -52,7 +52,7 @@
   margin-right: -10px;
 }
 
-@mixin hover-scrollbar($thumbColor: setColor(gray-4), $trackColor: white, $showX: false) {
+@mixin hover-scrollbar($trackColor: white, $thumbColor: setColor(gray-4), $showX: false) {
   overflow-y: scroll;
   @if $showX == true {
     overflow-x: scroll;

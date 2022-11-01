@@ -128,7 +128,7 @@ export default Vue.extend({
 
 .nav {
   @include size(100%, 100%);
-  @include hover-scrollbar($trackColor: setColor(nav));
+  @include hover-scrollbar(setColor(nav));
   padding-left: 10px;
   display: flex;
   flex-direction: column;

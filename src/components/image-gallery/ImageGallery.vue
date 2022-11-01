@@ -122,7 +122,7 @@ export default Vue.extend({
   overflow-x: visible;
   &__content {
     @include push-scrollbar10;
-    @include hover-scrollbar($trackColor: setColor(sidebar-panel));
+    @include hover-scrollbar(setColor(sidebar-panel));
     height: 100%;
     line-height: 0;
     text-align: left;
