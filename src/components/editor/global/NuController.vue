@@ -34,7 +34,7 @@
           @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
           v-press="isTouchDevice()? onPress : -1"
           @dblclick="onDblClick")
-        template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isTouchDevice()")
+        //- template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isTouchDevice()")
         template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isDragging()")
           div(class="sub-controller"
               :style="transformStyle")
