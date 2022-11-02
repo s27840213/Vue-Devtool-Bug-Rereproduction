@@ -419,20 +419,28 @@ class TextBg {
       body.style.width = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
       body.style.height = 'max-content'
     }
-    document.body.appendChild(body)
 
-    const bodyRect = body.getClientRects()[0]
-    // common svg attrs
-    const width = bodyRect.width
-    const height = bodyRect.height
-    const transform = vertical ? 'rotate(90) scale(1,-1)' : ''
+    let bodyRect: DOMRect
+    let width, height: number
+    let transform: string
 
-    for (const p of body.childNodes) {
-      for (const span of p.childNodes) {
-        rawRects.push((span as HTMLElement).getClientRects())
+    try {
+      document.body.appendChild(body)
+      bodyRect = body.getClientRects()[0]
+      width = bodyRect.width
+      height = bodyRect.height
+      transform = vertical ? 'rotate(90) scale(1,-1)' : ''
+
+      for (const p of body.childNodes) {
+        for (const span of p.childNodes) {
+          if (Object.prototype.hasOwnProperty.call(span, 'getClientRects')) {
+            rawRects.push((span as HTMLElement).getClientRects())
+          }
+        }
       }
+    } finally {
+      document.body.removeChild(body)
     }
-    document.body.removeChild(body)
     const rects = rawRects.reduce((acc, rect) => {
       if (rect) acc.push(...rect)
       return acc
