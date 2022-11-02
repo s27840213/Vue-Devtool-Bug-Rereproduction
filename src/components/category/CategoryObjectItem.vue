@@ -42,7 +42,7 @@ export default Vue.extend({
       }
     },
     handleEditObject() {
-      vivistickerUtils.startEditing('object', vivistickerUtils.getAssetInitiator(this.item), vivistickerUtils.getAssetCallback(this.item))
+      vivistickerUtils.startEditing('object', vivistickerUtils.getAssetInitiator(this.item, { db: 'svg' }), vivistickerUtils.getAssetCallback(this.item))
     }
   }
 })

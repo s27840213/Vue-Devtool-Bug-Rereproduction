@@ -1,12 +1,12 @@
 <template lang="pug">
   div(class="mobile-slider")
     div
-      span(class="mobile-slider__name text-gray-3 no-wrap") {{title}}
-      input(class="mobile-slider__text text-gray-2"
-        type="number"
-        v-model.number="propsVal"
-        :name="name"
-        @change="handleChangeStop")
+      span(class="mobile-slider__name text-gray-2 no-wrap") {{title}}
+      div(class="mobile-slider__text text-gray-2")
+        input(type="number"
+          v-model.number="propsVal"
+          :name="name"
+          @change="handleChangeStop")
     div(class="mobile-slider__range-input-wrapper")
       input(class="mobile-slider__range-input"
         :style="progressStyles()"
@@ -160,8 +160,9 @@ export default Vue.extend({
       box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
       position: relative;
     }
+  }
+
   &__range-input-wrapper {
-    margin-top: 12px;
     position: relative;
   }
 

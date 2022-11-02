@@ -246,6 +246,8 @@ export default Vue.extend({
   @include size(100%, 100%);
   display: grid;
   grid-auto-columns: 100%;
+  padding: 0 8px;
+  overflow-x: hidden;
   &__title {
     position: relative;
     text-align: center;
