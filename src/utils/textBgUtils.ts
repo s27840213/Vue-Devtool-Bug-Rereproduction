@@ -408,6 +408,9 @@ class TextBg {
     if (textBg.name === 'none') return null
     const vertical = config.styles.writingMode === 'vertical-lr'
     const rawRects = [] as DOMRectList[]
+    let bodyRect: DOMRect
+    let width, height: number
+    let transform: string
 
     const body = (_.nth(bodyHtml, -1) as Element).cloneNode(true) as HTMLElement
     body.style.writingMode = config.styles.writingMode
@@ -420,10 +423,6 @@ class TextBg {
       body.style.height = 'max-content'
     }
 
-    let bodyRect: DOMRect
-    let width, height: number
-    let transform: string
-
     try {
       document.body.appendChild(body)
       bodyRect = body.getClientRects()[0]
@@ -431,11 +430,9 @@ class TextBg {
       height = bodyRect.height
       transform = vertical ? 'rotate(90) scale(1,-1)' : ''
 
-      for (const p of body.childNodes) {
-        for (const span of p.childNodes) {
-          if (span.nodeType === Node.ELEMENT_NODE) {
-            rawRects.push((span as HTMLElement).getClientRects())
-          }
+      for (const p of body.children) {
+        for (const span of p.children) {
+          rawRects.push(span.getClientRects())
         }
       }
     } finally {
