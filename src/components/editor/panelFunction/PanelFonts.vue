@@ -313,8 +313,8 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel-fonts {
   @include size(100%, 100%);
-  display: grid;
-  grid-auto-columns: 100%;
+  display: flex;
+  flex-direction: column;
   &__title {
     position: relative;
     text-align: center;
@@ -324,6 +324,9 @@ export default Vue.extend({
   }
   > * + div{
     margin-top: 15px;
+  }
+  .search-bar {
+    flex-shrink: 0;
   }
   &__close {
     position: absolute;
