@@ -57,7 +57,7 @@ export default function (this: any) {
             if (keyword) {
               commit('SET_STATE', { keyword })
             }
-            vivistickerUtils.listAsset(key)
+            await vivistickerUtils.listAsset(key)
           }
         } else return data.data
       } catch (error) {
@@ -92,7 +92,7 @@ export default function (this: any) {
     },
 
     // For panel initial, get recently and categories at the same time.
-    getRecAndCate: async ({ dispatch, commit }, key?: string) => {
+    getRecAndCate: async ({ dispatch, commit, state }, key?: string) => {
       await Promise.all([
         dispatch('getRecently', { writeBack: false }),
         dispatch('getCategories', false)
@@ -100,9 +100,10 @@ export default function (this: any) {
         category.content = recently.content.concat(category.content)
         commit('SET_CATEGORIES', category)
         if (key) {
-          vivistickerUtils.listAsset(key)
+          return vivistickerUtils.listAsset(key)
         }
-        if (category.content.length === 0) {
+      }).then(() => {
+        if (state.categories.length === 0) {
           dispatch('getMoreContent')
         }
       })
