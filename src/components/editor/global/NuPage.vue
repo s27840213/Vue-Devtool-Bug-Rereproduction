@@ -89,8 +89,12 @@
           @keydown.meta.shift.90.exact.stop.prevent.self="redo()"
           @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
           @keydown.meta.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+          @keydown.ctrl.61.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+          @keydown.meta.61.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
           @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
           @keydown.meta.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+          @keydown.ctrl.173.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+          @keydown.meta.173.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
           @keydown.37.exact.stop.prevent.self="ShortcutUtils.left()"
           @keydown.38.exact.stop.prevent.self="ShortcutUtils.up()"
           @keydown.39.exact.stop.prevent.self="ShortcutUtils.right()"
@@ -102,6 +106,7 @@
           @mouseover="togglePageHighlighter(true)"
           @mouseleave="togglePageHighlighter(false)"
           tabindex="0")
+        //- command/ctrl + 61/173 for Firefox keycode, http://www.javascripter.net/faq/keycodes.htm
         lazy-load(
             target=".editor-view"
             :rootMargin="'1500px 0px 1500px 0px'"
