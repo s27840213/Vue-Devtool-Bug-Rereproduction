@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="my-design-object-item"
-      @click="addSvg"
-      v-press="addSvg")
+      @click="copySvg"
+      v-press="copySvg")
     img(class="my-design-object-item__img"
       draggable="false"
       :src="src")
@@ -16,6 +16,7 @@ import ProItem from '@/components/payment/ProItem.vue'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { mapMutations } from 'vuex'
 import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -33,19 +34,14 @@ export default Vue.extend({
     ...mapMutations({
       setMyDesignBuffer: 'vivisticker/SET_myDesignBuffer'
     }),
-    addSvg() {
-      // if (!paymentUtils.checkPro(this.item, 'pro-object')) return
+    copySvg() {
       if (this.item.type === 8) {
-        // this.handleEditObject()
+        console.log('frame cannot be copied')
       } else {
-        // vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(this.item))
+        const pages = generalUtils.deepCopy(this.item.pages)
+        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0]))
       }
     },
-    // handleEditObject() {
-    //   vivistickerUtils.startEditing(this.item.editorType, vivistickerUtils.getFetchDesignInitiator(() => {
-    //     pageUtils.setPages(pageUtils.newPages(this.item.pages))
-    //   }), vivistickerUtils.getEmptyCallback())
-    // }
     handleMoreActions() {
       this.setMyDesignBuffer(this.item)
       editorUtils.setCurrActivePanel('my-design-more')

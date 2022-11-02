@@ -206,8 +206,8 @@ class ViviStickerUtils {
     }
   }
 
-  createUrlForJSON(): string {
-    const page = pageUtils.getPage(0)
+  createUrlForJSON(page?: IPage): string {
+    page = page ?? pageUtils.getPage(0)
     // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
     return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}`
   }
