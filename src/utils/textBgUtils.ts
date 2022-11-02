@@ -139,7 +139,7 @@ class Gooey {
         oldHeight: rect.height
       })
     })
-    const last = _.nth(rects, -1)
+    const last = (_.nth(rects, -1) as DOMRect)
     this.controlPoints[0].push({
       top: new Point(last.x + last.width, last.y + last.height),
       bottom: new Point(last.x + last.width, last.y + last.height),
@@ -407,9 +407,12 @@ class TextBg {
     const textBg = config.styles.textBg
     if (textBg.name === 'none') return null
     const vertical = config.styles.writingMode === 'vertical-lr'
-    const rawRects = [] as DOMRect[][]
+    const rawRects = [] as DOMRectList[]
+    let bodyRect: DOMRect
+    let width, height: number
+    let transform: string
 
-    const body = _.nth(bodyHtml, -1).cloneNode(true)
+    const body = (_.nth(bodyHtml, -1) as Element).cloneNode(true) as HTMLElement
     body.style.writingMode = config.styles.writingMode
     const widthLimit = config.widthLimit
     if (vertical) {
@@ -419,24 +422,26 @@ class TextBg {
       body.style.width = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
       body.style.height = 'max-content'
     }
-    document.body.appendChild(body)
 
-    const bodyRect = body.getClientRects()[0]
-    // common svg attrs
-    const width = bodyRect.width
-    const height = bodyRect.height
-    const transform = vertical ? 'rotate(90) scale(1,-1)' : ''
+    try {
+      document.body.appendChild(body)
+      bodyRect = body.getClientRects()[0]
+      width = bodyRect.width
+      height = bodyRect.height
+      transform = vertical ? 'rotate(90) scale(1,-1)' : ''
 
-    for (const p of body.childNodes) {
-      for (const span of p.childNodes) {
-        rawRects.push(span.getClientRects())
+      for (const p of body.children) {
+        for (const span of p.children) {
+          rawRects.push(span.getClientRects())
+        }
       }
+    } finally {
+      document.body.removeChild(body)
     }
-    document.body.removeChild(body)
     const rects = rawRects.reduce((acc, rect) => {
       if (rect) acc.push(...rect)
       return acc
-    }, [])
+    }, [] as DOMRect[])
 
     // If is vertical text, exchange its coordinate.
     if (vertical) {

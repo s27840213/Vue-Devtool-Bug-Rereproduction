@@ -515,7 +515,7 @@ export default Vue.extend({
         if (this.currSelectedColorIndex <= decoration.color.length - 1) {
           key = 'decorationColors'
           color = [...decoration.color]
-          color[this.currSelectedIndex] = newColor
+          color[this.currSelectedColorIndex] = newColor
         } else {
           key = 'decorationTopColors'
           color = [...decorationTop.color]
@@ -700,7 +700,6 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .shape-setting {
-  @include size(100%, 100%);
   text-align: center;
   display: grid;
   grid-template-rows: auto auto auto minmax(0, 1fr);

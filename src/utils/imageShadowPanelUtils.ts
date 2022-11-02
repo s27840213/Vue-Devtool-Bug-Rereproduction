@@ -210,7 +210,7 @@ export default new class ImageShadowPanelUtils {
       let drawCanvasH = 0
       let drawCanvasW = 0
       const isStaticShadow = shadow.currentEffect === ShadowEffectType.floating ||
-      (!shadow.isTransparent && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect))
+        (!shadow.isTransparent && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect))
 
       setMark('upload', 1)
       const img = new Image()
@@ -443,8 +443,7 @@ export default new class ImageShadowPanelUtils {
     const { currentEffect, fieldRange } = this
     const { max, min } = (fieldRange as any)[this.currentEffect][name]
     if (currentEffect !== ShadowEffectType.none) {
-      const oldEffect = generalUtils
-        .deepCopy((layerUtils.getCurrConfig as IImage).styles.shadow.effects[currentEffect]) as IShadowProps
+      const oldEffect = generalUtils.deepCopy((layerUtils.getCurrConfig as IImage).styles.shadow.effects[currentEffect])
       imageShadowUtils.setEffect(currentEffect, {
         [currentEffect]:
           Object.assign(oldEffect, { [name]: +value > max ? max : (+value < min ? min : +value) })

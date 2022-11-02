@@ -303,7 +303,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-background-image {
-  will-change: opacity, transform;
+  // will-change: opacity, transform;
   position: absolute;
   top: 0;
   left: 0;

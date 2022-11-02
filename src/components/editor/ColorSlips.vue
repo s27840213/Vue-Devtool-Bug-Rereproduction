@@ -274,14 +274,10 @@ export default Vue.extend({
   box-sizing: border-box;
   filter: drop-shadow(0px -1px 5px setColor(white, 0.2));
   &__scroll {
-    @include hide-scrollbar($padding-right: 14px);
-    @include safariOnly {
-      padding-right: 4px;
-      overflow-y: scroll;
-    }
+    @include hover-scrollbar(dark);
     box-sizing: border-box;
     height: 100%;
-    padding: 20px 14px;
+    padding: 20px 4px 20px 14px; // padding-right: 14 - 10(scrollbar width)
     > div + div {
       margin-top: 20px;
     }
@@ -297,7 +293,7 @@ export default Vue.extend({
   &__btn {
     position: absolute;
     top: 0;
-    transform: translate3d(-50%, -100%, 0);
+    transform: translate(-50%, -100%);
   }
   &__colors {
     > div:nth-child(1) {

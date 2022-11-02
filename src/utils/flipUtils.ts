@@ -3,7 +3,7 @@ import store from '@/store'
 import LayerUtils from '@/utils/layerUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import ControlUtils from '@/utils/controlUtils'
-import { IFrame, IGroup } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage } from '@/interfaces/layer'
 import frameUtils from './frameUtils'
 
 class FlipUtils {
@@ -40,25 +40,41 @@ class FlipUtils {
       case 'frame':
         if (LayerUtils.subLayerIdx !== -1 || frameUtils.isImageFrame(LayerUtils.getCurrLayer as IFrame)) {
           const subIdx = Math.max(LayerUtils.subLayerIdx, 0)
-          frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index
-            , subIdx, {
-            horizontalFlip: !(layer as IFrame).clips[subIdx].styles.horizontalFlip
-          })
+          const horizontalFlip = !(layer as IFrame).clips[subIdx].styles.horizontalFlip
+          const { imgX, imgY } = this.imgFlipMapper((layer as IFrame).clips[subIdx], 'h')
+          frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, subIdx, { horizontalFlip, imgX, imgY })
         } else {
           defaultFlip()
         }
         break
       case 'group':
-        LayerUtils.subLayerIdx !== -1 && (() => {
-          LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index
-            , {
-              horizontalFlip: !(layer as IGroup).layers[LayerUtils.subLayerIdx].styles.horizontalFlip
-            }, LayerUtils.subLayerIdx)
-        })()
+        if (LayerUtils.subLayerIdx !== -1) {
+          const horizontalFlip = !(layer as IGroup).layers[LayerUtils.subLayerIdx].styles.horizontalFlip
+          const { imgX, imgY } = this.imgFlipMapper((layer as IGroup).layers[LayerUtils.subLayerIdx] as IImage, 'h')
+          LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index,
+            { horizontalFlip, imgX, imgY }, LayerUtils.subLayerIdx)
+        }
         break
+      case 'image': {
+        const horizontalFlip = !(layer as IImage).styles.horizontalFlip
+        const { imgX, imgY } = this.imgFlipMapper(layer as IImage, 'h')
+        LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, { horizontalFlip, imgX, imgY })
+        break
+      }
       default:
         defaultFlip()
     }
+  }
+
+  imgFlipMapper(layer: IImage, dir: 'h' | 'v') {
+    const { styles: { imgHeight, imgWidth, width, height } } = layer
+    let { styles: { imgX, imgY } } = layer
+    if (dir === 'h') {
+      imgX = Math.abs(imgX) + width - imgWidth
+    } else {
+      imgY = Math.abs(imgY) + height - imgHeight
+    }
+    return { imgX, imgY }
   }
 
   verticalFlip() {
@@ -73,22 +89,27 @@ class FlipUtils {
       case 'frame':
         if (LayerUtils.subLayerIdx !== -1 || frameUtils.isImageFrame(LayerUtils.getCurrLayer as IFrame)) {
           const subIdx = Math.max(LayerUtils.subLayerIdx, 0)
-          frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index
-            , subIdx, {
-            verticalFlip: !(layer as IFrame).clips[subIdx].styles.verticalFlip
-          })
+          const verticalFlip = !(layer as IFrame).clips[subIdx].styles.verticalFlip
+          const { imgX, imgY } = this.imgFlipMapper((layer as IFrame).clips[subIdx], 'v')
+          frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, subIdx, { verticalFlip, imgX, imgY })
         } else {
           defaultFlip()
         }
         break
       case 'group':
-        LayerUtils.subLayerIdx !== -1 && (() => {
-          LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index
-            , {
-              verticalFlip: !(layer as IGroup).layers[LayerUtils.subLayerIdx].styles.verticalFlip
-            }, LayerUtils.subLayerIdx)
-        })()
+        if (LayerUtils.subLayerIdx !== -1) {
+          const verticalFlip = !(layer as IGroup).layers[LayerUtils.subLayerIdx].styles.verticalFlip
+          const { imgX, imgY } = this.imgFlipMapper((layer as IGroup).layers[LayerUtils.subLayerIdx] as IImage, 'v')
+          LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index,
+            { verticalFlip, imgX, imgY }, LayerUtils.subLayerIdx)
+          }
         break
+      case 'image': {
+        const verticalFlip = !(layer as IImage).styles.verticalFlip
+        const { imgX, imgY } = this.imgFlipMapper(layer as IImage, 'v')
+        LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index, { verticalFlip, imgX, imgY })
+        break
+      }
       default:
         defaultFlip()
     }

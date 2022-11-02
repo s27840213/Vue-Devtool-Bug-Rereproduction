@@ -16,7 +16,6 @@
 import { LayerType } from '@/store/types'
 import layerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
-import { Function } from 'lodash'
 import Vue from 'vue'
 
 export default Vue.extend({

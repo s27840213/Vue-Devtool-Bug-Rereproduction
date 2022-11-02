@@ -313,8 +313,8 @@ class Controller {
           // this.syncShareAttrs(textEffect, null)
         } else {
           // this.syncShareAttrs(textEffect, effect)
-          let localAttrs = localStorageUtils.get('textEffectSetting', effect)
-          localAttrs = _.omit(localAttrs, ['color'])
+          let localAttrs = localStorageUtils.get('textEffectSetting', effect) as ITextEffect
+          localAttrs = _.omit(localAttrs, ['color']) as ITextEffect
           Object.assign(textEffect, defaultAttrs, localAttrs, attrs, { name: effect })
         }
         const mainColor = this.getLayerMainColor(paragraphs)

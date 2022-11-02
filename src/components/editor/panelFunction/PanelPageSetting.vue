@@ -727,7 +727,6 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .page-setting {
-  @include size(100%, 100%);
   text-align: left;
   &__title {
     & span {
@@ -906,22 +905,6 @@ export default Vue.extend({
 
   &__footer {
     height: 20px;
-  }
-  &__container {
-    max-height: 500px;
-    margin-right: -5px;
-    padding-right: 5px;
-    overflow-y: auto; // overlay is not supported in Firefox
-    scrollbar-width: thin;
-    &::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
-      background-color: rgba(24, 25, 31, 0.5);
-    }
-    &::-webkit-scrollbar-thumb {
-      border-radius: 2px;
-      background-color: setColor(gray-3);
-    }
   }
 }
 

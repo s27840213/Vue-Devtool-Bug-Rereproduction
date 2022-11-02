@@ -1186,11 +1186,11 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      console.log(error)
+      // console.log(error)
       isError = true
     } finally {
       if (isError === true) {
-        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        // console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (toSetFlag && this.toSetFlagId === setFlagId) {
         this.setIsFontLoading(false)
@@ -1216,11 +1216,11 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      console.log(error)
+      // console.log(error)
       isError = true
     } finally {
       if (isError === true) {
-        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        // console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (toSetFlag && this.toSetFlagId === setFlagId) {
         this.setIsFontLoading(false)
@@ -1263,16 +1263,18 @@ class TextUtils {
       if (isError === true) {
         console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
-      if (callback) {
-        callback()
-      }
-      if (this.toRecordId === recordId) {
-        // console.log('record')
-        stepsUtils.record()
-      }
-      if (this.toSetFlagId === recordId) {
-        this.setIsFontLoading(false)
-      }
+      setTimeout(() => {
+        if (callback) {
+          callback()
+        }
+        if (this.toRecordId === recordId) {
+          // console.log('record')
+          stepsUtils.record()
+        }
+        if (this.toSetFlagId === recordId) {
+          this.setIsFontLoading(false)
+        }
+      }, 100)
     }
     Promise.race([
       this.untilFontLoaded(paragraphs),
@@ -1296,16 +1298,18 @@ class TextUtils {
       if (isError === true) {
         console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
-      if (callback) {
-        callback()
-      }
-      if (this.toRecordId === recordId) {
-        // console.log('record')
-        stepsUtils.record()
-      }
-      if (this.toSetFlagId === recordId) {
-        this.setIsFontLoading(false)
-      }
+      setTimeout(() => {
+        if (callback) {
+          callback()
+        }
+        if (this.toRecordId === recordId) {
+          // console.log('record')
+          stepsUtils.record()
+        }
+        if (this.toSetFlagId === recordId) {
+          this.setIsFontLoading(false)
+        }
+      }, 100)
     }
     Promise.race([
       Promise.all(

@@ -121,7 +121,7 @@ export default Vue.extend({
     this.cardHeight = this.editorView ? this.editorView.clientHeight : 0
     this.cardWidth = this.editorView ? this.editorView.clientWidth : 0
 
-    pageUtils.fitPage()
+    pageUtils.fitPage(false, true)
     this.tmpScaleRatio = pageUtils.scaleRatio
 
     if (generalUtils.isTouchDevice()) {

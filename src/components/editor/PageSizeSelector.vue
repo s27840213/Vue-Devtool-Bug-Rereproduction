@@ -458,10 +458,13 @@ export default Vue.extend({
     padding-right: 5px;
     overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
+    @include firefoxOnly {
+      scrollbar-width: thin;
+      scrollbar-color: setColor(gray-3) transparent;
+    }
     &::-webkit-scrollbar {
       width: 4px;
       height: 4px;
-      background-color: rgba(24, 25, 31, 0.5);
     }
     &::-webkit-scrollbar-thumb {
       border-radius: 2px;

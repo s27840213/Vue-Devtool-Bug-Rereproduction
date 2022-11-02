@@ -2,6 +2,7 @@
   div(class="panel-adjust")
     div(v-for="field in fields" :key="field.name")
       mobile-slider(:title="`${field.label}`"
+        :borderTouchArea="true"
         :name="field.name"
         :value="adjustVal[field.name] || 0"
         :min="field.min"
@@ -138,5 +139,10 @@ export default Vue.extend({
   width: 100%;
   overflow: scroll;
   @include no-scrollbar;
+}
+.slider-input {
+  &__top {
+    position: absolute;
+  }
 }
 </style>

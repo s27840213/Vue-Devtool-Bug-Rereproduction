@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="ruler-hr"
-    :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}")
+    :style="rulerRootStyles")
   div(class="ruler-hr__body"
     ref="rulerBody"
     :style="rulerBodyStyles")
@@ -38,6 +38,12 @@ export default Vue.extend({
     }),
     currFocusPage(): IPage {
       return pageUtils.currFocusPage
+    },
+    rulerRootStyles(): { [index: string]: string } {
+      return {
+        cursor: `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`,
+        'z-index': `${pageUtils.pageNum + 10}`
+      }
     },
     rulerBodyStyles(): { [index: string]: number | string } {
       return {

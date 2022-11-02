@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame, IImageStyle } from '@/interfaces/layer'
-import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData, ILayerInfo, LayerType } from './types'
+import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData, LayerType } from './types'
 import { IPage } from '@/interfaces/page'
 import zindexUtils from '@/utils/zindexUtils'
 
@@ -22,7 +22,7 @@ import markers from '@/store/module/markers'
 import mobileEditor from '@/store/module/mobileEditor'
 import vivisticker from '@/store/module/vivisticker'
 import groupUtils from '@/utils/groupUtils'
-import { ICurrSubSelectedInfo } from '@/interfaces/editor'
+import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
 import pageUtils from '@/utils/pageUtils'
 import { getDocumentColor } from '@/utils/colorUtils'
@@ -104,7 +104,8 @@ const getDefaultState = (): IEditorState => ({
   isLargeDesktop: false,
   isGlobalLoading: false,
   useMobileEditor: false,
-  defaultContentScaleRatio: 1
+  defaultContentScaleRatio: 1,
+  _3dEnabledPageIndex: -1
 })
 
 const state = getDefaultState()
@@ -275,6 +276,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getContentScaleRatio(state: IEditorState) {
     return state.defaultContentScaleRatio
+  },
+  get3dEnabledPageIndex(state: IEditorState) {
+    return state._3dEnabledPageIndex
   }
 }
 
@@ -386,6 +390,7 @@ const mutations: MutationTree<IEditorState> = {
   SET_backgroundColor(state: IEditorState, updateInfo: { pageIndex: number, color: string }) {
     state.pages[updateInfo.pageIndex].backgroundColor = updateInfo.color
     state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.adjust.halation = 0
   },
   SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
     // state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
@@ -658,8 +663,16 @@ const mutations: MutationTree<IEditorState> = {
   CLEAR_clipboard(state: IEditorState) {
     state.clipboard = []
   },
-  SET_currSelectedInfo(state: IEditorState, data: { index: number, layers: Array<IShape | IText | IImage | IGroup | ITmp | IFrame>, types: Set<string> }) {
+  SET_currSelectedInfo(state: IEditorState, data: ICurrSelectedInfo) {
     Object.assign(state.currSelectedInfo, data)
+
+    const { pageIndex, layers } = state.currSelectedInfo
+    const layerNum = layers.length
+    const _3dEnabledPageIndex = layerNum > 1 && layerNum <= 50 ? pageIndex : -1
+
+    if (_3dEnabledPageIndex !== state._3dEnabledPageIndex) {
+      state._3dEnabledPageIndex = _3dEnabledPageIndex
+    }
   },
   SET_currSubSelectedInfo(state: IEditorState, data: { index: number, type: string }) {
     Object.assign(state.currSubSelectedInfo, data)
@@ -742,19 +755,29 @@ const mutations: MutationTree<IEditorState> = {
     }
   },
   DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex }) {
-    state.pages.forEach((page: IPage, index: number) => {
-      page.layers.filter((layer: IShape | IText | IImage | IGroup | IFrame, index: number) => {
-        return layer.type === 'image' && (layer as IImage).srcObj.assetId === assetId && layer.previewSrc
-      }).forEach((layer) => {
-        Vue.delete(layer, 'previewSrc')
-        Object.assign((layer as IImage).srcObj, {
-          type,
-          userId,
-          assetId: uploadUtils.isAdmin ? assetId : assetIndex
-        })
-
-        uploadUtils.uploadDesign()
-      })
+    const handler = (l: IShape | IText | IImage | IGroup | IFrame) => {
+      switch (l.type) {
+        case LayerType.image:
+          if ((l as IImage).srcObj.assetId === assetId && l.previewSrc) {
+            Vue.delete(l, 'previewSrc')
+            Object.assign((l as IImage).srcObj, {
+              type,
+              userId,
+              assetId: uploadUtils.isAdmin ? assetId : assetIndex
+            })
+            uploadUtils.uploadDesign()
+          }
+          break
+        case LayerType.tmp:
+        case LayerType.group:
+          (l as IGroup).layers.forEach(subL => handler(subL))
+          break
+        case LayerType.frame:
+          (l as IFrame).clips.forEach(subL => handler(subL))
+      }
+    }
+    state.pages.forEach(page => {
+      page.layers.forEach(l => handler(l))
     })
   },
   ADD_guideline(state: IEditorState, updateInfo: { pos: number, type: string, pageIndex?: number }) {
@@ -810,9 +833,6 @@ const mutations: MutationTree<IEditorState> = {
       path: 'root'
     })
   },
-  SET_documentColors(state: IEditorState, data: { pageIndex: number, colors: Array<{ color: string, count: number }> }) {
-    state.pages[data.pageIndex].documentColors = [...generalUtils.deepCopy(data.colors)]
-  },
   UPDATE_documentColors(state: IEditorState, payload: { pageIndex: number, color: string }) {
     state.pages[payload.pageIndex].documentColors = getDocumentColor(payload.pageIndex, payload.color)
   },
@@ -834,6 +854,11 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_useMobileEditor(state: IEditorState, bool: boolean) {
     state.useMobileEditor = bool
+  },
+  SET_3dEnabledPageIndex(state: IEditorState, index: number) {
+    if (index !== state._3dEnabledPageIndex) {
+      state._3dEnabledPageIndex = index
+    }
   },
   ...imgShadowMutations,
   ADD_subLayer

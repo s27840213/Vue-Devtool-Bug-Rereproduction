@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="editor-view scrollbar-gray"
+  div(class="editor-view"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="brushCursorStyles()"
       @pointerdown="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
@@ -354,13 +354,15 @@ export default Vue.extend({
     handleSelectionData(selectionData: DOMRect) {
       const layers = [...document.querySelectorAll(`.nu-layer--p${pageUtils.currFocusPageIndex}`)]
       const layerIndexs: number[] = []
-      layers.forEach((layer) => {
-        const layerData = layer.getBoundingClientRect()
-        if (((layerData.top <= selectionData.bottom) && (layerData.left <= selectionData.right) &&
-          (layerData.bottom >= selectionData.top) && (layerData.right >= selectionData.left))) {
-          layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
-        }
-      })
+      if (layers.length > 0) {
+        layers.forEach((layer) => {
+          const layerData = layer.getBoundingClientRect()
+          if (((layerData.top <= selectionData.bottom) && (layerData.left <= selectionData.right) &&
+            (layerData.bottom >= selectionData.top) && (layerData.right >= selectionData.left))) {
+            layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
+          }
+        })
+      }
 
       if (layerIndexs.length > 0) {
         GroupUtils.select(pageUtils.currFocusPageIndex, layerIndexs)
@@ -580,7 +582,15 @@ export default Vue.extend({
 $REULER_SIZE: 20px;
 
 .editor-view {
-  overflow: scroll;
+  @include hover-scrollbar($showX: true);
+  overflow: overlay;
+  &::-webkit-scrollbar-thumb {
+    border: none;
+  }
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
   position: relative;
   z-index: setZindex("editor-view");
 
@@ -606,8 +616,6 @@ $REULER_SIZE: 20px;
     position: relative;
     flex-direction: column;
     justify-content: center;
-    transform-style: preserve-3d;
-    transform: scale(1);
     padding: 40px;
   }
 

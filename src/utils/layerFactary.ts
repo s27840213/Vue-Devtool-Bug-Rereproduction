@@ -1,16 +1,12 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle, ILayer, IParagraph } from '@/interfaces/layer'
-import store from '@/store'
 import { LayerProcessType, LayerType } from '@/store/types'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import { STANDARD_TEXT_FONT } from './assetUtils'
-import layerUtils from './layerUtils'
 import localeUtils from './localeUtils'
 import textPropUtils from './textPropUtils'
-import tiptapUtils from './tiptapUtils'
 import ZindexUtils from './zindexUtils'
-import imageShadowUtils from './imageShadowUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import mouseUtils from './mouseUtils'
 
@@ -29,6 +25,7 @@ class LayerFactary {
       shown: false,
       locked: false,
       moved: false,
+      moving: false,
       imgControl: false,
       inProcess: LayerProcessType.none,
       trace: config.trace ?? 0,
@@ -174,6 +171,7 @@ class LayerFactary {
       shown: false,
       locked: locked ?? false,
       moved: false,
+      moving: false,
       dragging: false,
       designId: designId ?? '',
       styles: {
@@ -217,6 +215,11 @@ class LayerFactary {
       })()) : undefined
     }
     frame.clips.forEach(i => (i.parentLayerStyles = frame.styles))
+    if (frame.decoration && !frame.decoration.svg) {
+      (frame as any).needFetch = true
+    } else if (frame.decorationTop && !frame.decorationTop.svg) {
+      (frame as any).needFetch = true
+    }
     return frame
   }
 
@@ -230,6 +233,7 @@ class LayerFactary {
       shown: false,
       locked: false,
       moved: false,
+      moving: false,
       editing: false,
       dragging: false,
       designId: '',
@@ -349,6 +353,7 @@ class LayerFactary {
       shown: false,
       locked: config.locked ?? false,
       moved: false,
+      moving: false,
       dragging: false,
       designId: config.designId,
       db: config.db,
@@ -442,6 +447,7 @@ class LayerFactary {
       className: ShapeUtils.classGenerator(),
       locked: false,
       moved: false,
+      moving: false,
       dragging: false,
       designId: config.designId || '',
       ...(config.category === 'E' && { filled: false }),

@@ -28,6 +28,7 @@ import { IPopupComponent, IPopupOptions } from '@/interfaces/popup'
 import popupUtils from '@/utils/popupUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import pageUtils from '@/utils/pageUtils'
+import modalUtils from '@/utils/modalUtils'
 
 export default Vue.extend({
   components: {
@@ -77,7 +78,7 @@ export default Vue.extend({
     component(): string {
       return (this.popupComponent as IPopupComponent).component
     },
-    props(): { [key:string]: string } {
+    props(): { [key: string]: string } {
       return (this.popupComponent as IPopupComponent).props
     },
     hasDesignId(): boolean {
@@ -130,7 +131,16 @@ export default Vue.extend({
           shortcutText: '',
           condition: this.groupId && this.inAdminMode && !this.isOutsourcer && this.isLogin && this.groupType === 0,
           action: () => {
-            uploadUtils.uploadGroupDesign(1, 0, true)
+            modalUtils.setModalInfo(
+              '確認刪除群組模板？',
+              [],
+              {
+                msg: '',
+                action: () => {
+                  uploadUtils.uploadGroupDesign(1, 0, true)
+                }
+              }
+            )
           }
         },
         {

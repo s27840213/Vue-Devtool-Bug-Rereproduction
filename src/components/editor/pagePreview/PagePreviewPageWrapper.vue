@@ -63,12 +63,12 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import editorUtils from '@/utils/editorUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -158,10 +158,10 @@ export default Vue.extend({
       this._setmiddlemostPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'panel') {
-        pageUtils.jumpIntoPage(this.index)
+        pageUtils.scrollIntoPage(this.index)
       }
 
-      if (GeneralUtils.isTouchDevice() && clickFocusedPreview) {
+      if (generalUtils.isTouchDevice() && clickFocusedPreview) {
         this.$nextTick(() => {
           if (pageUtils.isDetailPage) {
             pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 'auto')
@@ -171,11 +171,9 @@ export default Vue.extend({
       }
     },
     dbclickPage() {
-      this._setmiddlemostPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'full') {
         this._setIsShowPagePreview(false)
-        pageUtils.jumpIntoPage(pageUtils.currFocusPageIndex)
       }
     },
     handleDragStart(e: DragEvent) {
@@ -213,7 +211,7 @@ export default Vue.extend({
       let page = null
       switch (icon) {
         case 'copy':
-          page = GeneralUtils.deepCopy(this.getPage(this.index))
+          page = generalUtils.deepCopy(this.getPage(this.index))
           page.designId = ''
           this._addPageToPos({
             newPage: page,

@@ -19,8 +19,8 @@ class GeneralUtils {
     return true
   }
 
-  deepCopy(el: unknown) {
-    return typeof el === 'undefined' ? {} : _.cloneDeep(el)
+  deepCopy<T>(el: T): T {
+    return _.cloneDeep(el) ?? {} as T
   }
 
   objHasOwnProperty(obj: { [index: string]: any }, property: string) {
@@ -42,6 +42,19 @@ class GeneralUtils {
     Vue.nextTick(() => {
       el.scrollLeft = Math.round((scrollCenterX * el.scrollWidth / oldScrollWidth - el.clientWidth) / 2)
       el.scrollTop = Math.round((scrollCenterY * el.scrollHeight / oldScrollHeight - el.clientHeight) / 2)
+    })
+  }
+
+  scrollToCenter(el?: HTMLElement, vertical = true, horizontal = true) {
+    const target = el !== undefined ? el : document.querySelector('.editor-view')
+    Vue.nextTick(() => {
+      if (!target) return
+      if (vertical) {
+        target.scrollTop = (target.scrollHeight - target.clientHeight) / 2
+      }
+      if (horizontal) {
+        target.scrollLeft = (target.scrollWidth - target.clientWidth) / 2
+      }
     })
   }
 
