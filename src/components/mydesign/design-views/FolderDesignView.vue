@@ -103,6 +103,7 @@
                 svg-icon(iconName="done"
                         iconWidth="15px"
                         iconColor="gray-2")
+        btn-new-design
     div(class="horizontal-rule")
     folder-gallery(:path="path"
                   :menuItems="[]"
@@ -129,6 +130,7 @@ import { mapActions, mapGetters, mapMutations } from 'vuex'
 import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import hintUtils from '@/utils/hintUtils'
+import BtnNewDesign from '@/components/mydesign/BtnNewDesign.vue'
 
 export default Vue.extend({
   mounted() {
@@ -139,7 +141,8 @@ export default Vue.extend({
   },
   components: {
     FolderGallery,
-    DesignGallery
+    DesignGallery,
+    BtnNewDesign
   },
   data() {
     return {
@@ -616,7 +619,6 @@ export default Vue.extend({
     border: 1px solid setColor(gray-3);
     border-radius: 6px;
     box-sizing: border-box;
-    margin-right: 38px;
     > span {
       font-size: 12px;
       letter-spacing: 0.045em;
