@@ -576,21 +576,7 @@ class ViviStickerUtils {
       await new Promise(resolve => setTimeout(resolve, 1000))
       return
     }
-    const editorEle = document.querySelector('#vvstk-editor') as HTMLElement
-    const { width: pageWidth, height: pageHeight } = pageUtils.getPageSize(0)
-    let { width, height, x, y } = editorEle.getBoundingClientRect()
-    if (width <= 0) {
-      width = pageWidth
-    }
-    if (height <= 0) {
-      height = pageHeight
-    }
-    if (x <= 0) { // left-padding of editor view
-      x = 16
-    }
-    if (y <= 0) { // top-padding of editor view + height of headerTabs
-      y = 60
-    }
+    const { x, y, width, height } = this.getEditorDimensions()
     await this.callIOSAsAPI('SCREENSHOT', {
       params: '',
       action: 'editorCopy',
@@ -672,8 +658,7 @@ class ViviStickerUtils {
         Vue.nextTick(() => {
           this.preCopyEditor()
           setTimeout(() => {
-            const editorEle = document.querySelector('#vvstk-editor') as HTMLElement
-            const { width, height, x, y } = editorEle.getBoundingClientRect()
+            const { x, y, width, height } = this.getEditorDimensions()
             this.callIOSAsAPI('GEN_THUMB', {
               type: 'mydesign',
               id,
@@ -732,6 +717,25 @@ class ViviStickerUtils {
     } as IMyDesign
     await this.addAsset(`mydesign-${editorType}`, json)
     return json
+  }
+
+  getEditorDimensions(): { x: number, y: number, width: number, height: number } {
+    const editorEle = document.querySelector('#vvstk-editor') as HTMLElement
+    const { width: pageWidth, height: pageHeight } = pageUtils.getPageSize(0)
+    let { width, height, x, y } = editorEle.getBoundingClientRect()
+    if (width <= 0) {
+      width = pageWidth
+    }
+    if (height <= 0) {
+      height = pageHeight
+    }
+    if (x <= 0) { // left-padding of editor view
+      x = 16
+    }
+    if (y <= 0) { // top-padding of editor view + height of headerTabs
+      y = 60
+    }
+    return { x, y, width, height }
   }
 
   getContrastColor(editorBg: string) {
