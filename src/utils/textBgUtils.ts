@@ -433,7 +433,7 @@ class TextBg {
 
       for (const p of body.childNodes) {
         for (const span of p.childNodes) {
-          if (Object.prototype.hasOwnProperty.call(span, 'getClientRects')) {
+          if (span.nodeType === Node.ELEMENT_NODE) {
             rawRects.push((span as HTMLElement).getClientRects())
           }
         }
