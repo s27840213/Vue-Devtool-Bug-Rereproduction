@@ -19,6 +19,7 @@
 
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
+import modalUtils from '@/utils/modalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -47,6 +48,20 @@ export default Vue.extend({
       editorUtils.setCloseMobilePanelFlag(true)
     },
     handleDelete() {
+      modalUtils.setModalInfo(
+        'Delete design',
+        ['Are you sure you want to delete this design?'],
+        {
+          msg: 'Delete',
+          action: this.confirmDeletion
+        },
+        {
+          msg: 'Cancel',
+          action: modalUtils.clearModalInfo
+        }
+      )
+    },
+    confirmDeletion() {
       vivistickerUtils.deleteAsset(`mydesign-${this.myDesignBuffer.type}`, this.myDesignBuffer.id, 'mydesign')
       editorUtils.setCloseMobilePanelFlag(true)
     }

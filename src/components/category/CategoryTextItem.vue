@@ -52,7 +52,10 @@ export default Vue.extend({
           textPropUtils.updateTextPropsState()
         })
       } else {
-        vivistickerUtils.startEditing('text', vivistickerUtils.getAssetInitiator(this.item), vivistickerUtils.getAssetCallback(this.item))
+        vivistickerUtils.startEditing('text', {
+          plan: this.item.plan,
+          assetId: this.item.id
+        }, vivistickerUtils.getAssetInitiator(this.item), vivistickerUtils.getAssetCallback(this.item))
       }
     }
   }

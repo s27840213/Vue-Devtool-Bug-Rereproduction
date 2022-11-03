@@ -269,6 +269,7 @@ export default Vue.extend({
       } else {
         vivistickerUtils.startEditing(
           'text',
+          { plan: 0, assetId: '' },
           async () => {
             console.log('start editing standard text')
             await this.addStandardText()

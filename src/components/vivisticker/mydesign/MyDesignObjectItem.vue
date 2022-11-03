@@ -5,8 +5,8 @@
     img(class="my-design-object-item__img"
       draggable="false"
       :src="src")
-    //- pro-item(v-if="item.plan")
-    div(v-if="item.type !== 8" class="my-design-object-item__more" @click.stop.prevent="handleMoreActions")
+    //- pro-item(v-if="item.assetInfo.plan")
+    div(class="my-design-object-item__more" @click.stop.prevent="handleMoreActions")
       svg-icon(iconName="more" iconColor="white" iconWidth="24px")
 </template>
 
@@ -35,7 +35,7 @@ export default Vue.extend({
       setMyDesignBuffer: 'vivisticker/SET_myDesignBuffer'
     }),
     copySvg() {
-      if (this.item.type === 8) {
+      if (this.item.assetInfo.isFrame) {
         console.log('frame cannot be copied')
       } else {
         const pages = generalUtils.deepCopy(this.item.pages)

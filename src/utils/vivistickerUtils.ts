@@ -265,7 +265,7 @@ class ViviStickerUtils {
     return (jsonData: any) => {}
   }
 
-  startEditing(editorType: string, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
+  startEditing(editorType: string, assetInfo: {[key: string]: any}, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
     const pageWidth = window.innerWidth - 32
     pageUtils.setPages([pageUtils.newPage({
       width: pageWidth,
@@ -274,6 +274,7 @@ class ViviStickerUtils {
       isAutoResizeNeeded: true
     })])
     store.commit('vivisticker/SET_editingDesignId', designId ?? '')
+    store.commit('vivisticker/SET_editingAssetInfo', assetInfo)
     initiator().then((jsonData?: any) => {
       if (jsonData) {
         stepsUtils.reset()
@@ -597,10 +598,12 @@ class ViviStickerUtils {
     const pages = pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
+    const assetInfo = store.getters['vivisticker/getEditingAssetInfo']
     const design = {
       pages: uploadUtils.prepareJsonToUpload(pages),
       editorType,
-      id: editingDesignId
+      id: editingDesignId,
+      assetInfo
     } as ITempDesign
     this.setState('tempDesign', { design: JSON.stringify(design) })
   }
@@ -620,22 +623,24 @@ class ViviStickerUtils {
     const {
       pages,
       editorType,
-      id
+      id,
+      assetInfo
     } = tempDesign
-    this.startEditing(editorType, this.getFetchDesignInitiator(() => {
+    this.startEditing(editorType, assetInfo ?? {}, this.getFetchDesignInitiator(() => {
       store.commit('SET_pages', pageUtils.newPages(pages))
-    }), this.getEmptyCallback(), id)
+    }), this.getEmptyCallback(), id ?? '')
   }
 
   initWithMyDesign(myDesign: IMyDesign) {
     const {
       id,
       pages,
-      type
+      type,
+      assetInfo
     } = myDesign
-    this.startEditing(type, this.getFetchDesignInitiator(() => {
+    this.startEditing(type, assetInfo ?? {}, this.getFetchDesignInitiator(() => {
       store.commit('SET_pages', pageUtils.newPages(generalUtils.deepCopy(pages)))
-    }), this.getEmptyCallback(), id)
+    }), this.getEmptyCallback(), id ?? '')
   }
 
   async saveAsMyDesign(): Promise<void> {
@@ -709,11 +714,13 @@ class ViviStickerUtils {
     if (this.isStandaloneMode) return
     const pages = pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
+    const assetInfo = store.getters['vivisticker/getEditingAssetInfo']
     const json = {
       pages: uploadUtils.prepareJsonToUpload(pages),
       type: editorType,
       id,
-      updateTime: new Date(Date.now()).toISOString()
+      updateTime: new Date(Date.now()).toISOString(),
+      assetInfo
     } as IMyDesign
     await this.addAsset(`mydesign-${editorType}`, json)
     return json

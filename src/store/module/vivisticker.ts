@@ -29,7 +29,9 @@ interface IViviStickerState {
   slideType: string,
   myDesignFiles: {[key: string]: IMyDesign[]},
   myDesignBuffer: IMyDesign | undefined,
-  editingDesignId: string
+  editingDesignId: string,
+  editingAssetInfo: {[key: string]: any},
+  selectedDesigns: {[key: string]: IMyDesign}
 }
 
 const EDITOR_BGS = [
@@ -69,7 +71,9 @@ const getDefaultState = (): IViviStickerState => ({
   slideType: 'none',
   myDesignFiles: vivistickerUtils.getDefaultMyDesignFiles(),
   myDesignBuffer: undefined,
-  editingDesignId: ''
+  editingDesignId: '',
+  editingAssetInfo: {},
+  selectedDesigns: {}
 })
 
 const state = getDefaultState()
@@ -156,6 +160,12 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getEditingDesignId(state: IViviStickerState): string {
     return state.editingDesignId
+  },
+  getEditingAssetInfo(state: IViviStickerState): {[key: string]: any} {
+    return state.editingAssetInfo
+  },
+  getSeletedDesigns(state: IViviStickerState): {[key: string]: IMyDesign} {
+    return state.selectedDesigns
   }
 }
 
@@ -245,6 +255,9 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_editingDesignId(state: IViviStickerState, editingDesignId) {
     state.editingDesignId = editingDesignId
   },
+  SET_editingAssetInfo(state: IViviStickerState, editingAssetInfo) {
+    state.editingAssetInfo = editingAssetInfo
+  },
   UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
     Object.entries(settings).forEach(([key, value]) => {
       (state.userSettings as any)[key] = value
@@ -273,6 +286,15 @@ const mutations: MutationTree<IViviStickerState> = {
     if (!design) return
     Object.assign(design, updateInfo.design)
     design.ver += 1
+  },
+  UPDATE_selectDesign(state: IViviStickerState, design: IMyDesign) {
+    state.selectedDesigns[design.id] = design
+  },
+  UPDATE_deselectDesign(state: IViviStickerState, design: IMyDesign) {
+    delete state.selectedDesigns[design.id]
+  },
+  UPDATE_clearSelectedDesigns(state: IViviStickerState) {
+    state.selectedDesigns = {}
   }
 }
 

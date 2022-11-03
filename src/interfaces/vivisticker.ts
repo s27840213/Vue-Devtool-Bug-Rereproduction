@@ -12,7 +12,8 @@ export interface IUserSettings {
 export interface ITempDesign {
   pages: Array<IPage>,
   editorType: string,
-  id: string
+  id: string,
+  assetInfo: {[key: string]: any}
 }
 
 export interface IMyDesign {
@@ -20,7 +21,8 @@ export interface IMyDesign {
   type: string,
   id: string,
   updateTime: string,
-  ver: number
+  ver: number,
+  assetInfo: {[key: string]: any}
 }
 
 export interface IMyDesignTag {
