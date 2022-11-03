@@ -62,14 +62,14 @@ export default Vue.extend({
     }
   },
   data() {
-    // const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
+    const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
     return {
       isDestroyed: false,
       resizeObserver: undefined as ResizeObserver | undefined,
       initSize: {
         width: this.config.styles.width,
         height: this.config.styles.height,
-        widthLimit: this.config.widthLimit
+        widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
       isLoading: true,
       svgBG: {} as Record<string, unknown> | null
