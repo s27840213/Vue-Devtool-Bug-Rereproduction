@@ -41,7 +41,7 @@ class ShortcutUtils {
     this.copySourcePageIndex = -1
   }
 
-  private regenerateLayerInfo(layer: IText | IShape | IImage | IGroup | ITmp, props: { toCenter?: boolean, offset?: number, targetPageIndex?: number }) {
+  private regenerateLayerInfo(layer: IText | IShape | IImage | IGroup | ITmp | IFrame, props: { toCenter?: boolean, offset?: number, targetPageIndex?: number }) {
     const { toCenter = false, offset = 10, targetPageIndex } = props
 
     if (toCenter && targetPageIndex !== undefined) {
@@ -71,8 +71,8 @@ class ShortcutUtils {
           .forEach(l => {
             if (l.type === 'shape') {
               l.className = ShapeUtils.classGenerator()
-              l.id = GeneralUtils.generateRandomString(8)
             }
+            l.id = GeneralUtils.generateRandomString(8)
           })
         break
       case 'tmp':
@@ -80,8 +80,8 @@ class ShortcutUtils {
           .forEach(l => {
             if (l.type === 'shape') {
               l.className = ShapeUtils.classGenerator()
-              l.id = GeneralUtils.generateRandomString(8)
             }
+            l.id = GeneralUtils.generateRandomString(8)
           })
         break
     }
@@ -156,7 +156,7 @@ class ShortcutUtils {
       GroupUtils.deselect()
       if (isTmp) {
         store.commit('ADD_layersToPos', { pageIndex: targetPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
-        GroupUtils.set(targetPageIndex, tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(clipboardInfo[0].layers))
+        GroupUtils.set(targetPageIndex, tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(clipboardInfo[0].layers) as Array<IShape | IText | IImage | IGroup | IFrame>)
       } else {
         store.commit('ADD_layersToPos', { pageIndex: targetPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
         GroupUtils.set(targetPageIndex, tmpIndex + tmpLayersNum, [...GeneralUtils.deepCopy(clipboardInfo)])
@@ -168,7 +168,7 @@ class ShortcutUtils {
       }
       if (isTmp) {
         store.commit('ADD_newLayers', { pageIndex: targetPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)] })
-        GroupUtils.set(targetPageIndex, store.getters.getLayersNum(targetPageIndex) - 1, GeneralUtils.deepCopy(clipboardInfo[0].layers))
+        GroupUtils.set(targetPageIndex, store.getters.getLayersNum(targetPageIndex) - 1, GeneralUtils.deepCopy(clipboardInfo[0].layers) as Array<IShape | IText | IImage | IGroup | IFrame>)
       } else {
         store.commit('ADD_newLayers', { pageIndex: targetPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)] })
         GroupUtils.set(targetPageIndex, store.getters.getLayersNum(targetPageIndex) - 1, [...GeneralUtils.deepCopy(clipboardInfo)])
@@ -185,7 +185,7 @@ class ShortcutUtils {
 
   duplicate() {
     const { getCurrLayer: currLayer } = LayerUtils
-    const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(currLayer), {})
+    const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(currLayer) as IShape | IText | IImage | IGroup | IFrame | ITmp, {})
 
     const currActivePageIndex = pageUtils.currActivePageIndex
     const isTmp: boolean = currLayer.type === 'tmp'
@@ -196,7 +196,7 @@ class ShortcutUtils {
       GroupUtils.deselect()
       if (isTmp) {
         store.commit('ADD_layersToPos', { pageIndex: currActivePageIndex, layers: [newLayer], pos: tmpIndex + tmpLayersNum })
-        GroupUtils.set(currActivePageIndex, tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(newLayer.layers))
+        GroupUtils.set(currActivePageIndex, tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(newLayer.layers as Array<IShape | IText | IImage | IGroup | IFrame>))
       } else {
         store.commit('ADD_layersToPos', { pageIndex: currActivePageIndex, layers: [newLayer], pos: tmpIndex + tmpLayersNum })
         GroupUtils.set(currActivePageIndex, tmpIndex + tmpLayersNum, [newLayer])
@@ -209,7 +209,7 @@ class ShortcutUtils {
       }
       if (isTmp) {
         store.commit('ADD_newLayers', { pageIndex: currFocusPageIndex, layers: [newLayer] })
-        GroupUtils.set(currFocusPageIndex, store.getters.getLayersNum(currFocusPageIndex) - 1, GeneralUtils.deepCopy(newLayer.layers))
+        GroupUtils.set(currFocusPageIndex, store.getters.getLayersNum(currFocusPageIndex) - 1, GeneralUtils.deepCopy(newLayer.layers as Array<IShape | IText | IImage | IGroup | IFrame>))
       } else {
         store.commit('ADD_newLayers', { pageIndex: currFocusPageIndex, layers: [newLayer] })
         GroupUtils.set(currFocusPageIndex, store.getters.getLayersNum(currFocusPageIndex) - 1, [newLayer])
@@ -220,7 +220,7 @@ class ShortcutUtils {
   }
 
   altDuplicate(targetPageIndex: number, targetLayerIndex: number, config: ILayer) {
-    const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(config), { offset: 0 })
+    const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(config as IShape | IText | IImage | IGroup | IFrame), { offset: 0 })
     newLayer.active = false
 
     const isTmp: boolean = config.type === 'tmp'

@@ -46,7 +46,7 @@ export default Vue.extend({
         plan: this.item.plan,
         isFrame: this.item.type === 8,
         assetId: this.item.id
-      }, vivistickerUtils.getAssetInitiator(this.item), vivistickerUtils.getAssetCallback(this.item))
+      }, vivistickerUtils.getAssetInitiator(this.item, { db: 'svg' }), vivistickerUtils.getAssetCallback(this.item))
     }
   }
 })

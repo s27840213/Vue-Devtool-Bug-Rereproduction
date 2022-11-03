@@ -261,7 +261,7 @@ export default Vue.extend({
     background-color: setColor(white);
     top: 0;
     right: 0px;
-    transform: translate3d(100%, 0, 0);
+    transform: translate(100%, 0);
     display: flex;
     flex-direction: column;
     border: 1px solid setColor(gray-4);

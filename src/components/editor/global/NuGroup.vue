@@ -8,13 +8,14 @@
       :subLayerIndex="index"
       :contentScaleRatio="contentScaleRatio"
       :config="layer"
-      :inGroup="true")
+      :isSubLayer="true")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 
 export default Vue.extend({
+  inheritAttrs: false,
   props: {
     config: Object,
     pageIndex: Number,

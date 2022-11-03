@@ -14,7 +14,8 @@
       :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
       :contentScaleRatio="contentScaleRatio"
       :primaryLayer="config"
-      :config="layer")
+      :config="layer"
+      :isSubLayer="true")
 </template>
 
 <script lang="ts">
@@ -28,6 +29,7 @@ import layerFactary from '@/utils/layerFactary'
 import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
+  inheritAttrs: false,
   props: {
     config: Object,
     pageIndex: Number,

@@ -54,6 +54,10 @@ class PageUtils {
     return store.getters.getCurrFocusPageIndex
   }
 
+  get _3dEnabledPageIndex() {
+    return store.getters.get3dEnabledPageIndex
+  }
+
   get currFocusPage(): IPage {
     return this.getPage(this.currFocusPageIndex)
   }
@@ -164,7 +168,6 @@ class PageUtils {
   addTwentyPages() {
     const arr = new Array(20).fill(this.newPage({}))
 
-    console.log(arr)
     this.addPages(arr)
   }
 
@@ -222,21 +225,14 @@ class PageUtils {
 
   scrollIntoPage(pageIndex: number, behavior?: 'auto' | 'smooth'): void {
     const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
-    currentPage.scrollIntoView({
-      behavior: behavior ?? 'smooth',
-      block: 'center',
-      inline: 'center'
-    })
-    this.findCentralPageIndexInfo()
-  }
-
-  jumpIntoPage(pageIndex: number): void {
-    const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
-    currentPage.scrollIntoView({
-      block: 'center',
-      inline: 'center'
-    })
-    this.findCentralPageIndexInfo()
+    if (currentPage !== undefined) {
+      currentPage.scrollIntoView({
+        behavior: behavior ?? 'smooth',
+        block: 'center',
+        inline: 'center'
+      })
+      this.findCentralPageIndexInfo()
+    }
   }
 
   clearPagesInfo() {
@@ -418,13 +414,14 @@ class PageUtils {
     store.commit('SET_pageScaleRatio', val)
   }
 
-  fitPage(scrollToTop = false) {
+  fitPage(scrollToTop = false, minRatioFiRestricttDisable = false) {
     // In these mode, don't fitPage.
+
     if (editorUtils.mobileAllPageMode || this.isSwitchingToEditor) {
       return
     }
-    // If user zoom in page, don't fitPage.
-    if (pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
+    // If mobile user zoom in page, don't fitPage.
+    if (generalUtils.isTouchDevice() && !minRatioFiRestricttDisable && pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
       return
     }
 

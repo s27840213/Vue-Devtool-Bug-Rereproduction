@@ -5,7 +5,7 @@
         @showAllPages="showAllPages"
         :currTab="currActivePanel"
         :inAllPagesMode="inAllPagesMode")
-      div(class="mobile-editor__content")
+      div(class="mobile-editor__content" :style="contentStyle")
         keep-alive
           component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
             :currActivePanel="currActivePanel"
@@ -18,7 +18,8 @@
         mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
           :currColorEvent="currColorEvent"
-          @switchTab="switchTab")
+          @switchTab="switchTab"
+          @panelHeight="setPanelHeight")
       //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
       //-   :currActivePanel="'color'"
       //-   :currColorEvent="ColorEventType.background"
@@ -68,7 +69,8 @@ export default Vue.extend({
       isLoading: false,
       currColorEvent: '',
       ColorEventType,
-      showMobilePanelAfterTransitoin: false
+      showMobilePanelAfterTransitoin: false,
+      panelHeight: 0
     }
   },
   created() {
@@ -134,6 +136,9 @@ export default Vue.extend({
     }),
     inPagePanel(): boolean {
       return SidebarPanelType.page === this.currPanel
+    },
+    contentStyle(): Record<string, string> {
+      return { transform: `translateY(-${this.panelHeight / 2}px)` }
     },
     scaleRatioEditorPos(): { [index: string]: string } {
       return this.inPagePanel ? {
@@ -228,6 +233,9 @@ export default Vue.extend({
         })
       }
     },
+    setPanelHeight(height: number) {
+      this.panelHeight = height
+    },
     beforeEnter() {
       this.showMobilePanelAfterTransitoin = true
     },
@@ -250,11 +258,12 @@ export default Vue.extend({
   grid-template-columns: 1fr;
 
   &__top {
+    box-sizing: border-box;
     height: 100%;
     width: 100%;
     position: relative;
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto 1fr;
     grid-template-columns: 1fr;
     background-color: setColor(gray-5);
   }
@@ -267,12 +276,8 @@ export default Vue.extend({
     height: 100%;
     width: 100%;
     z-index: setZindex("editor-view");
-
-    position: relative;
-    height: 100%;
-    width: 100%;
     overflow: hidden;
-    z-index: setZindex("editor-view");
+    transition: transform 0.3s map-get($ease-functions, ease-in-out-quint);
   }
 
   &__page-preview {

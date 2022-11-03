@@ -11,7 +11,6 @@ import imageApi from '@/apis/image-api'
 import { AxiosPromise } from 'axios'
 import { IShadowAsset } from '@/store/module/shadow'
 import generalUtils from './generalUtils'
-import { findIndex } from 'lodash'
 import editorUtils from './editorUtils'
 
 const FORCE_UPDATE_VER = '&ver=20220719'
@@ -529,6 +528,7 @@ class ImageUtils {
   }
 
   appendOriginQuery(src: string) {
+    if (!src) return src
     if (src.includes('origin=true')) return src
     if (src.includes('?')) {
       return `${src}&origin=true`

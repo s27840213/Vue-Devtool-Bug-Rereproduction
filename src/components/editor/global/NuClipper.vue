@@ -13,6 +13,7 @@ import frameUtils from '@/utils/frameUtils'
 import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 import Svgpath from 'svgpath'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   props: {
@@ -61,8 +62,8 @@ export default Vue.extend({
             clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')`
           }
           if (!this.config.isImageFrame && this.primaryLayer && (this.primaryLayer as IFrame).type === LayerType.frame) {
-            width = `${width}px`
-            height = `${height}px`
+            width = `${width * this.contentScaleRatio}px`
+            height = `${height * this.contentScaleRatio}px`
           } else {
             width = `${width * this.contentScaleRatio}px`
             height = `${height * this.contentScaleRatio}px`
@@ -89,7 +90,8 @@ export default Vue.extend({
         width,
         height,
         ...(!this.imgControl && this.config.type === 'image' && this.config.styles.shadow.currentEffect === ShadowEffectType.none && { clipPath }),
-        ...flip
+        ...flip,
+        'transform-style': pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
       }
     }
   }
@@ -98,7 +100,6 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-clipper {
-  transform-style: preserve-3d;
   // overflow: hidden;
 }
 

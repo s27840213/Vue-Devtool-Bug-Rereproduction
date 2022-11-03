@@ -50,11 +50,13 @@ export default Vue.extend({
       modalUtils.clearModalInfo()
     },
     confirmAction() {
-      this.modalInfo.confirmButton.action()
+      const { action } = this.modalInfo.confirmButton
+      action && action()
       this.closePopup()
     },
     cancelAction() {
-      this.modalInfo.cancelButton.action()
+      const { action } = this.modalInfo.cancelButton
+      action && action()
       this.closePopup()
     }
   }
@@ -74,15 +76,18 @@ export default Vue.extend({
   border-radius: 10px;
   &__close {
     position: absolute;
-    top: 6px;
-    right: 10px;
+    top: 16px;
+    right: 14px;
+    height: 20px;
+    background-color: setColor(gray-4);
+    border-radius: 100px;
   }
 
   &__content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: left;
+    text-align: center;
   }
 
   &__button {
@@ -92,7 +97,7 @@ export default Vue.extend({
     > button {
       @include btn-LG;
       transition: background-color 0.3s;
-      border-radius: 4px;
+      border-radius: 10px;
       width: 200px;
     }
     > button + button {
@@ -105,6 +110,10 @@ export default Vue.extend({
   .modal-card__button {
     flex-direction: column;
     align-items: center;
+    > button {
+      @include btn-SM;
+      height: 32px;
+    }
     > button + button {
       margin: 20px 0 0 0;
     }

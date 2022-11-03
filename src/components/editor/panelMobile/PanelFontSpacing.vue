@@ -2,6 +2,7 @@
   div(class="panel-spacing")
     mobile-slider(class="panel-spacing__field"
       :title="`${$t('NN0109')}`"
+      :borderTouchArea="true"
       :value="fontSpacing"
       :min="fieldRange.fontSpacing.min"
       :max="fieldRange.fontSpacing.max"
@@ -10,6 +11,7 @@
       @update:fs="updateFontSpacing")
     mobile-slider(class="panel-spacing__field"
       :title="`${$t('NN0110')}`"
+      :borderTouchArea="true"
       :value="lineHeight"
       :min="fieldRange.lineHeight.min"
       :max="fieldRange.lineHeight.max"

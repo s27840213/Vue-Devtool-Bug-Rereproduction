@@ -49,8 +49,8 @@ class AssetUtils {
   get getLayers() { return store.getters.getLayers }
   get getPages() { return store.getters.getPages }
 
-  get(item: IListServiceContentDataItem): Promise<IAsset> {
-    return this.fetch(item)
+  get(item: IListServiceContentDataItem, db?: string): Promise<IAsset> {
+    return this.fetch(item, db)
   }
 
   // used for api category
@@ -106,9 +106,9 @@ class AssetUtils {
     return STANDARD_TEXT_FONT
   }
 
-  fetch(item: IListServiceContentDataItem): Promise<IAsset> {
+  fetch(item: IListServiceContentDataItem, db?: string): Promise<IAsset> {
     const { id, type, ver, ...attrs } = item
-    const typeCategory = this.getTypeCategory(type)
+    const typeCategory = db ?? this.getTypeCategory(type)
     const asset = {
       id,
       type,
@@ -443,6 +443,7 @@ class AssetUtils {
 
     const config = {
       ...json,
+      widthLimit: json.widthLimit === -1 ? -1 : json.widthLimit * (textWidth / width),
       styles: {
         ...json.styles,
         width: textWidth,
@@ -550,7 +551,7 @@ class AssetUtils {
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
 
     let srcObj
-    let assetId = '' as string | undefined
+    let assetId = '' as string | number | undefined
     if (typeof url === 'string') {
       const type = ImageUtils.getSrcType(url)
       assetId = isPreview ? previewAssetId : ImageUtils.getAssetId(url, type)
@@ -667,7 +668,7 @@ class AssetUtils {
     try {
       store.commit('SET_mobileSidebarPanelOpen', false)
       let key = ''
-      const asset = await this.get(item) as IAsset
+      const asset = await this.get(item, attrs.db) as IAsset
       // const data = await ImageUtils.getImageSize(ImageUtils.getSrc({
       //   srcObj: {
       //     type: 'background',

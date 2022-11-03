@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(:class="['panel-fonts', isMobile ? 'panel-fonts-mobile' : 'panel-fonts-pc']")
+  div(class="panel-fonts")
     div(v-if="!noTitle && !isMobile" class="panel-fonts__title")
       span(v-if="!isMobile" class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
       svg-icon(
@@ -170,9 +170,9 @@ export default Vue.extend({
       const { keyword, pending } = this
       if (pending || !keyword || this.searchResult.length > 0) return ''
       return `${i18n.t('NN0393', {
-          keyword: this.keywordLabel,
-          target: i18n.tc('NN0353', 1)
-        })}`
+        keyword: this.keywordLabel,
+        target: i18n.tc('NN0353', 1)
+      })}`
     }
   },
   methods: {
@@ -244,35 +244,26 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel-fonts {
   @include size(100%, 100%);
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-auto-columns: 100%;
   padding: 0 8px;
   overflow-x: hidden;
   &__title {
-    text-align: center;
     position: relative;
-    margin-bottom: -10px;
+    text-align: center;
+    margin-bottom: 30px;
     background: white;
-    width: 285px;
-    min-height: 50px;
-    top: -20px;
-    left: -20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 30px;
   }
-  > div {
+  > * + div{
     margin-top: 15px;
-    &:nth-child(1) {
-      margin-top: 0px;
-    }
   }
   &__search {
     margin-top: 10px;
   }
   &__close {
     position: absolute;
-    right: 5px;
+    right: 0px;
   }
   &__items {
     display: grid;
@@ -296,7 +287,7 @@ export default Vue.extend({
       justify-content: center;
       width: 100%;
       position: absolute;
-      transform: translate3d(0, -100%, 0);
+      transform: translate(0, -100%);
       padding: 12px 0px 8px 0px;
       background-image: linear-gradient(transparent, setColor(white, 0.9) 30%);
       color: setColor(blue-1);

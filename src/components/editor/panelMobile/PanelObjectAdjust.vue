@@ -12,6 +12,7 @@
             @pointerdown.native="switchMode(index)")
       div(v-if="currMode !== -1" class="panel-object-adjust__settings mt-25")
         mobile-slider(v-if="currMode === 0" :title="`${$t('NN0681')}`"
+          :borderTouchArea="true"
           :name="`${$t('NN0681')}`"
           :value="lineWidth"
           :min="lineWidthMin"
@@ -81,6 +82,7 @@
           span {{corRadPercentage}}
       div(v-if="currMode !== -1" class="panel-object-adjust__settings mt-25")
         mobile-slider(v-if="currMode === 0" :title="`${$t('NN0681')}`"
+          :borderTouchArea="true"
           :name="`${$t('NN0681')}`"
           :value="lineWidth"
           :min="lineWidthMin"
@@ -98,6 +100,7 @@
             svg-icon(iconName="filled" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
             div(class="ml-25 body-2") {{$t('NN0087')}}
         mobile-slider(v-if="currMode === 2" :title="`${$t('NN0085')}`"
+          :borderTouchArea="true"
           :name="`${$t('NN0085')}`"
           :value="corRadPercentage"
           :min="0"

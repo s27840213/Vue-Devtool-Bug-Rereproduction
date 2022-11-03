@@ -1,5 +1,6 @@
 <template lang="pug">
-  div(class="nu-sub-controller")
+  div(class="nu-sub-controller"
+      :style="transformStyle")
     div(class="nu-sub-controller__wrapper" :style="positionStyles()")
       div(class="nu-sub-controller__wrapper" :style="wrapperStyles()")
         div(class="nu-sub-controller__content"
@@ -79,6 +80,8 @@ import i18n from '@/i18n'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import fileUtils from '@/utils/fileUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import pageUtils from '@/utils/pageUtils'
+import SvgPath from 'svgpath'
 
 export default Vue.extend({
   props: {
@@ -129,17 +132,19 @@ export default Vue.extend({
   },
   mounted() {
     const body = this.$refs.body as HTMLElement
-    /**
-     * Prevent the context menu from showing up when right click or Ctrl + left click on controller
-     */
-    body.addEventListener('contextmenu', (e: MouseEvent) => {
-      e.preventDefault()
-    }, false)
-    this.setLastSelectedLayerIndex(this.layerIndex)
-    this.parentId = this.primaryLayer.id as string
+    if (body) {
+      /**
+       * Prevent the context menu from showing up when right click or Ctrl + left click on controller
+       */
+      body.addEventListener('contextmenu', (e: MouseEvent) => {
+        e.preventDefault()
+      }, false)
+      this.setLastSelectedLayerIndex(this.layerIndex)
+      this.parentId = this.primaryLayer.id as string
 
-    if (this.type === LayerType.frame && this.config.type === LayerType.image) {
-      body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+      if (this.type === LayerType.frame && this.config.type === LayerType.image) {
+        body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+      }
     }
 
     // if (this.type === LayerType.frame && (this.primaryLayer as IFrame).clips.length === 1 && this.config.srcObj.type === 'frame') {
@@ -173,6 +178,14 @@ export default Vue.extend({
     },
     getPrimaryLayerSubLayerNum(): number {
       return (this.primaryLayer as IGroup | ITmp).layers.length
+    },
+    enalble3dTransform(): boolean {
+      return this.pageIndex === pageUtils._3dEnabledPageIndex
+    },
+    transformStyle(): { [index: string]: string } {
+      return {
+        transformStyle: this.enalble3dTransform ? 'preserve-3d' : 'initial'
+      }
     }
   },
   watch: {
@@ -464,18 +477,18 @@ export default Vue.extend({
           `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})`,
         width: `${this.config.styles.width * this.contentScaleRatio}px`,
         height: `${this.config.styles.height * this.contentScaleRatio}px`,
-        'pointer-events': 'none'
+        'pointer-events': 'none',
+        ...this.transformStyle
       }
     },
     wrapperStyles() {
       // const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
-      let scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
-      if (this.type === 'frame') {
-        scale *= this.contentScaleRatio
-      }
+      const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+
       return {
         transformOrigin: '0px 0px',
         transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
+        ...this.transformStyle,
         outline: this.outlineStyles(),
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
@@ -483,7 +496,7 @@ export default Vue.extend({
           if (this.config.isFrameImg) {
             return { clipPath: `path("M0,0h${width}v${height}h${-width}z")` }
           } else {
-            return { clipPath: `path("${clipPath}")` }
+            return { clipPath: clipPath !== undefined ? `path('${new SvgPath(clipPath).scale(this.contentScaleRatio).toString()}')` : clipPath }
           }
         })())
       }
@@ -495,7 +508,7 @@ export default Vue.extend({
       return {
         ...this.sizeStyle(),
         'pointer-events': 'initial',
-        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} translateZ(${zindex}px)`,
+        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`,
         ...TextEffectUtils.convertTextEffect(this.config)
       }
     },
@@ -533,6 +546,18 @@ export default Vue.extend({
         TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
       })
     },
+    waitFontLoadingAndResize() {
+      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const layerId = this.primaryLayer.id
+      const subLayerId = this.config.id
+      TextUtils.untilFontLoaded(this.config.paragraphs).then(() => {
+        setTimeout(() => {
+          const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+          if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+          TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+        }, 100)
+      })
+    },
     checkIfCurve(config: IText): boolean {
       const { textShape } = config.styles
       return textShape && textShape.name === 'curve'
@@ -545,6 +570,8 @@ export default Vue.extend({
       this.calcSize(this.config)
       if (payload.toRecord) {
         this.waitFontLoadingAndRecord()
+      } else {
+        this.waitFontLoadingAndResize()
       }
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         // if composing starts from empty line, isSetContentRequired will be true in the first typing.
@@ -834,13 +861,11 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-sub-controller {
   touch-action: none;
-  transform-style: preserve-3d;
   &__wrapper {
     top: 0;
     left: 0;
     position: absolute;
     touch-action: none;
-    transform-style: preserve-3d;
   }
   &__content {
     touch-action: none;

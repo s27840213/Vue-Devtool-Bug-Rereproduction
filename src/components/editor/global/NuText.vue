@@ -88,17 +88,19 @@ export default Vue.extend({
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
       setTimeout(() => {
         this.resizeCallback()
-        this.isLoading = false
-        vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
-      }, 500) // for the delay between font loading and dom rendering
+        if (this.$route.name === 'Screenshot') {
+          this.isLoading = false
+          vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+        }
+      }, 100) // for the delay between font loading and dom rendering
     })
     // if (this.currSelectedInfo.layers >= 1) {
     //   TextPropUtils.updateTextPropsState()
     // }
 
-    this.resizeObserver = new ResizeObserver(this.resizeCallback)
-    this.observeAllSpans()
-    this.drawSvgBG() // Check if needed
+    // this.resizeObserver = new ResizeObserver(this.resizeCallback)
+    // this.observeAllSpans()
+    this.drawSvgBG()
   },
   computed: {
     ...mapGetters({
@@ -146,13 +148,12 @@ export default Vue.extend({
   },
   watch: {
     'config.paragraphs': {
-      handler() {
+      handler(newVal) {
         this.isLoading = false
-        if (this.resizeObserver) {
-          this.resizeObserver.disconnect()
-          this.observeAllSpans()
-        }
-        this.drawSvgBG() // Check if needed
+        this.drawSvgBG()
+        textUtils.untilFontLoaded(newVal).then(() => {
+          this.drawSvgBG()
+        })
       }
     },
     'config.styles': {

@@ -1,4 +1,4 @@
-import { IAsset } from '@/interfaces/module'
+import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import Vue from 'vue'
@@ -220,14 +220,14 @@ class ViviStickerUtils {
     store.commit('vivisticker/SET_showAllRecently', { tab, bool })
   }
 
-  getAssetInitiator(asset: IAsset): () => Promise<any> {
+  getAssetInitiator(asset: IAsset, attrs: IAssetProps = {}): () => Promise<any> {
     return async () => {
       // console.log('start editing', asset)
       if (asset.type === 15) {
-        await assetUtils.addAsset(asset)
+        await assetUtils.addAsset(asset, attrs)
         return true
       } else {
-        return await assetUtils.addAsset(asset)
+        return await assetUtils.addAsset(asset, attrs)
       }
     }
   }

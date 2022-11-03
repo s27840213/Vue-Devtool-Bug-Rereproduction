@@ -7,17 +7,29 @@
           v-model.number="propsVal"
           :name="name"
           @change="handleChangeStop")
-    input(class="mobile-slider__range-input"
-      :style="progressStyles()"
-      v-model.number="propsVal"
-      :name="name"
-      :max="max"
-      :min="min"
-      :step="step"
-      v-ratio-change
-      type="range"
-      @pointerdown="$emit('pointerdown', $event)"
-      @pointerup="$emit('pointerup', $event); handleChangeStop();")
+    div(class="mobile-slider__range-input-wrapper")
+      input(class="mobile-slider__range-input"
+        :style="progressStyles()"
+        v-model.number="propsVal"
+        :name="name"
+        :max="max"
+        :min="min"
+        :step="step"
+        v-ratio-change
+        type="range"
+        @pointerdown="!borderTouchArea ? $emit('pointerdown', $event) : null"
+        @pointerup="!borderTouchArea ? handlePointerup() : null")
+      input(v-if="borderTouchArea"
+        class="mobile-slider__range-input mobile-slider__range-input-top"
+        v-model.number="propsVal"
+        :name="name"
+        :max="max"
+        :min="min"
+        :step="step"
+        v-ratio-change
+        type="range"
+        @pointerdown="$emit('pointerdown', $event)"
+        @pointerup="handlePointerup")
 </template>
 
 <script lang="ts">
@@ -32,6 +44,10 @@ export default Vue.extend({
   props: {
     title: String,
     name: String,
+    borderTouchArea: {
+      type: Boolean,
+      default: false
+    },
     value: {
       type: [Number, String],
       required: true
@@ -73,11 +89,16 @@ export default Vue.extend({
   methods: {
     progressStyles() {
       return {
-        '--progress': (typeof this.value === 'string') ? '50%' : `${(this.value - this.min) / (this.max - this.min) * 100}%`
+        '--progress': (typeof this.value === 'string') ? '50%' : `${(this.value - this.min) / (this.max - this.min) * 100}%`,
+        'pointer-events': this.borderTouchArea ? 'none' : 'auto'
       }
     },
     handleChangeStop() {
       stepsUtils.record()
+    },
+    handlePointerup(e: Event) {
+      this.$emit('pointerup', e)
+      this.handleChangeStop()
     }
   }
 })
@@ -139,6 +160,15 @@ export default Vue.extend({
       box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
       position: relative;
     }
+  }
+
+  &__range-input-wrapper {
+    position: relative;
+  }
+
+  &__range-input-top {
+    position: absolute;
+    opacity: 0;
   }
 }
 </style>

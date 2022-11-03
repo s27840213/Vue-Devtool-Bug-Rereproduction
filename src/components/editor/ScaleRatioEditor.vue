@@ -35,6 +35,7 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   data() {
@@ -82,7 +83,6 @@ export default Vue.extend({
     setIsShowPagePreview(show: boolean) {
       this._setIsShowPagePreview(show)
       if (!show) {
-        pageUtils.jumpIntoPage(pageUtils.currFocusPageIndex)
         this._setShowPagePanel(false)
       }
     },
@@ -110,24 +110,38 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .scale-ratio-editor {
+  position: absolute;
+  right: 16px;
+  bottom: 24px;
+  z-index: setZindex("scale-ratio-editor");
   display: grid;
-  grid-template-rows: auto;
-  grid-template-columns: auto auto auto auto auto;
+  grid-auto-flow: column;
+  column-gap: 8px;
   background-color: setColor(white);
   align-items: center;
   box-shadow: 0px 0px 5px setColor(gray-2, 0.3);
-  padding: 7px 14px;
-  border-radius: 7px 7px 0 0;
-  column-gap: 5px;
+  padding: 10px;
+  border-radius: 7px;
+  opacity: 0.7;
+  &:hover {
+    opacity: 1;
+  }
   &__input {
+    display: none;
+    .scale-ratio-editor:hover & { // Show range input when hovering this component.
+      display: block;
+    }
     width: 180px;
     --lower-color: #{setColor(gray-1)};
     --upper-color: #{setColor(gray-4)};
     height: 2px;
-    display: block;
     appearance: none;
     outline: none;
-    background: linear-gradient(to right, var(--lower-color) var(--progress), var(--upper-color) var(--progress));
+    background: linear-gradient(
+      to right,
+      var(--lower-color) var(--progress),
+      var(--upper-color) var(--progress)
+    );
     &:focus {
       outline: none;
     }
@@ -155,7 +169,6 @@ export default Vue.extend({
     }
   }
   &__percentage {
-    // border: 1px solid setColor(gray-2, 0.3);
     width: 2.5rem;
   }
 }

@@ -55,12 +55,13 @@ export interface IAsset {
 }
 
 export interface IAssetProps {
+  db?: string,
   ver?: number,
   pageIndex?: number
   styles?: Partial<IStyle>,
   // the following props are used for preview image during polling process
   isPreview?: boolean,
-  assetId?: string,
+  assetId?: string | number,
   assetIndex?: number,
   width?: number,
   height?: number,
