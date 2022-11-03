@@ -1,8 +1,8 @@
 <template lang="pug">
   div(class="modal-card")
-    div(class="text-H6 text-gray-2 mb-30")
+    div(class="modal-card__title text-H6 text-gray-2")
       span {{modalInfo.title}}
-    div(class="modal-card__content body-SM text-gray-2 mb-30")
+    div(class="modal-card__content body-SM text-gray-2")
       template(v-if="!pending")
         span(v-for="text in modalInfo.content"
         @keydown.ctrl.67.exact.stop
@@ -24,7 +24,7 @@
           @click="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
       div(class="modal-card__close")
         svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'"
-                iconColor="gray-2" @click.native="closePopup()")
+                iconColor="gray-3" @click.native="closePopup()")
 </template>
 
 <script lang="ts">
@@ -71,8 +71,8 @@ export default Vue.extend({
   align-items: center;
   background-color: white;
   max-width: min(calc(100% - 40px), 500px);
-  padding: 30px 20px;
-  margin: 0 20px;
+  padding: 16px 30px;
+  margin: 0 39px;
   border-radius: 10px;
   &__close {
     position: absolute;
@@ -83,7 +83,13 @@ export default Vue.extend({
     border-radius: 100px;
   }
 
+  &__title {
+    margin-top: 2px;
+    margin-bottom: 42px;
+  }
+
   &__content {
+    margin-bottom: 42px;
     display: flex;
     flex-direction: column;
     align-items: center;
