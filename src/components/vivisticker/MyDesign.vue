@@ -73,8 +73,6 @@ export default Vue.extend({
     isInMyDesign(newVal) {
       if (newVal) {
         this.refreshDesigns(this.MyDesignTab)
-      } else {
-        editorUtils.setCloseMobilePanelFlag(true)
       }
     }
   },
