@@ -443,6 +443,7 @@ class AssetUtils {
 
     const config = {
       ...json,
+      widthLimit: json.widthLimit === -1 ? -1 : json.widthLimit * (textWidth / width),
       styles: {
         ...json.styles,
         width: textWidth,
