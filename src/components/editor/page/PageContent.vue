@@ -57,7 +57,7 @@ import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { LayerType, SidebarPanelType } from '@/store/types'
+import { SidebarPanelType } from '@/store/types'
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
@@ -136,11 +136,13 @@ export default Vue.extend({
       }
     },
     layerFilter(): any {
-      return this.config.layers.filter((layer: ILayer) => {
-        // return layer.type !== LayerType.text && layer.type !== LayerType.shape
+      const filterResult = this.config.layers.filter((layer: ILayer) => {
+        // return layer.type !== LayerType.shape
         // return layer.type !== LayerType.text
         return layer
       })
+
+      return filterResult
     },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0

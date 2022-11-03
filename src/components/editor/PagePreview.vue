@@ -62,10 +62,14 @@ export default Vue.extend({
       return { ...page, isAutoResizeNeeded: false }
     },
     handleLoaded() {
-      // if (this.renderCount === this.getPages.length - 1) {
-      //   testUtils.log('preview', 'Preview Test')
-      // }
-      // this.renderCount++
+      if (this.renderCount === 0) {
+        testUtils.start('previewTest')
+      }
+
+      if (this.renderCount === this.getPages.length - 1) {
+        testUtils.log('previewTest', 'Preview Test')
+      }
+      this.renderCount++
     }
   }
 })

@@ -377,7 +377,7 @@ export default Vue.extend({
     pageRootStyles(): { [index: string]: string } {
       return {
         margin: this.isDetailPage ? '0px auto' : '25px auto',
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
     isOutOfBound(): boolean {
@@ -441,14 +441,14 @@ export default Vue.extend({
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
         overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden',
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
     wrapperStyles() {
       return {
         width: `${this.config.width * (this.scaleRatio / 100)}px`,
         height: `${this.config.height * (this.scaleRatio / 100)}px`,
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
     snapLineStyles(dir: string, pos: number, isGuideline?: string) {

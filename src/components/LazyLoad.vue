@@ -97,16 +97,16 @@ export default Vue.extend({
           queueUtils.deleteEvent(this.renderEventId)
           clearTimeout(this.renderTimer)
 
-          this.unrenderTimer = setTimeout(() => {
-            this.unrenderEventId = generalUtils.generateRandomString(3)
-            queueUtils.push(this.unrenderEventId, async () => {
-              this.shoudBeRendered = false
-            })
-          }, this.unrenderDelay)
-
           // this.unrenderTimer = setTimeout(() => {
-          //   this.shoudBeRendered = false
+          //   this.unrenderEventId = generalUtils.generateRandomString(3)
+          //   queueUtils.push(this.unrenderEventId, async () => {
+          //     this.shoudBeRendered = false
+          //   })
           // }, this.unrenderDelay)
+
+          this.unrenderTimer = setTimeout(() => {
+            this.shoudBeRendered = false
+          }, this.unrenderDelay)
         }
       }, options
     )
