@@ -139,7 +139,7 @@ class Gooey {
         oldHeight: rect.height
       })
     })
-    const last = _.nth(rects, -1)
+    const last = (_.nth(rects, -1) as DOMRect)
     this.controlPoints[0].push({
       top: new Point(last.x + last.width, last.y + last.height),
       bottom: new Point(last.x + last.width, last.y + last.height),
@@ -407,9 +407,9 @@ class TextBg {
     const textBg = config.styles.textBg
     if (textBg.name === 'none') return null
     const vertical = config.styles.writingMode === 'vertical-lr'
-    const rawRects = [] as DOMRect[][]
+    const rawRects = [] as DOMRectList[]
 
-    const body = _.nth(bodyHtml, -1).cloneNode(true)
+    const body = (_.nth(bodyHtml, -1) as Element).cloneNode(true) as HTMLElement
     body.style.writingMode = config.styles.writingMode
     const widthLimit = config.widthLimit
     if (vertical) {
@@ -429,14 +429,14 @@ class TextBg {
 
     for (const p of body.childNodes) {
       for (const span of p.childNodes) {
-        rawRects.push(span.getClientRects())
+        rawRects.push((span as HTMLElement).getClientRects())
       }
     }
     document.body.removeChild(body)
     const rects = rawRects.reduce((acc, rect) => {
       if (rect) acc.push(...rect)
       return acc
-    }, [])
+    }, [] as DOMRect[])
 
     // If is vertical text, exchange its coordinate.
     if (vertical) {

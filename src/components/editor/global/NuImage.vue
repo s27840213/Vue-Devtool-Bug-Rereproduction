@@ -216,9 +216,6 @@ export default Vue.extend({
     getImgDimension(newVal, oldVal) {
       this.handleDimensionUpdate(newVal, oldVal)
     },
-    // parentLayerDimension(newVal, oldVal) {
-    //   this.handleDimensionUpdate(newVal, oldVal)
-    // },
     'config.srcObj': {
       handler: function () {
         this.shadowBuff.canvasShadowImg = undefined
@@ -226,9 +223,6 @@ export default Vue.extend({
           return
         }
         this.previewAsLoading()
-        // if (typeof this.subLayerIndex !== 'undefined') {
-        //   this.handleDimensionUpdate(this.parentLayerDimension, 0)
-        // }
       },
       deep: true
     },

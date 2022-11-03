@@ -39,6 +39,7 @@
             span {{sel.label}}
         //- Option type range
         mobile-slider(v-if="option.type === 'range'"
+          :borderTouchArea="true"
           :title="option.label"
           :name="option.key"
           :value="currentStyle[currCategory.name][option.key]"
@@ -88,7 +89,7 @@ export default Vue.extend({
   },
   computed: {
     currCategory(): IEffectCategory {
-      return _.find(this.textEffects, ['name', _.nth(this.panelHistory, -1)])
+      return _.find(this.textEffects, ['name', _.nth(this.panelHistory, -1)]) as IEffectCategory
     },
     effectList(): IEffect[] | null {
       if (!this.currCategory) return null
@@ -97,7 +98,7 @@ export default Vue.extend({
     currEffect(): IEffect | null {
       if (!this.currCategory) return null
       return _.find(this.effectList, ['key',
-        this.currentStyle[this.currCategory.name as 'shadow' | 'bg' | 'shape'].name])
+        this.currentStyle[this.currCategory.name as 'shadow' | 'bg' | 'shape'].name]) as IEffect
     },
     currentStyle(): { shadow: ITextEffect, bg: ITextBgEffect, shape: ITextShape } {
       const { styles } = textEffectUtils.getCurrentLayer()

@@ -42,6 +42,7 @@ export default Vue.extend({
     })
   },
   mounted() {
+    testUtils.start('previewTest')
     this.screenWidth = document.body.clientWidth - 130
     this._setPagesPerRow(floor(this.screenWidth / 180))
     window.addEventListener('resize', () => {

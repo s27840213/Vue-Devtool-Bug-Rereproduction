@@ -34,7 +34,7 @@ export default Vue.extend({
         }
 
         let [key, value] = line.split(':')
-        key = _.camelCase(key.split('-'))
+        key = _.camelCase(key)
         value = value.trim().replace(';', '')
         if (typeof value === 'number') {
           value = `'${value}px'`
