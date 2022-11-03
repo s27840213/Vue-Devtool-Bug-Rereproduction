@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(v-if="imgControlPageIdx !== -1")
+  div(v-if="isImgCtrl")
     div(class="dim-background"
       :style="styles")
     div
@@ -24,14 +24,36 @@
                         :contentScaleRatio="contentScaleRatio"
                         :primaryLayer="primaryLayer"
                         :config="image")
+  div(v-else-if="isBgImgCtrl"
+      class="background-control"
+      :style="backgroundControlStyles")
+    nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio")
+    nu-background-controller(:config="image"
+      :pageIndex="pageIndex"
+      :contentScaleRatio="contentScaleRatio")
+    div(:style="backgroundContorlClipStyles")
+      nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
+      //- component(v-for="(elm, idx) in getHalation"
+      //-   :key="idx"
+      //-   :is="elm.tag"
+      //-   v-bind="elm.attrs")
+    //- div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
+    //-     class="dim-background"
+    //-     :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
+
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import { IPage } from '@/interfaces/page'
+import cssConverter from '@/utils/cssConverter'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
+  created() {
+    console.log(123)
+  },
   components: {
     NuBackgroundController
   },
@@ -50,14 +72,15 @@ export default Vue.extend({
   computed: {
     ...mapState('imgControl', ['image', 'layerInfo', 'primaryLayer']),
     ...mapGetters({
-      imgControlPageIdx: 'imgControl/imgControlPageIdx'
+      imgControlPageIdx: 'imgControl/imgControlPageIdx',
+      isImgCtrl: 'imgControl/isImgCtrl',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
     styles() {
       const config = this.config as IPage
       return {
         width: `${config.width * this.contentScaleRatio}px`,
         height: `${config.height * this.contentScaleRatio}px`
-        // overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden'
       }
     },
     pageIndex(): number {
@@ -68,6 +91,29 @@ export default Vue.extend({
     },
     primaryLayerIndex(): number {
       return this.layerInfo.subLayerIdx !== -1 ? this.layerInfo.layerIndex : -1
+    },
+    backgroundControlStyles() {
+      const backgroundImage = this.image
+      return {
+        // width: `${backgroundImage.styles.imgWidth * this.contentScaleRatio}px`,
+        // height: `${backgroundImage.styles.imgHeight * this.contentScaleRatio}px`,
+        left: `${backgroundImage.styles.imgX * this.contentScaleRatio}px`,
+        top: `${backgroundImage.styles.imgY * this.contentScaleRatio}px`
+      }
+    },
+    backgroundFlipStyles() {
+      const { horizontalFlip, verticalFlip } = this.image.styles
+      return cssConverter.convertFlipStyle(horizontalFlip, verticalFlip)
+    },
+    backgroundContorlClipStyles() {
+      const { imgX: posX, imgY: posY } = this.image.styles
+      const pageWidth = pageUtils.currFocusPage.width
+      const pageHeight = pageUtils.currFocusPage.height
+      console.log(`path('M${-posX * this.contentScaleRatio},${-posY * this.contentScaleRatio}h${pageWidth * this.contentScaleRatio}v${pageHeight * this.contentScaleRatio}h${-pageWidth * this.contentScaleRatio}z')`)
+      return {
+        clipPath: `path('M${-posX * this.contentScaleRatio},${-posY * this.contentScaleRatio}h${pageWidth * this.contentScaleRatio}v${pageHeight * this.contentScaleRatio}h${-pageWidth * this.contentScaleRatio}z`,
+        'pointer-events': 'none'
+      }
     }
   }
 })
@@ -108,5 +154,12 @@ export default Vue.extend({
   background: rgba(0, 0, 0, 0.4);
   pointer-events: none;
   transform-style: preserve-3d;
+}
+
+.background-control {
+  position: absolute;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
 }
 </style>

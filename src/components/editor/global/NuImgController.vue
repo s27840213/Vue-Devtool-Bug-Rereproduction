@@ -87,7 +87,6 @@ export default Vue.extend({
         ControlUtils.updateLayerProps(this.pageIndex, i, { imgControl: false })
       }
     }
-    // this.setImgConfig(undefined)
   },
   computed: {
     ...mapGetters({
@@ -183,7 +182,6 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex'
     }),
     ...mapMutations({
-      setImgConfig: 'imgControl/SET_CONFIG',
       updateConfig: 'imgControl/UPDATE_CONFIG'
     }),
     controllerStyles() {

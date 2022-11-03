@@ -89,6 +89,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      updateConfig: 'imgControl/UPDATE_CONFIG'
+    }),
     styles() {
       // preserve in case the background image is needed to be rotatable in the future
       // const zindex = (this.pageIndex + 1) * 100
@@ -177,7 +180,8 @@ export default Vue.extend({
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.page.height / this.getPageScale - this.getImgHeight
       }
-      PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
+      // PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
+      this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y })
     },
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
       const angleInRad = this.getPageRotate * Math.PI / 180
@@ -290,8 +294,9 @@ export default Vue.extend({
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
       }
-      PageUtils.updateBackgroundImageStyles(this.pageIndex, { width, height, imgWidth: width, imgHeight: height })
-      PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
+      // PageUtils.updateBackgroundImageStyles(this.pageIndex, { width, height, imgWidth: width, imgHeight: height })
+      // PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
+      this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y, imgWidth: width, imgHeight: height })
     },
     scaleEnd() {
       this.isControlling = false

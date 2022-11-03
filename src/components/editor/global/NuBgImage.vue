@@ -63,6 +63,14 @@ export default Vue.extend({
     },
     getImgDimension(newVal, oldVal) {
       this.handleDimensionUpdate(newVal, oldVal)
+    },
+    'image.config.imgControl'(val) {
+      if (val) {
+        this.setBgImgConfig(this.pageIndex)
+      } else {
+        this.setBgImgConfig(undefined)
+      }
+      console.log(val)
     }
   },
   async created() {
@@ -198,7 +206,8 @@ export default Vue.extend({
     ...mapActions('file', ['updateImages']),
     ...mapActions('brandkit', ['updateLogos']),
     ...mapMutations({
-      setBgImageSrc: 'SET_backgroundImageSrc'
+      setBgImageSrc: 'SET_backgroundImageSrc',
+      setBgImgConfig: 'imgControl/SET_BG_CONFIG'
     }),
     onError() {
       let updater

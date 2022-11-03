@@ -134,22 +134,22 @@
                   @setFocus="setFocus()"
                   @isDragging="handleDraggingController")
             dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
-            div(v-if="isBackgroundImageControl"
-                class="background-control"
-                :style="backgroundControlStyles()")
-              nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio")
-              nu-background-controller(:config="config.backgroundImage.config"
-                :pageIndex="pageIndex"
-                :contentScaleRatio="contentScaleRatio")
-              div(:style="backgroundContorlClipStyles()")
-                nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
-                component(v-for="(elm, idx) in getHalation"
-                  :key="idx"
-                  :is="elm.tag"
-                  v-bind="elm.attrs")
-            div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
-                class="dim-background"
-                :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
+            //- div(v-if="isBackgroundImageControl"
+            //-     class="background-control"
+            //-     :style="backgroundControlStyles()")
+            //-   nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio")
+            //-   nu-background-controller(:config="config.backgroundImage.config"
+            //-     :pageIndex="pageIndex"
+            //-     :contentScaleRatio="contentScaleRatio")
+            //-   div(:style="backgroundContorlClipStyles()")
+            //-     nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
+            //-     component(v-for="(elm, idx) in getHalation"
+            //-       :key="idx"
+            //-       :is="elm.tag"
+            //-       v-bind="elm.attrs")
+            //- div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
+            //-     class="dim-background"
+            //-     :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
 
       div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
         class="page-highlighter"
@@ -281,7 +281,8 @@ export default Vue.extend({
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapState('shadow', ['handleId']),
     ...mapGetters({
-      imgControlPageIdx: 'imgControl/imgControlPageIdx'
+      imgControlPageIdx: 'imgControl/imgControlPageIdx',
+      isImgCtrl: 'imgContorl/isImgCtrl'
     }),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
