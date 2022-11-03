@@ -1,6 +1,6 @@
 export interface IModalButton {
   msg: string,
-  action: () => void,
+  action?: () => void,
   style?: { [key: string]: number | string },
   class?: string | string[]
 }
