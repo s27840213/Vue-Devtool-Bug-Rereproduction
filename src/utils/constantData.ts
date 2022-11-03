@@ -79,9 +79,10 @@ class ConstantData {
         }, {
           label: '電商 Banner',
           url: 'https://blog.vivipic.com/tw/ec-banner/'
-        },
-        ...[7].map((id) => themeItem(id))
-        ]
+        }, {
+          label: '電商詳情頁',
+          url: 'https://blog.vivipic.com/tw/ec-landingpage/'
+        }]
       }, {
         label: i18n.t('NN0669'),
         content: [{
