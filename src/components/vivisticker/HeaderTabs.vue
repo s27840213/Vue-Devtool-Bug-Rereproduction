@@ -2,7 +2,7 @@
   div(class="header-bar relative" @pointerdown.stop)
     div(class="header-bar__left" :class="{ editor: isInEditor }")
       div(v-for="tab in leftTabs"
-          :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled}"
+          :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled, 'panel-icon': tab.isPanelIcon}"
           :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
           @click.prevent.stop="handleTabAction(tab.action)")
         svg-icon(:iconName="tab.icon"
@@ -13,7 +13,7 @@
       span(v-if="centerTitle") {{ centerTitle }}
     div(class="header-bar__right")
       div(v-for="tab in rightTabs"
-          :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled}"
+          :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled, 'panel-icon': tab.isPanelIcon}"
           :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
           @click.prevent.stop="handleTabAction(tab.action)")
         svg-icon(:iconName="tab.icon"
@@ -37,7 +37,9 @@ type TabConfig = {
   disabled?: boolean,
   width: number,
   height?: number,
-  action?: () => void
+  action?: () => void,
+  // If isPanelIcon is true, MobilePanel v-out will not be triggered by this icon.
+  isPanelIcon?: boolean
 }
 
 export default Vue.extend({
@@ -153,7 +155,7 @@ export default Vue.extend({
       } else {
         return [
           // { icon: 'folder', width: 24, action: this.handleMyDesign },
-          { icon: 'more', width: 24, action: this.handleMore }
+          { icon: 'more', width: 24, action: this.handleMore, isPanelIcon: true }
         ]
       }
     }
