@@ -49,6 +49,7 @@ import layerUtils from '@/utils/layerUtils'
 import { Chrome } from 'vue-color'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
+import { checkAndConvertToHex } from '@/utils/colorUtils'
 
 export default Vue.extend({
   props: {
@@ -141,7 +142,7 @@ export default Vue.extend({
       const eyeDropper = new (window as any).EyeDropper()
       if (eyeDropper !== undefined) {
         eyeDropper.open().then((result: { sRGBHex: string }) => {
-          this.color = result.sRGBHex
+          this.color = checkAndConvertToHex(result.sRGBHex)
         })
       }
     },

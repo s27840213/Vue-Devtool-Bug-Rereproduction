@@ -107,6 +107,15 @@ export default Vue.extend({
       this.snapUtils.clear()
       this.closestSnaplines.v = []
       this.closestSnaplines.h = []
+    },
+    showGuideline(pos: number, type: string, index: number) {
+      if (!rulerUtils.isDragging) {
+        rulerUtils.deleteGuideline(
+          index,
+          type,
+          this.pageIndex)
+        rulerUtils.event.emit('showGuideline', pos, rulerUtils.mapSnaplineToGuidelineArea(pos, type, this.pageIndex), type, this.pageIndex)
+      }
     }
   }
 })

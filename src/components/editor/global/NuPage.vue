@@ -594,15 +594,6 @@ export default Vue.extend({
       const { horizontalFlip, verticalFlip } = this.config.backgroundImage.config.styles
       return cssConverter.convertFlipStyle(horizontalFlip, verticalFlip)
     },
-    showGuideline(pos: number, type: string, index: number) {
-      if (!rulerUtils.isDragging) {
-        rulerUtils.deleteGuideline(
-          index,
-          type,
-          this.pageIndex)
-        rulerUtils.event.emit('showGuideline', pos, rulerUtils.mapSnaplineToGuidelineArea(pos, type, this.pageIndex), type, this.pageIndex)
-      }
-    },
     openLineTemplatePopup() {
       this.pageClickHandler()
       popupUtils.openPopup('line-template', {
