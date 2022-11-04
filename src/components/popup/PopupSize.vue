@@ -214,7 +214,7 @@ export default Vue.extend({
     onConfirmClicked() {
       this.isConfirmClicked = true
       if (!(this.$refs.pageSizeSelector as any).isFormatApplicable) return // TODO: disable submit button
-      designUtils.newDesignWithLoginRedirect(this.selectedFormat.width, this.selectedFormat.height)
+      designUtils.newDesignWithLoginRedirect(this.selectedFormat.width, this.selectedFormat.height, undefined, this.$route.path.split('/').pop())
       // if (this.selectedFormat === 'custom' && (!this.widthValid || !this.heightValid)) {
       //   this.errorMsg = '請輸入大於 0 的數字'
       //   return

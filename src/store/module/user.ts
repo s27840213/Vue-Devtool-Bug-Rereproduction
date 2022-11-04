@@ -267,7 +267,6 @@ const actions: ActionTree<IUserModule, unknown> = {
       if (flag === 0) {
         logUtils.setLog(`Put asset success: ${msg}`)
         dispatch('getAllAssets', { token: state.token })
-        Vue.notify({ group: 'copy', text: `${i18n.t('NN0357')}` })
       }
       if (flag === 1) {
         logUtils.setLog(`Put asset failed: ${msg}`)
@@ -276,6 +275,7 @@ const actions: ActionTree<IUserModule, unknown> = {
         logUtils.setLog(`Token invalid!: ${msg}`)
         Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
       }
+      return data
     } catch (error) {
       logUtils.setLog(error as string)
     }
