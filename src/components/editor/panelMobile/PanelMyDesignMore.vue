@@ -104,7 +104,4 @@ export default Vue.extend({
     }
   }
 }
-
-.horizontal-rule {
-}
 </style>

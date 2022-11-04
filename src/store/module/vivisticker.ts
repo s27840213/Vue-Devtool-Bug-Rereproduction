@@ -3,6 +3,7 @@ import { IMyDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
+import Vue from 'vue'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 
 interface IViviStickerState {
@@ -164,7 +165,7 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getEditingAssetInfo(state: IViviStickerState): {[key: string]: any} {
     return state.editingAssetInfo
   },
-  getSeletedDesigns(state: IViviStickerState): {[key: string]: IMyDesign} {
+  getSelectedDesigns(state: IViviStickerState): {[key: string]: IMyDesign} {
     return state.selectedDesigns
   }
 }
@@ -288,10 +289,10 @@ const mutations: MutationTree<IViviStickerState> = {
     design.ver += 1
   },
   UPDATE_selectDesign(state: IViviStickerState, design: IMyDesign) {
-    state.selectedDesigns[design.id] = design
+    Vue.set(state.selectedDesigns, design.id, design)
   },
   UPDATE_deselectDesign(state: IViviStickerState, design: IMyDesign) {
-    delete state.selectedDesigns[design.id]
+    Vue.delete(state.selectedDesigns, design.id)
   },
   UPDATE_clearSelectedDesigns(state: IViviStickerState) {
     state.selectedDesigns = {}

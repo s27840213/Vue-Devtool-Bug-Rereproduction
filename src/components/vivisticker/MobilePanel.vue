@@ -4,7 +4,7 @@
       :style="panelStyle"
       v-click-outside="vcoConfig()"
       ref="panel")
-    div(class="mobile-panel__top-section"
+    div(v-if="!noHeaderTheme" class="mobile-panel__top-section"
       :class="{'self-padding': noPaddingTheme}")
       div(class="mobile-panel__drag-bar"
         :class="{'visible-hidden': panelTitle !== '' || fixSize || extraFixSizeCondition}"
@@ -88,6 +88,7 @@ import PopupDownload from '@/components/popup/PopupDownload.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
 import PanelColorPicker from '@/components/editor/panelMobile/PanelColorPicker.vue'
 import PanelMyDesignMore from '@/components/editor/panelMobile/PanelMyDesignMore.vue'
+import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
 import Tabs from '@/components/Tabs.vue'
 
 import { mapActions, mapGetters, mapMutations } from 'vuex'
@@ -154,6 +155,7 @@ export default Vue.extend({
     PanelVvstkMore,
     PanelColorPicker,
     PanelMyDesignMore,
+    panelSelectDesign,
     Tabs
   },
   data() {
@@ -202,18 +204,21 @@ export default Vue.extend({
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust',
-        'brand-list', 'vvstk-more', 'color-picker', 'my-design-more']
+        'brand-list', 'vvstk-more', 'color-picker', 'my-design-more', 'select-design']
 
       return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
-      return ['brand-list', 'text', 'vvstk-more', 'my-design-more'].includes(this.currActivePanel)
+      return ['brand-list', 'text', 'vvstk-more', 'my-design-more', 'select-design'].includes(this.currActivePanel)
+    },
+    noHeaderTheme(): boolean {
+      return ['select-design'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
       return this.inSelectionState || [
         'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
-        'font-spacing', 'download', 'more', 'object-adjust', 'brand-list', 'vvstk-more'].includes(this.currActivePanel)
+        'font-spacing', 'download', 'more', 'object-adjust', 'brand-list', 'vvstk-more', 'select-design'].includes(this.currActivePanel)
     },
     trueWholeSize(): boolean {
       return ['text'].includes(this.currActivePanel)

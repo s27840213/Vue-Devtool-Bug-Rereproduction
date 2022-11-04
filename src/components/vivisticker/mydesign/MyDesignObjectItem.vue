@@ -6,7 +6,12 @@
       draggable="false"
       :src="src")
     //- pro-item(v-if="item.assetInfo.plan")
-    div(class="my-design-object-item__more" @click.stop.prevent="handleMoreActions")
+    div(v-if="isInSelectionMode"
+        class="my-design-object-item__checkbox"
+        :class="{checked: checkSelected()}"
+        @click.prevent.stop="handleToggleDesignSelected")
+      svg-icon(v-if="checkSelected()" iconName="check" iconColor="white" iconWidth="20.7px")
+    div(v-else class="my-design-object-item__more" @click.stop.prevent="handleMoreActions")
       svg-icon(iconName="more" iconColor="white" iconWidth="24px")
 </template>
 
@@ -14,7 +19,7 @@
 import Vue from 'vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import { mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 
@@ -26,14 +31,23 @@ export default Vue.extend({
     item: Object
   },
   computed: {
+    ...mapGetters({
+      isInSelectionMode: 'vivisticker/getIsInSelectionMode',
+      selectedDesigns: 'vivisticker/getSelectedDesigns'
+    }),
     src(): string {
       return vivistickerUtils.getThumbSrc('mydesign', this.item.id, this.item.ver)
     }
   },
   methods: {
     ...mapMutations({
-      setMyDesignBuffer: 'vivisticker/SET_myDesignBuffer'
+      setMyDesignBuffer: 'vivisticker/SET_myDesignBuffer',
+      selectDesign: 'vivisticker/UPDATE_selectDesign',
+      deselectDesign: 'vivisticker/UPDATE_deselectDesign'
     }),
+    checkSelected() {
+      return this.selectedDesigns[this.item.id] !== undefined
+    },
     copySvg() {
       if (this.item.assetInfo.isFrame) {
         console.log('frame cannot be copied')
@@ -46,6 +60,13 @@ export default Vue.extend({
       this.setMyDesignBuffer(this.item)
       editorUtils.setCurrActivePanel('my-design-more')
       editorUtils.setShowMobilePanel(true)
+    },
+    handleToggleDesignSelected() {
+      if (this.checkSelected()) {
+        this.deselectDesign(this.item)
+      } else {
+        this.selectDesign(this.item)
+      }
     }
   }
 })
@@ -61,6 +82,23 @@ export default Vue.extend({
     vertical-align: middle;
     -webkit-touch-callout: none;
     user-select: none;
+  }
+  &__checkbox {
+    @include size(20px);
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: setColor(gray-6);
+    border: 1px solid setColor(black-5);
+    border-radius: 50%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &.checked {
+      background: setColor(black-3);
+      border: none;
+    }
   }
   &__more {
     @include size(24px);
