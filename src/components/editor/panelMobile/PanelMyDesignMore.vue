@@ -57,7 +57,11 @@ export default Vue.extend({
         },
         {
           msg: 'Cancel',
-          action: modalUtils.clearModalInfo
+          action: modalUtils.clearModalInfo,
+          style: {
+            color: '#474A57',
+            background: '#D9DBE1'
+          }
         }
       )
     },
