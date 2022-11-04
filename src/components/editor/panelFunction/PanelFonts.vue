@@ -244,8 +244,8 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel-fonts {
   @include size(100%, 100%);
-  display: grid;
-  grid-auto-columns: 100%;
+  display: flex;
+  flex-direction: column;
   padding: 0 8px;
   overflow-x: hidden;
   &__title {
@@ -260,6 +260,9 @@ export default Vue.extend({
   }
   &__search {
     margin-top: 10px;
+  }
+  .search-bar {
+    flex-shrink: 0;
   }
   &__close {
     position: absolute;
