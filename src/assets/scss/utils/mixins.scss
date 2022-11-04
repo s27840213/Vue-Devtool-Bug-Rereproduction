@@ -50,6 +50,13 @@
 @mixin push-scrollbar10 {
   box-sizing: border-box;
   margin-right: -10px;
+
+  // Firefox mobile never display scrollbar, add padding right back.
+  @include firefoxOnly {
+    .mobile-panel & {
+      padding-right: 10px;
+    }
+  }
 }
 
 @mixin hover-scrollbar($theme: light, $showX: false) {
