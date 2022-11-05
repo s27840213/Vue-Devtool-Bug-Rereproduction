@@ -45,7 +45,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
   .category-list {
-    @include push-scrollbar10;
+    // @include push-scrollbar10;
     @include hover-scrollbar(dark);
     &__header {
       line-height: 26px;
