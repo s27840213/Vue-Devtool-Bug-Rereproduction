@@ -205,7 +205,7 @@ export default Vue.extend({
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: setColor(gray-2, 0.6);
+  background-color: setColor(gray-1, 0.3);
   z-index: 999;
 }
 

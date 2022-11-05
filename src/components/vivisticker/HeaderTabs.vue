@@ -25,6 +25,7 @@
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
 import imageUtils from '@/utils/imageUtils'
+import modalUtils from '@/utils/modalUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -211,7 +212,17 @@ export default Vue.extend({
     },
     handleCopy() {
       if (vivistickerUtils.checkVersion('1.3')) {
-        vivistickerUtils.copyEditor()
+        vivistickerUtils.copyEditor((flag: string) => {
+          if (flag === '1') {
+            modalUtils.setModalInfo(
+              `${this.$t('STK0017')}`,
+              [`${this.$t('STK0018')}`.replace('{newline}', '<br/>')],
+              {
+                msg: `${this.$t('STK0019')}`
+              }
+            )
+          }
+        })
       } else {
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON())
       }
