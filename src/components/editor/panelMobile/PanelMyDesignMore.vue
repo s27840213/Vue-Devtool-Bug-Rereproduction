@@ -49,14 +49,14 @@ export default Vue.extend({
     },
     handleDelete() {
       modalUtils.setModalInfo(
-        'Delete design',
-        ['Are you sure you want to delete this design?'],
+        `${this.$t('STK0013')}`,
+        [`${this.$t('STK0014')}`],
         {
-          msg: 'Delete',
+          msg: `${this.$t('NN0034')}`,
           action: this.confirmDeletion
         },
         {
-          msg: 'Cancel',
+          msg: `${this.$t('NN0203')}`,
           action: modalUtils.clearModalInfo,
           style: {
             color: '#474A57',

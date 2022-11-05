@@ -273,14 +273,22 @@ const mutations: MutationTree<IViviStickerState> = {
   UPDATE_switchBg(state: IViviStickerState) {
     state.editorBgIndex = (state.editorBgIndex + 1) % EDITOR_BGS.length
   },
-  UPDATE_deleteMyDesign(state: IViviStickerState, updateInfo: { tab: string, id: string }) {
+  UPDATE_deleteDesign(state: IViviStickerState, updateInfo: { tab: string, id: string }) {
     const list = state.myDesignFiles[updateInfo.tab]
     if (!list) return
     const index = list.findIndex(d => d.id === updateInfo.id)
     if (index < 0) return
     list.splice(index, 1)
   },
-  UPDATE_updateMyDesign(state: IViviStickerState, updateInfo: { tab: string, design: IMyDesign }) {
+  UPDATE_deleteDesigns(state: IViviStickerState, tab: string) {
+    const list = state.myDesignFiles[tab]
+    for (const design of Object.values(state.selectedDesigns)) {
+      const index = list.findIndex(d => d.id === design.id)
+      if (index < 0) continue
+      list.splice(index, 1)
+    }
+  },
+  UPDATE_updateDesign(state: IViviStickerState, updateInfo: { tab: string, design: IMyDesign }) {
     const list = state.myDesignFiles[updateInfo.tab]
     if (!list) return
     const design = list.find(d => d.id === updateInfo.design.id)
@@ -293,6 +301,13 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   UPDATE_deselectDesign(state: IViviStickerState, design: IMyDesign) {
     Vue.delete(state.selectedDesigns, design.id)
+  },
+  UPDATE_selectAllDesigns(state: IViviStickerState, tab: string) {
+    const newSelection = {} as {[key: string]: IMyDesign}
+    for (const design of state.myDesignFiles[tab]) {
+      newSelection[design.id] = design
+    }
+    state.selectedDesigns = newSelection
   },
   UPDATE_clearSelectedDesigns(state: IViviStickerState) {
     state.selectedDesigns = {}

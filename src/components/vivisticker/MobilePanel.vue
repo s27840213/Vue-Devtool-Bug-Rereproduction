@@ -270,11 +270,14 @@ export default Vue.extend({
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop' || this.inSelectionState
     },
+    noGap(): boolean {
+      return ['vvstk-more', 'select-design'].includes(this.currActivePanel)
+    },
     panelStyle(): { [index: string]: string } {
       return Object.assign(
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
-          'row-gap': (this.hideDynamicComp || this.currActivePanel === 'vvstk-more') ? '0px' : '10px',
+          'row-gap': (this.hideDynamicComp || this.noGap) ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#1F1F1F',
           maxHeight: this.isDuringCopy ? '0' : (
             this.fixSize || this.extraFixSizeCondition
@@ -614,7 +617,8 @@ export default Vue.extend({
       const target = event.target as HTMLElement
       // If target is a Svg <use>, its class will be SVGAnimatedString obj.
       // Ignor its className check using optional chaining "?.includes()"
-      return !(this.keepPanel(target) ||
+      return !(this.currActivePanel === 'select-design' ||
+        this.keepPanel(target) ||
         target.className.includes?.('footer-tabs') ||
         target.className === 'inputNode'
       )

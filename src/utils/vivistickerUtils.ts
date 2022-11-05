@@ -652,7 +652,7 @@ class ViviStickerUtils {
       this.saveDesignJson(id)
     ])
     if (design) {
-      store.commit('vivisticker/UPDATE_updateMyDesign', { tab: editorType, design })
+      store.commit('vivisticker/UPDATE_updateDesign', { tab: editorType, design })
     }
   }
 
@@ -700,7 +700,7 @@ class ViviStickerUtils {
     if (deletion) {
       const { key, id, thumbType } = deletion
       await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, 'delete-asset')
-      store.commit('vivisticker/UPDATE_deleteMyDesign', { tab: key.split('-').slice(1).join('-'), id })
+      store.commit('vivisticker/UPDATE_deleteDesign', { tab: key.split('-').slice(1).join('-'), id })
       this.designDeletionQueue.shift()
       this.processDeleteAsset()
     }

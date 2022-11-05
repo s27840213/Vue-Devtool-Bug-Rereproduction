@@ -116,7 +116,7 @@ export default Vue.extend({
 
   &__tag {
     background-color: setColor(black-3);
-    padding: 8px;
+    padding: 5.5px 8px;
     display: flex;
     align-content: center;
     justify-content: center;
