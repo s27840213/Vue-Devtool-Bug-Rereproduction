@@ -38,7 +38,7 @@ export default Vue.extend({
       updateUserSettings: 'vivisticker/updateUserSettings'
     }),
     getDescription(key: string) {
-      return vivistickerUtils.getUserSettingDescription(key)
+      return this.$t(vivistickerUtils.getUserSettingDescription(key))
     },
     getChecked(key: string) {
       return this.userSettings[key]

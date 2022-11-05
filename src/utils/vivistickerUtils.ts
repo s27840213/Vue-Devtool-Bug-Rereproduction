@@ -32,7 +32,7 @@ const STANDALONE_USER_INFO: IUserInfo = {
 const USER_SETTINGS_CONFIG: {[key: string]: {default: any, description: string}} = {
   autoSave: {
     default: false,
-    description: `${i18n.t('STK0012')}`
+    description: 'STK0012'
   }
 }
 
