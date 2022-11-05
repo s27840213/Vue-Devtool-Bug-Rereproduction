@@ -6,7 +6,8 @@
       template(v-if="!pending")
         span(v-for="text in modalInfo.content"
         @keydown.ctrl.67.exact.stop
-        @keydown.meta.67.exact.stop) {{text}}
+        @keydown.meta.67.exact.stop
+        v-html="text")
       svg-icon(v-if="pending"
         :iconName="'loading'"
         :iconColor="'gray-2'"

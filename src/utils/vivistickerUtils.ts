@@ -382,13 +382,14 @@ class ViviStickerUtils {
     return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
   }
 
-  copyEditor() {
+  copyEditor(callback?: (flag: string) => void) {
     const executor = () => {
       Vue.nextTick(() => {
         this.preCopyEditor()
         setTimeout(() => {
-          this.sendCopyEditor().then(() => {
+          this.sendCopyEditor().then((flag) => {
             this.postCopyEditor()
+            callback && callback(flag)
           })
         }, 500) // wait for soft keyboard to close
       })
@@ -430,15 +431,15 @@ class ViviStickerUtils {
     store.commit('vivisticker/UPDATE_addRecentlyBgColor', newBgColor)
   }
 
-  async callIOSAsAPI(type: string, message: any, event: string, timeout = 5000) {
+  async callIOSAsAPI(type: string, message: any, event: string, timeout = 5000): Promise<any> {
     this.sendToIOS(type, message)
     const result = await Promise.race([
-      new Promise<void>(resolve => {
+      new Promise<any>(resolve => {
         this.callbackMap[event] = resolve
       }),
-      new Promise<void>(resolve => {
+      new Promise<undefined>(resolve => {
         setTimeout(() => {
-          resolve()
+          resolve(undefined)
         }, timeout)
       })
     ])
@@ -572,13 +573,13 @@ class ViviStickerUtils {
     vivistickerUtils.handleCallback('getState', data.value ? JSON.parse(data.value) : undefined)
   }
 
-  async sendCopyEditor(): Promise<void> {
+  async sendCopyEditor(): Promise<string> {
     if (this.isStandaloneMode) {
       await new Promise(resolve => setTimeout(resolve, 1000))
-      return
+      return '0'
     }
     const { x, y, width, height } = this.getEditorDimensions()
-    await this.callIOSAsAPI('SCREENSHOT', {
+    const data = await this.callIOSAsAPI('SCREENSHOT', {
       params: '',
       action: 'editorCopy',
       width,
@@ -587,10 +588,11 @@ class ViviStickerUtils {
       y,
       bgColor: store.getters['vivisticker/getEditorBg'] // for older app
     }, 'copy-editor')
+    return data?.flag ?? '0'
   }
 
-  copyDone() {
-    vivistickerUtils.handleCallback('copy-editor')
+  copyDone(data: { flag: number }) {
+    vivistickerUtils.handleCallback('copy-editor', data)
   }
 
   saveDesign() {
