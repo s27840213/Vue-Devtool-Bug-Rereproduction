@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-background-image"
+  div(v-if="!image.config.imgContorl" class="nu-background-image"
     :style="mainStyles"
     @pointerdown="setInBgSettingMode"
     draggable="false")
@@ -70,7 +70,6 @@ export default Vue.extend({
       } else {
         this.setBgImgConfig(undefined)
       }
-      console.log(val)
     }
   },
   async created() {
