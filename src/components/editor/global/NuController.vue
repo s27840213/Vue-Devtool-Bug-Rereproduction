@@ -140,7 +140,6 @@
                 @pointerdown.native.stop="rotateStart"
                 @touchstart.native="disableTouchEvent")
               img(class="control-point__mover"
-                v-if="config.type !== 'text' || !contentEditable"
                 :src="require('@/assets/img/svg/move.svg')"
                 :style='controlPointStyles()'
                 @pointerdown="moveStart"
@@ -766,7 +765,7 @@ export default Vue.extend({
           const isMover = targetClassList.contains('control-point__mover')
 
           // if the text layer is already active and contentEditable
-          if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar) {
+          if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar && !isMover) {
             return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
