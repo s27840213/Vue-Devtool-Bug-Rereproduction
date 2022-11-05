@@ -539,7 +539,7 @@ class ViviStickerUtils {
     return data?.flag ?? '0'
   }
 
-  copyDone(data: { flag: number }) {
+  copyDone(data: { flag: string }) {
     vivistickerUtils.handleCallback('copy-editor', data)
   }
 
