@@ -591,7 +591,7 @@ class ViviStickerUtils {
     return data?.flag ?? '0'
   }
 
-  copyDone(data: { flag: number }) {
+  copyDone(data: { flag: string }) {
     vivistickerUtils.handleCallback('copy-editor', data)
   }
 
@@ -649,18 +649,17 @@ class ViviStickerUtils {
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
     const editorType = store.getters['vivisticker/getEditorType']
-    const [_, design] = await Promise.all([
-      this.genThumbnail(id),
-      this.saveDesignJson(id)
-    ])
+    const flag = await this.genThumbnail(id)
+    if (flag === '1') return
+    const design = await this.saveDesignJson(id)
     if (design) {
       store.commit('vivisticker/UPDATE_updateDesign', { tab: editorType, design })
     }
   }
 
-  async genThumbnail(id: string): Promise<void> {
-    if (this.isStandaloneMode) return
-    await new Promise<void>((resolve, reject) => {
+  async genThumbnail(id: string): Promise<string> {
+    if (this.isStandaloneMode) return '0'
+    return await new Promise<string>((resolve, reject) => {
       try {
         Vue.nextTick(() => {
           this.preCopyEditor()
@@ -674,9 +673,9 @@ class ViviStickerUtils {
               x,
               y,
               bgColor: store.getters['vivisticker/getEditorBg'] // for older app
-            }, 'gen-thumb').then(() => {
+            }, 'gen-thumb').then((data) => {
               this.postCopyEditor()
-              resolve()
+              resolve(data?.flag ?? '0')
             })
           }, 500) // wait for soft keyboard to close
         })
@@ -686,8 +685,8 @@ class ViviStickerUtils {
     })
   }
 
-  thumbDone() {
-    vivistickerUtils.handleCallback('gen-thumb')
+  thumbDone(data: { flag: string }) {
+    vivistickerUtils.handleCallback('gen-thumb', data)
   }
 
   async deleteAsset(key: string, id: string, thumbType: string): Promise<void> {
