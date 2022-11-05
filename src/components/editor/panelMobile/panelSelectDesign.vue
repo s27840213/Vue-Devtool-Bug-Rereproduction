@@ -66,6 +66,7 @@ export default Vue.extend({
       }
     },
     handleDeleteSelected() {
+      if (!this.isAnySelected) return
       modalUtils.setModalInfo(
         `${this.$t('NN0693')}`,
         [`${this.$t('NN0244')}`],
