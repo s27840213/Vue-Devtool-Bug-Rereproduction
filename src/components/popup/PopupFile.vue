@@ -174,7 +174,7 @@ export default Vue.extend({
       pageUtils.setPages([pageUtils.newPage({})])
     },
     duplicatePageTwentyTimes() {
-      pageUtils.duplicatePage1(60)
+      pageUtils.duplicatePage1(20)
     },
     onLogoutClicked() {
       localStorage.setItem('token', '')

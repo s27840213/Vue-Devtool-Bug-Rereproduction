@@ -246,6 +246,9 @@ export default Vue.extend({
     overflowContainer: HTMLElement,
     isScaling: Boolean
   },
+  updated() {
+    console.log('updated')
+  },
   mounted() {
     this.initialPageHeight = (this.config as IPage).height
     this.$nextTick(() => {
