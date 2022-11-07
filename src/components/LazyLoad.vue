@@ -3,11 +3,7 @@
       :style="styles"
       ref="observer")
     transition(name="fade-in")
-      div(v-if="vIfConfition"
-          :style="styles")
-        div(v-show="shoudBeRendered"
-          :style="styles")
-          slot
+      slot(v-if="shoudBeRendered")
 </template>
 
 <script lang="ts">
@@ -42,10 +38,6 @@ export default Vue.extend({
     unrenderDelay: {
       type: Number,
       default: 2000
-    },
-    vShowFlag: {
-      type: Boolean,
-      default: true
     }
   },
   data() {
@@ -56,7 +48,7 @@ export default Vue.extend({
       renderTimer: -1,
       unrenderEventId: '',
       renderEventId: '',
-      firstRender: false
+      loadedFlag: false
     }
   },
   mounted() {
@@ -88,7 +80,7 @@ export default Vue.extend({
                 this.handleLoaded()
               })
             },
-            this.handleUnrender ? 200 : 0
+            this.handleUnrender ? 150 : 0
           )
 
           // this.renderTimer = setTimeout(
@@ -105,24 +97,20 @@ export default Vue.extend({
           queueUtils.deleteEvent(this.renderEventId)
           clearTimeout(this.renderTimer)
 
-          // this.unrenderTimer = setTimeout(() => {
-          //   this.unrenderEventId = generalUtils.generateRandomString(3)
-          //   queueUtils.push(this.unrenderEventId, async () => {
-          //     this.shoudBeRendered = false
-          //   })
-          // }, this.unrenderDelay)
-
           this.unrenderTimer = setTimeout(() => {
-            this.shoudBeRendered = false
+            this.unrenderEventId = generalUtils.generateRandomString(3)
+            queueUtils.push(this.unrenderEventId, async () => {
+              this.shoudBeRendered = false
+            })
           }, this.unrenderDelay)
+
+          // this.unrenderTimer = setTimeout(() => {
+          //   this.shoudBeRendered = false
+          // }, this.unrenderDelay)
         }
       }, options
     )
     this.intersectionObserver.observe(this.$refs.observer as Element)
-
-    if (this.vShowFlag) {
-      this.firstRender = true
-    }
   },
   computed: {
     styles(): { [index: string]: string } {
@@ -130,9 +118,6 @@ export default Vue.extend({
         minHeight: `${this.minHeight}px`,
         ...(this.maxHeight && { maxHeight: `${this.maxHeight}px` })
       }
-    },
-    vIfConfition(): boolean {
-      return this.vShowFlag ? this.firstRender : this.shoudBeRendered
     }
   },
   methods: {
