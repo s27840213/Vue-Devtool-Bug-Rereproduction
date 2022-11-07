@@ -1,11 +1,11 @@
 <template lang="pug">
   div(class="mobile-editor")
-    div(class="mobile-editor__top" :style="topStyle")
+    div(class="mobile-editor__top")
       header-tabs(@switchTab="switchTab"
         @showAllPages="showAllPages"
         :currTab="currActivePanel"
         :inAllPagesMode="inAllPagesMode")
-      div(class="mobile-editor__content")
+      div(class="mobile-editor__content" :style="contentStyle")
         keep-alive
           component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
             :currActivePanel="currActivePanel"
@@ -14,8 +14,6 @@
             :showMobilePanel="showMobilePanelAfterTransitoin")
       transition(name="panel-up"
                 @before-enter="beforeEnter"
-                @after-enter="afterEnter"
-                @before-leave="beforeLeave"
                 @after-leave="afterLeave")
         mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
@@ -72,7 +70,6 @@ export default Vue.extend({
       currColorEvent: '',
       ColorEventType,
       showMobilePanelAfterTransitoin: false,
-      panelAnimating: false,
       panelHeight: 0
     }
   },
@@ -140,8 +137,8 @@ export default Vue.extend({
     inPagePanel(): boolean {
       return SidebarPanelType.page === this.currPanel
     },
-    topStyle(): Record<string, string> {
-      return { paddingBottom: this.panelAnimating ? '0' : `${this.panelHeight}px` }
+    contentStyle(): Record<string, string> {
+      return { transform: `translateY(-${this.panelHeight / 2}px)` }
     },
     scaleRatioEditorPos(): { [index: string]: string } {
       return this.inPagePanel ? {
@@ -241,29 +238,12 @@ export default Vue.extend({
     },
     beforeEnter() {
       this.showMobilePanelAfterTransitoin = true
-      this.panelAnimating = true
-    },
-    afterEnter() {
-      this.panelAnimating = false
-      this.$nextTick(() => {
-        pageUtils.fitPage()
-      })
-    },
-    beforeLeave() {
-      this.panelAnimating = true
-      this.$nextTick(() => {
-        pageUtils.fitPage()
-      })
     },
     afterLeave() {
       this.setCurrActivePanel('none')
       setTimeout(() => {
         this.showMobilePanelAfterTransitoin = false
       }, 300)
-      this.$nextTick(() => {
-        this.panelHeight = 0
-        this.panelAnimating = false
-      })
     }
   }
 })
@@ -296,12 +276,8 @@ export default Vue.extend({
     height: 100%;
     width: 100%;
     z-index: setZindex("editor-view");
-
-    position: relative;
-    height: 100%;
-    width: 100%;
     overflow: hidden;
-    z-index: setZindex("editor-view");
+    transition: transform 0.3s map-get($ease-functions, ease-in-out-quint);
   }
 
   &__page-preview {

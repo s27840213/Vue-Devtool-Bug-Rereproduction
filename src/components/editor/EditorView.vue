@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="editor-view scrollbar-gray"
+  div(class="editor-view"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="brushCursorStyles()"
       @pointerdown="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
@@ -582,7 +582,15 @@ export default Vue.extend({
 $REULER_SIZE: 20px;
 
 .editor-view {
-  overflow: scroll;
+  @include hover-scrollbar($showX: true);
+  overflow: overlay;
+  &::-webkit-scrollbar-thumb {
+    border: none;
+  }
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
   position: relative;
   z-index: setZindex("editor-view");
 

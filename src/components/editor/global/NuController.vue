@@ -140,7 +140,6 @@
                 @pointerdown.native.stop="rotateStart"
                 @touchstart.native="disableTouchEvent")
               img(class="control-point__mover"
-                v-if="config.type !== 'text' || !contentEditable"
                 :src="require('@/assets/img/svg/move.svg')"
                 :style='controlPointStyles()'
                 @pointerdown="moveStart"
@@ -601,6 +600,7 @@ export default Vue.extend({
       return {
         transform: this.enalble3dTransform ? `translate3d(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px, ${zindex}px) rotate(${rotate}deg)` : `translate(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px) rotate(${rotate}deg)`,
         ...this.transformStyle,
+        ...((!this.enalble3dTransform && this.isActive && type === 'control-point') && { 'z-index': 10000 }),
         willChange: this.isDragging() ? 'transform' : 'none',
         width: `${width * this.contentScaleRatio}px`,
         height: `${height * this.contentScaleRatio}px`,
@@ -765,7 +765,7 @@ export default Vue.extend({
           const isMover = targetClassList.contains('control-point__mover')
 
           // if the text layer is already active and contentEditable
-          if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar) {
+          if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar && !isMover) {
             return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex

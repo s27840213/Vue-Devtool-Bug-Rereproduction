@@ -87,12 +87,12 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .temp {
   &__content {
+    @include push-scrollbar10;
+    @include hover-scrollbar();
     height: 100%;
     line-height: 0;
     text-align: left;
     box-sizing: border-box;
-    @include push-scrollbar10;
-    @include hide-scrollbar;
   }
 }
 </style>

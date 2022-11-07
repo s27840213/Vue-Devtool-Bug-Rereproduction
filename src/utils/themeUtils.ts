@@ -84,7 +84,7 @@ class ThemeUtils {
 
     // Sort themes by difference and filter low difference themes.
     const currPageRatio = width / height
-    let recommendation: Itheme[] = _.sortBy(themes, [
+    let recommendation = _.sortBy(themes, [
       (theme: Itheme) => this.themeRatioDifference(theme, currPageRatio),
       (theme: Itheme) => Math.abs(theme.width - width)
     ])
