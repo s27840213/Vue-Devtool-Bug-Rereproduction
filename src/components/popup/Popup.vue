@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="popup bg-white")
+  div(v-if="component!==''" class="popup bg-white")
     component(:is="component"
     v-click-outside="vcoConfig"
     :updateOptions="sharedUpdateOptions"
