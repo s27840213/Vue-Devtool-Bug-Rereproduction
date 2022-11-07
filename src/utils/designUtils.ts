@@ -769,14 +769,15 @@ class DesignUtils {
     return Array(pageNum).fill('').map((_, index) => this.getDesignPreview(assetId, scale, ver, signedUrl, index))
   }
 
-  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, id: number | string | undefined = undefined, path: string | undefined = undefined) {
+  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, id: number | string | undefined = undefined, path?: string, folderName?: string) {
     // Redirect user to editor and create new design, will be use by login redirect.
     const query = {
       type: 'new-design-size',
       width: width.toString(),
       height: id?.toString() === '7' ? width.toString() : height.toString(),
       themeId: id ? id.toString() : undefined,
-      path
+      path,
+      folderName
     }
     const route = router.resolve({
       name: 'Editor',
@@ -786,7 +787,7 @@ class DesignUtils {
   }
 
   // Below function is used to update the page
-  async newDesign(width?: number, height?: number, newDesignType?: number, path: string | undefined = undefined) {
+  async newDesign(width?: number, height?: number, newDesignType?: number, path?: string, folderName?: string) {
     store.commit('file/SET_setLayersDone')
     pageUtils.setPages([pageUtils.newPage({
       width: width ?? 1080,
@@ -795,8 +796,7 @@ class DesignUtils {
     pageUtils.clearPagesInfo()
     await themeUtils.refreshTemplateState(undefined, newDesignType)
     if (this.isLogin) {
-      // TODO: fix url may be too long
-      router.replace({ query: { path: path?.replaceAll('&', ',') } })
+      router.replace({ query: { width: width?.toString(), height: height?.toString(), path, folderName } })
 
       // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
       // /**

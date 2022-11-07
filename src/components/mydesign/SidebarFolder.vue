@@ -74,6 +74,11 @@ export default Vue.extend({
     parents: Array,
     level: Number
   },
+  created() {
+    if (this.$router.currentRoute.path.split('/').pop()?.split('&').pop() === this.folder.id) {
+      this.setCurrFolderInfo(this.folder)
+    }
+  },
   directives: {
     clickOutside: vClickOutside.directive
   },
@@ -114,7 +119,8 @@ export default Vue.extend({
       setCurrLocation: 'SET_currLocation',
       setExpand: 'SET_expand',
       setDraggingFolder: 'SET_draggingFolder',
-      removeFolder: 'UPDATE_removeFolder'
+      removeFolder: 'UPDATE_removeFolder',
+      setCurrFolderInfo: 'SET_currFolderInfo'
     }),
     expandIconStyles() {
       return this.folder.isExpanded ? {} : { transform: 'rotate(-90deg)' }
@@ -170,6 +176,7 @@ export default Vue.extend({
     handleSelection() {
       if (this.isTempFolder) return
       this.setCurrLocation(`f:${designUtils.appendPath(this.parents as string[], this.folder as IFolder).join('/')}`)
+      this.setCurrFolderInfo(this.folder)
     },
     handleDragEnter() {
       if (this.folderUndroppable()) return

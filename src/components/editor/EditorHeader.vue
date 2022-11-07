@@ -9,10 +9,10 @@
           a(:href="`/login?redirect=${path}`") {{$tc('NN0168',1)}}
     template(v-else)
       router-link(to="/mydesign" class="body-3 pointer hover-effect a-reset") {{$t('NN0080')}}
-      span(class="body-3 pointer") {{`${!folderInfo.isRoot ? '/...': ''}`}}
-      router-link(v-if="folderInfo.parentFolder"
-        :to="`/mydesign/${this.folderInfo.path.split(',').join('&')}`"
-        class="body-3 pointer hover-effect a-reset") {{`/${folderInfo.parentFolder}`}}
+      span(class="body-3 pointer") {{`${!isRoot ? '/...': ''}`}}
+      router-link(v-if="parentFolder.name && parentFolder.path"
+        :to="`/mydesign/${parentFolder.path}`"
+        class="body-3 pointer hover-effect a-reset") {{`/${parentFolder.name}`}}
       span(class="body-3 ml-10 mr-5") /
       input(class="body-3 text-gray-2" type="text"
         :placeholder="`${$t('NN0079')}`"
@@ -76,11 +76,19 @@ export default Vue.extend({
     path(): string {
       return this.$route.path
     },
+    isRoot(): boolean {
+      return this.$route.query.path ? (this.$route.query.path as string).split(',').length === 1 : this.folderInfo.isRoot
+    },
     currLocale(): string {
       return this.$i18n.locale
     },
     pagesName(): string {
       return pageUtils.pagesName
+    },
+    parentFolder(): {name: string, path: string} {
+      const name = this.$route.query.folderName || this.folderInfo.parentFolder
+      const path = this.$route.query.path || this.folderInfo.path
+      return { name, path: path.split(',').join('&') }
     },
     headerPosStyle() {
       const top = rulerUtils.showRuler ? `${rulerUtils.RULER_SIZE}px` : '0px'

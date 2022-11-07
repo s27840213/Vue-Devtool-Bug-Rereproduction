@@ -670,9 +670,17 @@ class UploadUtils {
               await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
                 'move', designAssetIndex ?? null, null, path)
             } else {
-              // TODO: remove design and query
-              return
+              // TODO: remove design
             }
+            // update design info
+            designUtils.fetchDesign(teamId as string, assetId)
+            // remove query for new design
+            const query = Object.assign({}, router.currentRoute.query)
+            delete query.width
+            delete query.height
+            delete query.path
+            delete query.folderName
+            router.replace({ query })
           }
           Vue.notify({ group: 'copy', text: `${i18n.t('NN0357')}` })
         }

@@ -22,6 +22,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     const themeId = urlParams.get('themeId')
     const groupId = urlParams.get('group_id')
     const path = urlParams.get('path')
+    const folderName = urlParams.get('folderName')
 
     if (type && designId) {
       switch (type) {
@@ -45,7 +46,8 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
         parseInt(width),
         parseInt(height === '0' ? width : height),
         parseInt(themeId as string),
-        path === null ? undefined : path
+        path === null ? undefined : path,
+        folderName === null ? undefined : folderName
       )
       if (themeId === '7') {
         store.commit('SET_groupType', 1)
