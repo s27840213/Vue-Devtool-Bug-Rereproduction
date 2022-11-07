@@ -64,7 +64,8 @@ export interface ITextFormat {
   textShape: ITextShape | {},
   scale: number,
   paragraphStyle: IParagraphStyle,
-  spanStyle: ISpanStyle
+  spanStyle: ISpanStyle,
+  writingMode: string
 }
 
 export interface IImageFormat extends IAdjustJsonProps { }
