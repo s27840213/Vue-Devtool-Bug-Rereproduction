@@ -98,7 +98,7 @@ export default Vue.extend({
   computed: {
     ...mapState('design', [
       'currLocation',
-      'currFolderInfo'
+      'folders'
     ]),
     isMobile(): boolean {
       return document.body.clientWidth / document.body.clientHeight < 1
@@ -215,7 +215,9 @@ export default Vue.extend({
     onConfirmClicked() {
       this.isConfirmClicked = true
       if (!(this.$refs.pageSizeSelector as any).isFormatApplicable) return // TODO: disable submit button
-      designUtils.newDesignWithLoginRedirect(this.selectedFormat.width, this.selectedFormat.height, undefined, this.currLocation.split('/').slice(1).join(','), this.currFolderInfo?.name)
+      const path = this.$route.name === 'MyDesign' ? this.currLocation.split('/').slice(1).join(',') : undefined
+      const foldername = this.$route.name === 'MyDesign' ? designUtils.search(this.folders, designUtils.makePath(this.currLocation))?.name : undefined
+      designUtils.newDesignWithLoginRedirect(this.selectedFormat.width, this.selectedFormat.height, undefined, path, foldername)
       // if (this.selectedFormat === 'custom' && (!this.widthValid || !this.heightValid)) {
       //   this.errorMsg = '請輸入大於 0 的數字'
       //   return

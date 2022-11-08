@@ -15,7 +15,7 @@
                   :path="path"
                   :config="folder"
                   :index="index"
-                  @goto="handleGotoFolder(folder)"
+                  @goto="handleGotoFolder(folder.id)"
                   :undraggable="limitFunctions"
                   :undroppable="limitFunctions"
                   :nameIneditable="limitFunctions"
@@ -88,8 +88,7 @@ export default Vue.extend({
       setCurrLocation: 'SET_currLocation',
       addFolderToSelection: 'UPDATE_addFolderToSelection',
       removeFolderFromSelection: 'UPDATE_removeFolderFromSelection',
-      metaSelectFolder_: 'UPDATE_metaSelectFolder',
-      setCurrFolderInfo: 'SET_currFolderInfo'
+      metaSelectFolder_: 'UPDATE_metaSelectFolder'
     }),
     expansionIconStyles() {
       return this.isExpanded ? {} : { transform: 'rotate(-90deg)' }
@@ -105,14 +104,13 @@ export default Vue.extend({
     handleMoveItem(item: IQueueItem) {
       this.$emit('moveItem', item)
     },
-    handleGotoFolder(folder: IFolder) {
+    handleGotoFolder(id: string) {
       if (this.currLocation === 't') return
-      this.setCurrLocation(`${this.currLocation}/${folder.id}`)
+      this.setCurrLocation(`${this.currLocation}/${id}`)
       this.setExpand({
         path: this.path,
         isExpanded: true
       })
-      this.setCurrFolderInfo(folder)
     },
     toggleExpansion() {
       this.isExpanded = !this.isExpanded

@@ -104,8 +104,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('design', {
-      setCurrLocation: 'SET_currLocation',
-      setCurrFolderInfo: 'SET_currFolderInfo'
+      setCurrLocation: 'SET_currLocation'
     }),
     draggedOverStyles(type: string) {
       switch (type) {
@@ -123,7 +122,6 @@ export default Vue.extend({
     },
     handleSelection(selection: string) {
       this.setCurrLocation(selection)
-      this.setCurrFolderInfo(undefined)
     },
     handleDragEnter(type: string) {
       switch (type) {

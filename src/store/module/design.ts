@@ -9,7 +9,6 @@ import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api
 
 interface IDesignState {
   currLocation: string,
-  currFolderInfo: IFolder| undefined,
   moveToFolderSelectInfo: string,
   folders: IFolder[],
   copiedFolders: IFolder[],
@@ -36,7 +35,6 @@ interface IDesignState {
 
 const getDefaultState = (): IDesignState => ({
   currLocation: '',
-  currFolderInfo: undefined,
   moveToFolderSelectInfo: '',
   folders: [],
   copiedFolders: [],
@@ -65,9 +63,6 @@ const state = getDefaultState()
 const getters: GetterTree<IDesignState, unknown> = {
   getCurrLocation(state: IDesignState): string {
     return state.currLocation
-  },
-  getCurrFolderInfo(state: IDesignState): IFolder| undefined {
-    return state.currFolderInfo
   },
   getMoveToFolderSelectInfo(state: IDesignState): string {
     return state.moveToFolderSelectInfo
@@ -961,9 +956,6 @@ const mutations: MutationTree<IDesignState> = {
     }
     if (router.currentRoute.path === targetPath) return
     router.replace({ path: targetPath })
-  },
-  SET_currFolderInfo(state: IDesignState, folder: IFolder) {
-    state.currFolderInfo = folder
   },
   SET_moveToFolderSelectInfo(state: IDesignState, selectInfo: string) {
     const folders = generalUtils.deepCopy(state.copiedFolders)
