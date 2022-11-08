@@ -1,9 +1,9 @@
 <template lang="pug">
   div(class="panel-select-design")
-    div(class="panel-select-design__left")
+    div(class="panel-select-design__left"
+        @click.prevent.stop="handleToggleAllSelected")
       div(class="panel-select-design__left__checkbox"
-          :class="{checked: isAllSelected}"
-          @click.prevent.stop="handleToggleAllSelected")
+          :class="{checked: isAllSelected}")
         svg-icon(v-if="isAllSelected" iconName="check" iconColor="white" iconWidth="20.7px")
       div(class="panel-select-design__left__text")
         span {{ isAllSelected ? $t('STK0016') : $t('STK0015') }}
