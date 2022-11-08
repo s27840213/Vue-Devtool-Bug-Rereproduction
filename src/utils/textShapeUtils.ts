@@ -33,7 +33,7 @@ class Controller {
     return bend === 0 ? 10000 : 1000 / Math.pow(Math.abs(bend), 0.6)
   }
 
-  getTextShapeStyles(layer: IText, shape: string, attrs?: any) {
+  getTextShapeStyles(layer: IText, shape: string, isSubLayer: boolean, attrs?: any) {
     const {
       textShape: styleTextShape,
       width,
@@ -62,7 +62,11 @@ class Controller {
         x: x + ((width - textHW.width) / 2),
         y: +bend < 0 ? y + height - textHW.height : y
       })
-      props.widthLimit = -1
+      if (isSubLayer) {
+        props.widthLimit = textHW.width
+      } else {
+        props.widthLimit = -1
+      }
     } else { // curve
       const { bend } = styles.textShape as any
       Object.assign(styles, this.getCurveTextProps(layer, +bend))
@@ -101,6 +105,7 @@ class Controller {
           const { styles, props } = this.getTextShapeStyles(
             layers[idx],
             shape,
+            targetLayer.type !== 'text',
             attrs
           )
           store.commit('UPDATE_specLayerData', {
@@ -119,6 +124,7 @@ class Controller {
       const { styles, props } = this.getTextShapeStyles(
         layers[subLayerIndex],
         shape,
+        true,
         attrs
       )
       store.commit('UPDATE_specLayerData', {

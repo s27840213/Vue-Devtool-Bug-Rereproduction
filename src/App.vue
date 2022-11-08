@@ -10,7 +10,7 @@
     //-   div(class="coordinate__val coordinate__height")
     //-     span {{coordinateHeight}}px
     router-view
-    div(v-if="!isTouchDevice" class="popup-area")
+    div(class="popup-area")
       popup
       res-info(v-show="currSelectedResInfo.type"
         :info="currSelectedResInfo"
@@ -64,8 +64,7 @@ export default Vue.extend({
     return {
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
-      coordinateHeight: 0,
-      isTouchDevice: generalUtils.isTouchDevice()
+      coordinateHeight: 0
     }
   },
   beforeMount() {
