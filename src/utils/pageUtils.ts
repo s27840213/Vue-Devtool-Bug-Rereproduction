@@ -320,49 +320,49 @@ class PageUtils {
   findCentralPageIndexInfo = throttle(this.findCentralPageIndexInfoHandler, 100)
 
   private findCentralPageIndexInfoHandler(preventFocus = false) {
-    // const showMobilePanel = editorUtils.showMobilePanel || editorUtils.mobileAllPageMode
-    // const isTouchDevice = generalUtils.isTouchDevice()
+    const showMobilePanel = editorUtils.showMobilePanel || editorUtils.mobileAllPageMode
+    const isTouchDevice = generalUtils.isTouchDevice()
 
-    // // for mobile version
-    // if (isTouchDevice) {
-    //   if (!this.isDetailPage) {
-    //     store.commit('SET_middlemostPageIndex', this.currCardIndex)
-    //     return this.currCardIndex
-    //   } else {
-    //     if (showMobilePanel) {
-    //       return this.middlemostPageIndex
-    //     }
-    //   }
-    // }
+    // for mobile version
+    if (isTouchDevice) {
+      if (!this.isDetailPage) {
+        store.commit('SET_middlemostPageIndex', this.currCardIndex)
+        return this.currCardIndex
+      } else {
+        if (showMobilePanel) {
+          return this.middlemostPageIndex
+        }
+      }
+    }
 
-    // const pages = [...document.getElementsByClassName('nu-page')].map((page) => {
-    //   const rect = (page as HTMLElement).getBoundingClientRect()
-    //   return {
-    //     top: rect.top,
-    //     bottom: rect.bottom
-    //   }
-    // })
+    const pages = [...document.getElementsByClassName('nu-page')].map((page) => {
+      const rect = (page as HTMLElement).getBoundingClientRect()
+      return {
+        top: rect.top,
+        bottom: rect.bottom
+      }
+    })
 
-    // const targetContainer = this.isDetailPage && isTouchDevice ? 'mobile-editor__content' : 'content__editor'
+    const targetContainer = this.isDetailPage && isTouchDevice ? 'mobile-editor__content' : 'content__editor'
 
-    // const container = document.getElementsByClassName(targetContainer)[0] as HTMLElement
+    const container = document.getElementsByClassName(targetContainer)[0] as HTMLElement
 
-    // if (container === undefined) {
-    //   return -1
-    // }
-    // const containerRect = container.getBoundingClientRect()
-    // const centerLinePos = (containerRect.bottom - containerRect.top) / 2
+    if (container === undefined) {
+      return -1
+    }
+    const containerRect = container.getBoundingClientRect()
+    const centerLinePos = (containerRect.bottom - containerRect.top) / 2
 
-    // const minDistance = Number.MAX_SAFE_INTEGER
-    // const targetIndex = this.searchMiddlemostPageIndex(pages, centerLinePos, minDistance, -1)
-    // store.commit('SET_middlemostPageIndex', targetIndex)
-    // if (isTouchDevice && this.isDetailPage) {
-    //   store.commit('SET_currActivePageIndex', targetIndex)
-    // }
+    const minDistance = Number.MAX_SAFE_INTEGER
+    const targetIndex = this.searchMiddlemostPageIndex(pages, centerLinePos, minDistance, -1)
+    store.commit('SET_middlemostPageIndex', targetIndex)
+    if (isTouchDevice && this.isDetailPage) {
+      store.commit('SET_currActivePageIndex', targetIndex)
+    }
 
-    // if (!preventFocus) this.activeMiddlemostPage()
-    // this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
-    // this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
+    if (!preventFocus) this.activeMiddlemostPage()
+    this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
+    this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
   }
 
   findBoundary(posArr: Array<{ top: number, bottom: number }>, containerRect: DOMRect, currIndex: number, toTop: boolean): number {
