@@ -12,11 +12,11 @@
           @click="handleAutoSaveToggle")
         svg-icon(v-if="userSettings.autoSave" iconName="done" iconColor="white" iconWidth="20.7px")
     div(class="popup-save-design__buttons")
+      div(class="popup-save-design__button confirm"
+          @click.prevent.stop="handleSave") {{ $t('STK0004') }}
       div(class="popup-save-design__button cancel"
           :class="{disabled: userSettings.autoSave}"
           @click.prevent.stop="handleNotSave") {{ $t('STK0011') }}
-      div(class="popup-save-design__button confirm"
-          @click.prevent.stop="handleSave") {{ $t('STK0004') }}
 </template>
 
 <script lang="ts">
@@ -121,14 +121,14 @@ export default Vue.extend({
   &__buttons {
     margin-top: 16px;
     display: flex;
-    flex-wrap: nowrap;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
+    gap: 20px;
   }
   &__button {
     @include btn-SM;
-    width: 120px;
+    width: 200px;
     height: 32px;
     border-radius: 10px;
     padding: 0 14px;
