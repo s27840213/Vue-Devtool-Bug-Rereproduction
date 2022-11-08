@@ -192,7 +192,9 @@ export default Vue.extend({
       setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
       setCurrActiveTab: 'vivisticker/SET_currActiveTab',
-      setShowTutorial: 'vivisticker/SET_showTutorial'
+      setShowTutorial: 'vivisticker/SET_showTutorial',
+      setIsInMyDesign: 'vivisticker/SET_isInMyDesign',
+      setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode'
     }),
     headerStyles() {
       return {
@@ -235,6 +237,8 @@ export default Vue.extend({
       this.currColorEvent = ColorEventType.background
     },
     switchMainTab(panelType: string) {
+      this.setIsInMyDesign(false)
+      this.setIsInSelectionMode(false)
       this.setCurrActiveTab(panelType)
       if (this.currActivePanel === 'color-picker') {
         vivistickerUtils.setNewBgColor('')

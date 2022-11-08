@@ -49,6 +49,10 @@ export default Vue.extend({
       return this.selectedDesigns[this.item.id] !== undefined
     },
     copyText() {
+      if (this.isInSelectionMode) {
+        this.handleToggleDesignSelected()
+        return
+      }
       const pages = generalUtils.deepCopy(this.item.pages)
       vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0]))
     },

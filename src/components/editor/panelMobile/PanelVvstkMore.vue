@@ -88,7 +88,7 @@ export default Vue.extend({
         action: this.handleLocaleList
       }, {
         text: `${this.$t('NN0649')}`,
-        icon: 'settings',
+        icon: 'vivisticker_settings',
         action: this.handleShowUserSettings
       }, {
         text: `${this.$t('NN0147')}`,

@@ -176,8 +176,7 @@ export default Vue.extend({
       switchBg: 'vivisticker/UPDATE_switchBg',
       setIsInMyDesign: 'vivisticker/SET_isInMyDesign',
       setMyDesignTab: 'vivisticker/SET_myDesignTab',
-      setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode',
-      clearSelectedDesigns: 'vivisticker/UPDATE_clearSelectedDesigns'
+      setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode'
     }),
     handleTabAction(action?: () => void) {
       if (action) {
@@ -262,13 +261,6 @@ export default Vue.extend({
       this.setIsInSelectionMode(false)
     },
     handleSelectDesign() {
-      if (this.isInSelectionMode) {
-        editorUtils.setCloseMobilePanelFlag(true)
-        this.clearSelectedDesigns()
-      } else {
-        editorUtils.setCurrActivePanel('select-design')
-        editorUtils.setShowMobilePanel(true)
-      }
       this.setIsInSelectionMode(!this.isInSelectionMode)
     }
   }

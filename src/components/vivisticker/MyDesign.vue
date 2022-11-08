@@ -49,6 +49,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       isInMyDesign: 'vivisticker/getIsInMyDesign',
+      isInSelectionMode: 'vivisticker/getIsInSelectionMode',
       myDesignTab: 'vivisticker/getMyDesignTab',
       myDesignFileList: 'vivisticker/getMyDesignFileList'
     }),
@@ -97,12 +98,22 @@ export default Vue.extend({
       if (newVal) {
         this.refreshDesigns(this.myDesignTab)
       }
+    },
+    isInSelectionMode(newVal) {
+      if (newVal) {
+        editorUtils.setCurrActivePanel('select-design')
+        editorUtils.setShowMobilePanel(true)
+      } else {
+        editorUtils.setCloseMobilePanelFlag(true)
+        this.clearSelectedDesigns()
+      }
     }
   },
   methods: {
     ...mapMutations({
       setmyDesignTab: 'vivisticker/SET_myDesignTab',
-      setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode'
+      setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode',
+      clearSelectedDesigns: 'vivisticker/UPDATE_clearSelectedDesigns'
     }),
     refreshDesigns(tab: string) {
       vivistickerUtils.listAsset(`mydesign-${tab}`)

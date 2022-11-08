@@ -102,7 +102,7 @@ export default Vue.extend({
     }
     &__checkbox {
       @include size(42px, 24px);
-      background: setColor(black-5);
+      background: setColor(black-3);
       border-radius: 47px;
       padding: 2px;
       display: flex;
@@ -110,9 +110,9 @@ export default Vue.extend({
       box-sizing: border-box;
       transition: background 0.2s ease-in-out;
       &.checked {
-        background: setColor(black-3);
+        background: setColor(black-5);
         & > div {
-          transform: translateX(0);
+          transform: translateX(18px);
         }
       }
     }
@@ -120,7 +120,6 @@ export default Vue.extend({
       @include size(20px);
       background: setColor(gray-6);
       border-radius: 50%;
-      transform: translateX(18px);
       transition: transform 0.2s ease-in-out;
     }
   }

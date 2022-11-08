@@ -492,7 +492,6 @@ export default Vue.extend({
         if (this.isInEditor) {
           this.$emit('switchTab', tab.panelType, tab.props)
         } else {
-          if (this.isInMyDesign) return
           this.$emit('switchMainTab', tab.panelType, tab.props)
         }
       }

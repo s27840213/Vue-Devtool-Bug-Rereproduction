@@ -49,6 +49,10 @@ export default Vue.extend({
       return this.selectedDesigns[this.item.id] !== undefined
     },
     copySvg() {
+      if (this.isInSelectionMode) {
+        this.handleToggleDesignSelected()
+        return
+      }
       if (this.item.assetInfo.isFrame) {
         console.log('frame cannot be copied')
       } else {
