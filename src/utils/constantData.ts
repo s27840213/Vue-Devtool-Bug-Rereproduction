@@ -39,6 +39,7 @@ class ConstantData {
   // For header.vue and mobileMenu.vue
   headerItems(mobile = false) {
     function themeItem(id: number | number[]) {
+      const host = window.location.host
       if (id instanceof Array) {
         let templateName = _.filter(store.getters.getEditThemes, (theme: Itheme) => {
           return id.includes(theme.id)
@@ -46,13 +47,13 @@ class ConstantData {
         templateName = templateName?.split('(')?.[0]
         return {
           label: templateName,
-          url: `/templates?themes=${id.join(',')}&sort=recent`
+          url: `http://${host}/templates?themes=${id.join(',')}&sort=recent`
         }
       } else {
         const template = _.filter(store.getters.getEditThemes, ['id', id])?.[0]
         return {
           label: template?.title,
-          url: `/templates?themes=${id}&sort=recent`
+          url: `http://${host}/templates?themes=${id}&sort=recent`
         }
       }
     }
@@ -79,9 +80,10 @@ class ConstantData {
         }, {
           label: '電商 Banner',
           url: 'https://blog.vivipic.com/tw/ec-banner/'
-        },
-        ...[7].map((id) => themeItem(id))
-        ]
+        }, {
+          label: '電商詳情頁',
+          url: 'https://blog.vivipic.com/tw/ec-landingpage/'
+        }]
       }, {
         label: i18n.t('NN0669'),
         content: [{

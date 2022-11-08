@@ -38,7 +38,8 @@ class FormatUtils {
       scale: text.styles.scale,
       textEffect: generalUtils.deepCopy((text as any).styles.textEffect),
       textBg: generalUtils.deepCopy((text as any).styles.textBg),
-      textShape: generalUtils.deepCopy((text as any).styles.textShape)
+      textShape: generalUtils.deepCopy((text as any).styles.textShape),
+      writingMode: (text as any).styles.writingMode
     }
   }
 
@@ -99,7 +100,7 @@ class FormatUtils {
         layers = subLayers
       }
       if (type === 'text') {
-        const { scale, textEffect, textBg, textShape } = this.copiedFormat.content as ITextFormat
+        const { scale, textEffect, textBg, textShape, writingMode } = this.copiedFormat.content as ITextFormat
         for (const targetLayerIndex in layers) {
           const idx = subLayerIndex >= 0 ? subLayerIndex : +targetLayerIndex
           const targetLayer = layers[targetLayerIndex]
@@ -116,7 +117,8 @@ class FormatUtils {
               textEffect: { ...textEffect },
               textBg: { ...textBg },
               textShape: { ...textShape },
-              scale
+              scale,
+              writingMode
             },
             props: { paragraphs }
           })
@@ -138,7 +140,7 @@ class FormatUtils {
               { widthLimit: -1 }
             )
           } else {
-            const textHW = textUtils.getTextHW(targetTextLayer, targetTextLayer.styles.widthLimit)
+            const textHW = textUtils.getTextHW(targetTextLayer, targetTextLayer.widthLimit)
             layerUtils.updateSubLayerStyles(
               pageIndex,
               layerIndex,
@@ -190,7 +192,7 @@ class FormatUtils {
       if (!this.isApplicableType(type, layer.type)) return
       if (type === 'text') {
         const preParams = textShapeUtils.getPreParams(layer)
-        const { scale, textEffect, textBg, textShape } = this.copiedFormat.content as ITextFormat
+        const { scale, textEffect, textBg, textShape, writingMode } = this.copiedFormat.content as ITextFormat
         const paragraphs = this.applyTextStyles(layer.paragraphs)
         layerUtils.updateSpecLayerData({
           pageIndex,
@@ -199,7 +201,8 @@ class FormatUtils {
             textEffect: { ...textEffect },
             textBg: { ...textBg },
             textShape: { ...textShape },
-            scale
+            scale,
+            writingMode
           },
           props: { paragraphs }
         })
@@ -212,7 +215,7 @@ class FormatUtils {
           layerUtils.updateLayerStyles(pageIndex, layerIndex, textProps)
           layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit: -1 })
         } else {
-          const textHW = textUtils.getTextHW(text, text.styles.widthLimit)
+          const textHW = textUtils.getTextHW(text, text.widthLimit)
           layerUtils.updateLayerStyles(pageIndex, layerIndex, {
             ...textHW,
             ...textShapeUtils.getNewAnchoredPosition(textShapeUtils.getPostParams(text, preParams, textHW))

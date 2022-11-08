@@ -21,7 +21,7 @@
           :iconWidth="'20px'")
     div(class="header-bar__right")
       div(v-for="tab in rightTabs" class="header-bar__feature-icon"
-          :class="{'click-disabled': ((tab.disabled || isLocked) && tab.icon !== 'lock')}"
+          :class="{'click-disabled': (isLocked && tab.icon !== 'lock'), 'panel-icon': tab.isPanelIcon }"
           @pointerdown="handleIconAction(tab.icon)")
         svg-icon(
           :iconName="tab.icon"
@@ -40,6 +40,12 @@ import i18n from '@/i18n'
 import backgroundUtils from '@/utils/backgroundUtils'
 import imageUtils from '@/utils/imageUtils'
 
+interface IIcon {
+  icon: string,
+  // If isPanelIcon is true, MobilePanel v-out will not be triggered by this icon.
+  isPanelIcon?: boolean
+}
+
 export default Vue.extend({
   components: {
   },
@@ -56,11 +62,11 @@ export default Vue.extend({
   data() {
     return {
       homeTabs: [
-        { icon: 'resize' },
+        { icon: 'resize', isPanelIcon: true },
         { icon: 'all-pages' },
-        { icon: 'download' },
-        { icon: 'more' }
-      ],
+        { icon: 'download', isPanelIcon: true },
+        { icon: 'more', isPanelIcon: true }
+      ] as IIcon[],
       stepsUtils
     }
   },
@@ -82,20 +88,20 @@ export default Vue.extend({
     stepCount(): number {
       return stepsUtils.steps.length
     },
-    layerTabs(): Array<{ icon: string, disabled?: boolean }> {
+    layerTabs(): IIcon[] {
       return [
         { icon: 'copy' },
         { icon: this.isLocked ? 'lock' : 'unlock' },
         { icon: 'trash' }
       ]
     },
-    bgSettingTabs(): Array<{ icon: string, disabled?: boolean }> {
+    bgSettingTabs(): IIcon[] {
       return [
         { icon: backgroundUtils.backgroundLocked ? 'lock' : 'unlock' },
         { icon: 'trash' }
       ]
     },
-    rightTabs(): Array<{ icon: string, disabled?: boolean }> {
+    rightTabs(): IIcon[] {
       if (this.selectedLayerNum > 0) {
         return this.layerTabs
       } else if (this.inBgSettingMode) {
@@ -141,11 +147,11 @@ export default Vue.extend({
     }
   },
   methods: {
-    iconColor(tab: { icon: string, disabled: boolean }): string {
+    iconColor(tab: IIcon): string {
       if (tab.icon === 'all-pages') {
         return this.inAllPagesMode ? 'blue-1' : 'white'
       }
-      return ((tab.disabled || this.isLocked) && tab.icon !== 'lock') ? 'gray-2' : this.currTab === tab.icon ? 'blue-1' : 'white'
+      return (this.isLocked && tab.icon !== 'lock') ? 'gray-2' : this.currTab === tab.icon ? 'blue-1' : 'white'
     },
     targetIs(type: string): boolean {
       if (this.isGroup) {
