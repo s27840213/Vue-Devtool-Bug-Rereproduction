@@ -582,7 +582,6 @@ export default Vue.extend({
         border-bottom: 1px dashed setColor(gray-4);
       }
       > span {
-        height: 20px;
         font-size: 16px;
         font-weight: 400;
         color: setColor(gray-1);

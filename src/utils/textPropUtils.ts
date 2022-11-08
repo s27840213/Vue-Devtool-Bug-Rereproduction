@@ -133,17 +133,16 @@ class TextPropUtils {
         const targetWritingMode = targetIsVertical ? 'vertical-lr' : 'initial'
         const config = (typeof tmpLayerIndex === 'undefined' ? this.getCurrLayer : this.getCurrLayer.layers[tmpLayerIndex]) as IText
         const writingMode = config.styles.writingMode.includes('vertical') ? 'vertical-lr' : 'initial'
-        if (typeof tmpLayerIndex === 'undefined' && writingMode !== targetWritingMode) {
-          const { width, height } = TextUtils.getTextHW(config, config.widthLimit)
-          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: height, height: width })
-          // @TODO: need to reallocate position of each layer
-        }
         if (targetIsVertical) {
           const paragraphs = GeneralUtils.deepCopy(config.paragraphs)
           this.removeInvalidStyles(paragraphs, targetIsVertical)
           paragraphHandler(paragraphs)
         }
         handler({ writingMode: targetWritingMode })
+        if (typeof tmpLayerIndex === 'undefined' && writingMode !== targetWritingMode) {
+          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextUtils.getTextHW(config, config.widthLimit))
+          // @TODO: need to reallocate position of each layer
+        }
         this.updateTextPropsState({ isVertical: targetIsVertical, decoration: 'none', style: 'normal' })
         tiptapUtils.updateHtml()
       }

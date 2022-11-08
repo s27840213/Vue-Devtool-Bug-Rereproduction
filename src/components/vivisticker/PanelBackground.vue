@@ -462,7 +462,7 @@ export default Vue.extend({
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-background-item',
             list: rowItems,
-            size: title ? (this.itemWidth + 10 + 46) : this.itemWidth + 10,
+            size: this.itemWidth + 24 + (title ? 46 : 0), // (bg height) + 24(gap) + 0/46(title)
             title
           }
         })
