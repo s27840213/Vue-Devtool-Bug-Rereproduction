@@ -1,8 +1,7 @@
 <template lang="pug">
-  div(class="panel-text")
+  div(class="panel-text" :class="{'no-top': isInEditor}")
     search-bar(v-if="!isInCategory"
       class="panel-text__searchbar"
-      :class="{'no-top': isInEditor}"
       :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
       clear
       :defaultKeyword="keywordLabel"
@@ -312,13 +311,12 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  padding: 0 24px;
+  padding: 24px 24px 0 24px;
+  &.no-top {
+    padding-top: 0;
+  }
   &__searchbar {
-    margin-top: 24px;
     margin-bottom: 14px;
-    &.no-top {
-      margin-top: 0;
-    }
   }
   &__brand-header {
     margin-top: 10px;
