@@ -92,7 +92,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .search-bar {
-  @include size(100%, 40px);
+  @include size(100%, 42px);
   display: flex;
   justify-content: space-between;
   align-items: center;
