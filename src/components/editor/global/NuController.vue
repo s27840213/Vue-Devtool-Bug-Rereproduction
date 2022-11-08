@@ -657,7 +657,7 @@ export default Vue.extend({
         return 'none'
       } else if (this.isShown() || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px dashed ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
         } else {
           return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
         }
