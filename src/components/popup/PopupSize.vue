@@ -304,6 +304,8 @@ export default Vue.extend({
       margin: 0 auto;
       width: 60%;
       padding-top: 30px;
+      font-family: 'SF Pro';
+      font-weight: 400;
     }
   }
   &__close {

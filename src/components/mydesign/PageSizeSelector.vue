@@ -56,7 +56,7 @@
                     :circleColor="isDarkTheme ? 'white' : 'gray-2'"
                     :formatKey="`preset-${index}`",
                     @select="selectFormat")
-          span(class="page-size-selector__body__typical-name body-4"
+          span(class="page-size-selector__body__typical-name body-3"
                 :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatString(format)}}
 </template>
 
@@ -368,7 +368,7 @@ export default Vue.extend({
         & input {
           line-height: 16px;
           background-color: transparent;
-          font-family: NotoSansTC;
+          font-family: Mulish;
           &::placeholder{
             color: setColor(gray-3);
           }
@@ -401,28 +401,6 @@ export default Vue.extend({
       @extend .page-size-selector__body__text;
       width: 45%;
       white-space: nowrap;
-    }
-    &__buttons {
-      display: flex;
-      width: 95%;
-      margin-left: auto;
-      margin-right: auto;
-      margin-top: 29px;
-      margin-bottom: 17.43px;
-      gap: 11px;
-    }
-    &__button {
-      flex-grow: 1;
-      border-radius: 3px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 4px;
-      text-align: center;
-      &__text {
-        font-weight: 700;
-        font-size: 12px;
-      }
     }
   }
   &__footer {
