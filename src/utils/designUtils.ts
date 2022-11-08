@@ -855,6 +855,9 @@ class DesignUtils {
   }
 
   async renameDesign(name: string) {
+    if (!store.getters.getAssetId) {
+      await uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+    }
     let assetIndex = store.getters.getAssetIndex
     if (assetIndex === -1) {
       const teamId = designApis.getTeamId()
@@ -863,8 +866,9 @@ class DesignUtils {
       assetIndex = designData.asset_index
       store.commit('SET_assetIndex', assetIndex)
     }
-    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getTeamId(),
+    await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getTeamId(),
       'rename', assetIndex.toString(), null, name)
+    store.commit('SET_pagesName', name)
   }
 }
 
