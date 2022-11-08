@@ -10,7 +10,7 @@
       :color="{close: 'black-5', search: 'black-5'}"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
-    template(v-if="!keyword")
+    template(v-if="!keyword && !showAllRecently")
       div(class="panel-text__text-button-wrapper"
           :style="`font-family: ${localeFont()}`"
           @click="handleAddText")
