@@ -13,7 +13,7 @@
                     :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? widthValid ? '' : ' input-invalid' : '')")
           input(class="body-3" type="number" min="0" ref="inputWidth"
                 :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
-                :value="pageWidth" :placeholder="$t('NN0163', {term: $t('NN0320')})" @click="selectFormat('custom')" @input="setPageWidth")
+                :value="pageWidth || null" :placeholder="$t('NN0163', {term: $t('NN0320')})" @click="selectFormat('custom')" @input="setPageWidth")
           span(class="body-4"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") W
         svg-icon(class="pointer"
@@ -24,7 +24,7 @@
                     :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? heightValid ? '' : ' input-invalid' : '')")
           input(class="body-3" type="number" min="0"
                 :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
-                :value="pageHeight" :placeholder="$t('NN0163', {term: $t('NN0319')})" @click="selectFormat('custom')" @input="setPageHeight")
+                :value="pageHeight || null" :placeholder="$t('NN0163', {term: $t('NN0319')})" @click="selectFormat('custom')" @input="setPageHeight")
           span(class="body-4"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
         div(v-if="isValidate && !isCustomValid"
