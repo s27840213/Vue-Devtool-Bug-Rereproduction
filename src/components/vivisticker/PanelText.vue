@@ -1,7 +1,8 @@
 <template lang="pug">
-  div(class="panel-text" :class="{'no-top': isInEditor}")
+  div(class="panel-text" :class="{'in-category': isInCategory}")
     search-bar(v-if="!isInCategory"
       class="panel-text__searchbar"
+      :class="{'no-top': isInEditor}"
       :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
       clear
       :defaultKeyword="keywordLabel"
@@ -294,7 +295,7 @@ export default Vue.extend({
             type: 'category-text-item',
             list: rowItems,
             title,
-            size: title ? (90 + 46) : 90
+            size: 104 + (title ? 46 : 0) // 80(object height) + 24(gap) + 0/46(title)
           }
         })
     }
@@ -311,12 +312,13 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  padding: 24px 24px 0 24px;
-  &.no-top {
-    padding-top: 0;
-  }
+  padding: 0 24px;
   &__searchbar {
+    margin-top: 24px;
     margin-bottom: 14px;
+    &.no-top {
+      margin-top: 0;
+    }
   }
   &__brand-header {
     margin-top: 10px;
@@ -333,7 +335,8 @@ export default Vue.extend({
   &__item {
     width: 80px;
     height: 80px;
-    margin: 0 5px;
+    margin: 0 auto;
+    padding: 0 5px;
     // object-fit: contain;
     // vertical-align: middle;
   }
@@ -341,6 +344,9 @@ export default Vue.extend({
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     column-gap: 10px;
+  }
+  &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
+    margin-top: 24px;
   }
   &__header {
     grid-column: 1 / 4;

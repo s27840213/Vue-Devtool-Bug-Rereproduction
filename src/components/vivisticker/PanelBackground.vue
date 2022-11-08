@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="panel-bg")
+  div(class="panel-bg" :class="{'in-category': isInCategory}")
     tabs(v-if="!isInCategory"
           class="panel-bg__tabs"
           :tabs="[$tc('NN0002', 2),$t('NN0017')]"
@@ -462,7 +462,7 @@ export default Vue.extend({
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-background-item',
             list: rowItems,
-            size: title ? (this.itemWidth + 10 + 46) : this.itemWidth + 10,
+            size: this.itemWidth + 24 + (title ? 46 : 0), // (bg height) + 24(gap) + 0/46(title)
             title
           }
         })
@@ -480,8 +480,11 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  padding: 24px 24px 0 24px;
+  padding: 0 24px;
   position: relative;
+  &__tabs {
+    margin-top: 24px;
+  }
   &__searchbar {
     margin-bottom: 14px;
   }
@@ -581,6 +584,9 @@ export default Vue.extend({
   // &__color-inner {
   //   @include size(100%);
   // }
+  &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
+    margin-top: 24px;
+  }
   &__color-controller {
     padding-top: 13px;
     height: 203px;
