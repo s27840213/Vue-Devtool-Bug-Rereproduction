@@ -57,9 +57,7 @@
                     :formatKey="`preset-${index}`",
                     @select="selectFormat")
           span(class="page-size-selector__body__typical-name body-4"
-                :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ format.title }}
-          span(class="page-size-selector__body__typical-size body-4"
-                :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ format.description }}
+                :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatString(format)}}
 </template>
 
 <script lang="ts">
@@ -397,7 +395,7 @@ export default Vue.extend({
     }
     &__typical-name {
       @extend .page-size-selector__body__text;
-      width: 37%;
+      width: 88%;
     }
     &__typical-size {
       @extend .page-size-selector__body__text;
