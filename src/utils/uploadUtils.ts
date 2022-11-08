@@ -650,28 +650,33 @@ class UploadUtils {
           logUtils.setLog(`Put asset design (Type: ${typeMap[putAssetDesignType]})`)
           const resPutAssetDesign = await store.dispatch('user/putAssetDesign', {
             assetId,
-            type: putAssetDesignType
+            type: putAssetDesignType,
+            wait: 1
           })
           const { flag } = resPutAssetDesign
-          if (flag !== 0) return
+          if (flag !== 0) {
+            Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+            return
+          }
 
           // move new design to path
           const path = router.currentRoute.query.path as string
           if (isNewDesign && path) {
-            const getAssetIndex = async (cntRetry = 1): Promise<string | undefined> => {
-              if (cntRetry > 3) return undefined
-              await new Promise(resolve => setTimeout(resolve, 500))
-              const designAssetIndex = (await store.dispatch('design/fetchDesign', { teamId, assetId })).asset_index?.toString()
-              if (designAssetIndex) return designAssetIndex
-              else return getAssetIndex(cntRetry + 1)
+            const designAssetIndex = (await store.dispatch('design/fetchDesign', { teamId, assetId })).asset_index?.toString()
+            if (!designAssetIndex) {
+              Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+              return
             }
-            const designAssetIndex = await getAssetIndex()
-            if (designAssetIndex) {
+            await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+              'move', designAssetIndex, null, path).catch(async err => {
+              // remove design if move failed
+              console.error(err)
               await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-                'move', designAssetIndex ?? null, null, path)
-            } else {
-              // TODO: remove design
-            }
+                'delete', designAssetIndex, null, '2').catch(err => {
+                console.error(err)
+              })
+              Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+            })
             // update design info
             designUtils.fetchDesign(teamId as string, assetId)
             // remove query for new design

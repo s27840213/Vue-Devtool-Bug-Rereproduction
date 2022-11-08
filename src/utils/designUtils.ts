@@ -796,7 +796,7 @@ class DesignUtils {
     pageUtils.clearPagesInfo()
     await themeUtils.refreshTemplateState(undefined, newDesignType)
     if (this.isLogin) {
-      router.replace({ query: { width: width?.toString(), height: height?.toString(), path, folderName } })
+      router.replace({ query: { width: width?.toString(), height: height?.toString(), ...(path && { path }), ...(folderName && { folderName }) } })
 
       // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
       // /**

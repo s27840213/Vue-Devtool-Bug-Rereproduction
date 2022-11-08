@@ -253,7 +253,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       console.log(error)
     }
   },
-  async putAssetDesign({ dispatch }, { assetId, type }) {
+  async putAssetDesign({ dispatch }, { assetId, type, wait }) {
     try {
       if (type === 0) {
         logUtils.setLog('Update DB')
@@ -262,7 +262,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       } else if (type === 2) {
         logUtils.setLog('Update DB and preview')
       }
-      const { data } = await userApis.putAssetDesign(state.token, state.teamId || state.userId, assetId, type)
+      const { data } = await userApis.putAssetDesign(state.token, state.teamId || state.userId, assetId, type, wait)
       const { flag, msg } = data
       if (flag === 0) {
         logUtils.setLog(`Put asset success: ${msg}`)
