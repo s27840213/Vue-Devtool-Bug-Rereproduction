@@ -247,7 +247,8 @@ export default Vue.extend({
     ...mapMutations('design', {
       setCurrLocation: 'SET_currLocation',
       setSortByField: 'SET_sortByField',
-      setSortByDescending: 'SET_sortByDescending'
+      setSortByDescending: 'SET_sortByDescending',
+      setCurrFolderInfo: 'SET_currFolderInfo'
     }),
     newFolderStyles() {
       return this.isMaxLevelReached ? { pointerEvents: 'none' } : {}
@@ -255,6 +256,7 @@ export default Vue.extend({
     goToParent(index: number) {
       const selectedParents = this.parents.slice(0, index + 1)
       this.setCurrLocation(`f:${selectedParents.join('/')}`)
+      this.setCurrFolderInfo(designUtils.search(this.folders, selectedParents) as IFolder)
     },
     handleFolderNameMouseEnter() {
       this.isFolderNameMouseOver = true
@@ -277,6 +279,7 @@ export default Vue.extend({
       if (this.editableFolderName === '' || this.editableFolderName === this.folderName) return
       this.checkNameLength()
       designUtils.setFolderName(this.folder, this.editableFolderName, this.parents)
+      this.setCurrFolderInfo(this.folder)
     },
     handleMenuAction(extraEvent: { event: string, payload: any }) {
       const { event, payload } = extraEvent
