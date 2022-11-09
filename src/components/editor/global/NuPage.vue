@@ -2,7 +2,7 @@
   div(class="nu-page"
       :style="pageRootStyles"
       ref="page")
-    div(v-if="!isDetailPage && !isMobile && !isShowPagePreview"
+    div(v-if="!isOutOfBound && !isDetailPage && !isMobile && !isShowPagePreview"
       class="page-title text-left pb-10"
       :style="{'width': `${config.width * (scaleRatio/100)}px`, 'transform': `translate3d(0, -100%, ${isAnyLayerActive ? 0 : 1}px)`}")
       //- span(class="pr-10") 第 {{pageIndex+1}} 頁
@@ -43,7 +43,7 @@
           @click.native="deletePage()"
           v-hint="$t('NN0141')"
         )
-    div(v-if="isDetailPage && !isMobile && !isShowPagePreview" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
+    div(v-if="!isOutOfBound && isDetailPage && !isMobile && !isShowPagePreview" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
       div(class="page-bar__icons" v-if="!isBackgroundImageControl")
         div(class="body-2")
           span {{pageIndex + 1}}
