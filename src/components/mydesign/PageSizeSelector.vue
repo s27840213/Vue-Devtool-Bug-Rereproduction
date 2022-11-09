@@ -3,17 +3,12 @@
     div(class="page-size-selector__body-row first-row")
       span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0023')}}
     div(class="page-size-selector__body-row")
-      //- radio-btn(class="page-size-selector__body__radio"
-      //-           :isSelected="selectedFormatKey === 'custom'",
-      //-           :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-      //-           formatKey="custom",
-      //-           @select="selectFormat")
       div(class="page-size-selector__body__custom")
         property-bar(class="page-size-selector__body__custom__box"
                     :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? widthValid ? '' : ' input-invalid' : '')")
           input(class="body-3" type="number" min="0" ref="inputWidth"
                 :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
-                :value="pageWidth || null" :placeholder="$t('NN0163', {term: $t('NN0320')})" @click="selectFormat('custom')" @input="setPageWidth")
+                :value="pageWidth || null" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})" @click="selectFormat('custom')" @input="setPageWidth")
           span(class="body-4"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") W
         svg-icon(class="pointer"
@@ -24,7 +19,7 @@
                     :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? heightValid ? '' : ' input-invalid' : '')")
           input(class="body-3" type="number" min="0"
                 :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
-                :value="pageHeight || null" :placeholder="$t('NN0163', {term: $t('NN0319')})" @click="selectFormat('custom')" @input="setPageHeight")
+                :value="pageHeight || null" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})" @click="selectFormat('custom')" @input="setPageHeight")
           span(class="body-4"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
         div(v-if="isValidate && !isCustomValid"
@@ -65,14 +60,7 @@ import Vue from 'vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { ILayout } from '@/interfaces/layout'
-import pageUtils from '@/utils/pageUtils'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import groupUtils from '@/utils/groupUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import listApi from '@/apis/list'
-import generalUtils from '@/utils/generalUtils'
-import resizeUtils from '@/utils/resizeUtils'
-
 // TODO: merge with @/components/editor/PageSizeSelector.vue
 
 export default Vue.extend({
@@ -95,7 +83,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      // TODO: dafault value
       selectedFormatKey: 'custom',
       pageWidth: NaN,
       pageHeight: NaN,
@@ -137,6 +124,9 @@ export default Vue.extend({
       pagesLength: 'getPagesLength',
       getPageSize: 'getPageSize'
     }),
+    isMobile(): boolean {
+      return document.body.clientWidth / document.body.clientHeight < 1
+    },
     isCustomValid(): boolean {
       return this.widthValid && this.heightValid
     },
@@ -171,45 +161,13 @@ export default Vue.extend({
         return undefined
       }
     }
-    // formatList(): ILayout[] {
-    //   const targetCategory = this.categories.find((category: IListServiceContentData) => {
-    //     return category.title === `${this.$t('NN0025')}`
-    //   })
-    //   return targetCategory ? targetCategory.list.map((item: any) => ({
-    //     id: item.id,
-    //     width: item.width ?? 0,
-    //     height: item.height ?? 0,
-    //     title: item.title ?? '',
-    //     description: item.description ?? ''
-    //   })) : []
-    // },
-    // recentlyUsed(): ILayout[] {
-    //   const targetCategory = this.categories.find((category: any) => {
-    //     return category.title === `${this.$t('NN0024')}`
-    //   })
-    //   return targetCategory ? targetCategory.list.map((item: any) => ({
-    //     id: item.id,
-    //     width: item.width ?? 0,
-    //     height: item.height ?? 0,
-    //     title: item.title ?? '',
-    //     description: item.description ?? ''
-    //   })) : []
-    // }
-    // isLayoutReady(): boolean {
-    //   return this.formatList.length !== 0
-    // }
   },
   methods: {
     ...mapMutations({
-      updatePageProps: 'UPDATE_pageProps',
-      addPageToPos: 'ADD_pageToPos',
-      setCurrActivePageIndex: 'SET_currActivePageIndex',
-      setIsloading: 'SET_isGlobalLoading',
       updateRecentlyUsed: 'layouts/UPDATE_RECENTLY_PAGE'
     }),
     ...mapActions('layouts',
       [
-        'getCategories',
         'getRecently'
       ]
     ),
@@ -237,7 +195,6 @@ export default Vue.extend({
           this.pageHeight = Math.round(parseInt(value) / this.aspectRatio)
         }
       }
-      // console.log(this.pageWidth)
     },
     setPageHeight(event: Event) {
       const value = (event.target as HTMLInputElement).value
@@ -283,31 +240,6 @@ export default Vue.extend({
         }
       })
     }
-    // applySelectedFormatKey(record = true) {
-    //   if (!this.isFormatApplicable) return
-    //   const format = this.getSelectedFormatKey()
-    //   if (!format) return
-    //   this.resizePage(format)
-    //   if (this.groupType === 1) {
-    //     // resize電商詳情頁時 其他頁面要依width做resize
-    //     this.resizeOtherPages([pageUtils.currFocusPageIndex], { width: format.width })
-    //   }
-    //   listApi.addDesign(format.id, 'layout', format)
-    //   const index = this.recentlyUsed.findIndex((recent) => {
-    //     return format.id === recent.id && format.width === recent.width && format.height === recent.height
-    //   })
-    //   this.updateRecentlyUsed({
-    //     index,
-    //     format
-    //   })
-
-    //   if (generalUtils.isTouchDevice()) {
-    //     pageUtils.fitPage()
-    //   }
-    //   if (record) {
-    //     stepsUtils.record()
-    //   }
-    // }
   }
 })
 </script>
@@ -315,13 +247,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .page-size-selector {
   text-align: left;
-  &__arrow {
-    margin-left: auto;
-    margin-right: 30%;
-    margin-top: 15px;
-    margin-bottom: -5px;
-    display: block;
-  }
   &__body {
     background-color: setColor(gray-1-5);
     box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.25);
@@ -345,11 +270,6 @@ export default Vue.extend({
         margin-top: 0px;
       }
     }
-    &__close {
-      margin-left: auto;
-      width: fit-content;
-      height: 19px;
-    }
     &__title {
       font-weight: 700;
       margin-left: -16px;
@@ -360,7 +280,6 @@ export default Vue.extend({
       grid-template-rows: auto;
       column-gap: 18px;
       align-items: center;
-      // width: 85%;
       &__box {
         height: 26px;
         box-sizing: border-box;
@@ -373,10 +292,6 @@ export default Vue.extend({
             color: setColor(gray-3);
           }
         }
-        // &.border-black-1 {
-        //   @extend .border-black-1;
-        //   border: solid 1px black;
-        // }
       }
       &__err{
         grid-column: 1 / 4;
@@ -403,9 +318,6 @@ export default Vue.extend({
       white-space: nowrap;
     }
   }
-  &__footer {
-    height: 20px;
-  }
   &__container {
     max-height: 500px;
     margin-right: -5px;
@@ -415,7 +327,6 @@ export default Vue.extend({
     &::-webkit-scrollbar {
       width: 4px;
       height: 4px;
-      // background-color: rgba(24, 25, 31, 0.5);
     }
     &::-webkit-scrollbar-thumb {
       border-radius: 2px;
@@ -428,17 +339,6 @@ export default Vue.extend({
   margin-left: auto;
   margin-right: auto;
   padding: 0;
-}
-
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-  transition: 0.3s ease;
-}
-
-.slide-fade-enter,
-.slide-fade-leave-to {
-  transform: translateY(-10px);
-  opacity: 0;
 }
 
 .input-invalid {
