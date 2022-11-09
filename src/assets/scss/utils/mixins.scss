@@ -90,9 +90,7 @@
     border-radius: $borderRadius;
     background-color: $thumbColor;
     visibility: hidden;
-    @if $trackColor != none {
-      border: 3px solid $trackColor;
-    }
+    border: 3px solid $trackColor;
   }
   &:hover::-webkit-scrollbar-thumb {
     visibility: visible;
@@ -125,10 +123,6 @@
   z-index: setZindex("popup");
 }
 
-.popup-window {
-  @include popup-window;
-}
-
 @mixin default-input {
   @include body-SM;
   box-sizing: border-box;
@@ -143,10 +137,6 @@
   &[invalid="true"] {
     border-color: setColor(red);
   }
-}
-
-.default-input {
-  @include default-input;
 }
 
 @mixin progressSlider($height: 5px, $thumbSize: 12px, $marginTop: -3.5px, $thumbColor: white, $scale: false) {

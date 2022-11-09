@@ -63,32 +63,6 @@
   font-size: 16px;
 }
 
-.text {
-  &-H1 {
-    @include text-H1
-  }
-
-  &-H2 {
-    @include text-H2
-  }
-
-  &-H3 {
-    @include text-H3
-  }
-
-  &-H4 {
-    @include text-H4
-  }
-
-  &-H5 {
-    @include text-H5
-  }
-
-  &-H6 {
-    @include text-H6
-  }
-}
-
 @mixin body-XL {
   @include body();
   font-size: 20px;
@@ -120,32 +94,6 @@
   transform: scale(0.9);
 }
 
-.body {
-  &-XL {
-    @include body-XL;
-  }
-
-  &-LG {
-    @include body-LG;
-  }
-
-  &-MD {
-    @include body-MD
-  }
-
-  &-SM {
-    @include body-SM
-  }
-
-  &-XS {
-    @include body-XS
-  }
-
-  &-XXS {
-    @include body-XXS
-  }
-}
-
 @mixin caption-LG {
   @include caption();
   font-size: 14px;
@@ -162,20 +110,6 @@
   transform: scale(0.9);
 }
 
-.caption {
-  &-LG {
-    @include caption-LG
-  }
-
-  &-MD {
-    @include caption-MD
-  }
-
-  &-SM {
-    @include caption-SM
-  }
-}
-
 @mixin btn-LG {
   @include btn();
   font-size: 16px;
@@ -186,16 +120,6 @@
   font-size: 14px;
 }
 
-.btn {
-  &-LG {
-    @include btn-LG;
-  }
-
-  &-SM {
-    @include btn-SM;
-  }
-}
-
 @mixin overline-LG {
   @include overline();
   font-size: 14px;
@@ -204,16 +128,6 @@
 @mixin overline-SM {
   @include overline();
   font-size: 12px;
-}
-
-.overline {
-  &-LG {
-    @include overline-LG;
-  }
-
-  &-SM {
-    @include overline-SM;
-  }
 }
 
 @mixin primary-btn {
