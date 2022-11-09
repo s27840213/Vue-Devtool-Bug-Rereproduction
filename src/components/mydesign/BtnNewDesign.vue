@@ -1,6 +1,6 @@
 <template lang="pug">
   div(cless="btn-new-design")
-    div(class="btn-primary-sm" @click="openPopup()")
+    button(class="btn-primary-sm pointer" @click="openPopup()")
       span(class="header-sort") {{$t('NN0072')}}
     div(v-if="isShowPopup"
       class="popup-window")
@@ -33,6 +33,11 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .btn-primary-sm {
-  cursor: pointer;
+  height: 36px;
+  white-space: nowrap;
+  font-family: 'Poppins';
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
 }
 </style>

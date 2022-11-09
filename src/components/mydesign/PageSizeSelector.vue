@@ -10,7 +10,7 @@
             :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") W
       svg-icon(class="pointer"
           :iconName="isLocked ? 'lock' : 'unlock'"
-          iconWidth="20px" :iconColor="!isLockDisabled ? (selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-3')) : 'gray-3'"
+          iconWidth="20px" :iconColor="!isLockDisabled ? (selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-4')) : 'gray-4'"
           @click.native="toggleLock()")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? heightValid ? '' : ' input-invalid' : '')")
@@ -278,6 +278,7 @@ export default Vue.extend({
         padding: 4px 16px;
         grid-template-columns: 28px auto;
         justify-content: left;
+        font-family: 'Mulish';
         line-height: 20px;
       }
     }
@@ -303,10 +304,19 @@ export default Vue.extend({
           text-align: center;
         }
         & input {
-          line-height: 16px;
           background-color: transparent;
           font-family: 'Mulish';
-          &::placeholder{
+          &::placeholder {
+            /* Chrome, Firefox, Opera, Safari 10.1+ */
+            color: setColor(gray-3);
+            opacity: 1; /* Firefox */
+          }
+          &:-ms-input-placeholder {
+            /* Internet Explorer 10-11 */
+            color: setColor(gray-3);
+          }
+          &::-ms-input-placeholder {
+            /* Microsoft Edge */
             color: setColor(gray-3);
           }
         }
@@ -320,14 +330,11 @@ export default Vue.extend({
       margin-top: 20px;
       margin-bottom: 20px;
     }
-    &__text {
-      font-family: 'Mulish';
-    }
   }
   &__container {
     display: grid;
     gap: 4px;
-    height: 243px;
+    height: 271px;
     overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
     &::-webkit-scrollbar {

@@ -518,9 +518,10 @@ export default Vue.extend({
     gap: 13px;
     align-items: center;
     > div {
-      height: 29px;
+      height: 36px;
       display: flex;
       align-items: center;
+      white-space: nowrap;
     }
   }
   &__more {
@@ -720,7 +721,7 @@ export default Vue.extend({
 .horizontal-rule {
   height: 1px;
   background-color: setColor(gray-4);
-  margin-top: 24px;
+  margin-top: 13px;
   margin-bottom: 38px;
 }
 
