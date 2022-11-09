@@ -1,9 +1,10 @@
 import Vue from 'vue'
 import store from '@/store'
 import { IStyle, IText } from '@/interfaces/layer'
-import { isITextBox, isITextGooey, isITextUnderline, ITextBgEffect, ITextGooey } from '@/interfaces/format'
+import { isITextBox, isITextGooey, isITextSvgbg, isITextUnderline, ITextBgEffect, ITextGooey } from '@/interfaces/format'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
 import _ from 'lodash'
@@ -41,6 +42,193 @@ class Point {
 }
 function obj2Point(p: {x: number, y: number}) {
   return new Point(p.x, p.y)
+}
+
+class Rect {
+  bodyRect: DOMRect
+  vertical: boolean
+  width: number
+  height: number
+  transform: string
+  rows: {
+    rect: DOMRect
+    spanData: {
+      width: number
+      height: number
+      text: string
+    }[]
+  }[]
+
+  constructor(config: IText) {
+    this.vertical = config.styles.writingMode === 'vertical-lr'
+
+    const div = document.createElement('div')
+    config.paragraphs.forEach(para => {
+      const p = document.createElement('p')
+      const pStyle = tiptapUtils.textStylesRaw(para.styles)
+      Object.assign(p.style, pStyle, { margin: 0 })
+      div.appendChild(p)
+
+      para.spans.forEach(spanData => {
+        if (!spanData.text) {
+          const span = document.createElement('span')
+          span.appendChild(document.createElement('br'))
+          p.appendChild(span)
+        } else {
+          [...spanData.text].forEach(t => {
+            const span = document.createElement('span')
+            if (t === ' ') {
+              span.innerHTML = '&nbsp;'
+            } else {
+              span.textContent = t
+            }
+
+            const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
+            spanStyleObject.textIndent = spanStyleObject['letter-spacing'] || 'initial'
+            Object.assign(span.style, spanStyleObject)
+
+            p.appendChild(span)
+          })
+        }
+      })
+    })
+
+    div.style.writingMode = config.styles.writingMode
+    const widthLimit = config.widthLimit
+    if (this.vertical) {
+      div.style.width = 'max-content'
+      div.style.height = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
+    } else {
+      div.style.width = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
+      div.style.height = 'max-content'
+    }
+
+    try {
+      document.body.appendChild(div)
+      this.bodyRect = div.getClientRects()[0]
+      this.width = this.bodyRect.width
+      this.height = this.bodyRect.height
+      this.transform = this.vertical ? 'rotate(90) scale(1,-1)' : ''
+      this.rows = []
+
+      for (const p of div.children) {
+        for (const span of p.children) {
+          const cr = span.getClientRects()[0]
+          this.rows.push({
+            rect: cr,
+            spanData: [{
+              width: cr.width,
+              height: cr.height,
+              text: span.textContent ?? ''
+            }]
+          })
+        }
+      }
+    } finally {
+      document.body.removeChild(div)
+    }
+  }
+
+  // Exchange x, y coordinate, used when text vertical.
+  xyExchange() {
+    const { rows, bodyRect } = this
+    Object.assign(bodyRect, {
+      x: bodyRect.y,
+      y: bodyRect.x,
+      width: bodyRect.height,
+      height: bodyRect.width
+    })
+    rows.forEach((row) => {
+      const { rect, spanData } = row
+      Object.assign(rect, {
+        x: rect.y,
+        y: rect.x,
+        width: rect.height,
+        height: rect.width
+      })
+      spanData.forEach(data => {
+        [data.height, data.width] = [data.width, data.height]
+      })
+    })
+  }
+
+  // Merge Rect if at the same line.
+  mergeLine() {
+    const { rows } = this
+    rows.forEach((row, index) => {
+      const nextIndex = index + 1
+      while (nextIndex < rows.length) {
+        const curr = row.rect
+        const next = rows[nextIndex].rect
+        const currTop = curr.y
+        const currBottom = curr.y + curr.height
+        const nextTop = next.y
+        const nextBottom = next.y + next.height
+        if (((nextTop <= currTop && currTop <= nextBottom &&
+          nextTop <= currBottom && currBottom <= nextBottom) ||
+          (currTop <= nextTop && nextTop <= currBottom &&
+          currTop <= nextBottom && nextBottom <= currBottom))) {
+          curr.y = Math.min(curr.y, next.y)
+          curr.width += next.width
+          curr.height = Math.max(curr.height, next.height)
+          row.spanData = row.spanData.concat(rows[nextIndex].spanData)
+          Vue.delete(rows, nextIndex)
+        } else break
+      }
+    })
+  }
+
+  // expend empty line width as neibor.
+  expandEmptyLine() {
+    const { rows, bodyRect } = this
+    const defaultLine = {
+      rect: { x: bodyRect.x, width: bodyRect.width },
+      spanData: []
+    }
+    rows.forEach((row, index) => {
+      const { rect } = row
+      if (rect.width < 1) {
+        let nextIndex = index + 1
+        while (nextIndex < rows.length && rows[nextIndex].rect.width < 1)nextIndex++
+        const next = rows[nextIndex] ?? defaultLine
+        const prev = rows[index - 1] ?? defaultLine
+        const target = (prev.rect.width < next.rect.width) ? prev : next
+        rect.x = target.rect.x
+        rect.width = target.rect.width
+        row.spanData = []
+      }
+    })
+  }
+
+  // Coordinate initial, use bodyRect as origin.
+  coordinateInit() {
+    const { rows, bodyRect } = this
+    rows.forEach((row) => {
+      const { rect } = row
+      rect.x = rect.x - bodyRect.x
+      rect.y = rect.y - bodyRect.y
+    })
+  }
+
+  preprocess() {
+    const { vertical } = this
+    if (vertical) this.xyExchange()
+    this.mergeLine()
+    this.expandEmptyLine()
+    this.coordinateInit()
+  }
+
+  get() {
+    const { vertical, width, height, transform, rows } = this
+    return {
+      vertical,
+      width,
+      height,
+      transform,
+      rows,
+      rects: _.map(rows, 'rect')
+    }
+  }
 }
 
 // For text effect gooey
@@ -186,7 +374,7 @@ class Gooey {
   }
 
   // Keep doing merge and delete until nothing to delete.
-  preProcess() {
+  preprocess() {
     do {
       this.merge()
     } while (this.delete())
@@ -402,97 +590,10 @@ class TextBg {
   drawSvgBg(config: IText, bodyHtml: Element[]) {
     const textBg = config.styles.textBg
     if (textBg.name === 'none') return null
-    const vertical = config.styles.writingMode === 'vertical-lr'
-    const rawRects = [] as DOMRectList[]
-    let bodyRect: DOMRect
-    let width, height: number
-    let transform: string
 
-    const body = (_.nth(bodyHtml, -1) as Element).cloneNode(true) as HTMLElement
-    body.style.writingMode = config.styles.writingMode
-    const widthLimit = config.widthLimit
-    if (vertical) {
-      body.style.width = 'max-content'
-      body.style.height = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
-    } else {
-      body.style.width = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
-      body.style.height = 'max-content'
-    }
-
-    try {
-      document.body.appendChild(body)
-      bodyRect = body.getClientRects()[0]
-      width = bodyRect.width
-      height = bodyRect.height
-      transform = vertical ? 'rotate(90) scale(1,-1)' : ''
-
-      for (const p of body.children) {
-        for (const span of p.children) {
-          rawRects.push(span.getClientRects())
-        }
-      }
-    } finally {
-      document.body.removeChild(body)
-    }
-    const rects = rawRects.reduce((acc, rect) => {
-      if (rect) acc.push(...rect)
-      return acc
-    }, [] as DOMRect[])
-
-    // If is vertical text, exchange its coordinate.
-    if (vertical) {
-      Object.assign(bodyRect, {
-        x: bodyRect.y,
-        y: bodyRect.x,
-        width: bodyRect.height,
-        height: bodyRect.width
-      })
-      rects.forEach((rect: DOMRect) => {
-        Object.assign(rect, {
-          x: rect.y,
-          y: rect.x,
-          width: rect.height,
-          height: rect.width
-        })
-      })
-    }
-    // Merge Rect if at the same line.
-    rects.forEach((rect: DOMRect, index: number) => {
-      const nextIndex = index + 1
-      while (nextIndex < rects.length) {
-        const next = rects[nextIndex]
-        const currTop = rect.y
-        const currBottom = rect.y + rect.height
-        const nextTop = next.y
-        const nextBottom = next.y + next.height
-        if (((nextTop <= currTop && currTop <= nextBottom &&
-          nextTop <= currBottom && currBottom <= nextBottom) ||
-          (currTop <= nextTop && nextTop <= currBottom &&
-          currTop <= nextBottom && nextBottom <= currBottom))) {
-          rect.y = Math.min(rect.y, next.y)
-          rect.width += next.width
-          rect.height = Math.max(rect.height, next.height)
-        } else break
-        Vue.delete(rects, nextIndex)
-      }
-    })
-    // Deal with empty line
-    rects.forEach((rect: DOMRect, index: number) => {
-      if (rect.width < 1) {
-        let nextIndex = index + 1
-        while (nextIndex < rects.length && rects[nextIndex].width < 1)nextIndex++
-        const next = rects[nextIndex] ?? { x: bodyRect.x, width: bodyRect.width }
-        const prev = rects[index - 1] ?? { x: bodyRect.x, width: bodyRect.width }
-        const target = (prev.width < next.width) ? prev : next
-        rect.x = target.x
-        rect.width = target.width
-      }
-    })
-    // Coordinate initial.
-    rects.forEach((rect: DOMRect) => {
-      rect.x = rect.x - bodyRect.x
-      rect.y = rect.y - bodyRect.y
-    })
+    const myRect = new Rect(config)
+    myRect.preprocess()
+    const { vertical, width, height, transform, rects, rows } = myRect.get()
 
     if (isITextGooey(textBg)) {
       const padding = textBg.distance
@@ -508,7 +609,7 @@ class TextBg {
       })
 
       const cps = new Gooey(textBg, rects)
-      cps.preProcess()
+      cps.preprocess()
       const d = cps.process()
 
       return {
@@ -528,7 +629,6 @@ class TextBg {
       const paths = [] as Record<string, unknown>[]
       rects.forEach(rect => {
         const capWidth = rect.height * 0.005 * textBg.height
-        // capWidth = Math.min(capWidth, rect.width / 2)
         const yOffset = (rect.height - capWidth * 2) * 0.01 * (100 - textBg.yOffset)
         const path = new Path(new Point(rect.x + capWidth, rect.y + yOffset))
 
@@ -600,9 +700,7 @@ class TextBg {
           width: boxWidth + textBg.bStroke,
           height: boxHeight + textBg.bStroke,
           style: `left: ${left}px;
-            top: ${top}px;
-            border-radius: ${boxRadius}px;
-            overflow: hidden`
+            top: ${top}px;`
         },
         content: [{
           tag: 'path',
@@ -613,6 +711,38 @@ class TextBg {
           }
         }]
         // .concat(path.toCircle() as any) // Show control point
+      }
+    } else if (isITextSvgbg(textBg)) {
+      const pos = [] as Record<string, number>[]
+      const offset = { x: 0, y: 0 }
+      rows.forEach((row) => {
+        offset.x = 0
+        row.spanData.forEach((span) => {
+          const { width, height, text } = span
+          if (text !== ' ') {
+            pos.push({
+              x: offset.x,
+              y: height + offset.y,
+              width,
+              height
+            })
+          }
+          offset.x += width
+        })
+        offset.y += row.rect.height
+      })
+      return {
+        attrs: { width, height },
+        content: pos.map(p => ({
+          tag: 'use',
+          attrs: {
+            'xlink:href': '#arrow-up',
+            transform,
+            width: p.height,
+            x: p.x - (p.height - p.width) / 2,
+            y: p.y - height / 2
+          }
+        }))
       }
     } else return null
   }

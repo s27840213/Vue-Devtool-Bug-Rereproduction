@@ -582,7 +582,7 @@ class TextUtils {
         const span = document.createElement('span')
         span.textContent = spanData.text
 
-        const spanStyleObject = {}
+        const spanStyleObject = {} as Record<string, string>
         tiptapUtils.textStyles(spanData.styles)
           .split(';')
           .forEach(s => {

@@ -416,6 +416,10 @@ class ConstantData {
         key: 'underline',
         label: i18n.tc('NN0727'),
         options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
+      }, {
+        key: 'svgbg',
+        label: 'svgbg',
+        options: toOptions(['opacity'])
       }])
     }]
     return categories as IEffectCategory[]
