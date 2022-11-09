@@ -361,8 +361,8 @@ class PageUtils {
     }
 
     if (!preventFocus) this.activeMiddlemostPage()
-    this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
-    this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
+    // this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
+    // this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
   }
 
   findBoundary(posArr: Array<{ top: number, bottom: number }>, containerRect: DOMRect, currIndex: number, toTop: boolean): number {

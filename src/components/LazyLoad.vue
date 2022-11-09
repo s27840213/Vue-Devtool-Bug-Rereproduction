@@ -2,8 +2,9 @@
   div(class="lazy-load"
       :style="styles"
       ref="observer")
-    transition(name="fade-in")
+    transition(name="fade-in" mode="out-in")
       slot(v-if="shoudBeRendered")
+      slot(v-else name="placeholder")
 </template>
 
 <script lang="ts">
@@ -77,7 +78,7 @@ export default Vue.extend({
               this.renderEventId = generalUtils.generateRandomString(3)
               queueUtils.push(this.renderEventId, async () => {
                 this.shoudBeRendered = true
-                this.handleLoaded()
+                this.handleLoaded(true)
               })
             },
             this.handleUnrender ? 150 : 0
@@ -101,6 +102,7 @@ export default Vue.extend({
             this.unrenderEventId = generalUtils.generateRandomString(3)
             queueUtils.push(this.unrenderEventId, async () => {
               this.shoudBeRendered = false
+              this.handleLoaded(false)
             })
           }, this.unrenderDelay)
 
@@ -121,8 +123,8 @@ export default Vue.extend({
     }
   },
   methods: {
-    handleLoaded() {
-      this.$emit('loaded')
+    handleLoaded(bool: boolean) {
+      this.$emit('loaded', bool)
     }
   },
   destroyed() {
