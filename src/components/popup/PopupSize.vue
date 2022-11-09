@@ -65,7 +65,9 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .popup-size {
   position: relative;
-  width: 500px;
+  height: 466px;
+  width: 440px;
+  max-height: 90vh;
   display: grid;
   grid-template-columns: 1fr;
   box-sizing: border-box;

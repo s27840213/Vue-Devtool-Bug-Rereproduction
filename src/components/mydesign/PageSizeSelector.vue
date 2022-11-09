@@ -247,6 +247,9 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .page-size-selector {
   text-align: left;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
   &__body {
     background-color: setColor(gray-1-5);
     box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.25);
@@ -298,6 +301,7 @@ export default Vue.extend({
       }
     }
     &__hr {
+      width: 100%;
       margin-top: 24px;
       margin-bottom: 24px;
     }
@@ -319,9 +323,6 @@ export default Vue.extend({
     }
   }
   &__container {
-    max-height: 500px;
-    margin-right: -5px;
-    padding-right: 5px;
     overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
     &::-webkit-scrollbar {
