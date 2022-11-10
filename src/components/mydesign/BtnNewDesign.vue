@@ -1,7 +1,7 @@
 <template lang="pug">
   div(cless="btn-new-design")
     button(class="btn-primary-sm pointer" @click="openPopup()")
-      span(class="header-sort") {{$t('NN0072')}}
+      span(class="header-sort") {{$tc('NN0072')}}
     div(v-if="isShowPopup"
       class="popup-window")
       popup-size(@close="closePopup()")

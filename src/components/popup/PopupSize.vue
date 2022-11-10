@@ -7,8 +7,8 @@
         iconWidth="10px"
         iconColor="gray-2"
         @click.native="closePopup()")
-    div(class="popup-size__title label-mid mb-20 text-center")
-      span {{$t('NN0072')}}
+    div(class="popup-size__title label-mid mb-20")
+      span {{$tc('NN0072', 2)}}
     PageSizeSelector(:isValidate="isConfirmClicked" defaultFormat="custom" ref="pageSizeSelector" @select="selectFormat")
     div(class="popup-size__body__button")
       button(class="btn-primary-sm rounded my-6 full-width pointer"
@@ -82,8 +82,7 @@ export default Vue.extend({
     justify-content: center;
     // font-family: 'SF Pro';
     color: setColor(gray-2);
-    letter-spacing: 0.255em;
-    text-indent: 0.255em;
+    word-spacing: 0.255em;
   }
   &__body {
     &__button {
@@ -97,8 +96,7 @@ export default Vue.extend({
         // font-family: 'SF Pro';
         font-size: 12px;
         font-weight: 400;
-        letter-spacing: 1.21em;
-        text-indent: 1.21em;
+        word-spacing: 1.21em;
         line-height: 18px;
       }
     }

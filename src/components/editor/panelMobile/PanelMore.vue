@@ -11,7 +11,7 @@
     div(class="panel-more__item" @click="save()")
       span(class="body-2 pointer") {{$t('NN0009')}}
     div(class="panel-more__item" @click="newDesign()")
-      span(class="body-2 pointer") {{$t('NN0072')}}
+      span(class="body-2 pointer") {{$tc('NN0072')}}
     hr(class="panel-more__hr")
     div(class="panel-more__item" @click="goToPage('MyDesign')")
       span(class="body-2 pointer") {{$t('NN0080')}}
