@@ -70,9 +70,9 @@ export default Vue.extend({
 .warning { margin-top: 16px }
 
 .all-design-view {
-  @include hide-scrollbar-white($padding-right: 65px);
+  @include hover-scrollbar();
   box-sizing: border-box;
-  padding: 0 65px 0 55px;
+  padding: 0 43px 0 55px; // padding-right: 55 - 12(scrollbar width)
   text-align: left;
   &__toolbar{
     display: flex;

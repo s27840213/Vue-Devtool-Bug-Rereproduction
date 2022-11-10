@@ -97,7 +97,7 @@ export default Vue.extend({
       return {
         width: `${this.config.styles.imgWidth * this.getPageScale * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.getPageScale * this.contentScaleRatio}px`,
-        outline: `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px dashed #7190CC`
+        outline: `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`
       }
     },
     imgControllerPosHandler(): ICoordinate {

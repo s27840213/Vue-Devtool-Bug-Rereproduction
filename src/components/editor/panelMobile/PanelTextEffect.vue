@@ -39,6 +39,7 @@
             span {{sel.label}}
         //- Option type range
         mobile-slider(v-if="option.type === 'range'"
+          :borderTouchArea="true"
           :title="option.label"
           :name="option.key"
           :value="currentStyle[currCategory.name][option.key]"
@@ -254,6 +255,7 @@ export default Vue.extend({
   }
 
   &__form {
+    @include no-scrollbar;
     display: flex;
     flex-direction: column;
     overflow-y: scroll;

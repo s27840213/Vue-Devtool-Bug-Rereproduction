@@ -16,7 +16,7 @@
       span(class="body-3 ml-10 mr-5") /
       input(class="body-3 text-gray-2" type="text"
         :placeholder="`${$t('NN0079')}`"
-        maxlength="30"
+        maxlength="64"
         :value="pagesName"
         @change="setPagesName"
         ref="pagesName")

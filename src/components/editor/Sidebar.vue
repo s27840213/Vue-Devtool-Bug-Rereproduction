@@ -128,8 +128,16 @@ export default Vue.extend({
 
 .nav {
   @include size(100%, 100%);
-  @include push-scrollbar10;
-  @include hide-scrollbar;
+  @include hover-scrollbar(dark);
+  @include firefoxOnly {
+    &:hover {
+      scrollbar-color: setColor(gray-4) setColor(nav);
+    }
+  }
+  &::-webkit-scrollbar-thumb {
+    border: 3px solid setColor(nav);
+  }
+  padding-left: 10px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;

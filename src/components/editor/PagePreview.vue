@@ -2,9 +2,14 @@
 div(class="page-preview")
     template(v-for="(page, idx) in getPages")
         page-preview-plus(:index="idx" :last="false"  :key="`${page.id}-top`")
-        page-preview-page-wrapper(:index="idx" type="full" :config="wrappedPage(page)"  :key="page.id" @loaded="handleLoaded")
+        page-preview-page-wrapper(:index="idx"
+          type="full"
+          :config="wrappedPage(page)"
+          :lazyLoadTarget="'.page-preview'"
+          :key="page.id"
+          @loaded="handleLoaded")
         page-preview-plus(v-if="(idx+1) % getPagesPerRow === 0"
-                        :index="idx+1" :last="false"  :key="`${page.id}-bottom`")
+          :index="idx+1" :last="false"  :key="`${page.id}-bottom`")
     page-preview-plus(:index="getPages.length" last=true)
     div(class="page-preview-page-last pointer"
       @click="addPage()")
@@ -42,6 +47,7 @@ export default Vue.extend({
     })
   },
   mounted() {
+    testUtils.start('previewTest')
     this.screenWidth = document.body.clientWidth - 130
     this._setPagesPerRow(floor(this.screenWidth / 180))
     window.addEventListener('resize', () => {
@@ -62,10 +68,14 @@ export default Vue.extend({
       return { ...page, isAutoResizeNeeded: false }
     },
     handleLoaded() {
-      // if (this.renderCount === this.getPages.length - 1) {
-      //   testUtils.log('preview', 'Preview Test')
-      // }
-      // this.renderCount++
+      if (this.renderCount === 0) {
+        testUtils.start('previewTest')
+      }
+
+      if (this.renderCount === this.getPages.length - 1) {
+        testUtils.log('previewTest', 'Preview Test')
+      }
+      this.renderCount++
     }
   }
 })

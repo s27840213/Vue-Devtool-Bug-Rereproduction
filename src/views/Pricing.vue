@@ -136,7 +136,7 @@ export default Vue.extend({
 }
 
 .pricing-content {
-  @include hide-scrollbar-white(5.34%);
+  @include hover-scrollbar();
   display: flex;
   flex-direction: column;
   align-items: center;

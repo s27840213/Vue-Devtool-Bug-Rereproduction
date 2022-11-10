@@ -76,7 +76,8 @@ export interface IEditorState {
   isGlobalLoading: boolean,
   useMobileEditor: boolean,
   defaultContentScaleRatio: number,
-  _3dEnabledPageIndex: number
+  _3dEnabledPageIndex: number,
+  currFocusPageIndex: number
 }
 
 export enum SidebarPanelType {

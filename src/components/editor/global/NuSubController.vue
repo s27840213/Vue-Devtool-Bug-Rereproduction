@@ -449,7 +449,7 @@ export default Vue.extend({
       const outlineColor = this.config.locked ? '#EB5757' : '#7190CC'
       if (this.config?.active && LayerUtils.getCurrLayer.type !== 'frame') {
         if (this.isControlling) {
-          return `${2 * (100 / this.scaleRatio) / this.primaryLayer.styles.scale * this.contentScaleRatio}px dashed ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) / this.primaryLayer.styles.scale * this.contentScaleRatio}px solid ${outlineColor}`
         } else {
           return `${2 * (100 / this.scaleRatio) / this.primaryLayer.styles.scale * this.contentScaleRatio}px solid ${outlineColor}`
         }

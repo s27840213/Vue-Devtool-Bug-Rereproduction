@@ -7,6 +7,7 @@
           span(class="home-top-text__title" v-html="$t('NN0464')")
           span(class="home-top-text__description") {{$t('NN0465')}}
           animation(v-for="cb in colorBlock"
+            :key="cb"
             :class="`home-top-text__colorBlock ${cb.replace('.json', '')}`"
             :path="'/lottie/' + cb")
         iframe(title="Vivipic" class="home-top__yt"
@@ -22,7 +23,7 @@
           type="mydesign")
         template(v-if="isLogin")
           scroll-list(v-for="theme in themeList"
-            type="template" :theme="theme")
+            type="template" :theme="theme" :key="theme")
       div(class="home-block")
         ta-block(v-for="item in blocklist"
           :content="item")
@@ -151,8 +152,7 @@ export default Vue.extend({
   height: 100%;
 }
 .home-content {
-  @include push-scrollbar10;
-  @include hide-scrollbar-white;
+  @include hover-scrollbar();
   display: flex;
   flex-direction: column;
   align-items: center;

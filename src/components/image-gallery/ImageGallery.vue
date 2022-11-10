@@ -118,20 +118,15 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-#recycle {
-  // For overwrite vue-recycle setting
-  overflow-y: overlay;
-}
-
 .image-gallery {
   overflow-x: visible;
   &__content {
+    @include push-scrollbar10;
+    @include hover-scrollbar(dark);
     height: 100%;
     line-height: 0;
     text-align: left;
     box-sizing: border-box;
-    @include push-scrollbar10;
-    @include hide-scrollbar;
   }
 }
 </style>

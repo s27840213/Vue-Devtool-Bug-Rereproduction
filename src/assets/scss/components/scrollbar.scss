@@ -2,66 +2,82 @@
 @use '@/assets/scss/utils' as *;
 
 .scrollbar-white {
-	scrollbar-width: thin;
-	overscroll-behavior: contain;
+  overscroll-behavior: contain;
 
-	&::-webkit-scrollbar {
-		width: 15px;
-		height: 15px;
-		background-color: unset;
-	}
+  @include firefoxOnly {
+    scrollbar-width: thin;
+    scrollbar-color: white transparent;
+  }
 
-	&::-webkit-scrollbar-thumb {
-		border-radius: 10px;
-		background-color: white;
-	}
+  &::-webkit-scrollbar {
+    width: 15px;
+    height: 15px;
+    background-color: unset;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: white;
+  }
 }
 
 .scrollbar-gray {
-	scrollbar-width: thin;
-	overscroll-behavior: contain;
+  overscroll-behavior: contain;
 
-	&::-webkit-scrollbar {
-		width: 15px;
-		height: 15px;
-		background-color: unset;
-	}
+  @include firefoxOnly {
+    scrollbar-width: thin;
+    scrollbar-color: setColor(gray-3) transparent;
+  }
 
-	&::-webkit-scrollbar-thumb {
-		border-radius: 10px;
-		background-color: setColor(gray-3);
-	}
+  &::-webkit-scrollbar {
+    width: 15px;
+    height: 15px;
+    background-color: unset;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: setColor(gray-3);
+  }
 }
 
 
 .scrollbar-white-thin {
-	scrollbar-width: thin;
-	overscroll-behavior: contain;
+  overscroll-behavior: contain;
 
-	&::-webkit-scrollbar {
-		width: 8px;
-		height: 8px;
-		background-color: unset;
-	}
+  @include firefoxOnly {
+    scrollbar-width: thin;
+    scrollbar-color: white transparent;
+  }
 
-	&::-webkit-scrollbar-thumb {
-		border-radius: 10px;
-		background-color: white;
-	}
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background-color: unset;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: white;
+  }
 }
 
 .scrollbar-gray-thin {
-	scrollbar-width: thin;
-	overscroll-behavior: contain;
+  overscroll-behavior: contain;
 
-	&::-webkit-scrollbar {
-		width: 8px;
-		height: 8px;
-		background-color: unset;
-	}
+  @include firefoxOnly {
+    scrollbar-width: thin;
+    scrollbar-color: setColor(gray-3) transparent;
+  }
 
-	&::-webkit-scrollbar-thumb {
-		border-radius: 10px;
-		background-color: setColor(gray-3);
-	}
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background-color: unset;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: setColor(gray-3);
+  }
 }

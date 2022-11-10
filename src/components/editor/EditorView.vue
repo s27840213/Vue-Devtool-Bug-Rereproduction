@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="editor-view scrollbar-gray"
+  div(class="editor-view"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="brushCursorStyles()"
       @pointerdown="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
@@ -25,7 +25,7 @@
           div(v-show="isSelecting" class="selection-area" ref="selectionArea"
             :style="{'z-index': `${pageNum+1}`}")
         bg-remove-area(v-else :editorViewCanvas="editorViewCanvas")
-      template(v-if="showRuler")
+      template(v-if="showRuler && !isShowPagePreview")
         ruler-hr(:canvasRect="canvasRect"
           :editorView="editorView"
           @pointerdown.native.stop="dragStartH($event)")
@@ -75,6 +75,7 @@ import eventUtils from '@/utils/eventUtils'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
+import { globalQueue } from '@/utils/queueUtils'
 
 export default Vue.extend({
   components: {
@@ -112,6 +113,7 @@ export default Vue.extend({
   mounted() {
     // window.addEventListener('keydown', this.handleKeydown)
     // window.addEventListener('keyup', this.handleKeydown)
+    globalQueue.batchNum = 5
     this.getRecently()
 
     StepsUtils.record()
@@ -582,7 +584,15 @@ export default Vue.extend({
 $REULER_SIZE: 20px;
 
 .editor-view {
-  overflow: scroll;
+  @include hover-scrollbar($showX: true);
+  overflow: overlay;
+  &::-webkit-scrollbar-thumb {
+    border: none;
+  }
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
   position: relative;
   z-index: setZindex("editor-view");
 
