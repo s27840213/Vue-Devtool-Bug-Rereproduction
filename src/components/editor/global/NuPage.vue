@@ -4,7 +4,7 @@
       ref="page")
     div(v-if="!isOutOfBound && !isDetailPage && !isMobile && !isShowPagePreview"
       class="page-title text-left pb-10"
-      :style="{'width': `${config.width * (scaleRatio/100)}px`, 'transform': `translate3d(0, -100%, ${isAnyLayerActive ? 0 : 1}px)`}")
+      :style="{'transform': `translate3d(0, -100%, ${isAnyLayerActive ? 0 : 1}px)`}")
       //- span(class="pr-10") 第 {{pageIndex+1}} 頁
       span(class="pr-10") {{$t('NN0134', {num:`${pageIndex+1}`})}}
       input(
@@ -67,7 +67,8 @@
         :rootMargin="'1500px 0px 1500px 0px'"
         :minHeight="config.height * (scaleRatio / 100)"
         :maxHeight="config.height * (scaleRatio / 100)"
-        :threshold="[0,1]"
+        :threshold="[0]"
+        :pageIndex="pageIndex"
         @loaded="handleLoaded")
       template(v-if="!isShowPagePreview && (!hasEditingText)")
         div(class='pages-wrapper'
@@ -157,7 +158,8 @@
       template(#placeholder)
         div(class='pages-wrapper'
           :class="`nu-page-${pageIndex}`"
-          :style="wrapperStyles()")
+          :style="wrapperStyles(true)"
+          :key="'placeholder'")
     div(v-if="(currActivePageIndex === pageIndex && isDetailPage)"
         class="page-resizer"
         ref="pageResizer"
@@ -458,13 +460,13 @@ export default Vue.extend({
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
-    wrapperStyles() {
+    wrapperStyles(isPlaceHolder?: boolean) {
       return {
         width: `${this.config.width * (this.scaleRatio / 100)}px`,
         height: `${this.config.height * (this.scaleRatio / 100)}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial',
         // border: `2px solid ${this.pageIsHover || this.currFocusPageIndex === this.pageIndex ? '#7190CC' : 'transparent'}`
-        border: `2px solid ${this.pageIsHover || this.isFocusedPage ? '#7190CC' : 'transparent'}`
+        border: `2px solid ${(this.pageIsHover || this.isFocusedPage) && !isPlaceHolder ? '#7190CC' : 'transparent'}`
       }
     },
     snapLineStyles(dir: string, pos: number, isGuideline?: string) {
@@ -680,7 +682,7 @@ export default Vue.extend({
     handleDraggingController(index: number) {
       this.currDraggingIndex = index
     },
-    handleLoaded(bool: boolean) {
+    handleLoaded(bool: boolean, entries: Array<IntersectionObserverEntry>) {
       this.isOutOfBound = !bool
     }
   }
@@ -700,6 +702,7 @@ export default Vue.extend({
 
 .page-title {
   position: absolute;
+  width: 100%;
   top: 0;
   left: 0;
   display: flex;

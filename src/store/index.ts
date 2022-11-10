@@ -382,7 +382,6 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_middlemostPageIndex(state: IEditorState, index: number) {
     state.middlemostPageIndex = index
-
     const { pageIndex } = state.currSelectedInfo
     if (state.currActivePageIndex === -1 && pageIndex === -1 && state.currFocusPageIndex !== index) {
       state.currFocusPageIndex = index

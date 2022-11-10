@@ -3,10 +3,9 @@
       class="transition"
       :target="lazyLoadTarget"
       :threshold="[0,1]"
-      :minHeight="contentWidth"
+      :minHeight="itemSize ? pageHeight * scaleRatio : contentWidth"
       @loaded="handleLoaded")
-    div(v-if="!allPageMode && !isShowPagePreview && !showPagePanel" :style="loadingStyle()")
-    div(v-else class="page-preview-page"
+    div(class="page-preview-page"
       :style="styles2()"
       :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
       ref="pagePreview")
@@ -17,7 +16,7 @@
           draggable="true",
           @dragstart="handleDragStart"
           @dragend="handleDragEnd"
-          @mouseenter="handleMouseEnter"
+          @mouseenter="handleMouseEnter",
           @mouseleave="handleMouseLeave"
           ref="content")
         page-content(
@@ -27,7 +26,9 @@
           :pageIndex="index"
           :contentScaleRatio="scaleRatio()"
           :handleSequentially="true"
-          :isPagePreview="true")
+          :isPagePreview="true"
+          :layerLazyLoad="true"
+          :lazyLoadTarget="lazyLoadTarget")
         div(class="page-preview-page__highlighter"
           :class="{'focused': currFocusPageIndex === index}"
           :style="hightlighterStyles()")
@@ -57,6 +58,9 @@
       div(v-if="type === 'full'"
         class="page-preview-page-title")
         span(:style="{'color': currFocusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
+    template(#placeholder)
+      div(v-if="itemSize" :style="loadingStyle()"
+        :key="'placeholder'")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -81,6 +85,9 @@ export default Vue.extend({
     showMoreBtn: {
       default: true,
       type: Boolean
+    },
+    itemSize: {
+      type: Number
     },
     lazyLoadTarget: {
       type: String,
@@ -248,7 +255,7 @@ export default Vue.extend({
       return this.config.height
     },
     scaleRatio(): number {
-      return this.contentWidth / this.pageWidth()
+      return this.itemSize ? this.itemSize / this.pageWidth() : this.contentWidth / this.pageWidth()
     },
     contentScaleStyles(): { [index: string]: string } {
       return {
@@ -257,30 +264,35 @@ export default Vue.extend({
     },
     styles(): { [index: string]: string } {
       return {
-        height: `${this.pageHeight() * this.scaleRatio()}px`
+        height: `${this.pageHeight() * this.scaleRatio()}px`,
+        ...(this.itemSize && { width: `${this.itemSize}px` })
       }
     },
     styles2(): { [index: string]: string } {
       if (this.type === 'panel' &&
         this.isDragged && this.index !== pageUtils.currFocusPageIndex) {
         return {
-          'z-index': '-1'
+          'z-index': '-1',
+          width: `${this.itemSize}px`,
+          height: `${this.pageHeight() * this.scaleRatio()}px`
         }
       } else {
         return {
+          width: `${this.itemSize}px`,
+          height: `${this.pageHeight() * this.scaleRatio()}px`
         }
       }
     },
     hightlighterStyles(): { [index: string]: string } {
       return {
-        width: `${this.contentWidth + 20}px`,
+        width: this.itemSize ? `${this.itemSize + 20}px` : `${this.contentWidth + 20}px`,
         height: `${this.pageHeight() * this.scaleRatio() + 20}px`
       }
     },
     loadingStyle(): { [index: string]: string } {
       return {
-        width: '100%',
-        height: '100%'
+        width: this.itemSize ? `${this.itemSize}px` : '100%',
+        height: this.itemSize ? `${this.pageHeight() * this.scaleRatio()}px` : '100%'
       }
     }
   }
@@ -396,7 +408,6 @@ export default Vue.extend({
   box-sizing: border-box;
   background: linear-gradient(90deg, rgba(#59c3e1, 0.3), rgba(#50a2d8, 0.3));
 }
-
 .transition {
   transition: 0.25s ease-in-out;
 }
