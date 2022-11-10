@@ -665,6 +665,7 @@ class ViviStickerUtils {
           this.preCopyEditor()
           setTimeout(() => {
             const { x, y, width, height } = this.getEditorDimensions()
+            const editorType = store.getters['vivisticker/getEditorType']
             this.callIOSAsAPI('GEN_THUMB', {
               type: 'mydesign',
               id,
@@ -672,6 +673,7 @@ class ViviStickerUtils {
               height,
               x,
               y,
+              needCrop: editorType === 'text' ? 0 : 1,
               bgColor: store.getters['vivisticker/getEditorBg'] // for older app
             }, 'gen-thumb').then((data) => {
               this.postCopyEditor()
