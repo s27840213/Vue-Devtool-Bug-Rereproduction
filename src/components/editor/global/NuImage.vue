@@ -664,6 +664,9 @@ export default Vue.extend({
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
           if (!shadowBuff.canvasShadowImg) {
+            if (this.config.previewSrc.includes('data:image/png;base64')) {
+              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: '' })
+            }
             img.crossOrigin = 'anonymous'
             img.src = ImageUtils.getSrc(this.config,
               ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
