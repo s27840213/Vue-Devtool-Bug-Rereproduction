@@ -334,7 +334,7 @@ export default Vue.extend({
   &__container {
     display: grid;
     gap: 4px;
-    height: 271px;
+    height: calc(100% - 71px);
     overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
     &::-webkit-scrollbar {
