@@ -81,7 +81,7 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'SF Pro';
+    // font-family: 'SF Pro';
     color: setColor(gray-2);
     letter-spacing: 0.255em;
     text-indent: 0.255em;
@@ -95,10 +95,12 @@ export default Vue.extend({
       width: 240px;
       padding-top: 20px;
       span{
-        font-family: 'SF Pro';
+        // font-family: 'SF Pro';
+        font-size: 12px;
         font-weight: 400;
         letter-spacing: 1.21em;
         text-indent: 1.21em;
+        line-height: 18px;
       }
     }
   }

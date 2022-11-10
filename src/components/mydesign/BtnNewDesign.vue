@@ -35,7 +35,7 @@ export default Vue.extend({
 .btn-primary-sm {
   height: 36px;
   white-space: nowrap;
-  font-family: 'Poppins';
+  // font-family: 'Poppins';
   font-weight: 500;
   font-size: 14px;
   line-height: 24px;

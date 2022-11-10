@@ -268,7 +268,7 @@ export default Vue.extend({
       &.first-row {
         display: block;
         margin-top: 0px;
-        font-family: 'SF Pro';
+        // font-family: 'SF Pro';
         color: setColor(gray-2);
         letter-spacing: 1.5px;
       }
@@ -278,7 +278,7 @@ export default Vue.extend({
         padding: 4px 16px;
         grid-template-columns: 28px auto;
         justify-content: left;
-        font-family: 'Mulish';
+        // font-family: 'Mulish';
         line-height: 20px;
       }
     }
@@ -299,13 +299,13 @@ export default Vue.extend({
         padding: 5px 5px;
         &__input-label {
           width: 30px;
-          font-family: 'Manrope';
+          // font-family: 'Manrope';
           font-weight: 700;
           text-align: center;
         }
         & input {
           background-color: transparent;
-          font-family: 'Mulish';
+          // font-family: 'Mulish';
           &::placeholder {
             /* Chrome, Firefox, Opera, Safari 10.1+ */
             color: setColor(gray-3);
