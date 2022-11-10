@@ -24,6 +24,36 @@ div(class="overflow-container"
       //-     :key="layer.id"
       //-     target=".editor-view"
       //-     :threshold="[0,1]")
+      //- template(v-if="layerLazyLoad")
+      //-   lazy-load(v-for="(layer,index) in config.layers"
+      //-       :key="layer.id"
+      //-       :target="lazyLoadTarget"
+      //-       :minHeight="layer.styles.height * contentScaleRatio"
+      //-       :minWidth="layer.styles.width * contentScaleRatio"
+      //-       :threshold="[0]")
+      //-     nu-layer(
+      //-       :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
+      //-       :data-index="`${index}`"
+      //-       :data-pindex="`${pageIndex}`"
+      //-       :layerIndex="index"
+      //-       :pageIndex="pageIndex"
+      //-       :config="layer"
+      //-       :currSelectedInfo="currSelectedInfo"
+      //-       :contentScaleRatio="contentScaleRatio"
+      //-       :scaleRatio="scaleRatio"
+      //-       :getCurrFunctionPanelType="getCurrFunctionPanelType"
+      //-       :isUploadingShadowImg="isUploadingShadowImg"
+      //-       :isHandling="isHandling"
+      //-       :isShowPagePanel="isShowPagePanel"
+      //-       :imgSizeMap="imgSizeMap"
+      //-       :userId="userId"
+      //-       :verUni="verUni"
+      //-       :uploadId="uploadId"
+      //-       :handleId="handleId"
+      //-       :uploadShadowImgs="uploadShadowImgs"
+      //-       :isPagePreview="true"
+      //-       :forceRender="forceRender")
+      //- template(v-else)
       nu-layer(
         v-for="(layer,index) in config.layers"
         :key="layer.id"
@@ -46,7 +76,8 @@ div(class="overflow-container"
         :uploadId="uploadId"
         :handleId="handleId"
         :uploadShadowImgs="uploadShadowImgs"
-        :isPagePreview="true")
+        :isPagePreview="true"
+        :forceRender="forceRender")
     template(v-else)
       div(class='pages-loading')
 </template>
@@ -94,6 +125,18 @@ export default Vue.extend({
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    forceRender: {
+      default: false,
+      type: Boolean
+    },
+    layerLazyLoad: {
+      default: false,
+      type: Boolean
+    },
+    lazyLoadTarget: {
+      type: String,
+      default: '.mobile-editor__page-preview'
     }
   },
   data() {

@@ -2,8 +2,8 @@
   div(class="lazy-load"
       :style="styles"
       ref="observer")
-    transition(name="fade-in" mode="out-in")
-      slot(v-if="shoudBeRendered")
+    transition(:name="anamationEnabled && !forceRender ? 'fade-in': ''" mode="out-in")
+      slot(v-if="forceRender || shoudBeRendered")
       slot(v-else name="placeholder")
 </template>
 
@@ -11,7 +11,7 @@
 import Vue, { PropType } from 'vue'
 import { some } from 'lodash'
 import generalUtils from '@/utils/generalUtils'
-import queueUtils from '@/utils/queueUtils'
+import { globalQueue } from '@/utils/queueUtils'
 
 export default Vue.extend({
   props: {
@@ -28,6 +28,7 @@ export default Vue.extend({
       type: Number
     },
     maxHeight: Number,
+    minWidth: Number,
     threshold: {
       type: Array as PropType<number[]>,
       default: () => [0, 1]
@@ -39,6 +40,18 @@ export default Vue.extend({
     unrenderDelay: {
       type: Number,
       default: 2000
+    },
+    pageIndex: {
+      type: Number,
+      default: -1
+    },
+    anamationEnabled: {
+      type: Boolean,
+      default: true
+    },
+    forceRender: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -58,73 +71,108 @@ export default Vue.extend({
       rootMargin: this.rootMargin,
       threshold: this.threshold
     }
-    this.intersectionObserver = new IntersectionObserver(
-      // If element is created when it is intersecting,
-      // there will be two entries in var `entries`.
-      // So if any of entry is true, call callback.
-      (entries) => {
-        if (some(entries, ['isIntersecting', true])) {
-          // perhaps the user re-scrolled to a component that was set to unrender. In that case stop the unrendering timer
-          queueUtils.deleteEvent(this.unrenderEventId)
-          clearTimeout(this.unrenderTimer)
 
-          /**
-           *  if we're dealing underndering lets add a waiting period of 200ms before rendering.
-           *  If a component enters the viewport and also leaves it within 200ms it will not render at all.
-           *  This saves work and improves performance when user scrolls very fast
-           */
-          this.renderTimer = setTimeout(
-            () => {
-              this.renderEventId = generalUtils.generateRandomString(3)
-              queueUtils.push(this.renderEventId, async () => {
-                this.shoudBeRendered = true
-                this.handleLoaded(true)
-              })
-            },
-            this.handleUnrender ? 150 : 0
-          )
+    if (!this.forceRender) {
+      this.intersectionObserver = new IntersectionObserver(
+        // If element is created when it is intersecting,
+        // there will be two entries in var `entries`.
+        // So if any of entry is true, call callback.
+        (entries) => {
+          if (some(entries, ['isIntersecting', true])) {
+            // perhaps the user re-scrolled to a component that was set to unrender. In that case stop the unrendering timer
+            if (this.unrenderEventId !== '') {
+              globalQueue.deleteEvent(this.unrenderEventId, this.pageIndex)
+              // this.consoleLog(`delete unrender eventId: ${this.unrenderEventId}`)
+            }
+            if (this.unrenderTimer !== -1) {
+              clearTimeout(this.unrenderTimer)
+              // this.consoleLog('clear unrender timeout')
+            }
+            /**
+             *  if we're dealing underndering lets add a waiting period of 200ms before rendering.
+             *  If a component enters the viewport and also leaves it within 200ms it will not render at all.
+             *  This saves work and improves performance when user scrolls very fast
+             */
+            this.renderTimer = setTimeout(
+              () => {
+                this.renderEventId = generalUtils.generateRandomString(3)
+                // this.consoleLog(`push from lazyload: ${this.renderEventId}`)
+                globalQueue.push(this.renderEventId, async () => {
+                  // this.consoleLog('render succeed')
+                  this.shoudBeRendered = true
+                  this.handleLoaded(true, entries)
+                  this.renderEventId = ''
+                }, this.pageIndex)
+              },
+              this.handleUnrender ? 200 : 0
+            )
 
-          // this.renderTimer = setTimeout(
-          //   () => {
-          //     this.shoudBeRendered = true
-          //     this.handleLoaded()
-          //   },
-          //   this.handleUnrender ? 200 : 0
-          // )
-          if (!this.handleUnrender) {
-            this.intersectionObserver && this.intersectionObserver.disconnect()
+            // this.consoleLog(`setup render timer: ${this.renderTimer}`)
+
+            // this.renderTimer = setTimeout(
+            //   () => {
+            //     this.shoudBeRendered = true
+            //     this.handleLoaded()
+            //   },
+            //   this.handleUnrender ? 200 : 0
+            // )
+            if (!this.handleUnrender) {
+              this.intersectionObserver && this.intersectionObserver.disconnect()
+            }
+
+            this.handleIntersecting(entries)
+          } else {
+            if (this.renderEventId !== '') {
+              globalQueue.deleteEvent(this.renderEventId, this.pageIndex)
+              // this.consoleLog(`delete render eventId: ${this.unrenderEventId}`)
+            }
+            if (this.renderTimer !== -1) {
+              clearTimeout(this.renderTimer)
+              // this.consoleLog('clear render timeout')
+            }
+
+            this.unrenderTimer = setTimeout(() => {
+              this.unrenderEventId = generalUtils.generateRandomString(3)
+              // this.consoleLog(`push from lazyload: ${this.unrenderEventId}`)
+              globalQueue.push(this.unrenderEventId, async () => {
+                // this.consoleLog('unrender succeed')
+                this.shoudBeRendered = false
+                this.handleLoaded(false, entries)
+                this.unrenderEventId = ''
+              }, this.pageIndex)
+            }, this.unrenderDelay)
+
+            // this.consoleLog(`setup unrender timer: ${this.unrenderTimer}`)
+
+            // this.unrenderTimer = setTimeout(() => {
+            //   this.shoudBeRendered = false
+            // }, this.unrenderDelay)
           }
-        } else {
-          queueUtils.deleteEvent(this.renderEventId)
-          clearTimeout(this.renderTimer)
-
-          this.unrenderTimer = setTimeout(() => {
-            this.unrenderEventId = generalUtils.generateRandomString(3)
-            queueUtils.push(this.unrenderEventId, async () => {
-              this.shoudBeRendered = false
-              this.handleLoaded(false)
-            })
-          }, this.unrenderDelay)
-
-          // this.unrenderTimer = setTimeout(() => {
-          //   this.shoudBeRendered = false
-          // }, this.unrenderDelay)
-        }
-      }, options
-    )
-    this.intersectionObserver.observe(this.$refs.observer as Element)
+        }, options
+      )
+      this.intersectionObserver.observe(this.$refs.observer as Element)
+    }
   },
   computed: {
     styles(): { [index: string]: string } {
       return {
         minHeight: `${this.minHeight}px`,
-        ...(this.maxHeight && { maxHeight: `${this.maxHeight}px` })
+        ...(this.maxHeight && { maxHeight: `${this.maxHeight}px` }),
+        ...(this.minWidth && { minWidth: `${this.minWidth}px` })
       }
     }
   },
   methods: {
-    handleLoaded(bool: boolean) {
-      this.$emit('loaded', bool)
+    handleLoaded(bool: boolean, entry: Array<IntersectionObserverEntry>) {
+      this.$emit('loaded', bool, entry)
+    },
+    handleIntersecting(entry: Array<IntersectionObserverEntry>) {
+      this.$emit('intersecting', entry)
+    },
+    consoleLog(str: string) {
+      // if (this.pageIndex === 3) {
+      //   console.log(str)
+      // }
     }
   },
   destroyed() {
