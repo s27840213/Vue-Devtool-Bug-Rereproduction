@@ -39,7 +39,7 @@
         div(class="page-size-selector__body-row first-row")
           span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0025')}}
         div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
-          svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
+          svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
         div(v-for="(format, index) in formatList" class="page-size-selector__body-row item pointer"
             @click="selectFormat(`preset-${index}`)")
           radio-btn(class="page-size-selector__body__radio"
@@ -242,6 +242,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .page-size-selector {
+  height: 100%;
   text-align: left;
   overflow-y: hidden;
   display: flex;
@@ -334,7 +335,6 @@ export default Vue.extend({
   &__container {
     display: grid;
     gap: 4px;
-    height: calc(100% - 71px);
     overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
     &::-webkit-scrollbar {

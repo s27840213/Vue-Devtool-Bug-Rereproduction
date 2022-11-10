@@ -68,8 +68,8 @@ export default Vue.extend({
   position: relative;
   width: 440px;
   height: 90%;
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
   border-radius: 5px;
   box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
