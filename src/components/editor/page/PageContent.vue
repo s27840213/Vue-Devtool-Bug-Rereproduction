@@ -314,7 +314,7 @@ export default Vue.extend({
               pageIndex: this.pageIndex,
               props: { isAutoResizeNeeded: false }
             })
-          }, 100) // for the delay between font loading and dom rendering
+          }, 200) // for the delay between font loading and dom rendering
         })
       }
     }
