@@ -161,7 +161,7 @@ class ImageShadowUtils {
       // })
     }
     if ([ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(config.styles.shadow.currentEffect)) {
-      const ctxT = this.canvasT.getContext('2d') as CanvasRenderingContext2D
+      const ctxT = this.canvasT.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D
       const { drawCanvasW, drawCanvasH, timeout = DRAWING_TIMEOUT } = params
       const isRect = config.styles.shadow.currentEffect === ShadowEffectType.frame && !config.styles.shadow.isTransparent
       if (isRect) {
@@ -238,7 +238,7 @@ class ImageShadowUtils {
     setMark('floating', 0)
     const { canvasT, canvasMaxSize } = this
     const ctxT = canvasT.getContext('2d')
-    const ctxMaxSize = canvasMaxSize.getContext('2d')
+    const ctxMaxSize = canvasMaxSize.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D
 
     if (!ctxT || !ctxMaxSize) {
       logUtils.setLog('Error: ' + (ctxT ? 'canvasMaxSize' : 'ctxT') + 'is undefined')
@@ -351,7 +351,7 @@ class ImageShadowUtils {
     setMark('imageMatched', 0)
     const { canvasT, canvasMaxSize } = this
     const ctxT = canvasT.getContext('2d')
-    const ctxMaxSize = canvasMaxSize.getContext('2d')
+    const ctxMaxSize = canvasMaxSize.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D
 
     if (!ctxT || !ctxMaxSize) {
       logUtils.setLog('Error: ' + (ctxT ? 'canvasMaxSize' : 'ctxT') + 'is undefined')
@@ -462,7 +462,7 @@ class ImageShadowUtils {
       setMark('shadow', 0)
       const { canvasT, canvasMaxSize } = this
       const ctxT = canvasT.getContext('2d')
-      const ctxMax = canvasMaxSize.getContext('2d') as CanvasRenderingContext2D
+      const ctxMax = canvasMaxSize.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D
       if (!this.dilate) return
       if (!ctxT) {
         logUtils.setLog('Error: ' + (ctxT ? 'canvasMaxSize' : 'ctxT') + 'is undefined')
@@ -584,7 +584,7 @@ class ImageShadowUtils {
     } else {
       canvas = target
     }
-    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    const ctx = canvas.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D
     const { width, height } = canvas
     const data = ctx.getImageData(0, 0, width, height).data
     return data[3] !== 255 ||
@@ -656,7 +656,7 @@ class ImageShadowUtils {
   }
 
   getImgEdgeWidth(canvas: HTMLCanvasElement) {
-    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    const ctx = canvas.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
     const ROW_PIXELS = imageData.data.length / imageData.height
     const COL_PIXELS = imageData.data.length / imageData.width
