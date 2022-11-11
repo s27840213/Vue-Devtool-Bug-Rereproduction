@@ -208,7 +208,7 @@ export default Vue.extend({
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-object-item',
             list: rowItems,
-            size: 90
+            size: 104 // 80(object height) + 24(gap)
           }
         })
     }

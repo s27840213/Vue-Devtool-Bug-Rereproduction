@@ -64,6 +64,7 @@ const getDefaultState = (): IEditorState => ({
   isSettingScaleRatio: false,
   middlemostPageIndex: 0,
   currActivePageIndex: -1,
+  currFocusPageIndex: 0,
   currHoveredPageIndex: -1,
   lastSelectedLayerIndex: -1,
   clipboard: [],
@@ -205,10 +206,7 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.currActivePageIndex
   },
   getCurrFocusPageIndex(state: IEditorState): number {
-    const { pageIndex } = state.currSelectedInfo
-    return pageIndex >= 0 ? pageIndex
-      : state.currActivePageIndex >= 0
-        ? state.currActivePageIndex : state.middlemostPageIndex
+    return state.currFocusPageIndex
   },
   getCurrHoveredPageIndex(state: IEditorState): number {
     return state.currHoveredPageIndex
@@ -384,9 +382,18 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_middlemostPageIndex(state: IEditorState, index: number) {
     state.middlemostPageIndex = index
+    const { pageIndex } = state.currSelectedInfo
+    if (state.currActivePageIndex === -1 && pageIndex === -1 && state.currFocusPageIndex !== index) {
+      state.currFocusPageIndex = index
+    }
   },
   SET_currActivePageIndex(state: IEditorState, index: number) {
     state.currActivePageIndex = index
+
+    const { pageIndex } = state.currSelectedInfo
+    if (pageIndex === -1 && state.currFocusPageIndex !== index) {
+      state.currFocusPageIndex = index === -1 ? state.middlemostPageIndex : index
+    }
   },
   SET_lastSelectedLayerIndex(state: IEditorState, index: number) {
     state.lastSelectedLayerIndex = index
@@ -676,6 +683,10 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, layers } = state.currSelectedInfo
     const layerNum = layers.length
     const _3dEnabledPageIndex = layerNum > 1 && layerNum <= 50 ? pageIndex : -1
+
+    if (state.currFocusPageIndex !== pageIndex) {
+      state.currFocusPageIndex = pageIndex === -1 ? state.middlemostPageIndex : pageIndex
+    }
 
     if (_3dEnabledPageIndex !== state._3dEnabledPageIndex) {
       state._3dEnabledPageIndex = _3dEnabledPageIndex

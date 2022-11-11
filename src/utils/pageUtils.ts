@@ -10,7 +10,7 @@ import FocusUtils from './focusUtils'
 import generalUtils from './generalUtils'
 import layerFactary from './layerFactary'
 import resizeUtils from './resizeUtils'
-import { throttle } from 'lodash'
+import { debounce } from 'lodash'
 import groupUtils from './groupUtils'
 import { LayerType } from '@/store/types'
 
@@ -317,7 +317,7 @@ class PageUtils {
   // findCentralPageIndexInfo(preventFocus = false) {
   //   // console.lg
   // }
-  findCentralPageIndexInfo = throttle(this.findCentralPageIndexInfoHandler, 100)
+  findCentralPageIndexInfo = debounce(this.findCentralPageIndexInfoHandler, 100)
 
   private findCentralPageIndexInfoHandler(preventFocus = false) {
     const showMobilePanel = editorUtils.showMobilePanel || editorUtils.mobileAllPageMode
@@ -361,10 +361,17 @@ class PageUtils {
     }
 
     if (!preventFocus) this.activeMiddlemostPage()
-    this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
-    this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
+
+    /**
+     * @Note - don't remove the following codes unless the memember Alan isn't in the company anymore.
+     */
+    // this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
+    // this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
   }
 
+  /**
+   * @deprecated - although it's deprecated, but it may be usd in the future
+   */
   findBoundary(posArr: Array<{ top: number, bottom: number }>, containerRect: DOMRect, currIndex: number, toTop: boolean): number {
     if (currIndex < 0 || currIndex >= posArr.length) {
       return currIndex

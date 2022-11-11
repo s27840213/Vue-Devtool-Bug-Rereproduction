@@ -100,7 +100,7 @@ export default Vue.extend({
         transform: `translate3d(${pos.x * this.contentScaleRatio}px, ${pos.y * this.contentScaleRatio}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`,
-        outline: `${2 * (100 / this.scaleRatio * this.contentScaleRatio)}px dashed #7190CC`,
+        outline: `${2 * (100 / this.scaleRatio * this.contentScaleRatio)}px solid #7190CC`,
         'pointer-events': this.pointerEvents ?? 'initial'
       }
     },

@@ -34,7 +34,7 @@
           @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
           v-press="isTouchDevice()? onPress : -1"
           @dblclick="onDblClick")
-        template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isTouchDevice()")
+        //- template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isTouchDevice()")
         template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isDragging()")
           div(class="sub-controller"
               :style="transformStyle")
@@ -140,7 +140,6 @@
                 @pointerdown.native.stop="rotateStart"
                 @touchstart.native="disableTouchEvent")
               img(class="control-point__mover"
-                v-if="config.type !== 'text' || !contentEditable"
                 :src="require('@/assets/img/svg/move.svg')"
                 :style='controlPointStyles()'
                 @pointerdown="moveStart"
@@ -658,7 +657,7 @@ export default Vue.extend({
         return 'none'
       } else if (this.isShown() || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px dashed ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
         } else {
           return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
         }
@@ -766,7 +765,7 @@ export default Vue.extend({
           const isMover = targetClassList.contains('control-point__mover')
 
           // if the text layer is already active and contentEditable
-          if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar) {
+          if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar && !isMover) {
             return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
