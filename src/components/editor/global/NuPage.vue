@@ -69,8 +69,9 @@
         :maxHeight="config.height * (scaleRatio / 100)"
         :threshold="[0]"
         :pageIndex="pageIndex"
+        :forceRender="hasEditingText"
         @loaded="handleLoaded")
-      template(v-if="!isShowPagePreview && (!hasEditingText)")
+      template(v-if="!isShowPagePreview || (hasEditingText)")
         div(class='pages-wrapper'
             :class="`nu-page-${pageIndex}`"
             :style="wrapperStyles()"
@@ -683,7 +684,7 @@ export default Vue.extend({
       this.currDraggingIndex = index
     },
     handleLoaded(bool: boolean, entries: Array<IntersectionObserverEntry>) {
-      this.isOutOfBound = !bool
+      // this.isOutOfBound = !bool
     }
   }
 })
