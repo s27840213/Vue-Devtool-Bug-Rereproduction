@@ -220,7 +220,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
-                  S3_BUCKET: $AWS_BUCKET_DEV$5S
+                  S3_BUCKET: $AWS_BUCKET_DEV5S
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -250,7 +250,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
-                  S3_BUCKET: $AWS_BUCKET_DEV$4S
+                  S3_BUCKET: $AWS_BUCKET_DEV4S
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -280,7 +280,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
-                  S3_BUCKET: $AWS_BUCKET_DEV$3S
+                  S3_BUCKET: $AWS_BUCKET_DEV3S
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -310,7 +310,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
-                  S3_BUCKET: $AWS_BUCKET_DEV$2S
+                  S3_BUCKET: $AWS_BUCKET_DEV2S
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -340,7 +340,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
-                  S3_BUCKET: $AWS_BUCKET_DEV$1S
+                  S3_BUCKET: $AWS_BUCKET_DEV1S
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -370,7 +370,7 @@ pipelines:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
-                  S3_BUCKET: $AWS_BUCKET_DEV$0S
+                  S3_BUCKET: $AWS_BUCKET_DEV0S
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
