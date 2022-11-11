@@ -94,7 +94,7 @@ export default Vue.extend({
   position: relative;
   left: calc(100% - 280px + 24px);
   box-sizing: border-box;
-  padding: 50px 14px 153px 14px;
+  padding: 50px 14px;
   overflow-y: auto;
   text-align: left;
   color: setColor(gray-1);
