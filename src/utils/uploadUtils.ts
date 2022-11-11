@@ -1212,6 +1212,7 @@ class UploadUtils {
             this.isGettingDesign = false
             const editorView = document.querySelector('.editor-view') as HTMLElement
             if (editorUtils) {
+              pageUtils.fitPage()
               generalUtils.scrollToCenter(editorView, false)
             }
           })

@@ -418,7 +418,7 @@ export default Vue.extend({
       if (updater !== undefined) {
         try {
           updater().then(() => {
-            this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+            this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getImgDimension))
           })
         } catch (error) {
           if (this.src.indexOf('data:image/png;base64') !== 0) {
@@ -586,7 +586,7 @@ export default Vue.extend({
         }
         preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'pre')))
       } else {
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getImgDimension))
       }
     },
     handleShadowInit() {
@@ -664,6 +664,9 @@ export default Vue.extend({
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
           if (!shadowBuff.canvasShadowImg) {
+            if (this.config.previewSrc && this.config.previewSrc.includes('data:image/png;base64')) {
+              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: '' })
+            }
             img.crossOrigin = 'anonymous'
             img.src = ImageUtils.getSrc(this.config,
               ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
