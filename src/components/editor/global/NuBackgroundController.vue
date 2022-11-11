@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="nu-background-controller")
-    div(class="dim-background")
+    div(class="dim-background" :style="dimBgStyles")
     div(class="nu-controller__body"
         ref="body"
         :style="styles()"
@@ -11,8 +11,8 @@
           :key="index"
           :style="Object.assign(scaler.styles, cursorStyles(index, getPageRotate))"
           @pointerdown.stop="scaleStart")
-    div(class="nu-controller"
-        :style="controllerStyles()")
+    //- div(class="nu-controller"
+    //-     :style="controllerStyles()")
 </template>
 
 <script lang="ts">
@@ -67,10 +67,12 @@ export default Vue.extend({
       return this.getPage(this.pageIndex)
     },
     getImgX(): number {
-      return this.page.backgroundImage.posX
+      // return this.page.backgroundImage.posX
+      return this.config.styles.imgX
     },
     getImgY(): number {
-      return this.page.backgroundImage.posY
+      // return this.page.backgroundImage.posY
+      return this.config.styles.imgY
     },
     getImgWidth(): number {
       return this.config.styles.imgWidth
@@ -86,9 +88,18 @@ export default Vue.extend({
     },
     getImgController(): ICoordinate {
       return this.config.styles.imgController
+    },
+    dimBgStyles(): unknown {
+      return {
+        width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
+        height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`
+      }
     }
   },
   methods: {
+    ...mapMutations({
+      updateConfig: 'imgControl/UPDATE_CONFIG'
+    }),
     styles() {
       // preserve in case the background image is needed to be rotatable in the future
       // const zindex = (this.pageIndex + 1) * 100
@@ -133,8 +144,6 @@ export default Vue.extend({
       return imgControllerPos
     },
     controllerStyles() {
-      // rotate(${this.config.styles.rotate}deg)
-      console.log(this.contentScaleRatio)
       return {
         transform: `translate(${-this.page.backgroundImage.posX * this.contentScaleRatio}px, ${-this.page.backgroundImage.posY * this.contentScaleRatio}px)`,
         width: `${this.page.width * this.contentScaleRatio}px`,
@@ -177,7 +186,8 @@ export default Vue.extend({
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.page.height / this.getPageScale - this.getImgHeight
       }
-      PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
+      // PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
+      this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y })
     },
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
       const angleInRad = this.getPageRotate * Math.PI / 180
@@ -290,8 +300,9 @@ export default Vue.extend({
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
       }
-      PageUtils.updateBackgroundImageStyles(this.pageIndex, { width, height, imgWidth: width, imgHeight: height })
-      PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
+      // PageUtils.updateBackgroundImageStyles(this.pageIndex, { width, height, imgWidth: width, imgHeight: height })
+      // PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
+      this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y, imgWidth: width, imgHeight: height })
     },
     scaleEnd() {
       this.isControlling = false
@@ -360,12 +371,12 @@ export default Vue.extend({
 }
 
 .dim-background {
-  @include size(100%, 100%);
+  // @include size(100%, 100%);
   position: absolute;
   top: 0px;
   left: 0px;
   background: rgba(0, 0, 0, 0.4);
   pointer-events: none;
-  transform-style: preserve-3d;
+  // transform-style: preserve-3d;
 }
 </style>
