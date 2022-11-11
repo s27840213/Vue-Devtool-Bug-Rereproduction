@@ -3,7 +3,7 @@
     div(class="dim-background" :style="dimBgStyles")
     div(class="nu-controller__body"
         ref="body"
-        :style="styles()"
+        :style="styles"
         @pointerdown.stop="moveStart"
         @touchstart="disableTouchEvent")
       div(v-for="(scaler, index)  in controlPoints.scalers"
@@ -94,13 +94,8 @@ export default Vue.extend({
         width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`
       }
-    }
-  },
-  methods: {
-    ...mapMutations({
-      updateConfig: 'imgControl/UPDATE_CONFIG'
-    }),
-    styles() {
+    },
+    styles(): unknown {
       // preserve in case the background image is needed to be rotatable in the future
       // const zindex = (this.pageIndex + 1) * 100
       // const pos = this.imgControllerPosHandler()
@@ -110,7 +105,12 @@ export default Vue.extend({
         height: `${this.config.styles.imgHeight * this.getPageScale * this.contentScaleRatio}px`,
         outline: `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`
       }
-    },
+    }
+  },
+  methods: {
+    ...mapMutations({
+      updateConfig: 'imgControl/UPDATE_CONFIG'
+    }),
     imgControllerPosHandler(): ICoordinate {
       const page = this.page
       const angleInRad = this.getPageRotate * Math.PI / 180

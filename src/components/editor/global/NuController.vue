@@ -284,6 +284,7 @@ export default Vue.extend({
     ...mapState('text', ['sel', 'props']),
     ...mapState('shadow', ['processId', 'handleId']),
     ...mapState(['currDraggedPhoto']),
+    ...mapGetters('imgControl', ['isBgImgCtrl']),
     ...mapGetters('text', ['getDefaultFonts']),
     ...mapGetters({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
@@ -399,7 +400,8 @@ export default Vue.extend({
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
       setMoving: 'SET_moving',
-      setImgConfig: 'imgControl/SET_CONFIG'
+      setImgConfig: 'imgControl/SET_CONFIG',
+      setBgConfig: 'imgControl/SET_BG_CONFIG'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
@@ -672,17 +674,19 @@ export default Vue.extend({
       const currLayerIndex = LayerUtils.layerIndex
       if (currLayerIndex !== this.layerIndex) {
         const layer = LayerUtils.getLayer(this.pageIndex, currLayerIndex)
-        if (layer.type === 'image') {
+        if (layer.type === 'image' && layer.imgControl) {
           LayerUtils.updateLayerProps(this.pageIndex, currLayerIndex, { imgControl: false })
         } else if (layer.type === 'group') {
           (layer as IGroup).layers
             .forEach((l, i) => {
-              if (l.type === 'image') {
+              if (l.type === 'image' && l.imgControl) {
                 LayerUtils.updateLayerProps(this.pageIndex, currLayerIndex, { imgControl: false }, i)
               }
             })
         }
-        // this.setImgConfig(undefined)
+      }
+      if (this.isBgImgCtrl) {
+        this.setBgConfig(undefined)
       }
 
       const eventType = eventUtils.getEventType(event)
