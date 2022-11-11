@@ -122,6 +122,7 @@ export default Vue.extend({
     save() {
       const { index, pageIndex } = this.currSelectedInfo as ICurrSelectedInfo
       imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex: index }, { type: 'after-bg-remove', userId: '', assetId: '' })
+      imageShadowUtils.updateEffectProps({ pageIndex, layerIndex: index }, { isTransparent: true })
       if (!this.modifiedFlag) {
         layerUtils.updateLayerProps(pageIndex, index, {
           srcObj: {
