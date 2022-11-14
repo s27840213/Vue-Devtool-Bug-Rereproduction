@@ -120,14 +120,25 @@ class ImageShadowUtils {
     const { styles: { width, height, imgWidth, imgHeight, imgX, imgY, shadow } } = config
     const { maxsize = 1600, middsize = 510 } = shadow
     const ctxT = this.canvasT.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D
-    if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
-      canvasT.setAttribute('width', `${canvas.width}`)
-      canvasT.setAttribute('height', `${canvas.height}`)
+
+    this._layerData = { ...this._layerData, config, pageId: params.pageId || pageUtils.currFocusPage.id }
+    const { layerInfo } = params || {}
+    if (layerInfo) {
+      const primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
+      this._layerData.primarylayerId = primarylayerId
+      this.setProcessId({
+        pageId: pageUtils.currFocusPage.id,
+        layerId: primarylayerId || config.id || '',
+        subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
+      })
     }
+
+    canvasT.setAttribute('width', `${canvas.width}`)
+    canvasT.setAttribute('height', `${canvas.height}`)
+
     const imgRatio = img.naturalWidth / img.naturalHeight
     const isStaticShadow = shadow.currentEffect === ShadowEffectType.floating ||
       (!shadow.isTransparent && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect))
-
     if (isStaticShadow) {
       const ratio = shadow.currentEffect === ShadowEffectType.floating ? imgRatio : width / height
       const canvasW = Math.round((ratio > 1 ? 1600 : 1600 * ratio) + CANVAS_SPACE)
@@ -145,27 +156,7 @@ class ImageShadowUtils {
       canvasMaxSize.setAttribute('width', canvas.width.toString())
       canvasMaxSize.setAttribute('height', canvas.height.toString())
     }
-    this._layerData = { ...this._layerData, config, pageId: params.pageId || pageUtils.currFocusPage.id }
-    const { layerInfo } = params || {}
-    if (layerInfo) {
-      const primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
-      this._layerData.primarylayerId = primarylayerId
-      this.setProcessId({
-        pageId: pageUtils.currFocusPage.id,
-        layerId: primarylayerId || config.id || '',
-        subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
-      })
-      /**
-       * Check if the image is Transparent, only check as the isTransparent flag is undefined and false
-       */
-      if (!config.styles.shadow.isTransparent) {
-        ctxT.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvasT.width, canvasT.height)
-        this.updateEffectProps(layerInfo, {
-          isTransparent: this.isTransparentBg(canvas)
-        })
-      }
-      console.log(config.styles.shadow.isTransparent)
-    }
+
     if ([ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(config.styles.shadow.currentEffect)) {
       const { drawCanvasW, drawCanvasH, timeout = DRAWING_TIMEOUT } = params
       const isRect = config.styles.shadow.currentEffect === ShadowEffectType.frame && !config.styles.shadow.isTransparent
@@ -507,7 +498,6 @@ class ImageShadowUtils {
     const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * fieldRange.shadow.distance.weighting : 0
     ctxMax.putImageData(bluredData, offsetX, offsetY)
     ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
-
     ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
 
     setMark('shadow', 3)
