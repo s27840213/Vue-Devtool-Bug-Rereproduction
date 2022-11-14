@@ -603,7 +603,7 @@ export default Vue.extend({
         transform: this.enalble3dTransform ? `translate3d(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px, ${zindex}px) rotate(${rotate}deg)` : `translate(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px) rotate(${rotate}deg)`,
         ...this.transformStyle,
         ...((!this.enalble3dTransform && this.isActive && type === 'control-point') && { 'z-index': 10000 }),
-        willChange: this.isDragging() ? 'transform' : 'none',
+        willChange: this.isDragging() ? 'transform' : '',
         width: `${width * this.contentScaleRatio}px`,
         height: `${height * this.contentScaleRatio}px`,
         outline: this.outlineStyles(),

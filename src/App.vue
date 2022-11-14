@@ -16,6 +16,8 @@
         :info="currSelectedResInfo"
         @blur.native="setCurrSelectedResInfo()"
         tabindex="0")
+    div(v-if="isAdmin" class="fps")
+      span FPS: {{fps}}
     div(class="modal-container"
         v-if="isModalOpen")
       modal-card
@@ -64,14 +66,15 @@ export default Vue.extend({
     return {
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
-      coordinateHeight: 0
+      coordinateHeight: 0,
+      fps: 0
     }
-  },
-  beforeMount() {
-    networkUtils.registerNetworkListener()
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
+  },
+  beforeMount() {
+    networkUtils.registerNetworkListener()
   },
   beforeDestroy() {
     networkUtils.unregisterNetworkListener()
@@ -81,8 +84,18 @@ export default Vue.extend({
       currSelectedResInfo: 'getCurrSelectedResInfo',
       isModalOpen: 'modal/getModalOpen'
     }),
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
+    }),
     currLocale(): string {
       return localeUtils.currLocale()
+    }
+  },
+  watch: {
+    isAdmin(newVal) {
+      if (newVal) {
+        this.showFps()
+      }
     }
   },
   methods: {
@@ -133,6 +146,26 @@ export default Vue.extend({
         events: ['dblclick', 'click', 'contextmenu']
         // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
       }
+    },
+    showFps() {
+      const times: Array<number> = []
+      const T = 1000
+      const refreshLoop = () => {
+        window.requestAnimationFrame(() => {
+          const now = performance.now()
+          while (times.length > 0 && times[0] <= now - T) {
+            times.shift()
+          }
+          times.push(now)
+          this.fps = times.length
+          refreshLoop()
+        })
+      }
+      refreshLoop()
+      // output to console once per second
+      setInterval(() => {
+        this.fps *= 100 / T
+      }, T)
     }
   }
 })
@@ -222,6 +255,12 @@ export default Vue.extend({
   }
 }
 
+.fps {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
 // .vc-chrome-toggle-btn {
 //   display: none;
 // }

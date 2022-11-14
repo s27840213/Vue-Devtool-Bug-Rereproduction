@@ -317,7 +317,7 @@ class PageUtils {
   // findCentralPageIndexInfo(preventFocus = false) {
   //   // console.lg
   // }
-  findCentralPageIndexInfo = debounce(this.findCentralPageIndexInfoHandler, 100)
+  findCentralPageIndexInfo = debounce(this.findCentralPageIndexInfoHandler, 400)
 
   private findCentralPageIndexInfoHandler(preventFocus = false) {
     const showMobilePanel = editorUtils.showMobilePanel || editorUtils.mobileAllPageMode

@@ -122,7 +122,11 @@
           //- command/ctrl + 61/173 for Firefox keycode, http://www.javascripter.net/faq/keycodes.htm
           div(class="scale-container relative"
               :style="scaleContainerStyles")
-            page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio")
+            page-content(:config="config"
+              :pageIndex="pageIndex"
+              :contentScaleRatio="contentScaleRatio"
+              :lazyLoadTarget="'.editor-view'"
+              :forceRender="hasEditingText")
             div(v-if="isAdmin" class="layer-num") Layer數量: {{config.layers.length}} (Admin User 才看得到）
             div(class="page-control" :style="styles('control')")
               template(v-for="(layer, index) in config.layers")
@@ -280,7 +284,8 @@ export default Vue.extend({
     ...mapGetters({
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
       isImgCtrl: 'imgContorl/isImgCtrl',
-      isShowPagePreview: 'page/getIsShowPagePreview'
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      useMobileEditor: 'getUseMobileEditor'
     }),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
@@ -307,7 +312,7 @@ export default Vue.extend({
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
         transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`,
-        willChange: this.isScaling ? 'transform' : 'none'
+        willChange: this.isScaling ? 'transform' : ''
       }
     },
     getCurrLayer(): ILayer {

@@ -5,7 +5,7 @@ div(class="page-preview")
         page-preview-page-wrapper(:index="idx"
           type="full"
           :config="wrappedPage(page)"
-          :lazyLoadTarget="'.page-preview'"
+          :lazyLoadTarget="'.content__pages'"
           :key="page.id"
           @loaded="handleLoaded")
         page-preview-plus(v-if="(idx+1) % getPagesPerRow === 0"

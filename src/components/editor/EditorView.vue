@@ -113,7 +113,7 @@ export default Vue.extend({
   mounted() {
     // window.addEventListener('keydown', this.handleKeydown)
     // window.addEventListener('keyup', this.handleKeydown)
-    globalQueue.batchNum = 5
+    globalQueue.batchNum = 1000
     this.getRecently()
 
     StepsUtils.record()

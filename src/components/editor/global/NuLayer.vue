@@ -13,15 +13,32 @@
         nu-clipper(:config="config"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
             :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
-          component(:is="`nu-${config.type}`"
-            class="transition-none"
-            :config="config"
-            :imgControl="imgControl"
-            :contentScaleRatio="contentScaleRatio"
-            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-            :scaleRatio="scaleRatio"
-            :isPagePreview="isPagePreview"
-            v-bind="$attrs")
+          //- component(:is="`nu-${config.type}`"
+          //-   class="transition-none"
+          //-   :config="config"
+          //-   :imgControl="imgControl"
+          //-   :contentScaleRatio="contentScaleRatio"
+          //-   :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+          //-   :scaleRatio="scaleRatio"
+          //-   :isPagePreview="isPagePreview"
+          //-   v-bind="$attrs")
+          lazy-load(:target="lazyLoadTarget"
+              :rootMargin="'300px 0px 300px 0px'"
+              :minHeight="config.styles.height * contentScaleRatio"
+              :minWidth="config.styles.width * contentScaleRatio"
+              :threshold="[0]"
+              :handleUnrender="handleUnrender"
+              :anamationEnabled="false"
+              :forceRender="isSubLayer || forceRender")
+            component(:is="`nu-${config.type}`"
+              class="transition-none"
+              :config="config"
+              :imgControl="imgControl"
+              :contentScaleRatio="contentScaleRatio"
+              :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+              :scaleRatio="scaleRatio"
+              :isPagePreview="isPagePreview"
+              v-bind="$attrs")
     div(v-if="showSpinner()" class="nu-layer__inProcess")
       square-loading
       //- svg-icon(class="spiner"
@@ -43,11 +60,13 @@ import frameUtils from '@/utils/frameUtils'
 import { mapGetters } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 import { ILayer } from '@/interfaces/layer'
+import LazyLoad from '@/components/LazyLoad.vue'
 
 export default Vue.extend({
   inheritAttrs: false,
   components: {
-    SquareLoading
+    SquareLoading,
+    LazyLoad
   },
   props: {
     config: Object,
@@ -74,6 +93,18 @@ export default Vue.extend({
     'data-index': {
       default: '-1',
       type: String
+    },
+    lazyLoadTarget: {
+      default: '.editor-view',
+      type: String
+    },
+    forceRender: {
+      default: true,
+      type: Boolean
+    },
+    handleUnrender: {
+      default: false,
+      type: Boolean
     }
     /**
      * @Note Vuex Props
@@ -141,7 +172,7 @@ export default Vue.extend({
           // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
           'pointer-events': 'none',
           transformStyle: this.enalble3dTransform ? 'preserve-3d' : 'initial',
-          willChange: !this.isSubLayer && this.isDragging ? 'transform' : 'none'
+          willChange: !this.isSubLayer && this.isDragging ? 'transform' : ''
         }
       )
       switch (this.config.type) {
@@ -153,7 +184,7 @@ export default Vue.extend({
             textEffectStyles,
             textBgStyles,
             {
-              willChange: 'text-shadow',
+              willChange: 'text-shadow' + (this.isDragging ? ', transform' : ''),
               '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
             }
           )
