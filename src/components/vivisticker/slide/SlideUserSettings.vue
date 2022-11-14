@@ -99,6 +99,7 @@ export default Vue.extend({
     &__description {
       @include body-MD;
       color: white;
+      text-align: left;
     }
     &__checkbox {
       @include size(42px, 24px);
