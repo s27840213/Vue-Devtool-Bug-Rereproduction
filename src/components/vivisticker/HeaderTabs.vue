@@ -207,12 +207,16 @@ export default Vue.extend({
       vivistickerUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
     },
     handleEndEditing() {
-      if (vivistickerUtils.userSettings.autoSave) {
-        vivistickerUtils.saveAsMyDesign().then(() => {
-          vivistickerUtils.endEditing()
-        })
+      if (vivistickerUtils.checkVersion('1.13')) {
+        if (vivistickerUtils.userSettings.autoSave) {
+          vivistickerUtils.saveAsMyDesign().then(() => {
+            vivistickerUtils.endEditing()
+          })
+        } else {
+          vivistickerUtils.setShowSaveDesignPopup(true)
+        }
       } else {
-        vivistickerUtils.setShowSaveDesignPopup(true)
+        vivistickerUtils.endEditing()
       }
     },
     handleCopy() {
