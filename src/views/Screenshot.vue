@@ -199,6 +199,7 @@ export default Vue.extend({
           }
           case 'json': {
             const page = JSON.parse(decodeURIComponent(id ?? '')) as IPage
+            console.log(page)
             vivistickerUtils.initLoadingFlags(page, () => {
               this.onload()
             })

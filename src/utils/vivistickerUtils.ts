@@ -175,6 +175,7 @@ class ViviStickerUtils {
   }
 
   sendScreenshotUrl(query: string, action = 'copy') {
+    console.log(query)
     this.sendToIOS('SCREENSHOT', { params: query, action })
     if (this.isStandaloneMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
