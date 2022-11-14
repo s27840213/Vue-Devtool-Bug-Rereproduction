@@ -727,7 +727,7 @@ class ViviStickerUtils {
       assetInfo
     } as IMyDesign
     await this.addAsset(`mydesign-${editorType}`, json, 0, {
-      config: { pages }
+      config: { pages: uploadUtils.prepareJsonToUpload(pages) }
     })
     return json
   }
