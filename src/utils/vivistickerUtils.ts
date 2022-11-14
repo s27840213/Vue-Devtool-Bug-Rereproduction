@@ -55,7 +55,8 @@ const VVSTK_CALLBACKS = [
   'thumbDone',
   'setStateDone',
   'addAssetDone',
-  'deleteAssetDone'
+  'deleteAssetDone',
+  'getAssetResult'
 ]
 
 const MYDESIGN_TAGS = [{
@@ -539,10 +540,10 @@ class ViviStickerUtils {
     return resList
   }
 
-  async addAsset(key: string, asset: any) {
+  async addAsset(key: string, asset: any, limit = 100, files: {[key: string]: any} = {}) {
     if (this.isStandaloneMode) return
     if (this.checkVersion('1.9')) {
-      await this.callIOSAsAPI('ADD_ASSET', { key, asset }, 'addAsset')
+      await this.callIOSAsAPI('ADD_ASSET', { key, asset, limit, files }, 'addAsset')
     } else {
       this.sendToIOS('ADD_ASSET', { key, asset })
     }
@@ -636,13 +637,14 @@ class ViviStickerUtils {
   initWithMyDesign(myDesign: IMyDesign) {
     const {
       id,
-      pages,
       type,
       assetInfo
     } = myDesign
-    this.startEditing(type, assetInfo ?? {}, this.getFetchDesignInitiator(() => {
-      store.commit('SET_pages', pageUtils.newPages(generalUtils.deepCopy(pages)))
-    }), this.getEmptyCallback(), id ?? '')
+    this.getAsset(`mydesign-${type}`, id, 'config').then((data) => {
+      this.startEditing(type, assetInfo ?? {}, this.getFetchDesignInitiator(() => {
+        store.commit('SET_pages', pageUtils.newPages(generalUtils.deepCopy(data.pages)))
+      }), this.getEmptyCallback(), id ?? '')
+    })
   }
 
   async saveAsMyDesign(): Promise<void> {
@@ -719,14 +721,23 @@ class ViviStickerUtils {
     const editorType = store.getters['vivisticker/getEditorType']
     const assetInfo = store.getters['vivisticker/getEditingAssetInfo']
     const json = {
-      pages: uploadUtils.prepareJsonToUpload(pages),
       type: editorType,
       id,
       updateTime: new Date(Date.now()).toISOString(),
       assetInfo
     } as IMyDesign
-    await this.addAsset(`mydesign-${editorType}`, json)
+    await this.addAsset(`mydesign-${editorType}`, json, 0, {
+      config: { pages }
+    })
     return json
+  }
+
+  async getAsset(key: string, id: string, name: string): Promise<any> {
+    return await this.callIOSAsAPI('GET_ASSET', { key, id, name }, 'get-asset')
+  }
+
+  getAssetResult(data: { key: string, id: string, json: any }) {
+    vivistickerUtils.handleCallback('get-asset', data.json)
   }
 
   getEditorDimensions(): { x: number, y: number, width: number, height: number } {
