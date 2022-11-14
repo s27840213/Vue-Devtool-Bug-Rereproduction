@@ -253,10 +253,10 @@ export default Vue.extend({
       if (this.mode === ScreenShotMode.PAGE) {
         vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, true)
       } else {
-        const element = this.$refs.target
-        const target = (element as Vue).$el ? (element as Vue).$el : (element as HTMLElement)
-        const { width, height } = target.getBoundingClientRect()
-        vivistickerUtils.sendDoneLoading(width, height, this.options)
+        // const element = this.$refs.target
+        // const target = (element as Vue).$el ? (element as Vue).$el : (element as HTMLElement)
+        // const { width, height } = target.getBoundingClientRect()
+        vivistickerUtils.sendDoneLoading(window.innerWidth, window.innerHeight, this.options)
       }
     },
     fitPageToScreen(width: number, height: number): number {
