@@ -253,7 +253,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       console.log(error)
     }
   },
-  async putAssetDesign({ dispatch }, { assetId, type }) {
+  async putAssetDesign({ dispatch }, { assetId, type, wait }) {
     try {
       if (type === 0) {
         logUtils.setLog('Update DB')
@@ -262,12 +262,11 @@ const actions: ActionTree<IUserModule, unknown> = {
       } else if (type === 2) {
         logUtils.setLog('Update DB and preview')
       }
-      const { data } = await userApis.putAssetDesign(state.token, state.teamId || state.userId, assetId, type)
+      const { data } = await userApis.putAssetDesign(state.token, state.teamId || state.userId, assetId, type, wait)
       const { flag, msg } = data
       if (flag === 0) {
         logUtils.setLog(`Put asset success: ${msg}`)
         dispatch('getAllAssets', { token: state.token })
-        Vue.notify({ group: 'copy', text: `${i18n.t('NN0357')}` })
       }
       if (flag === 1) {
         logUtils.setLog(`Put asset failed: ${msg}`)
@@ -276,6 +275,7 @@ const actions: ActionTree<IUserModule, unknown> = {
         logUtils.setLog(`Token invalid!: ${msg}`)
         Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
       }
+      return data
     } catch (error) {
       logUtils.setLog(error as string)
     }
