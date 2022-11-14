@@ -75,7 +75,6 @@ import eventUtils from '@/utils/eventUtils'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
-import { globalQueue } from '@/utils/queueUtils'
 
 export default Vue.extend({
   components: {
@@ -113,7 +112,6 @@ export default Vue.extend({
   mounted() {
     // window.addEventListener('keydown', this.handleKeydown)
     // window.addEventListener('keyup', this.handleKeydown)
-    globalQueue.batchNum = 5
     this.getRecently()
 
     StepsUtils.record()

@@ -2,9 +2,9 @@
   div(class="nu-page"
       :style="pageRootStyles"
       ref="page")
-    div(v-if="!isOutOfBound && !isDetailPage && !isMobile && !isShowPagePreview"
+    div(v-if="!isDetailPage && !isMobile"
       class="page-title text-left pb-10"
-      :style="{'transform': `translate3d(0, -100%, ${isAnyLayerActive ? 0 : 1}px)`}")
+      :style="{'width': `${config.width * (scaleRatio/100)}px`, 'transform': `translate3d(0, -100%, ${isAnyLayerActive ? 0 : 1}px)`}")
       //- span(class="pr-10") 第 {{pageIndex+1}} 頁
       span(class="pr-10") {{$t('NN0134', {num:`${pageIndex+1}`})}}
       input(
@@ -43,7 +43,7 @@
           @click.native="deletePage()"
           v-hint="$t('NN0141')"
         )
-    div(v-if="!isOutOfBound && isDetailPage && !isMobile && !isShowPagePreview" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
+    div(v-if="isDetailPage && !isMobile" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
       div(class="page-bar__icons" v-if="!isBackgroundImageControl")
         div(class="body-2")
           span {{pageIndex + 1}}
@@ -62,64 +62,61 @@
         svg-icon(class="pointer mt-10"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
           @click.native="deletePage()")
-    lazy-load(
-        target=".editor-view"
-        :rootMargin="'1500px 0px 1500px 0px'"
-        :minHeight="config.height * (scaleRatio / 100)"
-        :maxHeight="config.height * (scaleRatio / 100)"
-        :threshold="[0]"
-        :pageIndex="pageIndex"
-        :forceRender="hasEditingText"
-        @loaded="handleLoaded")
-      template(v-if="!isShowPagePreview || (hasEditingText)")
-        div(class='pages-wrapper'
-            :class="`nu-page-${pageIndex}`"
-            :style="wrapperStyles()"
-            @keydown.delete.exact.self.prevent.stop="ShortcutUtils.del()"
-            @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.copy()"
-            @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.copy()"
-            @keydown.ctrl.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
-            @keydown.meta.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
-            @keydown.ctrl.88.exact.stop.prevent.self="ShortcutUtils.cut()"
-            @keydown.meta.88.exact.stop.prevent.self="ShortcutUtils.cut()"
-            @keydown.ctrl.83.exact.stop.prevent.self="ShortcutUtils.save()"
-            @keydown.meta.83.exact.stop.prevent.self="ShortcutUtils.save()"
-            @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
-            @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
-            @keydown.ctrl.71.exact.stop.prevent.self="ShortcutUtils.group()"
-            @keydown.meta.71.exact.stop.prevent.self="ShortcutUtils.group()"
-            @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
-            @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
-            @keydown.ctrl.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
-            @keydown.meta.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
-            @keydown.ctrl.90.exact.stop.prevent.self="undo()"
-            @keydown.meta.90.exact.stop.prevent.self="undo()"
-            @keydown.ctrl.shift.90.exact.stop.prevent.self="redo()"
-            @keydown.meta.shift.90.exact.stop.prevent.self="redo()"
-            @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-            @keydown.meta.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-            @keydown.ctrl.61.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-            @keydown.meta.61.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-            @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-            @keydown.meta.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-            @keydown.ctrl.107.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-            @keydown.meta.107.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-            @keydown.ctrl.109.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-            @keydown.meta.109.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-            @keydown.ctrl.173.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-            @keydown.meta.173.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-            @keydown.37.exact.stop.prevent.self="ShortcutUtils.left()"
-            @keydown.38.exact.stop.prevent.self="ShortcutUtils.up()"
-            @keydown.39.exact.stop.prevent.self="ShortcutUtils.right()"
-            @keydown.40.exact.stop.prevent.self="ShortcutUtils.down()"
-            @keydown.shift.37.exact.self.prevent.stop="ShortcutUtils.left(true)"
-            @keydown.shift.38.exact.self.prevent.stop="ShortcutUtils.up(true)"
-            @keydown.shift.39.exact.self.prevent.stop="ShortcutUtils.right(true)"
-            @keydown.shift.40.exact.self.prevent.stop="ShortcutUtils.down(true)"
-            @mouseover="togglePageHighlighter(true)"
-            @mouseleave="togglePageHighlighter(false)"
-            tabindex="0")
-          //- command/ctrl + 61/173 for Firefox keycode, http://www.javascripter.net/faq/keycodes.htm
+    template(v-if="!isOutOfBound || hasEditingText")
+      div(class='pages-wrapper'
+          :class="`nu-page-${pageIndex}`"
+          :style="wrapperStyles()"
+          @keydown.delete.exact.self.prevent.stop="ShortcutUtils.del()"
+          @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.copy()"
+          @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.copy()"
+          @keydown.ctrl.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
+          @keydown.meta.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
+          @keydown.ctrl.88.exact.stop.prevent.self="ShortcutUtils.cut()"
+          @keydown.meta.88.exact.stop.prevent.self="ShortcutUtils.cut()"
+          @keydown.ctrl.83.exact.stop.prevent.self="ShortcutUtils.save()"
+          @keydown.meta.83.exact.stop.prevent.self="ShortcutUtils.save()"
+          @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
+          @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
+          @keydown.ctrl.71.exact.stop.prevent.self="ShortcutUtils.group()"
+          @keydown.meta.71.exact.stop.prevent.self="ShortcutUtils.group()"
+          @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
+          @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
+          @keydown.ctrl.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
+          @keydown.meta.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
+          @keydown.ctrl.90.exact.stop.prevent.self="undo()"
+          @keydown.meta.90.exact.stop.prevent.self="undo()"
+          @keydown.ctrl.shift.90.exact.stop.prevent.self="redo()"
+          @keydown.meta.shift.90.exact.stop.prevent.self="redo()"
+          @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+          @keydown.meta.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+          @keydown.ctrl.61.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+          @keydown.meta.61.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+          @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+          @keydown.meta.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+          @keydown.ctrl.107.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+          @keydown.meta.107.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
+          @keydown.ctrl.109.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+          @keydown.meta.109.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+          @keydown.ctrl.173.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+          @keydown.meta.173.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
+          @keydown.37.exact.stop.prevent.self="ShortcutUtils.left()"
+          @keydown.38.exact.stop.prevent.self="ShortcutUtils.up()"
+          @keydown.39.exact.stop.prevent.self="ShortcutUtils.right()"
+          @keydown.40.exact.stop.prevent.self="ShortcutUtils.down()"
+          @keydown.shift.37.exact.self.prevent.stop="ShortcutUtils.left(true)"
+          @keydown.shift.38.exact.self.prevent.stop="ShortcutUtils.up(true)"
+          @keydown.shift.39.exact.self.prevent.stop="ShortcutUtils.right(true)"
+          @keydown.shift.40.exact.self.prevent.stop="ShortcutUtils.down(true)"
+          @mouseover="togglePageHighlighter(true)"
+          @mouseleave="togglePageHighlighter(false)"
+          tabindex="0")
+        //- command/ctrl + 61/173 for Firefox keycode, http://www.javascripter.net/faq/keycodes.htm
+        lazy-load(
+            target=".editor-view"
+            :rootMargin="'1500px 0px 1500px 0px'"
+            :minHeight="config.height * (scaleRatio / 100)"
+            :maxHeight="config.height * (scaleRatio / 100)"
+            :threshold="[0,1]")
           div(class="scale-container relative"
               :style="scaleContainerStyles")
             page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio")
@@ -137,30 +134,30 @@
                   @setFocus="setFocus()"
                   @isDragging="handleDraggingController")
             dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
-        //- div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
-        //-   class="page-highlighter"
-        //-   :style="wrapperStyles()")
-      template(#placeholder)
-        div(class='pages-wrapper'
-          :class="`nu-page-${pageIndex}`"
-          :style="wrapperStyles(true)"
-          :key="'placeholder'")
-    div(v-if="(currActivePageIndex === pageIndex && isDetailPage)"
-        class="page-resizer"
-        ref="pageResizer"
-        @pointerdown.left.stop="pageResizeStart($event)"
-        @touchstart="disableTouchEvent"
-        @mouseenter="toggleResizerHint(true)"
-        @mouseleave="toggleResizerHint(false)")
-      svg-icon(class="page-resizer__resizer-bar"
-        :iconName="'move-vertical'" :iconWidth="`${15}px`" :iconColor="'white'")
-      div(class="page-resizer__resizer-bar")
-      div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{!isResizingPage ? '拖曳調整畫布高度' : `${Math.trunc(config.height)}px`}}
-    snap-line-area(
-      :config="config"
-      :pageIndex="pageIndex"
-      :pageScaleRatio="pageScaleRatio"
-      :snapUtils="snapUtils")
+      div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
+        class="page-highlighter"
+        :style="wrapperStyles()")
+      div(v-if="(currActivePageIndex === pageIndex && isDetailPage)"
+          class="page-resizer"
+          ref="pageResizer"
+          @pointerdown.left.stop="pageResizeStart($event)"
+          @touchstart="disableTouchEvent"
+          @mouseenter="toggleResizerHint(true)"
+          @mouseleave="toggleResizerHint(false)")
+        svg-icon(class="page-resizer__resizer-bar"
+          :iconName="'move-vertical'" :iconWidth="`${15}px`" :iconColor="'white'")
+        div(class="page-resizer__resizer-bar")
+        div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{!isResizingPage ? '拖曳調整畫布高度' : `${Math.trunc(config.height)}px`}}
+      snap-line-area(
+        :config="config"
+        :pageIndex="pageIndex"
+        :pageScaleRatio="pageScaleRatio"
+        :snapUtils="snapUtils"
+      )
+    template(v-else)
+      div(class='pages-wrapper'
+        :class="`nu-page-${pageIndex}`"
+        :style="wrapperStyles()")
 </template>
 
 <script lang="ts">
@@ -230,9 +227,7 @@ export default Vue.extend({
       },
       generalUtils,
       pageUtils,
-      currDraggingIndex: -1,
-      isFocusedPage: false,
-      isOutOfBound: false
+      currDraggingIndex: -1
     }
   },
   props: {
@@ -260,17 +255,9 @@ export default Vue.extend({
           if (target) {
             const layerInfo = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
             imageShadowUtils.updateShadowSrc(layerInfo, target.styles.shadow.srcObj)
+            // imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
           }
         }
-      }
-    },
-    currFocusPageIndex(val) {
-      if (val === this.pageIndex && !this.isFocusedPage) {
-        this.isFocusedPage = true
-      }
-
-      if (val !== this.pageIndex && this.isFocusedPage) {
-        this.isFocusedPage = false
       }
     }
   },
@@ -278,16 +265,13 @@ export default Vue.extend({
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapState('shadow', ['handleId']),
     ...mapGetters({
-      imgControlPageIdx: 'imgControl/imgControlPageIdx',
-      isImgCtrl: 'imgContorl/isImgCtrl',
-      isShowPagePreview: 'page/getIsShowPagePreview'
+      imgControlPageIdx: 'imgControl/imgControlPageIdx'
     }),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       currActivePageIndex: 'getCurrActivePageIndex',
-      currFocusPageIndex: 'getCurrFocusPageIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       pages: 'getPages',
@@ -376,6 +360,9 @@ export default Vue.extend({
     guidelines(): { [index: string]: Array<number> } {
       return (this.config as IPage).guidelines
     },
+    currFocusPageIndex(): number {
+      return pageUtils.currFocusPageIndex
+    },
     isDetailPage(): boolean {
       return this.groupType === 1
     },
@@ -384,6 +371,9 @@ export default Vue.extend({
         margin: this.isDetailPage ? '0px auto' : '25px auto',
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
+    },
+    isOutOfBound(): boolean {
+      return pageUtils.isOutOfBound(this.pageIndex)
     },
     hasEditingText(): boolean {
       const page = this.config as IPage
@@ -446,13 +436,11 @@ export default Vue.extend({
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
-    wrapperStyles(isPlaceHolder?: boolean) {
+    wrapperStyles() {
       return {
         width: `${this.config.width * (this.scaleRatio / 100)}px`,
         height: `${this.config.height * (this.scaleRatio / 100)}px`,
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial',
-        // border: `2px solid ${this.pageIsHover || this.currFocusPageIndex === this.pageIndex ? '#7190CC' : 'transparent'}`
-        border: `2px solid ${(this.pageIsHover || this.isFocusedPage) && !isPlaceHolder ? '#7190CC' : 'transparent'}`
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
     snapLineStyles(dir: string, pos: number, isGuideline?: string) {
@@ -488,6 +476,11 @@ export default Vue.extend({
       // if (sel) {
       //   sel.empty()
       //   sel.removeAllRanges()
+      // }
+    },
+    pageDblClickHandler(): void {
+      // if ((this.config.backgroundImage.config.srcObj?.assetId ?? '') !== '') {
+      //   pageUtils.startBackgroundImageControl(this.pageIndex)
       // }
     },
     setFocus(): void {
@@ -667,9 +660,6 @@ export default Vue.extend({
     },
     handleDraggingController(index: number) {
       this.currDraggingIndex = index
-    },
-    handleLoaded(bool: boolean, entries: Array<IntersectionObserverEntry>) {
-      // this.isOutOfBound = !bool
     }
   }
 })
@@ -688,7 +678,6 @@ export default Vue.extend({
 
 .page-title {
   position: absolute;
-  width: 100%;
   top: 0;
   left: 0;
   display: flex;
