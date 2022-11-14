@@ -680,6 +680,19 @@ export default Vue.extend({
       })
 
       /**
+       * Check if the image is Transparent, only check as the isTransparent flag is undefined and false
+       */
+      if (!this.config.styles.shadow.isTransparent) {
+        canvas.setAttribute('width', `${img.naturalWidth}`)
+        canvas.setAttribute('height', `${img.naturalHeight}`)
+        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+        ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvas.width, canvas.height)
+        imageShadowUtils.updateEffectProps(layerInfo(), {
+          isTransparent: imageShadowUtils.isTransparentBg(canvas)
+        })
+      }
+
+      /**
        * Calculate canvas parameters
        */
       // small size preview

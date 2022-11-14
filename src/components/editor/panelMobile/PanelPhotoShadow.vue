@@ -208,8 +208,6 @@ export default Vue.extend({
     @include no-scrollbar;
   }
   &__reset {
-    margin: 12px 0 0 0;
-    text-align: right;
     > button {
       color: setColor(blue-1);
       font-size: 14px;
