@@ -10,6 +10,12 @@
                 iconWidth="24px"
                 iconColor="gray-1")
     div(v-if="isExpanded" class="mobile-design-gallery__designs")
+      btn-new-design(v-if="allDesigns.length > 0" class="mobile-design-gallery__designs__new" v-slot="slotProps")
+        div(class="mobile-design-gallery__designs__new__icon" @click="slotProps.openPopup")
+          svg-icon(iconName="plus-origin"
+            iconWidth="28px"
+            iconColor="gray-2")
+        span(class="body-XS text-gray-1") {{$tc('NN0072')}}
       mobile-design-item(v-for="(design, index) in allDesigns"
                   :key="design.asset_index"
                   :index="index"
@@ -35,11 +41,13 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MobileDesignItem from '@/components/mydesign/MobileDesignItem.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import BtnNewDesign from '@/components/mydesign/BtnNewDesign.vue'
 
 export default Vue.extend({
   components: {
     MobileDesignItem,
-    ObserverSentinel
+    ObserverSentinel,
+    BtnNewDesign
   },
   data() {
     return {
@@ -134,6 +142,25 @@ export default Vue.extend({
     grid-gap: 16px;
     padding: 0 16px;
     grid-template-columns: repeat(2, 1fr);
+    &__new {
+      display: flex;
+      flex-direction: column;
+      &__icon {
+        width: 100%;
+        height: calc(100% - 56px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: setColor(gray-5);
+        border-radius: 4px;
+      }
+      > span {
+        height: 38px;
+        margin-top: 10px;
+        padding: 4px 0px;
+        line-height: 180%;
+      }
+    }
   }
   &__loading {
     display: flex;

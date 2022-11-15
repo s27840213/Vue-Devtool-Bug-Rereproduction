@@ -9,6 +9,7 @@
                           @loadMore="handleLoadMore")
     div(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading" class="mobile-folder-design-view__empty")
       img(class="mobile-folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
+      btn-new-design
     div(v-else class="scroll-space")
 </template>
 
@@ -19,12 +20,14 @@ import { mapGetters, mapActions } from 'vuex'
 import MobileFolderGallery from '@/components/mydesign/MobileFolderGallery.vue'
 import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
+import BtnNewDesign from '@/components/mydesign/BtnNewDesign.vue'
 
 export default Vue.extend({
   components: {
     MobileFolderGallery,
     MobileDesignGallery,
-    DiskWarning
+    DiskWarning,
+    BtnNewDesign
   },
   mounted() {
     designUtils.on('refresh', this.refreshItems)

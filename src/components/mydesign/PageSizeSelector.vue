@@ -294,7 +294,6 @@ export default Vue.extend({
       column-gap: 15px;
       align-items: center;
       &__box {
-        width: 128px;
         height: 30px;
         box-sizing: border-box;
         padding: 5px 5px;

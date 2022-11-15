@@ -28,9 +28,6 @@
         ta-block(v-for="item in blocklist"
           :content="item")
       nu-footer(:isHome="true")
-      div(v-if="showSizePopup"
-        class="popup-window")
-        popup-size(@close="closeSizePopup()")
 </template>
 
 <script lang="ts">

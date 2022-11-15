@@ -1,26 +1,44 @@
 <template lang="pug">
-  div(cless="btn-new-design")
-    button(class="btn-primary-sm pointer" @click="openPopup()")
-      span(class="header-sort") {{$tc('NN0072')}}
-    div(v-if="isShowPopup"
+  div(class="btn-new-design")
+    slot(:openPopup="openPopup")
+      button(class="btn-primary-sm pointer" @click="openPopup()")
+        span(class="header-sort") {{$tc('NN0072')}}
+    div(v-if="isMobile < 0 && isShowPopup"
       class="popup-window")
       popup-size(@close="closePopup()")
+    div(v-if="isMobile > 0")
+      transition(name="panel-up")
+        panel-size(v-show="isShowPopup" @close="closePopup()")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import PopupSize from '@/components/popup/PopupSize.vue'
+import PanelSize from '@/components/PanelSize.vue'
 
 export default Vue.extend({
   components: {
-    PopupSize
+    PopupSize,
+    PanelSize
   },
   data() {
     return {
+      isMobile: 0,
       isShowPopup: false
     }
   },
+  mounted() {
+    window.addEventListener('resize', this.handleResize)
+
+    this.handleResize()
+  },
+  destroyed() {
+    window.removeEventListener('resize', this.handleResize)
+  },
   methods: {
+    handleResize() {
+      this.isMobile = window.matchMedia('screen and (max-width: 540px)').matches ? 1 : -1
+    },
     openPopup() {
       this.isShowPopup = true
     },
@@ -33,7 +51,8 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .btn-primary-sm {
-  height: 36px;
+  height: 100%;
+  width: 100%;
   white-space: nowrap;
   // font-family: 'Poppins';
   font-weight: 500;
