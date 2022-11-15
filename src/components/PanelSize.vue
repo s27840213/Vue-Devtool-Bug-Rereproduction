@@ -44,7 +44,6 @@ import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import { ILayout } from '@/interfaces/layout'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import pageUtils from '@/utils/pageUtils'
 import _ from 'lodash'
 
 export default Vue.extend({
@@ -62,16 +61,11 @@ export default Vue.extend({
       panelHeight: 0,
       lastPointerY: 0,
       isDraggingPanel: false,
-      fitPage: _.debounce(() => {
-        this.$nextTick(() => {
-          pageUtils.fitPage()
-        })
-      }, 100),
-      resizeObserver: null as unknown as ResizeObserver,
       initHeightPx: window.innerHeight,
       maxHeightPx: window.innerHeight,
       selectedFormat: {} as ILayout,
-      isConfirmClicked: false
+      isConfirmClicked: false,
+      isFullScreen: true
     }
   },
   computed: {
@@ -85,13 +79,6 @@ export default Vue.extend({
       bgRemoveMode: 'bgRemove/getInBgRemoveMode',
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
-    backgroundImgControl(): boolean {
-      return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
-    },
-    backgroundLocked(): boolean {
-      const { locked } = pageUtils.currFocusPage.backgroundImage.config
-      return locked
-    },
     selectedLayerNum(): number {
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
     },
@@ -127,14 +114,10 @@ export default Vue.extend({
   },
   mounted() {
     this.panelHeight = this.initHeightPx
-    this.resizeObserver = new ResizeObserver(() => {
-      this.$emit('panelHeight', (this.$refs.panel as HTMLElement).clientHeight)
-      this.fitPage()
-    })
-    this.resizeObserver.observe(this.$refs.panel as Element)
+    window.addEventListener('resize', this.handleResize)
   },
   beforeDestroy() {
-    this.resizeObserver && this.resizeObserver.disconnect()
+    window.removeEventListener('resize', this.handleResize)
   },
   methods: {
     ...mapMutations({
@@ -173,6 +156,7 @@ export default Vue.extend({
       )
     },
     closeMobilePanel() {
+      this.isFullScreen = true
       this.$emit('close')
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
@@ -193,8 +177,10 @@ export default Vue.extend({
         this.closeMobilePanel()
       } else if (this.panelHeight >= maxHeightPx * 0.75) {
         this.panelHeight = maxHeightPx
+        this.isFullScreen = true
       } else {
         this.panelHeight = maxHeightPx * 0.5
+        this.isFullScreen = false
       }
 
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)
@@ -204,6 +190,13 @@ export default Vue.extend({
       if (generalUtils.isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
+      }
+    },
+    handleResize() {
+      if (window.innerHeight < this.panelHeight || (window.innerHeight > this.panelHeight && this.isFullScreen)) {
+        this.panelHeight = window.innerHeight
+        this.maxHeightPx = window.innerHeight
+        this.isFullScreen = true
       }
     }
   }
