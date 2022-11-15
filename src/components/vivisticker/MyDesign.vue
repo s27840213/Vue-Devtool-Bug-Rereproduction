@@ -5,7 +5,12 @@
           :class="{ selected: checkTagSelected(tag) }"
           @click.prevent.stop="selectTag(tag)")
         span(class="my-design__tag-name") {{ tag.name }}
-    div(class="my-design__content")
+    div(v-if="list.length === 0" class="my-design__content center")
+      div(class="my-design__empty-icon")
+        svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
+      div(class="my-design__empty-title") {{ $t('STK0020') }}
+      div(class="my-design__empty-description") {{ $t('STK0021') }}
+    div(v-else class="my-design__content")
       category-list(:list="myDesignList")
         template(v-slot:my-design-text-item="{ list }")
           div(class="my-design__texts__items")
@@ -174,7 +179,35 @@ export default Vue.extend({
     height: 100%;
     overflow-y: scroll;
     @include no-scrollbar;
+    &.center {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
   }
+
+  &__empty-icon {
+    @include size(42px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  &__empty-title {
+    margin-top: 12px;
+    @include text-H6;
+    color: white;
+  }
+
+  &__empty-description {
+    margin-top: 24px;
+    @include btn-SM;
+    color: setColor(black-5);
+    max-width: 272px;
+    text-align: center;
+  }
+
   &__texts {
     &__item {
       width: calc(50vw - 32px);
