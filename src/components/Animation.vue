@@ -87,6 +87,9 @@ export default Vue.extend({
   mounted() {
     this.init()
   },
+  destroyed() {
+    this.anim && this.anim.destroy()
+  },
   methods: {
     async loadJsonData(path: string) {
       if (path.startsWith('@/')) {

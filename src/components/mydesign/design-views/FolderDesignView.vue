@@ -34,10 +34,14 @@
     div(class="folder-design-view__toolbar")
       div(class="folder-design-view__path")
         template(v-for="(parent, index) in shownParents")
-          span(class="folder-design-view__path__node" @click="goToParent(index + 1)") {{ parent + ' ' }}
+          span(class="folder-design-view__path__node"
+              :style="nodeStyles(false)"
+              @click="goToParent(index + 1)") {{ parent + ' ' }}
           span(class="folder-design-view__path__text") {{ ' > ' }}
           span(class="folder-design-view__path__text") {{ ' ' }}
-        span(class="folder-design-view__path__node" :title="folderName") {{ folderName }}
+        span(class="folder-design-view__path__node"
+            :style="nodeStyles(true)"
+            :title="folderName") {{ folderName }}
       div(class="folder-design-view__actions")
         div(class="folder-design-view__more"
             @click="toggleFolderMenu"
@@ -103,6 +107,7 @@
                 svg-icon(iconName="done"
                         iconWidth="15px"
                         iconColor="gray-2")
+        btn-new-design
     div(class="horizontal-rule")
     folder-gallery(:path="path"
                   :menuItems="[]"
@@ -129,6 +134,7 @@ import { mapActions, mapGetters, mapMutations } from 'vuex'
 import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import hintUtils from '@/utils/hintUtils'
+import BtnNewDesign from '@/components/mydesign/BtnNewDesign.vue'
 
 export default Vue.extend({
   mounted() {
@@ -136,10 +142,15 @@ export default Vue.extend({
     hintUtils.bind(this.$refs.newFolder as HTMLElement, `${this.$t('NN0190')}`, 500)
     this.refreshItems()
     this.refreshItemCount()
+    window.addEventListener('resize', this.handleResize)
+  },
+  destroyed() {
+    window.removeEventListener('resize', this.handleResize)
   },
   components: {
     FolderGallery,
-    DesignGallery
+    DesignGallery,
+    BtnNewDesign
   },
   data() {
     return {
@@ -151,6 +162,7 @@ export default Vue.extend({
       menuItems: designUtils.makeNormalMenuItems(),
       isFolderMenuOpen: false,
       isSortMenuOpen: false,
+      windowWidth: window.innerWidth,
       sortMenuItems: [
         {
           icon: 'chevron-duo-left',
@@ -249,6 +261,12 @@ export default Vue.extend({
     newFolderStyles() {
       return this.isMaxLevelReached ? { pointerEvents: 'none' } : {}
     },
+    nodeStyles(isCurrent: boolean) {
+      const basicWidth = (this.windowWidth - 570) / (this.parents.length + 2)
+      return {
+        maxWidth: `${isCurrent ? basicWidth * 2 : basicWidth}px`
+      }
+    },
     goToParent(index: number) {
       const selectedParents = this.parents.slice(0, index + 1)
       this.setCurrLocation(`f:${selectedParents.join('/')}`)
@@ -311,6 +329,9 @@ export default Vue.extend({
           path: this.path.slice(1).join(',')
         })
       }, false)
+    },
+    handleResize() {
+      this.windowWidth = window.innerWidth
     },
     checkFolderNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter' && this.editableFolderName === this.folderName) {
@@ -495,7 +516,6 @@ export default Vue.extend({
       display: inline-block;
     }
     &__node {
-      max-width: 6vw;
       overflow: hidden;
       display: inline-block;
       text-overflow: ellipsis;
@@ -505,9 +525,9 @@ export default Vue.extend({
         border-top: 1px solid transparent;
         border-bottom: 1px solid setColor(gray-2);
       }
-      @media (min-width: 1360px) {
-        max-width: 10vw;
-      }
+      // @media (min-width: 1360px) {
+      //   max-width: 10vw;
+      // }
     }
   }
   &__actions {
@@ -515,9 +535,10 @@ export default Vue.extend({
     gap: 13px;
     align-items: center;
     > div {
-      height: 29px;
+      height: 36px;
       display: flex;
       align-items: center;
+      white-space: nowrap;
     }
   }
   &__more {
@@ -616,7 +637,6 @@ export default Vue.extend({
     border: 1px solid setColor(gray-3);
     border-radius: 6px;
     box-sizing: border-box;
-    margin-right: 38px;
     > span {
       font-size: 12px;
       letter-spacing: 0.045em;
@@ -718,7 +738,7 @@ export default Vue.extend({
 .horizontal-rule {
   height: 1px;
   background-color: setColor(gray-4);
-  margin-top: 24px;
+  margin-top: 13px;
   margin-bottom: 38px;
 }
 

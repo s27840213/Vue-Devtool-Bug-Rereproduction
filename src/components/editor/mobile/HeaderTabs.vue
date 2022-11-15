@@ -6,19 +6,19 @@
         svg-icon(
           :iconName="'chevron-left'"
           :iconColor="'white'"
-          :iconWidth="'20px'")
+          :iconWidth="'22px'")
       div(class="header-bar__feature-icon mr-20"
           :class="{'click-disabled': stepsUtils.isInFirstStep || isCropping}"
           @pointerdown="undo()")
         svg-icon(:iconName="'undo'"
           :iconColor="(!stepsUtils.isInFirstStep && !isCropping) ? 'white' : 'gray-2'"
-          :iconWidth="'20px'")
+          :iconWidth="'22px'")
       div(class="header-bar__feature-icon"
           :class="{'click-disabled': stepsUtils.isInLastStep || isCropping}"
           @pointerdown="redo()")
         svg-icon(:iconName="'redo'"
           :iconColor="(!stepsUtils.isInLastStep && !isCropping) ? 'white' : 'gray-2'"
-          :iconWidth="'20px'")
+          :iconWidth="'22px'")
     div(class="header-bar__right")
       div(v-for="tab in rightTabs" class="header-bar__feature-icon"
           :class="{'click-disabled': (isLocked && tab.icon !== 'lock'), 'panel-icon': tab.isPanelIcon }"
@@ -26,7 +26,7 @@
         svg-icon(
           :iconName="tab.icon"
           :iconColor="iconColor(tab)"
-          :iconWidth="'20px'")
+          :iconWidth="'22px'")
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
@@ -259,12 +259,12 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .header-bar {
-  @include size(100%, 40px);
+  @include size(100%);
   background-color: setColor(nav);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0px 16px;
+  padding: 8px 16px;
   box-sizing: border-box;
   z-index: setZindex("editor-header");
 
@@ -287,7 +287,7 @@ export default Vue.extend({
     grid-auto-flow: column;
     grid-template-rows: auto;
     grid-auto-columns: auto;
-    column-gap: 18px;
+    column-gap: 20px;
   }
 }
 </style>

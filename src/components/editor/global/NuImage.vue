@@ -105,53 +105,30 @@ export default Vue.extend({
       type: Object,
       default: () => { return undefined }
     }
-    /**
-     * @Note Vuex Props
-     */
-    // scaleRatio: Number,
-    // getCurrFunctionPanelType: Number,
-    // isUploadingShadowImg: Boolean,
-    // isHandling: Boolean,
-    // isShowPagePanel: Boolean,
-    // imgSizeMap: Array as PropType<Array<{ [key: string]: string | number }>>,
-    // userId: String,
-    // verUni: String,
-    // uploadId: Object as PropType<ILayerIdentifier>,
-    // handleId: Object as PropType<ILayerIdentifier>,
-    // uploadShadowImgs: Array as PropType<Array<IUploadShadowImg>>
-    // ...mapGetters({
-    //   scaleRatio: 'getPageScaleRatio',
-    //   getCurrFunctionPanelType: 'getCurrFunctionPanelType',
-    //   isUploadingShadowImg: 'shadow/isUploading',
-    //   isHandling: 'shadow/isHandling',
-    //   isShowPagePanel: 'page/getShowPagePanel'
-    // }),
-    // ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
-    // ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs'])
   },
   async created() {
     this.handleInitLoad()
     const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
     if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender && !isPrimaryLayerFrame) {
       this.handleShadowInit()
-      if (typeof this.config.styles.shadow.isTransparent === 'undefined') {
-        const img = new Image()
-        img.crossOrigin = 'anonymous'
-        const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
-        img.src = ImageUtils.getSrc(this.config, size) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-        img.onload = () => {
-          if (!this.hasDestroyed) {
-            const canvas = document.createElement('canvas')
-            const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-            canvas.setAttribute('width', img.naturalWidth.toString())
-            canvas.setAttribute('height', img.naturalHeight.toString())
-            ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvas.width, canvas.height)
-            imageShadowUtils.updateEffectProps(this.layerInfo(), {
-              isTransparent: imageShadowUtils.isTransparentBg(canvas)
-            })
-          }
-        }
-      }
+      // if (typeof this.config.styles.shadow.isTransparent === 'undefined') {
+      //   const img = new Image()
+      //   img.crossOrigin = 'anonymous'
+      //   const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
+      //   img.src = ImageUtils.getSrc(this.config, size) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      //   img.onload = () => {
+      //     if (!this.hasDestroyed) {
+      //       const canvas = document.createElement('canvas')
+      //       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+      //       canvas.setAttribute('width', img.naturalWidth.toString())
+      //       canvas.setAttribute('height', img.naturalHeight.toString())
+      //       ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvas.width, canvas.height)
+      //       imageShadowUtils.updateEffectProps(this.layerInfo(), {
+      //         isTransparent: imageShadowUtils.isTransparentBg(canvas)
+      //       })
+      //     }
+      //   }
+      // }
     }
   },
   mounted() {
@@ -422,7 +399,7 @@ export default Vue.extend({
       if (updater !== undefined) {
         try {
           updater().then(() => {
-            this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+            this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getImgDimension))
           })
         } catch (error) {
           if (this.src.indexOf('data:image/png;base64') !== 0) {
@@ -597,7 +574,7 @@ export default Vue.extend({
         }
         preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'pre')))
       } else {
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getImgDimension))
       }
     },
     handleShadowInit() {
@@ -618,13 +595,6 @@ export default Vue.extend({
             }
           }
           break
-        // case '':
-        //   console.log('handle shadowInit: __', this.isHandling)
-        //   setTimeout(() => {
-        //     if (!this.isHandling && !this.isProcessing) {
-        //       imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
-        //     }
-        //   })
       }
     },
     handleUploadShadowImg() {
@@ -653,7 +623,6 @@ export default Vue.extend({
       const { currentEffect } = this.shadow()
       const hasShadowSrc = this.shadow().srcObj.type && this.shadow().srcObj.type !== 'upload' && this.shadow().srcObj.assetId
       if (currentEffect !== ShadowEffectType.none) {
-        // imageShadowUtils.setHandleId(id)
         imageShadowUtils.setProcessId(this.id())
         !hasShadowSrc && imageShadowUtils.setIsProcess(layerInfo(), true)
       }
@@ -675,6 +644,9 @@ export default Vue.extend({
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
           if (!shadowBuff.canvasShadowImg) {
+            if (this.config.previewSrc && this.config.previewSrc.includes('data:image/png;base64')) {
+              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: '' })
+            }
             img.crossOrigin = 'anonymous'
             img.src = ImageUtils.getSrc(this.config,
               ['unsplash', 'pixels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
@@ -717,6 +689,19 @@ export default Vue.extend({
         maxsize: shadowBuff.MAXSIZE,
         middsize: Math.max(img.naturalWidth, img.naturalHeight)
       })
+
+      /**
+       * Check if the image is Transparent, only check as the isTransparent flag is undefined and false
+       */
+      if (!this.config.styles.shadow.isTransparent) {
+        canvas.setAttribute('width', `${img.naturalWidth}`)
+        canvas.setAttribute('height', `${img.naturalHeight}`)
+        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+        ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvas.width, canvas.height)
+        imageShadowUtils.updateEffectProps(layerInfo(), {
+          isTransparent: imageShadowUtils.isTransparentBg(canvas)
+        })
+      }
 
       /**
        * Calculate canvas parameters

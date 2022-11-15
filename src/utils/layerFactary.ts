@@ -9,6 +9,7 @@ import textPropUtils from './textPropUtils'
 import ZindexUtils from './zindexUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import mouseUtils from './mouseUtils'
+import { IPage } from '@/interfaces/page'
 
 class LayerFactary {
   newImage(config: any): IImage {
@@ -339,6 +340,9 @@ class LayerFactary {
               delete paragraph.spanStyle
             }
           }
+        },
+        (span) => {
+          span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '')
         }
       )
     }
@@ -513,8 +517,10 @@ class LayerFactary {
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
     const bgImgConfig = config.backgroundImage.config
     bgImgConfig.id = GeneralUtils.generateRandomString(8)
-    if (bgImgConfig.srcObj.type && !bgImgConfig.srcObj.userId && !bgImgConfig.srcObj.assetId) {
-      config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+    if (bgImgConfig.srcObj.type) {
+      if (!bgImgConfig.srcObj.userId && !bgImgConfig.srcObj.assetId) {
+        config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+      }
     }
     return config
   }

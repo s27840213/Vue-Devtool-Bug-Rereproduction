@@ -42,6 +42,8 @@ import paymentUtils from '@/utils/paymentUtils'
 import { FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
+import store from '@/store'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   data() {
@@ -191,7 +193,10 @@ export default Vue.extend({
         const isLayerNeedRedraw = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
         const isShadowPanelOpen = this.currFunctionPanelType === FunctionPanelType.photoShadow
         if (btn.name === 'shadow') {
-          return (isCurrLayerHanlingShadow && !isShadowPanelOpen) || this.isUploadImgShadow || this.isHandleShadow
+          return (isCurrLayerHanlingShadow && !isShadowPanelOpen) ||
+            this.isUploadImgShadow ||
+            this.isHandleShadow ||
+            (store.state as any).file.uploadingAssets.some((e: { id: string }) => e.id === (layerUtils.getCurrConfig as IImage).tmpId)
           // return (isCurrLayerHanlingShadow && !isShadowPanelOpen) || this.isUploadImgShadow
         } else if (['remove-bg', 'crop'].includes(btn.name) && (isLayerNeedRedraw && this.isHandleShadow)) {
           return true

@@ -122,6 +122,7 @@ export default Vue.extend({
     save() {
       const { index, pageIndex } = this.currSelectedInfo as ICurrSelectedInfo
       imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex: index }, { type: 'after-bg-remove', userId: '', assetId: '' })
+      imageShadowUtils.updateEffectProps({ pageIndex, layerIndex: index }, { isTransparent: true })
       if (!this.modifiedFlag) {
         layerUtils.updateLayerProps(pageIndex, index, {
           srcObj: {
@@ -162,6 +163,11 @@ export default Vue.extend({
         // So we need to set isProcessing to true
         this.setIsProcessing(true)
         this.setCurrSidebarPanel(SidebarPanelType.file)
+        const targetPageIndex = pageUtils.getPageIndexById(pageId)
+        const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
+        layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+          tmpId: id
+        })
         uploadUtils.uploadAsset('image', [previewSrc], {
           addToPage: false,
           pollingCallback: (json: IUploadAssetResponse) => {
@@ -192,7 +198,7 @@ export default Vue.extend({
             this.setLoading(false)
             this.setIsProcessing(false)
           },
-          id: id,
+          id,
           needCompressed: false
         })
       }

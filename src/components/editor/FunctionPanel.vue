@@ -93,6 +93,7 @@ export default Vue.extend({
     ...mapState('fontTag', ['tags', 'showMore']),
     ...mapState(['isMoving']),
     ...mapState('imgControl', ['image']),
+    ...mapGetters('imgControl', ['isBgImgCtrl']),
     ...mapGetters({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -170,7 +171,7 @@ export default Vue.extend({
     },
     showPageSetting(): boolean {
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
-        this.selectedLayerNum === 0
+        this.selectedLayerNum === 0 && !this.isBgImgCtrl
     },
     showTextSetting(): boolean {
       return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&

@@ -9,8 +9,8 @@
           svg-icon(class="mb-5 click-disabled"
             :iconName="tab.icon"
             :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
-            :iconWidth="'24px'")
-          span(class="text-body-4 no-wrap click-disabled"
+            :iconWidth="'22px'")
+          span(class="body-3 no-wrap click-disabled"
           :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
 <script lang="ts">
@@ -96,7 +96,7 @@ export default Vue.extend({
         { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
         ...this.genearlLayerTabs,
-        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
+        { icon: 'bg-separate', text: `${this.$t('NN0757')}`, hidden: this.isInFrame }
       ]
     },
     photoTabs(): Array<IFooterTab> {
@@ -138,7 +138,7 @@ export default Vue.extend({
       return [
         { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || this.hasSubSelectedLayer || this.isGroup },
         { icon: 'font', text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`), panelType: 'fonts' },
-        { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
+        { icon: 'font-size', text: `${this.$t('NN0122')}`, panelType: 'font-size' },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -148,7 +148,7 @@ export default Vue.extend({
           }
         },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
-        { icon: 'spacing', text: `${this.$t('NN0109')}`, panelType: 'font-spacing' },
+        { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
@@ -231,7 +231,7 @@ export default Vue.extend({
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true },
-        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' }
+        { icon: 'layers-alt', text: `${this.$t('NN0757')}`, panelType: 'order' }
       ]
     },
     multiGeneralTabs(): Array<IFooterTab> {
@@ -613,8 +613,8 @@ export default Vue.extend({
     display: grid;
     grid-template-rows: auto;
     grid-auto-flow: column;
-    grid-auto-columns: 65px;
-    column-gap: 32px;
+    grid-auto-columns: 56px;
+    column-gap: 16px;
     background-color: setColor(nav);
     padding: 8px 12px;
     @include no-scrollbar;
@@ -629,8 +629,8 @@ export default Vue.extend({
     box-sizing: border-box;
     padding: 0px 4px;
     > span {
-      transform: scale(0.8);
       transition: background-color 0.2s, color 0.2s;
+      transform: scale(calc(10 / 12));
     }
   }
 }

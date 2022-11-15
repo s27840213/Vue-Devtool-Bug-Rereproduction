@@ -181,7 +181,7 @@ pipelines:
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
-            name: "dev0"
+            name: "dev0 ZhengYan"
             deployment: stkdev0
             trigger: manual
             script:
@@ -605,7 +605,7 @@ pipelines:
                     EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
           - step:
-              name: "dev0"
+              name: "dev0 ZhengYan"
               deployment: stkdev0
               trigger: manual
               script:

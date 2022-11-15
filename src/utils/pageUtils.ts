@@ -187,6 +187,10 @@ class PageUtils {
     designUtils.renameDesign(name)
   }
 
+  setPageSize(index: number, width: number, height: number) {
+    store.commit('SET_pageSize', { index, width, height })
+  }
+
   resizePage(format: { width: number, height: number }) {
     resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
     this.updatePageProps({

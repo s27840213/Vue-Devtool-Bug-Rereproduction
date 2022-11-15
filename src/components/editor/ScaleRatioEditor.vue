@@ -35,7 +35,6 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
-import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   data() {
@@ -128,7 +127,8 @@ export default Vue.extend({
   }
   &__input {
     display: none;
-    .scale-ratio-editor:hover & { // Show range input when hovering this component.
+    .scale-ratio-editor:hover & {
+      // Show range input when hovering this component.
       display: block;
     }
     width: 180px;

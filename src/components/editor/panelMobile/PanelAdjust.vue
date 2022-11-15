@@ -8,6 +8,8 @@
         :min="field.min"
         :max="field.max"
         @update="handleField")
+    div(class="panel-adjust__reset")
+      button(@click="reset") {{ 'Reset' }}
 </template>
 
 <script lang="ts">
@@ -82,6 +84,14 @@ export default Vue.extend({
       this.adjustVal[name] = fieldVal
       this.handleAdjust(this.adjustVal)
     },
+    reset() {
+      const defaultVal = imageAdjustUtil.getDefaultProps()
+      this.handleAdjust(defaultVal)
+      Object.entries(this.adjustVal)
+        .forEach(([k, v]) => {
+          this.adjustVal[k] = (defaultVal as any)[k]
+        })
+    },
     handleAdjust(adjust: any) {
       const { types } = this.currSelectedInfo
       const { index, type } = this.currSubSelectedInfo
@@ -139,6 +149,14 @@ export default Vue.extend({
   width: 100%;
   overflow: scroll;
   @include no-scrollbar;
+  &__reset {
+    margin-top: 1.25rem;
+    > button {
+      color: #4eabe6;
+      font-size: 14px;
+      padding: 0;
+    }
+  }
 }
 .slider-input {
   &__top {

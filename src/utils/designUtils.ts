@@ -769,13 +769,15 @@ class DesignUtils {
     return Array(pageNum).fill('').map((_, index) => this.getDesignPreview(assetId, scale, ver, signedUrl, index))
   }
 
-  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, id: number | string | undefined = undefined) {
+  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, id: number | string | undefined = undefined, path?: string, folderName?: string) {
     // Redirect user to editor and create new design, will be use by login redirect.
     const query = {
       type: 'new-design-size',
       width: width.toString(),
       height: id?.toString() === '7' ? width.toString() : height.toString(),
-      themeId: id ? id.toString() : undefined
+      themeId: id ? id.toString() : undefined,
+      path,
+      folderName
     }
     const route = router.resolve({
       name: 'Editor',
@@ -785,7 +787,7 @@ class DesignUtils {
   }
 
   // Below function is used to update the page
-  async newDesign(width?: number, height?: number, newDesignType?: number) {
+  async newDesign(width?: number, height?: number, newDesignType?: number, path?: string, folderName?: string) {
     store.commit('file/SET_setLayersDone')
     pageUtils.setPages([pageUtils.newPage({
       width: width ?? 1080,
@@ -794,7 +796,8 @@ class DesignUtils {
     pageUtils.clearPagesInfo()
     await themeUtils.refreshTemplateState(undefined, newDesignType)
     if (this.isLogin) {
-      router.replace({ query: Object.assign({}) })
+      router.replace({ query: { width: width?.toString(), height: height?.toString(), ...(path && { path }), ...(folderName && { folderName }) } })
+
       // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
       // /**
       //  * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
@@ -852,6 +855,9 @@ class DesignUtils {
   }
 
   async renameDesign(name: string) {
+    if (!store.getters.getAssetId) {
+      await uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+    }
     let assetIndex = store.getters.getAssetIndex
     if (assetIndex === -1) {
       const teamId = designApis.getTeamId()
@@ -860,8 +866,9 @@ class DesignUtils {
       assetIndex = designData.asset_index
       store.commit('SET_assetIndex', assetIndex)
     }
-    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getTeamId(),
+    await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getTeamId(),
       'rename', assetIndex.toString(), null, name)
+    store.commit('SET_pagesName', name)
   }
 }
 

@@ -12,27 +12,40 @@
 import { LayerType } from '@/store/types'
 import frameUtils from '@/utils/frameUtils'
 import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
 import Vue from 'vue'
-import { mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
   computed: {
+    ...mapGetters('imgControl', ['isBgImgCtrl', 'isImgCtrl'])
   },
   methods: {
-    ...mapMutations({ setImgConfig: 'imgControl/SET_CONFIG' }),
+    ...mapMutations({
+      setImgConfig: 'imgControl/SET_CONFIG',
+      setBgImgConfig: 'imgControl/SET_BG_CONFIG'
+    }),
     handleCancel() {
-      this.setImgConfig('reset')
+      if (this.isImgCtrl) {
+        this.setImgConfig('reset')
+      } else if (this.isBgImgCtrl) {
+        this.setBgImgConfig('reset')
+      }
       this.handleFinish()
     },
     handleFinish() {
-      const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
-      switch (currLayer.type) {
-        case LayerType.image:
-        case LayerType.group:
-          layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
-          break
-        case LayerType.frame:
-          frameUtils.updateFrameLayerProps(pageIndex, layerIndex, Math.max(subLayerIdx, 0), { imgControl: false })
+      if (this.isImgCtrl) {
+        const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+        switch (currLayer.type) {
+          case LayerType.image:
+          case LayerType.group:
+            layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
+            break
+          case LayerType.frame:
+            frameUtils.updateFrameLayerProps(pageIndex, layerIndex, Math.max(subLayerIdx, 0), { imgControl: false })
+        }
+      } else if (this.isBgImgCtrl) {
+        pageUtils.setBackgroundImageControlDefault()
       }
     }
   }
