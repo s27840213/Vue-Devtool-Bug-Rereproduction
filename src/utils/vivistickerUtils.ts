@@ -60,10 +60,10 @@ const VVSTK_CALLBACKS = [
 ]
 
 const MYDESIGN_TAGS = [{
-  name: `${i18n.tc('NN0005', 2)}`,
+  name: 'NN0005',
   tab: 'text'
 }, {
-  name: `${i18n.tc('NN0003', 2)}`,
+  name: 'NN0003',
   tab: 'object'
 }] as IMyDesignTag[]
 

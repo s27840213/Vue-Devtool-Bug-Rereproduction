@@ -4,7 +4,7 @@
       div(v-for="tag in tags" class="my-design__tag"
           :class="{ selected: checkTagSelected(tag) }"
           @click.prevent.stop="selectTag(tag)")
-        span(class="my-design__tag-name") {{ tag.name }}
+        span(class="my-design__tag-name") {{ $tc(tag.name, 2) }}
     div(v-if="list.length === 0" class="my-design__content center")
       div(class="my-design__empty-icon")
         svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
