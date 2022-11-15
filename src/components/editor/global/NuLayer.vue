@@ -204,6 +204,9 @@ export default Vue.extend({
     },
     getLayerType(): string {
       return this.config.type
+    },
+    isLine(): boolean {
+      return this.config.type === 'shape' && this.config.category === 'D'
     }
   },
   methods: {
@@ -215,6 +218,29 @@ export default Vue.extend({
       setImgConfig: 'imgControl/SET_CONFIG',
       setBgConfig: 'imgControl/SET_BG_CONFIG'
     }),
+    outlineStyles() {
+      const outlineColor = (() => {
+        if (this.getLayerType === 'frame' && this.config.clips[0].isFrameImg) {
+          return '#F10994'
+        } else if (this.isLocked()) {
+          return '#EB5757'
+        } else {
+          return '#7190CC'
+        }
+      })()
+
+      if (this.isLine || (this.config.moving && this.currSelectedInfo.index !== this.layerIndex)) {
+        return 'none'
+      } else if (this.config.shown || this.isActive) {
+        if (this.config.type === 'tmp' || this.isControlling) {
+          return `${5 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
+        } else {
+          return `${5 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
+        }
+      } else {
+        return 'none'
+      }
+    },
     moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
       const currLayerIndex = layerUtils.layerIndex
       if (currLayerIndex !== this.layerIndex) {
@@ -639,6 +665,7 @@ export default Vue.extend({
         {
           // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
           // 'pointer-events': 'none',
+          outline: this.outlineStyles(),
           transformStyle: this.enalble3dTransform ? 'preserve-3d' : 'initial',
           willChange: !this.isSubLayer && this.isDragging ? 'transform' : ''
         }
@@ -732,6 +759,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-layer {
+  touch-action: none;
   position: absolute;
   top: 0;
   left: 0;

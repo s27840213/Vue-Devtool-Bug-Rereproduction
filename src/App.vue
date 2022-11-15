@@ -256,6 +256,8 @@ export default Vue.extend({
 }
 
 .fps {
+  background: white;
+  padding: 2px;
   position: absolute;
   bottom: 20px;
   right: 20px;
