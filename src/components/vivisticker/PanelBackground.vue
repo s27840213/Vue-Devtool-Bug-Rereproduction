@@ -74,17 +74,13 @@
                 :style="colorStyles(color)"
                 @click="setBgColor(color)")
         div(class="panel-bg__color-controller")
-          div(class="panel-bg__color-controller__header")
-            div(class="panel-bg__color-controller__opacity-title") {{ $t('NN0030') }}
-            div(class="panel-bg__color-controller__opacity-value")
-              input(type="number" v-model.number="opacity")
-          div(class="panel-bg__color-controller__slider-container")
-            input(class="panel-bg__color-controller__slider"
-                  :style="progressStyles()"
-                  type="range"
-                  min="0"
-                  max="100"
-                  v-model.number="opacity")
+          mobile-slider(:title="`${$t('NN0030')}`"
+            :borderTouchArea="true"
+            :value="opacity"
+            :min="0"
+            :max="100"
+            theme="light"
+            @update="updateOpacity")
           div(class="panel-bg__color-controller__hint")
             p(class="panel-bg__color-controller__hint-text") {{ $t('STK0002') }}
             p(class="panel-bg__color-controller__hint-text") {{ $t('STK0003') }}
@@ -106,6 +102,7 @@
 import Vue from 'vue'
 import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
+import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
@@ -125,6 +122,7 @@ import assetUtils from '@/utils/assetUtils'
 export default Vue.extend({
   components: {
     SearchBar,
+    MobileSlider,
     ColorPicker,
     CategoryList,
     CategoryListRows,
@@ -466,6 +464,9 @@ export default Vue.extend({
             title
           }
         })
+    },
+    updateOpacity(opacity: number) {
+      this.opacity = opacity
     }
   }
 })
@@ -641,7 +642,6 @@ export default Vue.extend({
       }
     }
     &__hint {
-      margin-top: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;

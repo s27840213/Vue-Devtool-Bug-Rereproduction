@@ -1,14 +1,16 @@
 <template lang="pug">
   div(class="mobile-slider")
     div
-      span(class="mobile-slider__name text-gray-2 no-wrap") {{title}}
-      div(class="mobile-slider__text text-gray-2")
-        input(type="number"
+      span(class="mobile-slider__name no-wrap" :class="theme === 'dark' ? 'text-gray-2' : 'text-white'") {{title}}
+      div(class="mobile-slider__text")
+        input(:class="theme === 'dark' ? 'text-gray-2' : 'text-white'"
+          type="number"
           v-model.number="propsVal"
           :name="name"
           @change="handleChangeStop")
     div(class="mobile-slider__range-input-wrapper")
       input(class="mobile-slider__range-input"
+        :class="theme"
         :style="progressStyles()"
         v-model.number="propsVal"
         :name="name"
@@ -21,6 +23,7 @@
         @pointerup="!borderTouchArea ? handlePointerup() : null")
       input(v-if="borderTouchArea"
         class="mobile-slider__range-input mobile-slider__range-input-top"
+        :class="theme"
         v-model.number="propsVal"
         :name="name"
         :max="max"
@@ -70,6 +73,10 @@ export default Vue.extend({
     propKey: {
       type: String,
       default: ''
+    },
+    theme: {
+      type: String,
+      default: 'dark'
     }
   },
   computed: {
@@ -143,7 +150,6 @@ export default Vue.extend({
       height: 22px;
       @include body-SM;
       line-height: 22px;
-      color: setColor(gray-2);
     }
   }
 
@@ -160,6 +166,10 @@ export default Vue.extend({
       box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
       position: relative;
     }
+    &.light {
+      --lower-color: #{setColor(gray-6)};
+      --upper-color: #{setColor(gray-2)};
+    }
   }
 
   &__range-input-wrapper {
@@ -167,7 +177,7 @@ export default Vue.extend({
   }
 
   &__range-input-top {
-    @include progressSlider($height: 3px, $thumbSize: 32px, $marginTop: -16px);
+    @include progressSlider($height: 3px, $thumbSize: 40px, $marginTop: -20px);
     position: absolute;
     opacity: 0;
   }
