@@ -193,9 +193,9 @@ export default Vue.extend({
       }
     },
     handleResize() {
+      this.maxHeightPx = window.innerHeight
       if (window.innerHeight < this.panelHeight || (window.innerHeight > this.panelHeight && this.isFullScreen)) {
         this.panelHeight = window.innerHeight
-        this.maxHeightPx = window.innerHeight
         this.isFullScreen = true
       }
     }
