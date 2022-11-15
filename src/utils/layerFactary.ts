@@ -340,6 +340,9 @@ class LayerFactary {
               delete paragraph.spanStyle
             }
           }
+        },
+        (span) => {
+          span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '')
         }
       )
     }
