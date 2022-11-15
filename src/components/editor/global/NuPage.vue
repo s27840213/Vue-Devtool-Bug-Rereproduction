@@ -128,18 +128,18 @@
               :lazyLoadTarget="'.editor-view'"
               :forceRender="hasEditingText")
             div(v-if="isAdmin" class="layer-num") Layer數量: {{config.layers.length}} (Admin User 才看得到）
-            div(class="page-control" :style="styles('control')")
-              template(v-for="(layer, index) in config.layers")
-                nu-controller(v-if="(currDraggingIndex === -1 || currDraggingIndex === index || layer.type === 'frame') && (layer.type !== 'image' || !layer.imgControl) "
-                  data-identifier="controller"
-                  :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
-                  :layerIndex="index"
-                  :pageIndex="pageIndex"
-                  :config="layer"
-                  :snapUtils="snapUtils"
-                  :contentScaleRatio="contentScaleRatio"
-                  @setFocus="setFocus()"
-                  @isDragging="handleDraggingController")
+            //- div(class="page-control" :style="styles('control')")
+            //-   template(v-for="(layer, index) in config.layers")
+            //-     nu-controller(v-if="(currDraggingIndex === -1 || currDraggingIndex === index || layer.type === 'frame') && (layer.type !== 'image' || !layer.imgControl) "
+            //-       data-identifier="controller"
+            //-       :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
+            //-       :layerIndex="index"
+            //-       :pageIndex="pageIndex"
+            //-       :config="layer"
+            //-       :snapUtils="snapUtils"
+            //-       :contentScaleRatio="contentScaleRatio"
+            //-       @setFocus="setFocus()"
+            //-       @isDragging="handleDraggingController")
             dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
         //- div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
         //-   class="page-highlighter"
@@ -199,6 +199,7 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
 
 export default Vue.extend({
+  inheritAttrs: false,
   components: {
     NuImage,
     NuBackgroundController,

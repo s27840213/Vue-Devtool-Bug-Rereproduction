@@ -85,6 +85,7 @@ import { AxiosError } from 'axios'
 import i18n from '@/i18n'
 
 export default Vue.extend({
+  inheritAttrs: false,
   props: {
     config: Object,
     pageIndex: Number,
