@@ -21,12 +21,13 @@ import { SidebarPanelType } from '@/store/types'
 import i18n from '@/i18n'
 import logUtils from './logUtils'
 import listService from '@/apis/list'
-import designApis from '@/apis/design-info'
+import designInfoApis from '@/apis/design-info'
 import brandkitUtils from './brandkitUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import networkUtils from './networkUtils'
 import _ from 'lodash'
 import editorUtils from './editorUtils'
+import designApis from '@/apis/design'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -565,6 +566,7 @@ class UploadUtils {
     let type = router.currentRoute.query.type
     let designId = router.currentRoute.query.design_id
     let teamId = router.currentRoute.query.team_id
+    let isNewDesign = false
     // const exportIds = router.currentRoute.query.export_ids
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
 
@@ -586,6 +588,7 @@ class UploadUtils {
       type = router.currentRoute.query.type
       designId = router.currentRoute.query.design_id
       teamId = router.currentRoute.query.team_id
+      isNewDesign = true
     }
 
     store.commit('SET_assetId', assetId)
@@ -645,10 +648,46 @@ class UploadUtils {
         }, 300)
         if (putAssetDesignType !== undefined) {
           logUtils.setLog(`Put asset design (Type: ${typeMap[putAssetDesignType]})`)
-          await store.dispatch('user/putAssetDesign', {
+          const resPutAssetDesign = await store.dispatch('user/putAssetDesign', {
             assetId,
-            type: putAssetDesignType
+            type: putAssetDesignType,
+            wait: 1
           })
+          const { flag } = resPutAssetDesign
+          if (flag !== 0) {
+            Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+            return
+          }
+
+          // move new design to path
+          const path = router.currentRoute.query.path as string
+          if (isNewDesign && path) {
+            const designAssetIndex = (await store.dispatch('design/fetchDesign', { teamId, assetId })).asset_index?.toString()
+            if (!designAssetIndex) {
+              Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+              return
+            }
+            await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+              'move', designAssetIndex, null, path).catch(async err => {
+              // remove design if move failed
+              console.error(err)
+              await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+                'delete', designAssetIndex, null, '2').catch(err => {
+                console.error(err)
+              })
+              Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+            })
+            // update design info
+            designUtils.fetchDesign(teamId as string, assetId)
+            // remove query for new design
+            const query = Object.assign({}, router.currentRoute.query)
+            delete query.width
+            delete query.height
+            delete query.path
+            delete query.folderName
+            router.replace({ query })
+          }
+          Vue.notify({ group: 'copy', text: `${i18n.t('NN0357')}` })
         }
       })
       .catch(async (error) => {
@@ -954,7 +993,7 @@ class UploadUtils {
     const pageIndex = pageUtils.currFocusPageIndex
     const designId = store.getters.getPage(pageIndex).designId
     if (this.isOutsourcer) {
-      const res = await designApis.getDesignInfo(this.token, 'template', designId, 'select', JSON.stringify({}))
+      const res = await designInfoApis.getDesignInfo(this.token, 'template', designId, 'select', JSON.stringify({}))
       const { creator_id: creatorId } = res.data
       if (creatorId !== this.userId) {
         modalUtils.setModalInfo('更新失敗', ['無法更新他人模板'])

@@ -13,7 +13,7 @@ div(class="popup-file")
   div(class="popup-file__item" :class="{disabled: isFontLoading}" @click="save()")
     span {{$t('NN0009')}}
   div(class="popup-file__item" @click="newDesign()")
-    span {{$t('NN0072')}}
+    span {{$tc('NN0072')}}
   hr(class="popup-file__hr")
   div(class="popup-file__item " @click="togglerRuler()")
     span {{$t('NN0073')}}
