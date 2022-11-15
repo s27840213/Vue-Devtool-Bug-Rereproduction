@@ -4,7 +4,9 @@
                           :allFolders="allFolders"
                           :selectedNum="selectedNum")
     div(v-if="isFolderDesignDivisionNeeded" class="mobile-trash-design-view__hr")
-    mobile-design-gallery(:allDesigns="allDesigns"
+    mobile-design-gallery(:noNewDesign="true"
+                          :noHeader="true"
+                          :allDesigns="allDesigns"
                           :selectedNum="selectedNum"
                           :limitFunctions="true"
                           @loadMore="handleLoadMore")

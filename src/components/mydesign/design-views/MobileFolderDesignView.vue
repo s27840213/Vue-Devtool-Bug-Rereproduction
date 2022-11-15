@@ -4,13 +4,12 @@
                           :allFolders="allFolders"
                           :selectedNum="0")
     div(v-if="isFolderDesignDivisionNeeded" class="mobile-folder-design-view__hr")
-    mobile-design-gallery(:allDesigns="allDesigns"
+    mobile-design-gallery(v-if="allFolders.length > 0 || allDesigns.length > 0"
+                          :allDesigns="allDesigns"
                           :selectedNum="selectedNum"
                           @loadMore="handleLoadMore")
-    div(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading" class="mobile-folder-design-view__empty")
-      img(class="mobile-folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
-      btn-new-design
-    div(v-else class="scroll-space")
+    mobile-design-empty(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading") {{'此檔案夾是空的'}}
+    //- div(v-else class="scroll-space")
 </template>
 
 <script lang="ts">
@@ -21,13 +20,15 @@ import MobileFolderGallery from '@/components/mydesign/MobileFolderGallery.vue'
 import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
 import BtnNewDesign from '@/components/mydesign/BtnNewDesign.vue'
+import MobileDesignEmpty from '@/components/mydesign/MobileDesignEmpty.vue'
 
 export default Vue.extend({
   components: {
     MobileFolderGallery,
     MobileDesignGallery,
     DiskWarning,
-    BtnNewDesign
+    BtnNewDesign,
+    MobileDesignEmpty
   },
   mounted() {
     designUtils.on('refresh', this.refreshItems)
@@ -112,17 +113,6 @@ export default Vue.extend({
     margin-bottom: 2px;
     background: setColor(gray-4);
     height: 1px;
-  }
-  &__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    &__img {
-      width: 186px;
-      height: 165px;
-    }
   }
 }
 
