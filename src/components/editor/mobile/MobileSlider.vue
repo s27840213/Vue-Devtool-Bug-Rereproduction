@@ -167,6 +167,7 @@ export default Vue.extend({
   }
 
   &__range-input-top {
+    @include progressSlider($height: 3px, $thumbSize: 32px, $marginTop: -16px);
     position: absolute;
     opacity: 0;
   }
