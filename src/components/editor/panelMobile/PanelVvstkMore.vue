@@ -13,7 +13,7 @@
       div(class="horizontal-rule")
       div(class="panel-vvstk-more__option version" @pointerdown.prevent="handleDebugMode")
         div(class="panel-vvstk-more__option-icon")
-          svg-icon(iconName="vivisticker__version"
+          svg-icon(iconName="vivisticker_version"
                     iconWidth="24px"
                     iconColor="gray-3")
         span(class="panel-vvstk-more__option-title version") {{ `${$t('NN0743')} : v. ${appVersion} ${buildNumber}${domain}` }}
