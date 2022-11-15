@@ -155,7 +155,7 @@ export default Vue.extend({
         return []
       } else {
         return [
-          { icon: 'folder', width: 24, action: this.handleMyDesign },
+          ...(vivistickerUtils.checkVersion('1.14') ? [{ icon: 'folder', width: 24, action: this.handleMyDesign }] : []),
           { icon: 'more', width: 24, action: this.handleMore, isPanelIcon: true }
         ]
       }
@@ -207,7 +207,7 @@ export default Vue.extend({
       vivistickerUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
     },
     handleEndEditing() {
-      if (vivistickerUtils.checkVersion('1.13')) {
+      if (vivistickerUtils.checkVersion('1.14')) {
         if (vivistickerUtils.userSettings.autoSave) {
           vivistickerUtils.saveAsMyDesign().then(() => {
             vivistickerUtils.endEditing()
