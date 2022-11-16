@@ -152,9 +152,7 @@ class ViviStickerUtils {
     // console.log(messageType, message)
     try {
       const webkit = (window as any).webkit
-      if (!webkit) {
-        throw new Error('WebKit is not available!')
-      }
+      if (!webkit) return
       const messageHandler = webkit.messageHandlers[messageType]
       if (!messageHandler) {
         throw new Error(`message type: ${messageType} does not exist!`)
