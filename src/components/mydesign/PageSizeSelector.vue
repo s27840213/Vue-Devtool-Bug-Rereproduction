@@ -26,10 +26,10 @@
           class="page-size-selector__body__custom__err text-red") {{errorMsg}}
     div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
     div(class="page-size-selector__container")
-        div(class="page-size-selector__body-row first-row")
-          span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0024')}}
         div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
           svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
+        div(v-if="isLayoutReady && recentlyUsed.length > 0" class="page-size-selector__body-row first-row")
+          span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0024')}}
         div(v-for="(format, index) in recentlyUsed" class="page-size-selector__body-row item pointer"
             @click="selectFormat(`recent-${index}`)")
           radio-btn(class="page-size-selector__body-row__radio"
@@ -42,10 +42,8 @@
                   :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ isMobile ? format.title : makeFormatString(format) }}
             span(v-if="isMobile" class="page-size-selector__body__typical body-3"
                   :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ isMobile ? format.description :makeFormatString(format)}}
-        div(class="page-size-selector__body-row first-row")
+        div(v-if="isLayoutReady && formatList.length > 0" class="page-size-selector__body-row first-row")
           span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0025')}}
-        div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
-          svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
         div(v-for="(format, index) in formatList" class="page-size-selector__body-row item pointer"
             @click="selectFormat(`preset-${index}`)")
           radio-btn(class="page-size-selector__body-row__radio"
