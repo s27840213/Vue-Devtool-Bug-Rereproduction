@@ -5,7 +5,7 @@
     div(class="page-size-selector__body-row")
       div(class="page-size-selector__body__custom")
         property-bar(class="page-size-selector__body__custom__box"
-                    :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? widthValid ? '' : ' input-invalid' : '')")
+                    :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
           input(class="body-3" type="number" min="0" ref="inputWidth"
                 :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
                 :value="pageWidth || null" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})" @click="selectFormat('custom')" @input="setPageWidth")
@@ -16,13 +16,13 @@
             iconWidth="20px" :iconColor="!isLockDisabled ? (selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-4')) : 'gray-4'"
             @click.native="toggleLock()")
         property-bar(class="page-size-selector__body__custom__box"
-                    :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? heightValid ? '' : ' input-invalid' : '')")
+                    :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
           input(class="body-3" type="number" min="0"
                 :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
                 :value="pageHeight || null" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})" @click="selectFormat('custom')" @input="setPageHeight")
           span(class="body-4 page-size-selector__body__custom__box__input-label"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
-        div(v-if="isValidate && !isCustomValid"
+        div(v-if="selectedFormatKey === 'custom' && isValidate && !isCustomValid"
           class="page-size-selector__body__custom__err text-red") {{errorMsg}}
     div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
     div(class="page-size-selector__container")
