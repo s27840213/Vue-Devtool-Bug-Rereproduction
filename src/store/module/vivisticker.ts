@@ -291,10 +291,12 @@ const mutations: MutationTree<IViviStickerState> = {
   UPDATE_updateDesign(state: IViviStickerState, updateInfo: { tab: string, design: IMyDesign }) {
     const list = state.myDesignFiles[updateInfo.tab]
     if (!list) return
-    const design = list.find(d => d.id === updateInfo.design.id)
-    if (!design) return
+    const designIndex = list.findIndex(d => d.id === updateInfo.design.id)
+    if (!designIndex) return
+    const design = list.splice(designIndex, 1)[0]
     Object.assign(design, updateInfo.design)
     design.ver += 1
+    list.unshift(design)
   },
   UPDATE_selectDesign(state: IViviStickerState, design: IMyDesign) {
     Vue.set(state.selectedDesigns, design.id, design)
