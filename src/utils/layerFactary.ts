@@ -350,7 +350,7 @@ class LayerFactary {
   }
 
   newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
-    const group = {
+    const group: IGroup = {
       type: 'group',
       id: config.id || GeneralUtils.generateRandomString(8),
       active: false,
@@ -399,13 +399,14 @@ class LayerFactary {
   }
 
   newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
-    const tmp = {
+    const tmp: ITmp = {
       type: 'tmp',
       id: GeneralUtils.generateRandomString(8),
       active: true,
       shown: false,
       locked: false,
       moved: false,
+      moving: false,
       dragging: false,
       designId: '',
       styles: {
@@ -425,7 +426,7 @@ class LayerFactary {
         verticalFlip: false
       },
       layers
-    } as unknown as ITmp
+    }
     tmp.layers.forEach(l => l.type === LayerType.image && (l.parentLayerStyles = tmp.styles))
     return tmp
   }
