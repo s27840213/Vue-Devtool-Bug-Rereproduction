@@ -87,7 +87,7 @@ export default Vue.extend({
                 id: `result_${rowItems.map(item => item.id).join('_')}`,
                 type: 'my-design-object-item',
                 list: rowItems,
-                size: 90,
+                size: 104,
                 title: ''
               }
             })
