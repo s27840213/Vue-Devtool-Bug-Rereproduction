@@ -178,9 +178,7 @@ export default Vue.extend({
           line-height: 180%;
           font-size: 14px;
           font-weight: 400;
-          white-space: nowrap;
           text-overflow: ellipsis;
-          overflow: hidden;
         }
       }
       &__size {
