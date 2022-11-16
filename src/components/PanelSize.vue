@@ -88,7 +88,8 @@ export default Vue.extend({
         {
           'row-gap': '10px',
           backgroundColor: 'white',
-          maxHeight: this.panelHeight + 'px'
+          maxHeight: this.panelHeight + 'px',
+          bottom: (window.innerHeight - window.visualViewport.height) + 'px'
         }
       )
     },
@@ -115,10 +116,10 @@ export default Vue.extend({
   },
   mounted() {
     this.panelHeight = this.initHeightPx
-    window.addEventListener('resize', this.handleResize)
+    window.visualViewport.addEventListener('resize', this.handleResize)
   },
   beforeDestroy() {
-    window.removeEventListener('resize', this.handleResize)
+    window.visualViewport.removeEventListener('resize', this.handleResize)
   },
   methods: {
     ...mapMutations({
@@ -194,9 +195,9 @@ export default Vue.extend({
       }
     },
     handleResize() {
-      this.maxHeightPx = window.innerHeight
-      if (window.innerHeight < this.panelHeight || (window.innerHeight > this.panelHeight && this.isFullScreen)) {
-        this.panelHeight = window.innerHeight
+      this.maxHeightPx = window.visualViewport.height
+      if (window.visualViewport.height < this.panelHeight || (window.visualViewport.height > this.panelHeight && this.isFullScreen)) {
+        this.panelHeight = window.visualViewport.height
         this.isFullScreen = true
       }
     }
