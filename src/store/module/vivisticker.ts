@@ -292,7 +292,7 @@ const mutations: MutationTree<IViviStickerState> = {
     const list = state.myDesignFiles[updateInfo.tab]
     if (!list) return
     const designIndex = list.findIndex(d => d.id === updateInfo.design.id)
-    if (!designIndex) return
+    if (designIndex < 0) return
     const design = list.splice(designIndex, 1)[0]
     Object.assign(design, updateInfo.design)
     design.ver += 1
