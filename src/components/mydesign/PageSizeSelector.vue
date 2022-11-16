@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="page-size-selector")
     div(v-if="isMobile" class="page-size-selector__body-row first-row")
-      span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0024')}}
+      span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0023')}}
     div(class="page-size-selector__body-row")
       div(class="page-size-selector__body__custom")
         property-bar(class="page-size-selector__body__custom__box"
@@ -32,26 +32,32 @@
           svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
         div(v-for="(format, index) in recentlyUsed" class="page-size-selector__body-row item pointer"
             @click="selectFormat(`recent-${index}`)")
-          radio-btn(class="page-size-selector__body__radio"
+          radio-btn(class="page-size-selector__body-row__radio"
                     :isSelected="selectedFormatKey === `recent-${index}`",
-                    :circleColor="isDarkTheme ? 'white' : 'gray-2'"
+                    :circleColor="isDarkTheme ? 'white' : 'light-gray'"
                     :formatKey="`recent-${index}`",
                     @select="selectFormat")
-          span(class="page-size-selector__body__recently body-3 pointer"
-                :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatString(format) }}
+          div(class="page-size-selector__body-row__content")
+            span(class="page-size-selector__body__recently body-3 pointer"
+                  :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ isMobile ? format.title : makeFormatString(format) }}
+            span(v-if="isMobile" class="page-size-selector__body__typical body-3"
+                  :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ isMobile ? format.description :makeFormatString(format)}}
         div(class="page-size-selector__body-row first-row")
           span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0025')}}
         div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
           svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
         div(v-for="(format, index) in formatList" class="page-size-selector__body-row item pointer"
             @click="selectFormat(`preset-${index}`)")
-          radio-btn(class="page-size-selector__body__radio"
+          radio-btn(class="page-size-selector__body-row__radio"
                     :isSelected="selectedFormatKey === `preset-${index}`",
-                    :circleColor="isDarkTheme ? 'white' : 'gray-2'"
+                    :circleColor="isDarkTheme ? 'white' : 'light-gray'"
                     :formatKey="`preset-${index}`",
                     @select="selectFormat")
-          span(class="page-size-selector__body__typical body-3"
-                :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatString(format)}}
+          div(class="page-size-selector__body-row__content")
+            span(class="page-size-selector__body__typical body-3"
+                  :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ isMobile ? format.title : makeFormatString(format)}}
+            span(v-if="isMobile" class="page-size-selector__body__typical body-3"
+                  :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ isMobile ? format.description : makeFormatString(format)}}
 </template>
 
 <script lang="ts">
@@ -281,10 +287,23 @@ export default Vue.extend({
       &.item {
         display: grid;
         margin: 0px;
-        padding: 4px 16px;
-        grid-template-columns: 28px auto;
+        padding: 2px 16px;
+        grid-template-columns: 28px 1fr;
         justify-content: left;
         // font-family: 'Mulish';
+      }
+      &__radio {
+        height: 24px;
+        display: flex;
+        align-items: center;
+      }
+      &__content {
+        height: 24px;
+        display: grid;
+        grid-template-columns: auto auto;
+        align-items: center;
+        justify-content: space-between;
+        white-space: nowrap;
         line-height: 20px;
       }
     }
@@ -363,8 +382,12 @@ export default Vue.extend({
 }
 
 @media screen and (max-width: 540px) {
-  .page-size-selector__body-row{
+  .page-size-selector__body-row {
     padding: 0px 8px;
+  }
+
+  .page-size-selector__body-row.item {
+    padding: 4px 16px;
   }
 }
 </style>
