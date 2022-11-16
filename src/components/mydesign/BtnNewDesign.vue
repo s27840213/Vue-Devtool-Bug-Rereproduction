@@ -6,9 +6,8 @@
     div(v-if="isMobile < 0 && isShowPopup"
       class="popup-window")
       popup-size(@close="closePopup()")
-    div(v-if="isMobile > 0")
-      transition(name="panel-up")
-        panel-size(v-show="isShowPopup" @close="closePopup()")
+    transition(name="panel-up")
+      panel-size(v-if="isMobile > 0 && isShowPopup" @close="closePopup()")
 </template>
 
 <script lang="ts">
