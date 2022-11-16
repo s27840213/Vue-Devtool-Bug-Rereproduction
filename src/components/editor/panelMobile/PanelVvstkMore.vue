@@ -139,7 +139,7 @@ export default Vue.extend({
         },
         action: () => { this.switchDomain('sticker') }
       }, {
-        text: 'test',
+        text: 'rd',
         icon: 'vivisticker_global',
         selected: () => {
           return window.location.hostname === 'stkrd.vivipic.com'
