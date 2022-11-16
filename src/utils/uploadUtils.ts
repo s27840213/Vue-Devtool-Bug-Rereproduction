@@ -1084,13 +1084,8 @@ class UploadUtils {
         case 'image':
           layer.imgControl = false
           break
-        case 'tmp': { // If there is group layer in tmp layer, deconstruct the group layer.
-          const layers = (layer as ITmp).layers
-          for (let i = 0; i < layers.length; i++) {
-            if (layers[i].type === 'group') {
-              layers.splice(i, 1, ...groupUtils.mapGroupLayersToTmp(layers[i] as IGroup))
-            }
-          }
+        case 'tmp': { // If there is group layer in tmp layer, cancel tmp layer.
+          page.layers.splice(index, 1, ...(layer as ITmp).layers)
         }
       }
       basicDefault(layer)
