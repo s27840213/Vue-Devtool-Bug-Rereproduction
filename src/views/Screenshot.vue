@@ -253,10 +253,12 @@ export default Vue.extend({
       console.log('loaded')
       if (this.mode === ScreenShotMode.PAGE) {
         vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, true)
+      } else if ([ScreenShotMode.BG_IMG, ScreenShotMode.BG_COLOR].includes(this.mode)) {
+        const element = this.$refs.target
+        const target = (element as Vue).$el ? (element as Vue).$el : (element as HTMLElement)
+        const { width, height } = target.getBoundingClientRect()
+        vivistickerUtils.sendDoneLoading(width, height, this.options)
       } else {
-        // const element = this.$refs.target
-        // const target = (element as Vue).$el ? (element as Vue).$el : (element as HTMLElement)
-        // const { width, height } = target.getBoundingClientRect()
         vivistickerUtils.sendDoneLoading(window.innerWidth, window.innerHeight, this.options)
       }
     },
