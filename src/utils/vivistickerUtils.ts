@@ -9,7 +9,7 @@ import stepsUtils from './stepsUtils'
 import uploadUtils from './uploadUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
 import { ColorEventType, LayerType } from '@/store/types'
-import { IGroup, ILayer } from '@/interfaces/layer'
+import { IGroup, ILayer, IShape } from '@/interfaces/layer'
 import editorUtils from './editorUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
@@ -630,7 +630,11 @@ class ViviStickerUtils {
     } = tempDesign
     this.startEditing(editorType, assetInfo ?? {}, this.getFetchDesignInitiator(() => {
       store.commit('SET_pages', pageUtils.newPages(pages))
-    }), this.getEmptyCallback(), id ?? '')
+    }), () => {
+      if (editorType === 'object') {
+        groupUtils.select(0, [0])
+      }
+    }, id ?? '')
   }
 
   initWithMyDesign(myDesign: IMyDesign) {
@@ -642,7 +646,17 @@ class ViviStickerUtils {
     this.getAsset(`mydesign-${type}`, id, 'config').then((data) => {
       this.startEditing(type, assetInfo ?? {}, this.getFetchDesignInitiator(() => {
         store.commit('SET_pages', pageUtils.newPages(generalUtils.deepCopy(data.pages)))
-      }), this.getEmptyCallback(), id ?? '')
+      }), () => {
+        if (type === 'object') {
+          groupUtils.select(0, [0])
+          const firstObject = (data.pages[0] as IPage).layers[0]
+          if (firstObject.type === 'shape' && ((firstObject as IShape).color?.length ?? 0) > 0) {
+            eventUtils.emit(PanelEvent.switchTab, 'color', { currColorEvent: ColorEventType.shape })
+          } else {
+            eventUtils.emit(PanelEvent.switchTab, 'opacity')
+          }
+        }
+      }, id ?? '')
     })
   }
 
