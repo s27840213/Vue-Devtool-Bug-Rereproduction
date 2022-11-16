@@ -72,12 +72,6 @@ export default Vue.extend({
       }
     }
   },
-  props: {
-    isInsert: {
-      default: false,
-      type: Boolean
-    }
-  },
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
@@ -185,7 +179,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    if (this.isInsert) return
+    if (this.categories.length !== 0 || this.rawContent.list || this.rawSearchResult.list || this.pending) return
     generalUtils.panelInit('text',
       this.handleSearch,
       this.handleCategorySearch,

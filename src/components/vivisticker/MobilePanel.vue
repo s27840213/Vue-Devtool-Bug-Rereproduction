@@ -388,10 +388,6 @@ export default Vue.extend({
           return {
             is: ''
           }
-        case 'text':
-          return Object.assign(defaultVal, {
-            isInsert: true
-          })
         default: {
           return defaultVal
         }
