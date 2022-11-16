@@ -510,7 +510,7 @@ class ViviStickerUtils {
     const type = key.split('-').slice(1).join('-')
     store.commit('vivisticker/SET_myDesignFileList', {
       tab: type,
-      list: assets.map(asset => Object.assign(asset, { ver: 0 }))
+      list: assets.map(asset => Object.assign(asset, { ver: generalUtils.generateRandomString(12) }))
     })
   }
 
@@ -762,7 +762,7 @@ class ViviStickerUtils {
     return editorBg === '#F4F5F7' ? '#000000' : '#FFFFFF'
   }
 
-  getThumbSrc(type: string, id: string, ver: number) {
+  getThumbSrc(type: string, id: string, ver: string) {
     return `vvstk://${type}/${id}?ver=${ver}`
   }
 }

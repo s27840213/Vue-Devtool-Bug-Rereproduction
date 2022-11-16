@@ -21,7 +21,7 @@ export interface IMyDesign {
   type: string,
   id: string,
   updateTime: string,
-  ver: number,
+  ver: string,
   assetInfo: {[key: string]: any}
 }
 

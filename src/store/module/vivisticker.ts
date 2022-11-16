@@ -295,7 +295,7 @@ const mutations: MutationTree<IViviStickerState> = {
     if (designIndex < 0) return
     const design = list.splice(designIndex, 1)[0]
     Object.assign(design, updateInfo.design)
-    design.ver += 1
+    design.ver = generalUtils.generateRandomString(12)
     list.unshift(design)
   },
   UPDATE_selectDesign(state: IViviStickerState, design: IMyDesign) {
