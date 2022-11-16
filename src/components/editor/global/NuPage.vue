@@ -125,6 +125,7 @@
             page-content(:config="config"
               :pageIndex="pageIndex"
               :contentScaleRatio="contentScaleRatio"
+              :snapUtils="snapUtils"
               :lazyLoadTarget="'.editor-view'"
               :forceRender="hasEditingText")
             div(v-if="isAdmin" class="layer-num") Layer數量: {{config.layers.length}} (Admin User 才看得到）

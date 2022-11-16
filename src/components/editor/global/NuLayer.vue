@@ -1,51 +1,60 @@
 <template lang="pug">
-  div(class="nu-layer" :style="layerStyles()" ref="body"
-      :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
-      :data-p-index="pageIndex"
-      @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
-      @pointerdown="moveStart"
-      @dragover.prevent
-      @dragleave.prevent
-      @dragenter.prevent)
-    div(class="layer-translate posAbs"
-        :style="translateStyles()")
-      div(class="layer-scale posAbs" ref="scale"
-          :style="scaleStyles()")
-        nu-clipper(:config="config"
-            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-            :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
-          //- component(:is="`nu-${config.type}`"
-          //-   class="transition-none"
-          //-   :config="config"
-          //-   :imgControl="imgControl"
-          //-   :contentScaleRatio="contentScaleRatio"
-          //-   :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-          //-   :scaleRatio="scaleRatio"
-          //-   :isPagePreview="isPagePreview"
-          //-   v-bind="$attrs")
-          lazy-load(:target="lazyLoadTarget"
-              :rootMargin="'300px 0px 300px 0px'"
-              :minHeight="config.styles.height * contentScaleRatio"
-              :minWidth="config.styles.width * contentScaleRatio"
-              :threshold="[0]"
-              :handleUnrender="handleUnrender"
-              :anamationEnabled="false"
-              :forceRender="isSubLayer || forceRender")
-            component(:is="`nu-${config.type}`"
-              class="transition-none"
-              :config="config"
-              :imgControl="imgControl"
-              :contentScaleRatio="contentScaleRatio"
+  div
+    div(class="nu-layer" :style="layerStyles()" ref="body"
+        :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
+        :data-p-index="pageIndex"
+        @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
+        @pointerdown="moveStart"
+        @dragover.prevent
+        @dragleave.prevent
+        @dragenter.prevent)
+      div(class="layer-translate posAbs"
+          :style="translateStyles()")
+        div(class="layer-scale posAbs" ref="scale"
+            :style="scaleStyles()")
+          nu-clipper(:config="config"
               :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-              :scaleRatio="scaleRatio"
-              :isPagePreview="isPagePreview"
-              v-bind="$attrs")
-    div(v-if="showSpinner()" class="nu-layer__inProcess")
-      square-loading
-      //- svg-icon(class="spiner"
-      //-   :iconName="'spiner'"
-      //-   :iconColor="'white'"
-      //-   :iconWidth="'150px'")
+              :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
+            //- component(:is="`nu-${config.type}`"
+            //-   class="transition-none"
+            //-   :config="config"
+            //-   :imgControl="imgControl"
+            //-   :contentScaleRatio="contentScaleRatio"
+            //-   :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+            //-   :scaleRatio="scaleRatio"
+            //-   :isPagePreview="isPagePreview"
+            //-   v-bind="$attrs")
+            lazy-load(:target="lazyLoadTarget"
+                :rootMargin="'300px 0px 300px 0px'"
+                :minHeight="config.styles.height * contentScaleRatio"
+                :minWidth="config.styles.width * contentScaleRatio"
+                :threshold="[0]"
+                :handleUnrender="handleUnrender"
+                :anamationEnabled="false"
+                :forceRender="isSubLayer || forceRender")
+              component(:is="`nu-${config.type}`"
+                class="transition-none"
+                :config="config"
+                :imgControl="imgControl"
+                :contentScaleRatio="contentScaleRatio"
+                :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+                :scaleRatio="scaleRatio"
+                :isPagePreview="isPagePreview"
+                v-bind="$attrs")
+      div(v-if="showSpinner()" class="nu-layer__inProcess")
+        square-loading
+    nu-controller(v-if="isActive && !forRender"
+      data-identifier="controller"
+      :key="`controller-${config.id}`"
+      :layerIndex="layerIndex"
+      :pageIndex="pageIndex"
+      :config="config"
+      :snapUtils="snapUtils"
+      :contentScaleRatio="contentScaleRatio")
+        //- svg-icon(class="spiner"
+        //-   :iconName="'spiner'"
+        //-   :iconColor="'white'"
+        //-   :iconWidth="'150px'")
 </template>
 
 <script lang="ts">
@@ -112,6 +121,10 @@ export default Vue.extend({
     },
     forceRender: {
       default: true,
+      type: Boolean
+    },
+    forRender: {
+      default: false,
       type: Boolean
     },
     handleUnrender: {
@@ -233,9 +246,9 @@ export default Vue.extend({
         return 'none'
       } else if (this.config.shown || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          return `${5 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
         } else {
-          return `${5 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
         }
       } else {
         return 'none'
@@ -493,10 +506,10 @@ export default Vue.extend({
           y: moveOffset.offsetY
         }
       )
-      // const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
-      const offsetSnap = { x: 0, y: 0 }
-      // this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
-      // this.$emit('getClosestSnaplines')
+      const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
+      // const offsetSnap = { x: 0, y: 0 }
+      this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
+      this.$emit('getClosestSnaplines')
       const totalOffset = {
         x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
         y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
@@ -523,7 +536,7 @@ export default Vue.extend({
           dragging: false
         })
         this.isDoingGestureAction = false
-        // this.snapUtils.event.emit('clearSnapLines')
+        this.snapUtils.event.emit('clearSnapLines')
         return
       }
 
@@ -531,12 +544,6 @@ export default Vue.extend({
       this.setMoving(false)
 
       if (this.isActive) {
-        // if (posDiff.x === 0 && posDiff.y === 0 && !this.isLocked()) {
-        //   // if (layerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
-        //   //   groupUtils.deselect()
-        //   //   this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
-        //   // }
-        // }
         const posDiff = {
           x: Math.abs(this.getLayerPos().x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos().y - this.initTranslate.y)
@@ -641,7 +648,7 @@ export default Vue.extend({
       }
 
       this.isDoingGestureAction = false
-      // this.snapUtils.event.emit('clearSnapLines')
+      this.snapUtils.event.emit('clearSnapLines')
     },
     onDrop(e: DragEvent) {
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos())

@@ -60,6 +60,7 @@ div(class="overflow-container"
         :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
         :data-index="`${index}`"
         :data-pindex="`${pageIndex}`"
+        :snapUtils="snapUtils"
         :layerIndex="index"
         :pageIndex="pageIndex"
         :config="layer"
@@ -78,7 +79,8 @@ div(class="overflow-container"
         :uploadShadowImgs="uploadShadowImgs"
         :isPagePreview="isPagePreview"
         :forceRender="forceRender"
-        :lazyLoadTarget="lazyLoadTarget")
+        :lazyLoadTarget="lazyLoadTarget"
+        v-on="$listeners")
     template(v-else)
       div(class='pages-loading')
 </template>
@@ -107,6 +109,7 @@ export default Vue.extend({
     LazyLoad
   },
   props: {
+    snapUtils: Object,
     config: {
       type: Object,
       required: true
