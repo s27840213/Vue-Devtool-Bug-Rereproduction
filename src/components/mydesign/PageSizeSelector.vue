@@ -1,26 +1,29 @@
 <template lang="pug">
   div(class="page-size-selector")
-    div(class="page-size-selector__body__custom")
-      property-bar(class="page-size-selector__body__custom__box"
-                  :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? widthValid ? '' : ' input-invalid' : '')")
-        input(class="body-3" type="number" min="0" ref="inputWidth"
-              :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
-              :value="pageWidth || null" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})" @click="selectFormat('custom')" @input="setPageWidth")
-        span(class="body-4 page-size-selector__body__custom__box__input-label"
-            :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") W
-      svg-icon(class="pointer"
-          :iconName="isLocked ? 'lock' : 'unlock'"
-          iconWidth="20px" :iconColor="!isLockDisabled ? (selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-4')) : 'gray-4'"
-          @click.native="toggleLock()")
-      property-bar(class="page-size-selector__body__custom__box"
-                  :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? heightValid ? '' : ' input-invalid' : '')")
-        input(class="body-3" type="number" min="0"
-              :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
-              :value="pageHeight || null" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})" @click="selectFormat('custom')" @input="setPageHeight")
-        span(class="body-4 page-size-selector__body__custom__box__input-label"
-            :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
-      div(v-if="isValidate && !isCustomValid"
-        class="page-size-selector__body__custom__err text-red") {{errorMsg}}
+    div(v-if="isMobile" class="page-size-selector__body-row first-row")
+      span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0024')}}
+    div(class="page-size-selector__body-row")
+      div(class="page-size-selector__body__custom")
+        property-bar(class="page-size-selector__body__custom__box"
+                    :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? widthValid ? '' : ' input-invalid' : '')")
+          input(class="body-3" type="number" min="0" ref="inputWidth"
+                :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
+                :value="pageWidth || null" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})" @click="selectFormat('custom')" @input="setPageWidth")
+          span(class="body-4 page-size-selector__body__custom__box__input-label"
+              :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") W
+        svg-icon(class="pointer"
+            :iconName="isLocked ? 'lock' : 'unlock'"
+            iconWidth="20px" :iconColor="!isLockDisabled ? (selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-4')) : 'gray-4'"
+            @click.native="toggleLock()")
+        property-bar(class="page-size-selector__body__custom__box"
+                    :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? heightValid ? '' : ' input-invalid' : '')")
+          input(class="body-3" type="number" min="0"
+                :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
+                :value="pageHeight || null" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})" @click="selectFormat('custom')" @input="setPageHeight")
+          span(class="body-4 page-size-selector__body__custom__box__input-label"
+              :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
+        div(v-if="isValidate && !isCustomValid"
+          class="page-size-selector__body__custom__err text-red") {{errorMsg}}
     div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
     div(class="page-size-selector__container")
         div(class="page-size-selector__body-row first-row")
@@ -66,6 +69,10 @@ export default Vue.extend({
       default: false
     },
     isValidate: {
+      type: Boolean,
+      default: false
+    },
+    isMobile: {
       type: Boolean,
       default: false
     }
@@ -120,9 +127,6 @@ export default Vue.extend({
       pagesLength: 'getPagesLength',
       getPageSize: 'getPageSize'
     }),
-    isMobile(): boolean {
-      return document.body.clientWidth / document.body.clientHeight < 1
-    },
     isCustomValid(): boolean {
       return this.widthValid && this.heightValid
     },
@@ -253,9 +257,10 @@ export default Vue.extend({
     border-radius: 4px;
     padding: 11.57px;
     &-row {
+      box-sizing: border-box;
       display: flex;
-      justify-content: space-between;
-      width: 87%;
+      justify-content: center;
+      width: 100%;
       margin-left: auto;
       margin-top: 15px;
       margin-right: auto;
@@ -285,9 +290,9 @@ export default Vue.extend({
     }
     &__title {
       font-weight: 700;
-      margin-left: -16px;
     }
     &__custom {
+      width: 100%;
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       grid-template-rows: auto;
@@ -355,5 +360,11 @@ export default Vue.extend({
 
 .input-invalid {
   border: 1px solid setColor(red) !important;
+}
+
+@media screen and (max-width: 540px) {
+  .page-size-selector__body-row{
+    padding: 0px 8px;
+  }
 }
 </style>

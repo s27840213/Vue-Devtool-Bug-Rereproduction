@@ -28,7 +28,8 @@
             @pointerdown="rightButtonAction"
             @touchstart="disableTouchEvent")
     div(class="mobile-panel__bottom-section")
-      PageSizeSelector(:isValidate="isConfirmClicked"
+      PageSizeSelector(:isMobile="true"
+        :isValidate="isConfirmClicked"
         defaultFormat="custom"
         ref="pageSizeSelector"
         @select="selectFormat")

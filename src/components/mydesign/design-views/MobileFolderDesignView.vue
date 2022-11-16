@@ -8,7 +8,7 @@
                           :allDesigns="allDesigns"
                           :selectedNum="selectedNum"
                           @loadMore="handleLoadMore")
-    mobile-design-empty(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading") {{'此檔案夾是空的'}}
+    mobile-design-empty(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading") {{$t('NN0239')}}
     //- div(v-else class="scroll-space")
 </template>
 
