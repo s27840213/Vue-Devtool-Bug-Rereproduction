@@ -2,7 +2,21 @@
   svg(class="svg-icon" :class="`text-${iconColor}`"
       ref="icon"
       :style="iconStyles()")
-    use(:xlink:href="`#${iconName}`")
+    symbol(v-if="iconName === 'loading'"
+          viewBox="0 0 120 30"
+          xmlns="http://www.w3.org/2000/svg"
+          :id="id"
+          fill="currentColor")
+      circle(cx="15" cy="15" r="15")
+        animate(:class="`ani_${id}`" attributename="r" from="15" to="15" begin="0s" dur="0.8s" values="15;9;15" calcmode="linear" repeatcount="indefinite")
+        animate(:class="`ani_${id}`" attributename="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" values="1;.5;1" calcmode="linear" repeatcount="indefinite")
+      circle(cx="60" cy="15" r="9" fill-opacity="0.3")
+        animate(:class="`ani_${id}`" attributename="r" from="9" to="9" begin="0s" dur="0.8s" values="9;15;9" calcmode="linear" repeatcount="indefinite")
+        animate(:class="`ani_${id}`" attributename="fill-opacity" from="0.5" to="0.5" begin="0s" dur="0.8s" values=".5;1;.5" calcmode="linear" repeatcount="indefinite")
+      circle(cx="105" cy="15" r="15")
+        animate(:class="`ani_${id}`" attributename="r" from="15" to="15" begin="0s" dur="0.8s" values="15;9;15" calcmode="linear" repeatcount="indefinite")
+        animate(:class="`ani_${id}`" attributename="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" values="1;.5;1" calcmode="linear" repeatcount="indefinite")
+    use(:xlink:href="iconName === 'loading' ? `#${id}` : `#${iconName}`")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -37,7 +51,27 @@ export default Vue.extend({
     iconHeight: String
   },
   data() {
+    // The below is the content of generalUtils.generateRandomString
+    // Because importing generalUtils in this file will cause webpack error,
+    // I directly put the function content here.
+    let result = ''
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    const charactersLength = characters.length
+    for (let i = 0; i < 6; i++) {
+      result += characters.charAt(Math.floor(Math.random() *
+        charactersLength))
+    }
+    //
     return {
+      id: result
+    }
+  },
+  mounted() {
+    if (this.iconName === 'loading') {
+      for (const element of document.querySelectorAll(`.ani_${this.id}`).values()) {
+        (element as SVGAnimationElement).beginElement()
+        console.log(element)
+      }
     }
   },
   methods: {
