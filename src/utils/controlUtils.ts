@@ -107,13 +107,10 @@ class Controller {
     ]
   }
 
-  getControlPoints = (resizerShort: number, resizerLong: number) => {
+  private getScalers = (scalerSize: number, cursors?: Array<number | string>) => {
     const contentScaleRatio = editorUtils.contentScaleRatio
     const scaleRatio = store.getters.getPageScaleRatio
-    const isMobile = generalUtils.isTouchDevice()
-    const scalerSize = isMobile ? 12 : 8
-
-    const getScalers = (scalerSize: number, cursors?: Array<number | string>) => [
+    return [
       {
         cursor: cursors?.[0] ?? 0,
         styles: {
@@ -163,8 +160,16 @@ class Controller {
         scalerSize
       }
     ]
+  }
+
+  getControlPoints = (resizerShort: number, resizerLong: number) => {
+    const contentScaleRatio = editorUtils.contentScaleRatio
+    const scaleRatio = store.getters.getPageScaleRatio
+    const isMobile = generalUtils.isTouchDevice()
+    const scalerSize = isMobile ? 12 : 8
+
     return {
-      scalers: getScalers(scalerSize),
+      scalers: this.getScalers(scalerSize),
       cornerRotaters: this.getCornerRatater(scalerSize * 4),
       lineEnds: [
         {

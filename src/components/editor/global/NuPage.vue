@@ -134,23 +134,6 @@
                   @setFocus="setFocus()"
                   @isDragging="handleDraggingController")
             dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
-            div(v-if="isBackgroundImageControl"
-                class="background-control"
-                :style="backgroundControlStyles()")
-              nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio")
-              nu-background-controller(:config="config.backgroundImage.config"
-                :pageIndex="pageIndex"
-                :contentScaleRatio="contentScaleRatio")
-              div(:style="backgroundContorlClipStyles()")
-                nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
-                component(v-for="(elm, idx) in getHalation"
-                  :key="idx"
-                  :is="elm.tag"
-                  v-bind="elm.attrs")
-            div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
-                class="dim-background"
-                :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
-
       div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
         class="page-highlighter"
         :style="wrapperStyles()")
@@ -252,7 +235,8 @@ export default Vue.extend({
     pageIndex: Number,
     pageScaleRatio: Number,
     isAnyBackgroundImageControl: Boolean,
-    overflowContainer: HTMLElement
+    overflowContainer: HTMLElement,
+    isScaling: Boolean
   },
   mounted() {
     this.initialPageHeight = (this.config as IPage).height
@@ -306,7 +290,8 @@ export default Vue.extend({
         // transform: `scale(${1})`
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
-        transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`
+        transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`,
+        willChange: this.isScaling ? 'transform' : 'none'
       }
     },
     getCurrLayer(): ILayer {
@@ -384,7 +369,7 @@ export default Vue.extend({
     pageRootStyles(): { [index: string]: string } {
       return {
         margin: this.isDetailPage ? '0px auto' : '25px auto',
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
     isOutOfBound(): boolean {
@@ -448,14 +433,14 @@ export default Vue.extend({
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
         overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden',
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
     wrapperStyles() {
       return {
         width: `${this.config.width * (this.scaleRatio / 100)}px`,
         height: `${this.config.height * (this.scaleRatio / 100)}px`,
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
     snapLineStyles(dir: string, pos: number, isGuideline?: string) {

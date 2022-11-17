@@ -91,7 +91,7 @@ export default Vue.extend({
         height,
         ...(!this.imgControl && this.config.type === 'image' && this.config.styles.shadow.currentEffect === ShadowEffectType.none && { clipPath }),
         ...flip,
-        'transform-style': pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none'
+        'transform-style': pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     }
   }

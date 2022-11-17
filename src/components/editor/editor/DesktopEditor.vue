@@ -61,6 +61,7 @@ import logUtils from '@/utils/logUtils'
 import i18n from '@/i18n'
 import colorUtils from '@/utils/colorUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   name: 'DesktopEditor',
@@ -194,6 +195,14 @@ export default Vue.extend({
     })
     if (brandkitUtils.isBrandkitAvailable) {
       brandkitUtils.fetchBrands(this.fetchBrands)
+    }
+
+    // load size from query for new design
+    const newDesignWidth = parseInt(this.$route.query.width as string)
+    const newDesignHeight = parseInt(this.$route.query.height as string)
+    if (newDesignWidth && newDesignHeight) {
+      pageUtils.setPageSize(0, newDesignWidth, newDesignHeight)
+      pageUtils.fitPage()
     }
   },
   methods: {

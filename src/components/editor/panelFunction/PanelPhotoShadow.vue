@@ -106,7 +106,6 @@ export default Vue.extend({
     imageShadowPanelUtils.mount()
   },
   beforeDestroy() {
-    console.log('destroy')
     imageShadowPanelUtils.handleShadowUpload()
   },
   destroyed() {

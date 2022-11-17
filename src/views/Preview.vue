@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="preview" :style="containStyles")
-  page-content(v-if="pages.length > 0" :config="pages[0]" :pageIndex="0" :contentScaleRatio="contentScaleRatio")
+  page-content(v-if="pages.length > 0" :config="pages[0]" :pageIndex="0" :contentScaleRatio="contentScaleRatio" :forceRender="true")
   span(v-if="host" class="preview__host") {{host}}
 </template>
 
@@ -51,7 +51,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.preview{
+.preview {
   position: relative;
   &__host {
     @include body-LG;

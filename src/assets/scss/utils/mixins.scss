@@ -90,9 +90,7 @@
     border-radius: $borderRadius;
     background-color: $thumbColor;
     visibility: hidden;
-    @if $trackColor != none {
-      border: 3px solid $trackColor;
-    }
+    border: 3px solid $trackColor;
   }
   &:hover::-webkit-scrollbar-thumb {
     visibility: visible;
@@ -117,7 +115,7 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;

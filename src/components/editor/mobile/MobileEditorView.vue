@@ -27,6 +27,7 @@
             :style="pageStyle(index)"
             :config="page"
             :index="index"
+            :inScaling="isScaling"
             :isAnyBackgroundImageControl="isBackgroundImageControl")
 </template>
 
@@ -92,7 +93,8 @@ export default Vue.extend({
       cardHeight: 0,
       cardWidth: 0,
       editorViewResizeObserver: null as unknown as ResizeObserver,
-      isSwiping: false
+      isSwiping: false,
+      isScaling: false
     }
   },
   mounted() {
@@ -332,9 +334,13 @@ export default Vue.extend({
          */
         case 'start': {
           this.tmpScaleRatio = pageUtils.scaleRatio
+          this.isScaling = true
           break
         }
         case 'move': {
+          if (!this.isScaling) {
+            this.isScaling = true
+          }
           const limitMultiplier = 4
           if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
             pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
@@ -348,6 +354,8 @@ export default Vue.extend({
           if (pageUtils.scaleRatio < this.minScaleRatio) {
             pageUtils.setScaleRatio(this.minScaleRatio)
           }
+
+          this.isScaling = false
           break
         }
       }

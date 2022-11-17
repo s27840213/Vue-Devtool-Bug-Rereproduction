@@ -24,8 +24,38 @@ div(class="overflow-container"
       //-     :key="layer.id"
       //-     target=".editor-view"
       //-     :threshold="[0,1]")
+      //- template(v-if="layerLazyLoad")
+      //-   lazy-load(v-for="(layer,index) in config.layers"
+      //-       :key="layer.id"
+      //-       :target="lazyLoadTarget"
+      //-       :minHeight="layer.styles.height * contentScaleRatio"
+      //-       :minWidth="layer.styles.width * contentScaleRatio"
+      //-       :threshold="[0]")
+      //-     nu-layer(
+      //-       :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
+      //-       :data-index="`${index}`"
+      //-       :data-pindex="`${pageIndex}`"
+      //-       :layerIndex="index"
+      //-       :pageIndex="pageIndex"
+      //-       :config="layer"
+      //-       :currSelectedInfo="currSelectedInfo"
+      //-       :contentScaleRatio="contentScaleRatio"
+      //-       :scaleRatio="scaleRatio"
+      //-       :getCurrFunctionPanelType="getCurrFunctionPanelType"
+      //-       :isUploadingShadowImg="isUploadingShadowImg"
+      //-       :isHandling="isHandling"
+      //-       :isShowPagePanel="isShowPagePanel"
+      //-       :imgSizeMap="imgSizeMap"
+      //-       :userId="userId"
+      //-       :verUni="verUni"
+      //-       :uploadId="uploadId"
+      //-       :handleId="handleId"
+      //-       :uploadShadowImgs="uploadShadowImgs"
+      //-       :isPagePreview="true"
+      //-       :forceRender="forceRender")
+      //- template(v-else)
       nu-layer(
-        v-for="(layer,index) in layerFilter"
+        v-for="(layer,index) in config.layers"
         :key="layer.id"
         :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
         :data-index="`${index}`"
@@ -46,7 +76,8 @@ div(class="overflow-container"
         :uploadId="uploadId"
         :handleId="handleId"
         :uploadShadowImgs="uploadShadowImgs"
-        :isPagePreview="true")
+        :isPagePreview="true"
+        :forceRender="forceRender")
     template(v-else)
       div(class='pages-loading')
 </template>
@@ -57,7 +88,7 @@ import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { LayerType, SidebarPanelType } from '@/store/types'
+import { SidebarPanelType } from '@/store/types'
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
@@ -94,6 +125,18 @@ export default Vue.extend({
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    forceRender: {
+      default: false,
+      type: Boolean
+    },
+    layerLazyLoad: {
+      default: false,
+      type: Boolean
+    },
+    lazyLoadTarget: {
+      type: String,
+      default: '.mobile-editor__page-preview'
     }
   },
   data() {
@@ -136,11 +179,13 @@ export default Vue.extend({
       }
     },
     layerFilter(): any {
-      return this.config.layers.filter((layer: ILayer) => {
-        // return layer.type !== LayerType.text && layer.type !== LayerType.shape
+      const filterResult = this.config.layers.filter((layer: ILayer) => {
+        // return layer.type !== LayerType.shape
         // return layer.type !== LayerType.text
         return layer
       })
+
+      return filterResult
     },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
@@ -228,7 +273,10 @@ export default Vue.extend({
       groupUtils.deselect()
       // imageUtils.setImgControlDefault(false)
       editorUtils.setInMultiSelectionMode(false)
-      this.setCurrActivePageIndex(this.pageIndex)
+      if (this.currSelectedPageIndex !== this.pageIndex) {
+        pageUtils.setBackgroundImageControlDefault()
+        this.setCurrActivePageIndex(this.pageIndex)
+      }
       const sel = window.getSelection()
       if (sel) {
         sel.empty()
@@ -269,7 +317,7 @@ export default Vue.extend({
               pageIndex: this.pageIndex,
               props: { isAutoResizeNeeded: false }
             })
-          }, 100) // for the delay between font loading and dom rendering
+          }, 200) // for the delay between font loading and dom rendering
         })
       }
     }

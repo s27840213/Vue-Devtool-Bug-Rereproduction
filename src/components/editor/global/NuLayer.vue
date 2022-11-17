@@ -107,6 +107,14 @@ export default Vue.extend({
     }),
     isDragging(): boolean {
       return (this.config as ILayer).dragging
+    },
+    transformStyle(): { [index: string]: string } {
+      return {
+        transformStyle: this.enalble3dTransform ? 'preserve-3d' : 'initial'
+      }
+    },
+    enalble3dTransform(): boolean {
+      return this.pageIndex === pageUtils._3dEnabledPageIndex
     }
   },
   methods: {
@@ -132,7 +140,7 @@ export default Vue.extend({
         {
           // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
           'pointer-events': 'none',
-          transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'none',
+          transformStyle: this.enalble3dTransform ? 'preserve-3d' : 'initial',
           willChange: !this.isSubLayer && this.isDragging ? 'transform' : 'none'
         }
       )
@@ -191,7 +199,7 @@ export default Vue.extend({
       */
       return {
         transform,
-        'transform-style': pageUtils._3dEnabledPageIndex !== this.pageIndex ? 'none' : type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
+        'transform-style': pageUtils._3dEnabledPageIndex !== this.pageIndex ? 'initial' : type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
     },
     scaleStyles(): { [index: string]: string } {
@@ -202,7 +210,7 @@ export default Vue.extend({
 
       const styles = {
         transform: isImgType ? `scale(${this.compensationRatio()})` : `scale(${scale * (this.contentScaleRatio)}) scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`,
-        'transform-style': pageUtils._3dEnabledPageIndex !== this.pageIndex ? 'none' : type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
+        'transform-style': pageUtils._3dEnabledPageIndex !== this.pageIndex ? 'initial' : type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
       return styles
     }
@@ -218,6 +226,7 @@ export default Vue.extend({
   display: flex;
   align-items: center;
   justify-content: center;
+  // content-visibility: auto;
   // box-shadow: inset 0px 0px 0px 7px rgba(136, 136, 136, 0.5);
   width: 100px;
   height: 100px;
