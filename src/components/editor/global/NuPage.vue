@@ -129,6 +129,14 @@
               :lazyLoadTarget="'.editor-view'"
               :forceRender="hasEditingText")
             div(v-if="isAdmin" class="layer-num") Layer數量: {{config.layers.length}} (Admin User 才看得到）
+            div(v-if="currSelectedIndex !== -1" class="page-control" :style="styles('control')")
+              nu-controller(v-if="currFocusPageIndex === pageIndex" data-identifier="controller"
+                :key="`controller-${currLayer.id}`"
+                :layerIndex="currSelectedIndex"
+                :pageIndex="pageIndex"
+                :config="currLayer"
+                :snapUtils="snapUtils"
+                :contentScaleRatio="contentScaleRatio")
             //- div(class="page-control" :style="styles('control')")
             //-   template(v-for="(layer, index) in config.layers")
             //-     nu-controller(v-if="(currDraggingIndex === -1 || currDraggingIndex === index || layer.type === 'frame') && (layer.type !== 'image' || !layer.imgControl) "
@@ -317,46 +325,8 @@ export default Vue.extend({
         willChange: this.isScaling ? 'transform' : ''
       }
     },
-    getCurrLayer(): ILayer {
-      return generalUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
-    },
-    getCurrSubSelectedLayerShown(): IImage | undefined {
-      const layer = this.getCurrLayer
-      if (layer.type === 'group') {
-        const subLayer = generalUtils.deepCopy((this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]) as IImage
-        const scale = subLayer.styles.scale
-        subLayer.styles.scale = 1
-        subLayer.styles.x *= layer.styles.scale
-        subLayer.styles.y *= layer.styles.scale
-        const mappedLayer = GroupUtils
-          .mapLayersToPage([subLayer], this.getCurrLayer as ITmp)[0] as IImage
-        mappedLayer.styles.scale = scale
-        return Object.assign(mappedLayer, { forRender: true, pointerEvents: 'none' })
-      } else if (layer.type === 'frame') {
-        if (frameUtils.isImageFrame(layer as IFrame)) {
-          const image = generalUtils.deepCopy((layer as IFrame).clips[0]) as IImage
-          image.styles.x = layer.styles.x
-          image.styles.y = layer.styles.y
-          image.styles.scale = 1
-          // image.styles.imgWidth *= layer.styles.scale
-          // image.styles.imgHeight *= layer.styles.scale
-          return Object.assign(image, { forRender: true })
-        }
-        const primaryLayer = this.getCurrLayer as IFrame
-        const image = generalUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage
-        image.styles.x *= primaryLayer.styles.scale
-        image.styles.y *= primaryLayer.styles.scale
-        if (primaryLayer.styles.horizontalFlip || primaryLayer.styles.verticalFlip) {
-          const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
-          const [baselineX, baselineY] = [-(imgWidth - width) / 2, -(imgHeight - height) / 2]
-          const [translateX, translateY] = [imgX - baselineX, imgY - baselineY]
-          image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
-          image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
-        }
-        Object.assign(image, { forRender: true })
-        return GroupUtils.mapLayersToPage([image], this.getCurrLayer as ITmp)[0] as IImage
-      }
-      return undefined
+    currLayer(): ILayer {
+      return layerUtils.getCurrLayer
     },
     getPageCount(): number {
       return this.pages.length

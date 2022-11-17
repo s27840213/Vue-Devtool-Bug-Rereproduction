@@ -1,6 +1,6 @@
 <template lang="pug">
   div
-    div(class="nu-layer" :style="layerStyles()" ref="body"
+    div(class="nu-layer" :style="layerStyles()" ref="body" :id="`nu-layer-${pageIndex}-${layerIndex}`"
         :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
         :data-p-index="pageIndex"
         @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
@@ -15,15 +15,6 @@
           nu-clipper(:config="config"
               :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
               :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
-            //- component(:is="`nu-${config.type}`"
-            //-   class="transition-none"
-            //-   :config="config"
-            //-   :imgControl="imgControl"
-            //-   :contentScaleRatio="contentScaleRatio"
-            //-   :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-            //-   :scaleRatio="scaleRatio"
-            //-   :isPagePreview="isPagePreview"
-            //-   v-bind="$attrs")
             lazy-load(:target="lazyLoadTarget"
                 :rootMargin="'300px 0px 300px 0px'"
                 :minHeight="config.styles.height * contentScaleRatio"
@@ -40,17 +31,18 @@
                 :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
                 :scaleRatio="scaleRatio"
                 :isPagePreview="isPagePreview"
+                :forRender="forRender"
                 v-bind="$attrs")
       div(v-if="showSpinner()" class="nu-layer__inProcess")
         square-loading
-    nu-controller(v-if="isActive && !forRender"
-      data-identifier="controller"
-      :key="`controller-${config.id}`"
-      :layerIndex="layerIndex"
-      :pageIndex="pageIndex"
-      :config="config"
-      :snapUtils="snapUtils"
-      :contentScaleRatio="contentScaleRatio")
+    //- nu-controller(v-if="isActive && !forRender"
+    //-   data-identifier="controller"
+    //-   :key="`controller-${config.id}`"
+    //-   :layerIndex="layerIndex"
+    //-   :pageIndex="pageIndex"
+    //-   :config="config"
+    //-   :snapUtils="snapUtils"
+    //-   :contentScaleRatio="contentScaleRatio")
         //- svg-icon(class="spiner"
         //-   :iconName="'spiner'"
         //-   :iconColor="'white'"
@@ -434,7 +426,7 @@ export default Vue.extend({
       }
     },
     moving(e: MouseEvent | TouchEvent | PointerEvent) {
-      // console.log('moving')
+      // console.log('moving in layer')
       const posDiff = {
         x: Math.abs(MouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
         y: Math.abs(MouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)

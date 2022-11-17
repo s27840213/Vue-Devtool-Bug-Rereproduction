@@ -12,7 +12,8 @@
     div(class="editor-view__grid")
       div(class="editor-view__canvas"
           ref="canvas"
-          @mousedown.left.self="outerClick($event)")
+          @click.left.self="outerClick($event)")
+        //- @mousedown.left.self="outerClick($event)")
         template(v-if="!inBgRemoveMode")
           nu-page(v-for="(page,index) in pages"
                   :ref="`page-${index}`"
@@ -76,6 +77,7 @@ import DiskWarning from '@/components/payment/DiskWarning.vue'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import { globalQueue } from '@/utils/queueUtils'
+import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   components: {
@@ -271,6 +273,15 @@ export default Vue.extend({
       }
     },
     selectStart(e: MouseEvent) {
+      console.log(e.clientX, e.clientY)
+      if (layerUtils.layerIndex !== -1) {
+        const layer = document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
+        const rect = layer.getBoundingClientRect()
+        if (e.clientX > rect.x && e.clientX < rect.x + rect.width && e.clientY > rect.y && e.clientY < rect.y + rect.height) {
+          console.log('inside')
+          return
+        }
+      }
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()
       }

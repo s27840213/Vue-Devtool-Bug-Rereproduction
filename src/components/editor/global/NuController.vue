@@ -12,6 +12,49 @@
                   iconColor="gray-2")
         div(class="nu-controller__object-hint__text")
           span {{ Math.round(hintAngle) % 360 }}
+      //- div(class="nu-controller__content"
+      //-     ref="body"
+      //-     :layer-index="`${layerIndex}`"
+      //-     :style="contentStyles"
+      //-     @dragenter="dragEnter($event)"
+      //-     @dragover.prevent
+      //-     @click.right.stop="onRightClick"
+      //-     @contextmenu.prevent
+      //-     @pointerdown="moveStart"
+      //-     @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
+      //-     @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
+      //-     v-press="isTouchDevice()? onPress : -1"
+      //-     @dblclick="onDblClick")
+      //-   template(v-if="config.type === 'text' && isActive")
+      //-     div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
+      //-       nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
+      //-         :style="textBodyStyle()"
+      //-         :pageIndex="pageIndex"
+      //-         :layerIndex="layerIndex"
+      //-         :subLayerIndex="-1"
+      //-         @keydown.native.37.stop
+      //-         @keydown.native.38.stop
+      //-         @keydown.native.39.stop
+      //-         @keydown.native.40.stop
+      //-         @keydown.native.ctrl.67.exact.stop.self
+      //-         @keydown.native.meta.67.exact.stop.self
+      //-         @keydown.native.ctrl.86.exact.stop.self
+      //-         @keydown.native.meta.86.exact.stop.self
+      //-         @keydown.native.ctrl.88.exact.stop.self
+      //-         @keydown.native.meta.88.exact.stop.self
+      //-         @keydown.native.ctrl.65.exact.stop.self
+      //-         @keydown.native.meta.65.exact.stop.self
+      //-         @keydown.native.ctrl.90.exact.stop.self
+      //-         @keydown.native.meta.90.exact.stop.self
+      //-         @keydown.native.ctrl.shift.90.exact.stop.self
+      //-         @keydown.native.meta.shift.90.exact.stop.self
+      //-         @update="handleTextChange"
+      //-         @compositionend="handleTextCompositionEnd")
+      //-   div(v-if="isActive && isLocked() && (scaleRatio >20)"
+      //-       class="nu-controller__lock-icon"
+      //-       :style="lockIconStyles()")
+      //-     svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
+      //-       @click.native="MappingUtils.mappingIconAction('lock')")
       div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
           class="nu-controller__ctrl-points"
           :style="contentStyles")
@@ -352,6 +395,9 @@ export default Vue.extend({
     /**
      * While image is setted to frame, these event-listener should be removed
      */
+    if (this.getLayerType === 'text') {
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
+    }
     eventUtils.removePointerEvent('pointerup', this.moveEnd)
     eventUtils.removePointerEvent('pointermove', this.moving)
     this.isControlling = false
@@ -783,7 +829,7 @@ export default Vue.extend({
       }
     },
     moving(e: MouseEvent | TouchEvent | PointerEvent) {
-      // console.log('moving')
+      // console.log('moving in controller')
       const posDiff = {
         x: Math.abs(MouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
         y: Math.abs(MouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
@@ -2120,6 +2166,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-controller {
+  pointer-events: initial;
   &__line-hint {
     position: absolute;
     z-index: 9;
