@@ -740,9 +740,9 @@ class DesignUtils {
       store.commit('design/SET_allDesigns', [])
     }
     store.commit('design/SET_isDesignsLoading', true)
-    // fetcher().then(() => {
-    //   store.commit('design/SET_isDesignsLoading', false)
-    // })
+    fetcher().then(() => {
+      store.commit('design/SET_isDesignsLoading', false)
+    })
   }
 
   fetchFolders(fetcher: () => Promise<void>) {
