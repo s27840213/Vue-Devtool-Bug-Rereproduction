@@ -2,7 +2,8 @@
   div(class="mobile-panel p-15"
       :style="panelStyle"
       v-click-outside="vcoConfig()"
-      ref="panel")
+      ref="panel"
+      @touchmove="handleTouchMove")
     div(class="mobile-panel__top-section self-padding")
       div(class="mobile-panel__drag-bar"
         @pointerdown="dragPanelStart"
@@ -60,13 +61,17 @@ export default Vue.extend({
   data() {
     return {
       panelHeight: 0,
+      panelTop: 0,
+      panelPaddingBottom: window.innerHeight - window.visualViewport.height,
       lastPointerY: 0,
       isDraggingPanel: false,
-      initHeightPx: window.innerHeight,
-      maxHeightPx: window.innerHeight,
+      // initHeightPx: window.innerHeight,
+      // maxHeightPx: window.innerHeight,
       selectedFormat: {} as ILayout,
       isConfirmClicked: false,
-      isFullScreen: true
+      isFullScreen: true,
+      innerHeight: window.innerHeight,
+      visualViewportHeight: window.visualViewport.height
     }
   },
   computed: {
@@ -88,8 +93,10 @@ export default Vue.extend({
         {
           'row-gap': '10px',
           backgroundColor: 'white',
-          maxHeight: this.panelHeight + 'px',
-          bottom: (window.innerHeight - window.visualViewport.height) + 'px'
+          // maxHeight: this.panelHeight + 'px',
+          // bottom: (this.innerHeight - this.visualViewportHeight) + 'px'
+          top: this.panelTop + 'px',
+          paddingBottom: (this.panelPaddingBottom + 15) + 'px'
         }
       )
     },
@@ -115,11 +122,14 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.panelHeight = this.initHeightPx
-    window.visualViewport.addEventListener('resize', this.handleResize)
+    window.addEventListener('resize', this.handleResize)
+    window.visualViewport.addEventListener('resize', this.handleVisualViewportResize)
+    window.visualViewport.addEventListener('scroll', this.handleVisualViewportScroll)
   },
   beforeDestroy() {
-    window.visualViewport.removeEventListener('resize', this.handleResize)
+    window.removeEventListener('resize', this.handleResize)
+    window.visualViewport.removeEventListener('resize', this.handleVisualViewportResize)
+    window.visualViewport.removeEventListener('scroll', this.handleVisualViewportScroll)
   },
   methods: {
     ...mapMutations({
@@ -158,7 +168,6 @@ export default Vue.extend({
       )
     },
     closeMobilePanel() {
-      this.isFullScreen = true
       this.$emit('close')
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
@@ -170,20 +179,35 @@ export default Vue.extend({
     },
     dragingPanel(event: MouseEvent | PointerEvent) {
       this.panelHeight -= event.clientY - this.lastPointerY
+      this.panelTop += event.clientY - this.lastPointerY
+      this.panelPaddingBottom += event.clientY - this.lastPointerY
       this.lastPointerY = event.clientY
     },
     dragPanelEnd() {
       this.isDraggingPanel = false
-      const maxHeightPx = this.maxHeightPx
-      if (this.panelHeight < maxHeightPx * 0.25) {
+      const panelTopOffset = window.visualViewport.offsetTop
+      if (this.panelTop > this.visualViewportHeight * 0.75 + panelTopOffset) {
         this.closeMobilePanel()
-      } else if (this.panelHeight >= maxHeightPx * 0.75) {
-        this.panelHeight = maxHeightPx
+      } else if (this.panelTop <= this.visualViewportHeight * 0.25 + panelTopOffset) {
+        this.panelTop = panelTopOffset
+        this.panelPaddingBottom = this.innerHeight - this.visualViewportHeight
         this.isFullScreen = true
       } else {
-        this.panelHeight = maxHeightPx * 0.5
+        this.panelTop = this.visualViewportHeight * 0.5 + panelTopOffset
+        this.panelPaddingBottom = this.innerHeight - this.visualViewportHeight * 0.5
         this.isFullScreen = false
       }
+
+      // const maxHeightPx = this.maxHeightPx
+      // if (this.panelHeight < maxHeightPx * 0.25) {
+      //   this.closeMobilePanel()
+      // } else if (this.panelHeight >= maxHeightPx * 0.75) {
+      //   this.panelHeight = maxHeightPx
+      //   this.isFullScreen = true
+      // } else {
+      //   this.panelHeight = maxHeightPx * 0.5
+      //   this.isFullScreen = false
+      // }
 
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)
       eventUtils.removePointerEvent('pointerup', this.dragPanelEnd)
@@ -194,12 +218,46 @@ export default Vue.extend({
         e.stopPropagation()
       }
     },
+    handleVisualViewportScroll() {
+      console.log('handleVisualViewportScroll')
+      this.panelPaddingBottom = this.innerHeight - this.visualViewportHeight + this.panelTop - window.visualViewport.offsetTop
+    },
     handleResize() {
-      this.maxHeightPx = window.visualViewport.height
-      if (window.visualViewport.height < this.panelHeight || (window.visualViewport.height > this.panelHeight && this.isFullScreen)) {
-        this.panelHeight = window.visualViewport.height
+      console.log('handleResize')
+      this.innerHeight = window.innerHeight
+    },
+    handleVisualViewportResize() {
+      console.log('handleVisualViewportResize', window.innerHeight, window.visualViewport.height, this.panelPaddingBottom)
+
+      // this.visualViewportHeight = window.visualViewport.height
+      // this.maxHeightPx = window.visualViewport.height
+      // if (window.visualViewport.height < this.panelHeight || (window.visualViewport.height > this.panelHeight && this.isFullScreen)) {
+      //   this.panelHeight = window.visualViewport.height
+      //   this.isFullScreen = true
+      // }
+
+      const dTop = window.visualViewport.height - this.visualViewportHeight
+      // push panel up when keyboard shows
+      // if (dTop < 0) { this.panelTop += dTop }
+      // expand panel down when keyboard hides
+      if (dTop > 0) { this.panelPaddingBottom -= dTop }
+
+      this.visualViewportHeight = window.visualViewport.height
+      if (this.panelTop < window.visualViewport.offsetTop || this.isFullScreen) {
+        this.panelTop = window.visualViewport.offsetTop
+        this.panelPaddingBottom = this.innerHeight - this.visualViewportHeight
         this.isFullScreen = true
+      } else {
+        // push panel up to 50% visual viewport height if inputs covered by keyboard
+        const panelVisualHieght = this.visualViewportHeight - this.panelTop - this.panelPaddingBottom
+        if (panelVisualHieght < this.visualViewportHeight * 0.25) {
+          this.panelTop = this.visualViewportHeight * 0.5 + window.visualViewport.offsetTop
+          this.panelPaddingBottom = this.innerHeight - this.visualViewportHeight * 0.5
+        }
       }
+    },
+    handleTouchMove(evt: Event) {
+      evt.preventDefault()
     }
   }
 })
@@ -207,10 +265,12 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .mobile-panel {
+  height: 100%;
+  width: 100%;
   position: fixed;
   left: 0;
+  top: 0;
   bottom: 0;
-  width: 100%;
   box-sizing: border-box;
   z-index: setZindex(popup);
   border-radius: 10px 10px 0 0;

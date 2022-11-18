@@ -6,9 +6,19 @@
       div(class="page-size-selector__body__custom")
         property-bar(class="page-size-selector__body__custom__box"
                     :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
-          input(class="body-3" type="number" min="0" ref="inputWidth"
+          input(class="body-3 page-size-selector__body__custom__box__input" type="number" min="0" ref="inputWidth"
+                :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
+                :style="{position: this.isInputFocused ? 'static' : 'fixed'}"
+                :value="pageWidth || null" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
+                @click="selectFormat('custom')"
+                @input="setPageWidth"
+                @blur="handleInputBlur")
+          input(v-if="!isInputFocused"
+                class="body-3 page-size-selector__body__custom__box__input dummy" type="number" min="0"
+                readonly
                 :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
-                :value="pageWidth || null" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})" @click="selectFormat('custom')" @input="setPageWidth")
+                :value="pageWidth || null" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
+                @click="handleDummyClick($event, $refs.inputWidth)")
           span(class="body-4 page-size-selector__body__custom__box__input-label"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") W
         svg-icon(class="pointer"
@@ -17,15 +27,26 @@
             @click.native="toggleLock()")
         property-bar(class="page-size-selector__body__custom__box"
                     :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
-          input(class="body-3" type="number" min="0"
+          input(class="body-3 page-size-selector__body__custom__box__input" type="number" min="0" ref="inputHeight"
                 :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
-                :value="pageHeight || null" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})" @click="selectFormat('custom')" @input="setPageHeight")
+                :style="{position: this.isInputFocused ? 'static' : 'fixed'}"
+                :value="pageHeight || null" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
+                @click="selectFormat('custom')"
+                @input="setPageHeight"
+                @blur="handleInputBlur")
+          input(v-if="!isInputFocused"
+                class="body-3 page-size-selector__body__custom__box__input dummy" type="number" min="0"
+                readonly
+                :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
+                :value="pageHeight || null" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
+                @click="handleDummyClick($event, $refs.inputHeight)")
           span(class="body-4 page-size-selector__body__custom__box__input-label"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
         div(v-if="selectedFormatKey === 'custom' && isValidate && !isCustomValid"
           class="page-size-selector__body__custom__err text-red") {{errorMsg}}
     div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
-    div(class="page-size-selector__container")
+    div(class="page-size-selector__container"
+      @touchmove="handleTouchMove")
         div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
           svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
         div(v-if="isLayoutReady && recentlyUsed.length > 0" class="page-size-selector__body-row first-row")
@@ -85,8 +106,22 @@ export default Vue.extend({
     RadioBtn
   },
   mounted() {
-    this.fetchLayouts();
-    (this.$refs.inputWidth as HTMLInputElement).focus()
+    document.addEventListener('scroll', this.handleScroll)
+    this.fetchLayouts()
+    const inputWidth = this.$refs.inputWidth as HTMLInputElement
+    inputWidth.focus({ preventScroll: true })
+    if (this.isMobile) {
+      // prevent document scroll
+      setTimeout(() => {
+        this.isInputFocused = true
+      }, 100)
+    } else {
+      // disable dummy inputs
+      this.isInputFocused = true
+    }
+  },
+  beforeDestroy() {
+    document.removeEventListener('scroll', this.handleScroll)
   },
   data() {
     return {
@@ -98,7 +133,8 @@ export default Vue.extend({
       errorMsg: '',
       formatList: new Array<ILayout>(),
       recentlyUsed: new Array<ILayout>(),
-      isLayoutReady: false
+      isLayoutReady: false,
+      isInputFocused: false
     }
   },
   watch: {
@@ -243,6 +279,32 @@ export default Vue.extend({
           this.isLayoutReady = true
         }
       })
+    },
+    handleTouchMove(evt: Event) {
+      evt.stopPropagation()
+    },
+    handleScroll() {
+      console.log('scroll');
+      (this.$refs.inputWidth as HTMLElement).blur();
+      (this.$refs.inputHeight as HTMLElement).blur()
+    },
+    handleDummyClick(evt: Event, target: any) {
+      console.log('handleDummyClick')
+      evt.preventDefault()
+      this.selectFormat('custom')
+      target = target as HTMLInputElement
+      target.focus({ preventScroll: true })
+      // prevent document scroll
+      setTimeout(() => {
+        this.isInputFocused = true
+      }, 100)
+    },
+    handleInputBlur() {
+      console.log('handleInputBlur')
+      if (!this.isMobile) return
+      setTimeout(() => {
+        if (document.activeElement !== this.$refs.inputWidth && document.activeElement !== this.$refs.inputHeight) this.isInputFocused = false
+      }, 0)
     }
   }
 })
@@ -325,7 +387,9 @@ export default Vue.extend({
           font-weight: 700;
           text-align: center;
         }
-        & input {
+        &__input {
+          position: fixed;
+          top: -99999px;
           background-color: transparent;
           // font-family: 'Mulish';
           &::placeholder {
@@ -340,6 +404,9 @@ export default Vue.extend({
           &::-ms-input-placeholder {
             /* Microsoft Edge */
             color: setColor(gray-3);
+          }
+          &.dummy{
+            position: static;
           }
         }
       }
