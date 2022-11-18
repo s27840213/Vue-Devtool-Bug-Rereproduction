@@ -78,6 +78,8 @@ import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import { globalQueue } from '@/utils/queueUtils'
 import layerUtils from '@/utils/layerUtils'
+import { MovingUtils } from '@/utils/movingUtils'
+import SnapUtils from '@/utils/snapUtils'
 
 export default Vue.extend({
   components: {
@@ -263,22 +265,30 @@ export default Vue.extend({
     outerClick(e: MouseEvent) {
       if (!this.inBgRemoveMode) {
         // !this.isHandleShadow && GroupUtils.deselect()
-        GroupUtils.deselect()
-        this.setCurrActivePageIndex(-1)
-        pageUtils.setBackgroundImageControlDefault()
-        pageUtils.findCentralPageIndexInfo()
-        if (imageUtils.isImgControl()) {
-          ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
-        }
+        // GroupUtils.deselect()
+        // this.setCurrActivePageIndex(-1)
+        // pageUtils.setBackgroundImageControlDefault()
+        // pageUtils.findCentralPageIndexInfo()
+        // if (imageUtils.isImgControl()) {
+        //   ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+        // }
       }
     },
     selectStart(e: MouseEvent) {
-      console.log(e.clientX, e.clientY)
       if (layerUtils.layerIndex !== -1) {
+        /**
+         * when the user click the control-region outsize the page,
+         * the moving logic should be applied to the EditorView.
+         */
         const layer = document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
         const rect = layer.getBoundingClientRect()
         if (e.clientX > rect.x && e.clientX < rect.x + rect.width && e.clientY > rect.y && e.clientY < rect.y + rect.height) {
-          console.log('inside')
+          const movingUtils = new MovingUtils({
+            config: layerUtils.getCurrConfig,
+            snapUtils: new SnapUtils(this.pageIndex),
+            body: layer
+          })
+          movingUtils.moveStart(e)
           return
         }
       }

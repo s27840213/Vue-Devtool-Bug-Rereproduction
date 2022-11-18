@@ -16,33 +16,34 @@ import shortcutUtils from './shortcutUtils'
 import stepsUtils from './stepsUtils'
 import tiptapUtils from './tiptapUtils'
 
-class MovingUtils {
+export class MovingUtils {
   private component = undefined as Vue | undefined
   private eventTarget = null as unknown as HTMLElement
   private dblTabsFlag = false
   private config = null as unknown as ILayer
-  private layerInfo = {} as ILayerInfo
   private initialPos = { x: 0, y: 0 }
   private initTranslate = { x: 0, y: 0 }
   private movingByControlPoint = false
   private isControlling = false
   private isDoingGestureAction = false
   private isHandleMovingHandler = false
-  private snapUtils = null as any
+  private snapUtils = null as unknown
   private isMoved = false
   private body = undefined as unknown as HTMLElement
   private isPointerDownFromSubController = false
+  private _moving = null as unknown
+  private _moveEnd = null as unknown
 
   private get isBgImgCtrl(): boolean { return store.getters['imgControl/isBgImgCtrl'] }
-  private get currFunctionPanelType(): number { return store.getters['getCurrFunctionPanelType'] }
   private get inMultiSelectionMode(): number { return store.getters['mobileEditor/getInMultiSelectionMode'] }
-  private get currSelectedInfo(): any { return store.getters['getCurrSelectedInfo'] }
-  private get scaleRatio(): number { return store.getters['getPageScaleRatio'] }
-  private get currHoveredPageIndex(): number { return store.getters['getCurrHoveredPageIndex'] }
-  private get isActive() { return this.config.active }
-  private get getLayerType() { return this.config.type }
-  private get pageIndex(): number { return this.layerInfo.pageIndex }
-  private get layerIndex(): number { return this.layerInfo.layerIndex }
+  private get currFunctionPanelType(): number { return store.getters.getCurrFunctionPanelType }
+  private get currSelectedInfo(): any { return store.getters.getCurrSelectedInfo }
+  private get scaleRatio(): number { return store.getters.getPageScaleRatio }
+  private get currHoveredPageIndex(): number { return store.getters.getCurrHoveredPageIndex }
+  private get isActive(): boolean { return this.config.active }
+  private get getLayerType(): string { return this.config.type }
+  private get pageIndex(): number { return layerUtils.pageIndex }
+  private get layerIndex(): number { return layerUtils.layerIndex }
   private get isLocked(): boolean { return this.config.locked }
   private get contentEditable(): boolean { return (this.config as any).contentEditable || false }
   private get getLayerPos(): ICoordinate { return { x: this.config.styles.x, y: this.config.styles.y } }
@@ -65,11 +66,8 @@ class MovingUtils {
     return false
   }
 
-
-  init({ config, layerInfo, snapUtils, component, body}: any) {
-  // init(config: ILayer, layerInfo: ILayerInfo, snapUtils?: any, component?: Vue, body?: HTMLElement) {
+  constructor({ config, snapUtils, component, body }: { config: ILayer, snapUtils: unknown, component?: Vue, body: HTMLElement }) {
     this.config = config
-    this.layerInfo = layerInfo
     this.component = component
     this.snapUtils = snapUtils
     this.body = body
@@ -89,7 +87,7 @@ class MovingUtils {
     }
   }
 
-  moveStart(event: MouseEvent | TouchEvent | PointerEvent, attrs: { pageIndex: number, layerIndex: number }) {
+  moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
     const currLayerIndex = layerUtils.layerIndex
     if (currLayerIndex !== this.layerIndex) {
       const layer = layerUtils.getLayer(this.pageIndex, currLayerIndex)
@@ -160,8 +158,12 @@ class MovingUtils {
     if (generalUtils.isTouchDevice() && !this.isActive && !this.isLocked && !this.inMultiSelectionMode) {
       this.eventTarget.addEventListener('touchstart', this.disableTouchEvent)
       this.initialPos = mouseUtils.getMouseAbsPoint(event)
-      eventUtils.addPointerEvent('pointerup', this.moveEnd)
-      eventUtils.addPointerEvent('pointermove', this.moving)
+      this._moving = this.moving.bind(this)
+      this._moveEnd = this.moveEnd.bind(this)
+      eventUtils.addPointerEvent('pointerup', this._moveEnd)
+      eventUtils.addPointerEvent('pointermove', this._moving)
+      // eventUtils.addPointerEvent('pointerup', this.moveEnd)
+      // eventUtils.addPointerEvent('pointermove', this.moving)
       return
     }
 
@@ -205,8 +207,12 @@ class MovingUtils {
           if (!this.config.locked) {
             this.isControlling = true
             this.initialPos = mouseUtils.getMouseAbsPoint(event)
-            eventUtils.addPointerEvent('pointerup', this.moveEnd)
-            eventUtils.addPointerEvent('pointermove', this.moving)
+            this._moving = this.moving.bind(this)
+            this._moveEnd = this.moveEnd.bind(this)
+            eventUtils.addPointerEvent('pointerup', this._moveEnd)
+            eventUtils.addPointerEvent('pointermove', this._moving)
+            // eventUtils.addPointerEvent('pointerup', this.moveEnd)
+            // eventUtils.addPointerEvent('pointermove', this.moving)
           }
           return
         }
@@ -231,8 +237,12 @@ class MovingUtils {
      */
     if (!this.config.locked && !inSelectionMode) {
       this.initialPos = mouseUtils.getMouseAbsPoint(event)
-      eventUtils.addPointerEvent('pointerup', this.moveEnd)
-      eventUtils.addPointerEvent('pointermove', this.moving)
+      this._moving = this.moving.bind(this)
+      this._moveEnd = this.moveEnd.bind(this)
+      eventUtils.addPointerEvent('pointerup', this._moveEnd)
+      eventUtils.addPointerEvent('pointermove', this._moving)
+      // eventUtils.addPointerEvent('pointerup', this.moveEnd)
+      // eventUtils.addPointerEvent('pointermove', this.moving)
     }
     if (this.config.type !== 'tmp') {
       let targetIndex = this.layerIndex
@@ -269,7 +279,7 @@ class MovingUtils {
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
-    // console.log('moving in controller')
+    console.log('moving')
     const posDiff = {
       x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
       y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
@@ -302,8 +312,11 @@ class MovingUtils {
       this.component && this.component.$emit('isDragging', this.layerIndex)
     }
     if (this.isImgControl) {
-      eventUtils.removePointerEvent('pointerup', this.moveEnd)
-      eventUtils.removePointerEvent('pointermove', this.moving)
+      // eventUtils.removePointerEvent('pointerup', this.moveEnd)
+      // eventUtils.removePointerEvent('pointermove', this.moving)
+      console.log('remove')
+      eventUtils.removePointerEvent('pointerup', this._moveEnd)
+      eventUtils.removePointerEvent('pointermove', this._moving)
       return
     }
     if (this.isActive) {
@@ -342,12 +355,14 @@ class MovingUtils {
         y: moveOffset.offsetY
       }
     )
-    const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
-    this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
+    // const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
+    // this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
     // this.$emit('getClosestSnaplines')
     const totalOffset = {
-      x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
-      y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
+      x: offsetPos.x,
+      y: offsetPos.y
+      // x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
+      // y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
     }
     this.initialPos.x += totalOffset.x
     this.initialPos.y += totalOffset.y
@@ -360,8 +375,11 @@ class MovingUtils {
       const targetIndex = this.config.styles.zindex - 1
       this.setLastSelectedLayerIndex(this.layerIndex)
       groupUtils.select(this.pageIndex, [targetIndex])
-      eventUtils.removePointerEvent('pointerup', this.moveEnd)
-      eventUtils.removePointerEvent('pointermove', this.moving)
+      console.log('remove')
+      eventUtils.removePointerEvent('pointerup', this._moveEnd)
+      eventUtils.removePointerEvent('pointermove', this._moving)
+      // eventUtils.removePointerEvent('pointerup', this.moveEnd)
+      // eventUtils.removePointerEvent('pointermove', this.moving)
       this.isMoved = false
       this.isControlling = false
       this.setCursorStyle('')
@@ -369,7 +387,7 @@ class MovingUtils {
         dragging: false
       })
       this.isDoingGestureAction = false
-      this.snapUtils.event.emit('clearSnapLines')
+      // this.snapUtils.event.emit('clearSnapLines')
       return
     }
 
@@ -476,8 +494,11 @@ class MovingUtils {
       this.isPointerDownFromSubController = false
       this.isControlling = false
       this.setCursorStyle('')
-      eventUtils.removePointerEvent('pointerup', this.moveEnd)
-      eventUtils.removePointerEvent('pointermove', this.moving)
+      console.log('remove')
+      eventUtils.removePointerEvent('pointerup', this._moveEnd)
+      eventUtils.removePointerEvent('pointermove', this._moving)
+      // eventUtils.removePointerEvent('pointerup', this.moveEnd)
+      // eventUtils.removePointerEvent('pointermove', this.moving)
     }
 
     if (this.isDragging) {
@@ -488,8 +509,6 @@ class MovingUtils {
     }
 
     this.isDoingGestureAction = false
-    this.snapUtils.event.emit('clearSnapLines')
+    // this.snapUtils.event.emit('clearSnapLines')
   }
 }
-
-export default new MovingUtils()
