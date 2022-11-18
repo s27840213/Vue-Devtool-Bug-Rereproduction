@@ -240,7 +240,7 @@ export default Vue.extend({
       // push panel up when keyboard shows
       // if (dTop < 0) { this.panelTop += dTop }
       // expand panel down when keyboard hides
-      if (dTop > 0) { this.panelPaddingBottom -= dTop }
+      if (dTop > 0) { this.panelPaddingBottom = Math.max(this.panelTop, this.panelPaddingBottom - dTop) }
 
       this.visualViewportHeight = window.visualViewport.height
       if (this.panelTop < window.visualViewport.offsetTop || this.isFullScreen) {
