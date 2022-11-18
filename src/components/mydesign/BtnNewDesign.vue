@@ -53,7 +53,6 @@ export default Vue.extend({
   height: 100%;
   width: 100%;
   white-space: nowrap;
-  // font-family: 'Poppins';
   font-weight: 500;
   font-size: 14px;
   line-height: 24px;

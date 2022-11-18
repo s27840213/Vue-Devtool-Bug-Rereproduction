@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="mobile-panel p-15"
       :style="panelStyle"
-      v-click-outside="vcoConfig()"
+      v-click-outside="this.closeMobilePanel"
       ref="panel"
       @touchmove="handleTouchMove")
     div(class="mobile-panel__top-section self-padding")
@@ -40,13 +40,11 @@ import Vue from 'vue'
 import designUtils from '@/utils/designUtils'
 import PageSizeSelector from '@/components/mydesign/PageSizeSelector.vue'
 
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import { ILayout } from '@/interfaces/layout'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import _ from 'lodash'
 
 export default Vue.extend({
   name: 'panel-size',
@@ -60,13 +58,10 @@ export default Vue.extend({
   },
   data() {
     return {
-      panelHeight: 0,
       panelTop: 0,
       panelPaddingBottom: window.innerHeight - window.visualViewport.height,
       lastPointerY: 0,
       isDraggingPanel: false,
-      // initHeightPx: window.innerHeight,
-      // maxHeightPx: window.innerHeight,
       selectedFormat: {} as ILayout,
       isConfirmClicked: false,
       isFullScreen: true,
@@ -79,22 +74,11 @@ export default Vue.extend({
       'currLocation',
       'folders'
     ]),
-    ...mapGetters({
-      isShowPagePreview: 'page/getIsShowPagePreview',
-      showPagePanel: 'page/getShowPagePanel',
-      bgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      currSelectedInfo: 'getCurrSelectedInfo'
-    }),
-    selectedLayerNum(): number {
-      return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
-    },
     panelStyle(): { [index: string]: string } {
       return Object.assign(
         {
           'row-gap': '10px',
           backgroundColor: 'white',
-          // maxHeight: this.panelHeight + 'px',
-          // bottom: (this.innerHeight - this.visualViewportHeight) + 'px'
           top: this.panelTop + 'px',
           paddingBottom: (this.panelPaddingBottom + 15) + 'px'
         }
@@ -132,40 +116,8 @@ export default Vue.extend({
     window.visualViewport.removeEventListener('scroll', this.handleVisualViewportScroll)
   },
   methods: {
-    ...mapMutations({
-      setBgImageControl: 'SET_backgroundImageControl',
-      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
-    }),
-    ...mapActions({
-      fetchPalettes: 'brandkit/fetchPalettes',
-      initRecentlyColors: 'color/initRecentlyColors',
-      addRecentlyColors: 'color/addRecentlyColors'
-    }),
     selectFormat(layout: ILayout) {
       this.selectedFormat = layout
-    },
-    vcoConfig() {
-      return {
-        handler: this.closeMobilePanel,
-        middleware: this.middleware,
-        events: ['contextmenu', 'touchstart', 'pointerdown']
-      }
-    },
-    keepPanel(target: HTMLElement): boolean {
-      if (!target || target.id === 'app') return false
-      // If target is modal or panel-icon, don't close Panel.
-      else if (target.className.includes?.('modal')) return true
-      else if (target.className.includes?.('panel-icon')) return true
-      return this.keepPanel(target.parentNode as HTMLElement)
-    },
-    middleware(event: MouseEvent | TouchEvent | PointerEvent) {
-      const target = event.target as HTMLElement
-      // If target is a Svg <use>, its class will be SVGAnimatedString obj.
-      // Ignor its className check using optional chaining "?.includes()"
-      return !(this.keepPanel(target) ||
-        target.className.includes?.('footer-tabs') ||
-        target.className === 'inputNode'
-      )
     },
     closeMobilePanel() {
       this.$emit('close')
@@ -173,12 +125,10 @@ export default Vue.extend({
     dragPanelStart(event: MouseEvent | PointerEvent) {
       this.isDraggingPanel = true
       this.lastPointerY = event.clientY
-      this.panelHeight = (this.$refs.panel as HTMLElement).clientHeight
       eventUtils.addPointerEvent('pointermove', this.dragingPanel)
       eventUtils.addPointerEvent('pointerup', this.dragPanelEnd)
     },
     dragingPanel(event: MouseEvent | PointerEvent) {
-      this.panelHeight -= event.clientY - this.lastPointerY
       this.panelTop += event.clientY - this.lastPointerY
       this.panelPaddingBottom += event.clientY - this.lastPointerY
       this.lastPointerY = event.clientY
@@ -198,17 +148,6 @@ export default Vue.extend({
         this.isFullScreen = false
       }
 
-      // const maxHeightPx = this.maxHeightPx
-      // if (this.panelHeight < maxHeightPx * 0.25) {
-      //   this.closeMobilePanel()
-      // } else if (this.panelHeight >= maxHeightPx * 0.75) {
-      //   this.panelHeight = maxHeightPx
-      //   this.isFullScreen = true
-      // } else {
-      //   this.panelHeight = maxHeightPx * 0.5
-      //   this.isFullScreen = false
-      // }
-
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)
       eventUtils.removePointerEvent('pointerup', this.dragPanelEnd)
     },
@@ -219,26 +158,16 @@ export default Vue.extend({
       }
     },
     handleVisualViewportScroll() {
-      console.log('handleVisualViewportScroll')
       this.panelPaddingBottom = this.innerHeight - this.visualViewportHeight + this.panelTop - window.visualViewport.offsetTop
     },
     handleResize() {
-      console.log('handleResize')
       this.innerHeight = window.innerHeight
     },
     handleVisualViewportResize() {
-      console.log('handleVisualViewportResize', window.innerHeight, window.visualViewport.height, this.panelPaddingBottom)
-
-      // this.visualViewportHeight = window.visualViewport.height
-      // this.maxHeightPx = window.visualViewport.height
-      // if (window.visualViewport.height < this.panelHeight || (window.visualViewport.height > this.panelHeight && this.isFullScreen)) {
-      //   this.panelHeight = window.visualViewport.height
-      //   this.isFullScreen = true
-      // }
-
       const dTop = window.visualViewport.height - this.visualViewportHeight
       // push panel up when keyboard shows
       // if (dTop < 0) { this.panelTop += dTop }
+
       // expand panel down when keyboard hides
       if (dTop > 0) { this.panelPaddingBottom = Math.max(this.panelTop, this.panelPaddingBottom - dTop) }
 
@@ -321,22 +250,6 @@ export default Vue.extend({
     overflow-y: scroll;
     overflow-x: hidden;
     @include no-scrollbar;
-  }
-
-  &__inner-tab {
-    margin: 15px 0 14px 0;
-  }
-
-  &__title {
-    @include flexCenter();
-    font-weight: bold;
-  }
-
-  &__layer-num {
-    @include size(20px);
-    @include flexCenter();
-    background-color: setColor(blue-1);
-    border-radius: 50%;
   }
 
   &__drag-bar {

@@ -84,8 +84,7 @@ import Vue from 'vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { ILayout } from '@/interfaces/layout'
-import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-// TODO: merge with @/components/editor/PageSizeSelector.vue
+import { IListServiceContentData } from '@/interfaces/api'
 
 export default Vue.extend({
   props: {
@@ -284,12 +283,10 @@ export default Vue.extend({
       evt.stopPropagation()
     },
     handleScroll() {
-      console.log('scroll');
       (this.$refs.inputWidth as HTMLElement).blur();
       (this.$refs.inputHeight as HTMLElement).blur()
     },
     handleDummyClick(evt: Event, target: any) {
-      console.log('handleDummyClick')
       evt.preventDefault()
       this.selectFormat('custom')
       target = target as HTMLInputElement
@@ -300,7 +297,6 @@ export default Vue.extend({
       }, 100)
     },
     handleInputBlur() {
-      console.log('handleInputBlur')
       if (!this.isMobile) return
       setTimeout(() => {
         if (document.activeElement !== this.$refs.inputWidth && document.activeElement !== this.$refs.inputHeight) this.isInputFocused = false
@@ -340,7 +336,6 @@ export default Vue.extend({
       &.first-row {
         display: block;
         margin-top: 0px;
-        // font-family: 'SF Pro';
         color: setColor(gray-2);
         letter-spacing: 1.5px;
       }
@@ -350,7 +345,6 @@ export default Vue.extend({
         padding: 2px 16px;
         grid-template-columns: 28px 1fr;
         justify-content: left;
-        // font-family: 'Mulish';
       }
       &__radio {
         height: 24px;
@@ -383,7 +377,6 @@ export default Vue.extend({
         padding: 5px 5px;
         &__input-label {
           width: 30px;
-          // font-family: 'Manrope';
           font-weight: 700;
           text-align: center;
         }
@@ -391,7 +384,6 @@ export default Vue.extend({
           position: fixed;
           top: -99999px;
           background-color: transparent;
-          // font-family: 'Mulish';
           &::placeholder {
             /* Chrome, Firefox, Opera, Safari 10.1+ */
             color: setColor(gray-3);
