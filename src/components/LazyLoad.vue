@@ -14,6 +14,7 @@ import generalUtils from '@/utils/generalUtils'
 import { globalQueue } from '@/utils/queueUtils'
 
 export default Vue.extend({
+  name: 'LazyLoad',
   props: {
     target: {
       type: String,

@@ -85,9 +85,6 @@ export default Vue.extend({
     isCropping(): boolean {
       return imageUtils.isImgControl()
     },
-    stepCount(): number {
-      return stepsUtils.steps.length
-    },
     layerTabs(): IIcon[] {
       return [
         { icon: 'copy' },

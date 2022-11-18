@@ -113,7 +113,8 @@ const getDefaultState = (): IEditorState => ({
   isGlobalLoading: false,
   useMobileEditor: false,
   defaultContentScaleRatio: 0.6,
-  _3dEnabledPageIndex: -1
+  _3dEnabledPageIndex: -1,
+  enalbleComponentLog: false
 })
 
 const state = getDefaultState()
@@ -284,6 +285,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   get3dEnabledPageIndex(state: IEditorState) {
     return state._3dEnabledPageIndex
+  },
+  getEnalbleComponentLog(state: IEditorState) {
+    return state.enalbleComponentLog
   }
 }
 
@@ -880,6 +884,9 @@ const mutations: MutationTree<IEditorState> = {
     if (index !== state._3dEnabledPageIndex) {
       state._3dEnabledPageIndex = index
     }
+  },
+  SET_enalbleComponentLog(state: IEditorState, bool: boolean) {
+    state.enalbleComponentLog = bool
   },
   ...imgShadowMutations,
   ADD_subLayer

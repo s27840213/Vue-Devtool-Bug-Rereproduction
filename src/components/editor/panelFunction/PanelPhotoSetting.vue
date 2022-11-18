@@ -46,6 +46,7 @@ import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
+  name: 'PanelPhotoSetting',
   data() {
     return {
       show: '',
