@@ -1,7 +1,7 @@
 <template lang="pug">
   //- @pointerdown="moveStart"
   div
-    div(class="nu-layer" :style="layerStyles()" ref="body" :id="`nu-layer-${pageIndex}-${layerIndex}`"
+    div(class="nu-layer" :class="!config.locked ? `nu-layer--p${pageIndex}` : ''" :style="layerStyles()" ref="body" :id="`nu-layer-${pageIndex}-${layerIndex}`"
         :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
         :data-p-index="pageIndex"
         @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"

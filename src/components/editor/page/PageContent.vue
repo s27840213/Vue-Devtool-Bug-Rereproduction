@@ -57,7 +57,6 @@ div(class="overflow-container"
       nu-layer(
         v-for="(layer,index) in config.layers"
         :key="layer.id"
-        :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
         :data-index="`${index}`"
         :data-pindex="`${pageIndex}`"
         :snapUtils="snapUtils"

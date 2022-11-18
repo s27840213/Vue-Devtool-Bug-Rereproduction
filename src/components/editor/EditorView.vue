@@ -17,7 +17,7 @@
         template(v-if="!inBgRemoveMode")
           nu-page(v-for="(page,index) in pages"
                   :ref="`page-${index}`"
-                  :key="`page-${index}`"
+                  :key="`page-${page.id}`"
                   :pageIndex="index"
                   :overflowContainer="editorView"
                   :style="{'z-index': `${getPageZIndex(index)}`}"
@@ -262,16 +262,24 @@ export default Vue.extend({
     setAdminMode() {
       this._setAdminMode(!this.adminMode)
     },
+    isClickOnController(e: MouseEvent): boolean {
+      const layer = document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
+      if (layer) {
+        const rect = layer.getBoundingClientRect()
+        return e.clientX > rect.x && e.clientX < rect.x + rect.width && e.clientY > rect.y && e.clientY < rect.y + rect.height
+      }
+      return false
+    },
     outerClick(e: MouseEvent) {
-      if (!this.inBgRemoveMode) {
-        // !this.isHandleShadow && GroupUtils.deselect()
-        // GroupUtils.deselect()
-        // this.setCurrActivePageIndex(-1)
-        // pageUtils.setBackgroundImageControlDefault()
-        // pageUtils.findCentralPageIndexInfo()
-        // if (imageUtils.isImgControl()) {
-        //   ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
-        // }
+      if (!this.inBgRemoveMode && !this.isClickOnController(e)) {
+        !this.isHandleShadow && GroupUtils.deselect()
+        GroupUtils.deselect()
+        this.setCurrActivePageIndex(-1)
+        pageUtils.setBackgroundImageControlDefault()
+        pageUtils.findCentralPageIndexInfo()
+        if (imageUtils.isImgControl()) {
+          ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+        }
       }
     },
     selectStart(e: MouseEvent) {
@@ -280,13 +288,11 @@ export default Vue.extend({
          * when the user click the control-region outsize the page,
          * the moving logic should be applied to the EditorView.
          */
-        const layer = document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
-        const rect = layer.getBoundingClientRect()
-        if (e.clientX > rect.x && e.clientX < rect.x + rect.width && e.clientY > rect.y && e.clientY < rect.y + rect.height) {
+        if (this.isClickOnController(e)) {
           const movingUtils = new MovingUtils({
             config: layerUtils.getCurrConfig,
             snapUtils: new SnapUtils(this.pageIndex),
-            body: layer
+            body: document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
           })
           movingUtils.moveStart(e)
           return
@@ -386,7 +392,6 @@ export default Vue.extend({
           }
         })
       }
-
       if (layerIndexs.length > 0) {
         GroupUtils.select(pageUtils.currFocusPageIndex, layerIndexs)
       }

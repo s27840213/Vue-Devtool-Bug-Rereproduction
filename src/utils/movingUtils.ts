@@ -279,7 +279,6 @@ export class MovingUtils {
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
-    console.log('moving')
     const posDiff = {
       x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
       y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
@@ -314,7 +313,6 @@ export class MovingUtils {
     if (this.isImgControl) {
       // eventUtils.removePointerEvent('pointerup', this.moveEnd)
       // eventUtils.removePointerEvent('pointermove', this.moving)
-      console.log('remove')
       eventUtils.removePointerEvent('pointerup', this._moveEnd)
       eventUtils.removePointerEvent('pointermove', this._moving)
       return
@@ -375,7 +373,6 @@ export class MovingUtils {
       const targetIndex = this.config.styles.zindex - 1
       this.setLastSelectedLayerIndex(this.layerIndex)
       groupUtils.select(this.pageIndex, [targetIndex])
-      console.log('remove')
       eventUtils.removePointerEvent('pointerup', this._moveEnd)
       eventUtils.removePointerEvent('pointermove', this._moving)
       // eventUtils.removePointerEvent('pointerup', this.moveEnd)
@@ -494,7 +491,6 @@ export class MovingUtils {
       this.isPointerDownFromSubController = false
       this.isControlling = false
       this.setCursorStyle('')
-      console.log('remove')
       eventUtils.removePointerEvent('pointerup', this._moveEnd)
       eventUtils.removePointerEvent('pointermove', this._moving)
       // eventUtils.removePointerEvent('pointerup', this.moveEnd)
