@@ -601,7 +601,7 @@ class UploadUtils {
       PageNum: ${pages.length}`)
 
     const pagesJSON = pages.map((page: IPage) => {
-      const newPage = this.default(generalUtils.deepCopy(page)) as IPage
+      const newPage = this.default(page)
       for (const [i, layer] of newPage.layers.entries()) {
         if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
           newPage.layers[i] = this.layerInfoFilter(layer)
@@ -945,7 +945,7 @@ class UploadUtils {
       designId: designId
     })
 
-    const pageJSON = this.default(generalUtils.deepCopy(page))
+    const pageJSON = this.default(page)
     pageJSON.parentId = parentId
     for (const [i, layer] of pageJSON.layers.entries()) {
       if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
@@ -1001,7 +1001,7 @@ class UploadUtils {
       }
     }
 
-    const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex))) as IPage
+    const pageJSON = this.default(store.getters.getPage(pageIndex))
     for (const [i, layer] of pageJSON.layers.entries()) {
       if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
         pageJSON.layers[i] = this.layerInfoFilter(layer)
@@ -1048,7 +1048,8 @@ class UploadUtils {
     }
   }
 
-  private default(page: any) {
+  private default(page: any): IPage {
+    page = generalUtils.deepCopy(page)
     const basicDefault = (layer: any) => {
       layer.moved = false
       layer.shown = false
@@ -1083,16 +1084,8 @@ class UploadUtils {
         case 'image':
           layer.imgControl = false
           break
-        case 'tmp': {
-          const tmpLayer = layer as ITmp
-          const layers = generalUtils.deepCopy(tmpLayer).layers
-          if (tmpLayer.layers.filter(l => l.type === 'group').length) {
-            for (let i = 0; i < tmpLayer.layers.length; i++) {
-              if (tmpLayer.layers[i].type === 'group') {
-                layers.splice(i, 1, ...groupUtils.mapGroupLayersToTmp(tmpLayer.layers[i] as IGroup))
-              }
-            }
-          }
+        case 'tmp': { // If there is group layer in tmp layer, cancel tmp layer.
+          page.layers.splice(index, 1, ...(layer as ITmp).layers)
         }
       }
       basicDefault(layer)
@@ -1106,13 +1099,6 @@ class UploadUtils {
     }
     page.appVer = new Date().toISOString()
     page.jsonVer = jsonVer
-
-    if (page.documentColors && page.documentColors.length && typeof page.documentColors[0] !== 'string') {
-      const documentColors = (page.documentColors as Array<{ color: string, count: number }>).map(e => e.color)
-      delete page.documentColors
-      page.documentColors = documentColors
-    }
-
     page.isAutoResizeNeeded = false
     return page
   }
@@ -1560,7 +1546,7 @@ class UploadUtils {
   getPageJson(json?: any): any {
     // ref: uploadUtils.ts:L466
     const pagesJSON = (generalUtils.deepCopy(json || store.getters.getPages)).map((page: IPage) => {
-      const newPage = this.default(generalUtils.deepCopy(page)) as IPage
+      const newPage = this.default(page)
       for (const [i, layer] of newPage.layers.entries()) {
         if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
           newPage.layers[i] = this.layerInfoFilter(layer)
