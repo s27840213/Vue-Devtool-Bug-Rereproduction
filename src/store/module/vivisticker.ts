@@ -29,6 +29,7 @@ interface IViviStickerState {
   showSaveDesignPopup: boolean,
   slideType: string,
   myDesignFiles: {[key: string]: IMyDesign[]},
+  myDesignNextPages: {[key: string]: number},
   myDesignBuffer: IMyDesign | undefined,
   editingDesignId: string,
   editingAssetInfo: {[key: string]: any},
@@ -71,6 +72,7 @@ const getDefaultState = (): IViviStickerState => ({
   showSaveDesignPopup: false,
   slideType: 'none',
   myDesignFiles: vivistickerUtils.getDefaultMyDesignFiles(),
+  myDesignNextPages: vivistickerUtils.getDefaultMyDesignNextPages(),
   myDesignBuffer: undefined,
   editingDesignId: '',
   editingAssetInfo: {},
@@ -154,6 +156,11 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getMyDesignFileList(state: IViviStickerState): (tab: string) => IMyDesign[] {
     return (tab: string): IMyDesign[] => {
       return state.myDesignFiles[tab] ?? []
+    }
+  },
+  getMyDesignNextPage(state: IViviStickerState): (tab: string) => number {
+    return (tab: string): number => {
+      return state.myDesignNextPages[tab] ?? -1
     }
   },
   getMyDesignBuffer(state: IViviStickerState): IMyDesign | undefined {
@@ -248,7 +255,10 @@ const mutations: MutationTree<IViviStickerState> = {
     state.slideType = slideType
   },
   SET_myDesignFileList(state: IViviStickerState, updateInfo: { tab: string, list: IMyDesign[] }) {
-    state.myDesignFiles[updateInfo.tab] = updateInfo.list
+    state.myDesignFiles[updateInfo.tab] = state.myDesignFiles[updateInfo.tab].concat(updateInfo.list)
+  },
+  SET_myDesignNextPage(state: IViviStickerState, updateInfo: { tab: string, nextPage: number }) {
+    state.myDesignNextPages[updateInfo.tab] = updateInfo.nextPage
   },
   SET_myDesignBuffer(state: IViviStickerState, myDesignBuffer: IMyDesign | undefined) {
     state.myDesignBuffer = myDesignBuffer
@@ -273,6 +283,11 @@ const mutations: MutationTree<IViviStickerState> = {
   UPDATE_switchBg(state: IViviStickerState) {
     state.editorBgIndex = (state.editorBgIndex + 1) % EDITOR_BGS.length
   },
+  UPDATE_resetMyDesignFileList(state: IViviStickerState, tab: string) {
+    if (state.myDesignNextPages[tab] === undefined) return
+    state.myDesignFiles[tab] = []
+    state.myDesignNextPages[tab] = -1
+  },
   UPDATE_deleteDesign(state: IViviStickerState, updateInfo: { tab: string, id: string }) {
     const list = state.myDesignFiles[updateInfo.tab]
     if (!list) return
@@ -288,16 +303,16 @@ const mutations: MutationTree<IViviStickerState> = {
       list.splice(index, 1)
     }
   },
-  UPDATE_updateDesign(state: IViviStickerState, updateInfo: { tab: string, design: IMyDesign }) {
-    const list = state.myDesignFiles[updateInfo.tab]
-    if (!list) return
-    const designIndex = list.findIndex(d => d.id === updateInfo.design.id)
-    if (designIndex < 0) return
-    const design = list.splice(designIndex, 1)[0]
-    Object.assign(design, updateInfo.design)
-    design.ver = generalUtils.generateRandomString(12)
-    list.unshift(design)
-  },
+  // UPDATE_updateDesign(state: IViviStickerState, updateInfo: { tab: string, design: IMyDesign }) {
+  //   const list = state.myDesignFiles[updateInfo.tab]
+  //   if (!list) return
+  //   const designIndex = list.findIndex(d => d.id === updateInfo.design.id)
+  //   if (designIndex < 0) return
+  //   const design = list.splice(designIndex, 1)[0]
+  //   Object.assign(design, updateInfo.design)
+  //   design.ver = generalUtils.generateRandomString(12)
+  //   list.unshift(design)
+  // },
   UPDATE_selectDesign(state: IViviStickerState, design: IMyDesign) {
     Vue.set(state.selectedDesigns, design.id, design)
   },

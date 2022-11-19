@@ -132,6 +132,14 @@ class ViviStickerUtils {
     return res
   }
 
+  getDefaultMyDesignNextPages(): {[key: string]: number} {
+    const res = {} as {[key: string]: number}
+    for (const tag of MYDESIGN_TAGS) {
+      res[tag.tab] = -1
+    }
+    return res
+  }
+
   getEmptyMessage(): {[key: string]: string} {
     return { empty: '' }
   }
@@ -486,10 +494,20 @@ class ViviStickerUtils {
     await this.callIOSAsAPI('LIST_ASSET', { key }, `list-asset-${key}`)
   }
 
-  listAssetResult(data: { key: string, assets: any[] }) {
+  async listMoreAsset(key: string, nextPage: number): Promise<void> {
+    if (this.isStandaloneMode) return
+    if (nextPage < 0) return
+    await this.callIOSAsAPI('LIST_ASSET', { key, pageIndex: nextPage }, `list-asset-${key}`)
+  }
+
+  listAssetResult(data: { key: string, assets: any[], nextPage: string }) {
     if (data.key.startsWith('mydesign')) {
       vivistickerUtils.processMydesignList(data.key, data.assets)
       vivistickerUtils.handleCallback(`list-asset-${data.key}`)
+      store.commit('vivisticker/SET_myDesignNextPage', {
+        tab: vivistickerUtils.myDesignKey2Tab(data.key),
+        nextPage: parseInt(data.nextPage)
+      })
       return
     }
     if (['color', 'backgroundColor'].includes(data.key)) {
@@ -506,8 +524,12 @@ class ViviStickerUtils {
     })
   }
 
+  myDesignKey2Tab(key: string): string {
+    return key.split('-').slice(1).join('-')
+  }
+
   processMydesignList(key: string, assets: any[]) {
-    const type = key.split('-').slice(1).join('-')
+    const type = this.myDesignKey2Tab(key)
     store.commit('vivisticker/SET_myDesignFileList', {
       tab: type,
       list: assets.map(asset => Object.assign(asset, { ver: generalUtils.generateRandomString(12) }))
@@ -663,13 +685,14 @@ class ViviStickerUtils {
   async saveAsMyDesign(): Promise<void> {
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
-    const editorType = store.getters['vivisticker/getEditorType']
+    // const editorType = store.getters['vivisticker/getEditorType']
     const flag = await this.genThumbnail(id)
     if (flag === '1') return
-    const design = await this.saveDesignJson(id)
-    if (design) {
-      store.commit('vivisticker/UPDATE_updateDesign', { tab: editorType, design })
-    }
+    await this.saveDesignJson(id)
+    // const design = await this.saveDesignJson(id)
+    // if (design) {
+    //   store.commit('vivisticker/UPDATE_updateDesign', { tab: editorType, design })
+    // }
   }
 
   async genThumbnail(id: string): Promise<string> {
@@ -718,7 +741,7 @@ class ViviStickerUtils {
     if (deletion) {
       const { key, id, thumbType } = deletion
       await this.callIOSAsAPI('DELETE_ASSET', { key, id, thumbType }, 'delete-asset')
-      store.commit('vivisticker/UPDATE_deleteDesign', { tab: key.split('-').slice(1).join('-'), id })
+      store.commit('vivisticker/UPDATE_deleteDesign', { tab: this.myDesignKey2Tab(key), id })
       this.designDeletionQueue.shift()
       this.processDeleteAsset()
     }

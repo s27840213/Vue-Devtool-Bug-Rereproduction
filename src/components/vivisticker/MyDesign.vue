@@ -5,13 +5,16 @@
           :class="{ selected: checkTagSelected(tag) }"
           @click.prevent.stop="selectTag(tag)")
         span(class="my-design__tag-name") {{ $tc(tag.name, 2) }}
-    div(v-if="list.length === 0" class="my-design__content center")
+    div(v-show="list.length === 0" class="my-design__content center")
       div(class="my-design__empty-icon")
         svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
       div(class="my-design__empty-title") {{ $t('STK0020') }}
       div(class="my-design__empty-description") {{ $t('STK0021') }}
-    div(v-else class="my-design__content")
-      category-list(:list="myDesignList")
+    div(v-show="list.length !== 0" class="my-design__content")
+      category-list(class="my-design__content__list"
+                    :list="myDesignList"
+                    ref="content"
+                    @loadMore="handleLoadMore")
         template(v-slot:my-design-text-item="{ list }")
           div(class="my-design__texts__items")
             my-design-text-item(v-for="item in list"
@@ -39,8 +42,10 @@ import editorUtils from '@/utils/editorUtils'
 export default Vue.extend({
   name: 'my-design',
   data() {
+    const tags = vivistickerUtils.getMyDesignTags()
     return {
-      tags: vivistickerUtils.getMyDesignTags()
+      tags,
+      scrollTops: Object.fromEntries(tags.map(tag => [tag.tab, 0]))
     }
   },
   components: {
@@ -49,14 +54,24 @@ export default Vue.extend({
     MyDesignTextItem
   },
   mounted() {
-    this.refreshDesigns(this.myDesignTab)
+    const content = this.$refs.content as Vue
+    if (!content) return
+    content.$el.addEventListener('scroll', this.handleScroll)
+  },
+  destroyed() {
+    const content = this.$refs.content as Vue
+    if (!content) return
+    content.$el.removeEventListener('scroll', this.handleScroll)
   },
   computed: {
     ...mapGetters({
       isInMyDesign: 'vivisticker/getIsInMyDesign',
+      isInEditor: 'vivisticker/getIsInEditor',
       isInSelectionMode: 'vivisticker/getIsInSelectionMode',
+      editorType: 'vivisticker/getEditorType',
       myDesignTab: 'vivisticker/getMyDesignTab',
-      myDesignFileList: 'vivisticker/getMyDesignFileList'
+      myDesignFileList: 'vivisticker/getMyDesignFileList',
+      myDesignNextPage: 'vivisticker/getMyDesignNextPage'
     }),
     list(): IMyDesign[] {
       return this.myDesignFileList(this.myDesignTab) as IMyDesign[]
@@ -74,7 +89,8 @@ export default Vue.extend({
                 type: 'my-design-text-item',
                 list: rowItems,
                 size: (window.innerWidth / 2 - 20),
-                title: ''
+                title: '',
+                moreType: 'text'
               }
             })
           break
@@ -88,19 +104,31 @@ export default Vue.extend({
                 type: 'my-design-object-item',
                 list: rowItems,
                 size: 104,
-                title: ''
+                title: '',
+                moreType: 'object'
               }
             })
+      }
+      if (result.length !== 0) {
+        Object.assign(result[result.length - 1], { sentinel: true })
       }
       return result
     }
   },
   watch: {
-    myDesignTab(newVal) {
-      this.refreshDesigns(newVal)
-    },
     isInMyDesign(newVal) {
       if (newVal) {
+        this.refreshDesigns(this.myDesignTab).then((refetched) => {
+          if (!refetched) {
+            this.restoreScrollTop(this.myDesignTab)
+          }
+        })
+      }
+    },
+    isInEditor(newVal) {
+      if (newVal) {
+        this.resetMyDesignFileList(this.editorType)
+      } else if (this.isInMyDesign) {
         this.refreshDesigns(this.myDesignTab)
       }
     },
@@ -116,12 +144,19 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
+      resetMyDesignFileList: 'vivisticker/UPDATE_resetMyDesignFileList',
       setmyDesignTab: 'vivisticker/SET_myDesignTab',
       setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode',
       clearSelectedDesigns: 'vivisticker/UPDATE_clearSelectedDesigns'
     }),
-    refreshDesigns(tab: string) {
-      vivistickerUtils.listAsset(`mydesign-${tab}`)
+    async refreshDesigns(tab: string): Promise<boolean> {
+      if (this.myDesignFileList(tab).length !== 0) return false
+      await vivistickerUtils.listAsset(`mydesign-${tab}`)
+      return true
+    },
+    handleLoadMore(tab: string) {
+      const nextPage = this.myDesignNextPage(tab)
+      vivistickerUtils.listMoreAsset(`mydesign-${tab}`, nextPage)
     },
     checkTagSelected(tag: IMyDesignTag) {
       return this.myDesignTab === tag.tab
@@ -129,6 +164,19 @@ export default Vue.extend({
     selectTag(tag: IMyDesignTag) {
       this.setmyDesignTab(tag.tab)
       this.setIsInSelectionMode(false)
+      this.refreshDesigns(tag.tab).then((refetched) => {
+        if (!refetched) {
+          this.restoreScrollTop(tag.tab)
+        }
+      })
+    },
+    handleScroll(event: Event) {
+      this.scrollTops[this.myDesignTab] = (event.target as HTMLElement).scrollTop
+    },
+    restoreScrollTop(tab: string) {
+      const content = this.$refs.content as Vue
+      if (!content) return
+      content.$el.scrollTop = this.scrollTops[tab]
     }
   }
 })
@@ -184,6 +232,9 @@ export default Vue.extend({
       flex-direction: column;
       justify-content: center;
       align-items: center;
+    }
+    &__list {
+      height: 100%;
     }
   }
 
