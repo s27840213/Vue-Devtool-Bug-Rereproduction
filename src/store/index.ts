@@ -1,5 +1,5 @@
-import Vue from 'vue'
-import Vuex, { GetterTree, MutationTree } from 'vuex'
+import { } from 'vue'
+import { GetterTree, MutationTree, createStore } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame, IImageStyle } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData, LayerType } from './types'
 import { IPage } from '@/interfaces/page'
@@ -40,8 +40,6 @@ import payment from '@/store/module/payment'
 import fontTag from '@/store/module/fontTag'
 import imgControl from '@/store/module/imgControl'
 import { ADD_subLayer } from '@/utils/layerUtils'
-
-Vue.use(Vuex)
 
 const getDefaultState = (): IEditorState => ({
   pages: [pageUtils.newPage({})],
@@ -780,7 +778,11 @@ const mutations: MutationTree<IEditorState> = {
       switch (l.type) {
         case LayerType.image:
           if ((l as IImage).srcObj.assetId === assetId && l.previewSrc) {
-            Vue.delete(l, 'previewSrc')
+            /**
+             * @Vue3Update
+             */
+            // Vue.delete(l, 'previewSrc')
+            delete l.previewSrc
             Object.assign((l as IImage).srcObj, {
               type,
               userId,
@@ -893,7 +895,7 @@ function handleResize() {
 window.addEventListener('resize', handleResize)
 handleResize()
 
-export default new Vuex.Store({
+const store = createStore({
   state,
   getters,
   mutations,
@@ -925,3 +927,4 @@ export default new Vuex.Store({
     imgControl
   }
 })
+export default store

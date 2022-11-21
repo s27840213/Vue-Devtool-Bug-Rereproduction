@@ -1,5 +1,4 @@
-import Vue from 'vue'
-import VueRouter, { RawLocation, Route, RouteConfig } from 'vue-router'
+import VueRouter, { RawLocation, Route, RouteConfig, createRouter, createWebHistory } from 'vue-router';
 import Editor from '@/views/Editor.vue'
 import SignUp from '@/views/Login/SignUp.vue'
 import Login from '@/views/Login/Login.vue'
@@ -22,8 +21,6 @@ import assetUtils from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import appJson from '@/assets/json/app.json'
 import generalUtils from '@/utils/generalUtils'
-
-Vue.use(VueRouter)
 
 const MOBILE_ROUTES = [
   'Home',
@@ -221,9 +218,9 @@ if (process.env.NODE_ENV !== 'production') {
   })
 }
 
-const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
+const router = createRouter({
+  history: createWebHistory(process.env.BASE_URL),
+
   routes: [
     {
       // Include the locales you support between ()

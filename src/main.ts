@@ -1,9 +1,9 @@
 /* eslint-disable */
 
-import Vue from 'vue'
+import Vue, { createApp, h } from 'vue';
 import '@/globalComponents'
 import VueRecyclerviewNew from 'vue-recyclerview'
-import App from './App.vue'
+import App from '@/App.vue'
 import router from './router'
 import store from './store'
 import i18n from './i18n'
@@ -57,154 +57,151 @@ window.onerror = function (msg, url, line) {
 
 const tooltipUtils = new TooltipUtils()
 
-Vue.config.productionTip = false
-if (process.env.NODE_ENV !== 'production') {
-  Vue.config.performance = true
-}
-Vue.use(VueRecyclerviewNew, vueColor)
-Vue.use(Notifications)
-Vue.use(VueMeta)
-Vue.use(FloatingVue, {
-  themes: tooltipUtils.themes
-})
-
-// Vue.use(VueGtm, {
-//   id: 'GTM-T7LDWBP',
-//   enabled: true,
-//   // display console logs debugs or not (optional)
-//   debug: false
+// if (process.env.NODE_ENV !== 'production') {
+//   Vue.config.performance = true
+// }
+// Vue.use(VueRecyclerviewNew, vueColor)
+// Vue.use(Notifications)
+// Vue.use(VueMeta)
+// Vue.use(FloatingVue, {
+//   themes: tooltipUtils.themes
 // })
 
-Vue.component('RecycleScroller', RecycleScroller)
+// // Vue.use(VueGtm, {
+// //   id: 'GTM-T7LDWBP',
+// //   enabled: true,
+// //   // display console logs debugs or not (optional)
+// //   debug: false
+// // })
 
-Vue.directive('hint', {
-  // When the bound element is inserted into the DOM...
-  bind: (el, binding, vnode) => {
-    tooltipUtils.bind(el, binding)
-  },
-  update: (el, binding) => {
-    tooltipUtils.bind(el, binding)
-  },
-  unbind: (el) => {
-    tooltipUtils.unbind(el)
-  }
-})
+// Vue.component('RecycleScroller', RecycleScroller)
 
-Vue.directive('ratio-change', {
-  // When the bound element is inserted into the DOM...
-  bind: (el, binding, vnode) => {
-    el.addEventListener('change', function () {
-      el.blur()
-    })
-  },
-  unbind: (el) => {
-    el.removeEventListener('change', function () {
-      el.blur()
-    })
-  }
-})
+// Vue.directive('hint', {
+//   // When the bound element is inserted into the DOM...
+//   bind: (el, binding, vnode) => {
+//     tooltipUtils.bind(el, binding)
+//   },
+//   update: (el, binding) => {
+//     tooltipUtils.bind(el, binding)
+//   },
+//   unbind: (el) => {
+//     tooltipUtils.unbind(el)
+//   }
+// })
 
-Vue.directive('header-border', {
-  /**
-   * Useage: nu-header(v-header-border),
-   * nu-header(v-header-border="true"),
-   * nu-header(v-header-border="'.template-center'")
-   * 預設偵測被加上v-header-border(簡稱header)的下一個元素
-   * (簡稱target)是否在最高的位置，若是則不顯示邊框，若不是則
-   * 顯示，target可以使用CSS語法選擇，第一個結果會成為target
-   * 也可以直接給true指定永久顯示
-  */
-  bind(el, binding) {
-    if (binding.value === true) {
-      el.classList.add('navbar-shadow')
-    } else {
-      Vue.nextTick(() => {
-        const target = binding.value
-          ? document.querySelector(binding.value)
-          : el.nextElementSibling
+// Vue.directive('ratio-change', {
+//   // When the bound element is inserted into the DOM...
+//   bind: (el, binding, vnode) => {
+//     el.addEventListener('change', function () {
+//       el.blur()
+//     })
+//   },
+//   unbind: (el) => {
+//     el.removeEventListener('change', function () {
+//       el.blur()
+//     })
+//   }
+// })
 
-        target.addEventListener('scroll', (e: Event) => {
-          const target = e.target as Element
-          if (target?.scrollTop === 0) {
-            el.classList.remove('navbar-shadow')
-          } else {
-            el.classList.add('navbar-shadow')
-          }
-        }, { passive: true })
-      })
-    }
-  }
-})
+// Vue.directive('header-border', {
+//   /**
+//    * Useage: nu-header(v-header-border),
+//    * nu-header(v-header-border="true"),
+//    * nu-header(v-header-border="'.template-center'")
+//    * 預設偵測被加上v-header-border(簡稱header)的下一個元素
+//    * (簡稱target)是否在最高的位置，若是則不顯示邊框，若不是則
+//    * 顯示，target可以使用CSS語法選擇，第一個結果會成為target
+//    * 也可以直接給true指定永久顯示
+//   */
+//   bind(el, binding) {
+//     if (binding.value === true) {
+//       el.classList.add('navbar-shadow')
+//     } else {
+//       Vue.nextTick(() => {
+//         const target = binding.value
+//           ? document.querySelector(binding.value)
+//           : el.nextElementSibling
 
-Vue.directive('press', longpress)
+//         target.addEventListener('scroll', (e: Event) => {
+//           const target = e.target as Element
+//           if (target?.scrollTop === 0) {
+//             el.classList.remove('navbar-shadow')
+//           } else {
+//             el.classList.add('navbar-shadow')
+//           }
+//         }, { passive: true })
+//       })
+//     }
+//   }
+// })
 
-const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
-const req = require.context('@/assets/icon', true, /\.svg$/)
+// Vue.directive('press', longpress)
 
-if (process.env.NODE_ENV !== 'production') {
-  svgIconUtils.setIcons(requireAll(req).map((context: any) => {
-    return context.default.id
-  }))
-} else {
-  requireAll(req)
-}
+// const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
+// const req = require.context('@/assets/icon', true, /\.svg$/)
 
-// add temporarily for testing
-if (window.location.href.indexOf('logout') > -1) {
-  localStorage.setItem('token', '')
-  router.push({ name: 'Login' })
-}
+// if (process.env.NODE_ENV !== 'production') {
+//   svgIconUtils.setIcons(requireAll(req).map((context: any) => {
+//     return context.default.id
+//   }))
+// } else {
+//   requireAll(req)
+// }
 
-let token = localStorage.getItem('token') || ''
+// // add temporarily for testing
+// if (window.location.href.indexOf('logout') > -1) {
+//   localStorage.setItem('token', '')
+//   router.push({ name: 'Login' })
+// }
 
-// if token is contained in queryString, it would be used
-const urlParams = new URLSearchParams(window.location.search)
-if (urlParams.has('token')) {
-  const tokenGet = urlParams.get('token')
-  if (tokenGet) {
-    token = tokenGet
-    localStorage.setItem('token', token)
-  }
-}
+// let token = localStorage.getItem('token') || ''
 
-if (['production'].includes(process.env.NODE_ENV)) {
-  const Sentry = require('@sentry/vue')
-  const { Integrations } = require('@sentry/tracing')
-  Sentry.init({
-    Vue,
-    trackComponents: true,
-    maxBreadcrumbs: 10,
-    tracesSampleRate: 1.0,
-    environment: process.env.NODE_ENV,
-    dsn: process.env.VUE_APP_SENTRY_DSN,
-    release: process.env.VUE_APP_SENTRY_RELEASE,
-    integrations: [
-      new Integrations.BrowserTracing({
-        routingInstrumentation: Sentry.vueRouterInstrumentation(router)
-      })
-    ],
-    beforeBreadcrumb(breadcrumb: any, hint: any) {
-      if (hint && breadcrumb.category && ['xhr'].includes(breadcrumb.category)) {
-        const { __sentry_xhr__: request, response } = hint.xhr
-        Object.assign(breadcrumb.data, { response, requestBody: request.body })
-      }
-      return breadcrumb
-    }
-  })
-  Vue.config.devtools = false
-}
+// // if token is contained in queryString, it would be used
+// const urlParams = new URLSearchParams(window.location.search)
+// if (urlParams.has('token')) {
+//   const tokenGet = urlParams.get('token')
+//   if (tokenGet) {
+//     token = tokenGet
+//     localStorage.setItem('token', token)
+//   }
+// }
 
-new Vue({
-  router,
-  store,
-  i18n,
-  mounted() {
-    if ((window as any).__PRERENDER_INJECTED !== undefined) {
-      document.dispatchEvent(new Event('render-event'))
-    }
-  },
-  render: (h) => h(App)
-}).$mount('#app')
+// if (['production'].includes(process.env.NODE_ENV)) {
+//   const Sentry = require('@sentry/vue')
+//   const { Integrations } = require('@sentry/tracing')
+//   Sentry.init({
+//     Vue,
+//     trackComponents: true,
+//     maxBreadcrumbs: 10,
+//     tracesSampleRate: 1.0,
+//     environment: process.env.NODE_ENV,
+//     dsn: process.env.VUE_APP_SENTRY_DSN,
+//     release: process.env.VUE_APP_SENTRY_RELEASE,
+//     integrations: [
+//       new Integrations.BrowserTracing({
+//         routingInstrumentation: Sentry.vueRouterInstrumentation(router)
+//       })
+//     ],
+//     beforeBreadcrumb(breadcrumb: any, hint: any) {
+//       if (hint && breadcrumb.category && ['xhr'].includes(breadcrumb.category)) {
+//         const { __sentry_xhr__: request, response } = hint.xhr
+//         Object.assign(breadcrumb.data, { response, requestBody: request.body })
+//       }
+//       return breadcrumb
+//     }
+//   })
+//   Vue.config.devtools = false
+// }
+
+const app = createApp(App).use(i18n).use(router).use(store).mount('#app')
+
+// const app = createApp({
+//   mounted() {
+//     if ((window as any).__PRERENDER_INJECTED !== undefined) {
+//       document.dispatchEvent(new Event('render-event'))
+//     }
+//   }
+// }).use(i18n).use(router).use(store).mount('#app')
 
 // Here is a testing code to export whole porject as a Library
 // export default {

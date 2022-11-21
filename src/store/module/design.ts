@@ -7,6 +7,11 @@ import Vue from 'vue'
 import router from '@/router'
 import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
 
+/**
+ * @Vue3Update - Reviewer: TingAn
+ * Bcz Vue.set and Vue.delete is remove in Vue3, I have change it to the corresponding syntax but don't know how to verify all functionalities, I need U help Bro.
+ */
+
 interface IDesignState {
   currLocation: string,
   moveToFolderSelectInfo: string,
@@ -954,7 +959,7 @@ const mutations: MutationTree<IDesignState> = {
       default:
         targetPath = `/mydesign/${designUtils.makePath(currLocation).slice(1).join('&')}`
     }
-    if (router.currentRoute.path === targetPath) return
+    if (router.currentRoute.value.path === targetPath) return
     router.replace({ path: targetPath })
   },
   SET_moveToFolderSelectInfo(state: IDesignState, selectInfo: string) {
@@ -1163,21 +1168,26 @@ const mutations: MutationTree<IDesignState> = {
     }
   },
   UPDATE_addToSelection(state: IDesignState, design: IDesign) {
-    Vue.set(state.selectedDesigns, design.asset_index.toString(), design)
+    // Vue.set(state.selectedDesigns, design.asset_index.toString(), design)
+    state.selectedDesigns[design.asset_index.toString()] = design
   },
   UPDATE_removeFromSelection(state: IDesignState, design: IDesign) {
-    Vue.delete(state.selectedDesigns, design.asset_index.toString())
+    // Vue.delete(state.selectedDesigns, design.asset_index.toString())
+    delete state.selectedDesigns[design.asset_index.toString()]
   },
   UPDATE_addFolderToSelection(state: IDesignState, folder: IFolder) {
-    Vue.set(state.selectedFolders, folder.id, folder)
+    // Vue.set(state.selectedFolders, folder.id, folder)
+    state.selectedFolders[folder.id] = folder
   },
   UPDATE_removeFolderFromSelection(state: IDesignState, folder: IFolder) {
-    Vue.delete(state.selectedFolders, folder.id)
+    // Vue.delete(state.selectedFolders, folder.id)
+    delete state.selectedFolders[folder.id]
   },
-  UPDATE_metaSelect(state: IDesignState, updateInfo: {designs: IDesign[], index: number}) {
+  UPDATE_metaSelect(state: IDesignState, updateInfo: { designs: IDesign[], index: number }) {
     const { designs, index } = updateInfo
     if (Object.keys(state.selectedDesigns).length === 0) {
-      Vue.set(state.selectedDesigns, designs[index].asset_index.toString(), designs[index])
+      // Vue.set(state.selectedDesigns, designs[index].asset_index.toString(), designs[index])
+      state.selectedDesigns[designs[index].asset_index.toString()] = designs[index]
     } else {
       let nearestSelectedIndex = -1
       const indexQueue = [[index, 0]]
@@ -1199,19 +1209,22 @@ const mutations: MutationTree<IDesignState> = {
       }
       state.selectedDesigns = {}
       if (nearestSelectedIndex === -1) { // should not happen, but in case that selectedDesigns contain only designs not in updateInfo.designs
-        Vue.set(state.selectedDesigns, designs[index].asset_index.toString(), designs[index])
+        // Vue.set(state.selectedDesigns, designs[index].asset_index.toString(), designs[index])
+        state.selectedDesigns[designs[index].asset_index.toString()] = designs[index]
       } else {
         const [indexFrom, indexTo] = [nearestSelectedIndex, index].sort((a, b) => a - b)
         for (let i = indexFrom; i <= indexTo; i++) {
-          Vue.set(state.selectedDesigns, designs[i].asset_index.toString(), designs[i])
+          // Vue.set(state.selectedDesigns, designs[i].asset_index.toString(), designs[i])
+          state.selectedDesigns[designs[i].asset_index.toString()] = designs[i]
         }
       }
     }
   },
-  UPDATE_metaSelectFolder(state: IDesignState, updateInfo: {folders: IFolder[], index: number}) {
+  UPDATE_metaSelectFolder(state: IDesignState, updateInfo: { folders: IFolder[], index: number }) {
     const { folders, index } = updateInfo
     if (Object.keys(state.selectedFolders).length === 0) {
-      Vue.set(state.selectedFolders, folders[index].id, folders[index])
+      // Vue.set(state.selectedFolders, folders[index].id, folders[index])
+      state.selectedFolders[folders[index].id] = folders[index]
     } else {
       let nearestSelectedIndex = -1
       const indexQueue = [[index, 0]]
@@ -1233,11 +1246,11 @@ const mutations: MutationTree<IDesignState> = {
       }
       state.selectedFolders = {}
       if (nearestSelectedIndex === -1) { // should not happen, but in case that selectedFolders contain only folders not in updateInfo.folders
-        Vue.set(state.selectedFolders, folders[index].id, folders[index])
+        // Vue.set(state.selectedFolders, folders[index].id, folders[index])
       } else {
         const [indexFrom, indexTo] = [nearestSelectedIndex, index].sort((a, b) => a - b)
         for (let i = indexFrom; i <= indexTo; i++) {
-          Vue.set(state.selectedFolders, folders[i].id, folders[i])
+          // Vue.set(state.selectedFolders, folders[i].id, folders[i])
         }
       }
     }

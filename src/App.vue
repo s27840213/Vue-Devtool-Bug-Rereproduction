@@ -1,40 +1,40 @@
 <template lang="pug">
   div(id="app" :style="appStyles()")
-    link(rel="preconnect" href="https://fonts.googleapis.com")
-    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
-    link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
-    link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
-    //- div(class="coordinate" ref="coordinate")
-    //-   div(class="coordinate__val coordinate__width")
-    //-     span {{coordinateWidth}}px
-    //-   div(class="coordinate__val coordinate__height")
-    //-     span {{coordinateHeight}}px
-    router-view
-    div(class="popup-area")
-      popup
-      res-info(v-show="currSelectedResInfo.type"
-        :info="currSelectedResInfo"
-        @blur.native="setCurrSelectedResInfo()"
-        tabindex="0")
-    div(class="modal-container"
-        v-if="isModalOpen")
-      modal-card
-    notifications(group="copy"
-      position="top center"
-      width="300px"
-      :max="2"
-      :duration="2000")
-      template(v-slot:body="{ item }")
-        div(class="notification copy"
-          v-html="item.text")
-    notifications(group="error"
-      position="top center"
-      width="300px"
-      :max="1"
-      :duration="5000")
-      template(v-slot:body="{ item }")
-        div(class="notification error"
-          v-html="item.text")
+    //- link(rel="preconnect" href="https://fonts.googleapis.com")
+    //- link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+    //- link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
+    //- link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
+    //- //- div(class="coordinate" ref="coordinate")
+    //- //-   div(class="coordinate__val coordinate__width")
+    //- //-     span {{coordinateWidth}}px
+    //- //-   div(class="coordinate__val coordinate__height")
+    //- //-     span {{coordinateHeight}}px
+    //- router-view
+    //- div(class="popup-area")
+    //-   popup
+    //-   res-info(v-show="currSelectedResInfo.type"
+    //-     :info="currSelectedResInfo"
+    //-     @blur.native="setCurrSelectedResInfo()"
+    //-     tabindex="0")
+    //- div(class="modal-container"
+    //-     v-if="isModalOpen")
+    //-   modal-card
+    //- notifications(group="copy"
+    //-   position="top center"
+    //-   width="300px"
+    //-   :max="2"
+    //-   :duration="2000")
+    //-   template(v-slot:body="{ item }")
+    //-     div(class="notification copy"
+    //-       v-html="item.text")
+    //- notifications(group="error"
+    //-   position="top center"
+    //-   width="300px"
+    //-   :max="1"
+    //-   :duration="5000")
+    //-   template(v-slot:body="{ item }")
+    //-     div(class="notification error"
+    //-       v-html="item.text")
 </template>
 
 <script lang="ts">

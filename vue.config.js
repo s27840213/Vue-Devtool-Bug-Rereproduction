@@ -191,7 +191,11 @@ module.exports = {
             localeDir: 'locales',
             enableInSFC: true,
             includeLocales: false,
-            enableBridge: true
+            enableBridge: true,
+            enableLegacy: true,
+            runtimeOnly: false,
+            compositionOnly: true,
+            fullInstall: true
         }
     }
 }

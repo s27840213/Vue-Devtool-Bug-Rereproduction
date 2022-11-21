@@ -5,15 +5,10 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "build:prerender": "vue-cli-service build --PRERENDER=1",
     "lint": "vue-cli-service lint",
     "build-lib": "vue-cli-service build --target lib --name nueditor src/main.ts",
+    "build:prerender": "vue-cli-service build --PRERENDER=1",
     "i18n:report": "vue-cli-service i18n:report --src \"./src/**/*.?(js|vue)\" --locales \"./src/locales/**/*.json\""
-  },
-  "vuePlugins": {
-    "service": [
-      "build.prerender.js"
-    ]
   },
   "main": "./dist/nueditor.common.js",
   "dependencies": {
@@ -57,16 +52,16 @@
     "uuid": "^8.3.2",
     "v-click-outside": "^3.1.2",
     "vconsole": "^3.14.6",
-    "vue": "^2.6.11",
+    "vue": "^3.0.0-beta.1",
     "vue-color": "git+https://github.com/s27840213/CustomColorPicker.git",
-    "vue-i18n": "^8.26.3",
+    "vue-i18n": "^9.1.0",
     "vue-i18n-bridge": "^9.2.0-beta.10",
     "vue-meta": "^2.4.0",
     "vue-notification": "^1.3.20",
     "vue-recyclerview": "^0.4.1",
-    "vue-router": "^3.5.1",
+    "vue-router": "^4.0.0-alpha.6",
     "vue-virtual-scroller": "^1.0.10",
-    "vuex": "^3.4.0",
+    "vuex": "^4.0.0-alpha.1",
     "vuex-map-fields": "^1.4.1"
   },
   "devDependencies": {
@@ -85,6 +80,7 @@
     "@vue/cli-plugin-typescript": "~4.5.0",
     "@vue/cli-plugin-vuex": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0-beta.1",
     "@vue/eslint-config-standard": "^5.1.2",
     "@vue/eslint-config-typescript": "^7.0.0",
     "cypress": "^8.5.0",
@@ -96,7 +92,7 @@
     "eslint-plugin-promise": "^4.3.1",
     "eslint-plugin-react": "^7.23.2",
     "eslint-plugin-standard": "^4.1.0",
-    "eslint-plugin-vue": "^6.2.2",
+    "eslint-plugin-vue": "^7.0.0-alpha.0",
     "prerender-spa-plugin": "^3.4.0",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
@@ -104,7 +100,12 @@
     "svg-sprite-loader": "^6.0.2",
     "typescript": "~4.1.5",
     "vue-cli-plugin-i18n": "~2.3.1",
-    "vue-template-compiler": "^2.6.11",
+    "vue-cli-plugin-vue-next": "~0.1.4",
     "webpack-bundle-analyzer": "^4.5.0"
+  },
+  "vuePlugins": {
+    "service": [
+      "build.prerender.js"
+    ]
   }
 }
