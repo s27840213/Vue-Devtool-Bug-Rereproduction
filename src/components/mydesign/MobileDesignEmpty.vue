@@ -2,7 +2,7 @@
   div(class="mobile-design-empty")
       img(class="mobile-design-empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
       span
-        slot {{'尚無設計檔案'}}
+        slot {{$t('NN0766')}}
       btn-new-design(v-slot="slotProps")
         button(class="btn-primary-sm pointer" @click="slotProps.openPopup")
           span(class="header-sort") {{$tc('NN0072')}}

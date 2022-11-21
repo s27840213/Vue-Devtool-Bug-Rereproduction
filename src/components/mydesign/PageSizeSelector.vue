@@ -43,7 +43,7 @@
           span(class="body-4 page-size-selector__body__custom__box__input-label"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
         div(v-if="selectedFormatKey === 'custom' && isValidate && !isCustomValid"
-          class="page-size-selector__body__custom__err text-red") {{errorMsg}}
+          class="page-size-selector__body__custom__err text-red") {{$t('NN0163', { term: $t('NN0767', { num: 0 }) })}}
     div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
     div(class="page-size-selector__container"
       @touchmove="handleTouchMove")
@@ -129,7 +129,6 @@ export default Vue.extend({
       pageHeight: NaN,
       aspectRatio: 1,
       isLocked: false,
-      errorMsg: '',
       formatList: new Array<ILayout>(),
       recentlyUsed: new Array<ILayout>(),
       isLayoutReady: false,
@@ -137,12 +136,6 @@ export default Vue.extend({
     }
   },
   watch: {
-    isValidate() {
-      if (this.selectedFormatKey === 'custom' && this.isValidate && !this.isCustomValid) {
-        // TODO: translate
-        this.errorMsg = '請輸入大於 0 的數字'
-      }
-    },
     selectedFormat(layout: ILayout) {
       this.$emit('select', layout)
     }
