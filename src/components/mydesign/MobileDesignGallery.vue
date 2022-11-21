@@ -43,7 +43,7 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MobileDesignItem from '@/components/mydesign/MobileDesignItem.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import BtnNewDesign from '@/components/mydesign/BtnNewDesign.vue'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
 export default Vue.extend({
   components: {

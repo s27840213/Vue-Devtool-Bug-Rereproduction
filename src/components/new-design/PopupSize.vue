@@ -23,7 +23,7 @@ import vClickOutside from 'v-click-outside'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import { ILayout } from '@/interfaces/layout'
 import designUtils from '@/utils/designUtils'
-import PageSizeSelector from '@/components/mydesign/PageSizeSelector.vue'
+import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
 
 export default Vue.extend({
   components: {

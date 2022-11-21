@@ -19,7 +19,7 @@ import { mapGetters, mapActions } from 'vuex'
 import MobileFolderGallery from '@/components/mydesign/MobileFolderGallery.vue'
 import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
-import BtnNewDesign from '@/components/mydesign/BtnNewDesign.vue'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 import MobileDesignEmpty from '@/components/mydesign/MobileDesignEmpty.vue'
 
 export default Vue.extend({

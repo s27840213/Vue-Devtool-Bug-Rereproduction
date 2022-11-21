@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import BtnNewDesign from '@/components/mydesign/BtnNewDesign.vue'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
 export default Vue.extend({
   components: {

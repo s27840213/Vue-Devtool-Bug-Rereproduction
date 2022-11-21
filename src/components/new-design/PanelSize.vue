@@ -38,7 +38,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import designUtils from '@/utils/designUtils'
-import PageSizeSelector from '@/components/mydesign/PageSizeSelector.vue'
+import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
 
 import { mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'

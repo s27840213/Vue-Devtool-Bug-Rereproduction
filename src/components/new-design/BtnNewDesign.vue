@@ -12,8 +12,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import PopupSize from '@/components/popup/PopupSize.vue'
-import PanelSize from '@/components/PanelSize.vue'
+import PopupSize from '@/components/new-design/PopupSize.vue'
+import PanelSize from '@/components/new-design/PanelSize.vue'
 
 export default Vue.extend({
   components: {
