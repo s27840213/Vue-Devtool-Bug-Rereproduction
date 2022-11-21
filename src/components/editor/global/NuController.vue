@@ -97,25 +97,39 @@
               :style="Object.assign(end, {'cursor': 'pointer'})"
               @pointerdown.stop="lineEndMoveStart"
               @touchstart="disableTouchEvent")
-          div(v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalers) : []"
-              class="control-point scaler"
-              :key="index"
-              :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="scaleStart"
-              @touchstart="disableTouchEvent")
           div(v-for="(resizer, index) in resizer(controlPoints)"
               @pointerdown.prevent.stop="resizeStart"
               @touchstart="disableTouchEvent")
             div(class="control-point__resize-bar"
-                :key="index"
+                :key="`resizer-${index}`"
                 :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
             div(class="control-point resizer"
                 :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
+          div(v-if="isTouchDevice()" v-for="(resizer, index) in resizer(controlPoints, false, true)"
+              @pointerdown.prevent.stop="resizeStart"
+              @touchstart="disableTouchEvent")
+            div(class="control-point__resize-bar"
+                :key="`resizer-touch-${index}`"
+                :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
+            div(class="control-point resizer"
+                :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))")
           div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
               @pointerdown="moveStart")
             div(class="control-point__resize-bar control-point__move-bar"
-                :key="index"
+                :key="`resizer-text-${index}`"
                 :style="resizerBarStyles(resizer.styles)")
+          div(v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalers) : []"
+              class="control-point scaler"
+              :key="`scaler-${index}`"
+              :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
+              @pointerdown.prevent.stop="scaleStart"
+              @touchstart="disableTouchEvent")
+          div(v-if="isTouchDevice()" v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalerTouchAreas) : []"
+              class="control-point scaler"
+              :key="`scaler-touch-${index}`"
+              :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
+              @pointerdown.prevent.stop="scaleStart"
+              @touchstart="disableTouchEvent")
           div(class="control-point__line-controller-wrapper"
               v-if="isLine()"
               :style="`transform: scale(${100/scaleRatio * contentScaleRatio})`")
@@ -413,16 +427,16 @@ export default Vue.extend({
       } else {
         resizerStyle.transform += ` scaleX(${100 / this.scaleRatio})`
       }
-      const scalerOffset = generalUtils.isTouchDevice() ? 35 : 20
+      const scalerOffset = generalUtils.isTouchDevice() ? 36 : 20
       const resizeBarScale = generalUtils.isTouchDevice() ? 2.5 : 1
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: isHorizon ? `${this.getLayerWidth() * this.contentScaleRatio - scalerOffset}px` : `${width * this.contentScaleRatio * resizeBarScale}px`,
-        height: !isHorizon ? `${this.getLayerHeight() * this.contentScaleRatio - scalerOffset}px` : `${height * this.contentScaleRatio * resizeBarScale}px`
+        width: isHorizon ? `${this.getLayerWidth() - scalerOffset * 100 / this.scaleRatio}px` : `${width * this.contentScaleRatio * resizeBarScale}px`,
+        height: !isHorizon ? `${this.getLayerHeight() - scalerOffset * 100 / this.scaleRatio}px` : `${height * this.contentScaleRatio * resizeBarScale}px`
       }
       return Object.assign(resizerStyle, HW)
     },
-    resizerStyles(resizer: IResizer) {
+    resizerStyles(resizer: IResizer, isTouchArea = false) {
       const resizerStyle = { ...resizer }
       const tooShort = this.getLayerHeight() * this.scaleRatio < RESIZER_SHOWN_MIN
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < RESIZER_SHOWN_MIN
@@ -432,20 +446,23 @@ export default Vue.extend({
       if (!tooSmall) {
         resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
       }
+      // resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
       const width = parseFloat(resizerStyle.width.replace('px', ''))
       const height = parseFloat(resizerStyle.height.replace('px', ''))
+      const scale = isTouchArea ? 3 : 1
+      const aspectRatio = this.isTouchDevice() ? 0.24 : 0.16
 
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: width > height && tooSmall ? `${this.getLayerWidth() * this.contentScaleRatio - 10}px`
-          : (tooSmall ? `${(this.getLayerHeight() * this.contentScaleRatio - 10) * 0.16}px` : resizerStyle.width),
-        height: width < height && tooSmall ? `${this.getLayerHeight() * this.contentScaleRatio - 10}px`
-          : (tooSmall ? `${(this.getLayerWidth() * this.contentScaleRatio - 10) * 0.16}px` : resizerStyle.height)
+        width: width > height && tooSmall ? `${(this.getLayerWidth() * this.contentScaleRatio - 10) * scale}px`
+          : (tooSmall ? `${(this.getLayerHeight() * this.contentScaleRatio - 10) * aspectRatio * scale}px` : resizerStyle.width),
+        height: width < height && tooSmall ? `${(this.getLayerHeight() * this.contentScaleRatio - 10) * scale}px`
+          : (tooSmall ? `${(this.getLayerWidth() * this.contentScaleRatio - 10) * aspectRatio * scale}px` : resizerStyle.height)
       }
       return Object.assign(resizerStyle, HW)
     },
-    resizer(controlPoints: any, textMoveBar = false) {
-      let resizers = controlPoints.resizers as Array<{ [key: string]: string | number }>
+    resizer(controlPoints: any, textMoveBar = false, isTouchArea = false) {
+      let resizers = (isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers) as Array<{ [key: string]: string | number }>
       const tooShort = this.getLayerHeight() * this.scaleRatio < RESIZER_SHOWN_MIN
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < RESIZER_SHOWN_MIN
       switch (this.getLayerType) {
