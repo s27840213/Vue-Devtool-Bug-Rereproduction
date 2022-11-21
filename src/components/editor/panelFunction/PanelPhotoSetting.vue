@@ -22,7 +22,7 @@
     component(:is="show || 'div'"
       ref="popup"
       :imageAdjust="currLayerAdjust"
-      @update="handleAdjust" v-on="$listeners")
+      @update="handleAdjust" @toggleColorPanel="toggleColorPanel")
 </template>
 
 <script lang="ts">
@@ -210,6 +210,9 @@ export default Vue.extend({
       if (btn.name === 'crop' && this.isCropping) return true
       if (btn.name === 'remove-bg' && this.inBgRemoveMode) return true
       return false
+    },
+    toggleColorPanel(bool: boolean) {
+      this.$emit('toggleColorPanel', bool)
     },
     handleShow(name: string) {
       const { pageIndex, layerIndex, subLayerIdx, getCurrLayer: currLayer } = layerUtils

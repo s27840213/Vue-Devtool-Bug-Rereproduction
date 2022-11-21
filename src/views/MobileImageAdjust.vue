@@ -11,7 +11,7 @@
       span(class="photo-setting__title text-blue-1 subtitle-1") {{$t('NN0039')}}
       popup-adjust(
         :imageAdjust="currLayerAdjust"
-        @update="handleAdjust" v-on="$listeners")
+        @update="handleAdjust")
       div(class="label") 縮放
         input(class="range-input input__slider--range"
           :value="currentScale"
