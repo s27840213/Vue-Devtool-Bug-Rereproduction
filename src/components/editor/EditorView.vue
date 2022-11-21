@@ -291,7 +291,7 @@ export default Vue.extend({
         if (this.isClickOnController(e)) {
           const movingUtils = new MovingUtils({
             config: layerUtils.getCurrConfig,
-            snapUtils: new SnapUtils(this.pageIndex),
+            snapUtils: pageUtils.getPage(layerUtils.pageIndex).snapUtils,
             body: document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
           })
           movingUtils.moveStart(e)

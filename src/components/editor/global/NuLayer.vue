@@ -158,10 +158,23 @@ export default Vue.extend({
   },
   mounted() {
     const body = this.$refs.body as HTMLElement
+    const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.layerIndex }
+    const props = this.$props
+    Object.defineProperty(layerInfo, 'pageIndex', {
+      get() {
+        return props.pageIndex
+      }
+    })
+    Object.defineProperty(layerInfo, 'layerIndex', {
+      get() {
+        return props.layerIndex
+      }
+    })
     this.movingUtils = new MovingUtils({
       config: this.config,
       component: this,
       snapUtils: this.snapUtils,
+      layerInfo,
       body
     })
     const moveStart = this.movingUtils.moveStart.bind(this.movingUtils)

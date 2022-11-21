@@ -13,6 +13,7 @@ import resizeUtils from './resizeUtils'
 import { debounce } from 'lodash'
 import groupUtils from './groupUtils'
 import { LayerType } from '@/store/types'
+import SnapUtils from './snapUtils'
 
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -101,6 +102,7 @@ class PageUtils {
     const defaultPage: IPage = {
       width: 1080,
       height: 1080,
+      snapUtils: new SnapUtils(-1),
       backgroundColor: '#ffffff',
       backgroundImage: {
         config: layerFactary.newImage({
@@ -132,6 +134,7 @@ class PageUtils {
       },
       isAutoResizeNeeded: false
     }
+    pageData.snapUtils && delete pageData.snapUtils
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))
   }
 

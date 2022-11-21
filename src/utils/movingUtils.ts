@@ -27,12 +27,13 @@ export class MovingUtils {
   private isControlling = false
   private isDoingGestureAction = false
   private isHandleMovingHandler = false
-  private snapUtils = null as unknown
+  private snapUtils = null as any
   private isMoved = false
   private body = undefined as unknown as HTMLElement
   private isPointerDownFromSubController = false
   private _moving = null as unknown
   private _moveEnd = null as unknown
+  private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex }
 
   private get isBgImgCtrl(): boolean { return store.getters['imgControl/isBgImgCtrl'] }
   private get inMultiSelectionMode(): number { return store.getters['mobileEditor/getInMultiSelectionMode'] }
@@ -42,8 +43,8 @@ export class MovingUtils {
   private get currHoveredPageIndex(): number { return store.getters.getCurrHoveredPageIndex }
   private get isActive(): boolean { return this.config.active }
   private get getLayerType(): string { return this.config.type }
-  private get pageIndex(): number { return layerUtils.pageIndex }
-  private get layerIndex(): number { return layerUtils.layerIndex }
+  private get pageIndex(): number { return this.layerInfo.pageIndex }
+  private get layerIndex(): number { return this.layerInfo.layerIndex }
   private get isLocked(): boolean { return this.config.locked }
   private get contentEditable(): boolean { return (this.config as any).contentEditable || false }
   private get getLayerPos(): ICoordinate { return { x: this.config.styles.x, y: this.config.styles.y } }
@@ -66,11 +67,12 @@ export class MovingUtils {
     return false
   }
 
-  constructor({ config, snapUtils, component, body }: { config: ILayer, snapUtils: unknown, component?: Vue, body: HTMLElement }) {
+  constructor({ config, snapUtils, component, body, layerInfo }: { config: ILayer, snapUtils: unknown, component?: Vue, body: HTMLElement, layerInfo?: ILayerInfo }) {
     this.config = config
-    this.component = component
     this.snapUtils = snapUtils
     this.body = body
+    component && (this.component = component)
+    layerInfo && (this.layerInfo = layerInfo)
   }
 
   private setMoving = (bool: boolean) => store.commit('SET_moving', bool)
@@ -353,14 +355,13 @@ export class MovingUtils {
         y: moveOffset.offsetY
       }
     )
-    // const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
-    // this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
-    // this.$emit('getClosestSnaplines')
+    const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
+    this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
     const totalOffset = {
-      x: offsetPos.x,
-      y: offsetPos.y
-      // x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
-      // y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
+      // x: offsetPos.x,
+      // y: offsetPos.y
+      x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
+      y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
     }
     this.initialPos.x += totalOffset.x
     this.initialPos.y += totalOffset.y
@@ -384,7 +385,7 @@ export class MovingUtils {
         dragging: false
       })
       this.isDoingGestureAction = false
-      // this.snapUtils.event.emit('clearSnapLines')
+      this.snapUtils.event.emit('clearSnapLines')
       return
     }
 

@@ -173,7 +173,7 @@
       :config="config"
       :pageIndex="pageIndex"
       :pageScaleRatio="pageScaleRatio"
-      :snapUtils="snapUtils")
+      :snapUtils="config.snapUtils")
 </template>
 
 <script lang="ts">
@@ -217,6 +217,9 @@ export default Vue.extend({
     SnapLineArea,
     LazyLoad
   },
+  created() {
+    this.config.snapUtils.pageIndex = this.pageIndex
+  },
   data() {
     return {
       initialAbsPos: { x: 0, y: 0 },
@@ -237,7 +240,7 @@ export default Vue.extend({
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
       coordinateHeight: 0,
-      snapUtils: new SnapUtils(this.pageIndex),
+      // snapUtils: new SnapUtils(this.pageIndex),
       closestSnaplines: {
         v: [] as Array<number>,
         h: [] as Array<number>
@@ -264,6 +267,9 @@ export default Vue.extend({
     })
   },
   watch: {
+    pageIndex(val) {
+      this.config.snapUtils.pageIndex = val
+    },
     isOutOfBound(val) {
       if (val && this.currFunctionPanelType === FunctionPanelType.photoShadow && layerUtils.pageIndex === this.pageIndex) {
         GroupUtils.deselect()
@@ -324,6 +330,9 @@ export default Vue.extend({
         transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`,
         willChange: this.isScaling ? 'transform' : ''
       }
+    },
+    snapUtils(): SnapUtils {
+      return this.config.snapUtils
     },
     currLayer(): ILayer {
       return layerUtils.getCurrLayer
