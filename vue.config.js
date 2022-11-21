@@ -71,6 +71,15 @@ module.exports = {
         //         ]
         //     })
 
+        config.module
+            .rule('vue')
+            .use('vue-loader')
+            .loader('vue-loader')
+            .tap(options => {
+                options.exposeFilename = true
+                return options
+            })
+
         if (process.env.CI && ['production', 'staging'].includes(process.env.NODE_ENV)) {
             config.plugin('sentry')
                 .use(SentryWebpackPlugin, [{
