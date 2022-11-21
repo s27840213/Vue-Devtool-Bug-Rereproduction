@@ -1,19 +1,39 @@
 <template lang="pug">
 div(class="component-log"
     @pointerdown="moveStart"
-    :style="transformStyle")
+    :style="logStyles")
   div(class="component-log__header")
     span Component Updated Log
-    svg-icon(iconName="chevron-down" iconColor="gray-1" iconWidth="16px" @click.native="toggleContent(!showContent)")
-  div(v-show="showContent" class="component-log__content" ref="content")
-    div(v-for="(log,index) in logs"
-        :key="index"
-        class="component-log__item")
-      div
-        span(class="component-log__component-name text-bold") {{log.component}}
-        span(class="component-log__time text-bold ml-5") {{`${parseFloat(log.time.toFixed(3))}  ms`}}
-      div(class="component-log__parent")
-        span(class="text-white") from: {{log.parent}}
+    div(class="component-log__size-options")
+      span(class="component-log__size-option mr-15"
+        :class="{'component-log__size-option--active': allOpened}"
+        @click="toggleAllOpend()") All Open
+      span(class="component-log__size-option mr-5"
+        :class="{'component-log__size-option--active': !isLargeSize}"
+        @click="toggleSize(false)") S
+      span(class="component-log__size-option"
+        :class="{'component-log__size-option--active': isLargeSize}"
+        @click="toggleSize(true)") L
+      svg-icon(iconName="chevron-down"
+        iconColor="gray-1"
+        iconWidth="16px"
+        :style="{transform: showContent ? '' : 'rotate(180deg)'}"
+        @click.native="toggleContent(!showContent)")
+  div(v-show="showContent && logs.length > 0" class="component-log__content" ref="content")
+    component-log-item(
+      v-for="(log,index) in logs"
+      :key="index"
+      :log="log"
+      :allOpened="allOpened")
+    //- div(v-for="(log,index) in logs"
+    //-     :key="index"
+    //-     class="component-log__item")
+    //-   div(class="flex items-center")
+    //-     svg-icon(iconName="plus-square" iconColor="gray-3" iconWidth="16px" @click.native="toggleContent(!showContent)")
+    //-     span(class="component-log__component-name text-bold") {{log.component}}
+    //-     span(class="component-log__time text-bold ml-5") {{`${parseFloat(log.time.toFixed(3))}  ms`}}
+    //-   div(class="component-log__parent")
+    //-     span(class="text-white") from: {{log.parent}}
 </template>
 
 <script lang="ts">
@@ -22,9 +42,13 @@ import generalUtils from '@/utils/generalUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import { debounce } from 'lodash'
 import Vue from 'vue'
+import ComponentLogItem from '@/components/componentLog/ComponentLogItem.vue'
 
 export default Vue.extend({
   name: 'ComponentLog',
+  components: {
+    ComponentLogItem
+  },
   props: {
     logs: {
       type: Array,
@@ -44,7 +68,9 @@ export default Vue.extend({
       deltaX: 0,
       deltaY: 0,
       absPos: { x: 0, y: 0 },
-      showContent: true
+      showContent: true,
+      isLargeSize: false,
+      allOpened: false
     }
   },
   watch: {
@@ -53,9 +79,10 @@ export default Vue.extend({
     }, 500)
   },
   computed: {
-    transformStyle(): { [index: string]: string } {
+    logStyles(): { [index: string]: string } {
       return {
-        transform: `translate(${this.currPos.x}px,${this.currPos.y}px)`
+        transform: `translate(${this.currPos.x}px,${this.currPos.y}px)`,
+        maxHeight: `${this.isLargeSize ? 800 : 400}px`
       }
     }
   },
@@ -87,6 +114,12 @@ export default Vue.extend({
         e.preventDefault()
         e.stopPropagation()
       }
+    },
+    toggleSize(bool: boolean) {
+      this.isLargeSize = bool
+    },
+    toggleAllOpend() {
+      this.allOpened = !this.allOpened
     }
   }
 })
@@ -100,7 +133,6 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  max-height: 400px;
   width: 500px;
   z-index: 10000;
   background-color: setColor(gray-5);
@@ -155,6 +187,25 @@ export default Vue.extend({
     margin: 2px 0px;
     box-sizing: border-box;
     font-size: 14px;
+  }
+
+  &__size-options {
+    display: flex;
+    align-items: center;
+  }
+
+  &__size-option {
+    font-size: 10px;
+    padding: 4px 16px;
+    box-sizing: border-box;
+    border: 1px solid setColor(gray-2);
+    border-radius: 20px;
+
+    &--active {
+      border-color: setColor(blue-1);
+      color: setColor(white);
+      background-color: setColor(blue-1);
+    }
   }
 }
 </style>

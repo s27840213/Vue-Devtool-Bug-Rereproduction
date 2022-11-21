@@ -65,7 +65,7 @@ import i18n from '@/i18n'
 import colorUtils from '@/utils/colorUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import pageUtils from '@/utils/pageUtils'
-import ComponentLog from '@/components/ComponentLog.vue'
+import ComponentLog from '@/components/componentLog/ComponentLog.vue'
 import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
 
 export default Vue.extend({
@@ -98,7 +98,7 @@ export default Vue.extend({
   },
   created() {
     this.$root.$on('on-re-rendering', (component: IComponentUpdatedLog) => {
-      if (this.componentLogs.length >= 150) {
+      if (this.componentLogs.length >= 50) {
         this.componentLogs.shift()
       }
       this.componentLogs.push(component)

@@ -127,7 +127,7 @@ export default Vue.extend({
         const self = this as any
         if (!editorUtils.enalbleComponentLog) return
         const timeSpent = performance.now() - self.timeStart
-        const omitTarget = ['ComponentLog', 'DesktopEditor', 'PanelPhotoSetting', 'Btn', 'LazyLoad']
+        const omitTarget = ['ComponentLog', 'ComponentLogItem', 'DesktopEditor', 'PanelPhotoSetting', 'Btn', 'LazyLoad']
         if (omitTarget.includes(self.$options.name)) return
 
         const tmpArr = String(Object.getPrototypeOf(self.$options).__file).split('/')
@@ -143,7 +143,11 @@ export default Vue.extend({
             __name: self.$options.__name,
             parent: self.$options.parent?._name ?? 'no parent',
             time: timeSpent,
-            propsData: self.$options.propsData
+            propsData: {
+              index: self.$options.propsData?.index,
+              pageIndex: self.$options.propsData?.pageIndex,
+              layerIndex: self.$options.propsData?.layerIndex
+            }
           })
         })
       }
