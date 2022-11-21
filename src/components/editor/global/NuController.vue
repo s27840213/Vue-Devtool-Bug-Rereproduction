@@ -1751,11 +1751,11 @@ export default Vue.extend({
       }
     },
     setCursorStyle(cursor: string) {
-      const layer = this.$el as HTMLElement
-      if (layer) {
-        layer.style.cursor = cursor
-        document.body.style.cursor = cursor
-      }
+      // const layer = this.$el as HTMLElement
+      // if (layer) {
+      //   layer.style.cursor = cursor
+      //   document.body.style.cursor = cursor
+      // }
     },
     currCursorStyling(e: MouseEvent | TouchEvent | PointerEvent) {
       const el = e.target as HTMLElement
