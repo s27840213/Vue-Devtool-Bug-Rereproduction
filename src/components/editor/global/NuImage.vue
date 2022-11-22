@@ -33,7 +33,7 @@
             filter(:id="filterId"
               color-interpolation-filters="sRGB")
               component(v-for="(elm, idx) in svgFilterElms()"
-                :key="`svgFilter${idx}`"
+                :key="`${filterId}`"
                 :is="elm.tag"
                 v-bind="elm.attrs")
                 component(v-for="child in elm.child"
@@ -305,8 +305,10 @@ export default Vue.extend({
       return this.src
     },
     filterId(): string {
-      const randomId = generalUtils.generateRandomString(5)
-      return `filter__${randomId}`
+      const { styles: { adjust } } = this.config
+      const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
+      const id = blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
+      return `filter__${id}`
     },
     showCanvas(): boolean {
       const { pageIndex, layerIndex, subLayerIndex, handleId } = this
