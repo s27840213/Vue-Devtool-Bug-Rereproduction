@@ -6,7 +6,7 @@
                 :key="`textSvgBg${idx}`"
                 :is="elm.tag"
                 v-bind="elm.attrs")
-    div(v-for="text, idx in duplicatedText" class="nu-text__body" ref="body"
+    div(v-for="text, idx in duplicatedText" class="nu-text__body"
         :style="Object.assign(bodyStyles(), text.extraBody)")
       nu-curve-text(v-if="isCurveText"
         :config="config"
@@ -151,7 +151,7 @@ export default Vue.extend({
   methods: {
     drawSvgBG() {
       this.$nextTick(() => {
-        this.svgBG = textBgUtils.drawSvgBg(this.config, this.$refs.body as Element[])
+        this.svgBG = textBgUtils.drawSvgBg(this.config)
       })
     },
     spans(): ISpan[] {

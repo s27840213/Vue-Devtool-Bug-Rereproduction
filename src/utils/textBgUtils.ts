@@ -56,6 +56,7 @@ class Rect {
       width: number
       height: number
       text: string
+      letterSpacing: number
     }[]
   }[]
 
@@ -112,6 +113,9 @@ class Rect {
       this.rows = []
 
       for (const p of div.children) {
+        const fontSize = parseFloat((p as HTMLElement).style.fontSize.match(/[\d.]+/)?.[0] ?? '0')
+        const letterSpacingEm = parseFloat((p as HTMLElement).style.letterSpacing.match(/[\d.-]+/)?.[0] ?? '0')
+        const letterSpacing = fontSize * letterSpacingEm
         for (const span of p.children) {
           const cr = span.getClientRects()[0]
           this.rows.push({
@@ -119,7 +123,8 @@ class Rect {
             spanData: [{
               width: cr.width,
               height: cr.height,
-              text: span.textContent ?? ''
+              text: span.textContent ?? '',
+              letterSpacing
             }]
           })
         }
@@ -587,7 +592,7 @@ class TextBg {
     if (!isITextBox(effect)) return {}
   }
 
-  drawSvgBg(config: IText, bodyHtml: Element[]) {
+  drawSvgBg(config: IText) {
     const textBg = config.styles.textBg
     if (textBg.name === 'none') return null
 
@@ -714,22 +719,21 @@ class TextBg {
       }
     } else if (isITextSvgbg(textBg)) {
       const pos = [] as Record<string, number>[]
-      const offset = { x: 0, y: 0 }
+
       rows.forEach((row) => {
-        offset.x = 0
+        let offsetX = 0
         row.spanData.forEach((span) => {
           const { width, height, text } = span
           if (text !== ' ') {
             pos.push({
-              x: offset.x,
-              y: height + offset.y,
+              x: offsetX - span.letterSpacing / 2,
+              y: row.rect.y + height,
               width,
               height
             })
           }
-          offset.x += width
+          offsetX += width
         })
-        offset.y += row.rect.height
       })
       return {
         attrs: { width, height },
