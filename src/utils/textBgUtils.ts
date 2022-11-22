@@ -66,8 +66,10 @@ class Rect {
     this.vertical = config.styles.writingMode === 'vertical-lr'
 
     const div = document.createElement('div')
+    div.classList.add('nu-text__body')
     config.paragraphs.forEach(para => {
       const p = document.createElement('p')
+      p.classList.add('nu-text__p')
       const pStyle = tiptapUtils.textStylesRaw(para.styles)
       Object.assign(p.style, pStyle, { margin: 0 })
       div.appendChild(p)
@@ -75,11 +77,13 @@ class Rect {
       para.spans.forEach(spanData => {
         if (!spanData.text) {
           const span = document.createElement('span')
+          span.classList.add('nu-text__span')
           span.appendChild(document.createElement('br'))
           p.appendChild(span)
         } else {
           [...spanData.text].forEach(t => {
             const span = document.createElement('span')
+            span.classList.add('nu-text__span')
             if (t === ' ') {
               span.innerHTML = '&nbsp;'
             } else {
@@ -156,7 +160,7 @@ class Rect {
         height: rect.width
       })
       spanData.forEach(data => {
-        [data.height, data.width] = [data.width, data.height]
+        [data.x, data.y, data.height, data.width] = [data.y, data.x, data.width, data.height]
       })
     })
   }
