@@ -120,7 +120,7 @@ class Controller {
           top: '0',
           transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
           borderRadius: '50%',
-          opacity: isTouchArea ? '0.5' : '1'
+          opacity: isTouchArea ? '0' : '1'
         },
         scalerSize
       },
@@ -133,7 +133,7 @@ class Controller {
           right: '0',
           top: '0',
           borderRadius: '50%',
-          opacity: isTouchArea ? '0.5' : '1'
+          opacity: isTouchArea ? '0' : '1'
         },
         scalerSize
       },
@@ -146,7 +146,7 @@ class Controller {
           right: '0',
           bottom: '0',
           borderRadius: '50%',
-          opacity: isTouchArea ? '0.5' : '1'
+          opacity: isTouchArea ? '0' : '1'
         },
         scalerSize
       },
@@ -159,7 +159,7 @@ class Controller {
           left: '0',
           bottom: '0',
           borderRadius: '50%',
-          opacity: isTouchArea ? '0.5' : '1'
+          opacity: isTouchArea ? '0' : '1'
         },
         scalerSize
       }
@@ -176,7 +176,7 @@ class Controller {
           width: `${resizerShort}px`,
           left: '0',
           transform: `translate(-50%, -50%) scale(${contentScaleRatio})`,
-          opacity: isTouchArea ? '0.5' : '1'
+          opacity: isTouchArea ? '0' : '1'
         }
       },
       {
@@ -187,7 +187,7 @@ class Controller {
           width: `${resizerShort}px`,
           right: '0',
           transform: `translate(50%, -50%) scale(${contentScaleRatio})`,
-          opacity: isTouchArea ? '0.5' : '1'
+          opacity: isTouchArea ? '0' : '1'
         }
       },
       {
@@ -198,7 +198,7 @@ class Controller {
           height: `${resizerShort}px`,
           bottom: '0',
           transform: `translate(-50%, 50%) scale(${contentScaleRatio})`,
-          opacity: isTouchArea ? '0.5' : '1'
+          opacity: isTouchArea ? '0' : '1'
         }
       },
       {
@@ -209,7 +209,7 @@ class Controller {
           height: `${resizerShort}px`,
           top: '0',
           transform: `translate(-50%, -50%) scale(${contentScaleRatio})`,
-          opacity: isTouchArea ? '0.5' : '1'
+          opacity: isTouchArea ? '0' : '1'
         }
       }
     ]

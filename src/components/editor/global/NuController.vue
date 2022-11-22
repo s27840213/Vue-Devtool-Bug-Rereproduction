@@ -98,8 +98,8 @@
               @pointerdown.stop="lineEndMoveStart"
               @touchstart="disableTouchEvent")
           div(v-for="(resizer, index) in resizer(controlPoints)"
-              @pointerdown.prevent.stop="resizeStart"
-              @touchstart="disableTouchEvent")
+              @pointerdown.prevent.stop="!isTouchDevice() ? resizeStart($event) : null"
+              @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
             div(class="control-point__resize-bar"
                 :key="`resizer-${index}`"
                 :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
@@ -122,8 +122,8 @@
               class="control-point scaler"
               :key="`scaler-${index}`"
               :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="scaleStart"
-              @touchstart="disableTouchEvent")
+              @pointerdown.prevent.stop="!isTouchDevice() ? scaleStart($event) : null"
+              @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
           div(v-if="isTouchDevice()" v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalerTouchAreas) : []"
               class="control-point scaler"
               :key="`scaler-touch-${index}`"
@@ -467,8 +467,8 @@ export default Vue.extend({
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < RESIZER_SHOWN_MIN
       switch (this.getLayerType) {
         case 'image':
-          return this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
-        // return resizers
+          resizers = this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
+          break
         case 'text':
           if (textMoveBar) {
             resizers = this.config.styles.writingMode.includes('vertical') ? resizers.slice(0, 2)
