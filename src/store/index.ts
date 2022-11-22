@@ -114,7 +114,8 @@ const getDefaultState = (): IEditorState => ({
   useMobileEditor: false,
   defaultContentScaleRatio: 0.6,
   _3dEnabledPageIndex: -1,
-  enalbleComponentLog: false
+  enalbleComponentLog: false,
+  inScreenshotPreviewRoute: false
 })
 
 const state = getDefaultState()
@@ -288,6 +289,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getEnalbleComponentLog(state: IEditorState) {
     return state.enalbleComponentLog
+  },
+  getInScreenshotPreview(state: IEditorState) {
+    return state.inScreenshotPreviewRoute
   }
 }
 
@@ -887,6 +891,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_enalbleComponentLog(state: IEditorState, bool: boolean) {
     state.enalbleComponentLog = bool
+  },
+  SET_inScreenshotPreview(state: IEditorState, bool: boolean) {
+    state.inScreenshotPreviewRoute = bool
   },
   ...imgShadowMutations,
   ADD_subLayer

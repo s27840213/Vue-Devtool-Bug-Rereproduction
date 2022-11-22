@@ -7,7 +7,7 @@ div(class="preview" :style="containStyles")
 <script lang="ts">
 import Vue from 'vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters, mapState, mapMutations } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
@@ -41,6 +41,11 @@ export default Vue.extend({
       }
     }
   },
+  methods: {
+    ...mapMutations({
+      setInScreenshotPreview: 'SET_inScreenshotPreview'
+    })
+  },
   mounted() {
     const type = this.$router.currentRoute.query.type
     const designId = this.$router.currentRoute.query.design_id
@@ -48,6 +53,11 @@ export default Vue.extend({
     if (!type || !designId || !teamId) {
       uploadUtils.isGettingDesign = false
     }
+
+    this.setInScreenshotPreview(true)
+  },
+  beforeDestroy() {
+    this.setInScreenshotPreview(false)
   }
 })
 </script>

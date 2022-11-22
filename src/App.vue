@@ -16,7 +16,7 @@
         :info="currSelectedResInfo"
         @blur.native="setCurrSelectedResInfo()"
         tabindex="0")
-    div(v-if="isAdmin" class="fps")
+    div(v-if="isAdmin && !inScreenshotPreview" class="fps")
       span FPS: {{fps}}
     div(class="modal-container"
         v-if="isModalOpen")
@@ -67,7 +67,8 @@ export default Vue.extend({
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
       coordinateHeight: 0,
-      fps: 0
+      fps: 0,
+      fpsInterval: 0
     }
   },
   mounted() {
@@ -82,7 +83,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       currSelectedResInfo: 'getCurrSelectedResInfo',
-      isModalOpen: 'modal/getModalOpen'
+      isModalOpen: 'modal/getModalOpen',
+      inScreenshotPreview: 'getInScreenshotPreview'
     }),
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
@@ -93,7 +95,7 @@ export default Vue.extend({
   },
   watch: {
     isAdmin(newVal) {
-      if (newVal) {
+      if (newVal && !this.inScreenshotPreview) {
         this.showFps()
       }
     }
@@ -158,13 +160,17 @@ export default Vue.extend({
           }
           times.push(now)
           this.fps = times.length
+          if (this.inScreenshotPreview) {
+            clearInterval(this.fpsInterval)
+            return
+          }
           refreshLoop()
         })
       }
       refreshLoop()
       // output to console once per second
-      setInterval(() => {
-        this.fps *= 100 / T
+      this.fpsInterval = setInterval(() => {
+        this.fps *= 2000 / T
       }, T)
     }
   }
