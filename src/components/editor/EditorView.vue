@@ -127,7 +127,7 @@ export default Vue.extend({
         const self = this as any
         if (!editorUtils.enalbleComponentLog) return
         const timeSpent = performance.now() - self.timeStart
-        const omitTarget = ['ComponentLog', 'ComponentLogItem', 'DesktopEditor', 'PanelPhotoSetting', 'Btn', 'LazyLoad']
+        const omitTarget = ['ComponentLog', 'ComponentLogItem', 'DesktopEditor', 'LazyLoad']
         if (omitTarget.includes(self.$options.name)) return
 
         const tmpArr = String(Object.getPrototypeOf(self.$options).__file).split('/')
