@@ -1,15 +1,15 @@
 <template lang="pug">
-  div(class="mobile-folder-design-view")
+  mobile-design-empty(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading") {{$t('NN0239')}}
+  div(v-else class="mobile-folder-design-view")
     mobile-folder-gallery(:path="path"
                           :allFolders="allFolders"
                           :selectedNum="0")
     div(v-if="isFolderDesignDivisionNeeded" class="mobile-folder-design-view__hr")
-    mobile-design-gallery(v-if="allFolders.length > 0 || allDesigns.length > 0"
+    mobile-design-gallery(:folderLength="allFolders.length"
                           :allDesigns="allDesigns"
                           :selectedNum="selectedNum"
                           @loadMore="handleLoadMore")
-    mobile-design-empty(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading") {{$t('NN0239')}}
-    //- div(v-else class="scroll-space")
+    div(class="scroll-space")
 </template>
 
 <script lang="ts">

@@ -1,12 +1,11 @@
 <template lang="pug">
-  div(class="mobile-all-design-view")
-    mobile-design-gallery(v-if="allDesigns.length > 0"
-                          :noHeader="true"
+  mobile-design-empty(v-if="isEmpty && !isDesignsLoading")
+  div(v-else class="mobile-all-design-view")
+    mobile-design-gallery(:noHeader="true"
                           :allDesigns="allDesigns"
                           :selectedNum="selectedNum"
                           @loadMore="handleLoadMore")
-    mobile-design-empty(v-if="isEmpty && !isDesignsLoading")
-    //- div(class="scroll-space")
+    div(class="scroll-space")
 </template>
 
 <script lang="ts">
