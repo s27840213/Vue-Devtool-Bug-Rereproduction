@@ -6,11 +6,11 @@
     div(class="popup-save-design__title") {{ $t('STK0008') }}
     div(class="popup-save-design__description") {{ $t('STK0009') }}
     div(class="popup-save-design__auto-save")
-      span {{ $t('STK0010') }}
       div(class="popup-save-design__auto-save-checkbox"
           :class="{checked: userSettings.autoSave}"
           @click="handleAutoSaveToggle")
         svg-icon(v-if="userSettings.autoSave" iconName="done" iconColor="white" iconWidth="20.7px")
+      span {{ $t('STK0010') }}
     div(class="popup-save-design__buttons")
       div(class="popup-save-design__button confirm"
           @click.prevent.stop="handleSave") {{ $t('STK0004') }}
@@ -66,7 +66,7 @@ export default Vue.extend({
   width: 80vw;
   background: setColor(gray-6);
   border-radius: 10px;
-  padding: 16px 0;
+  padding: 16px 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -87,24 +87,26 @@ export default Vue.extend({
   }
   &__description {
     @include body-SM;
-    width: calc(100% - 60px);
     margin-top: 24px;
     color: setColor(gray-2);
+    line-break: anywhere;
   }
   &__auto-save {
     position: relative;
-    @include body-XS;
     margin-top: 24px;
     color: setColor(black-5);
+    display: flex;
+    align-items: flex-start;
+    align-self: start;
     > span {
       display: block;
+      @include body-XS;
+      line-height: 22px;
     }
   }
   &__auto-save-checkbox {
-    position: absolute;
-    top: calc(50% - 1px);
-    right: calc(100% + 12px);
-    transform: translateY(-50%);
+    margin-top: 2px;
+    margin-right: 12px;
     @include size(18px);
     border: 1px solid setColor(black-5);
     border-radius: 2px;
