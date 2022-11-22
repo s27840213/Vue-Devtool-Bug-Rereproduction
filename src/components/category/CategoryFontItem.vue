@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
@@ -36,7 +36,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     // host: String,
     // preview: String,

@@ -67,13 +67,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import { IDesign, IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     path: Array,
     config: Object,

@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import vClickOutside from 'v-click-outside'
 import PopupOrder from '@/components/popup/PopupOrder.vue'
 import PopupAlign from '@/components/popup/PopupAlign.vue'
@@ -30,7 +30,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import pageUtils from '@/utils/pageUtils'
 import modalUtils from '@/utils/modalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     PopupOrder,
     PopupLayer,

@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import store from '@/store'
 import DragUtils from '@/utils/dragUtils'
 import assetUtils, { RESIZE_RATIO_SVG } from '@/utils/assetUtils'
@@ -25,7 +25,7 @@ import ProItem from '@/components/payment/ProItem.vue'
 import paymentUtils from '@/utils/paymentUtils'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ProItem
   },

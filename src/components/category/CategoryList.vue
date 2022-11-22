@@ -18,7 +18,7 @@
 import Vue, { PropType } from 'vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     list: {
       type: Array as PropType<any[]>,

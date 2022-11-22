@@ -131,7 +131,7 @@
 
 <script lang="ts">
 import designUtils from '@/utils/designUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import MobileStructureFolder from '@/components/mydesign/MobileStructureFolder.vue'
@@ -139,7 +139,7 @@ import { IDesign, IFolder } from '@/interfaces/design'
 
 const PREV_BUTTON_MENUS = ['new-folder', 'move-folder']
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     MobileStructureFolder
   },
@@ -189,7 +189,7 @@ export default Vue.extend({
   mounted() {
     this.prepareForMenu(this.bottomMenu)
   },
-  destroyed() {
+  unmounted() {
     this.clearBuffers()
   },
   watch: {

@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
 import layerUtils from '@/utils/layerUtils'
@@ -23,7 +23,7 @@ import pageUtils from '@/utils/pageUtils'
 import { mapGetters, mapState } from 'vuex'
 import { IGroup, ILayer } from '@/interfaces/layer'
 import stepsUtils from '@/utils/stepsUtils'
-export default Vue.extend({
+export default defineComponent({
   components: {
     MobileSlider,
     FontSizeSelector

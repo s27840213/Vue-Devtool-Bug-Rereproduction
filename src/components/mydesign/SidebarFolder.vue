@@ -50,13 +50,13 @@
             style="pointer-events: none") {{ folder.name }}
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'sidebar-folder',
   components: {
   },

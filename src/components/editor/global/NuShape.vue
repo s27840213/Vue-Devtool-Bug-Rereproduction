@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
 import { IShape } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
@@ -49,7 +49,7 @@ const VIEWBOX_HEIGHT_REG = new RegExp(`\\${VIEWBOX_HEIGHT}`, 'g')
 const CROP_X_REG = new RegExp(`\\${CROP_X}`, 'g')
 const CROP_Y_REG = new RegExp(`\\${CROP_Y}`, 'g')
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       filterTemplate: '',

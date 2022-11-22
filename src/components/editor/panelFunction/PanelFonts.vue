@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
@@ -62,7 +62,7 @@ import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import FontTag from '@/components/global/Tags.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     CategoryList,
@@ -91,7 +91,7 @@ export default Vue.extend({
       this.addFontTags()
     }
   },
-  destroyed() {
+  unmounted() {
     this.setShowMore(false)
     TextUtils.setCurrTextInfo({ layerIndex: -1 })
   },

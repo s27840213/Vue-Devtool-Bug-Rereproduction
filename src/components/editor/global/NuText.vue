@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { IGroup, ISpan, IText } from '@/interfaces/layer'
 import { mapGetters } from 'vuex'
 import textUtils from '@/utils/textUtils'
@@ -48,7 +48,7 @@ import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import _ from 'lodash'
 
-export default Vue.extend({
+export default defineComponent({
   components: { NuCurveText },
   props: {
     config: Object,
@@ -77,7 +77,7 @@ export default Vue.extend({
   created() {
     textUtils.loadAllFonts(this.config)
   },
-  destroyed() {
+  unmounted() {
     this.isDestroyed = true
     this.resizeObserver && this.resizeObserver.disconnect()
     this.resizeObserver = undefined

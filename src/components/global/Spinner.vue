@@ -8,9 +8,9 @@
 <script lang="ts">
 
 import i18n from '@/i18n'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     textContent: {
       type: String,

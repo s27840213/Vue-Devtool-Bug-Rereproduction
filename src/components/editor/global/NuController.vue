@@ -146,7 +146,7 @@
                 @touchstart="disableTouchEvent")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { ICoordinate } from '@/interfaces/frame'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
@@ -189,7 +189,7 @@ const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
 const RESIZER_SHOWN_MIN = 4000
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     config: Object,
     layerIndex: Number,
@@ -272,7 +272,7 @@ export default Vue.extend({
     //   bodyAt.destroy()
     // })
   },
-  beforeDestroy() {
+  beforeUnmount() {
     eventUtils.removePointerEvent('pointerup', this.moveEnd)
     eventUtils.removePointerEvent('pointermove', this.moving)
     if (this.eventTarget) {
@@ -383,7 +383,7 @@ export default Vue.extend({
       !generalUtils.isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
   },
-  destroyed() {
+  unmounted() {
     /**
      * While image is setted to frame, these event-listener should be removed
      */

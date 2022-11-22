@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import { mapState, mapMutations, mapGetters } from 'vuex'
@@ -40,7 +40,7 @@ import rulerUtils from '@/utils/rulerUtils'
 import networkUtils from '@/utils/networkUtils'
 import uploadUtils from '@/utils/uploadUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       ShortcutUtils,
@@ -53,7 +53,7 @@ export default Vue.extend({
       this.designUploadStatus = status
     })
   },
-  beforeDestroy() {
+  beforeUnmount() {
     uploadUtils.offDesignUploadStatus()
   },
   computed: {

@@ -15,12 +15,12 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import popupUtils from '@/utils/popupUtils'
 import { mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       percentOptions: [25, 50, 75, 100, 125, 150, 200, 300]

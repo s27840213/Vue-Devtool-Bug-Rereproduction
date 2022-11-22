@@ -22,14 +22,14 @@
 /**
  * This components is temporarily used for img section, and it will be remove in the future
  */
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import GalleryUtils from '@/utils/galleryUtils'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ObserverSentinel,
     GalleryPhoto

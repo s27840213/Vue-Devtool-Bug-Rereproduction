@@ -63,7 +63,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
 import i18n from '@/i18n'
 import SearchBar from '@/components/SearchBar.vue'
@@ -81,7 +81,7 @@ import VueI18n from 'vue-i18n'
 import tiptapUtils from '@/utils/tiptapUtils'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     CategoryList,

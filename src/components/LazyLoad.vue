@@ -13,7 +13,7 @@ import { some } from 'lodash'
 import generalUtils from '@/utils/generalUtils'
 import { globalQueue } from '@/utils/queueUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     target: {
       type: String,
@@ -175,7 +175,7 @@ export default Vue.extend({
       // }
     }
   },
-  destroyed() {
+  unmounted() {
     this.intersectionObserver && this.intersectionObserver.disconnect()
   }
 })

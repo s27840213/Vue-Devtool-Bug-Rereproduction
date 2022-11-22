@@ -199,7 +199,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
 import markers from '@/store/module/markers'
 import vClickOutside from 'v-click-outside'
@@ -225,7 +225,7 @@ import designApis from '@/apis/design-info'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     ColorPicker,

@@ -23,10 +23,10 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import vClickOutside from 'v-click-outside'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     current: String,
     placeholder: String,

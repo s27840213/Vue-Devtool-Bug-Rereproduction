@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import RadioBtn from '@/components/global/RadioBtn.vue'
@@ -25,7 +25,7 @@ import { ILayout } from '@/interfaces/layout'
 import designUtils from '@/utils/designUtils'
 import PageSizeSelector from '@/components/mydesign/PageSizeSelector.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     RadioBtn,
     PageSizeSelector

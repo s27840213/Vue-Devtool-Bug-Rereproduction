@@ -84,7 +84,7 @@ import logUtils from '@/utils/logUtils'
 import { AxiosError } from 'axios'
 import i18n from '@/i18n'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     config: Object,
     pageIndex: Number,
@@ -164,7 +164,7 @@ export default Vue.extend({
       }
     })
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (!this.isBgImgControl) {
       if (this.config.inProcess) {
         this.setIsProcessing(LayerProcessType.none)
@@ -172,7 +172,7 @@ export default Vue.extend({
       eventUtils.off(ImageEvent.redrawCanvasShadow + this.config.id)
     }
   },
-  destroyed() {
+  unmounted() {
     this.hasDestroyed = true
   },
   data() {

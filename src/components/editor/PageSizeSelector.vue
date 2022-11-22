@@ -65,7 +65,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -78,7 +78,7 @@ import listApi from '@/apis/list'
 import generalUtils from '@/utils/generalUtils'
 import resizeUtils from '@/utils/resizeUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     isDarkTheme: {
       type: Boolean,

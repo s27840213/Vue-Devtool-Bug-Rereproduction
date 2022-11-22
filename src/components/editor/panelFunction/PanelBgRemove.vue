@@ -49,7 +49,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import store from '@/store'
@@ -69,7 +69,7 @@ import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import i18n from '@/i18n'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       minBrushSize: 1,

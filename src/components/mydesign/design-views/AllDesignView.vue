@@ -15,13 +15,13 @@
 
 <script lang="ts">
 import designUtils from '@/utils/designUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
 import BtnNewDesign from '@/components/mydesign/BtnNewDesign.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     DesignGallery,
     DiskWarning,

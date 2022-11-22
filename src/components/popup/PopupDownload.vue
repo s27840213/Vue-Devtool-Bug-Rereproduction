@@ -146,7 +146,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import { ITypeOption } from '@/interfaces/download'
@@ -161,7 +161,7 @@ import gtmUtils from '@/utils/gtmUtils'
 
 const submission = `${process.env.VUE_APP_VERSION}::download_submission`
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     DownloadCheckButton,
     DownloadTypeOption,

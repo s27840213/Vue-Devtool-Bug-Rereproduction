@@ -17,10 +17,10 @@ import { ILayer, ITmp } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import textPropUtils from '@/utils/textPropUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     config: Object,
     pageIndex: Number,

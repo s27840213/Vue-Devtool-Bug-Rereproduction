@@ -25,7 +25,7 @@ import generalUtils from '@/utils/generalUtils'
 import { mapState } from 'vuex'
 import { GalleryImage } from '@/interfaces/gallery'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     vendor: String,
     images: {

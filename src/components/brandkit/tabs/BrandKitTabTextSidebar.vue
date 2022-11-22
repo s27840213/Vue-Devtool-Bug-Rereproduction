@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
@@ -21,7 +21,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import assetUtils from '@/utils/assetUtils'
 import DragUtils from '@/utils/dragUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       MAPPING: {

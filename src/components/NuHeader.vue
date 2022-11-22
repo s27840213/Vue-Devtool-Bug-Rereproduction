@@ -88,7 +88,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import store from '@/store'
 import vClickOutside from 'v-click-outside'
 import SearchBar from '@/components/SearchBar.vue'
@@ -98,7 +98,7 @@ import MobileMenu from '@/components/homepage/MobileMenu.vue'
 import Url from '@/components/global/Url.vue'
 import constantData from '@/utils/constantData'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     PopupAccount,

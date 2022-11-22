@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import ScrollableTemplatePreview from '@/components/templates/ScrollableTemplatePreview.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
@@ -36,7 +36,7 @@ import { mapGetters } from 'vuex'
 import { ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     waterfallTemplates: Array,
     isTemplateReady: Boolean,

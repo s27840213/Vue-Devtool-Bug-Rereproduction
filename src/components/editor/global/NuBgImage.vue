@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -34,7 +34,7 @@ import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     image: Object,
     color: String,

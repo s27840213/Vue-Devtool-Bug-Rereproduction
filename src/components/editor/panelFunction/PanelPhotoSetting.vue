@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import layerUtils from '@/utils/layerUtils'
@@ -45,7 +45,7 @@ import { ShadowEffectType } from '@/interfaces/imgShadow'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       show: '',
@@ -94,7 +94,7 @@ export default Vue.extend({
     })
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoSetting)
   },
-  destroyed() {
+  unmounted() {
     document.removeEventListener('mouseup', this.handleClick)
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.none)
   },

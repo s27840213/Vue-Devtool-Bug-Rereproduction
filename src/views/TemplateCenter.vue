@@ -145,7 +145,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import hashtag from '@/store/module/hashtag'
 import vClickOutside from 'v-click-outside'
@@ -163,7 +163,7 @@ import paymentUtils from '@/utils/paymentUtils'
 
 const HEADER_HEIGHT = 72
 
-export default Vue.extend({
+export default defineComponent({
   name: 'TemplateCenter',
   components: {
     NuHeader,
@@ -312,13 +312,13 @@ export default Vue.extend({
 
     this.handleResize()
   },
-  destroyed() {
+  unmounted() {
     window.removeEventListener('resize', this.handleResize)
   },
   beforeCreate() {
     this.$store.registerModule('hashtag', hashtag)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.$store.unregisterModule('hashtag')
   },
   computed: {

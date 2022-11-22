@@ -25,13 +25,13 @@ import stepsUtils from '@/utils/stepsUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import ValueSelector from '@/components/ValueSelector.vue'
 import vClickOutside from 'v-click-outside'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ValueSelector
   },

@@ -43,7 +43,7 @@ import editorUtils from '@/utils/editorUtils'
 import Vue, { PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       editableName: '',
@@ -65,7 +65,7 @@ export default Vue.extend({
       default: false
     }
   },
-  destroyed() {
+  unmounted() {
     this.isDestroyed = true
   },
   computed: {

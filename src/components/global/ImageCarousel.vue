@@ -9,8 +9,8 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-export default Vue.extend({
+import { defineComponent } from 'vue'
+export default defineComponent({
   props: {
     speed: {
       type: Number,
@@ -32,7 +32,7 @@ export default Vue.extend({
       this.handleNext()
     }, this.speed)
   },
-  beforeDestroy () {
+  beforeUnmount () {
     clearInterval(this.handler)
     this.$emit('change', 0)
   },

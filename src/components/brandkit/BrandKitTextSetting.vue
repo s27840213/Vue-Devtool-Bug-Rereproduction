@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import ValueSelector from '@/components/ValueSelector.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import { IBrandTextStyle } from '@/interfaces/brandkit'
@@ -51,7 +51,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions } from 'vuex'
 import tiptapUtils from '@/utils/tiptapUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     type: String,
     textStyleSetting: Object

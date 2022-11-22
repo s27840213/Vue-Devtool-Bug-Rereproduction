@@ -33,7 +33,7 @@ import _ from 'lodash'
  * slide-toggle(:options="options" v-model="test" optionWidth="32px")
  */
 
-export default Vue.extend({
+export default defineComponent({
   name: 'SlideToggle',
   props: {
     // Only accept {label, value}[]

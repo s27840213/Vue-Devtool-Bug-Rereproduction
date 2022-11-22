@@ -77,7 +77,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import vClickOutside from 'v-click-outside'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
@@ -90,7 +90,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'ColorSlips',
   props: {
     whiteTheme: {
@@ -154,7 +154,7 @@ export default Vue.extend({
     }
     this.initRecentlyColors()
   },
-  destroyed() {
+  unmounted() {
     this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
     this.setIsColorPanelOpened(false)
   },

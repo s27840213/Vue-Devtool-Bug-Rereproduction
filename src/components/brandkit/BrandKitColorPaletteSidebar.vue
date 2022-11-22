@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrandColorPalette } from '@/interfaces/brandkit'
 import { mapMutations } from 'vuex'
@@ -24,7 +24,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import colorUtils from '@/utils/colorUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
     }

@@ -34,9 +34,9 @@
 
 <script lang="ts">
 import stepsUtils from '@/utils/stepsUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
     }

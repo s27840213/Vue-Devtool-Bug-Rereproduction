@@ -20,10 +20,10 @@
 import { PopupSliderEventType } from '@/store/types'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       popupUtils

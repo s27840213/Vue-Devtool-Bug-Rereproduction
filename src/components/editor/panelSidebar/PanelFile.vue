@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import uploadUtils from '@/utils/uploadUtils'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
@@ -42,7 +42,7 @@ import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     GalleryPhoto,

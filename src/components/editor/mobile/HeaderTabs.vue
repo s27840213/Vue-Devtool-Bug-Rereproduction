@@ -30,7 +30,7 @@
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import mappingUtils from '@/utils/mappingUtils'
@@ -46,7 +46,7 @@ interface IIcon {
   isPanelIcon?: boolean
 }
 
-export default Vue.extend({
+export default defineComponent({
   components: {
   },
   props: {

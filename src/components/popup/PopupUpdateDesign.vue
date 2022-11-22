@@ -55,14 +55,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import designApis from '@/apis/design-info'
 import GeneralUtils from '@/utils/generalUtils'
 import store from '@/store'
 
-export default Vue.extend({
+export default defineComponent({
   directives: {
     clickOutside: vClickOutside.directive
   },

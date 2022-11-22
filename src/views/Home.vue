@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import i18n from '@/i18n'
 import NuHeader from '@/components/NuHeader.vue'
@@ -46,7 +46,7 @@ import PopupSize from '@/components/popup/PopupSize.vue'
 import _ from 'lodash'
 import blocklistData from '@/utils/homeBlockData'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'Home',
   components: {
     NuHeader,

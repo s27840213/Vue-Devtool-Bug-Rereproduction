@@ -20,13 +20,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
 import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     ImageGallery

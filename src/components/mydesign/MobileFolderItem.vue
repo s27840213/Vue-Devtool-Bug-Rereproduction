@@ -29,10 +29,10 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     path: Array,
     config: Object,

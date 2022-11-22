@@ -212,7 +212,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
@@ -228,7 +228,7 @@ import listApi from '@/apis/list'
 import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 import pageUtils from '@/utils/pageUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     RadioBtn,

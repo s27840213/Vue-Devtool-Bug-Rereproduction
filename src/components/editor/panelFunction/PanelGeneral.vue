@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -61,7 +61,7 @@ import { IFrame, IGroup } from '@/interfaces/layer'
 import { PopupSliderEventType } from '@/store/types'
 import formatUtils from '@/utils/formatUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       ShortcutUtils,

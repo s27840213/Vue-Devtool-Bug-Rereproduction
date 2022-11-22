@@ -12,7 +12,7 @@ div(class="temp__content")
 /**
  * This components is temporarily used for text section, and it will be remove in the future
  */
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
 import shapeUtils from '@/utils/shapeUtils'
@@ -20,7 +20,7 @@ import { mapGetters } from 'vuex'
 import { ISvg } from '@/interfaces/shape'
 import pageUtils from '@/utils/pageUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       styleTextContent: [] as string[],

@@ -17,11 +17,11 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions } from 'vuex'
 import vClickOutside from 'v-click-outside'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'CardInfo',
   directives: {
     clickOutside: vClickOutside.directive

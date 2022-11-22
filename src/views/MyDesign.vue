@@ -5,11 +5,11 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MyDesignPc from '@/components/mydesign/MyDesignPC.vue'
 import MyDesignMobile from '@/components/mydesign/MyDesignMobile.vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'MyDesign',
   data() {
     return {
@@ -28,7 +28,7 @@ export default Vue.extend({
 
     this.handleResize()
   },
-  destroyed() {
+  unmounted() {
     window.removeEventListener('resize', this.handleResize)
   },
   methods: {

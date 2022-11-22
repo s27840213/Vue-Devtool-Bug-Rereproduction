@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
 import assetUtils from '@/utils/assetUtils'
@@ -32,7 +32,7 @@ import paymentUtils from '@/utils/paymentUtils'
 import generalUtils from '@/utils/generalUtils'
 import editorUtils from '@/utils/editorUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: { CategoryTemplateItem },
   props: {
     showId: Boolean,

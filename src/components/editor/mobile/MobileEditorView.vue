@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -50,7 +50,7 @@ import layerUtils from '@/utils/layerUtils'
 import editorUtils from '@/utils/editorUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     EditorHeader,
     BgRemoveArea
@@ -142,7 +142,7 @@ export default Vue.extend({
 
     this.editorViewResizeObserver.observe(this.editorView as HTMLElement)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.editorViewResizeObserver.disconnect()
   },
   watch: {

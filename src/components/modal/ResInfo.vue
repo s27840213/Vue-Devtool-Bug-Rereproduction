@@ -66,13 +66,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import i18n from '@/i18n'
 import { mapMutations, mapActions } from 'vuex'
 
 const moduleName = 'unsplash'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     info: Object
   },

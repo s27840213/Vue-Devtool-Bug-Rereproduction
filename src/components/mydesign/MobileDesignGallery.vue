@@ -31,12 +31,12 @@
 <script lang="ts">
 import { IDesign } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MobileDesignItem from '@/components/mydesign/MobileDesignItem.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     MobileDesignItem,
     ObserverSentinel

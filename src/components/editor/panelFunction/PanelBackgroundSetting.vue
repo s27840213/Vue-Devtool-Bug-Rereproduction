@@ -67,7 +67,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import vClickOutside from 'v-click-outside'
 import { mapGetters, mapMutations } from 'vuex'
 import { IPage } from '@/interfaces/page'
@@ -80,7 +80,7 @@ import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import pageUtils from '@/utils/pageUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: { PopupAdjust },
   directives: {
     clickOutside: vClickOutside.directive
@@ -147,7 +147,7 @@ export default Vue.extend({
     colorUtils.on(ColorEventType.background, this.handleChangeBgColor)
     colorUtils.onStop(ColorEventType.background, this.recordChange)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     popupUtils.event.off(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
     colorUtils.event.off(ColorEventType.background, this.handleChangeBgColor)
     colorUtils.offStop(ColorEventType.background, this.recordChange)

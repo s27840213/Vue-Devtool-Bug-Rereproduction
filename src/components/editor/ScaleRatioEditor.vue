@@ -31,12 +31,12 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
     }

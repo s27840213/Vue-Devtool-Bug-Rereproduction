@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GeneralUtils from '@/utils/generalUtils'
@@ -50,7 +50,7 @@ import assetUtils from '@/utils/assetUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     updateOptions: Array as () => Array<IPopupOptions>
   },

@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
@@ -29,7 +29,7 @@ import { mapGetters } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
 // import { CartType } from '@/store/types'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     PanelTemplate,
     PanelPhoto,

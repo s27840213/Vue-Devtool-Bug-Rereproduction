@@ -19,8 +19,8 @@
 
 <script lang="ts">
 import guideUtils from '@/utils/guideUtils'
-import Vue from 'vue'
-export default Vue.extend({
+import { defineComponent } from 'vue'
+export default defineComponent({
   props: {
     startIndex: {
       type: Number,

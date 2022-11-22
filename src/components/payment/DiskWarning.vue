@@ -20,12 +20,12 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import i18n from '@/i18n'
 import paymentUtils from '@/utils/paymentUtils'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'DiskWarning',
   props: {
     size: {

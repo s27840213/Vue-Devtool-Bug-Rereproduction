@@ -109,7 +109,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import userApis from '@/apis/user'
@@ -117,7 +117,7 @@ import store from '@/store'
 import i18n from '@/i18n'
 import localeUtils from '@/utils/localeUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     account: String,
     type: String

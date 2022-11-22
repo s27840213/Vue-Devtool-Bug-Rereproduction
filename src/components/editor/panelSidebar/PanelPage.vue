@@ -19,14 +19,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PanelPagePlus from '@/components/editor/pagePreview/PanelPagePlus.vue'
 import pageUtils from '@/utils/pageUtils'
 import { IPage } from '@/interfaces/page'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     PagePreviewPageWrapper,
     PanelPagePlus

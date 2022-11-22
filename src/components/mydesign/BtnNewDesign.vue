@@ -8,10 +8,10 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import PopupSize from '@/components/popup/PopupSize.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     PopupSize
   },

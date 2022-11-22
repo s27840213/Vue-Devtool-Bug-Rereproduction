@@ -43,7 +43,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import textBgUtils from '@/utils/textBgUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       currColor: '#fff',
@@ -89,7 +89,7 @@ export default Vue.extend({
     colorUtils.on(this.currEvent, this.handleColorUpdate)
     colorUtils.onStop(this.currEvent, this.recordChange)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     colorUtils.event.off(this.currEvent, this.handleColorUpdate)
     colorUtils.offStop(this.currEvent, this.recordChange)
   },

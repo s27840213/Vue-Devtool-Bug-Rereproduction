@@ -11,9 +11,9 @@
 <script lang="ts">
 import generalUtils from '@/utils/generalUtils'
 import svgIconUtils from '@/utils/svgIconUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'SvgIconView',
   data() {
     const icons = svgIconUtils.icons

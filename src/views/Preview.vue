@@ -5,12 +5,12 @@ div(class="preview" :style="containStyles")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
 import { mapGetters, mapState } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'Preview',
   components: {
     PageContent

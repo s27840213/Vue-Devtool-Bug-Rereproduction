@@ -21,12 +21,12 @@
               span {{view.label}}
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapState, mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
 import paymentData from '@/utils/constantData'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     current: String
   },

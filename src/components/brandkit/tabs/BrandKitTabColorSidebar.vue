@@ -12,14 +12,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import BrandKitColorPaletteSidebar from '@/components/brandkit/BrandKitColorPaletteSidebar.vue'
 import NoItemsHint from '@/components/brandkit/NoItemsHint.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
     }

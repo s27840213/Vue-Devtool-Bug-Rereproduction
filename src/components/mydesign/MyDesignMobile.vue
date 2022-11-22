@@ -76,7 +76,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import BottomMenu from '@/components/mydesign/BottomMenu.vue'
 import MobileAllDesignView from '@/components/mydesign/design-views/MobileAllDesignView.vue'
@@ -104,7 +104,7 @@ interface ITabButton {
   condition: (currLocation: string) => boolean
 }
 
-export default Vue.extend({
+export default defineComponent({
   name: 'MyDesignMobile',
   data() {
     return {

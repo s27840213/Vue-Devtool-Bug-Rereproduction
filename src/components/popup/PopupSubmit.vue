@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
@@ -17,7 +17,7 @@ import layerUtils from '@/utils/layerUtils'
 import modalUtils from '@/utils/modalUtils'
 import popupUtils from '@/utils/popupUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       MappingUtils,

@@ -63,7 +63,7 @@ lazy-load(
       :key="'placeholder'")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import i18n from '@/i18n'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
@@ -74,7 +74,7 @@ import editorUtils from '@/utils/editorUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     type: String,
     index: Number,

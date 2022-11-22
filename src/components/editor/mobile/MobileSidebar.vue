@@ -32,13 +32,13 @@
       class="text-white body-2 build-number") {{buildNumber}}
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import Avatar from '@/components/Avatar.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     Avatar
   },

@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import Popup from '@/components/popup/Popup.vue'
@@ -48,9 +48,8 @@ import ModalCard from '@/components/modal/ModalCard.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
-import generalUtils from './utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     Popup,
     'chrome-picker': Chrome,
@@ -73,7 +72,7 @@ export default Vue.extend({
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
   },
-  beforeDestroy() {
+  beforeUnmount() {
     networkUtils.unregisterNetworkListener()
   },
   computed: {

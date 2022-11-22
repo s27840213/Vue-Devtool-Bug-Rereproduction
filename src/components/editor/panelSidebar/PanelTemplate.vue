@@ -78,7 +78,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import i18n from '@/i18n'
 import { mapActions, mapState, mapMutations } from 'vuex'
 import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
@@ -96,7 +96,7 @@ import _ from 'lodash'
 import listService from '@/apis/list'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     CategoryList,

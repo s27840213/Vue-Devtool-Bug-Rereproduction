@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import AssetUtils from '@/utils/assetUtils'
@@ -24,7 +24,7 @@ import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ImageCarousel,
     ProItem

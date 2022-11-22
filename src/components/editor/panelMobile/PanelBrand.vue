@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import vClickOutside from 'v-click-outside'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
@@ -41,7 +41,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrandLogo } from '@/interfaces/brandkit'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     BrandSelector,
     BrandKitTab

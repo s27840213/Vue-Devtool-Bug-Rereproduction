@@ -161,7 +161,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapMutations, mapGetters, mapState } from 'vuex'
 import { IShape, IText, IImage, IGroup, ILayer, ITmp, IFrame, IImageStyle } from '@/interfaces/layer'
 import PageContent from '@/components/editor/page/PageContent.vue'
@@ -191,7 +191,7 @@ import generalUtils from '@/utils/generalUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     NuImage,
     NuBackgroundController,

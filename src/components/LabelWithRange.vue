@@ -1,27 +1,27 @@
 <template lang="pug">
-  div(class="label-with-range")
-    div(class="label-with-range__label flex-between"
-        :class="{ pointer: !disabled }"
-        @click="openCorRadSliderPopup")
-      div(class="label-with-range__label__description")
-        slot
-          div placeholder
-      div(class="label-with-range__label__value"
-          :class="{ disabled: disabled }")
-        input(:value="Math.round(value)"
-              @input="setValue"
-              :disabled="disabled"
-              @change="handleChangeStop")
+div(class="label-with-range")
+  div(class="label-with-range__label flex-between"
+      :class="{ pointer: !disabled }"
+      @click="openCorRadSliderPopup")
+    div(class="label-with-range__label__description")
+      slot
+        div placeholder
+    div(class="label-with-range__label__value"
+        :class="{ disabled: disabled }")
+      input(:value="Math.round(value)"
+            @input="setValue"
+            :disabled="disabled"
+            @change="handleChangeStop")
 
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import vClickOutside from 'v-click-outside'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 
-export default Vue.extend({
+export default defineComponent({
   directives: {
     clickOutside: vClickOutside.directive
   },

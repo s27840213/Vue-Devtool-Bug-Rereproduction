@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
@@ -65,7 +65,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'BrandKit',
   components: {
     NuHeader,

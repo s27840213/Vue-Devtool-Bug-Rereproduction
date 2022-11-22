@@ -15,7 +15,7 @@
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import stepsUtils from '@/utils/stepsUtils'
@@ -34,7 +34,7 @@ import editorUtils from '@/utils/editorUtils'
 import i18n from '@/i18n'
 import brandkitUtils from '@/utils/brandkitUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
   },
   props: {

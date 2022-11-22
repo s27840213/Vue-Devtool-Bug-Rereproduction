@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { Editor, EditorContent } from '@tiptap/vue-2'
 import tiptapUtils from '@/utils/tiptapUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -11,7 +11,7 @@ import { IGroup, IText, ITmp } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     EditorContent
   },
@@ -110,7 +110,7 @@ export default Vue.extend({
       }
     })
   },
-  destroyed() {
+  unmounted() {
     if (this.editor) {
       this.editor.destroy()
     }

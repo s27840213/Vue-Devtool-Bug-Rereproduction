@@ -32,12 +32,12 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       MappingUtils

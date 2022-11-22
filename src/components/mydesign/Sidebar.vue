@@ -60,13 +60,13 @@
             span {{$t('NN0226')}}
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import SidebarFolder from '@/components/mydesign/SidebarFolder.vue'
 import designUtils from '@/utils/designUtils'
 import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SidebarFolder
   },

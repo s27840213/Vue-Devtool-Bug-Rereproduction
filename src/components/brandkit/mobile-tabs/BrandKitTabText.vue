@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import BrandKitTextSetting from '@/components/brandkit/BrandKitTextSetting.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -64,7 +64,7 @@ interface IUrledFont extends IBrandFont {
   textPrevUrl?: string
 }
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       fonts: [] as IUrledFont[]
@@ -90,7 +90,7 @@ export default Vue.extend({
       }
     })
   },
-  destroyed() {
+  unmounted() {
     uploadUtils.offFontUploadStatus()
   },
   components: {

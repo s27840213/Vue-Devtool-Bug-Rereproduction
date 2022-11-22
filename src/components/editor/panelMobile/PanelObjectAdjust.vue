@@ -109,7 +109,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { ILayer, IShape } from '@/interfaces/layer'
@@ -124,7 +124,7 @@ import mappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import layerUtils from '@/utils/layerUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     MobileSlider,
     MarkerIcon

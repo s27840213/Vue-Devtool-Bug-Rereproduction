@@ -68,7 +68,7 @@ div(class="popup-window")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import vClickOutside from 'v-click-outside'
@@ -86,7 +86,7 @@ const { mapFields } = createHelpers({
   mutationType: 'payment/updateField'
 })
 
-export default Vue.extend({
+export default defineComponent({
   name: 'PopupPayment',
   components: {
     PaymentField,

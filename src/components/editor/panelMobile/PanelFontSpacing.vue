@@ -19,13 +19,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import layerUtils from '@/utils/layerUtils'
 import { mapState } from 'vuex'
 import textUtils from '@/utils/textUtils'
 import generalUtils from '@/utils/generalUtils'
-export default Vue.extend({
+export default defineComponent({
   components: {
     MobileSlider
   },

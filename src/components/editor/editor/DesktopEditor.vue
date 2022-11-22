@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import Sidebar from '@/components/editor/Sidebar.vue'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
 import SidebarPanel from '@/components/editor/SidebarPanel.vue'
@@ -63,7 +63,7 @@ import colorUtils from '@/utils/colorUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import pageUtils from '@/utils/pageUtils'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'DesktopEditor',
   components: {
     Sidebar,

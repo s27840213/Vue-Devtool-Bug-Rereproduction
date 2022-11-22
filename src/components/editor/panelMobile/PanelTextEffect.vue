@@ -72,7 +72,7 @@ import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 import textBgUtils from '@/utils/textBgUtils'
 import _ from 'lodash'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     MobileSlider
   },

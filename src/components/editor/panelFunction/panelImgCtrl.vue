@@ -13,10 +13,10 @@ import { LayerType } from '@/store/types'
 import frameUtils from '@/utils/frameUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   computed: {
     ...mapGetters('imgControl', ['isBgImgCtrl', 'isImgCtrl'])
   },

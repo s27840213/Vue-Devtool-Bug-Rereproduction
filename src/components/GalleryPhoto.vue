@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { IFrame, IImage } from '@/interfaces/layer'
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
@@ -49,7 +49,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import frameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'GalleryPhoto',
   props: {
     photo: Object,

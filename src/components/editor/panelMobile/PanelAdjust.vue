@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import { mapGetters, mapState } from 'vuex'
@@ -22,7 +22,7 @@ import pageUtils from '@/utils/pageUtils'
 import { IFrame } from '@/interfaces/layer'
 import backgroundUtils from '@/utils/backgroundUtils'
 import generalUtils from '@/utils/generalUtils'
-export default Vue.extend({
+export default defineComponent({
   components: {
     MobileSlider
   },

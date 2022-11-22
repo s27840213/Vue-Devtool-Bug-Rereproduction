@@ -21,12 +21,12 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import GeneralUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ImageCarousel,
     ProItem

@@ -12,11 +12,11 @@
 
 <script lang="ts">
 import designUtils from '@/utils/designUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     DesignGallery
   },

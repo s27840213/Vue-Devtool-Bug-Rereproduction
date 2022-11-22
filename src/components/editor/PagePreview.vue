@@ -18,7 +18,7 @@ div(class="page-preview")
         :iconWidth="'25px'")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
@@ -27,7 +27,7 @@ import { floor } from 'lodash'
 import stepsUtils from '@/utils/stepsUtils'
 import { IPage } from '@/interfaces/page'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       screenWidth: 0,

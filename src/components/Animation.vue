@@ -13,12 +13,12 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import i18n from '@/i18n'
 import axios from 'axios'
 import lottie, { AnimationItem } from 'lottie-web'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     path: {
       type: String,
@@ -87,7 +87,7 @@ export default Vue.extend({
   mounted() {
     this.init()
   },
-  destroyed() {
+  unmounted() {
     this.anim && this.anim.destroy()
   },
   methods: {

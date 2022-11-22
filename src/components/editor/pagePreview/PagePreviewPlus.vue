@@ -18,14 +18,14 @@
       class="page-preview-plus-drag")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     index: Number,
     last: Boolean

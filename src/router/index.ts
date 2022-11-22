@@ -1,4 +1,4 @@
-import VueRouter, { RawLocation, Route, RouteConfig, createRouter, createWebHistory } from 'vue-router';
+import VueRouter, { RawLocation, Route, RouteConfig, createRouter, createWebHistory } from 'vue-router'
 import Editor from '@/views/Editor.vue'
 import SignUp from '@/views/Login/SignUp.vue'
 import Login from '@/views/Login/Login.vue'

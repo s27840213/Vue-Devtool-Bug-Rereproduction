@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import textShapeUtils from '@/utils/textShapeUtils'
 import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
@@ -26,7 +26,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-export default Vue.extend({
+export default defineComponent({
   components: {
     MobileSlider
   },

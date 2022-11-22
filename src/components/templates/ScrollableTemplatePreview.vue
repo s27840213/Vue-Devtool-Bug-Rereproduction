@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import { IContentTemplate } from '@/interfaces/template'
 import mouseUtils from '@/utils/mouseUtils'
@@ -22,7 +22,7 @@ import mouseUtils from '@/utils/mouseUtils'
 const SCROLL_MARGIN_HALF = 5
 const SCROLL_MARGIN = SCROLL_MARGIN_HALF * 2
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     isMobile: Boolean,
     contentIds: Array

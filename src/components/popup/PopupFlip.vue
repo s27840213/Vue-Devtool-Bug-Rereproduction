@@ -16,9 +16,9 @@
 import { LayerType } from '@/store/types'
 import layerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       MappingUtils,
@@ -37,7 +37,7 @@ export default Vue.extend({
       }
     }
   },
-  destroyed() {
+  unmounted() {
     this.destoryCb && this.destoryCb()
   },
   methods: {

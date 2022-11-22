@@ -6,9 +6,9 @@
     line(:x1="x1" y1="5" :x2="iconWidth" y2="5" :stroke="iconColor" strokeWidth="2.5px")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'MarkerIcon',
   props: {
     iconWidth: {

@@ -25,12 +25,12 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 import i18n from '@/i18n'
 import Animation from '@/components/Animation.vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'Block', // need rename
   components: {
     Animation

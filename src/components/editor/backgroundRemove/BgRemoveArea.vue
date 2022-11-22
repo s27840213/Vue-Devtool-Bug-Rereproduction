@@ -22,10 +22,10 @@ import { IBgRemoveInfo } from '@/interfaces/image'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     editorViewCanvas: HTMLElement
   },
@@ -93,7 +93,7 @@ export default Vue.extend({
     this.setPrevPageScaleRatio(this.scaleRatio)
     pageUtils.fitPage()
   },
-  destroyed() {
+  unmounted() {
     window.removeEventListener('mouseup', this.drawEnd)
     window.removeEventListener('mousemove', this.brushMoving)
     this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)

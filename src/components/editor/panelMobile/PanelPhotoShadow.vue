@@ -31,7 +31,7 @@
           button(@click="imageShadowPanelUtils.reset()") {{ 'Reset' }}
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -42,7 +42,7 @@ import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
-export default Vue.extend({
+export default defineComponent({
   components: {
     MobileSlider
   },
@@ -57,7 +57,7 @@ export default Vue.extend({
   mounted() {
     imageShadowPanelUtils.mount()
   },
-  // beforeDestroy() {
+  // beforeUnmount() {
   //   imageShadowPanelUtils.handleShadowUpload()
   // },
   computed: {

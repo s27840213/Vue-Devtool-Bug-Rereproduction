@@ -47,7 +47,7 @@
 
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import { IPage } from '@/interfaces/page'
@@ -57,7 +57,7 @@ import { IImage } from '@/interfaces/layer'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     NuBackgroundController
   },

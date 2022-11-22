@@ -22,11 +22,11 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import stepsUtils from '@/utils/stepsUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     imageAdjust: {
       type: Object,

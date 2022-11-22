@@ -34,14 +34,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
 import { Itheme } from '@/interfaces/theme'
 import themeUtils from '@/utils/themeUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: { DownloadCheckButton },
   directives: {
     clickOutside: vClickOutside.directive

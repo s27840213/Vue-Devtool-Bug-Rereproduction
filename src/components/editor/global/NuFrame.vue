@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import AssetUtils from '@/utils/assetUtils'
@@ -28,7 +28,7 @@ import { mapGetters } from 'vuex'
 import layerFactary from '@/utils/layerFactary'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   inheritAttrs: false,
   props: {
     config: Object,

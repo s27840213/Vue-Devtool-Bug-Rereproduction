@@ -13,12 +13,12 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     hasImage: {
       type: Boolean,

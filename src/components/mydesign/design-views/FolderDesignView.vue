@@ -126,7 +126,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import vClickOutside from 'v-click-outside'
 import { IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
@@ -136,7 +136,7 @@ import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import hintUtils from '@/utils/hintUtils'
 import BtnNewDesign from '@/components/mydesign/BtnNewDesign.vue'
 
-export default Vue.extend({
+export default defineComponent({
   mounted() {
     hintUtils.bind(this.$refs.more as HTMLElement, `${this.$t('NN0225')}`, 500)
     hintUtils.bind(this.$refs.newFolder as HTMLElement, `${this.$t('NN0190')}`, 500)
@@ -144,7 +144,7 @@ export default Vue.extend({
     this.refreshItemCount()
     window.addEventListener('resize', this.handleResize)
   },
-  destroyed() {
+  unmounted() {
     window.removeEventListener('resize', this.handleResize)
   },
   components: {

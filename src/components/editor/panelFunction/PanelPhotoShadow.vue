@@ -79,7 +79,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorPanel from '@/components/editor/ColorSlips.vue'
 import colorUtils from '@/utils/colorUtils'
@@ -91,7 +91,7 @@ import { IShadowEffects, ShadowEffectType } from '@/interfaces/imgShadow'
 import { mapActions, mapGetters } from 'vuex'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ColorPicker,
     ColorPanel
@@ -105,10 +105,10 @@ export default Vue.extend({
   mounted() {
     imageShadowPanelUtils.mount()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     imageShadowPanelUtils.handleShadowUpload()
   },
-  destroyed() {
+  unmounted() {
     this.$nextTick(() => {
       this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoSetting)
     })

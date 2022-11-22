@@ -55,7 +55,7 @@
         @switchTab="switchTab")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
@@ -99,7 +99,7 @@ import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import _ from 'lodash'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'mobile-panel',
   props: {
     currActivePanel: {
@@ -521,7 +521,7 @@ export default Vue.extend({
     })
     this.resizeObserver.observe(this.$refs.panel as Element)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.resizeObserver && this.resizeObserver.disconnect()
   },
   methods: {

@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MobileEditorView from '@/components/editor/mobile/MobileEditorView.vue'
 import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
 import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
@@ -52,7 +52,7 @@ import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'MobileEditor',
   components: {
     MobileEditorView,

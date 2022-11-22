@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import { Chrome } from 'vue-color'
@@ -41,7 +41,7 @@ import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     currentColor: String,
     isMobile: {

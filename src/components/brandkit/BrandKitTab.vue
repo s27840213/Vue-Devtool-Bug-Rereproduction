@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import BrandKitTabLogo from '@/components/brandkit/tabs/BrandKitTabLogo.vue'
 import BrandKitTabText from '@/components/brandkit/tabs/BrandKitTabText.vue'
@@ -46,7 +46,7 @@ import BrandKitTabColorSidebarMobile from '@/components/brandkit/mobile-tabs/Bra
 import { mapGetters, mapMutations } from 'vuex'
 import { IDeletingItem } from '@/interfaces/brandkit'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     theme: {
       type: String,

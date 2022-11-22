@@ -62,7 +62,7 @@ div(class="settings-account")
   spinner(v-if="isLoading")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import i18n from '@/i18n'
 import { mapState, mapGetters } from 'vuex'
 import PopupVerify from '@/components/popup/PopupVerify.vue'
@@ -72,7 +72,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import localeUtils, { ILocale } from '@/utils/localeUtils'
 import GeneralUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     PopupVerify,
     Avatar

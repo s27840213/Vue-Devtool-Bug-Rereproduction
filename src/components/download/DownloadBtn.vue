@@ -17,13 +17,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import modalUtils from '@/utils/modalUtils'
 import { FunctionPanelType } from '@/store/types'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     PopupDownload
   },

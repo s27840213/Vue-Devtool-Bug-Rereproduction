@@ -45,13 +45,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import { IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import FolderItem from '@/components/mydesign/FolderItem.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     FolderItem
   },

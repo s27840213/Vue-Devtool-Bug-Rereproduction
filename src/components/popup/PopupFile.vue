@@ -58,7 +58,7 @@ div(class="popup-file")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import popupUtils from '@/utils/popupUtils'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
@@ -70,7 +70,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import page from '@/store/module/page'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     Avatar
   },

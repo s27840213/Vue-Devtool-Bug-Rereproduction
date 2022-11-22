@@ -19,14 +19,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import brandkitUtils from '@/utils/brandkitUtils'
 import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import BrandKitColorPalette from '@/components/brandkit/BrandKitColorPalette.vue'
 import { IBrand, IBrandColorPalette, IDeletingItem } from '@/interfaces/brandkit'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       selectedColor: {

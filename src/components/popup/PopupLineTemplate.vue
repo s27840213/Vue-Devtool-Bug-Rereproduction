@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters } from 'vuex'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
@@ -45,7 +45,7 @@ import popupUtils from '@/utils/popupUtils'
 import { LineTemplatesType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     const tmp = MappingUtils.mappingIconSet('lineTemplate')
     const lineTemplate1 = tmp.slice(0, 8)

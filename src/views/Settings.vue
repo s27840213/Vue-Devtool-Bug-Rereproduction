@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import router from '@/router'
 import Sidebar from '@/components/settings/Sidebar.vue'
 import NuHeader from '@/components/NuHeader.vue'
@@ -22,7 +22,7 @@ import SettingsSecurity from '@/components/settings/SettingsSecurity.vue'
 import SettingsPayment from '@/components/settings/SettingsPayment.vue'
 import SettingsBill from '@/components/settings/SettingsBill.vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'Settings',
   props: {
     view: String

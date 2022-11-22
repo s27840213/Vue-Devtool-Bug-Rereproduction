@@ -15,12 +15,12 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     BrandSelector,
     BrandKitTab

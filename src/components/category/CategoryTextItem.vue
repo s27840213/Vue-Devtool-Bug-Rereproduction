@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import store from '@/store'
 import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
@@ -18,7 +18,7 @@ import textPropUtils from '@/utils/textPropUtils'
 import DragUtils from '@/utils/dragUtils'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     src: String,
     item: Object

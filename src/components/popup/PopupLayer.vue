@@ -84,7 +84,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -101,7 +101,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     updateOptions: Array as () => Array<IPopupOptions>
   },

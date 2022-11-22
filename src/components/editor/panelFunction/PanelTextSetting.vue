@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -94,7 +94,7 @@ import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     ColorPicker,
@@ -157,7 +157,7 @@ export default Vue.extend({
       }
     })
   },
-  destroyed() {
+  unmounted() {
     this.setCurrFunctionPanel(FunctionPanelType.none)
     if (!this.isOpenFontPanel) {
       TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())

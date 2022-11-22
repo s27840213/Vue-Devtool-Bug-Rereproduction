@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import { IGroup, ISpan } from '@/interfaces/layer'
@@ -19,7 +19,7 @@ import LayerUtils from '@/utils/layerUtils'
 import textUtils from '@/utils/textUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     config: Object,
     layerIndex: Number,
@@ -44,7 +44,7 @@ export default Vue.extend({
     // textUtils.loadAllFonts(this.config, 1)
     textUtils.loadAllFonts(this.config)
   },
-  destroyed() {
+  unmounted() {
     this.isDestroyed = true
     this.resizeObserver && this.resizeObserver.disconnect()
     this.resizeObserver = undefined

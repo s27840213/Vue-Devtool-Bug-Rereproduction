@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import ControlUtils from '@/utils/controlUtils'
@@ -28,7 +28,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     config: Object,
     pageIndex: Number,
@@ -49,7 +49,7 @@ export default Vue.extend({
       control: { xSign: 1, ySign: 1, isHorizon: false }
     }
   },
-  destroyed() {
+  unmounted() {
     PageUtils.setBackgroundImageControlDefault()
   },
   computed: {

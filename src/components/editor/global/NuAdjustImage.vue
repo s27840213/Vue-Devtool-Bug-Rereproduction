@@ -28,13 +28,16 @@
 <script lang="ts">
 import GeneralUtils from '@/utils/generalUtils'
 import ImageAdjustUtil from '@/utils/imageAdjustUtil'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     src: String,
-    styles: Object,
+    styles: {
+      type: Object,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number

@@ -5,10 +5,10 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { throttle, some } from 'lodash'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     target: {
       type: String,
@@ -44,7 +44,7 @@ export default Vue.extend({
       this.$emit('callback')
     }, 500)
   },
-  destroyed() {
+  unmounted() {
     this.intersectionObserver && this.intersectionObserver.disconnect()
   }
 })

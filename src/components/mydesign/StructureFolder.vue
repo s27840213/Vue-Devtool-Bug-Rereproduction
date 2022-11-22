@@ -23,12 +23,12 @@
                     :parents="[...parents, folder.id]")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import { mapActions, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'structure-folder',
   props: {
     folder: Object,

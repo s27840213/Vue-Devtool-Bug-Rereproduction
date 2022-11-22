@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import * as type from '@/interfaces/payment'
 // import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -61,7 +61,7 @@ import * as type from '@/interfaces/payment'
 // @ts-ignore
 import html2pdf from 'html2pdf.js'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'SettingsBill',
   // components: {
   //   ObserverSentinel

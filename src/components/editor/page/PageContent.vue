@@ -83,7 +83,7 @@ div(class="overflow-container"
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
@@ -100,7 +100,7 @@ import generalUtils from '@/utils/generalUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
 import { ILayer } from '@/interfaces/layer'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     NuBgImage,
     LazyLoad

@@ -25,10 +25,10 @@ import { ISnapline } from '@/interfaces/snap'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import SnapUtils from '@/utils/snapUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     config: Object as () => IPage,
     pageIndex: Number,
@@ -47,7 +47,7 @@ export default Vue.extend({
     this.snapUtils.on(`getClosestSnaplines-${this.snapUtils.id}`, this.getClosestSnaplines)
     this.snapUtils.on('clearSnapLines', this.clearSnap)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.snapUtils.off(`getClosestSnaplines-${this.snapUtils.id}`, this.getClosestSnaplines)
     this.snapUtils.off('clearSnapLines', this.clearSnap)
   },

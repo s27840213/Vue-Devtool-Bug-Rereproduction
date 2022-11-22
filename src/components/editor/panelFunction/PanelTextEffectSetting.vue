@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import vClickOutside from 'v-click-outside'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
@@ -79,7 +79,7 @@ import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 import localStorageUtils from '@/utils/localStorageUtils'
 import _ from 'lodash'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ColorPicker
   },
@@ -114,7 +114,7 @@ export default Vue.extend({
     colorUtils.on(ColorEventType.textEffect, (color: string) => this.handleColorUpdate(color))
     colorUtils.onStop(ColorEventType.textEffect, this.recordChange)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     colorUtils.event.off(ColorEventType.textEffect, (color: string) => this.handleColorUpdate(color))
     colorUtils.offStop(ColorEventType.textEffect, this.recordChange)
   },

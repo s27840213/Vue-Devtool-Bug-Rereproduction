@@ -13,10 +13,10 @@ import stepsUtils from '@/utils/stepsUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import editorUtils from '@/utils/editorUtils'
 
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     DesktopEditor,
     MobileEditor

@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
@@ -39,7 +39,7 @@ import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow
 import groupUtils from '@/utils/groupUtils'
 import controlUtils from '@/utils/controlUtils'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'MobileImageAdjust',
   directives: {
     clickOutside: vClickOutside.directive

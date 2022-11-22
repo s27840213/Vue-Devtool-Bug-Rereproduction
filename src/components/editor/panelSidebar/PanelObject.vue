@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
@@ -48,7 +48,7 @@ import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceCont
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     CategoryList,

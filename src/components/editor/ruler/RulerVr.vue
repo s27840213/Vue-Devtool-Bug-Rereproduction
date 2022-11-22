@@ -15,10 +15,10 @@ div(class="ruler-vr"
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     canvasRect: DOMRect,
     editorView: HTMLElement

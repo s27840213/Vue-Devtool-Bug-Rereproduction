@@ -17,13 +17,13 @@ div(class="temp__content")
 /**
  * This components is temporarily used for text section, and it will be remove in the future
  */
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import CssConveter from '@/utils/cssConverter'
 import { IText } from '@/interfaces/layer'
 import textUtils from '@/utils/textUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       contents: [

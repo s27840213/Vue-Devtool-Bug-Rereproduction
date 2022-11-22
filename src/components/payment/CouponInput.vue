@@ -13,7 +13,7 @@ div(class="coupon-input")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import Animation from '@/components/Animation.vue'
@@ -23,7 +23,7 @@ const { mapFields } = createHelpers({
   mutationType: 'payment/updateField'
 })
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     Animation
   },

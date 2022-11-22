@@ -44,7 +44,7 @@ import { mapGetters } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 import { ILayer } from '@/interfaces/layer'
 
-export default Vue.extend({
+export default defineComponent({
   inheritAttrs: false,
   components: {
     SquareLoading

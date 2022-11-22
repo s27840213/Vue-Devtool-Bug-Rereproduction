@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import PanelGeneral from '@/components/editor/panelFunction/PanelGeneral.vue'
 import PanelTextSetting from '@/components/editor/panelFunction/PanelTextSetting.vue'
 import PanelColorPicker from '@/components/editor/panelFunction/PanelColorPicker.vue'
@@ -67,7 +67,7 @@ import { FunctionPanelType, LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     PanelGeneral,
     PanelTextSetting,

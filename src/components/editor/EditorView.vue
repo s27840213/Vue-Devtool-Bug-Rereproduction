@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -76,7 +76,7 @@ import DiskWarning from '@/components/payment/DiskWarning.vue'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     EditorHeader,
     RulerHr,

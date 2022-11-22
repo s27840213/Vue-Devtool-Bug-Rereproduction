@@ -43,14 +43,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import vClickOutside from 'v-click-outside'
 import { IBrandColor, IBrandColorPalette } from '@/interfaces/brandkit'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       isNameEditing: false,

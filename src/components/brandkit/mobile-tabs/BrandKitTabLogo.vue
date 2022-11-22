@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
@@ -65,7 +65,7 @@ import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       menuOpenLogoId: ''

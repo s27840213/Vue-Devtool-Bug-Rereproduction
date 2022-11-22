@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
@@ -68,7 +68,7 @@ import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import Tabs from '@/components/Tabs.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     ColorPicker,
@@ -200,7 +200,7 @@ export default Vue.extend({
     this.$refs.mainContent[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
     this.$refs.searchResult[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
-  beforeDestroy() {
+  beforeUnmount() {
     colorUtils.event.off(ColorEventType.background, (color: string) => {
       this.setBgColor(color)
     })

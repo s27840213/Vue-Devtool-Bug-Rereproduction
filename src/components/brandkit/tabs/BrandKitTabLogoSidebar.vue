@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import NoItemsHint from '@/components/brandkit/NoItemsHint.vue'
@@ -37,7 +37,7 @@ import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import GalleryUtils from '@/utils/galleryUtils'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       rows: [] as any[],

@@ -201,7 +201,7 @@ div(style="position: relative;")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import i18n from '@/i18n'
 import store from '@/store'
 import userApis from '@/apis/user'
@@ -211,7 +211,7 @@ import loginUtils from '@/utils/loginUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import fbPixelUtils from '@/utils/fbPixelUtils'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'Login',
   props: {
     redirect: {

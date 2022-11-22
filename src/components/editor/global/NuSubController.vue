@@ -42,7 +42,7 @@
                 @compositionend="handleTextCompositionEnd")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import CssConveter from '@/utils/cssConverter'
@@ -75,7 +75,7 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import pageUtils from '@/utils/pageUtils'
 import SvgPath from 'svgpath'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     config: Object,
     layerIndex: Number,
@@ -220,7 +220,7 @@ export default Vue.extend({
       !GeneralUtils.isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal }, this.layerIndex)
     }
   },
-  destroyed() {
+  unmounted() {
     // the condition indicates the primaryLayer transform from group-layer to tmp-layer
     if (this.config.type === 'text' && this.primaryLayer && this.primaryLayer.id === this.parentId) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false })

@@ -93,14 +93,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import vClickOutside from 'v-click-outside'
 import imageUtils from '@/utils/imageUtils'
 import designUtils from '@/utils/designUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ImageCarousel
   },

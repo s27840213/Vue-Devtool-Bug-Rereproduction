@@ -52,14 +52,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { ILayout } from '@/interfaces/layout'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 // TODO: merge with @/components/editor/PageSizeSelector.vue
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     isDarkTheme: {
       type: Boolean,

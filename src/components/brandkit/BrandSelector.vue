@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import brandkitUtils from '@/utils/brandkitUtils'
@@ -65,7 +65,7 @@ import { IBrand } from '@/interfaces/brandkit'
 import generalUtils from '@/utils/generalUtils'
 import editorUtils from '@/utils/editorUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     theme: {
       type: String,

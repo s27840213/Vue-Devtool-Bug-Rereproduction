@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import ControlUtils from '@/utils/controlUtils'
@@ -31,7 +31,7 @@ import pageUtils from '@/utils/pageUtils'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     config: Object,
     layerIndex: Number,
@@ -81,7 +81,7 @@ export default Vue.extend({
       }
     }
   },
-  destroyed() {
+  unmounted() {
     for (let i = 0; i < this.getPage(this.pageIndex).layers.length; i++) {
       if (LayerUtils.getLayer(this.pageIndex, i).type === 'image') {
         ControlUtils.updateLayerProps(this.pageIndex, i, { imgControl: false })

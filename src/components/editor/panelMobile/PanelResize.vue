@@ -5,10 +5,10 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     PageSizeSelector
   },

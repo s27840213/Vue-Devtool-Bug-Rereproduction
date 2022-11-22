@@ -27,13 +27,13 @@ div(class="settings-security")
       @close="closePopup()")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import i18n from '@/i18n'
 import { mapGetters } from 'vuex'
 import PopupVerify from '@/components/popup/PopupVerify.vue'
 import localeUtils from '@/utils/localeUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     PopupVerify
   },

@@ -106,7 +106,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import store from '@/store'
 import { mapGetters } from 'vuex'
 import { Itheme } from '@/interfaces/theme'
@@ -115,7 +115,7 @@ import designUtils from '@/utils/designUtils'
 import localeUtils, { ILocale } from '@/utils/localeUtils'
 import paymentUtils from '@/utils/paymentUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     isHome: {
       type: Boolean,

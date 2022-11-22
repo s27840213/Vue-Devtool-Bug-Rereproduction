@@ -8,9 +8,9 @@
     div(v-if="isHovered" class="radio-btn__hover-effect")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     isSelected: Boolean,
     formatKey: String,

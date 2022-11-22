@@ -11,11 +11,11 @@ import { LayerType } from '@/store/types'
 import cssConverter from '@/utils/cssConverter'
 import frameUtils from '@/utils/frameUtils'
 import layerUtils from '@/utils/layerUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import Svgpath from 'svgpath'
 import pageUtils from '@/utils/pageUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     config: Object,
     pageIndex: Number,

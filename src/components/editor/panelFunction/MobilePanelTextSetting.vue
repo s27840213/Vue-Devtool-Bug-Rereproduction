@@ -93,7 +93,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -115,7 +115,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import pageUtils from '@/utils/pageUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     ColorPicker,
@@ -173,7 +173,7 @@ export default Vue.extend({
       }
     })
   },
-  destroyed() {
+  unmounted() {
     this.setCurrFunctionPanel(FunctionPanelType.none)
     this.$emit('toggleConfigPanel', false)
     if (!this.isOpenFontPanel) {
