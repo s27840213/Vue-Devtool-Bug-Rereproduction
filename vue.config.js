@@ -98,6 +98,14 @@ module.exports = {
                 return args
             })
         }
+        // Write build number to ver.txt in production.
+        if (process.env.NODE_ENV === 'production') {
+            const fs = require('fs')
+            const content = process.env.BITBUCKET_BUILD_NUMBER || ''
+            fs.writeFile('ver.txt', content, err => {
+                if (err) console.error(err)
+            })
+        }
 
         if (argv.PRERENDER) {
             // Tell Vue (CLI 3) to provide this file to Pre-SPA:
