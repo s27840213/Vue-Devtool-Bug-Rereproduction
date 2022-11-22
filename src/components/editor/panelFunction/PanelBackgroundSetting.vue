@@ -1,69 +1,69 @@
 <template lang="pug">
-  div(class="bg-setting")
-    span(class="bg-setting__title text-blue-1 label-lg") {{$t('NN0142')}}
-    div(class="action-bar flex-evenly my-10")
-      svg-icon(class="btn-opacity pointer p-5 feature-button"
-        iconName="transparency" :iconWidth="'20px'"
-        :class="{ 'disabled': backgroundLocked }"
-        :iconColor="'gray-2'"
-        @click.native="openSliderPopup()"
-        v-hint="$t('NN0030')"
-      )
-      svg-icon(class="pointer p-5 feature-button"
-        :class="{ 'active': backgroundLocked }"
-        :iconName="backgroundLocked ? 'unlock' : 'lock'"
-        :iconWidth="'20px'"
-        :iconColor="'gray-2'"
-        @click.native="handleLockBackground"
-        v-hint="backgroundLocked ? $t('NN0382'): $t('NN0143')"
-      )
-      svg-icon(class="pointer p-5 feature-button"
-        :class="{ 'disabled': backgroundLocked }"
-        :iconColor="'gray-2'"
-        iconName="trash" :iconWidth="'20px'"
-        @click.native="handleDeleteBackground"
-        v-hint="$t('NN0034')"
-      )
-    div(class="mb-10")
-      btn(class="full-width"
-        :class="backgroundImgControl ? 'active' : ''"
-        type="gray-mid"
-        :disabled="!isShowImage || backgroundLocked"
-        @click.native="() => handleControlBgImage()") {{$t('NN0040')}}
-    div(class="bg-setting__grid mb-10")
-      btn(class="full-width"
-        :class="show === 'popup-flip' ? 'active' : ''"
-        type="gray-mid"
-        :disabled="!isShowImage || backgroundLocked"
-        @click.native="() => handleShow('popup-flip')") {{$t('NN0038')}}
-      btn(class="full-width"
-        :class="show === 'popup-adjust' ? 'active' : ''"
-        type="gray-mid"
-        :disabled="!isShowImage || backgroundLocked"
-        @click.native="handleShow('popup-adjust')") {{$t('NN0042')}}
-    div(class="mb-10 text-left")
-      div(v-if="show === 'popup-flip'"
-        class="popup-flip"
-        v-click-outside="handleOutSide")
-        div(v-for="data in popupDatas"
-            :key="`popup-${data.icon}`"
-            class="popup-flip__item"
-            @click="() => handleImageFlip(data.icon)")
-          svg-icon(
-            class="pointer"
-            :iconName="data.icon"
-            :iconWidth="'12px'"
-            :iconColor="'gray-1'")
-          span(class="ml-5 body-2") {{data.text}}
-      popup-adjust(v-if="show === 'popup-adjust'"
-        :imageAdjust="backgroundAdjust"
-        @update="handleChangeBgAdjust"
-        v-click-outside="handleOutSide")
-    div
-      div(class="bg-setting__current-color"
-        @click="() => handleColorPicker()"
-        :class="colorPickerClass"
-        :style="colorPickerStyle")
+div(class="bg-setting")
+  span(class="bg-setting__title text-blue-1 label-lg") {{$t('NN0142')}}
+  div(class="action-bar flex-evenly my-10")
+    svg-icon(class="btn-opacity pointer p-5 feature-button"
+      iconName="transparency" :iconWidth="'20px'"
+      :class="{ 'disabled': backgroundLocked }"
+      :iconColor="'gray-2'"
+      @click.native="openSliderPopup()"
+      v-hint="$t('NN0030')"
+    )
+    svg-icon(class="pointer p-5 feature-button"
+      :class="{ 'active': backgroundLocked }"
+      :iconName="backgroundLocked ? 'unlock' : 'lock'"
+      :iconWidth="'20px'"
+      :iconColor="'gray-2'"
+      @click.native="handleLockBackground"
+      v-hint="backgroundLocked ? $t('NN0382'): $t('NN0143')"
+    )
+    svg-icon(class="pointer p-5 feature-button"
+      :class="{ 'disabled': backgroundLocked }"
+      :iconColor="'gray-2'"
+      iconName="trash" :iconWidth="'20px'"
+      @click.native="handleDeleteBackground"
+      v-hint="$t('NN0034')"
+    )
+  div(class="mb-10")
+    btn(class="full-width"
+      :class="backgroundImgControl ? 'active' : ''"
+      type="gray-mid"
+      :disabled="!isShowImage || backgroundLocked"
+      @click.native="() => handleControlBgImage()") {{$t('NN0040')}}
+  div(class="bg-setting__grid mb-10")
+    btn(class="full-width"
+      :class="show === 'popup-flip' ? 'active' : ''"
+      type="gray-mid"
+      :disabled="!isShowImage || backgroundLocked"
+      @click.native="() => handleShow('popup-flip')") {{$t('NN0038')}}
+    btn(class="full-width"
+      :class="show === 'popup-adjust' ? 'active' : ''"
+      type="gray-mid"
+      :disabled="!isShowImage || backgroundLocked"
+      @click.native="handleShow('popup-adjust')") {{$t('NN0042')}}
+  div(class="mb-10 text-left")
+    div(v-if="show === 'popup-flip'"
+      class="popup-flip"
+      v-click-outside="handleOutSide")
+      div(v-for="data in popupDatas"
+          :key="`popup-${data.icon}`"
+          class="popup-flip__item"
+          @click="() => handleImageFlip(data.icon)")
+        svg-icon(
+          class="pointer"
+          :iconName="data.icon"
+          :iconWidth="'12px'"
+          :iconColor="'gray-1'")
+        span(class="ml-5 body-2") {{data.text}}
+    popup-adjust(v-if="show === 'popup-adjust'"
+      :imageAdjust="backgroundAdjust"
+      @update="handleChangeBgAdjust"
+      v-click-outside="handleOutSide")
+  div
+    div(class="bg-setting__current-color"
+      @click="() => handleColorPicker()"
+      :class="colorPickerClass"
+      :style="colorPickerStyle")
 </template>
 
 <script lang="ts">

@@ -1,7 +1,7 @@
 <template lang="pug">
-  div(class="panel-resize")
-    keep-alive
-      page-size-selector(:isDarkTheme="false" ref="pageSizeSelector")
+div(class="panel-resize")
+  keep-alive
+    page-size-selector(:isDarkTheme="false" ref="pageSizeSelector")
 </template>
 
 <script lang="ts">

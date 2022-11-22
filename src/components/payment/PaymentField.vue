@@ -1,35 +1,35 @@
 <template lang="pug">
-  div(class="field")
-    template(v-if="isChange")
-      svg-icon(iconName="page-close" iconWidth="10px"
-              iconColor="gray-0" class="field__close pointer" @click.native="close()")
-      span(class="text-H6 text-gray-2 mb-40") {{$t('NN0600')}}
-    div(class="field-card")
-      options(v-if="!isChange" class="mb-10"
-              :options="countryData" v-model="userCountryUi")
-      div(:class="{hidden: !useTappay}" class="field-card-tappay")
-        div(id="card-number")
-        div(id="card-date")
-        div(id="card-ccv")
-      div(:class="{hidden: useTappay}" class="field-card-stripe" id="stripe")
-        svg-icon(iconName="loading" iconColor="gray-1")
-      template(v-if="!isChange")
-        div(v-if="PaidDate" class="field-card__info")
-          span {{$t('NN0552', {date: PaidDate})}}
-          span {{`$${plans[planSelected][periodUi].nextPaid - coupon.discount}`}}
-        div(v-if="coupon.discount!==0" class="field-card__info text-green-1")
-          span {{$t('NN0699')}}
-          span {{`-$${coupon.discount}`}}
-        div(class="field-card__info overline-LG")
-          span {{$t('NN0553')}}
-          span {{priceToday}}
-    div(v-if="!isChange" class="field-invoice")
-      div(class="text-H4 mb-25") {{$t('NN0554')}}
-      div(v-for="inv in invoiceInput" class="field-invoice__input")
-        input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
-        span(v-if="biv[inv.key]" class="text-red") {{inv.error}}
-    btn(class="btn-LG mt-30 rounded" type="primary-lg"
-        :disabled="disableSubmit" @click.native="submit()") {{submitText}}
+div(class="field")
+  template(v-if="isChange")
+    svg-icon(iconName="page-close" iconWidth="10px"
+            iconColor="gray-0" class="field__close pointer" @click.native="close()")
+    span(class="text-H6 text-gray-2 mb-40") {{$t('NN0600')}}
+  div(class="field-card")
+    options(v-if="!isChange" class="mb-10"
+            :options="countryData" v-model="userCountryUi")
+    div(:class="{hidden: !useTappay}" class="field-card-tappay")
+      div(id="card-number")
+      div(id="card-date")
+      div(id="card-ccv")
+    div(:class="{hidden: useTappay}" class="field-card-stripe" id="stripe")
+      svg-icon(iconName="loading" iconColor="gray-1")
+    template(v-if="!isChange")
+      div(v-if="PaidDate" class="field-card__info")
+        span {{$t('NN0552', {date: PaidDate})}}
+        span {{`$${plans[planSelected][periodUi].nextPaid - coupon.discount}`}}
+      div(v-if="coupon.discount!==0" class="field-card__info text-green-1")
+        span {{$t('NN0699')}}
+        span {{`-$${coupon.discount}`}}
+      div(class="field-card__info overline-LG")
+        span {{$t('NN0553')}}
+        span {{priceToday}}
+  div(v-if="!isChange" class="field-invoice")
+    div(class="text-H4 mb-25") {{$t('NN0554')}}
+    div(v-for="inv in invoiceInput" class="field-invoice__input")
+      input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
+      span(v-if="biv[inv.key]" class="text-red") {{inv.error}}
+  btn(class="btn-LG mt-30 rounded" type="primary-lg"
+      :disabled="disableSubmit" @click.native="submit()") {{submitText}}
 </template>
 
 <script lang="ts">

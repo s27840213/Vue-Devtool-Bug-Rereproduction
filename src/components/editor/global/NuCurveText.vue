@@ -1,12 +1,12 @@
 <template lang="pug">
-  p(class="nu-curve-text__p" :style="pStyle()")
-    span(v-if="focus()"  class="nu-curve-text__circle" :style="circleStyle()")
-      svg-icon(iconName="curve-center" :style="curveIconStyle")
-    span(v-for="(span, sIndex) in spans()"
-      class="nu-curve-text__span"
-      :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
-      :key="sIndex",
-      :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan)") {{ span.text }}
+p(class="nu-curve-text__p" :style="pStyle()")
+  span(v-if="focus()"  class="nu-curve-text__circle" :style="circleStyle()")
+    svg-icon(iconName="curve-center" :style="curveIconStyle")
+  span(v-for="(span, sIndex) in spans()"
+    class="nu-curve-text__span"
+    :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
+    :key="sIndex",
+    :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan)") {{ span.text }}
 </template>
 
 <script lang="ts">

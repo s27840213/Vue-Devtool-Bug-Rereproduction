@@ -1,6 +1,6 @@
 <template lang="pug">
-  div(class="color-picker")
-    span(class="color-picker__title text-blue-1 label-lg") Color Picker
+div(class="color-picker")
+  span(class="color-picker__title text-blue-1 label-lg") Color Picker
 </template>
 
 <script lang="ts">

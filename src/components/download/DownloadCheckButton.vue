@@ -1,23 +1,23 @@
 <template lang="pug">
-  label(class="download-check-button")
-    svg-icon(v-if="type === 'checkbox'"
-      class="mr-5"
-      :iconColor="checked ? 'blue-1' : 'light-gray'"
-      :iconName="checked ? 'checkbox-checked' : 'checkbox'"
-      :iconWidth="iconSize")
-    svg-icon(v-else
-      class="mr-5"
-      :iconColor="checked ? 'blue-1' : 'light-gray'"
-      :iconName="checked ? 'radio-checked' : 'radio'"
-      :iconWidth="iconSize")
-    slot
-      span(class="download-check-button__label") {{ label }}
-    input(class="download-check-button__input"
-      :type="type"
-      :value="value"
-      :name="groupName"
-      :checked="checked"
-      @change="handleChange")
+label(class="download-check-button")
+  svg-icon(v-if="type === 'checkbox'"
+    class="mr-5"
+    :iconColor="checked ? 'blue-1' : 'light-gray'"
+    :iconName="checked ? 'checkbox-checked' : 'checkbox'"
+    :iconWidth="iconSize")
+  svg-icon(v-else
+    class="mr-5"
+    :iconColor="checked ? 'blue-1' : 'light-gray'"
+    :iconName="checked ? 'radio-checked' : 'radio'"
+    :iconWidth="iconSize")
+  slot
+    span(class="download-check-button__label") {{ label }}
+  input(class="download-check-button__input"
+    :type="type"
+    :value="value"
+    :name="groupName"
+    :checked="checked"
+    @change="handleChange")
 </template>
 
 <script lang="ts">

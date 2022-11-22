@@ -1,15 +1,15 @@
 <template lang="pug">
-  div(class="panel-position bg-white")
-    div(v-for="(data,index) in alignDatas()"
-        :key="`popup-${index}`"
-        class="panel-position__item"
-        @click="MappingUtils.mappingIconAction(data.icon)")
-      svg-icon(
-        class="pointer"
-        :iconName="data.icon"
-        :iconWidth="'18px'"
-        :iconColor="'gray-1'")
-      span(class="ml-5 body-2") {{data.text}}
+div(class="panel-position bg-white")
+  div(v-for="(data,index) in alignDatas()"
+      :key="`popup-${index}`"
+      class="panel-position__item"
+      @click="MappingUtils.mappingIconAction(data.icon)")
+    svg-icon(
+      class="pointer"
+      :iconName="data.icon"
+      :iconWidth="'18px'"
+      :iconColor="'gray-1'")
+    span(class="ml-5 body-2") {{data.text}}
 </template>
 
 <script lang="ts">

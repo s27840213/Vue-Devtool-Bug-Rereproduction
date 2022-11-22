@@ -1,62 +1,62 @@
 <template lang="pug">
-  div(class="panel-text-effect")
-    //- To choose effect category: shadow, shape and bg.
-    div(v-if="state === 'categories'" class="panel-text-effect__categories flex-evenly")
-      div(v-for="category in textEffects"
-          class="panel-text-effect__category pointer")
-        svg-icon(:iconName="`text-${category.name}-none`"
-                iconWidth="60px"
-                iconColor="gray-5"
-                @click.native="pushHistory(category.name)")
-        span(class="body-3") {{category.label}}
-    //- To choose effect, ex: hollow, splice or echo.
-    div(v-if="state === 'effects'"
-        class="panel-text-effect__effects")
-      div(v-for="effect in effectList"
-          :key="`${currCategory.name}-${effect.key}`"
-          :class="{ 'selected': currEffect.key === effect.key }"
-          @click="onEffectClick(effect.key)")
-        svg-icon(:iconName="`text-${currCategory.name}-${effect.key}`"
-                class="panel-text-effect__effects--icon"
-                iconWidth="100%" iconColor="gray-5")
-        div(v-if="currEffect.key === effect.key && effect.key !== 'none'"
-            class="panel-text-effect__effects--more")
-          svg-icon(iconName="adjust" iconWidth="20px" iconColor="white")
-    //- To set effect optoin, ex: distance, color.
-    div(v-if="state === 'options'"
-        class="w-full panel-text-effect__form")
-      span(class="panel-text-effect__name") {{currEffect.label}}
-      div(v-for="option in currEffect.options"
-          class="panel-text-effect__field")
-        //- Option type select
-        div(v-if="option.type === 'select'"
-            class="panel-text-effect__select")
-          div(v-for="sel in option.select"
-              :class="{'selected': currentStyle[currCategory.name].endpoint === sel.key }"
-              @click="handleSelectInput(option.key, sel.key)")
-            svg-icon(:iconName="`${option.key}-${sel.key}`"
-              iconWidth="24px")
-            span {{sel.label}}
-        //- Option type range
-        mobile-slider(v-if="option.type === 'range'"
-          :borderTouchArea="true"
-          :title="option.label"
-          :name="option.key"
-          :value="currentStyle[currCategory.name][option.key]"
-          :max="option.max"
-          :min="option.min"
-          @update="(e)=>handleRangeInput(e, option)"
-          @pointerdown="shapeFocus(true)"
-          @pointerup="shapeFocus(false)")
-        //- Option type color
-        div(v-if="option.type === 'color'"
-          class="panel-text-effect__color")
-          div {{option.label}}
-          div(class="panel-text-effect__color-slip"
-              :style="colorParser(currentStyle[currCategory.name][option.key])"
-              @click="openColorPanel(option.key)")
-      span(class="panel-text-effect__reset label-mid"
-          @click="resetTextEffect()") {{$t('NN0754')}}
+div(class="panel-text-effect")
+  //- To choose effect category: shadow, shape and bg.
+  div(v-if="state === 'categories'" class="panel-text-effect__categories flex-evenly")
+    div(v-for="category in textEffects"
+        class="panel-text-effect__category pointer")
+      svg-icon(:iconName="`text-${category.name}-none`"
+              iconWidth="60px"
+              iconColor="gray-5"
+              @click.native="pushHistory(category.name)")
+      span(class="body-3") {{category.label}}
+  //- To choose effect, ex: hollow, splice or echo.
+  div(v-if="state === 'effects'"
+      class="panel-text-effect__effects")
+    div(v-for="effect in effectList"
+        :key="`${currCategory.name}-${effect.key}`"
+        :class="{ 'selected': currEffect.key === effect.key }"
+        @click="onEffectClick(effect.key)")
+      svg-icon(:iconName="`text-${currCategory.name}-${effect.key}`"
+              class="panel-text-effect__effects--icon"
+              iconWidth="100%" iconColor="gray-5")
+      div(v-if="currEffect.key === effect.key && effect.key !== 'none'"
+          class="panel-text-effect__effects--more")
+        svg-icon(iconName="adjust" iconWidth="20px" iconColor="white")
+  //- To set effect optoin, ex: distance, color.
+  div(v-if="state === 'options'"
+      class="w-full panel-text-effect__form")
+    span(class="panel-text-effect__name") {{currEffect.label}}
+    div(v-for="option in currEffect.options"
+        class="panel-text-effect__field")
+      //- Option type select
+      div(v-if="option.type === 'select'"
+          class="panel-text-effect__select")
+        div(v-for="sel in option.select"
+            :class="{'selected': currentStyle[currCategory.name].endpoint === sel.key }"
+            @click="handleSelectInput(option.key, sel.key)")
+          svg-icon(:iconName="`${option.key}-${sel.key}`"
+            iconWidth="24px")
+          span {{sel.label}}
+      //- Option type range
+      mobile-slider(v-if="option.type === 'range'"
+        :borderTouchArea="true"
+        :title="option.label"
+        :name="option.key"
+        :value="currentStyle[currCategory.name][option.key]"
+        :max="option.max"
+        :min="option.min"
+        @update="(e)=>handleRangeInput(e, option)"
+        @pointerdown="shapeFocus(true)"
+        @pointerup="shapeFocus(false)")
+      //- Option type color
+      div(v-if="option.type === 'color'"
+        class="panel-text-effect__color")
+        div {{option.label}}
+        div(class="panel-text-effect__color-slip"
+            :style="colorParser(currentStyle[currCategory.name][option.key])"
+            @click="openColorPanel(option.key)")
+    span(class="panel-text-effect__reset label-mid"
+        @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">

@@ -1,11 +1,11 @@
 <template lang="pug">
-  div(class="popup-submit bg-white")
-    span(class="mr-10") ID
-    input(ref="input"
-      type="text"
-      v-model="id")
-    btn(:type="'primary-sm'" class="rounded my-5"
-      @click.native="upload()") 上傳
+div(class="popup-submit bg-white")
+  span(class="mr-10") ID
+  input(ref="input"
+    type="text"
+    v-model="id")
+  btn(:type="'primary-sm'" class="rounded my-5"
+    @click.native="upload()") 上傳
 </template>
 
 <script lang="ts">

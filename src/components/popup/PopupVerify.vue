@@ -1,111 +1,111 @@
 <template lang="pug">
-  div(class="popup-verify"
-    v-click-outside="closePopup")
-    div(v-if="currentPage === 'vcode'")
-      div(class="popup-verify__close")
-        svg-icon(class="pointer" iconName="page-close"
-          :iconWidth="'10px'" iconColor="gray-0"
-          @click.native="closePopup()")
-      div(class="text-blue-1 heading-5 pb-20 text-center") {{$t('NN0284')}}
-      div(class="pb-20")
-        span(class="body-2") {{$t('NN0285', {email: account, time: 10})}}
-      div
-        property-bar(:class="{'input-invalid': !vcodeValid}")
-          input(class="body-2 text-gray-2"
-            v-model="vcode" type="text" name="vcode"
-            :placeholder="$t('NN0163', {term: $t('NN0286')})")
-        div(v-if="!vcodeValid"
-          class="invalid-message")
-          span {{ vcodeErrorMessage }}
-        div(class="my-10")
-          div(class="popup-verify__btn btn-blue full-width"
-            @click="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
-        div(v-if="resendAvailable"
-          class="popup-verify__vcode-bottom")
-          span {{$t('NN0288')}}
-          btn(:type="'icon'"
-            class="text-blue-1"
-            @click.native="onResendClicked()") {{$t('NN0290')}}
-        div(v-else
-          class="popup-verify__vcode-bottom text-gray-3")
-          span {{ leftTimeText }}
-    div(v-if="currentPage === 'oldPass'")
-      div(class="popup-verify__close")
-        svg-icon(class="pointer" iconName="page-close"
-          :iconWidth="'10px'" iconColor="gray-0"
-          @click.native="closePopup()")
-      div(class="label-lg pb-20 text-center") {{$t('NN0335')}}
-      div(class="pb-10 body-2 text-gray-3 text-center") {{$t('NN0337')}}
-      div
-        property-bar(:class="{'input-invalid': !oldPassValid}")
-          input(class="body-2 text-gray-2"
-            v-model="oldPass" type="password" name="oldPass"
-            @input="onUpdate"
-            :placeholder="$t('NN0163', {term: $t('NN0336')})")
-        div(class="popup-verify__forgot-pwd")
-          div(class="invalid-message")
-            span(v-if="!oldPassValid") {{ oldPassErrorMessage }}
-          btn(:type="'icon'"
-            class="pt-5 body-2"
-            @click.native="onForgotClicked()") {{$t('NN0181')}}
-        div(class="popup-verify__btns my-15")
-          div(class="popup-verify__btn btn-gray"
-            @click="closePopup()") {{$t('NN0203')}}
-          div(class="popup-verify__btn btn-blue"
-            @click="onCheckPasswordClicked()") {{$t('NN0338')}}
-    div(v-if="currentPage === 'newPass'")
-      div(class="popup-verify__close")
-        svg-icon(class="pointer" iconName="page-close"
-          :iconWidth="'10px'" iconColor="gray-0"
-          @click.native="closePopup()")
-      div(class="label-lg pb-20 text-center") {{$t('NN0291')}}
-      div
-        property-bar(:class="{'input-invalid': !resetPasswordValid}")
-          input(class="body-2 text-gray-2"
-            v-model="newPass" type="password" name="newPass"
-            :placeholder="$t('NN0163', { term: $t('NN0292') })"
-            @input="onUpdate"
-            :type="togglePeerPasswordInput")
-          button(@click="isPeerPassword = !isPeerPassword")
-            svg-icon(class="pointer"
-            :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
-        div(v-if="emptyPassword || isResponseError"
-          class="body-3 pt-15 pb-40 pl-5"
-          :style="`${resetPasswordValid && !isResponseError ? '' : 'color: #EB5757;'}`")
-            span {{ passwordHint }}
-        div(v-else
-          class="invalid-message mt-10")
-          div(class="flex align-center")
-            svg-icon(class="pointer"
-              :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'20px'"
-              :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
-            span(class="ml-5 body-3"
-              :class="{'text-green-1': passwordLengthValid}") {{$t('NN0293', {len: 8})}}
-          div(class="flex align-center")
-            svg-icon(class="pointer"
-              :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'20px'"
-              :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
-            span(class="ml-5 body-3"
-              :class="{'text-green-1': passwordContainEng}") {{$t('NN0294')}}
-          div(class="flex align-center")
-            svg-icon(class="pointer"
-              :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'20px'"
-              :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
-            span(class="ml-5 body-3"
-              :class="{'text-green-1': passwordContainNum}") {{$t('NN0295')}}
-        div(class="popup-verify__btns my-15")
-          div(class="popup-verify__btn btn-gray"
-            @click="closePopup()") {{$t('NN0203')}}
-          div(class="popup-verify__btn btn-blue"
-            @click="onConfirmPasswordClicked()") {{$tc('NN0164', 2)}}
-    div(v-if="currentPage === 'removeAvatar'")
-      div(class="label-lg pb-20 text-center") {{$t('NN0339')}}
+div(class="popup-verify"
+  v-click-outside="closePopup")
+  div(v-if="currentPage === 'vcode'")
+    div(class="popup-verify__close")
+      svg-icon(class="pointer" iconName="page-close"
+        :iconWidth="'10px'" iconColor="gray-0"
+        @click.native="closePopup()")
+    div(class="text-blue-1 heading-5 pb-20 text-center") {{$t('NN0284')}}
+    div(class="pb-20")
+      span(class="body-2") {{$t('NN0285', {email: account, time: 10})}}
+    div
+      property-bar(:class="{'input-invalid': !vcodeValid}")
+        input(class="body-2 text-gray-2"
+          v-model="vcode" type="text" name="vcode"
+          :placeholder="$t('NN0163', {term: $t('NN0286')})")
+      div(v-if="!vcodeValid"
+        class="invalid-message")
+        span {{ vcodeErrorMessage }}
+      div(class="my-10")
+        div(class="popup-verify__btn btn-blue full-width"
+          @click="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
+      div(v-if="resendAvailable"
+        class="popup-verify__vcode-bottom")
+        span {{$t('NN0288')}}
+        btn(:type="'icon'"
+          class="text-blue-1"
+          @click.native="onResendClicked()") {{$t('NN0290')}}
+      div(v-else
+        class="popup-verify__vcode-bottom text-gray-3")
+        span {{ leftTimeText }}
+  div(v-if="currentPage === 'oldPass'")
+    div(class="popup-verify__close")
+      svg-icon(class="pointer" iconName="page-close"
+        :iconWidth="'10px'" iconColor="gray-0"
+        @click.native="closePopup()")
+    div(class="label-lg pb-20 text-center") {{$t('NN0335')}}
+    div(class="pb-10 body-2 text-gray-3 text-center") {{$t('NN0337')}}
+    div
+      property-bar(:class="{'input-invalid': !oldPassValid}")
+        input(class="body-2 text-gray-2"
+          v-model="oldPass" type="password" name="oldPass"
+          @input="onUpdate"
+          :placeholder="$t('NN0163', {term: $t('NN0336')})")
+      div(class="popup-verify__forgot-pwd")
+        div(class="invalid-message")
+          span(v-if="!oldPassValid") {{ oldPassErrorMessage }}
+        btn(:type="'icon'"
+          class="pt-5 body-2"
+          @click.native="onForgotClicked()") {{$t('NN0181')}}
       div(class="popup-verify__btns my-15")
         div(class="popup-verify__btn btn-gray"
           @click="closePopup()") {{$t('NN0203')}}
-        div(class="popup-verify__btn btn-red"
-          @click="onRemoveAvatarClicked()") {{$t('NN0170')}}
-    spinner(v-if="isLoading")
+        div(class="popup-verify__btn btn-blue"
+          @click="onCheckPasswordClicked()") {{$t('NN0338')}}
+  div(v-if="currentPage === 'newPass'")
+    div(class="popup-verify__close")
+      svg-icon(class="pointer" iconName="page-close"
+        :iconWidth="'10px'" iconColor="gray-0"
+        @click.native="closePopup()")
+    div(class="label-lg pb-20 text-center") {{$t('NN0291')}}
+    div
+      property-bar(:class="{'input-invalid': !resetPasswordValid}")
+        input(class="body-2 text-gray-2"
+          v-model="newPass" type="password" name="newPass"
+          :placeholder="$t('NN0163', { term: $t('NN0292') })"
+          @input="onUpdate"
+          :type="togglePeerPasswordInput")
+        button(@click="isPeerPassword = !isPeerPassword")
+          svg-icon(class="pointer"
+          :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
+      div(v-if="emptyPassword || isResponseError"
+        class="body-3 pt-15 pb-40 pl-5"
+        :style="`${resetPasswordValid && !isResponseError ? '' : 'color: #EB5757;'}`")
+          span {{ passwordHint }}
+      div(v-else
+        class="invalid-message mt-10")
+        div(class="flex align-center")
+          svg-icon(class="pointer"
+            :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'20px'"
+            :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
+          span(class="ml-5 body-3"
+            :class="{'text-green-1': passwordLengthValid}") {{$t('NN0293', {len: 8})}}
+        div(class="flex align-center")
+          svg-icon(class="pointer"
+            :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'20px'"
+            :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
+          span(class="ml-5 body-3"
+            :class="{'text-green-1': passwordContainEng}") {{$t('NN0294')}}
+        div(class="flex align-center")
+          svg-icon(class="pointer"
+            :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'20px'"
+            :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
+          span(class="ml-5 body-3"
+            :class="{'text-green-1': passwordContainNum}") {{$t('NN0295')}}
+      div(class="popup-verify__btns my-15")
+        div(class="popup-verify__btn btn-gray"
+          @click="closePopup()") {{$t('NN0203')}}
+        div(class="popup-verify__btn btn-blue"
+          @click="onConfirmPasswordClicked()") {{$tc('NN0164', 2)}}
+  div(v-if="currentPage === 'removeAvatar'")
+    div(class="label-lg pb-20 text-center") {{$t('NN0339')}}
+    div(class="popup-verify__btns my-15")
+      div(class="popup-verify__btn btn-gray"
+        @click="closePopup()") {{$t('NN0203')}}
+      div(class="popup-verify__btn btn-red"
+        @click="onRemoveAvatarClicked()") {{$t('NN0170')}}
+  spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">

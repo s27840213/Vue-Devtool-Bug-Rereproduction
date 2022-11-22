@@ -1,18 +1,18 @@
 <template lang="pug">
-  div(class="nu-background-controller")
-    div(class="dim-background" :style="dimBgStyles")
-    div(class="nu-controller__body"
-        ref="body"
-        :style="styles"
-        @pointerdown.stop="moveStart"
-        @touchstart="disableTouchEvent")
-      div(v-for="(scaler, index)  in controlPoints.scalers"
-          class="controller-point"
-          :key="index"
-          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getPageRotate))"
-          @pointerdown.stop="scaleStart")
-    //- div(class="nu-controller"
-    //-     :style="controllerStyles()")
+div(class="nu-background-controller")
+  div(class="dim-background" :style="dimBgStyles")
+  div(class="nu-controller__body"
+      ref="body"
+      :style="styles"
+      @pointerdown.stop="moveStart"
+      @touchstart="disableTouchEvent")
+    div(v-for="(scaler, index)  in controlPoints.scalers"
+        class="controller-point"
+        :key="index"
+        :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getPageRotate))"
+        @pointerdown.stop="scaleStart")
+  //- div(class="nu-controller"
+  //-     :style="controllerStyles()")
 </template>
 
 <script lang="ts">

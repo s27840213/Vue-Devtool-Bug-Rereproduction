@@ -1,201 +1,201 @@
 <template lang="pug">
-  div(class="shape-setting")
-    //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
-    //- Line shape setting
-    div(class="action-bar flex-around line-actions" style="padding: 8px 0"
-              v-if="isLine")
+div(class="shape-setting")
+  //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
+  //- Line shape setting
+  div(class="action-bar flex-around line-actions" style="padding: 8px 0"
+            v-if="isLine")
+    div(class="shape-setting__line-action-wrapper")
+      svg-icon(class="pointer feature-button"
+              iconName="line-width" iconWidth="24px" iconColor="gray-2"
+              @click.native="openLineSliderPopup")
+    div(class="shape-setting__line-action-wrapper")
+      svg-icon(class="pointer feature-button"
+              iconName="line-dash" iconWidth="24px" iconColor="gray-2"
+              @click.native="handleValueModal('line-dash')")
+      general-value-selector(v-if="openValueSelector === 'line-dash'"
+                    :valueArray="[[1, 2], [3, 4]]"
+                    class="shape-setting__value-selector-dash-and-edge"
+                    v-click-outside="handleValueModal"
+                    :values="dashAndEdge"
+                    @update="handleLineDashEdgeUpdate"
+                    itemMinWidth="70",
+                    buttonHeight="20")
+        template(class="pointer" v-slot:g0i0)
+          svg-icon(iconName="no-dash" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+        template(class="pointer" v-slot:g0i1)
+          svg-icon(iconName="dash-1" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+        template(class="pointer" v-slot:g1i0)
+          svg-icon(iconName="butt" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
+          div(class="shape-setting__value-selector__button-text") {{$t('NN0084')}}
+        template(class="pointer" v-slot:g1i1)
+          svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
+          div(class="shape-setting__value-selector__button-text") {{$t('NN0085')}}
+    div(class="vertical-rule bg-gray-4")
+    div(class="shape-setting__line-action-wrapper pointer feature-button"
+        @click="handleValueModal('start-marker')")
+      marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
+        :styleFormat="markerContentMap[startMarker].styleArray[0]"
+        :svg="markerContentMap[startMarker].svg"
+        :trimWidth="markerContentMap[startMarker].trimWidth"
+        :markerWidth="markerContentMap[startMarker].vSize[0]"
+        :trimOffset="markerContentMap[startMarker].trimOffset")
+      general-value-selector(v-if="openValueSelector === 'start-marker' && markerListReady"
+                    :valueArray="[markerIds]"
+                    class="shape-setting__value-selector-marker"
+                    v-click-outside="handleValueModal"
+                    :values="[startMarker]"
+                    @update="handleStartMarkerUpdate"
+                    itemMinWidth="76",
+                    buttonHeight="37")
+        template(v-for="markerslot in makeSlots(markerIds)" class="pointer" v-slot:[markerslot.name])
+          marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
+            :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
+            :svg="markerContentMap[markerslot.marker].svg"
+            :trimWidth="markerContentMap[markerslot.marker].trimWidth"
+            :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
+            :trimOffset="markerContentMap[markerslot.marker].trimOffset")
+      general-value-selector(v-if="openValueSelector === 'start-marker' && !markerListReady"
+                    :valueArray="[['pending']]"
+                    class="shape-setting__value-selector-marker"
+                    v-click-outside="handleValueModal"
+                    :values="['pending']"
+                    itemMinWidth="76",
+                    buttonHeight="37")
+          template(v-slot:g0i0)
+            svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
+    div(class="shape-setting__line-action-wrapper pointer feature-button"
+        @click="handleValueModal('end-marker')")
+      marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
+        :styleFormat="markerContentMap[endMarker].styleArray[0]"
+        :svg="markerContentMap[endMarker].svg"
+        :trimWidth="markerContentMap[endMarker].trimWidth"
+        :markerWidth="markerContentMap[endMarker].vSize[0]"
+        :trimOffset="markerContentMap[endMarker].trimOffset"
+        style="transform: rotate(180deg)")
+      general-value-selector(v-if="openValueSelector === 'end-marker' && markerListReady"
+                    :valueArray="[markerIds]"
+                    class="shape-setting__value-selector-marker"
+                    v-click-outside="handleValueModal"
+                    :values="[endMarker]"
+                    @update="handleEndMarkerUpdate"
+                    itemMinWidth="76",
+                    buttonHeight="37")
+        template(v-for="markerslot in makeSlots(markerIds)" class="pointer" v-slot:[markerslot.name])
+          marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
+            :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
+            :svg="markerContentMap[markerslot.marker].svg"
+            :trimWidth="markerContentMap[markerslot.marker].trimWidth"
+            :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
+            :trimOffset="markerContentMap[markerslot.marker].trimOffset"
+            style="transform: rotate(180deg)")
+      general-value-selector(v-if="openValueSelector === 'end-marker' && !markerListReady"
+                    :valueArray="[['pending']]"
+                    class="shape-setting__value-selector-marker"
+                    v-click-outside="handleValueModal"
+                    :values="['pending']"
+                    itemMinWidth="76",
+                    buttonHeight="37")
+          template(v-slot:g0i0)
+            svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
+  //- Other shape setting
+  div(class="shape-setting__basic-shape-action" v-if="isBasicShape")
+    div(class="action-bar flex-around basic-shape-actions" style="padding: 8px 0")
       div(class="shape-setting__line-action-wrapper")
         svg-icon(class="pointer feature-button"
                 iconName="line-width" iconWidth="24px" iconColor="gray-2"
-                @click.native="openLineSliderPopup")
+                @click.native="openBasicShapeSliderPopup")
       div(class="shape-setting__line-action-wrapper")
         svg-icon(class="pointer feature-button"
-                iconName="line-dash" iconWidth="24px" iconColor="gray-2"
-                @click.native="handleValueModal('line-dash')")
-        general-value-selector(v-if="openValueSelector === 'line-dash'"
-                      :valueArray="[[1, 2], [3, 4]]"
-                      class="shape-setting__value-selector-dash-and-edge"
-                      v-click-outside="handleValueModal"
-                      :values="dashAndEdge"
-                      @update="handleLineDashEdgeUpdate"
-                      itemMinWidth="70",
-                      buttonHeight="20")
+                v-if="filled"
+                iconName="filled" iconWidth="24px" iconColor="gray-2"
+                @click.native="handleValueModal('isFilled')")
+        svg-icon(class="pointer feature-button"
+                v-else
+                iconName="non-filled" iconWidth="24px" iconColor="gray-2"
+                @click.native="handleValueModal('isFilled')")
+        general-value-selector(v-if="openValueSelector === 'isFilled'"
+                    :valueArray="[[0, 1]]"
+                    class="shape-setting__value-selector-filled"
+                    v-click-outside="handleValueModal"
+                    :values="[filled ? 1 : 0]"
+                    @update="handleBasicShapeFilledUpdate"
+                    itemMinWidth="64",
+                    buttonHeight="26")
           template(class="pointer" v-slot:g0i0)
-            svg-icon(iconName="no-dash" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+            svg-icon(iconName="non-filled" iconWidth="17px" iconColor="gray-2")
+            div(class="shape-setting__value-selector__button-text") {{$t('NN0088')}}
           template(class="pointer" v-slot:g0i1)
-            svg-icon(iconName="dash-1" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
-          template(class="pointer" v-slot:g1i0)
-            svg-icon(iconName="butt" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
-            div(class="shape-setting__value-selector__button-text") {{$t('NN0084')}}
-          template(class="pointer" v-slot:g1i1)
-            svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
-            div(class="shape-setting__value-selector__button-text") {{$t('NN0085')}}
-      div(class="vertical-rule bg-gray-4")
-      div(class="shape-setting__line-action-wrapper pointer feature-button"
-          @click="handleValueModal('start-marker')")
-        marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
-          :styleFormat="markerContentMap[startMarker].styleArray[0]"
-          :svg="markerContentMap[startMarker].svg"
-          :trimWidth="markerContentMap[startMarker].trimWidth"
-          :markerWidth="markerContentMap[startMarker].vSize[0]"
-          :trimOffset="markerContentMap[startMarker].trimOffset")
-        general-value-selector(v-if="openValueSelector === 'start-marker' && markerListReady"
-                      :valueArray="[markerIds]"
-                      class="shape-setting__value-selector-marker"
-                      v-click-outside="handleValueModal"
-                      :values="[startMarker]"
-                      @update="handleStartMarkerUpdate"
-                      itemMinWidth="76",
-                      buttonHeight="37")
-          template(v-for="markerslot in makeSlots(markerIds)" class="pointer" v-slot:[markerslot.name])
-            marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
-              :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
-              :svg="markerContentMap[markerslot.marker].svg"
-              :trimWidth="markerContentMap[markerslot.marker].trimWidth"
-              :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
-              :trimOffset="markerContentMap[markerslot.marker].trimOffset")
-        general-value-selector(v-if="openValueSelector === 'start-marker' && !markerListReady"
-                      :valueArray="[['pending']]"
-                      class="shape-setting__value-selector-marker"
-                      v-click-outside="handleValueModal"
-                      :values="['pending']"
-                      itemMinWidth="76",
-                      buttonHeight="37")
-            template(v-slot:g0i0)
-              svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
-      div(class="shape-setting__line-action-wrapper pointer feature-button"
-          @click="handleValueModal('end-marker')")
-        marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
-          :styleFormat="markerContentMap[endMarker].styleArray[0]"
-          :svg="markerContentMap[endMarker].svg"
-          :trimWidth="markerContentMap[endMarker].trimWidth"
-          :markerWidth="markerContentMap[endMarker].vSize[0]"
-          :trimOffset="markerContentMap[endMarker].trimOffset"
-          style="transform: rotate(180deg)")
-        general-value-selector(v-if="openValueSelector === 'end-marker' && markerListReady"
-                      :valueArray="[markerIds]"
-                      class="shape-setting__value-selector-marker"
-                      v-click-outside="handleValueModal"
-                      :values="[endMarker]"
-                      @update="handleEndMarkerUpdate"
-                      itemMinWidth="76",
-                      buttonHeight="37")
-          template(v-for="markerslot in makeSlots(markerIds)" class="pointer" v-slot:[markerslot.name])
-            marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
-              :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
-              :svg="markerContentMap[markerslot.marker].svg"
-              :trimWidth="markerContentMap[markerslot.marker].trimWidth"
-              :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
-              :trimOffset="markerContentMap[markerslot.marker].trimOffset"
-              style="transform: rotate(180deg)")
-        general-value-selector(v-if="openValueSelector === 'end-marker' && !markerListReady"
-                      :valueArray="[['pending']]"
-                      class="shape-setting__value-selector-marker"
-                      v-click-outside="handleValueModal"
-                      :values="['pending']"
-                      itemMinWidth="76",
-                      buttonHeight="37")
-            template(v-slot:g0i0)
-              svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
-    //- Other shape setting
-    div(class="shape-setting__basic-shape-action" v-if="isBasicShape")
-      div(class="action-bar flex-around basic-shape-actions" style="padding: 8px 0")
-        div(class="shape-setting__line-action-wrapper")
-          svg-icon(class="pointer feature-button"
-                  iconName="line-width" iconWidth="24px" iconColor="gray-2"
-                  @click.native="openBasicShapeSliderPopup")
-        div(class="shape-setting__line-action-wrapper")
-          svg-icon(class="pointer feature-button"
-                  v-if="filled"
-                  iconName="filled" iconWidth="24px" iconColor="gray-2"
-                  @click.native="handleValueModal('isFilled')")
-          svg-icon(class="pointer feature-button"
-                  v-else
-                  iconName="non-filled" iconWidth="24px" iconColor="gray-2"
-                  @click.native="handleValueModal('isFilled')")
-          general-value-selector(v-if="openValueSelector === 'isFilled'"
-                      :valueArray="[[0, 1]]"
-                      class="shape-setting__value-selector-filled"
-                      v-click-outside="handleValueModal"
-                      :values="[filled ? 1 : 0]"
-                      @update="handleBasicShapeFilledUpdate"
-                      itemMinWidth="64",
-                      buttonHeight="26")
-            template(class="pointer" v-slot:g0i0)
-              svg-icon(iconName="non-filled" iconWidth="17px" iconColor="gray-2")
-              div(class="shape-setting__value-selector__button-text") {{$t('NN0088')}}
-            template(class="pointer" v-slot:g0i1)
-              svg-icon(iconName="filled" iconWidth="17px" iconColor="gray-2")
-              div(class="shape-setting__value-selector__button-text") {{$t('NN0087')}}
-      label-with-range(:value="corRadPercentage" :min="0" :max="100"
-                      @update="handleBasicShapeCorRadPercentUpdate"
-                      :event="corRadEvent"
-                      :disabled="corRadDisabled")
-        template
-          div(class="shape-setting__basic-shape-corner-radius flex-evenly")
-            svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
-            div(:style="`font-size: ${$i18n.locale === 'us' ? '12px': ''}`") {{$t('NN0086')}}
-    //- Shape color setting
-    div(class="shape-setting__colors")
-      div(v-if="hasMultiColors"
-        class="shape-setting__color"
-        :style="groupColorStyles()"
-        @click="selectColor(0)")
-      div(v-else v-for="(color, index) in getDocumentColors"
-        class="shape-setting__color"
-        :style="colorStyles(color, index)"
-        @click="selectColor(index)")
-    //- 管理介面
-    div(class="shape-setting__info")
-      div(v-if="inAdminMode && isObjectElement")
-        div(class="shape-setting__info__divider pb-10")
-        btn(:type="'primary-sm'"
-          class="shape-setting__info__button rounded my-5"
-          @click.native="getDataClicked()") 取 得 元 素 資 料
-        div(class="shape-setting__info__divider2 pb-10")
-        span(class="py-5 text-gray-1 label-lg") 元 素 資 訊
-        div(class="shape-setting__info__line" style="background: #eee;")
+            svg-icon(iconName="filled" iconWidth="17px" iconColor="gray-2")
+            div(class="shape-setting__value-selector__button-text") {{$t('NN0087')}}
+    label-with-range(:value="corRadPercentage" :min="0" :max="100"
+                    @update="handleBasicShapeCorRadPercentUpdate"
+                    :event="corRadEvent"
+                    :disabled="corRadDisabled")
+      template
+        div(class="shape-setting__basic-shape-corner-radius flex-evenly")
+          svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
+          div(:style="`font-size: ${$i18n.locale === 'us' ? '12px': ''}`") {{$t('NN0086')}}
+  //- Shape color setting
+  div(class="shape-setting__colors")
+    div(v-if="hasMultiColors"
+      class="shape-setting__color"
+      :style="groupColorStyles()"
+      @click="selectColor(0)")
+    div(v-else v-for="(color, index) in getDocumentColors"
+      class="shape-setting__color"
+      :style="colorStyles(color, index)"
+      @click="selectColor(index)")
+  //- 管理介面
+  div(class="shape-setting__info")
+    div(v-if="inAdminMode && isObjectElement")
+      div(class="shape-setting__info__divider pb-10")
+      btn(:type="'primary-sm'"
+        class="shape-setting__info__button rounded my-5"
+        @click.native="getDataClicked()") 取 得 元 素 資 料
+      div(class="shape-setting__info__divider2 pb-10")
+      span(class="py-5 text-gray-1 label-lg") 元 素 資 訊
+      div(class="shape-setting__info__line" style="background: #eee;")
+        span(class="body-1") id
+        span(class="pl-15 body-2" @click="copyText(focusDesignId)") {{focusDesignId}}
+      img(v-if="focusDesignId.length > 0"
+        class="shape-setting__info__image"
+        :src="`https://template.vivipic.com/svg/${focusDesignId}/prev?ver=${imgRandQuery}`")
+      div(v-if="isGetSvgInfo")
+        div(class="shape-setting__info__line")
           span(class="body-1") id
-          span(class="pl-15 body-2" @click="copyText(focusDesignId)") {{focusDesignId}}
-        img(v-if="focusDesignId.length > 0"
-          class="shape-setting__info__image"
-          :src="`https://template.vivipic.com/svg/${focusDesignId}/prev?ver=${imgRandQuery}`")
-        div(v-if="isGetSvgInfo")
-          div(class="shape-setting__info__line")
-            span(class="body-1") id
-            span(class="pl-15 body-2"
-              @click="copyText(svgInfo.key_id)") {{svgInfo.key_id}}
-          div(class="shape-setting__info__line")
-            span(class="body-1") 語系
-            select(class="shape-setting__info__select"
-              v-model="svgInfo.locale")
-              option(v-for="locale in localeOptions"
-                :value="locale") {{locale}}
-          div(class="shape-setting__info__line") tags_tw
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="svgInfo.tags_tw")
-          div(class="shape-setting__info__line") tags_us
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="svgInfo.tags_us")
-          div(class="shape-setting__info__line") tags_jp
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="svgInfo.tags_jp")
-          div(class="shape-setting__info__line") plan(0：預設一般 / 1：Pro)
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="svgInfo.plan")
-          div(class="pt-10")
-            btn(:type="'primary-sm'"
-              class="shape-setting__info__button rounded my-5"
-              @click.native="updateDataClicked()") 更新
-    spinner(v-if="isLoading")
+          span(class="pl-15 body-2"
+            @click="copyText(svgInfo.key_id)") {{svgInfo.key_id}}
+        div(class="shape-setting__info__line")
+          span(class="body-1") 語系
+          select(class="shape-setting__info__select"
+            v-model="svgInfo.locale")
+            option(v-for="locale in localeOptions"
+              :value="locale") {{locale}}
+        div(class="shape-setting__info__line") tags_tw
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="svgInfo.tags_tw")
+        div(class="shape-setting__info__line") tags_us
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="svgInfo.tags_us")
+        div(class="shape-setting__info__line") tags_jp
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="svgInfo.tags_jp")
+        div(class="shape-setting__info__line") plan(0：預設一般 / 1：Pro)
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="svgInfo.plan")
+        div(class="pt-10")
+          btn(:type="'primary-sm'"
+            class="shape-setting__info__button rounded my-5"
+            @click.native="updateDataClicked()") 更新
+  spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">

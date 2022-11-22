@@ -1,14 +1,14 @@
 <template lang="pug">
-  div(class="nu-group"
-      :style="styles()")
-    nu-layer(v-for="(layer,index) in config.layers"
-      :key="`layer-${index}`"
-      :pageIndex="pageIndex"
-      :layerIndex="layerIndex"
-      :subLayerIndex="index"
-      :contentScaleRatio="contentScaleRatio"
-      :config="layer"
-      :isSubLayer="true")
+div(class="nu-group"
+    :style="styles()")
+  nu-layer(v-for="(layer,index) in config.layers"
+    :key="`layer-${index}`"
+    :pageIndex="pageIndex"
+    :layerIndex="layerIndex"
+    :subLayerIndex="index"
+    :contentScaleRatio="contentScaleRatio"
+    :config="layer"
+    :isSubLayer="true")
 </template>
 
 <script lang="ts">

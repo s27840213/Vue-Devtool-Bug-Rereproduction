@@ -1,17 +1,17 @@
 <template lang="pug">
-  div(class="panel-font-format")
-    div(class="panel-font-format__bar mb-15")
-      svg-icon(v-for="(icon,index) in mappingIcons('font')"
-        class="record-selection feature-button p-5"
-        :class="{ pointer: iconClickable(icon)}"
-        :key="`gp-action-icon-${index}`"
-        :id="`icon-${icon}`"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon)? 'blue-1' :iconClickable(icon) ? 'gray-2' : 'gray-4'" @touchstart.native="onPropertyClick(icon)")
-    div(class="panel-font-format__bar")
-      svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
-        class="pointer feature-button p-5"
-        :key="`gp-action-icon-${index}`"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon)? 'blue-1'  :'gray-2'" @touchstart.native="onParaPropsClick(icon)")
+div(class="panel-font-format")
+  div(class="panel-font-format__bar mb-15")
+    svg-icon(v-for="(icon,index) in mappingIcons('font')"
+      class="record-selection feature-button p-5"
+      :class="{ pointer: iconClickable(icon)}"
+      :key="`gp-action-icon-${index}`"
+      :id="`icon-${icon}`"
+      :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon)? 'blue-1' :iconClickable(icon) ? 'gray-2' : 'gray-4'" @touchstart.native="onPropertyClick(icon)")
+  div(class="panel-font-format__bar")
+    svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
+      class="pointer feature-button p-5"
+      :key="`gp-action-icon-${index}`"
+      :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon)? 'blue-1'  :'gray-2'" @touchstart.native="onParaPropsClick(icon)")
 </template>
 
 <script lang="ts">

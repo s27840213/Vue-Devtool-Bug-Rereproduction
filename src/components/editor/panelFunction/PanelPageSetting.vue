@@ -1,214 +1,214 @@
 <template lang="pug">
-  div(class="page-setting")
-    div(class="page-setting-row page-setting__title")
-      span(class="text-gray-2 label-mid") {{$t('NN0021')}}
-    div(class="page-setting-row page-setting__size")
-      property-bar(class="page-setting__size__box pointer" @click.native="setSuggestionPanel(true)")
-        span(class="body-3 text-gray-2") {{ currentPageWidth }}
-        span(class="body-4 text-gray-3") W
-      svg-icon(class="pointer"
-          :iconName="isLocked ? 'lock' : 'unlock'" :iconWidth="'20px'" :iconColor="'gray-2'"
-          @click.native="toggleLock()")
-      property-bar(class="page-setting__size__box pointer" @click.native="setSuggestionPanel(true)")
-        span(class="body-3 text-gray-2") {{ currentPageHeight }}
-        span(class="body-4 text-gray-3") H
-    div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
-        @click="toggleSuggestionPanel()")
-      span(class="page-setting__apply__text") {{$t('NN0022')}}
-    transition(name="slide-fade")
-      div(v-if="isPanelOpen"
-        class="page-setting__suggestion-panel")
-        img(class="page-setting__suggestion-panel__arrow" :src="require('@/assets/img/svg/up-arrow.svg')")
-        div(class="page-setting__suggestion-panel__body")
-          div(class="page-setting__suggestion-panel__body__close pointer"
-              @click="setSuggestionPanel(false)")
-            svg-icon(class="page-setting__suggestion-panel__body__close"
-                    iconName="close" iconWidth="19px" iconColor="white")
-          keep-alive
-            page-size-selector(:isDarkTheme="true" @selectFormat="selectFormat" ref="pageSizeSelector")
-          div(class="page-setting__suggestion-panel__body__buttons")
-            div(class="page-setting__suggestion-panel__body__button text-white"
-                :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
-                @click="applySelectedFormat")
-              span(class="page-setting__suggestion-panel__body__button__text") {{$t('NN0022')}}
-            div(class="page-setting__suggestion-panel__body__button text-white"
-                :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
-                @click="copyAndApplySelectedFormat")
-              span(class="page-setting__suggestion-panel__body__button__text") {{$t('NN0211')}}
-    div(class="page-setting__footer")
-    div(v-if="inAdminMode"
-      class="template-information")
-      div(class="template-information__divider pb-10")
-      btn(:type="'primary-sm'" class="rounded my-5"
-          style="padding: 8px 0; margin-left: 6%; width: 88%;"
-          @click.native="getDataClicked()") 取 得 群 組 / 模 板 資 料
-      div(v-if="groupId.length > 0"
-        class="pt-10")
-        span(class="text-gray-1 label-lg") 群 組 資 訊
+div(class="page-setting")
+  div(class="page-setting-row page-setting__title")
+    span(class="text-gray-2 label-mid") {{$t('NN0021')}}
+  div(class="page-setting-row page-setting__size")
+    property-bar(class="page-setting__size__box pointer" @click.native="setSuggestionPanel(true)")
+      span(class="body-3 text-gray-2") {{ currentPageWidth }}
+      span(class="body-4 text-gray-3") W
+    svg-icon(class="pointer"
+        :iconName="isLocked ? 'lock' : 'unlock'" :iconWidth="'20px'" :iconColor="'gray-2'"
+        @click.native="toggleLock()")
+    property-bar(class="page-setting__size__box pointer" @click.native="setSuggestionPanel(true)")
+      span(class="body-3 text-gray-2") {{ currentPageHeight }}
+      span(class="body-4 text-gray-3") H
+  div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
+      @click="toggleSuggestionPanel()")
+    span(class="page-setting__apply__text") {{$t('NN0022')}}
+  transition(name="slide-fade")
+    div(v-if="isPanelOpen"
+      class="page-setting__suggestion-panel")
+      img(class="page-setting__suggestion-panel__arrow" :src="require('@/assets/img/svg/up-arrow.svg')")
+      div(class="page-setting__suggestion-panel__body")
+        div(class="page-setting__suggestion-panel__body__close pointer"
+            @click="setSuggestionPanel(false)")
+          svg-icon(class="page-setting__suggestion-panel__body__close"
+                  iconName="close" iconWidth="19px" iconColor="white")
+        keep-alive
+          page-size-selector(:isDarkTheme="true" @selectFormat="selectFormat" ref="pageSizeSelector")
+        div(class="page-setting__suggestion-panel__body__buttons")
+          div(class="page-setting__suggestion-panel__body__button text-white"
+              :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
+              @click="applySelectedFormat")
+            span(class="page-setting__suggestion-panel__body__button__text") {{$t('NN0022')}}
+          div(class="page-setting__suggestion-panel__body__button text-white"
+              :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
+              @click="copyAndApplySelectedFormat")
+            span(class="page-setting__suggestion-panel__body__button__text") {{$t('NN0211')}}
+  div(class="page-setting__footer")
+  div(v-if="inAdminMode"
+    class="template-information")
+    div(class="template-information__divider pb-10")
+    btn(:type="'primary-sm'" class="rounded my-5"
+        style="padding: 8px 0; margin-left: 6%; width: 88%;"
+        @click.native="getDataClicked()") 取 得 群 組 / 模 板 資 料
+    div(v-if="groupId.length > 0"
+      class="pt-10")
+      span(class="text-gray-1 label-lg") 群 組 資 訊
+      div(class="template-information__line")
+        span(class="body-1") groupId
+        span(class="pl-15 body-2"
+          @click="copyText(groupId)") {{groupId}}
+      div(class="pt-5 text-red body-2") {{groupErrorMsg}}
+      div(v-for="id in unsetThemeTemplate"
+        class="pt-5 text-red body-2"
+        @click="copyText(id)") {{id}}
+      div(v-if="isGetGroup")
+        div(v-if="showDbGroup"
+          class="py-5 text-red body-2") 提醒：原有的設定不合法，已自動修正。請在下方修正版確認內容後按下更新按鈕
+        div(v-if="showDbGroup"
+          class="template-information__line")
+          span(class="body-1 text-red-1") 原設定內容
+        div(v-if="showDbGroup"
+          class="mb-10 square-wrapper wrong text-center")
+          div(v-if="dbGroupThemes.length === 0"
+            class="body-1") 尚未設定
+          div(v-else
+            class="pr-10 cover-option body-4")
+            span theme
+            span 封面頁碼
+          div(v-for="(item, idx) in dbGroupThemes"
+            class="pt-5 pr-10 cover-option")
+            span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
+            span 第{{item.coverIndex+1}}頁
+        div(v-if="showDbGroup"
+          class="template-information__line")
+          span(class="body-1 ") 修正版
+        div(class="square-wrapper text-center")
+          div(class="pr-10 cover-option body-4")
+            span theme
+            span 封面頁碼
+          div(v-for="(item, idx) in groupInfo.groupThemes"
+            class="pt-5 pr-10 cover-option")
+            span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
+            select(class="template-information__cover-select text-center"
+              v-model="item.coverIndex")
+              option(v-for="option in item.options" :value="option.index") 第{{option.index+1}}頁
+        div(class="pt-10")
+          btn(:type="'primary-sm'" class="rounded my-5"
+            style="padding: 8px 0; margin: 0 auto; width: 70%;"
+            @click.native="updateGroupClicked()") 更新
+    div(class="template-information__divider2")
+    span(class="text-gray-1 label-lg") 模 板 資 訊
+    div(class="template-information__content")
+      div(class="template-information__line" style="background: #eee;")
+        span(class="body-1") focus
+        span(class="pl-15 body-2" @click="copyText(key_id)") {{key_id}}
+      img(v-if="key_id.length > 0" style="margin: 0 auto;"
+        :src="`https://template.vivipic.com/template/${key_id}/prev?ver=${imgRandQuery}`")
+      div(v-if="isGetTemplate")
+        div(v-if="groupId.length > 0 && !isGroupMember"
+          class="text-red") 此模板不是上列群組的成員
         div(class="template-information__line")
-          span(class="body-1") groupId
-          span(class="pl-15 body-2"
-            @click="copyText(groupId)") {{groupId}}
-        div(class="pt-5 text-red body-2") {{groupErrorMsg}}
-        div(v-for="id in unsetThemeTemplate"
-          class="pt-5 text-red body-2"
-          @click="copyText(id)") {{id}}
-        div(v-if="isGetGroup")
-          div(v-if="showDbGroup"
-            class="py-5 text-red body-2") 提醒：原有的設定不合法，已自動修正。請在下方修正版確認內容後按下更新按鈕
-          div(v-if="showDbGroup"
-            class="template-information__line")
-            span(class="body-1 text-red-1") 原設定內容
-          div(v-if="showDbGroup"
-            class="mb-10 square-wrapper wrong text-center")
-            div(v-if="dbGroupThemes.length === 0"
-              class="body-1") 尚未設定
-            div(v-else
-              class="pr-10 cover-option body-4")
-              span theme
-              span 封面頁碼
-            div(v-for="(item, idx) in dbGroupThemes"
-              class="pt-5 pr-10 cover-option")
-              span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
-              span 第{{item.coverIndex+1}}頁
-          div(v-if="showDbGroup"
-            class="template-information__line")
-            span(class="body-1 ") 修正版
-          div(class="square-wrapper text-center")
-            div(class="pr-10 cover-option body-4")
-              span theme
-              span 封面頁碼
-            div(v-for="(item, idx) in groupInfo.groupThemes"
-              class="pt-5 pr-10 cover-option")
-              span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
-              select(class="template-information__cover-select text-center"
-                v-model="item.coverIndex")
-                option(v-for="option in item.options" :value="option.index") 第{{option.index+1}}頁
-          div(class="pt-10")
-            btn(:type="'primary-sm'" class="rounded my-5"
-              style="padding: 8px 0; margin: 0 auto; width: 70%;"
-              @click.native="updateGroupClicked()") 更新
-      div(class="template-information__divider2")
-      span(class="text-gray-1 label-lg") 模 板 資 訊
-      div(class="template-information__content")
-        div(class="template-information__line" style="background: #eee;")
-          span(class="body-1") focus
-          span(class="pl-15 body-2" @click="copyText(key_id)") {{key_id}}
-        img(v-if="key_id.length > 0" style="margin: 0 auto;"
-          :src="`https://template.vivipic.com/template/${key_id}/prev?ver=${imgRandQuery}`")
-        div(v-if="isGetTemplate")
-          div(v-if="groupId.length > 0 && !isGroupMember"
-            class="text-red") 此模板不是上列群組的成員
+          span(class="body-1") key_id
+          span(class="pl-15 body-2" @click="copyText(templateInfo.key_id)") {{templateInfo.key_id}}
+        div(class="template-information__line")
+          span(class="body-1") 創建者
+          span(class="pl-15 body-2" @click="copyText(templateInfo.creator)") {{templateInfo.creator}}
+        div(class="template-information__line")
+          span(class="body-1") 修改者
+          span(class="pl-15 body-2" @click="copyText(templateInfo.author)") {{templateInfo.author}}
+        div(class="template-information__line")
+          span(class="body-1") 上次更新
+          span(class="pl-15 body-2") {{templateInfo.edit_time}}
+        div(class="template-information__line")
+          span(class="body-1") 模板尺寸
+          span(class="pl-15 body-2") {{templateInfo.width}} x {{templateInfo.height}}
+        div(class="pt-10") plan(0：預設一般 / 1：Pro)
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="templateInfo.plan")
+        div(class="template-information__line")
+          span(class="body-1") Theme_ids
+        template(v-if="showDbTemplate")
+          div(class="py-5 text-red body-2") 提醒：主題設定有誤。請在下方修正版確認內容後按下更新按鈕
           div(class="template-information__line")
-            span(class="body-1") key_id
-            span(class="pl-15 body-2" @click="copyText(templateInfo.key_id)") {{templateInfo.key_id}}
-          div(class="template-information__line")
-            span(class="body-1") 創建者
-            span(class="pl-15 body-2" @click="copyText(templateInfo.creator)") {{templateInfo.creator}}
-          div(class="template-information__line")
-            span(class="body-1") 修改者
-            span(class="pl-15 body-2" @click="copyText(templateInfo.author)") {{templateInfo.author}}
-          div(class="template-information__line")
-            span(class="body-1") 上次更新
-            span(class="pl-15 body-2") {{templateInfo.edit_time}}
-          div(class="template-information__line")
-            span(class="body-1") 模板尺寸
-            span(class="pl-15 body-2") {{templateInfo.width}} x {{templateInfo.height}}
-          div(class="pt-10") plan(0：預設一般 / 1：Pro)
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="templateInfo.plan")
-          div(class="template-information__line")
-            span(class="body-1") Theme_ids
-          template(v-if="showDbTemplate")
-            div(class="py-5 text-red body-2") 提醒：主題設定有誤。請在下方修正版確認內容後按下更新按鈕
-            div(class="template-information__line")
-              span(class="body-1 text-red-1") 原設定內容 (x表示設定錯誤)
-          div(v-if="showDbTemplate"
-            class="square-wrapper wrong")
-            template(v-for="(item, idx) in themeList")
-              div(v-if="dbTemplateThemes[item.id]"
-                class="pt-5 theme-option")
-                span(class="text-red-1 text-center") {{isDisabled(item.id, item.width, item.height) ? 'x' : ''}}
-                span(class="body-1") {{item.title}}
-                span(class="body-2 text-gray-2") {{item.description}}
-          div(v-if="showDbTemplate"
-            class="pt-10 template-information__line")
-            span(class="body-1 ") 修正版
-          div(class="square-wrapper")
-            div(v-for="(item, idx) in themeList"
+            span(class="body-1 text-red-1") 原設定內容 (x表示設定錯誤)
+        div(v-if="showDbTemplate"
+          class="square-wrapper wrong")
+          template(v-for="(item, idx) in themeList")
+            div(v-if="dbTemplateThemes[item.id]"
               class="pt-5 theme-option")
-              input(type="checkbox"
-                class="theme-option__check"
-                :disabled="isDisabled(item.id, item.width, item.height)"
-                v-model="templateThemes[item.id]")
+              span(class="text-red-1 text-center") {{isDisabled(item.id, item.width, item.height) ? 'x' : ''}}
               span(class="body-1") {{item.title}}
               span(class="body-2 text-gray-2") {{item.description}}
-          div(class="template-information__line pt-10")
-            span(class="body-1") 語系
-            select(class="template-information__select" v-model="templateInfo.locale")
-              option(v-for="locale in localeOptions" :value="locale") {{locale}}
-          div(class="pt-10") tags_tw
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="templateInfo.tags_tw")
-          div(class="pt-10") tags_us
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="templateInfo.tags_us")
-          div(class="pt-10") tags_jp
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="templateInfo.tags_jp")
-          div(class="pt-10")
-            btn(:type="'primary-sm'" class="rounded my-5"
-              style="padding: 8px 0; margin: 0 auto; width: 70%;"
-              @click.native="updateDataClicked()") 更新
-          div(class="template-information__divider")
-          div(class="template-information__line bg-blue")
-            span(class="body-1") 父
-            span(class="pl-15 body-2"
-              @click="copyText(templateInfo.parent_id)") {{templateInfo.parent_id || '無'}}
-            span(class="text-blue-1") {{templateInfo.parent_locale}}
-          div(class="template-information__line bg-blue border-bottom pb-5")
-            span(class="body-1") 爺
-            span(class="pl-15 body-2"
-              @click="copyText(templateInfo.grandparent_id)") {{templateInfo.grandparent_id || '無'}}
-            span(class="text-blue-1") {{templateInfo.grandparent_locale}}
-          div(class="bg-blue")
-            div(v-for="(item) in templateInfo.grandchildren_id"
-              class="border-bottom py-5")
-              div(class="child-item")
-                span(class="body-1") 子
-                span(class="body-2"
-                  @click="copyText(item.childrenId)") {{item.childrenId}}
-                span {{item.childrenLocale}}
-              div(v-for="(item2) in item.grandchildren"
-                class="child-item")
-                span 孫
-                span(class="body-2"
-                  @click="copyText(item2.key_id)") {{item2.key_id}}
-                span {{item2.locale}}
-          div(class="template-information__line")
-            span(class="body-1 pt-10") parent_id (父模板)
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="userParentId")
-            div(class="pt-5 text-red body-3") 注意: parent_id的修改會更新模板的json，請修改時注意模板內容有無更動，避免複寫
-          div(class="template-information__line pt-10")
-            div(style="width: 50%;")
-              input(type="checkbox"
-                class="template-information__check"
-                v-model="updateParentIdChecked")
-              label 確定修改
-            btn(:type="'primary-sm'" class="rounded my-5"
-              style="padding: 5px 40px;"
-              @click.native="updateParentIdClicked()") 修改
+        div(v-if="showDbTemplate"
+          class="pt-10 template-information__line")
+          span(class="body-1 ") 修正版
+        div(class="square-wrapper")
+          div(v-for="(item, idx) in themeList"
+            class="pt-5 theme-option")
+            input(type="checkbox"
+              class="theme-option__check"
+              :disabled="isDisabled(item.id, item.width, item.height)"
+              v-model="templateThemes[item.id]")
+            span(class="body-1") {{item.title}}
+            span(class="body-2 text-gray-2") {{item.description}}
+        div(class="template-information__line pt-10")
+          span(class="body-1") 語系
+          select(class="template-information__select" v-model="templateInfo.locale")
+            option(v-for="locale in localeOptions" :value="locale") {{locale}}
+        div(class="pt-10") tags_tw
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="templateInfo.tags_tw")
+        div(class="pt-10") tags_us
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="templateInfo.tags_us")
+        div(class="pt-10") tags_jp
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="templateInfo.tags_jp")
+        div(class="pt-10")
+          btn(:type="'primary-sm'" class="rounded my-5"
+            style="padding: 8px 0; margin: 0 auto; width: 70%;"
+            @click.native="updateDataClicked()") 更新
+        div(class="template-information__divider")
+        div(class="template-information__line bg-blue")
+          span(class="body-1") 父
+          span(class="pl-15 body-2"
+            @click="copyText(templateInfo.parent_id)") {{templateInfo.parent_id || '無'}}
+          span(class="text-blue-1") {{templateInfo.parent_locale}}
+        div(class="template-information__line bg-blue border-bottom pb-5")
+          span(class="body-1") 爺
+          span(class="pl-15 body-2"
+            @click="copyText(templateInfo.grandparent_id)") {{templateInfo.grandparent_id || '無'}}
+          span(class="text-blue-1") {{templateInfo.grandparent_locale}}
+        div(class="bg-blue")
+          div(v-for="(item) in templateInfo.grandchildren_id"
+            class="border-bottom py-5")
+            div(class="child-item")
+              span(class="body-1") 子
+              span(class="body-2"
+                @click="copyText(item.childrenId)") {{item.childrenId}}
+              span {{item.childrenLocale}}
+            div(v-for="(item2) in item.grandchildren"
+              class="child-item")
+              span 孫
+              span(class="body-2"
+                @click="copyText(item2.key_id)") {{item2.key_id}}
+              span {{item2.locale}}
+        div(class="template-information__line")
+          span(class="body-1 pt-10") parent_id (父模板)
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="userParentId")
+          div(class="pt-5 text-red body-3") 注意: parent_id的修改會更新模板的json，請修改時注意模板內容有無更動，避免複寫
+        div(class="template-information__line pt-10")
+          div(style="width: 50%;")
+            input(type="checkbox"
+              class="template-information__check"
+              v-model="updateParentIdChecked")
+            label 確定修改
+          btn(:type="'primary-sm'" class="rounded my-5"
+            style="padding: 5px 40px;"
+            @click.native="updateParentIdClicked()") 修改
 </template>
 
 <script lang="ts">

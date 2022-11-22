@@ -1,25 +1,25 @@
 <template lang="pug">
-  div(class="mobile-image-adjust")
-    div(class="page relative")
-      nu-layer(class="nu-layer--p0"
-        :data-index="0"
-        :data-pindex="0"
-        :layerIndex="0"
-        :pageIndex="0"
-        :config="config")
-    div(class="photo-setting")
-      span(class="photo-setting__title text-blue-1 subtitle-1") {{$t('NN0039')}}
-      popup-adjust(
-        :imageAdjust="currLayerAdjust"
-        @update="handleAdjust" v-on="$listeners")
-      div(class="label") 縮放
-        input(class="range-input input__slider--range"
-          :value="currentScale"
-          :max="100"
-          :min="1"
-          name="scale"
-          @input="handleScaling"
-          type="range")
+div(class="mobile-image-adjust")
+  div(class="page relative")
+    nu-layer(class="nu-layer--p0"
+      :data-index="0"
+      :data-pindex="0"
+      :layerIndex="0"
+      :pageIndex="0"
+      :config="config")
+  div(class="photo-setting")
+    span(class="photo-setting__title text-blue-1 subtitle-1") {{$t('NN0039')}}
+    popup-adjust(
+      :imageAdjust="currLayerAdjust"
+      @update="handleAdjust" v-on="$listeners")
+    div(class="label") 縮放
+      input(class="range-input input__slider--range"
+        :value="currentScale"
+        :max="100"
+        :min="1"
+        name="scale"
+        @input="handleScaling"
+        type="range")
 </template>
 
 <script lang="ts">

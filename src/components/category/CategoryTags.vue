@@ -1,21 +1,21 @@
 <template lang="pug">
-  div(class="category-tags")
-    div(v-if="prevIcon"
-      class="category-tags__move category-row__move--left"
-      @click="handlePrev")
-      div(class="category-tags__icon")
-        svg-icon(iconName="arrow-left" iconWidth="20px" iconColor="gray-1")
-    div(v-if="nextIcon"
-      class="category-tags__move category-tags__move--right"
-      @click="handleNext")
-      div(class="category-tags__icon")
-        svg-icon(iconName="arrow-right" iconWidth="20px" iconColor="gray-1")
-    div(class="category-tags__items" ref="items" @scroll.passive="handleScroll")
-      div(class="category-tags__tag") Women’s day
-      div(class="category-tags__tag") Spring
-      div(class="category-tags__tag") birthday
-      div(class="category-tags__tag") taiwan
-      div(class="category-tags__tag") okkk
+div(class="category-tags")
+  div(v-if="prevIcon"
+    class="category-tags__move category-row__move--left"
+    @click="handlePrev")
+    div(class="category-tags__icon")
+      svg-icon(iconName="arrow-left" iconWidth="20px" iconColor="gray-1")
+  div(v-if="nextIcon"
+    class="category-tags__move category-tags__move--right"
+    @click="handleNext")
+    div(class="category-tags__icon")
+      svg-icon(iconName="arrow-right" iconWidth="20px" iconColor="gray-1")
+  div(class="category-tags__items" ref="items" @scroll.passive="handleScroll")
+    div(class="category-tags__tag") Women’s day
+    div(class="category-tags__tag") Spring
+    div(class="category-tags__tag") birthday
+    div(class="category-tags__tag") taiwan
+    div(class="category-tags__tag") okkk
 </template>
 
 <script lang="ts">

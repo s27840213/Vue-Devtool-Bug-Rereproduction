@@ -1,31 +1,31 @@
 <template lang="pug">
-  div(v-if="allDesigns.length > 0 || isDesignsLoading" class="mobile-design-gallery")
-    div(v-if="!noHeader && allDesigns.length > 0" class="mobile-design-gallery__header")
-      div(class="mobile-design-gallery__title")
-        span {{$tc('NN0252', 2)}}
-      div(class="mobile-design-gallery__expand-icon-container"
-          @click="toggleExpansion")
-        svg-icon(:style="expansionIconStyles()"
-                iconName="chevron-left"
-                iconWidth="24px"
-                iconColor="gray-1")
-    div(v-if="isExpanded" class="mobile-design-gallery__designs")
-      mobile-design-item(v-for="(design, index) in allDesigns"
-                  :key="design.asset_index"
-                  :index="index"
-                  :config="design"
-                  :unenterable="limitFunctions"
-                  :isSelected="checkSelected(design.asset_index.toString())"
-                  :isAnySelected="isAnySelected"
-                  :isMultiSelected="isMultiSelected"
-                  @select="selectDesign(design)"
-                  @deselect="deselectDesign(design)")
-    div(v-if="isExpanded && isDesignsLoading" class="mobile-design-gallery__loading")
-      svg-icon(iconName="loading"
-                iconWidth="32px"
-                iconColor="gray-3")
-    observer-sentinel(v-if="!isDesignsLoading && designsPageIndex >= 0"
-                      @callback="handleLoadMore")
+div(v-if="allDesigns.length > 0 || isDesignsLoading" class="mobile-design-gallery")
+  div(v-if="!noHeader && allDesigns.length > 0" class="mobile-design-gallery__header")
+    div(class="mobile-design-gallery__title")
+      span {{$tc('NN0252', 2)}}
+    div(class="mobile-design-gallery__expand-icon-container"
+        @click="toggleExpansion")
+      svg-icon(:style="expansionIconStyles()"
+              iconName="chevron-left"
+              iconWidth="24px"
+              iconColor="gray-1")
+  div(v-if="isExpanded" class="mobile-design-gallery__designs")
+    mobile-design-item(v-for="(design, index) in allDesigns"
+                :key="design.asset_index"
+                :index="index"
+                :config="design"
+                :unenterable="limitFunctions"
+                :isSelected="checkSelected(design.asset_index.toString())"
+                :isAnySelected="isAnySelected"
+                :isMultiSelected="isMultiSelected"
+                @select="selectDesign(design)"
+                @deselect="deselectDesign(design)")
+  div(v-if="isExpanded && isDesignsLoading" class="mobile-design-gallery__loading")
+    svg-icon(iconName="loading"
+              iconWidth="32px"
+              iconColor="gray-3")
+  observer-sentinel(v-if="!isDesignsLoading && designsPageIndex >= 0"
+                    @callback="handleLoadMore")
 </template>
 
 <script lang="ts">

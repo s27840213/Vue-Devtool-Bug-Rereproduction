@@ -1,25 +1,25 @@
 <template lang="pug">
-  div(class="relative dropdown")
-    property-bar(class="pointer"
-      @click.native.prevent="handleOpen")
-      div(class="dropdown__label")
-        slot {{ current || placeholder }}
-      slot(name="caret-down")
-        svg-icon(iconName="caret-down"
-          iconWidth="10px"
-          iconColor="gray-2")
-    div(v-if="showDropdown && options.length"
-      v-click-outside="handleClose"
-      class="dropdown__options")
-      div(v-for="option in options"
-        :key="option.value || option"
-        @click.stop="() => handleSelect(option)")
-        slot(name="option" :data="option")
-          div(class="dropdown__option") {{ option.label || option }}
-    div(v-if="showDropdown && isCustomOptions"
-      v-click-outside="handleClose"
-      class="dropdown__options")
-      slot(name="custom")
+div(class="relative dropdown")
+  property-bar(class="pointer"
+    @click.native.prevent="handleOpen")
+    div(class="dropdown__label")
+      slot {{ current || placeholder }}
+    slot(name="caret-down")
+      svg-icon(iconName="caret-down"
+        iconWidth="10px"
+        iconColor="gray-2")
+  div(v-if="showDropdown && options.length"
+    v-click-outside="handleClose"
+    class="dropdown__options")
+    div(v-for="option in options"
+      :key="option.value || option"
+      @click.stop="() => handleSelect(option)")
+      slot(name="option" :data="option")
+        div(class="dropdown__option") {{ option.label || option }}
+  div(v-if="showDropdown && isCustomOptions"
+    v-click-outside="handleClose"
+    class="dropdown__options")
+    slot(name="custom")
 </template>
 
 <script lang="ts">

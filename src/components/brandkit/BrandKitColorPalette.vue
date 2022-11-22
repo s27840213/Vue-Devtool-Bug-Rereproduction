@@ -1,45 +1,45 @@
 <template lang="pug">
-  div(class="brand-kit-color-palette")
-    div(class="brand-kit-color-palette__header")
-      div(class="brand-kit-color-palette__name")
-        input(v-if="isNameEditing"
-          ref="paletteName"
-          v-model="editableName"
-          v-click-outside="handleNameEditEnd"
-          @change="handleNameEditEnd"
-          @keyup="checkNameEnter")
-        span(v-else
-          :title="paletteName"
-          @click="handleNameClick") {{ paletteName }}
-      div(class="brand-kit-color-palette__right")
-        div(class="brand-kit-color-palette__trash pointer"
-            @click="handleDeletePalette(colorPalette)")
-          svg-icon(iconName="trash" iconWidth="16px" iconColor="gray-2")
-    transition-group(class="brand-kit-color-palette__colors" name="color-list" tag="div")
-      template(v-for="(color, index) in colors")
-        div(v-if="color === 'add'"
-          class="brand-kit-color-palette__colors__color-wrapper pointer"
-          key="default"
-          @click="handleAddColor(colorPalette.id)")
-          div(class="brand-kit-color-palette__colors__color-add")
-            svg-icon(iconName="plus-origin" iconWidth="16px" iconColor="gray-3")
-        div(v-else
-          class="brand-kit-color-palette__colors__color-wrapper"
+div(class="brand-kit-color-palette")
+  div(class="brand-kit-color-palette__header")
+    div(class="brand-kit-color-palette__name")
+      input(v-if="isNameEditing"
+        ref="paletteName"
+        v-model="editableName"
+        v-click-outside="handleNameEditEnd"
+        @change="handleNameEditEnd"
+        @keyup="checkNameEnter")
+      span(v-else
+        :title="paletteName"
+        @click="handleNameClick") {{ paletteName }}
+    div(class="brand-kit-color-palette__right")
+      div(class="brand-kit-color-palette__trash pointer"
+          @click="handleDeletePalette(colorPalette)")
+        svg-icon(iconName="trash" iconWidth="16px" iconColor="gray-2")
+  transition-group(class="brand-kit-color-palette__colors" name="color-list" tag="div")
+    template(v-for="(color, index) in colors")
+      div(v-if="color === 'add'"
+        class="brand-kit-color-palette__colors__color-wrapper pointer"
+        key="default"
+        @click="handleAddColor(colorPalette.id)")
+        div(class="brand-kit-color-palette__colors__color-add")
+          svg-icon(iconName="plus-origin" iconWidth="16px" iconColor="gray-3")
+      div(v-else
+        class="brand-kit-color-palette__colors__color-wrapper"
+        :class="{ selected: checkSelected(colorPalette.id, color) }"
+        :key="color.id")
+        div(class="brand-kit-color-palette__colors__color pointer"
+          :style="backgroundColorStyles(color.color)"
+          @click="handleSelectColor(colorPalette.id, color)")
+        div(class="brand-kit-color-palette__colors__color-close pointer"
           :class="{ selected: checkSelected(colorPalette.id, color) }"
-          :key="color.id")
-          div(class="brand-kit-color-palette__colors__color pointer"
-            :style="backgroundColorStyles(color.color)"
-            @click="handleSelectColor(colorPalette.id, color)")
-          div(class="brand-kit-color-palette__colors__color-close pointer"
-            :class="{ selected: checkSelected(colorPalette.id, color) }"
-            @click.stop="handleDeleteColor(colorPalette.id, color)")
-            svg-icon(iconName="close" iconWidth="16px" iconColor="gray-2")
-          color-picker(v-if="checkSelected(colorPalette.id, color)"
-                      class="color-picker"
-                      v-click-outside="handleDeSelectColor"
-                      :currentColor="color.color"
-                      @update="handleDragUpdate"
-                      @final="handleColorChangeEnd")
+          @click.stop="handleDeleteColor(colorPalette.id, color)")
+          svg-icon(iconName="close" iconWidth="16px" iconColor="gray-2")
+        color-picker(v-if="checkSelected(colorPalette.id, color)"
+                    class="color-picker"
+                    v-click-outside="handleDeSelectColor"
+                    :currentColor="color.color"
+                    @update="handleDragUpdate"
+                    @final="handleColorChangeEnd")
 </template>
 
 <script lang="ts">

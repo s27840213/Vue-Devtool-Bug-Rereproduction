@@ -1,7 +1,7 @@
 <template lang="pug">
-  div(class="observer-sentinel"
-    ref="sentinel")
-    slot
+div(class="observer-sentinel"
+  ref="sentinel")
+  slot
 </template>
 
 <script lang="ts">

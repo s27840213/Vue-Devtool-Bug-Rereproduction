@@ -1,11 +1,11 @@
 <template lang="pug">
-  div(class="svg-icon-view bg-nav")
-    div(class="svg-icon-view__icon pointer" v-for="icon in icons" @click="copyText(icon)")
-      svg-icon(class="pointer"
-        :iconName="icon"
-        :iconWidth="'30px'"
-        :iconColor="'white'")
-      span(class="text-white") {{icon}}
+div(class="svg-icon-view bg-nav")
+  div(class="svg-icon-view__icon pointer" v-for="icon in icons" @click="copyText(icon)")
+    svg-icon(class="pointer"
+      :iconName="icon"
+      :iconWidth="'30px'"
+      :iconColor="'white'")
+    span(class="text-white") {{icon}}
 </template>
 
 <script lang="ts">

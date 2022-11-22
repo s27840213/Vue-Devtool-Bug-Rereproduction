@@ -1,7 +1,7 @@
 <template lang="pug">
-  div(class="my-design")
-    my-design-mobile(v-if="isMobile > 0" :view="view")
-    my-design-pc(v-if="isMobile < 0" :view="view")
+div(class="my-design")
+  my-design-mobile(v-if="isMobile > 0" :view="view")
+  my-design-pc(v-if="isMobile < 0" :view="view")
 </template>
 
 <script lang="ts">

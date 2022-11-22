@@ -1,58 +1,58 @@
 <template lang="pug">
-  div(class="mobile-panel"
-      :class="{'p-15': !noPaddingTheme}"
-      :style="panelStyle"
-      v-click-outside="vcoConfig()"
-      ref="panel")
-    div(class="mobile-panel__top-section"
-      :class="{'self-padding': noPaddingTheme}")
-      div(class="mobile-panel__drag-bar"
-        :class="{'visible-hidden': panelTitle !== ''}"
-        @pointerdown="dragPanelStart"
-        @touchstart="disableTouchEvent")
-          div
-      div
-        div(class="mobile-panel__btn mobile-panel__left-btn"
-            :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn,}")
-          svg-icon(
-            class="click-disabled"
-            :iconName="leftBtnName"
-            :iconColor="'white'"
-            :iconWidth="'20px'")
-          div(class="mobile-panel__btn-click-zone"
-            @pointerdown="leftButtonAction"
-            @touchstart="disableTouchEvent")
-        div(class="mobile-panel__title")
-          span(class="mobile-panel__title-text body-1 mr-10"
-            :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
-          div(v-if="inSelectionState" class="mobile-panel__layer-num")
-            span(class="label-sm text-white") {{selectedLayerNum}}
-        div(class="mobile-panel__btn mobile-panel__right-btn"
-            :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn}")
-          svg-icon(
-            class="click-disabled"
-            :iconName="rightBtnName"
-            :iconColor="'white'"
-            :iconWidth="'20px'")
-          div(class="mobile-panel__btn-click-zone"
-            @pointerdown="rightButtonAction"
-            @touchstart="disableTouchEvent")
-      tabs(v-if="innerTabs.label" class="mobile-panel__inner-tab" theme="light"
-          :tabs="innerTabs.label" @switchTab="switchInnerTab")
-    div(class="mobile-panel__bottom-section")
-      keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
-        //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-        component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
-          class="border-box p-2"
-          v-bind="dynamicBindProps"
-          v-on="dynamicBindMethod"
-          @close="closeMobilePanel")
-    transition(name="panel-up")
-      mobile-panel(v-if="!isSubPanel && currActiveSubPanel !== 'none'"
-        :currActivePanel="currActiveSubPanel"
-        :currColorEvent="currSubColorEvent"
-        :isSubPanel="true"
-        @switchTab="switchTab")
+div(class="mobile-panel"
+    :class="{'p-15': !noPaddingTheme}"
+    :style="panelStyle"
+    v-click-outside="vcoConfig()"
+    ref="panel")
+  div(class="mobile-panel__top-section"
+    :class="{'self-padding': noPaddingTheme}")
+    div(class="mobile-panel__drag-bar"
+      :class="{'visible-hidden': panelTitle !== ''}"
+      @pointerdown="dragPanelStart"
+      @touchstart="disableTouchEvent")
+        div
+    div
+      div(class="mobile-panel__btn mobile-panel__left-btn"
+          :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn,}")
+        svg-icon(
+          class="click-disabled"
+          :iconName="leftBtnName"
+          :iconColor="'white'"
+          :iconWidth="'20px'")
+        div(class="mobile-panel__btn-click-zone"
+          @pointerdown="leftButtonAction"
+          @touchstart="disableTouchEvent")
+      div(class="mobile-panel__title")
+        span(class="mobile-panel__title-text body-1 mr-10"
+          :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
+        div(v-if="inSelectionState" class="mobile-panel__layer-num")
+          span(class="label-sm text-white") {{selectedLayerNum}}
+      div(class="mobile-panel__btn mobile-panel__right-btn"
+          :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn}")
+        svg-icon(
+          class="click-disabled"
+          :iconName="rightBtnName"
+          :iconColor="'white'"
+          :iconWidth="'20px'")
+        div(class="mobile-panel__btn-click-zone"
+          @pointerdown="rightButtonAction"
+          @touchstart="disableTouchEvent")
+    tabs(v-if="innerTabs.label" class="mobile-panel__inner-tab" theme="light"
+        :tabs="innerTabs.label" @switchTab="switchInnerTab")
+  div(class="mobile-panel__bottom-section")
+    keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
+      //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
+      component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
+        class="border-box p-2"
+        v-bind="dynamicBindProps"
+        v-on="dynamicBindMethod"
+        @close="closeMobilePanel")
+  transition(name="panel-up")
+    mobile-panel(v-if="!isSubPanel && currActiveSubPanel !== 'none'"
+      :currActivePanel="currActiveSubPanel"
+      :currColorEvent="currSubColorEvent"
+      :isSubPanel="true"
+      @switchTab="switchTab")
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'

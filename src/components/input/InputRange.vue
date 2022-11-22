@@ -1,10 +1,10 @@
 <template lang="pug">
-  div(class="circle-checkbox")
-    input(:id="value" type="checkbox" name="cb" :value="value" v-model="myVm")
-    label(:for="value")
-      svg(fill="none", viewBox="0 0 12 12")
-        circle(class="box" cx="6", cy="6", r="5.5", fill="#4EABE6", stroke="#fff")
-        path(class="check" stroke="#fff", stroke-linecap="round", d="M4 5.333l1.087 1.933a.5.5 0 00.86.02L8 4")
+div(class="circle-checkbox")
+  input(:id="value" type="checkbox" name="cb" :value="value" v-model="myVm")
+  label(:for="value")
+    svg(fill="none", viewBox="0 0 12 12")
+      circle(class="box" cx="6", cy="6", r="5.5", fill="#4EABE6", stroke="#fff")
+      path(class="check" stroke="#fff", stroke-linecap="round", d="M4 5.333l1.087 1.933a.5.5 0 00.86.02L8 4")
 </template>
 
 <script lang="ts">

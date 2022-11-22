@@ -1,33 +1,33 @@
 <template lang="pug">
-  div(class="nu-layer" :style="layerStyles()" ref="body"
-      :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
-      :data-p-index="pageIndex"
-      @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
-      @dragover.prevent
-      @dragleave.prevent
-      @dragenter.prevent)
-    div(class="layer-translate posAbs"
-        :style="translateStyles()")
-      div(class="layer-scale posAbs" ref="scale"
-          :style="scaleStyles()")
-        nu-clipper(:config="config"
-            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-            :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
-          component(:is="`nu-${config.type}`"
-            class="transition-none"
-            :config="config"
-            :imgControl="imgControl"
-            :contentScaleRatio="contentScaleRatio"
-            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-            :scaleRatio="scaleRatio"
-            :isPagePreview="isPagePreview"
-            v-bind="$attrs")
-    div(v-if="showSpinner()" class="nu-layer__inProcess")
-      square-loading
-      //- svg-icon(class="spiner"
-      //-   :iconName="'spiner'"
-      //-   :iconColor="'white'"
-      //-   :iconWidth="'150px'")
+div(class="nu-layer" :style="layerStyles()" ref="body"
+    :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
+    :data-p-index="pageIndex"
+    @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
+    @dragover.prevent
+    @dragleave.prevent
+    @dragenter.prevent)
+  div(class="layer-translate posAbs"
+      :style="translateStyles()")
+    div(class="layer-scale posAbs" ref="scale"
+        :style="scaleStyles()")
+      nu-clipper(:config="config"
+          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+          :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
+        component(:is="`nu-${config.type}`"
+          class="transition-none"
+          :config="config"
+          :imgControl="imgControl"
+          :contentScaleRatio="contentScaleRatio"
+          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+          :scaleRatio="scaleRatio"
+          :isPagePreview="isPagePreview"
+          v-bind="$attrs")
+  div(v-if="showSpinner()" class="nu-layer__inProcess")
+    square-loading
+    //- svg-icon(class="spiner"
+    //-   :iconName="'spiner'"
+    //-   :iconColor="'white'"
+    //-   :iconWidth="'150px'")
 </template>
 
 <script lang="ts">

@@ -1,66 +1,66 @@
 <template lang="pug">
-  div(class="text-effect-setting mt-25")
-    //- Tabs to choose effect category: shadow, shape and bg.
-    div(class="text-effect-setting-tabs")
-      span(v-for="category in textEffects"
-          :selected="currTab===category.name"
-          @click="switchTab(category.name)") {{category.label}}
-    div(class="action-bar")
-      template(v-for="effects1d in currCategory.effects2d")
-        //- To choose effect, ex: hollow, splice or echo.
-        div(class="text-effect-setting__effects mb-10")
-          svg-icon(v-for="effect in effects1d"
-            :key="`${currCategory.name}-${effect.key}`"
-            :iconName="`text-${currCategory.name}-${effect.key}`"
-            @click.native="onEffectClick(effect.key)"
-            class="text-effect-setting__effect pointer"
-            :class="{'selected': currentStyle[currCategory.name].name === effect.key }"
-            iconWidth="60px"
-            iconColor="white"
-            v-hint="effect.label")
-        //- Effect option UI.
-        div(v-if="getOptions(effects1d) && getOptions(effects1d).length !== 0"
-            class="text-effect-setting-options")
-          div(v-for="option in getOptions(effects1d)"
-              :key="option.key"
-              class="text-effect-setting-options__field")
-            div(class="text-effect-setting-options__field--name") {{option.label}}
-            //- Option type select
-            div(v-if="option.type === 'select'"
-                class="text-effect-setting-options__field--select")
-              svg-icon(v-for="sel in option.select"
-                :iconName="`${option.key}-${sel.key}`"
-                iconWidth="24px"
-                :class="{'selected': currentStyle[currCategory.name].endpoint === sel.key }"
-                @click.native="handleSelectInput(option.key, sel.key)")
-            //- Option type range
-            template(v-if="option.type === 'range'")
-              input(class="text-effect-setting-options__field--number"
-                :value="currentStyle[currCategory.name][option.key]"
-                :name="option.key"
-                :max="option.max"
-                :min="option.min"
-                @change="(e)=>{handleRangeInput(e, option);recordChange()}"
-                type="number")
-              input(class="text-effect-setting-options__field--range input__slider--range"
-                :value="currentStyle[currCategory.name][option.key]"
-                :name="option.key"
-                :max="option.max"
-                :min="option.min"
-                @input="(e)=>handleRangeInput(e, option)"
-                @mousedown="handleRangeMousedown()"
-                @mouseup="handleRangeMouseup()"
-                v-ratio-change
-                type="range")
-            //- Option type color
-            template(v-if="option.type === 'color'")
-              div(class="text-effect-setting-options__field--btn"
-                :style="colorParser(currentStyle[currCategory.name][option.key])"
-                @click="handleColorModal(currCategory.name, option.key)")
-          div(class="text-effect-setting-options__field")
-            span
-            span(class="text-effect-setting-options__field--reset"
-                @click="resetTextEffect()") {{$t('NN0754')}}
+div(class="text-effect-setting mt-25")
+  //- Tabs to choose effect category: shadow, shape and bg.
+  div(class="text-effect-setting-tabs")
+    span(v-for="category in textEffects"
+        :selected="currTab===category.name"
+        @click="switchTab(category.name)") {{category.label}}
+  div(class="action-bar")
+    template(v-for="effects1d in currCategory.effects2d")
+      //- To choose effect, ex: hollow, splice or echo.
+      div(class="text-effect-setting__effects mb-10")
+        svg-icon(v-for="effect in effects1d"
+          :key="`${currCategory.name}-${effect.key}`"
+          :iconName="`text-${currCategory.name}-${effect.key}`"
+          @click.native="onEffectClick(effect.key)"
+          class="text-effect-setting__effect pointer"
+          :class="{'selected': currentStyle[currCategory.name].name === effect.key }"
+          iconWidth="60px"
+          iconColor="white"
+          v-hint="effect.label")
+      //- Effect option UI.
+      div(v-if="getOptions(effects1d) && getOptions(effects1d).length !== 0"
+          class="text-effect-setting-options")
+        div(v-for="option in getOptions(effects1d)"
+            :key="option.key"
+            class="text-effect-setting-options__field")
+          div(class="text-effect-setting-options__field--name") {{option.label}}
+          //- Option type select
+          div(v-if="option.type === 'select'"
+              class="text-effect-setting-options__field--select")
+            svg-icon(v-for="sel in option.select"
+              :iconName="`${option.key}-${sel.key}`"
+              iconWidth="24px"
+              :class="{'selected': currentStyle[currCategory.name].endpoint === sel.key }"
+              @click.native="handleSelectInput(option.key, sel.key)")
+          //- Option type range
+          template(v-if="option.type === 'range'")
+            input(class="text-effect-setting-options__field--number"
+              :value="currentStyle[currCategory.name][option.key]"
+              :name="option.key"
+              :max="option.max"
+              :min="option.min"
+              @change="(e)=>{handleRangeInput(e, option);recordChange()}"
+              type="number")
+            input(class="text-effect-setting-options__field--range input__slider--range"
+              :value="currentStyle[currCategory.name][option.key]"
+              :name="option.key"
+              :max="option.max"
+              :min="option.min"
+              @input="(e)=>handleRangeInput(e, option)"
+              @mousedown="handleRangeMousedown()"
+              @mouseup="handleRangeMouseup()"
+              v-ratio-change
+              type="range")
+          //- Option type color
+          template(v-if="option.type === 'color'")
+            div(class="text-effect-setting-options__field--btn"
+              :style="colorParser(currentStyle[currCategory.name][option.key])"
+              @click="handleColorModal(currCategory.name, option.key)")
+        div(class="text-effect-setting-options__field")
+          span
+          span(class="text-effect-setting-options__field--reset"
+              @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">

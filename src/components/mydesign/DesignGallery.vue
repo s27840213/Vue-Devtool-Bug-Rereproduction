@@ -1,50 +1,50 @@
 <template lang="pug">
-  div(v-if="allDesigns.length > 0 || isDesignsLoading" class="design-gallery")
-    div(v-if="!noHeader && allDesigns.length > 0" class="design-gallery__header")
-      div(class="design-gallery__expand-icon-container"
-          @click="toggleExpansion")
-        svg-icon(:style="expansionIconStyles()"
-                iconName="caret-down"
-                iconWidth="10px"
-                iconHeight="5px"
-                iconColor="gray-2")
-      div(class="design-gallery__title")
-        span {{$tc('NN0252', 2)}}
-    div(v-if="isExpanded" class="design-gallery__designs")
-      design-item(v-for="(design, index) in allDesigns"
-                  :key="design.asset_index"
-                  :index="index"
-                  :config="design"
-                  :favorable="!limitFunctions"
-                  :undraggable="limitFunctions"
-                  :nameIneditable="limitFunctions"
-                  :unenterable="limitFunctions"
-                  :isSelected="checkSelected(design.asset_index.toString())"
-                  :isAnySelected="isAnySelected"
-                  :isMultiSelected="isMultiSelected"
-                  :menuItemNum="menuItemSlots.length"
-                  @like="toggleFavorite(design)"
-                  @select="selectDesign(design)"
-                  @deselect="deselectDesign(design)"
-                  @metaSelect="metaSelectDesign(index)")
-        template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
-          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, design)")
-            div(class="design-menu-item__icon")
-              svg-icon(:iconName="menuItemSlot.icon"
-                      iconWidth="10px"
-                      iconColor="gray-2")
-            div(class="design-menu-item__text")
-              span {{ menuItemSlot.text }}
-            div(v-if="menuItemSlot.extendable" class="design-menu-item__right")
-              svg-icon(iconName="chevron-right"
-                      iconWidth="10px"
-                      iconColor="gray-2")
-    div(v-if="isExpanded && isDesignsLoading" class="design-gallery__loading")
-      svg-icon(iconName="loading"
-                iconWidth="50px"
-                iconColor="gray-3")
-    observer-sentinel(v-if="!isDesignsLoading && designsPageIndex >= 0"
-                      @callback="handleLoadMore")
+div(v-if="allDesigns.length > 0 || isDesignsLoading" class="design-gallery")
+  div(v-if="!noHeader && allDesigns.length > 0" class="design-gallery__header")
+    div(class="design-gallery__expand-icon-container"
+        @click="toggleExpansion")
+      svg-icon(:style="expansionIconStyles()"
+              iconName="caret-down"
+              iconWidth="10px"
+              iconHeight="5px"
+              iconColor="gray-2")
+    div(class="design-gallery__title")
+      span {{$tc('NN0252', 2)}}
+  div(v-if="isExpanded" class="design-gallery__designs")
+    design-item(v-for="(design, index) in allDesigns"
+                :key="design.asset_index"
+                :index="index"
+                :config="design"
+                :favorable="!limitFunctions"
+                :undraggable="limitFunctions"
+                :nameIneditable="limitFunctions"
+                :unenterable="limitFunctions"
+                :isSelected="checkSelected(design.asset_index.toString())"
+                :isAnySelected="isAnySelected"
+                :isMultiSelected="isMultiSelected"
+                :menuItemNum="menuItemSlots.length"
+                @like="toggleFavorite(design)"
+                @select="selectDesign(design)"
+                @deselect="deselectDesign(design)"
+                @metaSelect="metaSelectDesign(index)")
+      template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
+        div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, design)")
+          div(class="design-menu-item__icon")
+            svg-icon(:iconName="menuItemSlot.icon"
+                    iconWidth="10px"
+                    iconColor="gray-2")
+          div(class="design-menu-item__text")
+            span {{ menuItemSlot.text }}
+          div(v-if="menuItemSlot.extendable" class="design-menu-item__right")
+            svg-icon(iconName="chevron-right"
+                    iconWidth="10px"
+                    iconColor="gray-2")
+  div(v-if="isExpanded && isDesignsLoading" class="design-gallery__loading")
+    svg-icon(iconName="loading"
+              iconWidth="50px"
+              iconColor="gray-3")
+  observer-sentinel(v-if="!isDesignsLoading && designsPageIndex >= 0"
+                    @callback="handleLoadMore")
 </template>
 
 <script lang="ts">

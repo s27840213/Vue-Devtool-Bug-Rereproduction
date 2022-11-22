@@ -1,16 +1,16 @@
 <template lang="pug">
-  div(v-if="colorPalettes.length === 0 && !isPalettesLoading" class="hint" :style="minHeightStyles()")
-    no-items-hint(type="color" :mobile="true")
-  div(v-else class="brand-kit-tab-color" :style="minHeightStyles()")
-    div(class="brand-kit-tab-color__palettes")
-      div(v-if="isPalettesLoading" class="loading")
-        svg-icon(iconName="loading"
-                iconWidth="24px"
-                iconColor="gray-3")
-      template(v-else)
-        brand-kit-color-palette-sidebar-mobile(v-for="colorPalette in colorPalettes"
-                                        :colorPalette="colorPalette"
-                                        :settingmode="settingmode")
+div(v-if="colorPalettes.length === 0 && !isPalettesLoading" class="hint" :style="minHeightStyles()")
+  no-items-hint(type="color" :mobile="true")
+div(v-else class="brand-kit-tab-color" :style="minHeightStyles()")
+  div(class="brand-kit-tab-color__palettes")
+    div(v-if="isPalettesLoading" class="loading")
+      svg-icon(iconName="loading"
+              iconWidth="24px"
+              iconColor="gray-3")
+    template(v-else)
+      brand-kit-color-palette-sidebar-mobile(v-for="colorPalette in colorPalettes"
+                                      :colorPalette="colorPalette"
+                                      :settingmode="settingmode")
 </template>
 
 <script lang="ts">

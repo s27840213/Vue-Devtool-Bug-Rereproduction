@@ -1,52 +1,52 @@
 <template lang="pug">
-  div(class="panel-group mb-10")
-    div(class="panel-group__group-ctrl")
-      btn(class="full-width mr-10 rounded"
-        :type="'primary-mid'"
-        :disabled="isLocked || (!isGroup && selectedLayerNum <=1)"
-        @click.native="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup? $t('NN0212'):$t('NN0029')}}
-      div(class="border-gray-4 p-5 btn-opacity"
-        v-hint="$t('NN0030')"
-      )
-        svg-icon(:class="{'pointer': !isLocked}"
-          :iconName="'transparency'" :iconWidth="'24px'" :iconColor="'gray-2'"
-          @click.native="openSliderPopup()")
-    div(class="action-bar flex-between")
-      svg-icon(class="layers-alt feature-button p-5"
-        :class="{'pointer': !isLocked}"
-        iconName="layers-alt" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
-        @click.native="openOrderPopup()"
-        v-hint="$t('NN0031')"
-      )
-      svg-icon(class="feature-button p-5"
-        :class="{'pointer': !isLocked}"
-        iconName="copy" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
-        @click.native="iconAction('copy')"
-        v-hint="$t('NN0032')"
-      )
-      svg-icon(class="pointer feature-button p-5"
-        :class="{ active: isLocked }"
-        :iconName="isLocked ? 'unlock' : 'lock'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click.native="iconAction(isLocked ? 'lock' : 'unlock')"
-        v-hint="isLocked ? `${$t('NN0033')}` : `${$t('NN0213')}`"
-      )
-      svg-icon(class="feature-button p-5"
-        :class="{'pointer': !isLocked}"
-        iconName="trash" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
-        @click.native="iconAction('trash')"
-        v-hint="$t('NN0034')"
-      )
-      svg-icon(class="feature-button p-5"
-        :class="{'pointer': !isCopyFormatDisabled}"
-        iconName="brush" :iconWidth="'20px'" :iconColor="isCopyFormatDisabled ? 'gray-4' : 'gray-2'"
-        @click.native="handleCopyFormat"
-        v-hint="$t('NN0035')"
-      )
-    div(class="panel-group__adjust")
-      btn(class="btn-align full-width" :type="'gray-mid'" :disabled="isLocked"
-        @click.native="openAlignPopup") {{$tc('NN0044',1)}}
-      btn(class="btn-flip full-width" :type="'gray-mid'" :disabled="isLocked || isFlipDisabled"
-        @click.native="openFlipPopup") {{$t('NN0038')}}
+div(class="panel-group mb-10")
+  div(class="panel-group__group-ctrl")
+    btn(class="full-width mr-10 rounded"
+      :type="'primary-mid'"
+      :disabled="isLocked || (!isGroup && selectedLayerNum <=1)"
+      @click.native="isGroup? ShortcutUtils.ungroup(): ShortcutUtils.group()") {{isGroup? $t('NN0212'):$t('NN0029')}}
+    div(class="border-gray-4 p-5 btn-opacity"
+      v-hint="$t('NN0030')"
+    )
+      svg-icon(:class="{'pointer': !isLocked}"
+        :iconName="'transparency'" :iconWidth="'24px'" :iconColor="'gray-2'"
+        @click.native="openSliderPopup()")
+  div(class="action-bar flex-between")
+    svg-icon(class="layers-alt feature-button p-5"
+      :class="{'pointer': !isLocked}"
+      iconName="layers-alt" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
+      @click.native="openOrderPopup()"
+      v-hint="$t('NN0031')"
+    )
+    svg-icon(class="feature-button p-5"
+      :class="{'pointer': !isLocked}"
+      iconName="copy" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
+      @click.native="iconAction('copy')"
+      v-hint="$t('NN0032')"
+    )
+    svg-icon(class="pointer feature-button p-5"
+      :class="{ active: isLocked }"
+      :iconName="isLocked ? 'unlock' : 'lock'" :iconWidth="'20px'" :iconColor="'gray-2'"
+      @click.native="iconAction(isLocked ? 'lock' : 'unlock')"
+      v-hint="isLocked ? `${$t('NN0033')}` : `${$t('NN0213')}`"
+    )
+    svg-icon(class="feature-button p-5"
+      :class="{'pointer': !isLocked}"
+      iconName="trash" :iconWidth="'20px'" :iconColor="isLocked ? 'gray-4' : 'gray-2'"
+      @click.native="iconAction('trash')"
+      v-hint="$t('NN0034')"
+    )
+    svg-icon(class="feature-button p-5"
+      :class="{'pointer': !isCopyFormatDisabled}"
+      iconName="brush" :iconWidth="'20px'" :iconColor="isCopyFormatDisabled ? 'gray-4' : 'gray-2'"
+      @click.native="handleCopyFormat"
+      v-hint="$t('NN0035')"
+    )
+  div(class="panel-group__adjust")
+    btn(class="btn-align full-width" :type="'gray-mid'" :disabled="isLocked"
+      @click.native="openAlignPopup") {{$tc('NN0044',1)}}
+    btn(class="btn-flip full-width" :type="'gray-mid'" :disabled="isLocked || isFlipDisabled"
+      @click.native="openFlipPopup") {{$t('NN0038')}}
 </template>
 
 <script lang="ts">

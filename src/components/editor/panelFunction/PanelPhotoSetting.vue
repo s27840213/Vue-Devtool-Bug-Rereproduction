@@ -1,28 +1,28 @@
 <template lang="pug">
-  div(class="photo-setting")
-    span(class="photo-setting__title text-blue-1 subtitle-1") {{$t('NN0039')}}
-    div(class="photo-setting__grid mb-10")
-      template(v-for="btn in btns")
-        div(v-hint="disableBtn(btn) ? btn.hint : ''")
-          btn(v-if="!btn.condition || btn.condition()"
-            class="full-width"
-            :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0]"
-            type="gray-mid"
-            ref="btn"
-            :disabled="disableBtn(btn)"
-            :key="btn.name"
-            @click.native="handleShow(btn.show)") {{ btn.label }}
-            //- v-hint="(btn.hint && btn.hint.condition()) ? btn.hint.content : ''"
-      btn(v-if="isImage && !isFrame"
-        class="full-width"
-        type="gray-mid"
-        ref="btn"
-        :disabled="isHandleShadow || show === 'panel-photo-shadow'"
-        @click.native="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
-    component(:is="show || 'div'"
-      ref="popup"
-      :imageAdjust="currLayerAdjust"
-      @update="handleAdjust" v-on="$listeners")
+div(class="photo-setting")
+  span(class="photo-setting__title text-blue-1 subtitle-1") {{$t('NN0039')}}
+  div(class="photo-setting__grid mb-10")
+    template(v-for="btn in btns")
+      div(v-hint="disableBtn(btn) ? btn.hint : ''")
+        btn(v-if="!btn.condition || btn.condition()"
+          class="full-width"
+          :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0]"
+          type="gray-mid"
+          ref="btn"
+          :disabled="disableBtn(btn)"
+          :key="btn.name"
+          @click.native="handleShow(btn.show)") {{ btn.label }}
+          //- v-hint="(btn.hint && btn.hint.condition()) ? btn.hint.content : ''"
+    btn(v-if="isImage && !isFrame"
+      class="full-width"
+      type="gray-mid"
+      ref="btn"
+      :disabled="isHandleShadow || show === 'panel-photo-shadow'"
+      @click.native="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
+  component(:is="show || 'div'"
+    ref="popup"
+    :imageAdjust="currLayerAdjust"
+    @update="handleAdjust" v-on="$listeners")
 </template>
 
 <script lang="ts">

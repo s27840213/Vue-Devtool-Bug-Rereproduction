@@ -1,21 +1,21 @@
 <template lang="pug">
-  div(class="snap-area"
-    :style="wrapperStyles()")
-    div(v-for="line in closestSnaplines.v"
+div(class="snap-area"
+  :style="wrapperStyles()")
+  div(v-for="line in closestSnaplines.v"
+    class="snap-area__line snap-area__line--vr"
+    :style="snapLineStyles('v', line)")
+  div(v-for="line in closestSnaplines.h"
+    class="snap-area__line snap-area__line--hr"
+    :style="snapLineStyles('h', line)")
+  template(v-if="isShowGuideline && !isDetailPage")
+    div(v-for="(line,index) in guidelines.v"
       class="snap-area__line snap-area__line--vr"
-      :style="snapLineStyles('v', line)")
-    div(v-for="line in closestSnaplines.h"
+      :style="snapLineStyles('v', line,true)"
+      @mouseover="lockGuideline ? null : showGuideline(line,'v',index)")
+    div(v-for="(line,index) in guidelines.h"
       class="snap-area__line snap-area__line--hr"
-      :style="snapLineStyles('h', line)")
-    template(v-if="isShowGuideline && !isDetailPage")
-      div(v-for="(line,index) in guidelines.v"
-        class="snap-area__line snap-area__line--vr"
-        :style="snapLineStyles('v', line,true)"
-        @mouseover="lockGuideline ? null : showGuideline(line,'v',index)")
-      div(v-for="(line,index) in guidelines.h"
-        class="snap-area__line snap-area__line--hr"
-        :style="snapLineStyles('h', line,true)"
-        @mouseover="lockGuideline ? null : showGuideline(line,'h',index)")
+      :style="snapLineStyles('h', line,true)"
+      @mouseover="lockGuideline ? null : showGuideline(line,'h',index)")
 </template>
 
 <script lang="ts">

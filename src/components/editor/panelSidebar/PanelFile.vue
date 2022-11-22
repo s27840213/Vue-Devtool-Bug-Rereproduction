@@ -1,35 +1,35 @@
 <template lang="pug">
-  div(class="panel-file"
-      @drop.stop.prevent="onDrop($event)"
-      @dragover.prevent,
-      @dragenter.prevent)
-    btn(class="full-width mb-20" :type="'primary-mid'"
-        @click.native="uploadImage()") {{$t('NN0014')}}
-    image-gallery(
-      ref="mainContent"
-      :myfile="myfileImages"
-      vendor="myfile"
-      :inFilePanel="true"
-      @loadMore="handleLoadMore")
-      template(#pending)
-        div(v-if="pending" class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
-    transition(name="panel-up")
-      div(v-if="hasCheckedAssets"
-          class="panel-file__menu")
-        div
-          //- svg-icon(class="pointer"
-          //-   :iconName="'folder'"
-          //-   :iconColor="'white'"
-          //-   :iconWidth="'24px'")
-          svg-icon(class="pointer"
-            :iconName="'trash'"
-            :iconColor="'white'"
-            :iconWidth="'24px'"
-            @click.native="deleteAssets()")
-        span(class="text-blue-1 pointer" @click="clearCheckedAssets()") {{`${$t('NN0130')}(${checkedAssets.length})`}}
+div(class="panel-file"
+    @drop.stop.prevent="onDrop($event)"
+    @dragover.prevent,
+    @dragenter.prevent)
+  btn(class="full-width mb-20" :type="'primary-mid'"
+      @click.native="uploadImage()") {{$t('NN0014')}}
+  image-gallery(
+    ref="mainContent"
+    :myfile="myfileImages"
+    vendor="myfile"
+    :inFilePanel="true"
+    @loadMore="handleLoadMore")
+    template(#pending)
+      div(v-if="pending" class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
+  transition(name="panel-up")
+    div(v-if="hasCheckedAssets"
+        class="panel-file__menu")
+      div
+        //- svg-icon(class="pointer"
+        //-   :iconName="'folder'"
+        //-   :iconColor="'white'"
+        //-   :iconWidth="'24px'")
+        svg-icon(class="pointer"
+          :iconName="'trash'"
+          :iconColor="'white'"
+          :iconWidth="'24px'"
+          @click.native="deleteAssets()")
+      span(class="text-blue-1 pointer" @click="clearCheckedAssets()") {{`${$t('NN0130')}(${checkedAssets.length})`}}
 </template>
 
 <script lang="ts">

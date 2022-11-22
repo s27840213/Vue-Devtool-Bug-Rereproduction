@@ -1,9 +1,9 @@
 <template lang="pug">
-  svg(class="marker-icon"
-      ref="icon"
-      :style="iconStyles()")
-    g(v-html="svg" :style="styleFormatter")
-    line(:x1="x1" y1="5" :x2="iconWidth" y2="5" :stroke="iconColor" strokeWidth="2.5px")
+svg(class="marker-icon"
+    ref="icon"
+    :style="iconStyles()")
+  g(v-html="svg" :style="styleFormatter")
+  line(:x1="x1" y1="5" :x2="iconWidth" y2="5" :stroke="iconColor" strokeWidth="2.5px")
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'

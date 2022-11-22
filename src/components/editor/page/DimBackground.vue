@@ -1,50 +1,49 @@
 <template lang="pug">
-  div(v-if="isImgCtrl")
-    div(class="dim-background"
-      :style="styles")
-    div
-      nu-layer(:style="'opacity: 0.45'"
-        :layerIndex="layerIndex"
-        :pageIndex="pageIndex"
-        :primaryLayer="primaryLayer"
-        :imgControl="true"
-        :forRender="true"
-        :contentScaleRatio="contentScaleRatio"
-        :config="image")
-    div
-      nu-layer(:layerIndex="layerIndex"
-        :pageIndex="pageIndex"
-        :primaryLayer="primaryLayer"
-        :forRender="true"
-        :contentScaleRatio="contentScaleRatio"
-        :config="image")
-    div(class="page-control" :style="styles")
-      nu-img-controller(:layerIndex="layerIndex"
-                        :pageIndex="pageIndex"
-                        :contentScaleRatio="contentScaleRatio"
-                        :primaryLayer="primaryLayer"
-                        :config="image")
-  div(v-else-if="isBgImgCtrl")
-    div(class="background-control"
-        :style="backgroundControlStyles")
-      nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio")
-      nu-background-controller(:config="image"
-        :pageIndex="pageIndex"
-        :contentScaleRatio="contentScaleRatio")
-    div(class="page-window")
-      div(class="background-control"
+div(v-if="isImgCtrl")
+  div(class="dim-background"
+    :style="styles")
+  div
+    nu-layer(:style="'opacity: 0.45'"
+      :layerIndex="layerIndex"
+      :pageIndex="pageIndex"
+      :primaryLayer="primaryLayer"
+      :imgControl="true"
+      :forRender="true"
+      :contentScaleRatio="contentScaleRatio"
+      :config="image")
+  div
+    nu-layer(:layerIndex="layerIndex"
+      :pageIndex="pageIndex"
+      :primaryLayer="primaryLayer"
+      :forRender="true"
+      :contentScaleRatio="contentScaleRatio"
+      :config="image")
+  div(class="page-control" :style="styles")
+    nu-img-controller(:layerIndex="layerIndex"
+                      :pageIndex="pageIndex"
+                      :contentScaleRatio="contentScaleRatio"
+                      :primaryLayer="primaryLayer"
+                      :config="image")
+div(v-else-if="isBgImgCtrl")
+  div(class="background-control"
       :style="backgroundControlStyles")
-        nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio")
-      component(v-for="(elm, idx) in getHalation"
-        :key="idx"
-        :is="elm.tag"
-        v-bind="elm.attrs")
-    //- div(:style="backgroundContorlClipStyles")
-    //-   nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
-    //- div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
-    //-     class="dim-background"
-    //-     :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
-
+    nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio")
+    nu-background-controller(:config="image"
+      :pageIndex="pageIndex"
+      :contentScaleRatio="contentScaleRatio")
+  div(class="page-window")
+    div(class="background-control"
+    :style="backgroundControlStyles")
+      nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio")
+    component(v-for="(elm, idx) in getHalation"
+      :key="idx"
+      :is="elm.tag"
+      v-bind="elm.attrs")
+  //- div(:style="backgroundContorlClipStyles")
+  //-   nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
+  //- div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
+  //-     class="dim-background"
+  //-     :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'

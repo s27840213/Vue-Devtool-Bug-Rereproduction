@@ -1,54 +1,54 @@
 <template lang="pug">
-  div(class="page-size-selector")
-    div(class="page-size-selector__body__custom")
-      property-bar(class="page-size-selector__body__custom__box"
-                  :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? widthValid ? '' : ' input-invalid' : '')")
-        input(class="body-3" type="number" min="0" ref="inputWidth"
-              :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
-              :value="pageWidth || null" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})" @click="selectFormat('custom')" @input="setPageWidth")
-        span(class="body-4 page-size-selector__body__custom__box__input-label"
-            :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") W
-      svg-icon(class="pointer"
-          :iconName="isLocked ? 'lock' : 'unlock'"
-          iconWidth="20px" :iconColor="!isLockDisabled ? (selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-4')) : 'gray-4'"
-          @click.native="toggleLock()")
-      property-bar(class="page-size-selector__body__custom__box"
-                  :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? heightValid ? '' : ' input-invalid' : '')")
-        input(class="body-3" type="number" min="0"
-              :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
-              :value="pageHeight || null" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})" @click="selectFormat('custom')" @input="setPageHeight")
-        span(class="body-4 page-size-selector__body__custom__box__input-label"
-            :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
-      div(v-if="isValidate && !isCustomValid"
-        class="page-size-selector__body__custom__err text-red") {{errorMsg}}
-    div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
-    div(class="page-size-selector__container")
-        div(class="page-size-selector__body-row first-row")
-          span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0024')}}
-        div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
-          svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
-        div(v-for="(format, index) in recentlyUsed" class="page-size-selector__body-row item pointer"
-            @click="selectFormat(`recent-${index}`)")
-          radio-btn(class="page-size-selector__body__radio"
-                    :isSelected="selectedFormatKey === `recent-${index}`",
-                    :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                    :formatKey="`recent-${index}`",
-                    @select="selectFormat")
-          span(class="page-size-selector__body__recently body-3 pointer"
-                :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatString(format) }}
-        div(class="page-size-selector__body-row first-row")
-          span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0025')}}
-        div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
-          svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
-        div(v-for="(format, index) in formatList" class="page-size-selector__body-row item pointer"
-            @click="selectFormat(`preset-${index}`)")
-          radio-btn(class="page-size-selector__body__radio"
-                    :isSelected="selectedFormatKey === `preset-${index}`",
-                    :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                    :formatKey="`preset-${index}`",
-                    @select="selectFormat")
-          span(class="page-size-selector__body__typical body-3"
-                :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatString(format)}}
+div(class="page-size-selector")
+  div(class="page-size-selector__body__custom")
+    property-bar(class="page-size-selector__body__custom__box"
+                :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? widthValid ? '' : ' input-invalid' : '')")
+      input(class="body-3" type="number" min="0" ref="inputWidth"
+            :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
+            :value="pageWidth || null" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})" @click="selectFormat('custom')" @input="setPageWidth")
+      span(class="body-4 page-size-selector__body__custom__box__input-label"
+          :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") W
+    svg-icon(class="pointer"
+        :iconName="isLocked ? 'lock' : 'unlock'"
+        iconWidth="20px" :iconColor="!isLockDisabled ? (selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-4')) : 'gray-4'"
+        @click.native="toggleLock()")
+    property-bar(class="page-size-selector__body__custom__box"
+                :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? heightValid ? '' : ' input-invalid' : '')")
+      input(class="body-3" type="number" min="0"
+            :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
+            :value="pageHeight || null" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})" @click="selectFormat('custom')" @input="setPageHeight")
+      span(class="body-4 page-size-selector__body__custom__box__input-label"
+          :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
+    div(v-if="isValidate && !isCustomValid"
+      class="page-size-selector__body__custom__err text-red") {{errorMsg}}
+  div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
+  div(class="page-size-selector__container")
+      div(class="page-size-selector__body-row first-row")
+        span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0024')}}
+      div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
+        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
+      div(v-for="(format, index) in recentlyUsed" class="page-size-selector__body-row item pointer"
+          @click="selectFormat(`recent-${index}`)")
+        radio-btn(class="page-size-selector__body__radio"
+                  :isSelected="selectedFormatKey === `recent-${index}`",
+                  :circleColor="isDarkTheme ? 'white' : 'gray-2'"
+                  :formatKey="`recent-${index}`",
+                  @select="selectFormat")
+        span(class="page-size-selector__body__recently body-3 pointer"
+              :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatString(format) }}
+      div(class="page-size-selector__body-row first-row")
+        span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0025')}}
+      div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
+        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
+      div(v-for="(format, index) in formatList" class="page-size-selector__body-row item pointer"
+          @click="selectFormat(`preset-${index}`)")
+        radio-btn(class="page-size-selector__body__radio"
+                  :isSelected="selectedFormatKey === `preset-${index}`",
+                  :circleColor="isDarkTheme ? 'white' : 'gray-2'"
+                  :formatKey="`preset-${index}`",
+                  @select="selectFormat")
+        span(class="page-size-selector__body__typical body-3"
+              :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatString(format)}}
 </template>
 
 <script lang="ts">

@@ -1,22 +1,21 @@
 <template lang="pug">
-  div(class="font-tag" v-click-outside="clickOutsideHandler")
-    template(v-if="!isTouchDevice")
-      div(class="font-tag__flex-container"
-          :style="containerStyle")
+div(class="font-tag" v-click-outside="clickOutsideHandler")
+  template(v-if="!isTouchDevice")
+    div(class="font-tag__flex-container"
+        :style="containerStyle")
+      div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
+        @click="onClick(tag)")
+        div(class="font-tag__tag") {{ tag }}
+    div(v-if="!showMore" class="font-tag__more-wrapper")
+      div(class="font-tag__tag-wrapper pointer"
+        @click="onClickMore")
+        div(class="font-tag__tag") {{ `${$t('NN0082')}...` }}
+  template(v-else)
+    div(class="font-tag__container-mobile")
+      div(class="font-tag__flex-container-mobile")
         div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
           @click="onClick(tag)")
           div(class="font-tag__tag") {{ tag }}
-      div(v-if="!showMore" class="font-tag__more-wrapper")
-        div(class="font-tag__tag-wrapper pointer"
-          @click="onClickMore")
-          div(class="font-tag__tag") {{ `${$t('NN0082')}...` }}
-    template(v-else)
-      div(class="font-tag__container-mobile")
-        div(class="font-tag__flex-container-mobile")
-          div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
-            @click="onClick(tag)")
-            div(class="font-tag__tag") {{ tag }}
-
 </template>
 
 <script lang="ts">

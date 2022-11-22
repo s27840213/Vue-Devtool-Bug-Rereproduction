@@ -1,8 +1,8 @@
 <template lang="pug">
-  select(class="select" :value="value" autofocus required
-        @input="$emit('input', $event.target.value)")
-    option(v-if="ph" value="" disabled hidden selected) {{ph}}
-    option(v-for="op in options" :value="op.value || op") {{op.label || op}}
+select(class="select" :value="value" autofocus required
+      @input="$emit('input', $event.target.value)")
+  option(v-if="ph" value="" disabled hidden selected) {{ph}}
+  option(v-for="op in options" :value="op.value || op") {{op.label || op}}
 </template>
 
 <script lang="ts">

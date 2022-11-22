@@ -1,57 +1,57 @@
 <template lang="pug">
-  div(class="popup-updateDesign")
-      div(class="popup-updateDesign__wrapper"
-        v-click-outside="handleCancel")
-        div(class="popup-updateDesign__close")
-          svg-icon(class="pointer"
-            iconName="page-close"
-            iconWidth="15px"
-            iconColor="gray-0"
-            @click.native="handleCancel")
-        div(class="popup-updateDesign__title") {{ typeText }}資訊
-        div(class="popup-updateDesign__line mb-10" style="background: #eee;")
-          span(class="body-1") id
-          span(class="pl-15 body-2" @click="copyText(focusDesignId)") {{focusDesignId}}
-        img(v-if="focusDesignId.length > 0"
-          class="popup-updateDesign__image"
-          :style="backgroundStyle()"
-          :src="`https://template.vivipic.com/${type}/${focusDesignId}/prev?ver=${imgRandQuery}`")
+div(class="popup-updateDesign")
+    div(class="popup-updateDesign__wrapper"
+      v-click-outside="handleCancel")
+      div(class="popup-updateDesign__close")
+        svg-icon(class="pointer"
+          iconName="page-close"
+          iconWidth="15px"
+          iconColor="gray-0"
+          @click.native="handleCancel")
+      div(class="popup-updateDesign__title") {{ typeText }}資訊
+      div(class="popup-updateDesign__line mb-10" style="background: #eee;")
+        span(class="body-1") id
+        span(class="pl-15 body-2" @click="copyText(focusDesignId)") {{focusDesignId}}
+      img(v-if="focusDesignId.length > 0"
+        class="popup-updateDesign__image"
+        :style="backgroundStyle()"
+        :src="`https://template.vivipic.com/${type}/${focusDesignId}/prev?ver=${imgRandQuery}`")
+      div(v-if="!isBackgroundType"
+        class="popup-updateDesign__checkbox")
+        input(type="checkbox" v-model="isGrayBackground")
+        span 灰背景
+      div(v-if="isGetObjectInfo")
         div(v-if="!isBackgroundType"
-          class="popup-updateDesign__checkbox")
-          input(type="checkbox" v-model="isGrayBackground")
-          span 灰背景
-        div(v-if="isGetObjectInfo")
-          div(v-if="!isBackgroundType"
-            class="popup-updateDesign__line")
-            span(class="body-1") 語系
-            select(class="popup-updateDesign__select"
-              v-model="objectInfo.locale")
-              option(v-for="locale in localeOptions"
-                :value="locale") {{locale}}
-          div(class="popup-updateDesign__line") tags_tw
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="objectInfo.tags_tw")
-          div(class="popup-updateDesign__line") tags_us
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="objectInfo.tags_us")
-          div(class="popup-updateDesign__line") tags_jp
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="objectInfo.tags_jp")
-          div(class="popup-updateDesign__line") plan(0：預設一般 / 1：Pro)
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="objectInfo.plan")
-          btn(:type="'primary-sm'"
-              class="popup-updateDesign__button rounded my-5"
-              @click.native="updateDataClicked()") 更 新
-      spinner(v-if="isLoading")
+          class="popup-updateDesign__line")
+          span(class="body-1") 語系
+          select(class="popup-updateDesign__select"
+            v-model="objectInfo.locale")
+            option(v-for="locale in localeOptions"
+              :value="locale") {{locale}}
+        div(class="popup-updateDesign__line") tags_tw
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="objectInfo.tags_tw")
+        div(class="popup-updateDesign__line") tags_us
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="objectInfo.tags_us")
+        div(class="popup-updateDesign__line") tags_jp
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="objectInfo.tags_jp")
+        div(class="popup-updateDesign__line") plan(0：預設一般 / 1：Pro)
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="objectInfo.plan")
+        btn(:type="'primary-sm'"
+            class="popup-updateDesign__button rounded my-5"
+            @click.native="updateDataClicked()") 更 新
+    spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">

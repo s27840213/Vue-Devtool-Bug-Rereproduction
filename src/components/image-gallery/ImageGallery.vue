@@ -1,19 +1,19 @@
 <template lang="pug">
-  div(class="image-gallery")
-    recycle-scroller(class="image-gallery__content" id="recycle"
-      :items="rows")
-      template(v-slot="{ item }")
-        observer-sentinel(v-if="item.sentinel"
-          @callback="handleLoadMore(item)")
-        div(class="flex flex-between")
-          gallery-photo(v-for="photo in item.list"
-            :style="imageStyle(photo.preview)"
-            :photo="photo"
-            :vendor="vendor"
-            :inFilePanel="inFilePanel"
-            :key="photo.id")
-      template(#after)
-        slot(name="pending")
+div(class="image-gallery")
+  recycle-scroller(class="image-gallery__content" id="recycle"
+    :items="rows")
+    template(v-slot="{ item }")
+      observer-sentinel(v-if="item.sentinel"
+        @callback="handleLoadMore(item)")
+      div(class="flex flex-between")
+        gallery-photo(v-for="photo in item.list"
+          :style="imageStyle(photo.preview)"
+          :photo="photo"
+          :vendor="vendor"
+          :inFilePanel="inFilePanel"
+          :key="photo.id")
+    template(#after)
+      slot(name="pending")
 </template>
 
 <script lang="ts">

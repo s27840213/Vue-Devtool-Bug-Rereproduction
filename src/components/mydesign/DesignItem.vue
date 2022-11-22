@@ -1,95 +1,95 @@
 <template lang="pug">
-  div(class="design-item")
-    div(class="design-item__block pointer"
-      :style="blockStyles()"
-      :draggable="!undraggable && !isTempDesign"
-      @dragstart="handleDragStart"
-      @drag="handleDragging"
-      @dragend="handleDragEnd"
-      @mouseenter="handleMouseEnter"
-      @mouseleave="handleMouseLeave")
-      div(class="design-item__img-container")
-        image-carousel(v-if="showCarousel"
-          :imgs="pageImages"
-          @change="handleCarouselIdx")
-          template(v-slot="{ url }")
-            img(class="design-item__thumbnail"
-                draggable="false"
-                :style="imageStyles()"
-                :src="url")
-        img(ref="thumbnail"
-            v-if="!showCarousel && previewCheckReady"
-            class="design-item__thumbnail"
-            draggable="false"
-            :src="appliedUrl")
-      div(class="design-item__controller")
-        div(class="design-item__controller-content"
-          @click.self="handleClick")
-          div(v-if="isSelected"
-            class="design-item__checkbox-checked"
-            @click.stop="emitDeselect")
-            svg-icon(iconName="done"
-                    iconWidth="10px"
-                    iconHeight="8px"
-                    iconColor="white")
-          div(v-if="!isSelected && (isMouseOver || isAnySelected)"
-            class="design-item__checkbox"
-            @click.stop="emitSelect")
-          div(v-if="isMouseOver && !isMultiSelected"
-            class="design-item__more"
-            @click.stop="toggleMenu()")
-            svg-icon(iconName="more_vertical"
-                    iconWidth="24px"
-                    iconColor="gray-2")
-          div(v-if="menuItems.length > 0 && isMenuOpen && isMouseOver"
-              class="design-item__menu"
-              v-click-outside="closeMenu")
-            slot(v-for="(dummy, index) in menuItems" :name="`i${index}`") {{ index }}
-          div(v-if="favorable && !isMultiSelected" class="design-item__favorite" @click.stop="emitLike")
-            svg-icon(v-if="isMouseOver && !config.favorite"
-                    iconName="favorites"
-                    iconWidth="20px"
-                    iconColor="white")
-            svg-icon(v-if="isMouseOver && config.favorite"
-                    iconName="favorites-fill"
-                    iconWidth="20px"
-                    iconColor="white")
-            svg-icon(v-if="!isMouseOver && config.favorite"
-                    iconName="favorites-fill"
-                    iconWidth="20px"
-                    iconColor="gray-4")
-          span(v-if="isMouseOver" class="design-item__index") {{ carouselIdx + 1 }}/{{ config.pageNum }}
-    div(class="design-item__name"
-        v-click-outside="handleNameEditEnd"
-        @mouseenter="handleNameMouseEnter"
-        @mouseleave="handleNameMouseLeave"
-        @click="handleNameClick")
-      div(v-if="isNameEditing" class="design-item__name__container design-item__name__container-editor")
-        input(ref="name"
-              v-model="editableName"
-              @change="handleNameEditEnd"
-              @keyup="checkNameEnter")
-        div(class="pen-container")
-          svg-icon(iconName="pen"
-                  iconWidth="13px"
-                  iconColor="gray-3")
-      div(v-else class="design-item__name__container")
-        svg-icon(v-if="isNameMouseOver"
-                iconName="pen"
-                iconWidth="13px"
-                iconColor="gray-3"
-                style="color: transparent")
-        span(:title="config.name") {{ config.name }}
-        svg-icon(v-if="isNameMouseOver"
-                iconName="pen"
+div(class="design-item")
+  div(class="design-item__block pointer"
+    :style="blockStyles()"
+    :draggable="!undraggable && !isTempDesign"
+    @dragstart="handleDragStart"
+    @drag="handleDragging"
+    @dragend="handleDragEnd"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave")
+    div(class="design-item__img-container")
+      image-carousel(v-if="showCarousel"
+        :imgs="pageImages"
+        @change="handleCarouselIdx")
+        template(v-slot="{ url }")
+          img(class="design-item__thumbnail"
+              draggable="false"
+              :style="imageStyles()"
+              :src="url")
+      img(ref="thumbnail"
+          v-if="!showCarousel && previewCheckReady"
+          class="design-item__thumbnail"
+          draggable="false"
+          :src="appliedUrl")
+    div(class="design-item__controller")
+      div(class="design-item__controller-content"
+        @click.self="handleClick")
+        div(v-if="isSelected"
+          class="design-item__checkbox-checked"
+          @click.stop="emitDeselect")
+          svg-icon(iconName="done"
+                  iconWidth="10px"
+                  iconHeight="8px"
+                  iconColor="white")
+        div(v-if="!isSelected && (isMouseOver || isAnySelected)"
+          class="design-item__checkbox"
+          @click.stop="emitSelect")
+        div(v-if="isMouseOver && !isMultiSelected"
+          class="design-item__more"
+          @click.stop="toggleMenu()")
+          svg-icon(iconName="more_vertical"
+                  iconWidth="24px"
+                  iconColor="gray-2")
+        div(v-if="menuItems.length > 0 && isMenuOpen && isMouseOver"
+            class="design-item__menu"
+            v-click-outside="closeMenu")
+          slot(v-for="(dummy, index) in menuItems" :name="`i${index}`") {{ index }}
+        div(v-if="favorable && !isMultiSelected" class="design-item__favorite" @click.stop="emitLike")
+          svg-icon(v-if="isMouseOver && !config.favorite"
+                  iconName="favorites"
+                  iconWidth="20px"
+                  iconColor="white")
+          svg-icon(v-if="isMouseOver && config.favorite"
+                  iconName="favorites-fill"
+                  iconWidth="20px"
+                  iconColor="white")
+          svg-icon(v-if="!isMouseOver && config.favorite"
+                  iconName="favorites-fill"
+                  iconWidth="20px"
+                  iconColor="gray-4")
+        span(v-if="isMouseOver" class="design-item__index") {{ carouselIdx + 1 }}/{{ config.pageNum }}
+  div(class="design-item__name"
+      v-click-outside="handleNameEditEnd"
+      @mouseenter="handleNameMouseEnter"
+      @mouseleave="handleNameMouseLeave"
+      @click="handleNameClick")
+    div(v-if="isNameEditing" class="design-item__name__container design-item__name__container-editor")
+      input(ref="name"
+            v-model="editableName"
+            @change="handleNameEditEnd"
+            @keyup="checkNameEnter")
+      div(class="pen-container")
+        svg-icon(iconName="pen"
                 iconWidth="13px"
                 iconColor="gray-3")
-    div(class="design-item__size")
-      span {{ `${config.width}x${config.height}` }}
-    div(class="dragged-thumbnail" :style="draggedImageContainerStyles()")
-      div(class="relative")
-        img(:src="appliedUrl" :style="draggedImageStyles()")
-        div(v-if="isMultiSelected && isSelected" class="dragged-thumbnail__stack" :style="draggedImageStackStyles()")
+    div(v-else class="design-item__name__container")
+      svg-icon(v-if="isNameMouseOver"
+              iconName="pen"
+              iconWidth="13px"
+              iconColor="gray-3"
+              style="color: transparent")
+      span(:title="config.name") {{ config.name }}
+      svg-icon(v-if="isNameMouseOver"
+              iconName="pen"
+              iconWidth="13px"
+              iconColor="gray-3")
+  div(class="design-item__size")
+    span {{ `${config.width}x${config.height}` }}
+  div(class="dragged-thumbnail" :style="draggedImageContainerStyles()")
+    div(class="relative")
+      img(:src="appliedUrl" :style="draggedImageStyles()")
+      div(v-if="isMultiSelected && isSelected" class="dragged-thumbnail__stack" :style="draggedImageStackStyles()")
 </template>
 
 <script lang="ts">

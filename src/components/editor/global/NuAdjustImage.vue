@@ -1,28 +1,28 @@
 <template lang="pug">
-  div(class="nu-adjust-image")
-    svg(:viewBox="svgViewBox"
-      :width="svgImageWidth"
-      :height="svgImageHeight"
-      preserveAspectRatio="none"
-      role="image")
-      defs
-        filter(:id="filterId"
-          color-interpolation-filters="sRGB")
-          component(v-for="(elm, idx) in svgFilterElms"
-            :key="`svgFilter${idx}`"
-            :is="elm.tag"
-            v-bind="elm.attrs")
-            component(v-for="child in elm.child"
-              :key="child.tag"
-              :is="child.tag"
-              v-bind="child.attrs")
-      image(:xlink:href="src"
-        v-bind="style"
-        :filter="imageFilter")
-    //- component(v-for="(elm, idx) in cssFilterElms"
-    //-   :key="`cssFilter${idx}`"
-    //-   :is="elm.tag"
-    //-   v-bind="elm.attrs")
+div(class="nu-adjust-image")
+  svg(:viewBox="svgViewBox"
+    :width="svgImageWidth"
+    :height="svgImageHeight"
+    preserveAspectRatio="none"
+    role="image")
+    defs
+      filter(:id="filterId"
+        color-interpolation-filters="sRGB")
+        component(v-for="(elm, idx) in svgFilterElms"
+          :key="`svgFilter${idx}`"
+          :is="elm.tag"
+          v-bind="elm.attrs")
+          component(v-for="child in elm.child"
+            :key="child.tag"
+            :is="child.tag"
+            v-bind="child.attrs")
+    image(:xlink:href="src"
+      v-bind="style"
+      :filter="imageFilter")
+  //- component(v-for="(elm, idx) in cssFilterElms"
+  //-   :key="`cssFilter${idx}`"
+  //-   :is="elm.tag"
+  //-   v-bind="elm.attrs")
 </template>
 
 <script lang="ts">

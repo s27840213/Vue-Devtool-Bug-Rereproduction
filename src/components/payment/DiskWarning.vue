@@ -1,22 +1,22 @@
 <template lang="pug">
-  div(v-if="showWarning" class="warning")
-    div(v-if="size === 'small' && !dismissed" class="warning-small" :style="bgcolor")
-      svg-icon(iconName="error" iconColor="white" iconWidth="24px")
-      div(class="warning-small-title")
-        span(class="caption-SM") {{cur.title}}
-        div(class="warning-small-title-disk-total")
-          div(class="warning-small-title-disk-used" :style="diskStyle")
-      i18n(:path="cur.small.desc" class="warning-small-desc" tag="div")
-        template(#button)
-          span(class="warning-small-desc__btn" @click="cur.small.func") {{cur.small.buttonLabel}}
-      svg-icon(iconName="close" iconColor="white"
-              iconWidth="24px" @click.native="close()")
-    div(v-if="size === 'large'" class="warning-large" :style="bgcolor")
-      div(class="caption-LG") {{cur.title}}
-      div(class="warning-large-desc") {{cur.large.desc}}
-      div(class="warning-large-btn")
-        btn(v-for="btn in cur.large.buttons" :type="btn.type || 'light-mid'"
-            :disabled="btn.disabled" @click.native="btn.func()") {{btn.label}}
+div(v-if="showWarning" class="warning")
+  div(v-if="size === 'small' && !dismissed" class="warning-small" :style="bgcolor")
+    svg-icon(iconName="error" iconColor="white" iconWidth="24px")
+    div(class="warning-small-title")
+      span(class="caption-SM") {{cur.title}}
+      div(class="warning-small-title-disk-total")
+        div(class="warning-small-title-disk-used" :style="diskStyle")
+    i18n(:path="cur.small.desc" class="warning-small-desc" tag="div")
+      template(#button)
+        span(class="warning-small-desc__btn" @click="cur.small.func") {{cur.small.buttonLabel}}
+    svg-icon(iconName="close" iconColor="white"
+            iconWidth="24px" @click.native="close()")
+  div(v-if="size === 'large'" class="warning-large" :style="bgcolor")
+    div(class="caption-LG") {{cur.title}}
+    div(class="warning-large-desc") {{cur.large.desc}}
+    div(class="warning-large-btn")
+      btn(v-for="btn in cur.large.buttons" :type="btn.type || 'light-mid'"
+          :disabled="btn.disabled" @click.native="btn.func()") {{btn.label}}
 </template>
 
 <script lang="ts">

@@ -1,35 +1,35 @@
 <template lang="pug">
-  div(class="mobile-editor")
-    div(class="mobile-editor__top")
-      header-tabs(@switchTab="switchTab"
-        @showAllPages="showAllPages"
-        :currTab="currActivePanel"
-        :inAllPagesMode="inAllPagesMode")
-      div(class="mobile-editor__content" :style="contentStyle")
-        keep-alive
-          component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
-            :currActivePanel="currActivePanel"
-            :isConfigPanelOpen="isConfigPanelOpen"
-            :inAllPagesMode="inAllPagesMode"
-            :showMobilePanel="showMobilePanelAfterTransitoin")
-      transition(name="panel-up"
-                @before-enter="beforeEnter"
-                @after-leave="afterLeave")
-        mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
-          :currActivePanel="currActivePanel"
-          :currColorEvent="currColorEvent"
-          @switchTab="switchTab"
-          @panelHeight="setPanelHeight")
-      //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
-      //-   :currActivePanel="'color'"
-      //-   :currColorEvent="ColorEventType.background"
-      //-   :isExtraPanel="true"
-      //-   @switchTab="switchTab")
-    footer-tabs(class="mobile-editor__bottom"
-      @switchTab="switchTab"
+div(class="mobile-editor")
+  div(class="mobile-editor__top")
+    header-tabs(@switchTab="switchTab"
+      @showAllPages="showAllPages"
       :currTab="currActivePanel"
-      :inAllPagesMode="inAllPagesMode"
-      @showAllPages="showAllPages")
+      :inAllPagesMode="inAllPagesMode")
+    div(class="mobile-editor__content" :style="contentStyle")
+      keep-alive
+        component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
+          :currActivePanel="currActivePanel"
+          :isConfigPanelOpen="isConfigPanelOpen"
+          :inAllPagesMode="inAllPagesMode"
+          :showMobilePanel="showMobilePanelAfterTransitoin")
+    transition(name="panel-up"
+              @before-enter="beforeEnter"
+              @after-leave="afterLeave")
+      mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
+        :currActivePanel="currActivePanel"
+        :currColorEvent="currColorEvent"
+        @switchTab="switchTab"
+        @panelHeight="setPanelHeight")
+    //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
+    //-   :currActivePanel="'color'"
+    //-   :currColorEvent="ColorEventType.background"
+    //-   :isExtraPanel="true"
+    //-   @switchTab="switchTab")
+  footer-tabs(class="mobile-editor__bottom"
+    @switchTab="switchTab"
+    :currTab="currActivePanel"
+    :inAllPagesMode="inAllPagesMode"
+    @showAllPages="showAllPages")
 </template>
 
 <script lang="ts">

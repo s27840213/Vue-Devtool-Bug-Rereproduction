@@ -1,148 +1,148 @@
 <template lang="pug">
-  div(class="popup-download text-left"
-    :style="containerStyles"
-    v-click-outside="handleClose")
-    div(v-if="polling" class="popup-download__form popup-download__form--polling")
-      div(class="body-3 text-gray-3") {{ name || `${$t('NN0079')}` }}
-      div(class="flex flex-between text-gray-2 items-center")
-        span(class="body-2") {{$t('NN0216')}}
-        svg-icon(class="pointer"
-          iconName="close"
-          iconWidth="16px"
-          iconColor="gray-2"
-          @click.native="$emit('close')")
-      div(class="popup-download__progress mt-5")
-        div(class="popup-download__progress-value" :style="{ width: `${progress}%`}")
-    div(v-else class="popup-download__form")
-      div(class="body-3 mb-10") {{$t('NN0121')}}
-      dropdown(class="mb-10"
-        :options="typeOptions"
-        @select="handleSelectType")
-        download-type-option(:name="selectedType.name" :tag="selectedType.tag")
-        template(v-slot:option="{ data }")
-          div(class="popup-download__type")
-            download-type-option(:name="data.name" :tag="data.tag")
-            div(class="popup-download__type-desc") {{ data.desc }}
-      div(class="body-3")
-        div(v-if="'omitBackground' in selected")
-          download-check-button(type="checkbox"
-            class="mb-10"
-            :label="`${$t('NN0215')}`"
-            :default-checked="selected.omitBackground === 1"
-            @change="({ checked }) => handleUpdate('omitBackground', checked ? 1 : 0)")
-        div(v-if="'scale' in selected"
-          class="flex items-center mb-10")
-          span {{`${$t('NN0122')} x`}}
-          dropdown(class="mx-5 popup-download__size-scale"
-            :options="scaleOptions"
-            @select="option => handleUpdate('scale', option)") {{ selected.scale }}
-          span {{$t('NN0123')}}
-        div(v-if="'quality' in selected"
-          class="flex flex-column items-center mb-10")
-          div(class="flex items-center full-width mb-5")
-            span {{$t('NN0132')}}
-            property-bar(class="popup-download__size-scale ml-15")
-              input(class="px-0"
-                type="text"
-                v-model.number="selectedTypeQuality")
-          input(class="popup-download__range-input input__slider--range"
-            v-model.number="selected.quality"
-            max="100"
-            min="1"
-            v-ratio-change
-            type="range")
-        div(v-if="isDetailPage" class="mb-10 pt-5") {{ $t('NN0344') }}
-          dropdown(class="mt-5"
-            :options="detailPageDownloadOptions"
-            @select="handleDetailPageOption") {{ detailPageOptionLabel }}
-          div(v-if="selectedDetailPage.option === 'splice'"
-            class="mt-10")
-            download-check-button(type="radio"
-              class="mb-10"
-              group-name="product_page"
-              :label="$t('NN0345')"
-              :default-checked="selectedDetailPage.noLimit"
-              @change="handleDetailPageIsLimited"
-              value="no-limit")
-            div
-              download-check-button(type="radio"
-                class="mb-5"
-                group-name="product_page"
-                :label="$t('NN0346')"
-                :default-checked="!selectedDetailPage.noLimit"
-                @change="handleDetailPageIsLimited"
-                value="height-limit")
-              div(class="flex items-center")
-                property-bar(class="popup-download__size-scale ml-20 mr-5")
-                  input(type="text"
-                    v-model.number="selectedDetailPage.height"
-                    :disabled="selectedDetailPage.noLimit"
-                    @blur="handleMaxHeight")
-                span px
-        div(class="mb-10 pt-5") {{$t('NN0124')}}
-        div
-          download-check-button(type="radio"
-            class="mb-10"
-            group-name="range"
-            :label="`${$t('NN0125')}（${$t('NN0134', { num:`${currentPageIndex + 1}` })}）`"
-            value="current"
-            :default-checked="rangeType === 'current'"
-            @change="handleRangeType")
-          download-check-button(type="radio"
-            class="mb-10"
-            group-name="range"
-            :label="`${$t('NN0126')}`"
-            value="all"
-            :default-checked="rangeType === 'all'"
-            @change="handleRangeType")
-          div(class="flex items-center")
-            download-check-button(type="radio"
-              group-name="range"
-              value="spec"
-              :label="`${$t('NN0127')}`"
-              :default-checked="rangeType === 'spec'"
-              @change="handleRangeType")
-            download-page-selection(class="ml-5 w-75"
-              :defaultSelected="pageRange"
-              @confirm="handleRangeConfirm")
-        template(v-if="isAdmin || onDev")
-          hr(class="popup-download__hr my-15")
-          div(class="dev-selector mb-10")
-            dropdown(class="body-3 full-width"
-                    :options="devs"
-                    @select="handleDevSelect") {{ selectedDevLabel }}
-          download-check-button(
-            type="checkbox"
-            class="mb-20 body-3"
-            label="使用新後端瀏覽器"
-            :default-checked="newChrome"
-            @change="({ checked }) => handleNewChrome(checked)")
-          div
-            btn(class="full-width body-3 rounded"
-              :disabled="isButtonDisabled"
-              @click.native="handleSubmit(true)")
-              svg-icon(v-if="polling"
-                class="align-middle"
-                iconName="loading"
-                iconColor="white"
-                iconWidth="20px")
-              span(v-else) {{`${$t('NN0010')} (${$t('NN0460')})`}}
-        hr(class="popup-download__hr my-15")
+div(class="popup-download text-left"
+  :style="containerStyles"
+  v-click-outside="handleClose")
+  div(v-if="polling" class="popup-download__form popup-download__form--polling")
+    div(class="body-3 text-gray-3") {{ name || `${$t('NN0079')}` }}
+    div(class="flex flex-between text-gray-2 items-center")
+      span(class="body-2") {{$t('NN0216')}}
+      svg-icon(class="pointer"
+        iconName="close"
+        iconWidth="16px"
+        iconColor="gray-2"
+        @click.native="$emit('close')")
+    div(class="popup-download__progress mt-5")
+      div(class="popup-download__progress-value" :style="{ width: `${progress}%`}")
+  div(v-else class="popup-download__form")
+    div(class="body-3 mb-10") {{$t('NN0121')}}
+    dropdown(class="mb-10"
+      :options="typeOptions"
+      @select="handleSelectType")
+      download-type-option(:name="selectedType.name" :tag="selectedType.tag")
+      template(v-slot:option="{ data }")
+        div(class="popup-download__type")
+          download-type-option(:name="data.name" :tag="data.tag")
+          div(class="popup-download__type-desc") {{ data.desc }}
+    div(class="body-3")
+      div(v-if="'omitBackground' in selected")
         download-check-button(type="checkbox"
-          class="mb-20"
-          :label="`${$t('NN0129')}`"
-          :default-checked="saveSubmission"
-          @change="({ checked }) => handleSubmission(checked)")
+          class="mb-10"
+          :label="`${$t('NN0215')}`"
+          :default-checked="selected.omitBackground === 1"
+          @change="({ checked }) => handleUpdate('omitBackground', checked ? 1 : 0)")
+      div(v-if="'scale' in selected"
+        class="flex items-center mb-10")
+        span {{`${$t('NN0122')} x`}}
+        dropdown(class="mx-5 popup-download__size-scale"
+          :options="scaleOptions"
+          @select="option => handleUpdate('scale', option)") {{ selected.scale }}
+        span {{$t('NN0123')}}
+      div(v-if="'quality' in selected"
+        class="flex flex-column items-center mb-10")
+        div(class="flex items-center full-width mb-5")
+          span {{$t('NN0132')}}
+          property-bar(class="popup-download__size-scale ml-15")
+            input(class="px-0"
+              type="text"
+              v-model.number="selectedTypeQuality")
+        input(class="popup-download__range-input input__slider--range"
+          v-model.number="selected.quality"
+          max="100"
+          min="1"
+          v-ratio-change
+          type="range")
+      div(v-if="isDetailPage" class="mb-10 pt-5") {{ $t('NN0344') }}
+        dropdown(class="mt-5"
+          :options="detailPageDownloadOptions"
+          @select="handleDetailPageOption") {{ detailPageOptionLabel }}
+        div(v-if="selectedDetailPage.option === 'splice'"
+          class="mt-10")
+          download-check-button(type="radio"
+            class="mb-10"
+            group-name="product_page"
+            :label="$t('NN0345')"
+            :default-checked="selectedDetailPage.noLimit"
+            @change="handleDetailPageIsLimited"
+            value="no-limit")
+          div
+            download-check-button(type="radio"
+              class="mb-5"
+              group-name="product_page"
+              :label="$t('NN0346')"
+              :default-checked="!selectedDetailPage.noLimit"
+              @change="handleDetailPageIsLimited"
+              value="height-limit")
+            div(class="flex items-center")
+              property-bar(class="popup-download__size-scale ml-20 mr-5")
+                input(type="text"
+                  v-model.number="selectedDetailPage.height"
+                  :disabled="selectedDetailPage.noLimit"
+                  @blur="handleMaxHeight")
+              span px
+      div(class="mb-10 pt-5") {{$t('NN0124')}}
       div
-        btn(class="full-width body-3 rounded"
-          :disabled="isButtonDisabled"
-          @click.native="handleSubmit()")
-          svg-icon(v-if="polling"
-            class="align-middle"
-            iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
-          span(v-else) {{$t('NN0010')}}
+        download-check-button(type="radio"
+          class="mb-10"
+          group-name="range"
+          :label="`${$t('NN0125')}（${$t('NN0134', { num:`${currentPageIndex + 1}` })}）`"
+          value="current"
+          :default-checked="rangeType === 'current'"
+          @change="handleRangeType")
+        download-check-button(type="radio"
+          class="mb-10"
+          group-name="range"
+          :label="`${$t('NN0126')}`"
+          value="all"
+          :default-checked="rangeType === 'all'"
+          @change="handleRangeType")
+        div(class="flex items-center")
+          download-check-button(type="radio"
+            group-name="range"
+            value="spec"
+            :label="`${$t('NN0127')}`"
+            :default-checked="rangeType === 'spec'"
+            @change="handleRangeType")
+          download-page-selection(class="ml-5 w-75"
+            :defaultSelected="pageRange"
+            @confirm="handleRangeConfirm")
+      template(v-if="isAdmin || onDev")
+        hr(class="popup-download__hr my-15")
+        div(class="dev-selector mb-10")
+          dropdown(class="body-3 full-width"
+                  :options="devs"
+                  @select="handleDevSelect") {{ selectedDevLabel }}
+        download-check-button(
+          type="checkbox"
+          class="mb-20 body-3"
+          label="使用新後端瀏覽器"
+          :default-checked="newChrome"
+          @change="({ checked }) => handleNewChrome(checked)")
+        div
+          btn(class="full-width body-3 rounded"
+            :disabled="isButtonDisabled"
+            @click.native="handleSubmit(true)")
+            svg-icon(v-if="polling"
+              class="align-middle"
+              iconName="loading"
+              iconColor="white"
+              iconWidth="20px")
+            span(v-else) {{`${$t('NN0010')} (${$t('NN0460')})`}}
+      hr(class="popup-download__hr my-15")
+      download-check-button(type="checkbox"
+        class="mb-20"
+        :label="`${$t('NN0129')}`"
+        :default-checked="saveSubmission"
+        @change="({ checked }) => handleSubmission(checked)")
+    div
+      btn(class="full-width body-3 rounded"
+        :disabled="isButtonDisabled"
+        @click.native="handleSubmit()")
+        svg-icon(v-if="polling"
+          class="align-middle"
+          iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
+        span(v-else) {{$t('NN0010')}}
 </template>
 
 <script lang="ts">

@@ -1,19 +1,19 @@
 <template lang="pug">
-  div(class="download-btn"
-    v-hint="isHandlingShadow ? $t('NN0500') : ''")
-    btn(:hasIcon="true"
-      :iconName="'download'"
-      :iconWidth="'18px'"
-      :type="'primary-sm'"
-      :disabled="inprogress || inBgRemoveMode || uploadingImgs.length !== 0 || isHandlingShadow || isFontLoading"
-      class="btn-download rounded full-height full-width"
-      @click.native="() => handleShowPopup(true)")
-      span(v-if="!inprogress") {{$t('NN0010')}}
-    popup-download(v-if="show"
-      class="download-btn__modal"
-      :page-index="currFocusPageIndex"
-      @close="handleShowPopup"
-      @inprogress="handleInprogress")
+div(class="download-btn"
+  v-hint="isHandlingShadow ? $t('NN0500') : ''")
+  btn(:hasIcon="true"
+    :iconName="'download'"
+    :iconWidth="'18px'"
+    :type="'primary-sm'"
+    :disabled="inprogress || inBgRemoveMode || uploadingImgs.length !== 0 || isHandlingShadow || isFontLoading"
+    class="btn-download rounded full-height full-width"
+    @click.native="() => handleShowPopup(true)")
+    span(v-if="!inprogress") {{$t('NN0010')}}
+  popup-download(v-if="show"
+    class="download-btn__modal"
+    :page-index="currFocusPageIndex"
+    @close="handleShowPopup"
+    @inprogress="handleInprogress")
 </template>
 
 <script lang="ts">

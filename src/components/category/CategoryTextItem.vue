@@ -1,12 +1,12 @@
 <template lang="pug">
-  img(class="pointer"
-    :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
-    draggable="true"
-    :style="itemStyle"
-    @dragstart="dragStart($event)"
-    @click="addText"
-    @click.right.prevent="openUpdateDesignPopup()"
-    @error="handleNotFound")
+img(class="pointer"
+  :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
+  draggable="true"
+  :style="itemStyle"
+  @dragstart="dragStart($event)"
+  @click="addText"
+  @click.right.prevent="openUpdateDesignPopup()"
+  @error="handleNotFound")
 </template>
 
 <script lang="ts">

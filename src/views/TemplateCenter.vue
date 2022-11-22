@@ -1,147 +1,147 @@
 <template lang="pug">
-  div(ref="body"
-      class="template-center"
-      @scroll.passive="handleScroll")
-    nu-header(class="non-mobile-show" :noSearchbar="true" :noNavigation="snapToTop" v-header-border="'.template-center'")
-      transition(name="slide")
-        search-bar(v-if="snapToTop"
-                :style="absoluteSearchbarStyles()"
-                class="template-center__absolute-searchbar"
+div(ref="body"
+    class="template-center"
+    @scroll.passive="handleScroll")
+  nu-header(class="non-mobile-show" :noSearchbar="true" :noNavigation="snapToTop" v-header-border="'.template-center'")
+    transition(name="slide")
+      search-bar(v-if="snapToTop"
+              :style="absoluteSearchbarStyles()"
+              class="template-center__absolute-searchbar"
+              :clear="true"
+              :defaultKeyword="searchbarKeyword"
+              :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
+              @update="handleUpdate"
+              @search="handleSearch")
+  nu-header(class="non-tab-show" :noSearchbar="true" v-header-border="'.template-center'")
+  div(class="template-center__search-container")
+    div(class="template-center__search__title non-mobile-show")
+      span(v-html="$t('NN0486', { newline: '<br>' })")
+    div(class="template-center__search__title non-tab-show")
+      span(v-html="$t('NN0487', { newline: '<br>' })")
+    div(class="template-center__search__text non-mobile-show")
+      i18n(path="NN0488" tag="span")
+        template(#newline)
+          br
+    search-bar(ref="searchbar"
+              class="template-center__search__searchbar non-mobile-show"
+              :style="searchbarStyles()"
+              :clear="true"
+              :defaultKeyword="searchbarKeyword"
+              :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
+              @update="handleUpdate"
+              @search="handleSearch")
+    img(class="color-block vector-purple1" :src="require('@/assets/img/svg/color-block/vector_purple1.svg')")
+    img(class="color-block oval-lightblue1 non-mobile-show" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
+    img(class="color-block oval-orange2 non-mobile-show" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
+  div(ref="mobileSearch" class="template-center__mobile-search__wrapper non-tab-show"
+      :style="mobileSearchStyles()")
+    div(class="template-center__mobile-search")
+      search-bar(class="template-center__mobile-search__searchbar"
                 :clear="true"
                 :defaultKeyword="searchbarKeyword"
                 :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                 @update="handleUpdate"
                 @search="handleSearch")
-    nu-header(class="non-tab-show" :noSearchbar="true" v-header-border="'.template-center'")
-    div(class="template-center__search-container")
-      div(class="template-center__search__title non-mobile-show")
-        span(v-html="$t('NN0486', { newline: '<br>' })")
-      div(class="template-center__search__title non-tab-show")
-        span(v-html="$t('NN0487', { newline: '<br>' })")
-      div(class="template-center__search__text non-mobile-show")
-        i18n(path="NN0488" tag="span")
-          template(#newline)
-            br
-      search-bar(ref="searchbar"
-                class="template-center__search__searchbar non-mobile-show"
-                :style="searchbarStyles()"
-                :clear="true"
-                :defaultKeyword="searchbarKeyword"
-                :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
-                @update="handleUpdate"
-                @search="handleSearch")
-      img(class="color-block vector-purple1" :src="require('@/assets/img/svg/color-block/vector_purple1.svg')")
-      img(class="color-block oval-lightblue1 non-mobile-show" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
-      img(class="color-block oval-orange2 non-mobile-show" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
-    div(ref="mobileSearch" class="template-center__mobile-search__wrapper non-tab-show"
-        :style="mobileSearchStyles()")
-      div(class="template-center__mobile-search")
-        search-bar(class="template-center__mobile-search__searchbar"
-                  :clear="true"
-                  :defaultKeyword="searchbarKeyword"
-                  :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
-                  @update="handleUpdate"
-                  @search="handleSearch")
-        div(class="template-center__mobile-search__options"
-            :class="{'active': isShowOptions}"
-            @click="isShowOptions = !isShowOptions")
-          svg-icon(iconName="advanced"
-                  iconWidth="22px"
-                  iconHeight="18.36px"
-                  iconColor="white")
-        transition(name="slide-up")
-          img(v-if="!mobileSnapToTop" class="color-block oval-lightblue1" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
-        transition(name="slide-up")
-          img(v-if="!mobileSnapToTop" class="color-block oval-orange2" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
-      div(class="template-center__filter non-tab-show"
-          :style="{'max-height': isShowOptions ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions ? '1' : '0', 'pointer-events': isShowOptions ? 'initial' : 'none'}")
-        hashtag-category-row(v-for="hashtag in hashtags"
-                            :list="hashtag"
-                            :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
-                            @select="handleHashtagSelect")
-    div(class="template-center__content")
-      div(class="template-center__filter non-mobile-show")
-        hashtag-category-row(v-for="hashtag in hashtags"
-                            :list="hashtag"
-                            :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
-                            @select="handleHashtagSelect")
-      div(class="template-center__hr non-mobile-show")
-      div(class="template-center__sorter non-mobile-show")
-        div(class="template-center__sorter__left")
-          div(class="template-center__sorter__title") {{$t('NN0191')}}:
-          div(v-for="sortingCriterium in sortingCriteria"
-              class="template-center__sorter__sort pointer"
-              :class="{'selected': selectedSorting === sortingCriterium.key}"
-              @click="handleSelectSorting(sortingCriterium.key)") {{ sortingCriterium.text }}
-        div(class="template-center__sorter__right")
-      template-waterfall(:waterfallTemplates="waterfallTemplates"
-                        :isTemplateReady="isTemplateReady"
-                        :useScrollablePreview="!isMobile"
-                        :useScrollSpace="isMobile"
-                        :themes="themes"
-                        @loadMore="handleLoadMore"
-                        @clickWaterfall="handleClickWaterfall")
-    nu-footer(class="non-mobile-show")
-    transition(name="fade-scale")
-      div(v-if="snapToTop"
-          class="template-center__to-top pointer non-mobile-show"
-          @click="scrollToTop")
-        svg-icon(iconName="to-top" iconWidth="40px" iconColor="white")
-    transition(name="fade-scale-center")
-      div(v-if="modal === 'pages'" class="template-center__multi"
-          v-click-outside="() => { modal = '' }")
+      div(class="template-center__mobile-search__options"
+          :class="{'active': isShowOptions}"
+          @click="isShowOptions = !isShowOptions")
+        svg-icon(iconName="advanced"
+                iconWidth="22px"
+                iconHeight="18.36px"
+                iconColor="white")
+      transition(name="slide-up")
+        img(v-if="!mobileSnapToTop" class="color-block oval-lightblue1" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
+      transition(name="slide-up")
+        img(v-if="!mobileSnapToTop" class="color-block oval-orange2" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
+    div(class="template-center__filter non-tab-show"
+        :style="{'max-height': isShowOptions ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions ? '1' : '0', 'pointer-events': isShowOptions ? 'initial' : 'none'}")
+      hashtag-category-row(v-for="hashtag in hashtags"
+                          :list="hashtag"
+                          :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
+                          @select="handleHashtagSelect")
+  div(class="template-center__content")
+    div(class="template-center__filter non-mobile-show")
+      hashtag-category-row(v-for="hashtag in hashtags"
+                          :list="hashtag"
+                          :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
+                          @select="handleHashtagSelect")
+    div(class="template-center__hr non-mobile-show")
+    div(class="template-center__sorter non-mobile-show")
+      div(class="template-center__sorter__left")
+        div(class="template-center__sorter__title") {{$t('NN0191')}}:
+        div(v-for="sortingCriterium in sortingCriteria"
+            class="template-center__sorter__sort pointer"
+            :class="{'selected': selectedSorting === sortingCriterium.key}"
+            @click="handleSelectSorting(sortingCriterium.key)") {{ sortingCriterium.text }}
+      div(class="template-center__sorter__right")
+    template-waterfall(:waterfallTemplates="waterfallTemplates"
+                      :isTemplateReady="isTemplateReady"
+                      :useScrollablePreview="!isMobile"
+                      :useScrollSpace="isMobile"
+                      :themes="themes"
+                      @loadMore="handleLoadMore"
+                      @clickWaterfall="handleClickWaterfall")
+  nu-footer(class="non-mobile-show")
+  transition(name="fade-scale")
+    div(v-if="snapToTop"
+        class="template-center__to-top pointer non-mobile-show"
+        @click="scrollToTop")
+      svg-icon(iconName="to-top" iconWidth="40px" iconColor="white")
+  transition(name="fade-scale-center")
+    div(v-if="modal === 'pages'" class="template-center__multi"
+        v-click-outside="() => { modal = '' }")
+      div(class="template-center__multi__header")
+        div(class="template-center__multi__header__close"
+            @click="() => { modal = '' }")
+          svg-icon(iconName="close"
+                  iconWidth="20px"
+                  iconColor="gray-2")
+      div(class="template-center__multi__content")
+        div(class="template-center__multi__gallery")
+          div(v-for="content in contentIds" class="template-center__multi__gallery-item"
+              :style="`background-image: url(${getPrevUrl(content)})`"
+              @click="handleTemplateClick(content)")
+  transition(name="fade-slide")
+    div(v-if="modal === 'mobile-pages'" class="template-center__mobile-multi")
+      div(class="template-center__mobile-multi__content")
+        div(class="template-center__mobile-multi__gallery")
+          div(v-for="content in contentIds" class="template-center__mobile-multi__gallery-item"
+              :style="`background-image: url(${getPrevUrl(content, 2)})`"
+              @click="handleTemplateClick(content)")
+          div(class="template-center__scroll-space")
+  div(v-if="modal === 'mobile-pages'", class="template-center__mobile-multi__close"
+      @click="() => { modal = '' }")
+    svg-icon(iconName="close"
+            iconWidth="25px"
+            iconColor="gray-3")
+  transition(name="fade-scale-center")
+    div(v-if="modal === 'template'" class="template-center__multi-split"
+        v-click-outside="() => { modal = '' }")
+      div(class="template-center__multi__content-left")
+        div(class="template-center__multi__template"
+            :style="`background-image: url(${getPrevUrl(contentBuffer)})`")
+      div(class="template-center__multi__content-right")
         div(class="template-center__multi__header")
           div(class="template-center__multi__header__close"
-              @click="() => { modal = '' }")
+              @click="() => { modal = 'pages' }")
             svg-icon(iconName="close"
                     iconWidth="20px"
                     iconColor="gray-2")
-        div(class="template-center__multi__content")
-          div(class="template-center__multi__gallery")
-            div(v-for="content in contentIds" class="template-center__multi__gallery-item"
-                :style="`background-image: url(${getPrevUrl(content)})`"
-                @click="handleTemplateClick(content)")
-    transition(name="fade-slide")
-      div(v-if="modal === 'mobile-pages'" class="template-center__mobile-multi")
-        div(class="template-center__mobile-multi__content")
-          div(class="template-center__mobile-multi__gallery")
-            div(v-for="content in contentIds" class="template-center__mobile-multi__gallery-item"
-                :style="`background-image: url(${getPrevUrl(content, 2)})`"
-                @click="handleTemplateClick(content)")
-            div(class="template-center__scroll-space")
-    div(v-if="modal === 'mobile-pages'", class="template-center__mobile-multi__close"
-        @click="() => { modal = '' }")
-      svg-icon(iconName="close"
-              iconWidth="25px"
-              iconColor="gray-3")
-    transition(name="fade-scale-center")
-      div(v-if="modal === 'template'" class="template-center__multi-split"
-          v-click-outside="() => { modal = '' }")
-        div(class="template-center__multi__content-left")
-          div(class="template-center__multi__template"
-              :style="`background-image: url(${getPrevUrl(contentBuffer)})`")
-        div(class="template-center__multi__content-right")
-          div(class="template-center__multi__header")
-            div(class="template-center__multi__header__close"
-                @click="() => { modal = 'pages' }")
-              svg-icon(iconName="close"
-                      iconWidth="20px"
-                      iconColor="gray-2")
-          div(class="template-center__multi__title")
-            span {{$t('NN0228')}}：
-          div(class="template-center__multi__themes")
-            div(v-for="theme in matchedThemes" class="template-center__multi__themes__row"
-                :class="checkSelected(theme) ? 'selected' : ''"
-                @click="handleThemeSelect(theme)")
-              div(class="template-center__multi__themes__title")
-                span {{ theme.title }}
-              div(class="template-center__multi__themes__description")
-                span {{ `${theme.width}x${theme.height}` }}
-          div(class="template-center__multi__button"
-              :class="selectedTheme ? '' : 'disabled'"
-              @click="handleThemeSubmit")
-            span(:style="multiThemeButtonStyles()") {{$t('NN0229')}}
-    div(v-if="modal !== '' && modal !== 'mobile-pages'" class="dim-background")
+        div(class="template-center__multi__title")
+          span {{$t('NN0228')}}：
+        div(class="template-center__multi__themes")
+          div(v-for="theme in matchedThemes" class="template-center__multi__themes__row"
+              :class="checkSelected(theme) ? 'selected' : ''"
+              @click="handleThemeSelect(theme)")
+            div(class="template-center__multi__themes__title")
+              span {{ theme.title }}
+            div(class="template-center__multi__themes__description")
+              span {{ `${theme.width}x${theme.height}` }}
+        div(class="template-center__multi__button"
+            :class="selectedTheme ? '' : 'disabled'"
+            @click="handleThemeSubmit")
+          span(:style="multiThemeButtonStyles()") {{$t('NN0229')}}
+  div(v-if="modal !== '' && modal !== 'mobile-pages'" class="dim-background")
 </template>
 
 <script lang="ts">

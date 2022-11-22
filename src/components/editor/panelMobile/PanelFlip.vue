@@ -1,15 +1,15 @@
 <template lang="pug">
-  div(class="panel-flip bg-white")
-    div(v-for="(data,index) in flipData()"
-        :key="`popup-${index}`"
-        class="panel-flip__item"
-        @click="handleFlipAction(data)")
-      svg-icon(
-        class="pointer"
-        :iconName="data.icon"
-        :iconWidth="'12px'"
-        :iconColor="'gray-1'")
-      span(class="ml-5 body-2") {{data.text}}
+div(class="panel-flip bg-white")
+  div(v-for="(data,index) in flipData()"
+      :key="`popup-${index}`"
+      class="panel-flip__item"
+      @click="handleFlipAction(data)")
+    svg-icon(
+      class="pointer"
+      :iconName="data.icon"
+      :iconWidth="'12px'"
+      :iconColor="'gray-1'")
+    span(class="ml-5 body-2") {{data.text}}
 </template>
 
 <script lang="ts">

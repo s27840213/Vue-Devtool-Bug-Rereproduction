@@ -1,17 +1,17 @@
 <template lang="pug">
-  div(class="popup-page-scale bg-gray-6"
-      @click.stop="closePopup")
-    template(v-for="option in percentOptions")
-      div(class="popup-page-scale__item"
-          @click="setPageScaleRatio(option)")
-        span(class="body-2") {{`${option}%`}}
-    hr(class="popup-page-scale__hr")
+div(class="popup-page-scale bg-gray-6"
+    @click.stop="closePopup")
+  template(v-for="option in percentOptions")
     div(class="popup-page-scale__item"
-        @click="fitPage()")
-      span(class="body-2") fit page
-    div(class="popup-page-scale__item"
-        @click="fillPage()")
-      span(class="body-2") fill page
+        @click="setPageScaleRatio(option)")
+      span(class="body-2") {{`${option}%`}}
+  hr(class="popup-page-scale__hr")
+  div(class="popup-page-scale__item"
+      @click="fitPage()")
+    span(class="body-2") fit page
+  div(class="popup-page-scale__item"
+      @click="fillPage()")
+    span(class="body-2") fill page
 </template>
 
 <script lang="ts">

@@ -1,36 +1,36 @@
 <template lang="pug">
-  div(class="home")
-    nu-header(v-header-border)
-    div(class="home-content")
-      div(class="home-top")
-        div(class="home-top-text")
-          span(class="home-top-text__title" v-html="$t('NN0464')")
-          span(class="home-top-text__description") {{$t('NN0465')}}
-          animation(v-for="cb in colorBlock"
-            :key="cb"
-            :class="`home-top-text__colorBlock ${cb.replace('.json', '')}`"
-            :path="'/lottie/' + cb")
-        iframe(title="Vivipic" class="home-top__yt"
-          :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=${isMobile?0:1}&rel=0`"
-          frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
-        router-link(:to="`/editor?type=new-design-size&width=1080&height=1080`"
-            class="home-top__button rounded btn-primary-sm btn-LG")
-          span {{$t('NN0391')}}
-      div(class="home-list")
-        scroll-list(v-if="!isMobile || isLogin"
-          type="theme" @openSizePopup="openSizePopup()")
-        scroll-list(v-if="isLogin"
-          type="mydesign")
-        template(v-if="isLogin")
-          scroll-list(v-for="theme in themeList"
-            type="template" :theme="theme" :key="theme")
-      div(class="home-block")
-        ta-block(v-for="item in blocklist"
-          :content="item")
-      nu-footer(:isHome="true")
-      div(v-if="showSizePopup"
-        class="popup-window")
-        popup-size(@close="closeSizePopup()")
+div(class="home")
+  nu-header(v-header-border)
+  div(class="home-content")
+    div(class="home-top")
+      div(class="home-top-text")
+        span(class="home-top-text__title" v-html="$t('NN0464')")
+        span(class="home-top-text__description") {{$t('NN0465')}}
+        animation(v-for="cb in colorBlock"
+          :key="cb"
+          :class="`home-top-text__colorBlock ${cb.replace('.json', '')}`"
+          :path="'/lottie/' + cb")
+      iframe(title="Vivipic" class="home-top__yt"
+        :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=${isMobile?0:1}&rel=0`"
+        frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
+      router-link(:to="`/editor?type=new-design-size&width=1080&height=1080`"
+          class="home-top__button rounded btn-primary-sm btn-LG")
+        span {{$t('NN0391')}}
+    div(class="home-list")
+      scroll-list(v-if="!isMobile || isLogin"
+        type="theme" @openSizePopup="openSizePopup()")
+      scroll-list(v-if="isLogin"
+        type="mydesign")
+      template(v-if="isLogin")
+        scroll-list(v-for="theme in themeList"
+          type="template" :theme="theme" :key="theme")
+    div(class="home-block")
+      ta-block(v-for="item in blocklist"
+        :content="item")
+    nu-footer(:isHome="true")
+    div(v-if="showSizePopup"
+      class="popup-window")
+      popup-size(@close="closeSizePopup()")
 </template>
 
 <script lang="ts">

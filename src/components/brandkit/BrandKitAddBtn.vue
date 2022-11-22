@@ -1,9 +1,9 @@
 <template lang="pug">
-  div(class="brand-kit-add-btn pointer")
-    svg-icon(iconName="plus-origin"
-            iconWidth="16px"
-            iconColor="gray-1")
-    span(class="brand-kit-add-btn__text") {{ text }}
+div(class="brand-kit-add-btn pointer")
+  svg-icon(iconName="plus-origin"
+          iconWidth="16px"
+          iconColor="gray-1")
+  span(class="brand-kit-add-btn__text") {{ text }}
 </template>
 
 <script lang="ts">

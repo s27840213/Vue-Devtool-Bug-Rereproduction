@@ -1,172 +1,172 @@
 <template lang="pug">
-  div(class="my-design-pc")
-    nu-header(v-header-border="true")
-    div(class="my-design-pc__content")
-      sidebar(@deleteItem="handleDeleteItem"
-              @deleteFolder="handleDeleteFolder"
-              @deleteAll="deleteAll"
-              @moveItem="handleMoveItem")
-      section(class="my-design-pc__design-view")
-        transition(name="slide-down-fade")
-          div(v-if="isMultiSelected" class="my-design-pc__multi")
-            div(class="my-design-pc__multi__container")
-              div(class="my-design-pc__multi__number")
-                i18n(path="NN0254" tag="span")
-                  template(#selectedNum) {{selectedNum}}
-              div(class="my-design-pc__multi__actions relative")
-                div(ref="tgFav"
-                    v-if="mydesignView !== 'trash-design-view'"
-                    class="my-design-pc__multi__icon"
-                    @click="toggleAllFavorite")
-                  svg-icon(iconName="heart"
-                          iconWidth="21px"
-                          iconColor="gray-2")
-                div(ref="mvFolder"
-                    v-if="(mydesignView !== 'favorite-design-view') && (mydesignView !== 'trash-design-view')"
-                    class="my-design-pc__multi__icon"
-                    @click="isMoveToFolderPanelOpen = true")
-                  svg-icon(iconName="folder"
-                          iconWidth="21px"
-                          iconColor="gray-2")
-                div(ref="delDesign"
-                    v-if="mydesignView !== 'trash-design-view'"
-                    class="my-design-pc__multi__icon"
-                    @mouseenter="handleFavDelMouseOver(true)"
-                    @mouseleave="handleFavDelMouseOver(false)"
-                    @click="deleteAll")
-                  svg-icon(iconName="trash"
-                          iconWidth="21px"
-                          iconColor="gray-2")
-                transition(name="slide-fade-img")
-                  img(v-if="isFavDelMouseOver" class="my-design-pc__info__arrow" :src="require('@/assets/img/svg/left-arrow.svg')")
-                transition(name="slide-fade-text")
-                  div(v-if="isFavDelMouseOver" class="my-design-pc__info__text")
-                    span {{$t('NN0243')}}
-                div(ref="recover"
-                    v-if="mydesignView === 'trash-design-view'"
-                    class="my-design-pc__multi__icon"
-                    @click="recoverAll")
-                  svg-icon(iconName="reduction"
-                          iconWidth="21px"
-                          iconColor="gray-2")
-                div(ref="delForever"
-                    v-if="mydesignView === 'trash-design-view'"
-                    class="my-design-pc__multi__icon"
-                    @click="deleteAllForever")
-                  svg-icon(iconName="trash"
-                          iconWidth="21px"
-                          iconColor="gray-2")
-              div(class="my-design-pc__multi__close"
-                  @click="handleClearSelection")
-                svg-icon(iconName="close-large"
-                        iconWidth="11px"
-                        iconHeight="13px"
+div(class="my-design-pc")
+  nu-header(v-header-border="true")
+  div(class="my-design-pc__content")
+    sidebar(@deleteItem="handleDeleteItem"
+            @deleteFolder="handleDeleteFolder"
+            @deleteAll="deleteAll"
+            @moveItem="handleMoveItem")
+    section(class="my-design-pc__design-view")
+      transition(name="slide-down-fade")
+        div(v-if="isMultiSelected" class="my-design-pc__multi")
+          div(class="my-design-pc__multi__container")
+            div(class="my-design-pc__multi__number")
+              i18n(path="NN0254" tag="span")
+                template(#selectedNum) {{selectedNum}}
+            div(class="my-design-pc__multi__actions relative")
+              div(ref="tgFav"
+                  v-if="mydesignView !== 'trash-design-view'"
+                  class="my-design-pc__multi__icon"
+                  @click="toggleAllFavorite")
+                svg-icon(iconName="heart"
+                        iconWidth="21px"
                         iconColor="gray-2")
-        component(v-if="currLocation !== ''"
-                  :is="mydesignView"
-                  class="design-view"
-                  @deleteItem="handleDeleteItem"
-                  @clearSelection="handleClearSelection"
-                  @recoverItem="handleRecoverItem"
-                  @deleteFolder="handleDeleteFolder"
-                  @moveItem="handleMoveItem"
-                  @deleteForever="handleDeleteForever"
-                  @deleteFolderForever="handleDeleteFolderForever"
-                  @moveDesignToFolder="handleMoveDesignToFolder"
-                  @downloadDesign="handleDownloadDesign")
-        div(class="my-design-pc__message-stack" :style="stackStyles()")
-          transition(name="slide-fade")
-            div(v-if="isShowDeleteMessage" class="my-design-pc__message")
-              div(class="my-design-pc__message__img" :style="messageImageStyles(deletedQueue[0])")
-              div(class="my-design-pc__message__text")
-                i18n(path="NN0250" tag="span")
-                  template(#item) {{messageItemName(deletedQueue[0])}}
-                  template(#folder) {{$t('NN0189')}}
-              div(class="my-design-pc__message__button" @click="recover")
-                span {{$t('NN0119')}}
-          transition(name="slide-fade")
-            div(v-if="isShowRecoverMessage" class="my-design-pc__message")
-              div(class="my-design-pc__message__text")
-                i18n(path="NN0250" tag="span")
-                  template(#item) {{messageItemName(recoveredQueue[0])}}
-                  template(#folder) {{messageDestName(recoveredQueue[0])}}
-          transition(name="slide-fade")
-            div(v-if="isShowMoveMessage" class="my-design-pc__message")
-              div(class="my-design-pc__message__img" :style="messageImageStyles(movedQueue[0])")
-              div(class="my-design-pc__message__text")
-                i18n(path="NN0250" tag="span")
-                  template(#item) {{messageItemName(movedQueue[0])}}
-                  template(#folder) {{messageDestName(movedQueue[0])}}
-          transition(name="slide-fade")
-            div(v-if="isErrorShowing" class="my-design-pc__message")
-              div(class="my-design-pc__message__text")
-                span {{$t('NN0242')}}
-        div(v-if="isMoveToFolderPanelOpen"
-            class="my-design-pc__change-folder"
-            :class="{centered: isMovingSingleToFolder}"
-            v-click-outside="() => { isMoveToFolderPanelOpen = false }")
-          div(class="my-design-pc__change-folder__container scrollbar-gray-thin")
-            div(class="my-design-pc__change-folder__header")
-              div(class="my-design-pc__change-folder__title")
-                span {{$t('NN0206')}}
-              div(class="my-design-pc__change-folder__hr")
-            div(class="my-design-pc__change-folder__folders")
-              structure-folder(v-for="folder in realFolders"
-                              :folder="folder"
-                              :parents="[]"
-                              :level="0")
-            div(class="my-design-pc__change-folder__footer")
-              div(class="my-design-pc__change-folder__buttons")
-                div(class="my-design-pc__change-folder__cancel"
-                    @click="isMoveToFolderPanelOpen = false")
-                  span {{$t('NN0203')}}
-                div(class="my-design-pc__change-folder__confirm"
-                    :class="{'disabled': moveToFolderSelectInfo === ''}"
-                    @click="handleMoveToFolder")
-                  span {{$t('NN0206')}}
-    transition(name="scale-fade")
-      div(v-if="confirmMessage === 'delete-all'" class="dim-background" @click="closeConfirmMessage")
-        div(class="delete-all-message" @click.stop)
-          div(class="delete-all-message__img")
-            img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55px" height="57px")
-          div(class="delete-all-message__text")
-            span {{$t('NN0244')}}
-          div(class="delete-all-message__buttons")
-            div(class="delete-all-message__cancel" @click.stop="closeConfirmMessage")
-              span {{$t('NN0203')}}
-            div(class="delete-all-message__confirm" @click.stop="confirmAction(deleteAllConfirmed)")
-              span {{$t('NN0034')}}
-      div(v-if="confirmMessage === 'delete-folder'" class="dim-background" @click="closeConfirmMessage")
-        div(class="delete-folder-message" @click.stop)
-          div(class="delete-folder-message__img")
-            img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="76px" height="79px")
-          div
-            div(class="delete-folder-message__text")
-              span(class="first-line") {{$t('NN0245')}}
-              span {{$t('NN0246')}}
-            div(class="delete-folder-message__buttons")
-              div(class="delete-folder-message__cancel" @click.stop="closeConfirmMessage")
+              div(ref="mvFolder"
+                  v-if="(mydesignView !== 'favorite-design-view') && (mydesignView !== 'trash-design-view')"
+                  class="my-design-pc__multi__icon"
+                  @click="isMoveToFolderPanelOpen = true")
+                svg-icon(iconName="folder"
+                        iconWidth="21px"
+                        iconColor="gray-2")
+              div(ref="delDesign"
+                  v-if="mydesignView !== 'trash-design-view'"
+                  class="my-design-pc__multi__icon"
+                  @mouseenter="handleFavDelMouseOver(true)"
+                  @mouseleave="handleFavDelMouseOver(false)"
+                  @click="deleteAll")
+                svg-icon(iconName="trash"
+                        iconWidth="21px"
+                        iconColor="gray-2")
+              transition(name="slide-fade-img")
+                img(v-if="isFavDelMouseOver" class="my-design-pc__info__arrow" :src="require('@/assets/img/svg/left-arrow.svg')")
+              transition(name="slide-fade-text")
+                div(v-if="isFavDelMouseOver" class="my-design-pc__info__text")
+                  span {{$t('NN0243')}}
+              div(ref="recover"
+                  v-if="mydesignView === 'trash-design-view'"
+                  class="my-design-pc__multi__icon"
+                  @click="recoverAll")
+                svg-icon(iconName="reduction"
+                        iconWidth="21px"
+                        iconColor="gray-2")
+              div(ref="delForever"
+                  v-if="mydesignView === 'trash-design-view'"
+                  class="my-design-pc__multi__icon"
+                  @click="deleteAllForever")
+                svg-icon(iconName="trash"
+                        iconWidth="21px"
+                        iconColor="gray-2")
+            div(class="my-design-pc__multi__close"
+                @click="handleClearSelection")
+              svg-icon(iconName="close-large"
+                      iconWidth="11px"
+                      iconHeight="13px"
+                      iconColor="gray-2")
+      component(v-if="currLocation !== ''"
+                :is="mydesignView"
+                class="design-view"
+                @deleteItem="handleDeleteItem"
+                @clearSelection="handleClearSelection"
+                @recoverItem="handleRecoverItem"
+                @deleteFolder="handleDeleteFolder"
+                @moveItem="handleMoveItem"
+                @deleteForever="handleDeleteForever"
+                @deleteFolderForever="handleDeleteFolderForever"
+                @moveDesignToFolder="handleMoveDesignToFolder"
+                @downloadDesign="handleDownloadDesign")
+      div(class="my-design-pc__message-stack" :style="stackStyles()")
+        transition(name="slide-fade")
+          div(v-if="isShowDeleteMessage" class="my-design-pc__message")
+            div(class="my-design-pc__message__img" :style="messageImageStyles(deletedQueue[0])")
+            div(class="my-design-pc__message__text")
+              i18n(path="NN0250" tag="span")
+                template(#item) {{messageItemName(deletedQueue[0])}}
+                template(#folder) {{$t('NN0189')}}
+            div(class="my-design-pc__message__button" @click="recover")
+              span {{$t('NN0119')}}
+        transition(name="slide-fade")
+          div(v-if="isShowRecoverMessage" class="my-design-pc__message")
+            div(class="my-design-pc__message__text")
+              i18n(path="NN0250" tag="span")
+                template(#item) {{messageItemName(recoveredQueue[0])}}
+                template(#folder) {{messageDestName(recoveredQueue[0])}}
+        transition(name="slide-fade")
+          div(v-if="isShowMoveMessage" class="my-design-pc__message")
+            div(class="my-design-pc__message__img" :style="messageImageStyles(movedQueue[0])")
+            div(class="my-design-pc__message__text")
+              i18n(path="NN0250" tag="span")
+                template(#item) {{messageItemName(movedQueue[0])}}
+                template(#folder) {{messageDestName(movedQueue[0])}}
+        transition(name="slide-fade")
+          div(v-if="isErrorShowing" class="my-design-pc__message")
+            div(class="my-design-pc__message__text")
+              span {{$t('NN0242')}}
+      div(v-if="isMoveToFolderPanelOpen"
+          class="my-design-pc__change-folder"
+          :class="{centered: isMovingSingleToFolder}"
+          v-click-outside="() => { isMoveToFolderPanelOpen = false }")
+        div(class="my-design-pc__change-folder__container scrollbar-gray-thin")
+          div(class="my-design-pc__change-folder__header")
+            div(class="my-design-pc__change-folder__title")
+              span {{$t('NN0206')}}
+            div(class="my-design-pc__change-folder__hr")
+          div(class="my-design-pc__change-folder__folders")
+            structure-folder(v-for="folder in realFolders"
+                            :folder="folder"
+                            :parents="[]"
+                            :level="0")
+          div(class="my-design-pc__change-folder__footer")
+            div(class="my-design-pc__change-folder__buttons")
+              div(class="my-design-pc__change-folder__cancel"
+                  @click="isMoveToFolderPanelOpen = false")
                 span {{$t('NN0203')}}
-              div(class="delete-folder-message__confirm" @click.stop="confirmAction(() => deleteFolder(pathedFolderBuffer))")
-                span {{$t('NN0034')}}
-      div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click="closeConfirmMessage")
-        div(class="delete-forever-message" @click.stop)
-          div(class="delete-forever-message__img")
-            img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55px" height="57px")
-          div(class="delete-forever-message__text")
-            span {{$tc('NN0202', isMultiSelected ? 2 : 1)}}
-          div(class="delete-forever-message__description")
-            span {{$tc('NN0201', isMultiSelected ? 2 : 1)}}
-          div(class="delete-forever-message__buttons")
-            div(class="delete-forever-message__cancel" @click.stop="closeConfirmMessage")
+              div(class="my-design-pc__change-folder__confirm"
+                  :class="{'disabled': moveToFolderSelectInfo === ''}"
+                  @click="handleMoveToFolder")
+                span {{$t('NN0206')}}
+  transition(name="scale-fade")
+    div(v-if="confirmMessage === 'delete-all'" class="dim-background" @click="closeConfirmMessage")
+      div(class="delete-all-message" @click.stop)
+        div(class="delete-all-message__img")
+          img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55px" height="57px")
+        div(class="delete-all-message__text")
+          span {{$t('NN0244')}}
+        div(class="delete-all-message__buttons")
+          div(class="delete-all-message__cancel" @click.stop="closeConfirmMessage")
+            span {{$t('NN0203')}}
+          div(class="delete-all-message__confirm" @click.stop="confirmAction(deleteAllConfirmed)")
+            span {{$t('NN0034')}}
+    div(v-if="confirmMessage === 'delete-folder'" class="dim-background" @click="closeConfirmMessage")
+      div(class="delete-folder-message" @click.stop)
+        div(class="delete-folder-message__img")
+          img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="76px" height="79px")
+        div
+          div(class="delete-folder-message__text")
+            span(class="first-line") {{$t('NN0245')}}
+            span {{$t('NN0246')}}
+          div(class="delete-folder-message__buttons")
+            div(class="delete-folder-message__cancel" @click.stop="closeConfirmMessage")
               span {{$t('NN0203')}}
-            div(class="delete-forever-message__confirm" @click.stop="confirmAction(deleteForeverConfirmed)")
-              span {{$t('NN0200')}}
-      div(v-if="confirmMessage === 'download'" class="dim-background")
-        popup-download(class="my-design-pc__download"
-          :useExternelJSON="true"
-          @close="closeConfirmMessage")
-    div(v-if="isMoveToFolderPanelOpen && isMovingSingleToFolder" class="dim-background")
+            div(class="delete-folder-message__confirm" @click.stop="confirmAction(() => deleteFolder(pathedFolderBuffer))")
+              span {{$t('NN0034')}}
+    div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click="closeConfirmMessage")
+      div(class="delete-forever-message" @click.stop)
+        div(class="delete-forever-message__img")
+          img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55px" height="57px")
+        div(class="delete-forever-message__text")
+          span {{$tc('NN0202', isMultiSelected ? 2 : 1)}}
+        div(class="delete-forever-message__description")
+          span {{$tc('NN0201', isMultiSelected ? 2 : 1)}}
+        div(class="delete-forever-message__buttons")
+          div(class="delete-forever-message__cancel" @click.stop="closeConfirmMessage")
+            span {{$t('NN0203')}}
+          div(class="delete-forever-message__confirm" @click.stop="confirmAction(deleteForeverConfirmed)")
+            span {{$t('NN0200')}}
+    div(v-if="confirmMessage === 'download'" class="dim-background")
+      popup-download(class="my-design-pc__download"
+        :useExternelJSON="true"
+        @close="closeConfirmMessage")
+  div(v-if="isMoveToFolderPanelOpen && isMovingSingleToFolder" class="dim-background")
 </template>
 
 <script lang="ts">

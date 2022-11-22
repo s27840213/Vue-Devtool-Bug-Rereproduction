@@ -1,27 +1,27 @@
 <template lang="pug">
-  div(class="block" :style="blockStyle")
-    div(class="block-text" :style="blockTextStyle")
-      div(class="block-text__title")
-        span(v-html="content.title")
-        img(v-for="cb in content.colorBlock.filter((i)=>!i.ref)"
-          class="block__colorBlock"
-          :src="require('@/assets/img/svg/color-block/' + cb.name)"
-          :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
-      div(class="block-text__description text-gray-2")
-        span {{content.description}}
-      div(v-if="content.link && content.link.text"
-        class="block-text__link text-H5")
-        router-link(:to="content.link.to")
-          span {{content.link.text + ' →'}}
-    div(class="block-animation")
-      animation(:path="`${dir}/${locale}/${toFile}`"
-        :lottieName="content.img.name.replace('.json', '')"
-        :width="content.img.width * rwdModifier"
-        :height="(content.img.height ? content.img.height : content.img.width) * rwdModifier")
-      img(v-for="cb in content.colorBlock.filter((i)=>i.ref)"
+div(class="block" :style="blockStyle")
+  div(class="block-text" :style="blockTextStyle")
+    div(class="block-text__title")
+      span(v-html="content.title")
+      img(v-for="cb in content.colorBlock.filter((i)=>!i.ref)"
         class="block__colorBlock"
         :src="require('@/assets/img/svg/color-block/' + cb.name)"
         :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
+    div(class="block-text__description text-gray-2")
+      span {{content.description}}
+    div(v-if="content.link && content.link.text"
+      class="block-text__link text-H5")
+      router-link(:to="content.link.to")
+        span {{content.link.text + ' →'}}
+  div(class="block-animation")
+    animation(:path="`${dir}/${locale}/${toFile}`"
+      :lottieName="content.img.name.replace('.json', '')"
+      :width="content.img.width * rwdModifier"
+      :height="(content.img.height ? content.img.height : content.img.width) * rwdModifier")
+    img(v-for="cb in content.colorBlock.filter((i)=>i.ref)"
+      class="block__colorBlock"
+      :src="require('@/assets/img/svg/color-block/' + cb.name)"
+      :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
 </template>
 
 <script lang="ts">

@@ -1,26 +1,26 @@
 <template lang="pug">
-  div(class="panel-more")
-    div(class="panel-more__page-name")
-      input(class="body-1 text-gray-2" type="text"
-        :placeholder="`${$t('NN0079')}`"
-        maxlength="30"
-        :value="pagesName"
-        @change="setPagesName"
-        ref="pagesName")
-    hr(class="panel-more__hr")
-    div(class="panel-more__item" @click="save()")
-      span(class="body-2 pointer") {{$t('NN0009')}}
-    div(class="panel-more__item" @click="newDesign()")
-      span(class="body-2 pointer") {{$tc('NN0072')}}
-    hr(class="panel-more__hr")
-    div(class="panel-more__item" @click="goToPage('MyDesign')")
-      span(class="body-2 pointer") {{$t('NN0080')}}
-    hr(class="panel-more__hr")
-    div(class="panel-more__item"
-        @click="onLogoutClicked()")
-        span(class="body-2 pointer") {{$tc('NN0167',2)}}
-    div(class="body-2 panel-more__item" @click="gotoDesktop")
-      span(class="text-gray-3") Version: {{buildNumber}}
+div(class="panel-more")
+  div(class="panel-more__page-name")
+    input(class="body-1 text-gray-2" type="text"
+      :placeholder="`${$t('NN0079')}`"
+      maxlength="30"
+      :value="pagesName"
+      @change="setPagesName"
+      ref="pagesName")
+  hr(class="panel-more__hr")
+  div(class="panel-more__item" @click="save()")
+    span(class="body-2 pointer") {{$t('NN0009')}}
+  div(class="panel-more__item" @click="newDesign()")
+    span(class="body-2 pointer") {{$tc('NN0072')}}
+  hr(class="panel-more__hr")
+  div(class="panel-more__item" @click="goToPage('MyDesign')")
+    span(class="body-2 pointer") {{$t('NN0080')}}
+  hr(class="panel-more__hr")
+  div(class="panel-more__item"
+      @click="onLogoutClicked()")
+      span(class="body-2 pointer") {{$tc('NN0167',2)}}
+  div(class="body-2 panel-more__item" @click="gotoDesktop")
+    span(class="text-gray-3") Version: {{buildNumber}}
 </template>
 
 <script lang="ts">

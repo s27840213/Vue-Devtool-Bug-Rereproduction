@@ -1,18 +1,18 @@
 <template lang="pug">
-  div(class="design-item")
-    div(class="design-item__block pointer")
-      div(class="design-item__img-container"
-        :style="containerStyles()")
-        img(v-if="previewCheckReady"
-            class="design-item__thumbnail"
-            :style="imageStyles()"
-            :src="appliedUrl")
-      div(class="design-item__controller")
-        div(class="design-item__controller-content"
-          @click.self="handleClick")
-    div(class="design-item__name")
-      div(class="design-item__name__container")
-        span(:title="config.name") {{ config.name }}
+div(class="design-item")
+  div(class="design-item__block pointer")
+    div(class="design-item__img-container"
+      :style="containerStyles()")
+      img(v-if="previewCheckReady"
+          class="design-item__thumbnail"
+          :style="imageStyles()"
+          :src="appliedUrl")
+    div(class="design-item__controller")
+      div(class="design-item__controller-content"
+        @click.self="handleClick")
+  div(class="design-item__name")
+    div(class="design-item__name__container")
+      span(:title="config.name") {{ config.name }}
 </template>
 
 <script lang="ts">

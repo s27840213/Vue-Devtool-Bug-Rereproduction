@@ -1,18 +1,18 @@
 <template lang="pug">
-  div(class="nu-img-controller")
-    div(class="nu-controller"
-      :style="controllerStyles()")
-    div(class="nu-controller__body"
-        ref="body"
-        :style="styles"
-        @pointerdown.stop="moveStart"
+div(class="nu-img-controller")
+  div(class="nu-controller"
+    :style="controllerStyles()")
+  div(class="nu-controller__body"
+      ref="body"
+      :style="styles"
+      @pointerdown.stop="moveStart"
+      @touchstart="disableTouchEvent")
+    div(v-for="(scaler, index) in controlPoints.scalers"
+        class="controller-point"
+        :key="index"
+        :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' })"
+        @pointerdown.prevent.stop="scaleStart"
         @touchstart="disableTouchEvent")
-      div(v-for="(scaler, index) in controlPoints.scalers"
-          class="controller-point"
-          :key="index"
-          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' })"
-          @pointerdown.prevent.stop="scaleStart"
-          @touchstart="disableTouchEvent")
 </template>
 
 <script lang="ts">

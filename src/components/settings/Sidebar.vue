@@ -1,24 +1,24 @@
 <template lang="pug">
-  div(class="sidebar")
-    div(class="nav")
-      div(class="nav-container")
-        div(class="nav-container__profile")
-          avatar(class="mr-10"
-            :textSize="14"
-            :avatarSize="35")
-          div(class="profile-text body-4")
-            div {{showUname}}
-            div(class="text-gray-3") {{showAccount}}
-        template(v-for="view in settingsItems")
-          hr(v-if="view.name === 'hr'")
-          div(v-else class="nav-container__option"
-              :class="{'selected': subPath === view.name}")
-            router-link(:to="`/settings/${view.name}`"
-              class="nav-container__option__link")
-              svg-icon(:iconName="view.icon"
-                :iconWidth="'15px'"
-                :iconColor="'gray-2'")
-              span {{view.label}}
+div(class="sidebar")
+  div(class="nav")
+    div(class="nav-container")
+      div(class="nav-container__profile")
+        avatar(class="mr-10"
+          :textSize="14"
+          :avatarSize="35")
+        div(class="profile-text body-4")
+          div {{showUname}}
+          div(class="text-gray-3") {{showAccount}}
+      template(v-for="view in settingsItems")
+        hr(v-if="view.name === 'hr'")
+        div(v-else class="nav-container__option"
+            :class="{'selected': subPath === view.name}")
+          router-link(:to="`/settings/${view.name}`"
+            class="nav-container__option__link")
+            svg-icon(:iconName="view.icon"
+              :iconWidth="'15px'"
+              :iconColor="'gray-2'")
+            span {{view.label}}
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'

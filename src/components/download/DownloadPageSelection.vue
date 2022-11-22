@@ -1,22 +1,22 @@
 <template lang="pug">
-  div(class="download-page-selection")
-    dropdown(ref="dropdown"
-      isCustomOptions
-      @open="handleReset")
-      span(class="download-page-selection__label") {{ rangeLabel }} {{$t('NN0128')}}
-      template(v-slot:custom)
-        div(class="download-page-selection__options py-10 px-15 flex")
-          div(class="mb-10 pointer" @click.self="handleCancel") {{$t('NN0130')}}
-          download-check-button(v-for="(status, idx) in preSelected"
-            class="mb-10"
-            type="checkbox"
-            :key="`page_${idx}`"
-            :default-checked="status"
-            :label="$t('NN0134', { num:`${idx + 1}` })"
-            @change="({ checked }) => handleSelect(idx, checked)")
-          div
-            btn(class="full-width body-3 rounded"
-              @click.native="handleSubmit") {{$tc('NN0133', 2)}}
+div(class="download-page-selection")
+  dropdown(ref="dropdown"
+    isCustomOptions
+    @open="handleReset")
+    span(class="download-page-selection__label") {{ rangeLabel }} {{$t('NN0128')}}
+    template(v-slot:custom)
+      div(class="download-page-selection__options py-10 px-15 flex")
+        div(class="mb-10 pointer" @click.self="handleCancel") {{$t('NN0130')}}
+        download-check-button(v-for="(status, idx) in preSelected"
+          class="mb-10"
+          type="checkbox"
+          :key="`page_${idx}`"
+          :default-checked="status"
+          :label="$t('NN0134', { num:`${idx + 1}` })"
+          @change="({ checked }) => handleSelect(idx, checked)")
+        div
+          btn(class="full-width body-3 rounded"
+            @click.native="handleSubmit") {{$tc('NN0133', 2)}}
 </template>
 
 <script lang="ts">

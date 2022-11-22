@@ -1,59 +1,59 @@
 <template lang="pug">
-  div(class="brand-selector relative"
+div(class="brand-selector relative"
+  :class="`${theme}-theme`")
+  div(v-if="defaultOption && isDefaultSelected"
+    class="brand-selector__brand-name"
     :class="`${theme}-theme`")
-    div(v-if="defaultOption && isDefaultSelected"
-      class="brand-selector__brand-name"
-      :class="`${theme}-theme`")
-      span {{ $t('NN0089') }}
-    div(v-else
-      class="brand-selector__brand-name"
-      :class="[`${theme}-theme`, {hover: !isMobile}]")
-      input(v-if="isNameEditing"
-        ref="brandName"
-        v-model="editableName"
-        v-click-outside="handleNameEditEnd"
-        @change="handleNameEditEnd"
-        @keyup="checkNameEnter")
-      span(v-else
-        :title="brandName"
-        @click="handleNameClick") {{ brandName }}
-    div(class="brand-selector__dropdown pointer"
-      :class="[`${theme}-theme`, {mobile: isMobile}]"
-      @click="handleOpenMenu")
-      svg-icon(:class="`${theme}-theme`"
-        :style="dropdownStyles()"
-        iconName="chevron-down"
-        iconWidth="24px")
-    transition(name="fade-slide")
-      div(v-if="isBrandListOpen"
-        v-click-outside="() => { isBrandListOpen = false }"
-        class="brand-selector__brand-list")
-        div(v-for="brand in brands"
-          class="feature-button brand-selector__brand-list__item pointer relative"
-          :class="{'active': checkSelected(brand), 'disabled': checkTemp(brand)}"
-          @mouseenter="handleMouseEnter(brand)"
-          @mouseleave="handleMouseLeave()"
-          @click="handleSetCurrentBrand(brand)")
-          span(:title="getDisplayedBrandName(brand)") {{ getDisplayedBrandName(brand) }}
-          template(v-if="theme === 'brandkit'")
-            div(class="brand-selector__brand-list__item-menu-icon pointer" @click.stop="handleBrandMenu(brand)")
-              svg-icon(iconName="more_vertical" iconWidth="24px" iconColor="gray-2")
-            div(v-if="checkBrandMenuShowing(brand)" class="brand-selector__brand-list__item-menu-bridge")
-            div(v-if="checkBrandMenuShowing(brand)" class="brand-selector__brand-list__item-menu")
-              div(class="brand-selector__brand-list__item-menu-row pointer"
-                @click="handleCopyBrand(brand)")
-                svg-icon(iconName="copy" iconWidth="24px" iconColor="gray-2")
-                span {{ $t('NN0251') }}
-              div(class="brand-selector__brand-list__item-menu-row pointer"
-                @click="handleDeleteBrand(brand)")
-                svg-icon(iconName="trash" iconWidth="24px" iconColor="gray-2")
-                span {{ $t('NN0034') }}
-        template(v-if="defaultOption")
-          div(class="horizontal-rule")
-          div(class="feature-button brand-selector__brand-list__item pointer"
-            :class="{'active': isDefaultSelected}"
-            @click="handleSelectDefault")
-            span {{ $t('NN0089') }}
+    span {{ $t('NN0089') }}
+  div(v-else
+    class="brand-selector__brand-name"
+    :class="[`${theme}-theme`, {hover: !isMobile}]")
+    input(v-if="isNameEditing"
+      ref="brandName"
+      v-model="editableName"
+      v-click-outside="handleNameEditEnd"
+      @change="handleNameEditEnd"
+      @keyup="checkNameEnter")
+    span(v-else
+      :title="brandName"
+      @click="handleNameClick") {{ brandName }}
+  div(class="brand-selector__dropdown pointer"
+    :class="[`${theme}-theme`, {mobile: isMobile}]"
+    @click="handleOpenMenu")
+    svg-icon(:class="`${theme}-theme`"
+      :style="dropdownStyles()"
+      iconName="chevron-down"
+      iconWidth="24px")
+  transition(name="fade-slide")
+    div(v-if="isBrandListOpen"
+      v-click-outside="() => { isBrandListOpen = false }"
+      class="brand-selector__brand-list")
+      div(v-for="brand in brands"
+        class="feature-button brand-selector__brand-list__item pointer relative"
+        :class="{'active': checkSelected(brand), 'disabled': checkTemp(brand)}"
+        @mouseenter="handleMouseEnter(brand)"
+        @mouseleave="handleMouseLeave()"
+        @click="handleSetCurrentBrand(brand)")
+        span(:title="getDisplayedBrandName(brand)") {{ getDisplayedBrandName(brand) }}
+        template(v-if="theme === 'brandkit'")
+          div(class="brand-selector__brand-list__item-menu-icon pointer" @click.stop="handleBrandMenu(brand)")
+            svg-icon(iconName="more_vertical" iconWidth="24px" iconColor="gray-2")
+          div(v-if="checkBrandMenuShowing(brand)" class="brand-selector__brand-list__item-menu-bridge")
+          div(v-if="checkBrandMenuShowing(brand)" class="brand-selector__brand-list__item-menu")
+            div(class="brand-selector__brand-list__item-menu-row pointer"
+              @click="handleCopyBrand(brand)")
+              svg-icon(iconName="copy" iconWidth="24px" iconColor="gray-2")
+              span {{ $t('NN0251') }}
+            div(class="brand-selector__brand-list__item-menu-row pointer"
+              @click="handleDeleteBrand(brand)")
+              svg-icon(iconName="trash" iconWidth="24px" iconColor="gray-2")
+              span {{ $t('NN0034') }}
+      template(v-if="defaultOption")
+        div(class="horizontal-rule")
+        div(class="feature-button brand-selector__brand-list__item pointer"
+          :class="{'active': isDefaultSelected}"
+          @click="handleSelectDefault")
+          span {{ $t('NN0089') }}
 </template>
 
 <script lang="ts">

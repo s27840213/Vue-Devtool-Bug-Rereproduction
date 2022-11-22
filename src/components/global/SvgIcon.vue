@@ -1,8 +1,8 @@
 <template lang="pug">
-  svg(class="svg-icon" :class="`text-${iconColor}`"
-      ref="icon"
-      :style="iconStyles()")
-    use(:xlink:href="`#${iconName}`")
+svg(class="svg-icon" :class="`text-${iconColor}`"
+    ref="icon"
+    :style="iconStyles()")
+  use(:xlink:href="`#${iconName}`")
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'

@@ -1,65 +1,65 @@
 <template lang="pug">
-  div(class="panel-text")
-    search-bar(class="mb-15"
-      :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
-      clear
-      :defaultKeyword="keywordLabel"
-      @search="handleSearch")
-    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
-    template(v-if="!keyword")
-      template(v-if="isBrandkitAvailable")
-        div(class="panel-text__brand-header relative")
-          brand-selector(theme="panel" :defaultOption="true")
-          div(class="panel-text__brand-settings pointer"
-          @click="handleOpenSettings")
-            svg-icon(iconName="settings" iconColor="white" iconWidth="24px")
-      template(v-if="!isBrandkitAvailable || isDefaultSelected")
-        div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText"
-            :key="config.type"
-            draggable="true"
-            @dragstart="standardTextDrag($event, config)")
-          btn(
-            class="panel-text__text-button mb-10"
-            :type="`text-${config.type.toLowerCase()}`"
-            :fontFamily="localeFont()"
-            @click.native="handleAddText(config)") {{ config.text }}
-      template(v-else)
-        div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText"
-            :key="config.type"
-            draggable="true"
-            @dragstart="standardTextDrag($event, config)")
-          btn(
-            class="panel-text__text-button mb-10"
-            :style="getFontStyles(config.type.toLowerCase())"
-            :type="`text-${config.type.toLowerCase()}`"
-            @click.native="handleAddText(config)") {{ config.text }}
-    category-list(v-for="item in categoryListArray"
-                  v-show="item.show" :ref="item.key" :key="item.key"
-                  :list="item.content" @loadMore="handleLoadMore")
-      template(v-if="pending" #after)
-        div(class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
-      template(v-slot:category-list-rows="{ list, title }")
-        category-list-rows(
-          v-if="!keyword"
-          :list="list"
-          :title="title"
-          @action="handleCategorySearch")
-          template(v-slot:preview="{ item }")
-            category-text-item(class="panel-text__item"
-              :item="item")
-      template(v-slot:category-text-item="{ list, title }")
-        div(class="panel-text__items"
-          :style="{gridTemplateColumns: `repeat(${amountInRow}, 1fr)`}")
-          div(v-if="title"
-            :style="{gridColumn: `1 / ${amountInRow+1}`}"
-            class="panel-text__header") {{ title }}
-          category-text-item(v-for="item in list"
-            class="panel-text__item"
-            :key="item.id"
+div(class="panel-text")
+  search-bar(class="mb-15"
+    :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
+    clear
+    :defaultKeyword="keywordLabel"
+    @search="handleSearch")
+  div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+  template(v-if="!keyword")
+    template(v-if="isBrandkitAvailable")
+      div(class="panel-text__brand-header relative")
+        brand-selector(theme="panel" :defaultOption="true")
+        div(class="panel-text__brand-settings pointer"
+        @click="handleOpenSettings")
+          svg-icon(iconName="settings" iconColor="white" iconWidth="24px")
+    template(v-if="!isBrandkitAvailable || isDefaultSelected")
+      div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText"
+          :key="config.type"
+          draggable="true"
+          @dragstart="standardTextDrag($event, config)")
+        btn(
+          class="panel-text__text-button mb-10"
+          :type="`text-${config.type.toLowerCase()}`"
+          :fontFamily="localeFont()"
+          @click.native="handleAddText(config)") {{ config.text }}
+    template(v-else)
+      div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText"
+          :key="config.type"
+          draggable="true"
+          @dragstart="standardTextDrag($event, config)")
+        btn(
+          class="panel-text__text-button mb-10"
+          :style="getFontStyles(config.type.toLowerCase())"
+          :type="`text-${config.type.toLowerCase()}`"
+          @click.native="handleAddText(config)") {{ config.text }}
+  category-list(v-for="item in categoryListArray"
+                v-show="item.show" :ref="item.key" :key="item.key"
+                :list="item.content" @loadMore="handleLoadMore")
+    template(v-if="pending" #after)
+      div(class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
+    template(v-slot:category-list-rows="{ list, title }")
+      category-list-rows(
+        v-if="!keyword"
+        :list="list"
+        :title="title"
+        @action="handleCategorySearch")
+        template(v-slot:preview="{ item }")
+          category-text-item(class="panel-text__item"
             :item="item")
+    template(v-slot:category-text-item="{ list, title }")
+      div(class="panel-text__items"
+        :style="{gridTemplateColumns: `repeat(${amountInRow}, 1fr)`}")
+        div(v-if="title"
+          :style="{gridColumn: `1 / ${amountInRow+1}`}"
+          class="panel-text__header") {{ title }}
+        category-text-item(v-for="item in list"
+          class="panel-text__item"
+          :key="item.id"
+          :item="item")
 </template>
 
 <script lang="ts">

@@ -1,21 +1,21 @@
 <template lang="pug">
-  div(class="scale-ratio-editor")
-    input(class="scale-ratio-editor__input"
-      ref="scale-ratio-editor" type="range" min="0.1" max="5" step="0.01"
-      v-model="ratioInPercent"
-      :disabled="isShowPagePreview"
-      @input="setScaleRatio(Math.round(ratioInPercent*100))"
-      v-ratio-change)
-    div(class="px-5 flex items-center  btn-page-resize hover-effect"
-        @click="openResizePopup()")
-      div(class="scale-ratio-editor__percentage lead-2")
-        span(class="text-gray-2") {{pageScaleRatio}}%
-      svg-icon(class="pointer"
-        :class="[{'rotate-hr': isPageScalePopupOpen}]"
-        :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
-    svg-icon(class="hover-effect pointer"
-      @click.native="deleteLayer"
-      :iconName="'trash'" :iconColor="'gray-2'" iconWidth="20px")
+div(class="scale-ratio-editor")
+  input(class="scale-ratio-editor__input"
+    ref="scale-ratio-editor" type="range" min="0.1" max="5" step="0.01"
+    v-model="ratioInPercent"
+    :disabled="isShowPagePreview"
+    @input="setScaleRatio(Math.round(ratioInPercent*100))"
+    v-ratio-change)
+  div(class="px-5 flex items-center  btn-page-resize hover-effect"
+      @click="openResizePopup()")
+    div(class="scale-ratio-editor__percentage lead-2")
+      span(class="text-gray-2") {{pageScaleRatio}}%
+    svg-icon(class="pointer"
+      :class="[{'rotate-hr': isPageScalePopupOpen}]"
+      :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
+  svg-icon(class="hover-effect pointer"
+    @click.native="deleteLayer"
+    :iconName="'trash'" :iconColor="'gray-2'" iconWidth="20px")
 </template>
 
 <script lang="ts">

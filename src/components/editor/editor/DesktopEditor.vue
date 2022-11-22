@@ -1,43 +1,43 @@
 <template lang="pug">
-  div(class="desktop-editor")
-    sidebar(:isSidebarPanelOpen="isSidebarPanelOpen"
-      @toggleSidebarPanel="toggleSidebarPanel")
-    section
-      div(class="content")
-        sidebar-panel(:isSidebarPanelOpen="isSidebarPanelOpen")
-        div(class="content__main")
-          div(class="content__editor")
-            div(v-if="!inBgRemoveMode" class="header-container")
-              editor-header
-            div(v-if="isAdmin" class="admin-options")
-              div(class="admin-options__sticky-container"
-                  :style="stickyTopPos")
-                div(class="flex flex-column mr-10")
-                  span(class="ml-10 text-bold text-orange") {{templateText}}
-                  span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
-                svg-icon(v-if="isAdmin"
-                  class="mr-10"
-                  :iconName="`user-admin${getAdminModeText}`"
-                  :iconWidth="'20px'"
-                  :iconColor="'gray-2'"
-                  @click.native="setAdminMode()")
-                div(class="flex flex-column")
-                  select(class="locale-select" v-model="inputLocale")
-                    option(v-for="locale in localeOptions" :value="locale") {{locale}}
-            editor-view
-            scale-ratio-editor(@toggleSidebarPanel="toggleSidebarPanel")
-        div(class="content__panel"
-            :style="contentPanelStyles")
-          function-panel(@toggleColorPanel="toggleColorPanel")
-          transition(name="panel-up")
-            color-panel(v-if="isColorPanelOpen"
-              class="content__panel__color-panel"
-              @toggleColorPanel="toggleColorPanel")
-        div(v-if="isShowPagePreview" class="content__pages")
-          page-preview
-    tour-guide(v-if="showEditorGuide")
-    popup-brand-settings(v-if="isBrandSettingsOpen")
-    popup-update-design(v-if="isUpdateDesignOpen")
+div(class="desktop-editor")
+  sidebar(:isSidebarPanelOpen="isSidebarPanelOpen"
+    @toggleSidebarPanel="toggleSidebarPanel")
+  section
+    div(class="content")
+      sidebar-panel(:isSidebarPanelOpen="isSidebarPanelOpen")
+      div(class="content__main")
+        div(class="content__editor")
+          div(v-if="!inBgRemoveMode" class="header-container")
+            editor-header
+          div(v-if="isAdmin" class="admin-options")
+            div(class="admin-options__sticky-container"
+                :style="stickyTopPos")
+              div(class="flex flex-column mr-10")
+                span(class="ml-10 text-bold text-orange") {{templateText}}
+                span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
+              svg-icon(v-if="isAdmin"
+                class="mr-10"
+                :iconName="`user-admin${getAdminModeText}`"
+                :iconWidth="'20px'"
+                :iconColor="'gray-2'"
+                @click.native="setAdminMode()")
+              div(class="flex flex-column")
+                select(class="locale-select" v-model="inputLocale")
+                  option(v-for="locale in localeOptions" :value="locale") {{locale}}
+          editor-view
+          scale-ratio-editor(@toggleSidebarPanel="toggleSidebarPanel")
+      div(class="content__panel"
+          :style="contentPanelStyles")
+        function-panel(@toggleColorPanel="toggleColorPanel")
+        transition(name="panel-up")
+          color-panel(v-if="isColorPanelOpen"
+            class="content__panel__color-panel"
+            @toggleColorPanel="toggleColorPanel")
+      div(v-if="isShowPagePreview" class="content__pages")
+        page-preview
+  tour-guide(v-if="showEditorGuide")
+  popup-brand-settings(v-if="isBrandSettingsOpen")
+  popup-update-design(v-if="isUpdateDesignOpen")
 </template>
 
 <script lang="ts">

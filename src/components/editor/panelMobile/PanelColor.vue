@@ -1,27 +1,27 @@
 <template lang="pug">
-  div(class="panel-color px-5")
-    color-picker(
-      v-if="showColorPicker"
-      :isMobile="true" :aspectRatio="40"
-      :currentColor="colorUtils.currColor"
-      @update="handleDragUpdate"
-      @final="handleChangeStop")
-    color-slips(v-if="showPalette"
-      :whiteTheme="true"
-      :noPadding="true"
-      :showPanelBtn="false"
-      :allRecentlyControl="showAllRecently"
-      @openColorPicker="openColorPicker"
-      @openColorMore="openColorMore")
-    div(v-if="showDocumentColors" class="panel-color__document-colors")
-      div(v-if="hasMultiColors"
-        class="panel-color__document-color"
-        :style="groupColorStyles()"
-        @click="selectColor(0)")
-      div(v-else v-for="(color, index) in getDocumentColors"
-        class="panel-color__document-color"
-        :style="colorStyles(color, index)"
-        @click="selectColor(index)")
+div(class="panel-color px-5")
+  color-picker(
+    v-if="showColorPicker"
+    :isMobile="true" :aspectRatio="40"
+    :currentColor="colorUtils.currColor"
+    @update="handleDragUpdate"
+    @final="handleChangeStop")
+  color-slips(v-if="showPalette"
+    :whiteTheme="true"
+    :noPadding="true"
+    :showPanelBtn="false"
+    :allRecentlyControl="showAllRecently"
+    @openColorPicker="openColorPicker"
+    @openColorMore="openColorMore")
+  div(v-if="showDocumentColors" class="panel-color__document-colors")
+    div(v-if="hasMultiColors"
+      class="panel-color__document-color"
+      :style="groupColorStyles()"
+      @click="selectColor(0)")
+    div(v-else v-for="(color, index) in getDocumentColors"
+      class="panel-color__document-color"
+      :style="colorStyles(color, index)"
+      @click="selectColor(index)")
 </template>
 
 <script lang="ts">

@@ -1,19 +1,19 @@
 <template lang="pug">
-  div(class="font-size-selector size-bar relative")
-    div(class="pointer"
-      @pointerdown="fontSizeStepping(-step)"
-      @contextmenu.prevent) -
-    button(class="font-size-selector__range-input-button" @click="handleValueModal")
-      input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
-            @change="setSize" :value="fontSize" :disabled="fontSize === '--'")
-    div(class="pointer"
-      @pointerdown="fontSizeStepping(step)"
-      @contextmenu.prevent) +
-    value-selector(v-if="openValueSelector"
-                v-click-outside="handleValueModal"
-                :valueArray="fontSelectValue"
-                class="font-size-selector__value-selector"
-                @update="handleValueUpdate")
+div(class="font-size-selector size-bar relative")
+  div(class="pointer"
+    @pointerdown="fontSizeStepping(-step)"
+    @contextmenu.prevent) -
+  button(class="font-size-selector__range-input-button" @click="handleValueModal")
+    input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
+          @change="setSize" :value="fontSize" :disabled="fontSize === '--'")
+  div(class="pointer"
+    @pointerdown="fontSizeStepping(step)"
+    @contextmenu.prevent) +
+  value-selector(v-if="openValueSelector"
+              v-click-outside="handleValueModal"
+              :valueArray="fontSelectValue"
+              class="font-size-selector__value-selector"
+              @update="handleValueUpdate")
 </template>
 
 <script lang="ts">

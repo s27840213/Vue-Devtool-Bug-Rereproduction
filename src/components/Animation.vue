@@ -1,15 +1,15 @@
 <template lang="pug">
-  div(class="animation")
-    div(v-if="isJSON"
-      class="lottie"
-      :style="lottieStyle" ref="lavContainer")
-    video(v-if="isMp4"
-      class="video"
-      :src="require('@/' + path.slice(2))"
-      :width="width"
-      :height="height"
-      type="video/mp4"
-      autoplay muted loop playsinline)
+div(class="animation")
+  div(v-if="isJSON"
+    class="lottie"
+    :style="lottieStyle" ref="lavContainer")
+  video(v-if="isMp4"
+    class="video"
+    :src="require('@/' + path.slice(2))"
+    :width="width"
+    :height="height"
+    type="video/mp4"
+    autoplay muted loop playsinline)
 </template>
 
 <script lang="ts">

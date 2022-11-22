@@ -1,11 +1,11 @@
 <template lang="pug">
-  div(class="panel-opacity")
-    mobile-slider(:title="`${$t('NN0030')}`"
-      :borderTouchArea="true"
-      :value="opacity"
-      :min="0"
-      :max="100"
-      @update="updateLayerOpacity")
+div(class="panel-opacity")
+  mobile-slider(:title="`${$t('NN0030')}`"
+    :borderTouchArea="true"
+    :value="opacity"
+    :min="0"
+    :max="100"
+    @update="updateLayerOpacity")
 </template>
 
 <script lang="ts">

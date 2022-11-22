@@ -1,19 +1,19 @@
 <template lang="pug">
-  div(class="card")
-    img(:src="require(`@/assets/img/svg/card/${card.issuer}.svg`)")
-    span {{`**** ${card.last4}`}}
-    span {{`Expires ${card.date}`}}
-    svg-icon(v-if="canDelete" class="pointer" iconName="trash"
-            iconColor="gray-2" iconWidth="20px" @click.native="openPopup()")
-    div(v-if="showPopup" class="popup-window")
-      div(class="card-popup" v-click-outside="closePopup")
-        div(class="text-H6") {{$t('NN0622')}}
-        i18n(class="body-XS my-30" path="NN0623" tag="div")
-          template(#payment-method)
-            span(class="overline-LG") {{$t('NN0624')}}
-        div(class="card-popup-button")
-          btn(type="gray-mid" @click.native="closePopup()") {{$t('NN0203')}}
-          btn(type="red-mid" @click.native="deleteCard()") {{$t('NN0625')}}
+div(class="card")
+  img(:src="require(`@/assets/img/svg/card/${card.issuer}.svg`)")
+  span {{`**** ${card.last4}`}}
+  span {{`Expires ${card.date}`}}
+  svg-icon(v-if="canDelete" class="pointer" iconName="trash"
+          iconColor="gray-2" iconWidth="20px" @click.native="openPopup()")
+  div(v-if="showPopup" class="popup-window")
+    div(class="card-popup" v-click-outside="closePopup")
+      div(class="text-H6") {{$t('NN0622')}}
+      i18n(class="body-XS my-30" path="NN0623" tag="div")
+        template(#payment-method)
+          span(class="overline-LG") {{$t('NN0624')}}
+      div(class="card-popup-button")
+        btn(type="gray-mid" @click.native="closePopup()") {{$t('NN0203')}}
+        btn(type="red-mid" @click.native="deleteCard()") {{$t('NN0625')}}
 </template>
 
 <script lang="ts">

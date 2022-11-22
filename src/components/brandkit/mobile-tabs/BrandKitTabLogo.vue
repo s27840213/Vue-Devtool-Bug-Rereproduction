@@ -1,59 +1,59 @@
 <template lang="pug">
-  transition-group(v-else class="brand-kit-tab-logo" name="logo-list" tag="div")
-    template(v-for="logo in renderedLogos")
-      div(v-if="logo === 'add'"
-        class="brand-kit-tab-logo__item add pointer relative"
-        key="add"
-        @click="handleUploadLogo")
-        span(class="primary") {{ $t('NN0411') }}
-        i18n(class="secondary" path="NN0412" tag="span")
-          template(#newline)
-            br
-        svg-icon(class="hover"
-                iconName="plus-origin"
-                iconWidth="16px"
-                iconColor="gray-2")
-      div(v-else-if="logo === 'loading'"
-          class="brand-kit-tab-logo-loading no-trans"
-          key="loading")
-        svg-icon(iconName="loading"
-                iconWidth="50px"
-                iconColor="gray-3")
-      observer-sentinel(v-else-if="logo === 'sentinel'"
-                        class="no-trans"
-                        key="sentinel"
-                        :target="$route.name === 'Editor' ? '.popup-brand-settings__window' : undefined"
-                        @callback="handleLoadMore")
-      div(v-else
-        class="brand-kit-tab-logo__item relative"
-        :class="{hovered: checkMenuOpen(logo)}"
-        :key="logo.id.replace('new_', '')")
-        svg-icon(v-if="checkUploading(logo)" iconName="loading" iconWidth="24px" iconColor="gray-3")
-        img(v-else :src="getUrl(logo)" class="brand-kit-tab-logo__item__img")
-        div(v-if="!checkUploading(logo)" class="brand-kit-tab-logo__item__more pointer"
-          @click="handleOpenMenu(logo)")
-          div(class="brand-kit-tab-logo__item__more-container relative")
-            svg-icon(iconName="more_vertical"
-                    iconWidth="24px"
-                    iconColor="gray-2")
-            div(v-if="checkMenuOpen(logo)"
-              class="brand-kit-tab-logo__item__menu"
-              v-click-outside="() => { menuOpenLogoId = '' }")
-              div(class="brand-kit-tab-logo__item__menu__name")
-                span {{ logo.name }}
-              div(class="brand-kit-tab-logo__item__menu__hr")
-              div(class="brand-kit-tab-logo__item__menu__row pointer"
-                @click="handleDownload(logo)")
-                svg-icon(iconName="download"
-                        iconWidth="24px"
-                        iconColor="gray-2")
-                span {{ $t('NN0010') }}
-              div(class="brand-kit-tab-logo__item__menu__row pointer"
-                @click="handleDeleteLogo(logo)")
-                svg-icon(iconName="trash"
-                        iconWidth="24px"
-                        iconColor="gray-2")
-                span {{ $t('NN0034') }}
+transition-group(v-else class="brand-kit-tab-logo" name="logo-list" tag="div")
+  template(v-for="logo in renderedLogos")
+    div(v-if="logo === 'add'"
+      class="brand-kit-tab-logo__item add pointer relative"
+      key="add"
+      @click="handleUploadLogo")
+      span(class="primary") {{ $t('NN0411') }}
+      i18n(class="secondary" path="NN0412" tag="span")
+        template(#newline)
+          br
+      svg-icon(class="hover"
+              iconName="plus-origin"
+              iconWidth="16px"
+              iconColor="gray-2")
+    div(v-else-if="logo === 'loading'"
+        class="brand-kit-tab-logo-loading no-trans"
+        key="loading")
+      svg-icon(iconName="loading"
+              iconWidth="50px"
+              iconColor="gray-3")
+    observer-sentinel(v-else-if="logo === 'sentinel'"
+                      class="no-trans"
+                      key="sentinel"
+                      :target="$route.name === 'Editor' ? '.popup-brand-settings__window' : undefined"
+                      @callback="handleLoadMore")
+    div(v-else
+      class="brand-kit-tab-logo__item relative"
+      :class="{hovered: checkMenuOpen(logo)}"
+      :key="logo.id.replace('new_', '')")
+      svg-icon(v-if="checkUploading(logo)" iconName="loading" iconWidth="24px" iconColor="gray-3")
+      img(v-else :src="getUrl(logo)" class="brand-kit-tab-logo__item__img")
+      div(v-if="!checkUploading(logo)" class="brand-kit-tab-logo__item__more pointer"
+        @click="handleOpenMenu(logo)")
+        div(class="brand-kit-tab-logo__item__more-container relative")
+          svg-icon(iconName="more_vertical"
+                  iconWidth="24px"
+                  iconColor="gray-2")
+          div(v-if="checkMenuOpen(logo)"
+            class="brand-kit-tab-logo__item__menu"
+            v-click-outside="() => { menuOpenLogoId = '' }")
+            div(class="brand-kit-tab-logo__item__menu__name")
+              span {{ logo.name }}
+            div(class="brand-kit-tab-logo__item__menu__hr")
+            div(class="brand-kit-tab-logo__item__menu__row pointer"
+              @click="handleDownload(logo)")
+              svg-icon(iconName="download"
+                      iconWidth="24px"
+                      iconColor="gray-2")
+              span {{ $t('NN0010') }}
+            div(class="brand-kit-tab-logo__item__menu__row pointer"
+              @click="handleDeleteLogo(logo)")
+              svg-icon(iconName="trash"
+                      iconWidth="24px"
+                      iconColor="gray-2")
+              span {{ $t('NN0034') }}
 </template>
 
 <script lang="ts">

@@ -1,40 +1,40 @@
 <template lang="pug">
-  div(class="panel-objects")
-    //- Search bar
-    search-bar(class="mb-15"
-      :placeholder="$t('NN0092', {target: $tc('NN0003',1)})"
-      clear
-      :defaultKeyword="keywordLabel"
-      @search="handleSearch")
-    //- Admin tool
-    div(v-if="inAdminMode" class="panel-objects-2html")
-      input(type="text" placeholder="項目網址" v-model="panelParams")
-      btn(@click.native="downloadAll") Download all
-    //- Search result empty msg
-    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
-    //- Search result and main content
-    category-list(v-for="item in categoryListArray"
-                  v-show="item.show" :ref="item.key" :key="item.key"
-                  :list="item.content" @loadMore="handleLoadMore")
-      template(v-slot:category-list-rows="{ list, title }")
-        category-list-rows(
-          :list="list"
-          :title="title"
-          @action="handleCategorySearch")
-          template(v-slot:preview="{ item }")
-            category-object-item(class="panel-objects__item"
-              :item="item")
-      template(v-slot:category-object-item="{ list }")
-        div(class="panel-objects__items")
-          category-object-item(v-for="item in list"
-            class="panel-objects__item"
-            :key="item.id"
+div(class="panel-objects")
+  //- Search bar
+  search-bar(class="mb-15"
+    :placeholder="$t('NN0092', {target: $tc('NN0003',1)})"
+    clear
+    :defaultKeyword="keywordLabel"
+    @search="handleSearch")
+  //- Admin tool
+  div(v-if="inAdminMode" class="panel-objects-2html")
+    input(type="text" placeholder="項目網址" v-model="panelParams")
+    btn(@click.native="downloadAll") Download all
+  //- Search result empty msg
+  div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+  //- Search result and main content
+  category-list(v-for="item in categoryListArray"
+                v-show="item.show" :ref="item.key" :key="item.key"
+                :list="item.content" @loadMore="handleLoadMore")
+    template(v-slot:category-list-rows="{ list, title }")
+      category-list-rows(
+        :list="list"
+        :title="title"
+        @action="handleCategorySearch")
+        template(v-slot:preview="{ item }")
+          category-object-item(class="panel-objects__item"
             :item="item")
-      template(v-if="pending" #after)
-        div(class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
+    template(v-slot:category-object-item="{ list }")
+      div(class="panel-objects__items")
+        category-object-item(v-for="item in list"
+          class="panel-objects__item"
+          :key="item.id"
+          :item="item")
+    template(v-if="pending" #after)
+      div(class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
 </template>
 
 <script lang="ts">

@@ -1,80 +1,80 @@
 <template lang="pug">
-  div(class="panel-template" ref="panel")
-    div(v-if="showPrompt && !currentGroup"
-      class="panel-template__prompt body-2")
-      span {{$t('NN0247')}}
-      svg-icon(class="pl-5 pointer"
-        iconColor="gray-2"
-        iconName="close"
-        iconWidth="24px"
-        @click.native="handleClosePrompt")
-    //- Group template UI
-    panel-group-template(v-if="currentGroup"
-      :showId="inAdminMode"
-      :groupItem="currentGroup"
-      @close="currentGroup = null")
-    //- Search bar and themes
-    div
-      div(class="panel-template__search")
-        search-bar(class="mb-15"
-          :placeholder="$t('NN0092', {target: $tc('NN0001',1)})"
-          clear
-          :defaultKeyword="keywordLabel"
-          @search="handleSearch")
-          svg-icon(class="ml-5 pointer panel-template__advanced"
-            :class="{ 'panel-template__advanced--active': theme }"
-            iconName="advanced"
-            iconColor="gray-6"
-            iconWidth="20px"
-            @click.native="onAdvancedClicked()")
-        popup-theme(v-if="showTheme"
-          class="panel-template__theme"
-          :style="themeStyle()"
-          :preSelected="theme.split(',')"
-          @change="handleTheme"
-          @close="showTheme = false")
-      div(v-if="showTheme" class="panel-template__wrap")
-    //- Search result empty msg
-    div(v-if="theme && emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
-    //- Search result counter (only for admin)
-    div(v-if="inAdminMode && keyword && !pending && !emptyResultMessage"
-      class="text-white text-left pb-10")
-      span {{sum}} {{sum === 1 ? 'item' : 'items'}} in total (not work for category search)
-    //- Search result and main content
-    category-list(v-for="item in categoryListArray"
-                  v-show="item.show" :ref="item.key" :key="item.key"
-                  :list="item.content" @loadMore="handleLoadMore")
-      template(v-slot:category-list-rows="{ list, title }")
-        category-list-rows(:list="list" :title="title"
-          @action="handleCategorySearch")
-          template(v-slot:preview="{ item }")
-            component(class="panel-template__item"
-              :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
-              :showId="inAdminMode"
-              :item="item"
-              @click="handleShowGroup")
-      template(v-slot:category-template-item="{ list, title }")
-        div(v-if="title" class="panel-template__header") {{ title }}
-        div(class="panel-template__items")
-          component(v-for="item in list"
-            class="panel-template__item"
+div(class="panel-template" ref="panel")
+  div(v-if="showPrompt && !currentGroup"
+    class="panel-template__prompt body-2")
+    span {{$t('NN0247')}}
+    svg-icon(class="pl-5 pointer"
+      iconColor="gray-2"
+      iconName="close"
+      iconWidth="24px"
+      @click.native="handleClosePrompt")
+  //- Group template UI
+  panel-group-template(v-if="currentGroup"
+    :showId="inAdminMode"
+    :groupItem="currentGroup"
+    @close="currentGroup = null")
+  //- Search bar and themes
+  div
+    div(class="panel-template__search")
+      search-bar(class="mb-15"
+        :placeholder="$t('NN0092', {target: $tc('NN0001',1)})"
+        clear
+        :defaultKeyword="keywordLabel"
+        @search="handleSearch")
+        svg-icon(class="ml-5 pointer panel-template__advanced"
+          :class="{ 'panel-template__advanced--active': theme }"
+          iconName="advanced"
+          iconColor="gray-6"
+          iconWidth="20px"
+          @click.native="onAdvancedClicked()")
+      popup-theme(v-if="showTheme"
+        class="panel-template__theme"
+        :style="themeStyle()"
+        :preSelected="theme.split(',')"
+        @change="handleTheme"
+        @close="showTheme = false")
+    div(v-if="showTheme" class="panel-template__wrap")
+  //- Search result empty msg
+  div(v-if="theme && emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+  //- Search result counter (only for admin)
+  div(v-if="inAdminMode && keyword && !pending && !emptyResultMessage"
+    class="text-white text-left pb-10")
+    span {{sum}} {{sum === 1 ? 'item' : 'items'}} in total (not work for category search)
+  //- Search result and main content
+  category-list(v-for="item in categoryListArray"
+                v-show="item.show" :ref="item.key" :key="item.key"
+                :list="item.content" @loadMore="handleLoadMore")
+    template(v-slot:category-list-rows="{ list, title }")
+      category-list-rows(:list="list" :title="title"
+        @action="handleCategorySearch")
+        template(v-slot:preview="{ item }")
+          component(class="panel-template__item"
             :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
             :showId="inAdminMode"
             :item="item"
-            :key="item.group_id"
             @click="handleShowGroup")
-      template(#after)
-        //- Loading icon
-        div(v-if="!theme || pending" class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
-        //- Search result too few msg
-        div(v-if="keyword && theme && !pending && resultGroupCounter<=3 && !allThemesChecked"
-            class="text-white text-left")
-          span {{resultTooFew[0]}}
-          span(class="set-all-templatebtn-btn pointer" @click="setAllTemplate") {{resultTooFew[1]}}
-          span {{resultTooFew[2]}}
+    template(v-slot:category-template-item="{ list, title }")
+      div(v-if="title" class="panel-template__header") {{ title }}
+      div(class="panel-template__items")
+        component(v-for="item in list"
+          class="panel-template__item"
+          :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
+          :showId="inAdminMode"
+          :item="item"
+          :key="item.group_id"
+          @click="handleShowGroup")
+    template(#after)
+      //- Loading icon
+      div(v-if="!theme || pending" class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
+      //- Search result too few msg
+      div(v-if="keyword && theme && !pending && resultGroupCounter<=3 && !allThemesChecked"
+          class="text-white text-left")
+        span {{resultTooFew[0]}}
+        span(class="set-all-templatebtn-btn pointer" @click="setAllTemplate") {{resultTooFew[1]}}
+        span {{resultTooFew[2]}}
 </template>
 
 <script lang="ts">

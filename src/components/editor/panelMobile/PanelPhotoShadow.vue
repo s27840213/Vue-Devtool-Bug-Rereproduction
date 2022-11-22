@@ -1,34 +1,34 @@
 <template lang="pug">
-  div(class="panel-shadow")
-    div(class="flex-between photo-shadow__options mb-10")
-      div(v-for="icon in shadowOptions")
-        svg-icon(
-          :key="`shadow-${icon}`"
-          :iconName="`mobile-photo-shadow-${icon}`"
-          @click.native="onEffectClick(icon)"
-          class="photo-shadow__options__option pointer"
-          :class="{ 'photo-shadow__options__option--selected': currentEffect === icon }"
-          iconWidth="60px"
-          iconColor="gray-2")
-        div(class="photo-shadow__options__option-font") {{$t(shadowPropI18nMap[icon]._effectName)}}
-    div(class="photo-shadow__attrs" :style="shadowAttrsStyles")
-      div(v-for="field in shadowFields" :key="field")
-        mobile-slider(:title="`${$t(shadowPropI18nMap[currentEffect][field])}`"
-          :borderTouchArea="true"
-          :name="field"
-          :value="getFieldValue(field)"
-          :max="fieldRange[currentEffect][field].max"
-          :min="fieldRange[currentEffect][field].min"
-          @update="handleEffectUpdate")
-      div(v-if="!['none', 'imageMatched'].includes(currentEffect)" class="photo-shadow__row-wrapper")
-        div(class="photo-shadow__row")
-          div(class="photo-shadow__color-name text-gray-3 body-2 no-wrap") {{$t('NN0017')}}
-          div(class="photo-shadow__color"
-            :style="{ backgroundColor: currentStyle.shadow.effects.color || '#000000' }"
-            @click="handleColorModal")
-      div(v-if="currentEffect !== 'none'" class="photo-shadow__row-wrapper")
-        div(class="photo-shadow__reset")
-          button(@click="imageShadowPanelUtils.reset()") {{ 'Reset' }}
+div(class="panel-shadow")
+  div(class="flex-between photo-shadow__options mb-10")
+    div(v-for="icon in shadowOptions")
+      svg-icon(
+        :key="`shadow-${icon}`"
+        :iconName="`mobile-photo-shadow-${icon}`"
+        @click.native="onEffectClick(icon)"
+        class="photo-shadow__options__option pointer"
+        :class="{ 'photo-shadow__options__option--selected': currentEffect === icon }"
+        iconWidth="60px"
+        iconColor="gray-2")
+      div(class="photo-shadow__options__option-font") {{$t(shadowPropI18nMap[icon]._effectName)}}
+  div(class="photo-shadow__attrs" :style="shadowAttrsStyles")
+    div(v-for="field in shadowFields" :key="field")
+      mobile-slider(:title="`${$t(shadowPropI18nMap[currentEffect][field])}`"
+        :borderTouchArea="true"
+        :name="field"
+        :value="getFieldValue(field)"
+        :max="fieldRange[currentEffect][field].max"
+        :min="fieldRange[currentEffect][field].min"
+        @update="handleEffectUpdate")
+    div(v-if="!['none', 'imageMatched'].includes(currentEffect)" class="photo-shadow__row-wrapper")
+      div(class="photo-shadow__row")
+        div(class="photo-shadow__color-name text-gray-3 body-2 no-wrap") {{$t('NN0017')}}
+        div(class="photo-shadow__color"
+          :style="{ backgroundColor: currentStyle.shadow.effects.color || '#000000' }"
+          @click="handleColorModal")
+    div(v-if="currentEffect !== 'none'" class="photo-shadow__row-wrapper")
+      div(class="photo-shadow__reset")
+        button(@click="imageShadowPanelUtils.reset()") {{ 'Reset' }}
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'

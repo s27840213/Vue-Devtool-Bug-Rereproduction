@@ -1,16 +1,16 @@
 <template lang="pug">
-  div(class="all-design-view")
-    disk-warning(class="warning" size="small")
-    div(class="all-design-view__toolbar")
-      div(class="all-design-view__folder-name") {{$t('NN0187')}}
-      btn-new-design
-    div(class="horizontal-rule")
-    design-gallery(:noHeader="true"
-                  :menuItems="menuItems"
-                  :allDesigns="allDesigns"
-                  :selectedNum="selectedNum"
-                  @menuAction="handleDesignMenuAction"
-                  @loadMore="handleLoadMore")
+div(class="all-design-view")
+  disk-warning(class="warning" size="small")
+  div(class="all-design-view__toolbar")
+    div(class="all-design-view__folder-name") {{$t('NN0187')}}
+    btn-new-design
+  div(class="horizontal-rule")
+  design-gallery(:noHeader="true"
+                :menuItems="menuItems"
+                :allDesigns="allDesigns"
+                :selectedNum="selectedNum"
+                @menuAction="handleDesignMenuAction"
+                @loadMore="handleLoadMore")
 </template>
 
 <script lang="ts">

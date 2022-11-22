@@ -1,67 +1,67 @@
 <template lang="pug">
-  div(class="page-size-selector")
-    div(class="page-size-selector__body-row first-row")
-      span(class="page-size-selector__body__title subtitle-2"
-        :class="defaultTextColor") {{$t('NN0023')}}
-    div(class="page-size-selector__body-row")
-      radio-btn(class="page-size-selector__body__radio"
-                :isSelected="selectedFormat === 'custom'",
-                :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                formatKey="custom",
-                @select="selectFormat")
-      div(class="page-size-selector__body__custom")
-        property-bar(class="page-size-selector__body__custom__box"
-                    :class="selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`")
-          input(class="body-3" type="number" min="0"
-                :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
-                :value="pageWidth" @input="setPageWidth" @click="selectFormat('custom')")
-          span(class="body-4"
-              :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") W
-        svg-icon(class="pointer"
-            :iconName="isLocked ? 'lock' : 'unlock'"
-            iconWidth="15px" :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'blue'"
-            @click.native="toggleLock()")
-        property-bar(class="page-size-selector__body__custom__box"
-                    :class="selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`")
-          input(class="body-3" type="number" min="0"
-                :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
-                :value="pageHeight" @input="setPageHeight" @click="selectFormat('custom')")
-          span(class="body-4"
-              :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") H
-    div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
-    div(class="page-size-selector__container")
-        div(class="page-size-selector__body-row first-row")
-          span(class="page-size-selector__body__title subtitle-2"
-            :class="defaultTextColor") {{$t('NN0024')}}
-        div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
-          svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
-        div(v-for="(format, index) in recentlyUsed" class="page-size-selector__body-row pointer"
-            @click="selectFormat(`recent-${index}`)")
-          radio-btn(class="page-size-selector__body__radio"
-                    :isSelected="selectedFormat === `recent-${index}`",
-                    :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                    :formatKey="`recent-${index}`",
-                    @select="selectFormat")
-          span(class="page-size-selector__body__recently body-3 pointer"
-                :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor"
-                @click="selectFormat(`recent-${index}`)") {{ makeFormatString(format) }}
-        div(class="mt-10")
-        div(class="page-size-selector__body-row first-row")
-          span(class="page-size-selector__body__title subtitle-2"
-           :class="defaultTextColor") {{$t('NN0025')}}
-        div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
-          svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
-        div(v-for="(format, index) in formatList" class="page-size-selector__body-row pointer"
-            @click="selectFormat(`preset-${index}`)")
-          radio-btn(class="page-size-selector__body__radio"
-                    :isSelected="selectedFormat === `preset-${index}`",
-                    :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                    :formatKey="`preset-${index}`",
-                    @select="selectFormat")
-          span(class="page-size-selector__body__typical-name body-4"
-                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
-          span(class="page-size-selector__body__typical-size body-4"
-                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.description }}
+div(class="page-size-selector")
+  div(class="page-size-selector__body-row first-row")
+    span(class="page-size-selector__body__title subtitle-2"
+      :class="defaultTextColor") {{$t('NN0023')}}
+  div(class="page-size-selector__body-row")
+    radio-btn(class="page-size-selector__body__radio"
+              :isSelected="selectedFormat === 'custom'",
+              :circleColor="isDarkTheme ? 'white' : 'gray-2'"
+              formatKey="custom",
+              @select="selectFormat")
+    div(class="page-size-selector__body__custom")
+      property-bar(class="page-size-selector__body__custom__box"
+                  :class="selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`")
+        input(class="body-3" type="number" min="0"
+              :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
+              :value="pageWidth" @input="setPageWidth" @click="selectFormat('custom')")
+        span(class="body-4"
+            :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") W
+      svg-icon(class="pointer"
+          :iconName="isLocked ? 'lock' : 'unlock'"
+          iconWidth="15px" :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'blue'"
+          @click.native="toggleLock()")
+      property-bar(class="page-size-selector__body__custom__box"
+                  :class="selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`")
+        input(class="body-3" type="number" min="0"
+              :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
+              :value="pageHeight" @input="setPageHeight" @click="selectFormat('custom')")
+        span(class="body-4"
+            :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") H
+  div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
+  div(class="page-size-selector__container")
+      div(class="page-size-selector__body-row first-row")
+        span(class="page-size-selector__body__title subtitle-2"
+          :class="defaultTextColor") {{$t('NN0024')}}
+      div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
+        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
+      div(v-for="(format, index) in recentlyUsed" class="page-size-selector__body-row pointer"
+          @click="selectFormat(`recent-${index}`)")
+        radio-btn(class="page-size-selector__body__radio"
+                  :isSelected="selectedFormat === `recent-${index}`",
+                  :circleColor="isDarkTheme ? 'white' : 'gray-2'"
+                  :formatKey="`recent-${index}`",
+                  @select="selectFormat")
+        span(class="page-size-selector__body__recently body-3 pointer"
+              :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor"
+              @click="selectFormat(`recent-${index}`)") {{ makeFormatString(format) }}
+      div(class="mt-10")
+      div(class="page-size-selector__body-row first-row")
+        span(class="page-size-selector__body__title subtitle-2"
+         :class="defaultTextColor") {{$t('NN0025')}}
+      div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
+        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
+      div(v-for="(format, index) in formatList" class="page-size-selector__body-row pointer"
+          @click="selectFormat(`preset-${index}`)")
+        radio-btn(class="page-size-selector__body__radio"
+                  :isSelected="selectedFormat === `preset-${index}`",
+                  :circleColor="isDarkTheme ? 'white' : 'gray-2'"
+                  :formatKey="`preset-${index}`",
+                  @select="selectFormat")
+        span(class="page-size-selector__body__typical-name body-4"
+              :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
+        span(class="page-size-selector__body__typical-size body-4"
+              :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.description }}
 </template>
 
 <script lang="ts">

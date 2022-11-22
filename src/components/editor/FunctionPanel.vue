@@ -1,45 +1,45 @@
 <template lang="pug">
-  div(class="function-panel"
-    :style="functionPanelStyles")
-    //- span {{pageUtils._3dEnabledPageIndex}},
-    //- span {{pageUtils.currFocusPageIndex}},
-    //- span {{pageUtils._3dEnabledPageIndex === pageUtils.currFocusPageIndex}}
-    div(class="function-panel__topbar")
-      svg-icon(:class="{'pointer': !isInFirstStep}"
-        :iconName="'undo'"
-        :iconWidth="'20px'"
-        :iconColor="(!inBgRemoveMode && !isInFirstStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveFirstStep) ? 'gray-2' : 'gray-4'"
-        @click.native="undo"
-        v-hint="$t('NN0119')"
-      )
-      svg-icon(:class="{'pointer': !isInLastStep}"
-        :iconName="'redo'"
-        :iconWidth="'20px'"
-        :iconColor="(!inBgRemoveMode && !isInLastStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveLastStep) ? 'gray-2' : 'gray-4'"
-        @click.native="redo"
-        v-hint="$t('NN0120')")
-      download-btn
-      btn(:hasIcon="true"
-        :iconName="'menu'"
-        :iconWidth="'25px'"
-        :type="!inBgRemoveMode  ? 'primary-sm' : 'inactive-sm'"
-        :disabled="inBgRemoveMode"
-        :squared="true"
-        class="btn-file rounded full-height"
-        @click.native="openFilePopup")
-    div(v-if="!isShowPagePreview"
-        class="function-panel__content"
-        :class="{'dim-background': showMore}")
-      panel-bg-remove(v-if="showBgRemove")
-      panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
-      panel-general(v-if="showGeneral")
-      panel-page-setting(v-if="showPageSetting")
-      panel-background-setting(v-if="showPageSetting" v-on="$listeners")
-      panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel" v-on="$listeners")
-      panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
-      panel-photo-setting(v-if="showPhotoSetting" v-on="$listeners")
-      panel-shape-setting(v-if="showShapeSetting" v-on="$listeners")
-      panel-img-ctrl(v-if="isImgCtrl" v-on="$listeners")
+div(class="function-panel"
+  :style="functionPanelStyles")
+  //- span {{pageUtils._3dEnabledPageIndex}},
+  //- span {{pageUtils.currFocusPageIndex}},
+  //- span {{pageUtils._3dEnabledPageIndex === pageUtils.currFocusPageIndex}}
+  div(class="function-panel__topbar")
+    svg-icon(:class="{'pointer': !isInFirstStep}"
+      :iconName="'undo'"
+      :iconWidth="'20px'"
+      :iconColor="(!inBgRemoveMode && !isInFirstStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveFirstStep) ? 'gray-2' : 'gray-4'"
+      @click.native="undo"
+      v-hint="$t('NN0119')"
+    )
+    svg-icon(:class="{'pointer': !isInLastStep}"
+      :iconName="'redo'"
+      :iconWidth="'20px'"
+      :iconColor="(!inBgRemoveMode && !isInLastStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveLastStep) ? 'gray-2' : 'gray-4'"
+      @click.native="redo"
+      v-hint="$t('NN0120')")
+    download-btn
+    btn(:hasIcon="true"
+      :iconName="'menu'"
+      :iconWidth="'25px'"
+      :type="!inBgRemoveMode  ? 'primary-sm' : 'inactive-sm'"
+      :disabled="inBgRemoveMode"
+      :squared="true"
+      class="btn-file rounded full-height"
+      @click.native="openFilePopup")
+  div(v-if="!isShowPagePreview"
+      class="function-panel__content"
+      :class="{'dim-background': showMore}")
+    panel-bg-remove(v-if="showBgRemove")
+    panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
+    panel-general(v-if="showGeneral")
+    panel-page-setting(v-if="showPageSetting")
+    panel-background-setting(v-if="showPageSetting" v-on="$listeners")
+    panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel" v-on="$listeners")
+    panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
+    panel-photo-setting(v-if="showPhotoSetting" v-on="$listeners")
+    panel-shape-setting(v-if="showShapeSetting" v-on="$listeners")
+    panel-img-ctrl(v-if="isImgCtrl" v-on="$listeners")
 </template>
 
 <script lang="ts">

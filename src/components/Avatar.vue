@@ -1,7 +1,7 @@
 <template lang="pug">
-  div(class="avatar" :style="avatarStyle()")
-    span(v-if="!hasAvatar"
-      class="avatar__shortname text-white") {{shortName}}
+div(class="avatar" :style="avatarStyle()")
+  span(v-if="!hasAvatar"
+    class="avatar__shortname text-white") {{shortName}}
 </template>
 
 <script lang="ts">

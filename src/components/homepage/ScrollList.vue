@@ -1,59 +1,59 @@
 <template lang="pug">
-  div(class="list")
-    div(class="list-title text-H5")
-      span(class="list-title__text text-gray-1") {{title}}
-      router-link(v-if="type !== 'theme'"
-        class="list-title__more body-MD text-gray-2"
-        :to="moreLink")
-        span {{$t('NN0082')}}
-    div(class="list-content" :style="listContentSytle")
-      div(v-if="prevIcon"
-        class="list-content__lefticon"
-        @click="scroll(false)")
-        svg-icon(iconName="chevron-left"
-          iconWidth="25px"
+div(class="list")
+  div(class="list-title text-H5")
+    span(class="list-title__text text-gray-1") {{title}}
+    router-link(v-if="type !== 'theme'"
+      class="list-title__more body-MD text-gray-2"
+      :to="moreLink")
+      span {{$t('NN0082')}}
+  div(class="list-content" :style="listContentSytle")
+    div(v-if="prevIcon"
+      class="list-content__lefticon"
+      @click="scroll(false)")
+      svg-icon(iconName="chevron-left"
+        iconWidth="25px"
+        iconColor="gray-3")
+    div(v-if="nextIcon"
+      class="list-content__righticon"
+      @click="scroll(true)")
+      svg-icon(iconName="chevron-right"
+        iconWidth="25px"
+        iconColor="gray-3")
+    div(class="list-content-items"
+      @scroll.passive="updateIcon"
+      ref="items")
+      div(v-if="isLoading")
+        svg-icon(iconName="loading"
+          iconWidth="50px"
           iconColor="gray-3")
-      div(v-if="nextIcon"
-        class="list-content__righticon"
-        @click="scroll(true)")
-        svg-icon(iconName="chevron-right"
-          iconWidth="25px"
-          iconColor="gray-3")
-      div(class="list-content-items"
-        @scroll.passive="updateIcon"
-        ref="items")
-        div(v-if="isLoading")
-          svg-icon(iconName="loading"
-            iconWidth="50px"
-            iconColor="gray-3")
-        //- type theme
-        template(v-else-if="type === 'theme'")
-          div(class="list-content-items__theme-item")
-            img(class="list-content-items__theme-item-new pointer"
-              :src="require('@/assets/img/svg/plus-origin.svg')"
-              @click="$emit('openSizePopup')")
-            span(class="body-XS text-gray-1") {{$t('NN0023')}}
-          div(v-for="item in themeData"
-            class="list-content-items__theme-item")
-            router-link(:to="`/editor?type=new-design-size&themeId=${item.id}&width=${item.width}&height=${item.height}`")
-              img(class="list-content-items__theme-item-preset"
-                :src="item.url"
-                @error="imgOnerror")
-            span(class="body-XS text-gray-1") {{item.title}}
-            span(class="body-XXS text-gray-3") {{item.description}}
-        //- type mydesign
-        template(v-else-if="type === 'mydesign'")
-          design-item(v-for="item in mydesignData"
-            class="list-content-items__mydesign-item"
-            :config="item")
-        //- type template
-        template(v-else-if="type === 'template'")
-          div(v-for="item in templateData" class="list-content-items__template-item"
-              @click="clickTemplate(item)")
-            img(loading="lazy"
-              :src="`https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`"
-              :style="templateImgStyle(item.match_cover)")
-            pro-item(v-if="item.plan === 1")
+      //- type theme
+      template(v-else-if="type === 'theme'")
+        div(class="list-content-items__theme-item")
+          img(class="list-content-items__theme-item-new pointer"
+            :src="require('@/assets/img/svg/plus-origin.svg')"
+            @click="$emit('openSizePopup')")
+          span(class="body-XS text-gray-1") {{$t('NN0023')}}
+        div(v-for="item in themeData"
+          class="list-content-items__theme-item")
+          router-link(:to="`/editor?type=new-design-size&themeId=${item.id}&width=${item.width}&height=${item.height}`")
+            img(class="list-content-items__theme-item-preset"
+              :src="item.url"
+              @error="imgOnerror")
+          span(class="body-XS text-gray-1") {{item.title}}
+          span(class="body-XXS text-gray-3") {{item.description}}
+      //- type mydesign
+      template(v-else-if="type === 'mydesign'")
+        design-item(v-for="item in mydesignData"
+          class="list-content-items__mydesign-item"
+          :config="item")
+      //- type template
+      template(v-else-if="type === 'template'")
+        div(v-for="item in templateData" class="list-content-items__template-item"
+            @click="clickTemplate(item)")
+          img(loading="lazy"
+            :src="`https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`"
+            :style="templateImgStyle(item.match_cover)")
+          pro-item(v-if="item.plan === 1")
 </template>
 
 <script lang="ts">

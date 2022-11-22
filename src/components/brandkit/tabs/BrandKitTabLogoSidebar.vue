@@ -1,30 +1,30 @@
 <template lang="pug">
-  div(v-if="logos.length === 0 && !isLogosLoading" class="hint")
-    no-items-hint(type="logo")
-  div(v-else class="brand-kit-tab-logo")
-    recycle-scroller(class="brand-kit-tab-logo__content" :items="rows")
-      template(v-slot="{ item }")
-        observer-sentinel(v-if="item.sentinel"
-          target=".brand-kit-tab-logo"
-          @callback="handleLoadMore(item)")
-        div(class="brand-kit-tab-logo__row")
-          template(v-for="logo in item.list")
-            div(v-if="checkUploading(logo)"
-              class="brand-kit-tab-logo__item pointer relative"
-              :style="imageStyle(logo.preview)"
-              :key="logo.id")
-              svg-icon(iconName="loading" iconWidth="24px" iconColor="gray-3")
-            gallery-photo(v-else
-              :style="imageStyle(logo.preview)"
-              :photo="addPerviewUrl(item.brandId, logo)"
-              vendor="logo"
-              :inLogoPanel="true"
-              :key="logo.id")
-      template(#after)
-        div(v-if="isLogosLoading" class="brand-kit-tab-logo-loading")
-          svg-icon(iconName="loading"
-                  iconWidth="24px"
-                  iconColor="gray-3")
+div(v-if="logos.length === 0 && !isLogosLoading" class="hint")
+  no-items-hint(type="logo")
+div(v-else class="brand-kit-tab-logo")
+  recycle-scroller(class="brand-kit-tab-logo__content" :items="rows")
+    template(v-slot="{ item }")
+      observer-sentinel(v-if="item.sentinel"
+        target=".brand-kit-tab-logo"
+        @callback="handleLoadMore(item)")
+      div(class="brand-kit-tab-logo__row")
+        template(v-for="logo in item.list")
+          div(v-if="checkUploading(logo)"
+            class="brand-kit-tab-logo__item pointer relative"
+            :style="imageStyle(logo.preview)"
+            :key="logo.id")
+            svg-icon(iconName="loading" iconWidth="24px" iconColor="gray-3")
+          gallery-photo(v-else
+            :style="imageStyle(logo.preview)"
+            :photo="addPerviewUrl(item.brandId, logo)"
+            vendor="logo"
+            :inLogoPanel="true"
+            :key="logo.id")
+    template(#after)
+      div(v-if="isLogosLoading" class="brand-kit-tab-logo-loading")
+        svg-icon(iconName="loading"
+                iconWidth="24px"
+                iconColor="gray-3")
 </template>
 
 <script lang="ts">

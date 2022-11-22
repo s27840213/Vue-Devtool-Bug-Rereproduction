@@ -1,14 +1,14 @@
 <template lang="pug">
-  div(class="mobile-trash-design-view")
-    mobile-folder-gallery(:path="[]"
-                          :allFolders="allFolders"
-                          :selectedNum="selectedNum")
-    div(v-if="isFolderDesignDivisionNeeded" class="mobile-trash-design-view__hr")
-    mobile-design-gallery(:allDesigns="allDesigns"
-                          :selectedNum="selectedNum"
-                          :limitFunctions="true"
-                          @loadMore="handleLoadMore")
-    div(class="scroll-space")
+div(class="mobile-trash-design-view")
+  mobile-folder-gallery(:path="[]"
+                        :allFolders="allFolders"
+                        :selectedNum="selectedNum")
+  div(v-if="isFolderDesignDivisionNeeded" class="mobile-trash-design-view__hr")
+  mobile-design-gallery(:allDesigns="allDesigns"
+                        :selectedNum="selectedNum"
+                        :limitFunctions="true"
+                        @loadMore="handleLoadMore")
+  div(class="scroll-space")
 </template>
 
 <script lang="ts">

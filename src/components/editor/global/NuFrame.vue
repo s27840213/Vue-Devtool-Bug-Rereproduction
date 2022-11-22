@@ -1,21 +1,21 @@
 <template lang="pug">
-  div(class="nu-frame"
-      :style="styles()")
-    div(v-if="shadowSrc()" class="shadow__wrapper" :style="shadowWrapperStyles")
-      img(class="shadow__img"
-        draggable="false"
-        :src="shadowSrc()")
-    nu-layer(v-for="(layer,index) in layers"
-      :key="`layer-${index}`"
-      :pageIndex="pageIndex"
-      :layerIndex="layerIndex"
-      :isFrame="true"
-      :inImageFrame="inImageFrame()"
-      :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
-      :contentScaleRatio="contentScaleRatio"
-      :primaryLayer="config"
-      :config="layer"
-      :isSubLayer="true")
+div(class="nu-frame"
+    :style="styles()")
+  div(v-if="shadowSrc()" class="shadow__wrapper" :style="shadowWrapperStyles")
+    img(class="shadow__img"
+      draggable="false"
+      :src="shadowSrc()")
+  nu-layer(v-for="(layer,index) in layers"
+    :key="`layer-${index}`"
+    :pageIndex="pageIndex"
+    :layerIndex="layerIndex"
+    :isFrame="true"
+    :inImageFrame="inImageFrame()"
+    :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
+    :contentScaleRatio="contentScaleRatio"
+    :primaryLayer="config"
+    :config="layer"
+    :isSubLayer="true")
 </template>
 
 <script lang="ts">

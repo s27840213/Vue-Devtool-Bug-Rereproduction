@@ -1,29 +1,29 @@
 <template lang="pug">
-  div(class="sidebar")
-    div(class="logo")
-      router-link(to="/"
-        style="height: 30px;"
-        :style="inBgRemoveMode ? {pointerEvents: 'none'} : {}")
-        svg-icon(class="pointer"
-          :iconName="'logo-icon'"
-          :iconWidth="'30px'")
-    div(class="nav")
-      div(class="nav-container")
-        div(class="nav-item pointer"
-          v-for="(item,index) in navItem" :key="`icon-${index}`"
-          @click="switchNav(index)")
-          svg-icon(class="nav-item__icon"
-            :iconName="item.icon"
-            :iconColor="(currPanel === index && !inBgRemoveMode) ? 'blue-1' : 'gray-3'"
-            :iconWidth="'24px'")
-          div(class="nav-item__text body-3"
-            :class="[(currPanel === index && !inBgRemoveMode) ? 'text-blue-1' : 'text-gray-3', $i18n.locale]") {{item.text}}
-    div(class="sidebar__chevron pointer"
-        :class="[{'rotate-hr': isSidebarPanelOpen}]"
-        @click="toggleSidebarPanel")
-      svg-icon(:iconName="'chevron-duo-right'"
-        :iconColor="'gray-3'"
+div(class="sidebar")
+  div(class="logo")
+    router-link(to="/"
+      style="height: 30px;"
+      :style="inBgRemoveMode ? {pointerEvents: 'none'} : {}")
+      svg-icon(class="pointer"
+        :iconName="'logo-icon'"
         :iconWidth="'30px'")
+  div(class="nav")
+    div(class="nav-container")
+      div(class="nav-item pointer"
+        v-for="(item,index) in navItem" :key="`icon-${index}`"
+        @click="switchNav(index)")
+        svg-icon(class="nav-item__icon"
+          :iconName="item.icon"
+          :iconColor="(currPanel === index && !inBgRemoveMode) ? 'blue-1' : 'gray-3'"
+          :iconWidth="'24px'")
+        div(class="nav-item__text body-3"
+          :class="[(currPanel === index && !inBgRemoveMode) ? 'text-blue-1' : 'text-gray-3', $i18n.locale]") {{item.text}}
+  div(class="sidebar__chevron pointer"
+      :class="[{'rotate-hr': isSidebarPanelOpen}]"
+      @click="toggleSidebarPanel")
+    svg-icon(:iconName="'chevron-duo-right'"
+      :iconColor="'gray-3'"
+      :iconWidth="'30px'")
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'

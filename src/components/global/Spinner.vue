@@ -1,8 +1,8 @@
 <template lang="pug">
-  div(class="spinner popup-window")
-    div
-      img(:src="require('@/assets/img/gif/rocket-loading.gif')")
-      span {{textContent}}...
+div(class="spinner popup-window")
+  div
+    img(:src="require('@/assets/img/gif/rocket-loading.gif')")
+    span {{textContent}}...
 </template>
 
 <script lang="ts">

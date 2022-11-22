@@ -1,69 +1,69 @@
 <template lang="pug">
-  div(class="folder-item")
-    div(class="folder-item__block"
-        :class="isMouseOver ? 'block-over' : 'block'"
-        :style="{'cursor' : isTempFolder ? 'not-allowed' : ''}"
-        :draggable="!undraggable && !isTempFolder"
-        @dragstart="handleDragStart"
-        @drag="handleDragging"
-        @dragend="handleDragEnd"
-        v-on="undroppable || isTempFolder ? {} : { dragenter: handleDragEnter, dragleave: handleDragLeave }"
-        @mouseenter="handleMouseEnter"
-        @mouseleave="handleMouseLeave"
-        @dragover.prevent
-        @drop="handleDrop"
-        @click="emitGoto")
-      svg-icon(style="pointer-events: none"
+div(class="folder-item")
+  div(class="folder-item__block"
+      :class="isMouseOver ? 'block-over' : 'block'"
+      :style="{'cursor' : isTempFolder ? 'not-allowed' : ''}"
+      :draggable="!undraggable && !isTempFolder"
+      @dragstart="handleDragStart"
+      @drag="handleDragging"
+      @dragend="handleDragEnd"
+      v-on="undroppable || isTempFolder ? {} : { dragenter: handleDragEnter, dragleave: handleDragLeave }"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
+      @dragover.prevent
+      @drop="handleDrop"
+      @click="emitGoto")
+    svg-icon(style="pointer-events: none"
+            iconName="folder"
+            iconWidth="24px"
+            iconColor="gray-2")
+    div(class="folder-item__controller")
+      div(class="folder-item__controller-content")
+        div(v-if="isSelected"
+          class="folder-item__checkbox-checked"
+          @click.stop="emitDeselect")
+          svg-icon(iconName="done"
+                  iconWidth="10px"
+                  iconHeight="8px"
+                  iconColor="white")
+        div(v-if="menuItems.length > 0 && !isSelected && (isMouseOver || isAnySelected)"
+          class="folder-item__checkbox"
+          @click.stop="emitSelect")
+        div(v-if="menuItems.length > 0 && isMouseOver"
+          class="folder-item__more"
+          @click.stop="toggleMenu()")
+          svg-icon(iconName="more_vertical"
+                  iconWidth="24px"
+                  iconColor="gray-2")
+        div(v-if="menuItems.length > 0 && isMenuOpen && isMouseOver"
+            class="folder-item__menu"
+            v-click-outside="closeMenu")
+          slot(v-for="(dummy, index) in menuItems" :name="`i${index}`") {{ index }}
+  div(ref="nameblock"
+      class="folder-item__name"
+      :folderid="config.id"
+      v-click-outside="() => { isNameEditing && handleNameEditEnd() }")
+    input(ref="name"
+          v-if="isNameEditing"
+          v-model="editableName"
+          @change="handleNameEditEnd"
+          @keyup="checkNameEnter")
+    span(v-else
+        :title="config.name"
+        @dblclick="handleNameEditStart"
+        @click.right.stop.prevent="handleNameEditStart") {{ config.name }}
+  transition(name="fade")
+    div(v-if="isShowHint" class="folder-item__name-hint" :style="hintStyles()")
+      span {{$t('NN0226')}}
+  div(class="dragged-folder" :style="draggedFolderStyles()")
+    div
+      div(class="dragged-folder__icon")
+        svg-icon(style="pointer-events: none"
               iconName="folder"
               iconWidth="24px"
               iconColor="gray-2")
-      div(class="folder-item__controller")
-        div(class="folder-item__controller-content")
-          div(v-if="isSelected"
-            class="folder-item__checkbox-checked"
-            @click.stop="emitDeselect")
-            svg-icon(iconName="done"
-                    iconWidth="10px"
-                    iconHeight="8px"
-                    iconColor="white")
-          div(v-if="menuItems.length > 0 && !isSelected && (isMouseOver || isAnySelected)"
-            class="folder-item__checkbox"
-            @click.stop="emitSelect")
-          div(v-if="menuItems.length > 0 && isMouseOver"
-            class="folder-item__more"
-            @click.stop="toggleMenu()")
-            svg-icon(iconName="more_vertical"
-                    iconWidth="24px"
-                    iconColor="gray-2")
-          div(v-if="menuItems.length > 0 && isMenuOpen && isMouseOver"
-              class="folder-item__menu"
-              v-click-outside="closeMenu")
-            slot(v-for="(dummy, index) in menuItems" :name="`i${index}`") {{ index }}
-    div(ref="nameblock"
-        class="folder-item__name"
-        :folderid="config.id"
-        v-click-outside="() => { isNameEditing && handleNameEditEnd() }")
-      input(ref="name"
-            v-if="isNameEditing"
-            v-model="editableName"
-            @change="handleNameEditEnd"
-            @keyup="checkNameEnter")
-      span(v-else
-          :title="config.name"
-          @dblclick="handleNameEditStart"
-          @click.right.stop.prevent="handleNameEditStart") {{ config.name }}
-    transition(name="fade")
-      div(v-if="isShowHint" class="folder-item__name-hint" :style="hintStyles()")
-        span {{$t('NN0226')}}
-    div(class="dragged-folder" :style="draggedFolderStyles()")
-      div
-        div(class="dragged-folder__icon")
-          svg-icon(style="pointer-events: none"
-                iconName="folder"
-                iconWidth="24px"
-                iconColor="gray-2")
-        div(class="dragged-folder__name")
-          span {{ config.name }}
+      div(class="dragged-folder__name")
+        span {{ config.name }}
 </template>
 
 <script lang="ts">

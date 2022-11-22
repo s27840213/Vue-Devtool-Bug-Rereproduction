@@ -1,11 +1,11 @@
 <template lang="pug">
-  div(class="image-carousel")
-    div(class="image-carousel__overflow")
-      transition-group(tag="div" class="image-carousel__inner" leave-active-class="image-carousel__item--active")
-        div(v-for="(url, idx) in range"
-          :key="`${current}_${idx}_${url}`"
-          class="image-carousel__item")
-          slot(:url="url")
+div(class="image-carousel")
+  div(class="image-carousel__overflow")
+    transition-group(tag="div" class="image-carousel__inner" leave-active-class="image-carousel__item--active")
+      div(v-for="(url, idx) in range"
+        :key="`${current}_${idx}_${url}`"
+        class="image-carousel__item")
+        slot(:url="url")
 </template>
 
 <script lang="ts">

@@ -1,55 +1,55 @@
 <template lang="pug">
-  div(class="brand-kit relative"
-    @dragover.prevent.stop="handleDragEnter"
-    @dragenter.prevent.stop="handleDragEnter"
-    @dragleave.prevent.stop="handleDragLeave"
-    @drop.prevent.stop="handleDrop")
-    nu-header(v-header-border)
-    section(class="brand-kit__scroll")
-      div(v-if="isBrandsLoading" class="brand-kit__main")
-        svg-icon(iconName="loading"
-                iconWidth="50px"
-                iconColor="gray-3")
-      div(v-else class="brand-kit__main")
-        div(class="brand-kit__header")
-          div(class="brand-kit__selector")
-            brand-selector(@deleteItem="handleDeleteItem")
-          brand-kit-add-btn(:text="`${$t('NN0396')}`"
-                            @click.native="addNewBrand")
-        div(class="brand-kit__tab")
-          brand-kit-tab(@deleteItem="handleDeleteItem")
-      nu-footer
-    div(v-if="isOverlayed" class="dim-background"
-      :style="isDraggedOver ? { pointerEvents: 'none' } : {}")
-      template(v-if="isDraggedOver")
-        div(class="upload-large")
-          svg-icon(iconName="cloud-upload" iconWidth="78px" iconColor="white")
-          span {{ $t(hintText) }}
-        div(class="upload-small")
-            span {{ `・${$t('NN0414', { element: $t(elementType) })}： ${fileTypesString}` }}
-      div(v-if="isMessageShowing" class="delete-confirm"
-          v-click-outside="handleClearDeletion")
-        div(class="delete-confirm__title")
-          span {{ $t('NN0433') }}
-        div(class="delete-confirm__description")
-          i18n(path="NN0434" tag="span")
-            template(#itemName)
-              span(class="delete-confirm__item-name") {{ deleteBuffer ? getDisplayedName(deleteBuffer) : '' }}
-        div(class="delete-confirm__description")
-          span {{ $t('NN0435') }}
-        div(v-if="deleteBuffer && deleteBuffer.type === 'palette'" class="delete-confirm__description")
-          span {{ $t('NN0436') }}
-        div(v-else class="delete-confirm__description")
-          i18n(path="NN0459" tag="span")
-            template(#itemName)
-              span(class="delete-confirm__item-name") {{ deleteBuffer ? getDisplayedName(deleteBuffer) : '' }}
-        div(class="delete-confirm__buttons")
-          div(class="delete-confirm__buttons__cancel pointer"
-            @click="handleClearDeletion")
-            span {{ $t('NN0203') }}
-          div(class="delete-confirm__buttons__confirm pointer"
-            @click="handleConfirmDeletion")
-            span {{ $t('NN0437') }}
+div(class="brand-kit relative"
+  @dragover.prevent.stop="handleDragEnter"
+  @dragenter.prevent.stop="handleDragEnter"
+  @dragleave.prevent.stop="handleDragLeave"
+  @drop.prevent.stop="handleDrop")
+  nu-header(v-header-border)
+  section(class="brand-kit__scroll")
+    div(v-if="isBrandsLoading" class="brand-kit__main")
+      svg-icon(iconName="loading"
+              iconWidth="50px"
+              iconColor="gray-3")
+    div(v-else class="brand-kit__main")
+      div(class="brand-kit__header")
+        div(class="brand-kit__selector")
+          brand-selector(@deleteItem="handleDeleteItem")
+        brand-kit-add-btn(:text="`${$t('NN0396')}`"
+                          @click.native="addNewBrand")
+      div(class="brand-kit__tab")
+        brand-kit-tab(@deleteItem="handleDeleteItem")
+    nu-footer
+  div(v-if="isOverlayed" class="dim-background"
+    :style="isDraggedOver ? { pointerEvents: 'none' } : {}")
+    template(v-if="isDraggedOver")
+      div(class="upload-large")
+        svg-icon(iconName="cloud-upload" iconWidth="78px" iconColor="white")
+        span {{ $t(hintText) }}
+      div(class="upload-small")
+          span {{ `・${$t('NN0414', { element: $t(elementType) })}： ${fileTypesString}` }}
+    div(v-if="isMessageShowing" class="delete-confirm"
+        v-click-outside="handleClearDeletion")
+      div(class="delete-confirm__title")
+        span {{ $t('NN0433') }}
+      div(class="delete-confirm__description")
+        i18n(path="NN0434" tag="span")
+          template(#itemName)
+            span(class="delete-confirm__item-name") {{ deleteBuffer ? getDisplayedName(deleteBuffer) : '' }}
+      div(class="delete-confirm__description")
+        span {{ $t('NN0435') }}
+      div(v-if="deleteBuffer && deleteBuffer.type === 'palette'" class="delete-confirm__description")
+        span {{ $t('NN0436') }}
+      div(v-else class="delete-confirm__description")
+        i18n(path="NN0459" tag="span")
+          template(#itemName)
+            span(class="delete-confirm__item-name") {{ deleteBuffer ? getDisplayedName(deleteBuffer) : '' }}
+      div(class="delete-confirm__buttons")
+        div(class="delete-confirm__buttons__cancel pointer"
+          @click="handleClearDeletion")
+          span {{ $t('NN0203') }}
+        div(class="delete-confirm__buttons__confirm pointer"
+          @click="handleConfirmDeletion")
+          span {{ $t('NN0437') }}
 </template>
 
 <script lang="ts">

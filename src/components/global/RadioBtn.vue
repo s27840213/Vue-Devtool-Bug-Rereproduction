@@ -1,11 +1,11 @@
 <template lang="pug">
-  div(class="radio-btn relative pointer"
-    @click="select"
-    @mouseenter="setHovered(true)"
-    @mouseleave="setHovered(false)")
-    svg-icon(v-if="isSelected" class="radio-btn__svg" iconName="radio-checked" iconWidth="12px" iconColor="blue-1")
-    svg-icon(v-else class="radio-btn__svg" iconName="radio" iconWidth="12px" :iconColor="circleColor || 'white'")
-    div(v-if="isHovered" class="radio-btn__hover-effect")
+div(class="radio-btn relative pointer"
+  @click="select"
+  @mouseenter="setHovered(true)"
+  @mouseleave="setHovered(false)")
+  svg-icon(v-if="isSelected" class="radio-btn__svg" iconName="radio-checked" iconWidth="12px" iconColor="blue-1")
+  svg-icon(v-else class="radio-btn__svg" iconName="radio" iconWidth="12px" :iconColor="circleColor || 'white'")
+  div(v-if="isHovered" class="radio-btn__hover-effect")
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'

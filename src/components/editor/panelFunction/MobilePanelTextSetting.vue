@@ -1,95 +1,95 @@
 <template lang="pug">
-  div(class="text-setting" ref='body'
-      @mousedown.capture="textInfoRecorder()")
-    //- span(class="text-setting__title text-blue-1 label-lg") {{$t('NN0062')}}
-    div(class="text-setting__btn-row")
-      div(class="text-setting__btn")
-        svg-icon(iconName="text" iconWidth="24px" iconColor="gray-4")
-        span 字型
-      div(class="text-setting__btn" @click="openPanel('size')")
-        svg-icon(iconName="vertical" iconWidth="24px" iconColor="gray-4")
-        span 大小
-      div(class="text-setting__btn")
-        svg-icon(iconName="test" iconWidth="24px" iconColor="gray-4")
-        span 顏色
-      div(class="text-setting__btn")
-        svg-icon(iconName="font-spacing" iconWidth="24px" iconColor="gray-4")
-        span 空白
-      div(class="text-setting__btn")
-        svg-icon(iconName="bold" iconWidth="24px" iconColor="gray-4")
-        span 格式
-      div(class="text-setting__btn")
-        svg-icon(iconName="text-align-left" iconWidth="24px" iconColor="gray-4")
-        span 對齊
-    transition(name="slide")
-      div(v-if="openedPanel!==''" class="text-setting__config-panel")
-        div(class="text-setting__config-panel__close" @click="closePanel")
-          svg-icon(iconName="close" iconWidth="24px" iconColor="white")
-        div(v-if="openedPanel==='size'" class="text-setting__config-panel__size")
-    //- div(class="text-setting__row1")
-    //-   div(class="property-bar pointer record-selection" @click="openFontsPanel")
-    //-     img(v-if="props.font[0] !== '_'" class="text-setting__text-preview" :src="getFontPrev")
-    //-     span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font.substr(1) }}
-    //-     svg-icon(class="pointer"
-    //-       :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
-    //-   div(class="size-bar relative")
-    //-     div(class="pointer"
-    //-       @mousedown="fontSizeStepping(-step)") -
-    //-     button(class="text-setting__range-input-button" @click="handleValueModal")
-    //-       input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
-    //-             @change="setSize" :value="fontSize")
-    //-     div(class="pointer"
-    //-       @mousedown="fontSizeStepping(step)") +
-    //-     value-selector(v-if="openValueSelector"
-    //-                 :valueArray="fontSelectValue"
-    //-                 class="text-setting__value-selector"
-    //-                 v-click-outside="handleValueModal"
-    //-                 @update="handleValueUpdate")
-    //- div(class="text-setting__row2")
-    //-   div(class="text-setting__color"
-    //-       v-hint="$t('NN0099')")
-    //-     div(class="color-slip record-selection"
-    //-       @click="handleColorModal")
-    //-       svg-icon(iconName="text-color"
-    //-               iconWidth="24px"
-    //-               iconColor="gray-1")
-    //-       div(class="color-slip__bar"
-    //-           :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000', 'border': props.color === '#FFFFFF' ? '1px solid #EEEFF4' : ''}")
-    //-     div(class="text-setting__color__hex text-left overflow-hidden")
-    //-       button(class="text-setting__range-input-button input-color" @click="handleColorModal")
-    //-         input(class="body-2 text-gray-2 record-selection input-color" type="text" ref="input-color"
-    //-         :value="props.color" @change="inputColor")
-    //-         //-  v-model.lazy="props.color v-model.lazy="props.color
-    //-     svg-icon(class="text-setting__color__copy"
-    //-             iconName="copy"
-    //-             iconWidth="16px"
-    //-             iconColor="gray-4"
-    //-             @click.native="copyColor")
-    //-   div(class="action-bar action-bar--small flex-evenly")
-    //-     svg-icon(class="pointer record-selection btn-lh"
-    //-       :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
-    //-       @click.native="openLineHeightSliderPopup('.btn-lh')"
-    //-       v-hint="$t('NN0109')")
-    //-     svg-icon(class="pointer record-selection btn-ls"
-    //-       :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
-    //-       @click.native="openSpacingSliderPopup('.btn-ls')"
-    //-       v-hint="$t('NN0110')")
-    //- div(class="action-bar flex-evenly")
-    //-   svg-icon(v-for="(icon,index) in mappingIcons('font')"
-    //-     class="record-selection"
-    //-     :class="{ pointer: icon !== 'font-vertical' || !hasCurveText }"
-    //-     :key="`gp-action-icon-${index}`"
-    //-     :id="`icon-${icon}`"
-    //-     :style="propsBtnStyles(icon)"
-    //-     v-hint="hintMap[icon]"
-    //-     :iconName="icon" :iconWidth="'20px'" :iconColor="icon === 'font-vertical' && hasCurveText ? 'gray-4' : 'gray-2'" @mousedown.native="onPropertyClick(icon)")
-    //- div(class="action-bar flex-evenly")
-    //-   svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
-    //-     class="pointer"
-    //-     :key="`gp-action-icon-${index}`"
-    //-     :style="propsBtnStyles(icon)"
-    //-     v-hint="hintMap[icon]"
-    //-     :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
+div(class="text-setting" ref='body'
+    @mousedown.capture="textInfoRecorder()")
+  //- span(class="text-setting__title text-blue-1 label-lg") {{$t('NN0062')}}
+  div(class="text-setting__btn-row")
+    div(class="text-setting__btn")
+      svg-icon(iconName="text" iconWidth="24px" iconColor="gray-4")
+      span 字型
+    div(class="text-setting__btn" @click="openPanel('size')")
+      svg-icon(iconName="vertical" iconWidth="24px" iconColor="gray-4")
+      span 大小
+    div(class="text-setting__btn")
+      svg-icon(iconName="test" iconWidth="24px" iconColor="gray-4")
+      span 顏色
+    div(class="text-setting__btn")
+      svg-icon(iconName="font-spacing" iconWidth="24px" iconColor="gray-4")
+      span 空白
+    div(class="text-setting__btn")
+      svg-icon(iconName="bold" iconWidth="24px" iconColor="gray-4")
+      span 格式
+    div(class="text-setting__btn")
+      svg-icon(iconName="text-align-left" iconWidth="24px" iconColor="gray-4")
+      span 對齊
+  transition(name="slide")
+    div(v-if="openedPanel!==''" class="text-setting__config-panel")
+      div(class="text-setting__config-panel__close" @click="closePanel")
+        svg-icon(iconName="close" iconWidth="24px" iconColor="white")
+      div(v-if="openedPanel==='size'" class="text-setting__config-panel__size")
+  //- div(class="text-setting__row1")
+  //-   div(class="property-bar pointer record-selection" @click="openFontsPanel")
+  //-     img(v-if="props.font[0] !== '_'" class="text-setting__text-preview" :src="getFontPrev")
+  //-     span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font.substr(1) }}
+  //-     svg-icon(class="pointer"
+  //-       :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
+  //-   div(class="size-bar relative")
+  //-     div(class="pointer"
+  //-       @mousedown="fontSizeStepping(-step)") -
+  //-     button(class="text-setting__range-input-button" @click="handleValueModal")
+  //-       input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
+  //-             @change="setSize" :value="fontSize")
+  //-     div(class="pointer"
+  //-       @mousedown="fontSizeStepping(step)") +
+  //-     value-selector(v-if="openValueSelector"
+  //-                 :valueArray="fontSelectValue"
+  //-                 class="text-setting__value-selector"
+  //-                 v-click-outside="handleValueModal"
+  //-                 @update="handleValueUpdate")
+  //- div(class="text-setting__row2")
+  //-   div(class="text-setting__color"
+  //-       v-hint="$t('NN0099')")
+  //-     div(class="color-slip record-selection"
+  //-       @click="handleColorModal")
+  //-       svg-icon(iconName="text-color"
+  //-               iconWidth="24px"
+  //-               iconColor="gray-1")
+  //-       div(class="color-slip__bar"
+  //-           :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000', 'border': props.color === '#FFFFFF' ? '1px solid #EEEFF4' : ''}")
+  //-     div(class="text-setting__color__hex text-left overflow-hidden")
+  //-       button(class="text-setting__range-input-button input-color" @click="handleColorModal")
+  //-         input(class="body-2 text-gray-2 record-selection input-color" type="text" ref="input-color"
+  //-         :value="props.color" @change="inputColor")
+  //-         //-  v-model.lazy="props.color v-model.lazy="props.color
+  //-     svg-icon(class="text-setting__color__copy"
+  //-             iconName="copy"
+  //-             iconWidth="16px"
+  //-             iconColor="gray-4"
+  //-             @click.native="copyColor")
+  //-   div(class="action-bar action-bar--small flex-evenly")
+  //-     svg-icon(class="pointer record-selection btn-lh"
+  //-       :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
+  //-       @click.native="openLineHeightSliderPopup('.btn-lh')"
+  //-       v-hint="$t('NN0109')")
+  //-     svg-icon(class="pointer record-selection btn-ls"
+  //-       :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
+  //-       @click.native="openSpacingSliderPopup('.btn-ls')"
+  //-       v-hint="$t('NN0110')")
+  //- div(class="action-bar flex-evenly")
+  //-   svg-icon(v-for="(icon,index) in mappingIcons('font')"
+  //-     class="record-selection"
+  //-     :class="{ pointer: icon !== 'font-vertical' || !hasCurveText }"
+  //-     :key="`gp-action-icon-${index}`"
+  //-     :id="`icon-${icon}`"
+  //-     :style="propsBtnStyles(icon)"
+  //-     v-hint="hintMap[icon]"
+  //-     :iconName="icon" :iconWidth="'20px'" :iconColor="icon === 'font-vertical' && hasCurveText ? 'gray-4' : 'gray-2'" @mousedown.native="onPropertyClick(icon)")
+  //- div(class="action-bar flex-evenly")
+  //-   svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
+  //-     class="pointer"
+  //-     :key="`gp-action-icon-${index}`"
+  //-     :style="propsBtnStyles(icon)"
+  //-     v-hint="hintMap[icon]"
+  //-     :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
 </template>
 
 <script lang="ts">

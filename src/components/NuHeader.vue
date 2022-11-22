@@ -1,90 +1,90 @@
 <template lang="pug">
-  div(class="nu-header")
-    div(class="nu-header__container")
-      div
-        router-link(to="/"
-          class="nu-header__container-link"
-          style="height: 50px;")
-          svg-icon(class="pointer"
-            :iconName="'logo'"
-            :iconWidth="'100px'"
-            style="height: 50px;")
-      transition(name="fade" mode="out-in")
-        div(v-if="!noNavigation" class="body-2 full-height" key="navigation")
-          template(v-for="item in navItems")
-            div(v-if="!item.hidden" class="nu-header__container-link"
-                :class="{'text-blue-1': currentPage === item.name}")
-              url(:url="item.url") {{item.label}}
-              svg-icon(v-if="item.content" iconName="chevron-down"
-                      iconColor="gray-1" iconWidth="16px")
-              div(v-if="item.content" class="nu-header__container-link-more")
-                div(v-for="it in item.content" class="nu-header__container-link-more-col")
-                  url(:url="it.url") {{it.label}}
-                  url(v-for="i in it.content" :url="i.url") {{i.label}}
-        div(v-else class="body-2" key="no-navigation")
-      div(class="body-2")
-        search-bar(v-if="!noSearchbar"
-          class="nu-header__search"
-          :placeholder="$t('NN0037')"
-          :color="{ search: 'gray-1', close: 'gray-1' }"
-          @search="handleSearch")
-        div(v-if="!isLogin"
-          class="nu-header__btn-login py-5 px-30 text-bold pointer text-blue-1"
-          style="white-space: nowrap;"
-          @click="goToPage('Login')") {{$tc('NN0168',2)}}
-        div(v-if="!isLogin"
-          class="nu-header__btn text-bold"
-          @click="goToPage('SignUp')") {{$tc('NN0169',2)}}
-        //- svg-icon(v-if="isLogin"
-        //-   :iconName="`notify`"
-        //-   :iconWidth="'20px'")
-        div(v-if="isLogin")
-          avatar(class="pointer"
-            :textSize="14"
-            :avatarSize="35"
-            @click.native="isAccountPopup = true")
-          popup-account(v-if="isAccountPopup"
-            class="nu-header__account"
-            @close="() => (isAccountPopup = false)")
-    div(class="nu-header__container-mobile")
-      div(class="flex-center")
+div(class="nu-header")
+  div(class="nu-header__container")
+    div
+      router-link(to="/"
+        class="nu-header__container-link"
+        style="height: 50px;")
         svg-icon(class="pointer"
           :iconName="'logo'"
-          :iconWidth="'143px'"
-          style="height: 45px;"
-          @click.native="goToPage('Home')")
-      div(style="height: 25px")
-        template(v-if="!noSearchbar")
-          svg-icon(v-if="!isShowSearchPage"
-            :iconName="'search'"
-            :iconColor="'gray-3'"
-            :iconWidth="'25px'"
-            @click.native="() => { isShowSearchPage = true }")
-          svg-icon(v-else
-            :iconName="'close'"
-            :iconColor="'gray-3'"
-            :iconWidth="'25px'"
-            @click.native="closeSearchPage")
-        svg-icon(v-if="!isShowSearchPage"
-          :iconName="'menu'"
-          :iconWidth="'25px'"
-          :iconColor="'gray-1'"
-          @click.native="openMenu")
-    slot
-    transition(name="slide-x-right")
-      div(v-if="isShowMenu"
-          class="nu-header__menu popup-window")
-        mobile-menu(@closeMenu="() => { isShowMenu = false }"
-          v-click-outside="() => { isShowMenu = false }")
-    div(v-if="isShowSearchPage"
-      class="nu-header__search-mobile")
-      search-bar(class="search"
-        :placeholder="$t('NN0092', {target: $t('NN0145')})"
+          :iconWidth="'100px'"
+          style="height: 50px;")
+    transition(name="fade" mode="out-in")
+      div(v-if="!noNavigation" class="body-2 full-height" key="navigation")
+        template(v-for="item in navItems")
+          div(v-if="!item.hidden" class="nu-header__container-link"
+              :class="{'text-blue-1': currentPage === item.name}")
+            url(:url="item.url") {{item.label}}
+            svg-icon(v-if="item.content" iconName="chevron-down"
+                    iconColor="gray-1" iconWidth="16px")
+            div(v-if="item.content" class="nu-header__container-link-more")
+              div(v-for="it in item.content" class="nu-header__container-link-more-col")
+                url(:url="it.url") {{it.label}}
+                url(v-for="i in it.content" :url="i.url") {{i.label}}
+      div(v-else class="body-2" key="no-navigation")
+    div(class="body-2")
+      search-bar(v-if="!noSearchbar"
+        class="nu-header__search"
+        :placeholder="$t('NN0037')"
+        :color="{ search: 'gray-1', close: 'gray-1' }"
         @search="handleSearch")
-      //- div(class="pt-20 nu-header__search-mobile__title") {{$t('NN0227')}}:
-      //- div(class="pt-10 nu-header__search-mobile__options")
-      //-   span(v-for="key in keys"
-      //-     @click="handleSearch(key)") {{key}}
+      div(v-if="!isLogin"
+        class="nu-header__btn-login py-5 px-30 text-bold pointer text-blue-1"
+        style="white-space: nowrap;"
+        @click="goToPage('Login')") {{$tc('NN0168',2)}}
+      div(v-if="!isLogin"
+        class="nu-header__btn text-bold"
+        @click="goToPage('SignUp')") {{$tc('NN0169',2)}}
+      //- svg-icon(v-if="isLogin"
+      //-   :iconName="`notify`"
+      //-   :iconWidth="'20px'")
+      div(v-if="isLogin")
+        avatar(class="pointer"
+          :textSize="14"
+          :avatarSize="35"
+          @click.native="isAccountPopup = true")
+        popup-account(v-if="isAccountPopup"
+          class="nu-header__account"
+          @close="() => (isAccountPopup = false)")
+  div(class="nu-header__container-mobile")
+    div(class="flex-center")
+      svg-icon(class="pointer"
+        :iconName="'logo'"
+        :iconWidth="'143px'"
+        style="height: 45px;"
+        @click.native="goToPage('Home')")
+    div(style="height: 25px")
+      template(v-if="!noSearchbar")
+        svg-icon(v-if="!isShowSearchPage"
+          :iconName="'search'"
+          :iconColor="'gray-3'"
+          :iconWidth="'25px'"
+          @click.native="() => { isShowSearchPage = true }")
+        svg-icon(v-else
+          :iconName="'close'"
+          :iconColor="'gray-3'"
+          :iconWidth="'25px'"
+          @click.native="closeSearchPage")
+      svg-icon(v-if="!isShowSearchPage"
+        :iconName="'menu'"
+        :iconWidth="'25px'"
+        :iconColor="'gray-1'"
+        @click.native="openMenu")
+  slot
+  transition(name="slide-x-right")
+    div(v-if="isShowMenu"
+        class="nu-header__menu popup-window")
+      mobile-menu(@closeMenu="() => { isShowMenu = false }"
+        v-click-outside="() => { isShowMenu = false }")
+  div(v-if="isShowSearchPage"
+    class="nu-header__search-mobile")
+    search-bar(class="search"
+      :placeholder="$t('NN0092', {target: $t('NN0145')})"
+      @search="handleSearch")
+    //- div(class="pt-20 nu-header__search-mobile__title") {{$t('NN0227')}}:
+    //- div(class="pt-10 nu-header__search-mobile__options")
+    //-   span(v-for="key in keys"
+    //-     @click="handleSearch(key)") {{key}}
 </template>
 
 <script lang="ts">

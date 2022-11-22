@@ -1,32 +1,32 @@
 <template lang="pug">
-  div(class="popup-account text-left"
-    v-click-outside="closePopup")
-    div(class="popup-account__profile")
-      avatar(class="mr-10"
-        :textSize="14"
-        :avatarSize="35")
-      div(class="profile-text text-body-2")
-        div {{showUname}}
-        div(class="text-gray-3 body-3") {{showAccount}}
-    div(class="popup-account__hr")
-    template(v-for="view in settingsItems")
-      div(v-if="view.name === 'hr'" class="popup-account__hr")
-      div(v-else class="popup-account__option" @click="closePopup")
-        router-link(:to="`/settings/${view.name}`"
-                    class="popup-account__option__link")
-          svg-icon(:iconName="view.icon"
-                  class="pr-10"
-                  :iconWidth="'15px'"
-                  :iconColor="'gray-2'")
-          span {{view.label}}
-    div(class="popup-account__hr")
-    div(class="popup-account__option"
-      @click="onLogoutClicked()")
-      svg-icon(class="pr-10"
-        :iconName="'logout'"
-        :iconWidth="'15px'"
-        :iconColor="'gray-2'")
-      span {{$tc('NN0167',2)}}
+div(class="popup-account text-left"
+  v-click-outside="closePopup")
+  div(class="popup-account__profile")
+    avatar(class="mr-10"
+      :textSize="14"
+      :avatarSize="35")
+    div(class="profile-text text-body-2")
+      div {{showUname}}
+      div(class="text-gray-3 body-3") {{showAccount}}
+  div(class="popup-account__hr")
+  template(v-for="view in settingsItems")
+    div(v-if="view.name === 'hr'" class="popup-account__hr")
+    div(v-else class="popup-account__option" @click="closePopup")
+      router-link(:to="`/settings/${view.name}`"
+                  class="popup-account__option__link")
+        svg-icon(:iconName="view.icon"
+                class="pr-10"
+                :iconWidth="'15px'"
+                :iconColor="'gray-2'")
+        span {{view.label}}
+  div(class="popup-account__hr")
+  div(class="popup-account__option"
+    @click="onLogoutClicked()")
+    svg-icon(class="pr-10"
+      :iconName="'logout'"
+      :iconWidth="'15px'"
+      :iconColor="'gray-2'")
+    span {{$tc('NN0167',2)}}
 </template>
 
 <script lang="ts">

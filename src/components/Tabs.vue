@@ -1,11 +1,11 @@
 <template lang="pug">
-  div(class="tabs")
-    div(v-for="(tab,index) in tabs"
-        class="tabs__item"
-        :style="tabStyle(index)"
-        @click="switchTab(index)")
-      span(
-        class="text-H6") {{tab}}
+div(class="tabs")
+  div(v-for="(tab,index) in tabs"
+      class="tabs__item"
+      :style="tabStyle(index)"
+      @click="switchTab(index)")
+    span(
+      class="text-H6") {{tab}}
 </template>
 
 <script lang="ts">

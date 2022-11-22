@@ -1,108 +1,108 @@
 <template lang="pug">
-  div(class="nu-footer text-black")
-    div(class="nu-footer__wrapper label-lg")
-      svg-icon(:iconName="'logo'"
-        :iconWidth="'100px'"
-        style="height: 50px;")
-      div(class="nu-footer__feature")
-        div(class="nu-footer__feature-region")
-          div(class="label-lg nu-footer__feature-title"
-            @click="expandItems(0, !featureExpand[0])")
-            div(class="line")
-            span LEARN
-            svg-icon(class="nu-footer__feature-icon"
-              :iconName="featureExpand[0] ? 'minus-origin' : 'plus-origin'"
-              :iconColor="'black'"
-              :iconWidth="'15px'")
-          div(class="nu-footer__feature-items"
-            :class="featureExpand[0] ? 'expand' : ''")
-            a(:href="toturialPage") {{$t('NN0146')}}
-            a(:href="blogPage") {{$t('NN0157')}}
-        div(class="nu-footer__feature-region")
-          div(class="label-lg nu-footer__feature-title"
-            @click="expandItems(1, !featureExpand[1])")
-            div(class="line")
-            span DISCOVER
-            svg-icon(class="nu-footer__feature-icon"
-              :iconName="featureExpand[1] ? 'minus-origin' : 'plus-origin'"
-              :iconColor="'black'"
-              :iconWidth="'15px'")
-          div(class="nu-footer__feature-items"
-            :class="featureExpand[1] ? 'expand' : ''")
-            a(:href="facebookPage") {{$t('NN0158')}}
-            a(href="/templates") {{$t('NN0145')}}
-            span(class="pointer" @click="coupon()") {{$t('NN0697')}}
-        div(class="nu-footer__feature-region")
-          div(class="label-lg nu-footer__feature-title"
-            @click="expandItems(2, !featureExpand[2])")
-            div(class="line")
-            span CREATE
-            svg-icon(class="nu-footer__feature-icon"
-              :iconName="featureExpand[2] ? 'minus-origin' : 'plus-origin'"
-              :iconColor="'black'"
-              :iconWidth="'15px'")
-          div(class="nu-footer__feature-items"
-            :class="featureExpand[2] ? 'expand' : ''")
-            div(v-for="theme in themeList"
-              class="pointer"
-              @click="newDesign(theme)") {{theme.title}}
-        div(class="nu-footer__feature-region")
-          div(class="label-lg nu-footer__feature-title"
-            @click="expandItems(3, !featureExpand[3])")
-            div(class="line")
-            span LEGAL
-            svg-icon(class="nu-footer__feature-icon"
-              :iconName="featureExpand[3] ? 'minus-origin' : 'plus-origin'"
-              :iconColor="'black'"
-              :iconWidth="'15px'")
-          div(class="nu-footer__feature-items"
-            :class="featureExpand[3] ? 'expand' : ''")
-            a(:href="servicePage") {{$t('NN0160')}}
-            a(:href="privacyPage") {{$t('NN0161')}}
-            a(:href="agreementPage") {{$t('NN0162')}}
-    div(class="nu-footer__bottom")
-      div(class="nu-footer__bottom-left")
-        select(class="locale-select" v-model="inputLocale")
-          option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
-      div(class="nu-footer__bottom-center")
-        span {{'COPYRIGHT Vivipic 2022 - TERMS & CONDITIONS  PRIVACY POLICY'}}
-      div(class="nu-footer__bottom-right")
-        a(:href="facebookPage")
-          svg-icon(class="pointer"
-            iconName="facebook-black"
-            :iconWidth="'25px'")
-        a(:href="igPage")
-          svg-icon(class="pointer"
-            iconName="instagram-black"
-            :iconWidth="'25px'")
-        a(:href="mailtoService")
-          svg-icon(class="pointer"
-            iconName="email-black"
-            :iconWidth="'25px'")
-      div(class="nu-footer__bottom-info")
+div(class="nu-footer text-black")
+  div(class="nu-footer__wrapper label-lg")
+    svg-icon(:iconName="'logo'"
+      :iconWidth="'100px'"
+      style="height: 50px;")
+    div(class="nu-footer__feature")
+      div(class="nu-footer__feature-region")
+        div(class="label-lg nu-footer__feature-title"
+          @click="expandItems(0, !featureExpand[0])")
+          div(class="line")
+          span LEARN
+          svg-icon(class="nu-footer__feature-icon"
+            :iconName="featureExpand[0] ? 'minus-origin' : 'plus-origin'"
+            :iconColor="'black'"
+            :iconWidth="'15px'")
+        div(class="nu-footer__feature-items"
+          :class="featureExpand[0] ? 'expand' : ''")
+          a(:href="toturialPage") {{$t('NN0146')}}
+          a(:href="blogPage") {{$t('NN0157')}}
+      div(class="nu-footer__feature-region")
+        div(class="label-lg nu-footer__feature-title"
+          @click="expandItems(1, !featureExpand[1])")
+          div(class="line")
+          span DISCOVER
+          svg-icon(class="nu-footer__feature-icon"
+            :iconName="featureExpand[1] ? 'minus-origin' : 'plus-origin'"
+            :iconColor="'black'"
+            :iconWidth="'15px'")
+        div(class="nu-footer__feature-items"
+          :class="featureExpand[1] ? 'expand' : ''")
+          a(:href="facebookPage") {{$t('NN0158')}}
+          a(href="/templates") {{$t('NN0145')}}
+          span(class="pointer" @click="coupon()") {{$t('NN0697')}}
+      div(class="nu-footer__feature-region")
+        div(class="label-lg nu-footer__feature-title"
+          @click="expandItems(2, !featureExpand[2])")
+          div(class="line")
+          span CREATE
+          svg-icon(class="nu-footer__feature-icon"
+            :iconName="featureExpand[2] ? 'minus-origin' : 'plus-origin'"
+            :iconColor="'black'"
+            :iconWidth="'15px'")
+        div(class="nu-footer__feature-items"
+          :class="featureExpand[2] ? 'expand' : ''")
+          div(v-for="theme in themeList"
+            class="pointer"
+            @click="newDesign(theme)") {{theme.title}}
+      div(class="nu-footer__feature-region")
+        div(class="label-lg nu-footer__feature-title"
+          @click="expandItems(3, !featureExpand[3])")
+          div(class="line")
+          span LEGAL
+          svg-icon(class="nu-footer__feature-icon"
+            :iconName="featureExpand[3] ? 'minus-origin' : 'plus-origin'"
+            :iconColor="'black'"
+            :iconWidth="'15px'")
+        div(class="nu-footer__feature-items"
+          :class="featureExpand[3] ? 'expand' : ''")
+          a(:href="servicePage") {{$t('NN0160')}}
+          a(:href="privacyPage") {{$t('NN0161')}}
+          a(:href="agreementPage") {{$t('NN0162')}}
+  div(class="nu-footer__bottom")
+    div(class="nu-footer__bottom-left")
+      select(class="locale-select" v-model="inputLocale")
+        option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
+    div(class="nu-footer__bottom-center")
+      span {{'COPYRIGHT Vivipic 2022 - TERMS & CONDITIONS  PRIVACY POLICY'}}
+    div(class="nu-footer__bottom-right")
+      a(:href="facebookPage")
+        svg-icon(class="pointer"
+          iconName="facebook-black"
+          :iconWidth="'25px'")
+      a(:href="igPage")
+        svg-icon(class="pointer"
+          iconName="instagram-black"
+          :iconWidth="'25px'")
+      a(:href="mailtoService")
+        svg-icon(class="pointer"
+          iconName="email-black"
+          :iconWidth="'25px'")
+    div(class="nu-footer__bottom-info")
+      span(v-for="index in 5") {{$t(`NN07${13+index}`)}}
+  div(class="nu-footer__bottom-mobile")
+    div(class="nu-footer__bottom-mobile-icons")
+      a(:href="facebookPage")
+        svg-icon(class="pointer"
+          iconName="facebook-black"
+          :iconWidth="'25px'")
+      a(:href="igPage")
+        svg-icon(class="pointer ml-25"
+          iconName="instagram-black"
+          :iconWidth="'25px'")
+      a(:href="mailtoService")
+        svg-icon(class="pointer ml-25"
+          iconName="email-black"
+          :iconWidth="'25px'")
+    div(class="nu-footer__bottom-mobile-locale")
+      select(class="locale-select" v-model="inputLocale")
+        option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
+    div(class="nu-footer__bottom-mobile-copyright"
+      :style="{ 'margin-bottom': isHome ? '70px' : 0 }")
+      span {{'COPYRIGHT Vivipic 2022 - TERMS & CONDITIONS  PRIVACY POLICY'}}
+      div(class="nu-footer__bottom-mobile-info")
         span(v-for="index in 5") {{$t(`NN07${13+index}`)}}
-    div(class="nu-footer__bottom-mobile")
-      div(class="nu-footer__bottom-mobile-icons")
-        a(:href="facebookPage")
-          svg-icon(class="pointer"
-            iconName="facebook-black"
-            :iconWidth="'25px'")
-        a(:href="igPage")
-          svg-icon(class="pointer ml-25"
-            iconName="instagram-black"
-            :iconWidth="'25px'")
-        a(:href="mailtoService")
-          svg-icon(class="pointer ml-25"
-            iconName="email-black"
-            :iconWidth="'25px'")
-      div(class="nu-footer__bottom-mobile-locale")
-        select(class="locale-select" v-model="inputLocale")
-          option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
-      div(class="nu-footer__bottom-mobile-copyright"
-        :style="{ 'margin-bottom': isHome ? '70px' : 0 }")
-        span {{'COPYRIGHT Vivipic 2022 - TERMS & CONDITIONS  PRIVACY POLICY'}}
-        div(class="nu-footer__bottom-mobile-info")
-          span(v-for="index in 5") {{$t(`NN07${13+index}`)}}
 </template>
 
 <script lang="ts">

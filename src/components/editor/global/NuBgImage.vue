@@ -1,24 +1,24 @@
 <template lang="pug">
-  div(v-if="!image.config.imgContorl" class="nu-background-image"
-    :style="mainStyles"
-    @pointerdown="setInBgSettingMode"
-    draggable="false")
-    div(v-show="!isColorBackground")
-      div(v-if="isAdjustImage" :style="frameStyles")
-        nu-adjust-image(:src="src"
-          @error="onError"
-          :styles="adjustImgStyles"
-          :contentScaleRatio="contentScaleRatio")
-      img(v-else-if="src" :src="src"
-        draggable="false"
-        :style="imgStyles()"
-        class="body"
+div(v-if="!image.config.imgContorl" class="nu-background-image"
+  :style="mainStyles"
+  @pointerdown="setInBgSettingMode"
+  draggable="false")
+  div(v-show="!isColorBackground")
+    div(v-if="isAdjustImage" :style="frameStyles")
+      nu-adjust-image(:src="src"
         @error="onError"
-        ref="body")
-    component(v-for="(elm, idx) in cssFilterElms"
-      :key="`cssFilter${idx}`"
-      :is="elm.tag"
-      v-bind="elm.attrs")
+        :styles="adjustImgStyles"
+        :contentScaleRatio="contentScaleRatio")
+    img(v-else-if="src" :src="src"
+      draggable="false"
+      :style="imgStyles()"
+      class="body"
+      @error="onError"
+      ref="body")
+  component(v-for="(elm, idx) in cssFilterElms"
+    :key="`cssFilter${idx}`"
+    :is="elm.tag"
+    v-bind="elm.attrs")
 </template>
 
 <script lang="ts">

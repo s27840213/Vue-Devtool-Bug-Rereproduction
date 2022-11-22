@@ -1,30 +1,30 @@
 <template lang="pug">
-  div(class="template-waterfall__wrapper")
-    div(class="template-waterfall")
-      div(v-for="waterfallTemplate in waterfallTemplates"
-          class="template-waterfall__column")
-        div(v-for="template in waterfallTemplate"
-            class="template-waterfall__column__template"
-            :style="templateStyles(template.aspect_ratio)"
-            @click="handleClickWaterfall(template)"
-            @mouseenter="handleMouseEnter(template.group_id)"
-            @mouseleave="handleMouseLeave(template.group_id)")
-          scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type) && useScrollablePreview"
-                                      :contentIds="template.content_ids")
-          img(v-else class="template-waterfall__column__template__img" :src="template.url" loading="lazy")
-          pro-item(v-if="template.plan === 1")
-          div(v-if="template.group_type !== 1" class="template-waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
-          div(v-if="template.content_ids.length > 1" class="template-waterfall__column__template__multi")
-            svg-icon(iconName="multiple-file"
-                    iconWidth="24px"
-                    iconColor="gray-7")
-    div(v-if="!isTemplateReady")
-      svg-icon(iconName="loading"
-              iconWidth="24px"
-              iconColor="gray-2")
-    observer-sentinel(v-if="isTemplateReady && hasNextPage"
-                      @callback="handleLoadMore")
-    div(v-if="useScrollSpace" class="template-waterfall__scroll-space")
+div(class="template-waterfall__wrapper")
+  div(class="template-waterfall")
+    div(v-for="waterfallTemplate in waterfallTemplates"
+        class="template-waterfall__column")
+      div(v-for="template in waterfallTemplate"
+          class="template-waterfall__column__template"
+          :style="templateStyles(template.aspect_ratio)"
+          @click="handleClickWaterfall(template)"
+          @mouseenter="handleMouseEnter(template.group_id)"
+          @mouseleave="handleMouseLeave(template.group_id)")
+        scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type) && useScrollablePreview"
+                                    :contentIds="template.content_ids")
+        img(v-else class="template-waterfall__column__template__img" :src="template.url" loading="lazy")
+        pro-item(v-if="template.plan === 1")
+        div(v-if="template.group_type !== 1" class="template-waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
+        div(v-if="template.content_ids.length > 1" class="template-waterfall__column__template__multi")
+          svg-icon(iconName="multiple-file"
+                  iconWidth="24px"
+                  iconColor="gray-7")
+  div(v-if="!isTemplateReady")
+    svg-icon(iconName="loading"
+            iconWidth="24px"
+            iconColor="gray-2")
+  observer-sentinel(v-if="isTemplateReady && hasNextPage"
+                    @callback="handleLoadMore")
+  div(v-if="useScrollSpace" class="template-waterfall__scroll-space")
 </template>
 
 <script lang="ts">

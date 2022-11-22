@@ -1,10 +1,10 @@
 <template lang="pug">
-  div(class="mobile-all-design-view")
-    mobile-design-gallery(:noHeader="true"
-                          :allDesigns="allDesigns"
-                          :selectedNum="selectedNum"
-                          @loadMore="handleLoadMore")
-    div(class="scroll-space")
+div(class="mobile-all-design-view")
+  mobile-design-gallery(:noHeader="true"
+                        :allDesigns="allDesigns"
+                        :selectedNum="selectedNum"
+                        @loadMore="handleLoadMore")
+  div(class="scroll-space")
 </template>
 
 <script lang="ts">

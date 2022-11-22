@@ -1,17 +1,17 @@
 <template lang="pug">
-  div(class="footer-tabs" ref="tabs")
-    div(class="footer-tabs__container" :style="containerStyles"  ref="container")
-      template(v-for="(tab, index) in tabs")
-        div(v-if="!tab.hidden"
-            class="footer-tabs__item"
-            :class="{'click-disabled': (tab.disabled || isLocked)}"
-            @click="handleTabAction(tab)")
-          svg-icon(class="mb-5 click-disabled"
-            :iconName="tab.icon"
-            :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
-            :iconWidth="'22px'")
-          span(class="body-3 no-wrap click-disabled"
-          :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
+div(class="footer-tabs" ref="tabs")
+  div(class="footer-tabs__container" :style="containerStyles"  ref="container")
+    template(v-for="(tab, index) in tabs")
+      div(v-if="!tab.hidden"
+          class="footer-tabs__item"
+          :class="{'click-disabled': (tab.disabled || isLocked)}"
+          @click="handleTabAction(tab)")
+        svg-icon(class="mb-5 click-disabled"
+          :iconName="tab.icon"
+          :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
+          :iconWidth="'22px'")
+        span(class="body-3 no-wrap click-disabled"
+        :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'

@@ -1,15 +1,15 @@
 <template lang="pug">
-  div(class="settings")
-    nu-header(v-header-border="true")
-    div(class="settings__content")
-      sidebar(class="settings__sidebar" :style="sidebarStyle"
-        @switch="switchView"
-        :current="currentView")
-      section(class="settings__view")
-        settings-account(v-if="currentView === 'account'")
-        settings-security(v-if="currentView === 'security'")
-        settings-payment(v-if="currentView === 'payment'")
-        settings-bill(v-if="currentView === 'billing'")
+div(class="settings")
+  nu-header(v-header-border="true")
+  div(class="settings__content")
+    sidebar(class="settings__sidebar" :style="sidebarStyle"
+      @switch="switchView"
+      :current="currentView")
+    section(class="settings__view")
+      settings-account(v-if="currentView === 'account'")
+      settings-security(v-if="currentView === 'security'")
+      settings-payment(v-if="currentView === 'payment'")
+      settings-bill(v-if="currentView === 'billing'")
 </template>
 
 <script lang="ts">

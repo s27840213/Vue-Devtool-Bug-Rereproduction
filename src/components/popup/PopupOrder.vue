@@ -1,15 +1,15 @@
 <template lang="pug">
-  div(class="popup-order")
-    div(v-for="(data,index) in popupDatas()"
-        :key="`popup-order-${index}`"
-        class="popup-order__item"
-        @click="data.action")
-      svg-icon(
-        class="pointer"
-        :iconName="data.icon"
-        :iconWidth="'12px'"
-        :iconColor="'gray-1'")
-      span(class="ml-5 body-2") {{data.text}}
+div(class="popup-order")
+  div(v-for="(data,index) in popupDatas()"
+      :key="`popup-order-${index}`"
+      class="popup-order__item"
+      @click="data.action")
+    svg-icon(
+      class="pointer"
+      :iconName="data.icon"
+      :iconWidth="'12px'"
+      :iconColor="'gray-1'")
+    span(class="ml-5 body-2") {{data.text}}
 </template>
 
 <script lang="ts">

@@ -1,128 +1,128 @@
 <template lang="pug">
-  div(class="folder-design-view")
-    div(class="folder-design-view__folder-name")
-      span
-        div(v-if="isFolderNameEditing"
-            class="input-container"
-            v-click-outside="handleFolderNameEditEnd")
-          input(ref="folderName"
-                v-model="editableFolderName"
-                @change="handleFolderNameEditEnd"
-                @keyup="checkFolderNameEnter")
-          div(class="pen-container")
-            svg-icon(iconName="pen"
-                    iconWidth="20px"
-                    iconColor="gray-3")
-        button(v-else
-              @mouseenter="handleFolderNameMouseEnter"
-              @mouseleave="handleFolderNameMouseLeave"
-              @click="handleFolderNameClick")
-          span(:title="folderName") {{ folderName }}
+div(class="folder-design-view")
+  div(class="folder-design-view__folder-name")
+    span
+      div(v-if="isFolderNameEditing"
+          class="input-container"
+          v-click-outside="handleFolderNameEditEnd")
+        input(ref="folderName"
+              v-model="editableFolderName"
+              @change="handleFolderNameEditEnd"
+              @keyup="checkFolderNameEnter")
+        div(class="pen-container")
           svg-icon(iconName="pen"
                   iconWidth="20px"
                   iconColor="gray-3")
-        transition(name="fade")
-          svg-icon(v-if="isShowHint"
-                  class="folder-design-view__folder-name-hint-arrow"
-                  iconName="arrow-up"
-                  iconWidth="13.76px"
-                  iconHeight="9.79px"
-                  iconColor="red-1")
-        transition(name="fade")
-          div(v-if="isShowHint" class="folder-design-view__folder-name-hint-text")
-            span {{$t('NN0226')}}
-    div(class="folder-design-view__toolbar")
-      div(class="folder-design-view__path")
-        template(v-for="(parent, index) in shownParents")
-          span(class="folder-design-view__path__node"
-              :style="nodeStyles(false)"
-              @click="goToParent(index + 1)") {{ parent + ' ' }}
-          span(class="folder-design-view__path__text") {{ ' > ' }}
-          span(class="folder-design-view__path__text") {{ ' ' }}
+      button(v-else
+            @mouseenter="handleFolderNameMouseEnter"
+            @mouseleave="handleFolderNameMouseLeave"
+            @click="handleFolderNameClick")
+        span(:title="folderName") {{ folderName }}
+        svg-icon(iconName="pen"
+                iconWidth="20px"
+                iconColor="gray-3")
+      transition(name="fade")
+        svg-icon(v-if="isShowHint"
+                class="folder-design-view__folder-name-hint-arrow"
+                iconName="arrow-up"
+                iconWidth="13.76px"
+                iconHeight="9.79px"
+                iconColor="red-1")
+      transition(name="fade")
+        div(v-if="isShowHint" class="folder-design-view__folder-name-hint-text")
+          span {{$t('NN0226')}}
+  div(class="folder-design-view__toolbar")
+    div(class="folder-design-view__path")
+      template(v-for="(parent, index) in shownParents")
         span(class="folder-design-view__path__node"
-            :style="nodeStyles(true)"
-            :title="folderName") {{ folderName }}
-      div(class="folder-design-view__actions")
-        div(class="folder-design-view__more"
-            @click="toggleFolderMenu"
-            v-click-outside="closeFolderMenu")
-          div(ref="more"
-              class="folder-design-view__more__icon")
-            svg-icon(class="header-icon"
-                    iconName="more_vertical"
-                    iconWidth="18px"
-                    iconColor="gray-2")
-          div(v-if="isFolderMenuOpen"
-              class="folder-design-view__more__menu"
-              @click.stop)
-            div(class="folder-design-view__more__menu__title")
-              span(:title="folderName") {{ folderName }}
-            div(class="folder-design-view__more__menu__text")
-              span {{ `${$t('NN0196', { name:folder ? folder.author : '' })} | ${$t('NN0197', { num:itemCount })}` }}
-            div(class="folder-design-view__more__menu__divider")
-            div(class="folder-design-view__more__menu__actions")
-              div(@click="handleFolderNameClick")
-                div(class="more-menu-icon")
-                  svg-icon(iconName="pen"
-                          iconWidth="15px"
-                          iconColor="gray-2")
-                div(class="more-menu-text")
-                  span {{$t('NN0198')}}
-              div(@click="handleDeleteFolder")
-                div(class="more-menu-icon")
-                  svg-icon(iconName="trash"
-                          iconWidth="15px"
-                          iconColor="gray-2")
-                div(class="more-menu-text")
-                  span {{$t('NN0199')}}
-        div(ref="newFolder"
-            class="folder-design-view__new-folder"
-            :style="newFolderStyles()"
-            @click="handleNewFolder")
+            :style="nodeStyles(false)"
+            @click="goToParent(index + 1)") {{ parent + ' ' }}
+        span(class="folder-design-view__path__text") {{ ' > ' }}
+        span(class="folder-design-view__path__text") {{ ' ' }}
+      span(class="folder-design-view__path__node"
+          :style="nodeStyles(true)"
+          :title="folderName") {{ folderName }}
+    div(class="folder-design-view__actions")
+      div(class="folder-design-view__more"
+          @click="toggleFolderMenu"
+          v-click-outside="closeFolderMenu")
+        div(ref="more"
+            class="folder-design-view__more__icon")
           svg-icon(class="header-icon"
-                  iconName="folder_plus"
-                  iconWidth="18px"
-                  :iconColor="isMaxLevelReached ? 'gray-3' : 'gray-2'")
-        div(class="folder-design-view__sort-by"
-            @click="toggleSortMenu"
-            v-click-outside="closeSortMenu")
-          svg-icon(class="header-sort"
-                  iconName="sequence"
+                  iconName="more_vertical"
                   iconWidth="18px"
                   iconColor="gray-2")
-          span(class="header-sort") {{$t('NN0191')}}
-          div(v-if="isSortMenuOpen"
-              class="folder-design-view__sort-by__menu"
-              @click.stop)
-            div(v-for="sortMenuItem in sortMenuItems"
-                @click="handleSortByClick(sortMenuItem.payload)")
-              div(class="sort-menu-icon")
-                svg-icon(:iconName="sortMenuItem.icon"
-                        iconWidth="15px"
-                        iconColor="gray-2"
-                        :style="sortMenuItem.style")
-              div(class="sort-menu-text")
-                span {{ sortMenuItem.text }}
-              div(v-if="checkSortSelected(sortMenuItem.payload)" class="sort-menu-right")
-                svg-icon(iconName="done"
+        div(v-if="isFolderMenuOpen"
+            class="folder-design-view__more__menu"
+            @click.stop)
+          div(class="folder-design-view__more__menu__title")
+            span(:title="folderName") {{ folderName }}
+          div(class="folder-design-view__more__menu__text")
+            span {{ `${$t('NN0196', { name:folder ? folder.author : '' })} | ${$t('NN0197', { num:itemCount })}` }}
+          div(class="folder-design-view__more__menu__divider")
+          div(class="folder-design-view__more__menu__actions")
+            div(@click="handleFolderNameClick")
+              div(class="more-menu-icon")
+                svg-icon(iconName="pen"
                         iconWidth="15px"
                         iconColor="gray-2")
-        btn-new-design
-    div(class="horizontal-rule")
-    folder-gallery(:path="path"
-                  :menuItems="[]"
-                  :allFolders="allFolders"
-                  :selectedNum="selectedNum"
-                  @menuAction="handleMenuAction"
-                  @moveItem="handleMoveItem")
-    design-gallery(:menuItems="menuItems"
-                  :allDesigns="allDesigns"
-                  :selectedNum="selectedNum"
-                  @menuAction="handleMenuAction"
-                  @loadMore="handleLoadMore")
-    div(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading" class="folder-design-view__empty")
-      img(class="folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
-      span(class="folder-design-view__empty__text") {{$t('NN0239')}}
+              div(class="more-menu-text")
+                span {{$t('NN0198')}}
+            div(@click="handleDeleteFolder")
+              div(class="more-menu-icon")
+                svg-icon(iconName="trash"
+                        iconWidth="15px"
+                        iconColor="gray-2")
+              div(class="more-menu-text")
+                span {{$t('NN0199')}}
+      div(ref="newFolder"
+          class="folder-design-view__new-folder"
+          :style="newFolderStyles()"
+          @click="handleNewFolder")
+        svg-icon(class="header-icon"
+                iconName="folder_plus"
+                iconWidth="18px"
+                :iconColor="isMaxLevelReached ? 'gray-3' : 'gray-2'")
+      div(class="folder-design-view__sort-by"
+          @click="toggleSortMenu"
+          v-click-outside="closeSortMenu")
+        svg-icon(class="header-sort"
+                iconName="sequence"
+                iconWidth="18px"
+                iconColor="gray-2")
+        span(class="header-sort") {{$t('NN0191')}}
+        div(v-if="isSortMenuOpen"
+            class="folder-design-view__sort-by__menu"
+            @click.stop)
+          div(v-for="sortMenuItem in sortMenuItems"
+              @click="handleSortByClick(sortMenuItem.payload)")
+            div(class="sort-menu-icon")
+              svg-icon(:iconName="sortMenuItem.icon"
+                      iconWidth="15px"
+                      iconColor="gray-2"
+                      :style="sortMenuItem.style")
+            div(class="sort-menu-text")
+              span {{ sortMenuItem.text }}
+            div(v-if="checkSortSelected(sortMenuItem.payload)" class="sort-menu-right")
+              svg-icon(iconName="done"
+                      iconWidth="15px"
+                      iconColor="gray-2")
+      btn-new-design
+  div(class="horizontal-rule")
+  folder-gallery(:path="path"
+                :menuItems="[]"
+                :allFolders="allFolders"
+                :selectedNum="selectedNum"
+                @menuAction="handleMenuAction"
+                @moveItem="handleMoveItem")
+  design-gallery(:menuItems="menuItems"
+                :allDesigns="allDesigns"
+                :selectedNum="selectedNum"
+                @menuAction="handleMenuAction"
+                @loadMore="handleLoadMore")
+  div(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading" class="folder-design-view__empty")
+    img(class="folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
+    span(class="folder-design-view__empty__text") {{$t('NN0239')}}
 </template>
 
 <script lang="ts">

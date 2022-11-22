@@ -1,9 +1,9 @@
 <template lang="pug">
-  div(class="download-type-option__name")
-    span {{ name }}
-    span(v-if="tag"
-      class="download-type-option__tag")
-      span(class="download-type-option__label") {{ tag }}
+div(class="download-type-option__name")
+  span {{ name }}
+  span(v-if="tag"
+    class="download-type-option__tag")
+    span(class="download-type-option__label") {{ tag }}
 </template>
 
 <script lang="ts">

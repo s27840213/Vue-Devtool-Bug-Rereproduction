@@ -1,5 +1,5 @@
 <template lang="pug">
-  editor-content(:editor="editor")
+editor-content(:editor="editor")
 </template>
 
 <script lang="ts">

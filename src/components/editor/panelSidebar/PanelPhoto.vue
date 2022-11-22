@@ -1,22 +1,22 @@
 <template lang="pug">
-  div(class="panel-photo")
-    search-bar(class="mb-15"
-      :style="searchBarStyle()"
-      :placeholder="$t('NN0092', {target: $tc('NN0002',1)})"
-      clear
-      :defaultKeyword="keyword"
-      @search="handleSearch")
-    div(v-if="keyword && !pending && !searchResult.length"
-      class="text-white text-left") {{$t('NN0393', {keyword: keyword, target: $tc('NN0002',1)})}}
-    //- Search result and main content
-    image-gallery(v-for="item in categoryListArray"
-                  v-show="item.show" :ref="item.key" :key="item.key"
-                  :images="item.content" @loadMore="handleLoadMore" vendor="unsplash")
-      template(#pending)
-        div(v-if="pending" class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
+div(class="panel-photo")
+  search-bar(class="mb-15"
+    :style="searchBarStyle()"
+    :placeholder="$t('NN0092', {target: $tc('NN0002',1)})"
+    clear
+    :defaultKeyword="keyword"
+    @search="handleSearch")
+  div(v-if="keyword && !pending && !searchResult.length"
+    class="text-white text-left") {{$t('NN0393', {keyword: keyword, target: $tc('NN0002',1)})}}
+  //- Search result and main content
+  image-gallery(v-for="item in categoryListArray"
+                v-show="item.show" :ref="item.key" :key="item.key"
+                :images="item.content" @loadMore="handleLoadMore" vendor="unsplash")
+    template(#pending)
+      div(v-if="pending" class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
 </template>
 
 <script lang="ts">

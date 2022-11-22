@@ -1,35 +1,35 @@
 <template lang="pug">
-  div(class="sidebar")
-    div(class="logo")
-      svg-icon(class="pointer"
-        :iconName="'logo-icon'"
-        :iconWidth="'30px'"
-        @click.native="goToPage('Home')")
-    div(class="nav")
-      div(class="nav-container")
-        div(class="nav-item pointer"
-          v-for="(item,index) in navItem" :key="`icon-${index}`"
-          @click="switchNav(index)")
-          svg-icon(class="nav-item__icon"
-            :iconName="item.icon"
-            :iconColor="currPanel === index ? 'blue-1' : 'gray-3'"
-            :iconWidth="'24px'")
-          div(class="nav-item-text body-3"
-            :class="currPanel === index ? 'text-blue-1' : 'text-gray-3'") {{item.text}}
-    div(class="sidebar__chevron pointer"
-        :class="[{'rotate-hr': isSidebarPanelOpen}]"
-        @click="toggleSidebarPanel")
-      svg-icon(:iconName="'chevron-duo-right'"
-        :iconColor="'gray-3'"
-        :iconWidth="'30px'")
-    div(class="nav-setting pointer")
-      avatar(v-if="isLogin"
-        class="mt-30"
-        :textSize="14"
-        :avatarSize="35"
-        @click.native="goToPage('Settings')")
-    div(v-if="buildNumber"
-      class="text-white body-2 build-number") {{buildNumber}}
+div(class="sidebar")
+  div(class="logo")
+    svg-icon(class="pointer"
+      :iconName="'logo-icon'"
+      :iconWidth="'30px'"
+      @click.native="goToPage('Home')")
+  div(class="nav")
+    div(class="nav-container")
+      div(class="nav-item pointer"
+        v-for="(item,index) in navItem" :key="`icon-${index}`"
+        @click="switchNav(index)")
+        svg-icon(class="nav-item__icon"
+          :iconName="item.icon"
+          :iconColor="currPanel === index ? 'blue-1' : 'gray-3'"
+          :iconWidth="'24px'")
+        div(class="nav-item-text body-3"
+          :class="currPanel === index ? 'text-blue-1' : 'text-gray-3'") {{item.text}}
+  div(class="sidebar__chevron pointer"
+      :class="[{'rotate-hr': isSidebarPanelOpen}]"
+      @click="toggleSidebarPanel")
+    svg-icon(:iconName="'chevron-duo-right'"
+      :iconColor="'gray-3'"
+      :iconWidth="'30px'")
+  div(class="nav-setting pointer")
+    avatar(v-if="isLogin"
+      class="mt-30"
+      :textSize="14"
+      :avatarSize="35"
+      @click.native="goToPage('Settings')")
+  div(v-if="buildNumber"
+    class="text-white body-2 build-number") {{buildNumber}}
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'

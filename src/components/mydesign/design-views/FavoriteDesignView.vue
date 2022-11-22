@@ -1,13 +1,13 @@
 <template lang="pug">
-  div(class="favorite-design-view")
-    div(class="favorite-design-view__folder-name")  {{$t('NN0188')}}
-    div(class="horizontal-rule")
-    design-gallery(:noHeader="true"
-                  :menuItems="menuItems"
-                  :allDesigns="allDesigns"
-                  :selectedNum="selectedNum"
-                  @menuAction="handleDesignMenuAction"
-                  @loadMore="handleLoadMore")
+div(class="favorite-design-view")
+  div(class="favorite-design-view__folder-name")  {{$t('NN0188')}}
+  div(class="horizontal-rule")
+  design-gallery(:noHeader="true"
+                :menuItems="menuItems"
+                :allDesigns="allDesigns"
+                :selectedNum="selectedNum"
+                @menuAction="handleDesignMenuAction"
+                @loadMore="handleLoadMore")
 </template>
 
 <script lang="ts">

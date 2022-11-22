@@ -1,21 +1,21 @@
 <template lang="pug">
-  div(class="panel-page-plus"
-    :style="styles()"
-    @mouseover="pageMoveTo($event, 'mouse')"
-    @mouseout="pageMoveBack($event)"
-    @dragover="pageMoveTo($event, 'drag')"
-    @dragleave="pageMoveBack($event)"
-    @drop="handlePageDrop($event)")
-    div(v-if="actionType === 'mouse'"
-      class="panel-page-plus-wrapper pointer"
-      @click="addPage(index)")
-        svg-icon(class="py-5"
-            :iconColor="'white'"
-            :iconName="'plus-origin'"
-            :iconWidth="'15px'")
-        span(class="text-white") {{$t('NN0139')}}
-    div(v-if="actionType === 'drag'")
-      div(class="panel-page-plus-drag")
+div(class="panel-page-plus"
+  :style="styles()"
+  @mouseover="pageMoveTo($event, 'mouse')"
+  @mouseout="pageMoveBack($event)"
+  @dragover="pageMoveTo($event, 'drag')"
+  @dragleave="pageMoveBack($event)"
+  @drop="handlePageDrop($event)")
+  div(v-if="actionType === 'mouse'"
+    class="panel-page-plus-wrapper pointer"
+    @click="addPage(index)")
+      svg-icon(class="py-5"
+          :iconColor="'white'"
+          :iconName="'plus-origin'"
+          :iconWidth="'15px'")
+      span(class="text-white") {{$t('NN0139')}}
+  div(v-if="actionType === 'drag'")
+    div(class="panel-page-plus-drag")
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'

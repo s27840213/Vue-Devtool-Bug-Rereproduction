@@ -1,26 +1,26 @@
 <template lang="pug">
-  section
-    div(:class="[`nav-folder-${level}`, {'bg-gray-5': folder.isCurrLocation}]"
-        :title="folder.name"
-        @click="handleSelection")
-      div(class="nav-folder__expand-icon-container"
-          @click.stop="toggleExpansion")
-        svg-icon(class="nav-folder__expand-icon"
-            iconName="caret-down"
-            iconColor="gray-2"
-            iconWidth="7px"
-            iconHeight="4px"
-            :style="expandIconStyles()")
-      svg-icon(iconName="folder"
+section
+  div(:class="[`nav-folder-${level}`, {'bg-gray-5': folder.isCurrLocation}]"
+      :title="folder.name"
+      @click="handleSelection")
+    div(class="nav-folder__expand-icon-container"
+        @click.stop="toggleExpansion")
+      svg-icon(class="nav-folder__expand-icon"
+          iconName="caret-down"
           iconColor="gray-2"
-          iconWidth="15px"
-          style="pointer-events: none")
-      div(:class="`nav-folder-${level}__text`"
-          style="pointer-events: none")
-          span {{ folder.name }}
-    structure-folder(v-for="subFolder in checkExpand(realFolders)"
-                    :folder="subFolder" :level="level+1"
-                    :parents="[...parents, folder.id]")
+          iconWidth="7px"
+          iconHeight="4px"
+          :style="expandIconStyles()")
+    svg-icon(iconName="folder"
+        iconColor="gray-2"
+        iconWidth="15px"
+        style="pointer-events: none")
+    div(:class="`nav-folder-${level}__text`"
+        style="pointer-events: none")
+        span {{ folder.name }}
+  structure-folder(v-for="subFolder in checkExpand(realFolders)"
+                  :folder="subFolder" :level="level+1"
+                  :parents="[...parents, folder.id]")
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'

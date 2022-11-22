@@ -1,8 +1,8 @@
 <template lang="pug">
-  div(class="toggle" :style="outsideStyle")
-    div(v-for="op, idx in options" class="toggle-text"
-        :style="textStyle(idx)" @click="setValue(idx)") {{op.label}}
-    div(class="toggle-inside" :style="insideStyle")
+div(class="toggle" :style="outsideStyle")
+  div(v-for="op, idx in options" class="toggle-text"
+      :style="textStyle(idx)" @click="setValue(idx)") {{op.label}}
+  div(class="toggle-inside" :style="insideStyle")
 </template>
 
 <script lang="ts">

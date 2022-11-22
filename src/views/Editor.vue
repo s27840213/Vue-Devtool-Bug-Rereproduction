@@ -1,8 +1,8 @@
 <template lang="pug">
-  div(class="editor")
-    desktop-editor(v-if="!useMobileEditor" @setIsLoading="setIsLoading")
-    mobile-editor(v-else)
-    spinner(v-if="isLoading || isSaving || isGlobalLoading" :textContent="isSaving ? $t('NN0455') : $t('NN0454')")
+div(class="editor")
+  desktop-editor(v-if="!useMobileEditor" @setIsLoading="setIsLoading")
+  mobile-editor(v-else)
+  spinner(v-if="isLoading || isSaving || isGlobalLoading" :textContent="isSaving ? $t('NN0455') : $t('NN0454')")
 </template>
 
 <script lang="ts">

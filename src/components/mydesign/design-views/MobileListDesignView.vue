@@ -1,10 +1,10 @@
 <template lang="pug">
-  div(class="mobile-list-design-view")
-    mobile-folder-gallery(:path="[ROOT]"
-                          :noHeader="true"
-                          :allFolders="allFolders"
-                          :selectedNum="0")
-    div(class="scroll-space")
+div(class="mobile-list-design-view")
+  mobile-folder-gallery(:path="[ROOT]"
+                        :noHeader="true"
+                        :allFolders="allFolders"
+                        :selectedNum="0")
+  div(class="scroll-space")
 </template>
 
 <script lang="ts">

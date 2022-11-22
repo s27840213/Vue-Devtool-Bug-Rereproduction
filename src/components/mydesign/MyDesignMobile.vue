@@ -1,78 +1,78 @@
 <template lang="pug">
-  div(class="my-design-mobile")
-    div(class="my-design-mobile__nav-bar relative")
-      div(class="my-design-mobile__nav-bar__prev pointer"
-          @click="handlePrevPage")
-        svg-icon(iconName="chevron-left" iconColor="gray-1" iconWidth="24px")
-      div(class="my-design-mobile__nav-bar__title" :title="title") {{ title }}
-      div(class="my-design-mobile__nav-bar__menu")
-        div(v-for="button in menuButtons"
-            class="my-design-mobile__nav-bar__menu-button pointer"
-            @click="() => { !button.disabled && button.action() }")
-          svg-icon(:iconName="button.icon"
-                    :iconColor="button.disabled? 'gray-4' : 'gray-2'"
-                    :iconWidth="renderedWidth(button)"
-                    :iconHeight="renderedHeight(button)")
-    div(class="my-design-mobile__content relative")
-      component(v-if="currLocation !== ''"
-                :is="mydesignView"
-                class="design-view"
-                @clearSelection="handleClearSelection")
-      transition(name="slide-fade")
-        div(v-if="isShowMessage" class="my-design-mobile__message")
-          div(class="my-design-mobile__message__icon")
-            svg-icon(:iconName="messageItemIcon(messageQueue[0])"
-                    iconColor="white"
-                    iconWidth="24px")
-          div(class="my-design-mobile__message__text") {{ messageItemText(messageQueue[0]) }}
-    div(class="my-design-mobile__tab-bar")
-      div(v-for="tabButton in tabButtons"
-          class="my-design-mobile__tab-button pointer"
-          :class="{active: tabButton.condition(currLocation)}"
-          @click="handleGoTo(tabButton.tab)")
-        svg-icon(:iconName="tabButton.icon"
-                  iconColor="gray-2"
+div(class="my-design-mobile")
+  div(class="my-design-mobile__nav-bar relative")
+    div(class="my-design-mobile__nav-bar__prev pointer"
+        @click="handlePrevPage")
+      svg-icon(iconName="chevron-left" iconColor="gray-1" iconWidth="24px")
+    div(class="my-design-mobile__nav-bar__title" :title="title") {{ title }}
+    div(class="my-design-mobile__nav-bar__menu")
+      div(v-for="button in menuButtons"
+          class="my-design-mobile__nav-bar__menu-button pointer"
+          @click="() => { !button.disabled && button.action() }")
+        svg-icon(:iconName="button.icon"
+                  :iconColor="button.disabled? 'gray-4' : 'gray-2'"
+                  :iconWidth="renderedWidth(button)"
+                  :iconHeight="renderedHeight(button)")
+  div(class="my-design-mobile__content relative")
+    component(v-if="currLocation !== ''"
+              :is="mydesignView"
+              class="design-view"
+              @clearSelection="handleClearSelection")
+    transition(name="slide-fade")
+      div(v-if="isShowMessage" class="my-design-mobile__message")
+        div(class="my-design-mobile__message__icon")
+          svg-icon(:iconName="messageItemIcon(messageQueue[0])"
+                  iconColor="white"
                   iconWidth="24px")
-        div(class="my-design-mobile__tab-button__text") {{ tabButton.text }}
-    div(v-if="confirmMessage !== '' || bottomMenu !== ''" class="dim-background"
-        @click.stop.prevent="setBottomMenu('')")
-    transition(name="slide-full")
-      bottom-menu(v-if="bottomMenu !== '' || isAnySelected"
-                  class="bottom-menu"
-                  :bottomMenu="bottomMenu"
-                  :selectedNum="selectedNum"
-                  :isAnySelected="isAnySelected"
-                  :menuStack="menuStack"
-                  @close="setBottomMenu('')"
-                  @clear="handleClearSelection"
-                  @menuAction="handleMenuAction"
-                  @back="handlePrevMenu"
-                  @push="handlePushMenu")
-    div(v-if="confirmMessage !== ''" class="dim-background" @click.stop="closeConfirmMessage")
-      div(class="message" @click.stop)
-        div(class="message__close pointer"
-            @click.stop="closeConfirmMessage")
-          svg-icon(iconName="close" iconColor="gray-3" iconWidth="20px")
-        div(class="message__text")
-          span {{getMessageText()}}
-        div(class="message__description")
-          span(v-html="getMessageDescription()")
-        div(class="message__buttons")
-          div(class="message__cancel" @click.stop="closeConfirmMessage")
-            span {{$t('NN0203')}}
-          div(class="message__confirm" @click.stop="confirmAction")
-            span {{$t('NN0034')}}
-    div(v-if="isErrorShowing" class="dim-background" @click.stop="closeErrorMessage")
-      div(class="message" @click.stop)
-        div(class="message__close-minimal pointer"
-            @click.stop="closeErrorMessage")
-          svg-icon(iconName="close" iconColor="gray-2" iconWidth="20px")
-        div(class="message__text")
-          span {{$t('NN0456')}}
-        div(class="message__description")
-          span {{$t('NN0242')}}
-        div(class="message__ok" @click.stop="closeErrorMessage")
-          span {{$t('NN0563')}}
+        div(class="my-design-mobile__message__text") {{ messageItemText(messageQueue[0]) }}
+  div(class="my-design-mobile__tab-bar")
+    div(v-for="tabButton in tabButtons"
+        class="my-design-mobile__tab-button pointer"
+        :class="{active: tabButton.condition(currLocation)}"
+        @click="handleGoTo(tabButton.tab)")
+      svg-icon(:iconName="tabButton.icon"
+                iconColor="gray-2"
+                iconWidth="24px")
+      div(class="my-design-mobile__tab-button__text") {{ tabButton.text }}
+  div(v-if="confirmMessage !== '' || bottomMenu !== ''" class="dim-background"
+      @click.stop.prevent="setBottomMenu('')")
+  transition(name="slide-full")
+    bottom-menu(v-if="bottomMenu !== '' || isAnySelected"
+                class="bottom-menu"
+                :bottomMenu="bottomMenu"
+                :selectedNum="selectedNum"
+                :isAnySelected="isAnySelected"
+                :menuStack="menuStack"
+                @close="setBottomMenu('')"
+                @clear="handleClearSelection"
+                @menuAction="handleMenuAction"
+                @back="handlePrevMenu"
+                @push="handlePushMenu")
+  div(v-if="confirmMessage !== ''" class="dim-background" @click.stop="closeConfirmMessage")
+    div(class="message" @click.stop)
+      div(class="message__close pointer"
+          @click.stop="closeConfirmMessage")
+        svg-icon(iconName="close" iconColor="gray-3" iconWidth="20px")
+      div(class="message__text")
+        span {{getMessageText()}}
+      div(class="message__description")
+        span(v-html="getMessageDescription()")
+      div(class="message__buttons")
+        div(class="message__cancel" @click.stop="closeConfirmMessage")
+          span {{$t('NN0203')}}
+        div(class="message__confirm" @click.stop="confirmAction")
+          span {{$t('NN0034')}}
+  div(v-if="isErrorShowing" class="dim-background" @click.stop="closeErrorMessage")
+    div(class="message" @click.stop)
+      div(class="message__close-minimal pointer"
+          @click.stop="closeErrorMessage")
+        svg-icon(iconName="close" iconColor="gray-2" iconWidth="20px")
+      div(class="message__text")
+        span {{$t('NN0456')}}
+      div(class="message__description")
+        span {{$t('NN0242')}}
+      div(class="message__ok" @click.stop="closeErrorMessage")
+        span {{$t('NN0563')}}
 </template>
 
 <script lang="ts">

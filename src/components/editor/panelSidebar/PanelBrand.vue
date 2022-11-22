@@ -1,17 +1,17 @@
 <template lang="pug">
-  div(class="panel-brand relative")
-    div(v-if="isBrandsLoading" class="panel-brand__main")
-      svg-icon(iconName="loading"
-              iconWidth="20px"
-              iconColor="white")
-    div(v-else class="panel-brand__main")
-      div(class="panel-brand__header relative")
-        brand-selector(theme="editor")
-        div(class="panel-brand__settings pointer"
-          @click="handleOpenSettings")
-          svg-icon(iconName="settings" iconColor="white" iconWidth="24px")
-      div(class="panel-brand__tab")
-        brand-kit-tab(theme="editor")
+div(class="panel-brand relative")
+  div(v-if="isBrandsLoading" class="panel-brand__main")
+    svg-icon(iconName="loading"
+            iconWidth="20px"
+            iconColor="white")
+  div(v-else class="panel-brand__main")
+    div(class="panel-brand__header relative")
+      brand-selector(theme="editor")
+      div(class="panel-brand__settings pointer"
+        @click="handleOpenSettings")
+        svg-icon(iconName="settings" iconColor="white" iconWidth="24px")
+    div(class="panel-brand__tab")
+      brand-kit-tab(theme="editor")
 </template>
 
 <script lang="ts">

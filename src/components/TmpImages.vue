@@ -1,21 +1,21 @@
 <template lang="pug">
-  recycle-scroller(class="temp__content"
-    :items="rows")
-    template(v-slot="{ item }")
-      div
-        gallery-photo(v-for="(photo, i) in item.list"
-          :style="imageStyle(photo.preview, i > 0)",
-          :photo="photo"
-          :key="photo.id")
-        observer-sentinel(v-if="item.index === 2"
-          target=".temp__content"
-          @callback="handleLoadMore(item.page)")
-    template(#after)
-      div(class="text-center")
-        svg-icon(v-if="pending"
-          :iconName="'loading'"
-          :iconColor="'white'"
-          :iconWidth="'20px'")
+recycle-scroller(class="temp__content"
+  :items="rows")
+  template(v-slot="{ item }")
+    div
+      gallery-photo(v-for="(photo, i) in item.list"
+        :style="imageStyle(photo.preview, i > 0)",
+        :photo="photo"
+        :key="photo.id")
+      observer-sentinel(v-if="item.index === 2"
+        target=".temp__content"
+        @callback="handleLoadMore(item.page)")
+  template(#after)
+    div(class="text-center")
+      svg-icon(v-if="pending"
+        :iconName="'loading'"
+        :iconColor="'white'"
+        :iconWidth="'20px'")
 </template>
 
 <script lang="ts">

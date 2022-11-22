@@ -1,15 +1,15 @@
 <template lang="pug">
-  div(class="flip-to-square-random"
-      :style="styles")
-    div
-    div
-    div
-    div
-    div
-    div
-    div
-    div
-    div
+div(class="flip-to-square-random"
+    :style="styles")
+  div
+  div
+  div
+  div
+  div
+  div
+  div
+  div
+  div
 </template>
 
 <script lang="ts">

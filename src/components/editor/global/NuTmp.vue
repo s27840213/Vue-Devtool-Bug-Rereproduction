@@ -1,15 +1,15 @@
 <template lang="pug">
-  div(class="nu-tmp"
-      :style="styles()")
-    nu-layer(v-for="(layer,index) in config.layers"
-      :key="`layer-${index}`"
-      :pageIndex="pageIndex"
-      :layerIndex="layerIndex"
-      :subLayerIndex="index"
-      :contentScaleRatio="contentScaleRatio"
-      :config="layer"
-      :style="subLayerStyles(layer)"
-      :isSubLayer="true")
+div(class="nu-tmp"
+    :style="styles()")
+  nu-layer(v-for="(layer,index) in config.layers"
+    :key="`layer-${index}`"
+    :pageIndex="pageIndex"
+    :layerIndex="layerIndex"
+    :subLayerIndex="index"
+    :contentScaleRatio="contentScaleRatio"
+    :config="layer"
+    :style="subLayerStyles(layer)"
+    :isSubLayer="true")
 </template>
 
 <script lang="ts">

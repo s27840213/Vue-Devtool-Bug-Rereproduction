@@ -1,16 +1,16 @@
 <template lang="pug">
-  div(class="panel")
-    transition(name="panel-up")
-      div(v-if="isColorPanelOpen"
-      class="panel__color-panel")
-        color-panel(@toggleColorPanel="toggleColorPanel"
-          :alignLeft="false")
-    keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file', 'panel-brand']")
-      component(v-show="isSidebarPanelOpen && !isShowPagePreview && !bgRemoveMode"
-        class="p-10 border-box"
-        :style="panelStyles()"
-        @toggleColorPanel="toggleColorPanel"
-        :is="showPagePanel ? 'panel-page' : panelComponents[currPanel]")
+div(class="panel")
+  transition(name="panel-up")
+    div(v-if="isColorPanelOpen"
+    class="panel__color-panel")
+      color-panel(@toggleColorPanel="toggleColorPanel"
+        :alignLeft="false")
+  keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file', 'panel-brand']")
+    component(v-show="isSidebarPanelOpen && !isShowPagePreview && !bgRemoveMode"
+      class="p-10 border-box"
+      :style="panelStyles()"
+      @toggleColorPanel="toggleColorPanel"
+      :is="showPagePanel ? 'panel-page' : panelComponents[currPanel]")
 </template>
 
 <script lang="ts">

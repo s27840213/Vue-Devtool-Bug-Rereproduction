@@ -1,10 +1,10 @@
 <template lang="pug">
-  span(v-if="!url")
-    slot
-  a(v-else-if="url.startsWith('http')" :href="url")
-    slot
-  router-link(v-else :to="url")
-    slot
+span(v-if="!url")
+  slot
+a(v-else-if="url.startsWith('http')" :href="url")
+  slot
+router-link(v-else :to="url")
+  slot
 </template>
 
 <script lang="ts">

@@ -1,54 +1,53 @@
 <template lang="pug">
-  div(class="panel-bg")
-    tabs(:tabs="[$tc('NN0002', 2),$t('NN0017')]" @switchTab="switchTab")
-    //- Search bar
-    search-bar(v-if="showImageTab" class="mb-15"
-      :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
-      clear
-      :defaultKeyword="keywordLabel"
-      @search="handleSearch")
-    //- Default BG color
-    div(v-if="showColorTab" ref="colorBlock")
-      div(class="text-left py-5 text-white") {{$t('NN0017')}}
-      div(class="panel-bg__colors")
-        div(class="panel-bg__color"
-          @click="handleColorModal(currBackgroundColor)")
-        div(v-for="color in defaultBgColor"
-          class="panel-bg__color"
-          :style="colorStyles(color)"
-          @click="setBgColor(color)")
-        div(class="panel-bg__color"
-          @click="setBgColor('#ffffff00')")
-    //- Search result empty msg
-    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
-    //- Search result and main content
-    category-list(v-for="item in categoryListArray"
-                  v-show="item.show" :ref="item.key" :key="item.key"
-                  :list="item.content" @loadMore="handleLoadMore")
-      template(v-slot:category-list-rows="{ list, title }")
-        category-list-rows(
-          :list="list"
-          :title="title"
-          @action="handleCategorySearch")
-          template(v-slot:preview="{ item }")
-            category-background-item(class="panel-bg__item"
-              :item="item"
-              :locked="currentPageBackgroundLocked")
-      template(v-slot:category-background-item="{ list, title }")
-        div(class="panel-bg__items")
-          div(v-if="title"
-            class="panel-bg__header") {{ title }}
-          category-background-item(v-for="item in list"
-            class="panel-bg__item"
-            :key="item.id"
+div(class="panel-bg")
+  tabs(:tabs="[$tc('NN0002', 2),$t('NN0017')]" @switchTab="switchTab")
+  //- Search bar
+  search-bar(v-if="showImageTab" class="mb-15"
+    :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
+    clear
+    :defaultKeyword="keywordLabel"
+    @search="handleSearch")
+  //- Default BG color
+  div(v-if="showColorTab" ref="colorBlock")
+    div(class="text-left py-5 text-white") {{$t('NN0017')}}
+    div(class="panel-bg__colors")
+      div(class="panel-bg__color"
+        @click="handleColorModal(currBackgroundColor)")
+      div(v-for="color in defaultBgColor"
+        class="panel-bg__color"
+        :style="colorStyles(color)"
+        @click="setBgColor(color)")
+      div(class="panel-bg__color"
+        @click="setBgColor('#ffffff00')")
+  //- Search result empty msg
+  div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+  //- Search result and main content
+  category-list(v-for="item in categoryListArray"
+                v-show="item.show" :ref="item.key" :key="item.key"
+                :list="item.content" @loadMore="handleLoadMore")
+    template(v-slot:category-list-rows="{ list, title }")
+      category-list-rows(
+        :list="list"
+        :title="title"
+        @action="handleCategorySearch")
+        template(v-slot:preview="{ item }")
+          category-background-item(class="panel-bg__item"
             :item="item"
             :locked="currentPageBackgroundLocked")
-      template(v-if="pending" #after)
-        div(class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
-
+    template(v-slot:category-background-item="{ list, title }")
+      div(class="panel-bg__items")
+        div(v-if="title"
+          class="panel-bg__header") {{ title }}
+        category-background-item(v-for="item in list"
+          class="panel-bg__item"
+          :key="item.id"
+          :item="item"
+          :locked="currentPageBackgroundLocked")
+    template(v-if="pending" #after)
+      div(class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
 </template>
 
 <script lang="ts">

@@ -1,43 +1,43 @@
 <template lang="pug">
-  div(class="brand-kit-text-setting relative")
-    div(class="brand-kit-text-setting__inner pointer"
-        :class="type"
-        @click="handleToggleConfig")
-      span(:style="getFontStyles()") {{ getDisplayedText() }}
-    div(v-if="isConfigOpen" class="brand-kit-text-setting__config"
-        v-click-outside="() => { isConfigOpen = false }")
-      span(class="brand-kit-text-setting__config__title") {{ $t('NN0062') }}
-      div(class="brand-kit-text-setting__config__family-size")
-        div(class="property-bar pointer" @click="openFontsPanel")
-          img(:src="fontPrevUrl" @error="onError")
-          svg-icon(class="pointer"
-            :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
-        div(class="brand-kit-text-setting__config__size size-bar relative")
-          div(class="pointer"
-            @mousedown="fontSizeStepping(-1)")
-            svg-icon(iconName="minus-small" iconWidth="24px" iconColor="gray-2")
-          button(class="brand-kit-text-setting__config__range-input-button" @click="handleValueModal")
-            input(class="body-2 text-gray-2 center" type="text" ref="input-fontSize"
-                  @change="setSize" :value="fontSizeBuffer")
-          div(class="pointer"
-            @mousedown="fontSizeStepping(1)")
-            svg-icon(iconName="plus-small" iconWidth="24px" iconColor="gray-2")
-          value-selector(v-if="isValueSelectorOpen"
-                      :valueArray="fontSelectValue"
-                      class="brand-kit-text-setting__config__value-selector"
-                      v-click-outside="handleValueModal"
-                      @update="handleValueUpdate")
-      div(class="action-bar flex-evenly brand-kit-text-setting__config__style")
-        svg-icon(v-for="(icon, index) in fontIcons"
-          class="feature-button pointer"
-          :class="{active: styleHit(icon)}"
-          :id="`icon-${icon}`"
-          v-hint="hintMap[icon]"
-          :iconName="icon" iconWidth="24px" iconColor="gray-2" @mousedown.native="onPropertyClick(icon)")
-      div(v-if="isFontsPanelOpen"
-        class="brand-kit-text-setting__panel-fonts"
-        v-click-outside="() => { isFontsPanelOpen = false }")
-        panel-fonts(:noTitle="true" :textStyleType="type")
+div(class="brand-kit-text-setting relative")
+  div(class="brand-kit-text-setting__inner pointer"
+      :class="type"
+      @click="handleToggleConfig")
+    span(:style="getFontStyles()") {{ getDisplayedText() }}
+  div(v-if="isConfigOpen" class="brand-kit-text-setting__config"
+      v-click-outside="() => { isConfigOpen = false }")
+    span(class="brand-kit-text-setting__config__title") {{ $t('NN0062') }}
+    div(class="brand-kit-text-setting__config__family-size")
+      div(class="property-bar pointer" @click="openFontsPanel")
+        img(:src="fontPrevUrl" @error="onError")
+        svg-icon(class="pointer"
+          :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
+      div(class="brand-kit-text-setting__config__size size-bar relative")
+        div(class="pointer"
+          @mousedown="fontSizeStepping(-1)")
+          svg-icon(iconName="minus-small" iconWidth="24px" iconColor="gray-2")
+        button(class="brand-kit-text-setting__config__range-input-button" @click="handleValueModal")
+          input(class="body-2 text-gray-2 center" type="text" ref="input-fontSize"
+                @change="setSize" :value="fontSizeBuffer")
+        div(class="pointer"
+          @mousedown="fontSizeStepping(1)")
+          svg-icon(iconName="plus-small" iconWidth="24px" iconColor="gray-2")
+        value-selector(v-if="isValueSelectorOpen"
+                    :valueArray="fontSelectValue"
+                    class="brand-kit-text-setting__config__value-selector"
+                    v-click-outside="handleValueModal"
+                    @update="handleValueUpdate")
+    div(class="action-bar flex-evenly brand-kit-text-setting__config__style")
+      svg-icon(v-for="(icon, index) in fontIcons"
+        class="feature-button pointer"
+        :class="{active: styleHit(icon)}"
+        :id="`icon-${icon}`"
+        v-hint="hintMap[icon]"
+        :iconName="icon" iconWidth="24px" iconColor="gray-2" @mousedown.native="onPropertyClick(icon)")
+    div(v-if="isFontsPanelOpen"
+      class="brand-kit-text-setting__panel-fonts"
+      v-click-outside="() => { isFontsPanelOpen = false }")
+      panel-fonts(:noTitle="true" :textStyleType="type")
 </template>
 
 <script lang="ts">

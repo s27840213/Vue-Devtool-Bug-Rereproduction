@@ -1,24 +1,24 @@
 <template lang="pug">
-  div(class="popup-adjust p-10")
-    div(class="popup-adjust__field"
-      v-for="field in fields"
-      :key="field.name")
-      div(class="popup-adjust__label")
-        div {{ field.label }}
-        input(class="popup-adjust__text body-2 text-gray-2 ml-10"
-          type="text"
-          :name="field.name"
-          @input="handleField"
-          @blur="handleChangeStop"
-          :value="adjustTmp[field.name] || 0")
-      input(class="popup-adjust__range-input input__slider--range"
-        :value="adjustTmp[field.name] || 0"
-        :max="field.max"
-        :min="field.min"
+div(class="popup-adjust p-10")
+  div(class="popup-adjust__field"
+    v-for="field in fields"
+    :key="field.name")
+    div(class="popup-adjust__label")
+      div {{ field.label }}
+      input(class="popup-adjust__text body-2 text-gray-2 ml-10"
+        type="text"
         :name="field.name"
         @input="handleField"
-        @mouseup="handleChangeStop"
-        type="range")
+        @blur="handleChangeStop"
+        :value="adjustTmp[field.name] || 0")
+    input(class="popup-adjust__range-input input__slider--range"
+      :value="adjustTmp[field.name] || 0"
+      :max="field.max"
+      :min="field.min"
+      :name="field.name"
+      @input="handleField"
+      @mouseup="handleChangeStop"
+      type="range")
 </template>
 
 <script lang="ts">

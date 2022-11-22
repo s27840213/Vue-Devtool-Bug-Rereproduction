@@ -1,30 +1,30 @@
 <template lang="pug">
-  div(class="modal-card")
-    div(class="text-H6 text-gray-2 mb-30")
-      span {{modalInfo.title}}
-    div(class="modal-card__content body-SM text-gray-2 mb-30")
-      template(v-if="!pending")
-        span(v-for="text in modalInfo.content"
-        @keydown.ctrl.67.exact.stop
-        @keydown.meta.67.exact.stop) {{text}}
-      svg-icon(v-if="pending"
-        :iconName="'loading'"
-        :iconColor="'gray-2'"
-        :iconWidth="'60px'")
-    template(v-if='!pending')
-      div(class="modal-card__button")
-        button(class="btn-primary-mid full-width"
-          :class="modalInfo.confirmButton.class"
-          :style="modalInfo.confirmButton.style"
-          @click="confirmAction()") {{ modalInfo.confirmButton.msg || $t('NN0358') }}
-        button(v-if="modalInfo.cancelButton.msg"
-          class="btn-primary-mid full-width"
-          :class="modalInfo.cancelButton.class"
-          :style="modalInfo.cancelButton.style"
-          @click="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
-      div(class="modal-card__close")
-        svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'"
-                iconColor="gray-2" @click.native="closePopup()")
+div(class="modal-card")
+  div(class="text-H6 text-gray-2 mb-30")
+    span {{modalInfo.title}}
+  div(class="modal-card__content body-SM text-gray-2 mb-30")
+    template(v-if="!pending")
+      span(v-for="text in modalInfo.content"
+      @keydown.ctrl.67.exact.stop
+      @keydown.meta.67.exact.stop) {{text}}
+    svg-icon(v-if="pending"
+      :iconName="'loading'"
+      :iconColor="'gray-2'"
+      :iconWidth="'60px'")
+  template(v-if='!pending')
+    div(class="modal-card__button")
+      button(class="btn-primary-mid full-width"
+        :class="modalInfo.confirmButton.class"
+        :style="modalInfo.confirmButton.style"
+        @click="confirmAction()") {{ modalInfo.confirmButton.msg || $t('NN0358') }}
+      button(v-if="modalInfo.cancelButton.msg"
+        class="btn-primary-mid full-width"
+        :class="modalInfo.cancelButton.class"
+        :style="modalInfo.cancelButton.style"
+        @click="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
+    div(class="modal-card__close")
+      svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'"
+              iconColor="gray-2" @click.native="closePopup()")
 </template>
 
 <script lang="ts">

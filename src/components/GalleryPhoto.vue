@@ -1,32 +1,32 @@
 <template lang="pug">
-  div(class="gallery-photo" :class="{border: deletable}")
-    div(v-if="deletable"
-        class="gallery-photo__delete"
-        @click.stop.prevent="handleDeletePhoto")
-      svg-icon(iconName="close" iconColor="gray-2" iconWidth="24px")
-    circle-checkbox(v-if="inFilePanel"
-      class="gallery-photo__checkbox"
-      :class="{show: hasCheckedAssets}"
-      :value="photo.assetIndex"
-      :checkedValues="checkedAssets"
-      :disabled="isUploading"
-      @update="handleCheck")
-    svg-icon(v-if="showMoreBtn" class="pointer gallery-photo__more"
-      @click.native="showPhotoInfo"
-      :iconName="'more_vertical'"
-      :iconColor="'gray-2'"
-      :iconWidth="'20px'")
-    img(:src="previewSrc",
-      ref='img'
-      draggable="true",
-      class="gallery-photo__img pointer"
-      @dragstart="dragStart($event, photo)"
-      @dragend="dragEnd"
-      @click="onClick($event, photo)")
-    div(v-if="isUploading"
-        class="gallery-photo__progress")
-      div(class="gallery-photo__progress-bar"
-        :style="{'width': `${photo.progress}%`}")
+div(class="gallery-photo" :class="{border: deletable}")
+  div(v-if="deletable"
+      class="gallery-photo__delete"
+      @click.stop.prevent="handleDeletePhoto")
+    svg-icon(iconName="close" iconColor="gray-2" iconWidth="24px")
+  circle-checkbox(v-if="inFilePanel"
+    class="gallery-photo__checkbox"
+    :class="{show: hasCheckedAssets}"
+    :value="photo.assetIndex"
+    :checkedValues="checkedAssets"
+    :disabled="isUploading"
+    @update="handleCheck")
+  svg-icon(v-if="showMoreBtn" class="pointer gallery-photo__more"
+    @click.native="showPhotoInfo"
+    :iconName="'more_vertical'"
+    :iconColor="'gray-2'"
+    :iconWidth="'20px'")
+  img(:src="previewSrc",
+    ref='img'
+    draggable="true",
+    class="gallery-photo__img pointer"
+    @dragstart="dragStart($event, photo)"
+    @dragend="dragEnd"
+    @click="onClick($event, photo)")
+  div(v-if="isUploading"
+      class="gallery-photo__progress")
+    div(class="gallery-photo__progress-bar"
+      :style="{'width': `${photo.progress}%`}")
 </template>
 
 <script lang="ts">

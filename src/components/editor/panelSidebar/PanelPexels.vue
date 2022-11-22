@@ -1,12 +1,12 @@
 <template lang="pug">
-  div(class="panel-photo")
-    search-bar(class="mb-15"
-      :placeholder="$t('NN0092', {target: 'Pexels'})"
-      @search="handleSearch")
-    div(v-if="!pending && !list.length"
-      class="text-white text-left") {{$t('NN0393', {keyword: query, target: "Pexels"})}}
-    tmp-images(v-else
-      @loadMore="handleLoadMore")
+div(class="panel-photo")
+  search-bar(class="mb-15"
+    :placeholder="$t('NN0092', {target: 'Pexels'})"
+    @search="handleSearch")
+  div(v-if="!pending && !list.length"
+    class="text-white text-left") {{$t('NN0393', {keyword: query, target: "Pexels"})}}
+  tmp-images(v-else
+    @loadMore="handleLoadMore")
 </template>
 
 <script lang="ts">

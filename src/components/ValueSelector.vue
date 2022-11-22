@@ -1,12 +1,11 @@
 <template lang="pug">
-  div(class="value-selector")
-    div(class="value-selector__wrapper")
-      ul
-        li(v-for="i in valueArray" :key="i" :style="liStyles(i)")
-          button(@click="setValue(i)")
-            div(class="value-selector__value")
-              span {{ i }}
-
+div(class="value-selector")
+  div(class="value-selector__wrapper")
+    ul
+      li(v-for="i in valueArray" :key="i" :style="liStyles(i)")
+        button(@click="setValue(i)")
+          div(class="value-selector__value")
+            span {{ i }}
 </template>
 
 <script lang="ts">

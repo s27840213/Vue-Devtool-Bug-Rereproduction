@@ -1,29 +1,29 @@
 <template lang="pug">
-  div(class="mobile-warning")
-    div(class="mobile-warning__content")
-      div(class="mobile-warning__logo")
-        div(class="mobile-warning__logo-wrapper")
-          svg-icon(iconName="logo"
-                  iconWidth="100%")
-      img(class="mobile-warning__image"
-          :src="require('@/assets/img/jpg/mobilewarning/mobile.jpg')")
-      div(class="mobile-warning__title")
-        span(:style="titleStyles()") {{$t('NN0259')}}
-      div(class="mobile-warning__description")
-        div(class="mobile-warning__description-line")
-          span {{$t('NN0260')}}
-        div(class="mobile-warning__description-line")
-          span {{`${$t('NN0261')} (${width})`}}
-      div(class="mobile-warning__button-outter")
-        div(class="mobile-warning__button-wrapper")
-          div(class="mobile-warning__button"
-              @click="goToHome")
-            span(:style="buttonStyles()") {{$t('NN0262')}}
-      div(class="mobile-warning__button-outter secondary")
-        div(class="mobile-warning__button-wrapper secondary")
-          div(class="mobile-warning__button secondary"
-              @click="continueToUrl")
-            span(:style="buttonStyles()") {{$t('NN0362')}}
+div(class="mobile-warning")
+  div(class="mobile-warning__content")
+    div(class="mobile-warning__logo")
+      div(class="mobile-warning__logo-wrapper")
+        svg-icon(iconName="logo"
+                iconWidth="100%")
+    img(class="mobile-warning__image"
+        :src="require('@/assets/img/jpg/mobilewarning/mobile.jpg')")
+    div(class="mobile-warning__title")
+      span(:style="titleStyles()") {{$t('NN0259')}}
+    div(class="mobile-warning__description")
+      div(class="mobile-warning__description-line")
+        span {{$t('NN0260')}}
+      div(class="mobile-warning__description-line")
+        span {{`${$t('NN0261')} (${width})`}}
+    div(class="mobile-warning__button-outter")
+      div(class="mobile-warning__button-wrapper")
+        div(class="mobile-warning__button"
+            @click="goToHome")
+          span(:style="buttonStyles()") {{$t('NN0262')}}
+    div(class="mobile-warning__button-outter secondary")
+      div(class="mobile-warning__button-wrapper secondary")
+        div(class="mobile-warning__button secondary"
+            @click="continueToUrl")
+          span(:style="buttonStyles()") {{$t('NN0362')}}
 </template>
 
 <script lang="ts">

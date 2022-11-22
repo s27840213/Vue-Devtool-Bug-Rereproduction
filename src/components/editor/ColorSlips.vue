@@ -1,79 +1,79 @@
 <template lang="pug">
-  div(class="color-panel"
-      :class="[whiteTheme ? 'bg-white': 'bg-gray-1-5']"
-      v-click-outside="vcoConfig"
-      ref="colorPanel")
-    img(v-if="showPanelBtn" class="color-panel__btn"
-      :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
-      @click="closePanel()")
-    div(class="color-panel__scroll" :style="noPadding ? {padding:0} : {}")
-      //- Recently colors
+div(class="color-panel"
+    :class="[whiteTheme ? 'bg-white': 'bg-gray-1-5']"
+    v-click-outside="vcoConfig"
+    ref="colorPanel")
+  img(v-if="showPanelBtn" class="color-panel__btn"
+    :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
+    @click="closePanel()")
+  div(class="color-panel__scroll" :style="noPadding ? {padding:0} : {}")
+    //- Recently colors
+    div(class="color-panel__colors"
+        :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+      div(class="text-left mb-5")
+        div(class="flex-center")
+          svg-icon(v-if="showAllRecentlyColor && !isTouchDevice" iconName="chevron-left"
+                iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
+                class="mr-5" @click.native="lessRecently()")
+          span {{$t('NN0679')}}
+        span(v-if="!showAllRecentlyColor" class="btn-LG" @click="moreRecently()") {{$t('NN0082')}}
+      div
+        div(class="color-panel__add-color pointer"
+          @click="openColorPanel($event)")
+        div(v-for="color in recentlyColors"
+          class="color-panel__color"
+          :style="colorStyles(color)"
+          @click="handleColorEvent(color)")
+    template(v-if="!showAllRecentlyColor")
+      template(v-if="isBrandkitAvailable")
+        //- Brandkit select
+        div(class="relative")
+          brand-selector(theme="mobile-panel")
+          div(class="color-panel__brand-settings pointer"
+              @click="handleOpenSettings")
+            svg-icon(iconName="settings" iconColor="gray-2" iconWidth="24px")
+        //- Brandkit palettes
+        div(v-if="isPalettesLoading" class="color-panel__colors")
+          svg-icon(iconName="loading"
+                  iconWidth="20px"
+                  iconColor="white")
+        div(v-else v-for="palette in currentPalettes"
+            class="color-panel__colors"
+            :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+          div(class="text-left mb-5")
+            span {{getDisplayedPaletteName(palette)}}
+          div
+            div(v-for="color in palette.colors"
+              class="color-panel__color"
+              :style="colorStyles(color.color)"
+              @click="handleColorEvent(color.color)")
+      //- Document colors
       div(class="color-panel__colors"
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
         div(class="text-left mb-5")
-          div(class="flex-center")
-            svg-icon(v-if="showAllRecentlyColor && !isTouchDevice" iconName="chevron-left"
-                  iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
-                  class="mr-5" @click.native="lessRecently()")
-            span {{$t('NN0679')}}
-          span(v-if="!showAllRecentlyColor" class="btn-LG" @click="moreRecently()") {{$t('NN0082')}}
+          span {{$t('NN0091')}}
         div
-          div(class="color-panel__add-color pointer"
-            @click="openColorPanel($event)")
-          div(v-for="color in recentlyColors"
+          div(v-for="color in documentColors"
             class="color-panel__color"
             :style="colorStyles(color)"
             @click="handleColorEvent(color)")
-      template(v-if="!showAllRecentlyColor")
-        template(v-if="isBrandkitAvailable")
-          //- Brandkit select
-          div(class="relative")
-            brand-selector(theme="mobile-panel")
-            div(class="color-panel__brand-settings pointer"
-                @click="handleOpenSettings")
-              svg-icon(iconName="settings" iconColor="gray-2" iconWidth="24px")
-          //- Brandkit palettes
-          div(v-if="isPalettesLoading" class="color-panel__colors")
-            svg-icon(iconName="loading"
-                    iconWidth="20px"
-                    iconColor="white")
-          div(v-else v-for="palette in currentPalettes"
-              class="color-panel__colors"
-              :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-            div(class="text-left mb-5")
-              span {{getDisplayedPaletteName(palette)}}
-            div
-              div(v-for="color in palette.colors"
-                class="color-panel__color"
-                :style="colorStyles(color.color)"
-                @click="handleColorEvent(color.color)")
-        //- Document colors
-        div(class="color-panel__colors"
-            :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-          div(class="text-left mb-5")
-            span {{$t('NN0091')}}
-          div
-            div(v-for="color in documentColors"
-              class="color-panel__color"
-              :style="colorStyles(color)"
-              @click="handleColorEvent(color)")
-        //- Preset Colors
-        div(class="color-panel__colors"
-            :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-          div(class="text-left mb-5")
-            span {{$t('NN0089')}}
-          div
-            div(v-for="color in defaultColors"
-              class="color-panel__color"
-              :style="colorStyles(color)"
-              @click="handleColorEvent(color)")
-    color-picker(v-if="isColorPickerOpen"
-      class="color-panel__color-picker"
-      ref="colorPicker"
-      v-click-outside="closeColorModal"
-      :currentColor="colorUtils.currColor"
-      @update="handleDragUpdate"
-      @final="handleChangeStop")
+      //- Preset Colors
+      div(class="color-panel__colors"
+          :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+        div(class="text-left mb-5")
+          span {{$t('NN0089')}}
+        div
+          div(v-for="color in defaultColors"
+            class="color-panel__color"
+            :style="colorStyles(color)"
+            @click="handleColorEvent(color)")
+  color-picker(v-if="isColorPickerOpen"
+    class="color-panel__color-picker"
+    ref="colorPicker"
+    v-click-outside="closeColorModal"
+    :currentColor="colorUtils.currColor"
+    @update="handleDragUpdate"
+    @final="handleChangeStop")
 </template>
 
 <script lang="ts">

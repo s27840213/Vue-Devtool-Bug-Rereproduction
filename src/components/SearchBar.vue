@@ -1,24 +1,24 @@
 <template lang="pug">
-  form(class="search-bar bg-gray-6"
-    @submit="onSearch")
-    input(class="search-bar__input body-2"
-      type="text"
-      v-model="keyword"
-      @input="onUpdate"
-      :placeholder="placeholder"
-      :style="inputStyles()")
-    svg-icon(v-if="clear && keyword"
-      class="pointer mr-5"
-      iconName="close"
-      :iconColor="color.close || 'gray-3'"
-      iconWidth="20px"
-      @click.native="onClear")
-    svg-icon(class="pointer"
-      iconName="search"
-      :iconColor="color.search || 'gray-3'"
-      iconWidth="20px"
-      @click.native="onSearch")
-    slot
+form(class="search-bar bg-gray-6"
+  @submit="onSearch")
+  input(class="search-bar__input body-2"
+    type="text"
+    v-model="keyword"
+    @input="onUpdate"
+    :placeholder="placeholder"
+    :style="inputStyles()")
+  svg-icon(v-if="clear && keyword"
+    class="pointer mr-5"
+    iconName="close"
+    :iconColor="color.close || 'gray-3'"
+    iconWidth="20px"
+    @click.native="onClear")
+  svg-icon(class="pointer"
+    iconName="search"
+    :iconColor="color.search || 'gray-3'"
+    iconWidth="20px"
+    @click.native="onSearch")
+  slot
 </template>
 
 <script lang="ts">

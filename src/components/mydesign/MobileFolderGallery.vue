@@ -1,28 +1,28 @@
 <template lang="pug">
-  div(v-if="allFolders.length > 0 || isFoldersLoading" class="mobile-folder-gallery")
-    div(v-if="!noHeader && allFolders.length > 0" class="mobile-folder-gallery__header")
-      div(class="mobile-folder-gallery__title")
-        span {{$tc('NN0253', 2)}}
-      div(class="mobile-folder-gallery__expand-icon-container"
-          @click="toggleExpansion")
-        svg-icon(:style="expansionIconStyles()"
-                iconName="chevron-left"
-                iconWidth="24px"
-                iconColor="gray-2")
-    div(v-if="isExpanded" class="mobile-folder-gallery__folders")
-      mobile-folder-item(v-for="(folder, index) in allFolders"
-                  :path="path"
-                  :config="folder"
-                  :index="index"
-                  @goto="handleGotoFolder(folder.id)"
-                  :isSelected="checkFolderSelected(folder.id)"
-                  :isAnySelected="isAnySelected"
-                  @select="selectFolder(folder)"
-                  @deselect="deselectFolder(folder)")
-    div(v-if="isExpanded && isFoldersLoading" class="mobile-folder-gallery__loading")
-      svg-icon(iconName="loading"
-                iconWidth="32px"
-                iconColor="gray-3")
+div(v-if="allFolders.length > 0 || isFoldersLoading" class="mobile-folder-gallery")
+  div(v-if="!noHeader && allFolders.length > 0" class="mobile-folder-gallery__header")
+    div(class="mobile-folder-gallery__title")
+      span {{$tc('NN0253', 2)}}
+    div(class="mobile-folder-gallery__expand-icon-container"
+        @click="toggleExpansion")
+      svg-icon(:style="expansionIconStyles()"
+              iconName="chevron-left"
+              iconWidth="24px"
+              iconColor="gray-2")
+  div(v-if="isExpanded" class="mobile-folder-gallery__folders")
+    mobile-folder-item(v-for="(folder, index) in allFolders"
+                :path="path"
+                :config="folder"
+                :index="index"
+                @goto="handleGotoFolder(folder.id)"
+                :isSelected="checkFolderSelected(folder.id)"
+                :isAnySelected="isAnySelected"
+                @select="selectFolder(folder)"
+                @deselect="deselectFolder(folder)")
+  div(v-if="isExpanded && isFoldersLoading" class="mobile-folder-gallery__loading")
+    svg-icon(iconName="loading"
+              iconWidth="32px"
+              iconColor="gray-3")
 </template>
 
 <script lang="ts">

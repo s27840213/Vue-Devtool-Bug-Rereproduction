@@ -1,16 +1,16 @@
 <template lang="pug">
-  div(ref="box"
-      class="scrollable-template-preview"
-      @mousemove="changeMouseX")
-    div(ref="container"
-        class="scrollable-template-preview__images"
-        :style="scrollStyles()")
-      img(v-for="imageUrl in imageUrls"
-          :src="imageUrl")
-    div(class="scrollable-template-preview__bar"
-        :style="barStyles()")
-      div(class="scrollable-template-preview__bar-progress"
-          :style="progressStyles()")
+div(ref="box"
+    class="scrollable-template-preview"
+    @mousemove="changeMouseX")
+  div(ref="container"
+      class="scrollable-template-preview__images"
+      :style="scrollStyles()")
+    img(v-for="imageUrl in imageUrls"
+        :src="imageUrl")
+  div(class="scrollable-template-preview__bar"
+      :style="barStyles()")
+    div(class="scrollable-template-preview__bar-progress"
+        :style="progressStyles()")
 </template>
 
 <script lang="ts">

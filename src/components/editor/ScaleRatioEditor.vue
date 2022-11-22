@@ -1,33 +1,33 @@
 <template lang="pug">
-  div(class="scale-ratio-editor")
-    input(class="scale-ratio-editor__input pointer"
-      ref="scale-ratio-editor" type="range" min="0.1" max="5" step="0.01"
-      v-model="ratioInPercent"
-      :style="ratioStyles()"
-      :disabled="isShowPagePreview"
-      @input="setScaleRatio(Math.round(ratioInPercent*100))"
-      @mousedown="setIsSettingScaleRatio(true)"
-      @mouseup="handleMouseUp"
-      v-ratio-change)
-    div(class="px-5 flex items-center  btn-page-resize hover-effect pointer"
-        @click="openResizePopup()")
-      div(class="scale-ratio-editor__percentage lead-2")
-        span(class="text-gray-2") {{pageScaleRatio}}%
-      svg-icon(class="pointer"
-        :class="[{'rotate-hr': isPageScalePopupOpen}]"
-        :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
-    svg-icon(:class="{'hover-effect': !inBgRemoveMode, 'click-disabled': inBgRemoveMode}"
-      @click.native="setIsShowPagePreview(!isShowPagePreview)"
-      :iconName="'grid'"
-      :iconColor="inBgRemoveMode ? 'gray-4' :'gray-2'"
-      :disabled="inBgRemoveMode"
-      :iconWidth="'24px'")
-    svg-icon(:class="{'hover-effect': !inBgRemoveMode, 'click-disabled': inBgRemoveMode}"
-      :iconName="'navPage'"
-      :iconColor="inBgRemoveMode? 'gray-4' :'gray-2'"
-      :iconWidth="'24px'"
-      :disabled="inBgRemoveMode"
-      @click.native="setShowPagePanel(!showPagePanel)")
+div(class="scale-ratio-editor")
+  input(class="scale-ratio-editor__input pointer"
+    ref="scale-ratio-editor" type="range" min="0.1" max="5" step="0.01"
+    v-model="ratioInPercent"
+    :style="ratioStyles()"
+    :disabled="isShowPagePreview"
+    @input="setScaleRatio(Math.round(ratioInPercent*100))"
+    @mousedown="setIsSettingScaleRatio(true)"
+    @mouseup="handleMouseUp"
+    v-ratio-change)
+  div(class="px-5 flex items-center  btn-page-resize hover-effect pointer"
+      @click="openResizePopup()")
+    div(class="scale-ratio-editor__percentage lead-2")
+      span(class="text-gray-2") {{pageScaleRatio}}%
+    svg-icon(class="pointer"
+      :class="[{'rotate-hr': isPageScalePopupOpen}]"
+      :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
+  svg-icon(:class="{'hover-effect': !inBgRemoveMode, 'click-disabled': inBgRemoveMode}"
+    @click.native="setIsShowPagePreview(!isShowPagePreview)"
+    :iconName="'grid'"
+    :iconColor="inBgRemoveMode ? 'gray-4' :'gray-2'"
+    :disabled="inBgRemoveMode"
+    :iconWidth="'24px'")
+  svg-icon(:class="{'hover-effect': !inBgRemoveMode, 'click-disabled': inBgRemoveMode}"
+    :iconName="'navPage'"
+    :iconColor="inBgRemoveMode? 'gray-4' :'gray-2'"
+    :iconWidth="'24px'"
+    :disabled="inBgRemoveMode"
+    @click.native="setShowPagePanel(!showPagePanel)")
 </template>
 
 <script lang="ts">
