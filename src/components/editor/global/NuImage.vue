@@ -33,7 +33,7 @@
             filter(:id="filterId"
               color-interpolation-filters="sRGB")
               component(v-for="(elm, idx) in svgFilterElms()"
-                :key="`${filterId}`"
+                :key="`${filterId + idx}`"
                 :is="elm.tag"
                 v-bind="elm.attrs")
                 component(v-for="child in elm.child"
