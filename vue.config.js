@@ -102,7 +102,7 @@ module.exports = {
         if (process.env.NODE_ENV === 'production') {
             const fs = require('fs')
             const content = process.env.BITBUCKET_BUILD_NUMBER || ''
-            fs.writeFile('ver.txt', content, err => {
+            fs.writeFile('dist/ver.txt', content, err => {
                 if (err) console.error(err)
             })
         }
