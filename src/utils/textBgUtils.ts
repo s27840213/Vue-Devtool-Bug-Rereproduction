@@ -53,6 +53,8 @@ class Rect {
   rows: {
     rect: DOMRect
     spanData: {
+      x: number
+      y: number
       width: number
       height: number
       text: string
@@ -121,6 +123,8 @@ class Rect {
           this.rows.push({
             rect: cr,
             spanData: [{
+              x: cr.x,
+              y: cr.y,
               width: cr.width,
               height: cr.height,
               text: span.textContent ?? '',
@@ -210,8 +214,12 @@ class Rect {
     const { rows, bodyRect } = this
     rows.forEach((row) => {
       const { rect } = row
-      rect.x = rect.x - bodyRect.x
-      rect.y = rect.y - bodyRect.y
+      rect.x -= bodyRect.x
+      rect.y -= bodyRect.y
+      row.spanData.forEach((span) => {
+        span.x -= bodyRect.x
+        span.y -= bodyRect.y
+      })
     })
   }
 
@@ -721,18 +729,16 @@ class TextBg {
       const pos = [] as Record<string, number>[]
 
       rows.forEach((row) => {
-        let offsetX = 0
         row.spanData.forEach((span) => {
-          const { width, height, text } = span
+          const { x, y, width, height, text } = span
           if (text !== ' ') {
             pos.push({
-              x: offsetX - span.letterSpacing / 2,
-              y: row.rect.y + height,
+              x: x - span.letterSpacing / 2,
+              y: y + height,
               width,
               height
             })
           }
-          offsetX += width
         })
       })
       return {
