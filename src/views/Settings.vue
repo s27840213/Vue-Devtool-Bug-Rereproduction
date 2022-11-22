@@ -25,7 +25,10 @@ import SettingsBill from '@/components/settings/SettingsBill.vue'
 export default defineComponent({
   name: 'Settings',
   props: {
-    view: String
+    view: {
+      type: String,
+      required: true
+    }
   },
   components: {
     Sidebar,

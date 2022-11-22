@@ -62,7 +62,7 @@ div(v-if="!isImgControl() || forRender || isBgImgControl" class="nu-image"
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import Vue, { defineComponent, PropType } from 'vue'
 import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -643,7 +643,7 @@ export default defineComponent({
             await new Promise<void>((resolve) => {
               img.onerror = () => {
                 console.log('img load error')
-                Vue.notify({ group: 'copy', text: `${i18n.t('NN0351')}` })
+                // Vue.notify({ group: 'copy', text: `${i18n.t('NN0351')}` })
                 resolve()
               }
               img.onload = async () => {

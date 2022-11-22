@@ -556,7 +556,7 @@ export default defineComponent({
     copyColor() {
       GeneralUtils.copyText(this.props.color)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${this.props.color} 已複製` })
+          // this.$notify({ group: 'copy', text: `${this.props.color} 已複製` })
         })
     },
     iconClickable(icon: string): boolean {

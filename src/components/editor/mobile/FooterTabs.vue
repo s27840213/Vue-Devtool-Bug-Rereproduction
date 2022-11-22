@@ -549,7 +549,7 @@ export default defineComponent({
         }
         case 'effect': {
           if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
-            Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+            // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
             return
           }
           break
@@ -596,7 +596,7 @@ export default defineComponent({
       }
     },
     handleLockedNotify() {
-      this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+      // this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
     }
   }
 })

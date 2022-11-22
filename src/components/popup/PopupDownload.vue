@@ -314,10 +314,10 @@ export default defineComponent({
           if (status === 204) {
             this.addExportId(id)
             this.exportId = id
-            this.$router.replace({ query: Object.assign({}, this.$router.currentRoute.query, { export_ids: this.exportIds }) })
+            this.$router.replace({ query: Object.assign({}, this.$router.currentRoute.value.query, { export_ids: this.exportIds }) })
             uploadUtils.uploadDesign()
           } else {
-            this.$notify({ group: 'error', text: `${this.$t('NN0461')} (status: ${status})` })
+            // this.$notify({ group: 'error', text: `${this.$t('NN0461')} (status: ${status})` })
             this.$emit('close')
           }
         })
@@ -460,7 +460,7 @@ export default defineComponent({
           }, 1000)
           break
         case 1:
-          this.$notify({ group: 'error', text: `${this.$t('NN0462')} (${msg})` })
+          // this.$notify({ group: 'error', text: `${this.$t('NN0462')} (${msg})` })
           this.$emit('close')
           break
         case 2:

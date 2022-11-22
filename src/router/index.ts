@@ -252,7 +252,7 @@ const router = createRouter({
         if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.params.locale) {
           // Delete locale in url, will be ignore by prerender.
           delete router.currentRoute.params.locale
-          router.replace({ query: router.currentRoute.query, params: router.currentRoute.params })
+          router.replace({ query: router.currentRoute.value.query, params: router.currentRoute.params })
         }
       },
       children: routes

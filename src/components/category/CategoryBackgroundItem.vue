@@ -9,17 +9,27 @@ img(class="pointer"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import store from '@/store'
 import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
 import imageUtils from '@/utils/imageUtils'
+import { IListServiceContentDataItem } from '@/interfaces/api'
 
 export default defineComponent({
   props: {
-    src: String,
-    item: Object,
-    locked: Boolean
+    src: {
+      type: String,
+      required: true
+    },
+    item: {
+      type: Object as PropType<IListServiceContentDataItem>,
+      required: true
+    },
+    locked: {
+      type: Object,
+      required: true
+    }
   },
   data() {
     return {
@@ -38,7 +48,7 @@ export default defineComponent({
     },
     addBackground() {
       if (this.locked) {
-        return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+        // return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
       const img = this.$refs.img as HTMLImageElement
       if (!img) {

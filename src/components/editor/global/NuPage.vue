@@ -539,7 +539,7 @@ export default defineComponent({
     },
     duplicatePage() {
       if (this.isProcessingShadow) {
-        Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+        // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
         return
       }
       GroupUtils.deselect()

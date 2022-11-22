@@ -41,10 +41,16 @@ export default defineComponent({
     // host: String,
     // preview: String,
     // preview2: String,
-    item: Object,
-    textStyleType: String
+    item: {
+      type: Object,
+      required: true
+    },
+    textStyleType: {
+      type: String,
+      required: true
+    }
   },
-  data() {
+  data () {
     return {
       fallbackSrc: ''
     }
@@ -320,10 +326,10 @@ export default defineComponent({
       } catch (error: any) {
         const code = error.message === 'timeout' ? 'timeout' : error.code
         console.error(error)
-        this.$notify({
-          group: 'error',
-          text: `${this.$t('NN0248')} (ErrorCode: ${code})`
-        })
+        // this.$notify({
+        //   group: 'error',
+        //   text: `${this.$t('NN0248')} (ErrorCode: ${code})`
+        // })
       } finally {
         tiptapUtils.agent(editor => editor.setEditable(true))
         const sel = window.getSelection()

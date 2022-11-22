@@ -313,7 +313,7 @@ class GeneralUtils {
       normalInit()
     }
 
-    const query = _.omit(router.currentRoute.query,
+    const query = _.omit(router.currentRoute.value.query,
       ['panel', 'category', 'category_locale', 'search'])
     router.replace({ query })
   }

@@ -141,7 +141,7 @@ export default defineComponent({
               layerInfo
             }
             imageShadowPanelUtils.handleShadowUpload(layerData, true)
-            Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+            // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
           }
         }
         this.setInBgRemoveMode(false)
@@ -191,7 +191,7 @@ export default defineComponent({
                   layerInfo
                 }
                 imageShadowPanelUtils.handleShadowUpload(layerData, true)
-                Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+                // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
               }
             }
             stepsUtils.record()

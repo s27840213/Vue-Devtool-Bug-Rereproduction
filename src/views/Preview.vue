@@ -40,9 +40,9 @@ export default defineComponent({
     }
   },
   mounted() {
-    const type = this.$router.currentRoute.query.type
-    const designId = this.$router.currentRoute.query.design_id
-    const teamId = this.$router.currentRoute.query.team_id
+    const type = this.$router.currentRoute.value.query.type
+    const designId = this.$router.currentRoute.value.query.design_id
+    const teamId = this.$router.currentRoute.value.query.team_id
     if (!type || !designId || !teamId) {
       uploadUtils.isGettingDesign = false
     }

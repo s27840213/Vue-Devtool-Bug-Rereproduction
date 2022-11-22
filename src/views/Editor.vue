@@ -42,7 +42,7 @@ export default defineComponent({
 
     editorUtils.setCloseMobilePanelFlag(true)
     stepsUtils.clearSteps()
-    if (uploadUtils.isLogin && this.$router.currentRoute.query.design_id && this.$router.currentRoute.query.type) {
+    if (uploadUtils.isLogin && this.$router.currentRoute.value.query.design_id && this.$router.currentRoute.value.query.type) {
       this.isSaving = true
       uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
         uploadUtils.isGettingDesign = false

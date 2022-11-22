@@ -8,7 +8,6 @@ import router from './router'
 import store from './store'
 import i18n from './i18n'
 import vueColor from 'vue-color'
-import { RecycleScroller } from 'vue-virtual-scroller'
 import Notifications from 'vue-notification'
 import VueMeta from 'vue-meta'
 import 'floating-vue/dist/style.css'
@@ -20,6 +19,32 @@ import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import generalUtils from './utils/generalUtils'
 import imageShadowUtils from './utils/imageShadowUtils'
+
+// global component section
+import SvgIcon from '@/components/global/SvgIcon.vue'
+import TmpImages from '@/components/TmpImages.vue'
+import TmpText from '@/components/TmpText.vue'
+import TmpSvg from '@/components/TmpSvg.vue'
+import PropertyBar from '@/components/global/PropertyBar.vue'
+import Btn from '@/components/global/Btn.vue'
+import NuPage from '@/components/editor/global/NuPage.vue'
+import NuLayer from '@/components/editor/global/NuLayer.vue'
+import NuImage from '@/components/editor/global/NuImage.vue'
+import NuText from '@/components/editor/global/NuText.vue'
+import NuTmp from '@/components/editor/global/NuTmp.vue'
+import NuGroup from '@/components/editor/global/NuGroup.vue'
+import NuClipper from '@/components/editor/global/NuClipper.vue'
+import NuController from '@/components/editor/global/NuController.vue'
+import NuSubController from '@/components/editor/global/NuSubController.vue'
+import NuShape from '@/components/editor/global/NuShape.vue'
+import NuImgController from '@/components/editor/global/NuImgController.vue'
+import NuFrame from '@/components/editor/global/NuFrame.vue'
+import Spinner from '@/components/global/Spinner.vue'
+import Hint from '@/components/global/Hint.vue'
+import Dropdown from '@/components/global/Dropdown.vue'
+import { RecycleScroller } from 'vue-virtual-scroller'
+// global component section
+
 window.onerror = function (msg, url, line) {
   const message = [
     'Message: ' + msg,
@@ -55,145 +80,179 @@ window.onerror = function (msg, url, line) {
 //   }
 // }
 
+
+const app = createApp({
+  mounted() {
+    if ((window as any).__PRERENDER_INJECTED !== undefined) {
+      document.dispatchEvent(new Event('render-event'))
+    }
+  },
+  render: () => { h(App) }
+}).use(i18n).use(router).use(store)
+
 const tooltipUtils = new TooltipUtils()
 
-// if (process.env.NODE_ENV !== 'production') {
-//   Vue.config.performance = true
-// }
-// Vue.use(VueRecyclerviewNew, vueColor)
-// Vue.use(Notifications)
-// Vue.use(VueMeta)
-// Vue.use(FloatingVue, {
-//   themes: tooltipUtils.themes
+if (process.env.NODE_ENV !== 'production') {
+  app.config.performance = true
+}
+app.use(VueRecyclerviewNew, vueColor)
+app.use(Notifications)
+// app.use(VueMeta)
+app.use(FloatingVue, {
+  themes: tooltipUtils.themes
+})
+
+// Vue.use(VueGtm, {
+//   id: 'GTM-T7LDWBP',
+//   enabled: true,
+//   // display console logs debugs or not (optional)
+//   debug: false
 // })
 
-// // Vue.use(VueGtm, {
-// //   id: 'GTM-T7LDWBP',
-// //   enabled: true,
-// //   // display console logs debugs or not (optional)
-// //   debug: false
-// // })
+app.component('RecycleScroller', RecycleScroller)
 
-// Vue.component('RecycleScroller', RecycleScroller)
+app.component('svg-icon', SvgIcon)
+app.component('tmp-images', TmpImages)
+app.component('tmp-text', TmpText)
+app.component('tmp-svg', TmpSvg)
+app.component('btn', Btn)
+app.component('property-bar', PropertyBar)
+app.component('dropdown', Dropdown)
+app.component('nu-page', NuPage)
+app.component('nu-image', NuImage)
+app.component('nu-layer', NuLayer)
+app.component('nu-text', NuText)
+app.component('nu-group', NuGroup)
+app.component('nu-tmp', NuTmp)
+app.component('nu-clipper', NuClipper)
+app.component('nu-controller', NuController)
+app.component('nu-sub-controller', NuSubController)
+app.component('nu-shape', NuShape)
+app.component('nu-img-controller', NuImgController)
+app.component('nu-frame', NuFrame)
+app.component('spinner', Spinner)
+app.component('hint', Hint)
 
-// Vue.directive('hint', {
-//   // When the bound element is inserted into the DOM...
-//   bind: (el, binding, vnode) => {
-//     tooltipUtils.bind(el, binding)
-//   },
-//   update: (el, binding) => {
-//     tooltipUtils.bind(el, binding)
-//   },
-//   unbind: (el) => {
-//     tooltipUtils.unbind(el)
-//   }
-// })
 
-// Vue.directive('ratio-change', {
-//   // When the bound element is inserted into the DOM...
-//   bind: (el, binding, vnode) => {
-//     el.addEventListener('change', function () {
-//       el.blur()
-//     })
-//   },
-//   unbind: (el) => {
-//     el.removeEventListener('change', function () {
-//       el.blur()
-//     })
-//   }
-// })
+app.directive('hint', {
+  // When the bound element is inserted into the DOM...
+  mounted: (el, binding, vnode) => {
+    tooltipUtils.bind(el, binding)
+  },
+  beforeUpdate: (el, binding) => {
+    tooltipUtils.bind(el, binding)
+  },
+  unmounted: (el) => {
+    tooltipUtils.unbind(el)
+  }
+})
 
-// Vue.directive('header-border', {
-//   /**
-//    * Useage: nu-header(v-header-border),
-//    * nu-header(v-header-border="true"),
-//    * nu-header(v-header-border="'.template-center'")
-//    * 預設偵測被加上v-header-border(簡稱header)的下一個元素
-//    * (簡稱target)是否在最高的位置，若是則不顯示邊框，若不是則
-//    * 顯示，target可以使用CSS語法選擇，第一個結果會成為target
-//    * 也可以直接給true指定永久顯示
-//   */
-//   bind(el, binding) {
-//     if (binding.value === true) {
-//       el.classList.add('navbar-shadow')
-//     } else {
-//       Vue.nextTick(() => {
-//         const target = binding.value
-//           ? document.querySelector(binding.value)
-//           : el.nextElementSibling
+app.directive('ratio-change', {
+  // When the bound element is inserted into the DOM...
+  mounted: (el, binding, vnode) => {
+    el.addEventListener('change', function () {
+      el.blur()
+    })
+  },
+  unmounted: (el) => {
+    el.removeEventListener('change', function () {
+      el.blur()
+    })
+  }
+})
 
-//         target.addEventListener('scroll', (e: Event) => {
-//           const target = e.target as Element
-//           if (target?.scrollTop === 0) {
-//             el.classList.remove('navbar-shadow')
-//           } else {
-//             el.classList.add('navbar-shadow')
-//           }
-//         }, { passive: true })
-//       })
-//     }
-//   }
-// })
+app.directive('header-border', {
+  /**
+   * Useage: nu-header(v-header-border),
+   * nu-header(v-header-border="true"),
+   * nu-header(v-header-border="'.template-center'")
+   * 預設偵測被加上v-header-border(簡稱header)的下一個元素
+   * (簡稱target)是否在最高的位置，若是則不顯示邊框，若不是則
+   * 顯示，target可以使用CSS語法選擇，第一個結果會成為target
+   * 也可以直接給true指定永久顯示
+  */
+  mounted(el, binding) {
+    if (binding.value === true) {
+      el.classList.add('navbar-shadow')
+    } else {
+      Vue.nextTick(() => {
+        const target = binding.value
+          ? document.querySelector(binding.value)
+          : el.nextElementSibling
 
-// Vue.directive('press', longpress)
+        target.addEventListener('scroll', (e: Event) => {
+          const target = e.target as Element
+          if (target?.scrollTop === 0) {
+            el.classList.remove('navbar-shadow')
+          } else {
+            el.classList.add('navbar-shadow')
+          }
+        }, { passive: true })
+      })
+    }
+  }
+})
 
-// const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
-// const req = require.context('@/assets/icon', true, /\.svg$/)
+app.directive('press', longpress)
 
-// if (process.env.NODE_ENV !== 'production') {
-//   svgIconUtils.setIcons(requireAll(req).map((context: any) => {
-//     return context.default.id
-//   }))
-// } else {
-//   requireAll(req)
-// }
+const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
+const req = require.context('@/assets/icon', true, /\.svg$/)
 
-// // add temporarily for testing
-// if (window.location.href.indexOf('logout') > -1) {
-//   localStorage.setItem('token', '')
-//   router.push({ name: 'Login' })
-// }
+if (process.env.NODE_ENV !== 'production') {
+  svgIconUtils.setIcons(requireAll(req).map((context: any) => {
+    return context.default.id
+  }))
+} else {
+  requireAll(req)
+}
 
-// let token = localStorage.getItem('token') || ''
+// add temporarily for testing
+if (window.location.href.indexOf('logout') > -1) {
+  localStorage.setItem('token', '')
+  router.push({ name: 'Login' })
+}
 
-// // if token is contained in queryString, it would be used
-// const urlParams = new URLSearchParams(window.location.search)
-// if (urlParams.has('token')) {
-//   const tokenGet = urlParams.get('token')
-//   if (tokenGet) {
-//     token = tokenGet
-//     localStorage.setItem('token', token)
-//   }
-// }
+let token = localStorage.getItem('token') || ''
 
-// if (['production'].includes(process.env.NODE_ENV)) {
-//   const Sentry = require('@sentry/vue')
-//   const { Integrations } = require('@sentry/tracing')
-//   Sentry.init({
-//     Vue,
-//     trackComponents: true,
-//     maxBreadcrumbs: 10,
-//     tracesSampleRate: 1.0,
-//     environment: process.env.NODE_ENV,
-//     dsn: process.env.VUE_APP_SENTRY_DSN,
-//     release: process.env.VUE_APP_SENTRY_RELEASE,
-//     integrations: [
-//       new Integrations.BrowserTracing({
-//         routingInstrumentation: Sentry.vueRouterInstrumentation(router)
-//       })
-//     ],
-//     beforeBreadcrumb(breadcrumb: any, hint: any) {
-//       if (hint && breadcrumb.category && ['xhr'].includes(breadcrumb.category)) {
-//         const { __sentry_xhr__: request, response } = hint.xhr
-//         Object.assign(breadcrumb.data, { response, requestBody: request.body })
-//       }
-//       return breadcrumb
-//     }
-//   })
-//   Vue.config.devtools = false
-// }
+// if token is contained in queryString, it would be used
+const urlParams = new URLSearchParams(window.location.search)
+if (urlParams.has('token')) {
+  const tokenGet = urlParams.get('token')
+  if (tokenGet) {
+    token = tokenGet
+    localStorage.setItem('token', token)
+  }
+}
 
-const app = createApp(App).use(i18n).use(router).use(store).mount('#app')
+if (['production'].includes(process.env.NODE_ENV)) {
+  const Sentry = require('@sentry/vue')
+  const { Integrations } = require('@sentry/tracing')
+  Sentry.init({
+    Vue,
+    trackComponents: true,
+    maxBreadcrumbs: 10,
+    tracesSampleRate: 1.0,
+    environment: process.env.NODE_ENV,
+    dsn: process.env.VUE_APP_SENTRY_DSN,
+    release: process.env.VUE_APP_SENTRY_RELEASE,
+    integrations: [
+      new Integrations.BrowserTracing({
+        routingInstrumentation: Sentry.vueRouterInstrumentation(router)
+      })
+    ],
+    beforeBreadcrumb(breadcrumb: any, hint: any) {
+      if (hint && breadcrumb.category && ['xhr'].includes(breadcrumb.category)) {
+        const { __sentry_xhr__: request, response } = hint.xhr
+        Object.assign(breadcrumb.data, { response, requestBody: request.body })
+      }
+      return breadcrumb
+    }
+  })
+  // app.config.devtools = false
+}
+
+
+app.mount('#app')
 
 // const app = createApp({
 //   mounted() {

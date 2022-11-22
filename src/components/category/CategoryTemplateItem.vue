@@ -24,16 +24,32 @@ import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 
+/**
+ * @Todo - fix the any type problems -> TingAn
+ */
+
 export default defineComponent({
   components: {
     ImageCarousel,
     ProItem
   },
   props: {
-    src: String,
-    item: Object,
-    showId: Boolean,
-    groupItem: Object
+    src: {
+      type: String,
+      required: true
+    },
+    item: {
+      type: Object,
+      required: true
+    },
+    showId: {
+      type: Boolean,
+      required: true
+    },
+    groupItem: {
+      type: Object,
+      required: true
+    }
   },
   data() {
     return {
@@ -65,8 +81,8 @@ export default defineComponent({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     dragStart(event: DragEvent) {
-      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem, this.item)) return
-      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item)) return
+      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem as any, this.item as any)) return
+      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item as any)) return
       const dataTransfer = event.dataTransfer as DataTransfer
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
@@ -76,8 +92,8 @@ export default defineComponent({
         : this.item))
     },
     addTemplate() {
-      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem, this.item)) return
-      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item)) return
+      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem as any, this.item as any)) return
+      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item as any)) return
       const { match_cover: matchCover = {} } = this.item
       let { height, width } = this.item
 
@@ -96,10 +112,10 @@ export default defineComponent({
       const isSameSize = currPage.width === width && currPage.height === height
       const cb = this.groupItem
         ? (resize?: any) => {
-          AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
+          AssetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize)
         }
         : (resize?: any) => {
-          AssetUtils.addAsset(this.item, resize)
+          AssetUtils.addAsset(this.item as any, resize)
           GeneralUtils.fbq('track', 'AddToWishlist', {
             content_ids: [this.item.id]
           })
@@ -149,7 +165,7 @@ export default defineComponent({
     copyId() {
       GeneralUtils.copyText(this.item.id)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${this.item.id} 已複製` })
+          // this.$notify({ group: 'copy', text: `${this.item.id} 已複製` })
         })
     }
   }

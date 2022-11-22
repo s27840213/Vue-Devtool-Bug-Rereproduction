@@ -25,7 +25,7 @@ export default defineComponent({
     copyText(text: string) {
       generalUtils.copyText(text)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${text} 已複製` })
+          // this.$notify({ group: 'copy', text: `${text} 已複製` })
         })
     }
   }

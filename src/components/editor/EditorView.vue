@@ -329,7 +329,7 @@ export default defineComponent({
         if (!this.isHandleShadow) {
           GroupUtils.deselect()
         } else {
-          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
           imageUtils.setImgControlDefault(false)
         }
       }

@@ -314,7 +314,7 @@ export default defineComponent({
                       inProcess: LayerProcessType.none
                     })
 
-                    this.$notify({ group: 'error', text: `${this.$t('NN0349')}` })
+                    // this.$notify({ group: 'error', text: `${this.$t('NN0349')}` })
                   }
 
                   return true

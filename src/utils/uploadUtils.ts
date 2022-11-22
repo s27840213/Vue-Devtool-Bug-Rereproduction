@@ -563,11 +563,11 @@ class UploadUtils {
 
   async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
     const typeMap = ['UPDATE_DB', 'UPDATE_PREV', 'UPDATE_BOTH']
-    let type = router.currentRoute.query.type
-    let designId = router.currentRoute.query.design_id
-    let teamId = router.currentRoute.query.team_id
+    let type = router.currentRoute.value.query.type
+    let designId = router.currentRoute.value.query.design_id
+    let teamId = router.currentRoute.value.query.team_id
     let isNewDesign = false
-    // const exportIds = router.currentRoute.query.export_ids
+    // const exportIds = router.currentRoute.value.query.export_ids
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
 
     if (this.isGettingDesign) {
@@ -584,10 +584,10 @@ class UploadUtils {
       AssetId: ${assetId},
       TeamId: ${teamId}`)
       putAssetDesignType = PutAssetDesignType.UPDATE_BOTH
-      router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: assetId, team_id: this.teamId }) })
-      type = router.currentRoute.query.type
-      designId = router.currentRoute.query.design_id
-      teamId = router.currentRoute.query.team_id
+      router.replace({ query: Object.assign({}, router.currentRoute.value.query, { type: 'design', design_id: assetId, team_id: this.teamId }) })
+      type = router.currentRoute.value.query.type
+      designId = router.currentRoute.value.query.design_id
+      teamId = router.currentRoute.value.query.team_id
       isNewDesign = true
     }
 
@@ -660,7 +660,7 @@ class UploadUtils {
           }
 
           // move new design to path
-          const path = router.currentRoute.query.path as string
+          const path = router.currentRoute.value.query.path as string
           if (isNewDesign && path) {
             const designAssetIndex = (await store.dispatch('design/fetchDesign', { teamId, assetId })).asset_index?.toString()
             if (!designAssetIndex) {
@@ -669,18 +669,18 @@ class UploadUtils {
             }
             await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
               'move', designAssetIndex, null, path).catch(async err => {
-              // remove design if move failed
-              console.error(err)
-              await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-                'delete', designAssetIndex, null, '2').catch(err => {
+                // remove design if move failed
                 console.error(err)
+                await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+                  'delete', designAssetIndex, null, '2').catch(err => {
+                    console.error(err)
+                  })
+                Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
               })
-              Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
-            })
             // update design info
             designUtils.fetchDesign(teamId as string, assetId)
             // remove query for new design
-            const query = Object.assign({}, router.currentRoute.query)
+            const query = Object.assign({}, router.currentRoute.value.query)
             delete query.width
             delete query.height
             delete query.path
@@ -1172,7 +1172,7 @@ class UploadUtils {
           .then(() => {
             // Reference from designUtils.newDesignWithTemplae
             store.commit('SET_assetId', generalUtils.generateAssetId())
-            const query = _.omit(router.currentRoute.query,
+            const query = _.omit(router.currentRoute.value.query,
               ['width', 'height'])
             query.type = 'design'
             query.design_id = uploadUtils.assetId
@@ -1221,18 +1221,18 @@ class UploadUtils {
                  * @Todo add computableInfo if we need
                  */
                 // await ShapeUtils.addComputableInfo(json.layers[0])
-                if (router.currentRoute.query.team_id === this.teamId) {
+                if (router.currentRoute.value.query.team_id === this.teamId) {
                   store.commit('SET_assetId', designId)
                 } else {
                   const id = generalUtils.generateAssetId()
                   store.commit('SET_assetId', id)
-                  router.replace({ query: Object.assign({}, router.currentRoute.query, { design_id: id, team_id: this.teamId }) })
+                  router.replace({ query: Object.assign({}, router.currentRoute.value.query, { design_id: id, team_id: this.teamId }) })
                 }
                 /**
                  * @todo fix the filter function below
                  */
                 // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
-                router.replace({ query: Object.assign({}, router.currentRoute.query, { export_ids: json.exportIds }) })
+                router.replace({ query: Object.assign({}, router.currentRoute.value.query, { export_ids: json.exportIds }) })
                 pageUtils.setAutoResizeNeededForPages(json.pages, true)
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
                 stepsUtils.reset() // make sure to record and upload json right away after json fetched, so that no temp state is uploaded.

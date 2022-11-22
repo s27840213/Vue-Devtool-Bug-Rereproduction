@@ -191,7 +191,7 @@ export default defineComponent({
     },
     downloadAll() {
       generalUtils.copyText(this.panelParams)
-      this.$notify({ group: 'copy', text: '已複製網址到剪貼簿' })
+      // this.$notify({ group: 'copy', text: '已複製網址到剪貼簿' })
       const links = this.mainContent.map((it) => {
         return it.list.map((it) => {
           return `https://template.vivipic.com/svg/${it.id}/prev?ver=${it.ver}`

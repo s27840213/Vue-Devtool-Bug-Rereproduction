@@ -178,7 +178,8 @@ export default defineComponent({
       designUtils.newDesignWithLoginRedirect(item.width, item.height, item.id)
     },
     expandItems(index: number, expand: boolean) {
-      Vue.set(this.featureExpand, index, expand)
+      // Vue.set(this.featureExpand, index, expand)
+      this.featureExpand[index] = expand
     },
     getLocaleText(value: string) {
       return this.localeOptions.find(x => x.code === value)?.name

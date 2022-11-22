@@ -476,7 +476,7 @@ export default defineComponent({
       this.resetStatus()
       const data = {}
       if (this.groupId.length === 0 && this.key_id.length === 0) {
-        this.$notify({ group: 'copy', text: '無群組及模板id' })
+        // this.$notify({ group: 'copy', text: '無群組及模板id' })
       }
       if (this.groupId.length > 0) {
         const groupRes = await designApis.getDesignInfo(this.token, 'group', this.groupId, 'select', JSON.stringify(data))
@@ -484,7 +484,7 @@ export default defineComponent({
           this.isGetGroup = true
           this.setGroupInfo(groupRes.data)
         } else {
-          this.$notify({ group: 'copy', text: '找不到群組資料' })
+          // this.$notify({ group: 'copy', text: '找不到群組資料' })
         }
       }
 
@@ -498,7 +498,7 @@ export default defineComponent({
           }
           this.userParentId = this.templateInfo.parent_id
         } else {
-          this.$notify({ group: 'copy', text: '找不到模板資料' })
+          // this.$notify({ group: 'copy', text: '找不到模板資料' })
         }
       }
 
@@ -516,10 +516,10 @@ export default defineComponent({
 
       const res = await designApis.updateDesignInfo(this.token, 'group', this.groupId, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
-        this.$notify({ group: 'copy', text: '群組資料更新成功' })
+        // this.$notify({ group: 'copy', text: '群組資料更新成功' })
         this.setGroupInfo(res.data)
       } else {
-        this.$notify({ group: 'copy', text: '更新時發生錯誤' })
+        // this.$notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.resetStatus()
       this.setIsloading(false)
@@ -535,11 +535,11 @@ export default defineComponent({
       const themeIds = arr.join()
 
       if (!this.templateInfo.key_id) {
-        this.$notify({ group: 'copy', text: '請先取得模板資料' })
+        // this.$notify({ group: 'copy', text: '請先取得模板資料' })
         return
       }
       if (themeIds === '' || themeIds.length === 0) {
-        this.$notify({ group: 'copy', text: 'theme_ids不得為空' })
+        // this.$notify({ group: 'copy', text: 'theme_ids不得為空' })
         return
       }
 
@@ -554,10 +554,10 @@ export default defineComponent({
       }
       const res = await designApis.updateDesignInfo(this.token, 'template', this.templateInfo.key_id, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
-        this.$notify({ group: 'copy', text: '模板資料更新成功' })
+        // this.$notify({ group: 'copy', text: '模板資料更新成功' })
         this.setTemplateInfo(res.data)
       } else {
-        this.$notify({ group: 'copy', text: '更新時發生錯誤' })
+        // this.$notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.resetStatus()
       this.isGetGroup = false
@@ -567,7 +567,7 @@ export default defineComponent({
     },
     updateParentIdClicked() {
       if (!this.updateParentIdChecked) {
-        this.$notify({ group: 'copy', text: '請先勾選確定修改' })
+        // this.$notify({ group: 'copy', text: '請先勾選確定修改' })
         return
       }
       this.updatePageProps({
@@ -685,7 +685,7 @@ export default defineComponent({
       this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
       if (this.templateInfo.theme_ids === '0' ||
         this.templateInfo.theme_ids.length === 0) {
-        this.$notify({ group: 'copy', text: '尚未設定主題' })
+        // this.$notify({ group: 'copy', text: '尚未設定主題' })
       }
       const themes = this.templateInfo.theme_ids.split(',')
       themes.forEach((item) => {
@@ -699,7 +699,7 @@ export default defineComponent({
       }
       GeneralUtils.copyText(text)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${text} 已複製` })
+          // this.$notify({ group: 'copy', text: `${text} 已複製` })
         })
     },
     isDisabled(idx: number, themeWidth: string, themeHeight: string) {

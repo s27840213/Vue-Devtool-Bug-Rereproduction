@@ -64,7 +64,6 @@ lazy-load(
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import i18n from '@/i18n'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import GroupUtils from '@/utils/groupUtils'
@@ -73,11 +72,15 @@ import StepsUtils from '@/utils/stepsUtils'
 import editorUtils from '@/utils/editorUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
 import generalUtils from '@/utils/generalUtils'
+import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   props: {
     type: String,
-    index: Number,
+    index: {
+      type: Number,
+      required: true
+    },
     config: {
       type: Object,
       required: true
@@ -103,11 +106,11 @@ export default defineComponent({
       menuItems: [
         {
           icon: 'copy',
-          text: i18n.t('NN0251')
+          text: useI18n().t('NN0251')
         },
         {
           icon: 'trash',
-          text: i18n.t('NN0034')
+          text: useI18n().t('NN0034')
         }
       ],
       isMouseOver: false,

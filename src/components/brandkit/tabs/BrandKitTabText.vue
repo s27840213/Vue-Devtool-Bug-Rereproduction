@@ -77,16 +77,16 @@ export default defineComponent({
     this.refreshFontUrls()
     uploadUtils.onFontUploadStatus((status) => {
       if (status === 'success') {
-        this.$notify({
-          group: 'copy',
-          text: `${this.$t('NN0135')}`
-        })
+        // this.$notify({
+        //   group: 'copy',
+        //   text: `${this.$t('NN0135')}`
+        // })
       }
       if (status === 'fail') { // Fail will not goto here
-        this.$notify({
-          group: 'error',
-          text: `${this.$t('NN0137')}`
-        })
+        // this.$notify({
+        //   group: 'error',
+        //   text: `${this.$t('NN0137')}`
+        // })
       }
     })
   },

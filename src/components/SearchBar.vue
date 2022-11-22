@@ -24,6 +24,7 @@ form(class="search-bar bg-gray-6"
 <script lang="ts">
 import i18n from '@/i18n'
 import { defineComponent } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   components: {
@@ -31,7 +32,7 @@ export default defineComponent({
   props: {
     placeholder: {
       type: String,
-      default: `${i18n.t('NN0092')}`
+      default: `${useI18n().t('NN0092')}`
     },
     clear: {
       type: Boolean

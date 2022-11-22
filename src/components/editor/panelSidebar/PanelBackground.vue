@@ -237,7 +237,7 @@ export default defineComponent({
       //   colorUtils.setIsColorPickerOpen(false)
       // }
       if (this.currentPageBackgroundLocked) {
-        return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+        // return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
       this._setBgColor({
         pageIndex: pageUtils.currFocusPageIndex,

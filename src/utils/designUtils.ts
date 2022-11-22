@@ -24,7 +24,7 @@ class DesignUtils {
   ROOT = '$ROOT$'
   ROOT_DISPLAY = i18n.t('NN0187')
   event = new EventEmitter()
-  eventHash: {[key: string]: () => void} = {}
+  eventHash: { [key: string]: () => void } = {}
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get teamId(): string { return store.getters['user/getTeamId'] }
 
@@ -802,11 +802,11 @@ class DesignUtils {
       // /**
       //  * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
       //  */
-      // router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: uploadUtils.assetId }) })
+      // router.replace({ query: Object.assign({}, router.currentRoute.value.query, { type: 'design', design_id: uploadUtils.assetId }) })
     }
   }
 
-  newDesignWithTemplae(width: number, height: number, json: any, templateId:string, groupId: string) {
+  newDesignWithTemplae(width: number, height: number, json: any, templateId: string, groupId: string) {
     console.log(json)
     assetUtils.addTemplateToRecentlyUsedPure(templateId).then(() => {
       assetUtils.addTemplate(json, {}, false).then(() => {
@@ -825,7 +825,7 @@ class DesignUtils {
              */
             store.commit('SET_assetId', generalUtils.generateAssetId())
             // eslint-disable-next-line camelcase
-            const query = _.omit(router.currentRoute.query,
+            const query = _.omit(router.currentRoute.value.query,
               ['width', 'height'])
             query.type = 'design'
             query.design_id = uploadUtils.assetId

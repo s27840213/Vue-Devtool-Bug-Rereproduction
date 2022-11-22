@@ -207,7 +207,7 @@ export default defineComponent({
           if (data.flag) throw Error(data.msg)
           this.close()
         }).catch(msg => {
-          Vue.notify({ group: 'error', text: msg })
+          // Vue.notify({ group: 'error', text: msg })
           this.isLoading = false
         })
       }
@@ -229,7 +229,7 @@ export default defineComponent({
         if (data.flag) throw Error(data.msg)
         this.close()
       }).catch(msg => {
-        Vue.notify({ group: 'error', text: msg })
+        // Vue.notify({ group: 'error', text: msg })
         this.isLoading = false
       })
     },

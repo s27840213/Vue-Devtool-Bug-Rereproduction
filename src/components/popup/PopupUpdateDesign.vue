@@ -120,14 +120,14 @@ export default defineComponent({
         this.objectInfo = res.data.data
         this.objectInfo.edit_time = this.objectInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
       } else {
-        this.$notify({ group: 'copy', text: `找不到${this.typeText}資料` })
+        // this.$notify({ group: 'copy', text: `找不到${this.typeText}資料` })
       }
     }
   },
   methods: {
     async updateDataClicked() {
       if (!this.objectInfo.key_id) {
-        this.$notify({ group: 'copy', text: `請先取得${this.typeText}資料` })
+        // this.$notify({ group: 'copy', text: `請先取得${this.typeText}資料` })
         return
       }
 
@@ -141,11 +141,11 @@ export default defineComponent({
       }
       const res = await designApis.updateDesignInfo(this.token, this.type, this.objectInfo.key_id, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
-        this.$notify({ group: 'copy', text: `${this.typeText}資料更新成功` })
+        // this.$notify({ group: 'copy', text: `${this.typeText}資料更新成功` })
         this.objectInfo = res.data.data
         this.objectInfo.edit_time = this.objectInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
       } else {
-        this.$notify({ group: 'copy', text: '更新時發生錯誤' })
+        // this.$notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.isLoading = false
     },
@@ -166,7 +166,7 @@ export default defineComponent({
       }
       GeneralUtils.copyText(text)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${text} 已複製` })
+          // this.$notify({ group: 'copy', text: `${text} 已複製` })
         })
     },
     handleCancel() {

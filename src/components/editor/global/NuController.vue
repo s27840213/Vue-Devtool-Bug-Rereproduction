@@ -1787,7 +1787,7 @@ export default defineComponent({
         if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
           this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
         } else {
-          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
           body.removeEventListener('dragleave', this.dragLeave)
           body.removeEventListener('drop', this.onDrop)
         }

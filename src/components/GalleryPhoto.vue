@@ -52,7 +52,10 @@ import stepsUtils from '@/utils/stepsUtils'
 export default defineComponent({
   name: 'GalleryPhoto',
   props: {
-    photo: Object,
+    photo: {
+      type: Object,
+      required: true
+    },
     vendor: String,
     inFilePanel: {
       type: Boolean,

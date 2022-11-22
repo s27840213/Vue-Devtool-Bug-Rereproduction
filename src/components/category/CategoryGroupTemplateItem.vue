@@ -32,9 +32,18 @@ export default defineComponent({
     ProItem
   },
   props: {
-    src: String,
-    item: Object,
-    showId: Boolean
+    src: {
+      type: String,
+      required: true
+    },
+    item: {
+      type: Object,
+      required: true
+    },
+    showId: {
+      type: Boolean,
+      required: true
+    }
   },
   data () {
     return {
@@ -73,7 +82,7 @@ export default defineComponent({
     copyId() {
       GeneralUtils.copyText(this.item.id)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${this.item.id} 已複製` })
+          // this.$notify({ group: 'copy', text: `${this.item.id} 已複製` })
         })
     },
     handleCarouselIdx (idx: number) {
