@@ -566,10 +566,10 @@ export default Vue.extend({
     },
     initHeightPx() {
       // 40 = HeaderTabs height
-      return ((this.$el.parentElement as HTMLElement).clientHeight - 40) * (this.halfSizeInInitState ? 0.5 : 1.0)
+      return ((this.$el.parentElement as HTMLElement).clientHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
     },
     maxHeightPx() {
-      return ((this.$el.parentElement as HTMLElement).clientHeight - 40) * 1.0
+      return (this.$el.parentElement as HTMLElement).clientHeight
     },
     getMaxHeightPx(): number {
       return parseFloat((this.$el as HTMLElement).style.maxHeight.split('px')[0])
