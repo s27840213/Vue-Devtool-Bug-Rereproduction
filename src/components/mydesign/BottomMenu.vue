@@ -181,10 +181,22 @@ export default defineComponent({
     clickOutside: vClickOutside.directive
   },
   props: {
-    bottomMenu: String,
-    selectedNum: Number,
-    isAnySelected: Boolean,
-    menuStack: Array
+    bottomMenu: {
+      type: String,
+      required: true
+    },
+    selectedNum: {
+      type: Number,
+      required: true
+    },
+    isAnySelected: {
+      type: Boolean,
+      required: true
+    },
+    menuStack: {
+      type: Array,
+      required: true
+    }
   },
   mounted() {
     this.prepareForMenu(this.bottomMenu)

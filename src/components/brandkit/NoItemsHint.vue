@@ -15,8 +15,14 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
-    type: String,
-    mobile: Boolean
+    type: {
+      type: String,
+      required: true
+    },
+    mobile: {
+      type: Boolean,
+      required: true
+    }
   },
   data() {
     return {

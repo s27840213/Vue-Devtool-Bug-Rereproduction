@@ -33,7 +33,10 @@ import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   props: {
-    src: String,
+    src: {
+      type: String,
+      required: true
+    },
     styles: {
       type: Object,
       required: true

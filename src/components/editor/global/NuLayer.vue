@@ -50,11 +50,26 @@ export default defineComponent({
     SquareLoading
   },
   props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
-    subLayerIndex: Number,
-    imgControl: Boolean,
+    config: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    subLayerIndex: {
+      type: Number,
+      required: true
+    },
+    imgControl: {
+      type: Boolean,
+      required: true
+    },
     isSubLayer: {
       type: Boolean,
       default: false

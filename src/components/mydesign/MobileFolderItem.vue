@@ -34,11 +34,26 @@ import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   props: {
-    path: Array,
-    config: Object,
-    isAnySelected: Boolean,
-    isSelected: Boolean,
-    index: Number
+    path: {
+      type: Array,
+      required: true
+    },
+    config: {
+      type: Object,
+      required: true
+    },
+    isAnySelected: {
+      type: Boolean,
+      required: true
+    },
+    isSelected: {
+      type: Boolean,
+      required: true
+    },
+    index: {
+      type: Number,
+      required: true
+    }
   },
   computed: {
     ...mapGetters('design', {

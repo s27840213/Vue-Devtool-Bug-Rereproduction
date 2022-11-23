@@ -16,10 +16,22 @@ export default defineComponent({
     EditorContent
   },
   props: {
-    initText: Object,
-    pageIndex: Number,
-    layerIndex: Number,
-    subLayerIndex: Number
+    initText: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    subLayerIndex: {
+      type: Number,
+      required: true
+    }
   },
   data() {
     return {

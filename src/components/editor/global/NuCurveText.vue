@@ -21,10 +21,22 @@ import textEffectUtils from '@/utils/textEffectUtils'
 
 export default defineComponent({
   props: {
-    config: Object,
-    layerIndex: Number,
-    pageIndex: Number,
-    subLayerIndex: Number,
+    config: {
+      type: Object,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    subLayerIndex: {
+      type: Number,
+      required: true
+    },
     isDuplicated: {
       type: Boolean,
       default: false

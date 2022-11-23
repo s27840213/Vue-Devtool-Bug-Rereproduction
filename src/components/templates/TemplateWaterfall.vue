@@ -38,8 +38,14 @@ import { Itheme } from '@/interfaces/theme'
 
 export default defineComponent({
   props: {
-    waterfallTemplates: Array,
-    isTemplateReady: Boolean,
+    waterfallTemplates: {
+      type: Array,
+      required: true
+    },
+    isTemplateReady: {
+      type: Boolean,
+      required: true
+    },
     useScrollablePreview: {
       type: Boolean,
       default: true
@@ -48,7 +54,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    themes: Array
+    themes: {
+      type: Array,
+      required: true
+    }
   },
   data() {
     return {

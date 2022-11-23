@@ -30,7 +30,10 @@ export default defineComponent({
     }
   },
   props: {
-    colorPalette: Object
+    colorPalette: {
+      type: Object,
+      required: true
+    }
   },
   computed: {
     paletteName(): string {

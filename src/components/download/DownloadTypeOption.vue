@@ -11,8 +11,14 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
-    name: String,
-    tag: String
+    name: {
+      type: String,
+      required: true
+    },
+    tag: {
+      type: String,
+      required: true
+    }
   }
 })
 </script>

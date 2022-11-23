@@ -27,8 +27,14 @@ import StepsUtils from '@/utils/stepsUtils'
 
 export default defineComponent({
   props: {
-    index: Number,
-    last: Boolean
+    index: {
+      type: Number,
+      required: true
+    },
+    last: {
+      type: Boolean,
+      required: true
+    }
   },
   data() {
     return {

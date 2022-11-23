@@ -30,10 +30,22 @@ import { mapActions, mapGetters, mapMutations } from 'vuex'
 export default defineComponent({
   name: 'mobile-structure-folder',
   props: {
-    folder: Object,
-    parents: Array,
-    level: Number,
-    isPopup: Boolean
+    folder: {
+      type: Object,
+      required: true
+    },
+    parents: {
+      type: Array,
+      required: true
+    },
+    level: {
+      type: Number,
+      required: true
+    },
+    isPopup: {
+      type: Boolean,
+      required: true
+    }
   },
   computed: {
     ...mapGetters('design', {

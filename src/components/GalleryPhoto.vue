@@ -56,7 +56,10 @@ export default defineComponent({
       type: Object,
       required: true
     },
-    vendor: String,
+    vendor: {
+      type: String,
+      required: true
+    },
     inFilePanel: {
       type: Boolean,
       default: false

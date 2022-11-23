@@ -43,7 +43,10 @@ import { checkAndConvertToHex } from '@/utils/colorUtils'
 
 export default defineComponent({
   props: {
-    currentColor: String,
+    currentColor: {
+      type: String,
+      required: true
+    },
     isMobile: {
       type: Boolean,
       default: false

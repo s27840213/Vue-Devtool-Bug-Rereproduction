@@ -17,8 +17,17 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
-    valueArray: Array,
-    values: Array,
+    value{
+      type: Array,
+      required: true
+    }: {
+      type: Array,
+      required: true
+    },
+    values: {
+      type: Array,
+      required: true
+    },
     itemMinWidth: {
       type: String,
       default: '40'

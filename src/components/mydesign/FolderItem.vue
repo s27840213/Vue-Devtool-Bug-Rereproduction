@@ -75,15 +75,42 @@ import designUtils from '@/utils/designUtils'
 
 export default defineComponent({
   props: {
-    path: Array,
-    config: Object,
-    menuItemNum: Number,
-    undraggable: Boolean,
-    undroppable: Boolean,
-    nameIneditable: Boolean,
-    isAnySelected: Boolean,
-    isSelected: Boolean,
-    index: Number
+    path: {
+      type: Array,
+      required: true
+    },
+    config: {
+      type: Object,
+      required: true
+    },
+    menuItemNum: {
+      type: Number,
+      required: true
+    },
+    undraggable: {
+      type: Boolean,
+      required: true
+    },
+    undroppable: {
+      type: Boolean,
+      required: true
+    },
+    nameIneditable: {
+      type: Boolean,
+      required: true
+    },
+    isAnySelected: {
+      type: Boolean,
+      required: true
+    },
+    isSelected: {
+      type: Boolean,
+      required: true
+    },
+    index: {
+      type: Number,
+      required: true
+    }
   },
   directives: {
     clickOutside: vClickOutside.directive

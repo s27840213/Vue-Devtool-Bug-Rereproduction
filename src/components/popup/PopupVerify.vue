@@ -119,8 +119,14 @@ import localeUtils from '@/utils/localeUtils'
 
 export default defineComponent({
   props: {
-    account: String,
-    type: String
+    account: {
+      type: String,
+      required: true
+    },
+    type: {
+      type: String,
+      required: true
+    }
   },
   directives: {
     clickOutside: vClickOutside.directive

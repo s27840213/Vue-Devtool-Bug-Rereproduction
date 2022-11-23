@@ -70,9 +70,18 @@ export default defineComponent({
     }
   },
   props: {
-    folder: Object,
-    parents: Array,
-    level: Number
+    folder: {
+      type: Object,
+      required: true
+    },
+    parents: {
+      type: Array,
+      required: true
+    },
+    level: {
+      type: Number,
+      required: true
+    }
   },
   directives: {
     clickOutside: vClickOutside.directive

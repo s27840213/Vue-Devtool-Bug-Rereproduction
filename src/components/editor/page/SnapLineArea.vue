@@ -31,8 +31,14 @@ import { mapGetters, mapState } from 'vuex'
 export default defineComponent({
   props: {
     config: Object as () => IPage,
-    pageIndex: Number,
-    pageScaleRatio: Number,
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    pageScaleRatio: {
+      type: Number,
+      required: true
+    },
     snapUtils: SnapUtils
   },
   data() {

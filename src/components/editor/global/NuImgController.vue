@@ -33,11 +33,26 @@ import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default defineComponent({
   props: {
-    config: Object,
-    layerIndex: Number,
-    pageIndex: Number,
-    primaryLayerIndex: Number,
-    primaryLayer: Object,
+    config: {
+      type: Object,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    primaryLayerIndex: {
+      type: Number,
+      required: true
+    },
+    primaryLayer: {
+      type: Object,
+      required: true
+    },
     forRender: {
       type: Boolean,
       default: false

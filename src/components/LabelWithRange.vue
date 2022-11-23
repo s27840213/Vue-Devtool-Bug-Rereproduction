@@ -26,11 +26,26 @@ export default defineComponent({
     clickOutside: vClickOutside.directive
   },
   props: {
-    value: Number,
-    max: Number,
-    min: Number,
-    event: String,
-    disabled: Boolean
+    value: {
+      type: Number,
+      required: true
+    },
+    max: {
+      type: Number,
+      required: true
+    },
+    min: {
+      type: Number,
+      required: true
+    },
+    event: {
+      type: String,
+      required: true
+    },
+    disabled: {
+      type: Boolean,
+      required: true
+    }
   },
   mounted() {
     popupUtils.on(this.event, (value: number) => {

@@ -201,7 +201,10 @@ export default defineComponent({
     clickOutside: vClickOutside.directive
   },
   props: {
-    view: String
+    view: {
+      type: String,
+      required: true
+    }
   },
   async created() {
     this.resetState()

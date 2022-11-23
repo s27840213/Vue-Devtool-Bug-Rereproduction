@@ -17,8 +17,14 @@ import CategoryListRow from './CategoryListRow.vue'
 
 export default defineComponent({
   props: {
-    list: Array,
-    title: String
+    list: {
+      type: Array,
+      required: true
+    },
+    title: {
+      type: String,
+      required: true
+    }
   },
   components: {
     CategoryListRow

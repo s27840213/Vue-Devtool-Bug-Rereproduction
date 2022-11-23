@@ -28,8 +28,14 @@ import vClickOutside from 'v-click-outside'
 
 export default defineComponent({
   props: {
-    current: String,
-    placeholder: String,
+    current: {
+      type: String,
+      required: true
+    },
+    placeholder: {
+      type: String,
+      required: true
+    },
     options: {
       type: Array,
       default: () => []

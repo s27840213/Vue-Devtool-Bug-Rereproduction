@@ -110,8 +110,14 @@ export default defineComponent({
     clickOutside: vClickOutside.directive
   },
   props: {
-    noSearchbar: Boolean,
-    noNavigation: Boolean
+    noSearchbar: {
+      type: Boolean,
+      required: true
+    },
+    noNavigation: {
+      type: Boolean,
+      required: true
+    }
   },
   data() {
     return {

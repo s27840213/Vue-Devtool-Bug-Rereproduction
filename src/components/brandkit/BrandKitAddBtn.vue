@@ -11,7 +11,10 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
-    text: String
+    text: {
+      type: String,
+      required: true
+    }
   }
 })
 </script>

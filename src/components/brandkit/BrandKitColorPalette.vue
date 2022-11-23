@@ -59,8 +59,14 @@ export default defineComponent({
     }
   },
   props: {
-    colorPalette: Object,
-    selectedColor: Object
+    colorPalette: {
+      type: Object,
+      required: true
+    },
+    selectedColor: {
+      type: Object,
+      required: true
+    }
   },
   directives: {
     clickOutside: vClickOutside.directive

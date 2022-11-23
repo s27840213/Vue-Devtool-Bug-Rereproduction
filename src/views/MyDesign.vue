@@ -17,7 +17,10 @@ export default defineComponent({
     }
   },
   props: {
-    view: String
+    view: {
+      type: String,
+      required: true
+    }
   },
   components: {
     MyDesignPc,

@@ -22,7 +22,10 @@ export default defineComponent({
     }
   },
   props: {
-    colorPalette: Object,
+    colorPalette: {
+      type: Object,
+      required: true
+    },
     settingmode: {
       default: false,
       type: Boolean

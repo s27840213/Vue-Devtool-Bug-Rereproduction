@@ -14,8 +14,17 @@ import { mapState } from 'vuex'
 
 export default defineComponent({
   props: {
-    valueArray: Array,
-    value: String
+    value{
+      type: Array,
+      required: true
+    }: {
+      type: Array,
+      required: true
+    },
+    value: {
+      type: String,
+      required: true
+    }
   },
   data() {
     return {

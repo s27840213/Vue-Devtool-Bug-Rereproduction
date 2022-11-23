@@ -31,10 +31,22 @@ import { mapActions, mapMutations } from 'vuex'
 export default defineComponent({
   name: 'structure-folder',
   props: {
-    folder: Object,
-    parents: Array,
-    level: Number,
-    isPopup: Boolean
+    folder: {
+      type: Object,
+      required: true
+    },
+    parents: {
+      type: Array,
+      required: true
+    },
+    level: {
+      type: Number,
+      required: true
+    },
+    isPopup: {
+      type: Boolean,
+      required: true
+    }
   },
   computed: {
     path(): string[] {

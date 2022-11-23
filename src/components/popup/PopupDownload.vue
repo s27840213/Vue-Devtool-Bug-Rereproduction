@@ -171,8 +171,14 @@ export default defineComponent({
     clickOutside: vClickOutside.directive
   },
   props: {
-    useExternelJSON: Boolean,
-    pageIndex: Number,
+    useExternelJSON: {
+      type: Boolean,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
     hideContainer: {
       default: false,
       type: Boolean

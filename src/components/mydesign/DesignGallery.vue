@@ -66,12 +66,30 @@ export default defineComponent({
     }
   },
   props: {
-    menuItems: Array,
-    allDesigns: Array,
-    selectedNum: Number,
-    limitFunctions: Boolean,
-    useDelete: Boolean,
-    noHeader: Boolean
+    menuItems: {
+      type: Array,
+      required: true
+    },
+    allDesigns: {
+      type: Array,
+      required: true
+    },
+    selectedNum: {
+      type: Number,
+      required: true
+    },
+    limitFunctions: {
+      type: Boolean,
+      required: true
+    },
+    useDelete: {
+      type: Boolean,
+      required: true
+    },
+    noHeader: {
+      type: Boolean,
+      required: true
+    }
   },
   computed: {
     ...mapGetters('design', {

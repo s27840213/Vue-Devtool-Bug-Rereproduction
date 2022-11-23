@@ -42,8 +42,14 @@ export default defineComponent({
     }
   },
   props: {
-    title: String,
-    name: String,
+    title: {
+      type: String,
+      required: true
+    },
+    name: {
+      type: String,
+      required: true
+    },
     borderTouchArea: {
       type: Boolean,
       default: false

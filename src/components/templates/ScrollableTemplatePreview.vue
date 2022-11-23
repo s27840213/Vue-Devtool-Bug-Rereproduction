@@ -24,8 +24,14 @@ const SCROLL_MARGIN = SCROLL_MARGIN_HALF * 2
 
 export default defineComponent({
   props: {
-    isMobile: Boolean,
-    contentIds: Array
+    isMobile: {
+      type: Boolean,
+      required: true
+    },
+    contentIds: {
+      type: Array,
+      required: true
+    }
   },
   computed: {
     typedContentIds(): IContentTemplate[] {

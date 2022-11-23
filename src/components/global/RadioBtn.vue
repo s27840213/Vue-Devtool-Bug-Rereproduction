@@ -12,9 +12,18 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
-    isSelected: Boolean,
-    formatKey: String,
-    circleColor: String
+    isSelected: {
+      type: Boolean,
+      required: true
+    },
+    formatKey: {
+      type: String,
+      required: true
+    },
+    circleColor: {
+      type: String,
+      required: true
+    }
   },
   data() {
     return {

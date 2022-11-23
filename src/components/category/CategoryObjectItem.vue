@@ -30,8 +30,14 @@ export default defineComponent({
     ProItem
   },
   props: {
-    src: String,
-    item: Object
+    src: {
+      type: String,
+      required: true
+    },
+    item: {
+      type: Object,
+      required: true
+    }
   },
   computed: {
     ...mapGetters('user', {

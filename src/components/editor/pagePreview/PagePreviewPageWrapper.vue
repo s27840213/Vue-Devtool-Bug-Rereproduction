@@ -76,7 +76,10 @@ import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   props: {
-    type: String,
+    type: {
+      type: String,
+      required: true
+    },
     index: {
       type: Number,
       required: true

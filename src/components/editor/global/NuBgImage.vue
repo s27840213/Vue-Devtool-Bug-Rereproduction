@@ -36,9 +36,18 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 
 export default defineComponent({
   props: {
-    image: Object,
-    color: String,
-    pageIndex: Number,
+    image: {
+      type: Object,
+      required: true
+    },
+    color: {
+      type: String,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number

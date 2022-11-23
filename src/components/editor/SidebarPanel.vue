@@ -43,7 +43,10 @@ export default defineComponent({
     ColorPanel
   },
   props: {
-    isSidebarPanelOpen: Boolean
+    isSidebarPanelOpen: {
+      type: Boolean,
+      required: true
+    }
   },
   data() {
     return {

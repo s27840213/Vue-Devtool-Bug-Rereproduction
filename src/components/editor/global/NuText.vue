@@ -51,10 +51,22 @@ import _ from 'lodash'
 export default defineComponent({
   components: { NuCurveText },
   props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
-    subLayerIndex: Number,
+    config: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    subLayerIndex: {
+      type: Number,
+      required: true
+    },
     isPagePreview: {
       default: false,
       type: Boolean

@@ -61,13 +61,34 @@ export default defineComponent({
     }
   },
   props: {
-    path: Array,
-    menuItems: Array,
-    allFolders: Array,
-    selectedNum: Number,
-    limitFunctions: Boolean,
-    useDelete: Boolean,
-    selectable: Boolean
+    path: {
+      type: Array,
+      required: true
+    },
+    menuItems: {
+      type: Array,
+      required: true
+    },
+    allFolders: {
+      type: Array,
+      required: true
+    },
+    selectedNum: {
+      type: Number,
+      required: true
+    },
+    limitFunctions: {
+      type: Boolean,
+      required: true
+    },
+    useDelete: {
+      type: Boolean,
+      required: true
+    },
+    selectable: {
+      type: Boolean,
+      required: true
+    }
   },
   computed: {
     ...mapGetters('design', {

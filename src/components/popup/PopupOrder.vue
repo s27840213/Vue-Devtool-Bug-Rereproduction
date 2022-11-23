@@ -24,8 +24,14 @@ export default defineComponent({
       type: Boolean,
       default: true
     },
-    type: String,
-    datas: Array
+    type: {
+      type: String,
+      required: true
+    },
+    datas: {
+      type: Array,
+      required: true
+    }
   },
   directives: {
     clickOutside: vClickOutside.directive

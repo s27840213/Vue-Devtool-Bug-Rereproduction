@@ -47,10 +47,22 @@ export default defineComponent({
     }
   },
   props: {
-    allDesigns: Array,
-    selectedNum: Number,
-    limitFunctions: Boolean,
-    noHeader: Boolean
+    allDesigns: {
+      type: Array,
+      required: true
+    },
+    selectedNum: {
+      type: Number,
+      required: true
+    },
+    limitFunctions: {
+      type: Boolean,
+      required: true
+    },
+    noHeader: {
+      type: Boolean,
+      required: true
+    }
   },
   computed: {
     ...mapGetters('design', {

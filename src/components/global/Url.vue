@@ -12,7 +12,10 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
-    url: String
+    url: {
+      type: String,
+      required: true
+    }
   }
 })
 </script>

@@ -24,7 +24,10 @@ import designUtils from '@/utils/designUtils'
 
 export default defineComponent({
   props: {
-    config: Object
+    config: {
+      type: Object,
+      required: true
+    }
   },
   data() {
     return {

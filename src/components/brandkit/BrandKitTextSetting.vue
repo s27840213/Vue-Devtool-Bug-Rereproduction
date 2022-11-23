@@ -53,8 +53,14 @@ import tiptapUtils from '@/utils/tiptapUtils'
 
 export default defineComponent({
   props: {
-    type: String,
-    textStyleSetting: Object
+    type: {
+      type: String,
+      required: true
+    },
+    textStyleSetting: {
+      type: Object,
+      required: true
+    }
   },
   components: {
     ValueSelector,

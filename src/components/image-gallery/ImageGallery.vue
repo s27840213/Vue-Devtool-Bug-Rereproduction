@@ -27,7 +27,10 @@ import { GalleryImage } from '@/interfaces/gallery'
 
 export default defineComponent({
   props: {
-    vendor: String,
+    vendor: {
+      type: String,
+      required: true
+    },
     images: {
       type: Array as PropType<GalleryImage[]>,
       default: () => []

@@ -38,7 +38,10 @@ export default defineComponent({
     Avatar
   },
   props: {
-    isSidebarPanelOpen: Boolean
+    isSidebarPanelOpen: {
+      type: Boolean,
+      required: true
+    }
   },
   data() {
     return {

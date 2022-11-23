@@ -74,7 +74,10 @@ const moduleName = 'unsplash'
 
 export default defineComponent({
   props: {
-    info: Object
+    info: {
+      type: Object,
+      required: true
+    }
   },
   computed: {
     vendorLink (): string {

@@ -30,8 +30,14 @@ import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
   props: {
-    config: Object,
-    pageIndex: Number,
+    config: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number

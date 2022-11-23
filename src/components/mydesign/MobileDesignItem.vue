@@ -71,12 +71,30 @@ export default defineComponent({
     ImageCarousel
   },
   props: {
-    config: Object,
-    unenterable: Boolean,
-    isAnySelected: Boolean,
-    isSelected: Boolean,
-    isMultiSelected: Boolean,
-    index: Number
+    config: {
+      type: Object,
+      required: true
+    },
+    unenterable: {
+      type: Boolean,
+      required: true
+    },
+    isAnySelected: {
+      type: Boolean,
+      required: true
+    },
+    isSelected: {
+      type: Boolean,
+      required: true
+    },
+    isMultiSelected: {
+      type: Boolean,
+      required: true
+    },
+    index: {
+      type: Number,
+      required: true
+    }
   },
   data() {
     return {

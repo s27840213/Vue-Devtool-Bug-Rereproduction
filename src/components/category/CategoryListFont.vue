@@ -10,8 +10,14 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
-    title: String,
-    list: Array
+    title: {
+      type: String,
+      required: true
+    },
+    list: {
+      type: Array,
+      required: true
+    }
   }
 })
 

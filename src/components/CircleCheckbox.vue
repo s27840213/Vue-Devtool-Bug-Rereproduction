@@ -13,7 +13,10 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   props: {
     value: [Number, String],
-    checkedValues: Array,
+    checkedValues: {
+      type: Array,
+      required: true
+    },
     disabled: {
       type: Boolean,
       default: false

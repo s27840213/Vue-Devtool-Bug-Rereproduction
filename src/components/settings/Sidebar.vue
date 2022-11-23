@@ -28,7 +28,10 @@ import paymentData from '@/utils/constantData'
 
 export default defineComponent({
   props: {
-    current: String
+    current: {
+      type: String,
+      required: true
+    }
   },
   components: {
     Avatar

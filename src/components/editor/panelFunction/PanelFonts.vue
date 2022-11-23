@@ -75,7 +75,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    textStyleType: String
+    textStyleType: {
+      type: String,
+      required: true
+    }
   },
   data() {
     return {

@@ -56,7 +56,10 @@ export default defineComponent({
     BgRemoveArea
   },
   props: {
-    isConfigPanelOpen: Boolean,
+    isConfigPanelOpen: {
+      type: Boolean,
+      required: true
+    },
     inAllPagesMode: {
       type: Boolean,
       required: true

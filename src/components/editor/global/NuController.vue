@@ -191,10 +191,22 @@ const RESIZER_SHOWN_MIN = 4000
 
 export default defineComponent({
   props: {
-    config: Object,
-    layerIndex: Number,
-    pageIndex: Number,
-    snapUtils: Object,
+    config: {
+      type: Object,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    snapUtils: {
+      type: Object,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number

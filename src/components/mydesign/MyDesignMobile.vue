@@ -164,7 +164,10 @@ export default defineComponent({
     MobileTrashDesignView
   },
   props: {
-    view: String
+    view: {
+      type: String,
+      required: true
+    }
   },
   async created() {
     this.resetState()

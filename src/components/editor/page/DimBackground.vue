@@ -64,9 +64,18 @@ export default defineComponent({
     return {}
   },
   props: {
-    config: Object,
-    pageScaleRatio: Number,
-    isAnyBackgroundImageControl: Boolean,
+    config: {
+      type: Object,
+      required: true
+    },
+    pageScaleRatio: {
+      type: Number,
+      required: true
+    },
+    isAnyBackgroundImageControl: {
+      type: Boolean,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number

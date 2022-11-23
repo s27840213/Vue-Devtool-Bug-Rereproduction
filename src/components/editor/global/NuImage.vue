@@ -86,20 +86,44 @@ import i18n from '@/i18n'
 
 export default defineComponent({
   props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
-    subLayerIndex: Number,
-    inheritStyle: Object,
-    isBgImgControl: Boolean,
-    imgControl: Boolean,
+    config: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    subLayerIndex: {
+      type: Number,
+      required: true
+    },
+    inheritStyle: {
+      type: Object,
+      required: true
+    },
+    isBgImgControl: {
+      type: Boolean,
+      required: true
+    },
+    imgControl: {
+      type: Boolean,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
     },
     /** This prop is used to present if this image-component is
      *  only used for rendering as image controlling */
-    forRender: Boolean,
+    forRender: {
+      type: Boolean,
+      required: true
+    },
     primaryLayer: {
       type: Object,
       default: () => { return undefined }

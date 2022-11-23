@@ -26,7 +26,10 @@ import DownloadCheckButton from './DownloadCheckButton.vue'
 
 export default defineComponent({
   props: {
-    defaultSelected: Array
+    defaultSelected: {
+      type: Array,
+      required: true
+    }
   },
   data() {
     return {

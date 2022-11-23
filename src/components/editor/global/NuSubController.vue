@@ -77,14 +77,38 @@ import SvgPath from 'svgpath'
 
 export default defineComponent({
   props: {
-    config: Object,
-    layerIndex: Number,
-    pageIndex: Number,
-    primaryLayerIndex: Number,
-    primaryLayer: Object,
-    snapUtils: Object,
-    type: String,
-    isMoved: Boolean,
+    config: {
+      type: Object,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    primaryLayerIndex: {
+      type: Number,
+      required: true
+    },
+    primaryLayer: {
+      type: Object,
+      required: true
+    },
+    snapUtils: {
+      type: Object,
+      required: true
+    },
+    type: {
+      type: String,
+      required: true
+    },
+    isMoved: {
+      type: Boolean,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number

@@ -15,13 +15,34 @@ export default defineComponent({
       type: String,
       default: '40px'
     },
-    iconColor: String,
-    styleFormat: String,
-    svg: String,
-    trimWidth: Boolean,
-    markerWidth: Number,
-    trimOffset: Number,
-    iconHeight: String
+    iconColor: {
+      type: String,
+      required: true
+    },
+    styleFormat: {
+      type: String,
+      required: true
+    },
+    svg: {
+      type: String,
+      required: true
+    },
+    trimWidth: {
+      type: Boolean,
+      required: true
+    },
+    markerWidth: {
+      type: Number,
+      required: true
+    },
+    trimOffset: {
+      type: Number,
+      required: true
+    },
+    iconHeight: {
+      type: String,
+      required: true
+    }
   },
   data() {
     return {

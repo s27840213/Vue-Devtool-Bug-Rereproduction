@@ -232,11 +232,23 @@ export default defineComponent({
   },
   props: {
     config: Object as () => IPage,
-    pageIndex: Number,
-    pageScaleRatio: Number,
-    isAnyBackgroundImageControl: Boolean,
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    pageScaleRatio: {
+      type: Number,
+      required: true
+    },
+    isAnyBackgroundImageControl: {
+      type: Boolean,
+      required: true
+    },
     overflowContainer: HTMLElement,
-    isScaling: Boolean
+    isScaling: {
+      type: Boolean,
+      required: true
+    }
   },
   mounted() {
     this.initialPageHeight = (this.config as IPage).height

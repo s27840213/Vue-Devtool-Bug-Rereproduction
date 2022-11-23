@@ -35,8 +35,14 @@ import editorUtils from '@/utils/editorUtils'
 export default defineComponent({
   components: { CategoryTemplateItem },
   props: {
-    showId: Boolean,
-    groupItem: Object
+    showId: {
+      type: Boolean,
+      required: true
+    },
+    groupItem: {
+      type: Object,
+      required: true
+    }
   },
   computed: {
     ...mapGetters({

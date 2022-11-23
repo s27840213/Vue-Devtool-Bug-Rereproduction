@@ -42,10 +42,22 @@ export default defineComponent({
     }
   },
   props: {
-    path: Array,
-    allFolders: Array,
-    selectedNum: Number,
-    noHeader: Boolean
+    path: {
+      type: Array,
+      required: true
+    },
+    allFolders: {
+      type: Array,
+      required: true
+    },
+    selectedNum: {
+      type: Number,
+      required: true
+    },
+    noHeader: {
+      type: Boolean,
+      required: true
+    }
   },
   computed: {
     ...mapGetters('design', {

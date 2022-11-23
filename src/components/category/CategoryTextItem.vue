@@ -20,8 +20,14 @@ import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
   props: {
-    src: String,
-    item: Object
+    src: {
+      type: String,
+      required: true
+    },
+    item: {
+      type: Object,
+      required: true
+    }
   },
   data() {
     return {

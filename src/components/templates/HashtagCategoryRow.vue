@@ -15,8 +15,14 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
-    list: Object,
-    defaultSelection: Array
+    list: {
+      type: Object,
+      required: true
+    },
+    defaultSelection: {
+      type: Array,
+      required: true
+    }
   },
   mounted() {
     this.selected = this.defaultSelection as string[]

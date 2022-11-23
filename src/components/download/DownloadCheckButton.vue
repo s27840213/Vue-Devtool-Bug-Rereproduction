@@ -33,10 +33,22 @@ export default defineComponent({
       type: String,
       default: '16px'
     },
-    groupName: String,
-    type: String,
-    label: String,
-    value: String
+    groupName: {
+      type: String,
+      required: true
+    },
+    type: {
+      type: String,
+      required: true
+    },
+    label: {
+      type: String,
+      required: true
+    },
+    value: {
+      type: String,
+      required: true
+    }
   },
   data () {
     return { checked: this.defaultChecked ? 'checked' : '' }
