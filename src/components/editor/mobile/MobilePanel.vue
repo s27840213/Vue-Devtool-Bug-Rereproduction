@@ -52,7 +52,8 @@
         :currActivePanel="currActiveSubPanel"
         :currColorEvent="currSubColorEvent"
         :isSubPanel="true"
-        @switchTab="switchTab")
+        @switchTab="switchTab"
+        @close="closeMobilePanel")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -527,6 +528,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setBgImageControl: 'SET_backgroundImageControl',
+      setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
     }),
     ...mapActions({
@@ -560,6 +562,7 @@ export default Vue.extend({
     closeMobilePanel() {
       this.$emit('switchTab', 'none')
       this.panelHistory = []
+      this.setCurrActivePanel('none')
     },
     initHeightPx() {
       // 40 = HeaderTabs height

@@ -68,6 +68,7 @@ export default Vue.extend({
       } else {
         this.$router.push({ name: pageName })
       }
+      this.$emit('close')
     },
     setPagesName(event: Event) {
       const { value } = event.target as HTMLInputElement
