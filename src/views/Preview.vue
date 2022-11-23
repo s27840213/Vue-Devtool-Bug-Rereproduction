@@ -7,7 +7,7 @@ div(class="preview" :style="containStyles")
 <script lang="ts">
 import Vue from 'vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters, mapState, mapMutations } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
@@ -28,7 +28,9 @@ export default Vue.extend({
     host(): string {
       const host = window.location.host
       const subdomain = host.match(/(.+).vivipic.com/)
-      if (host === 'test.vivipic.com') return ''
+      const urlParams = new URLSearchParams(window.location.search)
+
+      if (host === 'test.vivipic.com' || urlParams.has('hideHostLabel')) return ''
       else if (host === 'localhost:8080') return 'local'
       else if (subdomain) return subdomain[1]
       else return host
@@ -39,6 +41,11 @@ export default Vue.extend({
       }
     }
   },
+  methods: {
+    ...mapMutations({
+      setInScreenshotPreview: 'SET_inScreenshotPreview'
+    })
+  },
   mounted() {
     const type = this.$router.currentRoute.query.type
     const designId = this.$router.currentRoute.query.design_id
@@ -46,6 +53,11 @@ export default Vue.extend({
     if (!type || !designId || !teamId) {
       uploadUtils.isGettingDesign = false
     }
+
+    this.setInScreenshotPreview(true)
+  },
+  beforeDestroy() {
+    this.setInScreenshotPreview(false)
   }
 })
 </script>

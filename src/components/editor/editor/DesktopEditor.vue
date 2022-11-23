@@ -24,6 +24,8 @@
                 div(class="flex flex-column")
                   select(class="locale-select" v-model="inputLocale")
                     option(v-for="locale in localeOptions" :value="locale") {{locale}}
+                div(class="ml-10" @click="setEnableComponentLog(!enableComponentLog)")
+                  span {{`${enableComponentLog ? '關閉' : '開啟'} Log`}}
             editor-view
             scale-ratio-editor(@toggleSidebarPanel="toggleSidebarPanel")
         div(class="content__panel"
@@ -38,6 +40,7 @@
     tour-guide(v-if="showEditorGuide")
     popup-brand-settings(v-if="isBrandSettingsOpen")
     popup-update-design(v-if="isUpdateDesignOpen")
+    component-log(v-if="enableComponentLog" :logs="componentLogs")
 </template>
 
 <script lang="ts">
@@ -62,6 +65,8 @@ import i18n from '@/i18n'
 import colorUtils from '@/utils/colorUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import pageUtils from '@/utils/pageUtils'
+import ComponentLog from '@/components/componentLog/ComponentLog.vue'
+import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
 
 export default Vue.extend({
   name: 'DesktopEditor',
@@ -76,7 +81,8 @@ export default Vue.extend({
     PagePreview,
     TourGuide,
     PopupBrandSettings,
-    PopupUpdateDesign
+    PopupUpdateDesign,
+    ComponentLog
   },
   data() {
     return {
@@ -86,8 +92,17 @@ export default Vue.extend({
       // isColorPanelOpen: false
       colorPanelOpenState: {
         val: false
-      }
+      },
+      componentLogs: [] as Array<IComponentUpdatedLog>
     }
+  },
+  created() {
+    this.$root.$on('on-re-rendering', (component: IComponentUpdatedLog) => {
+      if (this.componentLogs.length >= 50) {
+        this.componentLogs.shift()
+      }
+      this.componentLogs.push(component)
+    })
   },
   watch: {
     isShowPagePreview() {
@@ -123,7 +138,8 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      enableComponentLog: 'getEnalbleComponentLog'
     }),
     ...mapGetters('user', {
       token: 'getToken',
@@ -209,7 +225,8 @@ export default Vue.extend({
     ...mapMutations({
       setCurrFunctionPanel: 'SET_currFunctionPanelType',
       _setAdminMode: 'user/SET_ADMIN_MODE',
-      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
+      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
+      setEnableComponentLog: 'SET_enalbleComponentLog'
     }),
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'

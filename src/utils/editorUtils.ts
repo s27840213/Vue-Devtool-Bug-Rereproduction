@@ -26,6 +26,10 @@ class EditorUtils {
     return store.getters['mobileEditor/getShowMobilePanel']
   }
 
+  get enalbleComponentLog() {
+    return store.getters.getEnalbleComponentLog
+  }
+
   get contentScaleRatio(): number {
     return store.getters.getContentScaleRatio
   }

@@ -165,6 +165,7 @@ export default Vue.extend({
         this.config.thumbnail = this.previewPlaceholder
         this.pollingStep(0, callback)
       } else {
+        if (this.isTempDesign) return
         this.pageImages = designUtils.getDesignPreviews(this.config.pageNum, this.config.id, 2, this.config.ver, this.config.signedUrl)
         imageUtils.getImageSize(this.configPreview, this.imgWidth, this.imgHeight, false).then((size) => {
           const { width, height, exists } = size
@@ -180,6 +181,7 @@ export default Vue.extend({
     },
     pollingStep(step = 0, callback: () => void) {
       const timeout = step > 14 ? 2000 : 1000
+      if (this.isTempDesign) return
       imageUtils.getImageSize(
         designUtils.getDesignPreview(
           this.config.id, 2,
@@ -210,6 +212,7 @@ export default Vue.extend({
     },
     pagePollingStep(index: number, step = 0) {
       if (this.pageImages[index] !== this.previewPlaceholder) return
+      if (this.isTempDesign) return
       const timeout = step > 14 ? 2000 : 1000
       imageUtils.getImageSize(designUtils.getDesignPreview(this.config.id, 2, undefined, this.config.signedUrl, index), 0, 0, false).then((size) => {
         if (size.exists) {
@@ -309,7 +312,6 @@ export default Vue.extend({
     min-width: 50px;
     box-sizing: border-box;
     @include body-XS;
-    font-family: Noto Sans;
     transform-origin: right bottom;
     transform: scale(0.8);
     color: setColor(gray-2);

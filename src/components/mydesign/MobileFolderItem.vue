@@ -99,7 +99,9 @@ export default Vue.extend({
   &__body {
     display: flex;
     align-items: center;
-    gap: 16px;
+    > div + div {
+      margin-left: 16px;
+    }
   }
   &__info {
     display: flex;
