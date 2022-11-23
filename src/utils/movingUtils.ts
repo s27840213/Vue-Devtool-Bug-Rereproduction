@@ -78,8 +78,10 @@ export class MovingUtils {
   private setMoving = (bool: boolean) => store.commit('SET_moving', bool)
   private setBgConfig = (pageIndex?: number) => store.commit('imgControl/SET_BG_CONFIG', pageIndex)
   private setLastSelectedLayerIndex = (layerIndex: number) => store.commit('SET_lastSelectedLayerIndex', layerIndex)
-  private setCursorStyle(cursor: string) {
-    // document.body.style.cursor = cursor
+  private setCursorStyle(e: Event, cursor: string) {
+    if (this.body) {
+      this.body.style.cursor = cursor
+    }
   }
 
   disableTouchEvent(e: TouchEvent) {
@@ -325,7 +327,7 @@ export class MovingUtils {
       if (generalUtils.getEventType(e) !== 'touch') {
         e.preventDefault()
       }
-      this.setCursorStyle('move')
+      this.setCursorStyle(e, 'move')
       if (!this.isHandleMovingHandler) {
         window.requestAnimationFrame(() => {
           this.movingHandler(e)
@@ -385,7 +387,7 @@ export class MovingUtils {
       eventUtils.removePointerEvent('pointerup', this._moveEnd)
       eventUtils.removePointerEvent('pointermove', this._moving)
       this.isControlling = false
-      this.setCursorStyle('')
+      this.setCursorStyle(e, 'initial')
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false
       })
@@ -486,7 +488,7 @@ export class MovingUtils {
       }
       this.isPointerDownFromSubController = false
       this.isControlling = false
-      this.setCursorStyle('')
+      this.setCursorStyle(e, 'initial')
       eventUtils.removePointerEvent('pointerup', this._moveEnd)
       eventUtils.removePointerEvent('pointermove', this._moving)
     }
