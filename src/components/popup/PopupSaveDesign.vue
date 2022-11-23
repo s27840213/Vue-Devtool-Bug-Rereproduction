@@ -68,6 +68,7 @@ export default Vue.extend({
   border-radius: 10px;
   padding: 16px 30px;
   display: flex;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: center;
   &__close {
@@ -89,7 +90,6 @@ export default Vue.extend({
     @include body-SM;
     margin-top: 24px;
     color: setColor(gray-2);
-    line-break: anywhere;
   }
   &__auto-save {
     position: relative;
@@ -97,7 +97,6 @@ export default Vue.extend({
     color: setColor(black-5);
     display: flex;
     align-items: flex-start;
-    align-self: start;
     > span {
       display: block;
       @include body-XS;
