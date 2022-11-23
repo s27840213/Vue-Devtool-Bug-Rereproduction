@@ -506,7 +506,7 @@ export default Vue.extend({
       this.innerTab = this.innerTabs.key[0]
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
-      this.panelHeight = this.initHeightPx()
+      this.panelHeight = newVal === 'none' ? 0 : this.initHeightPx()
     },
     showMobilePanel(newVal) {
       if (!newVal) {
@@ -515,7 +515,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.panelHeight = this.initHeightPx()
+    this.panelHeight = 0
     this.resizeObserver = new ResizeObserver(() => {
       this.$emit('panelHeight', (this.$refs.panel as HTMLElement).clientHeight)
       this.fitPage()
@@ -565,7 +565,6 @@ export default Vue.extend({
       this.setCurrActivePanel('none')
     },
     initHeightPx() {
-      // 40 = HeaderTabs height
       return ((this.$el.parentElement as HTMLElement).clientHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
     },
     maxHeightPx() {

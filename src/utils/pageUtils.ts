@@ -436,6 +436,10 @@ class PageUtils {
     // Get size of target(design) and editor.
     // Target size can be pass by param or get according to situation.
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
+    const mobilePanel = document.getElementsByClassName('mobile-panel')[0] as HTMLElement
+    let mobilePanelHeight = parseFloat(mobilePanel?.style.maxHeight.replace('px', ''))
+    mobilePanelHeight = isNaN(mobilePanelHeight) ? 0 : mobilePanelHeight
+
     if (!editorViewBox) return
     const { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
     const { width: targetWidth, height: targetHeight }: { width: number, height: number } =
@@ -443,7 +447,10 @@ class PageUtils {
         : this.currFocusPageSize)
 
     // Calculate and do resize
-    const resizeRatio = Math.min(editorWidth / (targetWidth * (this.scaleRatio / 100)), editorHeight / (targetHeight * (this.scaleRatio / 100))) * 0.8
+    const resizeRatio = Math.min(
+      editorWidth / (targetWidth * (this.scaleRatio / 100)),
+      (editorHeight - mobilePanelHeight) / (targetHeight * (this.scaleRatio / 100))
+    ) * 0.8
     const newRatio = Math.max(3, Math.round(this.scaleRatio * resizeRatio))
 
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
