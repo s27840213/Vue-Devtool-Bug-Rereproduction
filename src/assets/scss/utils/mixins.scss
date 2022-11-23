@@ -54,7 +54,13 @@
   // Firefox mobile never display scrollbar, add padding right back.
   @include firefoxOnly {
     .mobile-panel & {
-      padding-right: 10px;
+      margin-right: 0;
+    }
+  }
+  @include safariOnly {
+    // Only for safari mobile, https://stackoverflow.com/a/47818418
+    @supports (-webkit-touch-callout: none) {
+      margin-right: 0;
     }
   }
 }
