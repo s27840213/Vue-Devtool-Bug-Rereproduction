@@ -71,7 +71,7 @@ export default Vue.extend({
       return this.allFolders.length + this.allDesigns.length === 0
     },
     isFolderDesignDivisionNeeded(): boolean {
-      return this.allFolders.length > 0 && this.allDesigns.length > 0
+      return this.allFolders.length > 0
     }
   },
   methods: {
