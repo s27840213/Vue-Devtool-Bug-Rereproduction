@@ -368,7 +368,7 @@ input {
   @include body-MD;
   display: flex;
   flex-direction: column;
-  padding: 95px 30px 118px 30px;
+  padding: 95px 30px;
   &-top,
   &-content,
   &-button {
@@ -536,7 +536,7 @@ input {
   }
   .payment-left {
     width: 100%;
-    padding: 105px 7.467% 175px 7.467%;
+    padding: 105px 7.467%;
   }
   .payment-right {
     display: none;

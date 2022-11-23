@@ -111,6 +111,14 @@ export default Vue.extend({
     }
 
     brandkitUtils.fetchBrands(this.fetchBrands)
+
+    // load size from query for new design
+    const newDesignWidth = parseInt(this.$route.query.width as string)
+    const newDesignHeight = parseInt(this.$route.query.height as string)
+    if (newDesignWidth && newDesignHeight) {
+      pageUtils.setPageSize(0, newDesignWidth, newDesignHeight)
+      pageUtils.fitPage()
+    }
   },
   computed: {
     ...mapState('mobileEditor', {
