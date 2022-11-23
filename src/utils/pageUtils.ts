@@ -436,9 +436,7 @@ class PageUtils {
     // Get size of target(design) and editor.
     // Target size can be pass by param or get according to situation.
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
-    const mobilePanel = document.getElementsByClassName('mobile-panel')[0] as HTMLElement
-    let mobilePanelHeight = parseFloat(mobilePanel?.style.maxHeight.replace('px', ''))
-    mobilePanelHeight = isNaN(mobilePanelHeight) ? 0 : mobilePanelHeight
+    const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight ?? 0
 
     if (!editorViewBox) return
     const { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
