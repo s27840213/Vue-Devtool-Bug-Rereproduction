@@ -51,15 +51,12 @@
   box-sizing: border-box;
   margin-right: -10px;
 
-  // Firefox mobile never display scrollbar, add padding right back.
-  @include firefoxOnly {
-    .mobile-panel & {
+  // Firefox & Safari mobile never display scrollbar, cancel minus margin.
+  .mobile-panel & {
+    @include firefoxOnly {
       margin-right: 0;
     }
-  }
-  @include safariOnly {
-    // Only for safari mobile, https://stackoverflow.com/a/47818418
-    @supports (-webkit-touch-callout: none) {
+    @include safariOnly {
       margin-right: 0;
     }
   }
