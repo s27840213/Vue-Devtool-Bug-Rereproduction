@@ -8,7 +8,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const { argv } = require('yargs')
 
-function resolve (dir) {
+function resolve(dir) {
     return path.join(__dirname, dir)
 }
 
@@ -28,9 +28,29 @@ module.exports = {
             .include.add(/node_modules/)
             .end()
 
+        // set worker-loader
+        config.module
+            .rule('worker')
+            .test(/\.worker\.(j|t)s$/)
+            .exclude.add(/node_modules/)
+            .end()
+            .use('worker-loader')
+            .loader('worker-loader')
+            .end()
+            // config.module
+            //     .rule('worker')
+            //     .test(/\.worker\.ts$/)
+            // .use('ts-loader')
+            // .loader('ts-loader')
+            // .end()
+
+        // 解决：worker 热更新问题
+        // config.module.rule('js').exclude.add(/\.worker\.js$/)
+        config.module.rule('ts').exclude.add(/\.worker\.ts$/)
+
         // 先刪除預設的svg配置，否則svg-sprite-loader會失效
         config.module.rules.delete('svg')
-        // 新增 svg-sprite-loader 設定
+            // 新增 svg-sprite-loader 設定
         config.module
             .rule('svg-sprite-loader')
             .test(/\.svg$/)
@@ -39,10 +59,10 @@ module.exports = {
             .use('svg-sprite-loader')
             .loader('svg-sprite-loader')
             .options({ symbolId: '[name]' })
-        /**
+            /**
              * 由於上面的代碼會讓 'src/assets/icon' 資料夾以外的svg全都不能用，
              * 但並不是所有svg圖檔都要拿來當icon，故設定另外一個loader來處理其他svg
-        */
+             */
         config.module
             .rule('file-loader')
             .test(/\.svg$/)
@@ -147,10 +167,10 @@ module.exports = {
             .plugin('speed-measure-webpack-plugin')
             .use(SpeedMeasurePlugin)
             .end()
-        // .use(SpeedMeasurePlugin, [{
-        //     outputFormat: 'humanVerbose',
-        //     loaderTopFiles: 5
-        // }])
+            // .use(SpeedMeasurePlugin, [{
+            //     outputFormat: 'humanVerbose',
+            //     loaderTopFiles: 5
+            // }])
     },
 
     configureWebpack: {
@@ -212,4 +232,5 @@ module.exports = {
             enableBridge: true
         }
     }
+    // parallel: false
 }

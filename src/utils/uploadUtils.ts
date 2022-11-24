@@ -28,7 +28,6 @@ import networkUtils from './networkUtils'
 import _ from 'lodash'
 import editorUtils from './editorUtils'
 import designApis from '@/apis/design'
-
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
   UPDATE_DB,

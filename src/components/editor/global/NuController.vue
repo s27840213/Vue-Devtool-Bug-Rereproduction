@@ -184,6 +184,7 @@ import { AnyTouchEvent } from 'any-touch'
 import textBgUtils from '@/utils/textBgUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { asyncCloneDeep } from '@/utils/workerUtils'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -1097,7 +1098,6 @@ export default Vue.extend({
       if (this.config.category === 'E') {
         this.initCorRadPercentage = ControlUtils.getCorRadPercentage(this.config.vSize, this.config.size, this.config.shapeType)
       }
-
       const body = this.$refs.body as HTMLElement
       body.classList.remove('hover')
       this.currCursorStyling(event)
