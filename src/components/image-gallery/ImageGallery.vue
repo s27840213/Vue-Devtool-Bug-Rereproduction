@@ -17,7 +17,7 @@ div(class="image-gallery")
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import Vue, { PropType, defineComponent } from 'vue'
 import GalleryUtils from '@/utils/galleryUtils'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IPhotoItem } from '@/interfaces/api'

@@ -542,7 +542,8 @@ export default defineComponent({
         this.handleLineEdge(value)
       }
       stepsUtils.record()
-      this.$set(this.dashAndEdge, index, value)
+      // this.$set(this.dashAndEdge, index, value)
+      this.dashAndEdge[index] = value
     },
     handleLineDash(dash: number) {
       LayerUtils.updateLayerProps(

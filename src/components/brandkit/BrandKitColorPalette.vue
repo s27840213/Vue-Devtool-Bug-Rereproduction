@@ -43,7 +43,7 @@ div(class="brand-kit-color-palette")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, Prop, PropType } from 'vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import vClickOutside from 'v-click-outside'
@@ -60,7 +60,7 @@ export default defineComponent({
   },
   props: {
     colorPalette: {
-      type: Object,
+      type: Object as PropType<IBrandColorPalette>,
       required: true
     },
     selectedColor: {

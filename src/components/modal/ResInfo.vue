@@ -67,7 +67,6 @@ div(class="res-info")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import i18n from '@/i18n'
 import { mapMutations, mapActions } from 'vuex'
 
 const moduleName = 'unsplash'

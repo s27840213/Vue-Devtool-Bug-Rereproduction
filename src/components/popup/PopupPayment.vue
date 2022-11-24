@@ -72,7 +72,6 @@ import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import vClickOutside from 'v-click-outside'
-import i18n from '@/i18n'
 import paymentUtils from '@/utils/paymentUtils'
 import PaymentField from '@/components/payment/PaymentField.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
@@ -135,7 +134,7 @@ export default defineComponent({
       planSelected: 'planSelected',
       trialStatus: 'trialStatus'
     }),
-    locale(): string { return i18n.locale },
+    locale(): string { return this.$i18n.locale },
     userPeriod(): string {
       return ['switch1', 'switch2'].includes(this.view)
         ? (this.isBundle ? 'monthly' : 'yearly')
@@ -177,14 +176,14 @@ export default defineComponent({
     getAd(name: string): string[] {
       switch (name) {
         case 'brandkit':
-          return [i18n.t('NN0583') as string, 'brandkit.jpg']
+          return [this.$t('NN0583') as string, 'brandkit.jpg']
         case 'bgrm':
         default:
-          return [i18n.t('NN0652') as string, 'remover.jpg']
+          return [this.$t('NN0652') as string, 'remover.jpg']
         case 'pro-template':
-          return [i18n.t('NN0653') as string, 'cb.jpg']
+          return [this.$t('NN0653') as string, 'cb.jpg']
         case 'pro-object':
-          return [i18n.t('NN0658') as string, 'pro-object.jpg']
+          return [this.$t('NN0658') as string, 'pro-object.jpg']
       }
     },
     async changeView(name: string) {
@@ -194,10 +193,10 @@ export default defineComponent({
         case 'bgrm':
         case 'pro-template':
         case 'pro-object':
-          this.title = i18n.tc('NN0507', 2) as string
+          this.title = this.$tc('NN0507', 2) as string
           [this.description, this.img] = this.getAd(name)
           this.buttons = [{
-            label: i18n.t('NN0561') as string,
+            label: this.$t('NN0561') as string,
             func: () => this.changeView('step1')
           }]
           break
@@ -206,10 +205,10 @@ export default defineComponent({
           this.init()
           this.currentStep = 1
           this.totalStep = 2
-          this.title = i18n.t('NN0701') as string
-          this.description = i18n.t('NN0702') as string
+          this.title = this.$t('NN0701') as string
+          this.description = this.$t('NN0702') as string
           this.buttons = [{
-            label: i18n.t('NN0550') as string,
+            label: this.$t('NN0550') as string,
             func: () => {
               this.applyCoupon()
               this.changeView(name.replace('1', '2'))
@@ -222,10 +221,10 @@ export default defineComponent({
           this.init()
           this.currentStep = 1
           this.totalStep = 2
-          this.title = i18n.t('NN0545') as string
-          this.description = (this.trialStatus === 'not used' ? i18n.t('NN0546') : i18n.t('NN0547')) as string
+          this.title = this.$t('NN0545') as string
+          this.description = (this.trialStatus === 'not used' ? this.$t('NN0546') : this.$t('NN0547')) as string
           this.buttons = [{
-            label: i18n.t('NN0550') as string,
+            label: this.$t('NN0550') as string,
             func: () => {
               this.changeView(name.replace('1', '2'))
             }
@@ -235,7 +234,7 @@ export default defineComponent({
         case 'step2-coupon':
         case 'step2':
           this.currentStep = 2
-          this.title = i18n.t('NN0551') as string
+          this.title = this.$t('NN0551') as string
           this.description = ''
           this.buttons = [] // Use button in PaymentField.vue
           this.img = 'pro-template1.jpg'
@@ -244,10 +243,10 @@ export default defineComponent({
           this.getBillingInfo()
           break
         case 'switch1':
-          this.title = i18n.t('NN0564', { period: this.isBundle ? i18n.t('NN0514') : i18n.t('NN0515') }) as string
-          this.description = (this.isBundle ? i18n.t('NN0566') : i18n.t('NN0565')) as string
+          this.title = this.$t('NN0564', { period: this.isBundle ? this.$t('NN0514') : this.$t('NN0515') }) as string
+          this.description = (this.isBundle ? this.$t('NN0566') : this.$t('NN0565')) as string
           this.buttons = [{
-            label: i18n.t('NN0567', { period: this.isBundle ? i18n.t('NN0514') : i18n.t('NN0515') }) as string,
+            label: this.$t('NN0567', { period: this.isBundle ? this.$t('NN0514') : this.$t('NN0515') }) as string,
             func: () => this.changeView('switch2')
           }]
           await this.getPrice(this.userCountryInfo)
@@ -256,10 +255,10 @@ export default defineComponent({
           // it will let user cannot switch plan since they should switch in the same plan.
           break
         case 'switch2':
-          this.title = i18n.t('NN0551') as string
-          this.description = i18n.t('NN0568') as string
+          this.title = this.$t('NN0551') as string
+          this.description = this.$t('NN0568') as string
           this.buttons = [{
-            label: i18n.t('NN0564', { period: this.isBundle ? i18n.t('NN0514') : i18n.t('NN0515') }) as string,
+            label: this.$t('NN0564', { period: this.isBundle ? this.$t('NN0514') : this.$t('NN0515') }) as string,
             func: async () => {
               await this.switch()
               this.closePopup()
@@ -268,19 +267,19 @@ export default defineComponent({
           this.img = 'pro-template1.jpg'
           break
         case 'cancel1':
-          this.title = i18n.t('NN0569') as string
+          this.title = this.$t('NN0569') as string
           this.buttons = [{
-            label: i18n.t('NN0575') as string,
+            label: this.$t('NN0575') as string,
             func: () => this.closePopup()
           }, {
             type: 'light-lg',
-            label: i18n.t('NN0574') as string,
+            label: this.$t('NN0574') as string,
             func: () => this.changeView('cancel2')
           }]
           this.img = 'pro-template2.jpg'
           break
         case 'cancel2':
-          this.title = i18n.t('NN0576') as string
+          this.title = this.$t('NN0576') as string
           this.buttons[1].disabled = () => !this.cancelReason
           this.buttons[1].func = this.cancel
           this.img = 'brandkit.jpg'
@@ -303,7 +302,7 @@ export default defineComponent({
       else if (this.view === 'switch2') this.changeView('switch1')
     },
     curPlan(period: string): string {
-      return this.view === 'switch1' && period !== this.userPeriod ? `(${i18n.t('NN0655')})` : ''
+      return this.view === 'switch1' && period !== this.userPeriod ? `(${this.$t('NN0655')})` : ''
     },
     selectCancelReason(index: string) {
       this.reasonIndex = index

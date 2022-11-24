@@ -65,6 +65,7 @@ import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import vClickOutside from 'v-click-outside'
 import imageUtils from '@/utils/imageUtils'
 import designUtils from '@/utils/designUtils'
+import { IDesign } from '@/interfaces/design'
 
 export default defineComponent({
   components: {
@@ -159,7 +160,7 @@ export default defineComponent({
         return
       }
       if (this.unenterable || this.isTempDesign) return
-      designUtils.setDesign(this.config)
+      designUtils.setDesign(this.config as IDesign)
     },
     handleCarouselIdx(idx: number) {
       this.carouselIdx = idx
@@ -180,6 +181,7 @@ export default defineComponent({
       if (this.config.polling) {
         this.pageImages = Array(this.config.pageNum).fill(this.previewPlaceholder)
         this.previewCheckReady = true
+        // eslint-disable-next-line vue/no-mutating-props
         this.config.thumbnail = this.previewPlaceholder
         this.pollingStep(0, callback)
       } else {
@@ -189,6 +191,7 @@ export default defineComponent({
           this.imgWidth = width
           this.imgHeight = height
           this.previewCheckReady = true
+          // eslint-disable-next-line vue/no-mutating-props
           this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
           this.$nextTick(() => {
             callback()
@@ -210,6 +213,7 @@ export default defineComponent({
         this.imgWidth = width
         this.imgHeight = height
         if (exists) {
+          // eslint-disable-next-line vue/no-mutating-props
           this.config.thumbnail = this.configPreview
           this.$nextTick(() => {
             callback()

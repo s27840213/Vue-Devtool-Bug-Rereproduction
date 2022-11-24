@@ -3,8 +3,8 @@ import i18n from '@/i18n'
 class HomeBlockData {
   data() {
     return [{
-      title: i18n.t('NN0466', { newline: '<br>' }),
-      description: i18n.t('NN0467'),
+      title: i18n.global.t('NN0466', { newline: '<br>' }),
+      description: i18n.global.t('NN0467'),
       img: {
         name: 'templateGallery.json',
         width: 3000,
@@ -23,8 +23,8 @@ class HomeBlockData {
       ],
       align: 'column'
     }, {
-      title: i18n.t('NN0480', { newline: '<br>' }),
-      description: i18n.t('NN0481'),
+      title: i18n.global.t('NN0480', { newline: '<br>' }),
+      description: i18n.global.t('NN0481'),
       img: {
         name: 'remover.mp4',
         width: 500,
@@ -37,8 +37,8 @@ class HomeBlockData {
       }],
       align: 'row'
     }, {
-      title: i18n.t('NN0471', { newline: '<br>' }),
-      description: i18n.t('NN0472'),
+      title: i18n.global.t('NN0471', { newline: '<br>' }),
+      description: i18n.global.t('NN0472'),
       img: {
         name: 'bundle.json',
         width: 500
@@ -51,8 +51,8 @@ class HomeBlockData {
       }],
       align: 'alternately'
     }, {
-      title: i18n.t('NN0473', { newline: '<br>' }),
-      description: i18n.t('NN0474'),
+      title: i18n.global.t('NN0473', { newline: '<br>' }),
+      description: i18n.global.t('NN0474'),
       img: {
         name: 'multiple-sizes.json',
         width: 500
@@ -64,11 +64,11 @@ class HomeBlockData {
       }],
       align: 'alternately'
     }, {
-      title: i18n.t('NN0475', { newline: '<br>' }),
-      description: i18n.t('NN0476'),
+      title: i18n.global.t('NN0475', { newline: '<br>' }),
+      description: i18n.global.t('NN0476'),
       link: {
-        text: i18n.t('NN0477'),
-        to: `/templates?q=${i18n.locale === 'tw' ? '九宮格' : 'storytelling'}`
+        text: i18n.global.t('NN0477'),
+        to: `/templates?q=${i18n.global.locale === 'tw' ? '九宮格' : 'storytelling'}`
       },
       img: {
         name: 'storytelling.mp4',
@@ -92,10 +92,10 @@ class HomeBlockData {
       ],
       align: 'alternately'
     }, {
-      title: i18n.t('NN0468', { newline: '<br>' }),
-      description: i18n.t('NN0469'),
+      title: i18n.global.t('NN0468', { newline: '<br>' }),
+      description: i18n.global.t('NN0469'),
       link: {
-        text: i18n.t('NN0470'),
+        text: i18n.global.t('NN0470'),
         to: '/templates'
       },
       img: {
@@ -120,10 +120,10 @@ class HomeBlockData {
       ],
       align: 'alternately'
     }, {
-      title: i18n.t('NN0478', { newline: '<br>' }),
-      description: i18n.t('NN0479'),
+      title: i18n.global.t('NN0478', { newline: '<br>' }),
+      description: i18n.global.t('NN0479'),
       link: {
-        text: i18n.t('NN0477'),
+        text: i18n.global.t('NN0477'),
         to: '/templates?themes=7'
       },
       img: {
@@ -139,8 +139,8 @@ class HomeBlockData {
       align: 'alternately'
     }, {
 
-      title: i18n.t('NN0482', { newline: '<br>' }),
-      description: i18n.t('NN0483'),
+      title: i18n.global.t('NN0482', { newline: '<br>' }),
+      description: i18n.global.t('NN0483'),
       img: {
         name: 'brandkit.json',
         width: 500
@@ -152,8 +152,8 @@ class HomeBlockData {
       }],
       align: 'alternately'
     }, {
-      title: i18n.t('NN0484', { newline: '<br>' }),
-      description: i18n.t('NN0485'),
+      title: i18n.global.t('NN0484', { newline: '<br>' }),
+      description: i18n.global.t('NN0485'),
       img: {
         name: 'comment.json',
         width: 2700,

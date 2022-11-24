@@ -63,7 +63,6 @@ import stepsUtils from '@/utils/stepsUtils'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
-import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import Tabs from '@/components/Tabs.vue'
 
@@ -170,9 +169,9 @@ export default defineComponent({
     emptyResultMessage(): string {
       const { keyword, pending } = this
       if (pending || !keyword || this.rawSearchResult.list.length > 0) return ''
-      return `${i18n.t('NN0393', {
+      return `${this.$t('NN0393', {
           keyword: this.keywordLabel,
-          target: i18n.tc('NN0004', 1)
+          target: this.$tc('NN0004', 1)
         })}`
     },
     showImageTab(): boolean { return this.currActiveTabIndex === 0 },
@@ -190,14 +189,18 @@ export default defineComponent({
       this.getRecAndCate)
   },
   activated() {
-    this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
-    this.$refs.searchResult[0].$el.scrollTop = this.scrollTop.searchResult
-    this.$refs.mainContent[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    const mainContent = (this.$refs.mainContent as any)[0]
+    const searchResult = (this.$refs.searchResult as any)[0]
+    mainContent.$el.scrollTop = this.scrollTop.mainContent
+    searchResult.$el.scrollTop = this.scrollTop.searchResult
+    mainContent.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    searchResult.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   deactivated() {
-    this.$refs.mainContent[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    const mainContent = (this.$refs.mainContent as any)[0]
+    const searchResult = (this.$refs.searchResult as any)[0]
+    mainContent.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    searchResult.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   beforeUnmount() {
     colorUtils.event.off(ColorEventType.background, (color: string) => {
@@ -210,7 +213,8 @@ export default defineComponent({
       if (!newVal) {
         this.$nextTick(() => {
           // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+          const mainContent = (this.$refs.mainContent as any)[0]
+          mainContent.$el.scrollTop = this.scrollTop.mainContent
         })
       }
     }

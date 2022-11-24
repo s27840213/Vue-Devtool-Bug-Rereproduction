@@ -76,8 +76,8 @@ export default defineComponent({
   },
   methods: {
     handleApplyGroupTemplate() {
-      if (!paymentUtils.checkProGroupTemplate(this.groupItem, this.groupItem.content_ids[0])) return
-      assetUtils.addGroupTemplate(this.groupItem)
+      if (!paymentUtils.checkProGroupTemplate(this.groupItem as any, this.groupItem.content_ids[0])) return
+      assetUtils.addGroupTemplate(this.groupItem as any)
         .then(() => {
           editorUtils.setMobileAllPageMode(true)
         })

@@ -37,7 +37,6 @@ import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import { Chrome } from 'vue-color'
-import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
 

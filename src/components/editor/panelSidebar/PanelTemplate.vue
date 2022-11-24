@@ -79,7 +79,6 @@ div(class="panel-template" ref="panel")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import i18n from '@/i18n'
 import { mapActions, mapState, mapMutations } from 'vuex'
 import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import SearchBar from '@/components/SearchBar.vue'
@@ -206,12 +205,12 @@ export default defineComponent({
       const { keyword, pending } = this
       if (pending || !keyword || this.searchResult.length > 0) return ''
       return keyword
-        ? `${i18n.t('NN0393', {
+        ? `${this.$t('NN0393', {
           keyword: this.keywordLabel,
-          target: i18n.tc('NN0001', 1)
+          target: this.$tc('NN0001', 1)
         })}`
-        : `${i18n.t('NN0394', {
-          target: i18n.tc('NN0001', 1)
+        : `${this.$t('NN0394', {
+          target: this.$tc('NN0001', 1)
         })}`
     },
     currPageThemeIds(): number[] {
@@ -221,7 +220,7 @@ export default defineComponent({
         .map(theme => theme.id)
     },
     resultTooFew(): string[] {
-      return (i18n.t('NN0398') as string).split('<html>')
+      return (this.$t('NN0398') as string).split('<html>')
     },
     allThemesChecked(): boolean {
       const allThemeString = _.sortBy(this.themes.map((item: Itheme) => item.id)).join(',')
@@ -229,14 +228,18 @@ export default defineComponent({
     }
   },
   activated() {
-    this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
-    this.$refs.searchResult[0].$el.scrollTop = this.scrollTop.searchResult
-    this.$refs.mainContent[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    const mainContent = (this.$refs.mainContent as any)[0]
+    const searchResult = (this.$refs.searchResult as any)[0]
+    mainContent.$el.scrollTop = this.scrollTop.mainContent
+    searchResult.$el.scrollTop = this.scrollTop.searchResult
+    mainContent.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    searchResult.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   deactivated() {
-    this.$refs.mainContent[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    const mainContent = (this.$refs.mainContent as any)[0]
+    const searchResult = (this.$refs.searchResult as any)[0]
+    mainContent.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    searchResult.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   watch: {
     currPageThemeIds(curr: number[] = []) {
@@ -253,7 +256,8 @@ export default defineComponent({
       if (!newVal) {
         this.$nextTick(() => {
           // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+          const mainContent = (this.$refs.mainContent as any)[0]
+          mainContent.$el.scrollTop = this.scrollTop.mainContent
         })
       }
     }
@@ -330,7 +334,7 @@ export default defineComponent({
     },
     themeStyle(): Record<string, string> {
       return {
-        maxHeight: `${this.$refs.panel.clientHeight - 80}px`
+        maxHeight: `${(this.$refs.panel as HTMLElement).clientHeight - 80}px`
       }
     },
     processListResult(list = [] as IAssetTemplate[], isSearch: boolean): ICategoryItem[] {

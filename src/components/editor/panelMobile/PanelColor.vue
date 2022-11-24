@@ -25,7 +25,7 @@ div(class="panel-color px-5")
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import Vue, { PropType, defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import colorUtils, { checkAndConvertToHex } from '@/utils/colorUtils'

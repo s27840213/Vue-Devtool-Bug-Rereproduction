@@ -24,10 +24,10 @@ class TestUtils {
     const result = `${key}: ${msg}, ${duration}`
     console.log(result)
     if (timer.notify) {
-      Vue.notify({
-        group: 'copy',
-        text: result
-      })
+      // Vue.notify({
+      //   group: 'copy',
+      //   text: result
+      // })P
     }
   }
 }

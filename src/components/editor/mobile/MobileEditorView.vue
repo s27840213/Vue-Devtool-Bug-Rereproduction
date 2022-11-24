@@ -97,7 +97,9 @@ export default defineComponent({
       cardWidth: 0,
       editorViewResizeObserver: null as unknown as ResizeObserver,
       isSwiping: false,
-      isScaling: false
+      isScaling: false,
+      editorViewAt: null as unknown as AnyTouch,
+      canvasAt: null as unknown as AnyTouch
     }
   },
   mounted() {
@@ -112,13 +114,8 @@ export default defineComponent({
     })
     this.getRecently()
 
-    const editorViewAt = new AnyTouch(this.$refs.editorView as HTMLElement, { preventDefault: false })
-    const canvasAt = new AnyTouch(this.$refs.canvas as HTMLElement, { preventDefault: false })
-    //  销毁
-    this.$on('hook:destroyed', () => {
-      editorViewAt.destroy()
-      canvasAt.destroy()
-    })
+    this.editorViewAt = new AnyTouch(this.$refs.editorView as HTMLElement, { preventDefault: false })
+    this.canvasAt = new AnyTouch(this.$refs.canvas as HTMLElement, { preventDefault: false })
 
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
@@ -147,6 +144,10 @@ export default defineComponent({
   },
   beforeUnmount() {
     this.editorViewResizeObserver.disconnect()
+  },
+  unmounted() {
+    this.editorViewAt.destroy()
+    this.canvasAt.destroy()
   },
   watch: {
     pageScaleRatio() {

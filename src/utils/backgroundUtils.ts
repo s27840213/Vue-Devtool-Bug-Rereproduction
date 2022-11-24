@@ -103,7 +103,7 @@ class BackgroundUtils {
   }
 
   handleLockedNotify() {
-    Vue.notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+    // Vue.notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
   }
 
   setBgImage(props: { pageIndex: number, config: Partial<IImage> }) {

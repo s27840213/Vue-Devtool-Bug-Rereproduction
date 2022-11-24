@@ -19,7 +19,7 @@ div(class="nu-frame"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import AssetUtils from '@/utils/assetUtils'
@@ -32,7 +32,7 @@ export default defineComponent({
   inheritAttrs: false,
   props: {
     config: {
-      type: Object,
+      type: Object as PropType<IFrame>,
       required: true
     },
     pageIndex: {
@@ -59,8 +59,10 @@ export default defineComponent({
 
       const json = (await AssetUtils.get(asset)).jsonData as IFrame
 
-      this.config.styles.initWidth = json.width
-      this.config.styles.initHeight = json.height
+      // eslint-disable-next-line vue/no-mutating-props
+      this.config.styles.initWidth = json.width as number
+      // eslint-disable-next-line vue/no-mutating-props
+      this.config.styles.initHeight = json.height as number
 
       config.clips.forEach((img, idx) => {
         if (json.clips[idx]) {
@@ -88,9 +90,11 @@ export default defineComponent({
         } as IListServiceContentDataItem
         AssetUtils.get(asset).then((res) => {
           const json = res.jsonData as IFrame
+          // eslint-disable-next-line vue/no-mutating-props
           this.config.clips = generalUtils.deepCopy(this.config.clips)
           if (this.config.decoration && json.decoration) {
             json.decoration.color = [...this.config.decoration.color] as [string]
+            // eslint-disable-next-line vue/no-mutating-props
             this.config.decoration = layerFactary.newShape({
               ...json.decoration,
               vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
@@ -104,6 +108,7 @@ export default defineComponent({
           }
           if (this.config.decorationTop && json.decorationTop) {
             json.decorationTop.color = [...this.config.decorationTop.color] as [string]
+            // eslint-disable-next-line vue/no-mutating-props
             this.config.decorationTop = layerFactary.newShape({
               ...json.decorationTop,
               vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
@@ -115,6 +120,7 @@ export default defineComponent({
               }
             })
           }
+          // eslint-disable-next-line vue/no-mutating-props
           this.config.needFetch = false
         })
       }

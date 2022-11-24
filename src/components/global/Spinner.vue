@@ -7,14 +7,15 @@ div(class="spinner popup-window")
 
 <script lang="ts">
 
-import i18n from '@/i18n'
+import i18n from '@/i18n';
 import { defineComponent } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   props: {
     textContent: {
       type: String,
-      default: `${i18n.t('NN0454')}`
+      default: `${i18n.global.t('NN0454')}`
     }
   }
 })

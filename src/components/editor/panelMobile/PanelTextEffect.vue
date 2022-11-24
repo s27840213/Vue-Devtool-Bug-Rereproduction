@@ -60,7 +60,7 @@ div(class="panel-text-effect")
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import Vue, { PropType, defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import textEffectUtils from '@/utils/textEffectUtils'
 import stepsUtils from '@/utils/stepsUtils'

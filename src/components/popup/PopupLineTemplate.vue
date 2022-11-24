@@ -70,7 +70,7 @@ export default defineComponent({
       const pageSize = pageUtils.getPageSize(pageUtils.currFocusPageIndex)
       return pageSize.width === 1230 && pageSize.height === 693
     },
-    row2Styles() {
+    row2Styles(): {[index: string]: string} {
       return {
         'grid-template-columns': this.isFbCover ? '0.25fr 0.75fr' : '0.75fr 0.25fr'
       }

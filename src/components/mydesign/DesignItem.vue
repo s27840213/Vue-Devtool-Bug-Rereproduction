@@ -99,6 +99,7 @@ import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import vClickOutside from 'v-click-outside'
 import imageUtils from '@/utils/imageUtils'
 import designUtils from '@/utils/designUtils'
+import { IDesign } from '@/interfaces/design'
 
 export default defineComponent({
   components: {
@@ -316,7 +317,7 @@ export default defineComponent({
       this.isNameEditing = false
       this.isNameMouseOver = false
       if (this.editableName === '' || this.editableName === this.config.name) return
-      designUtils.setDesignName(this.config, this.editableName)
+      designUtils.setDesignName(this.config as IDesign, this.editableName)
     },
     handleClick(e: MouseEvent) {
       if (this.isAnySelected) {
@@ -328,7 +329,7 @@ export default defineComponent({
         return
       }
       if (this.unenterable && this.isTempDesign) return
-      designUtils.setDesign(this.config)
+      designUtils.setDesign(this.config as IDesign)
     },
     handleCarouselIdx(idx: number) {
       this.carouselIdx = idx

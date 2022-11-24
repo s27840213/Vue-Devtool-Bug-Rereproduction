@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import Vue from 'vue'
 import store from '@/store'
 import i18n from '@/i18n'
@@ -17,7 +18,7 @@ class PaymentUtils {
     popupUtils.openPopup('payment')
   }
 
-  checkPro(template: {plan: number}, target: string) {
+  checkPro(template: { plan: number }, target: string) {
     if (this.isAdmin) return true
     if (template.plan === 1 && !this.isPro) {
       this.openPayment(target)
@@ -26,20 +27,20 @@ class PaymentUtils {
     return true
   }
 
-  checkProGroupTemplate(group: {plan: number}, template: {id:string, ver:number}) {
+  checkProGroupTemplate(group: { plan: number }, template: { id: string, ver: number }) {
     const url = `https://template.vivipic.com/template/${template.id}/prev_4x?ver=${template.ver}`
     return this._checkProTemplate(group.plan, url)
   }
 
-  checkProTemplate(template: {plan: number, url: string}) {
+  checkProTemplate(template: { plan: number, url: string }) {
     if (template.url) {
       return this._checkProTemplate(template.plan, template.url)
     } else {
-      return this.checkProGroupTemplate(template, template as unknown as {id:string, ver:number})
+      return this.checkProGroupTemplate(template, template as unknown as { id: string, ver: number })
     }
   }
 
-  _checkProTemplate(plan:number, url: string) {
+  _checkProTemplate(plan: number, url: string) {
     if (this.isAdmin) return true
     if (plan === 1 && !this.isPro) {
       this.openPayment('pro-template', url)
@@ -51,12 +52,12 @@ class PaymentUtils {
   checkCoupon() {
     const modal = (desc: string) => {
       modalUtils.setModalInfo(
-        i18n.tc('NN0709'),
-        i18n.tc(desc), {
-          msg: i18n.tc('NN0518'),
-          style: { width: '300px' },
-          action: () => { router.push('/settings/payment') }
-        }
+        i18n.global.tc('NN0709'),
+        i18n.global.tc(desc), {
+        msg: i18n.global.tc('NN0518'),
+        style: { width: '300px' },
+        action: () => { router.push('/settings/payment') }
+      }
       )
     }
 
@@ -72,7 +73,7 @@ class PaymentUtils {
   }
 
   contactUsUrl() {
-    switch (i18n.locale) {
+    switch (i18n.global.locale) {
       case 'tw':
         return 'https://blog.vivipic.com/tw/contactus/'
       case 'jp':
@@ -89,10 +90,10 @@ class PaymentUtils {
   errorHandler(msg?: string, initView = 'brandkit') {
     switch (msg) {
       case 'EXCEED_SIZE_LIMIT':
-        modalUtils.setModalInfo(i18n.t('NN0137') as string, [i18n.t('NN0645') as string])
+        modalUtils.setModalInfo(i18n.global.t('NN0137') as string, [i18n.global.t('NN0645') as string])
         break
       case 'EXCEED_CAPACITY':
-        modalUtils.setModalInfo(i18n.t('NN0137') as string, [i18n.t('NN0644') as string])
+        modalUtils.setModalInfo(i18n.global.t('NN0137') as string, [i18n.global.t('NN0644') as string])
         break
       case 'NOT_SUBSCRIBED':
         this.openPayment(initView)
@@ -102,29 +103,29 @@ class PaymentUtils {
         break
       case 'BG_DEPLETED_TRIAL':
       case 'BG_DEPLETED_YEAR':
-        modalUtils.setModalInfo(i18n.t('NN0646') as string,
-          [i18n.t('NN0648') as string], {
-            msg: i18n.t('NN0642') as string,
-            style: { width: '230px', height: '44px' },
-            action: this.contactUs
-          })
+        modalUtils.setModalInfo(i18n.global.t('NN0646') as string,
+          [i18n.global.t('NN0648') as string], {
+          msg: i18n.global.t('NN0642') as string,
+          style: { width: '230px', height: '44px' },
+          action: this.contactUs
+        })
         break
       case 'BG_DEPLETED_MONTH':
-        modalUtils.setModalInfo(i18n.t('NN0646') as string,
-          [i18n.t('NN0647') as string],
+        modalUtils.setModalInfo(i18n.global.t('NN0646') as string,
+          [i18n.global.t('NN0647') as string],
           {
-            msg: i18n.t('NN0642') as string,
+            msg: i18n.global.t('NN0642') as string,
             class: 'btn-light-mid',
             style: { width: '140px', height: '44px', border: '1px solid #4EABE6' },
             action: this.contactUs
           }, {
-            msg: i18n.t('NN0564', { period: i18n.t('NN0515') }) as string,
-            style: { width: '243px', height: '44px' },
-            action: () => { this.openPayment('switch1') }
-          })
+          msg: i18n.global.t('NN0564', { period: i18n.global.t('NN0515') }) as string,
+          style: { width: '243px', height: '44px' },
+          action: () => { this.openPayment('switch1') }
+        })
         break
       default:
-        Vue.notify({ group: 'error', text: msg })
+      // Vue.notify({ group: 'error', text: msg })
     }
   }
 }

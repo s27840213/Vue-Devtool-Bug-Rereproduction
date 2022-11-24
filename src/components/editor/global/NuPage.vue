@@ -161,7 +161,7 @@ div(class="nu-page"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapMutations, mapGetters, mapState } from 'vuex'
 import { IShape, IText, IImage, IGroup, ILayer, ITmp, IFrame, IImageStyle } from '@/interfaces/layer'
 import PageContent from '@/components/editor/page/PageContent.vue'
@@ -186,7 +186,6 @@ import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
 import cssConverter from '@/utils/cssConverter'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
-import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
@@ -231,7 +230,10 @@ export default defineComponent({
     }
   },
   props: {
-    config: Object as () => IPage,
+    config: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
     pageIndex: {
       type: Number,
       required: true
@@ -244,7 +246,10 @@ export default defineComponent({
       type: Boolean,
       required: true
     },
-    overflowContainer: HTMLElement,
+    overflowContainer: {
+      type: HTMLElement,
+      required: true
+    },
     isScaling: {
       type: Boolean,
       required: true

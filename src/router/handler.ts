@@ -1,4 +1,4 @@
-import { Route, NavigationGuardNext } from 'vue-router'
+import VueRouter, { NavigationGuardNext } from 'vue-router'
 import uploadUtils from '@/utils/uploadUtils'
 import assetUtils from '@/utils/assetUtils'
 import { SidebarPanelType } from '@/store/types'
@@ -8,7 +8,7 @@ import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
 
-export async function editorRouteHandler(_to: Route, from: Route, next: NavigationGuardNext<Vue>) {
+export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized, from: VueRouter.RouteLocationNormalized, next: VueRouter.NavigationGuardNext) {
   try {
     next()
     const urlParams = new URLSearchParams(window.location.search)
@@ -55,7 +55,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
           pageUtils.fillPage()
         }
       }
-    } else if (!url && (!from.name || ['Login'].includes(from.name))) {
+    } else if (!url && (!from.name || ['Login'].includes(String(from.name)))) {
       // refresh /editor page
       store.commit('file/SET_setLayersDone')
       themeUtils.refreshTemplateState()

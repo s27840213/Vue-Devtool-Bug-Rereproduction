@@ -65,9 +65,10 @@ export default defineComponent({
       return constantData.headerItems(true)
     },
     currentPage(): string {
-      return this.$route.name === 'Settings'
-        ? this.$route.params.view
-        : this.$route.name || ''
+      const { name, params } = this.$router.currentRoute.value
+      return (name as string) === 'Settings'
+        ? this.$route.params.view as string
+        : (name as string) || ''
     },
     currPath(): string {
       return this.$route.path || '/'

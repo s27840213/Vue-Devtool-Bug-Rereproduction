@@ -11,7 +11,7 @@ import TextEffectUtils from './textEffectUtils'
 import i18n from '@/i18n'
 import tiptapUtils from './tiptapUtils'
 
-const fontPropsMap: {[key: string]: string} = {
+const fontPropsMap: { [key: string]: string } = {
   fontSize: 'size',
   fontFamily: 'font',
   bold: 'weight',
@@ -579,7 +579,7 @@ class TextPropUtils {
         styles: { ...styles }
       })
       paragraphs[pIndex].spans[sIndex].text = paragraphs[pIndex].spans[sIndex].text.substring(0, offset)
-      Object.assign(config?.paragraphs, paragraphs)
+      Object.assign(config?.paragraphs as IParagraph[], paragraphs)
       TextUtils.updateSelection({ pIndex, sIndex: sIndex + 1, offset: 1 }, TextUtils.getNullSel())
     }
   }
@@ -1216,7 +1216,7 @@ class TextPropUtils {
         case 'font': {
           const font = this.propReader('fontFamily')
           // const font = this.getTextState.fontStore.find(font => font.face === this.propReader('fontFamily'))?.name
-          value = typeof font === 'string' ? font : `_${i18n.t('NN0341')}`
+          value = typeof font === 'string' ? font : `_${i18n.global.t('NN0341')}`
           break
         }
         case 'type': {

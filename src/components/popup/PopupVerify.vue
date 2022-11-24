@@ -114,7 +114,6 @@ import { mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import userApis from '@/apis/user'
 import store from '@/store'
-import i18n from '@/i18n'
 import localeUtils from '@/utils/localeUtils'
 
 export default defineComponent({
@@ -137,9 +136,9 @@ export default defineComponent({
       vcode: '' as string,
       oldPass: '',
       newPass: '',
-      vcodeErrorMessage: i18n.t('NN0298') as string,
+      vcodeErrorMessage: this.$t('NN0298') as string,
       oldPassErrorMessage: '' as string,
-      passwordHint: i18n.t('NN0308') as string,
+      passwordHint: this.$t('NN0308') as string,
       leftTime: 60 as number,
       leftTimeText: '' as string,
       resendAvailable: true as boolean,
@@ -239,7 +238,7 @@ export default defineComponent({
         return
       }
       this.resendAvailable = false
-      this.leftTimeText = i18n.t('NN0289', { time: this.leftTime }) as string
+      this.leftTimeText = this.$t('NN0289', { time: this.leftTime }) as string
       const parameter = {
         token: this.token,
         account: this.account,
@@ -253,7 +252,7 @@ export default defineComponent({
         this.isLoading = false
         const clock = window.setInterval(() => {
           this.leftTime--
-          this.leftTimeText = i18n.t('NN0289', { time: this.leftTime }) as string
+          this.leftTimeText = this.$t('NN0289', { time: this.leftTime }) as string
           if (this.leftTime === 0) {
             window.clearInterval(clock)
             this.resendAvailable = true
@@ -274,7 +273,7 @@ export default defineComponent({
         return
       }
       if (!this.vcodeValid) {
-        this.vcodeErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0286') }) as string
+        this.vcodeErrorMessage = this.$t('NN0163', { term: this.$t('NN0286') }) as string
         this.isLoading = false
         return
       }
@@ -297,7 +296,7 @@ export default defineComponent({
       this.isCheckPasswordClicked = true
       this.isLoading = true
       if (!this.oldPassValid) {
-        this.oldPassErrorMessage = i18n.t('NN0163', { term: i18n.tc('NN0180', 2) }) as string
+        this.oldPassErrorMessage = this.$t('NN0163', { term: this.$tc('NN0180', 2) }) as string
         this.isLoading = false
         return
       }
@@ -312,7 +311,7 @@ export default defineComponent({
         this.currentPage = 'newPass'
       } else {
         this.oldPass = ''
-        this.oldPassErrorMessage = data.msg || i18n.t('NN0242') as string
+        this.oldPassErrorMessage = data.msg || this.$t('NN0242') as string
         console.log(data.msg)
       }
       this.isLoading = false
@@ -325,7 +324,7 @@ export default defineComponent({
       this.isConfirmClicked = true
       this.isResponseError = false
       if (!this.resetPasswordValid) {
-        this.passwordHint = i18n.t('NN0308') as string
+        this.passwordHint = this.$t('NN0308') as string
         return
       }
       this.isLoading = true
@@ -341,7 +340,7 @@ export default defineComponent({
         this.closePopup()
       } else {
         this.isResponseError = true
-        this.passwordHint = data.msg || i18n.t('NN0242') as string
+        this.passwordHint = data.msg || this.$t('NN0242') as string
         console.log(data.msg)
       }
       this.isLoading = false

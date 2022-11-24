@@ -67,7 +67,6 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
-import i18n from '@/i18n'
 
 export default defineComponent({
   data() {

@@ -27,7 +27,6 @@ div(class="block" :style="blockStyle")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
-import i18n from '@/i18n'
 import Animation from '@/components/Animation.vue'
 
 export default defineComponent({
@@ -63,7 +62,7 @@ export default defineComponent({
       return this.isLargeDesktop ? 1 : 0.7
     },
     locale(): string {
-      return i18n.locale
+      return this.$i18n.locale
     },
     dir(): string {
       return this.content.img.name.endsWith('json')

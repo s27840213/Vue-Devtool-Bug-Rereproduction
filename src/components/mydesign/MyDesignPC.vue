@@ -367,9 +367,9 @@ export default defineComponent({
     showMessage(queue: IQueueItem[], flag: string, recordTimer: boolean) {
       const item = queue[0]
       if (item) {
-        this.$set(this, flag, true)
+        // this.$set(this, flag, true)
         const timer = setTimeout(() => {
-          this.$set(this, flag, false)
+          // this.$set(this, flag, false)
           setTimeout(() => {
             queue.shift()
             this.showMessage(queue, flag, recordTimer)

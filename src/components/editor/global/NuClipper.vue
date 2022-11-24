@@ -89,7 +89,7 @@ export default defineComponent({
           height = `${this.shapeHeight()}px`
           break
         case 'frame':
-          if (frameUtils.isImageFrame(this.config)) {
+          if (frameUtils.isImageFrame(this.config as IFrame)) {
             width = `${width * this.contentScaleRatio}px`
             height = `${height * this.contentScaleRatio}px`
           } else {

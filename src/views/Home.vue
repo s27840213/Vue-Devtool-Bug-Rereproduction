@@ -36,7 +36,6 @@ div(class="home")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
-import i18n from '@/i18n'
 import NuHeader from '@/components/NuHeader.vue'
 import Animation from '@/components/Animation.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
@@ -115,7 +114,7 @@ export default defineComponent({
     }),
     blocklist(): ReturnType<typeof blocklistData.data> {
       const blocklist = blocklistData.data().filter((item) => {
-        return !(i18n.locale === 'us' && item.img.name === 'e-commerce.json')
+        return !(this.$i18n.locale === 'us' && item.img.name === 'e-commerce.json')
       })
       // Set align as row, row-reverse alternately.
       for (let i = 1; i < blocklist.length; i++) {
@@ -126,13 +125,13 @@ export default defineComponent({
       return blocklist
     },
     ytId() {
-      return i18n.locale === 'us' ? 'GRSlz37Njo0'
-        : i18n.locale === 'jp' ? 'FzPHWU0O1uI'
-          : i18n.locale === 'tw' ? 'BBVAwlBk_zA' : 'GRSlz37Njo0'
+      return this.$i18n.locale === 'us' ? 'GRSlz37Njo0'
+        : this.$i18n.locale === 'jp' ? 'FzPHWU0O1uI'
+          : this.$i18n.locale === 'tw' ? 'BBVAwlBk_zA' : 'GRSlz37Njo0'
     }
   },
   created() {
-    if (i18n.locale === 'us') {
+    if (this.$i18n.locale === 'us') {
       this.themeList = _.without(this.themeList, '7')
     }
   },

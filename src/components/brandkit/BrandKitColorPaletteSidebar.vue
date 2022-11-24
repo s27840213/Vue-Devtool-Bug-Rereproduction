@@ -12,7 +12,7 @@ div(class="brand-kit-color-palette")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrandColorPalette } from '@/interfaces/brandkit'
 import { mapMutations } from 'vuex'
@@ -31,7 +31,7 @@ export default defineComponent({
   },
   props: {
     colorPalette: {
-      type: Object,
+      type: Object as PropType<IBrandColorPalette>,
       required: true
     }
   },

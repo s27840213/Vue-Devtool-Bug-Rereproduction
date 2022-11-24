@@ -45,7 +45,6 @@ import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
@@ -128,9 +127,9 @@ export default defineComponent({
     emptyResultMessage(): string {
       const { keyword, pending } = this
       if (pending || !keyword || this.searchResult.length > 0) return ''
-      return `${i18n.t('NN0393', {
+      return `${this.$t('NN0393', {
           keyword: this.keywordLabel,
-          target: i18n.tc('NN0003', 1)
+          target: this.$tc('NN0003', 1)
         })}`
     }
   },
@@ -142,21 +141,26 @@ export default defineComponent({
     )
   },
   activated() {
-    this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
-    this.$refs.searchResult[0].$el.scrollTop = this.scrollTop.searchResult
-    this.$refs.mainContent[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    const mainContent = (this.$refs.mainContent as any)[0]
+    const searchResult = (this.$refs.searchResult as any)[0]
+    mainContent.$el.scrollTop = this.scrollTop.mainContent
+    searchResult.$el.scrollTop = this.scrollTop.searchResult
+    mainContent.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    searchResult.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   deactivated() {
-    this.$refs.mainContent[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    const mainContent = (this.$refs.mainContent as any)[0]
+    const searchResult = (this.$refs.searchResult as any)[0]
+    mainContent.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    searchResult.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   watch: {
     keyword(newVal: string) {
       if (!newVal) {
         this.$nextTick(() => {
           // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+          const mainContent = (this.$refs.mainContent as any)[0]
+          mainContent.$el.scrollTop = this.scrollTop.mainContent
         })
       }
     }
@@ -179,7 +183,7 @@ export default defineComponent({
     handleCategorySearch(keyword: string, locale = '') {
       this.resetSearch()
       if (keyword) {
-        this.panelParams = `http://vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
+        this.panelParams = `http://vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${this.$i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
         this.getContent({ keyword, locale })
       }
     },

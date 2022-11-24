@@ -6,7 +6,7 @@ div(v-if="showWarning" class="warning")
       span(class="caption-SM") {{cur.title}}
       div(class="warning-small-title-disk-total")
         div(class="warning-small-title-disk-used" :style="diskStyle")
-    i18n(:path="cur.small.desc" class="warning-small-desc" tag="div")
+      i18n(:path="cur.small.desc" class="warning-small-desc" tag="div")
       template(#button)
         span(class="warning-small-desc__btn" @click="cur.small.func") {{cur.small.buttonLabel}}
     svg-icon(iconName="close" iconColor="white"
@@ -22,7 +22,6 @@ div(v-if="showWarning" class="warning")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
-import i18n from '@/i18n'
 import paymentUtils from '@/utils/paymentUtils'
 
 export default defineComponent({
@@ -55,7 +54,7 @@ export default defineComponent({
       return (this._diskPercent * 100).toFixed(0)
     },
     recalc(): string {
-      return (this.usage.diskLoading ? i18n.t('NN0454') : i18n.t('NN0641')) as string
+      return (this.usage.diskLoading ? this.$t('NN0454') : this.$t('NN0641')) as string
     },
     preset(): Record<string, Record<string, Record<string, unknown>>> {
       return {
@@ -63,23 +62,23 @@ export default defineComponent({
           0: { hidden: true },
           80: { hidden: true },
           100: {
-            title: i18n.t('NN0635', { disk: this.diskPercent }),
+            title: this.$t('NN0635', { disk: this.diskPercent }),
             bgcolor: '#4EABE6',
             large: {
-              desc: i18n.t('NN0639'),
+              desc: this.$t('NN0639'),
               buttons: [{
                 label: this.recalc,
                 func: this.reload,
                 disabled: this.usage.diskLoading,
                 type: 'transparent-mid'
               }, {
-                label: i18n.t('NN0642'),
+                label: this.$t('NN0642'),
                 func: this.contact
               }]
             },
             small: {
               desc: 'NN0640',
-              buttonLabel: i18n.t('NN0642'),
+              buttonLabel: this.$t('NN0642'),
               func: this.contact
             }
           }
@@ -87,43 +86,43 @@ export default defineComponent({
         free: {
           0: { hidden: true },
           80: {
-            title: i18n.t('NN0635', { disk: this.diskPercent }),
+            title: this.$t('NN0635', { disk: this.diskPercent }),
             bgcolor: '#FFBA49',
             large: {
-              desc: i18n.t('NN0636', { button: i18n.t('NN0561') }),
+              desc: this.$t('NN0636', { button: this.$t('NN0561') }),
               buttons: [{
-                label: i18n.t('NN0271'),
+                label: this.$t('NN0271'),
                 func: this.skip,
                 type: 'transparent-mid'
               }, {
-                label: i18n.t('NN0561'),
+                label: this.$t('NN0561'),
                 func: this.openPaymentPopup
               }]
             },
             small: {
               desc: 'NN0636',
-              buttonLabel: i18n.tc('NN0507', 1),
+              buttonLabel: this.$tc('NN0507', 1),
               func: this.openPaymentPopup
             }
           },
           100: {
-            title: i18n.t('NN0635', { disk: this.diskPercent }),
+            title: this.$t('NN0635', { disk: this.diskPercent }),
             bgcolor: '#4EABE6',
             large: {
-              desc: i18n.t('NN0637'),
+              desc: this.$t('NN0637'),
               buttons: [{
                 label: this.recalc,
                 func: this.reload,
                 disabled: this.usage.diskLoading,
                 type: 'transparent-mid'
               }, {
-                label: i18n.t('NN0561'),
+                label: this.$t('NN0561'),
                 func: this.openPaymentPopup
               }]
             },
             small: {
               desc: 'NN0638',
-              buttonLabel: i18n.tc('NN0507', 1),
+              buttonLabel: this.$tc('NN0507', 1),
               func: this.openPaymentPopup
             }
           }

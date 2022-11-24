@@ -59,7 +59,7 @@ export default defineComponent({
         this.folderBuffer &&
         (
           designUtils.isMaxLevelReached(this.parents.length) ||
-          designUtils.isParentOrEqual(this.folderBuffer, { parents: [designUtils.ROOT, ...this.parents as string[]], folder: this.folder })
+          designUtils.isParentOrEqual(this.folderBuffer, { parents: [designUtils.ROOT, ...this.parents as string[]], folder: this.folder as IFolder })
         )
       )
     },

@@ -24,7 +24,7 @@ interface IBrandKitState {
   isFontsLoading: boolean,
   selectedTab: string,
   fonts: IBrandFont[],
-  fetchedFonts: {[key: string]: {[key: string]: string}},
+  fetchedFonts: { [key: string]: { [key: string]: string } },
   logosPageIndex: number,
   palettesPageIndex: number,
   fontsPageIndex: number,
@@ -36,7 +36,7 @@ interface IBrandKitState {
 
 const NULL_BRAND = brandkitUtils.createNullBrand()
 const showNetworkError = () => {
-  Vue.notify({ group: 'error', text: `${i18n.t('NN0242')}` })
+  // Vue.notify({ group: 'error', text: `${i18n.t('NN0242')}` })
 }
 
 const getDefaultState = (): IBrandKitState => ({
@@ -127,7 +127,7 @@ const getters: GetterTree<IBrandKitState, unknown> = {
   getFontsPageIndex(state: IBrandKitState): number {
     return state.fontsPageIndex
   },
-  getFontUrlMap(state: IBrandKitState): (assetIndex: string) => {[key: string]: string} | undefined {
+  getFontUrlMap(state: IBrandKitState): (assetIndex: string) => { [key: string]: string } | undefined {
     return (assetIndex: string) => {
       return state.fetchedFonts[assetIndex]
     }
@@ -763,24 +763,24 @@ const mutations: MutationTree<IBrandKitState> = {
     if (index < 0) return
     state.fonts.splice(index, 1, updateInfo.font)
   },
-  UPDATE_replaceFontUrl(state: IBrandKitState, updateInfo: { font: IBrandFont, urlMap: {[key: string]: string} }) {
+  UPDATE_replaceFontUrl(state: IBrandKitState, updateInfo: { font: IBrandFont, urlMap: { [key: string]: string } }) {
     const font = state.fonts.find(font_ => font_.id === updateInfo.font.id)
     if (!font || !font.signed_url) return
     for (const key of Object.keys(font.signed_url)) {
       (font.signed_url as any)[key] = updateInfo.urlMap[key] ?? ''
     }
   },
-  UPDATE_replaceLogoUrl(state: IBrandKitState, updateInfo: { brand: IBrand, assetIndex: string, urlMap: {[key: string]: string} }) {
+  UPDATE_replaceLogoUrl(state: IBrandKitState, updateInfo: { brand: IBrand, assetIndex: string, urlMap: { [key: string]: string } }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
     if (!brand) return
     const logo = brand.logos.find(logo => logo.asset_index.toString() === updateInfo.assetIndex)
     if (!logo || !logo.signed_url) return
     (logo.signed_url as any) = updateInfo.urlMap
   },
-  UPDATE_addFetchedFont(state: IBrandKitState, updateInfo: { index: string, urlMap: {[key: string]: string} }) {
+  UPDATE_addFetchedFont(state: IBrandKitState, updateInfo: { index: string, urlMap: { [key: string]: string } }) {
     state.fetchedFonts[updateInfo.index] = updateInfo.urlMap
   },
-  UPDATE_setFetchedFont(state: IBrandKitState, urlMap: {[key: string]: {[key: string]: string}}) {
+  UPDATE_setFetchedFont(state: IBrandKitState, urlMap: { [key: string]: { [key: string]: string } }) {
     Object.assign(state.fetchedFonts, urlMap)
   },
   UPDATE_updateTextStyle(state: IBrandKitState, updateInfo: { brand: IBrand, type: string, style: any }) {

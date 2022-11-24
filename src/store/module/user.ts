@@ -270,10 +270,10 @@ const actions: ActionTree<IUserModule, unknown> = {
       }
       if (flag === 1) {
         logUtils.setLog(`Put asset failed: ${msg}`)
-        Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+        // Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
       } else if (flag === 2) {
         logUtils.setLog(`Token invalid!: ${msg}`)
-        Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+        // Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
       }
       return data
     } catch (error) {
@@ -337,7 +337,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       process.env.NODE_ENV === 'development' && console.log(data.data)
       const locale = localStorage.getItem('locale') as string
       if (locale !== data.data.locale) {
-        i18n.locale = data.data.locale
+        i18n.global.locale = data.data.locale
         localStorage.setItem('locale', data.data.locale)
       }
       uploadUtils.setLoginOutput(data.data)

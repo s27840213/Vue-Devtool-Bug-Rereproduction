@@ -6,50 +6,50 @@ import store from '@/store'
 import * as type from '@/interfaces/payment'
 
 class Payment {
-  planList (country: string) {
+  planList(country: string) {
     return axios.request<type.IApiBillingInfoList>({
       url: '/billing-info',
       method: 'POST',
       data: {
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         type: 'list',
         country: country
       }
     })
   }
 
-  billingInfo () {
+  billingInfo() {
     return axios.request<type.IApiBillingInfoStatus>({
       url: '/billing-info',
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         type: 'status'
       }
     })
   }
 
-  billingHistory (index: number) {
+  billingHistory(index: number) {
     return axios.request<type.IApiBillingInfoHistory>({
       url: '/billing-info',
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         type: 'history',
         page_index: index
       }
     })
   }
 
-  updateBillingInfo (params: type.IParamMeta) {
+  updateBillingInfo(params: type.IParamMeta) {
     return axios.request<type.IApiBasic>({
       url: '/billing-info',
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         type: 'update',
         ...params // meta (billing info)
       }
@@ -57,25 +57,25 @@ class Payment {
   }
 
   // For both stripe & tappay
-  init () {
+  init() {
     return axios.request<type.IApiPaymentInit>({
       url: '/payment',
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         action: 'init'
       }
     })
   }
 
-  tappayAdd (params: type.IParamTappayAdd) {
+  tappayAdd(params: type.IParamTappayAdd) {
     return axios.request<type.IApiBasic>({
       url: '/payment',
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         action: 'add_card',
         type: 'tappay',
         campaign: localStorage.getItem('campaign') || undefined,
@@ -84,13 +84,13 @@ class Payment {
     })
   }
 
-  stripeAdd (params: type.IParamStripeAdd) {
+  stripeAdd(params: type.IParamStripeAdd) {
     return axios.request<type.IApiBasic>({
       url: '/payment',
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         action: 'add_card',
         type: 'stripe',
         campaign: localStorage.getItem('campaign') || undefined,
@@ -99,13 +99,13 @@ class Payment {
     })
   }
 
-  tappayUpdate (params: type.IParamPrime) {
+  tappayUpdate(params: type.IParamPrime) {
     return axios.request<type.IApiBasic>({
       url: '/payment',
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         action: 'update_card',
         type: 'tappay',
         ...params
@@ -113,26 +113,26 @@ class Payment {
     })
   }
 
-  stripeUpdate () {
+  stripeUpdate() {
     return axios.request<type.IApiBasic>({
       url: '/payment',
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         action: 'update_card',
         type: 'stripe'
       }
     })
   }
 
-  getSwitchPrice (params: type.IParamSwitch) {
+  getSwitchPrice(params: type.IParamSwitch) {
     return axios.request<type.IApiPaymentSwitch>({
       url: '/payment',
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         action: 'switch',
         dry_run: 1,
         ...params // plan_id, is_bundle
@@ -140,13 +140,13 @@ class Payment {
     })
   }
 
-  switch (params: type.IParamSwitch) {
+  switch(params: type.IParamSwitch) {
     return axios.request<type.IApiPaymentSwitch>({
       url: '/payment',
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         action: 'switch',
         dry_run: 0,
         ...params // plan_id, is_bundle
@@ -154,26 +154,26 @@ class Payment {
     })
   }
 
-  cancel (reason: string) {
+  cancel(reason: string) {
     return axios.request<type.IApiBasic>({
       url: '/payment',
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         action: 'cancel',
         reason: reason
       }
     })
   }
 
-  resume () {
+  resume() {
     return axios.request<type.IApiBasic>({
       url: '/payment',
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         action: 'resume'
       }
     })
@@ -185,7 +185,7 @@ class Payment {
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         action: 'delete_card'
       }
     })
@@ -197,14 +197,14 @@ class Payment {
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         team_id: store.getters['user/getTeamId'],
         proc_id: procId
       }
     })
   }
 
-  calcDone(procId: string, callback: (e: MessageEvent)=>void): void {
+  calcDone(procId: string, callback: (e: MessageEvent) => void): void {
     const ws = new WebSocket(`${'wss://proc.vivipic.com'}?token=${authToken().token || ''}&proc_id=${procId}`)
     ws.onmessage = callback
     ws.onerror = (event) => { console.log('socket error', event) }
@@ -216,7 +216,7 @@ class Payment {
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         add: 0,
         coupon
       }
@@ -229,7 +229,7 @@ class Payment {
       method: 'POST',
       data: {
         token: authToken().token || '',
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         add: 0,
         coupon,
         plan_id,

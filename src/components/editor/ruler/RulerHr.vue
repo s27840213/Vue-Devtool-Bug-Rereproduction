@@ -81,7 +81,7 @@ export default defineComponent({
   methods: {
     calcRulerBodyOffset(): void {
       this.$nextTick(() => {
-        this.rulerBodyOffset = pageUtils.pageRect.left - this.canvasRect.left + this.editorView.scrollLeft
+        this.rulerBodyOffset = pageUtils.pageRect.left - this.canvasRect!.left + this.editorView!.scrollLeft
       })
     }
   }

@@ -202,7 +202,6 @@ div(style="position: relative;")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import i18n from '@/i18n'
 import store from '@/store'
 import userApis from '@/apis/user'
 import localeUtils from '@/utils/localeUtils'
@@ -227,10 +226,10 @@ export default defineComponent({
       vcode: '' as string,
       currentPageIndex: 0 as number,
       isLoginClicked: false as boolean,
-      passwordErrorMessage: i18n.t('NN0163', { term: i18n.tc('NN0180', 2) }) as string,
+      passwordErrorMessage: this.$t('NN0163', { term: this.$tc('NN0180', 2) }) as string,
       emailResponseError: false as boolean,
-      mailErrorMessage: i18n.t('NN0297') as string,
-      vcodeErrorMessage: i18n.t('NN0298') as string,
+      mailErrorMessage: this.$t('NN0297') as string,
+      vcodeErrorMessage: this.$t('NN0298') as string,
       leftTime: 60 as number,
       leftTimeText: '' as string,
       resendAvailable: true as boolean,
@@ -405,7 +404,7 @@ export default defineComponent({
       this.isLoginClicked = true
       this.isLoading = true
       if (this.password.length === 0) {
-        this.passwordErrorMessage = i18n.t('NN0163', { term: i18n.tc('NN0180', 2) }) as string
+        this.passwordErrorMessage = this.$t('NN0163', { term: this.$tc('NN0180', 2) }) as string
         this.isLoading = false
         return
       }
@@ -418,7 +417,7 @@ export default defineComponent({
         this.$router.push({ path: this.redirect || '/' })
       } else {
         this.password = ''
-        this.passwordErrorMessage = data.msg || i18n.t('NN0242')
+        this.passwordErrorMessage = data.msg || this.$t('NN0242')
       }
       this.isLoading = false
     },
@@ -441,12 +440,12 @@ export default defineComponent({
       this.isLoading = true
       if (this.email.length === 0) {
         this.isLoading = false
-        this.mailErrorMessage = i18n.t('NN0163', { term: i18n.tc('NN0173', 2) }) as string
+        this.mailErrorMessage = this.$t('NN0163', { term: this.$tc('NN0173', 2) }) as string
         return
       }
       if (!this.mailValid) {
         this.isLoading = false
-        this.mailErrorMessage = i18n.t('NN0297') as string
+        this.mailErrorMessage = this.$t('NN0297') as string
         return
       }
       const parameter = {
@@ -462,7 +461,7 @@ export default defineComponent({
         this.currentPageIndex = 2
       } else {
         this.emailResponseError = true
-        this.mailErrorMessage = data.msg || i18n.t('NN0242')
+        this.mailErrorMessage = data.msg || this.$t('NN0242')
       }
       this.isLoading = false
     },
@@ -474,7 +473,7 @@ export default defineComponent({
         return
       }
       this.resendAvailable = false
-      this.leftTimeText = i18n.t('NN0289', { time: this.leftTime }) as string
+      this.leftTimeText = this.$t('NN0289', { time: this.leftTime }) as string
       const parameter = {
         account: this.email,
         register: '0',
@@ -487,7 +486,7 @@ export default defineComponent({
         this.isLoading = false
         const clock = window.setInterval(() => {
           this.leftTime--
-          this.leftTimeText = i18n.t('NN0289', { time: this.leftTime }) as string
+          this.leftTimeText = this.$t('NN0289', { time: this.leftTime }) as string
           if (this.leftTime === 0) {
             window.clearInterval(clock)
             this.resendAvailable = true
@@ -510,7 +509,7 @@ export default defineComponent({
         return
       }
       if (!this.vcodeValid) {
-        this.vcodeErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0286') }) as string
+        this.vcodeErrorMessage = this.$t('NN0163', { term: this.$t('NN0286') }) as string
         this.isLoading = false
         return
       }
@@ -526,7 +525,7 @@ export default defineComponent({
         this.isResetClicked = false
         this.token = data.token
       } else {
-        this.vcodeErrorMessage = data.msg || i18n.t('NN0242')
+        this.vcodeErrorMessage = data.msg || this.$t('NN0242')
       }
       this.isLoading = false
     },
@@ -539,11 +538,11 @@ export default defineComponent({
         return
       }
       if (this.password.length === 0) {
-        this.confirmErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0292') }) as string
+        this.confirmErrorMessage = this.$t('NN0163', { term: this.$t('NN0292') }) as string
         this.isLoading = false
         return
       } else if (!this.resetPasswordValid || !this.confirmPasswordValid) {
-        this.confirmErrorMessage = i18n.t('NN0298') as string
+        this.confirmErrorMessage = this.$t('NN0298') as string
         this.isLoading = false
         return
       }
@@ -556,7 +555,7 @@ export default defineComponent({
         this.currentPageIndex = 0
         this.isLoginClicked = false
       } else {
-        this.confirmErrorMessage = data.msg || i18n.t('NN0242')
+        this.confirmErrorMessage = data.msg || this.$t('NN0242')
       }
       this.isLoading = false
     },

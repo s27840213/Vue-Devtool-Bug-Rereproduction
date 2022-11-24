@@ -36,7 +36,6 @@ div(class="field")
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
-import i18n from '@/i18n'
 import Options from '@/components/global/Options.vue'
 import paymentData from '@/utils/constantData'
 import mappingUtils from '@/utils/mappingUtils'
@@ -107,12 +106,12 @@ export default defineComponent({
     },
     submitText(): string {
       return (this.isLoading
-        ? i18n.t('NN0454')
+        ? this.$t('NN0454')
         : this.isChange
-          ? i18n.tc('NN0133', 2)
+          ? this.$tc('NN0133', 2)
           : this.trialStatus === 'not used'
-            ? i18n.t('NN0560')
-            : i18n.t('NN0561')) as string
+            ? this.$t('NN0560')
+            : this.$t('NN0561')) as string
     },
     invoiceReady(): boolean { // Check if input is empty
       for (const item of this.invoiceInput) {
@@ -169,7 +168,7 @@ export default defineComponent({
     async stripeInit() {
       await this.clientSecret // Wait for api promise
       this.stripe = await loadStripe('pk_live_51HPpbIJuHmbesNZIbXTLIiElWHqRqS9xLnCkoJ9LynKfQO2G9JIVpeEdogBdBU7aiqvXrTjjJQPUVVGQBdSxwmoc00bJcj9VG2', {
-        locale: mappingUtils.mappingLocales(i18n.locale) as 'zh-TW'// | 'ja-JP' | 'en-US'
+        locale: mappingUtils.mappingLocales(this.$i18n.locale) as 'zh-TW'// | 'ja-JP' | 'en-US'
       }) as Stripe
       this.stripeElement = this.stripe.elements({
         clientSecret: this.clientSecret,

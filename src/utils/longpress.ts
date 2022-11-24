@@ -1,6 +1,5 @@
 import store from '@/store'
-import { VNode } from 'vue'
-import { DirectiveBinding } from 'vue/types/options'
+import { VNode, DirectiveBinding } from 'vue'
 
 let pressTimer = -1
 

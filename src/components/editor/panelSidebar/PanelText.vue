@@ -65,7 +65,6 @@ div(class="panel-text")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
-import i18n from '@/i18n'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
@@ -180,9 +179,9 @@ export default defineComponent({
     emptyResultMessage(): string {
       const { keyword, pending } = this
       if (pending || !keyword || this.searchResult.length > 0) return ''
-      return `${i18n.t('NN0393', {
+      return `${this.$t('NN0393', {
           keyword: this.keywordLabel,
-          target: i18n.tc('NN0005', 1)
+          target: this.$tc('NN0005', 1)
         })}`
     }
   },
@@ -197,14 +196,18 @@ export default defineComponent({
       })
   },
   activated() {
-    this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
-    this.$refs.searchResult[0].$el.scrollTop = this.scrollTop.searchResult
-    this.$refs.mainContent[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    const mainContent = (this.$refs.mainContent as any)[0]
+    const searchResult = (this.$refs.searchResult as any)[0]
+    mainContent.$el.scrollTop = this.scrollTop.mainContent
+    searchResult.$el.scrollTop = this.scrollTop.searchResult
+    mainContent.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    searchResult.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   deactivated() {
-    this.$refs.mainContent[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    const mainContent = (this.$refs.mainContent as any)[0]
+    const searchResult = (this.$refs.searchResult as any)[0]
+    mainContent.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    searchResult.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   watch: {
     currentBrand() {
@@ -214,7 +217,8 @@ export default defineComponent({
       if (!newVal) {
         this.$nextTick(() => {
           // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+          const mainContent = (this.$refs.mainContent as any)[0]
+          mainContent.$el.scrollTop = this.scrollTop.mainContent
         })
       }
     }
@@ -261,13 +265,13 @@ export default defineComponent({
       this.getMoreContent()
     },
     async handleAddText(config: { type: string, text: string }) {
-      await AssetUtils.addStandardText(config.type.toLowerCase(), config.text, i18n.locale, undefined, undefined, this.getSpanStyles(config.type.toLowerCase()))
+      await AssetUtils.addStandardText(config.type.toLowerCase(), config.text, this.$i18n.locale, undefined, undefined, this.getSpanStyles(config.type.toLowerCase()))
     },
     handleOpenSettings() {
       this.setSettingsOpen(true)
     },
     localeFont() {
-      return AssetUtils.getFontMap()[i18n.locale]
+      return AssetUtils.getFontMap()[this.$i18n.locale]
     },
     handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
       this.scrollTop[key] = (event.target as HTMLElement).scrollTop
@@ -277,7 +281,7 @@ export default defineComponent({
       new DragUtils().itemDragStart(e, 'standardText', {
         textType: textType.toLowerCase(),
         text,
-        locale: i18n.locale,
+        locale: this.$i18n.locale,
         spanStyles: this.getSpanStyles(textType.toLowerCase())
       }, {
         offsetX: 20,

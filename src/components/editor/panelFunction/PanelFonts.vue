@@ -58,7 +58,6 @@ import { IListServiceContentData, IListServiceContentDataItem, ICategoryItem, IC
 import uploadUtils from '@/utils/uploadUtils'
 import { IBrandFont } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
-import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import FontTag from '@/components/global/Tags.vue'
 
@@ -233,9 +232,9 @@ export default defineComponent({
     emptyResultMessage(): string {
       const { keyword, pending } = this
       if (pending || !keyword || this.searchResult.length > 0) return ''
-      return `${i18n.t('NN0393', {
+      return `${this.$t('NN0393', {
         keyword: this.keywordLabel,
-        target: i18n.tc('NN0353', 1)
+        target: this.$tc('NN0353', 1)
       })}`
     }
   },

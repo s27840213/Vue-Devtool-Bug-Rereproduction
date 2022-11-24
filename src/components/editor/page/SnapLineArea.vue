@@ -25,12 +25,15 @@ import { ISnapline } from '@/interfaces/snap'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import SnapUtils from '@/utils/snapUtils'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   props: {
-    config: Object as () => IPage,
+    config: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
     pageIndex: {
       type: Number,
       required: true
@@ -39,7 +42,10 @@ export default defineComponent({
       type: Number,
       required: true
     },
-    snapUtils: SnapUtils
+    snapUtils: {
+      type: SnapUtils,
+      required: true
+    }
   },
   data() {
     return {

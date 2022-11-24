@@ -17,7 +17,8 @@ export default defineComponent({
       default: 1000
     },
     imgs: {
-      type: Array
+      type: Array,
+      required: true
     }
   },
   data () {

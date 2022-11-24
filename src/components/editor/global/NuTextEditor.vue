@@ -17,7 +17,7 @@ export default defineComponent({
   },
   props: {
     initText: {
-      type: Object,
+      type: String,
       required: true
     },
     pageIndex: {

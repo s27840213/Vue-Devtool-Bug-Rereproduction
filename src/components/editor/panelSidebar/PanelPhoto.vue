@@ -66,21 +66,26 @@ export default defineComponent({
     )
   },
   activated() {
-    this.$refs.mainContent[0].$el.children[0].scrollTop = this.scrollTop.mainContent
-    this.$refs.searchResult[0].$el.children[0].scrollTop = this.scrollTop.searchResult
-    this.$refs.mainContent[0].$el.children[0].addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.children[0].addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    const mainContent = (this.$refs.mainContent as any)[0]
+    const searchResult = (this.$refs.searchResult as any)[0]
+    mainContent.$el.scrollTop = this.scrollTop.mainContent
+    searchResult.$el.scrollTop = this.scrollTop.searchResult
+    mainContent.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    searchResult.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   deactivated() {
-    this.$refs.mainContent[0].$el.children[0].removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.children[0].removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    const mainContent = (this.$refs.mainContent as any)[0]
+    const searchResult = (this.$refs.searchResult as any)[0]
+    mainContent.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    searchResult.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   watch: {
     keyword(newVal: string) {
       if (!newVal) {
         this.$nextTick(() => {
           // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          this.$refs.mainContent[0].$el.children[0].scrollTop = this.scrollTop.mainContent
+          const mainContent = (this.$refs.mainContent as any)[0]
+          mainContent.$el.scrollTop = this.scrollTop.mainContent
         })
       }
     }

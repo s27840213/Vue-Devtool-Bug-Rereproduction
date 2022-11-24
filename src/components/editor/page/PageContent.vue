@@ -83,7 +83,7 @@ div(class="overflow-container"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
@@ -99,6 +99,7 @@ import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
 import { ILayer } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 
 export default defineComponent({
   components: {
@@ -107,7 +108,7 @@ export default defineComponent({
   },
   props: {
     config: {
-      type: Object,
+      type: Object as PropType<IPage>,
       required: true
     },
     pageIndex: {

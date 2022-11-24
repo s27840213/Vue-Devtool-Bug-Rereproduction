@@ -292,12 +292,12 @@ export default defineComponent({
           })
           this.deleteFolder(this.config)
         } else {
-          designUtils.createFolder(this.path as string[], this.config, this.editableName)
+          designUtils.createFolder(this.path as string[], this.config as IFolder, this.editableName)
         }
       } else {
         if (this.editableName === '' || this.editableName === this.config.name) return
         this.checkNameLength()
-        designUtils.setFolderName(this.config, this.editableName, this.path as string[])
+        designUtils.setFolderName(this.config as IFolder, this.editableName, this.path as string[])
       }
     },
     checkNameEnter(e: KeyboardEvent) {

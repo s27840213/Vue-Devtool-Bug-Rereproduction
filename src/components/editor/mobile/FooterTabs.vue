@@ -31,7 +31,6 @@ import shapeUtils from '@/utils/shapeUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import editorUtils from '@/utils/editorUtils'
-import i18n from '@/i18n'
 import brandkitUtils from '@/utils/brandkitUtils'
 
 export default defineComponent({

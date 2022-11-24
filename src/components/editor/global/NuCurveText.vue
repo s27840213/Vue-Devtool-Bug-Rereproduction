@@ -10,10 +10,10 @@ p(class="nu-curve-text__p" :style="pStyle()")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import TextShapeUtils from '@/utils/textShapeUtils'
-import { IGroup, ISpan } from '@/interfaces/layer'
+import { IGroup, ISpan, IText } from '@/interfaces/layer'
 import tiptapUtils from '@/utils/tiptapUtils'
 import LayerUtils from '@/utils/layerUtils'
 import textUtils from '@/utils/textUtils'
@@ -22,7 +22,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 export default defineComponent({
   props: {
     config: {
-      type: Object,
+      type: Object as PropType<IText>,
       required: true
     },
     layerIndex: {

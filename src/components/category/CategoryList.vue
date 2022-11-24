@@ -15,7 +15,7 @@ recycle-scroller(class="category-list" id="recycle" :items="list")
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import Vue, { PropType, defineComponent } from 'vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 
 export default defineComponent({

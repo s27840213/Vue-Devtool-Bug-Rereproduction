@@ -351,7 +351,7 @@ export default defineComponent({
       if (colorPanel && colorPanel.contains(e.target as Node)) {
         return
       }
-      if (!(this.$refs.popup as Vue).$el.contains(e.target as Node)) {
+      if (!(this.$refs.popup as any).$el.contains(e.target as Node)) {
         if (!this.isHandleShadow) {
           this.handleOutside()
         }

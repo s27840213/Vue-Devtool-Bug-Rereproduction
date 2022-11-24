@@ -73,6 +73,7 @@ import editorUtils from '@/utils/editorUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
 import generalUtils from '@/utils/generalUtils'
 import { useI18n } from 'vue-i18n'
+import i18n from '@/i18n'
 
 export default defineComponent({
   props: {
@@ -109,11 +110,11 @@ export default defineComponent({
       menuItems: [
         {
           icon: 'copy',
-          text: useI18n().t('NN0251')
+          text: i18n.global.t('NN0251')
         },
         {
           icon: 'trash',
-          text: useI18n().t('NN0034')
+          text: i18n.global.t('NN0034')
         }
       ],
       isMouseOver: false,

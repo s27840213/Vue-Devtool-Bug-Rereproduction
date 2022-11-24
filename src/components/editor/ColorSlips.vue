@@ -280,7 +280,7 @@ export default defineComponent({
         return
       }
       colorUtils.setIsColorPickerOpen(true)
-      Vue.nextTick(() => {
+      this.$nextTick(() => {
         const colorPanel = this.$refs.colorPanel as HTMLElement
         const colorPicker = document.getElementsByClassName('color-panel__color-picker')[0] as HTMLElement
         const [width, height] = [colorPicker.offsetWidth, colorPicker.offsetHeight]

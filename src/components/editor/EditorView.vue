@@ -73,7 +73,6 @@ import formatUtils from '@/utils/formatUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import eventUtils from '@/utils/eventUtils'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
-import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({

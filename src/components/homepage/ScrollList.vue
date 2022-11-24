@@ -59,7 +59,6 @@ div(class="list")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
-import i18n from '@/i18n'
 import DesignItem from '@/components/homepage/DesignItem.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import themeUtils from '@/utils/themeUtils'
@@ -81,7 +80,8 @@ export default defineComponent({
       required: true
     },
     theme: {
-      type: String
+      type: String,
+      required: true
     }
   },
   data() {
@@ -95,13 +95,13 @@ export default defineComponent({
       themeData: [] as Itheme[],
       templateData: [] as IAssetTemplate[],
       templateTitle: {
-        '1,2': i18n.t('NN0368'),
-        3: i18n.t('NN0026'),
-        8: i18n.tc('NN0151', 2, { media: 'Facebook' }),
-        6: i18n.t('NN0028'),
-        5: i18n.t('NN0027'),
-        7: i18n.t('NN0369'),
-        9: i18n.t('NN0370')
+        '1,2': this.$t('NN0368'),
+        3: this.$t('NN0026'),
+        8: this.$tc('NN0151', 2, { media: 'Facebook' }),
+        6: this.$t('NN0028'),
+        5: this.$t('NN0027'),
+        7: this.$t('NN0369'),
+        9: this.$t('NN0370')
       } as Record<string, string>
     }
   },
@@ -120,13 +120,13 @@ export default defineComponent({
           this.themeData = themeUtils.themesMainHidden
           this.isLoading = false
         })
-        this.title = i18n.t('NN0154') as string
+        this.title = this.$t('NN0154') as string
         break
       case 'mydesign':
         this.fetchAllDesigns().then(() => {
           this.isLoading = false
         })
-        this.title = i18n.t('NN0080') as string
+        this.title = this.$t('NN0080') as string
         this.moreLink = '/mydesign'
         break
       case 'template':

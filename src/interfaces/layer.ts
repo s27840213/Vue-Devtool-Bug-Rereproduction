@@ -6,6 +6,7 @@ import { LayerProcessType } from '@/store/types'
 import { ITextBgEffect, ITextEffect, ITextShape } from './format'
 
 export const jsonVer = '1.0.7'
+
 export interface ILayerIdentifier {
   pageId: string,
   layerId: string,
@@ -107,26 +108,28 @@ export interface IText extends ILayer<ITextStyle> {
 
 export interface IShape extends ILayer<IStyle> {
   // svgID: string,
+  className: string,
+  ratio: number,
   category: string,
   scaleType?: number,
-  svg: string,
-  className: string,
-  path?: string,
-  ratio: number,
+  styleArray: string[],
   color: [string],
+  size?: number[],
+  transArray?: string[],
+  markerTransArray?: string[],
+  svg: string,
   vSize: number[],
   cSize?: number[],
   pSize?: number[],
   pDiff?: number[],
   point?: number[],
-  size?: number[],
+  path?: string,
   dasharray?: number[],
   linecap?: 'butt' | 'round',
   markerId?: string[],
   markerWidth?: number[],
   trimWidth?: (boolean | undefined)[],
   trimOffset?: number[],
-  styleArray: string[],
   filled?: boolean,
   shapeType?: string,
   pDiffLimits?: number[]
@@ -164,6 +167,8 @@ export interface ITmp extends ILayer<IStyle> {
 export interface IFrame extends ILayer<IFrameStyle> {
   clips: Array<IImage>
   decoration?: IShape,
-  decorationTop?: IShape,
+  decorationTop?: IShape
   blendLayers?: Array<IShape>
 }
+
+export type LayerType = IShape | IText | IImage | IGroup | IFrame

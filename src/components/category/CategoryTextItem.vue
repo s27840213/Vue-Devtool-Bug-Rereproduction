@@ -10,13 +10,14 @@ img(class="pointer"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import store from '@/store'
 import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import DragUtils from '@/utils/dragUtils'
 import generalUtils from '@/utils/generalUtils'
+import { IListServiceContentDataItem } from '@/interfaces/api'
 
 export default defineComponent({
   props: {
@@ -25,7 +26,7 @@ export default defineComponent({
       required: true
     },
     item: {
-      type: Object,
+      type: Object as PropType<any>,
       required: true
     }
   },

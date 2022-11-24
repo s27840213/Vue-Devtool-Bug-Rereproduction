@@ -20,6 +20,8 @@ module.exports = {
         'space-before-function-paren': 0,
         '@typescript-eslint/no-var-requires': 0,
         'camelcase': 'off',
+        "@typescript-eslint/no-non-null-assertion": 0,
+        "vue/no-mutating-props": 0
         // 'comma-dangle': ['error', 'never'],
         // semi: 'off',
         // 'import/no-dynamic-require': 'off',

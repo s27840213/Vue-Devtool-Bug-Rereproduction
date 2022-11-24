@@ -31,7 +31,7 @@ div(class="nu-layer" :style="layerStyles()" ref="body"
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import Vue, { PropType, defineComponent } from 'vue'
 import { LayerType } from '@/store/types'
 import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
@@ -42,7 +42,7 @@ import SquareLoading from '@/components/global/SqureLoading.vue'
 import frameUtils from '@/utils/frameUtils'
 import { mapGetters } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
-import { ILayer } from '@/interfaces/layer'
+import { IFrame, ILayer, IText } from '@/interfaces/layer'
 
 export default defineComponent({
   inheritAttrs: false,
@@ -161,7 +161,7 @@ export default defineComponent({
       )
       switch (this.config.type) {
         case LayerType.text: {
-          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
+          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
           const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
           Object.assign(
             styles,
@@ -206,7 +206,7 @@ export default defineComponent({
     translateStyles(): { [index: string]: string } {
       const { zindex } = this.config.styles
       const { type } = this.config
-      const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
+      const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config as IFrame))
       const transform = isImgType ? `scale(${1 / (this.compensationRatio())})` : `scale(${1 / (this.compensationRatio())})`
       /**
       * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
@@ -221,7 +221,7 @@ export default defineComponent({
       const { zindex } = this.config.styles
       const { scale, scaleX, scaleY } = this.config.styles
       const { type } = this.config
-      const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
+      const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config as IFrame))
 
       const styles = {
         transform: isImgType ? `scale(${this.compensationRatio()})` : `scale(${scale * (this.contentScaleRatio)}) scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`,

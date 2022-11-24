@@ -63,7 +63,6 @@ div(class="settings-account")
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import i18n from '@/i18n'
 import { mapState, mapGetters } from 'vuex'
 import PopupVerify from '@/components/popup/PopupVerify.vue'
 import Avatar from '@/components/Avatar.vue'
@@ -84,7 +83,7 @@ export default defineComponent({
       inputLocale: '',
       inputSubscribe: true,
       localeOptions: [] as Array<ILocale>,
-      accountErrorMessage: i18n.t('NN0297') as string,
+      accountErrorMessage: this.$t('NN0297') as string,
       isLoading: false,
       isConfirmClicked: false as boolean,
       isEmailVerified: false,
@@ -161,9 +160,9 @@ export default defineComponent({
       this.isConfirmClicked = true
       if (!this.mailValid) {
         if (this.inputAccount.length === 0) {
-          this.accountErrorMessage = i18n.t('NN0163', { term: i18n.tc('NN0173', 2) }) as string
+          this.accountErrorMessage = this.$t('NN0163', { term: this.$tc('NN0173', 2) }) as string
         } else {
-          this.accountErrorMessage = i18n.t('NN0297') as string
+          this.accountErrorMessage = this.$t('NN0297') as string
         }
         this.isLoading = false
         return

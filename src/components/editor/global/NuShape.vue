@@ -12,7 +12,7 @@ div(class="nu-shape" :style="styles()")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
 import { IShape } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
@@ -50,6 +50,28 @@ const CROP_X_REG = new RegExp(`\\${CROP_X}`, 'g')
 const CROP_Y_REG = new RegExp(`\\${CROP_Y}`, 'g')
 
 export default defineComponent({
+  props: {
+    config: {
+      type: Object as PropType<any>,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    subLayerIndex: {
+      type: Number,
+      required: true
+    },
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
+  },
   data() {
     return {
       filterTemplate: '',
@@ -248,28 +270,6 @@ export default defineComponent({
       return ''
     }
   },
-  props: {
-    config: {
-      type: Object,
-      required: true
-    },
-    pageIndex: {
-      type: Number,
-      required: true
-    },
-    layerIndex: {
-      type: Number,
-      required: true
-    },
-    subLayerIndex: {
-      type: Number,
-      required: true
-    },
-    contentScaleRatio: {
-      default: 1,
-      type: Number
-    }
-  },
   methods: {
     className(): string {
       return this.config.className + this.pageIndex.toString()
@@ -321,10 +321,13 @@ export default defineComponent({
               return
             }
             shape.color = this.config.color
+            // eslint-disable-next-line vue/no-mutating-props
             this.config.styles.initWidth = shape.vSize[0]
+            // eslint-disable-next-line vue/no-mutating-props
             this.config.styles.initHeight = shape.vSize[1]
             Object.assign(this.config, shape)
             if (!this.config.className) {
+              // eslint-disable-next-line vue/no-mutating-props
               this.config.className = shapeUtils.classGenerator()
             }
           }
@@ -363,6 +366,7 @@ export default defineComponent({
               return
             }
             this.config.color && this.config.color.length && (shape.color = this.config.color)
+            // eslint-disable-next-line vue/no-mutating-props
             !this.config.className && (this.config.className = shapeUtils.classGenerator())
 
             const vSize = shape.vSize as number[]

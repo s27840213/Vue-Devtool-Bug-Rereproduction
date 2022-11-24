@@ -72,11 +72,11 @@ export default defineComponent({
     (this.$refs.mainContent as any).myfileUpdate()
   },
   activated() {
-    (this.$refs.mainContent as Vue).$el.children[0].scrollTop = this.scrollTop.mainContent;
-    (this.$refs.mainContent as Vue).$el.children[0].addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    (this.$refs.mainContent as any).$el.children[0].scrollTop = this.scrollTop.mainContent;
+    (this.$refs.mainContent as any).$el.children[0].addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
   },
   deactivated() {
-    (this.$refs.mainContent as Vue).$el.children[0].removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    (this.$refs.mainContent as any).$el.children[0].removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
   },
   methods: {
     ...mapActions({

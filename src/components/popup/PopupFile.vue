@@ -181,7 +181,7 @@ export default defineComponent({
       window.location.href = '/'
     },
     gotoMobile() { // TO-DELETE
-      window.location.href = this.$router.currentRoute.fullPath.replace('editor', 'mobile-editor')
+      window.location.href = this.$router.currentRoute.value.fullPath.replace('editor', 'mobile-editor')
     }
   }
 })

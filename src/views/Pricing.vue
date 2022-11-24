@@ -55,7 +55,6 @@ div(class="pricing")
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
-import i18n from '@/i18n'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import SlideToggle from '@/components/global/SlideToggle.vue'
@@ -101,10 +100,10 @@ export default defineComponent({
     canAddCard():boolean { return ['Initial', 'Deleted'].includes(this.status) },
     buyLabel():string {
       return (this.trialStatus === 'not used'
-        ? i18n.t('NN0517', { day: this.trialDay })
+        ? this.$t('NN0517', { day: this.trialDay })
         : this.canAddCard
-          ? i18n.t('NN0587')
-          : i18n.t('NN0518')) as string
+          ? this.$t('NN0587')
+          : this.$t('NN0518')) as string
     }
   },
   async mounted() {

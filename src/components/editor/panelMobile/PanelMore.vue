@@ -74,7 +74,7 @@ export default defineComponent({
       pageUtils.setPagesName(value)
     },
     gotoDesktop() { // TO-DELETE
-      this.$router.push(this.$router.currentRoute.fullPath.replace('mobile-editor', 'editor'))
+      this.$router.push(this.$router.currentRoute.value.fullPath.replace('mobile-editor', 'editor'))
     }
   }
 })

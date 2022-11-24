@@ -27,7 +27,10 @@ import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   props: {
-    editorViewCanvas: HTMLElement
+    editorViewCanvas: {
+      type: HTMLElement,
+      required: true
+    }
   },
   data() {
     return {
@@ -372,10 +375,13 @@ export default defineComponent({
       this.setCompositeOperationMode('destination-in', this.initImgCtx)
     },
     setCompositeOperationMode(mode: string, ctx?: CanvasRenderingContext2D) {
+      /**
+       * @Note GlobalCompositeOperation type has some problems
+       */
       if (ctx) {
-        ctx.globalCompositeOperation = mode
+        ctx.globalCompositeOperation = mode as any
       } else {
-        this.ctx.globalCompositeOperation = mode
+        this.ctx.globalCompositeOperation = mode as any
       }
     },
     getCanvasBlob(mycanvas: HTMLCanvasElement) {

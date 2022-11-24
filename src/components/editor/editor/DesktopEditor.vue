@@ -58,7 +58,6 @@ import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import store from '@/store'
 import rulerUtils from '@/utils/rulerUtils'
 import logUtils from '@/utils/logUtils'
-import i18n from '@/i18n'
 import colorUtils from '@/utils/colorUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -82,12 +81,15 @@ export default defineComponent({
     return {
       FunctionPanelType,
       isSidebarPanelOpen: true,
-      inputLocale: i18n.locale,
+      inputLocale: '',
       // isColorPanelOpen: false
       colorPanelOpenState: {
         val: false
       }
     }
+  },
+  created() {
+    this.inputLocale = this.$i18n.locale
   },
   watch: {
     isShowPagePreview() {
@@ -184,7 +186,7 @@ export default defineComponent({
       return this.viewGuide === 0
     },
     localeOptions(): string[] {
-      return i18n.availableLocales
+      return this.$i18n.availableLocales
     }
   },
   mounted() {

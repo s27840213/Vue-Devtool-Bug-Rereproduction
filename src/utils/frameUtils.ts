@@ -113,7 +113,7 @@ class FrameUtils {
       const _shadow = currLayer.styles.shadow
       if (_shadow && _shadow.currentEffect !== ShadowEffectType.none) {
         if (['', 'upload'].includes(_shadow.srcObj.type)) {
-          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
           return
         } else {
           shadow = generalUtils.deepCopy(_shadow) as IShadowProps

@@ -14,7 +14,6 @@ div(class="animation")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import i18n from '@/i18n'
 import axios from 'axios'
 import lottie, { AnimationItem } from 'lottie-web'
 
@@ -117,7 +116,7 @@ export default defineComponent({
         autoplay: this.autoPlay,
         animationData: jsonData,
         rendererSettings: this.rendererSettings,
-        assetsPath: `/lottie/${i18n.locale}/${this.lottieName}/images/`
+        assetsPath: `/lottie/${this.$i18n.locale}/${this.lottieName}/images/`
       })
       this.$emit('AnimControl', this.anim)
       this.anim.setSpeed(this.speed)

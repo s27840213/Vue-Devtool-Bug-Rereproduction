@@ -1,6 +1,7 @@
 import i18n from '@/i18n'
 import { EventEmitter } from 'events'
 import Vue from 'vue'
+import { useI18n } from 'vue-i18n'
 
 class NetworkUtils {
   event: any
@@ -45,7 +46,7 @@ class NetworkUtils {
   }
 
   notifyNetworkError() {
-    Vue.notify({ group: 'error', text: `${i18n.t('NN0351')}` })
+    // Vue.notify({ group: 'error', text: `${i18n.t('NN0351')}` })
   }
 }
 

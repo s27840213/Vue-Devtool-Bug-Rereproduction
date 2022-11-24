@@ -16,16 +16,17 @@ div(class="design-item")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import imageUtils from '@/utils/imageUtils'
 import vClickOutside from 'v-click-outside'
 import designUtils from '@/utils/designUtils'
+import { IDesign } from '@/interfaces/design'
 
 export default defineComponent({
   props: {
     config: {
-      type: Object,
+      type: Object as PropType<IDesign>,
       required: true
     }
   },
@@ -92,6 +93,7 @@ export default defineComponent({
       this.previewCheckReady = false
       if (this.config.polling) {
         this.previewCheckReady = true
+        // eslint-disable-next-line vue/no-mutating-props
         this.config.thumbnail = this.previewPlaceholder
         this.pollingStep()
       } else {
@@ -100,6 +102,7 @@ export default defineComponent({
           this.imgWidth = width
           this.imgHeight = height
           this.previewCheckReady = true
+          // eslint-disable-next-line vue/no-mutating-props
           this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
         })
       }
@@ -118,6 +121,7 @@ export default defineComponent({
         this.imgWidth = width
         this.imgHeight = height
         if (exists) {
+          // eslint-disable-next-line vue/no-mutating-props
           this.config.thumbnail = this.configPreview
         } else if (step < 35) {
           setTimeout(() => {

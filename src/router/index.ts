@@ -1,4 +1,4 @@
-import VueRouter, { RawLocation, Route, RouteConfig, createRouter, createWebHistory } from 'vue-router'
+import VueRouter, { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Editor from '@/views/Editor.vue'
 import SignUp from '@/views/Login/SignUp.vue'
 import Login from '@/views/Login/Login.vue'
@@ -35,36 +35,7 @@ const MOBILE_ROUTES = [
   'Pricing'
 ]
 
-// Ingore some normal router console error
-const originalPush = VueRouter.prototype.push
-VueRouter.prototype.push = function push(location: RawLocation): Promise<Route> {
-  return (originalPush.call(this, location) as unknown as Promise<Route>)
-    .catch(err => {
-      switch (err.name) {
-        case 'NavigationDuplicated':
-          break
-        default:
-          console.error(err)
-      }
-      return err
-    })
-}
-
-const originalReplace = VueRouter.prototype.replace
-VueRouter.prototype.replace = function repalce(location: RawLocation): Promise<Route> {
-  return (originalReplace.call(this, location) as unknown as Promise<Route>)
-    .catch(err => {
-      switch (err.name) {
-        case 'NavigationDuplicated':
-          break
-        default:
-          console.error(err)
-      }
-      return err
-    })
-}
-
-const routes: Array<RouteConfig> = [
+const routes: Array<RouteRecordRaw> = [
   {
     path: '',
     name: 'Home',
@@ -226,7 +197,7 @@ const router = createRouter({
       // Include the locales you support between ()
       path: `/:locale${localeUtils.getLocaleRegex()}?`,
       component: {
-        render(h) { return h('router-view') }
+        render(h: any) { return h('router-view') }
       },
       beforeEnter(to, from, next) {
         if (logUtils.getLog()) {
@@ -236,23 +207,23 @@ const router = createRouter({
         let locale = localStorage.getItem('locale')
         // if local storage is empty
         if (locale === '' || !locale) {
-          locale = to.params.locale
+          locale = to.params.locale as string
           // without locale param, determine the locale with browser language
           if (locale === '' || !locale) {
-            i18n.locale = localeUtils.getBrowserLang()
+            i18n.global.locale = localeUtils.getBrowserLang()
           } else {
-            i18n.locale = locale
+            i18n.global.locale = locale
           }
-        } else if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.locale) {
+        } else if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.global.locale) {
           // if local storage has been set
-          i18n.locale = locale
+          i18n.global.locale = locale
           localStorage.setItem('locale', locale)
         }
         next()
-        if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.params.locale) {
+        if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
           // Delete locale in url, will be ignore by prerender.
-          delete router.currentRoute.params.locale
-          router.replace({ query: router.currentRoute.value.query, params: router.currentRoute.params })
+          delete router.currentRoute.value.params.locale
+          router.replace({ query: router.currentRoute.value.query, params: router.currentRoute.value.params })
         }
       },
       children: routes
@@ -261,7 +232,7 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  document.title = to.meta?.title || i18n.t('SE0001')
+  document.title = to.meta?.title as string || i18n.global.t('SE0001')
 
   if ((window as any).__PRERENDER_INJECTED !== undefined) {
     next()
@@ -327,7 +298,7 @@ router.beforeEach(async (to, from, next) => {
         store.commit('text/UPDATE_DEFAULT_FONT', { font })
       })
   }
-  if (!MOBILE_ROUTES.includes(to.name ?? '') && (to.name === 'Editor' || !localStorage.getItem('not-mobile'))) {
+  if (!MOBILE_ROUTES.includes(String(to.name) ?? '') && (to.name === 'Editor' || !localStorage.getItem('not-mobile'))) {
     let isMobile = false
     const userAgent = navigator.userAgent || navigator.vendor
     logUtils.setLog(`Read device width: ${window.screen.width}`)
@@ -361,5 +332,35 @@ router.beforeEach(async (to, from, next) => {
 
   next()
 })
+
+// Ingore some normal router console error
+const originalPush = (router as any).prototype.push
+
+router.prototype.push = function push(location: VueRouter.RouteLocationRaw): Promise<void | VueRouter.NavigationFailure | undefined> {
+  return (originalPush.call(this, location) as unknown as Promise<void | VueRouter.NavigationFailure | undefined>)
+    .catch(err => {
+      switch (err.name) {
+        case 'NavigationDuplicated':
+          break
+        default:
+          console.error(err)
+      }
+      return err
+    })
+}
+
+const originalReplace = router.prototype.replace
+router.prototype.replace = function repalce(location: VueRouter.RouteLocationRaw): Promise<void | VueRouter.NavigationFailure | undefined> {
+  return (originalReplace.call(this, location) as unknown as Promise<void | VueRouter.NavigationFailure | undefined>)
+    .catch(err => {
+      switch (err.name) {
+        case 'NavigationDuplicated':
+          break
+        default:
+          console.error(err)
+      }
+      return err
+    })
+}
 
 export default router

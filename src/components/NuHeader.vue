@@ -131,7 +131,7 @@ export default defineComponent({
       return constantData.headerItems()
     },
     currentPage(): string {
-      return this.$route.name || ''
+      return String(this.$router.currentRoute.value.name) || ''
     },
     isLogin(): boolean {
       return store.getters['user/isLogin']

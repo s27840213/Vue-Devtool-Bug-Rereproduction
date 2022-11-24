@@ -70,7 +70,6 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import colorUtils from '@/utils/colorUtils'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import i18n from '@/i18n'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import pageUtils from '@/utils/pageUtils'
 import SvgPath from 'svgpath'
@@ -432,7 +431,7 @@ export default defineComponent({
 
       return {
         transformOrigin: '0px 0px',
-        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
+        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer as IFrame) ? scale : 1})`,
         ...this.transformStyle,
         outline: this.outlineStyles(),
         ...this.sizeStyle(),
@@ -454,7 +453,7 @@ export default defineComponent({
         ...this.sizeStyle(),
         'pointer-events': 'initial',
         transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`,
-        ...TextEffectUtils.convertTextEffect(this.config)
+        ...TextEffectUtils.convertTextEffect(this.config as IText)
       }
     },
     sizeStyle() {
@@ -512,7 +511,7 @@ export default defineComponent({
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      this.calcSize(this.config)
+      this.calcSize(this.config as IText)
       if (payload.toRecord) {
         this.waitFontLoadingAndRecord()
       } else {
@@ -791,7 +790,7 @@ export default defineComponent({
       if (currLayer && currLayer.type === LayerType.image) {
         LayerUtils.deleteLayer(LayerUtils.pageIndex, LayerUtils.layerIndex)
         const newIndex = this.primaryLayerIndex > LayerUtils.layerIndex ? this.primaryLayerIndex - 1 : this.primaryLayerIndex
-        groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer])
+        groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer as IFrame])
         FrameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.layerIndex, { active: true })
         StepsUtils.record()
       }

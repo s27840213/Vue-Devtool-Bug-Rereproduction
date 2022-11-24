@@ -5,6 +5,7 @@ import { captureException } from '@sentry/browser'
 import localeUtils from '@/utils/localeUtils'
 import store from '@/store'
 import i18n from '@/i18n'
+import { useI18n } from 'vue-i18n'
 
 export default function (this: any) {
   const getDefaultState = (): IListModuleState => ({
@@ -96,7 +97,7 @@ export default function (this: any) {
       const { keyword } = params
       const locale = params.locale || localeUtils.currLocale()
       commit('SET_STATE', { pending: true, locale })
-      if (keyword)commit('SET_STATE', { keyword })
+      if (keyword) commit('SET_STATE', { keyword })
       try {
         const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
@@ -196,7 +197,7 @@ export default function (this: any) {
     },
 
     // Clear search keyword and result.
-    resetSearch: async({ commit }) => {
+    resetSearch: async ({ commit }) => {
       commit('SET_STATE', {
         searchResult: {},
         nextSearch: 0,
@@ -252,7 +253,7 @@ export default function (this: any) {
     },
     UPDATE_RECENTLY_PAGE(state: IListModuleState, { index, format }) {
       const targetCategory = state.categories.find((category: any) => {
-        return category.title === `${i18n.t('NN0024')}`
+        return category.title === `${i18n.global.t('NN0024')}`
       })?.list
       if (targetCategory) {
         targetCategory.splice(index, 1)
