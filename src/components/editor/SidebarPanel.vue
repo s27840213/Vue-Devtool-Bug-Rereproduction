@@ -25,7 +25,7 @@ import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
 import PanelBrand from '@/components/editor/panelSidebar/PanelBrand.vue'
 import PanelPexels from '@/components/editor/panelSidebar/PanelPexels.vue'
 import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
 // import { CartType } from '@/store/types'
 
@@ -69,6 +69,9 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapState({
+      isMobile: 'isMobile'
+    }),
     ...mapGetters({
       currPanel: 'getCurrSidebarPanelType',
       isShowPagePreview: 'page/getIsShowPagePreview',
@@ -85,7 +88,7 @@ export default Vue.extend({
     },
     panelStyles() {
       return {
-        width: matchMedia('screen and (max-width: 767px)').matches ? 'calc(100vw - 75px)' : (this.showPagePanel ? '200px' : '320px')
+        width: this.isMobile ? 'calc(100vw - 75px)' : (this.showPagePanel ? '200px' : '320px')
       }
     }
   }
