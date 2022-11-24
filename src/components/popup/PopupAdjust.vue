@@ -19,7 +19,7 @@
         @input="handleField"
         @mouseup="handleChangeStop"
         type="range")
-    span(class="popup-adjust__reset" @click="reset") {{$t('NN0768')}}
+    span(class="popup-adjust__reset" @click="reset") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">
