@@ -1,8 +1,10 @@
 <template lang="pug">
-  div(class="modal-card")
-    div(class="modal-card__title text-H6 text-gray-2")
+  div(class="modal-card" :style="modalInfo.cardStyle")
+    div(v-if="modalInfo.title" class="modal-card__row modal-card__title text-H6 text-gray-2")
       span {{modalInfo.title}}
-    div(class="modal-card__content body-SM text-gray-2")
+    div(class="modal-card__image")
+      img(:src="modalInfo.imgSrc")
+    div(class="modal-card__text body-SM text-gray-2")
       template(v-if="!pending")
         span(v-for="text in modalInfo.content"
         @keydown.ctrl.67.exact.stop
@@ -13,7 +15,7 @@
         :iconColor="'gray-2'"
         :iconWidth="'60px'")
     template(v-if='!pending')
-      div(class="modal-card__button")
+      div(class="modal-card__row modal-card__button")
         button(class="btn-primary-mid full-width"
           :class="modalInfo.confirmButton.class"
           :style="modalInfo.confirmButton.style"
@@ -23,7 +25,7 @@
           :class="modalInfo.cancelButton.class"
           :style="modalInfo.cancelButton.style"
           @click="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
-      div(class="modal-card__close")
+      div(v-if="!modalInfo.noClose" class="modal-card__close")
         svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'"
                 iconColor="gray-3" @click.native="closePopup()")
 </template>
@@ -69,12 +71,14 @@ export default Vue.extend({
   position: relative;
   display: flex;
   flex-direction: column;
+  gap: 24px;
   align-items: center;
   background-color: white;
   max-width: min(calc(100% - 40px), 500px);
-  padding: 16px 30px;
-  margin: 0 39px;
+  max-height: calc(100% - 40px);
+  padding-bottom: 16px;
   border-radius: 10px;
+  overflow-y: auto;
   &__close {
     position: absolute;
     top: 16px;
@@ -84,13 +88,28 @@ export default Vue.extend({
     border-radius: 100px;
   }
 
-  &__title {
-    margin-top: 2px;
-    margin-bottom: 42px;
+  &__row {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0px 30px;
   }
 
-  &__content {
-    margin-bottom: 42px;
+  &__title {
+    margin-top: 16px;
+  }
+
+  &__image {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    > img{
+      width: 100%;
+    }
+  }
+
+  &__text {
+    padding: 0px 30px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -105,7 +124,7 @@ export default Vue.extend({
       @include btn-LG;
       transition: background-color 0.3s;
       border-radius: 10px;
-      width: 200px;
+      max-width: 200px;
     }
     > button + button {
       margin-left: 20px;

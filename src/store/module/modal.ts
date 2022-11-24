@@ -26,7 +26,11 @@ const getDefaultState = (): IModalState => ({
       action: () => {
         return false
       }
-    }
+    },
+    imgSrc: '',
+    noClose: false,
+    backdropStyle: {},
+    cardStyle: {}
   },
   modalOpen: false,
   pending: false

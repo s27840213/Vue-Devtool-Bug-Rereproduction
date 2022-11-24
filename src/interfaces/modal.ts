@@ -5,9 +5,13 @@ export interface IModalButton {
   class?: string | string[]
 }
 export interface IModalInfo {
-  [key: string]: string | Array<string> | IModalButton
+  [key: string]: string | boolean | Array<string> | IModalButton | { [key: string]: number | string } | undefined
   title: string,
   content: Array<string>,
   confirmButton: IModalButton,
-  cancelButton: IModalButton
+  cancelButton: IModalButton,
+  imgSrc: string,
+  noClose: boolean,
+  backdropStyle: { [key: string]: number | string },
+  cardStyle: { [key: string]: number | string },
 }

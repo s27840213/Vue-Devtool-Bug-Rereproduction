@@ -17,7 +17,8 @@
         @blur.native="setCurrSelectedResInfo()"
         tabindex="0")
     div(class="modal-container"
-        v-if="isModalOpen")
+        v-if="isModalOpen"
+        :style="modalInfo.backdropStyle")
       modal-card
     notifications(group="copy"
       position="top center"
@@ -79,7 +80,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       currSelectedResInfo: 'getCurrSelectedResInfo',
-      isModalOpen: 'modal/getModalOpen'
+      isModalOpen: 'modal/getModalOpen',
+      modalInfo: 'modal/getModalInfo'
     }),
     currLocale(): string {
       return localeUtils.currLocale()
