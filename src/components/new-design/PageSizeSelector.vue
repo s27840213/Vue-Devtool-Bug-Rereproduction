@@ -43,7 +43,7 @@
           span(class="body-4 page-size-selector__body__custom__box__input-label"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
         div(v-if="selectedFormatKey === 'custom' && isValidate && !isCustomValid"
-          class="page-size-selector__body__custom__err text-red") {{$t('NN0163', { term: $t('NN0767', { num: 0 }) })}}
+          class="page-size-selector__body__custom__err text-red") {{$t('NN0767', { num: 0 })}}
     div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
     div(class="page-size-selector__container"
       @touchmove="handleTouchMove")
