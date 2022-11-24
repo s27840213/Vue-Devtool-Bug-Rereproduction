@@ -7,9 +7,8 @@ div(class="spinner popup-window")
 
 <script lang="ts">
 
-import i18n from '@/i18n';
+import i18n from '@/i18n'
 import { defineComponent } from 'vue'
-import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   props: {
