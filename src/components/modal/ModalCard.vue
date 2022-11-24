@@ -2,9 +2,9 @@
   div(class="modal-card" :style="modalInfo.cardStyle")
     div(v-if="modalInfo.title" class="modal-card__row modal-card__title text-H6 text-gray-2")
       span {{modalInfo.title}}
-    div(class="modal-card__image")
+    div(v-if="modalInfo.imgSrc" class="modal-card__image")
       img(:src="modalInfo.imgSrc")
-    div(class="modal-card__text body-SM text-gray-2")
+    div(v-if="modalInfo.content" class="modal-card__text body-SM text-gray-2")
       template(v-if="!pending")
         span(v-for="text in modalInfo.content"
         @keydown.ctrl.67.exact.stop
@@ -55,12 +55,12 @@ export default Vue.extend({
     confirmAction() {
       const { action } = this.modalInfo.confirmButton
       action && action()
-      this.closePopup()
+      if (!this.modalInfo.noClose) this.closePopup()
     },
     cancelAction() {
       const { action } = this.modalInfo.cancelButton
       action && action()
-      this.closePopup()
+      if (!this.modalInfo.noClose) this.closePopup()
     }
   }
 })
