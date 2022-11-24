@@ -28,7 +28,7 @@
             @click="handleColorModal")
       div(v-if="currentEffect !== 'none'" class="photo-shadow__row-wrapper")
         div(class="photo-shadow__reset")
-          button(class="label-mid" @click="imageShadowPanelUtils.reset()") {{ 'Reset' }}
+          button(class="label-mid" @click="imageShadowPanelUtils.reset()") {{$t('NN0768')}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
