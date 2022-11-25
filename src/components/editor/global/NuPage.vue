@@ -175,7 +175,6 @@ import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
 import layerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import NuImage from '@/components/editor/global/NuImage.vue'
 import DimBackground from '@/components/editor/page/DimBackground.vue'
 import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
@@ -192,7 +191,6 @@ import eventUtils from '@/utils/eventUtils'
 
 export default defineComponent({
   components: {
-    NuImage,
     NuBackgroundController,
     PageContent,
     DimBackground,

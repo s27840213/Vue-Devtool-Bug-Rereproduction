@@ -1,7 +1,6 @@
 /* eslint-disable */
 
 import Vue, { createApp, h } from 'vue';
-import '@/globalComponents'
 import VueRecyclerviewNew from 'vue-recyclerview'
 import App from '@/App.vue'
 import router from './router'
@@ -81,14 +80,7 @@ window.onerror = function (msg, url, line) {
 // }
 
 
-const app = createApp({
-  mounted() {
-    if ((window as any).__PRERENDER_INJECTED !== undefined) {
-      document.dispatchEvent(new Event('render-event'))
-    }
-  },
-  render: () => { h(App) }
-}).use(i18n).use(router).use(store)
+const app = createApp(App).use(i18n).use(router).use(store)
 
 const tooltipUtils = new TooltipUtils()
 
@@ -253,22 +245,3 @@ if (['production'].includes(process.env.NODE_ENV)) {
 
 
 app.mount('#app')
-
-// const app = createApp({
-//   mounted() {
-//     if ((window as any).__PRERENDER_INJECTED !== undefined) {
-//       document.dispatchEvent(new Event('render-event'))
-//     }
-//   }
-// }).use(i18n).use(router).use(store).mount('#app')
-
-// Here is a testing code to export whole porject as a Library
-// export default {
-//   install(Vue: { component: (arg0: string, arg1: VueConstructor<Vue>) => void }, options: { store: { registerModule: (arg0: string, arg1: Store<IEditorState>) => void } }): void {
-//     if (!options || !options.store) {
-//       throw new Error('Please initialise plugin with a Vuex store.')
-//     }
-//     options.store.registerModule('nu-editor', store)
-//     Vue.component('nu-editor', App as VueConstructor<Vue>)
-//   }
-// }

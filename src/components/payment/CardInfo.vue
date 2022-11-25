@@ -9,7 +9,7 @@ div(class="card")
     div(class="card-popup" v-click-outside="closePopup")
       div(class="text-H6") {{$t('NN0622')}}
       i18n(class="body-XS my-30" path="NN0623" tag="div")
-        template(#payment-method)
+        template(#paymentMethod)
           span(class="overline-LG") {{$t('NN0624')}}
       div(class="card-popup-button")
         btn(type="gray-mid" @click.native="closePopup()") {{$t('NN0203')}}

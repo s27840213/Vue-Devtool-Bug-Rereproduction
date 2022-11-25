@@ -7,8 +7,8 @@ div(v-if="showWarning" class="warning")
       div(class="warning-small-title-disk-total")
         div(class="warning-small-title-disk-used" :style="diskStyle")
       i18n(:path="cur.small.desc" class="warning-small-desc" tag="div")
-      template(#button)
-        span(class="warning-small-desc__btn" @click="cur.small.func") {{cur.small.buttonLabel}}
+      //- template(#button)
+      //-   span(class="warning-small-desc__btn" @click="cur.small.func") {{cur.small.buttonLabel}}
     svg-icon(iconName="close" iconColor="white"
             iconWidth="24px" @click.native="close()")
   div(v-if="size === 'large'" class="warning-large" :style="bgcolor")

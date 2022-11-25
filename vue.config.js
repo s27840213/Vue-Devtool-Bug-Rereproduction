@@ -7,28 +7,30 @@ const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const { argv } = require('yargs')
+const { defineConfig } = require('@vue/cli-service')
 
 function resolve (dir) {
     return path.join(__dirname, dir)
 }
 
-module.exports = {
+module.exports = defineConfig({
+    transpileDependencies: true,
     chainWebpack: (config) => {
-        // config.resolve.alias.set('vue', '@vue/compat')
+        config.resolve.alias.set('vue', '@vue/compat')
 
-        // config.module
-        //     .rule('vue')
-        //     .use('vue-loader')
-        //     .tap(options => {
-        //         return {
-        //             ...options,
-        //             compilerOptions: {
-        //                 compatConfig: {
-        //                     MODE: 2
-        //                 }
-        //             }
-        //         }
-        //     })
+        config.module
+            .rule('vue')
+            .use('vue-loader')
+            .tap(options => {
+                return {
+                    ...options,
+                    compilerOptions: {
+                        compatConfig: {
+                            MODE: 2
+                        }
+                    }
+                }
+            })
 
         // To prevent safari use cached app.js, https://github.com/vuejs/vue-cli/issues/1132#issuecomment-409916879
         if (process.env.NODE_ENV === 'development') {
@@ -214,4 +216,4 @@ module.exports = {
             fullInstall: true
         }
     }
-}
+})

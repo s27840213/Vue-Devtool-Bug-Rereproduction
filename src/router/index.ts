@@ -333,34 +333,34 @@ router.beforeEach(async (to, from, next) => {
   next()
 })
 
-// Ingore some normal router console error
-const originalPush = (router as any).prototype.push
+// // Ingore some normal router console error
+// const originalPush = (router as any).prototype.push
 
-router.prototype.push = function push(location: VueRouter.RouteLocationRaw): Promise<void | VueRouter.NavigationFailure | undefined> {
-  return (originalPush.call(this, location) as unknown as Promise<void | VueRouter.NavigationFailure | undefined>)
-    .catch(err => {
-      switch (err.name) {
-        case 'NavigationDuplicated':
-          break
-        default:
-          console.error(err)
-      }
-      return err
-    })
-}
+// router.prototype.push = function push(location: VueRouter.RouteLocationRaw): Promise<void | VueRouter.NavigationFailure | undefined> {
+//   return (originalPush.call(this, location) as unknown as Promise<void | VueRouter.NavigationFailure | undefined>)
+//     .catch(err => {
+//       switch (err.name) {
+//         case 'NavigationDuplicated':
+//           break
+//         default:
+//           console.error(err)
+//       }
+//       return err
+//     })
+// }
 
-const originalReplace = router.prototype.replace
-router.prototype.replace = function repalce(location: VueRouter.RouteLocationRaw): Promise<void | VueRouter.NavigationFailure | undefined> {
-  return (originalReplace.call(this, location) as unknown as Promise<void | VueRouter.NavigationFailure | undefined>)
-    .catch(err => {
-      switch (err.name) {
-        case 'NavigationDuplicated':
-          break
-        default:
-          console.error(err)
-      }
-      return err
-    })
-}
+// const originalReplace = router.prototype.replace
+// router.prototype.replace = function repalce(location: VueRouter.RouteLocationRaw): Promise<void | VueRouter.NavigationFailure | undefined> {
+//   return (originalReplace.call(this, location) as unknown as Promise<void | VueRouter.NavigationFailure | undefined>)
+//     .catch(err => {
+//       switch (err.name) {
+//         case 'NavigationDuplicated':
+//           break
+//         default:
+//           console.error(err)
+//       }
+//       return err
+//     })
+// }
 
 export default router

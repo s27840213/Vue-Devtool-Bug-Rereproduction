@@ -656,7 +656,7 @@ $REULER_SIZE: 20px;
     border-right: 1px solid setColor(blue-1);
     width: 0px;
     height: 100%;
-    cursor: url("/assets/icon/ruler/ruler-v.svg");
+    // cursor: url("/assets/icon/ruler-v.svg");
     &::before {
       content: "";
       position: absolute;
@@ -679,7 +679,7 @@ $REULER_SIZE: 20px;
     border-top: 1px solid setColor(blue-1);
     width: 100%;
     height: 0px;
-    cursor: "/assets/icon/ruler/ruler-v.svg";
+    // cursor: "/assets/icon/ruler/ruler-v.svg";
     &::before {
       content: "";
       position: absolute;

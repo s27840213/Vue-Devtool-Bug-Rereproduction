@@ -136,7 +136,7 @@ div(class="my-design-pc")
             span {{$t('NN0203')}}
           div(class="delete-all-message__confirm" @click.stop="confirmAction(deleteAllConfirmed)")
             span {{$t('NN0034')}}
-    div(v-if="confirmMessage === 'delete-folder'" class="dim-background" @click="closeConfirmMessage")
+    div(v-else-if="confirmMessage === 'delete-folder'" class="dim-background" @click="closeConfirmMessage")
       div(class="delete-folder-message" @click.stop)
         div(class="delete-folder-message__img")
           img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="76px" height="79px")
@@ -149,7 +149,7 @@ div(class="my-design-pc")
               span {{$t('NN0203')}}
             div(class="delete-folder-message__confirm" @click.stop="confirmAction(() => deleteFolder(pathedFolderBuffer))")
               span {{$t('NN0034')}}
-    div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click="closeConfirmMessage")
+    div(v-else-if="confirmMessage === 'delete-forever'" class="dim-background" @click="closeConfirmMessage")
       div(class="delete-forever-message" @click.stop)
         div(class="delete-forever-message__img")
           img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55px" height="57px")
@@ -162,7 +162,7 @@ div(class="my-design-pc")
             span {{$t('NN0203')}}
           div(class="delete-forever-message__confirm" @click.stop="confirmAction(deleteForeverConfirmed)")
             span {{$t('NN0200')}}
-    div(v-if="confirmMessage === 'download'" class="dim-background")
+    div(v-else-if="confirmMessage === 'download'" class="dim-background")
       popup-download(class="my-design-pc__download"
         :useExternelJSON="true"
         @close="closeConfirmMessage")
