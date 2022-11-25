@@ -157,6 +157,9 @@ class ConstantData {
         }, {
           label: i18n.t('NN0147'),
           url: 'https://blog.vivipic.com/tw/faq/'
+        }, {
+          label: '特色功能',
+          url: 'https://blog.vivipic.com/tw/features/'
         }]
       }, {
         label: i18n.t('NN0674'),

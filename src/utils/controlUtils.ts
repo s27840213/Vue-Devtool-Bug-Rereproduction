@@ -107,13 +107,10 @@ class Controller {
     ]
   }
 
-  getControlPoints = (resizerShort: number, resizerLong: number) => {
+  private getScalers = (scalerSize: number, cursors?: Array<number | string>, isTouchArea = false) => {
     const contentScaleRatio = editorUtils.contentScaleRatio
     const scaleRatio = store.getters.getPageScaleRatio
-    const isMobile = generalUtils.isTouchDevice()
-    const scalerSize = isMobile ? 12 : 8
-
-    const getScalers = (scalerSize: number, cursors?: Array<number | string>) => [
+    return [
       {
         cursor: cursors?.[0] ?? 0,
         styles: {
@@ -122,7 +119,8 @@ class Controller {
           left: '0',
           top: '0',
           transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
-          borderRadius: '50%'
+          borderRadius: '50%',
+          opacity: isTouchArea ? '0' : '1'
         },
         scalerSize
       },
@@ -134,7 +132,8 @@ class Controller {
           transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
           right: '0',
           top: '0',
-          borderRadius: '50%'
+          borderRadius: '50%',
+          opacity: isTouchArea ? '0' : '1'
         },
         scalerSize
       },
@@ -146,7 +145,8 @@ class Controller {
           transform: `translate3d(50%,50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
           right: '0',
           bottom: '0',
-          borderRadius: '50%'
+          borderRadius: '50%',
+          opacity: isTouchArea ? '0' : '1'
         },
         scalerSize
       },
@@ -158,13 +158,72 @@ class Controller {
           transform: `translate3d(-50%,50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
           left: '0',
           bottom: '0',
-          borderRadius: '50%'
+          borderRadius: '50%',
+          opacity: isTouchArea ? '0' : '1'
         },
         scalerSize
       }
     ]
+  }
+
+  private getResizers = (resizerShort: number, resizerLong: number, contentScaleRatio: number, isTouchArea = false) => {
+    return [
+      {
+        type: 'H',
+        cursor: 7,
+        styles: {
+          height: `${resizerLong}px`,
+          width: `${resizerShort}px`,
+          left: '0',
+          transform: `translate(-50%, -50%) scale(${contentScaleRatio})`,
+          opacity: isTouchArea ? '0' : '1'
+        }
+      },
+      {
+        type: 'H',
+        cursor: 3,
+        styles: {
+          height: `${resizerLong}px`,
+          width: `${resizerShort}px`,
+          right: '0',
+          transform: `translate(50%, -50%) scale(${contentScaleRatio})`,
+          opacity: isTouchArea ? '0' : '1'
+        }
+      },
+      {
+        type: 'V',
+        cursor: 5,
+        styles: {
+          width: `${resizerLong}px`,
+          height: `${resizerShort}px`,
+          bottom: '0',
+          transform: `translate(-50%, 50%) scale(${contentScaleRatio})`,
+          opacity: isTouchArea ? '0' : '1'
+        }
+      },
+      {
+        type: 'V',
+        cursor: 1,
+        styles: {
+          width: `${resizerLong}px`,
+          height: `${resizerShort}px`,
+          top: '0',
+          transform: `translate(-50%, -50%) scale(${contentScaleRatio})`,
+          opacity: isTouchArea ? '0' : '1'
+        }
+      }
+    ]
+  }
+
+  getControlPoints = (resizerShort: number, resizerLong: number) => {
+    const contentScaleRatio = editorUtils.contentScaleRatio
+    const scaleRatio = store.getters.getPageScaleRatio
+    const isMobile = generalUtils.isTouchDevice()
+    const scalerSize = isMobile ? 12 : 8
+
     return {
-      scalers: getScalers(scalerSize),
+      scalers: this.getScalers(scalerSize),
+      scalerTouchAreas: this.getScalers(scalerSize * 3, undefined, true),
       cornerRotaters: this.getCornerRatater(scalerSize * 4),
       lineEnds: [
         {
@@ -184,48 +243,8 @@ class Controller {
           borderRadius: '50%'
         }
       ],
-      resizers: [
-        {
-          type: 'H',
-          cursor: 7,
-          styles: {
-            height: `${resizerLong}px`,
-            width: `${resizerShort}px`,
-            left: '0',
-            transform: `translate(-50%, -50%) scale(${contentScaleRatio})`
-          }
-        },
-        {
-          type: 'H',
-          cursor: 3,
-          styles: {
-            height: `${resizerLong}px`,
-            width: `${resizerShort}px`,
-            right: '0',
-            transform: `translate(50%, -50%) scale(${contentScaleRatio})`
-          }
-        },
-        {
-          type: 'V',
-          cursor: 5,
-          styles: {
-            width: `${resizerLong}px`,
-            height: `${resizerShort}px`,
-            bottom: '0',
-            transform: `translate(-50%, 50%) scale(${contentScaleRatio})`
-          }
-        },
-        {
-          type: 'V',
-          cursor: 1,
-          styles: {
-            width: `${resizerLong}px`,
-            height: `${resizerShort}px`,
-            top: '0',
-            transform: `translate(-50%, -50%) scale(${contentScaleRatio})`
-          }
-        }
-      ],
+      resizers: this.getResizers(resizerShort, resizerLong, contentScaleRatio),
+      resizerTouchAreas: this.getResizers(resizerShort * 3, resizerLong * 3, contentScaleRatio, true),
       cursors: [
         'nwse-resize',
         'ns-resize',

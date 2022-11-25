@@ -273,7 +273,10 @@ export default Vue.extend({
       groupUtils.deselect()
       // imageUtils.setImgControlDefault(false)
       editorUtils.setInMultiSelectionMode(false)
-      this.setCurrActivePageIndex(this.pageIndex)
+      if (this.currSelectedPageIndex !== this.pageIndex) {
+        pageUtils.setBackgroundImageControlDefault()
+        this.setCurrActivePageIndex(this.pageIndex)
+      }
       const sel = window.getSelection()
       if (sel) {
         sel.empty()
@@ -314,7 +317,7 @@ export default Vue.extend({
               pageIndex: this.pageIndex,
               props: { isAutoResizeNeeded: false }
             })
-          }, 100) // for the delay between font loading and dom rendering
+          }, 200) // for the delay between font loading and dom rendering
         })
       }
     }

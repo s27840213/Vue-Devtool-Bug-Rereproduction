@@ -9,7 +9,13 @@
         @touchstart="disableTouchEvent")
       div(v-for="(scaler, index) in controlPoints.scalers"
           class="controller-point"
-          :key="index"
+          :key="`scaler-${index}`"
+          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' })"
+          @pointerdown.prevent.stop="isTouchDevice() ? null : scaleStart"
+          @touchstart="isTouchDevice() ? null : disableTouchEvent")
+      div(v-if="isMobile" v-for="(scaler, index) in controlPoints.scalerTouchAreas"
+          class="controller-point"
+          :key="`scaler-touch-${index}`"
           :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' })"
           @pointerdown.prevent.stop="scaleStart"
           @touchstart="disableTouchEvent")
@@ -87,7 +93,6 @@ export default Vue.extend({
         ControlUtils.updateLayerProps(this.pageIndex, i, { imgControl: false })
       }
     }
-    // this.setImgConfig(undefined)
   },
   computed: {
     ...mapGetters({
@@ -183,7 +188,6 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex'
     }),
     ...mapMutations({
-      setImgConfig: 'imgControl/SET_CONFIG',
       updateConfig: 'imgControl/UPDATE_CONFIG'
     }),
     controllerStyles() {

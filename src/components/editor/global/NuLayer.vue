@@ -174,8 +174,11 @@ export default Vue.extend({
         y: this.config.styles.y
       }
     },
+    pageScaleRatio(): number {
+      return pageUtils.scaleRatio / 100
+    },
     compensationRatio(): number {
-      return 1
+      return Math.max(1, this.pageScaleRatio())
     },
     showSpinner(): boolean {
       const { config } = this
@@ -223,7 +226,7 @@ export default Vue.extend({
   display: flex;
   align-items: center;
   justify-content: center;
-  content-visibility: auto;
+  // content-visibility: auto;
   // box-shadow: inset 0px 0px 0px 7px rgba(136, 136, 136, 0.5);
   width: 100px;
   height: 100px;

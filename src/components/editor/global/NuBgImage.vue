@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-background-image"
+  div(v-if="!image.config.imgContorl" class="nu-background-image"
     :style="mainStyles"
     @pointerdown="setInBgSettingMode"
     draggable="false")
@@ -63,6 +63,13 @@ export default Vue.extend({
     },
     getImgDimension(newVal, oldVal) {
       this.handleDimensionUpdate(newVal, oldVal)
+    },
+    'image.config.imgControl'(val) {
+      if (val) {
+        this.setBgImgConfig(this.pageIndex)
+      } else {
+        this.setBgImgConfig(undefined)
+      }
     }
   },
   async created() {
@@ -198,7 +205,8 @@ export default Vue.extend({
     ...mapActions('file', ['updateImages']),
     ...mapActions('brandkit', ['updateLogos']),
     ...mapMutations({
-      setBgImageSrc: 'SET_backgroundImageSrc'
+      setBgImageSrc: 'SET_backgroundImageSrc',
+      setBgImgConfig: 'imgControl/SET_BG_CONFIG'
     }),
     onError() {
       let updater
@@ -238,7 +246,7 @@ export default Vue.extend({
             this.src = previewSrc
           }
         })
-      } else if (config.srcObj.type === 'background') {
+      } else if (this.image.config.panelPreviewSrc) {
         const panelPreviewSrc = this.image.config.panelPreviewSrc
         ImageUtils.imgLoadHandler(panelPreviewSrc, () => {
           if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {

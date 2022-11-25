@@ -111,7 +111,8 @@ export default Vue.extend({
       setShowInitImage: 'bgRemove/SET_showInitImage',
       setLoading: 'bgRemove/SET_loading',
       setIsProcessing: 'bgRemove/SET_isProcessing',
-      setCurrSidebarPanel: 'SET_currSidebarPanelType'
+      setCurrSidebarPanel: 'SET_currSidebarPanelType',
+      uploadMyfileImg: 'file/UPDATE_IMAGE_URLS'
     }),
     toggleShowInitImage(val: boolean): void {
       this.setShowInitImage(!val)
@@ -122,6 +123,7 @@ export default Vue.extend({
     save() {
       const { index, pageIndex } = this.currSelectedInfo as ICurrSelectedInfo
       imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex: index }, { type: 'after-bg-remove', userId: '', assetId: '' })
+      imageShadowUtils.updateEffectProps({ pageIndex, layerIndex: index }, { isTransparent: true })
       if (!this.modifiedFlag) {
         layerUtils.updateLayerProps(pageIndex, index, {
           srcObj: {
@@ -143,12 +145,13 @@ export default Vue.extend({
             Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
           }
         }
+        this.uploadMyfileImg(Object.assign({ assetId: this.autoRemoveResult.id }, this.autoRemoveResult))
         this.setInBgRemoveMode(false)
         this.setIsProcessing(false)
         this.setPageScaleRatio(this.prevPageScaleRatio)
         stepsUtils.record()
       } else {
-        const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
+        const { teamId, id, assetIndex } = (this.autoRemoveResult as IBgRemoveInfo)
         const previewSrc = this.canvas.toDataURL('image/png;base64')
         const { pageId, layerId } = this.bgRemoveIdInfo
         layerUtils.updateLayerProps(pageIndex, index, {
@@ -162,6 +165,11 @@ export default Vue.extend({
         // So we need to set isProcessing to true
         this.setIsProcessing(true)
         this.setCurrSidebarPanel(SidebarPanelType.file)
+        const targetPageIndex = pageUtils.getPageIndexById(pageId)
+        const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
+        layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+          tmpId: id
+        })
         uploadUtils.uploadAsset('image', [previewSrc], {
           addToPage: false,
           pollingCallback: (json: IUploadAssetResponse) => {
@@ -192,7 +200,7 @@ export default Vue.extend({
             this.setLoading(false)
             this.setIsProcessing(false)
           },
-          id: id,
+          id: id ?? assetIndex,
           needCompressed: false
         })
       }

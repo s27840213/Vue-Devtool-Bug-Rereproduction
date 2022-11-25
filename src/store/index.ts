@@ -40,6 +40,7 @@ import payment from '@/store/module/payment'
 import fontTag from '@/store/module/fontTag'
 import imgControl from '@/store/module/imgControl'
 import { ADD_subLayer } from '@/utils/layerUtils'
+import { throttle } from 'lodash'
 
 Vue.use(Vuex)
 
@@ -113,7 +114,9 @@ const getDefaultState = (): IEditorState => ({
   isGlobalLoading: false,
   useMobileEditor: false,
   defaultContentScaleRatio: 0.6,
-  _3dEnabledPageIndex: -1
+  _3dEnabledPageIndex: -1,
+  enalbleComponentLog: false,
+  inScreenshotPreviewRoute: false
 })
 
 const state = getDefaultState()
@@ -284,6 +287,12 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   get3dEnabledPageIndex(state: IEditorState) {
     return state._3dEnabledPageIndex
+  },
+  getEnalbleComponentLog(state: IEditorState) {
+    return state.enalbleComponentLog
+  },
+  getInScreenshotPreview(state: IEditorState) {
+    return state.inScreenshotPreviewRoute
   }
 }
 
@@ -416,9 +425,10 @@ const mutations: MutationTree<IEditorState> = {
     Object.assign(state.pages[pageIndex].backgroundImage.config, config)
     // state.pages[pageIndex].backgroundColor = '#ffffff'
   },
-  SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any, previewSrc: '' }) {
+  SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any, previewSrc: '', panelPreviewSrc: '' }) {
     Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj, updateInfo.srcObj)
     updateInfo.previewSrc && (state.pages[updateInfo.pageIndex].backgroundImage.config.previewSrc = updateInfo.previewSrc)
+    updateInfo.panelPreviewSrc && (state.pages[updateInfo.pageIndex].backgroundImage.config.panelPreviewSrc = updateInfo.panelPreviewSrc)
     // state.pages[updateInfo.pageIndex].backgroundColor = '#ffffff'
   },
   SET_backgroundImagePos(state: IEditorState, updateInfo: { pageIndex: number, imagePos: { x: number, y: number } }) {
@@ -880,14 +890,20 @@ const mutations: MutationTree<IEditorState> = {
       state._3dEnabledPageIndex = index
     }
   },
+  SET_enalbleComponentLog(state: IEditorState, bool: boolean) {
+    state.enalbleComponentLog = bool
+  },
+  SET_inScreenshotPreview(state: IEditorState, bool: boolean) {
+    state.inScreenshotPreviewRoute = bool
+  },
   ...imgShadowMutations,
   ADD_subLayer
 }
 
-function handleResize() {
-  state.isMobile = window.matchMedia('screen and (max-width: 768px)').matches
-  state.isLargeDesktop = window.matchMedia('screen and (min-width: 1440px)').matches
-}
+const handleResize = throttle(() => {
+  state.isMobile = generalUtils.getWidth() <= 768
+  state.isLargeDesktop = generalUtils.getWidth() >= 1440
+}, 500)
 
 window.addEventListener('resize', handleResize)
 handleResize()

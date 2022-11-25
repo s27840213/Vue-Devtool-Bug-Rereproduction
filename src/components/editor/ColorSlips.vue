@@ -382,9 +382,9 @@ export default Vue.extend({
     width: 100%;
     padding-top: 100%;
     border-radius: 2px;
-    border: 1px solid setColor(gray-4, 0.3);
+    border: 1px solid setColor(gray-0, 0.2);
     box-sizing: border-box;
-    box-shadow: 0px 1px 4px setColor(gray-1-5, 0.2);
+    // box-shadow: 0px 1px 4px setColor(gray-1-5, 0.2);
     cursor: pointer;
   }
 

@@ -6,8 +6,7 @@ div(class="page-preview")
           type="full"
           :config="wrappedPage(page)"
           :lazyLoadTarget="'.page-preview'"
-          :key="page.id"
-          @loaded="handleLoaded")
+          :key="page.id")
         page-preview-plus(v-if="(idx+1) % getPagesPerRow === 0"
           :index="idx+1" :last="false"  :key="`${page.id}-bottom`")
     page-preview-plus(:index="getPages.length" last=true)
@@ -27,7 +26,6 @@ import pageUtils from '@/utils/pageUtils'
 import { floor } from 'lodash'
 import stepsUtils from '@/utils/stepsUtils'
 import { IPage } from '@/interfaces/page'
-import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   data() {
@@ -47,7 +45,6 @@ export default Vue.extend({
     })
   },
   mounted() {
-    testUtils.start('previewTest')
     this.screenWidth = document.body.clientWidth - 130
     this._setPagesPerRow(floor(this.screenWidth / 180))
     window.addEventListener('resize', () => {
@@ -66,16 +63,6 @@ export default Vue.extend({
     },
     wrappedPage(page: IPage) {
       return { ...page, isAutoResizeNeeded: false }
-    },
-    handleLoaded() {
-      if (this.renderCount === 0) {
-        testUtils.start('previewTest')
-      }
-
-      if (this.renderCount === this.getPages.length - 1) {
-        testUtils.log('previewTest', 'Preview Test')
-      }
-      this.renderCount++
     }
   }
 })

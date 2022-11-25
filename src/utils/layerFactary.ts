@@ -9,6 +9,7 @@ import textPropUtils from './textPropUtils'
 import ZindexUtils from './zindexUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import mouseUtils from './mouseUtils'
+import { IPage } from '@/interfaces/page'
 
 class LayerFactary {
   newImage(config: any): IImage {
@@ -339,6 +340,9 @@ class LayerFactary {
               delete paragraph.spanStyle
             }
           }
+        },
+        (span) => {
+          span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '')
         }
       )
     }
@@ -346,7 +350,7 @@ class LayerFactary {
   }
 
   newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
-    const group = {
+    const group: IGroup = {
       type: 'group',
       id: config.id || GeneralUtils.generateRandomString(8),
       active: false,
@@ -395,13 +399,14 @@ class LayerFactary {
   }
 
   newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
-    const tmp = {
+    const tmp: ITmp = {
       type: 'tmp',
       id: GeneralUtils.generateRandomString(8),
       active: true,
       shown: false,
       locked: false,
       moved: false,
+      moving: false,
       dragging: false,
       designId: '',
       styles: {
@@ -421,7 +426,7 @@ class LayerFactary {
         verticalFlip: false
       },
       layers
-    } as unknown as ITmp
+    }
     tmp.layers.forEach(l => l.type === LayerType.image && (l.parentLayerStyles = tmp.styles))
     return tmp
   }
@@ -513,8 +518,10 @@ class LayerFactary {
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
     const bgImgConfig = config.backgroundImage.config
     bgImgConfig.id = GeneralUtils.generateRandomString(8)
-    if (bgImgConfig.srcObj.type && !bgImgConfig.srcObj.userId && !bgImgConfig.srcObj.assetId) {
-      config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+    if (bgImgConfig.srcObj.type) {
+      if (!bgImgConfig.srcObj.userId && !bgImgConfig.srcObj.assetId) {
+        config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+      }
     }
     return config
   }

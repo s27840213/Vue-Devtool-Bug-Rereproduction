@@ -7,8 +7,10 @@ import groupUtils from '@/utils/groupUtils'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import frameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import pageUtils from '@/utils/pageUtils'
 
 const SET_CONFIG = 'SET_CONFIG' as const
+const SET_BG_CONFIG = 'SET_BG_CONFIG' as const
 const UPDATE_CONFIG = 'UPDATE_CONFIG' as const
 
 interface IImgControlState {
@@ -32,6 +34,12 @@ const state: IImgControlState = {
 const getters: GetterTree<IImgControlState, IEditorState> = {
   imgControlPageIdx(state): number {
     return state.layerInfo.pageIndex
+  },
+  isImgCtrl(state): boolean {
+    return state.image !== undefined && state.layerInfo.layerIndex !== -1
+  },
+  isBgImgCtrl(state): boolean {
+    return state.image !== undefined && state.layerInfo.layerIndex === -1
   }
 }
 
@@ -52,9 +60,47 @@ const mutations: MutationTree<IImgControlState> = {
         state.layerInfo = { pageIndex: -1, layerIndex: -1, subLayerIdx: -1 }
         return
       }
+
+      let layer
+      if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
+        if (state.primaryLayer.type === LayerType.group) {
+          layer = (state.primaryLayer as IGroup).layers[subLayerIdx]
+        } else if (state.primaryLayer.type === LayerType.frame) {
+          layer = (state.primaryLayer as IFrame).clips[subLayerIdx]
+        }
+      } else {
+        layer = layerUtils.getLayer(pageIndex, layerIndex) as IImage
+      }
+
+      state.image = layerMapping(state.primaryLayer, generalUtils.deepCopy(layer) as IImage) as IImage
+      state.image_ori = generalUtils.deepCopy(state.image)
+      state.layerInfo = { pageIndex, layerIndex, subLayerIdx }
     } else {
+      /**
+       * pageIndex === -1 while the imgControl is set to false
+       */
       if (state.image && checkHasActualUpdate()) {
         handleImgLayerUpdate(state.layerInfo, state.image, state.primaryLayer)
+        stepsUtils.record()
+      }
+      state.image = undefined
+      state.image_ori = undefined
+      state.layerInfo = { pageIndex: -1, layerIndex: -1, subLayerIdx: -1 }
+    }
+  },
+  [SET_BG_CONFIG](state, pageIndex?: number | 'reset') {
+    if (pageIndex === 'reset') {
+      state.image = undefined
+      state.image_ori = undefined
+      state.layerInfo = { pageIndex: -1, layerIndex: -1, subLayerIdx: -1 }
+      return
+    }
+    /**
+     * pageIndex equals to undefined while the imgControl flag is set to false
+     */
+    if (pageIndex === undefined) {
+      if (state.image && checkHasActualUpdate()) {
+        handleBgImgUpdate(state)
         stepsUtils.record()
       }
       state.image = undefined
@@ -63,20 +109,11 @@ const mutations: MutationTree<IImgControlState> = {
       return
     }
 
-    let layer
-    if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
-      if (state.primaryLayer.type === LayerType.group) {
-        layer = (state.primaryLayer as IGroup).layers[subLayerIdx]
-      } else if (state.primaryLayer.type === LayerType.frame) {
-        layer = (state.primaryLayer as IFrame).clips[subLayerIdx]
-      }
-    } else {
-      layer = layerUtils.getLayer(pageIndex, layerIndex) as IImage
-    }
-
-    state.image = layerMapping(state.primaryLayer, generalUtils.deepCopy(layer) as IImage) as IImage
+    state.image = generalUtils.deepCopy(pageUtils.getPage(pageIndex).backgroundImage.config)
+    state.image.styles.imgX = pageUtils.getPage(pageIndex).backgroundImage.posX
+    state.image.styles.imgY = pageUtils.getPage(pageIndex).backgroundImage.posY
     state.image_ori = generalUtils.deepCopy(state.image)
-    state.layerInfo = { pageIndex, layerIndex, subLayerIdx }
+    state.layerInfo = { pageIndex, layerIndex: -1, subLayerIdx: -1 }
   },
   [UPDATE_CONFIG](state, styles: Partial<IImageStyle>) {
     const { image } = state
@@ -86,6 +123,16 @@ const mutations: MutationTree<IImgControlState> = {
           image.styles[k] = v
         })
     }
+  }
+}
+
+const handleBgImgUpdate = function (state: IImgControlState) {
+  const { image } = state
+  const pageIndex = state.layerInfo.pageIndex
+  if (image) {
+    const { imgX, imgY, imgWidth, imgHeight } = image.styles
+    pageUtils.updateBackgroundImagePos(pageIndex, imgX, imgY)
+    pageUtils.updateBackgroundImageStyles(pageIndex, { imgWidth, imgHeight })
   }
 }
 

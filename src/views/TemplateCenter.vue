@@ -559,8 +559,8 @@ export default Vue.extend({
       })
     },
     handleResize() {
-      this.isMobile = window.matchMedia('screen and (max-width: 540px)').matches
-      this.isPC = window.matchMedia('screen and (min-width: 976px)').matches
+      this.isMobile = generalUtils.getWidth() <= 540
+      this.isPC = generalUtils.getWidth() >= 976
     },
     getPrevUrl(content: IContentTemplate, scale: number): string {
       return templateCenterUtils.getPrevUrl(content, scale)
@@ -597,7 +597,7 @@ body {
     width: min(60vw, 512px);
     height: 42px;
     border-radius: 3px;
-    z-index: 21;
+    z-index: setZindex("nu-header") + 1;
     background: white;
     box-sizing: border-box;
     border: 1px solid setColor(gray-4);
@@ -747,7 +747,6 @@ body {
     margin-top: 16px;
     margin-bottom: 16px;
     display: flex;
-    gap: 10px;
     &__wrapper {
       display: flex;
       align-items: center;
@@ -767,6 +766,7 @@ body {
       border-radius: 5px;
       box-sizing: border-box;
       flex-grow: 1;
+      margin-right: 10px;
     }
     &__options {
       width: 44px;
@@ -807,7 +807,7 @@ body {
     background: #ffffff;
     box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
     border-radius: 6px;
-    z-index: 20;
+    z-index: setZindex("popup");
     &-split {
       @extend .template-center__multi;
       display: flex;
@@ -971,7 +971,7 @@ body {
     width: 100vw;
     height: 100vh;
     background: #ffffff;
-    z-index: 20;
+    z-index: setZindex("popup");
     &__close {
       position: fixed;
       display: flex;
@@ -981,7 +981,7 @@ body {
       right: 55px;
       width: 25px;
       height: 25px;
-      z-index: 20;
+      z-index: setZindex("popup");
       transform: translate(0%, -50%);
       cursor: pointer;
     }
@@ -1112,7 +1112,7 @@ body {
   left: 0px;
   background: rgba(0, 0, 0, 0.4);
   transform-style: preserve-3d;
-  z-index: 19;
+  z-index: setZindex("popup") - 1;
 }
 
 .fade-scale {

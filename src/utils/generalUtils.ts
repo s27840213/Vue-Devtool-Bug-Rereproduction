@@ -342,6 +342,27 @@ class GeneralUtils {
     words[0] = first[0].toUpperCase() + first.substring(1)
     return words.join(' ')
   }
+
+  // Get browser W/H, from jQuery lib, https://stackoverflow.com/a/1038781
+  getWidth() {
+    return Math.max(
+      document.body.scrollWidth,
+      document.documentElement.scrollWidth,
+      document.body.offsetWidth,
+      document.documentElement.offsetWidth,
+      document.documentElement.clientWidth
+    )
+  }
+
+  getHeight() {
+    return Math.max(
+      document.body.scrollHeight,
+      document.documentElement.scrollHeight,
+      document.body.offsetHeight,
+      document.documentElement.offsetHeight,
+      document.documentElement.clientHeight
+    )
+  }
 }
 
 const generalUtils = new GeneralUtils()

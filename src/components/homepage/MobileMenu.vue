@@ -113,13 +113,17 @@ export default Vue.extend({
 
 .menu-top,
 .menu-bottom {
-  details,
-  div {
+  details {
     display: flex;
     flex-direction: column;
     summary {
-      display: flex;
-      align-items: center;
+      span {
+        display: inline-block;
+      }
+      list-style: none; // Romove detail arrow in Chrome
+      &::-webkit-details-marker {
+        display: none; // Romove detail arrow in Safari
+      }
     }
   }
   details > div {
@@ -134,10 +138,6 @@ export default Vue.extend({
   summary:focus > svg {
     // Set color when user click summary
     color: setColor(blue-hover);
-  }
-  summary::-webkit-details-marker {
-    // Romove detail arrow in safari
-    display: none;
   }
   span,
   a {
