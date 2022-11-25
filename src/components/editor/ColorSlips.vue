@@ -160,7 +160,7 @@ export default Vue.extend({
       documentColors: 'color/getDocumentColors',
       _defaultColors: 'color/getDefaultColors',
       defaultBgColor: 'color/getDefaultBgColors',
-      recentlyColors: 'color/getRecentlyColors',
+      _recentlyColors: 'color/getRecentlyColors',
       currSelectedInfo: 'getCurrSelectedInfo',
       currentBrand: 'brandkit/getCurrentBrand',
       selectedTab: 'brandkit/getSelectedTab',
@@ -205,8 +205,8 @@ export default Vue.extend({
     },
     recentlyColors(): string[] {
       return this.showAllRecentlyColor
-        ? this.recentlyColors
-        : this.recentlyColors.slice(0, 20)
+        ? this._recentlyColors
+        : this._recentlyColors.slice(0, 20)
     },
     defaultColors(): unknown {
       return this.mode === 'PanelBG' ? this.defaultBgColor : this._defaultColors
@@ -391,10 +391,9 @@ export default Vue.extend({
   &__color {
     width: 100%;
     padding-top: 100%;
-    border-radius: 2px;
+    border-radius: 4px;
     border: 1px solid setColor(gray-0, 0.2);
     box-sizing: border-box;
-    // box-shadow: 0px 1px 4px setColor(gray-1-5, 0.2);
     cursor: pointer;
   }
 
