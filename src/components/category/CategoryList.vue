@@ -7,8 +7,7 @@
         @callback="onLoadMore(item.moreType)")
       slot(:name="item.type"
         :list="item.list"
-        :title="item.title"
-        :isFavorite="item.isFavorite")
+        :title="item.title")
     template(#before)
       slot(name="before")
     template(#after)

@@ -86,7 +86,6 @@ import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.v
 import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
-import PanelGiphyMore from '@/components/editor/panelMobile/PanelGiphyMore.vue'
 import PanelColorPicker from '@/components/editor/panelMobile/PanelColorPicker.vue'
 import PanelMyDesignMore from '@/components/editor/panelMobile/PanelMyDesignMore.vue'
 import panelSelectDesign from '@/components/editor/panelMobile/panelSelectDesign.vue'
@@ -154,7 +153,6 @@ export default Vue.extend({
     PanelObjectAdjust,
     PanelBrandList,
     PanelVvstkMore,
-    PanelGiphyMore,
     PanelColorPicker,
     PanelMyDesignMore,
     panelSelectDesign,
@@ -205,8 +203,8 @@ export default Vue.extend({
         'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
-        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list',
-        'vvstk-more', 'giphy-more', 'color-picker', 'my-design-more', 'select-design']
+        'adjust', 'photo-shadow', 'resize', 'object-adjust',
+        'brand-list', 'vvstk-more', 'color-picker', 'my-design-more', 'select-design']
 
       return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },

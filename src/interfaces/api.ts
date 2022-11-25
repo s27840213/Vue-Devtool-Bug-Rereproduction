@@ -112,8 +112,6 @@ export interface IListServiceParams {
   pageIndex?: number
   listAll?: 0 | 1
   listCategory?: 0 | 1
-  listTag?: 0 | 1
-  categoryIds?: number
   fontList?: 0 | 1 | 2
   aspect?: string
   width?: number
@@ -165,15 +163,12 @@ export interface ICategoryList {
   key: string
   show: boolean
   content: ICategoryItem[]
-  loadMore?: ()=>void
-  categorySearch?: (arg0: string)=>void
 }
 
 export interface IListServiceContentData {
-  id: number
+  // category_id: number
   list: IListServiceContentDataItem[]
   title: string
-  title_locale?: string // Category title locale
   is_recent?: number
 }
 
@@ -184,8 +179,6 @@ export interface IListServiceData {
   preview: string
   preview2?: string
   next_page?: number
-  tags?: string[]
-  url?: string // For IG tutorial viedo
 }
 
 export interface IListServiceResponse {

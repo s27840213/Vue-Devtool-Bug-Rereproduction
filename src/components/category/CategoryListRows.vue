@@ -18,8 +18,7 @@ import CategoryListRow from './CategoryListRow.vue'
 export default Vue.extend({
   props: {
     list: Array,
-    title: String,
-    isFavorite: Boolean
+    title: String
   },
   components: {
     CategoryListRow

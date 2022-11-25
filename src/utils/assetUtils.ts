@@ -67,8 +67,7 @@ class AssetUtils {
       10: 'svg',
       11: 'svg',
       14: 'svg',
-      15: 'svg',
-      16: 'giphy'
+      15: 'svg'
     } as { [key: number]: string }
     return typeStrMap[type]
   }
@@ -98,8 +97,7 @@ class AssetUtils {
       10: 'objects',
       11: 'objects',
       14: 'objects',
-      15: 'objects',
-      16: 'giphy'
+      15: 'objects'
     } as { [key: number]: string }
     return typeModuleMap[type]
   }

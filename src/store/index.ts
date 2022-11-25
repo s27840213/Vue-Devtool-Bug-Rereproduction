@@ -11,7 +11,6 @@ import color from '@/store/module/color'
 import bgRemove from '@/store/module/bgRemove'
 import text from '@/store/text'
 import objects from '@/store/module/objects'
-import giphy from '@/store/module/giphy'
 import textStock from '@/store/module/text'
 import shadow from '@/store/module/shadow'
 import font from '@/store/module/font'
@@ -914,7 +913,6 @@ export default new Vuex.Store({
     font,
     color,
     objects,
-    giphy,
     textStock,
     background,
     mobileEditor,

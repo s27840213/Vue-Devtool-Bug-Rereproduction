@@ -3,6 +3,5 @@ import { IListServiceParams } from '@/interfaces/api'
 import listFactory from './listFactory'
 
 export default listFactory.apply({
-  api: (params: IListServiceParams) => list.getSvg(params),
-  namespace: 'objects'
+  api: (params: IListServiceParams) => list.getSvg(params)
 })

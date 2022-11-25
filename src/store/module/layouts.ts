@@ -3,6 +3,5 @@ import { IListServiceParams } from '@/interfaces/api'
 import listFactory from './listFactory'
 
 export default listFactory.apply({
-  api: (params: IListServiceParams) => list.getLayout(params),
-  namespace: 'layouts'
+  api: (params: IListServiceParams) => list.getLayout(params)
 })

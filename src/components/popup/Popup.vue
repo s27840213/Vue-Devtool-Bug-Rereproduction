@@ -23,7 +23,6 @@ import PopupSlider from '@/components/popup/PopupSlider.vue'
 import PopupPageScale from '@/components/popup/PopupPageScale.vue'
 import PopupSubmit from '@/components/popup/PopupSubmit.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
-import PopupIcon from '@/components/popup/PopupIcon.vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { IPopupComponent, IPopupOptions } from '@/interfaces/popup'
 import popupUtils from '@/utils/popupUtils'
@@ -45,8 +44,7 @@ export default Vue.extend({
     PopupDownload,
     PopupPageScale,
     PopupSubmit,
-    PopupPayment,
-    PopupIcon
+    PopupPayment
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -210,7 +208,7 @@ export default Vue.extend({
       closePopup: 'popup/closePopup'
     }),
     middleware() { // These component controll v-click-o by themself.
-      if (['popup-payment', 'popup-icon'].includes(this.component)) return false
+      if (['popup-payment'].includes(this.component)) return false
       return true
     },
     async close() {

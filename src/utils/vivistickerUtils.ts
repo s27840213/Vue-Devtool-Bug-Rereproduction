@@ -36,7 +36,7 @@ const USER_SETTINGS_CONFIG: {[key: string]: {default: any, description: string}}
   }
 }
 
-export const MODULE_TYPE_MAPPING: {[key: string]: string} = {
+const MODULE_TYPE_MAPPING: {[key: string]: string} = {
   objects: 'svg',
   textStock: 'text',
   background: 'background',
@@ -510,7 +510,7 @@ class ViviStickerUtils {
       })
       return
     }
-    if (['color', 'backgroundColor', 'giphy'].includes(data.key)) {
+    if (['color', 'backgroundColor'].includes(data.key)) {
       assetUtils.setRecentlyUsed(data.key, data.assets)
       vivistickerUtils.handleCallback(`list-asset-${data.key}`)
       return

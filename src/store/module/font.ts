@@ -8,8 +8,7 @@ import listFactory from './listFactory'
 const SET_MORE_CATEGORY = 'SET_MORE_CATEGORY' as const
 
 const font = listFactory.apply({
-  api: (params: IListServiceParams) => list.getFont(params),
-  namespace: 'font'
+  api: (params: IListServiceParams) => list.getFont(params)
 })
 
 const actions = font.actions as ActionTree<IListModuleState, unknown>
