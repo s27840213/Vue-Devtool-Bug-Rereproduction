@@ -30,6 +30,7 @@ import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import Vue from 'vue'
+import _ from 'lodash'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 type TabConfig = {
@@ -59,8 +60,12 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState('objects', {
-      objectsKeyword: 'keyword'
+    ...mapGetters('objects', {
+      staticHeaderTab: 'headerTab'
+    }),
+    ...mapGetters('giphy', {
+      giphyKeyword: 'keyword',
+      gihpyHeaderTab: 'headerTab'
     }),
     ...mapState('background', {
       backgroundKeyword: 'keyword'
@@ -116,7 +121,7 @@ export default Vue.extend({
     keyword(): string {
       switch (this.currActiveTab) {
         case 'object':
-          return this.objectsKeyword
+          return this.staticHeaderTab.title || this.giphyKeyword
         case 'background':
           return this.backgroundKeyword
         case 'text':
@@ -151,6 +156,10 @@ export default Vue.extend({
         ]
       } else if (this.isInMyDesign) {
         return []
+      } else if (this.isInCategory && !_.isEmpty(this.staticHeaderTab)) {
+        return this.staticHeaderTab.icons
+      } else if (this.isInCategory && !_.isEmpty(this.gihpyHeaderTab)) {
+        return this.gihpyHeaderTab
       } else if (this.isInCategory || this.isInBgShare) {
         return []
       } else {
@@ -164,6 +173,9 @@ export default Vue.extend({
   methods: {
     ...mapActions({
       resetObjectsSearch: 'objects/resetSearch',
+      resetObjectsFavoritesSearch: 'objects/resetFavoritesSearch',
+      resetGifCategoryContent: 'giphy/resetCategoryContent',
+      resetGifTagContent: 'giphy/resetTagContent',
       resetBackgroundsSearch: 'background/resetSearch',
       resetTextsSearch: 'textStock/resetSearch'
     }),
@@ -188,7 +200,11 @@ export default Vue.extend({
       this.setShowAllRecently({ tab: this.currActiveTab, bool: false })
       switch (this.currActiveTab) {
         case 'object':
-          this.resetObjectsSearch()
+          this.resetObjectsSearch({ resetCategoryInfo: true })
+          this.resetObjectsFavoritesSearch()
+          this.resetGifCategoryContent()
+          this.resetGifTagContent()
+          this.setShowAllRecently({ tab: 'giphy', bool: false })
           break
         case 'background':
           this.resetBackgroundsSearch()

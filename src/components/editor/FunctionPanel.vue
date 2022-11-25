@@ -63,7 +63,7 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
-import { FunctionPanelType, LayerType } from '@/store/types'
+import { LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
 
