@@ -1,5 +1,5 @@
 <template lang="pug">
-transition-group(v-else class="brand-kit-tab-logo" name="logo-list" tag="div")
+transition-group(class="brand-kit-tab-logo" name="logo-list" tag="div")
   template(v-for="logo in renderedLogos")
     div(v-if="logo === 'add'"
       class="brand-kit-tab-logo__item add pointer relative"
