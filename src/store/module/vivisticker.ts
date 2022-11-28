@@ -33,7 +33,8 @@ interface IViviStickerState {
   myDesignBuffer: IMyDesign | undefined,
   editingDesignId: string,
   editingAssetInfo: {[key: string]: any},
-  selectedDesigns: {[key: string]: IMyDesign}
+  selectedDesigns: { [key: string]: IMyDesign },
+  modalInfo: {[key: string]: any},
 }
 
 const EDITOR_BGS = [
@@ -76,7 +77,8 @@ const getDefaultState = (): IViviStickerState => ({
   myDesignBuffer: undefined,
   editingDesignId: '',
   editingAssetInfo: {},
-  selectedDesigns: {}
+  selectedDesigns: {},
+  modalInfo: {}
 })
 
 const state = getDefaultState()
@@ -174,6 +176,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getSelectedDesigns(state: IViviStickerState): {[key: string]: IMyDesign} {
     return state.selectedDesigns
+  },
+  getModalInfo(state: IViviStickerState): {[key: string]: string} {
+    return state.modalInfo
   }
 }
 
@@ -268,6 +273,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_editingAssetInfo(state: IViviStickerState, editingAssetInfo) {
     state.editingAssetInfo = editingAssetInfo
+  },
+  SET_modalInfo(state: IViviStickerState, modalInfo) {
+    state.modalInfo = modalInfo
   },
   UPDATE_userSettings(state: IViviStickerState, settings: Partial<IUserSettings>) {
     Object.entries(settings).forEach(([key, value]) => {

@@ -47,6 +47,7 @@ import textUtils from '@/utils/textUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { ColorEventType } from '@/store/types'
+import modalUtils from '@/utils/modalUtils'
 
 declare let window: CustomWindow
 
@@ -111,6 +112,58 @@ export default Vue.extend({
       lastTouchEnd = now
     }, false)
     window.visualViewport.addEventListener('resize', this.handleResize)
+
+    // parse modal info
+    const exp = !vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0') ? 'exp_' : ''
+    let locale = this.userInfo.locale
+    if (!['us', 'tw', 'jp'].includes(locale)) {
+      locale = 'us'
+    }
+    const prefix = exp + locale + '_'
+    const modalInfo = Object.fromEntries(Object.entries(this.modalInfo).map(
+      ([k, v]) => {
+        if (k.startsWith(prefix)) k = k.replace(prefix, '')
+        return [k, v as string]
+      })
+    )
+
+    // show popup
+    const btn_txt = modalInfo.btn_txt
+    if (btn_txt) {
+      modalUtils.setModalInfo(
+        modalInfo.title,
+        modalInfo.msg,
+        {
+          msg: btn_txt,
+          class: 'btn-black-mid',
+          style: {
+            color: '#F8F8F8'
+          },
+          action: () => {
+            const url = modalInfo.btn_url
+            if (url) { window.open(url, '_blank') }
+          }
+        },
+        {
+          msg: modalInfo.btn2_txt || '',
+          class: 'btn-light-mid',
+          style: {
+            border: 'none',
+            color: '#474A57',
+            backgroundColor: '#D3D3D3'
+          }
+        },
+        modalInfo.img_url,
+        !!exp,
+        {
+          backgroundColor: 'rgba(24,25,31,0.3)'
+        },
+        {
+          backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(255,255,255,0.9)'
+        }
+      )
+    }
   },
   destroyed() {
     window.visualViewport.removeEventListener('resize', this.handleResize)
@@ -138,7 +191,8 @@ export default Vue.extend({
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       showSaveDesignPopup: 'vivisticker/getShowSaveDesignPopup',
       slideType: 'vivisticker/getSlideType',
-      isSlideShown: 'vivisticker/getIsSlideShown'
+      isSlideShown: 'vivisticker/getIsSlideShown',
+      modalInfo: 'vivisticker/getModalInfo'
     }),
     isLocked(): boolean {
       return layerUtils.getTmpLayer().locked
