@@ -115,21 +115,17 @@ export default Vue.extend({
 
     // parse modal info
     const exp = !vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0') ? 'exp_' : ''
-    let prefix = exp + 'us_'
+    let locale = this.userInfo.locale
+    if (!['us', 'tw', 'jp'].includes(locale)) {
+      locale = 'us'
+    }
+    const prefix = exp + locale + '_'
     const modalInfo = Object.fromEntries(Object.entries(this.modalInfo).map(
       ([k, v]) => {
         if (k.startsWith(prefix)) k = k.replace(prefix, '')
         return [k, v as string]
       })
     )
-    if (this.userInfo.locale !== 'us') {
-      prefix = exp + this.userInfo.locale + '_'
-      Object.entries(modalInfo).forEach(
-        ([k, v]) => {
-          if (k.startsWith(prefix) && v) { modalInfo[k.replace(prefix, '')] = v as string }
-        }
-      )
-    }
 
     // show popup
     const btn_txt = modalInfo.btn_txt
