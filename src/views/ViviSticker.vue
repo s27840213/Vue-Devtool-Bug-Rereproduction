@@ -113,36 +113,56 @@ export default Vue.extend({
     }, false)
     window.visualViewport.addEventListener('resize', this.handleResize)
 
-    modalUtils.setModalInfo(
-      'title',
-      ['Now you can save the design you have edited. Please update app to latest version.'],
-      {
-        msg: 'View more',
-        class: 'btn-black-mid',
-        style: {
-          color: '#F8F8F8'
-        },
-        action: () => {
-          console.log('View more')
-        }
-      },
-      {
-        msg: 'Confirm',
-        class: 'btn-light-mid',
-        style: {
-          border: 'none',
-          color: '#474A57',
-          backgroundColor: '#D3D3D3'
-        },
-        action: () => {
-          console.log('Confirm')
-        }
-      },
-      require('@/assets/img/jpg/homepage/feature_tw_3.jpg'),
-      true,
-      { backdropFilter: 'blur(10px)' },
-      { opacity: '90%' }
+    // parse modal info
+    const exp = !vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0') ? 'exp_' : ''
+    let prefix = exp + 'us_'
+    const modalInfo = Object.fromEntries(Object.entries(this.modalInfo).map(
+      ([k, v]) => {
+        if (k.startsWith(prefix)) k = k.replace(prefix, '')
+        return [k, v as string]
+      })
     )
+    if (this.userInfo.locale !== 'us') {
+      prefix = exp + this.userInfo.locale + '_'
+      Object.entries(modalInfo).forEach(
+        ([k, v]) => {
+          if (k.startsWith(prefix) && v) { modalInfo[k.replace(prefix, '')] = v as string }
+        }
+      )
+    }
+
+    // show popup
+    const btn_txt = modalInfo.btn_txt
+    if (btn_txt) {
+      modalUtils.setModalInfo(
+        modalInfo.title,
+        modalInfo.msg,
+        {
+          msg: btn_txt,
+          class: 'btn-black-mid',
+          style: {
+            color: '#F8F8F8'
+          },
+          action: () => {
+            const url = modalInfo.btn_url
+            if (url) { window.open(url, '_blank') }
+          }
+        },
+        {
+          msg: modalInfo.btn2_txt || '',
+          class: 'btn-light-mid',
+          style: {
+            border: 'none',
+            color: '#474A57',
+            backgroundColor: '#D3D3D3'
+          }
+        },
+        modalInfo.img_url,
+        !!exp,
+        { backdropFilter: 'blur(10px)' },
+        { opacity: '90%' }
+      )
+    }
   },
   destroyed() {
     window.visualViewport.removeEventListener('resize', this.handleResize)
@@ -170,7 +190,8 @@ export default Vue.extend({
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       showSaveDesignPopup: 'vivisticker/getShowSaveDesignPopup',
       slideType: 'vivisticker/getSlideType',
-      isSlideShown: 'vivisticker/getIsSlideShown'
+      isSlideShown: 'vivisticker/getIsSlideShown',
+      modalInfo: 'vivisticker/getModalInfo'
     }),
     isLocked(): boolean {
       return layerUtils.getTmpLayer().locked

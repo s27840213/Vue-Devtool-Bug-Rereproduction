@@ -162,7 +162,7 @@ router.beforeEach(async (to, from, next) => {
     /**
      * @MobileDebug - comment the following two line, and use const json = appJSON, or the request will be blocked by CORS
      */
-    const response = await fetch(`https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`)
+    const response = await fetch(`https://template.vivipic.com/static/app_sticker.json?ver=${generalUtils.generateRandomString(6)}`)
     const json = await response.json()
 
     // const json = appJson
@@ -190,6 +190,8 @@ router.beforeEach(async (to, from, next) => {
         }
         store.commit('text/UPDATE_DEFAULT_FONT', { font })
       })
+
+    store.commit('vivisticker/SET_modalInfo', json.modal)
   }
 
   next()

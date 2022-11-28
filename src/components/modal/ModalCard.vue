@@ -3,7 +3,12 @@
     div(v-if="modalInfo.title" class="modal-card__row modal-card__title text-H6 text-gray-2")
       span {{modalInfo.title}}
     div(v-if="modalInfo.imgSrc" class="modal-card__image")
-      img(:src="modalInfo.imgSrc")
+      div(v-if="modalInfo.imgSrc" class="modal-card__image__container")
+        img(v-show="isImgLoaded" :src="modalInfo.imgSrc" @load="handleImgLoad")
+        svg-icon(v-if="!isImgLoaded"
+          :iconName="'photo'"
+          :iconColor="'white'"
+          :iconWidth="'48px'")
     div(v-if="modalInfo.content" class="modal-card__text body-SM text-gray-2")
       template(v-if="!pending")
         span(v-for="text in modalInfo.content"
@@ -38,6 +43,11 @@ import modalUtils from '@/utils/modalUtils'
 
 export default Vue.extend({
   name: 'ModalCard',
+  data: () => {
+    return {
+      isImgLoaded: false
+    }
+  },
   computed: {
     ...mapGetters({
       _modalInfo: 'modal/getModalInfo',
@@ -60,7 +70,10 @@ export default Vue.extend({
     cancelAction() {
       const { action } = this.modalInfo.cancelButton
       action && action()
-      if (!this.modalInfo.noClose) this.closePopup()
+      this.closePopup()
+    },
+    handleImgLoad() {
+      this.isImgLoaded = true
     }
   }
 })
@@ -74,6 +87,7 @@ export default Vue.extend({
   gap: 24px;
   align-items: center;
   background-color: white;
+  width: 100%;
   max-width: min(calc(100% - 40px), 500px);
   max-height: calc(100% - 40px);
   padding-bottom: 16px;
@@ -99,12 +113,27 @@ export default Vue.extend({
   }
 
   &__image {
+    width: 100%;
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
     overflow: hidden;
-    > img{
+    background-color: #C9C9C9;
+    &__container {
       width: 100%;
+      height: 0;
+      padding-bottom: 100%;
+      position: relative;
+      > img, > svg{
+        position: absolute;
+        left: 50%;
+        right: 0;
+        bottom: 0;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: calc(100% + 1px);
+      }
     }
   }
 
