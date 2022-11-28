@@ -155,8 +155,13 @@ export default Vue.extend({
         },
         modalInfo.img_url,
         !!exp,
-        { backdropFilter: 'blur(10px)' },
-        { opacity: '90%' }
+        {
+          backgroundColor: 'rgba(24,25,31,0.3)'
+        },
+        {
+          backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(255,255,255,0.9)'
+        }
       )
     }
   },

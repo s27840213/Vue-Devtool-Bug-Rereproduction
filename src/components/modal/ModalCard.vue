@@ -88,8 +88,8 @@ export default Vue.extend({
   align-items: center;
   background-color: white;
   width: 100%;
-  max-width: min(calc(100% - 40px), 500px);
-  max-height: calc(100% - 40px);
+  max-width: min(calc(100% - 80px), 500px);
+  max-height: calc(100% - 80px);
   padding-bottom: 16px;
   border-radius: 10px;
   overflow-y: auto;
