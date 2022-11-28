@@ -48,7 +48,7 @@ export default Vue.extend({
           next: { text: this.$t('NN0272') }
         },
         {
-          target: '.nav-container .nav-item:nth-child(4)',
+          target: '.nav-container .nav-item:nth-child(3)',
           placement: 'right-end',
           title: this.$t('NN0265'),
           content: this.$t('NN0266'),
@@ -56,7 +56,7 @@ export default Vue.extend({
           next: { text: this.$t('NN0272') }
         },
         {
-          target: '.nav-container .nav-item:last-child',
+          target: '.nav-container .nav-item:nth-last-child(2)',
           placement: 'right-end',
           title: this.$t('NN0267'),
           content: this.$t('NN0268'),
