@@ -19,7 +19,8 @@
     div(v-if="isAdmin && !inScreenshotPreview" class="fps")
       span FPS: {{fps}}
     div(class="modal-container"
-        v-if="isModalOpen")
+        v-if="isModalOpen"
+        :style="modalInfo.backdropStyle")
       modal-card
     notifications(group="copy"
       position="top center"
@@ -84,6 +85,7 @@ export default Vue.extend({
     ...mapGetters({
       currSelectedResInfo: 'getCurrSelectedResInfo',
       isModalOpen: 'modal/getModalOpen',
+      modalInfo: 'modal/getModalInfo',
       inScreenshotPreview: 'getInScreenshotPreview'
     }),
     ...mapGetters('user', {
