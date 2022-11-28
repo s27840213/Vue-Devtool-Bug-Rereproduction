@@ -209,6 +209,7 @@ export default Vue.extend({
   .btn.skip,
   .btn.finish {
     border: 1px solid setColor(blue-3);
+    background-color: transparent;
     color: setColor(blue-3);
     &:hover {
       border-color: setColor(white);
@@ -220,7 +221,7 @@ export default Vue.extend({
     background-color: setColor(blue-4);
     color: setColor(blue-1);
     &:hover {
-      color: setColor(blue-4);
+      background-color: setColor(white);
     }
   }
 </style>
