@@ -24,22 +24,39 @@ class TestUtils {
     console.log(`${key}: start`)
   }
 
+  log(key: string, msg: string) {
+    const timer = this.timer[key]
+    const duration = (new Date()).getTime() - timer.start
+    const result = `${key}: ${msg}, ${duration}`
+    console.log(result)
+    if (timer.notify) {
+      Vue.notify({
+        group: 'copy',
+        text: result
+      })
+    }
+  }
+
   /**
+   * Flags: Layers performance measurement tool
+   * Usage: Measure time of multiple layer task.
+   * Call initializeFlags at the start of measue.
+   * Call setDoneFlag when a layer task finished.
+   *
    * Example:
-   * in NuText.vue:
-   * mounted() {
-   *   textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
-   *     setTimeout(() => {
-   *       testUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
-   *     }, 100)
-   *   })
-   * },
-   * **************
-   * in ScaleRatioEditor.vue:
+   * step 1: Initial at task start (ScaleRatioEditor.vue):
    * setIsShowPagePreview(show: boolean) {
-   *   if (show) {
+   *   if (show) { // Start to render page preview.
    *     testUtils.initializeFlags('text')
    *   }
+   * },
+   *
+   * step 2: Set flag when finish one task (NuText.vue):
+   * mounted() {
+   *   textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
+   *     // Font load finished, set flag.
+   *     testUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
+   *   })
    * },
    */
 
@@ -87,19 +104,6 @@ class TestUtils {
       textLayerIndexes.push(indexes)
     }
     return textLayerIndexes
-  }
-
-  log(key: string, msg: string) {
-    const timer = this.timer[key]
-    const duration = (new Date()).getTime() - timer.start
-    const result = `${key}: ${msg}, ${duration}`
-    console.log(result)
-    if (timer.notify) {
-      Vue.notify({
-        group: 'copy',
-        text: result
-      })
-    }
   }
 }
 
