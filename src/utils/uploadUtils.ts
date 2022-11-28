@@ -560,7 +560,7 @@ class UploadUtils {
     }
   }
 
-  async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
+  async uploadDesign(putAssetDesignType?: PutAssetDesignType, params?: { clonedPages?: Array<IPage> }) {
     const typeMap = ['UPDATE_DB', 'UPDATE_PREV', 'UPDATE_BOTH']
     let type = router.currentRoute.query.type
     let designId = router.currentRoute.query.design_id
@@ -591,7 +591,8 @@ class UploadUtils {
     }
 
     store.commit('SET_assetId', assetId)
-    const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
+    const { clonedPages } = params || {}
+    const pages = clonedPages ?? generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
 
     logUtils.setLog(`Upload Design:
       Type: ${putAssetDesignType ? typeMap[putAssetDesignType] : 'UPLOAD JSON'}
@@ -600,7 +601,7 @@ class UploadUtils {
       PageNum: ${pages.length}`)
 
     const pagesJSON = pages.map((page: IPage) => {
-      const newPage = this.default(page)
+      const newPage = this.default(page, false)
       for (const [i, layer] of newPage.layers.entries()) {
         if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
           newPage.layers[i] = this.layerInfoFilter(layer)
@@ -1047,8 +1048,8 @@ class UploadUtils {
     }
   }
 
-  private default(page: any): IPage {
-    page = generalUtils.deepCopy(page)
+  private default(page: any, deepCopy = true): IPage {
+    page = deepCopy ? generalUtils.deepCopy(page) : page
     const basicDefault = (layer: any) => {
       layer.moved = false
       layer.shown = false

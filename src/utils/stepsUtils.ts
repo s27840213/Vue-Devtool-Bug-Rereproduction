@@ -15,6 +15,7 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 import assetUtils from './assetUtils'
 import layerFactary from './layerFactary'
 import textUtils from './textUtils'
+import workerUtils from './workerUtils'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -249,6 +250,37 @@ class StepsUtils {
       // Don't upload the design when initialize the steps
       if (uploadUtils.isLogin) {
         uploadUtils.uploadDesign()
+      }
+    }
+  }
+
+  async asyncRecord() {
+    const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
+    const clonedData = await workerUtils.asyncCloneDeep({
+      pages_1: store.getters.getPages,
+      pages_2: store.getters.getPages,
+      selectedInfo: store.getters.getCurrSelectedInfo
+    })
+    if (clonedData) {
+      const pages = this.filterDataForLayersInPages(clonedData.pages_1)
+      const currSelectedInfo = clonedData.selectedInfo
+
+      // There's not any steps before, create the initial step first
+      if (this.currStep < 0) {
+        this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
+        this.currStep++
+      } else {
+        // if step isn't in last step and we record new step, we need to remove all steps larger than curr step
+        this.steps.length = this.currStep + 1
+        if (this.steps.length === this.MAX_STORAGE_COUNT) {
+          this.steps.shift()
+        }
+        this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
+        this.currStep = this.steps.length - 1
+        // Don't upload the design when initialize the steps
+        if (uploadUtils.isLogin) {
+          uploadUtils.uploadDesign(undefined, { clonedPages: clonedData.pages_2 })
+        }
       }
     }
   }

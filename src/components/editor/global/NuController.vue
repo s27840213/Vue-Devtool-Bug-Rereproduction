@@ -184,7 +184,6 @@ import { AnyTouchEvent } from 'any-touch'
 import textBgUtils from '@/utils/textBgUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { asyncCloneDeep } from '@/utils/workerUtils'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -922,12 +921,14 @@ export default Vue.extend({
           y: moveOffset.offsetY
         }
       )
-      const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
-      this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
+      // const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
+      // this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
       // this.$emit('getClosestSnaplines')
       const totalOffset = {
-        x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
-        y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
+        x: offsetPos.x,
+        y: offsetPos.y
+        // x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
+        // y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
       }
       this.initialPos.x += totalOffset.x
       this.initialPos.y += totalOffset.y
@@ -951,7 +952,7 @@ export default Vue.extend({
           dragging: false
         })
         this.isDoingGestureAction = false
-        this.snapUtils.event.emit('clearSnapLines')
+        // this.snapUtils.event.emit('clearSnapLines')
         return
       }
 
@@ -999,7 +1000,8 @@ export default Vue.extend({
             // The layerUtils.addLayers will trigger a record function, so we don't need to record the extra step here
           } else {
             if (!(this.config as IImage).isHoveringFrame) {
-              StepsUtils.record()
+              // StepsUtils.record()
+              StepsUtils.asyncRecord()
             }
           }
         } else {
@@ -1069,7 +1071,7 @@ export default Vue.extend({
       }
 
       this.isDoingGestureAction = false
-      this.snapUtils.event.emit('clearSnapLines')
+      // this.snapUtils.event.emit('clearSnapLines')
     },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
       if (eventUtils.checkIsMultiTouch(event)) {
@@ -1765,11 +1767,11 @@ export default Vue.extend({
       }
     },
     setCursorStyle(cursor: string) {
-      const layer = this.$el as HTMLElement
-      if (layer) {
-        layer.style.cursor = cursor
-        document.body.style.cursor = cursor
-      }
+      // const layer = this.$el as HTMLElement
+      // if (layer) {
+      //   layer.style.cursor = cursor
+      //   document.body.style.cursor = cursor
+      // }
     },
     currCursorStyling(e: MouseEvent | TouchEvent | PointerEvent) {
       const el = e.target as HTMLElement
