@@ -383,14 +383,14 @@ export default Vue.extend({
     width: 100%;
     // height: 100%;
     padding-top: 100%;
-    background-image: url("~@/assets/img/svg/addColor.png");
+    background-image: url("~@/assets/img/svg/addColor.svg");
     background-size: cover;
     box-shadow: 0px 1px 4px setColor(gray-1-5, 0.2);
   }
 
   &__color {
     width: 100%;
-    padding-top: 100%;
+    padding-top: calc(100% - 2px);
     border-radius: 4px;
     border: 1px solid setColor(gray-0, 0.2);
     box-sizing: border-box;
