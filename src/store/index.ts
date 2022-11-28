@@ -11,6 +11,7 @@ import color from '@/store/module/color'
 import bgRemove from '@/store/module/bgRemove'
 import text from '@/store/text'
 import objects from '@/store/module/objects'
+import giphy from '@/store/module/giphy'
 import textStock from '@/store/module/text'
 import shadow from '@/store/module/shadow'
 import font from '@/store/module/font'
@@ -106,7 +107,9 @@ const getDefaultState = (): IEditorState => ({
   isGlobalLoading: false,
   useMobileEditor: false,
   defaultContentScaleRatio: 1,
-  _3dEnabledPageIndex: -1
+  _3dEnabledPageIndex: -1,
+  enalbleComponentLog: false,
+  inScreenshotPreviewRoute: false
 })
 
 const state = getDefaultState()
@@ -277,6 +280,12 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   get3dEnabledPageIndex(state: IEditorState) {
     return state._3dEnabledPageIndex
+  },
+  getEnalbleComponentLog(state: IEditorState) {
+    return state.enalbleComponentLog
+  },
+  getInScreenshotPreview(state: IEditorState) {
+    return state.inScreenshotPreviewRoute
   }
 }
 
@@ -876,6 +885,12 @@ const mutations: MutationTree<IEditorState> = {
       state._3dEnabledPageIndex = index
     }
   },
+  SET_enalbleComponentLog(state: IEditorState, bool: boolean) {
+    state.enalbleComponentLog = bool
+  },
+  SET_inScreenshotPreview(state: IEditorState, bool: boolean) {
+    state.inScreenshotPreviewRoute = bool
+  },
   ...imgShadowMutations,
   ADD_subLayer
 }
@@ -899,6 +914,7 @@ export default new Vuex.Store({
     font,
     color,
     objects,
+    giphy,
     textStock,
     background,
     mobileEditor,

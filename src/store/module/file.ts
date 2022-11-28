@@ -34,8 +34,11 @@ const getDefaultState = (): IFileState => ({
 
 const state = getDefaultState()
 
+function isAdmin () {
+  return store.getters['user/isAdmin']
+}
+
 function addPerviewUrl(data: any[]) {
-  const isAdmin = store.getters['user/isAdmin']
   const teamId = store.getters['user/getTeamId']
   const userId = store.getters['user/getTeamId']
 
@@ -53,13 +56,13 @@ function addPerviewUrl(data: any[]) {
         height: prevH
       },
       urls: {
-        prev: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/prev` : image.signed_url?.prev ?? '',
-        full: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/full` : image.signed_url?.full ?? '',
-        larg: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/larg` : image.signed_url?.larg ?? '',
-        original: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/original` : image.signed_url?.original ?? '',
-        midd: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/midd` : image.signed_url?.midd ?? '',
-        smal: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/smal` : image.signed_url?.smal ?? '',
-        tiny: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/tiny` : image.signed_url?.tiny ?? ''
+        prev: isAdmin() ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/prev` : image.signed_url?.prev ?? '',
+        full: isAdmin() ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/full` : image.signed_url?.full ?? '',
+        larg: isAdmin() ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/larg` : image.signed_url?.larg ?? '',
+        original: isAdmin() ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/original` : image.signed_url?.original ?? '',
+        midd: isAdmin() ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/midd` : image.signed_url?.midd ?? '',
+        smal: isAdmin() ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/smal` : image.signed_url?.smal ?? '',
+        tiny: isAdmin() ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/tiny` : image.signed_url?.tiny ?? ''
       }
     }
   })
@@ -75,7 +78,7 @@ function addMyfile(response: [IUserImageContentData], pageIndex: number): void {
     data[img.asset_index] = img.signed_url
   }
 
-  if (!store.getters['user/isAdmin']) {
+  if (!isAdmin()) {
     store.commit('file/SET_STATE', {
       editorViewImages: Object.assign({}, state.editorViewImages, data)
     })
@@ -246,29 +249,32 @@ const mutations: MutationTree<IFileState> = {
     })
     state.myfileImages[targetIndex].progress = progress
   },
-  UPDATE_IMAGE_URLS(state: IFileState, { assetId, urls, assetIndex, type = 'private', width, height }) {
+  UPDATE_IMAGE_URLS(state: IFileState, { assetId, urls, assetIndex, width, height }) {
     const { myfileImages } = state
 
-    const isAdmin = type === 'public'
     const targetIndex = state.myfileImages.findIndex((img: IAssetPhoto) => {
-      return isAdmin ? img.id === assetId : img.assetIndex === assetId
+      return isAdmin() ? img.id === assetId : img.assetIndex === assetId
     })
 
     const data = addPerviewUrl([{
       width: width ?? myfileImages[targetIndex].width,
       height: height ?? myfileImages[targetIndex].height,
-      id: isAdmin ? assetId : undefined,
+      id: isAdmin() ? assetId : undefined,
       asset_index: assetIndex ?? assetId,
       signed_url: urls
     }])
 
-    // state.myfileImages[targetIndex] = Object.assign({}, data[0])
-    // Below code reduandont but and work, above don't work, src will get data:image/...
-    state.myfileImages[targetIndex].urls = data[0].urls
-    state.myfileImages[targetIndex].id = isAdmin ? assetId : undefined
-    state.myfileImages[targetIndex].assetIndex = assetIndex ?? assetId
-    state.myfileImages[targetIndex].width = width ?? myfileImages[targetIndex].width
-    state.myfileImages[targetIndex].height = height ?? myfileImages[targetIndex].height
+    if (targetIndex === -1) {
+      state.myfileImages.unshift(data[0])
+    } else {
+      // state.myfileImages[targetIndex] = Object.assign({}, data[0])
+      // Below code reduandont but and work, above don't work, src will get data:image/...
+      state.myfileImages[targetIndex].urls = data[0].urls
+      state.myfileImages[targetIndex].id = isAdmin() ? assetId : undefined
+      state.myfileImages[targetIndex].assetIndex = assetIndex ?? assetId
+      state.myfileImages[targetIndex].width = width ?? myfileImages[targetIndex].width
+      state.myfileImages[targetIndex].height = height ?? myfileImages[targetIndex].height
+    }
 
     if (width || height) {
       state.regenerateGalleryFlag = true

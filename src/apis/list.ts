@@ -17,6 +17,8 @@ class ListService {
       page_index: params.pageIndex,
       list_all: params.listAll,
       list_category: params.listCategory,
+      list_tag: params.listTag,
+      category_ids: params.categoryIds,
       keyword: params.keyword,
       font_list: params.fontList,
       theme: params.theme,

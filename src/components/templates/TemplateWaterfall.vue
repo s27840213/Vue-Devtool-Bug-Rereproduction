@@ -97,9 +97,13 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .template-waterfall {
   display: flex;
-  gap: 24px;
+  > div + div {
+    margin-left: 24px;
+  }
   @media screen and (max-width: 540px) {
-    gap: 15px;
+    > div + div {
+      margin-left: 15px;
+    }
     padding: 2px;
   }
   &__wrapper {
@@ -109,9 +113,13 @@ export default Vue.extend({
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    > div + div {
+      margin-top: 24px;
+    }
     @media screen and (max-width: 540px) {
-      gap: 15px;
+      > div + div {
+        margin-top: 15px;
+      }
     }
     &__template {
       position: relative;

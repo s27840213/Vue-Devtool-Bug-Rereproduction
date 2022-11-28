@@ -747,7 +747,6 @@ body {
     margin-top: 16px;
     margin-bottom: 16px;
     display: flex;
-    gap: 10px;
     &__wrapper {
       display: flex;
       align-items: center;
@@ -767,6 +766,7 @@ body {
       border-radius: 5px;
       box-sizing: border-box;
       flex-grow: 1;
+      margin-right: 10px;
     }
     &__options {
       width: 44px;

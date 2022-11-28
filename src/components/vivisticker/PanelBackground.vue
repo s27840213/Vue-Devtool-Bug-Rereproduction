@@ -138,7 +138,8 @@ export default Vue.extend({
       },
       currActiveTabIndex: 0,
       opacity: 100,
-      showAllRecentlyBgColors: false
+      showAllRecentlyBgColors: false,
+      colorAreaHeight: window.innerHeight - 176
     }
   },
   computed: {
@@ -325,7 +326,7 @@ export default Vue.extend({
     },
     colorTabWrapperStyles() {
       return {
-        height: `${window.innerHeight - 176}px`
+        height: `${this.colorAreaHeight}px`
       }
     },
     shareBgSizeStyles() {
