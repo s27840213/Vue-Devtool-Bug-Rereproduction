@@ -12,7 +12,7 @@
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
         div(class="text-left mb-5")
           div(class="flex-center")
-            svg-icon(v-if="showAllRecentlyColor && !isTouchDevice" iconName="chevron-left"
+            svg-icon(v-if="showAllRecentlyColor && mode!=='PanelColor'" iconName="chevron-left"
                   iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
                   class="mr-5" @click.native="lessRecently()")
             span {{$t('NN0679')}}
@@ -201,7 +201,7 @@ export default Vue.extend({
         : colorUtils.currColor
     },
     showAllRecentlyColor(): boolean {
-      return this.allRecentlyControl ? true : this.showAllRecently
+      return ['PanelColor'].includes(this.mode) ? this.allRecentlyControl : this.showAllRecently
     },
     recentlyColors(): string[] {
       return this.showAllRecentlyColor

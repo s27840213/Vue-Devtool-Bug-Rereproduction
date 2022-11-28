@@ -7,9 +7,11 @@
       clear
       :defaultKeyword="keywordLabel"
       @search="handleSearch")
-    //- Default BG color
-    color-slips(v-show="showColorTab" class="panel-bg__color-sets"
-                mode="PanelBG" @selectColor="setBgColor" @selectColorEnd="recordChange")
+    //- BG color tab content
+    color-slips(v-show="showColorTab" class="panel-bg__color-sets" mode="PanelBG"
+                @selectColor="setBgColor"
+                @selectColorEnd="recordChange"
+                @openColorPicker="openColorPicker")
     //- Search result empty msg
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     //- Search result and main content
@@ -44,18 +46,19 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
+import Tabs from '@/components/Tabs.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import pageUtils from '@/utils/pageUtils'
-import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
-import Tabs from '@/components/Tabs.vue'
 
 export default Vue.extend({
   components: {
@@ -221,6 +224,9 @@ export default Vue.extend({
     },
     switchTab(tabIndex: number) {
       this.currActiveTabIndex = tabIndex
+    },
+    openColorPicker() { // @openColorPicker will only be trigger in mobile.
+      this.$emit('openExtraColorModal', ColorEventType.background, MobileColorPanelType.picker)
     },
     processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
       return new Array(Math.ceil(list.length / 2))

@@ -354,40 +354,31 @@ export default Vue.extend({
       }
     },
     dynamicBindMethod(): { [index: string]: any } {
+      const pushHistory = (history: string) => {
+        this.panelHistory.push(history)
+      }
+      const openExtraColorModal = (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
+        this.showExtraColorPanel = true
+        this.extraColorEvent = colorEventType
+        this.panelHistory.push(initColorPanelType)
+      }
       switch (this.currActivePanel) {
-        case 'color': {
-          return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            }
-          }
-        }
+        case 'color':
+          return { pushHistory }
+        case 'background':
+          return { openExtraColorModal }
         case 'text-effect':
-        case 'photo-shadow': {
+        case 'photo-shadow':
+          return { pushHistory, openExtraColorModal }
+        case 'brand-list':
           return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            },
-            openExtraColorModal: (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
-              this.showExtraColorPanel = true
-              this.extraColorEvent = colorEventType
-              this.panelHistory.push(initColorPanelType)
-            }
-          }
-        }
-        case 'brand-list': {
-          return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            },
+            pushHistory,
             back: () => {
               this.panelHistory.pop()
             }
           }
-        }
-        default: {
+        default:
           return {}
-        }
       }
     },
     leftBtnName(): string {
