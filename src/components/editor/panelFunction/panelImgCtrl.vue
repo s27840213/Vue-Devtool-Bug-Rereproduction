@@ -35,7 +35,7 @@ export default Vue.extend({
       this.handleFinish(type)
     },
     handleFinish(type: string) {
-      if (type === 'imgCtrl') {
+      if (type === 'imgCtrl' || this.isImgCtrl) {
         const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
         switch (currLayer.type) {
           case LayerType.image:
@@ -45,7 +45,7 @@ export default Vue.extend({
           case LayerType.frame:
             frameUtils.updateFrameLayerProps(pageIndex, layerIndex, Math.max(subLayerIdx, 0), { imgControl: false })
         }
-      } else if (type === 'bgImgCtrl') {
+      } else if (type === 'bgImgCtrl' || this.isBgImgCtrl) {
         pageUtils.setBackgroundImageControlDefault()
       }
     }
