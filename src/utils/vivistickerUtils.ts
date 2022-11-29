@@ -23,7 +23,7 @@ import i18n from '@/i18n'
 import generalUtils from './generalUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
-  appVer: '1.3',
+  appVer: '1.12',
   locale: 'us',
   isFirstOpen: false,
   editorBg: ''
