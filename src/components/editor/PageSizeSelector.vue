@@ -15,8 +15,6 @@
           input(class="body-3" type="number" min="0"
                 :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
                 :value="pageWidth" @input="setPageWidth" @click="selectFormat('custom')")
-          span(class="body-4"
-              :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") W
         svg-icon(class="pointer"
             :iconName="isLocked ? 'lock' : 'unlock'"
             iconWidth="15px" :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'blue'"
@@ -26,8 +24,17 @@
           input(class="body-3" type="number" min="0"
                 :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
                 :value="pageHeight" @input="setPageHeight" @click="selectFormat('custom')")
-          span(class="body-4"
-              :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") H
+        property-bar(v-click-outside="() => {showUnitOptions = false}"
+                    class="page-size-selector__body__custom__box page-size-selector__body__custom__unit"
+                    :class="selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`"
+            @click.native="showUnitOptions = !showUnitOptions")
+          span(class="page-size-selector__body__custom__unit__label body-XS" :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{unitOptions[selectedUnit]}}
+          svg-icon(class="page-size-selector__body__custom__unit__icon"
+            iconName="chevron-down"
+            iconWidth="16px"
+            :iconColor="selectedFormat === 'custom' ? 'blue-1' : this.isDarkTheme ? 'white' : 'gray-2'")
+          div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option bg-gray-6")
+            div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item body-XS text-gray-2" @click="selectUnit($event, index)") {{unit}}
     div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
     div(class="page-size-selector__container")
         div(class="page-size-selector__body-row first-row")
@@ -77,6 +84,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import listApi from '@/apis/list'
 import generalUtils from '@/utils/generalUtils'
 import resizeUtils from '@/utils/resizeUtils'
+import vClickOutside from 'v-click-outside'
 
 export default Vue.extend({
   props: {
@@ -84,6 +92,9 @@ export default Vue.extend({
       type: Boolean,
       default: true
     }
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   components: {
     SearchBar,
@@ -96,9 +107,20 @@ export default Vue.extend({
   data() {
     return {
       selectedFormat: '',
-      pageWidth: '' as string | number,
-      pageHeight: '' as string | number,
-      isLocked: true
+      pageWidth: NaN,
+      pageHeight: NaN,
+      isLocked: true,
+      unitOptions: ['px', 'cm', 'mm', 'in'],
+      muls: [
+        // px cm mm in
+        [1, 1 / 96 * 2.54, 1 / 96 * 25.4, 1 / 96], // px
+        [96 / 2.54, 1, 10, 1 / 2.54], // cm
+        [96 / 25.4, 1 / 10, 1, 1 / 25.4], // mm
+        [96, 2.54, 25.4, 1] // in
+      ],
+      selectedUnit: 0,
+      showUnitOptions: false,
+      mulDecimal: 1e3
     }
   },
   watch: {
@@ -140,13 +162,19 @@ export default Vue.extend({
       return (this.getPage(pageUtils.currFocusPageIndex)?.width ?? 1) / this.getPage(pageUtils.currFocusPageIndex)?.height ?? 1
     },
     isCustomValid(): boolean {
-      return this.pageWidth !== '' && this.pageHeight !== ''
+      return this.widthValid && this.heightValid
     },
     defaultTextColor(): string {
       return this.isDarkTheme ? 'text-white' : 'text-gray-2'
     },
     isFormatApplicable(): boolean {
       return this.selectedFormat === 'custom' ? this.isCustomValid : (this.selectedFormat !== '')
+    },
+    widthValid(): boolean {
+      return !!this.pageWidth && this.pageWidth > 0
+    },
+    heightValid(): boolean {
+      return !!this.pageHeight && this.pageHeight > 0
     },
     formatList(): ILayout[] {
       const targetCategory = this.categories.find((category: IListServiceContentData) => {
@@ -218,31 +246,41 @@ export default Vue.extend({
     },
     setPageWidth(event: Event) {
       const value = (event.target as HTMLInputElement).value
-      this.pageWidth = typeof value === 'string' ? parseInt(value) : value
+      this.pageWidth = typeof value === 'string' ? parseFloat(value) : value
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
-          this.pageHeight = ''
+          this.pageHeight = NaN
         } else {
-          this.pageHeight = Math.round(parseInt(value) / this.aspectRatio)
+          this.pageHeight = Math.round(parseFloat(value) / this.aspectRatio * this.mulDecimal) / this.mulDecimal
         }
       }
     },
     setPageHeight(event: Event) {
       const value = (event.target as HTMLInputElement).value
-      this.pageHeight = typeof value === 'string' ? parseInt(value) : value
+      this.pageHeight = typeof value === 'string' ? parseFloat(value) : value
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
-          this.pageWidth = ''
+          this.pageHeight = NaN
         } else {
-          this.pageWidth = Math.round(parseInt(value) * this.aspectRatio)
+          this.pageWidth = Math.round(parseFloat(value) * this.aspectRatio * this.mulDecimal) / this.mulDecimal
         }
       }
     },
     selectFormat(key: string) {
       this.selectedFormat = key
       this.$emit('selectFormat', key)
+    },
+    selectUnit(evt: Event, key: number) {
+      evt.stopPropagation()
+      this.showUnitOptions = false
+      if (this.selectedUnit === key) return
+      const mul = this.muls[this.selectedUnit][key]
+      this.pageWidth = Math.round(this.pageWidth * mul * this.mulDecimal) / this.mulDecimal
+      this.pageHeight = Math.round(this.pageHeight * mul * this.mulDecimal) / this.mulDecimal
+      this.selectedUnit = key
+      this.$emit('selectUnit', key)
     },
     fetchLayouts() {
       this.isLayoutReady = false
@@ -384,7 +422,7 @@ export default Vue.extend({
     }
     &__custom {
       display: grid;
-      grid-template-columns: 1fr auto 1fr;
+      grid-template-columns: 1fr auto 1fr 1fr;
       grid-template-rows: auto;
       column-gap: 5px;
       align-items: center;
@@ -403,6 +441,30 @@ export default Vue.extend({
         // &.border-white {
         //   @extend .border-white;
         // }
+      }
+      &__unit {
+        display: flex;
+        align-items: center;
+        position: relative;
+        &__label {
+          height: 22px;
+        }
+        &__option {
+          position: absolute;
+          top: 30px;
+          left: 0px;
+          right: 0px;
+          border-radius: 3px;
+          display: grid;
+          overflow: hidden;
+          &__item {
+            height: 20px;
+            padding: 2px 8px;
+            &:hover {
+              background-color: setColor(blue-4);
+            }
+          }
+        }
       }
     }
     &__hr {
@@ -481,5 +543,9 @@ export default Vue.extend({
 .slide-fade-leave-to {
   transform: translateY(-10px);
   opacity: 0;
+}
+
+.border-blue-1 {
+  border: 1px solid setColor(blue-1);
 }
 </style>
