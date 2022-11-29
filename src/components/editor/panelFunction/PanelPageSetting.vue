@@ -26,15 +26,13 @@
                     iconName="close" iconWidth="19px" iconColor="white")
           keep-alive
             page-size-selector(:isDarkTheme="true" @selectFormat="selectFormat" ref="pageSizeSelector")
-          div(class="page-setting__suggestion-panel__body__buttons")
-            div(class="page-setting__suggestion-panel__body__button text-white"
-                :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
-                @click="applySelectedFormat")
-              span(class="page-setting__suggestion-panel__body__button__text") {{$t('NN0022')}}
-            div(class="page-setting__suggestion-panel__body__button text-white"
-                :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
-                @click="copyAndApplySelectedFormat")
-              span(class="page-setting__suggestion-panel__body__button__text") {{$t('NN0211')}}
+          div(class="page-setting__suggestion-panel__body__submit")
+            checkbox(iconSize="12px" v-model="copyBeforeApply") 複製並調整
+            btn(class="page-setting__suggestion-panel__body__button"
+                :disabled="!isFormatApplicable"
+                @click.native="applySelectedFormat")
+              svg-icon(iconName="pro" iconWidth="22px")
+              span {{$t('NN0022')}}
     div(class="page-setting__footer")
     div(v-if="inAdminMode"
       class="template-information")
@@ -216,15 +214,12 @@ import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
+import Checkbox from '@/components/global/Checkbox.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import StepsUtils from '@/utils/stepsUtils'
-import ResizeUtils from '@/utils/resizeUtils'
 import designApis from '@/apis/design-info'
 import GeneralUtils from '@/utils/generalUtils'
-import GroupUtils from '@/utils/groupUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { ILayout } from '@/interfaces/layout'
-import listApi from '@/apis/list'
 import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 import pageUtils from '@/utils/pageUtils'
 
@@ -232,7 +227,8 @@ export default Vue.extend({
   components: {
     SearchBar,
     RadioBtn,
-    PageSizeSelector
+    PageSizeSelector,
+    Checkbox
   },
   mounted() {
     this.pageWidth = this.currentPageWidth
@@ -282,6 +278,7 @@ export default Vue.extend({
       },
       showDbGroup: false,
       showDbTemplate: false,
+      copyBeforeApply: false,
       dbGroupThemes: [] as ICoverTheme[],
       templateThemes: [] as boolean[],
       dbTemplateThemes: [] as boolean[],
@@ -413,15 +410,12 @@ export default Vue.extend({
         return undefined
       }
     },
-    applySelectedFormat(record = true) {
-      (this.$refs.pageSizeSelector as any).applySelectedFormat()
-      this.setSuggestionPanel(false)
-      if (record) {
-        StepsUtils.record()
+    applySelectedFormat() {
+      if (this.copyBeforeApply) {
+        (this.$refs.pageSizeSelector as any).copyAndApplySelectedFormat()
+      } else {
+        (this.$refs.pageSizeSelector as any).applySelectedFormat()
       }
-    },
-    copyAndApplySelectedFormat() {
-      (this.$refs.pageSizeSelector as any).copyAndApplySelectedFormat()
       this.setSuggestionPanel(false)
     },
     toggleLock() {
@@ -807,6 +801,7 @@ export default Vue.extend({
   }
 
   &__suggestion-panel {
+    color: white;
     &__arrow {
       margin-left: auto;
       margin-right: 30%;
@@ -878,26 +873,23 @@ export default Vue.extend({
         white-space: nowrap;
         transform: scale(0.85);
       }
-      &__buttons {
-        display: flex;
+      &__submit {
         width: 95%;
-        margin-left: auto;
-        margin-right: auto;
-        margin-top: 29px;
-        margin-bottom: 17.43px;
-        gap: 11px;
+        margin: 20px auto 8.43px auto;
+        .checkbox {
+          @include body-XS;
+          margin: 0 auto 20px 0;
+        }
       }
       &__button {
-        flex-grow: 1;
-        border-radius: 3px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 4px;
-        text-align: center;
-        &__text {
-          font-weight: 700;
-          font-size: 12px;
+        @include body-SM;
+        width: 100%;
+        height: 36px;
+        border: none;
+        svg {
+          color: #FFBA49;
+          margin-right: 10px;
+          vertical-align: middle;
         }
       }
     }
