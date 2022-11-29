@@ -279,20 +279,16 @@ export default Vue.extend({
 
     if (this.config.type === LayerType.frame && (this.config as IFrame).clips.length === 1 && this.config.clips[0].srcObj.type === 'frame') {
       window.requestAnimationFrame(() => {
-        const input = document.getElementById(`input-${this.layerIndex}-0`) as HTMLInputElement
-        if (input) {
-          input.click()
-        }
+        vivistickerUtils.getIosImg()
+          .then((images: Array<string>) => {
+            FrameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, 0, {
+              type: 'ios',
+              assetId: images[0],
+              userId: ''
+            })
+          })
       })
     }
-
-    // const body = (this.$refs.body as HTMLElement)
-
-    // const bodyAt = new AnyTouch(body)
-    // //  销毁
-    // this.$on('hook:destroyed', () => {
-    //   bodyAt.destroy()
-    // })
   },
   beforeDestroy() {
     eventUtils.removePointerEvent('pointerup', this.moveEnd)
@@ -1079,11 +1075,14 @@ export default Vue.extend({
         if (this.config.type === LayerType.frame && !hasActualMove) {
           const primary = this.config as IFrame
           if (primary.clips.length === 1 && primary.clips[0].srcObj.type === 'frame') {
-            const fileInput = document.getElementById(`input-${this.layerIndex}-0`) as HTMLInputElement
-            if (fileInput) {
-              vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
-              fileInput.click()
-            }
+            vivistickerUtils.getIosImg()
+              .then((images: Array<string>) => {
+                FrameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, 0, {
+                  type: 'ios',
+                  assetId: images[0],
+                  userId: ''
+                })
+              })
           }
         }
         this.isPointerDownFromSubController = false
@@ -1860,9 +1859,6 @@ export default Vue.extend({
             eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
           }
         }
-        // GroupUtils.deselect()
-        // this.setLastSelectedLayerIndex(this.layerIndex)
-        // GroupUtils.select(this.pageIndex, [this.layerIndex])
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
@@ -2107,11 +2103,31 @@ export default Vue.extend({
           (this.config.type === LayerType.group && !(this.config as IGroup).layers[targetIndex].active)) {
           updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
           if (this.config.type === LayerType.frame && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame' && !this.controllerHidden && !this.isPointerDownFromSubController) {
-            const fileInput = document.getElementById(`input-${this.layerIndex}-${targetIndex}`) as HTMLInputElement
-            if (fileInput) {
-              vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
-              fileInput.click()
-            }
+            console.log('click sub controller')
+            vivistickerUtils.getIosImg()
+              .then(async (images: Array<string>) => {
+                const styles = await ImageUtils.getClipImgDimension((this.config as IFrame).clips[targetIndex], ImageUtils.getSrc({
+                  type: 'ios',
+                  assetId: images[0],
+                  userId: ''
+                }))
+                return { styles, images }
+              })
+              .then((data) => {
+                const { styles: { imgX, imgY, imgWidth, imgHeight }, images } = data
+                console.log(imgX, imgY, imgWidth, imgHeight)
+                FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, targetIndex, {
+                  imgWidth,
+                  imgHeight,
+                  imgX,
+                  imgY
+                })
+                FrameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, 0, {
+                  type: 'ios',
+                  assetId: images[0],
+                  userId: ''
+                })
+              })
           }
         }
         LayerUtils.setCurrSubSelectedInfo(targetIndex, type)

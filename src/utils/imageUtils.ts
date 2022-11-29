@@ -12,18 +12,22 @@ import { AxiosPromise } from 'axios'
 import { IShadowAsset } from '@/store/module/shadow'
 import generalUtils from './generalUtils'
 import editorUtils from './editorUtils'
+import mouseUtils from './mouseUtils'
+import { reject } from 'lodash'
 
 const FORCE_UPDATE_VER = '&ver=20220719'
 class ImageUtils {
-  imgLoadHandler(src: string, cb: (img: HTMLImageElement) => void, error?: () => void) {
-    const image = new Image()
-    image.src = src
-    if (image.complete) {
-      cb(image)
-    } else {
-      image.onload = () => cb(image)
-      error && (image.onerror = error)
-    }
+  async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, error?: () => void) {
+    return new Promise<T>((resolve) => {
+      const image = new Image()
+      image.src = src
+      if (image.complete) {
+        resolve(cb(image))
+      } else {
+        image.onload = () => resolve(cb(image))
+        error && (image.onerror = error)
+      }
+    })
   }
 
   getImgIdentifier(srcObj: SrcObj, ...attrs: Array<string>): string {
@@ -119,6 +123,8 @@ class ImageUtils {
         return assetId as string
       case 'svg':
         return `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true` + FORCE_UPDATE_VER + (ver ? `&ver=${ver}` : '')
+      case 'ios':
+        return `vvstk://${assetId}`
       default:
         return ''
     }
@@ -160,6 +166,7 @@ class ImageUtils {
     if (src.includes('template.vivipic.com/admin')) {
       return src.includes('logo') ? 'logo-public' : 'public'
     }
+    if (src.includes('vvstk')) return 'ios'
     if (src.includes('asset.vivipic')) {
       return src.includes('logo') ? 'logo-private' : 'private'
     }
@@ -525,6 +532,31 @@ class ImageUtils {
       },
       initSrc
     }
+  }
+
+  async getClipImgDimension(clip: IImage, src: string) {
+    return this.imgLoadHandler(src, (img: HTMLImageElement) => {
+      const imgData = {
+        srcObj: {
+          type: this.getSrcType(src),
+          userId: '',
+          assetId: src
+        },
+        styles: {
+          width: img.width,
+          height: img.height
+        }
+      }
+      return mouseUtils.clipperHandler(imgData as IImage, clip.clipPath, clip.styles).styles
+      // FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+      //   imgWidth,
+      //   imgHeight,
+      //   imgX,
+      //   imgY
+      // })
+      // FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { ...imgData.srcObj })
+      // StepsUtils.record()
+    })
   }
 
   appendOriginQuery(src: string) {

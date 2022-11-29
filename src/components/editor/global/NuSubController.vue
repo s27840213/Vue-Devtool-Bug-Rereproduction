@@ -40,14 +40,14 @@
                 @keydown.native.meta.shift.90.exact.stop.self
                 @update="handleTextChange"
                 @compositionend="handleTextCompositionEnd")
-        input(
-          type="file"
-          accept="image/jpeg, image/png"
-          ref="fileInput"
-          class="d-none"
-          :id="`input-${primaryLayerIndex}-${layerIndex}`"
-          :multiple="false"
-          @change="onImgFileChange")
+        //- input(
+        //-   type="file"
+        //-   accept="image/jpeg, image/png"
+        //-   ref="fileInput"
+        //-   class="d-none"
+        //-   :id="`input-${primaryLayerIndex}-${layerIndex}`"
+        //-   :multiple="false"
+        //-   @change="onImgFileChange")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -146,15 +146,6 @@ export default Vue.extend({
         body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
       }
     }
-
-    // if (this.type === LayerType.frame && (this.primaryLayer as IFrame).clips.length === 1 && this.config.srcObj.type === 'frame') {
-    //   window.requestAnimationFrame(() => {
-    //     const input = this.$refs.fileInput as HTMLInputElement
-    //     if (input) {
-    //       input.click()
-    //     }
-    //   })
-    // }
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
@@ -408,11 +399,8 @@ export default Vue.extend({
       }
       const hasActualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
       if (this.type === LayerType.frame && this.config.active && this.config.srcObj.type === 'frame' && !hasActualMove && !this.controllerHidden) {
-        const input = this.$refs.fileInput as HTMLInputElement
-        if (input) {
-          vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
-          input.click()
-        }
+        vivistickerUtils.getIosImg()
+          .then(data => console.log(data))
       }
       eventUtils.removePointerEvent('pointerup', this.onMouseup)
       this.isControlling = false

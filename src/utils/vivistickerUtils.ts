@@ -14,7 +14,7 @@ import editorUtils from './editorUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import textPropUtils from './textPropUtils'
-import { IMyDesign, IMyDesignTag, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IIosImgData, IMyDesign, IMyDesignTag, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import localeUtils from './localeUtils'
 import listApis from '@/apis/list'
 import { IListServiceContentDataItem } from '@/interfaces/api'
@@ -56,7 +56,8 @@ const VVSTK_CALLBACKS = [
   'setStateDone',
   'addAssetDone',
   'deleteAssetDone',
-  'getAssetResult'
+  'getAssetResult',
+  'uploadImageURL'
 ]
 
 const MYDESIGN_TAGS = [{
@@ -801,6 +802,15 @@ class ViviStickerUtils {
 
   getThumbSrc(type: string, id: string, ver: string) {
     return `vvstk://${type}/${id}?ver=${ver}`
+  }
+
+  async getIosImg(limit = 1): Promise<Array<string>> {
+    const { images } = await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image') as IIosImgData
+    return images
+  }
+
+  uploadImageURL(data: any) {
+    vivistickerUtils.handleCallback('upload-image', data)
   }
 }
 
