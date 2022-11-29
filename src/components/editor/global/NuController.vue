@@ -1266,7 +1266,8 @@ export default Vue.extend({
     },
     scaleEnd() {
       this.isControlling = false
-      StepsUtils.record()
+      // StepsUtils.record()
+      StepsUtils.asyncRecord()
 
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.scaling)
@@ -1331,7 +1332,8 @@ export default Vue.extend({
     lineEndMoveEnd() {
       this.isControlling = false
       this.isLineEndMoving = false
-      StepsUtils.record()
+      StepsUtils.asyncRecord()
+      // StepsUtils.record()
 
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.lineEndMoving)
@@ -1529,7 +1531,8 @@ export default Vue.extend({
         ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, shapeUtils.clipCorRad(this.config.shapeType, this.config.vSize, this.config.size))
       }
       this.isControlling = false
-      StepsUtils.record()
+      // StepsUtils.record()
+      StepsUtils.asyncRecord()
 
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
@@ -1647,7 +1650,8 @@ export default Vue.extend({
       this.isRotating = false
       this.isControlling = false
       this.initCornerRotate = -1
-      StepsUtils.record()
+      // StepsUtils.record()
+      StepsUtils.asyncRecord()
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.rotating)
       eventUtils.removePointerEvent('pointerup', this.rotateEnd)
@@ -1715,7 +1719,8 @@ export default Vue.extend({
     lineRotateEnd() {
       this.isRotating = false
       this.isControlling = false
-      StepsUtils.record()
+      // StepsUtils.record()
+      StepsUtils.asyncRecord()
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.lineRotating)
       eventUtils.removePointerEvent('pointerup', this.lineRotateEnd)

@@ -16,6 +16,7 @@ import assetUtils from './assetUtils'
 import layerFactary from './layerFactary'
 import textUtils from './textUtils'
 import workerUtils from './workerUtils'
+import { clone } from 'lodash'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -255,15 +256,26 @@ class StepsUtils {
   }
 
   async asyncRecord() {
-    const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
+    // const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
     const clonedData = await workerUtils.asyncCloneDeep({
       pages_1: store.getters.getPages,
-      pages_2: store.getters.getPages,
-      selectedInfo: store.getters.getCurrSelectedInfo
+      pages_2: Object.assign({}, store.getters.getPages),
+      selectedInfo: store.getters.getCurrSelectedInfo,
+      lastSelectedLayerIndex: store.getters.getLastSelectedLayerIndex
     })
     if (clonedData) {
       const pages = this.filterDataForLayersInPages(clonedData.pages_1)
       const currSelectedInfo = clonedData.selectedInfo
+      const lastSelectedLayerIndex = clonedData.lastSelectedLayerIndex
+
+      /**
+       * The following code modify the wrong config state cause by the async
+       */
+      if (currSelectedInfo.layers.length === 1) {
+        currSelectedInfo.layers[0].active = true
+        currSelectedInfo.layers[0].testPropss = 'test asad'
+      }
+      pages[currSelectedInfo.pageIndex].layers[lastSelectedLayerIndex].active = true
 
       // There's not any steps before, create the initial step first
       if (this.currStep < 0) {
