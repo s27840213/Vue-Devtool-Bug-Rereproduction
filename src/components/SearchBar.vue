@@ -1,4 +1,5 @@
 <template lang="pug">
+div(class="wrapper")
   form(class="search-bar bg-gray-6"
     :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
     @submit="onSearch")
@@ -22,6 +23,14 @@
       iconWidth="20px"
       @click.native="onSearch")
     slot
+  div(v-if="isFavorite !== undefined"
+      class="search-bar__favorite")
+    svg-icon(:iconName="isFavorite ? 'favorites-fill' : 'heart'"
+      class="pointer"
+      :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
+      :iconColor="color.close || 'gray-3'"
+      iconWidth="24px"
+      @click.native="clickHeart")
 </template>
 
 <script lang="ts">
@@ -59,6 +68,10 @@ export default Vue.extend({
     vivisticker: {
       type: String,
       default: 'none'
+    },
+    isFavorite: {
+      type: Boolean,
+      default: undefined
     }
   },
   data() {
@@ -85,12 +98,20 @@ export default Vue.extend({
     },
     onUpdate() {
       this.$emit('update', this.keyword)
+    },
+    clickHeart() {
+      this.$emit('favorite')
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+.wrapper {
+  display: grid;
+  grid-template-columns: 1fr auto;
+}
+
 .search-bar {
   @include size(100%, 42px);
   display: flex;
@@ -138,5 +159,16 @@ export default Vue.extend({
   & > svg.vivisticker {
     margin-right: 12px;
   }
+}
+
+.search-bar__favorite {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 42px;
+  height: 42px;
+  margin-left: 8px;
+  background-color: setColor(black-3);
+  border-radius: 10px;
 }
 </style>

@@ -1,21 +1,22 @@
 <template lang="pug">
-  div(class="font-tag" v-click-outside="clickOutsideHandler")
+  div(class="tags" v-click-outside="clickOutsideHandler")
     template(v-if="!isTouchDevice")
-      div(class="font-tag__flex-container"
+      div(class="tags__flex-container"
           :style="containerStyle")
-        div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
-          @click="onClick(tag)")
-          div(class="font-tag__tag") {{ tag }}
-      div(v-if="!showMore" class="font-tag__more-wrapper")
-        div(class="font-tag__tag-wrapper pointer"
+        div(class="tags__tag-wrapper pointer" v-for="tag in tags"
+          @click="onClick(tag.value || tag)")
+          div(class="tags__tag") {{ tag.label || tag }}
+      div(v-if="!showMore" class="tags__more-wrapper")
+        div(class="tags__tag-wrapper pointer"
           @click="onClickMore")
-          div(class="font-tag__tag") {{ `${$t('NN0082')}...` }}
+          div(class="tags__tag") {{ `${$t('NN0082')}...` }}
     template(v-else)
-      div(class="font-tag__container-mobile")
-        div(class="font-tag__flex-container-mobile")
-          div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
-            @click="onClick(tag)")
-            div(class="font-tag__tag") {{ tag }}
+      div(class="tags__container-mobile")
+        div(class="tags__flex-container-mobile")
+          div(v-for="tag in tags" :active="tag.active"
+              class="tags__tag-wrapper pointer" :class="{[theme]: true}"
+              @click="onClick(tag.value || tag)")
+            div(class="tags__tag") {{ tag.label || tag }}
 
 </template>
 
@@ -32,6 +33,10 @@ export default Vue.extend({
     tags: {
       type: Array,
       required: true
+    },
+    theme: {
+      type: String,
+      default: 'light'
     }
   },
   data() {
@@ -78,7 +83,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.font-tag {
+.tags {
   position: relative;
   font-size: 14px;
   &__flex-container {
@@ -96,9 +101,11 @@ export default Vue.extend({
   &__tag-wrapper {
     flex-shrink: 0;
     padding: 6px;
-    border-radius: 12px;
-    border: 1px solid #E0E0E0;
-    margin: 4px
+    margin: 4px 0;
+    border-radius: 10px;
+  }
+  &__tag-wrapper + &__tag-wrapper {
+    margin-left: 8px;
   }
   // mobile layout
   &__container-mobile {
@@ -107,6 +114,21 @@ export default Vue.extend({
   }
   &__flex-container-mobile {
     display: flex;
+  }
+}
+
+.light {
+  color: black;
+  background-color: white;
+  border: 1px solid #E0E0E0;
+}
+
+.dark {
+  color: setColor(black-5);
+  background-color: setColor(black-3);
+  &[active] {
+    color: setColor(gray-1);
+    background-color: setColor(gray-4);
   }
 }
 </style>
