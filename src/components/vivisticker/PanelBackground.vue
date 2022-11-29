@@ -570,7 +570,7 @@ export default Vue.extend({
     user-select: none;
     border-radius: 4px;
     &.add-color {
-      background-image: url("~@/assets/img/svg/addColor.png");
+      background-image: url("~@/assets/img/svg/addColor.svg");
       background-size: cover;
     }
   }
