@@ -71,6 +71,15 @@ module.exports = {
         //         ]
         //     })
 
+        config.module
+            .rule('vue')
+            .use('vue-loader')
+            .loader('vue-loader')
+            .tap(options => {
+                options.exposeFilename = true
+                return options
+            })
+
         if (process.env.CI && ['production', 'staging'].includes(process.env.NODE_ENV)) {
             config.plugin('sentry')
                 .use(SentryWebpackPlugin, [{
@@ -87,6 +96,15 @@ module.exports = {
                 const name = 'process.env'
                 args[0][name].VUE_APP_BUILD_NUMBER = process.env.BITBUCKET_BUILD_NUMBER || ''
                 return args
+            })
+        }
+        // Write build number to ver.txt in production.
+        if (process.env.NODE_ENV === 'production') {
+            const fs = require('fs')
+            const content = process.env.BITBUCKET_BUILD_NUMBER || ''
+            if (!fs.existsSync('dist')) fs.mkdirSync('dist')
+            fs.writeFile('dist/ver.txt', content, err => {
+                if (err) console.error(err)
             })
         }
 

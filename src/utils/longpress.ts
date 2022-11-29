@@ -19,7 +19,6 @@ const start = (callback: (e: PointerEvent) => void) => {
 }
 
 const cancel = (e: PointerEvent) => {
-  console.log('cancel')
   if (e.type === 'pointermove' && e.movementX === 0 && e.movementY === 0) {
     return
   }

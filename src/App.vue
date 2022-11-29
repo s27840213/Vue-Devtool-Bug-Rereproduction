@@ -16,6 +16,8 @@
         :info="currSelectedResInfo"
         @blur.native="setCurrSelectedResInfo()"
         tabindex="0")
+    div(v-if="isAdmin && !inScreenshotPreview" class="fps")
+      span FPS: {{fps}}
     div(class="modal-container"
         v-if="isModalOpen")
       modal-card
@@ -64,14 +66,16 @@ export default Vue.extend({
     return {
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
-      coordinateHeight: 0
+      coordinateHeight: 0,
+      fps: 0,
+      fpsInterval: 0
     }
-  },
-  beforeMount() {
-    networkUtils.registerNetworkListener()
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
+  },
+  beforeMount() {
+    networkUtils.registerNetworkListener()
   },
   beforeDestroy() {
     networkUtils.unregisterNetworkListener()
@@ -79,10 +83,21 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       currSelectedResInfo: 'getCurrSelectedResInfo',
-      isModalOpen: 'modal/getModalOpen'
+      isModalOpen: 'modal/getModalOpen',
+      inScreenshotPreview: 'getInScreenshotPreview'
+    }),
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
     }),
     currLocale(): string {
       return localeUtils.currLocale()
+    }
+  },
+  watch: {
+    isAdmin(newVal) {
+      if (newVal && !this.inScreenshotPreview) {
+        this.showFps()
+      }
     }
   },
   methods: {
@@ -133,6 +148,30 @@ export default Vue.extend({
         events: ['dblclick', 'click', 'contextmenu']
         // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
       }
+    },
+    showFps() {
+      const times: Array<number> = []
+      const T = 1000
+      const refreshLoop = () => {
+        window.requestAnimationFrame(() => {
+          const now = performance.now()
+          while (times.length > 0 && times[0] <= now - T) {
+            times.shift()
+          }
+          times.push(now)
+          this.fps = times.length
+          if (this.inScreenshotPreview) {
+            clearInterval(this.fpsInterval)
+            return
+          }
+          refreshLoop()
+        })
+      }
+      refreshLoop()
+      // output to console once per second
+      this.fpsInterval = setInterval(() => {
+        this.fps *= 2000 / T
+      }, T)
     }
   }
 })
@@ -222,6 +261,14 @@ export default Vue.extend({
   }
 }
 
+.fps {
+  background: white;
+  padding: 2px;
+  position: absolute;
+  bottom: 60px;
+  right: 20px;
+  z-index: 1000;
+}
 // .vc-chrome-toggle-btn {
 //   display: none;
 // }

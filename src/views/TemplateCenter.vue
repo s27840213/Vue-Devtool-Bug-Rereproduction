@@ -559,8 +559,8 @@ export default Vue.extend({
       })
     },
     handleResize() {
-      this.isMobile = window.matchMedia('screen and (max-width: 540px)').matches
-      this.isPC = window.matchMedia('screen and (min-width: 976px)').matches
+      this.isMobile = generalUtils.getWidth() <= 540
+      this.isPC = generalUtils.getWidth() >= 976
     },
     getPrevUrl(content: IContentTemplate, scale: number): string {
       return templateCenterUtils.getPrevUrl(content, scale)
@@ -747,7 +747,6 @@ body {
     margin-top: 16px;
     margin-bottom: 16px;
     display: flex;
-    gap: 10px;
     &__wrapper {
       display: flex;
       align-items: center;
@@ -767,6 +766,7 @@ body {
       border-radius: 5px;
       box-sizing: border-box;
       flex-grow: 1;
+      margin-right: 10px;
     }
     &__options {
       width: 44px;
