@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 const path = require('path')
 const webpack = require('webpack')
-const SentryWebpackPlugin = require('@sentry/webpack-plugin')
+// const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 const PrerenderSPAPlugin = require('prerender-spa-plugin')
 const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
@@ -98,17 +98,17 @@ module.exports = defineConfig({
                 return options
             })
 
-        if (process.env.CI && ['production', 'staging'].includes(process.env.NODE_ENV)) {
-            config.plugin('sentry')
-                .use(SentryWebpackPlugin, [{
-                    authToken: process.env.SENTRY_AUTH_TOKEN,
-                    release: process.env.VUE_APP_VERSION,
-                    org: 'nuphoto',
-                    project: 'vivipic',
-                    include: './dist',
-                    ignore: ['node_modules', 'vue.config.js']
-                }])
-        }
+        // if (process.env.CI && ['production', 'staging'].includes(process.env.NODE_ENV)) {
+        //     config.plugin('sentry')
+        //         .use(SentryWebpackPlugin, [{
+        //             authToken: process.env.SENTRY_AUTH_TOKEN,
+        //             release: process.env.VUE_APP_VERSION,
+        //             org: 'nuphoto',
+        //             project: 'vivipic',
+        //             include: './dist',
+        //             ignore: ['node_modules', 'vue.config.js']
+        //         }])
+        // }
         if (process.env.BITBUCKET_BUILD_NUMBER) {
             config.plugin('define').tap(args => {
                 const name = 'process.env'
