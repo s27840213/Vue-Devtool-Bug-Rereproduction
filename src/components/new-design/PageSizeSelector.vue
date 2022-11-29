@@ -119,7 +119,7 @@ export default defineComponent({
       this.isInputFocused = true
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     document.removeEventListener('scroll', this.handleScroll)
   },
   data() {

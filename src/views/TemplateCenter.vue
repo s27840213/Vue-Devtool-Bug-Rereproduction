@@ -19,7 +19,7 @@ div(ref="body"
     div(class="template-center__search__title non-tab-show")
       span(v-html="$t('NN0487', { newline: '<br>' })")
     div(class="template-center__search__text non-mobile-show")
-      i18n(path="NN0488" tag="span")
+      i18n-t(keypath="NN0488" tag="span")
         template(#newline)
           br
     search-bar(ref="searchbar"

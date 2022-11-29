@@ -69,7 +69,7 @@ div(style="position: relative;")
       div(class="text-center")
         span(class="text-blue-1 heading-5") {{$t('NN0181')}}?
       div
-        i18n(path="NN0282" tag="span")
+        i18n-t(keypath="NN0282" tag="span")
           template(#newline)
             br
       div
@@ -83,7 +83,7 @@ div(style="position: relative;")
           class="invalid-message")
           span {{ mailErrorMessage }}
       div(class="pb-10")
-        i18n(path="NN0395" tag="span"
+        i18n-t(keypath="NN0395" tag="span"
           class="forgot-hint")
           template(#newline)
             br

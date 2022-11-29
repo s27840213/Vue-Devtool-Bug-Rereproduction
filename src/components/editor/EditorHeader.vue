@@ -2,7 +2,7 @@
 div(class="editor-header" ref="header"
     :style="headerPosStyle")
   template(v-if="!isLogin")
-    i18n(path="NN0352" tag="span")
+    i18n-t(keypath="NN0352" tag="span")
       template(#signUp)
         a(:href="`/signup?redirect=${path}`") {{$tc('NN0169',1)}}
       template(#logIn)
@@ -39,8 +39,12 @@ import GeneralUtils from '@/utils/generalUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import networkUtils from '@/utils/networkUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import { Translation as I18nT } from 'vue-i18n'
 
 export default defineComponent({
+  components: {
+    I18nT
+  },
   data() {
     return {
       ShortcutUtils,

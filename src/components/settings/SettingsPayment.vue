@@ -36,7 +36,7 @@ div(class="sp")
     span(v-if="canUpdateCard" class="text-blue-1 body-SM pointer"
       @click="openCardPopup()")       {{$t('NN0600')}}
   hr
-  i18n(v-if="isErrorStatus" class="sp-error" path="NN0656" tag="div")
+  i18n-t(v-if="isErrorStatus" class="sp-error" keypath="NN0656" tag="div")
     template(#contactus)
       a(class="text-blue-1 pointer" :href="contactUsUrl") {{$t('NN0642')}}
     template(#status)

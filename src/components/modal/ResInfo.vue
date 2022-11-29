@@ -2,8 +2,8 @@
 div(class="res-info")
   strong(v-if="info.userName || info.vendor"
     class="res-info__desc")
-    i18n(v-if="this.info.type === 'photo'"
-      path="NN0364" tag="span")
+    i18n-t(v-if="this.info.type === 'photo'"
+      keypath="NN0364" tag="span")
         template(#author)
           a(v-if="info.userLink"
             class="res-info__link pointer"
@@ -21,8 +21,8 @@ div(class="res-info")
             @mousedown.prevent) {{ info.vendor }}
           span(v-else
             class="pl-5") {{ info.vendor }}
-    i18n(v-else
-      path="NN0365" tag="span")
+    i18n-t(v-else
+      keypath="NN0365" tag="span")
         template(#author)
           a(v-if="info.userLink"
             class="res-info__link pointer"

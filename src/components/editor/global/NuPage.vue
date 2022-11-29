@@ -237,16 +237,14 @@ export default defineComponent({
       required: true
     },
     pageScaleRatio: {
-      type: Number,
-      required: true
+      type: Number
     },
     isAnyBackgroundImageControl: {
       type: Boolean,
       required: true
     },
     overflowContainer: {
-      type: HTMLElement,
-      required: true
+      type: HTMLElement
     },
     isScaling: {
       type: Boolean,
@@ -614,13 +612,15 @@ export default defineComponent({
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       eventUtils.addPointerEvent('pointermove', this.pageResizing)
-      this.overflowContainer.addEventListener('scroll', this.scrollUpdate, { capture: true })
+      if (this.overflowContainer) {
+        this.overflowContainer.addEventListener('scroll', this.scrollUpdate, { capture: true })
+      }
       eventUtils.addPointerEvent('pointerup', this.pageResizeEnd)
     },
     pageResizing(e: PointerEvent) {
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
-      const isShownScrollbar = (this.overflowContainer.scrollHeight === this.overflowContainer.clientHeight)
+      const isShownScrollbar = (this.overflowContainer?.scrollHeight === this.overflowContainer?.clientHeight)
 
       if (isShownScrollbar === this.isShownScrollBar) {
         const multiplier = isShownScrollbar ? 2 : 1
@@ -644,7 +644,9 @@ export default defineComponent({
       StepsUtils.record()
       this.$nextTick(() => {
         eventUtils.removePointerEvent('pointermove', this.pageResizing)
-        this.overflowContainer.removeEventListener('scroll', this.scrollUpdate, { capture: true })
+        if (this.overflowContainer) {
+          this.overflowContainer.removeEventListener('scroll', this.scrollUpdate, { capture: true })
+        }
         eventUtils.removePointerEvent('pointerup', this.pageResizeEnd)
       })
       pageUtils.findCentralPageIndexInfo()

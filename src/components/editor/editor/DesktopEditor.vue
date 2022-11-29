@@ -109,22 +109,22 @@ export default defineComponent({
       this.toggleSidebarPanel = this.isShowPagePreview
     },
     async inputLocale() {
-      this.$emit('setIsLoading', true)
-      const updateValue: { [key: string]: string } = {}
-      updateValue.token = this.token
-      updateValue.locale = this.inputLocale
+      // this.$emit('setIsLoading', true)
+      // const updateValue: { [key: string]: string } = {}
+      // updateValue.token = this.token
+      // updateValue.locale = this.inputLocale
 
-      await store.dispatch('user/updateUser', updateValue)
-        .then((value) => {
-          if (!value.data.flag) {
-            localStorage.setItem('locale', value.data.locale)
-            this.$router.go(0)
-          } else {
-            this.networkError()
-          }
-        }, () => {
-          this.networkError()
-        })
+      // await store.dispatch('user/updateUser', updateValue)
+      //   .then((value) => {
+      //     if (!value.data.flag) {
+      //       localStorage.setItem('locale', value.data.locale)
+      //       this.$router.go(0)
+      //     } else {
+      //       this.networkError()
+      //     }
+      //   }, () => {
+      //     this.networkError()
+      //   })
     }
   },
   computed: {

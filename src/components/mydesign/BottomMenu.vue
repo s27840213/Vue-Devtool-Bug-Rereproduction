@@ -10,7 +10,7 @@ div(class="bottom-menu")
     template(v-if="isAnySelected && bottomMenu === ''")
       div(class="multi-menu")
         div(class="multi-menu__title")
-          i18n(path="NN0254" tag="span")
+          i18n-t(keypath="NN0254" tag="span")
             template(#selectedNum) {{selectedNum}}
         div(class="menu__hr")
         div(class="multi-menu__actions")

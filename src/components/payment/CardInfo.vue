@@ -8,7 +8,7 @@ div(class="card")
   div(v-if="showPopup" class="popup-window")
     div(class="card-popup" v-click-outside="closePopup")
       div(class="text-H6") {{$t('NN0622')}}
-      i18n(class="body-XS my-30" path="NN0623" tag="div")
+      i18n-t(class="body-XS my-30" keypath="NN0623" tag="div")
         template(#paymentMethod)
           span(class="overline-LG") {{$t('NN0624')}}
       div(class="card-popup-button")

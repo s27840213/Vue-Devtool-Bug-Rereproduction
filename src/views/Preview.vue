@@ -56,7 +56,7 @@ export default defineComponent({
 
     this.setInScreenshotPreview(true)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.setInScreenshotPreview(false)
   }
 })

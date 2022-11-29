@@ -39,8 +39,7 @@ export default defineComponent({
       required: true
     },
     pageScaleRatio: {
-      type: Number,
-      required: true
+      type: Number
     },
     snapUtils: {
       type: SnapUtils,

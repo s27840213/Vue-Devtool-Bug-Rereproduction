@@ -44,7 +44,7 @@ div(class="pricing")
       details(v-for="item in faqs")
         summary {{item.Q}}
           svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
-        i18n(v-if="item.isPath" :path="item.A" tag="p" class="body-MD text-gray-2 mt-20")
+        i18n-t(v-if="item.isPath" :keypath="item.A" tag="p" class="body-MD text-gray-2 mt-20")
           template(#history)
             router-link(to="/settings/billing") {{$t('NN0614')}}
         p(v-else class="body-MD text-gray-2 mt-20" v-html="item.A")

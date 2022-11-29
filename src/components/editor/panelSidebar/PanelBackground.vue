@@ -36,20 +36,11 @@ div(class="panel-bg")
           :key="item.id"
           :item="item"
           :locked="currentPageBackgroundLocked")
-  template(v-slot:category-background-item="{ list, title }")
-    div(class="panel-bg__items")
-      div(v-if="title"
-        class="panel-bg__header") {{ title }}
-      category-background-item(v-for="item in list"
-        class="panel-bg__item"
-        :key="item.id"
-        :item="item"
-        :locked="currentPageBackgroundLocked")
-  template(v-if="pending" #after)
-    div(class="text-center")
-      svg-icon(iconName="loading"
-        iconColor="white"
-        iconWidth="20px")
+    template(v-if="pending" #after)
+      div(class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
 </template>
 
 <script lang="ts">

@@ -1,25 +1,25 @@
 <template lang="pug">
-  div(class="component-log-item"
-      @click="toggleItem")
-    div(class="component-log-item__main-info")
-      div(class="flex items-center")
-        //- svg-icon(iconName="plus-square" iconColor="gray-3" iconWidth="16px" @click.native="toggleContent(!showContent)")
-        span(class="component-log-item__component-name text-bold") {{log.component}}
-        span(class="component-log-item__time text-bold ml-5") {{`${parseFloat(log.time.toFixed(3))}  ms`}}
-      div(class="component-log-item__parent")
-        span(class="text-white") from: {{log.parent}}
-    div(v-if="allOpened || showDetail" class="component-log-item__detail-info flex flex-column pl-15")
-      template(v-for="(value, index) in Object.entries(log.propsData)")
-        div(v-if="value[1] !== undefined"
-            class="ml-10")
-          span(class="text-bold text-gray-3") {{`${value[0]}: `}}
-          span(class="text-gray-3") {{value[1]}}
+div(class="component-log-item"
+    @click="toggleItem")
+  div(class="component-log-item__main-info")
+    div(class="flex items-center")
+      //- svg-icon(iconName="plus-square" iconColor="gray-3" iconWidth="16px" @click.native="toggleContent(!showContent)")
+      span(class="component-log-item__component-name text-bold") {{log.component}}
+      span(class="component-log-item__time text-bold ml-5") {{`${parseFloat(log.time.toFixed(3))}  ms`}}
+    div(class="component-log-item__parent")
+      span(class="text-white") from: {{log.parent}}
+  div(v-if="allOpened || showDetail" class="component-log-item__detail-info flex flex-column pl-15")
+    template(v-for="(value, index) in Object.entries(log.propsData)")
+      div(v-if="value[1] !== undefined"
+          class="ml-10")
+        span(class="text-bold text-gray-3") {{`${value[0]}: `}}
+        span(class="text-gray-3") {{value[1]}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'ComponentLogItem',
   props: {
     log: {

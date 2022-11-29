@@ -33,8 +33,7 @@ export default defineComponent({
       required: true
     },
     minWidth: {
-      type: Number,
-      required: true
+      type: Number
     },
     threshold: {
       type: Array as PropType<number[]>,

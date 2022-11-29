@@ -41,10 +41,10 @@ import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import { debounce } from 'lodash'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import ComponentLogItem from '@/components/componentLog/ComponentLogItem.vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'ComponentLog',
   components: {
     ComponentLogItem

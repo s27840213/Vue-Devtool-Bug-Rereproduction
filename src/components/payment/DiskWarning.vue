@@ -6,7 +6,7 @@ div(v-if="showWarning" class="warning")
       span(class="caption-SM") {{cur.title}}
       div(class="warning-small-title-disk-total")
         div(class="warning-small-title-disk-used" :style="diskStyle")
-      i18n(:path="cur.small.desc" class="warning-small-desc" tag="div")
+      i18n-t(:keypath="cur.small.desc" class="warning-small-desc" tag="div")
       //- template(#button)
       //-   span(class="warning-small-desc__btn" @click="cur.small.func") {{cur.small.buttonLabel}}
     svg-icon(iconName="close" iconColor="white"

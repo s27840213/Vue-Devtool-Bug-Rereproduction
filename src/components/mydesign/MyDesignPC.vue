@@ -11,7 +11,7 @@ div(class="my-design-pc")
         div(v-if="isMultiSelected" class="my-design-pc__multi")
           div(class="my-design-pc__multi__container")
             div(class="my-design-pc__multi__number")
-              i18n(path="NN0254" tag="span")
+              i18n-t(keypath="NN0254" tag="span")
                 template(#selectedNum) {{selectedNum}}
             div(class="my-design-pc__multi__actions relative")
               div(ref="tgFav"
@@ -79,7 +79,7 @@ div(class="my-design-pc")
           div(v-if="isShowDeleteMessage" class="my-design-pc__message")
             div(class="my-design-pc__message__img" :style="messageImageStyles(deletedQueue[0])")
             div(class="my-design-pc__message__text")
-              i18n(path="NN0250" tag="span")
+              i18n-t(keypath="NN0250" tag="span")
                 template(#item) {{messageItemName(deletedQueue[0])}}
                 template(#folder) {{$t('NN0189')}}
             div(class="my-design-pc__message__button" @click="recover")
@@ -87,14 +87,14 @@ div(class="my-design-pc")
         transition(name="slide-fade")
           div(v-if="isShowRecoverMessage" class="my-design-pc__message")
             div(class="my-design-pc__message__text")
-              i18n(path="NN0250" tag="span")
+              i18n-t(keypath="NN0250" tag="span")
                 template(#item) {{messageItemName(recoveredQueue[0])}}
                 template(#folder) {{messageDestName(recoveredQueue[0])}}
         transition(name="slide-fade")
           div(v-if="isShowMoveMessage" class="my-design-pc__message")
             div(class="my-design-pc__message__img" :style="messageImageStyles(movedQueue[0])")
             div(class="my-design-pc__message__text")
-              i18n(path="NN0250" tag="span")
+              i18n-t(keypath="NN0250" tag="span")
                 template(#item) {{messageItemName(movedQueue[0])}}
                 template(#folder) {{messageDestName(movedQueue[0])}}
         transition(name="slide-fade")

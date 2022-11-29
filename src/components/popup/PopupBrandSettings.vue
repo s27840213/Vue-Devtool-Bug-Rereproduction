@@ -34,7 +34,7 @@ div(class="popup-brand-settings")
             div(class="delete-confirm__title")
               span {{ $t('NN0433') }}
             div(class="delete-confirm__description")
-              i18n(path="NN0434" tag="span")
+              i18n-t(keypath="NN0434" tag="span")
                 template(#itemName)
                   span(class="delete-confirm__item-name") {{ deleteBuffer ? getDisplayedName(deleteBuffer) : '' }}
             div(class="delete-confirm__description")

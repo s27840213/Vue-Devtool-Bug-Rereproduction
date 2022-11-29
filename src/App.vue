@@ -16,8 +16,10 @@ div(id="app" :style="appStyles()")
       :info="currSelectedResInfo"
       @blur.native="setCurrSelectedResInfo()"
       tabindex="0")
-  div(v-if="isAdmin && !inScreenshotPreview" class="fps")
+  //- div(v-if="isAdmin && !inScreenshotPreview" class="fps")
+  div(class="fps")
     span FPS: {{fps}}
+    span JS-Heap-Size {{jsHeapSize}}
   div(class="modal-container"
       v-if="isModalOpen")
     modal-card
@@ -67,11 +69,13 @@ export default defineComponent({
       coordinateWidth: 0,
       coordinateHeight: 0,
       fps: 0,
+      jsHeapSize: 0,
       fpsInterval: 0
     }
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
+    this.showFps()
   },
   beforeMount() {
     networkUtils.registerNetworkListener()
@@ -159,6 +163,7 @@ export default defineComponent({
           }
           times.push(now)
           this.fps = times.length
+          this.jsHeapSize = (performance as any).memory.usedJSHeapSize
           if (this.inScreenshotPreview) {
             clearInterval(this.fpsInterval)
             return
