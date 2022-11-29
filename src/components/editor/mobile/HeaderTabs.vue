@@ -263,7 +263,7 @@ export default Vue.extend({
   justify-content: space-between;
   padding: 8px 16px;
   box-sizing: border-box;
-  z-index: setZindex("editor-header");
+  z-index: setZindex("header");
 
   &__feature-icon {
     width: 22px;

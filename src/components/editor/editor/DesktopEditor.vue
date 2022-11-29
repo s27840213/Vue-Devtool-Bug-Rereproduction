@@ -32,7 +32,7 @@
             :style="contentPanelStyles")
           function-panel(@toggleColorPanel="toggleColorPanel")
           transition(name="panel-up")
-            color-panel(v-if="isColorPanelOpen"
+            color-slips(v-if="isColorPanelOpen" mode="FunctionPanel"
               class="content__panel__color-panel"
               @toggleColorPanel="toggleColorPanel")
         div(v-if="isShowPagePreview" class="content__pages")
@@ -49,7 +49,7 @@ import Sidebar from '@/components/editor/Sidebar.vue'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
 import SidebarPanel from '@/components/editor/SidebarPanel.vue'
 import FunctionPanel from '@/components/editor/FunctionPanel.vue'
-import ColorPanel from '@/components/editor/ColorSlips.vue'
+import ColorSlips from '@/components/editor/ColorSlips.vue'
 import EditorView from '@/components/editor/EditorView.vue'
 import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
 import PagePreview from '@/components/editor/PagePreview.vue'
@@ -77,7 +77,7 @@ export default Vue.extend({
     EditorView,
     ScaleRatioEditor,
     FunctionPanel,
-    ColorPanel,
+    ColorSlips,
     PagePreview,
     TourGuide,
     PopupBrandSettings,

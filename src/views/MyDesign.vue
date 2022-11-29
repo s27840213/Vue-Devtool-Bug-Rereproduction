@@ -8,6 +8,7 @@
 import Vue from 'vue'
 import MyDesignPc from '@/components/mydesign/MyDesignPC.vue'
 import MyDesignMobile from '@/components/mydesign/MyDesignMobile.vue'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   name: 'MyDesign',
@@ -33,7 +34,7 @@ export default Vue.extend({
   },
   methods: {
     handleResize() {
-      this.isMobile = window.matchMedia('screen and (max-width: 540px)').matches ? 1 : -1
+      this.isMobile = generalUtils.getWidth() <= 540 ? 1 : -1
     }
   }
 })
