@@ -14,6 +14,7 @@ import generalUtils from '@/utils/generalUtils'
 import { globalQueue } from '@/utils/queueUtils'
 
 export default defineComponent({
+  name: 'LazyLoad',
   props: {
     target: {
       type: String,

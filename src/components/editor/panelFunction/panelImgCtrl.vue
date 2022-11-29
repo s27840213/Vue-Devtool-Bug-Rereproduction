@@ -26,15 +26,16 @@ export default defineComponent({
       setBgImgConfig: 'imgControl/SET_BG_CONFIG'
     }),
     handleCancel() {
+      const type = this.isImgCtrl ? 'imgCtrl' : (this.isBgImgCtrl ? 'bgImgCtrl' : '')
       if (this.isImgCtrl) {
         this.setImgConfig('reset')
       } else if (this.isBgImgCtrl) {
         this.setBgImgConfig('reset')
       }
-      this.handleFinish()
+      this.handleFinish(type)
     },
-    handleFinish() {
-      if (this.isImgCtrl) {
+    handleFinish(type: string) {
+      if (type === 'imgCtrl' || this.isImgCtrl) {
         const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
         switch (currLayer.type) {
           case LayerType.image:
@@ -44,7 +45,7 @@ export default defineComponent({
           case LayerType.frame:
             frameUtils.updateFrameLayerProps(pageIndex, layerIndex, Math.max(subLayerIdx, 0), { imgControl: false })
         }
-      } else if (this.isBgImgCtrl) {
+      } else if (type === 'bgImgCtrl' || this.isBgImgCtrl) {
         pageUtils.setBackgroundImageControlDefault()
       }
     }

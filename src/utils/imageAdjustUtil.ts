@@ -5,6 +5,8 @@ import {
   IAdjustProps
 } from '@/interfaces/adjust'
 import i18n from '@/i18n'
+import { IImage } from '@/interfaces/layer'
+import imageShadowUtils from './imageShadowUtils'
 
 class ImageAdjustUtil {
   getFields() {
@@ -128,7 +130,7 @@ class ImageAdjustUtil {
     ]
   }
 
-  getBlur(value: number) {
+  getBlur(value: number, config?: IImage) {
     if (value < 0) {
       return [
         this.createSvgFilter({
@@ -152,12 +154,14 @@ class ImageAdjustUtil {
         })
       ]
     }
-    return [
+    const res = [
       this.createSvgFilter({
         tag: 'feGaussianBlur',
         attrs: { stdDeviation: 0.275 * value }
-      }),
-      this.createSvgFilter({
+      })
+    ]
+    if (config && !config.styles.shadow.isTransparent) {
+      res.push(this.createSvgFilter({
         tag: 'feComponentTransfer',
         child: [
           this.createSvgFilter({
@@ -165,8 +169,9 @@ class ImageAdjustUtil {
             attrs: { type: 'linear', slope: 0, intercept: 1 }
           })
         ]
-      })
-    ]
+      }))
+    }
+    return res
   }
 
   getWarm(value: number) {
@@ -204,7 +209,7 @@ class ImageAdjustUtil {
     }]
   }
 
-  getSvgFilter(name: string, value: number): any {
+  getSvgFilter(name: string, value: number, config?: IImage): any {
     if (value === 0) return []
     // @TODO: handle more filter func
     switch (name) {
@@ -217,7 +222,7 @@ class ImageAdjustUtil {
       case 'hue':
         return this.getHue(value)
       case 'blur':
-        return this.getBlur(value)
+        return this.getBlur(value, config)
       case 'warm':
         return this.getWarm(value)
       default:
@@ -225,9 +230,9 @@ class ImageAdjustUtil {
     }
   }
 
-  convertAdjustToSvgFilter(adjust: IAdjustJsonProps) {
+  convertAdjustToSvgFilter(adjust: IAdjustJsonProps, config?: IImage) {
     return Object.entries(adjust)
-      .flatMap(([key, val]) => this.getSvgFilter(key, val))
+      .flatMap(([key, val]) => this.getSvgFilter(key, val, config))
   }
 
   setAdjust(props: IAdjustProps) {

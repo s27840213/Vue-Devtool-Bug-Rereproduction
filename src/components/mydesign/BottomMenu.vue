@@ -578,8 +578,10 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: start;
-    gap: 8px;
     margin-left: 22.5px;
+    > div + div {
+      margin-left: 8px;
+    }
     &__text {
       max-width: 65vw;
       @include text-H6;
@@ -619,7 +621,9 @@ export default defineComponent({
     height: 40px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    > div + div {
+      margin-left: 16px;
+    }
     &.selected, &:active {
       background: setColor(blue-4);
     }
@@ -743,11 +747,13 @@ export default defineComponent({
   &__new-folder {
     display: flex;
     align-items: center;
-    gap: 16px;
     height: 42px;
     border-radius: 4px;
     box-sizing: border-box;
     padding: 0 8px;
+    > div + div {
+      margin-left: 16px;
+    }
     &__icon {
       @include size(24px);
       display: flex;
@@ -798,7 +804,9 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 64px;
+    > div + div {
+      margin-left: 64px;
+    }
   }
   &__action {
     @include size(24px);

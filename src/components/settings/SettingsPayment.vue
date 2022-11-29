@@ -329,7 +329,7 @@ div.sp-rocket {
     padding: 24px 6.4%;
   }
   .sp-field {
-    padding: 65px 7.466% 175px 7.466%;
+    padding: 65px 7.466% 130px 7.466%;
     bottom: 0px;
   }
 }

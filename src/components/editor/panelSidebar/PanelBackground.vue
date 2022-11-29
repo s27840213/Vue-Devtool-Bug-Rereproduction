@@ -7,18 +7,11 @@ div(class="panel-bg")
     clear
     :defaultKeyword="keywordLabel"
     @search="handleSearch")
-  //- Default BG color
-  div(v-if="showColorTab" ref="colorBlock")
-    div(class="text-left py-5 text-white") {{$t('NN0017')}}
-    div(class="panel-bg__colors")
-      div(class="panel-bg__color"
-        @click="handleColorModal(currBackgroundColor)")
-      div(v-for="color in defaultBgColor"
-        class="panel-bg__color"
-        :style="colorStyles(color)"
-        @click="setBgColor(color)")
-      div(class="panel-bg__color"
-        @click="setBgColor('#ffffff00')")
+  //- BG color tab content
+  color-slips(v-show="showColorTab" class="panel-bg__color-sets" mode="PanelBG"
+              @selectColor="setBgColor"
+              @selectColorEnd="recordChange"
+              @openColorPicker="openColorPicker")
   //- Search result empty msg
   div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
   //- Search result and main content
@@ -43,41 +36,48 @@ div(class="panel-bg")
           :key="item.id"
           :item="item"
           :locked="currentPageBackgroundLocked")
-    template(v-if="pending" #after)
-      div(class="text-center")
-        svg-icon(iconName="loading"
-          iconColor="white"
-          iconWidth="20px")
+  template(v-slot:category-background-item="{ list, title }")
+    div(class="panel-bg__items")
+      div(v-if="title"
+        class="panel-bg__header") {{ title }}
+      category-background-item(v-for="item in list"
+        class="panel-bg__item"
+        :key="item.id"
+        :item="item"
+        :locked="currentPageBackgroundLocked")
+  template(v-if="pending" #after)
+    div(class="text-center")
+      svg-icon(iconName="loading"
+        iconColor="white"
+        iconWidth="20px")
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
-import ColorPicker from '@/components/ColorPicker.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
+import ColorSlips from '@/components/editor/ColorSlips.vue'
+import Tabs from '@/components/Tabs.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import stepsUtils from '@/utils/stepsUtils'
-import colorUtils from '@/utils/colorUtils'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import stepsUtils from '@/utils/stepsUtils'
 import pageUtils from '@/utils/pageUtils'
 import generalUtils from '@/utils/generalUtils'
-import Tabs from '@/components/Tabs.vue'
 
 export default defineComponent({
   components: {
     SearchBar,
-    ColorPicker,
     CategoryList,
     CategoryListRows,
     CategoryBackgroundItem,
-    Tabs
+    Tabs,
+    ColorSlips
   },
   data() {
     return {
-      openColorPicker: false,
       scrollTop: {
         mainContent: 0,
         searchResult: 0
@@ -86,9 +86,6 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapState({
-      isMobile: 'isMobile'
-    }),
     ...mapState('background', {
       categories: 'categories',
       rawContent: 'content',
@@ -97,9 +94,7 @@ export default defineComponent({
       keyword: 'keyword'
     }),
     ...mapGetters({
-      getPage: 'getPage',
-      defaultBgColor: 'color/getDefaultBgColors',
-      getBackgroundColor: 'getBackgroundColor'
+      getPage: 'getPage'
     }),
     itemWidth(): number {
       const basicWidth = (window.innerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
@@ -107,17 +102,6 @@ export default defineComponent({
     },
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
-    },
-    currBackgroundColor(): string {
-      return this.getBackgroundColor(pageUtils.currFocusPageIndex)
-    },
-    defaultBackgroundColors(): Partial<ICategoryItem>[] {
-      const key = 'default-background-colors'
-      return [{
-        id: key,
-        type: key,
-        size: generalUtils.isTouchDevice() ? window.innerWidth / 2 : 157
-      }]
     },
     listCategories(): ICategoryItem[] {
       const { categories } = this
@@ -158,10 +142,6 @@ export default defineComponent({
         key: 'mainContent'
       }]
     },
-    currentPageColor(): string {
-      const { backgroundColor } = this.getPage(pageUtils.currFocusPageIndex) || {}
-      return backgroundColor || ''
-    },
     currentPageBackgroundLocked(): boolean {
       const { backgroundImage } = this.getPage(pageUtils.currFocusPageIndex) || {}
       return backgroundImage && backgroundImage.config.locked
@@ -178,11 +158,6 @@ export default defineComponent({
     showColorTab(): boolean { return this.currActiveTabIndex === 1 }
   },
   mounted() {
-    colorUtils.on(ColorEventType.background, (color: string) => {
-      this.setBgColor(color)
-    })
-    colorUtils.onStop(ColorEventType.background, this.recordChange)
-
     generalUtils.panelInit('bg',
       this.handleSearch,
       this.handleCategorySearch,
@@ -201,12 +176,6 @@ export default defineComponent({
     const searchResult = (this.$refs.searchResult as any)[0]
     mainContent.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
     searchResult.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
-  },
-  beforeUnmount() {
-    colorUtils.event.off(ColorEventType.background, (color: string) => {
-      this.setBgColor(color)
-    })
-    colorUtils.offStop(ColorEventType.background, this.recordChange)
   },
   watch: {
     keyword(newVal: string) {
@@ -231,15 +200,7 @@ export default defineComponent({
       _setBgColor: 'SET_backgroundColor',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag'
     }),
-    colorStyles(color: string) {
-      return {
-        backgroundColor: color
-      }
-    },
     setBgColor(color: string) {
-      // if (colorUtils.isColorPickerOpen) {
-      //   colorUtils.setIsColorPickerOpen(false)
-      // }
       if (this.currentPageBackgroundLocked) {
         // return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
@@ -267,15 +228,6 @@ export default defineComponent({
     handleLoadMore() {
       this.getMoreContent()
     },
-    handleColorModal(color: string) {
-      if (generalUtils.isTouchDevice()) {
-        this.$emit('openExtraColorModal', ColorEventType.background, MobileColorPanelType.picker)
-        return
-      }
-      colorUtils.setCurrEvent(ColorEventType.background)
-      colorUtils.setCurrColor(color)
-      this.$emit('toggleColorPanel', true)
-    },
     handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
       this.scrollTop[key] = (event.target as HTMLElement).scrollTop
     },
@@ -284,6 +236,9 @@ export default defineComponent({
     },
     switchTab(tabIndex: number) {
       this.currActiveTabIndex = tabIndex
+    },
+    openColorPicker() { // @openColorPicker will only be trigger in mobile.
+      this.$emit('openExtraColorModal', ColorEventType.background, MobileColorPanelType.picker)
     },
     processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
       return new Array(Math.ceil(list.length / 2))
@@ -313,6 +268,13 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  &__color-sets {
+    filter: none;
+    height: calc(100% - 53px);
+    &::v-deep .color-panel__scroll {
+      @include push-scrollbar10;
+    }
+  }
   &__item {
     width: min(calc((100vw - 10px - 48px) / 2), 145px);
     height: min(calc((100vw - 10px - 48px) / 2), 145px);
@@ -331,33 +293,6 @@ export default defineComponent({
     color: #ffffff;
     padding: 10px 0;
     text-align: left;
-  }
-  &__color-picker {
-    position: absolute;
-    z-index: 99;
-    top: 40px;
-    left: 40px;
-  }
-  &__colors {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    column-gap: 12px;
-    row-gap: 10px;
-    position: relative;
-  }
-  &__color {
-    padding-top: 100%;
-    border-radius: 4px;
-    cursor: pointer;
-    position: relative;
-    &:nth-child(1) {
-      background-image: url("~@/assets/img/svg/addColor.svg");
-      background-size: cover;
-    }
-    &:last-child {
-      background-image: url("~@/assets/img/svg/transparent.svg");
-      background-size: cover;
-    }
   }
   &::v-deep .vue-recycle-scroller__item-view:first-child {
     z-index: 1;

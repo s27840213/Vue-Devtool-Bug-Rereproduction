@@ -134,7 +134,7 @@ import { mapActions, mapGetters, mapMutations } from 'vuex'
 import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import hintUtils from '@/utils/hintUtils'
-import BtnNewDesign from '@/components/mydesign/BtnNewDesign.vue'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
 export default defineComponent({
   mounted() {

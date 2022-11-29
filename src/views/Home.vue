@@ -28,9 +28,6 @@ div(class="home")
       ta-block(v-for="item in blocklist"
         :content="item")
     nu-footer(:isHome="true")
-    div(v-if="showSizePopup"
-      class="popup-window")
-      popup-size(@close="closeSizePopup()")
 </template>
 
 <script lang="ts">
@@ -41,7 +38,6 @@ import Animation from '@/components/Animation.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
 import TaBlock from '@/components/homepage/TaBlock.vue'
 import NuFooter from '@/components/NuFooter.vue'
-import PopupSize from '@/components/popup/PopupSize.vue'
 import _ from 'lodash'
 import blocklistData from '@/utils/homeBlockData'
 
@@ -52,8 +48,7 @@ export default defineComponent({
     Animation,
     ScrollList,
     TaBlock,
-    NuFooter,
-    PopupSize
+    NuFooter
   },
   data() {
     return {

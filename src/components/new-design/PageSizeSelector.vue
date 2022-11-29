@@ -1,54 +1,82 @@
 <template lang="pug">
 div(class="page-size-selector")
-  div(class="page-size-selector__body__custom")
-    property-bar(class="page-size-selector__body__custom__box"
-                :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? widthValid ? '' : ' input-invalid' : '')")
-      input(class="body-3" type="number" min="0" ref="inputWidth"
-            :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
-            :value="pageWidth || null" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})" @click="selectFormat('custom')" @input="setPageWidth")
-      span(class="body-4 page-size-selector__body__custom__box__input-label"
-          :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") W
-    svg-icon(class="pointer"
-        :iconName="isLocked ? 'lock' : 'unlock'"
-        iconWidth="20px" :iconColor="!isLockDisabled ? (selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-4')) : 'gray-4'"
-        @click.native="toggleLock()")
-    property-bar(class="page-size-selector__body__custom__box"
-                :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (isValidate ? heightValid ? '' : ' input-invalid' : '')")
-      input(class="body-3" type="number" min="0"
-            :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
-            :value="pageHeight || null" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})" @click="selectFormat('custom')" @input="setPageHeight")
-      span(class="body-4 page-size-selector__body__custom__box__input-label"
-          :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
-    div(v-if="isValidate && !isCustomValid"
-      class="page-size-selector__body__custom__err text-red") {{errorMsg}}
+  div(v-if="isMobile" class="page-size-selector__body-row first-row")
+    span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0023')}}
+  div(class="page-size-selector__body-row")
+    div(class="page-size-selector__body__custom")
+      property-bar(class="page-size-selector__body__custom__box"
+                  :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
+        input(class="body-3 page-size-selector__body__custom__box__input" type="number" min="0" ref="inputWidth"
+              :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
+              :style="{position: this.isInputFocused ? 'static' : 'fixed'}"
+              :value="pageWidth || null" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
+              @click="selectFormat('custom')"
+              @input="setPageWidth"
+              @blur="handleInputBlur")
+        input(v-if="!isInputFocused"
+              class="body-3 page-size-selector__body__custom__box__input dummy" type="number" min="0"
+              readonly
+              :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
+              :value="pageWidth || null" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
+              @click="handleDummyClick($event, $refs.inputWidth)")
+        span(class="body-4 page-size-selector__body__custom__box__input-label"
+            :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") W
+      svg-icon(class="pointer"
+          :iconName="isLocked ? 'lock' : 'unlock'"
+          iconWidth="20px" :iconColor="!isLockDisabled ? (selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-4')) : 'gray-4'"
+          @click.native="toggleLock()")
+      property-bar(class="page-size-selector__body__custom__box"
+                  :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
+        input(class="body-3 page-size-selector__body__custom__box__input" type="number" min="0" ref="inputHeight"
+              :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
+              :style="{position: this.isInputFocused ? 'static' : 'fixed'}"
+              :value="pageHeight || null" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
+              @click="selectFormat('custom')"
+              @input="setPageHeight"
+              @blur="handleInputBlur")
+        input(v-if="!isInputFocused"
+              class="body-3 page-size-selector__body__custom__box__input dummy" type="number" min="0"
+              readonly
+              :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
+              :value="pageHeight || null" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
+              @click="handleDummyClick($event, $refs.inputHeight)")
+        span(class="body-4 page-size-selector__body__custom__box__input-label"
+            :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
+      div(v-if="selectedFormatKey === 'custom' && isValidate && !isCustomValid"
+        class="page-size-selector__body__custom__err text-red") {{$t('NN0767', { num: 0 })}}
   div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
-  div(class="page-size-selector__container")
-      div(class="page-size-selector__body-row first-row")
-        span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0024')}}
+  div(class="page-size-selector__container"
+    @touchmove="handleTouchMove")
       div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
         svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
+      div(v-if="isLayoutReady && recentlyUsed.length > 0" class="page-size-selector__body-row first-row")
+        span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0024')}}
       div(v-for="(format, index) in recentlyUsed" class="page-size-selector__body-row item pointer"
           @click="selectFormat(`recent-${index}`)")
-        radio-btn(class="page-size-selector__body__radio"
+        radio-btn(class="page-size-selector__body-row__radio"
                   :isSelected="selectedFormatKey === `recent-${index}`",
-                  :circleColor="isDarkTheme ? 'white' : 'gray-2'"
+                  :circleColor="isDarkTheme ? 'white' : 'light-gray'"
                   :formatKey="`recent-${index}`",
                   @select="selectFormat")
-        span(class="page-size-selector__body__recently body-3 pointer"
-              :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatString(format) }}
-      div(class="page-size-selector__body-row first-row")
+        div(class="page-size-selector__body-row__content")
+          span(class="page-size-selector__body__recently body-3 pointer"
+                :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ isMobile ? format.title : makeFormatString(format) }}
+          span(v-if="isMobile" class="page-size-selector__body__typical body-3"
+                :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ isMobile ? format.description :makeFormatString(format)}}
+      div(v-if="isLayoutReady && formatList.length > 0" class="page-size-selector__body-row first-row")
         span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0025')}}
-      div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
-        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
       div(v-for="(format, index) in formatList" class="page-size-selector__body-row item pointer"
           @click="selectFormat(`preset-${index}`)")
-        radio-btn(class="page-size-selector__body__radio"
+        radio-btn(class="page-size-selector__body-row__radio"
                   :isSelected="selectedFormatKey === `preset-${index}`",
-                  :circleColor="isDarkTheme ? 'white' : 'gray-2'"
+                  :circleColor="isDarkTheme ? 'white' : 'light-gray'"
                   :formatKey="`preset-${index}`",
                   @select="selectFormat")
-        span(class="page-size-selector__body__typical body-3"
-              :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatString(format)}}
+        div(class="page-size-selector__body-row__content")
+          span(class="page-size-selector__body__typical body-3"
+                :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ isMobile ? format.title : makeFormatString(format)}}
+          span(v-if="isMobile" class="page-size-selector__body__typical body-3"
+                :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ isMobile ? format.description : makeFormatString(format)}}
 </template>
 
 <script lang="ts">
@@ -56,8 +84,7 @@ import { defineComponent } from 'vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { ILayout } from '@/interfaces/layout'
-import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-// TODO: merge with @/components/editor/PageSizeSelector.vue
+import { IListServiceContentData } from '@/interfaces/api'
 
 export default defineComponent({
   props: {
@@ -68,14 +95,32 @@ export default defineComponent({
     isValidate: {
       type: Boolean,
       default: false
+    },
+    isMobile: {
+      type: Boolean,
+      default: false
     }
   },
   components: {
     RadioBtn
   },
   mounted() {
-    this.fetchLayouts();
-    (this.$refs.inputWidth as HTMLInputElement).focus()
+    document.addEventListener('scroll', this.handleScroll)
+    this.fetchLayouts()
+    const inputWidth = this.$refs.inputWidth as HTMLInputElement
+    inputWidth.focus({ preventScroll: true })
+    if (this.isMobile) {
+      // prevent document scroll
+      setTimeout(() => {
+        this.isInputFocused = true
+      }, 100)
+    } else {
+      // disable dummy inputs
+      this.isInputFocused = true
+    }
+  },
+  beforeDestroy() {
+    document.removeEventListener('scroll', this.handleScroll)
   },
   data() {
     return {
@@ -84,19 +129,13 @@ export default defineComponent({
       pageHeight: NaN,
       aspectRatio: 1,
       isLocked: false,
-      errorMsg: '',
       formatList: new Array<ILayout>(),
       recentlyUsed: new Array<ILayout>(),
-      isLayoutReady: false
+      isLayoutReady: false,
+      isInputFocused: false
     }
   },
   watch: {
-    isValidate() {
-      if (this.selectedFormatKey === 'custom' && this.isValidate && !this.isCustomValid) {
-        // TODO: translate
-        this.errorMsg = '請輸入大於 0 的數字'
-      }
-    },
     selectedFormat(layout: ILayout) {
       this.$emit('select', layout)
     }
@@ -120,9 +159,6 @@ export default defineComponent({
       pagesLength: 'getPagesLength',
       getPageSize: 'getPageSize'
     }),
-    isMobile(): boolean {
-      return document.body.clientWidth / document.body.clientHeight < 1
-    },
     isCustomValid(): boolean {
       return this.widthValid && this.heightValid
     },
@@ -235,6 +271,29 @@ export default defineComponent({
           this.isLayoutReady = true
         }
       })
+    },
+    handleTouchMove(evt: Event) {
+      evt.stopPropagation()
+    },
+    handleScroll() {
+      (this.$refs.inputWidth as HTMLElement).blur();
+      (this.$refs.inputHeight as HTMLElement).blur()
+    },
+    handleDummyClick(evt: Event, target: any) {
+      evt.preventDefault()
+      this.selectFormat('custom')
+      target = target as HTMLInputElement
+      target.focus({ preventScroll: true })
+      // prevent document scroll
+      setTimeout(() => {
+        this.isInputFocused = true
+      }, 100)
+    },
+    handleInputBlur() {
+      if (!this.isMobile) return
+      setTimeout(() => {
+        if (document.activeElement !== this.$refs.inputWidth && document.activeElement !== this.$refs.inputHeight) this.isInputFocused = false
+      }, 0)
     }
   }
 })
@@ -253,9 +312,10 @@ export default defineComponent({
     border-radius: 4px;
     padding: 11.57px;
     &-row {
+      box-sizing: border-box;
       display: flex;
-      justify-content: space-between;
-      width: 87%;
+      justify-content: center;
+      width: 100%;
       margin-left: auto;
       margin-top: 15px;
       margin-right: auto;
@@ -269,44 +329,54 @@ export default defineComponent({
       &.first-row {
         display: block;
         margin-top: 0px;
-        // font-family: 'SF Pro';
         color: setColor(gray-2);
         letter-spacing: 1.5px;
       }
       &.item {
         display: grid;
         margin: 0px;
-        padding: 4px 16px;
-        grid-template-columns: 28px auto;
+        padding: 2px 16px;
+        grid-template-columns: 28px 1fr;
         justify-content: left;
-        // font-family: 'Mulish';
+      }
+      &__radio {
+        height: 24px;
+        display: flex;
+        align-items: center;
+      }
+      &__content {
+        height: 24px;
+        display: grid;
+        grid-template-columns: auto auto;
+        align-items: center;
+        justify-content: space-between;
+        white-space: nowrap;
         line-height: 20px;
       }
     }
     &__title {
       font-weight: 700;
-      margin-left: -16px;
     }
     &__custom {
+      width: 100%;
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       grid-template-rows: auto;
       column-gap: 15px;
       align-items: center;
       &__box {
-        width: 128px;
         height: 30px;
         box-sizing: border-box;
         padding: 5px 5px;
         &__input-label {
           width: 30px;
-          // font-family: 'Manrope';
           font-weight: 700;
           text-align: center;
         }
-        & input {
+        &__input {
+          position: fixed;
+          top: -99999px;
           background-color: transparent;
-          // font-family: 'Mulish';
           &::placeholder {
             /* Chrome, Firefox, Opera, Safari 10.1+ */
             color: setColor(gray-3);
@@ -319,6 +389,9 @@ export default defineComponent({
           &::-ms-input-placeholder {
             /* Microsoft Edge */
             color: setColor(gray-3);
+          }
+          &.dummy{
+            position: static;
           }
         }
       }
@@ -356,5 +429,15 @@ export default defineComponent({
 
 .input-invalid {
   border: 1px solid setColor(red) !important;
+}
+
+@media screen and (max-width: 540px) {
+  .page-size-selector__body-row {
+    padding: 0px 8px;
+  }
+
+  .page-size-selector__body-row.item {
+    padding: 4px 16px;
+  }
 }
 </style>

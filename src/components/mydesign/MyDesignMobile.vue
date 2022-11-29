@@ -600,7 +600,9 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 18px;
+      > div + div {
+        margin-left: 18px;
+      }
       &-button {
         width: 24px;
         height: 24px;
@@ -630,7 +632,9 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    > div + div {
+      margin-left: 4px;
+    }
     &__text {
       font-weight: 400;
       font-size: 10px;
@@ -654,10 +658,12 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
     padding: 4px 16px;
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     border-radius: 5px;
+    > div + div {
+      margin-left: 8px;
+    }
     &__icon {
       @include size(24px);
       display: flex;
@@ -749,7 +755,9 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 16px;
+    > div + div {
+      margin-left: 16px;
+    }
     > div {
       min-width: calc(50% - 36px);
       height: 32px;

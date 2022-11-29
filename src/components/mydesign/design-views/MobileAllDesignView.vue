@@ -1,5 +1,6 @@
 <template lang="pug">
-div(class="mobile-all-design-view")
+mobile-design-empty(v-if="isEmpty && !isDesignsLoading")
+div(v-else class="mobile-all-design-view")
   mobile-design-gallery(:noHeader="true"
                         :allDesigns="allDesigns"
                         :selectedNum="selectedNum"
@@ -13,11 +14,15 @@ import { defineComponent } from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
+import MobileDesignEmpty from '@/components/mydesign/MobileDesignEmpty.vue'
 
 export default defineComponent({
   components: {
     MobileDesignGallery,
-    DiskWarning
+    DiskWarning,
+    BtnNewDesign,
+    MobileDesignEmpty
   },
   mounted() {
     designUtils.fetchDesigns(this.fetchAllDesigns)
@@ -30,10 +35,14 @@ export default defineComponent({
   computed: {
     ...mapGetters('design', {
       selectedDesigns: 'getSelectedDesigns',
-      allDesigns: 'getAllDesigns'
+      allDesigns: 'getAllDesigns',
+      isDesignsLoading: 'getIsDesignsLoading'
     }),
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length
+    },
+    isEmpty(): boolean {
+      return this.allDesigns.length === 0
     }
   },
   methods: {

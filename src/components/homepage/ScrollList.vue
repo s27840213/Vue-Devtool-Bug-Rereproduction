@@ -29,10 +29,11 @@ div(class="list")
       //- type theme
       template(v-else-if="type === 'theme'")
         div(class="list-content-items__theme-item")
-          img(class="list-content-items__theme-item-new pointer"
-            :src="require('@/assets/img/svg/plus-origin.svg')"
-            @click="$emit('openSizePopup')")
-          span(class="body-XS text-gray-1") {{$t('NN0023')}}
+          btn-new-design(v-slot="slotProps")
+            img(class="list-content-items__theme-item-new pointer"
+              :src="require('@/assets/img/svg/plus-origin.svg')"
+              @click="slotProps.openPopup")
+            span(class="body-XS text-gray-1") {{$t('NN0023')}}
         div(v-for="item in themeData"
           class="list-content-items__theme-item")
           router-link(:to="`/editor?type=new-design-size&themeId=${item.id}&width=${item.width}&height=${item.height}`")
@@ -67,12 +68,14 @@ import { IAssetTemplate } from '@/interfaces/api'
 import { Itheme } from '@/interfaces/theme'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import generalUtils from '@/utils/generalUtils'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
 export default defineComponent({
   name: 'ScrollList',
   components: {
     DesignItem,
-    ProItem
+    ProItem,
+    BtnNewDesign
   },
   props: {
     type: {

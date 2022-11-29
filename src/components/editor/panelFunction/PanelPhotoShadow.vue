@@ -81,20 +81,18 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
 <script lang="ts">
 import { defineComponent } from 'vue'
 import ColorPicker from '@/components/ColorPicker.vue'
-import ColorPanel from '@/components/editor/ColorSlips.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType, FunctionPanelType } from '@/store/types'
 import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
-import { IShadowEffects, ShadowEffectType } from '@/interfaces/imgShadow'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { mapActions, mapGetters } from 'vuex'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 
 export default defineComponent({
   components: {
-    ColorPicker,
-    ColorPanel
+    ColorPicker
   },
   data() {
     return {

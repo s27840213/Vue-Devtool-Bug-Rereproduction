@@ -74,6 +74,7 @@ import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import eventUtils from '@/utils/eventUtils'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
 import generalUtils from '@/utils/generalUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default defineComponent({
   components: {
@@ -107,6 +108,49 @@ export default defineComponent({
       screenHeight: document.documentElement.clientHeight,
       scrollHeight: 0
     }
+  },
+  created() {
+    Vue.mixin({
+      data() {
+        return {
+          timeStart: 0
+        }
+      },
+      beforeUpdate() {
+        const self = this as any
+        if (!editorUtils.enalbleComponentLog) return
+        self.timeStart = performance.now()
+      },
+      updated() {
+        // tiny workaround for typescript errors
+        const self = this as any
+        if (!editorUtils.enalbleComponentLog) return
+        const timeSpent = performance.now() - self.timeStart
+        const omitTarget = ['ComponentLog', 'ComponentLogItem', 'DesktopEditor', 'LazyLoad']
+        if (omitTarget.includes(self.$options.name)) return
+
+        const tmpArr = String(Object.getPrototypeOf(self.$options).__file).split('/')
+        const componentName = tmpArr[tmpArr.length - 1]
+
+        // undefined means it's Vue built-in component
+        if (componentName === 'undefined') return
+
+        window.requestAnimationFrame(() => {
+          self.$root.$emit('on-re-rendering', {
+            component: componentName,
+            name: self.$options.name,
+            __name: self.$options.__name,
+            parent: self.$options.parent?._name ?? 'no parent',
+            time: timeSpent,
+            propsData: {
+              index: self.$options.propsData?.index,
+              pageIndex: self.$options.propsData?.pageIndex,
+              layerIndex: self.$options.propsData?.layerIndex
+            }
+          })
+        })
+      }
+    })
   },
   mounted() {
     // window.addEventListener('keydown', this.handleKeydown)
@@ -197,7 +241,8 @@ export default defineComponent({
       getInInGestureMode: 'getInGestureToolMode',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
-      isSettingScaleRatio: 'getIsSettingScaleRatio'
+      isSettingScaleRatio: 'getIsSettingScaleRatio',
+      enableComponentLog: 'getEnalbleComponentLog'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]

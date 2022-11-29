@@ -95,21 +95,21 @@ export default defineComponent({
         { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
         ...this.genearlLayerTabs,
-        { icon: 'bg-separate', text: `${this.$t('NN0757')}`, hidden: this.isInFrame }
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
       ]
     },
     photoTabs(): Array<IFooterTab> {
       return [
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
-        // { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        { icon: 'set-as-frame', text: `${this.$t(this.isInFrame ? 'NN0098' : 'NN0706')}` },
-        { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
         { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        ...(this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
         { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
         ...this.genearlLayerTabs,
-        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
+        ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : [])
+        // { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
     },
@@ -225,21 +225,21 @@ export default defineComponent({
     },
     genearlLayerTabs(): Array<IFooterTab> {
       return [
-        { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, disabled: !this.isGroup && this.selectedLayerNum === 1 },
-        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
+        { icon: 'layers-alt', text: `${this.$t('NN0757')}`, panelType: 'order' },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true },
-        { icon: 'layers-alt', text: `${this.$t('NN0757')}`, panelType: 'order' }
+        { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1 },
+        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
+        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' }
+        // { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true }
       ]
     },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
         this.mainMenu,
-        this.groupTab,
-        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
+        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        this.groupTab,
+        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' }
       ]
     },
     tabs(): Array<IFooterTab> {

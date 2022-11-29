@@ -383,6 +383,7 @@ export default defineComponent({
     },
     pollingStep(step = 0) {
       const timeout = step > 14 ? 2000 : 1000
+      if (this.isTempDesign) return
       imageUtils.getImageSize(
         designUtils.getDesignPreview(
           this.config.id, 2,
@@ -410,6 +411,7 @@ export default defineComponent({
     },
     pagePollingStep(index: number, step = 0) {
       if (this.pageImages[index] !== this.previewPlaceholder) return
+      if (this.isTempDesign) return
       const timeout = step > 14 ? 2000 : 1000
       imageUtils.getImageSize(designUtils.getDesignPreview(this.config.id, 2, undefined, this.config.signedUrl, index), 0, 0, false).then((size) => {
         if (size.exists) {

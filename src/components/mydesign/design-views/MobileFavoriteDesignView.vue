@@ -1,6 +1,7 @@
 <template lang="pug">
 div(class="mobile-favorite-design-view")
-  mobile-design-gallery(:noHeader="true"
+  mobile-design-gallery(:noNewDesign="true"
+                        :noHeader="true"
                         :allDesigns="allDesigns"
                         :selectedNum="selectedNum"
                         @loadMore="handleLoadMore")

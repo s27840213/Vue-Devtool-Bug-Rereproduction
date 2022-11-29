@@ -34,12 +34,12 @@ div(class="function-panel"
     panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
     panel-general(v-if="showGeneral")
     panel-page-setting(v-if="showPageSetting")
-    panel-background-setting(v-if="showPageSetting" v-on="$listeners")
-    panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel" v-on="$listeners")
+    panel-background-setting(v-if="showPageSetting" @toggleColorPanel="toggleColorPanel")
+    panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel" @toggleColorPanel="toggleColorPanel")
     panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
-    panel-photo-setting(v-if="showPhotoSetting" v-on="$listeners")
-    panel-shape-setting(v-if="showShapeSetting" v-on="$listeners")
-    panel-img-ctrl(v-if="isImgCtrl" v-on="$listeners")
+    panel-photo-setting(v-if="showPhotoSetting" @toggleColorPanel="toggleColorPanel")
+    panel-shape-setting(v-if="showShapeSetting" @toggleColorPanel="toggleColorPanel")
+    panel-img-ctrl(v-if="isImgCtrl")
 </template>
 
 <script lang="ts">
@@ -212,6 +212,9 @@ export default defineComponent({
     }
   },
   methods: {
+    toggleColorPanel(bool: boolean) {
+      this.$emit('toggleColorPanel', bool)
+    },
     targetIs(type: string): boolean {
       if (this.isGroup) {
         if (this.hasSubSelectedLayer) {

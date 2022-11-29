@@ -84,9 +84,6 @@ export default defineComponent({
     isCropping(): boolean {
       return imageUtils.isImgControl()
     },
-    stepCount(): number {
-      return stepsUtils.steps.length
-    },
     layerTabs(): IIcon[] {
       return [
         { icon: 'copy' },
@@ -265,7 +262,7 @@ export default defineComponent({
   justify-content: space-between;
   padding: 8px 16px;
   box-sizing: border-box;
-  z-index: setZindex("editor-header");
+  z-index: setZindex("header");
 
   &__feature-icon {
     width: 22px;

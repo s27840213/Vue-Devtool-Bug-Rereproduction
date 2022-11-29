@@ -19,7 +19,7 @@ import { defineComponent } from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
-import BtnNewDesign from '@/components/mydesign/BtnNewDesign.vue'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
 export default defineComponent({
   components: {

@@ -8,6 +8,7 @@ div(class="my-design")
 import { defineComponent } from 'vue'
 import MyDesignPc from '@/components/mydesign/MyDesignPC.vue'
 import MyDesignMobile from '@/components/mydesign/MyDesignMobile.vue'
+import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
   name: 'MyDesign',
@@ -36,7 +37,7 @@ export default defineComponent({
   },
   methods: {
     handleResize() {
-      this.isMobile = window.matchMedia('screen and (max-width: 540px)').matches ? 1 : -1
+      this.isMobile = generalUtils.getWidth() <= 540 ? 1 : -1
     }
   }
 })
