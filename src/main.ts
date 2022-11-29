@@ -214,32 +214,32 @@ if (urlParams.has('token')) {
   }
 }
 
-if (['production'].includes(process.env.NODE_ENV)) {
-  const Sentry = require('@sentry/vue')
-  const { Integrations } = require('@sentry/tracing')
-  Sentry.init({
-    Vue,
-    trackComponents: true,
-    maxBreadcrumbs: 10,
-    tracesSampleRate: 1.0,
-    environment: process.env.NODE_ENV,
-    dsn: process.env.VUE_APP_SENTRY_DSN,
-    release: process.env.VUE_APP_SENTRY_RELEASE,
-    integrations: [
-      new Integrations.BrowserTracing({
-        routingInstrumentation: Sentry.vueRouterInstrumentation(router)
-      })
-    ],
-    beforeBreadcrumb(breadcrumb: any, hint: any) {
-      if (hint && breadcrumb.category && ['xhr'].includes(breadcrumb.category)) {
-        const { __sentry_xhr__: request, response } = hint.xhr
-        Object.assign(breadcrumb.data, { response, requestBody: request.body })
-      }
-      return breadcrumb
-    }
-  })
-  // app.config.devtools = false
-}
+// if (['production'].includes(process.env.NODE_ENV)) {
+//   const Sentry = require('@sentry/vue')
+//   const { Integrations } = require('@sentry/tracing')
+//   Sentry.init({
+//     Vue,
+//     trackComponents: true,
+//     maxBreadcrumbs: 10,
+//     tracesSampleRate: 1.0,
+//     environment: process.env.NODE_ENV,
+//     dsn: process.env.VUE_APP_SENTRY_DSN,
+//     release: process.env.VUE_APP_SENTRY_RELEASE,
+//     integrations: [
+//       new Integrations.BrowserTracing({
+//         routingInstrumentation: Sentry.vueRouterInstrumentation(router)
+//       })
+//     ],
+//     beforeBreadcrumb(breadcrumb: any, hint: any) {
+//       if (hint && breadcrumb.category && ['xhr'].includes(breadcrumb.category)) {
+//         const { __sentry_xhr__: request, response } = hint.xhr
+//         Object.assign(breadcrumb.data, { response, requestBody: request.body })
+//       }
+//       return breadcrumb
+//     }
+//   })
+//   // app.config.devtools = false
+// }
 
 
 app.mount('#app')
