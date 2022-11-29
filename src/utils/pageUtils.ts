@@ -3,7 +3,7 @@ import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import designUtils from './designUtils'
 import editorUtils from './editorUtils'
 import FocusUtils from './focusUtils'
@@ -456,7 +456,7 @@ class PageUtils {
       this.findCentralPageIndexInfo()
     }
     if (scrollToTop) {
-      Vue.nextTick(() => {
+      nextTick(() => {
         editorViewBox.scrollTo((editorViewBox.scrollWidth - editorWidth) / 2, 0)
       })
     }
@@ -464,7 +464,7 @@ class PageUtils {
       pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
     } else {
       this.isSwitchingToEditor = true
-      Vue.nextTick(() => {
+      nextTick(() => {
         setTimeout(() => {
           this.scrollIntoPage(this.currFocusPageIndex, 'auto')
           this.isSwitchingToEditor = false

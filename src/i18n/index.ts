@@ -49,8 +49,8 @@ function loadLocaleMessages(): LocaleMessages<VueMessageType> {
 }
 
 const i18n = createI18n({
-  locale: process.env.VUE_APP_I18N_LOCALE || 'en',
-  fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'en',
+  locale: process.env.VUE_APP_I18N_LOCALE || 'us',
+  fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'us',
   messages: loadLocaleMessages() as unknown as { [key: string]: { [key: string]: string } },
   globalInjection: true,
   legacy: true

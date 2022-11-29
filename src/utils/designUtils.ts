@@ -9,7 +9,7 @@ import pageUtils from './pageUtils'
 import themeUtils from './themeUtils'
 import uploadUtils from './uploadUtils'
 import resizeUtils from './resizeUtils'
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import i18n from '@/i18n'
 import stepsUtils from './stepsUtils'
 import _ from 'lodash'
@@ -812,7 +812,7 @@ class DesignUtils {
       assetUtils.addTemplate(json, {}, false).then(() => {
         stepsUtils.reset()
         pageUtils.clearPagesInfo()
-        Vue.nextTick(() => {
+        nextTick(() => {
           resizeUtils.resizePage(0, json, { width, height })
           store.commit('UPDATE_pageProps', {
             pageIndex: 0,

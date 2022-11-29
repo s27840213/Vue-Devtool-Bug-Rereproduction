@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import { captureException } from '@sentry/browser'
 import store from '@/store'
 import { IListServiceContentDataItem, IListServiceContentData } from '@/interfaces/api'
@@ -610,7 +610,7 @@ class AssetUtils {
         }
         pageUtils.setAutoResizeNeededForPages(jsonDataList, true)
         pageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
-        Vue.nextTick(() => {
+        nextTick(() => {
           pageUtils.scrollIntoPage(targetIndex)
           // @TODO: resize page/layer before adding to the store.
           if (resize) {

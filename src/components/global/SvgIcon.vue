@@ -35,8 +35,7 @@ export default defineComponent({
       default: 'blue-1'
     },
     iconHeight: {
-      type: String,
-      required: true
+      type: String
     }
   },
   data() {

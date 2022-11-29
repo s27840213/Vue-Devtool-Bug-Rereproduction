@@ -1,5 +1,5 @@
 import store from '@/store'
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import GroupUtils from '@/utils/groupUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import ZindexUtils from '@/utils/zindexUtils'
@@ -178,7 +178,7 @@ class ShortcutUtils {
     if (targetPageIndex === this.copySourcePageIndex) {
       navigator.clipboard.writeText(JSON.stringify(GeneralUtils.deepCopy(store.getters.getLayer(this.copySourcePageIndex, store.getters.getCurrSelectedIndex))))
     }
-    Vue.nextTick(() => {
+    nextTick(() => {
       StepsUtils.record()
     })
   }
@@ -282,7 +282,7 @@ class ShortcutUtils {
       editor.storage.nuTextStyle.pasting = true
       chainedCommands.run()
       editor.storage.nuTextStyle.pasting = false
-      Vue.nextTick(() => {
+      nextTick(() => {
         editor.commands.scrollIntoView()
       })
       LayerUtils.updatecCurrTypeLayerProp({ isEdited: true })
@@ -396,7 +396,7 @@ class ShortcutUtils {
         }
       }
       await StepsUtils.undo()
-      Vue.nextTick(() => {
+      nextTick(() => {
         tiptapUtils.agent(editor => {
           const currLayer = LayerUtils.getCurrLayer
           let textLayer = currLayer
@@ -420,7 +420,7 @@ class ShortcutUtils {
   async redo() {
     if (!StepsUtils.isInLastStep) {
       await StepsUtils.redo()
-      Vue.nextTick(() => {
+      nextTick(() => {
         tiptapUtils.agent(editor => {
           const currLayer = LayerUtils.getCurrLayer
           let textLayer = currLayer

@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 
 class HintUtils {
   showHint: boolean
@@ -47,7 +47,7 @@ class HintUtils {
   }
 
   private showHintUnderTarget(target: HTMLElement) {
-    Vue.nextTick(() => {
+    nextTick(() => {
       const el = document.querySelector('.hint') as HTMLElement
       const [width, height] = [el.offsetWidth, el.offsetHeight]
       const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]

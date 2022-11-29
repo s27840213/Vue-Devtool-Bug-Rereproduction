@@ -2,7 +2,7 @@ import { IPopupComponent, IPopupProps } from '@/interfaces/popup'
 import store from '@/store'
 import { PopupSliderEventType } from '@/store/types'
 import { EventEmitter } from 'events'
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import MouseUtils from './mouseUtils'
 
 interface ISliderConfig {
@@ -64,7 +64,7 @@ class PopupUtils {
   }
 
   private openPopupNearTarget(target: string, pos: { x: 'left' | 'right', y: 'top' | 'bottom' }) {
-    Vue.nextTick(() => {
+    nextTick(() => {
       const [width, height] = [this.popupEl.offsetWidth, this.popupEl.offsetHeight]
       const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
       const { left, bottom, right, top } = document.querySelector(target)?.getBoundingClientRect() as DOMRect
@@ -90,7 +90,7 @@ class PopupUtils {
   }
 
   private openPopupOnMousePos(event: MouseEvent) {
-    Vue.nextTick(() => {
+    nextTick(() => {
       const [width, height] = [this.popupEl.offsetWidth, this.popupEl.offsetHeight]
       const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
       const mousePos = MouseUtils.getMouseAbsPoint(event)

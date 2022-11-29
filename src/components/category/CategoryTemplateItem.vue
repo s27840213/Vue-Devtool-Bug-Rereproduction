@@ -35,8 +35,7 @@ export default defineComponent({
   },
   props: {
     src: {
-      type: String,
-      required: true
+      type: String
     },
     item: {
       type: Object,
@@ -47,8 +46,7 @@ export default defineComponent({
       required: true
     },
     groupItem: {
-      type: Object,
-      required: true
+      type: Object
     }
   },
   data() {

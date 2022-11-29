@@ -19,22 +19,22 @@ div(id="app" :style="appStyles()")
   div(class="modal-container"
       v-if="isModalOpen")
     modal-card
-  notifications(group="copy"
-    position="top center"
-    width="300px"
-    :max="2"
-    :duration="2000")
-    template(v-slot:body="{ item }")
-      div(class="notification copy"
-        v-html="item.text")
-  notifications(group="error"
-    position="top center"
-    width="300px"
-    :max="1"
-    :duration="5000")
-    template(v-slot:body="{ item }")
-      div(class="notification error"
-        v-html="item.text")
+  //- notifications(group="copy"
+  //-   position="top center"
+  //-   width="300px"
+  //-   :max="2"
+  //-   :duration="2000")
+  //-   template(v-slot:body="{ item }")
+  //-     div(class="notification copy"
+  //-       v-html="item.text")
+  //- notifications(group="error"
+  //-   position="top center"
+  //-   width="300px"
+  //-   :max="1"
+  //-   :duration="5000")
+  //-   template(v-slot:body="{ item }")
+  //-     div(class="notification error"
+  //-       v-html="item.text")
 </template>
 
 <script lang="ts">

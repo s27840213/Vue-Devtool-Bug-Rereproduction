@@ -21,6 +21,7 @@ import assetUtils from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import appJson from '@/assets/json/app.json'
 import generalUtils from '@/utils/generalUtils'
+import { h, resolveComponent } from 'vue'
 
 const MOBILE_ROUTES = [
   'Home',
@@ -197,7 +198,7 @@ const router = createRouter({
       // Include the locales you support between ()
       path: `/:locale${localeUtils.getLocaleRegex()}?`,
       component: {
-        render(h: any) { return h('router-view') }
+        render() { return h(resolveComponent('router-view')) }
       },
       beforeEnter(to, from, next) {
         if (logUtils.getLog()) {
@@ -247,15 +248,15 @@ router.beforeEach(async (to, from, next) => {
 
   // Force login in these page
   if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string)) {
-    if (!store.getters['user/isLogin']) {
-      const token = localStorage.getItem('token')
-      if (token === '' || !token) {
-        next({ name: 'SignUp', query: { redirect: to.fullPath } })
-        return
-      } else {
-        await store.dispatch('user/login', { token: token })
-      }
-    }
+    // if (!store.getters['user/isLogin']) {
+    //   const token = localStorage.getItem('token')
+    //   if (token === '' || !token) {
+    //     next({ name: 'SignUp', query: { redirect: to.fullPath } })
+    //     return
+    //   } else {
+    //     await store.dispatch('user/login', { token: token })
+    //   }
+    // }
   } else {
     if (!store.getters['user/isLogin']) {
       const token = localStorage.getItem('token')

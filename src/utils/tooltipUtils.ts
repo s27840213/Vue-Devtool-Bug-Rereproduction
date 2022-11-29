@@ -38,16 +38,16 @@ class TooltipUtils {
   }
 
   async bind(el: HTMLElement, binding: any): Promise<void> {
-    const options = {
-      value: this.generateConfig(binding.value),
-      oldValue: binding.oldValue,
-      modifiers: binding.modifiers
-    }
-    VTooltip.bind(el, options)
+    // const options = {
+    //   value: this.generateConfig(binding.value),
+    //   oldValue: binding.oldValue,
+    //   modifiers: binding.modifiers
+    // }
+    // VTooltip.bind(el, options)
   }
 
   unbind(el: HTMLElement): void {
-    destroyTooltip(el)
+    // destroyTooltip(el)
   }
 }
 

@@ -9,7 +9,7 @@ import TextUtils from './textUtils'
 import mouseUtils from './mouseUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import stepsUtils from './stepsUtils'
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import { SrcObj } from '@/interfaces/gallery'
 import { ITiptapSelection } from '@/interfaces/text'
 import mathUtils from './mathUtils'
@@ -124,7 +124,7 @@ class LayerUtils {
      * e.g. text-layer: the editing props need to be set to false after deactive
      * Hence, this kind of initilization should be done before conducting a step-record.
      */
-    Vue.nextTick(() => {
+    nextTick(() => {
       stepsUtils.record()
     })
   }

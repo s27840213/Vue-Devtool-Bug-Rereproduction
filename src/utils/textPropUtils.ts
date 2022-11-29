@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import store from '@/store'
 import text, { ITextState } from '@/store/text/index'
 import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
@@ -103,7 +103,7 @@ class TextPropUtils {
           const newConfig = this.spanPropertyHandler(propName, prop, selStart, selEnd, config as IText)
           LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
           if (TextUtils.isSel(selEnd)) {
-            Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
+            nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
           } else {
             setTimeout(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end), 0)
           }
@@ -274,7 +274,7 @@ class TextPropUtils {
       const prop = this.propIndicator(start, end, propName, value ?? '', config)
       const newConfig = this.spanPropertyHandler(propName, prop, start, end, config)
       LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: newConfig.paragraphs })
-      // Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end, subLayerIndex))
+      // nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end, subLayerIndex))
       TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end, subLayerIndex)
     }
   }
@@ -1031,7 +1031,7 @@ class TextPropUtils {
             }
           }
           editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
-          Vue.nextTick(() => {
+          nextTick(() => {
             tiptapUtils.forceUpdate()
             this.updateTextPropsState()
           })

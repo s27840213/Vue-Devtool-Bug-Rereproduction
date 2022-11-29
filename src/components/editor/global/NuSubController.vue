@@ -47,9 +47,7 @@ import { mapState, mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import { ICoordinate } from '@/interfaces/frame'
 import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IText, ITmp } from '@/interfaces/layer'
-import { IControlPoints } from '@/interfaces/controller'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
@@ -93,10 +91,6 @@ export default defineComponent({
       required: true
     },
     primaryLayer: {
-      type: Object,
-      required: true
-    },
-    snapUtils: {
       type: Object,
       required: true
     },

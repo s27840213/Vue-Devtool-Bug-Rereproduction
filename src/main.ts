@@ -1,16 +1,15 @@
 /* eslint-disable */
 
-import Vue, { createApp, h } from 'vue';
+import Vue, { createApp, h, nextTick } from 'vue';
 import VueRecyclerviewNew from 'vue-recyclerview'
 import App from '@/App.vue'
 import router from './router'
 import store from './store'
 import i18n from './i18n'
 import vueColor from 'vue-color'
-import Notifications from 'vue-notification'
 import VueMeta from 'vue-meta'
-import 'floating-vue/dist/style.css'
-import FloatingVue from 'floating-vue'
+// import 'floating-vue/dist/style.css'
+// import FloatingVue from 'floating-vue'
 import TooltipUtils from './utils/tooltipUtils'
 import VueGtm from '@gtm-support/vue2-gtm'
 import svgIconUtils from './utils/svgIconUtils'
@@ -88,11 +87,10 @@ if (process.env.NODE_ENV !== 'production') {
   app.config.performance = true
 }
 app.use(VueRecyclerviewNew, vueColor)
-app.use(Notifications)
 // app.use(VueMeta)
-app.use(FloatingVue, {
-  themes: tooltipUtils.themes
-})
+// app.use(FloatingVue, {
+//   themes: tooltipUtils.themes
+// })
 
 // Vue.use(VueGtm, {
 //   id: 'GTM-T7LDWBP',
@@ -167,7 +165,7 @@ app.directive('header-border', {
     if (binding.value === true) {
       el.classList.add('navbar-shadow')
     } else {
-      Vue.nextTick(() => {
+      nextTick(() => {
         const target = binding.value
           ? document.querySelector(binding.value)
           : el.nextElementSibling

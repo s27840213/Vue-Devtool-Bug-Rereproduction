@@ -3,7 +3,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import { IStep } from '@/interfaces/steps'
 import TextPropUtils from './textPropUtils'
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import { FunctionPanelType } from '@/store/types'
 import pageUtils from './pageUtils'
 import popupUtils from './popupUtils'
@@ -285,7 +285,7 @@ class StepsUtils {
       pageUtils.scrollIntoPage(pageIndex)
     }
     if (this.currStep > 0) {
-      Vue.nextTick(() => {
+      nextTick(() => {
         if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
           TextPropUtils.updateTextPropsState()
         }
@@ -338,7 +338,7 @@ class StepsUtils {
     if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
       pageUtils.scrollIntoPage(pageIndex)
     }
-    Vue.nextTick(() => {
+    nextTick(() => {
       if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
         TextPropUtils.updateTextPropsState()
       }

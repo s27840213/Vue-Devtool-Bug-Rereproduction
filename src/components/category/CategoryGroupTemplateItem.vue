@@ -33,8 +33,7 @@ export default defineComponent({
   },
   props: {
     src: {
-      type: String,
-      required: true
+      type: String
     },
     item: {
       type: Object,

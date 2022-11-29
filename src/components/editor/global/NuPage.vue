@@ -250,7 +250,7 @@ export default defineComponent({
     },
     isScaling: {
       type: Boolean,
-      required: true
+      default: false
     }
   },
   mounted() {
