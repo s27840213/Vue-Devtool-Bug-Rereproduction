@@ -182,8 +182,8 @@ export default Vue.extend({
         if (this.forRender) {
           return
         }
-        this.handleIsTransparent()
         this.previewAsLoading()
+        this.handleIsTransparent()
       },
       deep: true
     },
@@ -540,14 +540,17 @@ export default Vue.extend({
       img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       img.crossOrigin = 'anoynous'
       img.onload = () => {
-        imageShadowUtils.updateEffectProps(this.layerInfo(), {
-          isTransparent: imageShadowUtils.isTransparentBg(img)
-        })
+        const isTransparent = imageShadowUtils.isTransparentBg(img)
+        imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
+        if (!isTransparent && this.config.styles.adjust.blur > 0) {
+          this.$forceUpdate()
+        }
       }
     },
     async handleInitLoad() {
       const { type } = this.config.srcObj
       if (this.userId !== 'backendRendering') {
+        this.handleIsTransparent()
         await this.previewAsLoading()
         const preImg = new Image()
         preImg.onerror = (error) => {
@@ -583,7 +586,6 @@ export default Vue.extend({
       } else {
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getImgDimension))
       }
-      this.handleIsTransparent()
     },
     handleShadowInit() {
       if (this.forRender) return

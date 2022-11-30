@@ -33,6 +33,7 @@ import { IImage, IImageStyle } from '@/interfaces/layer'
 import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 
 export default Vue.extend({
   props: {
@@ -58,6 +59,7 @@ export default Vue.extend({
           this.src = ''
         } else {
           this.previewAsLoading()
+          this.handleIsTransparent()
         }
       }
     },
@@ -90,6 +92,7 @@ export default Vue.extend({
 
     if (this.userId !== 'backendRendering') {
       this.previewAsLoading()
+      this.handleIsTransparent()
       const nextImg = new Image()
       nextImg.onerror = () => {
         if (srcObj.type === 'pexels') {
@@ -230,6 +233,22 @@ export default Vue.extend({
           })
         } catch (error) {
         }
+      }
+    },
+    handleIsTransparent() {
+      const img = new Image()
+      const imgSize = ImageUtils.getSrcSize(this.image.config.srcObj, 100)
+      img.src = ImageUtils.getSrc(this.image.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      img.crossOrigin = 'anoynous'
+      img.onload = () => {
+        this.$store.commit('SET_backgroundImageStyles', {
+          pageIndex: this.pageIndex,
+          styles: {
+            shadow: {
+              isTransparent: imageShadowUtils.isTransparentBg(img)
+            }
+          }
+        })
       }
     },
     imgStyles(): Partial<IImage> {
