@@ -64,7 +64,7 @@
                 :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.description }}
     div(class="page-size-selector__body__hr second bg-gray-4")
     div(class="page-size-selector__body__submit")
-      checkbox(iconSize="12px" v-model="copyBeforeApply") {{$t('NN0211')}}
+      checkbox(:iconSize="isTouchDevice ? '16px' : '12px'" v-model="copyBeforeApply") {{$t('NN0211')}}
       btn(class="page-size-selector__body__button"
           :disabled="!isFormatApplicable"
           @click.native="submit")
@@ -505,6 +505,10 @@ export default Vue.extend({
     padding-right: 5px;
     overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
+    :not(.isTouchDevice) > & {
+      // Set maxHeight 500px to scroll container in PC
+      max-height: 500px;
+    }
     @include firefoxOnly {
       scrollbar-width: thin;
       scrollbar-color: setColor(gray-3) transparent;
