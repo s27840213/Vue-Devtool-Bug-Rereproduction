@@ -21,7 +21,7 @@ class PaymentUtils {
   }
 
   checkPro(item: {plan: number}, target: IPaymentWarningView) {
-    // if (this.isAdmin) return true
+    if (this.isAdmin) return true
     if (item.plan === 1 && !this.isPro) {
       this.openPayment(target)
       return false

@@ -244,7 +244,7 @@ export default Vue.extend({
       return this.whiteTheme
     },
     showLeftBtn(): boolean {
-      return this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize' || this.showExtraColorPanel)
+      return this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel)
     },
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop' || this.inSelectionState
@@ -314,11 +314,6 @@ export default Vue.extend({
           return Object.assign(defaultVal, {
             currEvent: this.currColorEvent,
             panelHistory: this.panelHistory
-          })
-        }
-        case 'resize': {
-          return Object.assign(defaultVal, {
-            ref: 'panelResize'
           })
         }
         case 'brand-list': {
@@ -405,14 +400,10 @@ export default Vue.extend({
       }
     },
     leftBtnName(): string {
-      if (this.panelHistory.length > 0 && this.currActivePanel !== 'resize') {
-        return 'back-circle'
-      } else {
-        return 'close-circle'
-      }
+      return 'back-circle'
     },
     rightBtnName(): string {
-      if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop', 'resize'].includes(this.currActivePanel)) {
+      if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop'].includes(this.currActivePanel)) {
         return 'check-mobile-circle'
       } else {
         return 'close-circle'
@@ -473,11 +464,6 @@ export default Vue.extend({
                 imgControl: !this.backgroundImgControl
               })
             }
-            break
-          }
-
-          case 'resize': {
-            (this.$refs.panelResize as any).applySelectedFormat()
             break
           }
 
@@ -569,9 +555,6 @@ export default Vue.extend({
     },
     maxHeightPx() {
       return (this.$el.parentElement as HTMLElement).clientHeight
-    },
-    getMaxHeightPx(): number {
-      return parseFloat((this.$el as HTMLElement).style.maxHeight.split('px')[0])
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
       if (this.fixSize) {
