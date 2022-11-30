@@ -79,11 +79,7 @@ window.onerror = function (msg, url, line) {
 // }
 
 
-const app = createApp({
-  mounted() {
-
-  },
-}).use(i18n).use(router).use(store)
+const app = createApp(App).use(i18n).use(router).use(store)
 
 const tooltipUtils = new TooltipUtils()
 
