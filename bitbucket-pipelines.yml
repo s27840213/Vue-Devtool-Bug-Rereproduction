@@ -16,7 +16,7 @@ pipelines:
             image: cypress/browsers:node14.17.0-chrome88-ff89
             script:
               - yarn install
-              - yarn build
+              - yarn build:prerender
             artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
               - dist/**
         # - step:

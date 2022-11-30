@@ -75,11 +75,8 @@ export default defineComponent({
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
-    this.showFps()
 
-    if ((window as any).__PRERENDER_INJECTED !== undefined) {
-      document.dispatchEvent(new Event('render-event'))
-    }
+    document.dispatchEvent(new Event('render-event'))
   },
   beforeMount() {
     networkUtils.registerNetworkListener()
