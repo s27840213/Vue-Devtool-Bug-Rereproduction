@@ -47,6 +47,7 @@ import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import _ from 'lodash'
+import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -236,6 +237,7 @@ export default Vue.extend({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
       this.drawSvgBG()
+      testUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
     },
     observeAllSpans() {
       const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
