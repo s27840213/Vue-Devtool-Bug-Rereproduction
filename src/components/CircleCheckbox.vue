@@ -33,8 +33,7 @@ export default defineComponent({
         return this.checkedValues !== undefined ? this.checkedValues : this.checked
       },
       set(value: Array<any> | boolean): void {
-        if (!this.checkedValues) {
-        } else {
+        if (this.checkedValues) {
           if (!this.disabled) {
             this.$emit('update', value)
           }

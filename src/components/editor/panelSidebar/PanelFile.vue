@@ -104,6 +104,7 @@ export default defineComponent({
     onDrop(evt: DragEvent) {
       const dt = evt.dataTransfer
       if (evt.dataTransfer?.getData('data') || !dt) {
+        // console.log('')
       } else {
         const files = dt.files
         if (!networkUtils.check()) {

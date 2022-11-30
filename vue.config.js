@@ -1,4 +1,36 @@
+/**
+ * Chain-webpack 文件
+ * 規則處理順序:
+ *  - pre 優先處理
+ *  - normal 正常處理 (default)
+ *  - inline 其次處理
+ *  - post 最後處理
+ *         config.module
+            .rule('lint') // 定義一個叫 lint 的規則
+                .test(/\.js$/) // 設置 lint 規則的 RexExp 來匹配對應檔案
+                .pre()  // 指定此規則的優先級
+                .include // 設置當前規則作用的資料夾
+                    .add('src')
+                    .end()
+                .use('eslint') // 指定一个名叫 eslint 的 loader 配置
+                    .loader('eslint-loader') // 該配置使用 eslint-loader 作為 loader
+                    .options({ // 該 eslint-loader 的配置
+                        rules: {
+                            semi: 'off'
+                        }
+                    })
+                    .end()
+                .use('zidingyi') // 指定一个名叫 zidingyi 的 loader 配置
+                    .loader('zidingyi-loader') // 该配置使用 zidingyi-loader 作為處理 loader
+                    .options({ // 該 zidingyi-loader 的配置
+                        rules: {
+                            semi: 'off'
+                        }
+                    })
+ */
+
 /* eslint-disable indent */
+
 const path = require('path')
 const webpack = require('webpack')
 // const SentryWebpackPlugin = require('@sentry/webpack-plugin')
@@ -68,6 +100,13 @@ module.exports = defineConfig({
             .end()
             .use('file-loader')
             .loader('file-loader')
+
+        config.module
+            .rule('image-assets')
+            .test(/\.(png|jpg|gif|svg)$/)
+            .exclude.add(resolve('src/assets/icon'))
+            .end()
+            .type('asset/resource')
         // config.module
         //     .rule('babel-loader')
         //     .test(/\.js$/)
@@ -200,28 +239,11 @@ module.exports = defineConfig({
         }
     },
 
-    // configureWebpack: {
-    //     plugins: [
-    //         new PrerenderSPAPlugin({
-    //             staticDir: path.join(__dirname, 'dist'),
-    //             routes: ['/', '/tw', '/us', '/jp', '/templates'],
-    //             renderer: new Renderer({
-    //                 renderAfterDocumentEvent: 'render-event',
-    //                 headless: true
-    //             }),
-    //             injectProperty: '__PRERENDER_INJECTED',
-    //             // Optional - Any values you'd like your app to have access to via `window.injectProperty`.
-    //             inject: {
-    //                 isPrerender: true
-    //             }
-    //         })
-    //     ]
-    // },
-    // indexPath: 'app.html',
     css: {
         loaderOptions: {
             scss: {
-                prependData: '@use "~@/assets/scss/utils" as *;'
+                // prependData: '@use "~@/assets/scss/utils" as *;'
+                additionalData: '@use "~@/assets/scss/utils" as *;'
             }
         }
     },

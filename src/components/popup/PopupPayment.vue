@@ -178,12 +178,12 @@ export default defineComponent({
         case 'brandkit':
           return [this.$t('NN0583') as string, 'brandkit.jpg']
         case 'bgrm':
-        default:
-          return [this.$t('NN0652') as string, 'remover.jpg']
         case 'pro-template':
           return [this.$t('NN0653') as string, 'cb.jpg']
         case 'pro-object':
           return [this.$t('NN0658') as string, 'pro-object.jpg']
+        default:
+        return [this.$t('NN0652') as string, 'remover.jpg']
       }
     },
     async changeView(name: string) {

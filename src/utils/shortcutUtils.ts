@@ -102,11 +102,11 @@ class ShortcutUtils {
             return 'image'
           } else if (blob.type.includes('text')) {
             return 'text'
-          } else {
-            return ''
           }
         }
       }
+
+      return ''
     } catch (err) {
       console.error(err)
     }

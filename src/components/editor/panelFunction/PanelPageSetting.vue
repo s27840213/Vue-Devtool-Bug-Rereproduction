@@ -632,7 +632,7 @@ export default defineComponent({
 
       // fill in cover_ids
       const coverList = this.groupInfo.cover_ids.split(',')
-      coverList.map((cover) => {
+      coverList.forEach((cover) => {
         const id = parseInt(cover.split(':')[0])
         if (id === 0) {
           return

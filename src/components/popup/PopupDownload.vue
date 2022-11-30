@@ -440,7 +440,7 @@ export default defineComponent({
 
             switch (rangeType) {
               case 'all': {
-                pageUtils.getPages.map((page, index) => {
+                pageUtils.getPages.forEach((page, index) => {
                   if (pageUtils.hasDesignId(index)) {
                     gtmUtils.trackPageDownload(page.designId)
                   }
@@ -448,7 +448,7 @@ export default defineComponent({
                 break
               }
               case 'spec': {
-                this.pageRange.map((index: number) => {
+                this.pageRange.forEach((index: number) => {
                   if (pageUtils.hasDesignId(index)) {
                     gtmUtils.trackPageDownload(pageUtils.getPage(index).designId)
                   }

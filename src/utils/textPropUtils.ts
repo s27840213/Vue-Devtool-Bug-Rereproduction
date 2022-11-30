@@ -1144,7 +1144,6 @@ class TextPropUtils {
             flag = true
             break
           }
-          default: { }
         }
         if (flag) break
       }
