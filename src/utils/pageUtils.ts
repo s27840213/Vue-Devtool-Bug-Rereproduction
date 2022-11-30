@@ -101,6 +101,9 @@ class PageUtils {
     const defaultPage: IPage = {
       width: 1080,
       height: 1080,
+      physicalWidth: 28.575,
+      physicalHeight: 28.575,
+      sizeUnit: 'px',
       backgroundColor: '#ffffff',
       backgroundImage: {
         config: layerFactary.newImage({
