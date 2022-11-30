@@ -37,7 +37,7 @@
         template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isDragging()")
           div(class="sub-controller"
               :style="transformStyle")
-            template(v-for="(layer,index) in getLayers()")
+            template(v-for="(layer,index) in getLayers")
               nu-sub-controller(v-if="layer.type !== 'image' || !layer.imgControl"
                 class="relative"
                 data-identifier="controller"
@@ -279,14 +279,14 @@ export default Vue.extend({
 
     if (this.config.type === LayerType.frame && (this.config as IFrame).clips.length === 1 && this.config.clips[0].srcObj.type === 'frame') {
       window.requestAnimationFrame(() => {
-        vivistickerUtils.getIosImg()
-          .then((images: Array<string>) => {
-            FrameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, 0, {
-              type: 'ios',
-              assetId: images[0],
-              userId: ''
-            })
-          })
+        // vivistickerUtils.getIosImg()
+        //   .then((images: Array<string>) => {
+        //     FrameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, 0, {
+        //       type: 'ios',
+        //       assetId: images[0],
+        //       userId: ''
+        //     })
+        //   })
       })
     }
   },
@@ -317,6 +317,11 @@ export default Vue.extend({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       controllerHidden: 'vivisticker/getControllerHidden'
     }),
+    getLayers(): Array<ILayer> {
+      const type = this.getLayerType
+      return (type === 'group' || type === 'tmp')
+        ? this.config.layers : (type === 'frame' ? this.config.clips : [])
+    },
     isControllerShown(): boolean {
       return this.isActive && !this.controllerHidden
     },
@@ -2103,7 +2108,6 @@ export default Vue.extend({
           (this.config.type === LayerType.group && !(this.config as IGroup).layers[targetIndex].active)) {
           updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
           if (this.config.type === LayerType.frame && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame' && !this.controllerHidden && !this.isPointerDownFromSubController) {
-            console.log('click sub controller')
             vivistickerUtils.getIosImg()
               .then(async (images: Array<string>) => {
                 const styles = await ImageUtils.getClipImgDimension((this.config as IFrame).clips[targetIndex], ImageUtils.getSrc({
@@ -2207,11 +2211,6 @@ export default Vue.extend({
         x: this.config.styles.x,
         y: this.config.styles.y
       }
-    },
-    getLayers(): Array<ILayer> {
-      const type = this.getLayerType
-      return (type === 'group' || type === 'tmp')
-        ? this.config.layers : (type === 'frame' ? this.config.clips : [])
     },
     isShown(): boolean {
       return this.config.shown

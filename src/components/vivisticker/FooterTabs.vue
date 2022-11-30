@@ -503,16 +503,6 @@ export default Vue.extend({
                 userId: ''
               })
             })
-          // return vivistickerUtils.getIosImg()
-          //   .then((images: Array<string>) => {
-          //     frameUtils.updateFrameClipSrc(layerUtils.pageIndex, layerIndex, subLayerIdx, {
-          //       type: 'ios',
-          //       assetId: images[0],
-          //       userId: ''
-          //     })
-          //   })
-          // const fileInput = document.getElementById(`input-${layerIndex}-${Math.max(subLayerIdx, 0)}`) as HTMLInputElement
-          // vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
           break
         }
         default: {

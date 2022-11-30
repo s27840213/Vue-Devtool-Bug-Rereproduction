@@ -130,7 +130,27 @@ export default Vue.extend({
       }
     }
   },
-  mounted() {
+  async mounted() {
+    const styles = await imageUtils.getClipImgDimension((this.primaryLayer as IFrame).clips[0], imageUtils.getSrc({
+      type: 'unsplash',
+      assetId: 'photo-1665686310974-2ed1eb7f57ac',
+      userId: ''
+    }))
+
+    const { imgX, imgY, imgWidth, imgHeight } = styles
+
+    FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, 0, {
+      imgWidth,
+      imgHeight,
+      imgX,
+      imgY
+    })
+    FrameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, 0, {
+      type: 'unsplash',
+      assetId: 'photo-1665686310974-2ed1eb7f57ac',
+      userId: ''
+    })
+
     const body = this.$refs.body as HTMLElement
     if (body) {
       /**

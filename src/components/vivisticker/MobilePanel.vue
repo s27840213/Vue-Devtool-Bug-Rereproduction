@@ -44,7 +44,7 @@
     div(class="mobile-panel__bottom-section")
       //- keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-file']")
       //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-      component(v-if="!bgRemoveMode && !hideDynamicComp"
+      component(v-if="currActivePanel && innerTab && !bgRemoveMode && !hideDynamicComp"
         class="border-box"
         v-bind="dynamicBindProps"
         v-on="dynamicBindMethod"
@@ -293,17 +293,17 @@ export default Vue.extend({
     },
     innerTabs(): Record<string, string[]> {
       switch (this.currActivePanel) {
-        case 'replace':
-          return {
-            key: [
-              'photo',
-              'file'
-            ],
-            label: [
-              this.$tc('NN0002', 2),
-              this.$tc('NN0006')
-            ]
-          }
+        // case 'replace':
+        // return {
+        //   key: [
+        //     'photo',
+        //     'file'
+        //   ],
+        //   label: [
+        //     this.$tc('NN0002', 2),
+        //     this.$tc('NN0006')
+        //   ]
+        // }
         default:
           return {
             key: ['']
