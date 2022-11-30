@@ -148,7 +148,7 @@ div(style="position: relative;")
         property-bar(class="mt-5"
           :class="{'input-invalid': !resetPasswordValid}")
           input(class="body-2 text-gray-2"
-            v-model="password" type="number"
+            v-model="password"
             :placeholder="$t('NN0292')"
             :type="togglePeerPasswordInput")
           button(@click="isPeerPassword = !isPeerPassword")
@@ -178,7 +178,7 @@ div(style="position: relative;")
         property-bar(class="mt-5"
           :class="{'input-invalid': !confirmPasswordValid}")
           input(class="body-2 text-gray-2"
-            v-model="confirmPassword" type="number"
+            v-model="confirmPassword"
             :placeholder="$t('NN0296')"
             :type="togglePeerPasswordInput")
           button(@click="isPeerPassword = !isPeerPassword")
