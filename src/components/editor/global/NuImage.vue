@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(v-if="!isImgControl() || forRender || isBgImgControl" class="nu-image"
+  div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
     :id="`nu-image-${config.id}`"
     :style="containerStyles()"
     draggable="false")
@@ -121,6 +121,7 @@ export default Vue.extend({
         const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect() === ShadowEffectType.imageMatched || this.shadow().isTransparent)
         if (redrawImmediately) {
           this.redrawShadow()
+          return
         }
         const img = new Image()
         img.crossOrigin = 'anonymous'
@@ -181,6 +182,7 @@ export default Vue.extend({
         if (this.forRender) {
           return
         }
+        this.handleIsTransparent()
         this.previewAsLoading()
       },
       deep: true
@@ -331,12 +333,14 @@ export default Vue.extend({
       const { imgWidth, imgHeight } = this.config.styles
       let renderW = imgWidth
       let renderH = imgHeight
-      if (!this.forRender && (this.config.parentLayerStyles || this.primaryLayer)) {
-        const { scale } = this.config.parentLayerStyles || this.primaryLayer.styles
+      const primaryLayer = this.primaryLayer || [layerUtils.getLayer(this.pageIndex, this.layerIndex)].filter(i => [LayerType.group, LayerType.frame].includes(i.type as LayerType))[0]
+      const isPrimaryFrameImg = primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.clips[0].isFrameImg
+      if (!this.forRender && (this.config.parentLayerStyles || primaryLayer) && !isPrimaryFrameImg) {
+        const { scale } = this.config.parentLayerStyles || primaryLayer?.styles
         renderW *= scale
         renderH *= scale
       }
-      return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio / 100))
+      return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
     },
     parentLayerDimension(): number {
       const { width, height } = this.config.parentLayerStyles || {}
@@ -403,10 +407,17 @@ export default Vue.extend({
       if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1) {
         const newW = this.config.styles.imgHeight * physicalRatio
         const offsetW = this.config.styles.imgWidth - newW
-        layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-          imgWidth: newW,
-          imgX: this.config.styles.imgX + offsetW / 2
-        }, this.subLayerIndex)
+        if (this.primaryLayerType() === 'group') {
+          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+            imgWidth: newW,
+            imgX: this.config.styles.imgX + offsetW / 2
+          }, this.subLayerIndex)
+        } else {
+          frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+            imgWidth: newW,
+            imgX: this.config.styles.imgX + offsetW / 2
+          })
+        }
       }
     },
     onLoadShadow() {
@@ -522,6 +533,18 @@ export default Vue.extend({
         img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, val, preLoadType)))
       })
     },
+    handleIsTransparent() {
+      if (this.forRender || this.primaryLayerType() === 'frame') return
+      const img = new Image()
+      const imgSize = ImageUtils.getSrcSize(this.config.srcObj, 100)
+      img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      img.crossOrigin = 'anoynous'
+      img.onload = () => {
+        imageShadowUtils.updateEffectProps(this.layerInfo(), {
+          isTransparent: imageShadowUtils.isTransparentBg(img)
+        })
+      }
+    },
     async handleInitLoad() {
       const { type } = this.config.srcObj
       if (this.userId !== 'backendRendering') {
@@ -560,6 +583,7 @@ export default Vue.extend({
       } else {
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getImgDimension))
       }
+      this.handleIsTransparent()
     },
     handleShadowInit() {
       if (this.forRender) return
@@ -677,7 +701,7 @@ export default Vue.extend({
       /**
        * Check if the image is Transparent, only check as the isTransparent flag is undefined and false
        */
-      if (!this.config.styles.shadow.isTransparent) {
+      if (typeof this.config.styles.shadow.isTransparent === 'undefined') {
         canvas.setAttribute('width', `${img.naturalWidth}`)
         canvas.setAttribute('height', `${img.naturalHeight}`)
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
@@ -863,9 +887,6 @@ export default Vue.extend({
         }
       }
     },
-    isImgControl(): boolean {
-      return this.config.imgControl
-    },
     layerInfo(): ILayerInfo {
       const layerInfo = {
         pageIndex: this.pageIndex,
@@ -927,7 +948,7 @@ export default Vue.extend({
     },
     svgFilterElms(): any[] {
       const { adjust } = this.adjustImgStyles()
-      return imageAdjustUtil.convertAdjustToSvgFilter(adjust || {})
+      return imageAdjustUtil.convertAdjustToSvgFilter(adjust || {}, this.config as IImage)
     },
     flipStyles(): any {
       const { horizontalFlip, verticalFlip } = this.config.styles

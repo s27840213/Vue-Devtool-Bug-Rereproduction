@@ -1,15 +1,9 @@
 <template lang="pug">
   div(class="panel")
-    transition(name="panel-up")
-      div(v-if="isColorPanelOpen"
-      class="panel__color-panel")
-        color-panel(@toggleColorPanel="toggleColorPanel"
-          :alignLeft="false")
     keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file', 'panel-brand']")
       component(v-show="isSidebarPanelOpen && !isShowPagePreview && !bgRemoveMode"
         class="p-10 border-box"
         :style="panelStyles()"
-        @toggleColorPanel="toggleColorPanel"
         :is="showPagePanel ? 'panel-page' : panelComponents[currPanel]")
 </template>
 
@@ -18,7 +12,6 @@ import Vue from 'vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
-import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
@@ -39,8 +32,7 @@ export default Vue.extend({
     PanelFile,
     PanelBrand,
     PanelPexels, // for testing purposes
-    PanelPage,
-    ColorPanel
+    PanelPage
   },
   props: {
     isSidebarPanelOpen: Boolean
@@ -64,8 +56,7 @@ export default Vue.extend({
         'panel-page-setting',
         'panel-photo-setting'
       ],
-      isActive: true,
-      isColorPanelOpen: false
+      isActive: true
     }
   },
   computed: {
@@ -82,9 +73,6 @@ export default Vue.extend({
   methods: {
     togglePanel() {
       this.isActive = !this.isActive
-    },
-    toggleColorPanel(bool: boolean) {
-      this.isColorPanelOpen = bool
     },
     panelStyles() {
       return {
