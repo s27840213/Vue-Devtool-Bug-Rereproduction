@@ -68,7 +68,6 @@ module.exports = defineConfig({
             .end()
             .use('file-loader')
             .loader('file-loader')
-
         // config.module
         //     .rule('babel-loader')
         //     .test(/\.js$/)

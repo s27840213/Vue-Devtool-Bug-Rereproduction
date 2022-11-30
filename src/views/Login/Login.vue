@@ -41,7 +41,7 @@ div(style="position: relative;")
           property-bar(class="mt-5"
             :class="{'input-invalid': !passwordValid}")
             input(class="body-2 text-gray-2"
-              v-model="password" type="number"
+              v-model="password"
               :placeholder="$t('NN0163', {term: $tc('NN0180', 2)})"
               :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
