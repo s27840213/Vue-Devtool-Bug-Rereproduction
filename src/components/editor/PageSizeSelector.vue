@@ -64,7 +64,7 @@
                 :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.description }}
     div(class="page-size-selector__body__hr second bg-gray-4")
     div(class="page-size-selector__body__submit")
-      checkbox(:iconSize="isTouchDevice ? '16px' : '12px'" v-model="copyBeforeApply") {{$t('NN0211')}}
+      checkbox(v-model="copyBeforeApply") {{$t('NN0211')}}
       btn(class="page-size-selector__body__button"
           :disabled="!isFormatApplicable"
           @click.native="submit")
