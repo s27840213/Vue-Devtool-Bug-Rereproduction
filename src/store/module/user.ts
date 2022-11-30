@@ -25,7 +25,6 @@ export interface IUserModule {
   role: number,
   roleRaw: number,
   adminMode: boolean,
-  isAuthenticated: boolean,
   account: string,
   email: string
   upassUpdate: string,
@@ -55,7 +54,6 @@ const getDefaultState = (): IUserModule => ({
   role: -1,
   roleRaw: -1,
   adminMode: true,
-  isAuthenticated: false,
   account: '',
   email: '',
   upassUpdate: '',
@@ -97,7 +95,7 @@ const state = getDefaultState()
 
 const getters: GetterTree<IUserModule, any> = {
   isLogin: state => {
-    return state.isAuthenticated
+    return state.token.length > 0
   },
   getUserId: state => {
     return state.userId
@@ -184,7 +182,6 @@ const getters: GetterTree<IUserModule, any> = {
 
 const mutations: MutationTree<IUserModule> = {
   [SET_TOKEN](state: IUserModule, token: string) {
-    state.isAuthenticated = token.length > 0
     state.token = token
     localStorage.setItem('token', token)
   },
@@ -283,7 +280,6 @@ const actions: ActionTree<IUserModule, unknown> = {
   async login({ commit, dispatch }, { token, account, password }) {
     try {
       const { data } = await userApis.login(token, account, password)
-      state.isAuthenticated = token.length > 0
       await dispatch('loginSetup', { data: data })
       return Promise.resolve(data)
     } catch (error) {
