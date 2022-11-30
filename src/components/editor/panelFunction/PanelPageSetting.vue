@@ -222,6 +222,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import { ILayout } from '@/interfaces/layout'
 import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 import pageUtils from '@/utils/pageUtils'
+import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   components: {
@@ -411,6 +412,7 @@ export default Vue.extend({
       }
     },
     applySelectedFormat() {
+      if (!paymentUtils.checkPro({ plan: 1 }, 'page-resize')) return
       if (this.copyBeforeApply) {
         (this.$refs.pageSizeSelector as any).copyAndApplySelectedFormat()
       } else {
