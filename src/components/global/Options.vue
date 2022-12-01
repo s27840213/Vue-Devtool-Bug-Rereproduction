@@ -17,6 +17,7 @@ export default Vue.extend({
     },
     // Use v-model to two way bindings this props, don't use :value.
     value: {
+      type: String,
       default: ''
     },
     // To use placeholder, you need to pass ph.

@@ -151,7 +151,8 @@ export default Vue.extend({
         this.setPageScaleRatio(this.prevPageScaleRatio)
         stepsUtils.record()
       } else {
-        const { teamId, id, assetIndex } = (this.autoRemoveResult as IBgRemoveInfo)
+        const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
+        const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
         const previewSrc = this.canvas.toDataURL('image/png;base64')
         const { pageId, layerId } = this.bgRemoveIdInfo
         layerUtils.updateLayerProps(pageIndex, index, {
@@ -200,7 +201,7 @@ export default Vue.extend({
             this.setLoading(false)
             this.setIsProcessing(false)
           },
-          id: id ?? assetIndex,
+          id: id ?? privateId,
           needCompressed: false
         })
       }

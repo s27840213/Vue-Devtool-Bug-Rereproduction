@@ -182,8 +182,8 @@ export default Vue.extend({
         if (this.forRender) {
           return
         }
-        this.handleIsTransparent()
         this.previewAsLoading()
+        this.handleIsTransparent()
       },
       deep: true
     },
@@ -307,9 +307,9 @@ export default Vue.extend({
       return this.src
     },
     filterId(): string {
-      const { styles: { adjust } } = this.config
+      const { styles: { adjust }, id: layerId } = this.config
       const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
-      const id = blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
+      const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
       return `filter__${id}`
     },
     showCanvas(): boolean {
@@ -540,13 +540,16 @@ export default Vue.extend({
       img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       img.crossOrigin = 'anoynous'
       img.onload = () => {
-        imageShadowUtils.updateEffectProps(this.layerInfo(), {
-          isTransparent: imageShadowUtils.isTransparentBg(img)
-        })
+        const isTransparent = imageShadowUtils.isTransparentBg(img)
+        imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
+        if (!isTransparent && this.config.styles.adjust.blur > 0) {
+          this.$forceUpdate()
+        }
       }
     },
     async handleInitLoad() {
       const { type } = this.config.srcObj
+      this.handleIsTransparent()
       if (this.userId !== 'backendRendering') {
         await this.previewAsLoading()
         const preImg = new Image()
@@ -583,7 +586,6 @@ export default Vue.extend({
       } else {
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getImgDimension))
       }
-      this.handleIsTransparent()
     },
     handleShadowInit() {
       if (this.forRender) return
