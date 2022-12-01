@@ -660,7 +660,7 @@ export default Vue.extend({
     border-radius: 3px;
     text-align: center;
     margin-top: 19px;
-    width: 88%;
+    width: 90%;
     margin-left: auto;
     margin-right: auto;
     display: flex;
