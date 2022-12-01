@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="page-size-selector")
+  div(class="page-size-selector" :class="{isTouchDevice}")
     div(class="page-size-selector__body-row first-row")
       span(class="page-size-selector__body__title subtitle-2"
         :class="defaultTextColor") {{$t('NN0023')}}
@@ -35,7 +35,7 @@
             :iconColor="selectedFormat === 'custom' ? 'blue-1' : this.isDarkTheme ? 'white' : 'gray-2'")
           div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option bg-gray-6")
             div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item body-XS text-gray-2" @click="selectUnit($event, index)") {{unit}}
-    div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
+    div(class="page-size-selector__body__hr first bg-gray-4")
     div(class="page-size-selector__container")
         div(class="page-size-selector__body-row first-row")
           span(class="page-size-selector__body__title subtitle-2"
@@ -55,7 +55,7 @@
         div(class="mt-10")
         div(class="page-size-selector__body-row first-row")
           span(class="page-size-selector__body__title subtitle-2"
-           :class="defaultTextColor") {{$t('NN0025')}}
+              :class="defaultTextColor") {{$t('NN0025')}}
         div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
           svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
         div(v-for="(format, index) in formatList" class="page-size-selector__body-row pointer"
@@ -69,12 +69,22 @@
                 :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
           span(class="page-size-selector__body__typical-size body-4"
                 :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.description }}
+    div(class="page-size-selector__body__hr second bg-gray-4")
+    div(class="page-size-selector__body__submit")
+      checkbox(v-model="copyBeforeApply") {{$t('NN0211')}}
+      btn(class="page-size-selector__body__button"
+          :disabled="!isFormatApplicable"
+          @click.native="submit")
+        svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm")
+        span {{$t('NN0022')}}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import vClickOutside from 'v-click-outside'
 import SearchBar from '@/components/SearchBar.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
+import Checkbox from '@/components/global/Checkbox.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { ILayout } from '@/interfaces/layout'
 import pageUtils from '@/utils/pageUtils'
@@ -84,7 +94,8 @@ import stepsUtils from '@/utils/stepsUtils'
 import listApi from '@/apis/list'
 import generalUtils from '@/utils/generalUtils'
 import resizeUtils from '@/utils/resizeUtils'
-import vClickOutside from 'v-click-outside'
+import paymentUtils from '@/utils/paymentUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   props: {
@@ -98,7 +109,8 @@ export default Vue.extend({
   },
   components: {
     SearchBar,
-    RadioBtn
+    RadioBtn,
+    Checkbox
   },
   mounted() {
     this.selectedUnit = this.currentPageUnit
@@ -121,7 +133,8 @@ export default Vue.extend({
       ],
       selectedUnit: 0,
       showUnitOptions: false,
-      mulPrecision: 1e3
+      mulPrecision: 1e3,
+      copyBeforeApply: true
     }
   },
   watch: {
@@ -156,6 +169,9 @@ export default Vue.extend({
       pagesLength: 'getPagesLength',
       getPageSize: 'getPageSize'
     }),
+    isTouchDevice() {
+      return generalUtils.isTouchDevice()
+    },
     currentPageWidth(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
       return this.selectedUnit
@@ -291,7 +307,6 @@ export default Vue.extend({
     },
     selectFormat(key: string) {
       this.selectedFormat = key
-      this.$emit('selectFormat', key)
     },
     selectUnit(evt: Event, key: number) {
       evt.stopPropagation()
@@ -371,6 +386,16 @@ export default Vue.extend({
       stepsUtils.record()
       this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex) })
     },
+    submit() {
+      if (!paymentUtils.checkPro({ plan: 1 }, 'page-resize')) return
+      if (this.copyBeforeApply) {
+        this.copyAndApplySelectedFormat()
+      } else {
+        this.applySelectedFormat()
+      }
+      editorUtils.setShowMobilePanel(false) // For mobile
+      this.$emit('close') // For PC
+    },
     resizePage(format: { width: number, height: number }) {
       resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
       this.updatePageProps({
@@ -411,6 +436,8 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .page-size-selector {
+  height: 100%;
+  display: grid;
   &__arrow {
     margin-left: auto;
     margin-right: 30%;
@@ -465,12 +492,6 @@ export default Vue.extend({
           line-height: 16px;
           background-color: transparent;
         }
-        // &.border-blue-1 {
-        //   @extend .border-blue-1;
-        // }
-        // &.border-white {
-        //   @extend .border-white;
-        // }
       }
       &__unit {
         display: flex;
@@ -498,8 +519,21 @@ export default Vue.extend({
       }
     }
     &__hr {
-      margin-top: 31px;
-      margin-bottom: 31px;
+      width: 100%;
+      height: 1px;
+      :not(.isTouchDevice) > &.first {
+        margin: 20px 0;
+      }
+      .isTouchDevice > &.first {
+        margin: 24px 0 16px 0;
+      }
+      :not(.isTouchDevice) > &.second {
+        height: 0px;
+        margin: 10px 0;
+      }
+      .isTouchDevice > &.second {
+        margin: 0 0 15.5px 0;
+      }
     }
     &__recently {
       width: 88%;
@@ -533,16 +567,39 @@ export default Vue.extend({
         font-size: 12px;
       }
     }
+    &__submit {
+      width: 100%;
+      > .checkbox {
+        @include body-SM;
+        margin: 0 auto 20px 0;
+        .isTouchDevice > & {
+          margin-bottom: 15.5px;
+        }
+      }
+    }
+    &__button {
+      @include body-SM;
+      width: 100%;
+      height: 36px;
+      border: none;
+      svg {
+        margin-right: 10px;
+        vertical-align: middle;
+      }
+    }
   }
   &__footer {
     height: 20px;
   }
   &__container {
-    max-height: 500px;
     margin-right: -5px;
     padding-right: 5px;
     overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
+    :not(.isTouchDevice) > & {
+      // Set maxHeight 500px to scroll container in PC
+      max-height: 500px;
+    }
     @include firefoxOnly {
       scrollbar-width: thin;
       scrollbar-color: setColor(gray-3) transparent;
@@ -556,12 +613,6 @@ export default Vue.extend({
       background-color: setColor(gray-3);
     }
   }
-}
-.horizontal-rule {
-  height: 1px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0;
 }
 
 .slide-fade-enter-active,

@@ -11,8 +11,8 @@
           class="controller-point"
           :key="`scaler-${index}`"
           :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' })"
-          @pointerdown.prevent.stop="isTouchDevice() ? null : scaleStart"
-          @touchstart="isTouchDevice() ? null : disableTouchEvent")
+          @pointerdown.prevent.stop="isMobile ? null : scaleStart($event)"
+          @touchstart="isMobile ? null : disableTouchEvent($event)")
       div(v-if="isMobile" v-for="(scaler, index) in controlPoints.scalerTouchAreas"
           class="controller-point"
           :key="`scaler-touch-${index}`"
