@@ -549,8 +549,8 @@ export default Vue.extend({
     },
     async handleInitLoad() {
       const { type } = this.config.srcObj
+      this.handleIsTransparent()
       if (this.userId !== 'backendRendering') {
-        this.handleIsTransparent()
         await this.previewAsLoading()
         const preImg = new Image()
         preImg.onerror = (error) => {
