@@ -386,6 +386,10 @@ export default Vue.extend({
           return {
             is: `panel-${this.innerTab}`
           }
+        case 'adjust':
+          return {
+            is: 'panel-adjust'
+          }
         case 'none':
           return {
             is: ''

@@ -189,7 +189,8 @@ class ImageUtils {
     }
   }
 
-  getAssetId(src: string, type: string) {
+  getAssetId(src: string, type?: string) {
+    type = type ?? this.getSrcType(src)
     switch (type) {
       case 'logo-public': {
         const keyStart = 'logo/'
@@ -219,6 +220,10 @@ class ImageUtils {
       case 'svg': {
         const keyStart = 'svg/'
         return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf('/prev') === -1 ? src.indexOf('/larg') : src.indexOf('/prev'))
+      }
+      case 'ios': {
+        const keyStart = 'vvstk://'
+        return src.substring(keyStart.length)
       }
       case 'logo-private':
       case 'private':
@@ -540,22 +545,15 @@ class ImageUtils {
         srcObj: {
           type: this.getSrcType(src),
           userId: '',
-          assetId: src
+          assetId: this.getAssetId(src)
         },
         styles: {
           width: img.width,
           height: img.height
         }
       }
+      console.log(generalUtils.deepCopy(clip.styles))
       return mouseUtils.clipperHandler(imgData as IImage, clip.clipPath, clip.styles).styles
-      // FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-      //   imgWidth,
-      //   imgHeight,
-      //   imgX,
-      //   imgY
-      // })
-      // FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { ...imgData.srcObj })
-      // StepsUtils.record()
     })
   }
 

@@ -232,6 +232,7 @@ export default Vue.extend({
           this.setImgConfig(this.layerInfo())
         }
       } else {
+        groupUtils.deselect()
         this.setImgConfig(undefined)
         setTimeout(() => {
           if (layerUtils.layerIndex === -1) {
