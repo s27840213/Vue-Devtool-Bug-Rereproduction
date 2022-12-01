@@ -11,8 +11,23 @@ import localStorageUtils from '@/utils/localStorageUtils'
 
 class Controller {
   shapes = {} as { [key: string]: any }
+  observer: IntersectionObserver
+  observerCallbackMap: {[key: string]: () => void} = {}
+
   constructor() {
+    this.observerCallbackMap = {}
+    this.observer = new IntersectionObserver(this.intersectionHandler.bind(this))
     this.shapes = this.getDefaultShapes()
+  }
+
+  intersectionHandler(entries: IntersectionObserverEntry[]) {
+    console.log(entries.length)
+    for (const entry of entries) {
+      const id = entry.target.id
+      if (this.observerCallbackMap[id]) {
+        this.observerCallbackMap[id]()
+      }
+    }
   }
 
   getDefaultShapes() {
@@ -169,6 +184,33 @@ class Controller {
   }
 
   getTextHWsBySpans(spans: ISpan[]): { textWidth: number[], textHeight: number[], minHeight: number } {
+    const { body, p } = this.genTextDivP(spans)
+    document.body.appendChild(body)
+    const textHWs = this.getHWsByOffset(p)
+    document.body.removeChild(body)
+    return textHWs
+  }
+
+  async getTextHWsBySpansAsync(spans: ISpan[]): Promise<{ textWidth: number[]; textHeight: number[]; minHeight: number }> {
+    const textId = generalUtils.generateRandomString(12)
+    const { body, p } = this.genTextDivP(spans)
+    body.setAttribute('id', textId)
+    return new Promise(resolve => {
+      this.observerCallbackMap[textId] = () => {
+        const textHWs = this.getHWsByOffset(p)
+        // document.body.removeChild(body)
+        this.observer.unobserve(body)
+        resolve(textHWs)
+      }
+      document.body.appendChild(body)
+      this.observer.observe(body)
+    })
+  }
+
+  genTextDivP(spans: ISpan[]): {
+    body: HTMLDivElement,
+    p: HTMLParagraphElement
+  } {
     const body = document.createElement('div')
     const p = document.createElement('p')
 
@@ -199,8 +241,11 @@ class Controller {
     body.style.height = 'max-content'
     body.style.writingMode = 'initial'
     body.classList.add('nu-text')
-    document.body.appendChild(body)
+    body.classList.add('curve')
+    return { body, p }
+  }
 
+  getHWsByOffset(p: HTMLParagraphElement): { textWidth: number[], textHeight: number[], minHeight: number } {
     const eleSpans = p.querySelectorAll('span.nu-curve-text__span')
     const textWidth = []
     const textHeight = []
@@ -211,13 +256,15 @@ class Controller {
       textHeight.push(offsetHeight)
       minHeight = Math.max(minHeight, offsetHeight)
     }
-
-    document.body.removeChild(body)
     return { textWidth, textHeight, minHeight }
   }
 
   getTextHWs(_content: IText): { textWidth: number[], textHeight: number[], minHeight: number } {
     return this.getTextHWsBySpans(this.flattenSpans(generalUtils.deepCopy(_content)))
+  }
+
+  async getTextHWsAsync(_content: IText): Promise<{ textWidth: number[]; textHeight: number[]; minHeight: number }> {
+    return await this.getTextHWsBySpansAsync(this.flattenSpans(generalUtils.deepCopy(_content)))
   }
 
   calcArea(transforms: string[], minHeight: number, scale: number, config: IText): { areaWidth: number, areaHeight: number } {
@@ -228,6 +275,21 @@ class Controller {
         areaHeight: textHW.height
       }
     }
+    return this.calcAreaCore(transforms, minHeight, scale)
+  }
+
+  async calcAreaAsync(transforms: string[], minHeight: number, scale: number, config: IText): Promise<{ areaWidth: number; areaHeight: number }> {
+    if (transforms.length < 2) {
+      const textHW = await TextUtils.getTextHWAsync(config, -1)
+      return {
+        areaWidth: textHW.width,
+        areaHeight: textHW.height
+      }
+    }
+    return this.calcAreaCore(transforms, minHeight, scale)
+  }
+
+  calcAreaCore(transforms: string[], minHeight: number, scale: number): { areaWidth: number; areaHeight: number } {
     const positionList = transforms.map(transform => transform.match(/[.\d]+/g) || []) as any
     const midLeng = Math.floor(positionList.length / 2)
     const minY = Math.min.apply(null, positionList.map((position: string[]) => position[1]))
@@ -279,6 +341,15 @@ class Controller {
     const { textWidth, minHeight } = this.getTextHWs(config)
     const transforms = this.convertTextShape(textWidth, bend)
     const { areaWidth, areaHeight } = this.calcArea(transforms, minHeight, scale, config)
+    return { areaWidth, areaHeight, minHeight }
+  }
+
+  async getCurveTextHWAsync(config: IText, bend?: number): Promise<{ areaWidth: number; areaHeight: number; minHeight: number }> {
+    bend = bend ?? +((config.styles as any).textShape?.bend ?? 0)
+    const scale = config.styles.scale
+    const { textWidth, minHeight } = await this.getTextHWsAsync(config)
+    const transforms = this.convertTextShape(textWidth, bend)
+    const { areaWidth, areaHeight } = await this.calcAreaAsync(transforms, minHeight, scale, config)
     return { areaWidth, areaHeight, minHeight }
   }
 
@@ -348,6 +419,10 @@ class Controller {
 
   getCurveTextProps(config: IText, bend?: number): { width: number, height: number, x: number, y: number } {
     return this.getCurveTextPropsByHW(config, this.getCurveTextHW(config, bend), bend)
+  }
+
+  async getCurveTextPropsAsync(config: IText, bend?: number): Promise<{ width: number; height: number; x: number; y: number }> {
+    return this.getCurveTextPropsByHW(config, await this.getCurveTextHWAsync(config, bend), bend)
   }
 }
 

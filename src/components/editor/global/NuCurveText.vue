@@ -40,8 +40,8 @@ export default Vue.extend({
       resizeObserver: undefined as ResizeObserver | undefined
     }
   },
-  created () {
-    this.computeDimensions(this.spans())
+  async created () {
+    await this.computeDimensions(this.spans())
     // textUtils.loadAllFonts(this.config, 1)
     textUtils.loadAllFonts(this.config)
   },
@@ -51,24 +51,6 @@ export default Vue.extend({
     this.resizeObserver = undefined
   },
   mounted() {
-    // this.resizeObserver = new ResizeObserver(() => {
-    //   if (this.isDestroyed) return
-
-    //   // console.log('resize')
-
-    //   if (typeof this.subLayerIndex === 'undefined') {
-    //     LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
-    //   } else {
-    //     const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
-    //     if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
-    //     LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
-    //     textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
-    //     textUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
-    //   }
-
-    //   this.computeDimensions(this.spans())
-    // })
-    // this.observeAllSpans()
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
       setTimeout(() => {
         this.resizeCallback()
@@ -169,28 +151,28 @@ export default Vue.extend({
         this.resizeObserver && this.resizeObserver.observe(span as Element)
       })
     },
-    computeDimensions(spans: ISpan[]) {
-      const { textWidth, textHeight, minHeight } = TextShapeUtils.getTextHWsBySpans(spans)
+    async computeDimensions(spans: ISpan[]) {
+      const { textWidth, textHeight, minHeight } = await TextShapeUtils.getTextHWsBySpansAsync(spans)
       this.textWidth = textWidth
       this.textHeight = textHeight
       this.minHeight = minHeight
     },
-    resizeCallback() {
+    async resizeCallback() {
       if (this.isDestroyed) return
 
       // console.log('resize')
 
       if (typeof this.subLayerIndex === 'undefined') {
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, await TextShapeUtils.getTextHWsAsync(this.config))
       } else {
         const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, await TextShapeUtils.getTextHWsAsync(this.config))
         textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
         textUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
       }
 
-      this.computeDimensions(this.spans())
+      await this.computeDimensions(this.spans())
       testUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
     }
   }

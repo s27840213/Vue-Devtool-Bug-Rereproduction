@@ -24,6 +24,8 @@ class TextUtils {
   get getCurrSel(): { start: ISelection, end: ISelection } { return (store.state as any).text.sel }
   get isFontLoading(): boolean { return (store.state as any).text.isFontLoading }
 
+  observer: IntersectionObserver
+  observerCallbackMap: {[key: string]: () => void} = {}
   toRecordId: string
   toSetFlagId: string
   fieldRange: {
@@ -34,6 +36,8 @@ class TextUtils {
   }
 
   constructor() {
+    this.observerCallbackMap = {}
+    this.observer = new IntersectionObserver(this.intersectionHandler.bind(this))
     this.toRecordId = ''
     this.toSetFlagId = ''
     this.fieldRange = {
@@ -41,6 +45,16 @@ class TextUtils {
       lineHeight: { min: 0.5, max: 2.5 },
       fontSpacing: { min: -200, max: 800 },
       opacity: { min: 0, max: 100 }
+    }
+  }
+
+  intersectionHandler(entries: IntersectionObserverEntry[]) {
+    console.log(entries.length)
+    for (const entry of entries) {
+      const id = entry.target.id
+      if (this.observerCallbackMap[id]) {
+        this.observerCallbackMap[id]()
+      }
     }
   }
 
@@ -573,6 +587,44 @@ class TextUtils {
   }
 
   getTextHW(_content: IText, widthLimit = -1): { width: number, height: number } {
+    const body = this.genTextDiv(_content, widthLimit)
+    const scale = _content.styles.scale ?? 1
+    document.body.appendChild(body)
+    const textHW = this.getHWByRect(body, scale, widthLimit)
+    document.body.removeChild(body)
+    return textHW
+  }
+
+  async getTextHWAsync(_content: IText, widthLimit = -1): Promise<{ width: number, height: number }> {
+    const textId = GeneralUtils.generateRandomString(12)
+    const body = this.genTextDiv(_content, widthLimit)
+    body.setAttribute('id', textId)
+    const scale = _content.styles.scale ?? 1
+    return new Promise(resolve => {
+      this.observerCallbackMap[textId] = () => {
+        const textHW = this.getHWByRect(body, scale, widthLimit)
+        // document.body.removeChild(body)
+        this.observer.unobserve(body)
+        resolve(textHW)
+      }
+      document.body.appendChild(body)
+      this.observer.observe(body)
+    })
+    // return new Promise(resolve => {
+    // const observer = new MutationObserver((mutations) => {
+    //   if (document.body.contains(body)) {
+    //     const textHW = this.getHWByRect(body, scale, widthLimit)
+    //     document.body.removeChild(body)
+    //     observer.disconnect()
+    //     resolve(textHW)
+    //   }
+    // })
+    //   observer.observe(document.body, { childList: true, attributes: false, characterData: false })
+    //   document.body.appendChild(body)
+    // })
+  }
+
+  genTextDiv(_content: IText, widthLimit = -1): HTMLDivElement {
     const body = document.createElement('div')
     const content = GeneralUtils.deepCopy(_content) as IText
     content.paragraphs.forEach(pData => {
@@ -631,15 +683,15 @@ class TextUtils {
     }
     body.classList.add('nu-text')
     body.style.writingMode = content.styles.writingMode
-    document.body.appendChild(body)
+    return body
+  }
 
-    const scale = content.styles.scale ?? 1
+  getHWByRect(body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number } {
+    const rect = body.getBoundingClientRect()
     const textHW = {
-      width: body.style.width !== 'max-content' ? widthLimit : body.getBoundingClientRect().width * scale,
-      height: body.style.height !== 'max-content' ? widthLimit : body.getBoundingClientRect().height * scale,
-      body: body
+      width: body.style.width !== 'max-content' ? widthLimit : rect.width * scale,
+      height: body.style.height !== 'max-content' ? widthLimit : rect.height * scale
     }
-    document.body.removeChild(body)
     return textHW
   }
 
@@ -1049,9 +1101,9 @@ class TextUtils {
     }
   }
 
-  autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number }): number {
+  async autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number }): Promise<number> {
     if (config.widthLimit === -1) return config.widthLimit
-    const { widthLimit, otherDimension } = this.autoResizeCore(config, initSize)
+    const { widthLimit, otherDimension } = await this.autoResizeCore(config, initSize)
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const limitDiff = Math.abs(widthLimit - initSize.widthLimit)
     const firstPText = config.paragraphs[0].spans.map(span => span.text).join('')
@@ -1066,17 +1118,17 @@ class TextUtils {
     }
   }
 
-  autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number }): {
+  async autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number }): Promise<{
     widthLimit: number,
     otherDimension: number
-  } {
+  }> {
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const scale = config.styles.scale
     let direction = 0
     let shouldContinue = true
     let widthLimit = initSize.widthLimit
     let autoDimension = -1
-    let autoSize = this.getTextHW(config, widthLimit)
+    let autoSize = await this.getTextHWAsync(config, widthLimit)
     const originDimension = initSize[dimension]
     let prevDiff = Number.MAX_VALUE
     let minDiff = Number.MAX_VALUE
@@ -1110,7 +1162,7 @@ class TextUtils {
         if (direction >= 100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension }
         widthLimit += scale
         direction += 1
-        autoSize = this.getTextHW(config, widthLimit)
+        autoSize = await this.getTextHWAsync(config, widthLimit)
         continue
       }
       if (originDimension - autoDimension > 5 * scale) {
@@ -1118,7 +1170,7 @@ class TextUtils {
         if (direction <= -100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension }
         widthLimit -= scale
         direction -= 1
-        autoSize = this.getTextHW(config, widthLimit)
+        autoSize = await this.getTextHWAsync(config, widthLimit)
         continue
       }
       shouldContinue = false
