@@ -90,9 +90,9 @@ export default Vue.extend({
       }
     }
 
+    this.handleIsTransparent()
     if (this.userId !== 'backendRendering') {
       this.previewAsLoading()
-      this.handleIsTransparent()
       const nextImg = new Image()
       nextImg.onerror = () => {
         if (srcObj.type === 'pexels') {
