@@ -51,6 +51,7 @@ import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   name: 'MobileEditor',
@@ -239,6 +240,8 @@ export default Vue.extend({
         this.$nextTick(() => {
           pageUtils.fitPage()
         })
+      } else {
+        testUtils.initializeFlags('text')
       }
     },
     setPanelHeight(height: number) {

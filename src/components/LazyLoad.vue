@@ -6,7 +6,7 @@
       //- slot(v-if="forceRender || shoudBeRendered")
       //- slot(v-else name="placeholder")
       slot
-      slot(v-if="!forceRender && !shoudBeRendered" name="placeholder")
+    slot(v-if="!forceRender && !shoudBeRendered" name="placeholder")
 </template>
 
 <script lang="ts">
