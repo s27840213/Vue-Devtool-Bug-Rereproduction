@@ -2071,16 +2071,16 @@ export default Vue.extend({
       }
 
       if (!this.isHandleShadow) {
-        if (this.currSubSelectedInfo.index !== -1) {
-          for (let idx = 0; idx < layers.length; idx++) {
-            if (idx !== targetIndex) {
-              updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
-            }
-            if (this.currSubSelectedInfo.type === 'image') {
-              updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
-            }
+        // if (this.currSubSelectedInfo.index !== -1) {
+        for (let idx = 0; idx < layers.length; idx++) {
+          if (idx !== targetIndex) {
+            updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
+          }
+          if (this.currSubSelectedInfo.type === 'image') {
+            updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
           }
         }
+        // }
         if ((this.config.type === LayerType.frame && !(this.config as IFrame).clips[targetIndex].active) ||
           (this.config.type === LayerType.group && !(this.config as IGroup).layers[targetIndex].active)) {
           updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })

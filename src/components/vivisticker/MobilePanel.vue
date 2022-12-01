@@ -44,7 +44,7 @@
     div(class="mobile-panel__bottom-section")
       //- keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-file']")
       //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-      component(v-if="currActivePanel && innerTab && !bgRemoveMode && !hideDynamicComp"
+      component(v-if="currActivePanel && !bgRemoveMode && !hideDynamicComp"
         class="border-box"
         v-bind="dynamicBindProps"
         v-on="dynamicBindMethod"
