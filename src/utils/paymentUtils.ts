@@ -2,6 +2,7 @@
 import Vue from 'vue'
 import store from '@/store'
 import i18n from '@/i18n'
+import { IPaymentView, IPaymentWarningView } from '@/interfaces/payment'
 import modalUtils from './modalUtils'
 import popupUtils from './popupUtils'
 import router from '@/router'
@@ -11,16 +12,18 @@ class PaymentUtils {
   get isAdmin(): string { return store.getters['user/isAdmin'] }
   get isPro(): boolean { return store.getters['payment/getIsPro'] }
 
-  openPayment(initView: string, templateImg = '') {
+  // initView is defined in PopupPayment.vue method changeView.
+  // Set initView and open corresponding layout in PopupPayment.
+  openPayment(initView: IPaymentView, templateImg = '') {
     store.commit('brandkit/SET_isSettingsOpen', false)
     store.commit('payment/SET_initView', initView)
     store.commit('payment/SET_templateImg', templateImg)
     popupUtils.openPopup('payment')
   }
 
-  checkPro(template: { plan: number }, target: string) {
+  checkPro(item: { plan: number }, target: IPaymentWarningView) {
     if (this.isAdmin) return true
-    if (template.plan === 1 && !this.isPro) {
+    if (item.plan === 1 && !this.isPro) {
       this.openPayment(target)
       return false
     }
@@ -40,7 +43,7 @@ class PaymentUtils {
     }
   }
 
-  _checkProTemplate(plan: number, url: string) {
+  private _checkProTemplate(plan: number, url: string) {
     if (this.isAdmin) return true
     if (plan === 1 && !this.isPro) {
       this.openPayment('pro-template', url)
@@ -87,7 +90,7 @@ class PaymentUtils {
     window.open(this.contactUsUrl(), '_blank')
   }
 
-  errorHandler(msg?: string, initView = 'brandkit') {
+  errorHandler(msg?: string, initView = 'brandkit' as IPaymentView) {
     switch (msg) {
       case 'EXCEED_SIZE_LIMIT':
         modalUtils.setModalInfo(i18n.global.t('NN0137') as string, [i18n.global.t('NN0645') as string])

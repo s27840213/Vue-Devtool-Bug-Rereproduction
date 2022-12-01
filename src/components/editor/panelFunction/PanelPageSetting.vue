@@ -14,6 +14,7 @@ div(class="page-setting")
       span(class="body-4 text-gray-3") H
   div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
       @click="toggleSuggestionPanel()")
+    svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm" class="mr-10")
     span(class="page-setting__apply__text") {{$t('NN0022')}}
   transition(name="slide-fade")
     div(v-if="isPanelOpen"
@@ -25,16 +26,7 @@ div(class="page-setting")
           svg-icon(class="page-setting__suggestion-panel__body__close"
                   iconName="close" iconWidth="19px" iconColor="white")
         keep-alive
-          page-size-selector(:isDarkTheme="true" @selectFormat="selectFormat" ref="pageSizeSelector")
-        div(class="page-setting__suggestion-panel__body__buttons")
-          div(class="page-setting__suggestion-panel__body__button text-white"
-              :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
-              @click="applySelectedFormat")
-            span(class="page-setting__suggestion-panel__body__button__text") {{$t('NN0022')}}
-          div(class="page-setting__suggestion-panel__body__button text-white"
-              :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
-              @click="copyAndApplySelectedFormat")
-            span(class="page-setting__suggestion-panel__body__button__text") {{$t('NN0211')}}
+          page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)" ref="pageSizeSelector")
   div(class="page-setting__footer")
   div(v-if="inAdminMode"
     class="template-information")
@@ -217,14 +209,10 @@ import SearchBar from '@/components/SearchBar.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import StepsUtils from '@/utils/stepsUtils'
-import ResizeUtils from '@/utils/resizeUtils'
 import designApis from '@/apis/design-info'
 import GeneralUtils from '@/utils/generalUtils'
-import GroupUtils from '@/utils/groupUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { ILayout } from '@/interfaces/layout'
-import listApi from '@/apis/list'
 import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 import pageUtils from '@/utils/pageUtils'
 
@@ -240,19 +228,14 @@ export default defineComponent({
   },
   data() {
     return {
-      formatList: [] as ILayout[],
-      recentlyUsed: [] as ILayout[],
-      selectedFormat: '',
       pageWidth: '' as string | number,
       pageHeight: '' as string | number,
-      isLayoutReady: false,
       isLocked: true,
       isPanelOpen: false,
       isGetGroup: false,
       isGetTemplate: false,
       updateParentIdChecked: false,
       localeOptions: ['tw', 'us', 'jp'],
-      currentKeyId: '',
       imgRandQuery: '',
       templateInfo: {
         key_id: '' as string,
@@ -290,11 +273,6 @@ export default defineComponent({
     }
   },
   watch: {
-    isPanelOpen(newVal) {
-      if (!newVal) {
-        this.selectedFormat = ''
-      }
-    },
     key_id: function () {
       this.isGetTemplate = false
       this.isGetGroup = false
@@ -350,26 +328,13 @@ export default defineComponent({
     ...mapGetters({
       getPage: 'getPage',
       token: 'user/getToken',
-      getAsset: 'getAsset',
-      groupId: 'getGroupId',
-      groupType: 'getGroupType',
-      pagesLength: 'getPagesLength',
-      getPageSize: 'getPageSize'
+      groupId: 'getGroupId'
     }),
     currentPageWidth(): number {
       return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.width ?? 0)
     },
     currentPageHeight(): number {
       return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.height ?? 0)
-    },
-    aspectRatio(): number {
-      return (this.getPage(pageUtils.currFocusPageIndex)?.width ?? 1) / this.getPage(pageUtils.currFocusPageIndex)?.height ?? 1
-    },
-    isCustomValid(): boolean {
-      return this.pageWidth !== '' && this.pageHeight !== ''
-    },
-    isFormatApplicable(): boolean {
-      return this.selectedFormat === 'custom' ? this.isCustomValid : (this.selectedFormat !== '')
     },
     inAdminMode(): boolean {
       return this.role === 0 && this.adminMode === true
@@ -390,40 +355,11 @@ export default defineComponent({
   methods: {
     ...mapMutations({
       updatePageProps: 'UPDATE_pageProps',
-      addPageToPos: 'ADD_pageToPos',
-      setCurrActivePageIndex: 'SET_currActivePageIndex',
       setIsloading: 'SET_isGlobalLoading'
     }),
     ...mapActions('layouts', [
       'getRecently'
     ]),
-    getSelectedFormat(): ILayout | undefined {
-      if (this.selectedFormat === 'custom') {
-        if (!this.isCustomValid) return undefined
-        return { id: '', width: this.pageWidth as number, height: this.pageHeight as number, title: '', description: '' }
-      } else if (this.selectedFormat.startsWith('recent')) {
-        const [type, index] = this.selectedFormat.split('-')
-        const format = this.recentlyUsed[parseInt(index)]
-        return format
-      } else if (this.selectedFormat.startsWith('preset')) {
-        const [type, index] = this.selectedFormat.split('-')
-        const format = this.formatList[parseInt(index)]
-        return format
-      } else {
-        return undefined
-      }
-    },
-    applySelectedFormat(record = true) {
-      (this.$refs.pageSizeSelector as any).applySelectedFormat()
-      this.setSuggestionPanel(false)
-      if (record) {
-        StepsUtils.record()
-      }
-    },
-    copyAndApplySelectedFormat() {
-      (this.$refs.pageSizeSelector as any).copyAndApplySelectedFormat()
-      this.setSuggestionPanel(false)
-    },
     toggleLock() {
       this.isLocked = !this.isLocked
     },
@@ -432,43 +368,6 @@ export default defineComponent({
     },
     toggleSuggestionPanel() {
       this.setSuggestionPanel(!this.isPanelOpen)
-    },
-    dropDownStyles() {
-      return this.isPanelOpen ? { transform: 'translateX(-50%) rotate(180deg)' } : {}
-    },
-    makeFormatString(format: ILayout) {
-      if (format.id !== '') {
-        return `${format.title} ${format.description}`
-      } else {
-        return `${format.width} x ${format.height}`
-      }
-    },
-    setPageWidth(event: Event) {
-      const value = (event.target as HTMLInputElement).value
-      this.pageWidth = typeof value === 'string' ? parseInt(value) : value
-      this.selectedFormat = 'custom'
-      if (this.isLocked) {
-        if (value === '') {
-          this.pageHeight = ''
-        } else {
-          this.pageHeight = Math.round(parseInt(value) / this.aspectRatio)
-        }
-      }
-    },
-    setPageHeight(event: Event) {
-      const value = (event.target as HTMLInputElement).value
-      this.pageHeight = typeof value === 'string' ? parseInt(value) : value
-      this.selectedFormat = 'custom'
-      if (this.isLocked) {
-        if (value === '') {
-          this.pageWidth = ''
-        } else {
-          this.pageWidth = Math.round(parseInt(value) * this.aspectRatio)
-        }
-      }
-    },
-    selectFormat(key: string) {
-      this.selectedFormat = key
     },
     async getDataClicked() {
       this.setIsloading(true)
@@ -757,11 +656,11 @@ export default defineComponent({
     }
   }
   &__apply {
-    height: 28px;
+    height: 36px;
     border-radius: 3px;
     text-align: center;
     margin-top: 19px;
-    width: 88%;
+    width: 90%;
     margin-left: auto;
     margin-right: auto;
     display: flex;
@@ -807,6 +706,7 @@ export default defineComponent({
   }
 
   &__suggestion-panel {
+    color: white;
     &__arrow {
       margin-left: auto;
       margin-right: 30%;
@@ -877,28 +777,6 @@ export default defineComponent({
         width: 45%;
         white-space: nowrap;
         transform: scale(0.85);
-      }
-      &__buttons {
-        display: flex;
-        width: 95%;
-        margin-left: auto;
-        margin-right: auto;
-        margin-top: 29px;
-        margin-bottom: 17.43px;
-        gap: 11px;
-      }
-      &__button {
-        flex-grow: 1;
-        border-radius: 3px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 4px;
-        text-align: center;
-        &__text {
-          font-weight: 700;
-          font-size: 12px;
-        }
       }
     }
   }

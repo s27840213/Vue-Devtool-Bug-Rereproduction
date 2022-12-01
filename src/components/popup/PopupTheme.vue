@@ -7,22 +7,10 @@ div(class="popup-theme text-left"
       span(v-html="$t('NN0322')")
   div(class="popup-theme-items")
     div(class="caption-LG body-2 mb-5") {{ $t('NN0321') }}
-    download-check-button(class="popup-theme-items__checkbox body-3 text-gray-2 pl-5"
-      type="checkbox"
-      iconSize="12px"
-      :label="$t('NN0324')"
-      value="all"
-      :default-checked="all"
-      @change="handleAllCheck")
-    download-check-button(v-for="theme in themes"
-      type="checkbox"
-      class="popup-theme-items__checkbox body-3 text-gray-2 pl-5"
-      iconSize="12px"
-      :key="theme.id"
-      :label="theme.title"
-      :value="`${theme.id}`"
-      :default-checked="selected[`${theme.id}`]"
-      @change="handleChange")
+    checkbox(v-model="all"
+            class="popup-theme-items__checkbox body-3 text-gray-2 pl-5") {{$t('NN0324')}}
+    checkbox(v-for="theme in themes" v-model="selected[theme.id]"
+            class="popup-theme-items__checkbox body-3 text-gray-2 pl-5") {{theme.title}}
   div(class="popup-theme-buttons")
     btn(class="popup-theme-buttons__btn popup-theme-buttons__btn--cancel rounded"
       type="primary-sm"
@@ -37,12 +25,15 @@ div(class="popup-theme text-left"
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
+import Checkbox from '@/components/global/Checkbox.vue'
 import { Itheme } from '@/interfaces/theme'
 import themeUtils from '@/utils/themeUtils'
+import { mapValues } from 'lodash'
 
 export default defineComponent({
-  components: { DownloadCheckButton },
+  components: {
+    Checkbox
+  },
   directives: {
     clickOutside: vClickOutside.directive
   },
@@ -75,8 +66,11 @@ export default defineComponent({
     isConfirmDisabled(): boolean {
       return !(Object.values(this.selected).some(Boolean))
     },
-    all(): boolean {
-      return Object.values(this.selected).every(Boolean)
+    all: {
+      get: function(): boolean { return Object.values(this.selected).every(Boolean) },
+      set: function(newVal: boolean) {
+        this.selected = mapValues(this.selected, () => newVal)
+      }
     }
   },
   methods: {
@@ -86,15 +80,6 @@ export default defineComponent({
         prev[curr.id] = preSelected.includes(`${curr.id}`)
         return prev
       }, {})
-    },
-    handleAllCheck(event: { value: string, checked: boolean }) {
-      Object.keys(this.selected)
-        .forEach((id: string) => {
-          this.selected[id] = event.checked
-        })
-    },
-    handleChange(event: { value: string, checked: boolean }) {
-      this.selected[event.value] = event.checked
     },
     handleSubmit() {
       this.$emit('change', this.selected)
@@ -128,6 +113,7 @@ export default defineComponent({
 }
 
 .popup-theme-items {
+  @include hover-scrollbar();
   overflow: auto;
   &__checkbox {
     line-height: 24px;

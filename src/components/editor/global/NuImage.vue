@@ -196,116 +196,116 @@ export default defineComponent({
       canvas: undefined as HTMLCanvasElement | undefined
     }
   },
-  // watch: {
-  // getImgDimension(newVal, oldVal) {
-  //   this.handleDimensionUpdate(newVal, oldVal)
-  // },
-  // 'config.srcObj': {
-  //   handler: function () {
-  //     this.shadowBuff.canvasShadowImg = undefined
-  //     if (this.forRender) {
-  //       return
-  //     }
-  //     this.handleIsTransparent()
-  //     this.previewAsLoading()
-  //     },
-  //     deep: true
-  //   },
-  //   'config.styles.shadow.effects': {
-  //     handler(val) {
-  //       const shadow = (this.config as IImage).styles.shadow
-  //       if (shadow.old && shadow.old.currentEffect !== shadow.currentEffect) {
-  //         return
-  //       }
-  //       if (!this.forRender && this.$refs.canvas && !this.isUploadingShadowImg && this.currentShadowEffect() !== ShadowEffectType.none) {
-  //         this.updateShadowEffect(val)
-  //       }
-  //     },
-  //     deep: true
-  //   },
-  //   'config.styles.shadow.currentEffect'(val) {
-  //     if (this.forRender || this.shadow().srcObj.type === 'upload' || this.getCurrFunctionPanelType !== FunctionPanelType.photoShadow) {
-  //       return
-  //     }
-  //     if (this.$refs.canvas) {
-  //       this.handleNewShadowEffect()
-  //     } else {
-  //       /** until the canvas is mounted */
-  //       this.$nextTick(() => this.handleNewShadowEffect())
-  //     }
-  //   },
-  //   showCanvas(val) {
-  //     if (val && (this.config as IImage).styles.shadow.srcObj.type) {
-  //       setTimeout(() => {
-  //         this.handleNewShadowEffect(false)
-  //       })
-  //     }
-  //   },
-  //   'config.imgControl'(val) {
-  //     if (val) {
-  //       const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
-  //       const isSubLayer = typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1
-  //       const currLayer = layerUtils.getLayer(pageIndex, layerIndex)
-  //       const isInFrame = isSubLayer && currLayer.type === LayerType.frame && (currLayer as IFrame).clips[subLayerIdx || 0].type === LayerType.image
-  //       const isInGroup = isSubLayer && currLayer.type === LayerType.group && (currLayer as IGroup).layers[subLayerIdx || 0].type === LayerType.image
-  //       if ((!isSubLayer && currLayer.type === LayerType.image) || isInFrame || isInGroup) {
-  //         this.setImgConfig(this.layerInfo())
-  //       }
-  //     } else {
-  //       this.setImgConfig(undefined)
-  //       setTimeout(() => {
-  //         if (layerUtils.layerIndex === -1) {
-  //           const isSubLayer = this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined'
-  //           const targetIdx = isSubLayer ? ((this.config as IImage).parentLayerStyles?.zindex ?? 0) - 1 : this.config.styles.zindex - 1
-  //           groupUtils.deselect()
-  //           groupUtils.select(this.pageIndex, [targetIdx])
-  //           if (isSubLayer) {
-  //             const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
-  //             if (this.primaryLayerType() === LayerType.group) {
-  //               layerUtils.updateLayerProps(pageIndex, layerIndex, { active: true }, subLayerIdx)
-  //             } else if (this.primaryLayerType() === LayerType.frame) {
-  //               frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx ?? 0, { active: true })
-  //             }
-  //           }
-  //         }
-  //       }, 0)
-  //       this.handleDimensionUpdate()
-  //     }
-  //     if (this.forRender) {
-  //       return
-  //     }
-  //     if (!this.config.imgControl && this.currentShadowEffect() !== ShadowEffectType.none) {
-  //       if (this.shadow().isTransparent && ![ShadowEffectType.floating].includes(this.currentShadowEffect())) {
-  //         this.redrawShadow()
-  //       } else if (this.currentShadowEffect() === ShadowEffectType.imageMatched) {
-  //         this.redrawShadow()
-  //       }
-  //     }
-  //   },
-  //   'config.styles.shadow.srcObj': {
-  //     handler: function (val) {
-  //       if (!this.config.isFrameImg && val.type === '' && !this.config.forRender) {
-  //         imageShadowUtils.setEffect(this.shadow().currentEffect, {}, this.layerInfo())
-  //       }
-  //       this.handleUploadShadowImg()
-  //     },
-  //     deep: true
-  //   },
-  //   uploadShadowImgs: {
-  //     handler(val: Array<IUploadShadowImg>) {
-  //       const latest = val[val.length - 1]
-  //       const shadow = this.shadow()
-  //       if (shadow.srcObj.type === 'upload' && latest.id === shadow.srcObj.assetId) {
-  //         const { pageIndex, layerIndex, subLayerIndex: subLayerIdx } = this
-  //         const srcObj = latest.srcObj
-  //         const shadowImgStyles = latest.styles
-  //         imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
-  //         imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
-  //       }
-  //     },
-  //     deep: true
-  //   }
-  // },
+  watch: {
+  getImgDimension(newVal, oldVal) {
+    this.handleDimensionUpdate(newVal, oldVal)
+  },
+  'config.srcObj': {
+      handler: function () {
+        this.shadowBuff.canvasShadowImg = undefined
+        if (this.forRender) {
+          return
+        }
+        this.previewAsLoading()
+        this.handleIsTransparent()
+      },
+      deep: true
+    },
+    'config.styles.shadow.effects': {
+      handler(val) {
+        const shadow = (this.config as IImage).styles.shadow
+        if (shadow.old && shadow.old.currentEffect !== shadow.currentEffect) {
+          return
+        }
+        if (!this.forRender && this.$refs.canvas && !this.isUploadingShadowImg && this.currentShadowEffect() !== ShadowEffectType.none) {
+          this.updateShadowEffect(val)
+        }
+      },
+      deep: true
+    },
+    'config.styles.shadow.currentEffect'(val) {
+      if (this.forRender || this.shadow().srcObj.type === 'upload' || this.getCurrFunctionPanelType !== FunctionPanelType.photoShadow) {
+        return
+      }
+      if (this.$refs.canvas) {
+        this.handleNewShadowEffect()
+      } else {
+        /** until the canvas is mounted */
+        this.$nextTick(() => this.handleNewShadowEffect())
+      }
+    },
+    showCanvas(val) {
+      if (val && (this.config as IImage).styles.shadow.srcObj.type) {
+        setTimeout(() => {
+          this.handleNewShadowEffect(false)
+        })
+      }
+    },
+    'config.imgControl'(val) {
+      if (val) {
+        const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
+        const isSubLayer = typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1
+        const currLayer = layerUtils.getLayer(pageIndex, layerIndex)
+        const isInFrame = isSubLayer && currLayer.type === LayerType.frame && (currLayer as IFrame).clips[subLayerIdx || 0].type === LayerType.image
+        const isInGroup = isSubLayer && currLayer.type === LayerType.group && (currLayer as IGroup).layers[subLayerIdx || 0].type === LayerType.image
+        if ((!isSubLayer && currLayer.type === LayerType.image) || isInFrame || isInGroup) {
+          this.setImgConfig(this.layerInfo())
+        }
+      } else {
+        this.setImgConfig(undefined)
+        setTimeout(() => {
+          if (layerUtils.layerIndex === -1) {
+            const isSubLayer = this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined'
+            const targetIdx = isSubLayer ? ((this.config as IImage).parentLayerStyles?.zindex ?? 0) - 1 : this.config.styles.zindex - 1
+            groupUtils.deselect()
+            groupUtils.select(this.pageIndex, [targetIdx])
+            if (isSubLayer) {
+              const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
+              if (this.primaryLayerType() === LayerType.group) {
+                layerUtils.updateLayerProps(pageIndex, layerIndex, { active: true }, subLayerIdx)
+              } else if (this.primaryLayerType() === LayerType.frame) {
+                frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx ?? 0, { active: true })
+              }
+            }
+          }
+        }, 0)
+        this.handleDimensionUpdate()
+      }
+      if (this.forRender) {
+        return
+      }
+      if (!this.config.imgControl && this.currentShadowEffect() !== ShadowEffectType.none) {
+        if (this.shadow().isTransparent && ![ShadowEffectType.floating].includes(this.currentShadowEffect())) {
+          this.redrawShadow()
+        } else if (this.currentShadowEffect() === ShadowEffectType.imageMatched) {
+          this.redrawShadow()
+        }
+      }
+    },
+    'config.styles.shadow.srcObj': {
+      handler: function (val) {
+        if (!this.config.isFrameImg && val.type === '' && !this.config.forRender) {
+          imageShadowUtils.setEffect(this.shadow().currentEffect, {}, this.layerInfo())
+        }
+        this.handleUploadShadowImg()
+      },
+      deep: true
+    },
+    uploadShadowImgs: {
+      handler(val: Array<IUploadShadowImg>) {
+        const latest = val[val.length - 1]
+        const shadow = this.shadow()
+        if (shadow.srcObj.type === 'upload' && latest.id === shadow.srcObj.assetId) {
+          const { pageIndex, layerIndex, subLayerIndex: subLayerIdx } = this
+          const srcObj = latest.srcObj
+          const shadowImgStyles = latest.styles
+          imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
+          imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
+        }
+      },
+      deep: true
+    }
+  },
   components: { NuAdjustImage },
   computed: {
     ...mapGetters({
@@ -325,9 +325,9 @@ export default defineComponent({
       return this.src
     },
     filterId(): string {
-      const { styles: { adjust } } = this.config
+      const { styles: { adjust }, id: layerId } = this.config
       const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
-      const id = blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
+      const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
       return `filter__${id}`
     },
     showCanvas(): boolean {
@@ -558,13 +558,16 @@ export default defineComponent({
       img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       img.crossOrigin = 'anoynous'
       img.onload = () => {
-        imageShadowUtils.updateEffectProps(this.layerInfo(), {
-          isTransparent: imageShadowUtils.isTransparentBg(img)
-        })
+        const isTransparent = imageShadowUtils.isTransparentBg(img)
+        imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
+        if (!isTransparent && this.config.styles.adjust.blur > 0) {
+          this.$forceUpdate()
+        }
       }
     },
     async handleInitLoad() {
       const { type } = this.config.srcObj
+      this.handleIsTransparent()
       if (this.userId !== 'backendRendering') {
         await this.previewAsLoading()
         const preImg = new Image()
@@ -601,7 +604,6 @@ export default defineComponent({
       } else {
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getImgDimension))
       }
-      this.handleIsTransparent()
     },
     handleShadowInit() {
       if (this.forRender) return

@@ -11,22 +11,12 @@ import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
 export default defineComponent({
   components: {
     PageSizeSelector
-  },
-  data() {
-    return {
-    }
-  },
-  computed: {
-  },
-  methods: {
-    applySelectedFormat() {
-      (this.$refs.pageSizeSelector as any).applySelectedFormat()
-    }
   }
 })
 </script>
 
 <style lang="scss" scoped>
 .panel-resize {
+  height: 100%;
 }
 </style>

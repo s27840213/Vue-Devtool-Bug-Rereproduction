@@ -16,10 +16,9 @@ div(id="app" :style="appStyles()")
       :info="currSelectedResInfo"
       @blur.native="setCurrSelectedResInfo()"
       tabindex="0")
-  //- div(v-if="isAdmin && !inScreenshotPreview" class="fps")
-  div(class="fps")
+  div(v-if="isAdmin && !inScreenshotPreview" class="fps")
     span FPS: {{fps}}
-    span JS-Heap-Size {{jsHeapSize}}
+    span {{` JS-Heap-Size: ${jsHeapSize / Math.pow(1000, 2)} MB`}}
   div(class="modal-container"
       v-if="isModalOpen")
     modal-card
@@ -164,7 +163,7 @@ export default defineComponent({
           }
           times.push(now)
           this.fps = times.length
-          this.jsHeapSize = (performance as any).memory.usedJSHeapSize
+          this.jsHeapSize = (performance as any).memory ? (performance as any).memory.usedJSHeapSize : -1
           if (this.inScreenshotPreview) {
             clearInterval(this.fpsInterval)
             return
