@@ -522,7 +522,13 @@ export default Vue.extend({
       this.setPanelType(SidebarPanelType.template)
       GroupUtils.reset()
 
-      pageUtils.addPageToPos(pageUtils.newPage({ width: this.config.width, height: this.config.height }), this.pageIndex + 1)
+      pageUtils.addPageToPos(pageUtils.newPage({
+        width: this.config.width,
+        height: this.config.height,
+        physicalWidth: this.config.physicalWidth,
+        physicalHeight: this.config.physicalHeight,
+        unit: this.config.unit
+      }), this.pageIndex + 1)
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })
       StepsUtils.record()
