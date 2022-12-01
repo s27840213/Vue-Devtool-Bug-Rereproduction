@@ -14,6 +14,7 @@
         span(class="body-4 text-gray-3") H
     div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
         @click="toggleSuggestionPanel()")
+      svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm" class="mr-10")
       span(class="page-setting__apply__text") {{$t('NN0022')}}
     transition(name="slide-fade")
       div(v-if="isPanelOpen"
@@ -655,7 +656,7 @@ export default Vue.extend({
     }
   }
   &__apply {
-    height: 28px;
+    height: 36px;
     border-radius: 3px;
     text-align: center;
     margin-top: 19px;

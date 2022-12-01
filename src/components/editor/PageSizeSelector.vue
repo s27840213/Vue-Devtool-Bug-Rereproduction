@@ -68,7 +68,7 @@
       btn(class="page-size-selector__body__button"
           :disabled="!isFormatApplicable"
           @click.native="submit")
-        svg-icon(iconName="pro" iconWidth="22px")
+        svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm")
         span {{$t('NN0022')}}
 </template>
 
@@ -491,7 +491,6 @@ export default Vue.extend({
       height: 36px;
       border: none;
       svg {
-        color: #FFBA49;
         margin-right: 10px;
         vertical-align: middle;
       }

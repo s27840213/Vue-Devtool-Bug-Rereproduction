@@ -14,7 +14,8 @@ export default Vue.extend({
   props: {
     // Use v-model to two way bindings this props, don't use :value.
     value: {
-      default: ''
+      type: Boolean,
+      required: true
     },
     iconSize: {
       type: String,
