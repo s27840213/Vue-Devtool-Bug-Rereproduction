@@ -69,13 +69,19 @@ export default defineComponent({
       coordinateHeight: 0,
       fps: 0,
       jsHeapSize: 0,
-      fpsInterval: 0
+      fpsInterval: 0,
+      fpsStarted: false
     }
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
+    console.log(this.isAdmin)
+    if (this.isAdmin) {
+      this.showFps()
+      this.fpsStarted = true
+    }
 
-    document.dispatchEvent(new Event('render-event'))
+    // document.dispatchEvent(new Event('render-event'))
   },
   beforeMount() {
     networkUtils.registerNetworkListener()
@@ -98,7 +104,7 @@ export default defineComponent({
   },
   watch: {
     isAdmin(newVal) {
-      if (newVal && !this.inScreenshotPreview) {
+      if (newVal && !this.inScreenshotPreview && !this.fpsStarted) {
         this.showFps()
       }
     }

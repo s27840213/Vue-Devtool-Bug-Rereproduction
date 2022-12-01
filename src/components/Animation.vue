@@ -87,7 +87,6 @@ export default defineComponent({
     mp4FileName(): string {
       const splitResult = this.path.split('/')
       const len = splitResult.length
-      console.log(`${splitResult[len - 2]}/${splitResult[len - 1]}`)
       return `${splitResult[len - 2]}/${splitResult[len - 1]}`
     }
   },
