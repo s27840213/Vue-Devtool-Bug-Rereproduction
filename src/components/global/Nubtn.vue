@@ -1,5 +1,6 @@
 <template lang="pug">
 div(:class="`nubtn ${theme} ${sizeClass} ${status}`"
+    v-hint="hint"
     @mouseenter="mouseenter"
     @mouseleave="mouseleave"
     @click="click")
@@ -31,16 +32,20 @@ export default Vue.extend({
       type: String,
       default: 'sm'
     },
-    icon: {
-      type: String,
-      default: 'none'
-    },
     // Use v-model if parent compenent need Nubtn status value.
     // Use :status if you don't want Nubtn change status.
     // Vale: default, hover, disabled, active
     status: {
       type: String,
       default: 'default'
+    },
+    icon: {
+      type: String,
+      default: 'none'
+    },
+    hint: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -169,7 +174,7 @@ export default Vue.extend({
   height: 36px;
   padding: 6px 24px;
   border-radius: 50px;
-  &.default {
+  &.default, &.active {
     color: setColor(blue-1);
     background-color: setColor(blue-4);
   }
@@ -186,7 +191,7 @@ export default Vue.extend({
   height: 36px;
   padding: 6px 24px;
   border-radius: 50px;
-  &.default {
+  &.default, &.active {
     color: setColor(blue-3);
     border: 1px solid setColor(blue-3);
   }

@@ -16,7 +16,7 @@ div(class="btnList" :style="{backgroundColor: darkBG ? '#2C2F43' : 'white'}")
       span {{status}}
       Nubtn(v-for="btn in btns"
             :theme="btn.theme" :size="`${btn.size}${width100?'-full':''}`"
-            :status="status" :icon="btnIcon") {{btnText}}
+            :status="status" :icon="btnIcon" v-hint="btnText") {{btnText}}
 </template>
 
 <script lang="ts">
