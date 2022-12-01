@@ -350,9 +350,10 @@ export default Vue.extend({
       // translate physical size to px size
       let pxWidth = format.width
       let pxHeight = format.height
-      if (this.selectedUnit !== 0) {
-        pxWidth *= this.mulUnits[this.selectedUnit][0]
-        pxHeight *= this.mulUnits[this.selectedUnit][0]
+      if (format.unit !== 'px') {
+        const idxUnit = this.unitOptions.indexOf(format.unit)
+        pxWidth *= this.mulUnits[idxUnit][0]
+        pxHeight *= this.mulUnits[idxUnit][0]
       }
       pxWidth = Math.round(pxWidth)
       pxHeight = Math.round(pxHeight)
