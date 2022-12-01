@@ -2,16 +2,14 @@
   div(class="page-setting")
     div(class="page-setting-row page-setting__title")
       span(class="text-gray-2 label-mid") {{$t('NN0021')}}
-    div(class="page-setting-row page-setting__size")
-      property-bar(class="page-setting__size__box pointer" @click.native="setSuggestionPanel(true)")
-        span(class="body-3 text-gray-2") {{ currentPageWidth }}
-        span(class="body-4 text-gray-3") W
-      svg-icon(class="pointer"
-          :iconName="isLocked ? 'lock' : 'unlock'" :iconWidth="'20px'" :iconColor="'gray-2'"
-          @click.native="toggleLock()")
-      property-bar(class="page-setting__size__box pointer" @click.native="setSuggestionPanel(true)")
-        span(class="body-3 text-gray-2") {{ currentPageHeight }}
-        span(class="body-4 text-gray-3") H
+    div(class="page-setting-row page-setting__size bg-gray-6 pointer" @click="toggleSuggestionPanel()")
+      div(class="page-setting__size__box")
+        span(class="body-XS text-gray-2") {{ `${currentPageWidth} ${currentPageUnit}` }}
+      span(class="body-XS text-gray-3") W
+      span(class="body-XS text-gray-2 text-center") x
+      div(class="page-setting__size__box")
+        span(class="body-XS text-gray-2") {{ `${currentPageHeight} ${currentPageUnit}` }}
+      span(class="body-XS text-gray-3") H
     div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
         @click="toggleSuggestionPanel()")
       svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm" class="mr-10")
@@ -212,7 +210,6 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import designApis from '@/apis/design-info'
 import GeneralUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { ILayout } from '@/interfaces/layout'
 import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 import pageUtils from '@/utils/pageUtils'
 
@@ -228,8 +225,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      pageWidth: '' as string | number,
-      pageHeight: '' as string | number,
+      pageWidth: NaN,
+      pageHeight: NaN,
       isLocked: true,
       isPanelOpen: false,
       isGetGroup: false,
@@ -331,10 +328,19 @@ export default Vue.extend({
       groupId: 'getGroupId'
     }),
     currentPageWidth(): number {
-      return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.width ?? 0)
+      const currPage = this.getPage(pageUtils.currFocusPageIndex)
+      return this.currentPageUnit !== 'px'
+        ? Math.round((currPage?.physicalWidth ?? 0) * 1e3) / 1e3
+        : Math.round(currPage?.width ?? 0)
     },
     currentPageHeight(): number {
-      return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.height ?? 0)
+      const currPage = this.getPage(pageUtils.currFocusPageIndex)
+      return this.currentPageUnit !== 'px'
+        ? Math.round((currPage?.physicalHeight ?? 0) * 1e3) / 1e3
+        : Math.round(currPage?.height ?? 0)
+    },
+    currentPageUnit(): string {
+      return this.getPage(pageUtils.currFocusPageIndex)?.unit ?? 'px'
     },
     inAdminMode(): boolean {
       return this.role === 0 && this.adminMode === true
@@ -642,16 +648,22 @@ export default Vue.extend({
     }
   }
   &__size {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    grid-template-rows: auto;
-    column-gap: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border-radius: 4px;
     &__box {
-      height: 26px;
+      width: 64px;
+      height: 22px;
       box-sizing: border-box;
-      & input {
-        line-height: 16px;
+      display: flex;
+      align-items: center;
+      text-align: center;
+      & span {
+        width: 100%;
       }
     }
   }
