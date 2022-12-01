@@ -159,7 +159,7 @@ export default Vue.extend({
     background-color: setColor(blue-3, 0.5);
   }
   &.disabled {
-    opacity: 50%;
+    opacity: 0.5;
   }
   &.active {
     background-color: setColor(blue-3);
