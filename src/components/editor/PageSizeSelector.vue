@@ -174,13 +174,13 @@ export default Vue.extend({
     },
     currentPageWidth(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return this.selectedUnit
+      return this.currentPageUnit
         ? Math.round((currPage?.physicalWidth ?? 0) * this.mulPrecision) / this.mulPrecision
         : Math.round(currPage?.width ?? 0)
     },
     currentPageHeight(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return this.selectedUnit
+      return this.currentPageUnit
         ? Math.round((currPage?.physicalHeight ?? 0) * this.mulPrecision) / this.mulPrecision
         : Math.round(currPage?.height ?? 0)
     },
