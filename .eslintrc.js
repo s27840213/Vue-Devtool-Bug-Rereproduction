@@ -25,7 +25,7 @@ module.exports = {
     'multiline-ternary': 'off',
     'vue/multi-word-component-names': 'off',
     'prefer-regex-literals': 'off',
-    'indent': 'off',
+    indent: 'off',
     'no-empty': 'off',
     'no-unreachable-loop': 'off'
     // 'comma-dangle': ['error', 'never'],

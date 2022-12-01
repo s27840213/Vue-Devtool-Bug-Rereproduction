@@ -111,12 +111,10 @@ export default defineComponent({
   },
   props: {
     noSearchbar: {
-      type: Boolean,
-      required: true
+      type: Boolean
     },
     noNavigation: {
-      type: Boolean,
-      required: true
+      type: Boolean
     }
   },
   data() {

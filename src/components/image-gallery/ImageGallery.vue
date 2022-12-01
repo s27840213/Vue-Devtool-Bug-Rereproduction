@@ -23,6 +23,7 @@ import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IPhotoItem } from '@/interfaces/api'
 import generalUtils from '@/utils/generalUtils'
 import { mapState } from 'vuex'
+import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import { GalleryImage } from '@/interfaces/gallery'
 
 export default defineComponent({
@@ -46,11 +47,7 @@ export default defineComponent({
   },
   components: {
     ObserverSentinel,
-    /**
-     * I'm not sure why I need to async import this component to prevent from the following errors:
-     *  did you register the component correctly? For recursive components, make sure to provide the "name" option
-     */
-    GalleryPhoto: () => import('@/components/GalleryPhoto.vue')
+    GalleryPhoto
   },
   computed: {
     ...mapState('file', ['regenerateGalleryFlag']),

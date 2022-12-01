@@ -108,11 +108,11 @@ export default defineComponent({
     },
     isBgImgControl: {
       type: Boolean,
-      required: true
+      default: false
     },
     imgControl: {
       type: Boolean,
-      required: true
+      default: false
     },
     contentScaleRatio: {
       default: 1,

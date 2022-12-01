@@ -248,15 +248,15 @@ router.beforeEach(async (to, from, next) => {
 
   // Force login in these page
   if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string)) {
-    // if (!store.getters['user/isLogin']) {
-    //   const token = localStorage.getItem('token')
-    //   if (token === '' || !token) {
-    //     next({ name: 'SignUp', query: { redirect: to.fullPath } })
-    //     return
-    //   } else {
-    //     await store.dispatch('user/login', { token: token })
-    //   }
-    // }
+    if (!store.getters['user/isLogin']) {
+      const token = localStorage.getItem('token')
+      if (token === '' || !token) {
+        next({ name: 'SignUp', query: { redirect: to.fullPath } })
+        return
+      } else {
+        await store.dispatch('user/login', { token: token })
+      }
+    }
   } else {
     if (!store.getters['user/isLogin']) {
       const token = localStorage.getItem('token')

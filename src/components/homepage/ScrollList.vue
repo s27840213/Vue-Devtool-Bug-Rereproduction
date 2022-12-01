@@ -83,8 +83,7 @@ export default defineComponent({
       required: true
     },
     theme: {
-      type: String,
-      required: true
+      type: String
     }
   },
   data() {
@@ -141,7 +140,7 @@ export default defineComponent({
           this.templateData = response.data.content[0].list
           this.isLoading = false
         })
-        this.title = this.templateTitle[this.theme]
+        this.title = this.templateTitle[this.theme!]
         this.moreLink = `/templates?themes=${this.theme}`
         break
     }
