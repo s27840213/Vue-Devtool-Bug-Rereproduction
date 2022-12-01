@@ -185,7 +185,7 @@ export default Vue.extend({
         : Math.round(currPage?.height ?? 0)
     },
     currentPageUnit(): number {
-      return this.unitOptions.indexOf(this.getPage(pageUtils.currFocusPageIndex)?.sizeUnit ?? 'px')
+      return this.unitOptions.indexOf(this.getPage(pageUtils.currFocusPageIndex)?.unit ?? 'px')
     },
     aspectRatio(): number {
       return (this.getPage(pageUtils.currFocusPageIndex)?.width ?? 1) / this.getPage(pageUtils.currFocusPageIndex)?.height ?? 1
@@ -214,7 +214,8 @@ export default Vue.extend({
         width: item.width ?? 0,
         height: item.height ?? 0,
         title: item.title ?? '',
-        description: item.description ? (item.description.includes(' ') ? item.description.replace(' ', ' px') : item.description + ' px') : ''
+        description: item.description ? (item.description.includes(' ') ? item.description.replace(' ', ' px') : item.description + ' px') : '',
+        unit: item.unit ?? 'px'
       })) : []
     },
     recentlyUsed(): ILayout[] {
@@ -226,7 +227,8 @@ export default Vue.extend({
         width: item.width ?? 0,
         height: item.height ?? 0,
         title: item.title ?? '',
-        description: item.description ?? ''
+        description: item.description ?? '',
+        unit: item.unit ?? 'px'
       })) : []
     },
     isLayoutReady(): boolean {
@@ -250,15 +252,7 @@ export default Vue.extend({
     getSelectedFormat(): ILayout | undefined {
       if (this.selectedFormat === 'custom') {
         if (!this.isCustomValid) return undefined
-        let width = this.pageWidth
-        let height = this.pageHeight
-        if (this.selectedUnit !== 0) {
-          width *= this.mulUnits[this.selectedUnit][0]
-          height *= this.mulUnits[this.selectedUnit][0]
-        }
-        width = Math.round(width)
-        height = Math.round(height)
-        return { id: '', width, height, title: '', description: '' }
+        return { id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.unitOptions[this.selectedUnit] }
       } else if (this.selectedFormat.startsWith('recent')) {
         const [type, index] = this.selectedFormat.split('-')
         const format = this.recentlyUsed[parseInt(index)]
@@ -276,9 +270,9 @@ export default Vue.extend({
     },
     makeFormatString(format: ILayout) {
       if (format.id !== '') {
-        return `${format.title} ${format.description}`
+        return `${format.title} ${format.description.replace(' ', ' ' + format.unit)}`
       } else {
-        return `${format.width} x ${format.height}`
+        return `${format.width} x ${format.height} ${format.unit}`
       }
     },
     setPageWidth(event: Event) {
@@ -331,7 +325,8 @@ export default Vue.extend({
               width: item.width ?? 0,
               height: item.height ?? 0,
               title: item.title ?? '',
-              description: item.description ?? ''
+              description: item.description ?? '',
+              unit: item.unit ?? 'px'
             }))
           }
           if (category.title === `${this.$t('NN0024')}`) {
@@ -340,7 +335,8 @@ export default Vue.extend({
               width: item.width ?? 0,
               height: item.height ?? 0,
               title: item.title ?? '',
-              description: item.description ?? ''
+              description: item.description ?? '',
+              unit: item.unit ?? 'px'
             }))
           }
         }
@@ -351,14 +347,33 @@ export default Vue.extend({
       if (!this.isFormatApplicable) return
       const format = this.getSelectedFormat()
       if (!format) return
-      this.resizePage(format)
+      // translate physical size to px size
+      let pxWidth = format.width
+      let pxHeight = format.height
+      if (this.selectedUnit !== 0) {
+        pxWidth *= this.mulUnits[this.selectedUnit][0]
+        pxHeight *= this.mulUnits[this.selectedUnit][0]
+      }
+      pxWidth = Math.round(pxWidth)
+      pxHeight = Math.round(pxHeight)
+
+      // resize page with px size
+      this.resizePage({
+        width: pxWidth,
+        height: pxHeight,
+        physicalWidth: format.width,
+        physicalHeight: format.height,
+        unit: format.unit
+      })
       if (this.groupType === 1) {
         // resize電商詳情頁時 其他頁面要依width做resize
-        this.resizeOtherPages([pageUtils.currFocusPageIndex], { width: format.width })
+        this.resizeOtherPages([pageUtils.currFocusPageIndex], { width: pxWidth })
       }
+
+      // update recently used size
       listApi.addDesign(format.id, 'layout', format)
       const index = this.recentlyUsed.findIndex((recent) => {
-        return format.id === recent.id && format.width === recent.width && format.height === recent.height
+        return format.id === recent.id && format.width === recent.width && format.height === recent.height && format.unit === recent.unit
       })
       this.updateRecentlyUsed({
         index,
@@ -396,16 +411,16 @@ export default Vue.extend({
       editorUtils.setShowMobilePanel(false) // For mobile
       this.$emit('close') // For PC
     },
-    resizePage(format: { width: number, height: number }) {
+    resizePage(format: { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string}) {
       resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
       this.updatePageProps({
         pageIndex: pageUtils.currFocusPageIndex,
         props: {
           width: format.width,
           height: format.height,
-          physicalWidth: this.pageWidth,
-          physicalHeight: this.pageHeight,
-          sizeUnit: this.unitOptions[this.selectedUnit]
+          physicalWidth: format.physicalWidth,
+          physicalHeight: format.physicalHeight,
+          unit: format.unit
         }
       })
     },
@@ -413,7 +428,7 @@ export default Vue.extend({
       const { pagesLength, getPageSize } = this
       for (let pageIndex = 0; pageIndex < pagesLength; pageIndex++) {
         if (excludes.includes(pageIndex)) continue
-        const { width, height, sizeUnit } = getPageSize(pageIndex)
+        const { width, height, unit } = getPageSize(pageIndex)
         const newSize = {
           width: format.width || width * (format.height / height),
           height: format.height || height * (format.width / width)
@@ -421,8 +436,8 @@ export default Vue.extend({
         resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
         const props = {
           ...newSize,
-          physicalWidth: Math.round(newSize.width * this.mulUnits[0][this.unitOptions.indexOf(sizeUnit)] * this.mulPrecision) / this.mulPrecision,
-          physicalHeight: Math.round(newSize.height * this.mulUnits[0][this.unitOptions.indexOf(sizeUnit)] * this.mulPrecision) / this.mulPrecision
+          physicalWidth: Math.round(newSize.width * this.mulUnits[0][this.unitOptions.indexOf(unit)] * this.mulPrecision) / this.mulPrecision,
+          physicalHeight: Math.round(newSize.height * this.mulUnits[0][this.unitOptions.indexOf(unit)] * this.mulPrecision) / this.mulPrecision
         }
         this.updatePageProps({
           pageIndex,

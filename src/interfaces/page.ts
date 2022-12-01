@@ -14,7 +14,7 @@ export interface IPage {
   height: number,
   physicalWidth: number,
   physicalHeight: number,
-  sizeUnit: string,
+  unit: string,
   backgroundColor: string,
   backgroundImage: IBackgroundImage,
   name: string,

@@ -148,6 +148,7 @@ export interface IListServiceContentDataItem {
   asset_index?: number
   asset_id?: string
   src?: string
+  unit?: string
 }
 export interface ICategoryItem {
   id: string

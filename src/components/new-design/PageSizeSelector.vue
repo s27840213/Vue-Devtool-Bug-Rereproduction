@@ -180,7 +180,7 @@ export default Vue.extend({
     selectedFormat(): ILayout | undefined {
       if (this.selectedFormatKey === 'custom') {
         if (!this.isCustomValid) return undefined
-        return { id: '', width: this.pageWidth as number, height: this.pageHeight as number, title: '', description: '' }
+        return { id: '', width: this.pageWidth as number, height: this.pageHeight as number, title: '', description: '', unit: 'px' }
       } else if (this.selectedFormatKey.startsWith('recent')) {
         const [type, index] = this.selectedFormatKey.split('-')
         const format = this.recentlyUsed[parseInt(index)]
@@ -254,7 +254,8 @@ export default Vue.extend({
               width: item.width ?? 0,
               height: item.height ?? 0,
               title: item.title ?? '',
-              description: item.description ?? ''
+              description: item.description ?? '',
+              unit: item.unit ?? 'px'
             }))
           }
           if (category.title === `${this.$t('NN0024')}`) {
@@ -263,7 +264,8 @@ export default Vue.extend({
               width: item.width ?? 0,
               height: item.height ?? 0,
               title: item.title ?? '',
-              description: item.description ?? ''
+              description: item.description ?? '',
+              unit: item.unit ?? 'px'
             }))
           }
         }

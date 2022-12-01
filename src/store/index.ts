@@ -154,13 +154,13 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.folderInfo
   },
   getPageSize(state: IEditorState) {
-    return (pageIndex: number): { width: number, height: number, physicalWidth: number, physicalHeight: number, sizeUnit: string} => {
+    return (pageIndex: number): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string} => {
       return {
         width: state.pages[pageIndex].width,
         height: state.pages[pageIndex].height,
         physicalWidth: state.pages[pageIndex].physicalWidth,
         physicalHeight: state.pages[pageIndex].physicalHeight,
-        sizeUnit: state.pages[pageIndex].sizeUnit
+        unit: state.pages[pageIndex].unit
       }
     }
   },

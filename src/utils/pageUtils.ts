@@ -103,7 +103,7 @@ class PageUtils {
       height: 1080,
       physicalWidth: 28.575,
       physicalHeight: 28.575,
-      sizeUnit: 'px',
+      unit: 'px',
       backgroundColor: '#ffffff',
       backgroundImage: {
         config: layerFactary.newImage({

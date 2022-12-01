@@ -10,7 +10,7 @@ export class Page implements IPage {
   height: number
   physicalWidth: number
   physicalHeight: number
-  sizeUnit: string
+  unit: string
   backgroundColor: string
   backgroundImage: IBackgroundImage
   name: string
@@ -31,7 +31,7 @@ export class Page implements IPage {
     this.height = 1080
     this.physicalWidth = 28.575
     this.physicalHeight = 28.575
-    this.sizeUnit = 'px'
+    this.unit = 'px'
     this.backgroundColor = '#ffffff'
     this.backgroundImage = {
       config: layerFactary.newImage({
