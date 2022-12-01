@@ -113,15 +113,15 @@ export default Vue.extend({
     Checkbox
   },
   mounted() {
-    this.selectedUnit = this.currentPageUnit
-    this.pageWidth = this.currentPageWidth
-    this.pageHeight = this.currentPageHeight
+    this.handleCurrFocusPageIndexChange()
   },
   data() {
     return {
       selectedFormat: '',
       pageWidth: NaN,
       pageHeight: NaN,
+      pageTransWidths: [] as number[],
+      pageTransHeights: [] as number[],
       isLocked: true,
       unitOptions: ['px', 'cm', 'mm', 'in'],
       mulUnits: [
@@ -133,21 +133,12 @@ export default Vue.extend({
       ],
       selectedUnit: 0,
       showUnitOptions: false,
-      mulPrecision: 1e3,
       copyBeforeApply: true
     }
   },
   watch: {
-    currentPageWidth: function (newVal) {
-      this.pageWidth = newVal
-      this.pageHeight = this.currentPageHeight
-    },
-    currentPageHeight: function (newVal) {
-      this.pageWidth = this.currentPageWidth
-      this.pageHeight = newVal
-    },
-    currentPageUnit: function (newVal) {
-      this.selectedUnit = newVal
+    currFocusPageIndex: function () {
+      this.handleCurrFocusPageIndexChange()
     }
   },
   computed: {
@@ -171,6 +162,9 @@ export default Vue.extend({
     }),
     isTouchDevice() {
       return generalUtils.isTouchDevice()
+    },
+    currFocusPageIndex(): number {
+      return pageUtils.currFocusPageIndex
     },
     currentPageWidth(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
@@ -233,6 +227,9 @@ export default Vue.extend({
     },
     isLayoutReady(): boolean {
       return this.formatList.length !== 0
+    },
+    mulPrecision(): number {
+      return this.selectedUnit === 0 ? 1 : 1e3
     }
   },
   methods: {
@@ -275,27 +272,46 @@ export default Vue.extend({
         return `${format.width} x ${format.height} ${format.unit}`
       }
     },
+    transSize(size: number) {
+      return this.mulUnits[this.selectedUnit].map((mulTransUnit, idx) => {
+        const mulPrecision = idx === 0 ? 1 : 1e3
+        return Math.round(size * mulTransUnit * mulPrecision) / mulPrecision
+      })
+    },
+    handleCurrFocusPageIndexChange() {
+      this.selectedUnit = this.currentPageUnit
+      this.pageWidth = this.currentPageWidth
+      this.pageHeight = this.currentPageHeight
+      this.pageTransWidths = this.transSize(this.pageWidth)
+      this.pageTransHeights = this.transSize(this.pageHeight)
+    },
     setPageWidth(event: Event) {
       const value = (event.target as HTMLInputElement).value
       this.pageWidth = typeof value === 'string' ? parseFloat(value) : value
+      this.pageWidth = Math.floor(this.pageWidth * this.mulPrecision) / this.mulPrecision
+      this.pageTransWidths = this.transSize(this.pageWidth)
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
           this.pageHeight = NaN
         } else {
           this.pageHeight = Math.round(parseFloat(value) / this.aspectRatio * this.mulPrecision) / this.mulPrecision
+          this.pageTransHeights = this.transSize(this.pageHeight)
         }
       }
     },
     setPageHeight(event: Event) {
       const value = (event.target as HTMLInputElement).value
       this.pageHeight = typeof value === 'string' ? parseFloat(value) : value
+      this.pageHeight = Math.floor(this.pageHeight * this.mulPrecision) / this.mulPrecision
+      this.pageTransHeights = this.transSize(this.pageHeight)
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
           this.pageHeight = NaN
         } else {
           this.pageWidth = Math.round(parseFloat(value) * this.aspectRatio * this.mulPrecision) / this.mulPrecision
+          this.pageTransWidths = this.transSize(this.pageWidth)
         }
       }
     },
@@ -307,9 +323,8 @@ export default Vue.extend({
       this.selectedFormat = 'custom'
       this.showUnitOptions = false
       if (this.selectedUnit === key) return
-      const mulUnit = this.mulUnits[this.selectedUnit][key]
-      this.pageWidth = Math.round(this.pageWidth * mulUnit * this.mulPrecision) / this.mulPrecision
-      this.pageHeight = Math.round(this.pageHeight * mulUnit * this.mulPrecision) / this.mulPrecision
+      this.pageWidth = this.pageTransWidths[key]
+      this.pageHeight = this.pageTransHeights[key]
       this.selectedUnit = key
       this.$emit('selectUnit', key)
     },
