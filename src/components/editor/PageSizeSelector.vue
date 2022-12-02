@@ -439,36 +439,22 @@ export default Vue.extend({
     }, 2000, { trailing: false }),
     resizePage(format: { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string}) {
       resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
-      this.updatePageProps({
-        pageIndex: pageUtils.currFocusPageIndex,
-        props: {
-          width: format.width,
-          height: format.height,
-          physicalWidth: format.physicalWidth,
-          physicalHeight: format.physicalHeight,
-          unit: format.unit
-        }
-      })
     },
     resizeOtherPages(excludes: number[] = [], format: { [key: string]: number }) {
       const { pagesLength, getPageSize } = this
       for (let pageIndex = 0; pageIndex < pagesLength; pageIndex++) {
         if (excludes.includes(pageIndex)) continue
         const { width, height, unit } = getPageSize(pageIndex)
+        const newWidth = format.width || width * (format.height / height)
+        const newHeight = format.height || height * (format.width / width)
         const newSize = {
-          width: format.width || width * (format.height / height),
-          height: format.height || height * (format.width / width)
+          width: newWidth,
+          height: newHeight,
+          physicalWidth: Math.round(newWidth * this.mulUnits[0][this.unitOptions.indexOf(unit)] * this.mulPrecision) / this.mulPrecision,
+          physicalHeight: Math.round(newHeight * this.mulUnits[0][this.unitOptions.indexOf(unit)] * this.mulPrecision) / this.mulPrecision,
+          unit
         }
         resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
-        const props = {
-          ...newSize,
-          physicalWidth: Math.round(newSize.width * this.mulUnits[0][this.unitOptions.indexOf(unit)] * this.mulPrecision) / this.mulPrecision,
-          physicalHeight: Math.round(newSize.height * this.mulUnits[0][this.unitOptions.indexOf(unit)] * this.mulPrecision) / this.mulPrecision
-        }
-        this.updatePageProps({
-          pageIndex,
-          props
-        })
       }
     }
   }

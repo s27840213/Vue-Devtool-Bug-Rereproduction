@@ -98,11 +98,16 @@ class PageUtils {
         }
       })
     }
+
+    // set physical size to px size if not exist
+    pageData.physicalWidth ||= pageData.width
+    pageData.physicalHeight ||= pageData.height
+    pageData.unit ||= 'px'
     const defaultPage: IPage = {
       width: 1080,
       height: 1080,
-      physicalWidth: 28.575,
-      physicalHeight: 28.575,
+      physicalWidth: 1080,
+      physicalHeight: 1080,
       unit: 'px',
       backgroundColor: '#ffffff',
       backgroundImage: {

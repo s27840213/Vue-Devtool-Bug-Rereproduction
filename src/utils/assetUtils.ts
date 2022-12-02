@@ -166,10 +166,6 @@ class AssetUtils {
     pageUtils.updateSpecPage(targetPageIndex, newLayer)
     if (width && height) {
       resizeUtils.resizePage(targetPageIndex, newLayer, { width, height })
-      store.commit('UPDATE_pageProps', {
-        pageIndex: targetPageIndex,
-        props: { width, height }
-      })
     }
     store.commit('SET_currActivePageIndex', targetPageIndex)
     if (recordStep) {
@@ -189,10 +185,6 @@ class AssetUtils {
       pageUtils.updateSpecPage(i, newLayer)
       if (width && height) {
         resizeUtils.resizePage(i, newLayer, { width, height })
-        store.commit('UPDATE_pageProps', {
-          pageIndex: i,
-          props: { width, height }
-        })
       }
     }
 
@@ -615,10 +607,6 @@ class AssetUtils {
           // @TODO: resize page/layer before adding to the store.
           if (resize) {
             resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
-            store.commit('UPDATE_pageProps', {
-              pageIndex: targetIndex,
-              props: resize
-            })
           }
           if ((groupType === 1 || currGroupType === 1) && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
@@ -628,10 +616,6 @@ class AssetUtils {
               const pageIndex = +idx + targetIndex
               const newSize = { height: height * pageWidth / width, width: pageWidth }
               resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
-              store.commit('UPDATE_pageProps', {
-                pageIndex,
-                props: newSize
-              })
             }
           }
           store.commit('SET_currActivePageIndex', targetIndex)

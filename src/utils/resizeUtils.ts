@@ -171,7 +171,7 @@ class ResizeUtils {
     )
   }
 
-  resizePage(pageIndex: number, page: IPage, format: { width: number, height: number }) {
+  resizePage(pageIndex: number, page: IPage, format: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
     const { width, height } = page
     const aspectRatio = width / height
     const targetAspectRatio = format.width / format.height
@@ -190,6 +190,16 @@ class ResizeUtils {
     }
 
     rulerUtils.removeInvalidGuides(pageIndex, format)
+
+    // set physical size to px size if not exist
+    format.physicalWidth ||= format.width
+    format.physicalHeight ||= format.height
+    format.unit ||= 'px'
+
+    store.commit('UPDATE_pageProps', {
+      pageIndex: pageIndex,
+      props: { ...format }
+    })
   }
 
   testResizeAllPages() {
