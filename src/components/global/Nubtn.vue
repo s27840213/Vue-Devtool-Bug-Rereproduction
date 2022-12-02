@@ -1,8 +1,6 @@
 <template lang="pug">
 div(:class="`nubtn ${theme} ${sizeClass} ${status}`"
     v-hint="hint"
-    @mouseenter="mouseenter"
-    @mouseleave="mouseleave"
     @click="click")
   svg-icon(v-if="theme.includes('icon')"
           :iconName="icon" iconWidth="24px" :iconColor="iconColor")
@@ -34,7 +32,7 @@ export default Vue.extend({
     },
     // Use v-model if parent compenent need Nubtn status value.
     // Use :status if you don't want Nubtn change status.
-    // Vale: default, hover, disabled, active
+    // Vale: default, active, hover, disabled
     status: {
       type: String,
       default: 'default'
@@ -50,7 +48,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      hover: false,
       active: false
     }
   },
@@ -66,20 +63,12 @@ export default Vue.extend({
   methods: {
     updateStatus() {
       const newStatus = this.status === 'disabled' ? 'disabled'
-        : this.hover ? 'hover'
-          : this.active ? 'active'
-            : 'default'
+        : this.active ? 'active'
+          : 'default'
       this.$emit('status', newStatus)
     },
-    mouseenter() {
-      this.hover = true
-      this.updateStatus()
-    },
-    mouseleave() {
-      this.hover = false
-      this.updateStatus()
-    },
     click() {
+      if (this.status === 'disabled') return
       this.active = !this.active
       this.updateStatus()
       this.$emit('click')
@@ -99,9 +88,11 @@ export default Vue.extend({
   user-select: none;
   &:not(.full) {
     margin: auto;
+    width: fit-content;
   }
 }
 
+// Common size
 @mixin default-size {
   &.sm {
     @include btn-SM;
@@ -115,34 +106,37 @@ export default Vue.extend({
   }
 }
 
+// Common blue color
+// Color rule priority: disabled > hover > active > default
 .default {
   --blue: #{setColor(blue-1)};
 }
-.hover {
+.active {
+  --blue: #{setColor(blue-active)};
+}
+:hover, .hover { // In this way, :hover can overwrite default and active but not disabled.
   --blue: #{setColor(blue-hover)};
 }
 .disabled {
   --blue: #{setColor(gray-4)};
 }
-.active {
-  --blue: #{setColor(blue-active)};
-}
 
-.primary {
+// Themes rules
+.nubtn.primary {
   @include default-size;
   color: setColor(white);
   background-color: var(--blue);
 }
-.outline {
+.nubtn.outline {
   @include default-size;
   color: var(--blue);
   border: 1px solid var(--blue);
 }
-.text {
+.nubtn.text {
   @include default-size;
   color: var(--blue);
 }
-.icon_text {
+.nubtn.icon_text {
   svg {
     margin-right: 8px;
   }
@@ -157,20 +151,20 @@ export default Vue.extend({
   color: setColor(white);
   background-color: var(--blue);
 }
-.icon {
+.nubtn.icon {
   width: 32px;
   height: 32px;
-  &.hover {
+  &.active {
+    background-color: setColor(blue-3);
+  }
+  &:hover, &.hover {
     background-color: setColor(blue-3, 0.5);
   }
   &.disabled {
     opacity: 0.5;
   }
-  &.active {
-    background-color: setColor(blue-3);
-  }
 }
-.ghost {
+.nubtn.ghost {
   height: 36px;
   padding: 6px 24px;
   border-radius: 50px;
@@ -178,7 +172,7 @@ export default Vue.extend({
     color: setColor(blue-1);
     background-color: setColor(blue-4);
   }
-  &.hover {
+  &:hover, &.hover {
     color: setColor(blue-1);
     background-color: setColor(white);
   }
@@ -187,7 +181,7 @@ export default Vue.extend({
     background-color: setColor(white);
   }
 }
-.ghost_outline {
+.nubtn.ghost_outline {
   height: 36px;
   padding: 6px 24px;
   border-radius: 50px;
@@ -195,7 +189,7 @@ export default Vue.extend({
     color: setColor(blue-3);
     border: 1px solid setColor(blue-3);
   }
-  &.hover {
+  &:hover, &.hover {
     color: setColor(white);
     border: 1px solid setColor(white);
   }
@@ -204,29 +198,33 @@ export default Vue.extend({
     border: 1px solid setColor(gray-4);
   }
 }
-.danger {
+.nubtn.danger {
   @include default-size;
   color: setColor(white);
   &.default {
     background-color: setColor(red);
   }
-  &.hover {
+  &.active {
+    background-color: #D9624E;
+  }
+  &:hover, &.hover {
     background-color: #FC5757;
   }
   &.disabled {
     background-color: setColor(gray-4);
   }
-  &.active {
-    background-color: #D9624E;
-  }
 }
-.secondary {
+.nubtn.secondary {
   @include default-size;
   &.default {
     color: setColor(gray-2);
     border: 1px solid setColor(gray-3);
   }
-  &.hover {
+  &.active {
+    color: setColor(gray-2);
+    border: 1px solid setColor(gray-2);
+  }
+  &:hover, &.hover {
     color: setColor(gray-2);
     background-color: setColor(gray-4);
     border: 1px solid setColor(gray-3);
@@ -235,10 +233,6 @@ export default Vue.extend({
     color: setColor(white);
     background-color: setColor(gray-4);
     border: none;
-  }
-  &.active {
-    color: setColor(gray-2);
-    border: 1px solid setColor(gray-2);
   }
 }
 </style>
