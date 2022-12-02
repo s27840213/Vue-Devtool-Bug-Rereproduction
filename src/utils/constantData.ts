@@ -489,7 +489,7 @@ class ConstantData {
       i18n.t('NN0527'), true, true,
       i18n.t('NN0528'), '-', true,
       i18n.t('NN0529'), '-', true,
-      i18n.t('NN0530'), true, true,
+      i18n.t('NN0530'), '-', true,
       i18n.t('NN0531'), true, true,
       i18n.t('NN0532'), true, true
     ]
@@ -532,7 +532,8 @@ class ConstantData {
       i18n.t('NN0570'),
       i18n.t('NN0571'),
       i18n.t('NN0572'),
-      i18n.t('NN0573')
+      i18n.t('NN0573'),
+      i18n.t('NN0769')
     ]
   }
 
