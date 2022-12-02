@@ -26,6 +26,7 @@
 </template>
 
 <script lang="ts">
+import { IImage } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
 import ImageAdjustUtil from '@/utils/imageAdjustUtil'
 import Vue from 'vue'
@@ -56,7 +57,7 @@ export default Vue.extend({
     },
     svgFilterElms(): any[] {
       const { adjust } = this.styles
-      return ImageAdjustUtil.convertAdjustToSvgFilter(adjust || {})
+      return ImageAdjustUtil.convertAdjustToSvgFilter(adjust || {}, { styles: this.styles } as IImage)
     },
     cssFilterElms(): any[] {
       const { styles: { adjust, width, imgX, imgY, height } } = this

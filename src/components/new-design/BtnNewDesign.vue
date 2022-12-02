@@ -14,6 +14,7 @@
 import Vue from 'vue'
 import PopupSize from '@/components/new-design/PopupSize.vue'
 import PanelSize from '@/components/new-design/PanelSize.vue'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -36,7 +37,7 @@ export default Vue.extend({
   },
   methods: {
     handleResize() {
-      this.isMobile = window.matchMedia('screen and (max-width: 540px)').matches ? 1 : -1
+      this.isMobile = generalUtils.getWidth() <= 540 ? 1 : -1
     },
     openPopup() {
       this.isShowPopup = true

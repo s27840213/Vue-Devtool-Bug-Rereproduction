@@ -123,7 +123,7 @@ export default Vue.extend({
   }
 
   &__range-input-wrapper {
-    margin-top: 12px;
+    margin: 12px 0;
     position: relative;
   }
 

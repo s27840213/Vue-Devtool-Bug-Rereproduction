@@ -60,7 +60,6 @@ import Vue from 'vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
-import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
@@ -128,7 +127,6 @@ export default Vue.extend({
     PanelFile,
     PanelBrand,
     PanelPage,
-    ColorPanel,
     PanelPosition,
     PanelFlip,
     PanelOpacity,
@@ -244,7 +242,7 @@ export default Vue.extend({
       return this.whiteTheme
     },
     showLeftBtn(): boolean {
-      return this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize' || this.showExtraColorPanel)
+      return this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel)
     },
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop' || this.inSelectionState
@@ -316,11 +314,6 @@ export default Vue.extend({
             panelHistory: this.panelHistory
           })
         }
-        case 'resize': {
-          return Object.assign(defaultVal, {
-            ref: 'panelResize'
-          })
-        }
         case 'brand-list': {
           const brandDefaultVal = Object.assign(defaultVal, {
             panelHistory: this.panelHistory
@@ -356,63 +349,38 @@ export default Vue.extend({
       }
     },
     dynamicBindMethod(): { [index: string]: any } {
+      const pushHistory = (history: string) => {
+        this.panelHistory.push(history)
+      }
+      const openExtraColorModal = (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
+        this.showExtraColorPanel = true
+        this.extraColorEvent = colorEventType
+        this.panelHistory.push(initColorPanelType)
+      }
       switch (this.currActivePanel) {
-        case 'color': {
-          return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            }
-          }
-        }
+        case 'color':
+          return { pushHistory }
+        case 'background':
+          return { openExtraColorModal }
         case 'text-effect':
-        case 'photo-shadow': {
+        case 'photo-shadow':
+          return { pushHistory, openExtraColorModal }
+        case 'brand-list':
           return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            },
-            openExtraColorModal: (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
-              this.showExtraColorPanel = true
-              this.extraColorEvent = colorEventType
-              this.panelHistory.push(initColorPanelType)
-            }
-          }
-        }
-        case 'background': {
-          // bind listener to let the parent access the grandchild's event
-          // return this.$listeners
-
-          return {
-            openExtraColorModal: (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
-              this.showExtraColorPanel = true
-              this.extraColorEvent = colorEventType
-              this.panelHistory.push(initColorPanelType)
-            }
-          }
-        }
-        case 'brand-list': {
-          return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            },
+            pushHistory,
             back: () => {
               this.panelHistory.pop()
             }
           }
-        }
-        default: {
+        default:
           return {}
-        }
       }
     },
     leftBtnName(): string {
-      if (this.panelHistory.length > 0 && this.currActivePanel !== 'resize') {
-        return 'back-circle'
-      } else {
-        return 'close-circle'
-      }
+      return 'back-circle'
     },
     rightBtnName(): string {
-      if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop', 'resize'].includes(this.currActivePanel)) {
+      if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop'].includes(this.currActivePanel)) {
         return 'check-mobile-circle'
       } else {
         return 'close-circle'
@@ -476,11 +444,6 @@ export default Vue.extend({
             break
           }
 
-          case 'resize': {
-            (this.$refs.panelResize as any).applySelectedFormat()
-            break
-          }
-
           case 'color': {
             if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
               this.addRecentlyColors(colorUtils.currColor)
@@ -506,7 +469,7 @@ export default Vue.extend({
       this.innerTab = this.innerTabs.key[0]
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
-      this.panelHeight = this.initHeightPx()
+      this.panelHeight = newVal === 'none' ? 0 : this.initHeightPx()
     },
     showMobilePanel(newVal) {
       if (!newVal) {
@@ -515,7 +478,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.panelHeight = this.initHeightPx()
+    this.panelHeight = 0
     this.resizeObserver = new ResizeObserver(() => {
       this.$emit('panelHeight', (this.$refs.panel as HTMLElement).clientHeight)
       this.fitPage()
@@ -565,14 +528,10 @@ export default Vue.extend({
       this.setCurrActivePanel('none')
     },
     initHeightPx() {
-      // 40 = HeaderTabs height
-      return ((this.$el.parentElement as HTMLElement).clientHeight - 40) * (this.halfSizeInInitState ? 0.5 : 1.0)
+      return ((this.$el.parentElement as HTMLElement).clientHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
     },
     maxHeightPx() {
-      return ((this.$el.parentElement as HTMLElement).clientHeight - 40) * 1.0
-    },
-    getMaxHeightPx(): number {
-      return parseFloat((this.$el as HTMLElement).style.maxHeight.split('px')[0])
+      return (this.$el.parentElement as HTMLElement).clientHeight
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
       if (this.fixSize) {

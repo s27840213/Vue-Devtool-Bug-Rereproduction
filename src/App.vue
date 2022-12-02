@@ -50,7 +50,6 @@ import Fps from '@/components/componentLog/Fps.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
-import generalUtils from './utils/generalUtils'
 
 export default Vue.extend({
   components: {

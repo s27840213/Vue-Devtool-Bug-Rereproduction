@@ -559,8 +559,8 @@ export default Vue.extend({
       })
     },
     handleResize() {
-      this.isMobile = window.matchMedia('screen and (max-width: 540px)').matches
-      this.isPC = window.matchMedia('screen and (min-width: 976px)').matches
+      this.isMobile = generalUtils.getWidth() <= 540
+      this.isPC = generalUtils.getWidth() >= 976
     },
     getPrevUrl(content: IContentTemplate, scale: number): string {
       return templateCenterUtils.getPrevUrl(content, scale)
