@@ -49,7 +49,7 @@ export default Vue.extend({
       historySize: 30000,
       history1s: [] as number[],
       historyLong: [] as number[],
-      fps: '0',
+      fps: 0,
       pause: false,
       graph: {},
       valleys: [] as Valley[],
@@ -67,7 +67,7 @@ export default Vue.extend({
           this.history1s.shift()
         }
         this.history1s.push(now)
-        this.fps = (this.history1s.length / (now - this.history1s[0]) * 1000).toPrecision(2)
+        this.fps = this.history1s.length
 
         while (this.historyLong.length > 0 && this.historyLong[0] <= now - this.historySize) {
           this.historyLong.shift()
