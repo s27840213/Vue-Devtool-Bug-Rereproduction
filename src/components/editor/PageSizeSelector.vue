@@ -445,13 +445,14 @@ export default Vue.extend({
       for (let pageIndex = 0; pageIndex < pagesLength; pageIndex++) {
         if (excludes.includes(pageIndex)) continue
         const { width, height, unit } = getPageSize(pageIndex)
-        const newWidth = format.width || width * (format.height / height)
-        const newHeight = format.height || height * (format.width / width)
+        const newWidth = Math.round(format.width || width * (format.height / height))
+        const newHeight = Math.round(format.height || height * (format.width / width))
+        const mulPrecision = unit === 'px' ? 1 : 1e3
         const newSize = {
           width: newWidth,
           height: newHeight,
-          physicalWidth: Math.round(newWidth * this.mulUnits[0][this.unitOptions.indexOf(unit)] * this.mulPrecision) / this.mulPrecision,
-          physicalHeight: Math.round(newHeight * this.mulUnits[0][this.unitOptions.indexOf(unit)] * this.mulPrecision) / this.mulPrecision,
+          physicalWidth: Math.round(newWidth * this.mulUnits[0][this.unitOptions.indexOf(unit)] * mulPrecision) / mulPrecision,
+          physicalHeight: Math.round(newHeight * this.mulUnits[0][this.unitOptions.indexOf(unit)] * mulPrecision) / mulPrecision,
           unit
         }
         resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
