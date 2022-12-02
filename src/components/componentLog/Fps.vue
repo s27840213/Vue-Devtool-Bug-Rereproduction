@@ -6,15 +6,41 @@ div(class="fps")
                 :key="`graph-${idx}`"
                 :is="elm.tag"
                 v-bind="elm.attrs") {{elm.text}}
-  div(class="fps__value")
-    span(@click="showGraph") FPS: {{fps}}
-    span(@click="showGraph") JS-Heap: {{jsHeapSize}}MB
+    div(class="fps-graph__valleys")
+      div(v-for="valley in valleys" :style="{color: valley.color}") {{valley.text}}
+  div(class="fps__value" @click="showGraph")
+    span FPS: {{fps}}
+    span JS-Heap: {{jsHeapSize}}MB
 </template>
 
 <script lang="ts">
 import { Path, Point } from '@/utils/textBgUtils'
-import { filter, floor, groupBy, map, range } from 'lodash'
+import { filter, range } from 'lodash'
 import Vue from 'vue'
+
+class Valley {
+  min: number
+  duration = 0
+  start = -1
+  text = ''
+  color = ''
+  path = null as Path | null
+
+  constructor(baseline: number) {
+    this.min = baseline
+  }
+
+  process(baseline: number, colorIndex: number, fpsArray: number[]) {
+    const end = this.start + this.duration
+    this.text = `min: ${this.min}, duration: ${this.duration / 10}s`
+    this.color = ['red', 'orange', 'green', 'purple'][colorIndex]
+    this.path = new Path(new Point(this.start, baseline))
+    range(this.start, end).forEach((index) => {
+      (this.path as Path).L(new Point(index, baseline - fpsArray[index]))
+    });
+    (this.path as Path).L(new Point(end, baseline))
+  }
+}
 
 export default Vue.extend({
   name: 'Fps',
@@ -26,6 +52,7 @@ export default Vue.extend({
       fps: '0',
       pause: false,
       graph: {},
+      valleys: [] as Valley[],
       jsHeapSize: 0
     }
   },
@@ -42,12 +69,10 @@ export default Vue.extend({
         this.history1s.push(now)
         this.fps = (this.history1s.length / (now - this.history1s[0]) * 1000).toPrecision(2)
 
-        if (!this.pause) {
-          while (this.historyLong.length > 0 && this.historyLong[0] <= now - this.historySize) {
-            this.historyLong.shift()
-          }
-          this.historyLong.push(now)
+        while (this.historyLong.length > 0 && this.historyLong[0] <= now - this.historySize) {
+          this.historyLong.shift()
         }
+        this.historyLong.push(now)
         this.jsHeapSize = parseInt(`${(performance as any)?.memory.usedJSHeapSize / 1000000}`) ?? -1
         this.showFps()
       })
@@ -55,6 +80,7 @@ export default Vue.extend({
     showGraph() {
       this.pause = !this.pause
       if (!this.pause) return
+
       const { historyLong } = this
       const now = performance.now()
       const fpsArray = range(291).reverse().map((index) => {
@@ -67,31 +93,47 @@ export default Vue.extend({
       const path = new Path(new Point(0, baseline))
       fpsArray.forEach((fps, index) => path.L(new Point(index, baseline - fps)))
       path.L(new Point(291, baseline))
-      const valleys = []
-      let i = 1
+      this.valleys = []
+      let i = 0
       while (i < fpsArray.length) {
-        const valley = {
-          min: baseline,
-          duration: 0,
-          start: -1
-        }
-        while (i < fpsArray.length && fpsArray[i] < baseline - 5) {
-          if (valley.start) valley.start = i
+        const valley = new Valley(baseline)
+        // If fps lower than baseline, record a valley.
+        while (i < fpsArray.length && fpsArray[i] < baseline - 10) {
+          if (valley.start === -1) valley.start = i
           valley.min = Math.min(valley.min, fpsArray[i])
           valley.duration++
           i++
         }
-        if (valley.duration > 10)valleys.push(valley)
+        // If valley duration longer than 0.3s, save it.
+        if (valley.duration > 3) {
+          valley.process(baseline, this.valleys.length % 4, fpsArray)
+          this.valleys.push(valley)
+        }
         i++
       }
-      console.log('val', valleys)
+
+      const valleyCover = this.valleys.map((valley) => ({
+        tag: 'path',
+        attrs: {
+          style: `fill: ${valley.color};`,
+          d: valley.path?.result()
+        }
+      }))
+      const scaleLine = range(0, baseline, 10).map(scale => ({
+        tag: 'line',
+        attrs: {
+          style: 'stroke: black; stroke-width: 0.3',
+          x1: 0,
+          y1: baseline - scale,
+          x2: 291,
+          y2: baseline - scale
+        }
+      }))
 
       this.graph = {
         attrs: {
           viewBox: `0 0 291 ${baseline}`,
           width: '100%'
-          // height: boxHeight + textBg.bStroke,
-          // style: ``
         },
         content: [{
           tag: 'path',
@@ -99,23 +141,7 @@ export default Vue.extend({
             style: 'fill: #4EABE6;',
             d: path.result()
           }
-        }, ...valleys.map((valley) => ({
-          tag: 'text',
-          attrs: {
-            x: valley.start,
-            y: baseline / 2,
-            style: 'font-size: 5px'
-          },
-          text: `d:${valley.duration}`
-        })), ...valleys.map((valley) => ({
-          tag: 'text',
-          attrs: {
-            x: valley.start,
-            y: baseline / 2 + 5,
-            style: 'font-size: 5px'
-          },
-          text: `min: ${valley.min}`
-        }))]
+        }, ...valleyCover, ...scaleLine]
       }
     }
   }
@@ -142,8 +168,6 @@ export default Vue.extend({
   right: 0;
   background: white;
   z-index: 999;
-  &__svg{
-
-  }
+  overflow-y: auto;
 }
 </style>
