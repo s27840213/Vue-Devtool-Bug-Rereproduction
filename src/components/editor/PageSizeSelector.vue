@@ -101,6 +101,7 @@ import generalUtils from '@/utils/generalUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import editorUtils from '@/utils/editorUtils'
+import { throttle } from 'lodash'
 
 export default Vue.extend({
   props: {
@@ -425,7 +426,8 @@ export default Vue.extend({
       stepsUtils.record()
       this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex) })
     },
-    submit() {
+    submit: throttle(function(this: any) {
+      // Use throttle to prevent submit multiple times.
       if (!paymentUtils.checkPro({ plan: 1 }, 'page-resize')) return
       if (this.copyBeforeApply) {
         this.copyAndApplySelectedFormat()
@@ -434,7 +436,7 @@ export default Vue.extend({
       }
       editorUtils.setShowMobilePanel(false) // For mobile
       this.$emit('close') // For PC
-    },
+    }, 2000, { trailing: false }),
     resizePage(format: { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string}) {
       resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
       this.updatePageProps({

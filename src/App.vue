@@ -18,6 +18,7 @@
         tabindex="0")
     div(v-if="isAdmin && !inScreenshotPreview" class="fps")
       span FPS: {{fps}}
+      span {{` JS-Heap-Size: ${jsHeapSize} MB`}}
     div(class="modal-container"
         v-if="isModalOpen")
       modal-card
@@ -50,7 +51,6 @@ import ModalCard from '@/components/modal/ModalCard.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
-import generalUtils from './utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -68,6 +68,7 @@ export default Vue.extend({
       coordinateWidth: 0,
       coordinateHeight: 0,
       fps: 0,
+      jsHeapSize: 0,
       fpsInterval: 0
     }
   },
@@ -160,6 +161,7 @@ export default Vue.extend({
           }
           times.push(now)
           this.fps = times.length
+          this.jsHeapSize = parseInt(`${(performance as any)?.memory.usedJSHeapSize / 1000000}`) ?? -1
           if (this.inScreenshotPreview) {
             clearInterval(this.fpsInterval)
             return
@@ -262,6 +264,9 @@ export default Vue.extend({
 }
 
 .fps {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   background: white;
   padding: 2px;
   position: absolute;
