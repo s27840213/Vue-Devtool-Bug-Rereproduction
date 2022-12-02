@@ -593,6 +593,7 @@ class UploadUtils {
     store.commit('SET_assetId', assetId)
     const { clonedPages } = params || {}
     const pages = clonedPages ?? generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
+    // const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
 
     logUtils.setLog(`Upload Design:
       Type: ${putAssetDesignType ? typeMap[putAssetDesignType] : 'UPLOAD JSON'}
