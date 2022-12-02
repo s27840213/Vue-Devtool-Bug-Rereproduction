@@ -333,7 +333,8 @@ export default Vue.extend({
          */
         if (this.isClickOnController(e)) {
           const movingUtils = new MovingUtils({
-            config: layerUtils.getCurrConfig,
+            _config: { config: layerUtils.getCurrConfig },
+            // config: layerUtils.getCurrConfig,
             snapUtils: pageUtils.getPage(layerUtils.pageIndex).snapUtils,
             body: document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
           })

@@ -20,7 +20,8 @@ export class MovingUtils {
   private component = undefined as Vue | undefined
   private eventTarget = null as unknown as HTMLElement
   private dblTabsFlag = false
-  private config = null as unknown as ILayer
+  // private config = null as unknown as ILayer
+  private _config = { config: null as unknown as ILayer }
   private initialPos = { x: 0, y: 0 }
   private initTranslate = { x: 0, y: 0 }
   private movingByControlPoint = false
@@ -36,6 +37,7 @@ export class MovingUtils {
   private isTouchDevice = generalUtils.isTouchDevice()
 
   private get isBgImgCtrl(): boolean { return store.getters['imgControl/isBgImgCtrl'] }
+  private get config(): ILayer { return this._config.config }
   private get inMultiSelectionMode(): number { return store.getters['mobileEditor/getInMultiSelectionMode'] }
   private get currFunctionPanelType(): number { return store.getters.getCurrFunctionPanelType }
   private get currSelectedInfo(): any { return store.getters.getCurrSelectedInfo }
@@ -67,8 +69,8 @@ export class MovingUtils {
     return false
   }
 
-  constructor({ config, snapUtils, component, body, layerInfo }: { config: ILayer, snapUtils: unknown, component?: Vue, body: HTMLElement, layerInfo?: ILayerInfo }) {
-    this.config = config
+  constructor({ _config, snapUtils, component, body, layerInfo }: { _config: { config: ILayer }, snapUtils: unknown, component?: Vue, body: HTMLElement, layerInfo?: ILayerInfo }) {
+    this._config = _config
     this.snapUtils = snapUtils
     this.body = body
     component && (this.component = component)
@@ -283,7 +285,7 @@ export class MovingUtils {
         }
       }
     }
-    console.log('handle start', Date.now() - this.start)
+    // console.log('handle start', Date.now() - this.start)
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
@@ -333,7 +335,7 @@ export class MovingUtils {
           this.movingHandler(e)
           this.isHandleMovingHandler = false
           // if (!this.recorded) {
-          console.log(Date.now() - this.start)
+          // console.log(Date.now() - this.start)
           //   this.recorded = true
           // }
         })

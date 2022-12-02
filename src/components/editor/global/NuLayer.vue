@@ -157,9 +157,13 @@ export default Vue.extend({
     }
   },
   mounted() {
+    /**
+     * Use definedProperty to bind some props of the vue.$props with the movingUtils
+     * thus, we are unnecessary to watching these props and update them manually
+     */
     const body = this.$refs.body as HTMLElement
-    const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.layerIndex }
     const props = this.$props
+    const layerInfo = { pageIndex: -1, layerIndex: -1 }
     Object.defineProperty(layerInfo, 'pageIndex', {
       get() {
         return props.pageIndex
@@ -170,8 +174,14 @@ export default Vue.extend({
         return props.layerIndex
       }
     })
+    const _config = { config: this.config }
+    Object.defineProperty(_config, 'config', {
+      get() {
+        return props.config
+      }
+    })
     this.movingUtils = new MovingUtils({
-      config: this.config,
+      _config: _config,
       component: this,
       snapUtils: this.snapUtils,
       layerInfo,
