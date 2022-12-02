@@ -23,7 +23,7 @@ import vClickOutside from 'v-click-outside'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import { ILayout } from '@/interfaces/layout'
 import designUtils from '@/utils/designUtils'
-import PageSizeSelector from '@/components/mydesign/PageSizeSelector.vue'
+import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
 
 export default Vue.extend({
   components: {
@@ -80,7 +80,6 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     justify-content: center;
-    // font-family: 'SF Pro';
     color: setColor(gray-2);
     word-spacing: 0.255em;
   }
@@ -93,7 +92,6 @@ export default Vue.extend({
       width: 240px;
       padding-top: 20px;
       span{
-        // font-family: 'SF Pro';
         font-size: 12px;
         font-weight: 400;
         word-spacing: 1.21em;

@@ -162,3 +162,17 @@ export interface IBillingHistory {
     price: number
   }]
 }
+
+// Union type with string array value, https://github.com/microsoft/TypeScript/issues/28046#issuecomment-962656602
+export const _IPaymentWarningView = [
+  'brandkit', 'bgrm', 'pro-template', 'pro-object', 'page-resize'
+] as const
+export type IPaymentWarningView = typeof _IPaymentWarningView[number]
+
+export const _IPaymentPayingView = [
+  'step1-coupon', 'step1', 'step2-coupon', 'step2', 'finish',
+  'switch1', 'switch2', 'cancel1', 'cancel2'
+] as const
+export type IPaymentPayingView = typeof _IPaymentPayingView[number]
+
+export type IPaymentView = IPaymentWarningView|IPaymentPayingView

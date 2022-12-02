@@ -40,6 +40,7 @@ import payment from '@/store/module/payment'
 import fontTag from '@/store/module/fontTag'
 import imgControl from '@/store/module/imgControl'
 import { ADD_subLayer } from '@/utils/layerUtils'
+import { throttle } from 'lodash'
 
 Vue.use(Vuex)
 
@@ -899,10 +900,10 @@ const mutations: MutationTree<IEditorState> = {
   ADD_subLayer
 }
 
-function handleResize() {
-  state.isMobile = window.matchMedia('screen and (max-width: 768px)').matches
-  state.isLargeDesktop = window.matchMedia('screen and (min-width: 1440px)').matches
-}
+const handleResize = throttle(() => {
+  state.isMobile = generalUtils.getWidth() <= 768
+  state.isLargeDesktop = generalUtils.getWidth() >= 1440
+}, 500)
 
 window.addEventListener('resize', handleResize)
 handleResize()

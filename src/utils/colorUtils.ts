@@ -12,7 +12,6 @@ class ColorUtils {
   eventHash: { [index: string]: (color: string) => void }
   currEvent: string
   currColor: string
-  isColorPickerOpen: boolean
 
   get currPageBackgroundColor() {
     return pageUtils.currFocusPage.backgroundColor
@@ -23,7 +22,6 @@ class ColorUtils {
     this.eventHash = {}
     this.currEvent = ''
     this.currColor = '#ffffff'
-    this.isColorPickerOpen = false
   }
 
   get currStopEvent(): string { return this.currEvent + STOP_POSTFIX }
@@ -54,10 +52,6 @@ class ColorUtils {
     if (/^#[0-9A-F]{6}$/i.test(color)) {
       this.currColor = color
     }
-  }
-
-  setIsColorPickerOpen(bool: boolean) {
-    this.isColorPickerOpen = bool
   }
 
   setCurrPageBackgroundColor(color: string) {

@@ -1086,7 +1086,7 @@ class UploadUtils {
           layer.imgControl = false
           break
         case 'tmp': { // If there is group layer in tmp layer, cancel tmp layer.
-          page.layers.splice(index, 1, ...(layer as ITmp).layers)
+          page.layers.splice(index, 1, ...groupUtils.mapLayersToPage((layer as ITmp).layers, layer as ITmp))
         }
       }
       basicDefault(layer)

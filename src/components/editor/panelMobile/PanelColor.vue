@@ -7,9 +7,7 @@
       @update="handleDragUpdate"
       @final="handleChangeStop")
     color-slips(v-if="showPalette"
-      :whiteTheme="true"
-      :noPadding="true"
-      :showPanelBtn="false"
+      mode="PanelColor"
       :allRecentlyControl="showAllRecently"
       @openColorPicker="openColorPicker"
       @openColorMore="openColorMore")

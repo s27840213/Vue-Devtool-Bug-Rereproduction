@@ -278,6 +278,9 @@ export default Vue.extend({
     justify-content: center;
   }
   &__button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     color: setColor(gray-2);
     border-radius: 5px;
     border: 2px solid setColor(gray-3);
