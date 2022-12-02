@@ -6,7 +6,9 @@ div(class="fps")
                 :key="`graph-${idx}`"
                 :is="elm.tag"
                 v-bind="elm.attrs") {{elm.text}}
-  span(class="fps__value" @click="showGraph") FPS: {{fps}}
+  div(class="fps__value")
+    span(@click="showGraph") FPS: {{fps}}
+    span(@click="showGraph") JS-Heap: {{jsHeapSize}}MB
 </template>
 
 <script lang="ts">
@@ -23,7 +25,8 @@ export default Vue.extend({
       historyLong: [] as number[],
       fps: '0',
       pause: false,
-      graph: {}
+      graph: {},
+      jsHeapSize: 0
     }
   },
   mounted() {
@@ -45,6 +48,7 @@ export default Vue.extend({
           }
           this.historyLong.push(now)
         }
+        this.jsHeapSize = parseInt(`${(performance as any)?.memory.usedJSHeapSize / 1000000}`) ?? -1
         this.showFps()
       })
     },
@@ -120,6 +124,9 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .fps__value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   background: white;
   padding: 2px;
   position: absolute;
