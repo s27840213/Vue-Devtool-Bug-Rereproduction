@@ -17,7 +17,7 @@
             span {{$t('NN0509')}}
             hr
           div(class="pricing-plan-left-bottom")
-            div(v-for="item in ['NN0510', 'NN0511', 'NN0512', 'NN0513']")
+            div(v-for="item in ['NN0510', 'NN0511', 'NN0512', 'NN0513', 'NN0769']")
               svg-icon(iconName="item-check" iconWidth="20px")
               span {{$t(item)}}
         div(class="pricing-plan-right")
@@ -173,18 +173,18 @@ export default Vue.extend({
   grid-template-rows: 1fr auto 1fr;
   box-sizing: border-box;
   width: 68%;
-  padding: 64px 24px 64px 60px;
+  padding: 0 24px 0 60px;
   text-align: left;
   &-top {
     display: flex;
     flex-direction: column;
+    margin: auto 0 29px 0;
   }
   &-divider {
     @include overline-LG;
     display: grid;
     grid-template-columns: auto 1fr;
     align-items: center;
-    margin: 10px 0;
     color: setColor(blue-1);
     > hr {
       width: calc(100% - 12px);
@@ -196,8 +196,9 @@ export default Vue.extend({
     @include body-MD;
     display: grid;
     grid-template-columns: auto auto;
-    margin-top: 10px;
+    margin: 21px 0 auto 0;
     color: setColor(gray-2);
+    gap: 12px 0;
     > div {
       display: flex;
       svg {
@@ -338,8 +339,13 @@ export default Vue.extend({
       display: block;
       width: 100%;
       padding: 18px;
+      &-top {
+        margin: 0 0 10px 0;
+      }
       &-bottom {
+        margin: 10px 0 0 0;
         grid-template-columns: auto;
+        gap: 0;
         > div + div {
           margin-top: 10px;
         }
@@ -357,13 +363,16 @@ export default Vue.extend({
 }
 @media screen and (max-width: 1024px) and (min-width: 834.02px) {
   .pricing-plan-left {
+    grid-template-rows: auto auto auto;
     width: 58%;
-    padding: 39px 12px 39px 44px;
+    padding: 0 12px 0 44px;
+    &-top {
+      margin: auto 0 5px 0;
+    }
     &-bottom {
+      margin: 5px 0 auto 0;
       grid-template-columns: auto;
-      > div + div {
-        margin-top: 10px;
-      }
+      gap: 10px 0;
     }
   }
   .pricing-plan-right {
@@ -372,7 +381,7 @@ export default Vue.extend({
 }
 @media screen and (max-width: 1440px) and (min-width: 1024.02px) {
   .pricing-plan-left {
-    padding: 64px 12px 64px 44px;
+    padding: 0 12px 0 44px;
   }
 }
 </style>
