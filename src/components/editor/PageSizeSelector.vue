@@ -3,38 +3,43 @@
     div(class="page-size-selector__body-row first-row")
       span(class="page-size-selector__body__title subtitle-2"
         :class="defaultTextColor") {{$t('NN0023')}}
-    div(class="page-size-selector__body-row")
-      radio-btn(class="page-size-selector__body__radio"
-                :isSelected="selectedFormat === 'custom'",
-                :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                formatKey="custom",
-                @select="selectFormat")
-      div(class="page-size-selector__body__custom")
+    div(class="page-size-selector__body__custom")
+        radio-btn(class="page-size-selector__body__radio"
+                  :isSelected="selectedFormat === 'custom'",
+                  :circleColor="isDarkTheme ? 'white' : 'gray-2'"
+                  formatKey="custom",
+                  @select="selectFormat")
         property-bar(class="page-size-selector__body__custom__box"
                     :class="selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`")
-          input(class="body-3" type="number" min="0"
+          input(class="body-XS" type="number" min="0"
                 :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
                 :value="pageWidth" @input="setPageWidth" @click="selectFormat('custom')")
+          span(class="body-XS"
+              :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") W
         svg-icon(class="pointer"
             :iconName="isLocked ? 'lock' : 'unlock'"
             iconWidth="15px" :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'blue'"
             @click.native="toggleLock()")
         property-bar(class="page-size-selector__body__custom__box"
                     :class="selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`")
-          input(class="body-3" type="number" min="0"
+          input(class="body-XS" type="number" min="0"
                 :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
                 :value="pageHeight" @input="setPageHeight" @click="selectFormat('custom')")
+          span(class="body-XS"
+              :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") H
         property-bar(v-click-outside="() => {showUnitOptions = false}"
-                    class="page-size-selector__body__custom__box page-size-selector__body__custom__unit"
-                    :class="selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`"
+                    class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
+                    :class="selectedFormat === 'custom' || showUnitOptions ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`"
             @click.native="showUnitOptions = !showUnitOptions")
-          span(class="page-size-selector__body__custom__unit__label body-XS" :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{unitOptions[selectedUnit]}}
+          span(class="page-size-selector__body__custom__unit__label body-XXS" :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{unitOptions[selectedUnit]}}
           svg-icon(class="page-size-selector__body__custom__unit__icon"
             iconName="chevron-down"
             iconWidth="16px"
             :iconColor="selectedFormat === 'custom' ? 'blue-1' : this.isDarkTheme ? 'white' : 'gray-2'")
-          div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option bg-gray-6")
-            div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item body-XS text-gray-2" @click="selectUnit($event, index)") {{unit}}
+          div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option" :class="`bg-${this.isDarkTheme ? 'white' : 'gray-1-5'}`")
+            div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-gray-2" @click="selectUnit($event, index)")
+              span(class="body-XS"
+                  :class="`text-${isDarkTheme ? 'gray-1' : 'white'}`") {{unit}}
     div(class="page-size-selector__body__hr first bg-gray-4")
     div(class="page-size-selector__container")
         div(class="page-size-selector__body-row first-row")
@@ -51,14 +56,13 @@
                     @select="selectFormat")
           span(class="page-size-selector__body__recently body-3 pointer"
                 :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor"
-                @click="selectFormat(`recent-${index}`)") {{ makeFormatString(format) }}
-        div(class="mt-10")
+                @click="selectFormat(`recent-${index}`)") {{ makeFormatTitle(format) }}
         div(class="page-size-selector__body-row first-row")
           span(class="page-size-selector__body__title subtitle-2"
               :class="defaultTextColor") {{$t('NN0025')}}
         div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
           svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
-        div(v-for="(format, index) in formatList" class="page-size-selector__body-row pointer"
+        div(v-for="(format, index) in formatList" class="page-size-selector__body-row typical-row pointer"
             @click="selectFormat(`preset-${index}`)")
           radio-btn(class="page-size-selector__body__radio"
                     :isSelected="selectedFormat === `preset-${index}`",
@@ -68,10 +72,11 @@
           span(class="page-size-selector__body__typical-name body-4"
                 :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
           span(class="page-size-selector__body__typical-size body-4"
-                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.description }}
+                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
     div(class="page-size-selector__body__hr second bg-gray-4")
     div(class="page-size-selector__body__submit")
-      checkbox(v-model="copyBeforeApply") {{$t('NN0211')}}
+      div(class="page-size-selector__body__submit__option body-XS")
+        checkbox(v-model="copyBeforeApply" class="pointer") {{$t('NN0211')}}
       btn(class="page-size-selector__body__button"
           :disabled="!isFormatApplicable"
           @click.native="submit")
@@ -208,7 +213,7 @@ export default Vue.extend({
         width: item.width ?? 0,
         height: item.height ?? 0,
         title: item.title ?? '',
-        description: item.description ? (item.description.includes(' ') ? item.description.replace(' ', ' px') : item.description + ' px') : '',
+        description: item.description ?? '',
         unit: item.unit ?? 'px'
       })) : []
     },
@@ -265,12 +270,15 @@ export default Vue.extend({
     toggleLock() {
       this.isLocked = !this.isLocked
     },
-    makeFormatString(format: ILayout) {
+    makeFormatTitle(format: ILayout) {
       if (format.id !== '') {
-        return `${format.title} ${format.description.replace(' ', ' ' + format.unit)}`
+        return `${format.title} ${this.makeFormatDescription(format)}`
       } else {
         return `${format.width} x ${format.height} ${format.unit}`
       }
+    },
+    makeFormatDescription(format: ILayout): string {
+      return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description} ${format.unit ?? 'px'}`
     },
     transSize(size: number) {
       return this.mulUnits[this.selectedUnit].map((mulTransUnit, idx) => {
@@ -482,13 +490,15 @@ export default Vue.extend({
     border-radius: 4px;
     padding: 11.57px;
     &-row {
-      display: flex;
-      justify-content: space-between;
-      width: 87%;
-      margin-left: auto;
-      margin-top: 15px;
-      margin-right: 10px;
+      display: grid;
+      grid-template-columns: 12px auto;
+      grid-template-rows: auto;
+      column-gap: 12px;
+      width: 100%;
+      padding: 3px 22px 3px 10px;
       align-items: center;
+      box-sizing: border-box;
+      text-align: left;
       &-center {
         margin-top: 20px;
         display: flex;
@@ -496,7 +506,18 @@ export default Vue.extend({
         justify-content: center;
       }
       &.first-row {
-        margin-top: 0px;
+        display: block;
+        padding: 0px;
+        margin: 0px;
+        > span {
+          display: block;
+          height: 16px;
+          word-spacing: 1.5px;
+          text-transform: uppercase;
+        }
+      }
+      &.typical-row  {
+        grid-template-columns: 12px calc((100% - 36px) * 0.5) auto;
       }
     }
     &__close {
@@ -506,17 +527,17 @@ export default Vue.extend({
     }
     &__title {
       font-weight: 700;
-      margin-left: -16px;
     }
     &__custom {
       display: grid;
-      grid-template-columns: 1fr auto 1fr 1fr;
+      grid-template-columns: 12px auto 15px auto 50px;
       grid-template-rows: auto;
-      column-gap: 5px;
+      column-gap: 6px;
       align-items: center;
-      width: 85%;
+      margin-top: 16px;
+      margin-left: 10px;
       &__box {
-        height: 26px;
+        height: 28px;
         box-sizing: border-box;
         padding: 5px 5px;
         & input {
@@ -529,21 +550,31 @@ export default Vue.extend({
         align-items: center;
         position: relative;
         &__label {
-          height: 22px;
+          height: 18px;
+          line-height: 18px;
         }
         &__option {
           position: absolute;
-          top: 30px;
+          top: 36px;
           left: 0px;
           right: 0px;
-          border-radius: 3px;
+          border-radius: 4px;
+          box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
           display: grid;
           overflow: hidden;
+          padding: 4px;
           &__item {
-            height: 20px;
-            padding: 2px 8px;
+            height: 30px;
+            padding: 4px;
+            box-sizing: border-box;
+            border-radius: 4px;
             &:hover {
-              background-color: setColor(blue-4);
+              background-color: setColor(blue-3);
+            }
+            > span {
+              display: block;
+              text-align: left;
+              height: 100%;
             }
           }
         }
@@ -553,28 +584,18 @@ export default Vue.extend({
       width: 100%;
       height: 1px;
       :not(.isTouchDevice) > &.first {
-        margin: 20px 0;
+        margin: 16px 0;
       }
       .isTouchDevice > &.first {
-        margin: 24px 0 16px 0;
+        margin: 20px 0 12px 0;
       }
       :not(.isTouchDevice) > &.second {
         height: 0px;
-        margin: 10px 0;
+        margin: 8px 0;
       }
       .isTouchDevice > &.second {
         margin: 0 0 15.5px 0;
       }
-    }
-    &__recently {
-      width: 88%;
-    }
-    &__typical-name {
-      width: 37%;
-    }
-    &__typical-size {
-      width: 45%;
-      white-space: nowrap;
     }
     &__buttons {
       display: flex;
@@ -599,7 +620,12 @@ export default Vue.extend({
       }
     }
     &__submit {
+      display: grid;
+      gap: 16px;
       width: 100%;
+      &__option {
+        padding: 3px 0px;
+      }
       > .checkbox {
         @include body-SM;
         margin: 0 auto 20px 0;
@@ -623,8 +649,8 @@ export default Vue.extend({
     height: 20px;
   }
   &__container {
-    margin-right: -5px;
-    padding-right: 5px;
+    display: grid;
+    gap: 4px;
     overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
     :not(.isTouchDevice) > & {
@@ -659,5 +685,9 @@ export default Vue.extend({
 
 .border-blue-1 {
   border: 1px solid setColor(blue-1);
+}
+
+@media (max-width: 1260px) {
+
 }
 </style>
