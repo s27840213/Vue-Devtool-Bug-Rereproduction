@@ -18,7 +18,7 @@
         tabindex="0")
     div(v-if="isAdmin && !inScreenshotPreview" class="fps")
       span FPS: {{fps}}
-      span {{` JS-Heap-Size: ${jsHeapSize / Math.pow(1000, 2)} MB`}}
+      span {{` JS-Heap-Size: ${jsHeapSize} MB`}}
     div(class="modal-container"
         v-if="isModalOpen")
       modal-card
@@ -161,7 +161,7 @@ export default Vue.extend({
           }
           times.push(now)
           this.fps = times.length
-          this.jsHeapSize = (performance as any).memory ? (performance as any).memory.usedJSHeapSize : -1
+          this.jsHeapSize = parseInt(`${(performance as any)?.memory.usedJSHeapSize / 1000000}`) ?? -1
           if (this.inScreenshotPreview) {
             clearInterval(this.fpsInterval)
             return
@@ -264,6 +264,9 @@ export default Vue.extend({
 }
 
 .fps {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   background: white;
   padding: 2px;
   position: absolute;
