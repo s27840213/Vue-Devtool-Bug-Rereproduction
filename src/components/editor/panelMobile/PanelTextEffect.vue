@@ -303,7 +303,7 @@ export default Vue.extend({
   }
 
   &__reset {
-    margin-top: 5px;
+    margin-top: 10px;
     color: setColor(blue-1);
   }
 }

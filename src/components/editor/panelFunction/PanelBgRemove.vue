@@ -111,7 +111,8 @@ export default Vue.extend({
       setShowInitImage: 'bgRemove/SET_showInitImage',
       setLoading: 'bgRemove/SET_loading',
       setIsProcessing: 'bgRemove/SET_isProcessing',
-      setCurrSidebarPanel: 'SET_currSidebarPanelType'
+      setCurrSidebarPanel: 'SET_currSidebarPanelType',
+      uploadMyfileImg: 'file/UPDATE_IMAGE_URLS'
     }),
     toggleShowInitImage(val: boolean): void {
       this.setShowInitImage(!val)
@@ -144,12 +145,14 @@ export default Vue.extend({
             Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
           }
         }
+        this.uploadMyfileImg(Object.assign({ assetId: this.autoRemoveResult.id }, this.autoRemoveResult))
         this.setInBgRemoveMode(false)
         this.setIsProcessing(false)
         this.setPageScaleRatio(this.prevPageScaleRatio)
         stepsUtils.record()
       } else {
         const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
+        const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
         const previewSrc = this.canvas.toDataURL('image/png;base64')
         const { pageId, layerId } = this.bgRemoveIdInfo
         layerUtils.updateLayerProps(pageIndex, index, {
@@ -198,7 +201,7 @@ export default Vue.extend({
             this.setLoading(false)
             this.setIsProcessing(false)
           },
-          id,
+          id: id ?? privateId,
           needCompressed: false
         })
       }

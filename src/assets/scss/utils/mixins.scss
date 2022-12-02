@@ -28,10 +28,8 @@
 
 @mixin safariOnly {
   // Only for Safari, https://stackoverflow.com/a/25975282
-  @media not all and (min-resolution: 0.001dpcm) {
-    @supports (-webkit-appearance: none) {
-      @content;
-    }
+  @supports (font: -apple-system-body) and (-webkit-appearance: none) {
+    @content;
   }
 }
 
@@ -51,10 +49,13 @@
   box-sizing: border-box;
   margin-right: -10px;
 
-  // Firefox mobile never display scrollbar, add padding right back.
-  @include firefoxOnly {
-    .mobile-panel & {
-      padding-right: 10px;
+  // Firefox & Safari mobile never display scrollbar, cancel minus margin.
+  .mobile-panel & {
+    @include firefoxOnly {
+      margin-right: 0;
+    }
+    @include safariOnly {
+      margin-right: 0;
     }
   }
 }
@@ -115,7 +116,7 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;

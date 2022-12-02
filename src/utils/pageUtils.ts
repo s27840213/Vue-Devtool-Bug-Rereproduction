@@ -10,7 +10,7 @@ import FocusUtils from './focusUtils'
 import generalUtils from './generalUtils'
 import layerFactary from './layerFactary'
 import resizeUtils from './resizeUtils'
-import { debounce } from 'lodash'
+import { throttle } from 'lodash'
 import groupUtils from './groupUtils'
 import { LayerType } from '@/store/types'
 import SnapUtils from './snapUtils'
@@ -191,6 +191,10 @@ class PageUtils {
     designUtils.renameDesign(name)
   }
 
+  setPageSize(index: number, width: number, height: number) {
+    store.commit('SET_pageSize', { index, width, height })
+  }
+
   resizePage(format: { width: number, height: number }) {
     resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
     this.updatePageProps({
@@ -320,7 +324,7 @@ class PageUtils {
   // findCentralPageIndexInfo(preventFocus = false) {
   //   // console.lg
   // }
-  findCentralPageIndexInfo = debounce(this.findCentralPageIndexInfoHandler, 400)
+  findCentralPageIndexInfo = throttle(this.findCentralPageIndexInfoHandler, 100)
 
   private findCentralPageIndexInfoHandler(preventFocus = false) {
     const showMobilePanel = editorUtils.showMobilePanel || editorUtils.mobileAllPageMode
@@ -364,17 +368,10 @@ class PageUtils {
     }
 
     if (!preventFocus) this.activeMiddlemostPage()
-
-    /**
-     * @Note - don't remove the following codes unless the memember Alan isn't in the company anymore.
-     */
-    // this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
-    // this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
+    this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
+    this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
   }
 
-  /**
-   * @deprecated - although it's deprecated, but it may be usd in the future
-   */
   findBoundary(posArr: Array<{ top: number, bottom: number }>, containerRect: DOMRect, currIndex: number, toTop: boolean): number {
     if (currIndex < 0 || currIndex >= posArr.length) {
       return currIndex
@@ -442,6 +439,8 @@ class PageUtils {
     // Get size of target(design) and editor.
     // Target size can be pass by param or get according to situation.
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
+    const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight ?? 0
+
     if (!editorViewBox) return
     const { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
     const { width: targetWidth, height: targetHeight }: { width: number, height: number } =
@@ -449,7 +448,10 @@ class PageUtils {
         : this.currFocusPageSize)
 
     // Calculate and do resize
-    const resizeRatio = Math.min(editorWidth / (targetWidth * (this.scaleRatio / 100)), editorHeight / (targetHeight * (this.scaleRatio / 100))) * 0.8
+    const resizeRatio = Math.min(
+      editorWidth / (targetWidth * (this.scaleRatio / 100)),
+      (editorHeight - mobilePanelHeight) / (targetHeight * (this.scaleRatio / 100))
+    ) * 0.8
     const newRatio = Math.max(3, Math.round(this.scaleRatio * resizeRatio))
 
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {

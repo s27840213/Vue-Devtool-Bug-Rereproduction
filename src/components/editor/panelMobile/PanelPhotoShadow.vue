@@ -28,7 +28,7 @@
             @click="handleColorModal")
       div(v-if="currentEffect !== 'none'" class="photo-shadow__row-wrapper")
         div(class="photo-shadow__reset")
-          button(@click="imageShadowPanelUtils.reset()") {{ 'Reset' }}
+          button(class="label-mid" @click="imageShadowPanelUtils.reset()") {{$t('NN0754')}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -208,8 +208,6 @@ export default Vue.extend({
     @include no-scrollbar;
   }
   &__reset {
-    margin: 12px 0 0 0;
-    text-align: right;
     > button {
       color: setColor(blue-1);
       font-size: 14px;

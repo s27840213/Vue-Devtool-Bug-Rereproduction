@@ -15,6 +15,9 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 import assetUtils from './assetUtils'
 import layerFactary from './layerFactary'
 import textUtils from './textUtils'
+import workerUtils from './workerUtils'
+import { clone } from 'lodash'
+import layerUtils from './layerUtils'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -98,8 +101,8 @@ class StepsUtils {
           delete shape.styles
           Object.assign(layer, shape)
           Object.assign(layer.styles, {
-            initWidth: vSize[0],
-            initHeight: vSize[1]
+            initWidth: vSize?.[0] ?? 0,
+            initHeight: vSize?.[1] ?? 0
           })
         }
         return layer
@@ -249,6 +252,51 @@ class StepsUtils {
       // Don't upload the design when initialize the steps
       if (uploadUtils.isLogin) {
         uploadUtils.uploadDesign()
+      }
+    }
+  }
+
+  async asyncRecord() {
+    const clonedData = await workerUtils.asyncCloneDeep({
+      pages_1: store.getters.getPages,
+      // pages_2: GeneralUtils.deepCopy(store.getters.getPages),
+      selectedInfo: store.getters.getCurrSelectedInfo
+    })
+    const pages_2 = await workerUtils.asyncCloneDeep(store.getters.getPages)
+    if (clonedData) {
+      const pages = this.filterDataForLayersInPages(clonedData.pages_1)
+      const currSelectedInfo = clonedData.selectedInfo
+      const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
+      // console.log(GeneralUtils.deepCopy(clonedData.pages_1))
+      /**
+       * The following code modify the wrong config state cause by the async
+       */
+      if (currSelectedInfo.layers.length === 1) {
+        currSelectedInfo.layers[0].active = true
+      }
+      // pages[currSelectedInfo.pageIndex].layers[lastSelectedLayerIndex].active = true
+      // if (currIndex !== lastSelectedLayerIndex) {
+      //   pages[currSelectedInfo.pageIndex].layers[currIndex].active = false
+      //   clonedData.pages_2[currSelectedInfo.pageIndex].layers[currIndex].active = false
+      // }
+
+      // There's not any steps before, create the initial step first
+      if (this.currStep < 0) {
+        this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
+        this.currStep++
+      } else {
+        // if step isn't in last step and we record new step, we need to remove all steps larger than curr step
+        this.steps.length = this.currStep + 1
+        if (this.steps.length === this.MAX_STORAGE_COUNT) {
+          this.steps.shift()
+        }
+        this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
+        this.currStep = this.steps.length - 1
+        // Don't upload the design when initialize the steps
+        if (uploadUtils.isLogin) {
+          uploadUtils.uploadDesign(undefined, { clonedPages: pages_2 })
+          // uploadUtils.uploadDesign(undefined, { clonedPages: clonedData.pages_2 })
+        }
       }
     }
   }

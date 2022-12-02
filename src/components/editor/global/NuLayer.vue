@@ -731,8 +731,11 @@ export default Vue.extend({
         y: this.config.styles.y
       }
     },
+    pageScaleRatio(): number {
+      return pageUtils.scaleRatio / 100
+    },
     compensationRatio(): number {
-      return 1
+      return Math.max(1, this.pageScaleRatio())
     },
     showSpinner(): boolean {
       const { config } = this

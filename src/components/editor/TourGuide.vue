@@ -48,7 +48,7 @@ export default Vue.extend({
           next: { text: this.$t('NN0272') }
         },
         {
-          target: '.nav-container .nav-item:nth-child(4)',
+          target: '.nav-container .nav-item:nth-child(3)',
           placement: 'right-end',
           title: this.$t('NN0265'),
           content: this.$t('NN0266'),
@@ -56,7 +56,7 @@ export default Vue.extend({
           next: { text: this.$t('NN0272') }
         },
         {
-          target: '.nav-container .nav-item:last-child',
+          target: '.nav-container .nav-item:nth-last-child(2)',
           placement: 'right-end',
           title: this.$t('NN0267'),
           content: this.$t('NN0268'),
@@ -209,6 +209,7 @@ export default Vue.extend({
   .btn.skip,
   .btn.finish {
     border: 1px solid setColor(blue-3);
+    background-color: transparent;
     color: setColor(blue-3);
     &:hover {
       border-color: setColor(white);
@@ -220,7 +221,7 @@ export default Vue.extend({
     background-color: setColor(blue-4);
     color: setColor(blue-1);
     &:hover {
-      color: setColor(blue-4);
+      background-color: setColor(white);
     }
   }
 </style>

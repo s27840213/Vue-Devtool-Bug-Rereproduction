@@ -29,7 +29,7 @@ export default class GalleryUtils {
   }
 
   setRegenerateGalleryFlag(bool: boolean): void {
-    store.commit('SET_REGENERATE_GALLERY_FLAG', bool)
+    store.commit('file/SET_REGENERATE_GALLERY_FLAG', bool)
   }
 
   createRows(images: GalleryImage[]): RowData[] {

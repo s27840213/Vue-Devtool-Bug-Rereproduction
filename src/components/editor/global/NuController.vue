@@ -75,25 +75,39 @@
               :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
               @pointerdown.stop="lineEndMoveStart"
               @touchstart="disableTouchEvent")
-          div(v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalers) : []"
-              class="control-point scaler"
-              :key="index"
-              :style="ctrlPointerStyles(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="scaleStart"
-              @touchstart="disableTouchEvent")
           div(v-for="(resizer, index) in resizer(controlPoints)"
+              @pointerdown.prevent.stop="!isTouchDevice() ? resizeStart($event) : null"
+              @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
+            div(class="control-point__resize-bar"
+                :key="`resizer-${index}`"
+                :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
+            div(class="control-point resizer"
+                :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
+          div(v-if="isTouchDevice()" v-for="(resizer, index) in resizer(controlPoints, false, true)"
               @pointerdown.prevent.stop="resizeStart"
               @touchstart="disableTouchEvent")
             div(class="control-point__resize-bar"
-                :key="index"
-                :style="ctrlPointerStyles(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
+                :key="`resizer-touch-${index}`"
+                :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
             div(class="control-point resizer"
-                :style="ctrlPointerStyles(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
+                :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))")
           div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
               @pointerdown="moveStart")
             div(class="control-point__resize-bar control-point__move-bar"
-                :key="index"
+                :key="`resizer-text-${index}`"
                 :style="resizerBarStyles(resizer.styles)")
+          div(v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalers) : []"
+              class="control-point scaler"
+              :key="`scaler-${index}`"
+              :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
+              @pointerdown.prevent.stop="!isTouchDevice() ? scaleStart($event) : null"
+              @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
+          div(v-if="isTouchDevice()" v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalerTouchAreas) : []"
+              class="control-point scaler"
+              :key="`scaler-touch-${index}`"
+              :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
+              @pointerdown.prevent.stop="scaleStart"
+              @touchstart="disableTouchEvent")
           div(class="control-point__line-controller-wrapper"
               v-if="isLine()"
               :style="`transform: scale(${100/scaleRatio * contentScaleRatio})`")
@@ -424,16 +438,16 @@ export default Vue.extend({
       } else {
         resizerStyle.transform += ` scaleX(${100 / this.scaleRatio})`
       }
-      const scalerOffset = generalUtils.isTouchDevice() ? 35 : 20
+      const scalerOffset = generalUtils.isTouchDevice() ? 36 : 20
       const resizeBarScale = generalUtils.isTouchDevice() ? 2.5 : 1
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: isHorizon ? `${this.getLayerWidth() * this.contentScaleRatio - scalerOffset}px` : `${width * this.contentScaleRatio * resizeBarScale}px`,
-        height: !isHorizon ? `${this.getLayerHeight() * this.contentScaleRatio - scalerOffset}px` : `${height * this.contentScaleRatio * resizeBarScale}px`
+        width: isHorizon ? `${this.getLayerWidth() - scalerOffset * 100 / this.scaleRatio}px` : `${width * this.contentScaleRatio * resizeBarScale}px`,
+        height: !isHorizon ? `${this.getLayerHeight() - scalerOffset * 100 / this.scaleRatio}px` : `${height * this.contentScaleRatio * resizeBarScale}px`
       }
       return Object.assign(resizerStyle, HW)
     },
-    resizerStyles(resizer: IResizer) {
+    resizerStyles(resizer: IResizer, isTouchArea = false) {
       const resizerStyle = { ...resizer }
       const tooShort = this.getLayerHeight() * this.scaleRatio < RESIZER_SHOWN_MIN
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < RESIZER_SHOWN_MIN
@@ -443,26 +457,29 @@ export default Vue.extend({
       if (!tooSmall) {
         resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
       }
+      // resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
       const width = parseFloat(resizerStyle.width.replace('px', ''))
       const height = parseFloat(resizerStyle.height.replace('px', ''))
+      const scale = isTouchArea ? 3 : 1
+      const aspectRatio = this.isTouchDevice() ? 0.24 : 0.16
 
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: width > height && tooSmall ? `${this.getLayerWidth() * this.contentScaleRatio - 10}px`
-          : (tooSmall ? `${(this.getLayerHeight() * this.contentScaleRatio - 10) * 0.16}px` : resizerStyle.width),
-        height: width < height && tooSmall ? `${this.getLayerHeight() * this.contentScaleRatio - 10}px`
-          : (tooSmall ? `${(this.getLayerWidth() * this.contentScaleRatio - 10) * 0.16}px` : resizerStyle.height)
+        width: width > height && tooSmall ? `${(this.getLayerWidth() * this.contentScaleRatio - 10) * scale}px`
+          : (tooSmall ? `${(this.getLayerHeight() * this.contentScaleRatio - 10) * aspectRatio * scale}px` : resizerStyle.width),
+        height: width < height && tooSmall ? `${(this.getLayerHeight() * this.contentScaleRatio - 10) * scale}px`
+          : (tooSmall ? `${(this.getLayerWidth() * this.contentScaleRatio - 10) * aspectRatio * scale}px` : resizerStyle.height)
       }
       return Object.assign(resizerStyle, HW)
     },
-    resizer(controlPoints: any, textMoveBar = false) {
-      let resizers = controlPoints.resizers as Array<{ [key: string]: string | number }>
+    resizer(controlPoints: any, textMoveBar = false, isTouchArea = false) {
+      let resizers = (isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers) as Array<{ [key: string]: string | number }>
       const tooShort = this.getLayerHeight() * this.scaleRatio < RESIZER_SHOWN_MIN
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < RESIZER_SHOWN_MIN
       switch (this.getLayerType) {
         case 'image':
-          return this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
-        // return resizers
+          resizers = this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
+          break
         case 'text':
           if (textMoveBar) {
             resizers = this.config.styles.writingMode.includes('vertical') ? resizers.slice(0, 2)
@@ -901,12 +918,14 @@ export default Vue.extend({
           y: moveOffset.offsetY
         }
       )
-      const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
-      this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
+      // const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
+      // this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
       // this.$emit('getClosestSnaplines')
       const totalOffset = {
-        x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
-        y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
+        x: offsetPos.x,
+        y: offsetPos.y
+        // x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
+        // y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
       }
       this.initialPos.x += totalOffset.x
       this.initialPos.y += totalOffset.y
@@ -930,7 +949,7 @@ export default Vue.extend({
           dragging: false
         })
         this.isDoingGestureAction = false
-        this.snapUtils.event.emit('clearSnapLines')
+        // this.snapUtils.event.emit('clearSnapLines')
         return
       }
 
@@ -978,7 +997,8 @@ export default Vue.extend({
             // The layerUtils.addLayers will trigger a record function, so we don't need to record the extra step here
           } else {
             if (!(this.config as IImage).isHoveringFrame) {
-              StepsUtils.record()
+              // StepsUtils.record()
+              StepsUtils.asyncRecord()
             }
           }
         } else {
@@ -1048,7 +1068,7 @@ export default Vue.extend({
       }
 
       this.isDoingGestureAction = false
-      this.snapUtils.event.emit('clearSnapLines')
+      // this.snapUtils.event.emit('clearSnapLines')
     },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
       if (eventUtils.checkIsMultiTouch(event)) {
@@ -1077,7 +1097,6 @@ export default Vue.extend({
       if (this.config.category === 'E') {
         this.initCorRadPercentage = ControlUtils.getCorRadPercentage(this.config.vSize, this.config.size, this.config.shapeType)
       }
-
       const body = this.$refs.body as HTMLElement
       body.classList.remove('hover')
       this.currCursorStyling(event)
@@ -1244,7 +1263,8 @@ export default Vue.extend({
     },
     scaleEnd() {
       this.isControlling = false
-      StepsUtils.record()
+      // StepsUtils.record()
+      StepsUtils.asyncRecord()
 
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.scaling)
@@ -1309,7 +1329,8 @@ export default Vue.extend({
     lineEndMoveEnd() {
       this.isControlling = false
       this.isLineEndMoving = false
-      StepsUtils.record()
+      StepsUtils.asyncRecord()
+      // StepsUtils.record()
 
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.lineEndMoving)
@@ -1507,7 +1528,8 @@ export default Vue.extend({
         ControlUtils.updateShapeCorRad(this.pageIndex, this.layerIndex, this.config.size, shapeUtils.clipCorRad(this.config.shapeType, this.config.vSize, this.config.size))
       }
       this.isControlling = false
-      StepsUtils.record()
+      // StepsUtils.record()
+      StepsUtils.asyncRecord()
 
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
@@ -1625,7 +1647,8 @@ export default Vue.extend({
       this.isRotating = false
       this.isControlling = false
       this.initCornerRotate = -1
-      StepsUtils.record()
+      // StepsUtils.record()
+      StepsUtils.asyncRecord()
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.rotating)
       eventUtils.removePointerEvent('pointerup', this.rotateEnd)
@@ -1693,7 +1716,8 @@ export default Vue.extend({
     lineRotateEnd() {
       this.isRotating = false
       this.isControlling = false
-      StepsUtils.record()
+      // StepsUtils.record()
+      StepsUtils.asyncRecord()
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.lineRotating)
       eventUtils.removePointerEvent('pointerup', this.lineRotateEnd)

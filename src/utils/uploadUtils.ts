@@ -21,13 +21,13 @@ import { SidebarPanelType } from '@/store/types'
 import i18n from '@/i18n'
 import logUtils from './logUtils'
 import listService from '@/apis/list'
-import designApis from '@/apis/design-info'
+import designInfoApis from '@/apis/design-info'
 import brandkitUtils from './brandkitUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import networkUtils from './networkUtils'
 import _ from 'lodash'
 import editorUtils from './editorUtils'
-
+import designApis from '@/apis/design'
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
   UPDATE_DB,
@@ -250,7 +250,7 @@ class UploadUtils {
                       assetId: assetId,
                       progress: 100
                     })
-                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
+                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index })
                     store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                     store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
                     // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot
@@ -402,7 +402,7 @@ class UploadUtils {
                               assetId: assetId,
                               progress: 100
                             })
-                            store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: asset_index, type: this.isAdmin ? 'public' : 'private', ...(isUnknown && { width, height }) })
+                            store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: asset_index, ...(isUnknown && { width, height }) })
                           }
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                           store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
@@ -560,11 +560,12 @@ class UploadUtils {
     }
   }
 
-  async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
+  async uploadDesign(putAssetDesignType?: PutAssetDesignType, params?: { clonedPages?: Array<IPage> }) {
     const typeMap = ['UPDATE_DB', 'UPDATE_PREV', 'UPDATE_BOTH']
     let type = router.currentRoute.query.type
     let designId = router.currentRoute.query.design_id
     let teamId = router.currentRoute.query.team_id
+    let isNewDesign = false
     // const exportIds = router.currentRoute.query.export_ids
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
 
@@ -586,10 +587,13 @@ class UploadUtils {
       type = router.currentRoute.query.type
       designId = router.currentRoute.query.design_id
       teamId = router.currentRoute.query.team_id
+      isNewDesign = true
     }
 
     store.commit('SET_assetId', assetId)
-    const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
+    const { clonedPages } = params || {}
+    const pages = clonedPages ?? generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
+    // const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
 
     logUtils.setLog(`Upload Design:
       Type: ${putAssetDesignType ? typeMap[putAssetDesignType] : 'UPLOAD JSON'}
@@ -598,7 +602,7 @@ class UploadUtils {
       PageNum: ${pages.length}`)
 
     const pagesJSON = pages.map((page: IPage) => {
-      const newPage = this.default(generalUtils.deepCopy(page)) as IPage
+      const newPage = this.default(page, false)
       for (const [i, layer] of newPage.layers.entries()) {
         if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
           newPage.layers[i] = this.layerInfoFilter(layer)
@@ -645,10 +649,46 @@ class UploadUtils {
         }, 300)
         if (putAssetDesignType !== undefined) {
           logUtils.setLog(`Put asset design (Type: ${typeMap[putAssetDesignType]})`)
-          await store.dispatch('user/putAssetDesign', {
+          const resPutAssetDesign = await store.dispatch('user/putAssetDesign', {
             assetId,
-            type: putAssetDesignType
+            type: putAssetDesignType,
+            wait: 1
           })
+          const { flag } = resPutAssetDesign
+          if (flag !== 0) {
+            Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+            return
+          }
+
+          // move new design to path
+          const path = router.currentRoute.query.path as string
+          if (isNewDesign && path) {
+            const designAssetIndex = (await store.dispatch('design/fetchDesign', { teamId, assetId })).asset_index?.toString()
+            if (!designAssetIndex) {
+              Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+              return
+            }
+            await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+              'move', designAssetIndex, null, path).catch(async err => {
+              // remove design if move failed
+              console.error(err)
+              await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+                'delete', designAssetIndex, null, '2').catch(err => {
+                console.error(err)
+              })
+              Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+            })
+            // update design info
+            designUtils.fetchDesign(teamId as string, assetId)
+            // remove query for new design
+            const query = Object.assign({}, router.currentRoute.query)
+            delete query.width
+            delete query.height
+            delete query.path
+            delete query.folderName
+            router.replace({ query })
+          }
+          Vue.notify({ group: 'copy', text: `${i18n.t('NN0357')}` })
         }
       })
       .catch(async (error) => {
@@ -906,7 +946,7 @@ class UploadUtils {
       designId: designId
     })
 
-    const pageJSON = this.default(generalUtils.deepCopy(page))
+    const pageJSON = this.default(page)
     pageJSON.parentId = parentId
     for (const [i, layer] of pageJSON.layers.entries()) {
       if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
@@ -954,7 +994,7 @@ class UploadUtils {
     const pageIndex = pageUtils.currFocusPageIndex
     const designId = store.getters.getPage(pageIndex).designId
     if (this.isOutsourcer) {
-      const res = await designApis.getDesignInfo(this.token, 'template', designId, 'select', JSON.stringify({}))
+      const res = await designInfoApis.getDesignInfo(this.token, 'template', designId, 'select', JSON.stringify({}))
       const { creator_id: creatorId } = res.data
       if (creatorId !== this.userId) {
         modalUtils.setModalInfo('更新失敗', ['無法更新他人模板'])
@@ -962,7 +1002,7 @@ class UploadUtils {
       }
     }
 
-    const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex))) as IPage
+    const pageJSON = this.default(store.getters.getPage(pageIndex))
     for (const [i, layer] of pageJSON.layers.entries()) {
       if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
         pageJSON.layers[i] = this.layerInfoFilter(layer)
@@ -1009,7 +1049,8 @@ class UploadUtils {
     }
   }
 
-  private default(page: any) {
+  private default(page: any, deepCopy = true): IPage {
+    page = deepCopy ? generalUtils.deepCopy(page) : page
     const basicDefault = (layer: any) => {
       layer.moved = false
       layer.shown = false
@@ -1044,16 +1085,8 @@ class UploadUtils {
         case 'image':
           layer.imgControl = false
           break
-        case 'tmp': {
-          const tmpLayer = layer as ITmp
-          const layers = generalUtils.deepCopy(tmpLayer).layers
-          if (tmpLayer.layers.filter(l => l.type === 'group').length) {
-            for (let i = 0; i < tmpLayer.layers.length; i++) {
-              if (tmpLayer.layers[i].type === 'group') {
-                layers.splice(i, 1, ...groupUtils.mapGroupLayersToTmp(tmpLayer.layers[i] as IGroup))
-              }
-            }
-          }
+        case 'tmp': { // If there is group layer in tmp layer, cancel tmp layer.
+          page.layers.splice(index, 1, ...groupUtils.mapLayersToPage((layer as ITmp).layers, layer as ITmp))
         }
       }
       basicDefault(layer)
@@ -1067,13 +1100,6 @@ class UploadUtils {
     }
     page.appVer = new Date().toISOString()
     page.jsonVer = jsonVer
-
-    if (page.documentColors && page.documentColors.length && typeof page.documentColors[0] !== 'string') {
-      const documentColors = (page.documentColors as Array<{ color: string, count: number }>).map(e => e.color)
-      delete page.documentColors
-      page.documentColors = documentColors
-    }
-
     page.isAutoResizeNeeded = false
     return page
   }
@@ -1504,7 +1530,7 @@ class UploadUtils {
   getPageJson(json?: any): any {
     // ref: uploadUtils.ts:L466
     const pagesJSON = (generalUtils.deepCopy(json || store.getters.getPages)).map((page: IPage) => {
-      const newPage = this.default(generalUtils.deepCopy(page)) as IPage
+      const newPage = this.default(page)
       for (const [i, layer] of newPage.layers.entries()) {
         if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
           newPage.layers[i] = this.layerInfoFilter(layer)

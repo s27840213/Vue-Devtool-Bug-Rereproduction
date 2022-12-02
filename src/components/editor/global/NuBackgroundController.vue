@@ -9,7 +9,7 @@
       div(v-for="(scaler, index)  in controlPoints.scalers"
           class="controller-point"
           :key="index"
-          :style="Object.assign(scaler.styles, cursorStyles(index, getPageRotate))"
+          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getPageRotate))"
           @pointerdown.stop="scaleStart")
     //- div(class="nu-controller"
     //-     :style="controllerStyles()")
@@ -84,7 +84,7 @@ export default Vue.extend({
       return this.config.styles.scale
     },
     getPageRotate(): number {
-      return this.config.styles.rotate
+      return 0
     },
     getImgController(): ICoordinate {
       return this.config.styles.imgController

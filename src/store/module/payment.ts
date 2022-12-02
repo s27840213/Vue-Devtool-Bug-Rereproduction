@@ -11,7 +11,7 @@ import * as type from '@/interfaces/payment'
 
 interface IPaymentState {
   isLoading: boolean
-  initView: string
+  initView: type.IPaymentView
   templateImg: string
   // Constant
   status: string
@@ -130,7 +130,7 @@ function recordThePlanToGTM(trialStatus: string, isYearlyPlan: boolean) {
 
 const getDefaultState = (): IPaymentState => ({
   isLoading: false,
-  initView: '',
+  initView: 'brandkit',
   templateImg: '',
   // Constant
   status: 'Loading',
@@ -603,7 +603,7 @@ const mutations: MutationTree<IPaymentState> = {
   SET_isLoading(state: IPaymentState, isLoading) {
     state.isLoading = isLoading
   },
-  SET_initView(state: IPaymentState, initView) {
+  SET_initView(state: IPaymentState, initView: type.IPaymentView) {
     state.initView = initView
   },
   SET_templateImg(state: IPaymentState, templateImg) {

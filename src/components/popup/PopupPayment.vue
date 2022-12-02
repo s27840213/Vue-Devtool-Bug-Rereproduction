@@ -74,6 +74,9 @@ import { createHelpers } from 'vuex-map-fields'
 import vClickOutside from 'v-click-outside'
 import i18n from '@/i18n'
 import paymentUtils from '@/utils/paymentUtils'
+import {
+  IPaymentPayingView, IPaymentView, IPaymentWarningView, _IPaymentWarningView
+} from '@/interfaces/payment'
 import PaymentField from '@/components/payment/PaymentField.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import Animation from '@/components/Animation.vue'
@@ -110,8 +113,8 @@ export default Vue.extend({
       img: 'remover.jpg',
       // View constant
       periodInput: paymentData.periodOptions(),
-      cancel1: paymentData.cancel1(),
-      cancel2: paymentData.cancel2(),
+      cancel1: paymentData.cancel1() as string[],
+      cancel2: paymentData.cancel2() as string[],
       // User input
       reasonIndex: '-1',
       otherReason: ''
@@ -145,11 +148,11 @@ export default Vue.extend({
       return ['step2', 'step2-coupon', 'switch2'].includes(this.view)
     },
     showFeature(): boolean {
-      return ['cancel1', 'brandkit', 'bgrm', 'pro-template', 'pro-object'].includes(this.view)
+      return [..._IPaymentWarningView, 'cancel1'].includes(this.view)
     },
     cancelReason(): string {
       return Number(this.reasonIndex) < this.cancel2.length - 1
-        ? this.cancel2[Number(this.reasonIndex)] as string
+        ? this.cancel2[Number(this.reasonIndex)]
         : this.otherReason
     }
   },
@@ -174,30 +177,33 @@ export default Vue.extend({
       cancelApi: 'cancel',
       getPrice: 'getPrice'
     }),
-    getAd(name: string): string[] {
+    getAd(name: IPaymentWarningView): string[] {
       switch (name) {
+        case 'page-resize':
+          return [i18n.tc('NN0768'), 'page-resize.jpg']
         case 'brandkit':
-          return [i18n.t('NN0583') as string, 'brandkit.jpg']
+          return [i18n.tc('NN0583'), 'brandkit.jpg']
         case 'bgrm':
         default:
-          return [i18n.t('NN0652') as string, 'remover.jpg']
+          return [i18n.tc('NN0652'), 'remover.jpg']
         case 'pro-template':
-          return [i18n.t('NN0653') as string, 'cb.jpg']
+          return [i18n.tc('NN0653'), 'cb.jpg']
         case 'pro-object':
-          return [i18n.t('NN0658') as string, 'pro-object.jpg']
+          return [i18n.tc('NN0658'), 'pro-object.jpg']
       }
     },
-    async changeView(name: string) {
+    async changeView(name: IPaymentView) {
       this.view = name
       switch (name) {
+        case 'page-resize':
         case 'brandkit':
         case 'bgrm':
         case 'pro-template':
         case 'pro-object':
-          this.title = i18n.tc('NN0507', 2) as string
           [this.description, this.img] = this.getAd(name)
+          this.title = i18n.tc('NN0507', 2)
           this.buttons = [{
-            label: i18n.t('NN0561') as string,
+            label: i18n.tc('NN0561'),
             func: () => this.changeView('step1')
           }]
           break
@@ -206,13 +212,13 @@ export default Vue.extend({
           this.init()
           this.currentStep = 1
           this.totalStep = 2
-          this.title = i18n.t('NN0701') as string
-          this.description = i18n.t('NN0702') as string
+          this.title = i18n.tc('NN0701')
+          this.description = i18n.tc('NN0702')
           this.buttons = [{
-            label: i18n.t('NN0550') as string,
+            label: i18n.tc('NN0550'),
             func: () => {
               this.applyCoupon()
-              this.changeView(name.replace('1', '2'))
+              this.changeView(name.replace('1', '2') as IPaymentPayingView)
             }
           }]
           this.img = 'remover.jpg'
@@ -222,12 +228,14 @@ export default Vue.extend({
           this.init()
           this.currentStep = 1
           this.totalStep = 2
-          this.title = i18n.t('NN0545') as string
-          this.description = (this.trialStatus === 'not used' ? i18n.t('NN0546') : i18n.t('NN0547')) as string
+          this.title = i18n.tc('NN0545')
+          this.description = this.trialStatus === 'not used'
+            ? i18n.tc('NN0546')
+            : i18n.tc('NN0547')
           this.buttons = [{
-            label: i18n.t('NN0550') as string,
+            label: i18n.tc('NN0550'),
             func: () => {
-              this.changeView(name.replace('1', '2'))
+              this.changeView(name.replace('1', '2') as IPaymentPayingView)
             }
           }]
           this.img = 'remover.jpg'
@@ -235,7 +243,7 @@ export default Vue.extend({
         case 'step2-coupon':
         case 'step2':
           this.currentStep = 2
-          this.title = i18n.t('NN0551') as string
+          this.title = i18n.tc('NN0551')
           this.description = ''
           this.buttons = [] // Use button in PaymentField.vue
           this.img = 'pro-template1.jpg'
@@ -244,10 +252,12 @@ export default Vue.extend({
           this.getBillingInfo()
           break
         case 'switch1':
-          this.title = i18n.t('NN0564', { period: this.isBundle ? i18n.t('NN0514') : i18n.t('NN0515') }) as string
-          this.description = (this.isBundle ? i18n.t('NN0566') : i18n.t('NN0565')) as string
+          this.title = i18n.t('NN0564', { period: this.isBundle ? i18n.tc('NN0514') : i18n.tc('NN0515') }) as string
+          this.description = this.isBundle
+            ? i18n.tc('NN0566')
+            : i18n.tc('NN0565')
           this.buttons = [{
-            label: i18n.t('NN0567', { period: this.isBundle ? i18n.t('NN0514') : i18n.t('NN0515') }) as string,
+            label: i18n.t('NN0567', { period: this.isBundle ? i18n.tc('NN0514') : i18n.tc('NN0515') }) as string,
             func: () => this.changeView('switch2')
           }]
           await this.getPrice(this.userCountryInfo)
@@ -256,10 +266,10 @@ export default Vue.extend({
           // it will let user cannot switch plan since they should switch in the same plan.
           break
         case 'switch2':
-          this.title = i18n.t('NN0551') as string
-          this.description = i18n.t('NN0568') as string
+          this.title = i18n.tc('NN0551')
+          this.description = i18n.tc('NN0568')
           this.buttons = [{
-            label: i18n.t('NN0564', { period: this.isBundle ? i18n.t('NN0514') : i18n.t('NN0515') }) as string,
+            label: i18n.t('NN0564', { period: this.isBundle ? i18n.tc('NN0514') : i18n.tc('NN0515') }) as string,
             func: async () => {
               await this.switch()
               this.closePopup()
@@ -268,19 +278,19 @@ export default Vue.extend({
           this.img = 'pro-template1.jpg'
           break
         case 'cancel1':
-          this.title = i18n.t('NN0569') as string
+          this.title = i18n.tc('NN0569')
           this.buttons = [{
-            label: i18n.t('NN0575') as string,
+            label: i18n.tc('NN0575'),
             func: () => this.closePopup()
           }, {
             type: 'light-lg',
-            label: i18n.t('NN0574') as string,
+            label: i18n.tc('NN0574'),
             func: () => this.changeView('cancel2')
           }]
           this.img = 'pro-template2.jpg'
           break
         case 'cancel2':
-          this.title = i18n.t('NN0576') as string
+          this.title = i18n.tc('NN0576')
           this.buttons[1].disabled = () => !this.cancelReason
           this.buttons[1].func = this.cancel
           this.img = 'brandkit.jpg'
@@ -299,11 +309,11 @@ export default Vue.extend({
       if (this.view.includes('step1')) { this.periodUi = value }
     },
     preStep() {
-      if (this.view.startsWith('step2')) this.changeView(this.view.replace('2', '1'))
+      if (this.view.startsWith('step2')) this.changeView(this.view.replace('2', '1') as IPaymentPayingView)
       else if (this.view === 'switch2') this.changeView('switch1')
     },
     curPlan(period: string): string {
-      return this.view === 'switch1' && period !== this.userPeriod ? `(${i18n.t('NN0655')})` : ''
+      return this.view === 'switch1' && period !== this.userPeriod ? `(${i18n.tc('NN0655')})` : ''
     },
     selectCancelReason(index: string) {
       this.reasonIndex = index
@@ -368,7 +378,7 @@ input {
   @include body-MD;
   display: flex;
   flex-direction: column;
-  padding: 95px 30px 118px 30px;
+  padding: 95px 30px;
   &-top,
   &-content,
   &-button {
@@ -536,7 +546,7 @@ input {
   }
   .payment-left {
     width: 100%;
-    padding: 105px 7.467% 175px 7.467%;
+    padding: 105px 7.467%;
   }
   .payment-right {
     display: none;

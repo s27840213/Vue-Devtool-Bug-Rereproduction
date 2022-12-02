@@ -24,13 +24,15 @@
                 div(class="flex flex-column")
                   select(class="locale-select" v-model="inputLocale")
                     option(v-for="locale in localeOptions" :value="locale") {{locale}}
+                div(class="ml-10" @click="setEnableComponentLog(!enableComponentLog)")
+                  span {{`${enableComponentLog ? '關閉' : '開啟'} Log`}}
             editor-view
             scale-ratio-editor(@toggleSidebarPanel="toggleSidebarPanel")
         div(class="content__panel"
             :style="contentPanelStyles")
           function-panel(@toggleColorPanel="toggleColorPanel")
           transition(name="panel-up")
-            color-panel(v-if="isColorPanelOpen"
+            color-slips(v-if="isColorPanelOpen" mode="FunctionPanel"
               class="content__panel__color-panel"
               @toggleColorPanel="toggleColorPanel")
         div(v-if="isShowPagePreview" class="content__pages")
@@ -38,6 +40,7 @@
     tour-guide(v-if="showEditorGuide")
     popup-brand-settings(v-if="isBrandSettingsOpen")
     popup-update-design(v-if="isUpdateDesignOpen")
+    component-log(v-if="enableComponentLog" :logs="componentLogs")
 </template>
 
 <script lang="ts">
@@ -46,7 +49,7 @@ import Sidebar from '@/components/editor/Sidebar.vue'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
 import SidebarPanel from '@/components/editor/SidebarPanel.vue'
 import FunctionPanel from '@/components/editor/FunctionPanel.vue'
-import ColorPanel from '@/components/editor/ColorSlips.vue'
+import ColorSlips from '@/components/editor/ColorSlips.vue'
 import EditorView from '@/components/editor/EditorView.vue'
 import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
 import PagePreview from '@/components/editor/PagePreview.vue'
@@ -61,6 +64,9 @@ import logUtils from '@/utils/logUtils'
 import i18n from '@/i18n'
 import colorUtils from '@/utils/colorUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
+import pageUtils from '@/utils/pageUtils'
+import ComponentLog from '@/components/componentLog/ComponentLog.vue'
+import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
 
 export default Vue.extend({
   name: 'DesktopEditor',
@@ -71,11 +77,12 @@ export default Vue.extend({
     EditorView,
     ScaleRatioEditor,
     FunctionPanel,
-    ColorPanel,
+    ColorSlips,
     PagePreview,
     TourGuide,
     PopupBrandSettings,
-    PopupUpdateDesign
+    PopupUpdateDesign,
+    ComponentLog
   },
   data() {
     return {
@@ -85,8 +92,17 @@ export default Vue.extend({
       // isColorPanelOpen: false
       colorPanelOpenState: {
         val: false
-      }
+      },
+      componentLogs: [] as Array<IComponentUpdatedLog>
     }
+  },
+  created() {
+    this.$root.$on('on-re-rendering', (component: IComponentUpdatedLog) => {
+      if (this.componentLogs.length >= 50) {
+        this.componentLogs.shift()
+      }
+      this.componentLogs.push(component)
+    })
   },
   watch: {
     isShowPagePreview() {
@@ -122,7 +138,8 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      enableComponentLog: 'getEnalbleComponentLog'
     }),
     ...mapGetters('user', {
       token: 'getToken',
@@ -195,12 +212,21 @@ export default Vue.extend({
     if (brandkitUtils.isBrandkitAvailable) {
       brandkitUtils.fetchBrands(this.fetchBrands)
     }
+
+    // load size from query for new design
+    const newDesignWidth = parseInt(this.$route.query.width as string)
+    const newDesignHeight = parseInt(this.$route.query.height as string)
+    if (newDesignWidth && newDesignHeight) {
+      pageUtils.setPageSize(0, newDesignWidth, newDesignHeight)
+      pageUtils.fitPage()
+    }
   },
   methods: {
     ...mapMutations({
       setCurrFunctionPanel: 'SET_currFunctionPanelType',
       _setAdminMode: 'user/SET_ADMIN_MODE',
-      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
+      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
+      setEnableComponentLog: 'SET_enalbleComponentLog'
     }),
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'

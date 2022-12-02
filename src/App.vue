@@ -16,8 +16,9 @@
         :info="currSelectedResInfo"
         @blur.native="setCurrSelectedResInfo()"
         tabindex="0")
-    div(v-if="isAdmin" class="fps")
+    div(v-if="isAdmin && !inScreenshotPreview" class="fps")
       span FPS: {{fps}}
+      span {{` JS-Heap-Size: ${jsHeapSize / Math.pow(1000, 2)} MB`}}
     div(class="modal-container"
         v-if="isModalOpen")
       modal-card
@@ -50,7 +51,6 @@ import ModalCard from '@/components/modal/ModalCard.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
-import generalUtils from './utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -67,7 +67,9 @@ export default Vue.extend({
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
       coordinateHeight: 0,
-      fps: 0
+      fps: 0,
+      jsHeapSize: 0,
+      fpsInterval: 0
     }
   },
   mounted() {
@@ -82,7 +84,11 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       currSelectedResInfo: 'getCurrSelectedResInfo',
-      isModalOpen: 'modal/getModalOpen'
+      isModalOpen: 'modal/getModalOpen',
+      inScreenshotPreview: 'getInScreenshotPreview'
+    }),
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
     }),
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
@@ -93,7 +99,7 @@ export default Vue.extend({
   },
   watch: {
     isAdmin(newVal) {
-      if (newVal) {
+      if (newVal && !this.inScreenshotPreview) {
         this.showFps()
       }
     }
@@ -158,13 +164,18 @@ export default Vue.extend({
           }
           times.push(now)
           this.fps = times.length
+          this.jsHeapSize = (performance as any).memory ? (performance as any).memory.usedJSHeapSize : -1
+          if (this.inScreenshotPreview) {
+            clearInterval(this.fpsInterval)
+            return
+          }
           refreshLoop()
         })
       }
       refreshLoop()
       // output to console once per second
-      setInterval(() => {
-        this.fps *= 100 / T
+      this.fpsInterval = setInterval(() => {
+        this.fps *= 2000 / T
       }, T)
     }
   }
@@ -259,7 +270,7 @@ export default Vue.extend({
   background: white;
   padding: 2px;
   position: absolute;
-  bottom: 20px;
+  bottom: 60px;
   right: 20px;
   z-index: 1000;
 }

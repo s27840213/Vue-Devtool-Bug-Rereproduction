@@ -19,7 +19,7 @@ import svgIconUtils from './utils/svgIconUtils'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import generalUtils from './utils/generalUtils'
-import imageShadowUtils from './utils/imageShadowUtils'
+
 window.onerror = function (msg, url, line) {
   const message = [
     'Message: ' + msg,
@@ -28,32 +28,6 @@ window.onerror = function (msg, url, line) {
   ].join(' - ')
   logUtils.setLog(message)
 }
-
-// const _console = console as any
-// if (_console.everything === undefined) {
-//   _console.everything = []
-
-//   _console.defaultLog = console.log.bind(console)
-//   _console.log = function() {
-//     _console.everything.push({ type: 'log', datetime: Date().toLocaleString(), value: Array.from(arguments) })
-//     _console.defaultLog.apply(console, arguments)
-//   }
-//   _console.defaultError = console.error.bind(console)
-//   _console.error = function() {
-//     _console.everything.push({ type: 'error', datetime: Date().toLocaleString(), value: Array.from(arguments) })
-//     _console.defaultError.apply(console, arguments)
-//   }
-//   _console.defaultWarn = console.warn.bind(console)
-//   _console.warn = function() {
-//     _console.everything.push({ type: 'warn', datetime: Date().toLocaleString(), value: Array.from(arguments) })
-//     _console.defaultWarn.apply(console, arguments)
-//   }
-//   _console.defaultDebug = console.debug.bind(console)
-//   _console.debug = function() {
-//     _console.everything.push({ type: 'debug', datetime: Date().toLocaleString(), value: Array.from(arguments)})
-//     _console.defaultDebug.apply(_console, arguments)
-//   }
-// }
 
 const tooltipUtils = new TooltipUtils()
 
