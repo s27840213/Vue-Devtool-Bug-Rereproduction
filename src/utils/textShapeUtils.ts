@@ -12,20 +12,34 @@ import localStorageUtils from '@/utils/localStorageUtils'
 class Controller {
   shapes = {} as { [key: string]: any }
   observer: IntersectionObserver
-  observerCallbackMap: {[key: string]: () => void} = {}
+  observerCallbackMap: {[key: string]: () => void}
+  trashDivs: HTMLDivElement[] = []
 
   constructor() {
     this.observerCallbackMap = {}
     this.observer = new IntersectionObserver(this.intersectionHandler.bind(this))
     this.shapes = this.getDefaultShapes()
+
+    setInterval(() => {
+      // ---------- snapshot current list in case that new divs are pushed into the list while deleting --------
+      const currentDivCount = this.trashDivs.length
+      const divsToDelete = this.trashDivs.slice(0, currentDivCount)
+      this.trashDivs = this.trashDivs.slice(currentDivCount)
+      // -------------------------------------------------------------------------------------------------------
+      while (divsToDelete.length) {
+        const div = divsToDelete.pop()
+        if (!div) break
+        document.body.removeChild(div)
+      }
+    }, 5000)
   }
 
   intersectionHandler(entries: IntersectionObserverEntry[]) {
-    console.log(entries.length)
     for (const entry of entries) {
       const id = entry.target.id
       if (this.observerCallbackMap[id]) {
         this.observerCallbackMap[id]()
+        this.trashDivs.push(entry.target as HTMLDivElement)
       }
     }
   }
@@ -198,7 +212,6 @@ class Controller {
     return new Promise(resolve => {
       this.observerCallbackMap[textId] = () => {
         const textHWs = this.getHWsByOffset(p)
-        // document.body.removeChild(body)
         this.observer.unobserve(body)
         resolve(textHWs)
       }

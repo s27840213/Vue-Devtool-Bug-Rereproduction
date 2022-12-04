@@ -25,7 +25,8 @@ class TextUtils {
   get isFontLoading(): boolean { return (store.state as any).text.isFontLoading }
 
   observer: IntersectionObserver
-  observerCallbackMap: {[key: string]: () => void} = {}
+  observerCallbackMap: {[key: string]: (size: { width: number, height: number }) => void}
+  trashDivs: HTMLDivElement[] = []
   toRecordId: string
   toSetFlagId: string
   fieldRange: {
@@ -46,14 +47,27 @@ class TextUtils {
       fontSpacing: { min: -200, max: 800 },
       opacity: { min: 0, max: 100 }
     }
+
+    setInterval(() => {
+      // ---------- snapshot current list in case that new divs are pushed into the list while deleting --------
+      const currentDivCount = this.trashDivs.length
+      const divsToDelete = this.trashDivs.slice(0, currentDivCount)
+      this.trashDivs = this.trashDivs.slice(currentDivCount)
+      // -------------------------------------------------------------------------------------------------------
+      while (divsToDelete.length) {
+        const div = divsToDelete.pop()
+        if (!div) break
+        document.body.removeChild(div)
+      }
+    }, 5000)
   }
 
   intersectionHandler(entries: IntersectionObserverEntry[]) {
-    console.log(entries.length)
     for (const entry of entries) {
       const id = entry.target.id
       if (this.observerCallbackMap[id]) {
-        this.observerCallbackMap[id]()
+        this.observerCallbackMap[id](entry.boundingClientRect)
+        this.trashDivs.push(entry.target as HTMLDivElement)
       }
     }
   }
@@ -601,27 +615,14 @@ class TextUtils {
     body.setAttribute('id', textId)
     const scale = _content.styles.scale ?? 1
     return new Promise(resolve => {
-      this.observerCallbackMap[textId] = () => {
-        const textHW = this.getHWByRect(body, scale, widthLimit)
-        // document.body.removeChild(body)
+      this.observerCallbackMap[textId] = (size) => {
+        const textHW = this.getHWBySize(size, body, scale, widthLimit)
         this.observer.unobserve(body)
         resolve(textHW)
       }
       document.body.appendChild(body)
       this.observer.observe(body)
     })
-    // return new Promise(resolve => {
-    // const observer = new MutationObserver((mutations) => {
-    //   if (document.body.contains(body)) {
-    //     const textHW = this.getHWByRect(body, scale, widthLimit)
-    //     document.body.removeChild(body)
-    //     observer.disconnect()
-    //     resolve(textHW)
-    //   }
-    // })
-    //   observer.observe(document.body, { childList: true, attributes: false, characterData: false })
-    //   document.body.appendChild(body)
-    // })
   }
 
   genTextDiv(_content: IText, widthLimit = -1): HTMLDivElement {
@@ -687,12 +688,14 @@ class TextUtils {
   }
 
   getHWByRect(body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number } {
-    const rect = body.getBoundingClientRect()
-    const textHW = {
-      width: body.style.width !== 'max-content' ? widthLimit : rect.width * scale,
-      height: body.style.height !== 'max-content' ? widthLimit : rect.height * scale
+    return this.getHWBySize(body.getBoundingClientRect(), body, scale, widthLimit)
+  }
+
+  getHWBySize(size: { width: number, height: number }, body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number } {
+    return {
+      width: body.style.width !== 'max-content' ? widthLimit : size.width * scale,
+      height: body.style.height !== 'max-content' ? widthLimit : size.height * scale
     }
-    return textHW
   }
 
   updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, compensateX = false, noPush = false) {
