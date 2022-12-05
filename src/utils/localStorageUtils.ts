@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 class LocalStorage {
   defaultValue = {
     textEffectSetting: {
@@ -23,7 +25,7 @@ class LocalStorage {
       this.reset(category)
       obj = this.defaultValue[category]
     }
-    obj[key] = value
+    _.set(obj, key, value)
     localStorage.setItem(category, JSON.stringify(obj))
   }
 
@@ -32,15 +34,22 @@ class LocalStorage {
     if (item && typeof item === 'string') {
       try {
         const obj = JSON.parse(item)
-        return obj[key]
+        return _.get(obj, key)
       } catch {
         this.reset(category)
-        return this.defaultValue[category][key]
+        return _.get(this.defaultValue[category], key)
       }
     } else {
       this.reset(category)
-      return this.defaultValue[category][key]
+      return _.get(this.defaultValue[category], key)
     }
+  }
+
+  update<T>(category: string, key: string, fn: (old: T)=>T) {
+    const oldVal = this.get(category, key) as T
+    const newVal = fn(oldVal)
+    this.set(category, key, newVal)
+    return newVal
   }
 }
 

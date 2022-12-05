@@ -11,6 +11,12 @@ export default function (this: any) {
     content: {},
     categories: [],
     searchResult: {},
+    searchCategoryInfo: { // Extra data for category search.
+      categoryName: '',
+      tags: [],
+      url: ''
+    },
+    tags: [],
     keyword: '',
     theme: '',
     page: 0,
@@ -25,7 +31,29 @@ export default function (this: any) {
     // preview2: '',
     locale: '',
     error: '',
-    sum: 0
+    sum: 0,
+    favorites: {
+      items: {
+        order: [],
+        obj: {}
+      },
+      tags: {
+        order: [],
+        obj: {}
+      },
+      categories: {
+        order: [],
+        obj: {}
+      },
+      nextItems: [],
+      nextTags: [],
+      nextCategories: [],
+      itemsContent: {},
+      tagsContent: {},
+      categoriesContent: {},
+      searchTarget: '',
+      pending: false
+    }
   })
 
   const actions: ActionTree<IListModuleState, unknown> = {

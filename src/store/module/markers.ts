@@ -3,5 +3,6 @@ import { IListServiceParams } from '@/interfaces/api'
 import listFactory from './listFactory'
 
 export default listFactory.apply({
-  api: (params: IListServiceParams) => list.getMarker(params)
+  api: (params: IListServiceParams) => list.getMarker(params),
+  namespace: 'markers'
 })
