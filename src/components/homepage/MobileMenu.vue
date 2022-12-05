@@ -138,6 +138,7 @@ export default Vue.extend({
   summary:focus > svg {
     // Set color when user click summary
     color: setColor(blue-hover);
+    outline: none; // For Safari 14.3, which have a summary outline by default.
   }
   span,
   a {

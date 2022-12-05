@@ -78,6 +78,7 @@ export default function (this: any) {
 
     // For panel initial, get recently and categories at the same time.
     getRecAndCate: async ({ dispatch, commit }) => {
+      dispatch('resetContent')
       await Promise.all([
         dispatch('getRecently', false),
         dispatch('getCategories', false)
