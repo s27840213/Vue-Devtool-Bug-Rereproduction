@@ -311,7 +311,7 @@ class ViviStickerUtils {
     store.commit('vivisticker/SET_showSaveDesignPopup', bool)
   }
 
-  initLoadingFlags(page: IPage, callback?: () => void) {
+  initLoadingFlags(page: IPage | { layers: ILayer[] }, callback?: () => void) {
     this.loadingFlags = {}
     this.loadingCallback = callback
     for (const [index, layer] of page.layers.entries()) {
