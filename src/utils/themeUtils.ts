@@ -31,7 +31,6 @@ class ThemeUtils {
   }
 
   async fetchTemplateContent() {
-    store.dispatch('templates/resetContent')
     generalUtils.panelInit('template',
       (keyword: string) => {
         store.dispatch('templates/getTagContent', { keyword })
