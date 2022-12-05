@@ -15,7 +15,8 @@
     "types": [
       "webpack-env",
       "@vueuse/gesture",
-      "resize-observer-browser"
+      "resize-observer-browser",
+      "tpdirect"
     ],
     "paths": {
       "@/*": [

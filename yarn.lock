@@ -2288,6 +2288,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/tpdirect@^5.5.3":
+  version "5.5.3"
+  resolved "https://registry.yarnpkg.com/@types/tpdirect/-/tpdirect-5.5.3.tgz#900560567f70a7ad01986ed2bd0dff0b06a8305f"
+  integrity sha512-s1Tt4vhKiUJtl1/5stc6WWilthZUoz2jsk44+EX/yGsTNg1IhQ7zEF4UhLddO541fmfnyfcVK489BamHAfA9kw==
+
 "@types/uuid@^8.3.0":
   version "8.3.0"
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-8.3.0.tgz#215c231dff736d5ba92410e6d602050cce7e273f"

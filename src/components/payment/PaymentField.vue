@@ -66,8 +66,7 @@ export default defineComponent({
       stripe: null as unknown as Stripe,
       stripeElement: null as unknown as StripeElements,
       // Tappay
-      tappayPayReady: false,
-      TPDirect: (window as any).TPDirect
+      tappayPayReady: false
     }
   },
   watch: {
@@ -155,13 +154,14 @@ export default defineComponent({
       setPrime: 'payment/SET_prime'
     }),
     tappayInit() {
-      this.TPDirect.setupSDK(
+      window.TPDirect.setupSDK(
         122890,
         'app_vCknZsetHXn07bficr2XQdp7o373nyvvxNoBEm6yIcqgQGFQA96WYtUTDu60',
         'production'
       )
-      this.TPDirect.card.setup(paymentData.tappayConfig())
-      this.TPDirect.card.onUpdate((update: any) => {
+      // @ts-expect-error: Type of card.setup is not correct, skip its type check.
+      window.TPDirect.card.setup(paymentData.tappayConfig())
+      window.TPDirect.card.onUpdate((update) => {
         this.tappayPayReady = update.canGetPrime
       })
     },
@@ -195,7 +195,7 @@ export default defineComponent({
       if (!await this.checkInvoiceInput()) return
       this.isLoading = true
 
-      const callback = (result: any) => {
+      window.TPDirect.card.getPrime((result) => {
         return new Promise<void>((resolve) => {
           if (result.status !== 0) throw Error(result.msg)
           this.setPrime(result.card.prime)
@@ -209,8 +209,7 @@ export default defineComponent({
           // Vue.notify({ group: 'error', text: msg })
           this.isLoading = false
         })
-      }
-      this.TPDirect.card.getPrime(callback)
+      })
     },
     async stripeSubmit() {
       if (!await this.checkInvoiceInput()) return
