@@ -126,7 +126,7 @@ export default Vue.extend({
         }
         modalUtils.setModalInfo(
           this.$t('NN0695') as string,
-          [`${this.$t('NN0209', { tsize: `${width}x${height}`, psize: `${currPage.width}x${currPage.height}` })}`],
+          [`${this.$t('NN0209', { tsize: `${width}x${height}`, psize: `${Math.round(currPage.width)}x${Math.round(currPage.height)}` })}`],
           {
             msg: `${this.$t('NN0021')}`,
             class: 'btn-light-mid',

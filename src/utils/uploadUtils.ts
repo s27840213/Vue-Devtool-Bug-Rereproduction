@@ -610,8 +610,12 @@ class UploadUtils {
         }
       }
       newPage.backgroundImage.config.imgControl = false
-      newPage.width = parseInt(newPage.width.toString(), 10)
-      newPage.height = parseInt(newPage.height.toString(), 10)
+      newPage.width = Math.round(parseFloat(newPage.width.toString()))
+      newPage.height = Math.round(parseFloat(newPage.height.toString()))
+      if (newPage.unit === 'px') {
+        newPage.physicalWidth = Math.round(parseFloat(newPage.physicalWidth.toString()))
+        newPage.physicalHeight = Math.round(parseFloat(newPage.physicalHeight.toString()))
+      }
       return newPage
     })
 
