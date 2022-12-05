@@ -325,6 +325,7 @@ export default function (this: any) {
     initFavorites: async({ state, commit, dispatch }) => {
       commit('SET_pending', { favorites: true })
       console.log(this.namespace)
+      console.log(await localStorageUtils.appGet('favorites', `${this.namespace}.items`))
       for (const target of ['categories', 'tags', 'items']) {
         commit('UPDATE_favorites', {
           [target]: await localStorageUtils.appGet('favorites', `${this.namespace}.${target}`)

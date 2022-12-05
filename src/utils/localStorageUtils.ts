@@ -83,11 +83,11 @@ class LocalStorage {
     return newVal
   }
 
-  appReset(category: string) {
+  async appReset(category: string) {
     if (vivistickerUtils.isStandaloneMode) {
       return this.reset(category)
     }
-    vivistickerUtils.setState(category, this.defaultValue[category])
+    await vivistickerUtils.setState(category, this.defaultValue[category])
   }
 
   async appSet(category: string, key: string, value: unknown) {
@@ -98,11 +98,11 @@ class LocalStorage {
 
     let item = await vivistickerUtils.getState(category)
     if (!item) {
-      this.appReset(category)
+      await this.appReset(category)
       item = this.defaultValue[category]
     }
     _.set(item, key, value)
-    vivistickerUtils.setState(category, item)
+    await vivistickerUtils.setState(category, item)
   }
 
   async appGet(category: string, key: string):Promise<unknown> {
@@ -114,7 +114,7 @@ class LocalStorage {
     if (item) {
       return _.get(item, key)
     } else {
-      this.appReset(category)
+      await this.appReset(category)
       return _.get(this.defaultValue[category], key)
     }
   }
