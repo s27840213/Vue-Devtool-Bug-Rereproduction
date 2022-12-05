@@ -10,6 +10,7 @@ import TemplateCenter from '@/views/TemplateCenter.vue'
 import MobileWarning from '@/views/MobileWarning.vue'
 import Preview from '@/views/Preview.vue'
 import SvgIconView from '@/views/SvgIconView.vue'
+import NubtnList from '@/views/NubtnList.vue'
 import BrandKit from '@/views/BrandKit.vue'
 import Pricing from '@/views/Pricing.vue'
 import CopyTool from '@/views/CopyTool.vue'
@@ -208,7 +209,7 @@ const routes: Array<RouteConfig> = [
   }
 ]
 
-if (process.env.NODE_ENV !== 'production') {
+if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
@@ -218,6 +219,11 @@ if (process.env.NODE_ENV !== 'production') {
     path: 'copytool',
     name: 'CopyTool',
     component: CopyTool
+  })
+  routes.push({
+    path: 'nubtnlist',
+    name: 'NubtnList',
+    component: NubtnList
   })
 }
 

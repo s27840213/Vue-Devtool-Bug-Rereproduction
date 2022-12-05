@@ -141,7 +141,7 @@ Vue.directive('press', longpress)
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
 const req = require.context('@/assets/icon', true, /\.svg$/)
 
-if (process.env.NODE_ENV !== 'production') {
+if (window.location.host !== 'vivipic.com') {
   svgIconUtils.setIcons(requireAll(req).map((context: any) => {
     return context.default.id
   }))
