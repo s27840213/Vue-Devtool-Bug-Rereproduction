@@ -9,7 +9,7 @@ div(:class="`nubtn ${theme} ${sizeClass} ${status}`"
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { PropType } from 'vue'
 
 export default Vue.extend({
   name: 'Nubtn',
@@ -19,23 +19,20 @@ export default Vue.extend({
     event: 'status'
   },
   props: {
-    // The same as style in figma, but style is reserved prop name.
-    // Value: primary, outline, text, icon_text, icon, ghost, ghost_outline, danger, secondary
     theme: {
-      type: String,
+      type: String as PropType<'primary'|'outline'|'text'|'icon_text'|'icon'|'ghost'|'ghost_outline'|'danger'|'secondary'>,
       default: 'primary'
     },
-    // Value: sm, sm-full, mid, mid-full
-    // full mean button will occupy all width.
+    // *-full mean button will occupy all width.
     size: {
-      type: String,
+      type: String as PropType<'sm'|'sm-full'|'mid'|'mid-full'>,
       default: 'sm'
     },
     // Use v-model if you want Nubtn switch between active/default.
     // Use :status if you want to control state from parent, not from Nubtn itself.
     // Vale: default, active, hover, disabled
     status: {
-      type: String,
+      type: String as PropType<'default'|'active'|'hover'|'disabled'>,
       default: 'default'
     },
     icon: {

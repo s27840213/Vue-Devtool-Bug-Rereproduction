@@ -28,9 +28,11 @@ div(class="btnList" :style="BGstyle")
       span 邏輯測試按鈕的主題：
       options(:options="themes" v-model="testBtnTheme")
     Nubtn(:theme="testBtnTheme" v-model="testBtnStatus"
-          icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，下拉選單可改變/觀察此按鈕狀態
+          icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，下拉選單可改變/觀察此按鈕狀態(此按鈕會切換active)
+    Nubtn(:theme="testBtnTheme" :status="testBtnStatus"
+          icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，下拉選單可改變/觀察此按鈕狀態(此按鈕不會active)
     Nubtn(:theme="testBtnTheme"
-          icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，此按鈕狀態沒有連動
+          icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，此按鈕狀態沒有連動，僅hover
 </template>
 
 <script lang="ts">
