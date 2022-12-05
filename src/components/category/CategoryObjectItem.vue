@@ -75,11 +75,18 @@ export default Vue.extend({
       })
     },
     handleEditObject() {
-      vivistickerUtils.startEditing('object', {
-        plan: this.item.plan,
-        isFrame: this.item.type === 8,
-        assetId: this.item.id
-      }, vivistickerUtils.getAssetInitiator(this.item, { db: 'svg' }), vivistickerUtils.getAssetCallback(this.item))
+      if (this.item.type === 7) {
+        vivistickerUtils.startEditing('objectGroup', {
+          plan: this.item.plan,
+          assetId: this.item.id
+        }, vivistickerUtils.getAssetInitiator(this.item, { db: 'svg' }, 'objects'), vivistickerUtils.getAssetCallback(this.item))
+      } else {
+        vivistickerUtils.startEditing('object', {
+          plan: this.item.plan,
+          isFrame: this.item.type === 8,
+          assetId: this.item.id
+        }, vivistickerUtils.getAssetInitiator(this.item, { db: 'svg' }), vivistickerUtils.getAssetCallback(this.item))
+      }
     },
     openGiphyMore() {
       this.selectGif(this.item as IGif)

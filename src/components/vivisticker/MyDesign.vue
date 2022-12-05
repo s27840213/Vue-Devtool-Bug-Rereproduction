@@ -127,7 +127,7 @@ export default Vue.extend({
     },
     isInEditor(newVal) {
       if (newVal) {
-        this.resetMyDesignFileList(this.editorType)
+        this.resetMyDesignFileList(vivistickerUtils.mapEditorType2MyDesignKey(this.editorType))
       } else if (this.isInMyDesign) {
         this.refreshDesigns(this.myDesignTab)
       }

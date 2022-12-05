@@ -70,6 +70,7 @@ export default Vue.extend({
       isHandleShadow: 'shadow/isHandling',
       isInEditor: 'vivisticker/getIsInEditor',
       editorType: 'vivisticker/getEditorType',
+      editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       controllerHidden: 'vivisticker/getControllerHidden'
     }),
@@ -233,7 +234,7 @@ export default Vue.extend({
         return [...this.genearlLayerTabs]
       } else if (!this.isInEditor) {
         return this.homeTabs
-      } else if (this.editorType === 'text') {
+      } else if (this.editorTypeTextLike) {
         return [{ icon: 'plus-square', text: `${this.$t('STK0006')}`, panelType: 'text' }]
       } else {
         return []

@@ -666,7 +666,7 @@ class AssetUtils {
       })
   }
 
-  async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
+  async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}, moduleKey?: string) {
     try {
       store.commit('SET_mobileSidebarPanelOpen', false)
       let key = ''
@@ -742,6 +742,7 @@ class AssetUtils {
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)
       }
+      key = moduleKey ?? key
       editorUtils.setCloseMobilePanelFlag(true)
       this.addAssetToRecentlyUsed(asset, key)
       return asset.jsonData
