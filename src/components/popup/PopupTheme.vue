@@ -56,7 +56,7 @@ export default defineComponent({
       selected: {} as { [key: string]: boolean }
     }
   },
-  mounted() {
+  created() {
     this.initSelected(this.preSelected as string[])
   },
   computed: {

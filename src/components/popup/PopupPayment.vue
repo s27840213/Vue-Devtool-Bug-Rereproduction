@@ -461,7 +461,7 @@ input {
   &:not([isSelected]) &__off {
     color: setColor(red-1);
   }
-  &[isSelected] {
+  &[isSelected="true"] {
     background-color: setColor(blue-1);
     border: 1px solid setColor(blue-1);
     color: white;

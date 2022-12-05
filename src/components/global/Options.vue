@@ -1,6 +1,6 @@
 <template lang="pug">
-select(class="select" :value="value" autofocus required
-      @input="$emit('input', $event.target.value)")
+select(class="select" :value="modelValue" autofocus required
+      @input="$emit('update:modelValue', $event.target.value)")
   option(v-if="ph" value="" disabled hidden selected) {{ph}}
   option(v-for="op in options" :value="op.value || op") {{op.label || op}}
 </template>
@@ -15,8 +15,8 @@ export default defineComponent({
       type: Array,
       required: true
     },
-    // Use v-model to two way bindings this props, don't use :value.
-    value: {
+    // Use v-model to two way bindings this props, don't use :modelValue.
+    modelValue: {
       type: String,
       default: ''
     },

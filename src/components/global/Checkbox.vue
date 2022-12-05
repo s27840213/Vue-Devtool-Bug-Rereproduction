@@ -1,7 +1,7 @@
 <template lang="pug">
-div(class="checkbox" @click="$emit('input', !value)")
-  svg-icon(:iconColor="value ? 'blue-1' : 'light-gray'"
-          :iconName="value ? 'checkbox-checked' : 'checkbox'"
+div(class="checkbox" @click="$emit('update:modelValue', !modelValue)")
+  svg-icon(:iconColor="modelValue ? 'blue-1' : 'light-gray'"
+          :iconName="modelValue ? 'checkbox-checked' : 'checkbox'"
           :iconWidth="iconSize")
   slot
 </template>
@@ -12,8 +12,8 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   name: 'Checkbox',
   props: {
-    // Use v-model to two way bindings this props, don't use :value.
-    value: {
+    // Use v-model to two way bindings this props, don't use :modelValue.
+    modelValue: {
       type: Boolean,
       required: true
     },

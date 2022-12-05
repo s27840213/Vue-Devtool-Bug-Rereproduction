@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="circle-checkbox")
-  input(:id="value" type="checkbox" name="cb" :value="value" v-model="myVm")
-  label(:for="value")
+  input(:id="modelValue" type="checkbox" name="cb" :value="modelValue" v-model="myVm")
+  label(:for="modelValue")
     svg(fill="none", viewBox="0 0 12 12")
       circle(class="box" cx="6", cy="6", r="5.5", fill="#4EABE6", stroke="#fff")
       path(class="check" stroke="#fff", stroke-linecap="round", d="M4 5.333l1.087 1.933a.5.5 0 00.86.02L8 4")
@@ -12,7 +12,7 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
-    value: {
+    modelValue: {
       type: String,
       required: true
     },
@@ -34,7 +34,7 @@ export default defineComponent({
       set(value: Array<any> | boolean): void {
         if (!this.checkedValues) {
         } else {
-          this.$emit('update', value)
+          this.$emit('update:modelValue', value)
         }
       }
     }

@@ -41,9 +41,9 @@ export default defineComponent({
       type: Array as PropType<{label: string, value: string}[]>,
       required: true
     },
-    // Use v-model to two way bindings this props, don't use :value.
+    // Use v-model to two way bindings this props, don't use :modelValue.
     // If value cannot found in options, will be set to first option automatically.
-    value: {
+    modelValue: {
       type: String,
       required: true
     },
@@ -70,7 +70,7 @@ export default defineComponent({
   },
   computed: {
     insideIndex():number {
-      return _.findIndex(this.options, ['value', this.value])
+      return _.findIndex(this.options, ['value', this.modelValue])
     },
     outsideStyle():Record<string, string> {
       return {
@@ -94,7 +94,7 @@ export default defineComponent({
   },
   methods: {
     setValue(index: number) {
-      this.$emit('input', this.options[index].value)
+      this.$emit('update:modelValue', this.options[index].value)
     },
     textStyle(idx: number):Record<string, string> {
       return {
