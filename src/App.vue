@@ -75,7 +75,6 @@ export default defineComponent({
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
-    console.log(this.isAdmin)
     if (this.isAdmin) {
       this.showFps()
       this.fpsStarted = true

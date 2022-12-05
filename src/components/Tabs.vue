@@ -21,8 +21,8 @@ export default defineComponent({
       type: Number,
       default: 0
     },
-    theme: { // value: dark, light
-      type: String,
+    theme: {
+      type: String as PropType<'dark'|'light'>,
       default: 'dark'
     }
   },

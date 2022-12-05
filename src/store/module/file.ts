@@ -187,7 +187,7 @@ const actions: ActionTree<IFileState, unknown> = {
 }
 
 const mutations: MutationTree<IFileState> = {
-  SET_setLayersDone() {
+  SET_setLayersDone(state: IFileState) {
     state.setLayersDone = true
   },
   SET_STATE(state: IFileState, data: Partial<IFileState>) {
