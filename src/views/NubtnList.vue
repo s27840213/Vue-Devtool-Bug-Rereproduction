@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="btnList" :style="{backgroundColor: darkBG ? '#2C2F43' : 'white'}")
   div(class="btnList-options")
-    Checkbox(v-model="width100") width: 100%
+    Checkbox(v-model="full") full size
     Checkbox(v-model="darkBG") dark BG
     div
       span {{'button text: '}}
@@ -15,7 +15,7 @@ div(class="btnList" :style="{backgroundColor: darkBG ? '#2C2F43' : 'white'}")
     template(v-for="status in statuses")
       span {{status}}
       Nubtn(v-for="btn in btns"
-            :theme="btn.theme" :size="`${btn.size}${width100?'-full':''}`"
+            :theme="btn.theme" :size="`${btn.size}${full?'-full':''}`"
             :status="status" :icon="btnIcon" :hint="btnText") {{btnText}}
   hr(style="width: 50%")
   div(class="btnList-options")
@@ -88,7 +88,7 @@ export default Vue.extend({
       statuses: ['default', 'hover', 'disabled', 'active'],
       themes: ['primary', 'outline', 'text', 'icon_text', 'icon',
         'ghost', 'ghost_outline', 'danger', 'secondary'],
-      width100: false,
+      full: false,
       darkBG: true,
       btnText: 'button',
       btnIcon: 'download',

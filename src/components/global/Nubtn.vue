@@ -13,7 +13,8 @@ import Vue from 'vue'
 
 export default Vue.extend({
   name: 'Nubtn',
-  model: { // Let status prop and @status will be the target of v-model
+  // Let status prop and @status will be the target of v-model, https://bit.ly/3ukz2Yq
+  model: {
     prop: 'status',
     event: 'status'
   },
@@ -30,8 +31,8 @@ export default Vue.extend({
       type: String,
       default: 'sm'
     },
-    // Use v-model if parent compenent need Nubtn status value.
-    // Use :status if you don't want Nubtn change status.
+    // Use v-model if you want Nubtn switch between active/default.
+    // Use :status if you want to control state from parent, not from Nubtn itself.
     // Vale: default, active, hover, disabled
     status: {
       type: String,
@@ -67,11 +68,11 @@ export default Vue.extend({
           : 'default'
       this.$emit('status', newStatus)
     },
-    click() {
+    click(event: Event) {
       if (this.status === 'disabled') return
       this.active = !this.active
       this.updateStatus()
-      this.$emit('click')
+      this.$emit('click', event)
     }
   }
 })
