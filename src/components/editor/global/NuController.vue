@@ -277,14 +277,6 @@ export default Vue.extend({
     if (this.config.active) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
     }
-
-    // const body = (this.$refs.body as HTMLElement)
-
-    // const bodyAt = new AnyTouch(body)
-    // //  销毁
-    // this.$on('hook:destroyed', () => {
-    //   bodyAt.destroy()
-    // })
   },
   beforeDestroy() {
     eventUtils.removePointerEvent('pointerup', this.moveEnd)
