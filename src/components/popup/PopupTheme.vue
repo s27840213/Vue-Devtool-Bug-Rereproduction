@@ -24,7 +24,7 @@ div(class="popup-theme text-left"
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import Checkbox from '@/components/global/Checkbox.vue'
 import { Itheme } from '@/interfaces/theme'
 import themeUtils from '@/utils/themeUtils'

@@ -20,7 +20,7 @@ div(class="font-tag" v-click-outside="clickOutsideHandler")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({

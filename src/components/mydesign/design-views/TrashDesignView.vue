@@ -35,7 +35,7 @@ div(class="trash-design-view")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import { IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import FolderGallery from '@/components/mydesign/FolderGallery.vue'

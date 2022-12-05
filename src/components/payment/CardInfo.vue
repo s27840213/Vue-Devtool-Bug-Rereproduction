@@ -19,7 +19,7 @@ div(class="card")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapActions } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 
 export default defineComponent({
   name: 'CardInfo',

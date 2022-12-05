@@ -57,7 +57,7 @@ div(class="popup-updateDesign")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import designApis from '@/apis/design-info'
 import GeneralUtils from '@/utils/generalUtils'
 import store from '@/store'

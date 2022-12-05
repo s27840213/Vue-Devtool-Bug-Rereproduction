@@ -62,7 +62,7 @@ div(class="mobile-design-item")
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import imageUtils from '@/utils/imageUtils'
 import designUtils from '@/utils/designUtils'
 import { IDesign } from '@/interfaces/design'

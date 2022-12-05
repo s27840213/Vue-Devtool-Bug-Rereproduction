@@ -148,7 +148,7 @@ div(ref="body"
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import hashtag from '@/store/module/hashtag'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import SearchBar from '@/components/SearchBar.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'

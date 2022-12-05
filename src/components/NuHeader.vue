@@ -90,7 +90,7 @@ div(class="nu-header")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import store from '@/store'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import SearchBar from '@/components/SearchBar.vue'
 import PopupAccount from '@/components/popup/PopupAccount.vue'
 import Avatar from '@/components/Avatar.vue'

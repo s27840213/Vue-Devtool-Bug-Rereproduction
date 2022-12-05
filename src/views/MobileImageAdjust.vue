@@ -2,7 +2,7 @@
 div(class="mobile-image-adjust")
   div(class="page relative")
     nu-layer(class="nu-layer--p0"
-      :data-index="0"
+      :data-lindex="0"
       :data-pindex="0"
       :layerIndex="0"
       :pageIndex="0"
@@ -25,7 +25,7 @@ div(class="mobile-image-adjust")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'

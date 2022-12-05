@@ -65,7 +65,7 @@ div(class="text-effect-setting mt-25")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textBgUtils from '@/utils/textBgUtils'

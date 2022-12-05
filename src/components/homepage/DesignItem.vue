@@ -19,7 +19,7 @@ div(class="design-item")
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import imageUtils from '@/utils/imageUtils'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import designUtils from '@/utils/designUtils'
 import { IDesign } from '@/interfaces/design'
 

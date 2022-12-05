@@ -359,6 +359,7 @@ class ShortcutUtils {
   }
 
   selectAll() {
+    console.log('select all')
     GroupUtils.selectAll()
   }
 

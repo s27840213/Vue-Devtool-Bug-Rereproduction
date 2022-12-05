@@ -127,7 +127,7 @@ div(class="folder-design-view")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import { IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import { mapActions, mapGetters, mapMutations } from 'vuex'

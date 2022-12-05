@@ -41,7 +41,7 @@ import designUtils from '@/utils/designUtils'
 import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
 
 import { mapState } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import { ILayout } from '@/interfaces/layout'

@@ -1,7 +1,9 @@
 <template lang="pug">
 div(class="nu-layer" :style="layerStyles()" ref="body"
+    :class="!isLocked ? `nu-layer--p${pageIndex}` : ''"
     :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
     :data-p-index="pageIndex"
+    :data-pindex="dataPindex"
     @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
     @dragover.prevent
     @dragleave.prevent
@@ -20,8 +22,7 @@ div(class="nu-layer" :style="layerStyles()" ref="body"
           :contentScaleRatio="contentScaleRatio"
           :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
           :scaleRatio="scaleRatio"
-          :isPagePreview="isPagePreview"
-          v-bind="$attrs")
+          :isPagePreview="isPagePreview")
   div(v-if="showSpinner()" class="nu-layer__inProcess")
     square-loading
     //- svg-icon(class="spiner"
@@ -63,12 +64,10 @@ export default defineComponent({
       required: true
     },
     subLayerIndex: {
-      type: Number,
-      required: true
+      type: Number
     },
     imgControl: {
-      type: Boolean,
-      required: true
+      type: Boolean
     },
     isSubLayer: {
       type: Boolean,
@@ -86,8 +85,12 @@ export default defineComponent({
       default: false,
       type: Boolean
     },
-    'data-index': {
+    dataIndex: {
       default: '-1',
+      type: String
+    },
+    dataPindex: {
+      default: -1,
       type: String
     }
     /**
@@ -130,6 +133,9 @@ export default defineComponent({
     },
     enalble3dTransform(): boolean {
       return this.pageIndex === pageUtils._3dEnabledPageIndex
+    },
+    isLocked(): boolean {
+      return (this.config as ILayer).locked
     }
   },
   methods: {

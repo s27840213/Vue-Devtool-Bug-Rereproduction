@@ -85,7 +85,7 @@ import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
 
 import { mapActions, mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
 import { IFrame } from '@/interfaces/layer'

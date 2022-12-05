@@ -16,7 +16,7 @@ div(class="popup-order")
 import { defineComponent } from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapMutations } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 
 export default defineComponent({
   props: {

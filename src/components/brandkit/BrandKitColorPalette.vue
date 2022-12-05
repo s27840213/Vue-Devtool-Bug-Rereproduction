@@ -46,7 +46,7 @@ div(class="brand-kit-color-palette")
 import { defineComponent, Prop, PropType } from 'vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import { IBrandColor, IBrandColorPalette } from '@/interfaces/brandkit'
 import generalUtils from '@/utils/generalUtils'
 

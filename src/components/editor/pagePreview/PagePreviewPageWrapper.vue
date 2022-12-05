@@ -65,7 +65,7 @@ lazy-load(
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import GroupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'

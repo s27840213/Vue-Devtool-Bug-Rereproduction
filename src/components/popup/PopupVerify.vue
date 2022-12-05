@@ -111,7 +111,7 @@ div(class="popup-verify"
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import userApis from '@/apis/user'
 import store from '@/store'
 import localeUtils from '@/utils/localeUtils'

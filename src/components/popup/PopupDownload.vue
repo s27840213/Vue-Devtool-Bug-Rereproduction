@@ -148,7 +148,7 @@ div(class="popup-download text-left"
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import { ITypeOption } from '@/interfaces/download'
 import DownloadUtil from '@/utils/downloadUtil'
 import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'

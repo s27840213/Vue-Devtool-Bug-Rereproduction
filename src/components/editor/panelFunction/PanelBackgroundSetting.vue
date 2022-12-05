@@ -68,7 +68,7 @@ div(class="bg-setting")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import { mapGetters, mapMutations } from 'vuex'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType, PopupSliderEventType } from '@/store/types'

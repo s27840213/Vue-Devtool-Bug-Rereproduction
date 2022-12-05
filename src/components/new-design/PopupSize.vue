@@ -19,7 +19,7 @@ div(class="popup-size"
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import { ILayout } from '@/interfaces/layout'
 import designUtils from '@/utils/designUtils'

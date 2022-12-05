@@ -28,7 +28,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import ValueSelector from '@/components/ValueSelector.vue'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({

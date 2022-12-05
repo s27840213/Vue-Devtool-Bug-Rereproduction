@@ -172,7 +172,7 @@ div(class="my-design-pc")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import Sidebar from '@/components/mydesign/Sidebar.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import AllDesignView from '@/components/mydesign/design-views/AllDesignView.vue'

@@ -133,7 +133,7 @@ div(class="bottom-menu")
 import designUtils from '@/utils/designUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import MobileStructureFolder from '@/components/mydesign/MobileStructureFolder.vue'
 import { IDesign, IFolder } from '@/interfaces/design'
 

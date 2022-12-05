@@ -61,7 +61,7 @@ import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
 

@@ -84,7 +84,7 @@ import MobileFavoriteDesignView from '@/components/mydesign/design-views/MobileF
 import MobileListDesignView from '@/components/mydesign/design-views/MobileListDesignView.vue'
 import MobileFolderDesignView from '@/components/mydesign/design-views/MobileFolderDesignView.vue'
 import MobileTrashDesignView from '@/components/mydesign/design-views/MobileTrashDesignView.vue'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import designUtils from '@/utils/designUtils'
 import { IDesign, IFolder, IPathedFolder, IMobileMessageItem } from '@/interfaces/design'
 import generalUtils from '@/utils/generalUtils'

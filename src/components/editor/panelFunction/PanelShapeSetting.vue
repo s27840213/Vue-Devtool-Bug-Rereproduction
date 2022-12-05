@@ -202,7 +202,7 @@ div(class="shape-setting")
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
 import markers from '@/store/module/markers'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import SearchBar from '@/components/SearchBar.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import GeneralValueSelector from '@/components/GeneralValueSelector.vue'

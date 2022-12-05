@@ -71,7 +71,7 @@ div(class="popup-window")
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import paymentUtils from '@/utils/paymentUtils'
 import {
   IPaymentPayingView, IPaymentView, IPaymentWarningView, _IPaymentWarningView

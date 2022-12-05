@@ -176,6 +176,7 @@ class GroupUtils {
         this.set(pageIndex, layerIndexs[0], currSelectedLayers)
       } else {
         // when we select multiple layer
+        console.log(MappingUtils.mappingLayers(pageIndex, layerIndexs))
         const layers = MappingUtils.mappingLayers(pageIndex, layerIndexs)
           .filter(l => !l.locked)
         const tmpStyles = calcTmpProps(layers)

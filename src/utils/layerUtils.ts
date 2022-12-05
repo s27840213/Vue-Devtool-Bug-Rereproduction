@@ -41,6 +41,9 @@ class LayerUtils {
   get getCurrOpacity(): number {
     const currLayer = this.getCurrLayer
     const { subLayerIdx } = this
+
+    if (this.currSelectedInfo.pageIndex === -1) return 1
+
     switch (currLayer.type) {
       case 'tmp':
         return Math.max(...(this.getCurrLayer as IGroup | ITmp).layers.map((layer: ILayer) => layer.styles.opacity))

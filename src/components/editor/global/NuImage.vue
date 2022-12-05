@@ -100,11 +100,10 @@ export default defineComponent({
     },
     subLayerIndex: {
       type: Number,
-      required: true
+      default: -1
     },
     inheritStyle: {
-      type: Object,
-      required: true
+      type: Object
     },
     isBgImgControl: {
       type: Boolean,

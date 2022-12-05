@@ -9,7 +9,7 @@ div(class="popup bg-white")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import PopupOrder from '@/components/popup/PopupOrder.vue'
 import PopupAlign from '@/components/popup/PopupAlign.vue'
 import PopupLayer from '@/components/popup/PopupLayer.vue'

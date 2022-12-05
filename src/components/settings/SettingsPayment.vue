@@ -75,7 +75,7 @@ div(class="sp")
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import Options from '@/components/global/Options.vue'
 import PaymentField from '@/components/payment/PaymentField.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
