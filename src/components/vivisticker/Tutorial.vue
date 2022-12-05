@@ -1,6 +1,6 @@
 <template lang="pug">
   transition(name="panel-up")
-    div(ref="main" class="tutorial relative"
+    div(ref="main" class="tutorial relative" v-touch
         @swipeleft="handleSwipeLeft"
         @swiperight="handleSwipeRight")
       div(class="tutorial__close"
@@ -34,7 +34,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import AnyTouch, { AnyTouchEvent } from 'any-touch'
+import { AnyTouchEvent } from 'any-touch'
 import { mapMutations } from 'vuex'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import i18n from '@/i18n'
@@ -78,13 +78,6 @@ export default Vue.extend({
     videoSource(): string {
       return this.stepConfigs[this.step].video
     }
-  },
-  mounted() {
-    const mainAt = new AnyTouch(this.$refs.main as HTMLElement, { preventDefault: false })
-    this.$on('hook:destroyed', () => {
-      mainAt.destroy()
-    })
-    console.log('locale', i18n.locale)
   },
   methods: {
     ...mapMutations({
