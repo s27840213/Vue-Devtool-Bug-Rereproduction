@@ -1,12 +1,14 @@
+// eslint-disable-next-line
 import CloneDeepWorker from '@/components/editor/worker/clneDeep.worker.ts'
 
 class WorkerUtils {
-  private cloneDeepWorker = new CloneDeepWorker() as CloneDeepWorker | undefined
+  private cloneDeepWorker = new CloneDeepWorker() as CloneDeepWorker | null
   async asyncCloneDeep<T>(data: T) {
     this.cloneDeepWorker && this.cloneDeepWorker.terminate()
     return new Promise<T>((resolve, reject) => {
       this.cloneDeepWorker = new CloneDeepWorker()
       try {
+        console.log(this.cloneDeepWorker, data)
         this.cloneDeepWorker.postMessage(data)
         this.cloneDeepWorker.addEventListener('message', function(e) {
           resolve(e.data)

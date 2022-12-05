@@ -1,4 +1,4 @@
-import { IPage } from '@/interfaces/page'
+import { IPage, IPageState } from '@/interfaces/page'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ITextState } from './text'
@@ -13,7 +13,7 @@ import { Itheme } from '@/interfaces/theme'
    @param groupId: for template group used (only for admin),
  */
 export interface IEditorState {
-  pages: Array<IPage>,
+  pages: Array<IPageState>
   name: string,
   designId: string,
   assetId: string,

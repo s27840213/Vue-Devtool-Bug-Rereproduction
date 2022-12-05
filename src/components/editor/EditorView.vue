@@ -15,13 +15,13 @@
           @click.left.self="outerClick($event)")
         //- @mousedown.left.self="outerClick($event)")
         template(v-if="!inBgRemoveMode")
-          nu-page(v-for="(page,index) in pages"
+          nu-page(v-for="(page,index) in pageStates"
                   :ref="`page-${index}`"
-                  :key="`page-${page.id}`"
+                  :key="`page-${page.config.id}`"
                   :pageIndex="index"
                   :overflowContainer="editorView"
                   :style="{'z-index': `${getPageZIndex(index)}`}"
-                  :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
+                  :pageState="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
                   @stepChange="handleStepChange")
           div(v-show="isSelecting" class="selection-area" ref="selectionArea"
             :style="{'z-index': `${pageNum+1}`}")
@@ -62,7 +62,7 @@ import StepsUtils from '@/utils/stepsUtils'
 import ControlUtils from '@/utils/controlUtils'
 import pageUtils from '@/utils/pageUtils'
 import RulerUtils from '@/utils/rulerUtils'
-import { IPage } from '@/interfaces/page'
+import { IPage, IPageState } from '@/interfaces/page'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import RulerHr from '@/components/editor/ruler/RulerHr.vue'
 import RulerVr from '@/components/editor/ruler/RulerVr.vue'
@@ -229,7 +229,7 @@ export default Vue.extend({
       'adminMode']),
     ...mapGetters({
       groupId: 'getGroupId',
-      pages: 'getPages',
+      pageStates: 'getPagesState',
       getMiddlemostPageIndex: 'getMiddlemostPageIndex',
       geCurrActivePageIndex: 'getCurrActivePageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
@@ -249,6 +249,9 @@ export default Vue.extend({
       isSettingScaleRatio: 'getIsSettingScaleRatio',
       enableComponentLog: 'getEnalbleComponentLog'
     }),
+    pages(): Array<IPage> {
+      return (this.pageStates as Array<IPageState>).map(p => p.config)
+    },
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
       let res = false
@@ -335,7 +338,7 @@ export default Vue.extend({
           const movingUtils = new MovingUtils({
             _config: { config: layerUtils.getCurrConfig },
             // config: layerUtils.getCurrConfig,
-            snapUtils: pageUtils.getPage(layerUtils.pageIndex).snapUtils,
+            snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
             body: document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
           })
           movingUtils.moveStart(e)

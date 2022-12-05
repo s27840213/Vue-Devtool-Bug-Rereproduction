@@ -263,6 +263,7 @@ class StepsUtils {
       selectedInfo: store.getters.getCurrSelectedInfo
     })
     const pages_2 = await workerUtils.asyncCloneDeep(store.getters.getPages)
+
     if (clonedData) {
       const pages = this.filterDataForLayersInPages(clonedData.pages_1)
       const currSelectedInfo = clonedData.selectedInfo

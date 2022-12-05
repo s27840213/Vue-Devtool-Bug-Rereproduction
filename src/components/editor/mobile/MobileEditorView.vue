@@ -25,7 +25,7 @@
             :pageIndex="index"
             :overflowContainer="editorView"
             :style="pageStyle(index)"
-            :config="page"
+            :page="page"
             :index="index"
             :inScaling="isScaling"
             :isAnyBackgroundImageControl="isBackgroundImageControl")

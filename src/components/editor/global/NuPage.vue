@@ -193,7 +193,7 @@ import DimBackground from '@/components/editor/page/DimBackground.vue'
 import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import rulerUtils from '@/utils/rulerUtils'
-import { IPage } from '@/interfaces/page'
+import { IPage, IPageState } from '@/interfaces/page'
 import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
 import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -215,7 +215,7 @@ export default Vue.extend({
     LazyLoad
   },
   created() {
-    this.config.snapUtils.pageIndex = this.pageIndex
+    this.pageState.modules.snapUtils.pageIndex = this.pageIndex
   },
   data() {
     return {
@@ -248,7 +248,7 @@ export default Vue.extend({
     }
   },
   props: {
-    config: Object as () => IPage,
+    pageState: Object as () => IPageState,
     pageIndex: Number,
     pageScaleRatio: Number,
     isAnyBackgroundImageControl: Boolean,
@@ -263,7 +263,7 @@ export default Vue.extend({
   },
   watch: {
     pageIndex(val) {
-      this.config.snapUtils.pageIndex = val
+      this.pageState.modules.snapUtils.pageIndex = val
     },
     isOutOfBound(val) {
       if (val && this.currFunctionPanelType === FunctionPanelType.photoShadow && layerUtils.pageIndex === this.pageIndex) {
@@ -305,6 +305,9 @@ export default Vue.extend({
       contentScaleRatio: 'getContentScaleRatio',
       isAdmin: 'user/isAdmin'
     }),
+    config(): IPage {
+      return this.pageState.config
+    },
     scaleContainerStyles(): { [index: string]: string } {
       return {
         // transform: `scale(${1})`
@@ -315,7 +318,7 @@ export default Vue.extend({
       }
     },
     snapUtils(): SnapUtils {
-      return this.config.snapUtils
+      return this.pageState.modules.snapUtils
     },
     currLayer(): ILayer {
       return layerUtils.getCurrLayer

@@ -1,6 +1,5 @@
 import { IShape, IText, IImage, IGroup, IFrame } from '@/interfaces/layer'
 import SnapUtils from '@/utils/snapUtils'
-import { SrcObj } from './gallery'
 
 export interface IBackgroundImage {
   config: IImage,
@@ -17,7 +16,7 @@ export interface IPage {
   backgroundImage: IBackgroundImage,
   name: string,
   layers: Array<IShape | IText | IImage | IGroup | IFrame>,
-  snapUtils: SnapUtils,
+  // snapUtils: SnapUtils,
   documentColors: Array<string>,
   designId: string,
   modified?: boolean,
@@ -27,4 +26,11 @@ export interface IPage {
     h: Array<number>
   },
   isAutoResizeNeeded: boolean
+}
+
+export interface IPageState {
+  config: IPage,
+  modules: {
+    snapUtils: SnapUtils
+  }
 }
