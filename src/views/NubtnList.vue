@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="btnList" :style="{backgroundColor: darkBG ? '#2C2F43' : 'white'}")
+div(class="btnList" :style="BGstyle")
   div(class="btnList-options")
     Checkbox(v-model="full") full size
     Checkbox(v-model="darkBG") dark BG
@@ -94,6 +94,17 @@ export default Vue.extend({
       btnIcon: 'download',
       testBtnStatus: 'default',
       testBtnTheme: 'primary'
+    }
+  },
+  computed: {
+    BGstyle(): Record<string, string> {
+      return this.darkBG ? {
+        backgroundColor: '#2C2F43',
+        color: 'white'
+      } : {
+        backgroundColor: 'white',
+        color: 'black'
+      }
     }
   },
   methods: {
