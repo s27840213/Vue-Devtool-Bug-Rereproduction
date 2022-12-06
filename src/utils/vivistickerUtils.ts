@@ -805,7 +805,7 @@ class ViviStickerUtils {
   }
 
   async getIosImg(limit = 1): Promise<Array<string>> {
-    const { images } = await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image') as IIosImgData
+    const { images } = await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image', 60000) as IIosImgData
     return images
   }
 

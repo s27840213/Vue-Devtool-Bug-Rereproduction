@@ -320,7 +320,7 @@ export default Vue.extend({
       }
 
       const defaultVal = {
-        is: `panel-${this.currActivePanel}`
+        is: this.currActivePanel ? `panel-${this.currActivePanel}` : ''
       }
 
       switch (this.currActivePanel) {
@@ -384,7 +384,7 @@ export default Vue.extend({
         }
         case 'replace':
           return {
-            is: `panel-${this.innerTab}`
+            is: this.innerTab ? `panel-${this.innerTab}` : ''
           }
         case 'adjust':
           return {

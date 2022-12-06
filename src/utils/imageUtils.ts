@@ -552,7 +552,6 @@ class ImageUtils {
           height: img.height
         }
       }
-      console.log(generalUtils.deepCopy(clip.styles))
       return mouseUtils.clipperHandler(imgData as IImage, clip.clipPath, clip.styles).styles
     })
   }

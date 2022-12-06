@@ -223,6 +223,9 @@ export default Vue.extend({
       vivistickerUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
     },
     handleEndEditing() {
+      if (imageUtils.isImgControl()) {
+        imageUtils.setImgControlDefault()
+      }
       if (vivistickerUtils.checkVersion('1.13')) {
         if (vivistickerUtils.userSettings.autoSave) {
           vivistickerUtils.saveAsMyDesign().then(() => {
@@ -236,6 +239,9 @@ export default Vue.extend({
       }
     },
     handleCopy() {
+      if (imageUtils.isImgControl()) {
+        imageUtils.setImgControlDefault()
+      }
       if (vivistickerUtils.checkVersion('1.3')) {
         vivistickerUtils.copyEditor((flag: string) => {
           if (flag === '1') {
