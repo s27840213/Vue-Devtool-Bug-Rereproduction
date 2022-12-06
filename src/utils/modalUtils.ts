@@ -2,7 +2,7 @@ import { IModalButton } from '@/interfaces/modal'
 import store from '@/store'
 
 class ModalUtils {
-  setModalInfo(title?: string, content?: Array<string> | string, confirmButton?: IModalButton, cancelButton?: IModalButton, imgSrc = '', noClose = false, backdropStyle = {}, cardStyle = {}) {
+  setModalInfo(title?: string, content?: Array<string> | string, confirmButton?: IModalButton, cancelButton?: IModalButton, imgSrc = '', noClose = false, noCloseIcon = false, backdropStyle = {}, cardStyle = {}) {
     if (typeof content === 'string') content = [content]
     store.commit('modal/SET_MODAL_INFO', {
       title,
@@ -11,6 +11,7 @@ class ModalUtils {
       cancelButton: cancelButton === undefined ? this.generateIModalTemplate() : cancelButton,
       imgSrc,
       noClose,
+      noCloseIcon,
       backdropStyle,
       cardStyle
     })
