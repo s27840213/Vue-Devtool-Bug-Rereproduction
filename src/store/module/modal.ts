@@ -29,6 +29,7 @@ const getDefaultState = (): IModalState => ({
     },
     imgSrc: '',
     noClose: false,
+    noCloseIcon: false,
     backdropStyle: {},
     cardStyle: {}
   },
