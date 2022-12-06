@@ -15,6 +15,9 @@ body {
     padding: 0;
     touch-action: manipulation;
     overflow: hidden; // vivisticker only
+    -webkit-user-select: none; // vivisticker only
+    user-select: none; // vivisticker only
+    -webkit-touch-callout: none; // vivisticker only
 }
 
 [contenteditable] {
