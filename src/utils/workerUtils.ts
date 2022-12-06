@@ -8,7 +8,6 @@ class WorkerUtils {
     return new Promise<T>((resolve, reject) => {
       this.cloneDeepWorker = new CloneDeepWorker()
       try {
-        console.log(this.cloneDeepWorker, data)
         this.cloneDeepWorker.postMessage(data)
         this.cloneDeepWorker.addEventListener('message', function(e) {
           resolve(e.data)

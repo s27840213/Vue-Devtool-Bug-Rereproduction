@@ -14,7 +14,7 @@
           @swipeup="swipeUpHandler"
           @swipedown="swipeDownHandler"
           :style="canvasStyle")
-        div(v-for="(page,index) in pages"
+        div(v-for="(page,index) in pagesState"
             :key="`page-${index}`"
             class="editor-view__card"
             :style="cardStyle"
@@ -25,7 +25,7 @@
             :pageIndex="index"
             :overflowContainer="editorView"
             :style="pageStyle(index)"
-            :page="page"
+            :pageState="page"
             :index="index"
             :inScaling="isScaling"
             :isAnyBackgroundImageControl="isBackgroundImageControl")
@@ -38,7 +38,7 @@ import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import ControlUtils from '@/utils/controlUtils'
 import pageUtils from '@/utils/pageUtils'
-import { IPage } from '@/interfaces/page'
+import { IPage, IPageState } from '@/interfaces/page'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import imageUtils from '@/utils/imageUtils'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
@@ -176,7 +176,7 @@ export default Vue.extend({
     }),
     ...mapGetters({
       groupId: 'getGroupId',
-      pages: 'getPages',
+      pagesState: 'getPagesState',
       getMiddlemostPageIndex: 'getMiddlemostPageIndex',
       geCurrActivePageIndex: 'getCurrActivePageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
@@ -192,6 +192,9 @@ export default Vue.extend({
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       groupType: 'getGroupType'
     }),
+    pages(): Array<IPage> {
+      return this.pagesState.map((p: IPageState) => p.config)
+    },
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
       let res = false

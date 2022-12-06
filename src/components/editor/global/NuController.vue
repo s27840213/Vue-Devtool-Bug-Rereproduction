@@ -55,16 +55,17 @@
       //-       :style="lockIconStyles()")
       //-     svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
       //-       @click.native="MappingUtils.mappingIconAction('lock')")
-      div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
+      div(v-show="isActive && !isControlling && !isLocked() && !isImgControl"
           class="nu-controller__ctrl-points"
           :style="contentStyles")
         div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
             class="control-point__corner-rotate scaler"
+            :ref="`corner-rotate-${index}`"
             :key="`corner-rotate-${index}`"
             :style="ctrlPointerStyles(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
             @pointerdown.stop="rotateStart($event, index)"
             @touchstart="disableTouchEvent")
-      div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
+      div(v-show="isActive && !isControlling && !isLocked() && !isImgControl"
             ref="body"
             class="nu-controller__ctrl-points"
             :style="contentStyles")
@@ -124,6 +125,7 @@
               @touchstart="disableTouchEvent")
           template(v-else)
             div(class="control-point__controller-wrapper"
+                ref="rotater"
                 :style="`transform: scale(${100/scaleRatio  * contentScaleRatio})`")
               svg-icon(class="control-point__rotater"
                 :iconName="'rotate'" :iconWidth="`${20}px`"
@@ -1531,8 +1533,6 @@ export default Vue.extend({
       // StepsUtils.record()
       StepsUtils.asyncRecord()
 
-      // const body = this.$refs.body as HTMLElement
-      // body.classList.add('hover')
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.resizing)
       eventUtils.removePointerEvent('pointerup', this.resizeEnd)
@@ -1542,24 +1542,6 @@ export default Vue.extend({
     },
     rotateStart(event: MouseEvent | PointerEvent, index = -1) {
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
-      // console.warn(index)
-      // let rotateAngle = this.getLayerRotate()
-      // if (rotateAngle > 180) {
-      //   rotateAngle = rotateAngle - 360
-      // }
-      // let cursorIndex = index * 2
-      // if (rotateAngle >= 22.5) {
-      //   cursorIndex++
-      //   cursorIndex += Math.floor((rotateAngle - 22.5) / 45)
-      // } else if (rotateAngle <= -22.5) {
-      //   cursorIndex--
-      //   cursorIndex -= Math.floor((-rotateAngle - 22.5) / 45)
-      //   if (cursorIndex < 0) {
-      //     cursorIndex = 8 + cursorIndex
-      //   }
-      // }
-      // console.log(cursorIndex)
-      // this.initCornerRotate = cursorIndex
       const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
       const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
@@ -1776,9 +1758,10 @@ export default Vue.extend({
     },
     setCursorStyle(cursor: string) {
       // const layer = this.$el as HTMLElement
+      // const body = this.$refs.body as HTMLElement
       // if (layer) {
+      //   body.style.cursor = cursor
       //   layer.style.cursor = cursor
-      //   document.body.style.cursor = cursor
       // }
     },
     currCursorStyling(e: MouseEvent | TouchEvent | PointerEvent) {

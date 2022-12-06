@@ -318,14 +318,23 @@ const mutations: MutationTree<IEditorState> = {
         res.push({
           config: p,
           modules: {
-            snapUtils: new SnapUtils(-1)
+            snapUtils: new SnapUtils(res.length)
           }
         })
         return res
       }, [])
       state.pages = newPages
     } else {
-      state.pages = newPageConfigs.loadDesign ? pageUtils.newPages(newPageConfigs.pages) : newPageConfigs.pages
+      state.pages = (newPageConfigs.loadDesign ? pageUtils.newPages(newPageConfigs.pages) : newPageConfigs.pages)
+        .reduce((res: Array<IPageState>, p: IPage) => {
+          res.push({
+            config: p,
+            modules: {
+              snapUtils: new SnapUtils(res.length)
+            }
+          })
+          return res
+        }, [])
       state.groupId = newPageConfigs.groupId || state.groupId
       state.groupType = newPageConfigs.groupType || state.groupType
       state.exportIds = newPageConfigs.exportIds || state.exportIds
@@ -338,7 +347,7 @@ const mutations: MutationTree<IEditorState> = {
     state.pages.splice(updateInfo.pos, 1, {
       config: updateInfo.newPage,
       modules: {
-        snapUtils: new SnapUtils(-1)
+        snapUtils: new SnapUtils(updateInfo.pos)
       }
     })
   },
@@ -346,16 +355,16 @@ const mutations: MutationTree<IEditorState> = {
     state.pages.push({
       config: newPage,
       modules: {
-        snapUtils: new SnapUtils(-1)
+        snapUtils: new SnapUtils(state.pages.length)
       }
     })
   },
   ADD_pages(state: IEditorState, newPages: Array<IPage>) {
-    state.pages = [...state.pages, ...newPages.map((p) => {
+    state.pages = [...state.pages, ...newPages.map((p, i) => {
       return {
         config: p,
         modules: {
-          snapUtils: new SnapUtils(-1)
+          snapUtils: new SnapUtils(state.pages.length + i)
         }
       }
     })]

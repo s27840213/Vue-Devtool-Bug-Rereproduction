@@ -15,7 +15,7 @@
           @click.left.self="outerClick($event)")
         //- @mousedown.left.self="outerClick($event)")
         template(v-if="!inBgRemoveMode")
-          nu-page(v-for="(page,index) in pageStates"
+          nu-page(v-for="(page,index) in pagesState"
                   :ref="`page-${index}`"
                   :key="`page-${page.config.id}`"
                   :pageIndex="index"
@@ -229,7 +229,7 @@ export default Vue.extend({
       'adminMode']),
     ...mapGetters({
       groupId: 'getGroupId',
-      pageStates: 'getPagesState',
+      pagesState: 'getPagesState',
       getMiddlemostPageIndex: 'getMiddlemostPageIndex',
       geCurrActivePageIndex: 'getCurrActivePageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
@@ -250,7 +250,7 @@ export default Vue.extend({
       enableComponentLog: 'getEnalbleComponentLog'
     }),
     pages(): Array<IPage> {
-      return (this.pageStates as Array<IPageState>).map(p => p.config)
+      return (this.pagesState as Array<IPageState>).map(p => p.config)
     },
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -337,7 +337,6 @@ export default Vue.extend({
         if (this.isClickOnController(e)) {
           const movingUtils = new MovingUtils({
             _config: { config: layerUtils.getCurrConfig },
-            // config: layerUtils.getCurrConfig,
             snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
             body: document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
           })
