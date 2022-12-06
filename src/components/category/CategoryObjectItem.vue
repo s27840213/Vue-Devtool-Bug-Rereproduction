@@ -59,7 +59,7 @@ export default Vue.extend({
         assetUtils.addAssetToRecentlyUsed(this.item, 'giphy')
       } else {
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
-        assetUtils.addAssetToRecentlyUsed(this.item, 'objects')
+        assetUtils.addAssetToRecentlyUsed(this.item, 'objects', 'svg')
       }
     },
     click4in1(event: Event) {

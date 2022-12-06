@@ -752,7 +752,7 @@ class AssetUtils {
     }
   }
 
-  addAssetToRecentlyUsed(asset: IAsset, key = '') {
+  addAssetToRecentlyUsed(asset: IAsset, key?: string, db?: string) {
     const {
       id, type, width, height, plan,
       content_ids: contentIds, match_cover: matchCover,
@@ -774,8 +774,8 @@ class AssetUtils {
       signed_url: signedUrl,
       ver
     }
-    const typeCategory = this.getTypeCategory(type)
-    const typeModule = this.getTypeModule(type)
+    const typeCategory = db ?? this.getTypeCategory(type)
+    const typeModule = key ?? this.getTypeModule(type)
     if (typeCategory && typeModule) {
       // @TODO 手動加入最近使用
       const categories = generalUtils.deepCopy((store.state as any)[typeModule].categories)
