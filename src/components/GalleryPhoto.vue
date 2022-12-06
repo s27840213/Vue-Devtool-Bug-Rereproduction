@@ -30,7 +30,7 @@ div(class="gallery-photo" :class="{border: deletable}")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { IFrame, IImage } from '@/interfaces/layer'
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
@@ -57,7 +57,7 @@ export default defineComponent({
       required: true
     },
     vendor: {
-      type: String,
+      type: String as PropType<'a' | 'b' | 'c'>,
       required: true
     },
     inFilePanel: {
