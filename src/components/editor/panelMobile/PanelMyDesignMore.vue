@@ -66,7 +66,7 @@ export default Vue.extend({
       )
     },
     confirmDeletion() {
-      vivistickerUtils.deleteAsset(`mydesign-${this.myDesignBuffer.type}`, this.myDesignBuffer.id, 'mydesign')
+      vivistickerUtils.deleteAsset(`mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(this.myDesignBuffer.type)}`, this.myDesignBuffer.id, 'mydesign')
       editorUtils.setCloseMobilePanelFlag(true)
     }
   }

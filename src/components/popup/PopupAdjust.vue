@@ -19,6 +19,7 @@
         @input="handleField"
         @mouseup="handleChangeStop"
         type="range")
+    span(class="popup-adjust__reset" @click="reset") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">
@@ -60,6 +61,13 @@ export default Vue.extend({
       if (this.$route.name !== 'MobileImageAdjust') {
         stepsUtils.record()
       }
+    },
+    reset() {
+      const defaultVal = imageAdjustUtil.getDefaultProps()
+      this.fields.forEach(field => {
+        this.adjustTmp[field.name] = defaultVal[field.name]
+      })
+      this.$emit('update', this.adjustTmp)
     }
   }
 })
@@ -103,6 +111,11 @@ export default Vue.extend({
     &::-webkit-slider-thumb {
       border: 2px solid #4eabe6;
     }
+  }
+  &__reset {
+    @include body-SM;
+    text-align: right;
+    color: setColor(blue-1);
   }
 }
 </style>

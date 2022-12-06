@@ -30,7 +30,7 @@
           :class="modalInfo.cancelButton.class"
           :style="modalInfo.cancelButton.style"
           @click="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
-      div(v-if="!modalInfo.noClose" class="modal-card__close")
+      div(v-if="!modalInfo.noClose && !modalInfo.noCloseIcon" class="modal-card__close")
         svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'"
                 iconColor="gray-3" @click.native="closePopup()")
 </template>

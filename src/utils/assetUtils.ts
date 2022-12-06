@@ -666,7 +666,7 @@ class AssetUtils {
       })
   }
 
-  async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
+  async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}, moduleKey?: string) {
     try {
       store.commit('SET_mobileSidebarPanelOpen', false)
       let key = ''
@@ -742,6 +742,7 @@ class AssetUtils {
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)
       }
+      key = moduleKey ?? key
       editorUtils.setCloseMobilePanelFlag(true)
       this.addAssetToRecentlyUsed(asset, key)
       return asset.jsonData
@@ -751,7 +752,7 @@ class AssetUtils {
     }
   }
 
-  addAssetToRecentlyUsed(asset: IAsset, key = '') {
+  addAssetToRecentlyUsed(asset: IAsset, key?: string, db?: string) {
     const {
       id, type, width, height, plan,
       content_ids: contentIds, match_cover: matchCover,
@@ -773,8 +774,8 @@ class AssetUtils {
       signed_url: signedUrl,
       ver
     }
-    const typeCategory = this.getTypeCategory(type)
-    const typeModule = this.getTypeModule(type)
+    const typeCategory = db ?? this.getTypeCategory(type)
+    const typeModule = key ?? this.getTypeModule(type)
     if (typeCategory && typeModule) {
       // @TODO 手動加入最近使用
       const categories = generalUtils.deepCopy((store.state as any)[typeModule].categories)

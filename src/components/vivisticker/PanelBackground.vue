@@ -563,15 +563,18 @@ export default Vue.extend({
     margin-top: 16px;
   }
   &__color {
-    padding-top: 100%;
+    padding-top: calc(100% - 2px);
     cursor: pointer;
     position: relative;
     -webkit-touch-callout: none;
     user-select: none;
     border-radius: 4px;
+    border: 1px solid setColor(gray-0, 0.2);
     &.add-color {
-      background-image: url("~@/assets/img/svg/addColor.png");
+      padding-top: 100%;
+      background-image: url("~@/assets/img/svg/addColor.svg");
       background-size: cover;
+      border: none;
     }
   }
   // &__color-back {

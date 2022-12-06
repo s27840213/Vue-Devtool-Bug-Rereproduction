@@ -52,14 +52,14 @@
         :currActivePanel="currActiveSubPanel"
         :currColorEvent="currSubColorEvent"
         :isSubPanel="true"
-        @switchTab="switchTab")
+        @switchTab="switchTab"
+        @close="closeMobilePanel")
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
-import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
@@ -127,7 +127,6 @@ export default Vue.extend({
     PanelFile,
     PanelBrand,
     PanelPage,
-    ColorPanel,
     PanelPosition,
     PanelFlip,
     PanelOpacity,
@@ -355,52 +354,31 @@ export default Vue.extend({
       }
     },
     dynamicBindMethod(): { [index: string]: any } {
+      const pushHistory = (history: string) => {
+        this.panelHistory.push(history)
+      }
+      const openExtraColorModal = (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
+        this.showExtraColorPanel = true
+        this.extraColorEvent = colorEventType
+        this.panelHistory.push(initColorPanelType)
+      }
       switch (this.currActivePanel) {
-        case 'color': {
-          return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            }
-          }
-        }
+        case 'color':
+          return { pushHistory }
+        case 'background':
+          return { openExtraColorModal }
         case 'text-effect':
-        case 'photo-shadow': {
+        case 'photo-shadow':
+          return { pushHistory, openExtraColorModal }
+        case 'brand-list':
           return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            },
-            openExtraColorModal: (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
-              this.showExtraColorPanel = true
-              this.extraColorEvent = colorEventType
-              this.panelHistory.push(initColorPanelType)
-            }
-          }
-        }
-        case 'background': {
-          // bind listener to let the parent access the grandchild's event
-          // return this.$listeners
-
-          return {
-            openExtraColorModal: (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
-              this.showExtraColorPanel = true
-              this.extraColorEvent = colorEventType
-              this.panelHistory.push(initColorPanelType)
-            }
-          }
-        }
-        case 'brand-list': {
-          return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            },
+            pushHistory,
             back: () => {
               this.panelHistory.pop()
             }
           }
-        }
-        default: {
+        default:
           return {}
-        }
       }
     },
     leftBtnName(): string {
@@ -505,7 +483,7 @@ export default Vue.extend({
       this.innerTab = this.innerTabs.key[0]
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
-      this.panelHeight = this.initHeightPx()
+      this.panelHeight = newVal === 'none' ? 0 : this.initHeightPx()
     },
     showMobilePanel(newVal) {
       if (!newVal) {
@@ -514,7 +492,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.panelHeight = this.initHeightPx()
+    this.panelHeight = 0
     this.resizeObserver = new ResizeObserver(() => {
       this.$emit('panelHeight', (this.$refs.panel as HTMLElement).clientHeight)
       this.fitPage()
@@ -527,6 +505,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setBgImageControl: 'SET_backgroundImageControl',
+      setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
     }),
     ...mapActions({
@@ -560,13 +539,13 @@ export default Vue.extend({
     closeMobilePanel() {
       this.$emit('switchTab', 'none')
       this.panelHistory = []
+      this.setCurrActivePanel('none')
     },
     initHeightPx() {
-      // 40 = HeaderTabs height
-      return ((this.$el.parentElement as HTMLElement).clientHeight - 40) * (this.halfSizeInInitState ? 0.5 : 1.0)
+      return ((this.$el.parentElement as HTMLElement).clientHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
     },
     maxHeightPx() {
-      return ((this.$el.parentElement as HTMLElement).clientHeight - 40) * 1.0
+      return (this.$el.parentElement as HTMLElement).clientHeight
     },
     getMaxHeightPx(): number {
       return parseFloat((this.$el as HTMLElement).style.maxHeight.split('px')[0])

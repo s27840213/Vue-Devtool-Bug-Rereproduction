@@ -79,7 +79,7 @@ export default Vue.extend({
       isCurrentShowAllRecently: 'vivisticker/getShowAllRecently',
       currActiveTab: 'vivisticker/getCurrActiveTab',
       isInBgShare: 'vivisticker/getIsInBgShare',
-      editorType: 'vivisticker/getEditorType',
+      editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       editorBg: 'vivisticker/getEditorBg',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       isInSelectionMode: 'vivisticker/getIsInSelectionMode'
@@ -150,7 +150,7 @@ export default Vue.extend({
       if (this.isInEditor) {
         return [
           { icon: 'bg', width: 24, action: this.handleSwitchBg },
-          ...(this.editorType === 'text' ? [{ icon: 'trash', width: 24, action: shortcutUtils.del }] : []),
+          ...(this.editorTypeTextLike ? [{ icon: 'trash', width: 24, action: shortcutUtils.del }] : []),
           { icon: 'copy', width: 24, action: this.handleCopy },
           { icon: 'vivisticker_close', width: 24, action: this.handleEndEditing }
         ]
