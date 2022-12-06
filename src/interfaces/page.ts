@@ -27,5 +27,11 @@ export interface IPage {
     v: Array<number>,
     h: Array<number>
   },
+  bleeds: {
+    up: number,
+    down: number,
+    left: number,
+    right: number
+  }
   isAutoResizeNeeded: boolean
 }

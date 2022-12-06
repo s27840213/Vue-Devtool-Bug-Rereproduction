@@ -15,6 +15,8 @@ div(class="popup-file")
   div(class="popup-file__item" @click="newDesign()")
     span {{$tc('NN0072')}}
   hr(class="popup-file__hr")
+  div(class="popup-file__item " @click="toggleBleed()")
+    span {{showBleed ? "關閉印刷出血" : "開啟印刷出血"}}
   div(class="popup-file__item " @click="togglerRuler()")
     span {{$t('NN0073')}}
     svg-icon(v-if="isShownRuler" class="pointer"
@@ -62,7 +64,7 @@ import Vue from 'vue'
 import popupUtils from '@/utils/popupUtils'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters, mapState, mapMutations } from 'vuex'
 import shortcutHandler from '@/utils/shortcutUtils'
 import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
@@ -80,6 +82,9 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapState([
+      'showBleed'
+    ]),
     ...mapState('user', [
       'uname'
     ]),
@@ -117,6 +122,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      setShowBleed: 'SET_showBleed'
+    }),
     closePopup() {
       popupUtils.closePopup()
     },
@@ -136,6 +144,9 @@ export default Vue.extend({
     },
     togglelockGuideline() {
       rulerUtils.setLockGuideline(!rulerUtils.lockGuideline)
+    },
+    toggleBleed() {
+      this.setShowBleed(!this.showBleed)
     },
     newDesign() {
       // designUtils.newDesign()
@@ -234,6 +245,7 @@ export default Vue.extend({
     padding: 0.35rem;
     border-radius: 0.25rem;
     position: relative;
+    cursor: pointer;
     &.disabled {
       color: setColor(gray-4);
     }

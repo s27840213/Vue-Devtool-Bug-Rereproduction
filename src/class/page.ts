@@ -24,6 +24,13 @@ export class Page implements IPage {
     h: Array<number>
   }
 
+  bleeds: {
+    up: number
+    down: number
+    left: number
+    right: number
+  }
+
   isAutoResizeNeeded: boolean
 
   constructor() {
@@ -60,6 +67,12 @@ export class Page implements IPage {
     this.guidelines = {
       v: [],
       h: []
+    }
+    this.bleeds = {
+      up: 0,
+      down: 0,
+      left: 0,
+      right: 0
     }
     this.isAutoResizeNeeded = false
   }

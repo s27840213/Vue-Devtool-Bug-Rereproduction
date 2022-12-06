@@ -138,6 +138,12 @@ class PageUtils {
         v: [],
         h: []
       },
+      bleeds: {
+        up: 0,
+        down: 0,
+        left: 0,
+        right: 0
+      },
       isAutoResizeNeeded: false
     }
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))
@@ -198,6 +204,13 @@ class PageUtils {
 
   setPageSize(index: number, width: number, height: number) {
     store.commit('SET_pageSize', { index, width, height })
+  }
+
+  /**
+   * @param {Array<number>} bleeds [up, down, left, right]
+   */
+  setPageBleeds(pageIndex: number, bleeds: Array<number>) {
+    store.commit('SET_bleeds', { pageIndex, bleeds })
   }
 
   resizePage(format: { width: number, height: number }) {

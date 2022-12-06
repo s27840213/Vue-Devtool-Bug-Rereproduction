@@ -4,11 +4,11 @@
       span(class="text-gray-2 label-mid") {{$t('NN0021')}}
     div(class="page-setting-row page-setting__size bg-gray-6 pointer" @click="toggleSuggestionPanel()")
       div(class="page-setting__size__box")
-        span(class="body-XS text-gray-2") {{ `${currentPageWidth} ${currentPageUnit}` }}
+        span(class="body-XS text-gray-2") {{ `${currentPageWidth} ${unitOptions[currentPageUnit]}` }}
       span(class="body-XS text-gray-3") W
       span(class="body-XS text-gray-2 text-center") x
       div(class="page-setting__size__box")
-        span(class="body-XS text-gray-2") {{ `${currentPageHeight} ${currentPageUnit}` }}
+        span(class="body-XS text-gray-2") {{ `${currentPageHeight} ${unitOptions[currentPageUnit]}` }}
       span(class="body-XS text-gray-3") H
     div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
         @click="toggleSuggestionPanel()")
@@ -25,6 +25,44 @@
                     iconName="close" iconWidth="19px" iconColor="white")
           keep-alive
             page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)" ref="pageSizeSelector")
+    div(v-if="showBleed" class="page-setting__bleed")
+      div(class="page-setting-row page-setting__bleed__title pointer" @click="() => showBleedSettings = !showBleedSettings")
+        span(class="text-gray-2 label-mid") {{'印刷出血設定'}}
+        svg-icon(class='page-setting__bleed__expand-icon'
+                iconName="chevron-up"
+                iconWidth="14px"
+                iconColor="gray-2"
+                :style="expandIconStyles()")
+      div(v-if="showBleedSettings" class="page-setting-row page-setting__bleed__content")
+        div(v-for="(bleed, idx) in bleedSettings" class='page-setting__bleed__content__item')
+          div(class='page-setting__bleed__content__item__label')
+            span(class="body-XS text-gray-2") {{bleed.label}}
+          div(class='page-setting__bleed__content__item__input')
+            div(class='page-setting__bleed__content__item__input__icon pointer'
+                @click="addBleed(idx, 1, isLocked)")
+              svg-icon(iconName="chevron-up"
+                iconWidth="14px"
+                iconColor="gray-2")
+            div(class='page-setting__bleed__content__item__input__icon pointer'
+                @click="addBleed(idx, -1, isLocked)")
+              svg-icon(iconName="chevron-up"
+                iconWidth="14px"
+                iconColor="gray-2"
+                :style="{transform: 'scaleY(-1)'}")
+            div(class='page-setting__bleed__content__item__input__value body-XS')
+              input(type="number" min="0"
+                    :value="!isNaN(bleed.values[currentPageUnit]) ? bleed.values[currentPageUnit] : ''"
+                    @input="setBleed(idx, {evt: $event}, isLocked)"
+                    @blur="handleBleedBlur()")
+              span(class='text-gray-3') {{unitOptions[currentPageUnit]}}
+        div(class="page-setting__bleed__content__lock-icon")
+          div(class="page-setting__bleed__content__lock-icon__box"
+              :style="isLocked ? {background: '#E7EFFF'} : {}")
+            svg-icon(class="pointer"
+                    :iconName="isLocked ? 'lock' : 'unlock'"
+                    iconWidth="15px"
+                    iconColor="gray-2"
+                    @click.native="toggleLock()")
     div(class="page-setting__footer")
     div(v-if="inAdminMode"
       class="template-information")
@@ -212,6 +250,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   components: {
@@ -222,6 +261,9 @@ export default Vue.extend({
   mounted() {
     this.pageWidth = this.currentPageWidth
     this.pageHeight = this.currentPageHeight
+    this.currentPageBleeds.forEach((val: number, idx: number) => {
+      this.setBleed(idx, { value: val, noRecord: true })
+    })
   },
   data() {
     return {
@@ -266,7 +308,34 @@ export default Vue.extend({
       templateThemes: [] as boolean[],
       dbTemplateThemes: [] as boolean[],
       groupErrorMsg: '',
-      unsetThemeTemplate: [] as string[]
+      unsetThemeTemplate: [] as string[],
+      showBleedSettings: true,
+      unitOptions: ['px', 'cm', 'mm', 'in'],
+      mulUnits: [
+        // px cm mm in
+        [1, 1 / 96 * 2.54, 1 / 96 * 25.4, 1 / 96], // px
+        [96 / 2.54, 1, 10, 1 / 2.54], // cm
+        [96 / 25.4, 1 / 10, 1, 1 / 25.4], // mm
+        [96, 2.54, 25.4, 1] // in
+      ],
+      bleedSettings: [
+        {
+          label: '上',
+          values: [11, 0.3, 3, 0.118]
+        },
+        {
+          label: '下',
+          values: [11, 0.3, 3, 0.118]
+        },
+        {
+          label: '左',
+          values: [11, 0.3, 3, 0.118]
+        },
+        {
+          label: '右',
+          values: [11, 0.3, 3, 0.118]
+        }
+      ]
     }
   },
   watch: {
@@ -313,12 +382,24 @@ export default Vue.extend({
     currentPageHeight: function (newVal) {
       this.pageWidth = this.currentPageWidth
       this.pageHeight = newVal
+    },
+    currFocusPageIndex: function () {
+      this.currentPageBleeds.forEach((val: number, idx: number) => {
+        this.setBleed(idx, { value: val, noRecord: true })
+      })
+    },
+    showBleed: function () {
+      this.showBleedSettings = true
     }
   },
   computed: {
+    ...mapState([
+      'showBleed'
+    ]),
     ...mapState('user', [
       'role',
-      'adminMode']),
+      'adminMode'
+    ]),
     ...mapState('layouts', [
       'categories'
     ]),
@@ -327,20 +408,27 @@ export default Vue.extend({
       token: 'user/getToken',
       groupId: 'getGroupId'
     }),
+    currFocusPageIndex(): number {
+      return pageUtils.currFocusPageIndex
+    },
     currentPageWidth(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return this.currentPageUnit !== 'px'
+      return this.currentPageUnit
         ? Math.round((currPage?.physicalWidth ?? 0) * 1e3) / 1e3
         : Math.round(currPage?.width ?? 0)
     },
     currentPageHeight(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return this.currentPageUnit !== 'px'
+      return this.currentPageUnit
         ? Math.round((currPage?.physicalHeight ?? 0) * 1e3) / 1e3
         : Math.round(currPage?.height ?? 0)
     },
-    currentPageUnit(): string {
-      return this.getPage(pageUtils.currFocusPageIndex)?.unit ?? 'px'
+    currentPageUnit(): number {
+      return this.unitOptions.indexOf(this.getPage(pageUtils.currFocusPageIndex)?.unit ?? 'px')
+    },
+    currentPageBleeds(): number[] {
+      const currBleeds = this.getPage(pageUtils.currFocusPageIndex)?.bleeds
+      return currBleeds ? [currBleeds.up ?? 0, currBleeds.down ?? 0, currBleeds.left ?? 0, currBleeds.right ?? 0] : [0, 0, 0, 0]
     },
     inAdminMode(): boolean {
       return this.role === 0 && this.adminMode === true
@@ -625,6 +713,56 @@ export default Vue.extend({
         }
         return true
       }
+    },
+    expandIconStyles() {
+      return this.showBleedSettings ? {} : { transform: 'scaleY(-1)' }
+    },
+    setBleed(idx: number, opts: { evt?: Event, value?: number, noRecord?: boolean }, all = false) {
+      let value: number
+      if (typeof opts.value !== 'undefined' && !isNaN(opts.value)) value = opts.value
+      else if (opts.evt) value = Math.max(parseFloat((opts.evt.target as HTMLInputElement).value), 0)
+      else return
+      if (all) {
+        this.bleedSettings = this.bleedSettings.map(bleed => {
+          bleed.values = this.transBleed(value)
+          return bleed
+        })
+      } else {
+        this.bleedSettings[idx].values = this.transBleed(value)
+      }
+      this.updateBleeds()
+      // if (!opts.noRecord) stepsUtils.record()
+    },
+    addBleed(idx: number, value: number, all = false) {
+      if (all) {
+        this.bleedSettings = this.bleedSettings.map(bleed => {
+          const newValue = Math.max(bleed.values[this.currentPageUnit] + value, 0)
+          bleed.values = this.transBleed(newValue)
+          return bleed
+        })
+      } else {
+        const newValue = Math.max(this.bleedSettings[idx].values[this.currentPageUnit] + value, 0)
+        this.bleedSettings[idx].values = this.transBleed(newValue)
+      }
+      this.updateBleeds()
+      stepsUtils.record()
+    },
+    updateBleeds(pageIndex = pageUtils.currFocusPageIndex) {
+      const pageUnit = this.unitOptions.indexOf(this.getPage(pageIndex)?.unit ?? 'px')
+      const bleeds = this.bleedSettings.map((bleed) => !isNaN(bleed.values[pageUnit]) ? bleed.values[pageUnit] : 0)
+      pageUtils.setPageBleeds(pageIndex, bleeds)
+    },
+    transBleed(bleed: number) {
+      return this.mulUnits[this.currentPageUnit].map((mulTransUnit, idx) => {
+        const mulPrecision = idx === 0 ? 1 : 1e3
+        return Math.round(bleed * mulTransUnit * mulPrecision) / mulPrecision
+      })
+    },
+    handleBleedBlur() {
+      stepsUtils.record()
+      this.currentPageBleeds.forEach((val: number, idx: number) => {
+        this.setBleed(idx, { value: val, noRecord: true })
+      })
     }
   }
 })
@@ -685,6 +823,69 @@ export default Vue.extend({
       font-weight: 700;
       font-size: 12px;
       line-height: 16px;
+    }
+  }
+  &__bleed {
+    margin-top: 19px;
+    &__title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    &__content {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 24px;
+      gap: 8px;
+      &__item {
+        &__label {
+          height: 22px;
+          display: flex;
+          align-items: center;
+        }
+        &__input {
+          border: 1px solid setColor(gray-4);
+          border-radius: 4px;
+          display: grid;
+          grid-template-columns: 30px auto;
+          overflow: hidden;
+          &__icon {
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid setColor(gray-4);
+            &:active {
+              background: setColor(blue-4);
+            }
+          }
+          &__value {
+            padding: 6px;
+            grid-row: 1 / span 2;
+            grid-column: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          }
+        }
+      }
+      &__lock-icon {
+        grid-row: 1 / span 2;
+        grid-column: 3;
+        display: flex;
+        align-items: center;
+        padding-top: 22px;
+        &__box {
+          box-sizing: border-box;
+          width: 24px;
+          height: 24px;
+          border: 1px solid setColor(gray-4);
+          border-radius: 3px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
     }
   }
   &__hr {
