@@ -234,8 +234,8 @@ export default Vue.extend({
       } else {
         groupUtils.deselect()
         this.setImgConfig(undefined)
-        setTimeout(() => {
-          if (layerUtils.layerIndex === -1) {
+        this.$nextTick(() => {
+          const reSelecting = () => {
             const isSubLayer = this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined'
             const targetIdx = isSubLayer ? ((this.config as IImage).parentLayerStyles?.zindex ?? 0) - 1 : this.config.styles.zindex - 1
             groupUtils.deselect()
@@ -249,7 +249,22 @@ export default Vue.extend({
               }
             }
           }
-        }, 0)
+          if (layerUtils.layerIndex === -1 && !this.isDuringCopy) {
+            reSelecting()
+          }
+          if (this.isDuringCopy) {
+            const start = Date.now()
+            const timer = setInterval(() => {
+              if (Date.now() - start > 10000) {
+                clearInterval(timer)
+              }
+              if (!this.isDuringCopy) {
+                reSelecting()
+                clearInterval(timer)
+              }
+            }, 300)
+          }
+        })
         this.handleDimensionUpdate()
       }
       if (this.forRender) {
@@ -297,6 +312,7 @@ export default Vue.extend({
       isShowPagePanel: 'page/getShowPagePanel',
       isProcessing: 'shadow/isProcessing'
     }),
+    ...mapState('vivisticker', ['isDuringCopy']),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     canvas: {
