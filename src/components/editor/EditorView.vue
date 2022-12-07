@@ -308,16 +308,8 @@ export default Vue.extend({
     setAdminMode() {
       this._setAdminMode(!this.adminMode)
     },
-    isClickOnController(e: MouseEvent): boolean {
-      const layer = document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
-      if (layer) {
-        const rect = layer.getBoundingClientRect()
-        return e.clientX > rect.x && e.clientX < rect.x + rect.width && e.clientY > rect.y && e.clientY < rect.y + rect.height
-      }
-      return false
-    },
     outerClick(e: MouseEvent) {
-      if (!this.inBgRemoveMode && !this.isClickOnController(e)) {
+      if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         !this.isHandleShadow && GroupUtils.deselect()
         GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
@@ -334,7 +326,8 @@ export default Vue.extend({
          * when the user click the control-region outsize the page,
          * the moving logic should be applied to the EditorView.
          */
-        if (this.isClickOnController(e)) {
+        if (ControlUtils.isClickOnController(e)) {
+          console.log('click on contorl')
           const movingUtils = new MovingUtils({
             _config: { config: layerUtils.getCurrConfig },
             snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,

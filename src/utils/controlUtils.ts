@@ -6,6 +6,7 @@ import generalUtils from '@/utils/generalUtils'
 import layerUtils from './layerUtils'
 import editorUtils from './editorUtils'
 import { svg1, svg2, svg3, svg4, svg5, svg6, svg7, svg8 } from './cornerRotate'
+import mathUtils from './mathUtils'
 
 const blob1 = new Blob([svg1], { type: 'image/svg+xml' })
 const blob2 = new Blob([svg2], { type: 'image/svg+xml' })
@@ -469,6 +470,55 @@ class Controller {
       }
     }
     return [width, height]
+  }
+
+  // isClickOnController(e: MouseEvent, layerIndex = layerUtils.layerIndex): boolean {
+  //   const layer = document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerIndex}`) as HTMLElement
+  //   if (layer) {
+  //     const rect = layer.getBoundingClientRect()
+  //     const { x: x0, y: y0, width: w, height: h } = rect
+  //     const sinT = mathUtils.sin(layerUtils.getCurrLayer.styles.rotate)
+  //     const cosT = mathUtils.cos(layerUtils.getCurrLayer.styles.rotate)
+  //     const yd = (w * sinT + h * cosT - h) * 0.5
+  //     const xd = (w * cosT + h * sinT - w) * 0.5
+  //     const yt = y0 - yd
+  //     // const yb = y0 + yd + h
+  //     const xl = x0 - xd
+  //     const xr = x0 + xd + w
+  //     const p1 = {
+  //       x: xl + h * sinT,
+  //       y: yt
+  //     }
+  //     const p2 = {
+  //       x: xr,
+  //       y: yt + w * sinT
+  //     }
+  //     // const p3 = {
+  //     //   x: xr - h * sinT,
+  //     //   y: yb
+  //     // }
+  //     // const p4 = {
+  //     //   x: xl,
+  //     //   y: yb - w * sinT
+  //     // }
+  //     console.log(p1.x, e.clientX)
+  //     console.log(p2.x, e.clientX)
+  //     console.log(p1.y, e.clientY)
+  //     console.log(p2.y, e.clientY)
+  //     console.log('pe1: ', (p1.x - e.clientX), (p1.y - e.clientY))
+  //     console.log('pe2: ', (p2.x - e.clientX), (p2.y - e.clientY))
+  //     console.log((p1.x - e.clientX) * (p2.x - e.clientX) + (p1.y - e.clientY) * (p2.y - e.clientY))
+  //     return (p1.x - e.clientX) * (p2.x - e.clientX) + (p1.y - e.clientY) * (p2.y - e.clientY) < 0
+  //   }
+  //   return false
+  // }
+  isClickOnController(e: MouseEvent): boolean {
+    const layer = document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
+    if (layer) {
+      const rect = layer.getBoundingClientRect()
+      return e.clientX > rect.x && e.clientX < rect.x + rect.width && e.clientY > rect.y && e.clientY < rect.y + rect.height
+    }
+    return false
   }
 
   updateImgPos(pageIndex: number, layerIndex: number, imgX: number, imgY: number) {

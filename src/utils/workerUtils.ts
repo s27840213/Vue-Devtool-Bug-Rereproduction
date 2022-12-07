@@ -1,4 +1,4 @@
-// eslint-disable-next-line
+// eslint-disable
 import CloneDeepWorker from '@/components/editor/worker/clneDeep.worker.ts'
 
 class WorkerUtils {

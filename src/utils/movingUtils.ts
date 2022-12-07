@@ -97,6 +97,8 @@ export class MovingUtils {
   private recorded = false
 
   moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
+    this.initTranslate.x = this.getLayerPos.x
+    this.initTranslate.y = this.getLayerPos.y
     this.start = Date.now()
     this.recorded = false
     const currLayerIndex = layerUtils.layerIndex
@@ -190,7 +192,6 @@ export class MovingUtils {
     }
     formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
     formatUtils.clearCopiedFormat()
-    this.initTranslate = this.getLayerPos
 
     if (inCopyMode) {
       shortcutUtils.altDuplicate(this.pageIndex, this.layerIndex, this.config)
@@ -309,6 +310,13 @@ export class MovingUtils {
       if (!this.isActive) {
         if (posDiff.x > 1 || posDiff.y > 1) {
           this.isDoingGestureAction = true
+          if (controlUtils.isClickOnController(e as MouseEvent)) {
+            console.log('is click on control')
+            window.requestAnimationFrame(() => {
+              this.movingHandler(e)
+              this.isHandleMovingHandler = false
+            })
+          }
           return
         }
       } else {
@@ -380,14 +388,23 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
-    if (!this.isDoingGestureAction && !this.isActive) {
+    eventUtils.removePointerEvent('pointerup', this._moveEnd)
+    eventUtils.removePointerEvent('pointermove', this._moving)
+
+    const posDiff = {
+      x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
+      y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
+    }
+    const hasActiualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
+
+    if (!this.isDoingGestureAction && !this.isActive && !hasActiualMove) {
       this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
       groupUtils.deselect()
       const targetIndex = this.config.styles.zindex - 1
       this.setLastSelectedLayerIndex(this.layerIndex)
       groupUtils.select(this.pageIndex, [targetIndex])
-      eventUtils.removePointerEvent('pointerup', this._moveEnd)
-      eventUtils.removePointerEvent('pointermove', this._moving)
+      // eventUtils.removePointerEvent('pointerup', this._moveEnd)
+      // eventUtils.removePointerEvent('pointermove', this._moving)
       this.isControlling = false
       this.setCursorStyle(e, 'initial')
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -402,11 +419,6 @@ export class MovingUtils {
     this.setMoving(false)
 
     if (this.isActive) {
-      const posDiff = {
-        x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
-        y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
-      }
-      const hasActiualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
       if (hasActiualMove) {
         if (this.getLayerType === 'text') {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
@@ -492,8 +504,8 @@ export class MovingUtils {
       this.isPointerDownFromSubController = false
       this.isControlling = false
       this.setCursorStyle(e, 'initial')
-      eventUtils.removePointerEvent('pointerup', this._moveEnd)
-      eventUtils.removePointerEvent('pointermove', this._moving)
+      // eventUtils.removePointerEvent('pointerup', this._moveEnd)
+      // eventUtils.removePointerEvent('pointermove', this._moving)
     }
 
     if (this.isDragging) {
