@@ -35,6 +35,7 @@ export class MovingUtils {
   private _moveEnd = null as unknown
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex }
   private isTouchDevice = generalUtils.isTouchDevice()
+  private isClickOnController = false
 
   private get isBgImgCtrl(): boolean { return store.getters['imgControl/isBgImgCtrl'] }
   private get config(): ILayer { return this._config.config }
@@ -132,6 +133,8 @@ export class MovingUtils {
     this.eventTarget.releasePointerCapture((event as PointerEvent).pointerId)
 
     if (this.isTouchDevice) {
+      this.isClickOnController = controlUtils.isClickOnController(event as MouseEvent)
+      event.stopPropagation()
       if (!this.dblTabsFlag && this.isActive) {
         const touchtime = Date.now()
         const interval = 500
@@ -310,8 +313,7 @@ export class MovingUtils {
       if (!this.isActive) {
         if (posDiff.x > 1 || posDiff.y > 1) {
           this.isDoingGestureAction = true
-          if (controlUtils.isClickOnController(e as MouseEvent)) {
-            console.log('is click on control')
+          if (layerUtils.layerIndex !== this.layerIndex && this.isClickOnController) {
             window.requestAnimationFrame(() => {
               this.movingHandler(e)
               this.isHandleMovingHandler = false

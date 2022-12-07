@@ -18,6 +18,7 @@
             :key="`page-${index}`"
             class="editor-view__card"
             :style="cardStyle"
+            @pointerdown="selectStart"
             @pointerdown.self.prevent="outerClick($event)"
             ref="card")
           nu-page(
@@ -49,6 +50,7 @@ import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import layerUtils from '@/utils/layerUtils'
 import editorUtils from '@/utils/editorUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
+import { MovingUtils } from '@/utils/movingUtils'
 
 export default Vue.extend({
   components: {
@@ -236,7 +238,7 @@ export default Vue.extend({
         height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
         padding: this.isDetailPage ? '0px' : '40px',
         flexDirection: this.isDetailPage ? 'column' : 'initial',
-        overflow: this.isDetailPage ? 'initial' : 'scroll',
+        // overflow: this.isDetailPage ? 'initial' : 'scroll',
         minHeight: this.isDetailPage ? 'none' : '100%'
       }
     },
@@ -273,7 +275,7 @@ export default Vue.extend({
       this._setAdminMode(!this.adminMode)
     },
     outerClick(e: MouseEvent) {
-      if (!this.inBgRemoveMode) {
+      if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         editorUtils.setInBgSettingMode(false)
         GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
@@ -282,6 +284,23 @@ export default Vue.extend({
         pageUtils.findCentralPageIndexInfo()
         if (imageUtils.isImgControl()) {
           ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+        }
+      }
+    },
+    selectStart(e: MouseEvent) {
+      if (layerUtils.layerIndex !== -1) {
+        /**
+         * when the user click the control-region outsize the page,
+         * the moving logic should be applied to the EditorView.
+         */
+        if (ControlUtils.isClickOnController(e)) {
+          console.log('click on contorl xxxxxxx')
+          const movingUtils = new MovingUtils({
+            _config: { config: layerUtils.getCurrConfig },
+            snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+            body: document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
+          })
+          movingUtils.moveStart(e)
         }
       }
     },

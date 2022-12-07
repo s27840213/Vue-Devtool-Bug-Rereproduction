@@ -321,13 +321,13 @@ export default Vue.extend({
       }
     },
     selectStart(e: MouseEvent) {
+      console.log('select start')
       if (layerUtils.layerIndex !== -1) {
         /**
          * when the user click the control-region outsize the page,
          * the moving logic should be applied to the EditorView.
          */
         if (ControlUtils.isClickOnController(e)) {
-          console.log('click on contorl')
           const movingUtils = new MovingUtils({
             _config: { config: layerUtils.getCurrConfig },
             snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,

@@ -472,51 +472,55 @@ class Controller {
     return [width, height]
   }
 
-  // isClickOnController(e: MouseEvent, layerIndex = layerUtils.layerIndex): boolean {
-  //   const layer = document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerIndex}`) as HTMLElement
-  //   if (layer) {
-  //     const rect = layer.getBoundingClientRect()
-  //     const { x: x0, y: y0, width: w, height: h } = rect
-  //     const sinT = mathUtils.sin(layerUtils.getCurrLayer.styles.rotate)
-  //     const cosT = mathUtils.cos(layerUtils.getCurrLayer.styles.rotate)
-  //     const yd = (w * sinT + h * cosT - h) * 0.5
-  //     const xd = (w * cosT + h * sinT - w) * 0.5
-  //     const yt = y0 - yd
-  //     // const yb = y0 + yd + h
-  //     const xl = x0 - xd
-  //     const xr = x0 + xd + w
-  //     const p1 = {
-  //       x: xl + h * sinT,
-  //       y: yt
-  //     }
-  //     const p2 = {
-  //       x: xr,
-  //       y: yt + w * sinT
-  //     }
-  //     // const p3 = {
-  //     //   x: xr - h * sinT,
-  //     //   y: yb
-  //     // }
-  //     // const p4 = {
-  //     //   x: xl,
-  //     //   y: yb - w * sinT
-  //     // }
-  //     console.log(p1.x, e.clientX)
-  //     console.log(p2.x, e.clientX)
-  //     console.log(p1.y, e.clientY)
-  //     console.log(p2.y, e.clientY)
-  //     console.log('pe1: ', (p1.x - e.clientX), (p1.y - e.clientY))
-  //     console.log('pe2: ', (p2.x - e.clientX), (p2.y - e.clientY))
-  //     console.log((p1.x - e.clientX) * (p2.x - e.clientX) + (p1.y - e.clientY) * (p2.y - e.clientY))
-  //     return (p1.x - e.clientX) * (p2.x - e.clientX) + (p1.y - e.clientY) * (p2.y - e.clientY) < 0
-  //   }
-  //   return false
-  // }
-  isClickOnController(e: MouseEvent): boolean {
-    const layer = document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
+  /**
+   * This function determine if the point 'c' is on the left-hand-side of the line p1_p2
+   */
+  private isOnLeftHandSide(p1: ICoordinate, p2: ICoordinate, c: ICoordinate) {
+    const p1_p2 = {
+      x: p2.x - p1.x,
+      y: p2.y - p1.y
+    }
+    const p1_c = {
+      x: c.x - p1.x,
+      y: c.y - p1.y
+    }
+    return p1_p2.x * p1_c.y - p1_p2.y * p1_c.x > 0
+  }
+
+  isClickOnController(e: MouseEvent, layerIndex = layerUtils.layerIndex): boolean {
+    const layer = document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerIndex}`) as HTMLElement
     if (layer) {
       const rect = layer.getBoundingClientRect()
-      return e.clientX > rect.x && e.clientX < rect.x + rect.width && e.clientY > rect.y && e.clientY < rect.y + rect.height
+      const c = { x: e.clientX, y: e.clientY }
+      const { x: x0, y: y0, width: W, height: H } = rect
+      const sinT = mathUtils.sin(layerUtils.getCurrLayer.styles.rotate % 90)
+      const cosT = mathUtils.cos(layerUtils.getCurrLayer.styles.rotate % 90)
+      const w = (H * sinT - W * cosT) / (sinT * sinT - cosT * cosT)
+      const h = (H * cosT - W * sinT) / (cosT * cosT - sinT * sinT)
+      const yt = y0
+      const yb = y0 + H
+      const xl = x0
+      const xr = x0 + W
+      const p1 = {
+        x: xl + h * sinT,
+        y: yt
+      }
+      const p2 = {
+        x: xr,
+        y: yt + w * sinT
+      }
+      const p3 = {
+        x: xr - h * sinT,
+        y: yb
+      }
+      const p4 = {
+        x: xl,
+        y: yb - w * sinT
+      }
+      return this.isOnLeftHandSide(p1, p2, c) &&
+        this.isOnLeftHandSide(p2, p3, c) &&
+        this.isOnLeftHandSide(p3, p4, c) &&
+        this.isOnLeftHandSide(p4, p1, c)
     }
     return false
   }
