@@ -159,6 +159,7 @@ export default defineComponent({
         'app_vCknZsetHXn07bficr2XQdp7o373nyvvxNoBEm6yIcqgQGFQA96WYtUTDu60',
         'production'
       )
+      // @ts-expect-error: Type of card.setup is not correct, skip its type check.
       window.TPDirect.card.setup(paymentData.tappayConfig())
       window.TPDirect.card.onUpdate((update) => {
         this.tappayPayReady = update.canGetPrime
