@@ -249,6 +249,7 @@ import designApis from '@/apis/design-info'
 import GeneralUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
+import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import unitUtils, { STR_UNITS, IMapUnit } from '@/utils/unitUtils'
@@ -384,6 +385,9 @@ export default Vue.extend({
     },
     showBleed: function () {
       this.showBleedSettings = true
+    },
+    hasBleed: function (newVal) {
+      if (!this.showBleed) this.setShowBleed(newVal)
     }
   },
   computed: {
@@ -399,6 +403,7 @@ export default Vue.extend({
     ]),
     ...mapGetters({
       getPage: 'getPage',
+      getPages: 'getPages',
       token: 'user/getToken',
       groupId: 'getGroupId'
     }),
@@ -420,6 +425,9 @@ export default Vue.extend({
       const currBleeds = this.getPage(pageUtils.currFocusPageIndex)?.bleeds
       return currBleeds ? [currBleeds.up ?? 0, currBleeds.down ?? 0, currBleeds.left ?? 0, currBleeds.right ?? 0] : [0, 0, 0, 0]
     },
+    hasBleed(): boolean {
+      return this.getPages.some((page: IPage) => page.bleeds.up || page.bleeds.down || page.bleeds.left || page.bleeds.right)
+    },
     inAdminMode(): boolean {
       return this.role === 0 && this.adminMode === true
     },
@@ -439,7 +447,8 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       updatePageProps: 'UPDATE_pageProps',
-      setIsloading: 'SET_isGlobalLoading'
+      setIsloading: 'SET_isGlobalLoading',
+      setShowBleed: 'SET_showBleed'
     }),
     ...mapActions('layouts', [
       'getRecently'
