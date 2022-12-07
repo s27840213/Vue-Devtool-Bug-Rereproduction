@@ -4,11 +4,11 @@
       span(class="text-gray-2 label-mid") {{$t('NN0021')}}
     div(class="page-setting-row page-setting__size bg-gray-6 pointer" @click="toggleSuggestionPanel()")
       div(class="page-setting__size__box")
-        span(class="body-XS text-gray-2") {{ `${currentPageWidth} ${unitOptions[currentPageUnit]}` }}
+        span(class="body-XS text-gray-2") {{ `${currentPageWidth} ${currentPageUnit}` }}
       span(class="body-XS text-gray-3") W
       span(class="body-XS text-gray-2 text-center") x
       div(class="page-setting__size__box")
-        span(class="body-XS text-gray-2") {{ `${currentPageHeight} ${unitOptions[currentPageUnit]}` }}
+        span(class="body-XS text-gray-2") {{ `${currentPageHeight} ${currentPageUnit}` }}
       span(class="body-XS text-gray-3") H
     div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
         @click="toggleSuggestionPanel()")
@@ -54,7 +54,7 @@
                     :value="!isNaN(bleed.values[currentPageUnit]) ? bleed.values[currentPageUnit] : ''"
                     @input="setBleed(idx, {evt: $event}, isLocked)"
                     @blur="handleBleedBlur()")
-              span(class='text-gray-3') {{unitOptions[currentPageUnit]}}
+              span(class='text-gray-3') {{currentPageUnit}}
         div(class="page-setting__bleed__content__lock-icon")
           div(class="page-setting__bleed__content__lock-icon__box"
               :style="isLocked ? {background: '#E7EFFF'} : {}")
@@ -251,6 +251,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import unitUtils, { STR_UNITS, IMapUnit } from '@/utils/unitUtils'
 
 export default Vue.extend({
   components: {
@@ -310,30 +311,23 @@ export default Vue.extend({
       groupErrorMsg: '',
       unsetThemeTemplate: [] as string[],
       showBleedSettings: true,
-      unitOptions: ['px', 'cm', 'mm', 'in'],
-      mulUnits: [
-        // px cm mm in
-        [1, 1 / 96 * 2.54, 1 / 96 * 25.4, 1 / 96], // px
-        [96 / 2.54, 1, 10, 1 / 2.54], // cm
-        [96 / 25.4, 1 / 10, 1, 1 / 25.4], // mm
-        [96, 2.54, 25.4, 1] // in
-      ],
+      unitOptions: STR_UNITS,
       bleedSettings: [
         {
           label: '上',
-          values: [11, 0.3, 3, 0.118]
+          values: {} as IMapUnit
         },
         {
           label: '下',
-          values: [11, 0.3, 3, 0.118]
+          values: {} as IMapUnit
         },
         {
           label: '左',
-          values: [11, 0.3, 3, 0.118]
+          values: {} as IMapUnit
         },
         {
           label: '右',
-          values: [11, 0.3, 3, 0.118]
+          values: {} as IMapUnit
         }
       ]
     }
@@ -413,18 +407,14 @@ export default Vue.extend({
     },
     currentPageWidth(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return this.currentPageUnit
-        ? Math.round((currPage?.physicalWidth ?? 0) * 1e3) / 1e3
-        : Math.round(currPage?.width ?? 0)
+      return unitUtils.round(currPage?.physicalWidth ?? 0, this.currentPageUnit)
     },
     currentPageHeight(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return this.currentPageUnit
-        ? Math.round((currPage?.physicalHeight ?? 0) * 1e3) / 1e3
-        : Math.round(currPage?.height ?? 0)
+      return unitUtils.round(currPage?.physicalHeight ?? 0, this.currentPageUnit)
     },
-    currentPageUnit(): number {
-      return this.unitOptions.indexOf(this.getPage(pageUtils.currFocusPageIndex)?.unit ?? 'px')
+    currentPageUnit(): string {
+      return this.getPage(pageUtils.currFocusPageIndex)?.unit ?? 'px'
     },
     currentPageBleeds(): number[] {
       const currBleeds = this.getPage(pageUtils.currFocusPageIndex)?.bleeds
@@ -724,11 +714,11 @@ export default Vue.extend({
       else return
       if (all) {
         this.bleedSettings = this.bleedSettings.map(bleed => {
-          bleed.values = this.transBleed(value)
+          bleed.values = unitUtils.convertAll(value, this.currentPageUnit)
           return bleed
         })
       } else {
-        this.bleedSettings[idx].values = this.transBleed(value)
+        this.bleedSettings[idx].values = unitUtils.convertAll(value, this.currentPageUnit)
       }
       this.updateBleeds()
       // if (!opts.noRecord) stepsUtils.record()
@@ -737,26 +727,20 @@ export default Vue.extend({
       if (all) {
         this.bleedSettings = this.bleedSettings.map(bleed => {
           const newValue = Math.max(bleed.values[this.currentPageUnit] + value, 0)
-          bleed.values = this.transBleed(newValue)
+          bleed.values = unitUtils.convertAll(newValue, this.currentPageUnit)
           return bleed
         })
       } else {
         const newValue = Math.max(this.bleedSettings[idx].values[this.currentPageUnit] + value, 0)
-        this.bleedSettings[idx].values = this.transBleed(newValue)
+        this.bleedSettings[idx].values = unitUtils.convertAll(newValue, this.currentPageUnit)
       }
       this.updateBleeds()
       stepsUtils.record()
     },
     updateBleeds(pageIndex = pageUtils.currFocusPageIndex) {
-      const pageUnit = this.unitOptions.indexOf(this.getPage(pageIndex)?.unit ?? 'px')
+      const pageUnit = this.getPage(pageIndex)?.unit ?? 'px'
       const bleeds = this.bleedSettings.map((bleed) => !isNaN(bleed.values[pageUnit]) ? bleed.values[pageUnit] : 0)
       pageUtils.setPageBleeds(pageIndex, bleeds)
-    },
-    transBleed(bleed: number) {
-      return this.mulUnits[this.currentPageUnit].map((mulTransUnit, idx) => {
-        const mulPrecision = idx === 0 ? 1 : 1e3
-        return Math.round(bleed * mulTransUnit * mulPrecision) / mulPrecision
-      })
     },
     handleBleedBlur() {
       stepsUtils.record()

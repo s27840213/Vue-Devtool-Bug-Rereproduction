@@ -31,13 +31,13 @@
                     class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
                     :class="selectedFormat === 'custom' || showUnitOptions ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`"
             @click.native="showUnitOptions = !showUnitOptions")
-          span(class="page-size-selector__body__custom__unit__label body-XXS" :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{unitOptions[selectedUnit]}}
+          span(class="page-size-selector__body__custom__unit__label body-XXS" :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{selectedUnit}}
           svg-icon(class="page-size-selector__body__custom__unit__icon"
             iconName="chevron-down"
             iconWidth="16px"
             :iconColor="selectedFormat === 'custom' ? 'blue-1' : this.isDarkTheme ? 'white' : 'gray-2'")
           div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option" :class="`bg-${this.isDarkTheme ? 'white' : 'gray-1-5'}`")
-            div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-gray-2" @click="selectUnit($event, index)")
+            div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-gray-2" @click="selectUnit($event, unit)")
               span(class="body-XS"
                   :class="`text-${isDarkTheme ? 'gray-1' : 'white'}`") {{unit}}
     div(class="page-size-selector__body__hr first bg-gray-4")
@@ -101,6 +101,7 @@ import generalUtils from '@/utils/generalUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import editorUtils from '@/utils/editorUtils'
+import unitUtils, { STR_UNITS, IMapUnit } from '@/utils/unitUtils'
 import { throttle } from 'lodash'
 
 export default Vue.extend({
@@ -126,18 +127,11 @@ export default Vue.extend({
       selectedFormat: '',
       pageWidth: NaN,
       pageHeight: NaN,
-      pageTransWidths: [] as number[],
-      pageTransHeights: [] as number[],
+      pageTransWidths: {} as IMapUnit,
+      pageTransHeights: {} as IMapUnit,
       isLocked: true,
-      unitOptions: ['px', 'cm', 'mm', 'in'],
-      mulUnits: [
-        // px cm mm in
-        [1, 1 / 96 * 2.54, 1 / 96 * 25.4, 1 / 96], // px
-        [96 / 2.54, 1, 10, 1 / 2.54], // cm
-        [96 / 25.4, 1 / 10, 1, 1 / 25.4], // mm
-        [96, 2.54, 25.4, 1] // in
-      ],
-      selectedUnit: 0,
+      unitOptions: STR_UNITS,
+      selectedUnit: '',
       showUnitOptions: false,
       copyBeforeApply: true
     }
@@ -174,18 +168,14 @@ export default Vue.extend({
     },
     currentPageWidth(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return this.currentPageUnit
-        ? Math.round((currPage?.physicalWidth ?? 0) * this.mulPrecision) / this.mulPrecision
-        : Math.round(currPage?.width ?? 0)
+      return unitUtils.round(currPage?.physicalWidth ?? 0, this.currentPageUnit)
     },
     currentPageHeight(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return this.currentPageUnit
-        ? Math.round((currPage?.physicalHeight ?? 0) * this.mulPrecision) / this.mulPrecision
-        : Math.round(currPage?.height ?? 0)
+      return unitUtils.round(currPage?.physicalHeight ?? 0, this.currentPageUnit)
     },
-    currentPageUnit(): number {
-      return this.unitOptions.indexOf(this.getPage(pageUtils.currFocusPageIndex)?.unit ?? 'px')
+    currentPageUnit(): string {
+      return this.getPage(pageUtils.currFocusPageIndex)?.unit ?? 'px'
     },
     aspectRatio(): number {
       return (this.getPage(pageUtils.currFocusPageIndex)?.width ?? 1) / this.getPage(pageUtils.currFocusPageIndex)?.height ?? 1
@@ -233,9 +223,6 @@ export default Vue.extend({
     },
     isLayoutReady(): boolean {
       return this.formatList.length !== 0
-    },
-    mulPrecision(): number {
-      return this.selectedUnit === 0 ? 1 : 1e3
     }
   },
   methods: {
@@ -255,7 +242,7 @@ export default Vue.extend({
     getSelectedFormat(): ILayout | undefined {
       if (this.selectedFormat === 'custom') {
         if (!this.isCustomValid) return undefined
-        return { id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.unitOptions[this.selectedUnit] }
+        return { id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.selectedUnit }
       } else if (this.selectedFormat.startsWith('recent')) {
         const [type, index] = this.selectedFormat.split('-')
         const format = this.recentlyUsed[parseInt(index)]
@@ -281,61 +268,54 @@ export default Vue.extend({
     makeFormatDescription(format: ILayout): string {
       return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description} ${format.unit ?? 'px'}`
     },
-    transSize(size: number) {
-      return this.mulUnits[this.selectedUnit].map((mulTransUnit, idx) => {
-        const mulPrecision = idx === 0 ? 1 : 1e3
-        return Math.round(size * mulTransUnit * mulPrecision) / mulPrecision
-      })
-    },
     handleCurrFocusPageIndexChange() {
       this.selectedUnit = this.currentPageUnit
       this.pageWidth = this.currentPageWidth
       this.pageHeight = this.currentPageHeight
-      this.pageTransWidths = this.transSize(this.pageWidth)
-      this.pageTransHeights = this.transSize(this.pageHeight)
+      this.pageTransWidths = unitUtils.convertAll(this.pageWidth, this.selectedUnit)
+      this.pageTransHeights = unitUtils.convertAll(this.pageHeight, this.selectedUnit)
     },
     setPageWidth(event: Event) {
       const value = (event.target as HTMLInputElement).value
       this.pageWidth = typeof value === 'string' ? parseFloat(value) : value
-      this.pageWidth = Math.floor(this.pageWidth * this.mulPrecision) / this.mulPrecision
-      this.pageTransWidths = this.transSize(this.pageWidth)
+      this.pageWidth = unitUtils.round(this.pageWidth, this.selectedUnit)
+      this.pageTransWidths = unitUtils.convertAll(this.pageWidth, this.selectedUnit)
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
           this.pageHeight = NaN
         } else {
-          this.pageHeight = Math.round(parseFloat(value) / this.aspectRatio * this.mulPrecision) / this.mulPrecision
-          this.pageTransHeights = this.transSize(this.pageHeight)
+          this.pageHeight = unitUtils.round(parseFloat(value) / this.aspectRatio, this.selectedUnit)
+          this.pageTransHeights = unitUtils.convertAll(this.pageHeight, this.selectedUnit)
         }
       }
     },
     setPageHeight(event: Event) {
       const value = (event.target as HTMLInputElement).value
       this.pageHeight = typeof value === 'string' ? parseFloat(value) : value
-      this.pageHeight = Math.floor(this.pageHeight * this.mulPrecision) / this.mulPrecision
-      this.pageTransHeights = this.transSize(this.pageHeight)
+      this.pageHeight = unitUtils.round(this.pageHeight, this.selectedUnit)
+      this.pageTransHeights = unitUtils.convertAll(this.pageHeight, this.selectedUnit)
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
           this.pageHeight = NaN
         } else {
-          this.pageWidth = Math.round(parseFloat(value) * this.aspectRatio * this.mulPrecision) / this.mulPrecision
-          this.pageTransWidths = this.transSize(this.pageWidth)
+          this.pageWidth = unitUtils.round(parseFloat(value) * this.aspectRatio, this.selectedUnit)
+          this.pageTransWidths = unitUtils.convertAll(this.pageWidth, this.selectedUnit)
         }
       }
     },
     selectFormat(key: string) {
       this.selectedFormat = key
     },
-    selectUnit(evt: Event, key: number) {
+    selectUnit(evt: Event, unit: string) {
       evt.stopPropagation()
       this.selectedFormat = 'custom'
       this.showUnitOptions = false
-      if (this.selectedUnit === key) return
-      this.pageWidth = this.pageTransWidths[key]
-      this.pageHeight = this.pageTransHeights[key]
-      this.selectedUnit = key
-      this.$emit('selectUnit', key)
+      if (this.selectedUnit === unit) return
+      this.pageWidth = this.pageTransWidths[unit]
+      this.pageHeight = this.pageTransHeights[unit]
+      this.selectedUnit = unit
     },
     fetchLayouts() {
       this.isLayoutReady = false
@@ -375,12 +355,9 @@ export default Vue.extend({
       let pxWidth = format.width
       let pxHeight = format.height
       if (format.unit !== 'px') {
-        const idxUnit = this.unitOptions.indexOf(format.unit)
-        pxWidth *= this.mulUnits[idxUnit][0]
-        pxHeight *= this.mulUnits[idxUnit][0]
+        pxWidth = unitUtils.convert(pxWidth, format.unit, 'px')
+        pxHeight = unitUtils.convert(pxHeight, format.unit, 'px')
       }
-      pxWidth = Math.round(pxWidth)
-      pxHeight = Math.round(pxHeight)
 
       // resize page with px size
       this.resizePage({
@@ -447,12 +424,11 @@ export default Vue.extend({
         const { width, height, unit } = getPageSize(pageIndex)
         const newWidth = Math.round(format.width || width * (format.height / height))
         const newHeight = Math.round(format.height || height * (format.width / width))
-        const mulPrecision = unit === 'px' ? 1 : 1e3
         const newSize = {
           width: newWidth,
           height: newHeight,
-          physicalWidth: Math.round(newWidth * this.mulUnits[0][this.unitOptions.indexOf(unit)] * mulPrecision) / mulPrecision,
-          physicalHeight: Math.round(newHeight * this.mulUnits[0][this.unitOptions.indexOf(unit)] * mulPrecision) / mulPrecision,
+          physicalWidth: unitUtils.convert(newWidth, 'px', unit),
+          physicalHeight: unitUtils.convert(newHeight, 'px', unit),
           unit
         }
         resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
