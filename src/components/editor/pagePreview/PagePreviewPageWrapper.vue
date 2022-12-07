@@ -72,8 +72,8 @@ import StepsUtils from '@/utils/stepsUtils'
 import editorUtils from '@/utils/editorUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
 import generalUtils from '@/utils/generalUtils'
-import { useI18n } from 'vue-i18n'
 import i18n from '@/i18n'
+import PageContent from '@/components/editor/page/PageContent.vue'
 
 export default defineComponent({
   props: {
@@ -102,7 +102,7 @@ export default defineComponent({
     }
   },
   components: {
-    PageContent: () => import('@/components/editor/page/PageContent.vue'),
+    PageContent,
     LazyLoad
   },
   data() {

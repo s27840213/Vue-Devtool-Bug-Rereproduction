@@ -29,7 +29,6 @@ import networkUtils from './networkUtils'
 import _ from 'lodash'
 import editorUtils from './editorUtils'
 import designApis from '@/apis/design'
-import { useI18n } from 'vue-i18n'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {

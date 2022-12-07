@@ -1,7 +1,6 @@
 import i18n from '@/i18n'
 import { EventEmitter } from 'events'
 import Vue from 'vue'
-import { useI18n } from 'vue-i18n'
 
 class NetworkUtils {
   event: any

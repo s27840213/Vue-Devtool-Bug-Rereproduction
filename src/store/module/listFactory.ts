@@ -5,7 +5,6 @@ import { captureException } from '@sentry/browser'
 import localeUtils from '@/utils/localeUtils'
 import store from '@/store'
 import i18n from '@/i18n'
-import { useI18n } from 'vue-i18n'
 
 export default function (this: any) {
   const getDefaultState = (): IListModuleState => ({

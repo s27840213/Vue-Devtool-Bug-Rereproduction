@@ -57,7 +57,7 @@ export default defineComponent({
       required: true
     },
     vendor: {
-      type: String as PropType<'a' | 'b' | 'c'>,
+      type: String as PropType<'default' | 'active' | 'hover' | 'disabled'>,
       required: true
     },
     inFilePanel: {
