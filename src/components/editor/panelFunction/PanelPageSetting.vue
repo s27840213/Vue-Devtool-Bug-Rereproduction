@@ -260,13 +260,6 @@ export default Vue.extend({
     RadioBtn,
     PageSizeSelector
   },
-  mounted() {
-    this.pageWidth = this.currentPageWidth
-    this.pageHeight = this.currentPageHeight
-    this.currentPageBleeds.forEach((val: number, idx: number) => {
-      this.setBleed(idx, { value: val, noRecord: true })
-    })
-  },
   data() {
     return {
       pageWidth: NaN,
@@ -380,6 +373,11 @@ export default Vue.extend({
     },
     currFocusPageIndex: function () {
       this.currentPageBleeds.forEach((val: number, idx: number) => {
+        this.setBleed(idx, { value: val, noRecord: true })
+      })
+    },
+    currentPageBleeds: function (newVal) {
+      newVal.forEach((val: number, idx: number) => {
         this.setBleed(idx, { value: val, noRecord: true })
       })
     },
