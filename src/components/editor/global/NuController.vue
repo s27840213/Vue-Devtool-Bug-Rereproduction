@@ -2060,7 +2060,10 @@ export default Vue.extend({
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
     },
-    onPress(event: AnyTouchEvent) {
+    onPress() {
+      if (this.contentEditable) {
+        return
+      }
       if (!this.isControllerShown) {
         GroupUtils.deselect()
         GroupUtils.select(this.pageIndex, [this.layerIndex])
