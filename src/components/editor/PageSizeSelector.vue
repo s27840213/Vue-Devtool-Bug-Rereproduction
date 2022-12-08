@@ -167,11 +167,11 @@ export default Vue.extend({
     },
     currentPageWidth(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return unitUtils.round(currPage?.physicalWidth ?? 0, this.currentPageUnit)
+      return unitUtils.round(currPage?.physicalWidth ?? currPage?.width ?? 0, this.currentPageUnit)
     },
     currentPageHeight(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return unitUtils.round(currPage?.physicalHeight ?? 0, this.currentPageUnit)
+      return unitUtils.round(currPage?.physicalHeight ?? currPage?.height ?? 0, this.currentPageUnit)
     },
     currentPageUnit(): string {
       return this.getPage(pageUtils.currFocusPageIndex)?.unit ?? 'px'
@@ -245,10 +245,12 @@ export default Vue.extend({
       } else if (this.selectedFormat.startsWith('recent')) {
         const [type, index] = this.selectedFormat.split('-')
         const format = this.recentlyUsed[parseInt(index)]
+        this.pageSizes = unitUtils.convertAllSize(format.width, format.height, format.unit)
         return format
       } else if (this.selectedFormat.startsWith('preset')) {
         const [type, index] = this.selectedFormat.split('-')
         const format = this.formatList[parseInt(index)]
+        this.pageSizes = unitUtils.convertAllSize(format.width, format.height, format.unit)
         return format
       } else {
         return undefined
@@ -354,19 +356,48 @@ export default Vue.extend({
         const { width, height } = unitUtils.convertSize(this.pageWidth, this.pageHeight, format.unit, 'px')
         pxWidth = width
         pxHeight = height
+        if (this.groupType === 1) {
+          const aspectRatio = format.width / format.height
+          pxWidth = 1000
+          pxHeight = Math.round(1000 / aspectRatio)
+        }
       }
 
-      // resize page with px size
-      this.resizePage({
-        width: pxWidth,
-        height: pxHeight,
-        physicalWidth: format.width,
-        physicalHeight: format.height,
-        unit: format.unit
-      })
       if (this.groupType === 1) {
         // resize電商詳情頁時 其他頁面要依width做resize
-        this.resizeOtherPages([pageUtils.currFocusPageIndex], { width: pxWidth })
+        const { pagesLength, getPageSize } = this
+        const resizingPage = pageUtils.getPage(this.currFocusPageIndex)
+        const ratio = unitUtils.convertSize(format.width, format.height, format.unit, resizingPage.unit, false).width / resizingPage.physicalWidth
+        for (let pageIndex = 0; pageIndex < pagesLength; pageIndex++) {
+          if (pageIndex === pageUtils.currFocusPageIndex) continue
+          const { width, height, physicalWidth, physicalHeight, unit } = getPageSize(pageIndex)
+          const newWidth = pxWidth
+          const newHeight = height * (pxWidth / width)
+          const newPhysicalSizeConv = unitUtils.convertSize(newWidth, newHeight, 'px', unit, false)
+          let newPhysicalWidth = physicalWidth ? physicalWidth * ratio : newPhysicalSizeConv.width
+          let newPhysicalHeight = physicalHeight ? physicalHeight * ratio : newPhysicalSizeConv.height
+          if (unit === 'px') {
+            newPhysicalWidth = newWidth
+            newPhysicalHeight = newHeight
+          }
+          const newSize = {
+            width: newWidth,
+            height: newHeight,
+            physicalWidth: unitUtils.round(newPhysicalWidth, unit),
+            physicalHeight: unitUtils.round(newPhysicalHeight, unit),
+            unit
+          }
+          resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
+        }
+
+        // resize page with px size
+        this.resizePage({
+          width: pxWidth,
+          height: pxHeight,
+          physicalWidth: format.width,
+          physicalHeight: format.height,
+          unit: format.unit
+        })
       }
 
       // update recently used size
@@ -413,24 +444,6 @@ export default Vue.extend({
     }, 2000, { trailing: false }),
     resizePage(format: { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string}) {
       resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
-    },
-    resizeOtherPages(excludes: number[] = [], format: { [key: string]: number }) {
-      const { pagesLength, getPageSize } = this
-      for (let pageIndex = 0; pageIndex < pagesLength; pageIndex++) {
-        if (excludes.includes(pageIndex)) continue
-        const { width, height, unit } = getPageSize(pageIndex)
-        const newWidth = Math.round(format.width || width * (format.height / height))
-        const newHeight = Math.round(format.height || height * (format.width / width))
-        const newPhysicalSize = unitUtils.convertSize(this.pageWidth, this.pageHeight, 'px', unit)
-        const newSize = {
-          width: newWidth,
-          height: newHeight,
-          physicalWidth: newPhysicalSize.width,
-          physicalHeight: newPhysicalSize.height,
-          unit
-        }
-        resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
-      }
     }
   }
 })

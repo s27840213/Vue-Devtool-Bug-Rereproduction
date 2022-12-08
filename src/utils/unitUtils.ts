@@ -39,9 +39,9 @@ class UnitUtils {
     return Object.fromEntries(mulConvUnit(dpi)[IDX_UNITS[sourceUnit]].map((mulConvUnit, idxUnit) => [STR_UNITS[idxUnit], this.round(value * mulConvUnit, STR_UNITS[idxUnit])]))
   }
 
-  convertSize(width: number, height: number, sourceUnit: string, targetUnit: string) {
+  convertSize(width: number, height: number, sourceUnit: string, targetUnit: string, round = true) {
     if (sourceUnit === targetUnit) return { width, height }
-    if (sourceUnit !== 'px' && targetUnit !== 'px') return { width: this.convert(width, sourceUnit, targetUnit), height: this.convert(height, sourceUnit, targetUnit) }
+    if (sourceUnit !== 'px' && targetUnit !== 'px') return { width: this.convert(width, sourceUnit, targetUnit, 96, round), height: this.convert(height, sourceUnit, targetUnit, 96, round) }
     const aspectRatio = width / height
     let longEdge = Math.max(width, height)
 
@@ -69,14 +69,15 @@ class UnitUtils {
     }
 
     if (width > height) {
-      width = this.round(longEdge, targetUnit)
-      height = this.round(longEdge / aspectRatio, targetUnit)
+      width = longEdge
+      height = longEdge / aspectRatio
     } else {
-      height = this.round(longEdge, targetUnit)
-      width = this.round(longEdge * aspectRatio, targetUnit)
+      height = longEdge
+      width = longEdge * aspectRatio
     }
 
-    return { width, height }
+    if (!round) return { width, height }
+    return { width: this.round(width, targetUnit), height: this.round(height, targetUnit) }
   }
 
   convertAllSize(width: number, height: number, sourceUnit: string): IMapSize {

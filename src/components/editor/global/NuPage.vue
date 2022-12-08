@@ -616,8 +616,12 @@ export default Vue.extend({
       if (isShownScrollbar === this.isShownScrollBar) {
         const multiplier = isShownScrollbar ? 2 : 1
         const yDiff = (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
+        const newHeight = Math.max(Math.trunc(this.initialPageHeight + yDiff), 20)
         pageUtils.updatePageProps({
-          height: Math.max(Math.trunc(this.initialPageHeight + yDiff), 20)
+          height: newHeight,
+          physicalWidth: Math.round(this.config.width),
+          physicalHeight: newHeight,
+          unit: 'px'
         })
       } else {
         this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
@@ -629,8 +633,12 @@ export default Vue.extend({
     pageResizeEnd(e: PointerEvent) {
       this.initialPageHeight = (this.config as IPage).height
       this.isResizingPage = false
+      const newHeight = Math.round(this.config.height)
       pageUtils.updatePageProps({
-        height: Math.round(this.config.height)
+        height: newHeight,
+        physicalWidth: Math.round(this.config.width),
+        physicalHeight: newHeight,
+        unit: 'px'
       })
       StepsUtils.record()
       this.$nextTick(() => {
