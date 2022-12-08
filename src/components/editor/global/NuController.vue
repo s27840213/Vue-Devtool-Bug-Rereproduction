@@ -2016,7 +2016,12 @@ export default Vue.extend({
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
     },
-    onPress(event: AnyTouchEvent) {
+    onPress() {
+      // 'long-press' when contentEditable has default behaviors on iOS.
+      // To avoid breaking such behaviors, don't run handler in such state.
+      if (this.contentEditable) {
+        return
+      }
       if (!this.isActive) {
         GroupUtils.deselect()
         GroupUtils.select(this.pageIndex, [this.layerIndex])
