@@ -101,7 +101,7 @@ import generalUtils from '@/utils/generalUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import editorUtils from '@/utils/editorUtils'
-import unitUtils, { STR_UNITS, IMapUnit } from '@/utils/unitUtils'
+import unitUtils, { STR_UNITS, IMapSize } from '@/utils/unitUtils'
 import { throttle } from 'lodash'
 
 export default Vue.extend({
@@ -127,8 +127,7 @@ export default Vue.extend({
       selectedFormat: '',
       pageWidth: NaN,
       pageHeight: NaN,
-      pageTransWidths: {} as IMapUnit,
-      pageTransHeights: {} as IMapUnit,
+      pageSizes: {} as IMapSize,
       isLocked: true,
       unitOptions: STR_UNITS,
       selectedUnit: '',
@@ -272,38 +271,35 @@ export default Vue.extend({
       this.selectedUnit = this.currentPageUnit
       this.pageWidth = this.currentPageWidth
       this.pageHeight = this.currentPageHeight
-      this.pageTransWidths = unitUtils.convertAll(this.pageWidth, this.selectedUnit)
-      this.pageTransHeights = unitUtils.convertAll(this.pageHeight, this.selectedUnit)
+      this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     },
     setPageWidth(event: Event) {
       const value = (event.target as HTMLInputElement).value
       this.pageWidth = typeof value === 'string' ? parseFloat(value) : value
       this.pageWidth = unitUtils.round(this.pageWidth, this.selectedUnit)
-      this.pageTransWidths = unitUtils.convertAll(this.pageWidth, this.selectedUnit)
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
           this.pageHeight = NaN
         } else {
           this.pageHeight = unitUtils.round(parseFloat(value) / this.aspectRatio, this.selectedUnit)
-          this.pageTransHeights = unitUtils.convertAll(this.pageHeight, this.selectedUnit)
         }
       }
+      this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     },
     setPageHeight(event: Event) {
       const value = (event.target as HTMLInputElement).value
       this.pageHeight = typeof value === 'string' ? parseFloat(value) : value
       this.pageHeight = unitUtils.round(this.pageHeight, this.selectedUnit)
-      this.pageTransHeights = unitUtils.convertAll(this.pageHeight, this.selectedUnit)
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
           this.pageHeight = NaN
         } else {
           this.pageWidth = unitUtils.round(parseFloat(value) * this.aspectRatio, this.selectedUnit)
-          this.pageTransWidths = unitUtils.convertAll(this.pageWidth, this.selectedUnit)
         }
       }
+      this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     },
     selectFormat(key: string) {
       this.selectedFormat = key
@@ -313,8 +309,8 @@ export default Vue.extend({
       this.selectedFormat = 'custom'
       this.showUnitOptions = false
       if (this.selectedUnit === unit) return
-      this.pageWidth = this.pageTransWidths[unit]
-      this.pageHeight = this.pageTransHeights[unit]
+      this.pageWidth = this.pageSizes[unit].width
+      this.pageHeight = this.pageSizes[unit].height
       this.selectedUnit = unit
     },
     fetchLayouts() {
@@ -355,8 +351,9 @@ export default Vue.extend({
       let pxWidth = format.width
       let pxHeight = format.height
       if (format.unit !== 'px') {
-        pxWidth = unitUtils.convert(pxWidth, format.unit, 'px')
-        pxHeight = unitUtils.convert(pxHeight, format.unit, 'px')
+        const { width, height } = unitUtils.convertSize(this.pageWidth, this.pageHeight, format.unit, 'px')
+        pxWidth = width
+        pxHeight = height
       }
 
       // resize page with px size
@@ -424,11 +421,12 @@ export default Vue.extend({
         const { width, height, unit } = getPageSize(pageIndex)
         const newWidth = Math.round(format.width || width * (format.height / height))
         const newHeight = Math.round(format.height || height * (format.width / width))
+        const newPhysicalSize = unitUtils.convertSize(this.pageWidth, this.pageHeight, 'px', unit)
         const newSize = {
           width: newWidth,
           height: newHeight,
-          physicalWidth: unitUtils.convert(newWidth, 'px', unit),
-          physicalHeight: unitUtils.convert(newHeight, 'px', unit),
+          physicalWidth: newPhysicalSize.width,
+          physicalHeight: newPhysicalSize.height,
           unit
         }
         resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
