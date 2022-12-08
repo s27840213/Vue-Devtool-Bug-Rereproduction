@@ -2061,6 +2061,8 @@ export default Vue.extend({
       })
     },
     onPress() {
+      // 'long-press' when contentEditable has default behaviors on iOS.
+      // To avoid breaking such behaviors, don't run handler in such state.
       if (this.contentEditable) {
         return
       }
