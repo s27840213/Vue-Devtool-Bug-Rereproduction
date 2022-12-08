@@ -102,17 +102,38 @@ const routes: Array<RouteConfig> = [
       try {
         const urlParams = new URLSearchParams(window.location.search)
         const url = urlParams.get('url')
+        const teamId = urlParams.get('team_id')
+        const token = urlParams.get('token')
 
-        if (url) {
+        console.log(generalUtils.deepCopy(urlParams))
+        console.log(url)
+        console.log(teamId)
+        console.log(token)
+
+        if (token && teamId && url) {
+          // for new version
+          // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET
+          store.commit('user/SET_STATE', { token, teamId })
+          const response = await (await fetch(`https://${url}`)).json()
+          await assetUtils.addTemplate(response, { pageIndex: 0 })
+          store.commit('file/SET_setLayersDone')
+          store.commit('user/SET_STATE', { userId: 'backendRendering' })
+        } else if (url) {
+          // for old version
           // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET
           const hasToken = url.indexOf('token=') !== -1
           let tokenKey = ''
           let src = url
           if (hasToken) {
             tokenKey = url.match('&token') ? '&token=' : '?token='
-            src = url.substring(0, hasToken ? url.indexOf(tokenKey) : undefined)
-            const token = url.substring((src + tokenKey).length, url.indexOf('&team_id='))
-            const teamId = url.substr((src + tokenKey + token + '&team_id=').length)
+            src = url.substring(0, url.indexOf(tokenKey))
+            const querys: { [index: string]: string } = {}
+            url.split('?')[1].split('&').forEach((query: string) => {
+              const [key, val] = query.split('=')
+              querys[key] = val
+            })
+            const token = querys.token
+            const teamId = querys.team_id
             store.commit('user/SET_STATE', { token, teamId })
           }
           const response = await (await fetch(`https://${src}`)).json()
