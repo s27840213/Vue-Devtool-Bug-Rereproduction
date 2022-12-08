@@ -94,7 +94,9 @@ export default Vue.extend({
     },
     handleAdjust(adjust: any) {
       const { types } = this.currSelectedInfo
-      const { index, type } = this.currSubSelectedInfo
+      // const { index, type } = this.currSubSelectedInfo
+      const { type } = this.currSubSelectedInfo
+      const { subLayerIdx: index } = layerUtils
       if (index === -1 && backgroundUtils.inBgSettingMode) {
         backgroundUtils.handleChangeBgAdjust(adjust)
         return

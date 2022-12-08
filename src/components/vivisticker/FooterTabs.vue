@@ -481,16 +481,12 @@ export default Vue.extend({
           const { pageIndex, layerIndex, subLayerIdx = 0 } = layerUtils
           vivistickerUtils.getIosImg()
             .then(async (images: Array<string>) => {
-              const styles = await imageUtils
+              const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
                 .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[subLayerIdx], imageUtils.getSrc({
                   type: 'ios',
                   assetId: images[0],
                   userId: ''
                 }))
-              return { styles, images }
-            })
-            .then((data) => {
-              const { styles: { imgX, imgY, imgWidth, imgHeight }, images } = data
               frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
                 imgWidth,
                 imgHeight,
@@ -502,6 +498,7 @@ export default Vue.extend({
                 assetId: images[0],
                 userId: ''
               })
+              stepsUtils.record()
             })
           break
         }

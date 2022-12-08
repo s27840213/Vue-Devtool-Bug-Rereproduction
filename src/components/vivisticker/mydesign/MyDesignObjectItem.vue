@@ -54,7 +54,11 @@ export default Vue.extend({
         return
       }
       if (this.item.assetInfo.isFrame) {
-        console.log('frame cannot be copied')
+        // console.log('frame cannot be copied')
+        vivistickerUtils.getAsset(`mydesign-${this.item.type}`, this.item.id, 'config').then(data => {
+          const pages = generalUtils.deepCopy(data.pages)
+          vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0]))
+        })
       } else {
         vivistickerUtils.getAsset(`mydesign-${this.item.type}`, this.item.id, 'config').then(data => {
           const pages = generalUtils.deepCopy(data.pages)

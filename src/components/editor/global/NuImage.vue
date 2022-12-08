@@ -356,8 +356,8 @@ export default Vue.extend({
       let renderH = imgHeight
       const primaryLayer = this.config.primaryLayer || [LayerType.group, LayerType.frame].includes(layerUtils.getLayer(this.pageIndex, this.layerIndex).type as LayerType)
       const isPrimaryFrameImg = primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.clips[0].isFrameImg
-      if (!this.forRender && (this.config.parentLayerStyles || primaryLayer) && !isPrimaryFrameImg) {
-        const { scale } = this.config.parentLayerStyles || primaryLayer?.styles
+      if (!this.forRender && (this.config.parentLayerStyles || primaryLayer) && !isPrimaryFrameImg && srcObj.type !== 'ios') {
+        const { scale = 1 } = this.config.parentLayerStyles || primaryLayer?.styles || {}
         renderW *= scale
         renderH *= scale
       }
