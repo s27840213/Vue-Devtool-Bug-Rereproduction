@@ -5,11 +5,11 @@
     draggable="false")
     div(v-show="!isColorBackground")
       div(v-if="isAdjustImage" :style="frameStyles")
-        nu-adjust-image(:src="src"
+        nu-adjust-image(:src="finalSrc"
           @error="onError"
           :styles="adjustImgStyles"
           :contentScaleRatio="contentScaleRatio")
-      img(v-else-if="src" :src="src"
+      img(v-else-if="src" :src="finalSrc"
         draggable="false"
         :style="imgStyles()"
         class="body"
@@ -123,11 +123,17 @@ export default Vue.extend({
     configStyles(): IImageStyle {
       return this.image.config.styles
     },
+    finalSrc(): string {
+      if (this.$route.name === 'Preview') {
+        return ImageUtils.appendCompQueryForVivipic(this.src)
+      }
+      return this.src
+    },
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
       return !srcObj || srcObj.assetId === ''
     },
-    getImgDimension(): number {
+    getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
       return ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100))
     },

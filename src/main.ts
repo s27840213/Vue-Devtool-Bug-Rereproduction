@@ -20,6 +20,8 @@ import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import generalUtils from './utils/generalUtils'
 import imageShadowUtils from './utils/imageShadowUtils'
+import AnyTouch from 'any-touch'
+
 window.onerror = function (msg, url, line) {
   const message = [
     'Message: ' + msg,
@@ -136,12 +138,27 @@ Vue.directive('header-border', {
   }
 })
 
+// How to pass variable to unbind: https://github.com/vuejs/vue/issues/6385#issuecomment-323141918
+const anyTouchWeakMap = new WeakMap()
+Vue.directive('touch', {
+  /**
+   * Useage: div(v-touch @tap="..." @swipeleft="...")
+   * If you want to prevetDefault, use: div(v-touch="true" ...)
+   */
+  bind(el, binding) {
+    anyTouchWeakMap.set(el, new AnyTouch(el, { preventDefault: Boolean(binding.value) }))
+  },
+  unbind(el){
+    (anyTouchWeakMap.get(el) as AnyTouch).destroy()
+    anyTouchWeakMap.delete(el)
+  }
+})
 Vue.directive('press', longpress)
 
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
 const req = require.context('@/assets/icon', true, /\.svg$/)
 
-if (process.env.NODE_ENV !== 'production') {
+if (window.location.host !== 'vivipic.com') {
   svgIconUtils.setIcons(requireAll(req).map((context: any) => {
     return context.default.id
   }))

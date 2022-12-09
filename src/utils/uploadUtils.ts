@@ -1517,7 +1517,13 @@ class UploadUtils {
         Url: ${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
 
       // this.resetControlStates(pagesJSON)
-      const blob = new Blob([JSON.stringify(this.getPageJson(json))], { type: 'application/json' })
+      const pagesJSON = this.getPageJson(json)
+      const resultJSON = {
+        pages: pagesJSON,
+        groupId: store.state.groupId,
+        groupType: store.state.groupType
+      }
+      const blob = new Blob([JSON.stringify(resultJSON)], { type: 'application/json' })
       if (formData.has('file')) {
         formData.set('file', blob)
       } else {
