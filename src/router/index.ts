@@ -111,8 +111,11 @@ const routes: Array<RouteConfig> = [
             tokenKey = url.match('&token') ? '&token=' : '?token='
             src = url.substring(0, hasToken ? url.indexOf(tokenKey) : undefined)
             const token = url.substring((src + tokenKey).length, url.indexOf('&team_id='))
-            const teamId = url.substr((src + tokenKey + token + '&team_id=').length)
+            const teamId = url.substring((src + tokenKey + token + '&team_id=').length, url.indexOf('&dpi='))
             store.commit('user/SET_STATE', { token, teamId })
+          }
+          if (url.indexOf('dpi=') !== -1) {
+            store.commit('user/SET_STATE', { dpi: +url.substring(url.indexOf('dpi=') + 'dpi='.length) })
           }
           const response = await (await fetch(`https://${src}`)).json()
           await assetUtils.addTemplate(response, { pageIndex: 0 })
@@ -311,7 +314,8 @@ router.beforeEach(async (to, from, next) => {
     store.commit('user/SET_STATE', {
       verUni: json.ver_uni,
       verApi: json.ver_api,
-      imgSizeMap: json.image_size_map
+      imgSizeMap: json.image_size_map,
+      imgSizeMapExtra: json.image_size_map_extra
     })
     let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
 

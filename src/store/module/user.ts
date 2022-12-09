@@ -35,6 +35,7 @@ export interface IUserModule {
   verUni: string,
   verApi: string,
   imgSizeMap: Array<{ [key: string]: string | number }>,
+  imgSizeMapExtra: Array<{ [key: string]: string | number }>,
   avatar: {
     prev: string,
     prev_2x: string,
@@ -43,7 +44,8 @@ export interface IUserModule {
   viewGuide: number,
   isUpdateDesignOpen: boolean,
   updateDesignId: string,
-  updateDesignType: string
+  updateDesignType: string,
+  dpi?: number
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -82,6 +84,7 @@ const getDefaultState = (): IUserModule => ({
   verUni: '',
   verApi: '',
   imgSizeMap: [],
+  imgSizeMapExtra: [],
   avatar: {
     prev: '',
     prev_2x: '',
@@ -90,7 +93,8 @@ const getDefaultState = (): IUserModule => ({
   viewGuide: +localStorage.guest_view_guide || 0,
   isUpdateDesignOpen: false,
   updateDesignId: '',
-  updateDesignType: ''
+  updateDesignType: '',
+  dpi: -1
 })
 
 const state = getDefaultState()

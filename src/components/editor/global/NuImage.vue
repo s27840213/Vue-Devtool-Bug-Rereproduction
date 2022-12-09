@@ -292,7 +292,7 @@ export default Vue.extend({
       isShowPagePanel: 'page/getShowPagePanel',
       isProcessing: 'shadow/isProcessing'
     }),
-    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'dpi']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     canvas: {
       get(): HTMLCanvasElement | undefined {
@@ -328,7 +328,7 @@ export default Vue.extend({
       })()
       return isCurrShadowEffectApplied && isHandling
     },
-    getImgDimension(): number {
+    getImgDimension(): number | string {
       const { srcObj } = this.config
       const { imgWidth, imgHeight } = this.config.styles
       let renderW = imgWidth
@@ -340,9 +340,14 @@ export default Vue.extend({
         renderW *= scale
         renderH *= scale
       }
+      const { dpi } = this
+      if (dpi !== -1) {
+        renderW *= dpi / 96
+        renderH *= dpi / 96
+      }
       return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
     },
-    parentLayerDimension(): number {
+    parentLayerDimension(): number | string {
       const { width, height } = this.config.parentLayerStyles || {}
       const { imgWidth, imgHeight } = this.config.styles
       const imgRatio = imgWidth / imgHeight
@@ -515,7 +520,7 @@ export default Vue.extend({
         })
       }
     },
-    async preLoadImg(preLoadType: 'pre' | 'next', val: number) {
+    async preLoadImg(preLoadType: 'pre' | 'next', val: number | string) {
       return new Promise<void>((resolve, reject) => {
         const img = new Image()
         img.onload = () => resolve()
@@ -1025,7 +1030,7 @@ export default Vue.extend({
         transform: `translate(${xFactor * imgX * scale}px, ${yFactor * imgY * scale}px) scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
       }
     },
-    getPreviewSize(): number {
+    getPreviewSize(): number | string {
       const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
       return ImageUtils
         .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)

@@ -127,7 +127,7 @@ export default Vue.extend({
       const { srcObj } = this.image.config
       return !srcObj || srcObj.assetId === ''
     },
-    getImgDimension(): number {
+    getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
       return ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100))
     },
