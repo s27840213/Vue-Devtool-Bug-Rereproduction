@@ -1089,7 +1089,11 @@ export default Vue.extend({
       if (!this.shadow() || !this.shadow().srcObj) {
         return ''
       }
-      return ImageUtils.getSrc(this.shadow().srcObj, ImageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension))
+      const src = ImageUtils.getSrc(this.shadow().srcObj, ImageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension))
+      if (this.$route.name === 'Preview') {
+        return ImageUtils.appendCompQueryForVivipic(src)
+      }
+      return src
     },
     id(): ILayerIdentifier {
       return {
