@@ -147,7 +147,7 @@
         svg-icon(class="page-resizer__resizer-bar"
           :iconName="'move-vertical'" :iconWidth="`${15}px`" :iconColor="'white'")
         div(class="page-resizer__resizer-bar")
-        div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{!isResizingPage ? '拖曳調整畫布高度' : `${Math.trunc(config.height)}px`}}
+        div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{resizerHint}}
       snap-line-area(
         :config="config"
         :pageIndex="pageIndex"
@@ -190,6 +190,8 @@ import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
+import { round } from 'lodash'
+import unitUtils from '@/utils/unitUtils'
 
 export default Vue.extend({
   components: {
@@ -227,7 +229,8 @@ export default Vue.extend({
       },
       generalUtils,
       pageUtils,
-      currDraggingIndex: -1
+      currDraggingIndex: -1,
+      displayDPI: 96
     }
   },
   props: {
@@ -407,6 +410,9 @@ export default Vue.extend({
     },
     selectedLayerCount(): number {
       return this.currSelectedInfo.layers.length
+    },
+    resizerHint(): string {
+      return !this.isResizingPage ? '拖曳調整畫布高度' : `${round(this.config.physicalHeight, 3)}${this.config.unit}`
     }
   },
   methods: {
@@ -604,6 +610,7 @@ export default Vue.extend({
       this.isResizingPage = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
+      this.displayDPI = this.config.height / unitUtils.convert(this.config.physicalHeight, this.config.unit, 'in')
       eventUtils.addPointerEvent('pointermove', this.pageResizing)
       this.overflowContainer.addEventListener('scroll', this.scrollUpdate, { capture: true })
       eventUtils.addPointerEvent('pointerup', this.pageResizeEnd)
@@ -617,11 +624,10 @@ export default Vue.extend({
         const multiplier = isShownScrollbar ? 2 : 1
         const yDiff = (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
         const newHeight = Math.max(Math.trunc(this.initialPageHeight + yDiff), 20)
+        const newPhysicalHeight = unitUtils.convert(newHeight / this.displayDPI, 'in', this.config.unit)
         pageUtils.updatePageProps({
           height: newHeight,
-          physicalWidth: Math.round(this.config.width),
-          physicalHeight: newHeight,
-          unit: 'px'
+          physicalHeight: newPhysicalHeight
         })
       } else {
         this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
@@ -634,11 +640,10 @@ export default Vue.extend({
       this.initialPageHeight = (this.config as IPage).height
       this.isResizingPage = false
       const newHeight = Math.round(this.config.height)
+      const newPhysicalHeight = unitUtils.convert(newHeight / this.displayDPI, 'in', this.config.unit)
       pageUtils.updatePageProps({
         height: newHeight,
-        physicalWidth: Math.round(this.config.width),
-        physicalHeight: newHeight,
-        unit: 'px'
+        physicalHeight: newPhysicalHeight
       })
       StepsUtils.record()
       this.$nextTick(() => {
