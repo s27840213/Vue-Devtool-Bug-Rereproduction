@@ -356,20 +356,32 @@ export default Vue.extend({
         const { width, height } = unitUtils.convertSize(this.pageWidth, this.pageHeight, format.unit, 'px')
         pxWidth = width
         pxHeight = height
-        if (this.groupType === 1) {
-          const aspectRatio = format.width / format.height
-          pxWidth = 1000
-          pxHeight = Math.round(1000 / aspectRatio)
-        }
+        // if (this.groupType === 1) {
+        //   pxWidth = 1000
+        //   pxHeight = Math.round(1000 / format.width * format.height)
+        // }
       }
 
-      if (this.groupType === 1) {
+      if (this.groupType !== 1) {
+        // resize page with px size
+        this.resizePage({
+          width: pxWidth,
+          height: pxHeight,
+          physicalWidth: format.width,
+          physicalHeight: format.height,
+          unit: format.unit
+        })
+      } else {
         // resize電商詳情頁時 其他頁面要依width做resize
         const { pagesLength, getPageSize } = this
         const resizingPage = pageUtils.getPage(this.currFocusPageIndex)
         const ratio = unitUtils.convertSize(format.width, format.height, format.unit, resizingPage.unit, false).width / resizingPage.physicalWidth
+        console.log(ratio)
+
         for (let pageIndex = 0; pageIndex < pagesLength; pageIndex++) {
-          if (pageIndex === pageUtils.currFocusPageIndex) continue
+          if (pageIndex === pageUtils.currFocusPageIndex) {
+            continue
+          }
           const { width, height, physicalWidth, physicalHeight, unit } = getPageSize(pageIndex)
           const newWidth = pxWidth
           const newHeight = height * (pxWidth / width)
@@ -377,6 +389,7 @@ export default Vue.extend({
           let newPhysicalWidth = physicalWidth ? physicalWidth * ratio : newPhysicalSizeConv.width
           let newPhysicalHeight = physicalHeight ? physicalHeight * ratio : newPhysicalSizeConv.height
           if (unit === 'px') {
+            console.log(newWidth, newHeight)
             newPhysicalWidth = newWidth
             newPhysicalHeight = newHeight
           }
@@ -389,15 +402,6 @@ export default Vue.extend({
           }
           resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
         }
-
-        // resize page with px size
-        this.resizePage({
-          width: pxWidth,
-          height: pxHeight,
-          physicalWidth: format.width,
-          physicalHeight: format.height,
-          unit: format.unit
-        })
       }
 
       // update recently used size
