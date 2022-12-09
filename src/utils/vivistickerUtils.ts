@@ -9,7 +9,7 @@ import stepsUtils from './stepsUtils'
 import uploadUtils from './uploadUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
 import { ColorEventType, LayerType } from '@/store/types'
-import { IGroup, ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
 import editorUtils from './editorUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
@@ -322,6 +322,12 @@ class ViviStickerUtils {
     switch (layer.type) {
       case LayerType.group:
         for (const [subIndex, subLayer] of (layer as IGroup).layers.entries()) {
+          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
+        }
+        break
+      case LayerType.frame:
+        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
+        for (const [subIndex, subLayer] of (layer as IFrame).clips.entries()) {
           this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
         }
         break
