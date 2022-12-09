@@ -253,6 +253,7 @@ import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import unitUtils, { STR_UNITS, IMapUnit } from '@/utils/unitUtils'
+import { round } from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -262,8 +263,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      pageWidth: NaN,
-      pageHeight: NaN,
       isLocked: true,
       isPanelOpen: false,
       isGetGroup: false,
@@ -363,14 +362,6 @@ export default Vue.extend({
         groupThemes: []
       }
     },
-    currentPageWidth: function (newVal) {
-      this.pageWidth = newVal
-      this.pageHeight = this.currentPageHeight
-    },
-    currentPageHeight: function (newVal) {
-      this.pageWidth = this.currentPageWidth
-      this.pageHeight = newVal
-    },
     currFocusPageIndex: function () {
       this.currentPageBleeds.forEach((val: number, idx: number) => {
         this.setBleed(idx, { value: val, noRecord: true })
@@ -410,11 +401,11 @@ export default Vue.extend({
     },
     currentPageWidth(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return unitUtils.round(currPage?.physicalWidth ?? 0, this.currentPageUnit)
+      return round(currPage?.physicalWidth ?? currPage?.width ?? 0, 3)
     },
     currentPageHeight(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return unitUtils.round(currPage?.physicalHeight ?? 0, this.currentPageUnit)
+      return round(currPage?.physicalHeight ?? currPage?.height ?? 0, 3)
     },
     currentPageUnit(): string {
       return this.getPage(pageUtils.currFocusPageIndex)?.unit ?? 'px'
@@ -793,6 +784,8 @@ export default Vue.extend({
       text-align: center;
       & span {
         width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
       }
     }
   }

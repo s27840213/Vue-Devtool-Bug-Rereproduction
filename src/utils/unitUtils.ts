@@ -1,4 +1,4 @@
-import { round as _round } from 'lodash'
+import { round } from 'lodash'
 
 interface IMapUnit {
   [key: string]: number
@@ -26,45 +26,40 @@ function mulConvUnit(dpi = 96): number[][] {
 }
 
 class UnitUtils {
-  round(value: number, unit: string): number {
-    return _round(value, unit === 'px' ? 0 : PRECISION)
-  }
-
-  convert(value: number, sourceUnit: string, targetUnit: string, dpi = 96, round = true): number {
-    const r = value * mulConvUnit(dpi)[IDX_UNITS[sourceUnit]][IDX_UNITS[targetUnit]]
-    return round ? this.round(r, targetUnit) : r
+  convert(value: number, sourceUnit: string, targetUnit: string, dpi = 96): number {
+    return value * mulConvUnit(dpi)[IDX_UNITS[sourceUnit]][IDX_UNITS[targetUnit]]
   }
 
   convertAll(value: number, sourceUnit: string, dpi = 96): IMapUnit {
-    return Object.fromEntries(mulConvUnit(dpi)[IDX_UNITS[sourceUnit]].map((mulConvUnit, idxUnit) => [STR_UNITS[idxUnit], this.round(value * mulConvUnit, STR_UNITS[idxUnit])]))
+    return Object.fromEntries(mulConvUnit(dpi)[IDX_UNITS[sourceUnit]].map((mulConvUnit, idxUnit) => [STR_UNITS[idxUnit], STR_UNITS[idxUnit] === 'px' ? round(value * mulConvUnit) : value * mulConvUnit]))
   }
 
-  convertSize(width: number, height: number, sourceUnit: string, targetUnit: string, round = true) {
+  convertSize(width: number, height: number, sourceUnit: string, targetUnit: string) {
     if (sourceUnit === targetUnit) return { width, height }
-    if (sourceUnit !== 'px' && targetUnit !== 'px') return { width: this.convert(width, sourceUnit, targetUnit, 96, round), height: this.convert(height, sourceUnit, targetUnit, 96, round) }
+    if (sourceUnit !== 'px' && targetUnit !== 'px') return { width: this.convert(width, sourceUnit, targetUnit, 96), height: this.convert(height, sourceUnit, targetUnit, 96) }
     const aspectRatio = width / height
     let longEdge = Math.max(width, height)
 
     // physical to px
     if (targetUnit === 'px' && sourceUnit !== 'px') {
-      longEdge = this.convert(longEdge, sourceUnit, 'in', 96, false)
+      longEdge = this.convert(longEdge, sourceUnit, 'in', 96)
       if (longEdge <= 6) {
-        longEdge = this.convert(longEdge, 'in', 'px', 300, false)
+        longEdge = this.convert(longEdge, 'in', 'px', 300)
       } else if (longEdge <= 2200 / 96) {
-        longEdge = 1800 + this.convert(longEdge - 6, 'in', 'px', (2200 - 1800) / (2200 / 96 - 6), false)
+        longEdge = 1800 + this.convert(longEdge - 6, 'in', 'px', (2200 - 1800) / (2200 / 96 - 6))
       } else {
-        longEdge = this.convert(longEdge, 'in', 'px', 96, false)
+        longEdge = this.convert(longEdge, 'in', 'px', 96)
       }
     }
 
     // px to physical
     if (targetUnit !== 'px' && sourceUnit === 'px') {
       if (longEdge <= 1800) {
-        longEdge = this.convert(longEdge, 'px', targetUnit, 300, false)
+        longEdge = this.convert(longEdge, 'px', targetUnit, 300)
       } else if (longEdge <= 2200) {
-        longEdge = this.convert(6, 'in', targetUnit, 96, false) + this.convert(longEdge - 1800, 'px', targetUnit, (2200 - 1800) / (2200 / 96 - 6), false)
+        longEdge = this.convert(6, 'in', targetUnit, 96) + this.convert(longEdge - 1800, 'px', targetUnit, (2200 - 1800) / (2200 / 96 - 6))
       } else {
-        longEdge = this.convert(longEdge, 'px', targetUnit, 96, false)
+        longEdge = this.convert(longEdge, 'px', targetUnit, 96)
       }
     }
 
@@ -76,8 +71,8 @@ class UnitUtils {
       width = longEdge * aspectRatio
     }
 
-    if (!round) return { width, height }
-    return { width: this.round(width, targetUnit), height: this.round(height, targetUnit) }
+    if (targetUnit === 'px') return { width: round(width), height: round(height) }
+    return { width, height }
   }
 
   convertAllSize(width: number, height: number, sourceUnit: string): IMapSize {

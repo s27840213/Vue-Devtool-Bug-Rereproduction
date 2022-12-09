@@ -610,12 +610,11 @@ class UploadUtils {
         }
       }
       newPage.backgroundImage.config.imgControl = false
-      newPage.width = Math.round(parseFloat(newPage.width.toString()))
-      newPage.height = Math.round(parseFloat(newPage.height.toString()))
-      if (newPage.unit === 'px') {
-        newPage.physicalWidth = Math.round(parseFloat(newPage.physicalWidth.toString()))
-        newPage.physicalHeight = Math.round(parseFloat(newPage.physicalHeight.toString()))
-      }
+      newPage.width = _.round(newPage.width)
+      newPage.height = _.round(newPage.height)
+      const precision = newPage.unit === 'px' ? 0 : 3
+      newPage.physicalWidth = _.round(newPage.physicalWidth, precision)
+      newPage.physicalHeight = _.round(newPage.physicalHeight, precision)
       return newPage
     })
 
