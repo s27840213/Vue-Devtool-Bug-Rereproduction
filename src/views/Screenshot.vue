@@ -19,12 +19,10 @@ import layerFactary from '@/utils/layerFactary'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { CustomWindow } from '@/interfaces/customWindow'
 import pageUtils from '@/utils/pageUtils'
-import { calcTmpProps } from '@/utils/groupUtils'
 import { IPage } from '@/interfaces/page'
-import shapeUtils from '@/utils/shapeUtils'
 import mathUtils from '@/utils/mathUtils'
-import { IImageStyle } from '@/interfaces/layer'
-import generalUtils from '@/utils/generalUtils'
+import { IGroup, IImageStyle } from '@/interfaces/layer'
+import layerUtils from '@/utils/layerUtils'
 
 declare let window: CustomWindow
 
@@ -187,6 +185,45 @@ export default Vue.extend({
                 imgY: imgY * scaleRatio
               }
             })
+            break
+          }
+          case 'text': {
+            const json = await (await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)).json()
+            const page = pageUtils.newPage({ width: window.innerWidth, height: window.innerHeight })
+            page.isAutoResizeNeeded = true
+            pageUtils.setPages([page])
+            vivistickerUtils.initLoadingFlags({ layers: [json] }, () => {
+              this.onload()
+            })
+
+            const { width, height, scale } = json.styles
+            const pageAspectRatio = window.innerWidth / window.innerHeight
+            const textAspectRatio = width / height
+            const textWidth = textAspectRatio > pageAspectRatio ? window.innerWidth : window.innerHeight * textAspectRatio
+            const textHeight = textAspectRatio > pageAspectRatio ? window.innerWidth / textAspectRatio : window.innerHeight
+            const config = {
+              ...json,
+              widthLimit: json.widthLimit === -1 ? -1 : json.widthLimit * (textWidth / width),
+              styles: {
+                ...json.styles,
+                width: textWidth,
+                height: textHeight,
+                scale: scale * (textWidth / width),
+                x: 0,
+                y: 0
+              }
+            }
+
+            const newLayer = config.type === 'group'
+              ? layerFactary.newGroup(config, (config as IGroup).layers)
+              : layerFactary.newText(config)
+            layerUtils.addLayers(0, [newLayer])
+
+            this.JSONcontentSize = {
+              width: page.width,
+              height: page.height
+            }
+            this.usingJSON = true
             break
           }
           case 'background': {

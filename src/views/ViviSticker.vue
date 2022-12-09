@@ -155,6 +155,7 @@ export default Vue.extend({
         },
         modalInfo.img_url,
         !!exp,
+        true,
         {
           backgroundColor: 'rgba(24,25,31,0.3)'
         },

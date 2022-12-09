@@ -120,6 +120,7 @@ export default Vue.extend({
   row-gap: 20px;
   padding: 0 8px 20px 8px;
   box-sizing: border-box;
+  overflow-y: hidden;
 
   > div:nth-child(1) {
     display: flex;

@@ -81,6 +81,10 @@ class ViviStickerUtils {
     return store.getters['vivisticker/getEditorType']
   }
 
+  get editorTypeTextLike(): string {
+    return store.getters['vivisticker/getEditorTypeTextLike']
+  }
+
   get controllerHidden(): boolean {
     return store.getters['vivisticker/getControllerHidden']
   }
@@ -208,6 +212,8 @@ class ViviStickerUtils {
         return `type=svgImage2&id=${item.id}&ver=${item.ver}`
       case 15:
         return `type=svgImage&id=${item.id}&ver=${item.ver}&width=${item.width}&height=${item.height}`
+      case 7:
+        return `type=text&id=${item.id}&ver=${item.ver}`
       case 1:
         return `type=background&id=${item.id}&ver=${item.ver}`
       default:
@@ -229,14 +235,14 @@ class ViviStickerUtils {
     store.commit('vivisticker/SET_showAllRecently', { tab, bool })
   }
 
-  getAssetInitiator(asset: IAsset, attrs: IAssetProps = {}): () => Promise<any> {
+  getAssetInitiator(asset: IAsset, ...args: any[]): () => Promise<any> {
     return async () => {
       // console.log('start editing', asset)
       if (asset.type === 15) {
-        await assetUtils.addAsset(asset, attrs)
+        await assetUtils.addAsset(asset, ...args)
         return true
       } else {
-        return await assetUtils.addAsset(asset, attrs)
+        return await assetUtils.addAsset(asset, ...args)
       }
     }
   }
@@ -306,7 +312,7 @@ class ViviStickerUtils {
     store.commit('vivisticker/SET_showSaveDesignPopup', bool)
   }
 
-  initLoadingFlags(page: IPage, callback?: () => void) {
+  initLoadingFlags(page: IPage | { layers: ILayer[] }, callback?: () => void) {
     this.loadingFlags = {}
     this.loadingCallback = callback
     for (const [index, layer] of page.layers.entries()) {
@@ -367,7 +373,7 @@ class ViviStickerUtils {
   }
 
   deselect() {
-    if (this.editorType === 'text') {
+    if (this.editorTypeTextLike) {
       groupUtils.deselect()
       editorUtils.setInMultiSelectionMode(false)
       store.commit('SET_currActivePageIndex', 0)
@@ -672,7 +678,8 @@ class ViviStickerUtils {
       type,
       assetInfo
     } = myDesign
-    this.getAsset(`mydesign-${type}`, id, 'config').then((data) => {
+    const myDesignKey = this.mapEditorType2MyDesignKey(type)
+    this.getAsset(`mydesign-${myDesignKey}`, id, 'config').then((data) => {
       this.startEditing(type, assetInfo ?? {}, this.getFetchDesignInitiator(() => {
         store.commit('SET_pages', pageUtils.newPages(generalUtils.deepCopy(data.pages)))
       }), () => {
@@ -692,14 +699,9 @@ class ViviStickerUtils {
   async saveAsMyDesign(): Promise<void> {
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const id = editingDesignId !== '' ? editingDesignId : generalUtils.generateAssetId()
-    // const editorType = store.getters['vivisticker/getEditorType']
     const flag = await this.genThumbnail(id)
     if (flag === '1') return
     await this.saveDesignJson(id)
-    // const design = await this.saveDesignJson(id)
-    // if (design) {
-    //   store.commit('vivisticker/UPDATE_updateDesign', { tab: editorType, design })
-    // }
   }
 
   async genThumbnail(id: string): Promise<string> {
@@ -769,7 +771,7 @@ class ViviStickerUtils {
       updateTime: new Date(Date.now()).toISOString(),
       assetInfo
     } as IMyDesign
-    await this.addAsset(`mydesign-${editorType}`, json, 0, {
+    await this.addAsset(`mydesign-${this.mapEditorType2MyDesignKey(editorType)}`, json, 0, {
       config: { pages: uploadUtils.prepareJsonToUpload(pages) }
     })
     return json
@@ -817,6 +819,14 @@ class ViviStickerUtils {
 
   uploadImageURL(data: any) {
     vivistickerUtils.handleCallback('upload-image', data)
+  }
+
+  mapEditorType2MyDesignKey(editorType: string): string {
+    if (editorType === 'objectGroup') {
+      return 'object'
+    } else {
+      return editorType
+    }
   }
 }
 
