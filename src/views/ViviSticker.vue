@@ -277,7 +277,9 @@ export default Vue.extend({
         editorUtils.setShowMobilePanel(false)
         this.setCurrActivePanel('none')
       } else {
-        editorUtils.setShowMobilePanel(true)
+        if (panelType !== 'replace') {
+          editorUtils.setShowMobilePanel(true)
+        }
         this.setCurrActivePanel(panelType)
         if (props) {
           if (panelType === 'color' && props.currColorEvent) {

@@ -232,9 +232,10 @@ export default Vue.extend({
           this.setImgConfig(this.layerInfo())
         }
       } else {
+        groupUtils.deselect()
         this.setImgConfig(undefined)
-        setTimeout(() => {
-          if (layerUtils.layerIndex === -1) {
+        this.$nextTick(() => {
+          const reSelecting = () => {
             const isSubLayer = this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined'
             const targetIdx = isSubLayer ? ((this.config as IImage).parentLayerStyles?.zindex ?? 0) - 1 : this.config.styles.zindex - 1
             groupUtils.deselect()
@@ -248,7 +249,22 @@ export default Vue.extend({
               }
             }
           }
-        }, 0)
+          if (layerUtils.layerIndex === -1 && !this.isDuringCopy) {
+            reSelecting()
+          }
+          if (this.isDuringCopy) {
+            const start = Date.now()
+            const timer = setInterval(() => {
+              if (Date.now() - start > 10000) {
+                clearInterval(timer)
+              }
+              if (!this.isDuringCopy) {
+                reSelecting()
+                clearInterval(timer)
+              }
+            }, 300)
+          }
+        })
         this.handleDimensionUpdate()
       }
       if (this.forRender) {
@@ -296,6 +312,7 @@ export default Vue.extend({
       isShowPagePanel: 'page/getShowPagePanel',
       isProcessing: 'shadow/isProcessing'
     }),
+    ...mapState('vivisticker', ['isDuringCopy']),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     canvas: {
@@ -339,8 +356,8 @@ export default Vue.extend({
       let renderH = imgHeight
       const primaryLayer = this.config.primaryLayer || [LayerType.group, LayerType.frame].includes(layerUtils.getLayer(this.pageIndex, this.layerIndex).type as LayerType)
       const isPrimaryFrameImg = primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.clips[0].isFrameImg
-      if (!this.forRender && (this.config.parentLayerStyles || primaryLayer) && !isPrimaryFrameImg) {
-        const { scale } = this.config.parentLayerStyles || primaryLayer?.styles
+      if (!this.forRender && (this.config.parentLayerStyles || primaryLayer) && !isPrimaryFrameImg && srcObj.type !== 'ios') {
+        const { scale = 1 } = this.config.parentLayerStyles || primaryLayer?.styles || {}
         renderW *= scale
         renderH *= scale
       }
@@ -387,7 +404,7 @@ export default Vue.extend({
       if (updater !== undefined) {
         try {
           updater().then(() => {
-            this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getImgDimension))
+            this.src = ImageUtils.getSrc(this.config, this.getImgDimension)
           })
         } catch (error) {
           if (this.src.indexOf('data:image/png;base64') !== 0) {
@@ -479,7 +496,7 @@ export default Vue.extend({
       // const { srcObj, styles: { imgWidth, imgHeight } } = this.config
       // const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
       const currSize = this.getImgDimension
-      const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
+      const src = ImageUtils.getSrc(this.config, currSize)
       return new Promise<void>((resolve, reject) => {
         ImageUtils.imgLoadHandler(src, () => {
           if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
@@ -503,14 +520,12 @@ export default Vue.extend({
       })
     },
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
-      const { srcObj, styles: { imgWidth, imgHeight } } = this.config
-      // const scale = this.isInFrame() ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
-      // const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
+      if (this.config.srcObj.type === 'ios') return
       const currSize = this.getImgDimension
       if (!this.isOnError && this.config.previewSrc === undefined) {
         const { type } = this.config.srcObj
         if (type === 'background') return
-        const currUrl = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
+        const currUrl = ImageUtils.getSrc(this.config, currSize)
         const urlId = ImageUtils.getImgIdentifier(this.config.srcObj)
         ImageUtils.imgLoadHandler(currUrl, async () => {
           if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
@@ -588,11 +603,11 @@ export default Vue.extend({
         }
         preImg.onload = () => {
           const nextImg = new Image()
-          nextImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'next')))
+          nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'next'))
         }
-        preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'pre')))
+        preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'pre'))
       } else {
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getImgDimension))
+        this.src = ImageUtils.getSrc(this.config, this.getImgDimension)
       }
       this.handleIsTransparent()
     },

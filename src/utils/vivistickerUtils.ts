@@ -9,12 +9,12 @@ import stepsUtils from './stepsUtils'
 import uploadUtils from './uploadUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
 import { ColorEventType, LayerType } from '@/store/types'
-import { IGroup, ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
 import editorUtils from './editorUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import textPropUtils from './textPropUtils'
-import { IMyDesign, IMyDesignTag, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IIosImgData, IMyDesign, IMyDesignTag, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import localeUtils from './localeUtils'
 import listApis from '@/apis/list'
 import { IListServiceContentDataItem } from '@/interfaces/api'
@@ -56,7 +56,8 @@ const VVSTK_CALLBACKS = [
   'setStateDone',
   'addAssetDone',
   'deleteAssetDone',
-  'getAssetResult'
+  'getAssetResult',
+  'uploadImageURL'
 ]
 
 const MYDESIGN_TAGS = [{
@@ -327,6 +328,12 @@ class ViviStickerUtils {
     switch (layer.type) {
       case LayerType.group:
         for (const [subIndex, subLayer] of (layer as IGroup).layers.entries()) {
+          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
+        }
+        break
+      case LayerType.frame:
+        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
+        for (const [subIndex, subLayer] of (layer as IFrame).clips.entries()) {
           this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
         }
         break
@@ -803,6 +810,15 @@ class ViviStickerUtils {
 
   getThumbSrc(type: string, id: string, ver: string) {
     return `vvstk://${type}/${id}?ver=${ver}`
+  }
+
+  async getIosImg(limit = 1): Promise<Array<string>> {
+    const { images } = await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image', 60000) as IIosImgData
+    return images
+  }
+
+  uploadImageURL(data: any) {
+    vivistickerUtils.handleCallback('upload-image', data)
   }
 
   mapEditorType2MyDesignKey(editorType: string): string {

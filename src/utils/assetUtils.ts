@@ -357,7 +357,7 @@ class AssetUtils {
     LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newFrame(config)], index)
     ZindexUtils.reassignZindex(targePageIndex)
     GroupUtils.select(targePageIndex, [index])
-    stepsUtils.record()
+    // stepsUtils.record()
   }
 
   addBackground(url: string, attrs: IAssetProps = {}) {
