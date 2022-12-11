@@ -175,7 +175,7 @@ class Controller {
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           left: '0',
-          transform: `translate(-50%, -50%) scale(${contentScaleRatio})`,
+          transform: isTouchArea ? `translate(-75%, -50%) scale(${contentScaleRatio})` : `translate(-50%, -50%) scale(${contentScaleRatio})`,
           opacity: isTouchArea ? '0' : '1'
         }
       },
@@ -186,7 +186,7 @@ class Controller {
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           right: '0',
-          transform: `translate(50%, -50%) scale(${contentScaleRatio})`,
+          transform: isTouchArea ? `translate(75%, -50%) scale(${contentScaleRatio})` : `translate(50%, -50%) scale(${contentScaleRatio})`,
           opacity: isTouchArea ? '0' : '1'
         }
       },
@@ -197,7 +197,7 @@ class Controller {
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           bottom: '0',
-          transform: `translate(-50%, 50%) scale(${contentScaleRatio})`,
+          transform: isTouchArea ? `translate(-50%, 75%) scale(${contentScaleRatio})` : `translate(-50%, 50%) scale(${contentScaleRatio})`,
           opacity: isTouchArea ? '0' : '1'
         }
       },
@@ -208,7 +208,7 @@ class Controller {
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           top: '0',
-          transform: `translate(-50%, -50%) scale(${contentScaleRatio})`,
+          transform: isTouchArea ? `translate(-50%, -75%) scale(${contentScaleRatio})` : `translate(-50%, -50%) scale(${contentScaleRatio})`,
           opacity: isTouchArea ? '0' : '1'
         }
       }
@@ -244,7 +244,7 @@ class Controller {
         }
       ],
       resizers: this.getResizers(resizerShort, resizerLong, contentScaleRatio),
-      resizerTouchAreas: this.getResizers(resizerShort * 3, resizerLong * 3, contentScaleRatio, true),
+      resizerTouchAreas: this.getResizers(resizerShort * 2, resizerLong * 2, contentScaleRatio, true),
       cursors: [
         'nwse-resize',
         'ns-resize',

@@ -12,17 +12,9 @@
                   iconColor="gray-2")
         div(class="nu-controller__object-hint__text")
           span {{ Math.round(hintAngle) % 360 }}
-      div(v-if="isControllerShown && !isControlling && !isLocked() && !isImgControl"
-          class="nu-controller__ctrl-points"
-          :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
-        div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
-            class="control-point__corner-rotate scaler"
-            :key="`corner-rotate-${index}`"
-            :style="Object.assign(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
-            @pointerdown.stop="rotateStart($event, index)"
-            @touchstart="disableTouchEvent")
       div(class="nu-controller__content"
           ref="body"
+          key="body"
           :layer-index="`${layerIndex}`"
           :style="contentStyles(getLayerType)"
           @dragenter="dragEnter($event)"
@@ -86,6 +78,15 @@
             :style="lockIconStyles()")
           svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
             @click.native="MappingUtils.mappingIconAction('lock')")
+      div(v-if="isControllerShown && !isControlling && !isLocked() && !isImgControl"
+          class="nu-controller__ctrl-points"
+          :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
+        div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
+            class="control-point__corner-rotate scaler"
+            :key="`corner-rotate-${index}`"
+            :style="Object.assign(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
+            @pointerdown.stop="rotateStart($event, index)"
+            @touchstart="disableTouchEvent")
       div(v-if="isControllerShown && !isControlling && !isLocked() && !isImgControl"
             class="nu-controller__ctrl-points"
             :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
@@ -375,6 +376,7 @@ export default Vue.extend({
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
     isActive(val) {
+      console.log('isActive', val)
       if (!val) {
         this.isControlling = false
         this.setLastSelectedLayerIndex(this.layerIndex)
@@ -440,11 +442,10 @@ export default Vue.extend({
         resizerStyle.transform += ` scaleX(${100 / this.scaleRatio})`
       }
       const scalerOffset = generalUtils.isTouchDevice() ? 36 : 20
-      const resizeBarScale = generalUtils.isTouchDevice() ? 2.5 : 1
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: isHorizon ? `${this.getLayerWidth() - scalerOffset * 100 / this.scaleRatio}px` : `${width * this.contentScaleRatio * resizeBarScale}px`,
-        height: !isHorizon ? `${this.getLayerHeight() - scalerOffset * 100 / this.scaleRatio}px` : `${height * this.contentScaleRatio * resizeBarScale}px`
+        width: isHorizon ? `${this.getLayerWidth() - scalerOffset * 100 / this.scaleRatio}px` : `${width * this.contentScaleRatio}px`,
+        height: !isHorizon ? `${this.getLayerHeight() - scalerOffset * 100 / this.scaleRatio}px` : `${height * this.contentScaleRatio}px`
       }
       return Object.assign(resizerStyle, HW)
     },
@@ -458,18 +459,21 @@ export default Vue.extend({
       if (!tooSmall) {
         resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
       }
-      // resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
+
       const width = parseFloat(resizerStyle.width.replace('px', ''))
       const height = parseFloat(resizerStyle.height.replace('px', ''))
-      const scale = isTouchArea ? 3 : 1
+      const scale = isTouchArea ? 2 : 1
       const aspectRatio = this.isTouchDevice() ? 0.24 : 0.16
 
+      const isHorizon = width > height
+      const sizeForWidth = this.getLayerWidth() * this.contentScaleRatio - 10
+      const sizeForHeight = this.getLayerHeight() * this.contentScaleRatio - 10
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: width > height && tooSmall ? `${(this.getLayerWidth() * this.contentScaleRatio - 10) * scale}px`
-          : (tooSmall ? `${(this.getLayerHeight() * this.contentScaleRatio - 10) * aspectRatio * scale}px` : resizerStyle.width),
-        height: width < height && tooSmall ? `${(this.getLayerHeight() * this.contentScaleRatio - 10) * scale}px`
-          : (tooSmall ? `${(this.getLayerWidth() * this.contentScaleRatio - 10) * aspectRatio * scale}px` : resizerStyle.height)
+        width: isHorizon && tooSmall ? `${sizeForWidth * scale}px`
+          : (tooSmall ? `${sizeForHeight * aspectRatio * scale}px` : resizerStyle.width),
+        height: !isHorizon && tooSmall ? `${sizeForHeight * scale}px`
+          : (tooSmall ? `${sizeForWidth * aspectRatio * scale}px` : resizerStyle.height)
       }
       return Object.assign(resizerStyle, HW)
     },
