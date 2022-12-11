@@ -29,7 +29,7 @@
         template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isDragging()")
           div(class="sub-controller"
               :style="transformStyle")
-            template(v-for="(layer,index) in getLayers()")
+            template(v-for="(layer,index) in getLayers")
               nu-sub-controller(v-if="layer.type !== 'image' || !layer.imgControl"
                 class="relative"
                 data-identifier="controller"
@@ -278,22 +278,14 @@ export default Vue.extend({
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
     }
 
+    /**
+     * If the frame contain only one clip, auto popping the photo-selector
+     */
     if (this.config.type === LayerType.frame && (this.config as IFrame).clips.length === 1 && this.config.clips[0].srcObj.type === 'frame') {
       window.requestAnimationFrame(() => {
-        const input = document.getElementById(`input-${this.layerIndex}-0`) as HTMLInputElement
-        if (input) {
-          input.click()
-        }
+        this.iosPhotoSelect(0)
       })
     }
-
-    // const body = (this.$refs.body as HTMLElement)
-
-    // const bodyAt = new AnyTouch(body)
-    // //  销毁
-    // this.$on('hook:destroyed', () => {
-    //   bodyAt.destroy()
-    // })
   },
   beforeDestroy() {
     eventUtils.removePointerEvent('pointerup', this.moveEnd)
@@ -322,6 +314,11 @@ export default Vue.extend({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       controllerHidden: 'vivisticker/getControllerHidden'
     }),
+    getLayers(): Array<ILayer> {
+      const type = this.getLayerType
+      return (type === 'group' || type === 'tmp')
+        ? this.config.layers : (type === 'frame' ? this.config.clips : [])
+    },
     isControllerShown(): boolean {
       return this.isActive && !this.controllerHidden
     },
@@ -882,7 +879,6 @@ export default Vue.extend({
       }
     },
     moving(e: MouseEvent | TouchEvent | PointerEvent) {
-      // console.log('moving')
       const posDiff = {
         x: Math.abs(MouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
         y: Math.abs(MouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
@@ -1083,11 +1079,14 @@ export default Vue.extend({
         if (this.config.type === LayerType.frame && !hasActualMove) {
           const primary = this.config as IFrame
           if (primary.clips.length === 1 && primary.clips[0].srcObj.type === 'frame') {
-            const fileInput = document.getElementById(`input-${this.layerIndex}-0`) as HTMLInputElement
-            if (fileInput) {
-              vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
-              fileInput.click()
-            }
+            // vivistickerUtils.getIosImg()
+            //   .then((images: Array<string>) => {
+            //     FrameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, 0, {
+            //       type: 'ios',
+            //       assetId: images[0],
+            //       userId: ''
+            //     })
+            //   })
           }
         }
         this.isPointerDownFromSubController = false
@@ -1577,24 +1576,6 @@ export default Vue.extend({
     },
     rotateStart(event: MouseEvent | PointerEvent, index = -1) {
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
-      // console.warn(index)
-      // let rotateAngle = this.getLayerRotate()
-      // if (rotateAngle > 180) {
-      //   rotateAngle = rotateAngle - 360
-      // }
-      // let cursorIndex = index * 2
-      // if (rotateAngle >= 22.5) {
-      //   cursorIndex++
-      //   cursorIndex += Math.floor((rotateAngle - 22.5) / 45)
-      // } else if (rotateAngle <= -22.5) {
-      //   cursorIndex--
-      //   cursorIndex -= Math.floor((-rotateAngle - 22.5) / 45)
-      //   if (cursorIndex < 0) {
-      //     cursorIndex = 8 + cursorIndex
-      //   }
-      // }
-      // console.log(cursorIndex)
-      // this.initCornerRotate = cursorIndex
       const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
       const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
@@ -1864,9 +1845,6 @@ export default Vue.extend({
             eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
           }
         }
-        // GroupUtils.deselect()
-        // this.setLastSelectedLayerIndex(this.layerIndex)
-        // GroupUtils.select(this.pageIndex, [this.layerIndex])
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
@@ -2102,25 +2080,21 @@ export default Vue.extend({
       }
 
       if (!this.isHandleShadow) {
-        if (this.currSubSelectedInfo.index !== -1) {
-          for (let idx = 0; idx < layers.length; idx++) {
-            if (idx !== targetIndex) {
-              updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
-            }
-            if (this.currSubSelectedInfo.type === 'image') {
-              updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
-            }
+        // if (this.currSubSelectedInfo.index !== -1) {
+        for (let idx = 0; idx < layers.length; idx++) {
+          if (idx !== targetIndex) {
+            updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
+          }
+          if (this.currSubSelectedInfo.type === 'image') {
+            updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
           }
         }
+        // }
         if ((this.config.type === LayerType.frame && !(this.config as IFrame).clips[targetIndex].active) ||
           (this.config.type === LayerType.group && !(this.config as IGroup).layers[targetIndex].active)) {
           updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
           if (this.config.type === LayerType.frame && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame' && !this.controllerHidden && !this.isPointerDownFromSubController) {
-            const fileInput = document.getElementById(`input-${this.layerIndex}-${targetIndex}`) as HTMLInputElement
-            if (fileInput) {
-              vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
-              fileInput.click()
-            }
+            this.iosPhotoSelect(targetIndex)
           }
         }
         LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
@@ -2128,6 +2102,30 @@ export default Vue.extend({
     },
     pointerDownSubController() {
       this.isPointerDownFromSubController = true
+    },
+    iosPhotoSelect(subLayerIdx: number) {
+      vivistickerUtils.getIosImg()
+        .then(async (images: Array<string>) => {
+          if (images.length) {
+            const { imgX, imgY, imgWidth, imgHeight } = await ImageUtils.getClipImgDimension((this.config as IFrame).clips[subLayerIdx], ImageUtils.getSrc({
+              type: 'ios',
+              assetId: images[0],
+              userId: ''
+            }))
+            FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, subLayerIdx, {
+              imgWidth,
+              imgHeight,
+              imgX,
+              imgY
+            })
+            FrameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, subLayerIdx, {
+              type: 'ios',
+              assetId: images[0],
+              userId: ''
+            })
+            StepsUtils.record()
+          }
+        })
     },
     dblSubController(e: MouseEvent, targetIndex: number) {
       e.stopPropagation()
@@ -2200,11 +2198,6 @@ export default Vue.extend({
         x: this.config.styles.x,
         y: this.config.styles.y
       }
-    },
-    getLayers(): Array<ILayer> {
-      const type = this.getLayerType
-      return (type === 'group' || type === 'tmp')
-        ? this.config.layers : (type === 'frame' ? this.config.clips : [])
     },
     isShown(): boolean {
       return this.config.shown

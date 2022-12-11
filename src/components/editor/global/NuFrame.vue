@@ -27,6 +27,7 @@ import ImageUtils from '@/utils/imageUtils'
 import { mapGetters } from 'vuex'
 import layerFactary from '@/utils/layerFactary'
 import generalUtils from '@/utils/generalUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   inheritAttrs: false,
@@ -67,6 +68,7 @@ export default Vue.extend({
         Object.assign(config.decorationTop, json.decorationTop)
       }
       config.needFetch = false
+      vivistickerUtils.setLoadingFlag(this.layerIndex)
     }
   },
   watch: {

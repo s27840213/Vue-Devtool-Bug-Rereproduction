@@ -479,10 +479,29 @@ export default Vue.extend({
         }
         case 'photo':
         case 'replace': {
-          const { layerIndex, subLayerIdx } = layerUtils
-          const fileInput = document.getElementById(`input-${layerIndex}-${Math.max(subLayerIdx, 0)}`) as HTMLInputElement
-          vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
-          return fileInput.click()
+          const { pageIndex, layerIndex, subLayerIdx = 0 } = layerUtils
+          vivistickerUtils.getIosImg()
+            .then(async (images: Array<string>) => {
+              const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
+                .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[subLayerIdx], imageUtils.getSrc({
+                  type: 'ios',
+                  assetId: images[0],
+                  userId: ''
+                }))
+              frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
+                imgWidth,
+                imgHeight,
+                imgX,
+                imgY
+              })
+              frameUtils.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, {
+                type: 'ios',
+                assetId: images[0],
+                userId: ''
+              })
+              stepsUtils.record()
+            })
+          break
         }
         default: {
           break

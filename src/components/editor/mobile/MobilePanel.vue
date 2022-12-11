@@ -260,17 +260,17 @@ export default Vue.extend({
     },
     innerTabs(): Record<string, string[]> {
       switch (this.currActivePanel) {
-        case 'replace':
-          return {
-            key: [
-              'photo',
-              'file'
-            ],
-            label: [
-              this.$tc('NN0002', 2),
-              this.$tc('NN0006')
-            ]
-          }
+        // case 'replace':
+        //   return {
+        //     key: [
+        //       'photo',
+        //       'file'
+        //     ],
+        //     label: [
+        //       this.$tc('NN0002', 2),
+        //       this.$tc('NN0006')
+        //     ]
+        //   }
         default:
           return {
             key: ['']
