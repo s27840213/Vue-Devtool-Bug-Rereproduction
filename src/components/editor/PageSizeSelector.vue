@@ -501,8 +501,8 @@ export default Vue.extend({
     },
     fixSize() {
       const fixedSize = this.fixedSize
-      if (this.lastFocusedInput === 'width' || this.isLocked) this.pageWidth = fixedSize.width
-      if (this.lastFocusedInput === 'height' || this.isLocked) this.pageHeight = fixedSize.height
+      if (this.lastFocusedInput === 'width' || this.isLocked) this.pageWidth = round(fixedSize.width, 3)
+      if (this.lastFocusedInput === 'height' || this.isLocked) this.pageHeight = round(fixedSize.height, 3)
       this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     }
   }
