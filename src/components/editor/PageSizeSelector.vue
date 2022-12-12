@@ -10,10 +10,14 @@
                   formatKey="custom",
                   @select="selectFormat")
         property-bar(class="page-size-selector__body__custom__box"
-                    :class="selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`")
+                    :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
           input(class="body-XS" type="number" min="0"
                 :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
-                :value="pageSize.width" @input="setPageWidth" @click="selectFormat('custom')")
+                :value="pageSize.width"
+                @input="setPageWidth"
+                @click="selectFormat('custom')"
+                @focus="lastFocusedInput = 'width'"
+                @blur="handleInputBlur('width')")
           span(class="body-XS"
               :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") W
         svg-icon(class="pointer"
@@ -21,10 +25,14 @@
             iconWidth="15px" :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'blue'"
             @click.native="toggleLock()")
         property-bar(class="page-size-selector__body__custom__box"
-                    :class="selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`")
+                    :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
           input(class="body-XS" type="number" min="0"
                 :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
-                :value="pageSize.height" @input="setPageHeight" @click="selectFormat('custom')")
+                :value="pageSize.height"
+                @input="setPageHeight"
+                @click="selectFormat('custom')"
+                @focus="lastFocusedInput = 'height'"
+                @blur="() => handleInputBlur('height')")
           span(class="body-XS"
               :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") H
         property-bar(v-click-outside="() => {showUnitOptions = false}"
@@ -40,6 +48,9 @@
             div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-gray-2" @click="selectUnit($event, unit)")
               span(class="body-XS"
                   :class="`text-${isDarkTheme ? 'gray-1' : 'white'}`") {{unit}}
+        div(v-if="selectedFormat === 'custom' && isValidate && !isCustomValid"
+          class="page-size-selector__body__custom__err body-XS text-red") {{errMsg}}
+          span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{'Fix it for me.'}}
     div(class="page-size-selector__body__hr first bg-gray-4")
     div(class="page-size-selector__container")
         div(class="page-size-selector__body-row first-row")
@@ -102,7 +113,7 @@ import resizeUtils from '@/utils/resizeUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import editorUtils from '@/utils/editorUtils'
 import unitUtils, { STR_UNITS, IMapSize } from '@/utils/unitUtils'
-import { throttle, round } from 'lodash'
+import { throttle, round, floor } from 'lodash'
 
 export default Vue.extend({
   props: {
@@ -132,7 +143,10 @@ export default Vue.extend({
       unitOptions: STR_UNITS,
       selectedUnit: '',
       showUnitOptions: false,
-      copyBeforeApply: true
+      copyBeforeApply: true,
+      isValidate: false,
+      lastFocusedInput: 'width',
+      maxArea: 36000000
     }
   },
   watch: {
@@ -169,7 +183,16 @@ export default Vue.extend({
       return (this.getPage(pageUtils.currFocusPageIndex)?.width ?? 1) / this.getPage(pageUtils.currFocusPageIndex)?.height ?? 1
     },
     isCustomValid(): boolean {
-      return this.widthValid && this.heightValid
+      return this.widthValid && this.heightValid && !this.overSize
+    },
+    overSize(): { width: number, height: number } | undefined {
+      let pxWidth = this.pageWidth
+      let pxHeight = this.pageHeight
+      if (this.selectedUnit !== 'px') {
+        pxWidth = unitUtils.convert(pxWidth, this.selectedUnit, 'px', 300)
+        pxHeight = unitUtils.convert(pxHeight, this.selectedUnit, 'px', 300)
+      }
+      return pxWidth * pxHeight > this.maxArea ? { width: pxWidth, height: pxHeight } : undefined
     },
     defaultTextColor(): string {
       return this.isDarkTheme ? 'text-white' : 'text-gray-2'
@@ -178,10 +201,40 @@ export default Vue.extend({
       return this.selectedFormat === 'custom' ? this.isCustomValid : (this.selectedFormat !== '')
     },
     widthValid(): boolean {
-      return !!this.pageWidth && this.pageWidth > 0
+      if (!this.pageWidth || this.pageWidth < 0 || (this.overSize && (this.isLocked || this.lastFocusedInput === 'width'))) return false
+      return true
     },
     heightValid(): boolean {
-      return !!this.pageHeight && this.pageHeight > 0
+      if (!this.pageHeight || this.pageHeight < 0 || (this.overSize && (this.isLocked || this.lastFocusedInput === 'height'))) return false
+      return true
+    },
+    fixedSize(): {[key: string]: number, width: number, height: number} {
+      const pxSize = this.overSize
+      const res = {
+        width: this.pageWidth,
+        height: this.pageHeight
+      }
+      if (pxSize) {
+        if (this.isLocked) {
+          res.height = floor(Math.sqrt(this.maxArea / pxSize.width * pxSize.height))
+          res.width = floor(res.height / pxSize.height * pxSize.width)
+        } else {
+          res.height = this.maxArea / pxSize.width
+          res.width = this.maxArea / pxSize.height
+        }
+      } else return res
+      if (this.selectedUnit === 'px') {
+        res.width = round(res.width)
+        res.height = round(res.height)
+      }
+      res.width = unitUtils.convert(res.width, 'px', this.selectedUnit, 300)
+      res.height = unitUtils.convert(res.height, 'px', this.selectedUnit, 300)
+      return res
+    },
+    errMsg(): string {
+      if (!this.pageWidth || !this.pageHeight || this.pageWidth <= 0 || this.pageHeight <= 0) return this.$t('NN0767', { num: 0 }).toString()
+      if (this.overSize) return `Must be less than ${this.isLocked ? `${round(this.fixedSize.width, 3)} x ${round(this.fixedSize.height, 3)}` : round(this.fixedSize[this.lastFocusedInput], 3)} ${this.selectedUnit} to stay within our maximum allowed area. `
+      return ''
     },
     formatList(): ILayout[] {
       const targetCategory = this.categories.find((category: IListServiceContentData) => {
@@ -275,6 +328,7 @@ export default Vue.extend({
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
+          this.pageWidth = NaN
           this.pageHeight = NaN
         } else {
           this.pageHeight = this.pageWidth / this.aspectRatio
@@ -290,6 +344,7 @@ export default Vue.extend({
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
+          this.pageWidth = NaN
           this.pageHeight = NaN
         } else {
           this.pageWidth = this.pageHeight * this.aspectRatio
@@ -309,10 +364,11 @@ export default Vue.extend({
       this.pageWidth = this.pageSizes[unit].width
       this.pageHeight = this.pageSizes[unit].height
       if (unit === 'px') {
-        this.pageHeight = round(this.pageHeight)
+        this.pageWidth = round(this.pageWidth)
         this.pageHeight = round(this.pageHeight)
       }
       this.selectedUnit = unit
+      this.isValidate = true
     },
     fetchLayouts() {
       this.isLayoutReady = false
@@ -436,6 +492,18 @@ export default Vue.extend({
     }, 2000, { trailing: false }),
     resizePage(format: { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string}) {
       resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
+    },
+    handleInputBlur(target: string) {
+      this.isValidate = true
+      if ((target === 'width' || this.isLocked) && isNaN(this.pageWidth)) this.pageWidth = 0
+      if ((target === 'height' || this.isLocked) && isNaN(this.pageHeight)) this.pageHeight = 0
+      this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
+    },
+    fixSize() {
+      const fixedSize = this.fixedSize
+      if (this.lastFocusedInput === 'width' || this.isLocked) this.pageWidth = fixedSize.width
+      if (this.lastFocusedInput === 'height' || this.isLocked) this.pageHeight = fixedSize.height
+      this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     }
   }
 })
@@ -547,6 +615,13 @@ export default Vue.extend({
           }
         }
       }
+      &__err{
+        grid-column: 2 / span 4;
+        > span {
+          cursor: pointer;
+          text-decoration: underline;
+        }
+      }
     }
     &__hr {
       width: 100%;
@@ -653,6 +728,13 @@ export default Vue.extend({
 
 .border-blue-1 {
   border: 1px solid setColor(blue-1);
+}
+
+.input-invalid {
+  border: 1px solid setColor(red) !important;
+  > * {
+    color: setColor(red);
+  }
 }
 
 @media (max-width: 1260px) {

@@ -37,7 +37,7 @@ class UnitUtils {
   convertSize(width: number, height: number, sourceUnit: string, targetUnit: string) {
     if (sourceUnit === targetUnit) return { width, height }
     if (sourceUnit !== 'px' && targetUnit !== 'px') return { width: this.convert(width, sourceUnit, targetUnit, 96), height: this.convert(height, sourceUnit, targetUnit, 96) }
-    const aspectRatio = width / height
+    const aspectRatio = width / height || 1
     let longEdge = Math.max(width, height)
 
     // physical to px
