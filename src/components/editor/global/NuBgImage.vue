@@ -34,6 +34,8 @@ import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
+import { IPage } from '@/interfaces/page'
+import unitUtils from '@/utils/unitUtils'
 
 export default Vue.extend({
   props: {
@@ -90,8 +92,8 @@ export default Vue.extend({
       }
     }
 
-    this.handleIsTransparent()
     if (this.userId !== 'backendRendering') {
+      this.handleIsTransparent()
       this.previewAsLoading()
       const nextImg = new Image()
       nextImg.onerror = () => {
@@ -109,7 +111,10 @@ export default Vue.extend({
       }
       nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
     } else {
-      this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config))
+      if (this.isAdjustImage) {
+        this.handleIsTransparent()
+      }
+      this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, this.getImgDimension))
     }
   },
   components: { NuAdjustImage },
@@ -119,7 +124,7 @@ export default Vue.extend({
       getPageSize: 'getPageSize',
       getEditorViewImages: 'file/getEditorViewImages'
     }),
-    ...mapState('user', ['imgSizeMap', 'userId']),
+    ...mapState('user', ['imgSizeMap', 'userId', 'dpi']),
     configStyles(): IImageStyle {
       return this.image.config.styles
     },
@@ -135,7 +140,30 @@ export default Vue.extend({
     },
     getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
-      return ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100))
+      const { dpi } = this
+      let renderW = imgWidth
+      let renderH = imgHeight
+      if (dpi !== -1) {
+        const { width, height, physicalHeight, physicalWidth, unit = 'px'} = this.pageSizeData
+        if (unit !== 'px' && physicalHeight && physicalWidth) {
+          const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
+          renderW *= dpi / physicaldpi
+          renderH *= dpi / physicaldpi
+        } else {
+          renderW *= dpi / 96
+          renderH *= dpi / 96
+        }
+      }
+      return ImageUtils.getSrcSize(srcObj, Math.max(renderW, renderH) * (this.scaleRatio / 100))
+    },
+    pageSizeData(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
+      return {
+        width: pageUtils.getPage(this.pageIndex).width,
+        height: pageUtils.getPage(this.pageIndex).height,
+        physicalWidth: pageUtils.getPage(this.pageIndex).physicalWidth,
+        physicalHeight: pageUtils.getPage(this.pageIndex).physicalHeight,
+        unit: pageUtils.getPage(this.pageIndex).unit
+      }
     },
     srcObj(): SrcObj {
       return this.image.config.srcObj
@@ -232,7 +260,7 @@ export default Vue.extend({
       if (updater !== undefined) {
         try {
           updater().then(() => {
-            const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config))
+            const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, this.getImgDimension))
             ImageUtils.imgLoadHandler(src, () => {
               this.src = src
             })

@@ -90,13 +90,9 @@ class ImageUtils {
         }
       }
       case 'private': {
-        if ((size as string).includes('ext')) {
-          return `https://template.vivipic.com/pdf/${userId}/asset/image/${assetId}/${size}?token=${store.getters['user/getToken']}`
-        } else {
-          const editorImg = store.getters['file/getEditorViewImages']
-          const query = forBgRemove ? '' : '&origin=true'
-          return editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
-        }
+        const editorImg = store.getters['file/getEditorViewImages']
+        const query = forBgRemove ? '' : '&origin=true'
+        return editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
       }
       case 'logo-public':
         if ((size as string).includes('ext')) {
@@ -105,12 +101,14 @@ class ImageUtils {
           return `https://template.vivipic.com/admin/${userId}/asset/logo/${brandId}/${assetId}/${size}?origin=true`
         }
       case 'logo-private': {
-        if ((size as string).includes('ext')) {
-          return `https://template.vivipic.com/pdf/${userId}/asset/logo/${brandId}/${assetId}/${size}?token=${store.getters['user/getToken']}`
-        } else {
-          const editorLogo = store.getters['brandkit/getEditorViewLogos']
-          return editorLogo(assetId) ? editorLogo(assetId)[size as string] + '&origin=true' : ''
-        }
+        // if ((size as string).includes('ext')) {
+        //   return `https://template.vivipic.com/pdf/${userId}/asset/logo/${brandId}/${assetId}/${size}?token=${store.getters['user/getToken']}`
+        // } else {
+        //   const editorLogo = store.getters['brandkit/getEditorViewLogos']
+        //   return editorLogo(assetId) ? editorLogo(assetId)[size as string] + '&origin=true' : ''
+        // }
+        const editorLogo = store.getters['brandkit/getEditorViewLogos']
+        return editorLogo(assetId) ? editorLogo(assetId)[size as string] + '&origin=true' : ''
       }
       case 'unsplash':
         return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`

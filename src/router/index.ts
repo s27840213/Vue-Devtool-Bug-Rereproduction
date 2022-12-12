@@ -104,7 +104,7 @@ const routes: Array<RouteConfig> = [
         const url = urlParams.get('url')
         const teamId = urlParams.get('team_id')
         const token = urlParams.get('token')
-        const dpi = urlParams.get('dpi')
+        const dpi = +(urlParams.get('dpi') ?? -1)
 
         if (token && teamId && url) {
           // for new version
@@ -130,7 +130,7 @@ const routes: Array<RouteConfig> = [
             })
             const token = querys.token
             const teamId = querys.team_id
-            const dpi = querys.dpi
+            const dpi = +(querys.dpi ?? -1)
             store.commit('user/SET_STATE', { token, teamId, dpi })
           }
           const response = await (await fetch(`https://${src}`)).json()

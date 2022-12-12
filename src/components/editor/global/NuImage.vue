@@ -78,6 +78,7 @@ import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
+import unitUtils from '@/utils/unitUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { AxiosError } from 'axios'
 import Vue from 'vue'
@@ -342,10 +343,26 @@ export default Vue.extend({
       }
       const { dpi } = this
       if (dpi !== -1) {
-        renderW *= dpi / 96
-        renderH *= dpi / 96
+        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.pageSizeData
+        if (unit !== 'px' && physicalHeight && physicalWidth) {
+          const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
+          renderW *= dpi / physicaldpi
+          renderH *= dpi / physicaldpi
+        } else {
+          renderW *= dpi / 96
+          renderH *= dpi / 96
+        }
       }
       return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
+    },
+    pageSizeData() {
+      return {
+        width: pageUtils.getPage(this.pageIndex).width,
+        height: pageUtils.getPage(this.pageIndex).height,
+        physicalWidth: pageUtils.getPage(this.pageIndex).physicalWidth,
+        physicalHeight: pageUtils.getPage(this.pageIndex).physicalHeight,
+        unit: pageUtils.getPage(this.pageIndex).unit
+      }
     },
     parentLayerDimension(): number | string {
       const { width, height } = this.config.parentLayerStyles || {}
@@ -554,8 +571,8 @@ export default Vue.extend({
     },
     async handleInitLoad() {
       const { type } = this.config.srcObj
-      this.handleIsTransparent()
       if (this.userId !== 'backendRendering') {
+        this.handleIsTransparent()
         await this.previewAsLoading()
         const preImg = new Image()
         preImg.onerror = (error) => {
@@ -589,6 +606,9 @@ export default Vue.extend({
         }
         preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'pre')))
       } else {
+        if (this.isAdjustImage()) {
+          this.handleIsTransparent()
+        }
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getImgDimension))
       }
     },
@@ -1047,8 +1067,9 @@ export default Vue.extend({
       return (this.config as IImage).srcObj
     },
     adjustImgStyles(): any {
-      const styles = generalUtils.deepCopy(this.config.styles)
+      let styles = this.config.styles
       if (this.isBgImgControl) {
+        styles = generalUtils.deepCopy(this.config.styles)
         Object.assign(styles.adjust, {
           halation: 0
         })
