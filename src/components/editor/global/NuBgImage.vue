@@ -92,8 +92,8 @@ export default Vue.extend({
       }
     }
 
-    this.handleIsTransparent()
     if (this.userId !== 'backendRendering') {
+      this.handleIsTransparent()
       this.previewAsLoading()
       const nextImg = new Image()
       nextImg.onerror = () => {
@@ -111,6 +111,9 @@ export default Vue.extend({
       }
       nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
     } else {
+      if (this.isAdjustImage) {
+        this.handleIsTransparent()
+      }
       this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, this.getImgDimension))
     }
   },
@@ -141,8 +144,8 @@ export default Vue.extend({
       let renderW = imgWidth
       let renderH = imgHeight
       if (dpi !== -1) {
-        const { width, height, physicalHeight, physicalWidth, unit } = this.pageSizeData
-        if (unit !== 'px') {
+        const { width, height, physicalHeight, physicalWidth, unit = 'px'} = this.pageSizeData
+        if (unit !== 'px' && physicalHeight && physicalWidth) {
           const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
           renderW *= dpi / physicaldpi
           renderH *= dpi / physicaldpi
