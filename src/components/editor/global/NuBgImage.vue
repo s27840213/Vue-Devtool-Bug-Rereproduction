@@ -144,7 +144,7 @@ export default Vue.extend({
       let renderW = imgWidth
       let renderH = imgHeight
       if (dpi !== -1) {
-        const { width, height, physicalHeight, physicalWidth, unit = 'px'} = this.pageSizeData
+        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.pageSizeData
         if (unit !== 'px' && physicalHeight && physicalWidth) {
           const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
           renderW *= dpi / physicaldpi
