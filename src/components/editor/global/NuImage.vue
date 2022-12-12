@@ -78,6 +78,7 @@ import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
+import unitUtils from '@/utils/unitUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { AxiosError } from 'axios'
 import Vue from 'vue'
@@ -342,10 +343,26 @@ export default Vue.extend({
       }
       const { dpi } = this
       if (dpi !== -1) {
-        renderW *= dpi / 96
-        renderH *= dpi / 96
+        const { width, height, physicalHeight, physicalWidth, unit } = this.pageSizeData
+        if (unit !== 'px') {
+          const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
+          renderW *= dpi / physicaldpi
+          renderH *= dpi / physicaldpi
+        } else {
+          renderW *= dpi / 96
+          renderH *= dpi / 96
+        }
       }
       return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
+    },
+    pageSizeData() {
+      return {
+        width: pageUtils.getPage(this.pageIndex).width,
+        height: pageUtils.getPage(this.pageIndex).height,
+        physicalWidth: pageUtils.getPage(this.pageIndex).physicalWidth,
+        physicalHeight: pageUtils.getPage(this.pageIndex).physicalHeight,
+        unit: pageUtils.getPage(this.pageIndex).unit
+      }
     },
     parentLayerDimension(): number | string {
       const { width, height } = this.config.parentLayerStyles || {}
