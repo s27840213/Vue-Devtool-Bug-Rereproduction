@@ -13,7 +13,7 @@
                     :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
           input(class="body-XS" type="number" min="0"
                 :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
-                :value="pageSize.width"
+                :value="pageSizeToShow.width"
                 @input="setPageWidth"
                 @click="selectFormat('custom')"
                 @focus="lastFocusedInput = 'width'"
@@ -28,7 +28,7 @@
                     :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
           input(class="body-XS" type="number" min="0"
                 :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
-                :value="pageSize.height"
+                :value="pageSizeToShow.height"
                 @input="setPageHeight"
                 @click="selectFormat('custom')"
                 @focus="lastFocusedInput = 'height'"
@@ -112,7 +112,7 @@ import generalUtils from '@/utils/generalUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import editorUtils from '@/utils/editorUtils'
-import unitUtils, { STR_UNITS, IMapSize } from '@/utils/unitUtils'
+import unitUtils, { STR_UNITS, IMapSize, PRECISION } from '@/utils/unitUtils'
 import { throttle, round, floor } from 'lodash'
 
 export default Vue.extend({
@@ -233,7 +233,7 @@ export default Vue.extend({
     },
     errMsg(): string {
       if (!this.pageWidth || !this.pageHeight || this.pageWidth <= 0 || this.pageHeight <= 0) return this.$t('NN0767', { num: 0 }).toString()
-      if (this.overSize) return `Must be less than ${this.isLocked ? `${round(this.fixedSize.width, 3)} x ${round(this.fixedSize.height, 3)}` : round(this.fixedSize[this.lastFocusedInput], 3)} ${this.selectedUnit} to stay within our maximum allowed area. `
+      if (this.overSize) return `Must be less than ${this.isLocked ? `${round(this.fixedSize.width, PRECISION)} x ${round(this.fixedSize.height, PRECISION)}` : round(this.fixedSize[this.lastFocusedInput], PRECISION)} ${this.selectedUnit} to stay within our maximum allowed area. `
       return ''
     },
     formatList(): ILayout[] {
@@ -265,8 +265,8 @@ export default Vue.extend({
     isLayoutReady(): boolean {
       return this.formatList.length !== 0
     },
-    pageSize(): {width: number, height: number} {
-      return { width: round(this.pageWidth, 3), height: round(this.pageHeight, 3) }
+    pageSizeToShow(): {width: number, height: number} {
+      return { width: round(this.pageWidth, PRECISION), height: round(this.pageHeight, PRECISION) }
     }
   },
   methods: {
@@ -446,7 +446,7 @@ export default Vue.extend({
       }
 
       // update recently used size
-      const precision = format.unit === 'px' ? 0 : 3
+      const precision = format.unit === 'px' ? 0 : PRECISION
       format.width = round(format.width, precision)
       format.height = round(format.height, precision)
 
@@ -502,8 +502,8 @@ export default Vue.extend({
     },
     fixSize(convert = true) {
       const fixedSize = this.fixedSize
-      if (this.lastFocusedInput === 'width' || this.isLocked) this.pageWidth = round(fixedSize.width, 3)
-      if (this.lastFocusedInput === 'height' || this.isLocked) this.pageHeight = round(fixedSize.height, 3)
+      if (this.lastFocusedInput === 'width' || this.isLocked) this.pageWidth = round(fixedSize.width, PRECISION)
+      if (this.lastFocusedInput === 'height' || this.isLocked) this.pageHeight = round(fixedSize.height, PRECISION)
       if (convert) this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     }
   }

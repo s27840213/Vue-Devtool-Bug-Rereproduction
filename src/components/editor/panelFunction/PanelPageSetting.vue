@@ -252,7 +252,7 @@ import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import unitUtils, { STR_UNITS, IMapUnit } from '@/utils/unitUtils'
+import unitUtils, { STR_UNITS, IMapUnit, PRECISION } from '@/utils/unitUtils'
 import { round } from 'lodash'
 
 export default Vue.extend({
@@ -401,11 +401,11 @@ export default Vue.extend({
     },
     currentPageWidth(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return round(currPage?.physicalWidth ?? currPage?.width ?? 0, 3)
+      return round(currPage?.physicalWidth ?? currPage?.width ?? 0, PRECISION)
     },
     currentPageHeight(): number {
       const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return round(currPage?.physicalHeight ?? currPage?.height ?? 0, 3)
+      return round(currPage?.physicalHeight ?? currPage?.height ?? 0, PRECISION)
     },
     currentPageUnit(): string {
       return this.getPage(pageUtils.currFocusPageIndex)?.unit ?? 'px'

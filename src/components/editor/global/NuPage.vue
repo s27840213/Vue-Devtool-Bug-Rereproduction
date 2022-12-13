@@ -191,7 +191,7 @@ import generalUtils from '@/utils/generalUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
 import { round } from 'lodash'
-import unitUtils from '@/utils/unitUtils'
+import unitUtils, { PRECISION } from '@/utils/unitUtils'
 
 export default Vue.extend({
   components: {
@@ -412,7 +412,7 @@ export default Vue.extend({
       return this.currSelectedInfo.layers.length
     },
     resizerHint(): string {
-      return !this.isResizingPage ? '拖曳調整畫布高度' : `${round(this.config.physicalHeight, 3)}${this.config.unit}`
+      return !this.isResizingPage ? '拖曳調整畫布高度' : `${round(this.config.physicalHeight, PRECISION)}${this.config.unit}`
     }
   },
   methods: {

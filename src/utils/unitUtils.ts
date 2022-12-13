@@ -83,6 +83,7 @@ class UnitUtils {
 export default new UnitUtils()
 export {
   STR_UNITS,
+  PRECISION,
   IMapUnit,
   IMapSize
 }

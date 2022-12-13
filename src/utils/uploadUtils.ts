@@ -28,6 +28,7 @@ import networkUtils from './networkUtils'
 import _ from 'lodash'
 import editorUtils from './editorUtils'
 import designApis from '@/apis/design'
+import { PRECISION } from '@/utils/unitUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -612,7 +613,7 @@ class UploadUtils {
       newPage.backgroundImage.config.imgControl = false
       newPage.width = _.round(newPage.width)
       newPage.height = _.round(newPage.height)
-      const precision = newPage.unit === 'px' ? 0 : 3
+      const precision = newPage.unit === 'px' ? 0 : PRECISION
       newPage.physicalWidth = _.round(newPage.physicalWidth, precision)
       newPage.physicalHeight = _.round(newPage.physicalHeight, precision)
       return newPage
