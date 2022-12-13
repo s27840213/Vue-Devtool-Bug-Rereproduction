@@ -6,7 +6,7 @@
         draggable="false"
         :src="shadowSrc()")
     nu-layer(v-for="(layer,index) in layers"
-      :key="`layer-${index}`"
+      :key="`layer-${layer.id}`"
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
       :isFrame="true"
@@ -59,13 +59,40 @@ export default Vue.extend({
           img.clipPath = json.clips[idx].clipPath
         }
       })
-      if (config.decoration && json.decoration) {
-        json.decoration.color = [...config.decoration.color]
-        Object.assign(config.decoration, json.decoration)
+
+      // if (config.decoration && json.decoration) {
+      //   json.decoration.color = [...config.decoration.color]
+      //   Object.assign(config.decoration, json.decoration)
+      // }
+      // if (config.decorationTop && json.decorationTop) {
+      //   json.decorationTop.color = [...config.decorationTop.color]
+      //   Object.assign(config.decorationTop, json.decorationTop)
+      // }
+      if (this.config.decoration && json.decoration) {
+        json.decoration.color = [...this.config.decoration.color] as [string]
+        this.config.decoration = layerFactary.newShape({
+          ...json.decoration,
+          vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
+          styles: {
+            width: this.config.styles.initWidth,
+            height: this.config.styles.initHeight,
+            initWidth: this.config.styles.initWidth,
+            initHeight: this.config.styles.initHeight
+          }
+        })
       }
-      if (config.decorationTop && json.decorationTop) {
-        json.decorationTop.color = [...config.decorationTop.color]
-        Object.assign(config.decorationTop, json.decorationTop)
+      if (this.config.decorationTop && json.decorationTop) {
+        json.decorationTop.color = [...this.config.decorationTop.color] as [string]
+        this.config.decorationTop = layerFactary.newShape({
+          ...json.decorationTop,
+          vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
+          styles: {
+            width: this.config.styles.initWidth,
+            height: this.config.styles.initHeight,
+            initWidth: this.config.styles.initWidth,
+            initHeight: this.config.styles.initHeight
+          }
+        })
       }
       config.needFetch = false
       vivistickerUtils.setLoadingFlag(this.layerIndex)

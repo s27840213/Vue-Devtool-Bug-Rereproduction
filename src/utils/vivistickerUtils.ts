@@ -9,7 +9,7 @@ import stepsUtils from './stepsUtils'
 import uploadUtils from './uploadUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
 import { ColorEventType, LayerType } from '@/store/types'
-import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import editorUtils from './editorUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
@@ -331,11 +331,20 @@ class ViviStickerUtils {
           this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
         }
         break
-      case LayerType.frame:
+      case LayerType.frame: {
         this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
-        for (const [subIndex, subLayer] of (layer as IFrame).clips.entries()) {
+        const frame = layer as IFrame
+        const layers = frame.clips as Array<IImage | IShape>
+        if (frame.decoration) {
+          layers.unshift(frame.decoration)
+        }
+        if (frame.decorationTop) {
+          layers.push(frame.decorationTop)
+        }
+        for (const [subIndex, subLayer] of layers.entries()) {
           this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
         }
+      }
         break
       default:
         this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false

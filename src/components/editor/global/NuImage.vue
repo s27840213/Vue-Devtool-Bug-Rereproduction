@@ -45,7 +45,7 @@
               image(:xlink:href="finalSrc" ref="img"
                 class="nu-image__picture"
                 draggable="false"
-                @error="onError()"
+                @error="onError"
                 @load="onLoad($event, 'main')")
         img(v-else-if="src" ref="img"
           :style="flipStyles()"
@@ -399,6 +399,21 @@ export default Vue.extend({
         case 'logo-private':
           updater = async () => await this.updateLogos({ assetSet: new Set<string>([srcObj.assetId]) })
           break
+        case 'ios': {
+          if (this.primaryLayer.type === LayerType.frame) {
+            frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex,
+              {
+                type: 'frame',
+                assetId: '',
+                userId: ''
+              }
+            )
+            this.src = ImageUtils.getSrc(this.config)
+            setTimeout(() => {
+              vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+            }, 0)
+          }
+        }
       }
 
       if (updater !== undefined) {
