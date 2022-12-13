@@ -4,11 +4,11 @@ div(class="ruler-vr"
   div(class="ruler-vr__body"
     ref="rulerBody"
     :style="rulerBodyStyles")
-    div(v-for="i in rulerLineCount.count" class="ruler-vr__block ruler-vr__block--int")
-      span(class="ruler-vr__number") {{(i-1)*SPLIT_UNIT}}
+    div(v-for="i in rulerLineCount" class="ruler-vr__block ruler-vr__block--int")
+      span(class="ruler-vr__number") {{(i-1)*scale}}
       div(v-for="i in 5" class="ruler-vr__line")
-    div(v-if="rulerLineCount.float > 0" class="ruler-vr__block ruler-vr__block--float")
-      span(class="ruler-vr__number") {{rulerLineCount.count * SPLIT_UNIT}}
+    div(v-if="rulerLineCount" class="ruler-vr__block ruler-vr__block--float")
+      span(class="ruler-vr__number") {{rulerLineCount * scale}}
 </template>
 
 <script lang="ts">
@@ -21,7 +21,9 @@ import { mapGetters } from 'vuex'
 export default Vue.extend({
   props: {
     canvasRect: DOMRect,
-    editorView: HTMLElement
+    editorView: HTMLElement,
+    scale: Number,
+    scaleSpace: Number
   },
   data() {
     return {
@@ -49,19 +51,11 @@ export default Vue.extend({
         width: `${rulerUtils.RULER_SIZE}px`,
         height: `${this.currFocusPage.height * (this.pageScaleRatio / 100)}px`,
         transform: `translate3d(0px,${this.rulerBodyOffset}px,0px)`,
-        'grid-template-rows': `repeat(${this.rulerLineCount.count},1fr) ${this.rulerLineCount.float}fr`
-
+        'grid-template-rows': `repeat(${this.rulerLineCount},${this.scaleSpace}px) auto`
       }
     },
-    rulerLineCount(): { count: number, float: number } {
-      const lineCount = (pageUtils.currFocusPage.height / this.SPLIT_UNIT).toFixed(2).split('.')
-      return {
-        count: parseInt(lineCount[0]),
-        float: parseFloat(`0.${lineCount[1]}`)
-      }
-    },
-    SPLIT_UNIT(): number {
-      return rulerUtils.mapSplitUnit()
+    rulerLineCount(): number {
+      return Math.floor(this.currFocusPage.height / this.scale)
     }
   },
   mounted() {
@@ -72,6 +66,9 @@ export default Vue.extend({
       this.calcRulerBodyOffset()
     },
     currFocusPage() {
+      this.calcRulerBodyOffset()
+    },
+    'currFocusPage.height'() {
       this.calcRulerBodyOffset()
     }
   },

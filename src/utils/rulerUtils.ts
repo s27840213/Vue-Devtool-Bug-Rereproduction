@@ -7,6 +7,9 @@ interface ITemplateSetting {
   v: Array<number>
   h: Array<number>
 }
+
+const RULER_SCALE_MIN = 25
+const RULER_SCALE = 50
 class RulerUtils {
   get currFocusPage() {
     return pageUtils.currFocusPage
@@ -34,15 +37,6 @@ class RulerUtils {
 
   fbCover: { v: Array<number>, h: Array<number> }
 
-  splitUnitMap: {
-    xxs: number,
-    xs: number,
-    s: number,
-    m: number,
-    l: number,
-    xl: number
-  }
-
   isDragging: boolean
   lastMapedInfo: {
     type: string,
@@ -59,14 +53,6 @@ class RulerUtils {
       pageIndex: -1
     }
     this.isDragging = false
-    this.splitUnitMap = {
-      xxs: 250,
-      xs: 200,
-      s: 150,
-      m: 100,
-      l: 50,
-      xl: 25
-    }
     this.templates = {
       type1: [
         {
@@ -151,7 +137,6 @@ class RulerUtils {
           pos: mapResult,
           outOfPage: mapResult < 0 || mapResult > targetPage.width
         }
-        break
       }
       case 'h': {
         const pageRect = document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
@@ -160,7 +145,6 @@ class RulerUtils {
           pos: mapResult,
           outOfPage: mapResult < 0 || mapResult > targetPage.height
         }
-        break
       }
     }
     return {
@@ -175,13 +159,11 @@ class RulerUtils {
         const pageRect = document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
         const mapResult = pos * (this.scaleRatio / 100) + pageRect.left
         return mapResult
-        break
       }
       case 'h': {
         const pageRect = document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
         const mapResult = pos * (this.scaleRatio / 100) + pageRect.top
         return mapResult
-        break
       }
     }
     return -1
@@ -270,22 +252,6 @@ class RulerUtils {
     })
   }
 
-  mapSplitUnit() {
-    if (this.scaleRatio < 30) {
-      return this.splitUnitMap.xxs
-    } else if (this.scaleRatio < 30) {
-      return this.splitUnitMap.xs
-    } else if (this.scaleRatio < 80) {
-      return this.splitUnitMap.s
-    } else if (this.scaleRatio < 150) {
-      return this.splitUnitMap.m
-    } else if (this.scaleRatio < 350) {
-      return this.splitUnitMap.l
-    } else {
-      return this.splitUnitMap.xl
-    }
-  }
-
   removeInvalidGuides(pageIndex: number, format: { width: number, height: number }) {
     const { guidelines } = pageUtils.getPage(pageIndex)
     const { width, height } = format
@@ -293,6 +259,28 @@ class RulerUtils {
       v: guidelines.v.filter((line) => line <= width),
       h: guidelines.h.filter((line) => line <= height)
     })
+  }
+
+  adjRulerScale(scale = RULER_SCALE): number {
+    const space = 30 // space between scale lines
+    const rulerScaleSpace = () => scale * this.scaleRatio / 100
+    while (rulerScaleSpace() > space * 2 && scale > RULER_SCALE_MIN) {
+      scale -= RULER_SCALE
+      console.log('rdc split', scale)
+    }
+    if (scale < RULER_SCALE_MIN) {
+      scale = RULER_SCALE_MIN
+      console.log('set split', scale)
+    }
+    if (scale === RULER_SCALE_MIN && rulerScaleSpace() < space) {
+      scale = RULER_SCALE
+      console.log('set split', scale)
+    }
+    while (rulerScaleSpace() < space) {
+      scale += RULER_SCALE
+      console.log('inc split', scale)
+    }
+    return scale
   }
 }
 
