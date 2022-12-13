@@ -368,6 +368,7 @@ export default Vue.extend({
         this.pageHeight = round(this.pageHeight)
       }
       this.selectedUnit = unit
+      this.fixSize(false)
       this.isValidate = true
     },
     fetchLayouts() {
@@ -499,11 +500,11 @@ export default Vue.extend({
       if ((target === 'height' || this.isLocked) && isNaN(this.pageHeight)) this.pageHeight = 0
       this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     },
-    fixSize() {
+    fixSize(convert = true) {
       const fixedSize = this.fixedSize
       if (this.lastFocusedInput === 'width' || this.isLocked) this.pageWidth = round(fixedSize.width, 3)
       if (this.lastFocusedInput === 'height' || this.isLocked) this.pageHeight = round(fixedSize.height, 3)
-      this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
+      if (convert) this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     }
   }
 })
