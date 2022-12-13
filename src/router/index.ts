@@ -104,11 +104,7 @@ const routes: Array<RouteConfig> = [
         const url = urlParams.get('url')
         const teamId = urlParams.get('team_id')
         const token = urlParams.get('token')
-
-        console.log(generalUtils.deepCopy(urlParams))
-        console.log(url)
-        console.log(teamId)
-        console.log(token)
+        const dpi = urlParams.get('dpi')
 
         if (token && teamId && url) {
           // for new version
@@ -117,7 +113,7 @@ const routes: Array<RouteConfig> = [
           const response = await (await fetch(`https://${url}`)).json()
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           store.commit('file/SET_setLayersDone')
-          store.commit('user/SET_STATE', { userId: 'backendRendering' })
+          store.commit('user/SET_STATE', { userId: 'backendRendering', dpi })
         } else if (url) {
           // for old version
           // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET
@@ -134,7 +130,8 @@ const routes: Array<RouteConfig> = [
             })
             const token = querys.token
             const teamId = querys.team_id
-            store.commit('user/SET_STATE', { token, teamId })
+            const dpi = querys.dpi
+            store.commit('user/SET_STATE', { token, teamId, dpi })
           }
           const response = await (await fetch(`https://${src}`)).json()
           await assetUtils.addTemplate(response, { pageIndex: 0 })
