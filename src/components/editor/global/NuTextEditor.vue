@@ -73,11 +73,8 @@ export default Vue.extend({
       this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord })
     })
     tiptapUtils.on('create', ({ editor }) => {
-      // if (!this.config?.isEdited && !generalUtils.isTouchDevice()) {
-      //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
-      //   editor.commands.focus()
-      // }
-      if (this.config?.contentEditable) {
+      if (!this.config?.isEdited && !generalUtils.isTouchDevice()) {
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
         editor.commands.focus()
       }
       const editorDiv = editor.view.dom as HTMLDivElement

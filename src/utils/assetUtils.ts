@@ -24,7 +24,6 @@ import errorHandleUtils from './errorHandleUtils'
 import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import mathUtils from './mathUtils'
-import tiptapUtils from './tiptapUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -472,11 +471,8 @@ class AssetUtils {
         }
 
         TextUtils.resetTextField(textLayer, targePageIndex, field)
-        LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false, contentEditable: true }))])
+        LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false }))])
         editorUtils.setCloseMobilePanelFlag(true)
-        setTimeout(() => {
-          tiptapUtils.agent(editor => editor.commands.selectAll())
-        }, 100)
       })
       .catch(() => {
         console.log('Cannot find the file')

@@ -175,7 +175,7 @@ export default Vue.extend({
     },
     bodyStyles() {
       const { editing, contentEditable } = this.config
-      const opacity = editing ? ((this.isCurveText || this.isFlipped) ? (contentEditable ? 0.2 : 1) : 0) : 1
+      const opacity = editing ? (contentEditable ? ((this.isCurveText || this.isFlipped) ? 0.2 : 0) : 1) : 1
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
         width: isVertical ? 'auto' : '',
