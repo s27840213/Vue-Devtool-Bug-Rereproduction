@@ -13,6 +13,38 @@
         div(class="nu-controller__object-hint__text")
           span {{ Math.round(hintAngle) % 360 }}
       //- div(class="nu-controller__content"
+      //-   template(v-if="config.type === 'text' && isActive")
+      //-     div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
+      //-       nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
+      //-         :style="textBodyStyle()"
+      //-         :pageIndex="pageIndex"
+      //-         :layerIndex="layerIndex"
+      //-         :subLayerIndex="-1"
+      //-         @keydown.native.37.stop
+      //-         @keydown.native.38.stop
+      //-         @keydown.native.39.stop
+      //-         @keydown.native.40.stop
+      //-         @keydown.native.ctrl.67.exact.stop.self
+      //-         @keydown.native.meta.67.exact.stop.self
+      //-         @keydown.native.ctrl.86.exact.stop.self
+      //-         @keydown.native.meta.86.exact.stop.self
+      //-         @keydown.native.ctrl.88.exact.stop.self
+      //-         @keydown.native.meta.88.exact.stop.self
+      //-         @keydown.native.ctrl.65.exact.stop.self
+      //-         @keydown.native.meta.65.exact.stop.self
+      //-         @keydown.native.ctrl.90.exact.stop.self
+      //-         @keydown.native.meta.90.exact.stop.self
+      //-         @keydown.native.ctrl.shift.90.exact.stop.self
+      //-         @keydown.native.meta.shift.90.exact.stop.self
+      //-         @update="handleTextChange"
+      //-         @compositionend="handleTextCompositionEnd")
+      //-   div(v-if="isActive && isLocked() && (scaleRatio >20)"
+      //-       class="nu-controller__lock-icon"
+      //-       :style="lockIconStyles()")
+      //-     svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
+      //-       @click.native="MappingUtils.mappingIconAction('lock')")
+
+      //- div(class="nu-controller__content"
       //-     ref="body"
       //-     :layer-index="`${layerIndex}`"
       //-     :style="contentStyles"
@@ -292,6 +324,15 @@ export default Vue.extend({
       isHandleShadow: 'shadow/isHandling',
       currFunctionPanelType: 'getCurrFunctionPanelType'
     }),
+    subLayer(): any {
+      if ([LayerType.group, LayerType.frame].includes(this.config.type)) {
+        if (this.config.type === LayerType.group) {
+          return (this.config as IGroup).layers.find(l => l.active)
+        } else if ((this.config.type === LayerType.group)) {
+          return (this.config as IFrame).clips.find(c => c.active)
+        }
+      }
+    },
     contentStyles(): any {
       const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
       const isGroup = (this.getLayerType === 'group') && this.currSelectedInfo.index === this.layerIndex

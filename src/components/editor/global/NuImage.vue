@@ -541,10 +541,12 @@ export default Vue.extend({
       img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       img.crossOrigin = 'anoynous'
       img.onload = () => {
-        const isTransparent = imageShadowUtils.isTransparentBg(img)
-        imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
-        if (!isTransparent && this.config.styles.adjust.blur > 0) {
-          this.$forceUpdate()
+        if (!this.hasDestroyed) {
+          const isTransparent = imageShadowUtils.isTransparentBg(img)
+          imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
+          if (!isTransparent && this.config.styles.adjust.blur > 0) {
+            this.$forceUpdate()
+          }
         }
       }
     },
