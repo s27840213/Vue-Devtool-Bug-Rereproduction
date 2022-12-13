@@ -471,7 +471,7 @@ class AssetUtils {
         }
 
         TextUtils.resetTextField(textLayer, targePageIndex, field)
-        LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false }))])
+        LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false, contentEditable: true }))])
         editorUtils.setCloseMobilePanelFlag(true)
       })
       .catch(() => {

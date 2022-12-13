@@ -219,7 +219,7 @@ export default Vue.extend({
     LazyLoad
   },
   created() {
-    LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false, editing: false })
+    LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false })
     this.cornerRotaters = generalUtils.deepCopy(this.controlPoints.cornerRotaters)
     this.cornerRotaterbaffles = generalUtils.deepCopy(this.controlPoints.cornerRotaters)
   },
@@ -324,6 +324,9 @@ export default Vue.extend({
     isCurveText(): boolean {
       return this.checkIfCurve(this.config)
     },
+    isFlipped(): boolean {
+      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
+    },
     isTextEditing(): boolean {
       // return !this.isControlling && this.contentEditable
       // @Test
@@ -379,7 +382,7 @@ export default Vue.extend({
     contentEditable(newVal) {
       if (this.config.type !== 'text') return
       if (this.config.active) {
-        if (!newVal || !this.config.isEdited) {
+        if (!newVal) {
           tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
         }
         tiptapUtils.agent(editor => {
@@ -546,9 +549,9 @@ export default Vue.extend({
         width: '100%',
         height: '100%',
         userSelect: this.contentEditable ? 'text' : 'none',
-        opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
+        opacity: this.isTextEditing ? 1 : 0
       }
-      return !this.isCurveText ? textstyles
+      return !(this.isCurveText || this.isFlipped) ? textstyles
         : {
           width: 'auto',
           height: 'auto',
@@ -977,7 +980,8 @@ export default Vue.extend({
           x: Math.abs(this.getLayerPos().x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos().y - this.initTranslate.y)
         }
-        const hasActiualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
+        // const hasActiualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
+        const hasActiualMove = posDiff.x !== 0 || posDiff.y !== 0
         if (hasActiualMove) {
           if (this.getLayerType === 'text') {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
@@ -1018,6 +1022,11 @@ export default Vue.extend({
             }
             if (this.config.contentEditable) {
               tiptapUtils.focus({ scrollIntoView: false })
+              if (!this.config.isEdited) {
+                setTimeout(() => {
+                  tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
+                }, 100) // wait for default behavior to set cursor position, then select (otherwise selection will be overwritten)
+              }
             }
           }
           this.isMoved = false
