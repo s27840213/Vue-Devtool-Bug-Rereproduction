@@ -184,6 +184,12 @@ export default Vue.extend({
     isControllerShown(): boolean {
       return this.config?.active && !this.controllerHidden
     },
+    isCurveText(): boolean {
+      return this.checkIfCurve(this.config)
+    },
+    isFlipped(): boolean {
+      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
+    },
     isTextEditing(): boolean {
       return !this.isControlling && this.isControllerShown
     },
@@ -246,7 +252,7 @@ export default Vue.extend({
     'config.contentEditable'(newVal) {
       if (this.config.type !== 'text') return
       if (this.config.active) {
-        if (!newVal || !this.config.isEdited) {
+        if (!newVal) {
           tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
         }
         tiptapUtils.agent(editor => {
@@ -299,13 +305,28 @@ export default Vue.extend({
       }
     },
     textBodyStyle() {
-      const isVertical = this.config.styles.writingMode.includes('vertical')
-      return {
+      // const isVertical = this.config.styles.writingMode.includes('vertical')
+      // return {
+      //   width: `${this.config.styles.width / this.config.styles.scale}px`,
+      //   height: `${this.config.styles.height / this.config.styles.scale}px`,
+      //   userSelect: this.config.contentEditable ? 'text' : 'none',
+      //   opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
+      // }
+      const textstyles = {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
         userSelect: this.config.contentEditable ? 'text' : 'none',
-        opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
+        opacity: this.isTextEditing ? 1 : 0
       }
+      return !(this.isCurveText || this.isFlipped) ? textstyles
+        : {
+          width: `${this.config.styles.width / this.config.styles.scale}px`,
+          height: `${this.config.styles.height / this.config.styles.scale}px`,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
+        }
     },
     textStyles(styles: any) {
       const textStyles = CssConveter.convertFontStyle(styles)
@@ -404,7 +425,7 @@ export default Vue.extend({
       if (this.config.type === 'text') {
         this.posDiff.x = this.primaryLayer.styles.x - this.posDiff.x
         this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
-        if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
+        if (this.posDiff.x !== 0 || this.posDiff.y !== 0) {
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
         } else {
           if (this.config.contentEditable) {
