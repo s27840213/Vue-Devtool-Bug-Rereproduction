@@ -26,6 +26,14 @@ function mulConvUnit(dpi = 96): number[][] {
 }
 
 class UnitUtils {
+  /**
+   * Convert value in source unit into target unit.
+   * @param value Value to be convert
+   * @param sourceUnit Unit of value
+   * @param targetUnit Target unit to convert into
+   * @param dpi DPI for convertion between px and physical units
+   * @returns Converted value
+   */
   convert(value: number, sourceUnit: string, targetUnit: string, dpi = 96): number {
     return value * mulConvUnit(dpi)[IDX_UNITS[sourceUnit]][IDX_UNITS[targetUnit]]
   }

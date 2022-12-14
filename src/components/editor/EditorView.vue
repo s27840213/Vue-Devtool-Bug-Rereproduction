@@ -28,13 +28,9 @@
       template(v-if="showRuler && !isShowPagePreview")
         ruler-hr(:canvasRect="canvasRect"
           :editorView="editorView"
-          :scale="rulerScale"
-          :scaleSpace="rulerScaleSpace"
           @pointerdown.native.stop="dragStartH($event)")
         ruler-vr(:canvasRect="canvasRect"
           :editorView="editorView"
-          :scale="rulerScale"
-          :scaleSpace="rulerScaleSpace"
           @pointerdown.native.stop="dragStartV($event)")
         div(class="corner-block")
     div(v-if="!inBgRemoveMode"
@@ -108,7 +104,6 @@ export default Vue.extend({
       RulerUtils,
       rulerVPos: 0,
       rulerHPos: 0,
-      rulerScale: RulerUtils.adjRulerScale(),
       from: -1,
       screenWidth: document.documentElement.clientWidth,
       screenHeight: document.documentElement.clientHeight,
@@ -219,7 +214,6 @@ export default Vue.extend({
       } else {
         generalUtils.scaleFromCenter(editor)
       }
-      this.rulerScale = RulerUtils.adjRulerScale(this.rulerScale)
     },
     screenHeight() {
       pageUtils.findCentralPageIndexInfo()
@@ -283,9 +277,6 @@ export default Vue.extend({
     },
     showRuler(): boolean {
       return this._showRuler && !this.inBgRemoveMode
-    },
-    rulerScaleSpace(): number {
-      return this.rulerScale * this.pageScaleRatio / 100
     }
   },
   methods: {

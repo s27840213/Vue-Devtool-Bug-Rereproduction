@@ -4,30 +4,30 @@ div(class="ruler-hr"
   div(class="ruler-hr__body"
     ref="rulerBody"
     :style="rulerBodyStyles")
-    div(v-for="i in rulerLineCount" class="ruler-hr__block ruler-hr__block--int")
+    div(v-for="i in scaleCount" class="ruler-hr__block ruler-hr__block--int")
       span(class="ruler-hr__number") {{(i-1)*scale}}
       div(v-for="i in 5" class="ruler-hr__line")
-    div(v-if="rulerLineCount" class="ruler-hr__block ruler-hr__block--float")
-      span(class="ruler-hr__number") {{rulerLineCount * scale}}
+    div(v-if="scaleCount" class="ruler-hr__block ruler-hr__block--float")
+      span(class="ruler-hr__number") {{scaleCount * scale}}
 </template>
 
 <script lang="ts">
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
+import unitUtils from '@/utils/unitUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   props: {
     canvasRect: DOMRect,
-    editorView: HTMLElement,
-    scale: Number,
-    scaleSpace: Number
+    editorView: HTMLElement
   },
   data() {
     return {
-      rulerBodyOffset: 0
+      rulerBodyOffset: 0,
+      scale: rulerUtils.adjRulerScale()
     }
   },
   computed: {
@@ -52,11 +52,17 @@ export default Vue.extend({
         width: `${this.currFocusPage.width * (this.pageScaleRatio / 100)}px`,
         height: `${rulerUtils.RULER_SIZE}px`,
         transform: `translate3d(${this.rulerBodyOffset}px,0px,0px)`,
-        'grid-template-columns': `repeat(${this.rulerLineCount},${this.scaleSpace}px) auto`
+        'grid-template-columns': `repeat(${this.scaleCount},${this.scaleSpace}px) auto`
       }
     },
-    rulerLineCount(): number {
-      return Math.floor(this.currFocusPage.width / this.scale)
+    pxScale(): number {
+      return unitUtils.convert(this.scale, this.currFocusPage.unit, 'px', pageUtils.getPageDPI().width)
+    },
+    scaleCount(): number {
+      return Math.floor(this.currFocusPage.width / this.pxScale)
+    },
+    scaleSpace(): number {
+      return this.pxScale * this.pageScaleRatio / 100
     }
   },
   mounted() {
@@ -65,12 +71,19 @@ export default Vue.extend({
   watch: {
     pageScaleRatio() {
       this.calcRulerBodyOffset()
+      this.scale = rulerUtils.adjRulerScale(this.scale)
     },
     currFocusPage() {
       this.calcRulerBodyOffset()
+      this.scale = rulerUtils.adjRulerScale()
     },
     'currFocusPage.width'() {
       this.calcRulerBodyOffset()
+      this.scale = rulerUtils.adjRulerScale(this.scale)
+    },
+    'currFocusPage.unit'() {
+      this.calcRulerBodyOffset()
+      this.scale = rulerUtils.adjRulerScale(this.scale)
     },
     showPagePanel() {
       this.calcRulerBodyOffset()

@@ -13,6 +13,7 @@ import resizeUtils from './resizeUtils'
 import { throttle } from 'lodash'
 import groupUtils from './groupUtils'
 import { LayerType } from '@/store/types'
+import unitUtils from './unitUtils'
 
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -560,6 +561,19 @@ class PageUtils {
 
   setAutoResizeNeededForPage(page: IPage, isAutoResizeNeeded: boolean) {
     page.isAutoResizeNeeded = isAutoResizeNeeded
+  }
+
+  /**
+   * Returns DPI of target page based on it's px size and physical size.
+   * @param pageIndex Index of target page, use current focused page's if undefined
+   * @returns DPI of target page if target page is in physical size, otherwise 96 (default DPI)
+   */
+  getPageDPI(pageIndex?: number): {width: number, height: number} {
+    const page = this.getPage(pageIndex ?? this.currFocusPageIndex)
+    return {
+      width: page.width / unitUtils.convert(page.physicalWidth, page.unit, 'in'),
+      height: page.height / unitUtils.convert(page.physicalHeight, page.unit, 'in')
+    }
   }
 }
 

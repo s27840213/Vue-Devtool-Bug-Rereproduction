@@ -3,13 +3,11 @@ import store from '@/store'
 import { LineTemplatesType } from '@/store/types'
 import { EventEmitter } from 'events'
 import pageUtils from './pageUtils'
+import unitUtils from './unitUtils'
 interface ITemplateSetting {
   v: Array<number>
   h: Array<number>
 }
-
-const RULER_SCALE_MIN = 25
-const RULER_SCALE = 50
 class RulerUtils {
   get currFocusPage() {
     return pageUtils.currFocusPage
@@ -261,24 +259,25 @@ class RulerUtils {
     })
   }
 
-  adjRulerScale(scale = RULER_SCALE): number {
-    const space = 30 // space between scale lines
-    const rulerScaleSpace = () => scale * this.scaleRatio / 100
-    while (rulerScaleSpace() > space * 2 && scale > RULER_SCALE_MIN) {
-      scale -= RULER_SCALE
-      console.log('rdc split', scale)
+  adjRulerScale(scale = (this.currFocusPage.unit === 'px' ? 20 : 1), dpi = pageUtils.getPageDPI().width): number {
+    const scaleMin = this.currFocusPage.unit === 'px' ? 20 : 1 // min scale for px and physical size
+    const scaleStepMax = 5 // max times scale can be increase or reduce
+    const scaleSpace = 30 // space between scale lines (in px)
+    const getScaleSpace = () => unitUtils.convert(scale, this.currFocusPage.unit, 'px', dpi) * this.scaleRatio / 100
+
+    for (let i = 0; i < scaleStepMax && getScaleSpace() > scaleSpace * 2 && scale > scaleMin; i++) {
+      if (scale.toString()[0] === '5') scale = scale / 5 * 4
+      scale = Math.floor(scale / 2)
+      // console.log('rdc scale', scale)
     }
-    if (scale < RULER_SCALE_MIN) {
-      scale = RULER_SCALE_MIN
-      console.log('set split', scale)
+    if (scale < scaleMin) {
+      scale = scaleMin
+      // console.log('set scale', scale)
     }
-    if (scale === RULER_SCALE_MIN && rulerScaleSpace() < space) {
-      scale = RULER_SCALE
-      console.log('set split', scale)
-    }
-    while (rulerScaleSpace() < space) {
-      scale += RULER_SCALE
-      console.log('inc split', scale)
+    for (let i = 0; i < scaleStepMax && getScaleSpace() < scaleSpace; i++) {
+      if (scale.toString()[0] === '2') scale = scale / 2 * 2.5
+      scale *= 2
+      // console.log('inc scale', scale)
     }
     return scale
   }
