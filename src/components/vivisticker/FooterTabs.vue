@@ -456,7 +456,7 @@ export default Vue.extend({
               })
             }
 
-            tiptapUtils.focus({ scrollIntoView: false })
+            tiptapUtils.focus({ scrollIntoView: false }, currLayer.isEdited ? 'end' : null)
           } else {
             /**
              * @Todo handle the sub controler
