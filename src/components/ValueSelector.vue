@@ -17,6 +17,7 @@ export default defineComponent({
     valueArray: Array,
     value: String
   },
+  emits: ['update'],
   data() {
     return {
       currentValue: NaN

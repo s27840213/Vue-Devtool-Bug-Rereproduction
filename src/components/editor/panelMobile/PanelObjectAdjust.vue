@@ -9,7 +9,7 @@ div(class="panel-object-adjust")
           :iconName="option"
           iconWidth="24px"
           :iconColor="currMode === index ? 'white' :'gray-2'"
-          @pointerdown.native="switchMode(index)")
+          @pointerdown="switchMode(index)")
     div(v-if="currMode !== -1" class="panel-object-adjust__settings mt-25")
       mobile-slider(v-if="currMode === 0" :title="`${$t('NN0681')}`"
         :borderTouchArea="true"

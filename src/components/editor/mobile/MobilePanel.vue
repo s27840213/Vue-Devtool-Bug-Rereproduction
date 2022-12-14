@@ -115,6 +115,7 @@ export default defineComponent({
       type: Boolean
     }
   },
+  emits: ['panelHeight', 'switchTab'],
   directives: {
     clickOutside: vClickOutside.directive
   },

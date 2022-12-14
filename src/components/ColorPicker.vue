@@ -6,7 +6,7 @@ div(class="color-picker" ref="colorPicker"
     :value="convertedHex"
     @input="updateHex"
     @paste="onPaste"
-    @mouseup.native="onmouseup"
+    @mouseup="onmouseup"
     :disableFields="true"
     :disableAlpha="true"
     :isMobile="isMobile"
@@ -19,7 +19,7 @@ div(class="color-picker" ref="colorPicker"
         iconName="eye-dropper"
         :iconWidth="'20px'"
         :iconColor="'gray-2'"
-        @click.native="eyeDropper"
+        @click="eyeDropper"
         v-hint="$t('NN0407')")
       span(class="body-1") Hex
       div(class="color-picker__input")
@@ -55,6 +55,7 @@ export default defineComponent({
       default: 56.25
     }
   },
+  emits: ['update', 'final'],
   components: {
     'chrome-picker': Chrome
   },

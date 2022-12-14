@@ -50,6 +50,7 @@ export default defineComponent({
     Avatar,
     Url
   },
+  emits: ['closeMenu'],
   data() {
     return {
       settingsItems: constantData.settingsItems()

@@ -22,6 +22,7 @@ export default defineComponent({
       default: false
     }
   },
+  emits: ['update'],
   data() {
     return {
       checked: false

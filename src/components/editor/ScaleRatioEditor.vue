@@ -17,7 +17,7 @@ div(class="scale-ratio-editor")
       :class="[{'rotate-hr': isPageScalePopupOpen}]"
       :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
   svg-icon(:class="{'hover-effect': !inBgRemoveMode, 'click-disabled': inBgRemoveMode}"
-    @click.native="setIsShowPagePreview(!isShowPagePreview)"
+    @click="setIsShowPagePreview(!isShowPagePreview)"
     :iconName="'grid'"
     :iconColor="inBgRemoveMode ? 'gray-4' :'gray-2'"
     :disabled="inBgRemoveMode"
@@ -27,7 +27,7 @@ div(class="scale-ratio-editor")
     :iconColor="inBgRemoveMode? 'gray-4' :'gray-2'"
     :iconWidth="'24px'"
     :disabled="inBgRemoveMode"
-    @click.native="setShowPagePanel(!showPagePanel)")
+    @click="setShowPagePanel(!showPagePanel)")
 </template>
 
 <script lang="ts">
@@ -37,6 +37,7 @@ import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 
 export default defineComponent({
+  emits: ['toggleSidebarPanel'],
   data() {
     return {
     }

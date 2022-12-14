@@ -16,7 +16,7 @@ div(class="download-page-selection")
           @change="({ checked }) => handleSelect(idx, checked)")
         div
           btn(class="full-width body-3 rounded"
-            @click.native="handleSubmit") {{$tc('NN0133', 2)}}
+            @click="handleSubmit") {{$tc('NN0133', 2)}}
 </template>
 
 <script lang="ts">
@@ -25,6 +25,7 @@ import { mapGetters } from 'vuex'
 import DownloadCheckButton from './DownloadCheckButton.vue'
 
 export default defineComponent({
+  emits: ['confirm'],
   props: {
     defaultSelected: {
       type: Array,

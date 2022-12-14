@@ -4,7 +4,7 @@ div(class="card")
   span {{`**** ${card.last4}`}}
   span {{`Expires ${card.date}`}}
   svg-icon(v-if="canDelete" class="pointer" iconName="trash"
-          iconColor="gray-2" iconWidth="20px" @click.native="openPopup()")
+          iconColor="gray-2" iconWidth="20px" @click="openPopup()")
   div(v-if="showPopup" class="popup-window")
     div(class="card-popup" v-click-outside="closePopup")
       div(class="text-H6") {{$t('NN0622')}}
@@ -12,8 +12,8 @@ div(class="card")
         template(#paymentMethod)
           span(class="overline-LG") {{$t('NN0624')}}
       div(class="card-popup-button")
-        btn(type="gray-mid" @click.native="closePopup()") {{$t('NN0203')}}
-        btn(type="red-mid" @click.native="deleteCard()") {{$t('NN0625')}}
+        btn(type="gray-mid" @click="closePopup()") {{$t('NN0203')}}
+        btn(type="red-mid" @click="deleteCard()") {{$t('NN0625')}}
 </template>
 
 <script lang="ts">

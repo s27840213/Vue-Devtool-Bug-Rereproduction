@@ -43,6 +43,7 @@ export default defineComponent({
   components: {
     Avatar
   },
+  emits: ['close'],
   data() {
     return {
       settingsItems: paymentData.settingsItems()

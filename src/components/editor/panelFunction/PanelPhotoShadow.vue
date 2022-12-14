@@ -5,7 +5,7 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
       svg-icon(v-for="(icon, idx) in shadowOption.slice(0, 3)"
         :key="`shadow-${icon}`"
         :iconName="`photo-shadow-${icon}`"
-        @click.native="onEffectClick(icon)"
+        @click="onEffectClick(icon)"
         class="photo-effect-setting__option pointer"
         :class="{ 'photo-effect-setting__option--selected': currentEffect === icon }"
         iconWidth="60px"
@@ -42,7 +42,7 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
       svg-icon(v-for="(icon, idx) in shadowOption.slice(3)"
         :key="`shadow-${icon}`"
         :iconName="`photo-shadow-${icon}`"
-        @click.native="onEffectClick(icon)"
+        @click="onEffectClick(icon)"
         class="photo-effect-setting__option pointer"
         :class="{ 'photo-effect-setting__option--selected': currentEffect === icon }"
         iconWidth="60px"
@@ -94,6 +94,7 @@ export default defineComponent({
   components: {
     ColorPicker
   },
+  emits: ['toggleColorPanel'],
   data() {
     return {
       shadowPropI18nMap,

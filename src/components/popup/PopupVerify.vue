@@ -5,7 +5,7 @@ div(class="popup-verify"
     div(class="popup-verify__close")
       svg-icon(class="pointer" iconName="page-close"
         :iconWidth="'10px'" iconColor="gray-0"
-        @click.native="closePopup()")
+        @click="closePopup()")
     div(class="text-blue-1 heading-5 pb-20 text-center") {{$t('NN0284')}}
     div(class="pb-20")
       span(class="body-2") {{$t('NN0285', {email: account, time: 10})}}
@@ -25,7 +25,7 @@ div(class="popup-verify"
         span {{$t('NN0288')}}
         btn(:type="'icon'"
           class="text-blue-1"
-          @click.native="onResendClicked()") {{$t('NN0290')}}
+          @click="onResendClicked()") {{$t('NN0290')}}
       div(v-else
         class="popup-verify__vcode-bottom text-gray-3")
         span {{ leftTimeText }}
@@ -33,7 +33,7 @@ div(class="popup-verify"
     div(class="popup-verify__close")
       svg-icon(class="pointer" iconName="page-close"
         :iconWidth="'10px'" iconColor="gray-0"
-        @click.native="closePopup()")
+        @click="closePopup()")
     div(class="label-lg pb-20 text-center") {{$t('NN0335')}}
     div(class="pb-10 body-2 text-gray-3 text-center") {{$t('NN0337')}}
     div
@@ -47,7 +47,7 @@ div(class="popup-verify"
           span(v-if="!oldPassValid") {{ oldPassErrorMessage }}
         btn(:type="'icon'"
           class="pt-5 body-2"
-          @click.native="onForgotClicked()") {{$t('NN0181')}}
+          @click="onForgotClicked()") {{$t('NN0181')}}
       div(class="popup-verify__btns my-15")
         div(class="popup-verify__btn btn-gray"
           @click="closePopup()") {{$t('NN0203')}}
@@ -57,7 +57,7 @@ div(class="popup-verify"
     div(class="popup-verify__close")
       svg-icon(class="pointer" iconName="page-close"
         :iconWidth="'10px'" iconColor="gray-0"
-        @click.native="closePopup()")
+        @click="closePopup()")
     div(class="label-lg pb-20 text-center") {{$t('NN0291')}}
     div
       property-bar(:class="{'input-invalid': !resetPasswordValid}")

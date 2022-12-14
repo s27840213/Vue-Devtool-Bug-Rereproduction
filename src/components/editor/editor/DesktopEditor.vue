@@ -20,7 +20,7 @@ div(class="desktop-editor")
                 :iconName="`user-admin${getAdminModeText}`"
                 :iconWidth="'20px'"
                 :iconColor="'gray-2'"
-                @click.native="setAdminMode()")
+                @click="setAdminMode()")
               div(class="flex flex-column")
                 select(class="locale-select" v-model="inputLocale")
                   option(v-for="locale in localeOptions" :value="locale") {{locale}}
@@ -83,6 +83,7 @@ export default defineComponent({
     PopupUpdateDesign,
     ComponentLog
   },
+  emits: ['setIsLoading'],
   data() {
     return {
       FunctionPanelType,

@@ -64,29 +64,29 @@ div(:layer-index="`${layerIndex}`"
           :pageIndex="pageIndex"
           :layerIndex="layerIndex"
           :subLayerIndex="-1"
-          @keydown.native.37.stop
-          @keydown.native.38.stop
-          @keydown.native.39.stop
-          @keydown.native.40.stop
-          @keydown.native.ctrl.67.exact.stop.self
-          @keydown.native.meta.67.exact.stop.self
-          @keydown.native.ctrl.86.exact.stop.self
-          @keydown.native.meta.86.exact.stop.self
-          @keydown.native.ctrl.88.exact.stop.self
-          @keydown.native.meta.88.exact.stop.self
-          @keydown.native.ctrl.65.exact.stop.self
-          @keydown.native.meta.65.exact.stop.self
-          @keydown.native.ctrl.90.exact.stop.self
-          @keydown.native.meta.90.exact.stop.self
-          @keydown.native.ctrl.shift.90.exact.stop.self
-          @keydown.native.meta.shift.90.exact.stop.self
+          @keydown.37.stop
+          @keydown.38.stop
+          @keydown.39.stop
+          @keydown.40.stop
+          @keydown.ctrl.67.exact.stop.self
+          @keydown.meta.67.exact.stop.self
+          @keydown.ctrl.86.exact.stop.self
+          @keydown.meta.86.exact.stop.self
+          @keydown.ctrl.88.exact.stop.self
+          @keydown.meta.88.exact.stop.self
+          @keydown.ctrl.65.exact.stop.self
+          @keydown.meta.65.exact.stop.self
+          @keydown.ctrl.90.exact.stop.self
+          @keydown.meta.90.exact.stop.self
+          @keydown.ctrl.shift.90.exact.stop.self
+          @keydown.meta.shift.90.exact.stop.self
           @update="handleTextChange"
           @compositionend="handleTextCompositionEnd")
     div(v-if="isActive && isLocked() && (scaleRatio >20)"
         class="nu-controller__lock-icon"
         :style="lockIconStyles()")
       svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
-        @click.native="MappingUtils.mappingIconAction('lock')")
+        @click="MappingUtils.mappingIconAction('lock')")
   div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
         class="nu-controller__ctrl-points"
         :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
@@ -137,8 +137,8 @@ div(:layer-index="`${layerIndex}`"
           :iconName="'rotate'" :iconWidth="`${20}px`"
           :src="require('@/assets/img/svg/rotate.svg')"
           :style='lineControlPointStyles()'
-          @pointerdown.native.stop="lineRotateStart"
-          @touchstart.native="lineRotateStart")
+          @pointerdown.stop="lineRotateStart"
+          @touchstart="lineRotateStart")
         img(class="control-point__mover"
           :src="require('@/assets/img/svg/move.svg')"
           :style='lineControlPointStyles()'
@@ -151,8 +151,8 @@ div(:layer-index="`${layerIndex}`"
             :iconName="'rotate'" :iconWidth="`${20}px`"
             :src="require('@/assets/img/svg/rotate.svg')"
             :style='controlPointStyles()'
-            @pointerdown.native.stop="rotateStart"
-            @touchstart.native="disableTouchEvent")
+            @pointerdown.stop="rotateStart"
+            @touchstart="disableTouchEvent")
           img(class="control-point__mover"
             :src="require('@/assets/img/svg/move.svg')"
             :style='controlPointStyles()'
@@ -225,6 +225,7 @@ export default defineComponent({
       type: Number
     }
   },
+  emits: ['isDragging', 'setFocus'],
   components: {
     NuTextEditor,
     LazyLoad

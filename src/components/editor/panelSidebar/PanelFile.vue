@@ -4,7 +4,7 @@ div(class="panel-file"
     @dragover.prevent,
     @dragenter.prevent)
   btn(class="full-width mb-20" :type="'primary-mid'"
-      @click.native="uploadImage()") {{$t('NN0014')}}
+      @click="uploadImage()") {{$t('NN0014')}}
   image-gallery(
     ref="mainContent"
     :myfile="myfileImages"
@@ -28,7 +28,7 @@ div(class="panel-file"
           :iconName="'trash'"
           :iconColor="'white'"
           :iconWidth="'24px'"
-          @click.native="deleteAssets()")
+          @click="deleteAssets()")
       span(class="text-blue-1 pointer" @click="clearCheckedAssets()") {{`${$t('NN0130')}(${checkedAssets.length})`}}
 </template>
 

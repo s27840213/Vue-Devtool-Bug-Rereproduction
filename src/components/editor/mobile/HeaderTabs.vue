@@ -58,6 +58,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['switchTab', 'showAllPages'],
   data() {
     return {
       homeTabs: [

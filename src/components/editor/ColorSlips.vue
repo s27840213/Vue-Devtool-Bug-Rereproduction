@@ -14,7 +14,7 @@ div(class="color-panel"
         div(class="flex-center")
           svg-icon(v-if="showAllRecentlyColor && mode!=='PanelColor'" iconName="chevron-left"
                 iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
-                class="mr-5" @click.native="lessRecently()")
+                class="mr-5" @click="lessRecently()")
           span {{$t('NN0679')}}
         span(v-if="!showAllRecentlyColor" class="btn-LG" @click="moreRecently()") {{$t('NN0082')}}
       div
@@ -119,6 +119,7 @@ export default defineComponent({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  emits: ['selectColor', 'selectColorEnd', 'toggleColorPanel', 'openColorPicker', 'openColorMore'],
   data() {
     return {
       vcoConfig: {

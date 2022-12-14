@@ -3,12 +3,12 @@ div(class="popup-window")
   div(class="wrapper")
     div(class="payment" v-click-outside="vcoConfig()")
       svg-icon(class="payment__close" iconName="close" iconWidth="32px"
-              iconColor="gray-0" @click.native="closePopup()")
+              iconColor="gray-0" @click="closePopup()")
       div(class="payment-left")
         div(class="payment-left-top")
           div(class="payment-left-top__step")
             svg-icon(v-if="showPreStep" iconName="left-arrow" iconWidth="24px"
-                    iconColor="gray1" @click.native="preStep()")
+                    iconColor="gray1" @click="preStep()")
             span(v-if="totalStep") {{$t('NN0544')}} {{currentStep}} of {{totalStep}}
           div(class="text-H4" v-html="title")
           div(v-if="description" class="mt-15") {{description}}
@@ -54,7 +54,7 @@ div(class="popup-window")
         div(class="payment-left-button")
           btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
               :disabled="button.disabled ? button.disabled() : false"
-              @click.native="button.func()") {{button.label}}
+              @click="button.func()") {{button.label}}
       div(class="payment-right")
         img(class="payment-right-bg" loading="lazy"
             :src="require(`@/assets/img/jpg/pricing/${locale}/${img}`)")
@@ -64,7 +64,7 @@ div(class="popup-window")
         div(class="payment-finish-content")
           animation(path="/lottie/pro.json")
           span {{$t('NN0562')}}
-          btn(type="primary-mid" @click.native="closePopup()") {{$t('NN0563')}}
+          btn(type="primary-mid" @click="closePopup()") {{$t('NN0563')}}
 </template>
 
 <script lang="ts">

@@ -43,6 +43,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['toggleSidebarPanel'],
   data() {
     return {
       SidebarPanelType

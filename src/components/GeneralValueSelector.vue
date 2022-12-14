@@ -28,6 +28,7 @@ export default defineComponent({
       default: '30'
     }
   },
+  emits: ['update'],
   data() {
     return {
     }

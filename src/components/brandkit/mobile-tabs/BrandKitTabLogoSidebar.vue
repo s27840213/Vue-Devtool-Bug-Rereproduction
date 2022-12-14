@@ -30,7 +30,7 @@ div(v-else class="brand-kit-tab-logo" :style="minHeightStyles()")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, defineAsyncComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import NoItemsHint from '@/components/brandkit/NoItemsHint.vue'
@@ -65,7 +65,7 @@ export default defineComponent({
   },
   components: {
     ObserverSentinel,
-    GalleryPhoto: () => import('@/components/GalleryPhoto.vue'),
+    GalleryPhoto: defineAsyncComponent(() => import('@/components/GalleryPhoto.vue')),
     NoItemsHint
   },
   watch: {

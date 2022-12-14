@@ -34,6 +34,7 @@ export default defineComponent({
   components: {
     MobileSlider
   },
+  emits: ['close'],
   computed: {
     opacity(): number {
       return layerUtils.getCurrOpacity
@@ -51,7 +52,6 @@ export default defineComponent({
       layerUtils.updateLayerOpacity(val)
     },
     newDesign() {
-      // designUtils.newDesign()
       const path = `${window.location.origin}${window.location.pathname}`
       window.open(path)
     },

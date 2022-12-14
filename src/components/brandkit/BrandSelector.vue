@@ -76,6 +76,7 @@ export default defineComponent({
       default: false
     }
   },
+  emits: ['deleteItem'],
   data() {
     return {
       isNameEditing: false,

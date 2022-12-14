@@ -7,7 +7,7 @@ div(class="popup-updateDesign")
           iconName="page-close"
           iconWidth="15px"
           iconColor="gray-0"
-          @click.native="handleCancel")
+          @click="handleCancel")
       div(class="popup-updateDesign__title") {{ typeText }}資訊
       div(class="popup-updateDesign__line mb-10" style="background: #eee;")
         span(class="body-1") id
@@ -50,7 +50,7 @@ div(class="popup-updateDesign")
               v-model="objectInfo.plan")
         btn(:type="'primary-sm'"
             class="popup-updateDesign__button rounded my-5"
-            @click.native="updateDataClicked()") 更 新
+            @click="updateDataClicked()") 更 新
     spinner(v-if="isLoading")
 </template>
 

@@ -19,6 +19,7 @@ import Vue, { PropType, defineComponent } from 'vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 
 export default defineComponent({
+  emits: ['loadMore'],
   props: {
     list: {
       type: Array as PropType<any[]>,

@@ -14,7 +14,7 @@ div(class="scale-ratio-editor")
       :class="[{'rotate-hr': isPageScalePopupOpen}]"
       :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
   svg-icon(class="hover-effect pointer"
-    @click.native="deleteLayer"
+    @click="deleteLayer"
     :iconName="'trash'" :iconColor="'gray-2'" iconWidth="20px")
 </template>
 
@@ -26,6 +26,7 @@ import popupUtils from '@/utils/popupUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 
 export default defineComponent({
+  emits: ['toggleSidebarPanel'],
   data() {
     return {
     }

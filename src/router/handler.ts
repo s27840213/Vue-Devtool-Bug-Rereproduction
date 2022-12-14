@@ -7,11 +7,17 @@ import themeUtils from '@/utils/themeUtils'
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
+import router from '.'
 
 export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized, from: VueRouter.RouteLocationNormalized, next: VueRouter.NavigationGuardNext) {
   try {
     next()
-    const urlParams = new URLSearchParams(window.location.search)
+    const { query } = _to
+    const urlParams = new URLSearchParams()
+
+    Object.entries(query).forEach(([key, val]) => {
+      urlParams.append(key, val as string)
+    })
     const type = urlParams.get('type')
     const designId = urlParams.get('design_id')
     const teamId = urlParams.get('team_id')
@@ -47,7 +53,8 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
         parseInt(height === '0' ? width : height),
         parseInt(themeId as string),
         path === null ? undefined : path,
-        folderName === null ? undefined : folderName
+        folderName === null ? undefined : folderName,
+        _to
       )
       if (themeId === '7') {
         store.commit('SET_groupType', 1)

@@ -90,6 +90,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['menuAction', 'moveItem'],
   computed: {
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',

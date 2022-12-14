@@ -147,6 +147,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['metaSelect', 'deselect', 'select', 'like', 'metaSelect'],
   data() {
     return {
       isDragged: false,

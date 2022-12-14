@@ -1,3 +1,4 @@
+import VueRouter from 'vue-router'
 import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
 import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
 import designApis from '@/apis/design'
@@ -787,7 +788,7 @@ class DesignUtils {
   }
 
   // Below function is used to update the page
-  async newDesign(width?: number, height?: number, newDesignType?: number, path?: string, folderName?: string) {
+  async newDesign(width?: number, height?: number, newDesignType?: number, path?: string, folderName?: string, to?: VueRouter.RouteLocationNormalized) {
     store.commit('file/SET_setLayersDone')
     pageUtils.setPages([pageUtils.newPage({
       width: width ?? 1080,
@@ -795,14 +796,12 @@ class DesignUtils {
     })])
     pageUtils.clearPagesInfo()
     await themeUtils.refreshTemplateState(undefined, newDesignType)
-    if (this.isLogin) {
-      router.replace({ query: { width: width?.toString(), height: height?.toString(), ...(path && { path }), ...(folderName && { folderName }) } })
 
-      // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
-      // /**
-      //  * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
-      //  */
-      // router.replace({ query: Object.assign({}, router.currentRoute.value.query, { type: 'design', design_id: uploadUtils.assetId }) })
+    if (this.isLogin) {
+      router.replace({
+        query: { width: width?.toString(), height: height?.toString(), ...(path && { path }), ...(folderName && { folderName }) },
+        path: to?.path ?? router.currentRoute.value.path
+      })
     }
   }
 

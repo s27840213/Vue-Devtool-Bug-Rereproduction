@@ -5,7 +5,7 @@ div(class="panel-shadow")
       svg-icon(
         :key="`shadow-${icon}`"
         :iconName="`mobile-photo-shadow-${icon}`"
-        @click.native="onEffectClick(icon)"
+        @click="onEffectClick(icon)"
         class="photo-shadow__options__option pointer"
         :class="{ 'photo-shadow__options__option--selected': currentEffect === icon }"
         iconWidth="60px"
@@ -46,6 +46,7 @@ export default defineComponent({
   components: {
     MobileSlider
   },
+  emits: ['openExtraColorModal', 'toggleColorPanel'],
   data() {
     return {
       imageShadowPanelUtils,

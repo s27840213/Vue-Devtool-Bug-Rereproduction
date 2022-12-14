@@ -64,15 +64,15 @@ div(class="text-setting" ref='body'
   //-             iconName="copy"
   //-             iconWidth="16px"
   //-             iconColor="gray-4"
-  //-             @click.native="copyColor")
+  //-             @click="copyColor")
   //-   div(class="action-bar action-bar--small flex-evenly")
   //-     svg-icon(class="pointer record-selection btn-lh"
   //-       :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
-  //-       @click.native="openLineHeightSliderPopup('.btn-lh')"
+  //-       @click="openLineHeightSliderPopup('.btn-lh')"
   //-       v-hint="$t('NN0109')")
   //-     svg-icon(class="pointer record-selection btn-ls"
   //-       :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
-  //-       @click.native="openSpacingSliderPopup('.btn-ls')"
+  //-       @click="openSpacingSliderPopup('.btn-ls')"
   //-       v-hint="$t('NN0110')")
   //- div(class="action-bar flex-evenly")
   //-   svg-icon(v-for="(icon,index) in mappingIcons('font')"
@@ -82,14 +82,14 @@ div(class="text-setting" ref='body'
   //-     :id="`icon-${icon}`"
   //-     :style="propsBtnStyles(icon)"
   //-     v-hint="hintMap[icon]"
-  //-     :iconName="icon" :iconWidth="'20px'" :iconColor="icon === 'font-vertical' && hasCurveText ? 'gray-4' : 'gray-2'" @mousedown.native="onPropertyClick(icon)")
+  //-     :iconName="icon" :iconWidth="'20px'" :iconColor="icon === 'font-vertical' && hasCurveText ? 'gray-4' : 'gray-2'" @mousedown="onPropertyClick(icon)")
   //- div(class="action-bar flex-evenly")
   //-   svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
   //-     class="pointer"
   //-     :key="`gp-action-icon-${index}`"
   //-     :style="propsBtnStyles(icon)"
   //-     v-hint="hintMap[icon]"
-  //-     :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
+  //-     :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown="onParaPropsClick(icon)")
 </template>
 
 <script lang="ts">
@@ -124,6 +124,7 @@ export default defineComponent({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  emits: ['toggleConfigPanel', 'toggleColorPanel', 'openFontsPanel'],
   data() {
     return {
       openColorPicker: false,

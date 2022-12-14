@@ -4,7 +4,7 @@ div(class="sidebar")
     svg-icon(class="pointer"
       :iconName="'logo-icon'"
       :iconWidth="'30px'"
-      @click.native="goToPage('Home')")
+      @click="goToPage('Home')")
   div(class="nav")
     div(class="nav-container")
       div(class="nav-item pointer"
@@ -27,7 +27,7 @@ div(class="sidebar")
       class="mt-30"
       :textSize="14"
       :avatarSize="35"
-      @click.native="goToPage('Settings')")
+      @click="goToPage('Settings')")
   div(v-if="buildNumber"
     class="text-white body-2 build-number") {{buildNumber}}
 </template>
@@ -48,6 +48,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['toggleSidebarPanel'],
   data() {
     return {
       SidebarPanelType

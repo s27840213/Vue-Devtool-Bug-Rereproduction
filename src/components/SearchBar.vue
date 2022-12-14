@@ -12,12 +12,12 @@ form(class="search-bar bg-gray-6"
     iconName="close"
     :iconColor="color.close || 'gray-3'"
     iconWidth="20px"
-    @click.native="onClear")
+    @click="onClear")
   svg-icon(class="pointer"
     iconName="search"
     :iconColor="color.search || 'gray-3'"
     iconWidth="20px"
-    @click.native="onSearch")
+    @click="onSearch")
   slot
 </template>
 
@@ -53,6 +53,7 @@ export default defineComponent({
       }
     }
   },
+  emits: ['search', 'update'],
   data() {
     return {
       keyword: this.defaultKeyword

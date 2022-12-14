@@ -68,6 +68,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['deleteItem', 'selectColor'],
   directives: {
     clickOutside: vClickOutside.directive
   },

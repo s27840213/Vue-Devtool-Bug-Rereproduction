@@ -90,7 +90,7 @@ export default defineComponent({
       type: String
     },
     dataPindex: {
-      default: -1,
+      default: '-1',
       type: String
     }
     /**

@@ -3,7 +3,7 @@ div(class="component-log-item"
     @click="toggleItem")
   div(class="component-log-item__main-info")
     div(class="flex items-center")
-      //- svg-icon(iconName="plus-square" iconColor="gray-3" iconWidth="16px" @click.native="toggleContent(!showContent)")
+      //- svg-icon(iconName="plus-square" iconColor="gray-3" iconWidth="16px" @click="toggleContent(!showContent)")
       span(class="component-log-item__component-name text-bold") {{log.component}}
       span(class="component-log-item__time text-bold ml-5") {{`${parseFloat(log.time.toFixed(3))}  ms`}}
     div(class="component-log-item__parent")

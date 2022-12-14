@@ -7,7 +7,7 @@ div(class="download-btn"
     :type="'primary-sm'"
     :disabled="inprogress || inBgRemoveMode || uploadingImgs.length !== 0 || isHandlingShadow || isFontLoading"
     class="btn-download rounded full-height full-width"
-    @click.native="() => handleShowPopup(true)")
+    @click="() => handleShowPopup(true)")
     span(v-if="!inprogress") {{$t('NN0010')}}
   popup-download(v-if="show"
     class="download-btn__modal"

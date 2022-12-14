@@ -46,6 +46,7 @@ export default defineComponent({
       default: false
     }
   },
+  emits: ['switchTab', 'showAllPages'],
   data() {
     const mainMenu = { icon: 'main-menu', text: `${this.$t('NN0489')}` }
 

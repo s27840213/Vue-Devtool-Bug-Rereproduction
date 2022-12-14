@@ -5,9 +5,9 @@ div(class="sp")
     svg-icon(v-if="isProIcon" iconName="pro" :iconColor="proIconColor")
     svg-icon(v-else           iconName="free")
     span(v-if="showDueDay")           {{$t('NN0593', {date: myPaidDate})}}
-    btn(v-if="canResume" class="rounded" type="primary-mid" @click.native="resume()")
+    btn(v-if="canResume" class="rounded" type="primary-mid" @click="resume()")
       span                            {{$t('NN0588')}}
-    btn(v-if="canAdd" class="rounded" type="primary-lg" @click.native="buy()")
+    btn(v-if="canAdd" class="rounded" type="primary-lg" @click="buy()")
       span                            {{$t('NN0587')}}
     span(v-if="isFail"
         class="text-red overline-LG") {{$t('NN0626')}}
@@ -63,7 +63,7 @@ div(class="sp")
         input(:id="input.key" v-model="bi[input.key]"
               :placeholder="input.ph" :invalid="biv[input.key]")
         span(v-if="biv[input.key]" class="text-red") {{input.error}}
-    btn(type="primary-mid" @click.native="updateBillingInfo()"
+    btn(type="primary-mid" @click="updateBillingInfo()"
         :disabled="!billingInfoCheck") {{$t('NN0176')}}
   div(v-if="showCardPopup" class="popup-window")
     div(class="sp-field" v-click-outside="closeCardPopup")

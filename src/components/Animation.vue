@@ -57,6 +57,7 @@ export default defineComponent({
       default: 0
     }
   },
+  emits: ['AnimControl'],
   data() {
     return {
       rendererSettings: {

@@ -25,7 +25,8 @@ export default defineComponent({
     ph: {
       type: String
     }
-  }
+  },
+  emits: ['update:modelValue']
 })
 </script>
 

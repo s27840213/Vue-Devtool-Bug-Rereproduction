@@ -12,21 +12,21 @@ div(style="position:relative;")
         div {{$t('NN0301')}}
         div {{$t('NN0302')}}
       div
-        btn(@click.native="onFacebookClicked()"
+        btn(@click="onFacebookClicked()"
           :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/facebook.png')")
         span(class="body-2") {{$t('NN0303', {media:'Facebook'})}}
       div
-        btn(@click.native="onGoogleClicked()" :type="'icon-mid-body'")
+        btn(@click="onGoogleClicked()" :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/google.png')")
         span(class="body-2") {{$t('NN0303', {media:'Google'})}}
       div
-        btn(@click.native="onEmailClicked()" :type="'icon-mid-body text-white'") {{$t('NN0303', {media: $tc('NN0173', 2)})}}
+        btn(@click="onEmailClicked()" :type="'icon-mid-body text-white'") {{$t('NN0303', {media: $tc('NN0173', 2)})}}
       div
         span {{$t('NN0304')}}
         btn(:type="'icon'"
           class="h-link"
-          @click.native="onLoginClicked()") {{$t('NN0305')}}
+          @click="onLoginClicked()") {{$t('NN0305')}}
       div
         button(@click="onCloseClicked")
               svg-icon(class="pointer"
@@ -98,7 +98,7 @@ div(style="position:relative;")
       div
         btn(:type="'primary-mid'"
           class="bg-gray-2 text-white btn-shadow"
-          @click.native="onSignUpClicked()") {{$tc('NN0169',2)}}
+          @click="onSignUpClicked()") {{$tc('NN0169',2)}}
       div
         this($path="NN0307" tag="span")
           template(#use)
@@ -109,7 +109,7 @@ div(style="position:relative;")
         span {{$t('NN0304')}}
         btn(:type="'icon'"
           class="h-link"
-          @click.native="onLoginClicked()") {{$t('NN0305')}}
+          @click="onLoginClicked()") {{$t('NN0305')}}
     div(v-if="currentPageIndex === 2"
       class="signup")
       div(class="text-center")
@@ -127,7 +127,7 @@ div(style="position:relative;")
       div(style="margin-bottom: 15px;")
         btn(:type="'primary-mid'"
           class="btn-shadow full-width"
-          @click.native="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
+          @click="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
       div(class="page-close")
         button(@click="onCloseClicked")
           svg-icon(class="pointer"
@@ -138,7 +138,7 @@ div(style="position:relative;")
         span {{$t('NN0288')}}
         btn(:type="'icon'"
           class="text-blue-1 body-1"
-          @click.native="onResendClicked()") {{$t('NN0290')}}
+          @click="onResendClicked()") {{$t('NN0290')}}
       div(v-else
         class="flex align-center text-gray-3"
         style="height:30px; margin-bottom: 0;")

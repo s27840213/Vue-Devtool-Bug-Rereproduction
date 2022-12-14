@@ -55,6 +55,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['select', 'deselect', 'goto'],
   computed: {
     ...mapGetters('design', {
       selectedDesigns: 'getSelectedDesigns'

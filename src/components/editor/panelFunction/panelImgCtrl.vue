@@ -3,9 +3,9 @@ div(class="panel-group mb-10")
   span(class="text-blue-1 subtitle-1") {{$t('NN0416') + $t('NN0036')}}
   div(class="panel-group__adjust")
     btn(class="btn-align full-width" :type="'gray-mid'"
-      @click.native="handleCancel") {{$t('NN0203')}}
+      @click="handleCancel") {{$t('NN0203')}}
     btn(class="btn-flip full-width" :type="'primary-mid'"
-      @click.native="handleFinish") {{$tc('NN0133', 1)}}
+      @click="handleFinish") {{$tc('NN0133', 1)}}
 </template>
 
 <script lang="ts">

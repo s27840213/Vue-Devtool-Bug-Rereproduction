@@ -19,6 +19,7 @@ export default defineComponent({
       default: '0px'
     }
   },
+  emits: ['callback'],
   data(): { intersectionObserver: IntersectionObserver | null } {
     return {
       intersectionObserver: null

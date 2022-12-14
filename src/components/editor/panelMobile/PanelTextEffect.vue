@@ -7,7 +7,7 @@ div(class="panel-text-effect")
       svg-icon(:iconName="`text-${category.name}-none`"
               iconWidth="60px"
               iconColor="gray-5"
-              @click.native="pushHistory(category.name)")
+              @click="pushHistory(category.name)")
       span(class="body-3") {{category.label}}
   //- To choose effect, ex: hollow, splice or echo.
   div(v-if="state === 'effects'"
@@ -82,6 +82,7 @@ export default defineComponent({
       default: () => []
     }
   },
+  emits: ['pushHistory', 'openExtraColorModal'],
   data() {
     return {
       textEffects: constantData.textEffects()

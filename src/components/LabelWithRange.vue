@@ -47,6 +47,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['update'],
   mounted() {
     popupUtils.on(this.event, (value: number) => {
       this.emitValue(value)

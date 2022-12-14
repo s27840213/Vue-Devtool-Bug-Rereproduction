@@ -2,7 +2,7 @@
 div(class="field")
   template(v-if="isChange")
     svg-icon(iconName="page-close" iconWidth="10px"
-            iconColor="gray-0" class="field__close pointer" @click.native="close()")
+            iconColor="gray-0" class="field__close pointer" @click="close()")
     span(class="text-H6 text-gray-2 mb-40") {{$t('NN0600')}}
   div(class="field-card")
     options(v-if="!isChange" class="mb-10"
@@ -29,7 +29,7 @@ div(class="field")
       input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
       span(v-if="biv[inv.key]" class="text-red") {{inv.error}}
   btn(class="btn-LG mt-30 rounded" type="primary-lg"
-      :disabled="disableSubmit" @click.native="submit()") {{submitText}}
+      :disabled="disableSubmit" @click="submit()") {{submitText}}
 </template>
 
 <script lang="ts">
@@ -58,6 +58,7 @@ export default defineComponent({
   components: {
     Options
   },
+  emits: ['next'],
   data() {
     return {
       countryData: paymentData.countryList(),

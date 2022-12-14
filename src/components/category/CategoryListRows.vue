@@ -16,6 +16,7 @@ import { defineComponent } from 'vue'
 import CategoryListRow from './CategoryListRow.vue'
 
 export default defineComponent({
+  emits: ['action'],
   props: {
     list: {
       type: Array,

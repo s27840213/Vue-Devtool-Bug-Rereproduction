@@ -7,7 +7,7 @@ div(class="panel-template" ref="panel")
       iconColor="gray-2"
       iconName="close"
       iconWidth="24px"
-      @click.native="handleClosePrompt")
+      @click="handleClosePrompt")
   //- Group template UI
   panel-group-template(v-if="currentGroup"
     :showId="inAdminMode"
@@ -26,7 +26,7 @@ div(class="panel-template" ref="panel")
           iconName="advanced"
           iconColor="gray-6"
           iconWidth="20px"
-          @click.native="onAdvancedClicked()")
+          @click="onAdvancedClicked()")
       popup-theme(v-if="showTheme"
         class="panel-template__theme"
         :style="themeStyle()"

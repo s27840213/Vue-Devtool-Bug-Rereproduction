@@ -27,6 +27,7 @@ import ProItem from '@/components/payment/ProItem.vue'
 import GeneralUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: ['click'],
   components: {
     ImageCarousel,
     ProItem

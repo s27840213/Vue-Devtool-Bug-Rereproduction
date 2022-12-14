@@ -32,7 +32,7 @@ div(class="pricing")
           span(class="pricing-plan-right-price__dollar") {{'$ '}}
           span(class="text-H1") {{plans[planSelected][periodUi].now}}
           span {{' ' + $t('NN0516')}}
-        btn(class="pricing-plan-right-buy" type="light-lg" @click.native="tryAddCard()")
+        btn(class="pricing-plan-right-buy" type="light-lg" @click="tryAddCard()")
           span(class="btn-LG") {{buyLabel}}
     span(class="pricing-currency") {{$t('NN0519')}}
     div(class="pricing-compare")

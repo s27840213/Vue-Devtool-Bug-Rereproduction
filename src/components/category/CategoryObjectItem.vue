@@ -8,7 +8,7 @@ div(class="category-object-item"
     :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
   svg-icon(v-if="!isTouchDevice && (item.info || (item.tags && item.tags.length > 0))"
     class="category-object-item__more"
-    @click.native="showSvgInfo"
+    @click="showSvgInfo"
     :iconName="'more_vertical'"
     :iconColor="'gray-2'"
     :iconWidth="'20px'")
@@ -31,8 +31,7 @@ export default defineComponent({
   },
   props: {
     src: {
-      type: String,
-      required: true
+      type: String
     },
     item: {
       type: Object,

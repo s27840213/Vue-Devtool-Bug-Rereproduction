@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="brand-kit-tab-color")
   brand-kit-add-btn(:text="`${$t('NN0404')}`"
-                    @click.native="handleCreatePalette")
+                    @click="handleCreatePalette")
   transition-group(class="brand-kit-tab-color__palettes" name="list" tag="div")
     template(v-for="colorPalette in renderedColorPalettes")
       div(v-if="colorPalette === 'loading'"
@@ -27,6 +27,7 @@ import BrandKitColorPalette from '@/components/brandkit/BrandKitColorPalette.vue
 import { IBrand, IBrandColorPalette, IDeletingItem } from '@/interfaces/brandkit'
 
 export default defineComponent({
+  emits: ['deleteItem'],
   data() {
     return {
       selectedColor: {

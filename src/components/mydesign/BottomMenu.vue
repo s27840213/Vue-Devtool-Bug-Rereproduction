@@ -143,6 +143,7 @@ export default defineComponent({
   components: {
     MobileStructureFolder
   },
+  emits: ['menuAction', 'back', 'clear', 'close', 'push'],
   data() {
     return {
       sortMenuItems: [

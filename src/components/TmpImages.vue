@@ -43,6 +43,7 @@ export default defineComponent({
       return this.galleryUtils.margin
     }
   },
+  emits: ['loadMore'],
   data() {
     return {
       rows: [],

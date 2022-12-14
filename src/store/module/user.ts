@@ -224,7 +224,6 @@ const actions: ActionTree<IUserModule, unknown> = {
     try {
       const { data } = await userApis.groupDesign(params)
       const { flag, group_id: groupId, msg } = data
-      console.log(data)
       const isDelete = params.list?.length === 0 && params.update === 1
       if (flag === 0) {
         commit('SET_groupId', groupId, { root: true })
@@ -237,7 +236,6 @@ const actions: ActionTree<IUserModule, unknown> = {
           commit('SET_groupType', 0, { root: true })
         }
         themeUtils.fetchTemplateContent()
-        console.log(`Success: ${groupId}}`)
       } else if (flag === 1) {
         modalUtils.setModalInfo('上傳失敗', [`Error msg: ${msg}`])
         commit('SET_groupId', '', { root: true })
@@ -330,7 +328,6 @@ const actions: ActionTree<IUserModule, unknown> = {
       })
 
       // locale settings
-      process.env.NODE_ENV === 'development' && console.log(data.data)
       const locale = localStorage.getItem('locale') as string
       if (locale !== data.data.locale) {
         i18n.global.locale = data.data.locale

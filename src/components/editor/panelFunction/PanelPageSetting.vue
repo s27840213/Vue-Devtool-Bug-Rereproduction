@@ -3,13 +3,13 @@ div(class="page-setting")
   div(class="page-setting-row page-setting__title")
     span(class="text-gray-2 label-mid") {{$t('NN0021')}}
   div(class="page-setting-row page-setting__size")
-    property-bar(class="page-setting__size__box pointer" @click.native="setSuggestionPanel(true)")
+    property-bar(class="page-setting__size__box pointer" @click="setSuggestionPanel(true)")
       span(class="body-3 text-gray-2") {{ currentPageWidth }}
       span(class="body-4 text-gray-3") W
     svg-icon(class="pointer"
         :iconName="isLocked ? 'lock' : 'unlock'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click.native="toggleLock()")
-    property-bar(class="page-setting__size__box pointer" @click.native="setSuggestionPanel(true)")
+        @click="toggleLock()")
+    property-bar(class="page-setting__size__box pointer" @click="setSuggestionPanel(true)")
       span(class="body-3 text-gray-2") {{ currentPageHeight }}
       span(class="body-4 text-gray-3") H
   div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
@@ -33,7 +33,7 @@ div(class="page-setting")
     div(class="template-information__divider pb-10")
     btn(:type="'primary-sm'" class="rounded my-5"
         style="padding: 8px 0; margin-left: 6%; width: 88%;"
-        @click.native="getDataClicked()") 取 得 群 組 / 模 板 資 料
+        @click="getDataClicked()") 取 得 群 組 / 模 板 資 料
     div(v-if="groupId.length > 0"
       class="pt-10")
       span(class="text-gray-1 label-lg") 群 組 資 訊
@@ -79,7 +79,7 @@ div(class="page-setting")
         div(class="pt-10")
           btn(:type="'primary-sm'" class="rounded my-5"
             style="padding: 8px 0; margin: 0 auto; width: 70%;"
-            @click.native="updateGroupClicked()") 更新
+            @click="updateGroupClicked()") 更新
     div(class="template-information__divider2")
     span(class="text-gray-1 label-lg") 模 板 資 訊
     div(class="template-information__content")
@@ -159,7 +159,7 @@ div(class="page-setting")
         div(class="pt-10")
           btn(:type="'primary-sm'" class="rounded my-5"
             style="padding: 8px 0; margin: 0 auto; width: 70%;"
-            @click.native="updateDataClicked()") 更新
+            @click="updateDataClicked()") 更新
         div(class="template-information__divider")
         div(class="template-information__line bg-blue")
           span(class="body-1") 父
@@ -200,7 +200,7 @@ div(class="page-setting")
             label 確定修改
           btn(:type="'primary-sm'" class="rounded my-5"
             style="padding: 5px 40px;"
-            @click.native="updateParentIdClicked()") 修改
+            @click="updateParentIdClicked()") 修改
 </template>
 
 <script lang="ts">

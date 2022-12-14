@@ -34,6 +34,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['update'],
   data() {
     const fields = imageAdjustUtil.getFields()
     const adjustTmp = Object.assign(

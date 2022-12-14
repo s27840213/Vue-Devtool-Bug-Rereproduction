@@ -11,14 +11,14 @@ div(class="photo-setting")
           ref="btn"
           :disabled="disableBtn(btn)"
           :key="btn.name"
-          @click.native="handleShow(btn.show)") {{ btn.label }}
+          @click="handleShow(btn.show)") {{ btn.label }}
           //- v-hint="(btn.hint && btn.hint.condition()) ? btn.hint.content : ''"
     btn(v-if="isImage && !isFrame"
       class="full-width"
       type="gray-mid"
       ref="btn"
       :disabled="isHandleShadow || show === 'panel-photo-shadow'"
-      @click.native="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
+      @click="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
   component(:is="show || 'div'"
     ref="popup"
     :imageAdjust="currLayerAdjust"
@@ -47,6 +47,7 @@ import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
   name: 'PanelPhotoSetting',
+  emits: ['toggleColorPanel'],
   data() {
     return {
       show: '',

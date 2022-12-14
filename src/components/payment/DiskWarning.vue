@@ -10,13 +10,13 @@ div(v-if="showWarning" class="warning")
       //- template(#button)
       //-   span(class="warning-small-desc__btn" @click="cur.small.func") {{cur.small.buttonLabel}}
     svg-icon(iconName="close" iconColor="white"
-            iconWidth="24px" @click.native="close()")
+            iconWidth="24px" @click="close()")
   div(v-if="size === 'large'" class="warning-large" :style="bgcolor")
     div(class="caption-LG") {{cur.title}}
     div(class="warning-large-desc") {{cur.large.desc}}
     div(class="warning-large-btn")
       btn(v-for="btn in cur.large.buttons" :type="btn.type || 'light-mid'"
-          :disabled="btn.disabled" @click.native="btn.func()") {{btn.label}}
+          :disabled="btn.disabled" @click="btn.func()") {{btn.label}}
 </template>
 
 <script lang="ts">

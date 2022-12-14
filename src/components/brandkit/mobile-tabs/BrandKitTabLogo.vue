@@ -66,6 +66,7 @@ import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
 
 export default defineComponent({
+  emits: ['deleteItem'],
   data() {
     return {
       menuOpenLogoId: ''

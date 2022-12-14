@@ -259,7 +259,6 @@ module.exports = defineConfig({
             enableBridge: true,
             enableLegacy: true,
             runtimeOnly: false,
-            compositionOnly: true,
             fullInstall: true
         }
     }

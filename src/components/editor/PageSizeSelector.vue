@@ -20,7 +20,7 @@ div(class="page-size-selector" :class="{isTouchDevice}")
       svg-icon(class="pointer"
           :iconName="isLocked ? 'lock' : 'unlock'"
           iconWidth="15px" :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'blue'"
-          @click.native="toggleLock()")
+          @click="toggleLock()")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`")
         input(class="body-3" type="number" min="0"
@@ -67,7 +67,7 @@ div(class="page-size-selector" :class="{isTouchDevice}")
     checkbox(v-model="copyBeforeApply") {{$t('NN0211')}}
     btn(class="page-size-selector__body__button"
         :disabled="!isFormatApplicable"
-        @click.native="submit")
+        @click="submit")
       svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm")
       span {{$t('NN0022')}}
 </template>
@@ -96,6 +96,7 @@ export default defineComponent({
       default: true
     }
   },
+  emits: ['close'],
   components: {
     SearchBar,
     RadioBtn,

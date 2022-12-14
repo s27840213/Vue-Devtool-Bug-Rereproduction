@@ -59,6 +59,7 @@ export default defineComponent({
       default: () => []
     }
   },
+  emits: ['pushHistory'],
   components: {
     MobileSlider,
     ColorPicker,

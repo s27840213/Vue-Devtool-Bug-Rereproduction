@@ -21,6 +21,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['change'],
   data () {
     return {
       handler: 0,

@@ -26,6 +26,7 @@ export default defineComponent({
       default: 'dark'
     }
   },
+  emits: ['switchTab'],
   data() {
     return {
       currActiveTabIndex: this.defaultTab

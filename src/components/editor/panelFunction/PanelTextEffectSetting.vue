@@ -12,7 +12,7 @@ div(class="text-effect-setting mt-25")
         svg-icon(v-for="effect in effects1d"
           :key="`${currCategory.name}-${effect.key}`"
           :iconName="`text-${currCategory.name}-${effect.key}`"
-          @click.native="onEffectClick(effect.key)"
+          @click="onEffectClick(effect.key)"
           class="text-effect-setting__effect pointer"
           :class="{'selected': currentStyle[currCategory.name].name === effect.key }"
           iconWidth="60px"
@@ -32,7 +32,7 @@ div(class="text-effect-setting mt-25")
               :iconName="`${option.key}-${sel.key}`"
               iconWidth="24px"
               :class="{'selected': currentStyle[currCategory.name].endpoint === sel.key }"
-              @click.native="handleSelectInput(option.key, sel.key)")
+              @click="handleSelectInput(option.key, sel.key)")
           //- Option type range
           template(v-if="option.type === 'range'")
             input(class="text-effect-setting-options__field--number"
@@ -86,6 +86,7 @@ export default defineComponent({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  emits: ['toggleColorPanel'],
   data() {
     return {
       openColorPicker: false,

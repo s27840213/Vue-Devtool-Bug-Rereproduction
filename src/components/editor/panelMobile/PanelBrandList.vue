@@ -65,6 +65,7 @@ export default defineComponent({
       default: false
     }
   },
+  emits: ['pushHistory', 'back'],
   unmounted() {
     this.isDestroyed = true
   },

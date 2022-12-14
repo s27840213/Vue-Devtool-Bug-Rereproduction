@@ -24,6 +24,7 @@ label(class="download-check-button")
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: ['change'],
   props: {
     defaultChecked: {
       type: Boolean,

@@ -68,6 +68,7 @@ export default defineComponent({
       default: '#fff'
     }
   },
+  emits: ['update:modelValue'],
   computed: {
     insideIndex():number {
       return _.findIndex(this.options, ['value', this.modelValue])

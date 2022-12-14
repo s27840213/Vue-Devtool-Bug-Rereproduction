@@ -67,6 +67,7 @@ export default defineComponent({
     Tabs,
     ColorSlips
   },
+  emits: ['openExtraColorModal'],
   data() {
     return {
       scrollTop: {

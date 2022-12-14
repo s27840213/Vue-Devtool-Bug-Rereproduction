@@ -33,7 +33,7 @@ div(class="brand-kit-text-setting relative")
         :class="{active: styleHit(icon)}"
         :id="`icon-${icon}`"
         v-hint="hintMap[icon]"
-        :iconName="icon" iconWidth="24px" iconColor="gray-2" @mousedown.native="onPropertyClick(icon)")
+        :iconName="icon" iconWidth="24px" iconColor="gray-2" @mousedown="onPropertyClick(icon)")
     div(v-if="isFontsPanelOpen"
       class="brand-kit-text-setting__panel-fonts"
       v-click-outside="() => { isFontsPanelOpen = false }")

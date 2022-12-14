@@ -76,6 +76,7 @@ export default defineComponent({
     },
     noNewDesign: Boolean
   },
+  emits: ['loadMore'],
   computed: {
     ...mapGetters('design', {
       favoriteDesigns: 'getFavoriteDesigns',

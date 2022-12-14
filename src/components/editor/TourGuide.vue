@@ -7,13 +7,13 @@ div(class="tour-guide")
     div(class="tour-guide__actions mt-15")
       btn(v-if="stepInfo.skip"
         class="skip"
-        @click.native="handleSkip") {{ stepInfo.skip.text }}
+        @click="handleSkip") {{ stepInfo.skip.text }}
       btn(v-if="stepInfo.next"
         class="next"
-        @click.native="handleNextStep") {{ stepInfo.next.text }}
+        @click="handleNextStep") {{ stepInfo.next.text }}
       btn(v-if="stepInfo.finish"
         class="finish"
-        @click.native="handleFinish") {{ stepInfo.finish.text }}
+        @click="handleFinish") {{ stepInfo.finish.text }}
   div(class="tour-guide__arrow" ref="arrow")
 </template>
 

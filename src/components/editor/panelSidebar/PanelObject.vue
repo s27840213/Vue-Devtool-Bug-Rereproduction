@@ -9,7 +9,7 @@ div(class="panel-objects")
   //- Admin tool
   div(v-if="inAdminMode" class="panel-objects-2html")
     input(type="text" placeholder="項目網址" v-model="panelParams")
-    btn(@click.native="downloadAll") Download all
+    btn(@click="downloadAll") Download all
   //- Search result empty msg
   div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
   //- Search result and main content

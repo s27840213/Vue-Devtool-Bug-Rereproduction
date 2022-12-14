@@ -21,7 +21,8 @@ export default defineComponent({
       type: String,
       default: '16px'
     }
-  }
+  },
+  emits: ['update:modelValue']
 })
 </script>
 

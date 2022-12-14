@@ -8,7 +8,7 @@ div(class="panel-fonts")
       :iconName="'close'"
       :iconWidth="'30px'"
       :iconColor="'gray-2'"
-      @click.native="closeFontsPanel")
+      @click="closeFontsPanel")
   search-bar(placeholder="Search font"
     clear
     :defaultKeyword="keywordLabel"
@@ -40,7 +40,7 @@ div(class="panel-fonts")
           :iconWidth="'30px'"
           :iconColor="'green-2'")
         span {{fontUploadStatus === 'uploading' ? `${$t('NN0136')}` : `${$t('NN0135')}`}}
-    btn(class="full-width" :type="'primary-mid'" @click.native="uploadFont()"
+    btn(class="full-width" :type="'primary-mid'" @click="uploadFont()"
       :disabled="fontUploadStatus === 'uploading'") Upload Font
 </template>
 
@@ -79,6 +79,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['closeFontsPanel'],
   data() {
     return {
       FileUtils

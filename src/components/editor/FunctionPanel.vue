@@ -9,14 +9,14 @@ div(class="function-panel"
       :iconName="'undo'"
       :iconWidth="'20px'"
       :iconColor="(!inBgRemoveMode && !isInFirstStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveFirstStep) ? 'gray-2' : 'gray-4'"
-      @click.native="undo"
+      @click="undo"
       v-hint="$t('NN0119')"
     )
     svg-icon(:class="{'pointer': !isInLastStep}"
       :iconName="'redo'"
       :iconWidth="'20px'"
       :iconColor="(!inBgRemoveMode && !isInLastStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveLastStep) ? 'gray-2' : 'gray-4'"
-      @click.native="redo"
+      @click="redo"
       v-hint="$t('NN0120')")
     download-btn
     btn(:hasIcon="true"
@@ -26,7 +26,7 @@ div(class="function-panel"
       :disabled="inBgRemoveMode"
       :squared="true"
       class="btn-file rounded full-height"
-      @click.native="openFilePopup")
+      @click="openFilePopup")
   div(v-if="!isShowPagePreview"
       class="function-panel__content"
       :class="{'dim-background': showMore}")
@@ -36,7 +36,7 @@ div(class="function-panel"
     panel-page-setting(v-if="showPageSetting")
     panel-background-setting(v-if="showPageSetting" @toggleColorPanel="toggleColorPanel")
     panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel" @toggleColorPanel="toggleColorPanel")
-    panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
+    panel-text-effect-setting(v-if="showTextSetting" @toggleColorPanel="toggleColorPanel")
     panel-photo-setting(v-if="showPhotoSetting" @toggleColorPanel="toggleColorPanel")
     panel-shape-setting(v-if="showShapeSetting" @toggleColorPanel="toggleColorPanel")
     panel-img-ctrl(v-if="isImgCtrl")
@@ -83,6 +83,7 @@ export default defineComponent({
     PanelPhotoShadow,
     PanelImgCtrl
   },
+  emits: ['toggleColorPanel'],
   data() {
     return {
       isFontsPanelOpened: false,

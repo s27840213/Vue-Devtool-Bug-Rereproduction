@@ -24,7 +24,7 @@ div(class="modal-card")
         @click="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
     div(class="modal-card__close")
       svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'"
-              iconColor="gray-2" @click.native="closePopup()")
+              iconColor="gray-2" @click="closePopup()")
 </template>
 
 <script lang="ts">

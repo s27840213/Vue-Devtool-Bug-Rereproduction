@@ -60,6 +60,7 @@ export default defineComponent({
       default: false
     }
   },
+  emits: ['loaded', 'intersecting'],
   data() {
     return {
       intersectionObserver: null as unknown as IntersectionObserver,

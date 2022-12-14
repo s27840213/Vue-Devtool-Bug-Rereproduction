@@ -91,6 +91,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['menuAction', 'loadMore'],
   computed: {
     ...mapGetters('design', {
       favoriteDesigns: 'getFavoriteDesigns',

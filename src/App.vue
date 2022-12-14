@@ -14,7 +14,7 @@ div(id="app" :style="appStyles()")
     popup
     res-info(v-show="currSelectedResInfo.type"
       :info="currSelectedResInfo"
-      @blur.native="setCurrSelectedResInfo()"
+      @blur="setCurrSelectedResInfo()"
       tabindex="0")
   div(v-if="isAdmin && !inScreenshotPreview" class="fps")
     span FPS: {{fps}}

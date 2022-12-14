@@ -80,6 +80,7 @@ export default defineComponent({
       isTrashDraggedOver: false
     }
   },
+  emits: ['moveItem', 'deleteAll', 'deleteFolder', 'deleteItem'],
   computed: {
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',

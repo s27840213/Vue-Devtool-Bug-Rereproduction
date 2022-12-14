@@ -56,6 +56,7 @@ export default defineComponent({
   components: {
     PageSizeSelector
   },
+  emits: ['close'],
   data() {
     return {
       panelTop: 0,

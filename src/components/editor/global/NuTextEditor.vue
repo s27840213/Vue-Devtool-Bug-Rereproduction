@@ -33,6 +33,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['update', 'compositionend'],
   data() {
     return {
       editor: undefined as Editor | undefined,

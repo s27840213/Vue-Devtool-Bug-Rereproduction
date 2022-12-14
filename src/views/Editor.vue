@@ -12,9 +12,11 @@ import logUtils from '@/utils/logUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import editorUtils from '@/utils/editorUtils'
+import { editorRouteHandler } from '@/router/handler'
 
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
   components: {

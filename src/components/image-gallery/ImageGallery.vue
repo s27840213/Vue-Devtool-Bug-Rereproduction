@@ -49,6 +49,7 @@ export default defineComponent({
     ObserverSentinel,
     GalleryPhoto
   },
+  emits: ['loadMore'],
   computed: {
     ...mapState('file', ['regenerateGalleryFlag']),
     margin(): number {

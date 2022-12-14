@@ -10,7 +10,7 @@ div(class="popup-download text-left"
         iconName="close"
         iconWidth="16px"
         iconColor="gray-2"
-        @click.native="$emit('close')")
+        @click="$emit('close')")
     div(class="popup-download__progress mt-5")
       div(class="popup-download__progress-value" :style="{ width: `${progress}%`}")
   div(v-else class="popup-download__form")
@@ -120,7 +120,7 @@ div(class="popup-download text-left"
         div
           btn(class="full-width body-3 rounded"
             :disabled="isButtonDisabled"
-            @click.native="handleSubmit(true)")
+            @click="handleSubmit(true)")
             svg-icon(v-if="polling"
               class="align-middle"
               iconName="loading"
@@ -136,7 +136,7 @@ div(class="popup-download text-left"
     div
       btn(class="full-width body-3 rounded"
         :disabled="isButtonDisabled"
-        @click.native="handleSubmit()")
+        @click="handleSubmit()")
         svg-icon(v-if="polling"
           class="align-middle"
           iconName="loading"
@@ -184,6 +184,7 @@ export default defineComponent({
       type: Boolean
     }
   },
+  emits: ['close', 'inprogress'],
   data() {
     const {
       selectedTypeVal,

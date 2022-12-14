@@ -38,6 +38,7 @@ export default defineComponent({
       showMore: false
     }
   },
+  emits: ['search', 'showMore'],
   computed: {
     isTouchDevice(): boolean {
       return generalUtils.isTouchDevice()

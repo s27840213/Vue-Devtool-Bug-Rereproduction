@@ -12,7 +12,7 @@ div(class="popup-line-template bg-white")
             :iconName="template"
             :iconWidth="'80px'"
             :iconColor="'gray-1'"
-            @click.native="addLineTemplate(index,LineTemplatesType.type1)")
+            @click="addLineTemplate(index,LineTemplatesType.type1)")
     hr(class="popup-line-template__hr")
     div(class="popup-line-template__row2" :style="row2Styles")
       div(v-if="isFbCover" class="popup-line-template__fb-cover")
@@ -22,7 +22,7 @@ div(class="popup-line-template bg-white")
             :iconName="'line-template-fb-cover'"
             :iconWidth="'80px'"
             :iconColor="'gray-1'"
-            @click.native="addLineToSpecPos(fbCover)")
+            @click="addLineToSpecPos(fbCover)")
       div(class="popup-line-template__options")
         span(class="popup-line-template__subtitle text-gray-3 mb-5") {{$t('NN0452')}}
         div(class="popup-line-template__grid-3")
@@ -32,7 +32,7 @@ div(class="popup-line-template bg-white")
               :iconName="template"
               :iconWidth="'80px'"
               :iconColor="'gray-1'"
-              @click.native="addLineTemplate(index,LineTemplatesType.type2)")
+              @click="addLineTemplate(index,LineTemplatesType.type2)")
 </template>
 
 <script lang="ts">

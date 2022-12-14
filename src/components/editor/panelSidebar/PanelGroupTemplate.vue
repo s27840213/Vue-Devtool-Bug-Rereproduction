@@ -4,7 +4,7 @@ div(class="panel-group-template py-20 px-10 flex flex-column" :style="panelStyle
     svg-icon(class="panel-group-template__close pointer"
       iconName="chevron-left"
       iconColor="white"
-      @click.native="$emit('close')")
+      @click="$emit('close')")
     button(class="panel-group-template__apply lead-2"
       @click="handleApplyGroupTemplate") {{ $t('NN0392', { num: count })}}
     svg-icon(v-if="isAdmin"
@@ -12,7 +12,7 @@ div(class="panel-group-template py-20 px-10 flex flex-column" :style="panelStyle
       iconName="trash"
       iconWidth="30px"
       iconColor="white"
-      @click.native="handleDeleteGroupTemplate")
+      @click="handleDeleteGroupTemplate")
   div(class="panel-group-template__list" :style="listStyle")
     category-template-item(v-for="(item, idx) in contents"
       class="panel-group-template__item"
@@ -44,6 +44,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['close'],
   computed: {
     ...mapGetters({
       token: 'user/getToken',

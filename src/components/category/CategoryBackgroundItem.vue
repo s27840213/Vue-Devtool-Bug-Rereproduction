@@ -19,15 +19,14 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 export default defineComponent({
   props: {
     src: {
-      type: String,
-      required: true
+      type: String
     },
     item: {
       type: Object as PropType<IListServiceContentDataItem>,
       required: true
     },
     locked: {
-      type: Object,
+      type: Boolean,
       required: true
     }
   },

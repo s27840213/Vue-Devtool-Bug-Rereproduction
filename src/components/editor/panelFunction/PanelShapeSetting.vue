@@ -7,11 +7,11 @@ div(class="shape-setting")
     div(class="shape-setting__line-action-wrapper")
       svg-icon(class="pointer feature-button"
               iconName="line-width" iconWidth="24px" iconColor="gray-2"
-              @click.native="openLineSliderPopup")
+              @click="openLineSliderPopup")
     div(class="shape-setting__line-action-wrapper")
       svg-icon(class="pointer feature-button"
               iconName="line-dash" iconWidth="24px" iconColor="gray-2"
-              @click.native="handleValueModal('line-dash')")
+              @click="handleValueModal('line-dash')")
       general-value-selector(v-if="openValueSelector === 'line-dash'"
                     :valueArray="[[1, 2], [3, 4]]"
                     class="shape-setting__value-selector-dash-and-edge"
@@ -103,16 +103,16 @@ div(class="shape-setting")
       div(class="shape-setting__line-action-wrapper")
         svg-icon(class="pointer feature-button"
                 iconName="line-width" iconWidth="24px" iconColor="gray-2"
-                @click.native="openBasicShapeSliderPopup")
+                @click="openBasicShapeSliderPopup")
       div(class="shape-setting__line-action-wrapper")
         svg-icon(class="pointer feature-button"
                 v-if="filled"
                 iconName="filled" iconWidth="24px" iconColor="gray-2"
-                @click.native="handleValueModal('isFilled')")
+                @click="handleValueModal('isFilled')")
         svg-icon(class="pointer feature-button"
                 v-else
                 iconName="non-filled" iconWidth="24px" iconColor="gray-2"
-                @click.native="handleValueModal('isFilled')")
+                @click="handleValueModal('isFilled')")
         general-value-selector(v-if="openValueSelector === 'isFilled'"
                     :valueArray="[[0, 1]]"
                     class="shape-setting__value-selector-filled"
@@ -151,7 +151,7 @@ div(class="shape-setting")
       div(class="shape-setting__info__divider pb-10")
       btn(:type="'primary-sm'"
         class="shape-setting__info__button rounded my-5"
-        @click.native="getDataClicked()") 取 得 元 素 資 料
+        @click="getDataClicked()") 取 得 元 素 資 料
       div(class="shape-setting__info__divider2 pb-10")
       span(class="py-5 text-gray-1 label-lg") 元 素 資 訊
       div(class="shape-setting__info__line" style="background: #eee;")
@@ -194,7 +194,7 @@ div(class="shape-setting")
         div(class="pt-10")
           btn(:type="'primary-sm'"
             class="shape-setting__info__button rounded my-5"
-            @click.native="updateDataClicked()") 更新
+            @click="updateDataClicked()") 更新
   spinner(v-if="isLoading")
 </template>
 
@@ -236,6 +236,7 @@ export default defineComponent({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  emits: ['toggleColorPanel'],
   data() {
     return {
       fieldRange: {

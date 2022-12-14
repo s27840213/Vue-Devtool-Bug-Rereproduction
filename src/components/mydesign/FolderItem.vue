@@ -115,6 +115,7 @@ export default defineComponent({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  emits: ['metaSelectFolder', 'deselect', 'select', 'goto', 'moveItem', 'metaSelectFolder'],
   data() {
     return {
       isDragged: false,

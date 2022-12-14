@@ -61,6 +61,7 @@ export default defineComponent({
       type: Boolean
     }
   },
+  emits: ['deleteItem'],
   components: {
     BrandKitTabLogo,
     BrandKitTabText,

@@ -39,7 +39,7 @@ div(class="brand-kit-tab-text")
             img(:src="font.textPrevUrl")
           svg-icon(class="brand-kit-tab-text__font-column__trash-icon"
                   iconName="trash" iconWidth="24px" iconColor="gray-2"
-                  @click.native="handleDeleteFont(font)")
+                  @click="handleDeleteFont(font)")
   div(class="brand-kit-tab-text__style-column")
     brand-kit-text-setting(class="brand-kit-tab-text__style-column__item"
                           type="heading" :textStyleSetting="textStyleSetting")
@@ -65,6 +65,7 @@ interface IUrledFont extends IBrandFont {
 }
 
 export default defineComponent({
+  emits: ['deleteItem'],
   data() {
     return {
       fonts: [] as IUrledFont[]

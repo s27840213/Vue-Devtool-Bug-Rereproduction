@@ -97,6 +97,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['select', 'deselect'],
   data() {
     return {
       imgWidth: 150,

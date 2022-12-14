@@ -42,7 +42,7 @@ div(class="nu-header")
         avatar(class="pointer"
           :textSize="14"
           :avatarSize="35"
-          @click.native="isAccountPopup = true")
+          @click="isAccountPopup = true")
         popup-account(v-if="isAccountPopup"
           class="nu-header__account"
           @close="() => (isAccountPopup = false)")
@@ -52,24 +52,24 @@ div(class="nu-header")
         :iconName="'logo'"
         :iconWidth="'143px'"
         style="height: 45px;"
-        @click.native="goToPage('Home')")
+        @click="goToPage('Home')")
     div(style="height: 25px")
       template(v-if="!noSearchbar")
         svg-icon(v-if="!isShowSearchPage"
           :iconName="'search'"
           :iconColor="'gray-3'"
           :iconWidth="'25px'"
-          @click.native="() => { isShowSearchPage = true }")
+          @click="() => { isShowSearchPage = true }")
         svg-icon(v-else
           :iconName="'close'"
           :iconColor="'gray-3'"
           :iconWidth="'25px'"
-          @click.native="closeSearchPage")
+          @click="closeSearchPage")
       svg-icon(v-if="!isShowSearchPage"
         :iconName="'menu'"
         :iconWidth="'25px'"
         :iconColor="'gray-1'"
-        @click.native="openMenu")
+        @click="openMenu")
   slot
   transition(name="slide-x-right")
     div(v-if="isShowMenu"
@@ -117,6 +117,7 @@ export default defineComponent({
       type: Boolean
     }
   },
+  emits: ['search'],
   data() {
     return {
       isAccountPopup: false,

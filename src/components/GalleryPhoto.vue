@@ -12,7 +12,7 @@ div(class="gallery-photo" :class="{border: deletable}")
     :disabled="isUploading"
     @update="handleCheck")
   svg-icon(v-if="showMoreBtn" class="pointer gallery-photo__more"
-    @click.native="showPhotoInfo"
+    @click="showPhotoInfo"
     :iconName="'more_vertical'"
     :iconColor="'gray-2'"
     :iconWidth="'20px'")

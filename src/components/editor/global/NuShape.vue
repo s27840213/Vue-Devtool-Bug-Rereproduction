@@ -64,8 +64,7 @@ export default defineComponent({
       required: true
     },
     subLayerIndex: {
-      type: Number,
-      required: true
+      type: Number
     },
     contentScaleRatio: {
       default: 1,

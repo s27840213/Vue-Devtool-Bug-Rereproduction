@@ -24,7 +24,7 @@ div(class="page-size-selector")
       svg-icon(class="pointer"
           :iconName="isLocked ? 'lock' : 'unlock'"
           iconWidth="20px" :iconColor="!isLockDisabled ? (selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-4')) : 'gray-4'"
-          @click.native="toggleLock()")
+          @click="toggleLock()")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
         input(class="body-3 page-size-selector__body__custom__box__input" type="number" min="0" ref="inputHeight"
@@ -104,6 +104,7 @@ export default defineComponent({
   components: {
     RadioBtn
   },
+  emits: ['select'],
   mounted() {
     document.addEventListener('scroll', this.handleScroll)
     this.fetchLayouts()

@@ -6,7 +6,7 @@ div(class="popup-size"
       iconName="page-close"
       iconWidth="10px"
       iconColor="gray-2"
-      @click.native="closePopup()")
+      @click="closePopup()")
   div(class="popup-size__title label-mid mb-20")
     span {{$tc('NN0072', 2)}}
   PageSizeSelector(:isValidate="isConfirmClicked" defaultFormat="custom" ref="pageSizeSelector" @select="selectFormat")
@@ -33,6 +33,7 @@ export default defineComponent({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  emits: ['close'],
   data() {
     return {
       selectedFormat: {} as ILayout,

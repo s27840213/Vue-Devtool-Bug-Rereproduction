@@ -5,7 +5,7 @@ div(class="popup-submit bg-white")
     type="text"
     v-model="id")
   btn(:type="'primary-sm'" class="rounded my-5"
-    @click.native="upload()") 上傳
+    @click="upload()") 上傳
 </template>
 
 <script lang="ts">

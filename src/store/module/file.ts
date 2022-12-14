@@ -34,7 +34,7 @@ const getDefaultState = (): IFileState => ({
 
 const state = getDefaultState()
 
-function isAdmin () {
+function isAdmin() {
   return store.getters['user/isAdmin']
 }
 
@@ -319,4 +319,4 @@ export default {
   getters,
   mutations,
   actions
-} as ModuleTree<IFileState>
+} as unknown as ModuleTree<IFileState>

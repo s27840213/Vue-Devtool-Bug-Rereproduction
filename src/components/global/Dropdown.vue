@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="relative dropdown")
   property-bar(class="pointer"
-    @click.native.prevent="handleOpen")
+    @click.prevent="handleOpen")
     div(class="dropdown__label")
       slot {{ current || placeholder }}
     slot(name="caret-down")
@@ -56,6 +56,7 @@ export default defineComponent({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  emits: ['open', 'close', 'select'],
   data () {
     return {
       showDropdown: false

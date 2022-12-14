@@ -101,6 +101,7 @@ export default defineComponent({
       default: '.mobile-editor__page-preview'
     }
   },
+  emits: ['loaded'],
   components: {
     PageContent,
     LazyLoad

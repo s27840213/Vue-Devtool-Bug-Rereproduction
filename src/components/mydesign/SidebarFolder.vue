@@ -83,6 +83,7 @@ export default defineComponent({
       required: true
     }
   },
+  emits: ['moveItem', 'showHint'],
   directives: {
     clickOutside: vClickOutside.directive
   },

@@ -18,7 +18,7 @@ div(class="component-log"
         iconColor="gray-1"
         iconWidth="16px"
         :style="{transform: showContent ? '' : 'rotate(180deg)'}"
-        @click.native="toggleContent(!showContent)")
+        @click="toggleContent(!showContent)")
   div(v-show="showContent && logs.length > 0" class="component-log__content" ref="content")
     component-log-item(
       v-for="(log,index) in logs"
@@ -29,7 +29,7 @@ div(class="component-log"
     //-     :key="index"
     //-     class="component-log__item")
     //-   div(class="flex items-center")
-    //-     svg-icon(iconName="plus-square" iconColor="gray-3" iconWidth="16px" @click.native="toggleContent(!showContent)")
+    //-     svg-icon(iconName="plus-square" iconColor="gray-3" iconWidth="16px" @click="toggleContent(!showContent)")
     //-     span(class="component-log__component-name text-bold") {{log.component}}
     //-     span(class="component-log__time text-bold ml-5") {{`${parseFloat(log.time.toFixed(3))}  ms`}}
     //-   div(class="component-log__parent")
