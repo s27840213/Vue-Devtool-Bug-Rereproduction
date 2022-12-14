@@ -76,6 +76,8 @@ import DiskWarning from '@/components/payment/DiskWarning.vue'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import editorUtils from '@/utils/editorUtils'
+import unitUtils, { PRECISION } from '@/utils/unitUtils'
+import { round } from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -181,7 +183,7 @@ export default Vue.extend({
       switch (type) {
         case 'v': {
           this.isShowGuidelineV = true
-          this.rulerVPos = Math.round(pagePos)
+          this.rulerVPos = round(unitUtils.convert(round(pagePos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().width), PRECISION)
           this.$nextTick(() => {
             const guidelineV = this.$refs.guidelineV as HTMLElement
             guidelineV.style.transform = `translate(${pos - guidelineAreaRect.left}px,0px)`
@@ -190,7 +192,7 @@ export default Vue.extend({
         }
         case 'h': {
           this.isShowGuidelineH = true
-          this.rulerHPos = Math.round(pagePos)
+          this.rulerHPos = round(unitUtils.convert(round(pagePos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().height), PRECISION)
           this.$nextTick(() => {
             const guidelineH = this.$refs.guidelineH as HTMLElement
             guidelineH.style.transform = `translate(0px,${pos - guidelineAreaRect.top}px)`
@@ -476,7 +478,7 @@ export default Vue.extend({
       eventUtils.addPointerEvent('pointerup', this.dragEndV)
     },
     draggingV(e: PointerEvent) {
-      this.rulerVPos = Math.trunc(this.mapGuidelineToPage('v').pos)
+      this.rulerVPos = round(unitUtils.convert(Math.trunc(this.mapGuidelineToPage('v').pos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().width), PRECISION)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineV(this.currentRelPos)
     },
@@ -547,7 +549,7 @@ export default Vue.extend({
       window.addEventListener('mouseup', this.dragEndH)
     },
     draggingH(e: MouseEvent) {
-      this.rulerHPos = Math.trunc(this.mapGuidelineToPage('h').pos)
+      this.rulerHPos = round(unitUtils.convert(Math.trunc(this.mapGuidelineToPage('h').pos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().height), PRECISION)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineH(this.currentRelPos)
     },
