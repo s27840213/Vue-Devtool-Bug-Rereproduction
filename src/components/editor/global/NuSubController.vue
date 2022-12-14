@@ -333,13 +333,6 @@ export default Vue.extend({
           opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
         }
     },
-    textStyles(styles: any) {
-      const textStyles = CssConveter.convertFontStyle(styles)
-      Object.assign(textStyles, {
-        'caret-color': this.config.contentEditable && !this.isControlling ? '' : '#00000000'
-      })
-      return textStyles
-    },
     groupControllerStyle() {
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
