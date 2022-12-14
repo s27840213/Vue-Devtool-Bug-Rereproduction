@@ -139,6 +139,7 @@ export default Vue.extend({
       pageWidth: NaN,
       pageHeight: NaN,
       pageSizes: {} as IMapSize,
+      aspectRatio: NaN,
       isLocked: true,
       unitOptions: STR_UNITS,
       selectedUnit: '',
@@ -178,9 +179,6 @@ export default Vue.extend({
     },
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
-    },
-    aspectRatio(): number {
-      return (this.getPage(pageUtils.currFocusPageIndex)?.width ?? 1) / this.getPage(pageUtils.currFocusPageIndex)?.height ?? 1
     },
     isCustomValid(): boolean {
       return this.widthValid && this.heightValid && !this.overSize
@@ -291,6 +289,7 @@ export default Vue.extend({
     },
     toggleLock() {
       this.isLocked = !this.isLocked
+      if (this.isLocked) this.aspectRatio = this.pageWidth / this.pageHeight
     },
     makeFormatTitle(format: ILayout) {
       if (format.id !== '') {
@@ -308,6 +307,7 @@ export default Vue.extend({
       this.pageWidth = currPage?.physicalWidth ?? currPage?.width ?? 0
       this.pageHeight = currPage?.physicalHeight ?? currPage?.height ?? 0
       this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
+      this.aspectRatio = this.pageWidth / this.pageHeight
     },
     setPageWidth(event: Event) {
       const value = (event.target as HTMLInputElement).value
