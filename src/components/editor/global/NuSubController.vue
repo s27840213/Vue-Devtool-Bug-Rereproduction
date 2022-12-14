@@ -6,7 +6,7 @@
         div(class="nu-sub-controller__content"
             ref="body"
             :layer-index="`${layerIndex}`"
-            :style="styles('')"
+            :style="styles()"
             @dblclick="onDblClick($event)"
             @dragenter="onDragEnter($event)"
             @pointerdown="onPointerdown($event)")
@@ -229,6 +229,11 @@ export default Vue.extend({
         }
         popupUtils.closePopup()
       } else {
+        if (this.config.type === 'text') {
+          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+            editing: true
+          })
+        }
         TextUtils.setCurrTextInfo({
           config: this.config as IText,
           subLayerIndex: this.layerIndex
@@ -557,12 +562,14 @@ export default Vue.extend({
     styles() {
       const { isFrameImg } = this.config
       const zindex = this.type === 'group' ? this.isControllerShown ? this.getPrimaryLayerSubLayerNum : this.primaryLayerZindex : this.config.styles.zindex
+      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
 
       return {
         ...this.sizeStyle(),
         'pointer-events': 'initial',
         transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`,
-        ...TextEffectUtils.convertTextEffect(this.config)
+        ...textEffectStyles,
+        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
     sizeStyle() {
