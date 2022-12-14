@@ -216,19 +216,15 @@ export default Vue.extend({
       }
       if (pxSize) {
         if (this.isLocked) {
-          res.height = floor(Math.sqrt(this.maxArea / pxSize.width * pxSize.height))
-          res.width = floor(res.height / pxSize.height * pxSize.width)
+          res.height = Math.sqrt(this.maxArea / pxSize.width * pxSize.height)
+          res.width = res.height / pxSize.height * pxSize.width
         } else {
           res.height = this.maxArea / pxSize.width
           res.width = this.maxArea / pxSize.height
         }
       } else return res
-      if (this.selectedUnit === 'px') {
-        res.width = round(res.width)
-        res.height = round(res.height)
-      }
-      res.width = unitUtils.convert(res.width, 'px', this.selectedUnit, 300)
-      res.height = unitUtils.convert(res.height, 'px', this.selectedUnit, 300)
+      res.width = unitUtils.convert(floor(res.width), 'px', this.selectedUnit, 300)
+      res.height = unitUtils.convert(floor(res.height), 'px', this.selectedUnit, 300)
       return res
     },
     errMsg(): string {
