@@ -185,14 +185,8 @@ export default Vue.extend({
     isCustomValid(): boolean {
       return this.widthValid && this.heightValid && !this.overSize
     },
-    overSize(): { width: number, height: number } | undefined {
-      let pxWidth = this.pageWidth
-      let pxHeight = this.pageHeight
-      if (this.selectedUnit !== 'px') {
-        pxWidth = unitUtils.convert(pxWidth, this.selectedUnit, 'px', 300)
-        pxHeight = unitUtils.convert(pxHeight, this.selectedUnit, 'px', 300)
-      }
-      return pxWidth * pxHeight > this.maxArea ? { width: pxWidth, height: pxHeight } : undefined
+    overSize(): boolean {
+      return this.pageSizes.px.width * this.pageSizes.px.height > this.maxArea
     },
     defaultTextColor(): string {
       return this.isDarkTheme ? 'text-white' : 'text-gray-2'
@@ -209,12 +203,12 @@ export default Vue.extend({
       return true
     },
     fixedSize(): {[key: string]: number, width: number, height: number} {
-      const pxSize = this.overSize
       const res = {
         width: this.pageWidth,
         height: this.pageHeight
       }
-      if (pxSize) {
+      if (this.overSize) {
+        const pxSize = this.pageSizes.px
         if (this.isLocked) {
           res.height = Math.sqrt(this.maxArea / pxSize.width * pxSize.height)
           res.width = res.height / pxSize.height * pxSize.width
@@ -223,9 +217,7 @@ export default Vue.extend({
           res.width = this.maxArea / pxSize.height
         }
       } else return res
-      res.width = unitUtils.convert(floor(res.width), 'px', this.selectedUnit, 300)
-      res.height = unitUtils.convert(floor(res.height), 'px', this.selectedUnit, 300)
-      return res
+      return unitUtils.convertSize(floor(res.width), floor(res.height), 'px', this.selectedUnit)
     },
     errMsg(): string {
       if (!this.pageWidth || !this.pageHeight || this.pageWidth <= 0 || this.pageHeight <= 0) return this.$t('NN0767', { num: 0 }).toString()
