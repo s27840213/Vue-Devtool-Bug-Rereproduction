@@ -30,6 +30,7 @@ div(class="mobile-warning")
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   name: 'MobileWarning',
   data() {
     return {

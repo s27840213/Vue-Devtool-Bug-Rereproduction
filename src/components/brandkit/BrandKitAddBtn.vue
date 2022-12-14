@@ -10,6 +10,7 @@ div(class="brand-kit-add-btn pointer")
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   props: {
     text: {
       type: String,

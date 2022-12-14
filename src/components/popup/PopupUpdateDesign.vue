@@ -63,6 +63,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import store from '@/store'
 
 export default defineComponent({
+  emits: [],
   directives: {
     clickOutside: vClickOutside.directive
   },

@@ -52,6 +52,7 @@ import { mapActions } from 'vuex'
 import tiptapUtils from '@/utils/tiptapUtils'
 
 export default defineComponent({
+  emits: [],
   props: {
     type: {
       type: String,

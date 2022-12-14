@@ -51,15 +51,15 @@ export default defineComponent({
       isAdmin: 'user/isAdmin'
     }),
     count(): number {
-      return this.groupItem.content_ids.length
+      return this.groupItem.content_ids ? this.groupItem.content_ids.length : 0
     },
     contents(): Array<{ [key: string]: any }> {
       const { content_ids: ids } = this.groupItem
-      return (ids as Array<{ [key: string]: any }>)
+      return ids ? (ids as Array<{ [key: string]: any }>)
         .map(content => ({
           ...content,
           type: 6
-        }))
+        })) : []
     },
     isDetailPage(): boolean {
       return this.groupItem.group_type === 1

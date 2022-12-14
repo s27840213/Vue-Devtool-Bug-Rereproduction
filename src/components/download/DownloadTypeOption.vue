@@ -10,6 +10,7 @@ div(class="download-type-option__name")
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   props: {
     name: {
       type: String,

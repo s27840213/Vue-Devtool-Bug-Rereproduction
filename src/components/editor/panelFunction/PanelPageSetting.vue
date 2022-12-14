@@ -217,6 +217,7 @@ import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 import pageUtils from '@/utils/pageUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     SearchBar,
     RadioBtn,

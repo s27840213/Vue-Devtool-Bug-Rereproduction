@@ -9,6 +9,7 @@ import { defineComponent } from 'vue'
 import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
 
 export default defineComponent({
+  emits: [],
   components: {
     PageSizeSelector
   }

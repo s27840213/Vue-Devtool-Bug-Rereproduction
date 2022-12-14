@@ -15,6 +15,7 @@ div(class="nu-group"
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   inheritAttrs: false,
   props: {
     config: {

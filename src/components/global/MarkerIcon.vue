@@ -9,6 +9,7 @@ svg(class="marker-icon"
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   name: 'MarkerIcon',
   props: {
     iconWidth: {

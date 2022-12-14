@@ -12,6 +12,7 @@ import hintUtils from '@/utils/hintUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   name: 'Hint',
   data() {
     return {

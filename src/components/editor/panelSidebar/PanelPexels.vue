@@ -15,6 +15,7 @@ import { mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
 
 export default defineComponent({
+  emits: [],
   components: {
     SearchBar
   },

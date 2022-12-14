@@ -32,6 +32,7 @@ import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewP
 import { globalQueue } from '@/utils/queueUtils'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
       screenWidth: 0,

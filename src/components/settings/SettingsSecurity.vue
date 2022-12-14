@@ -33,6 +33,7 @@ import PopupVerify from '@/components/popup/PopupVerify.vue'
 import localeUtils from '@/utils/localeUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     PopupVerify
   },

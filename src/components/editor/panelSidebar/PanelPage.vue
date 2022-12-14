@@ -27,6 +27,7 @@ import pageUtils from '@/utils/pageUtils'
 import { IPage } from '@/interfaces/page'
 
 export default defineComponent({
+  emits: [],
   components: {
     PagePreviewPageWrapper,
     PanelPagePlus

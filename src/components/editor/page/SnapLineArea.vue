@@ -29,6 +29,7 @@ import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
+  emits: [],
   props: {
     config: {
       type: Object as PropType<IPage>,

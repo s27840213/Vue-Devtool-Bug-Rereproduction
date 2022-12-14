@@ -21,6 +21,7 @@ import { ISvg } from '@/interfaces/shape'
 import pageUtils from '@/utils/pageUtils'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
       styleTextContent: [] as string[],

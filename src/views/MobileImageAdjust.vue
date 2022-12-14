@@ -40,6 +40,7 @@ import groupUtils from '@/utils/groupUtils'
 import controlUtils from '@/utils/controlUtils'
 
 export default defineComponent({
+  emits: [],
   name: 'MobileImageAdjust',
   directives: {
     clickOutside: vClickOutside.directive

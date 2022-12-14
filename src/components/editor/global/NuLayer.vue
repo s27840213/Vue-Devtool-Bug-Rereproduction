@@ -46,6 +46,7 @@ import pageUtils from '@/utils/pageUtils'
 import { IFrame, ILayer, IText } from '@/interfaces/layer'
 
 export default defineComponent({
+  emits: [],
   inheritAttrs: false,
   components: {
     SquareLoading

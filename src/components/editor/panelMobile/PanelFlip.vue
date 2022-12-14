@@ -20,6 +20,7 @@ import { ICurrSelectedInfo } from '@/interfaces/editor'
 import backgroundUtils from '@/utils/backgroundUtils'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
       MappingUtils

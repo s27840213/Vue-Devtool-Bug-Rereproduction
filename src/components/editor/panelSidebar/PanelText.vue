@@ -81,6 +81,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     SearchBar,
     CategoryList,

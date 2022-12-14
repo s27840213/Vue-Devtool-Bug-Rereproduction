@@ -9,6 +9,7 @@ div(class="list-font")
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   props: {
     title: {
       type: String,

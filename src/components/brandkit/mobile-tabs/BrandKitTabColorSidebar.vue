@@ -22,6 +22,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
     }

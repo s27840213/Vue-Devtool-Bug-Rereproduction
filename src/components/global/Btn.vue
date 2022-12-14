@@ -16,6 +16,7 @@ button(class="btn"
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   name: 'Btn',
   components: {
   },

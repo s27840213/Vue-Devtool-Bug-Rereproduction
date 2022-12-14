@@ -62,6 +62,7 @@ import * as type from '@/interfaces/payment'
 import html2pdf from 'html2pdf.js'
 
 export default defineComponent({
+  emits: [],
   name: 'SettingsBill',
   // components: {
   //   ObserverSentinel

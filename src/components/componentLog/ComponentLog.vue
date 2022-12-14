@@ -45,6 +45,7 @@ import { defineComponent } from 'vue'
 import ComponentLogItem from '@/components/componentLog/ComponentLogItem.vue'
 
 export default defineComponent({
+  emits: [],
   name: 'ComponentLog',
   components: {
     ComponentLogItem

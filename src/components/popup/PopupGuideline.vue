@@ -15,6 +15,7 @@ import popupUtils from '@/utils/popupUtils'
 import rulerUtils from '@/utils/rulerUtils'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
     }

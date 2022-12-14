@@ -24,6 +24,7 @@ import modalUtils from '@/utils/modalUtils'
 import { FunctionPanelType } from '@/store/types'
 
 export default defineComponent({
+  emits: [],
   components: {
     PopupDownload
   },

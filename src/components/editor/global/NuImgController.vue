@@ -38,6 +38,7 @@ import { IImage, IImageStyle } from '@/interfaces/layer'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default defineComponent({
+  emits: [],
   props: {
     config: {
       type: Object,

@@ -27,6 +27,7 @@ import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 export default defineComponent({
+  emits: [],
   components: {
     MobileSlider
   },

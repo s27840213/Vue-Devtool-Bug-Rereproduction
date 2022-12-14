@@ -15,6 +15,7 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import { mapGetters, mapMutations } from 'vuex'
 export default defineComponent({
+  emits: [],
   components: {
     MobileSlider
   },

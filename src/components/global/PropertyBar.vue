@@ -8,7 +8,7 @@ div(class="property-bar px-5 py-10")
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-
+  emits: []
 })
 </script>
 

@@ -27,6 +27,7 @@ import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     SearchBar,
     ImageGallery

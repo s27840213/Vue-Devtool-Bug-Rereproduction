@@ -211,6 +211,7 @@ import gtmUtils from '@/utils/gtmUtils'
 import fbPixelUtils from '@/utils/fbPixelUtils'
 
 export default defineComponent({
+  emits: [],
   name: 'Login',
   props: {
     redirect: {

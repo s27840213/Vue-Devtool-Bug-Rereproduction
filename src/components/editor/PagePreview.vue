@@ -27,6 +27,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import { IPage } from '@/interfaces/page'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
       screenWidth: 0,

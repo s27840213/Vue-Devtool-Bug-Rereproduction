@@ -71,6 +71,7 @@ import gtmUtils from '@/utils/gtmUtils'
 import page from '@/store/module/page'
 
 export default defineComponent({
+  emits: [],
   components: {
     Avatar
   },

@@ -24,6 +24,7 @@ import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
       popupUtils

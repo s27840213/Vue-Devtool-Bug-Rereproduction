@@ -48,6 +48,7 @@ import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceCont
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     SearchBar,
     CategoryList,

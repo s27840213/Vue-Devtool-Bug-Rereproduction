@@ -18,6 +18,7 @@ import modalUtils from '@/utils/modalUtils'
 import popupUtils from '@/utils/popupUtils'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
       MappingUtils,

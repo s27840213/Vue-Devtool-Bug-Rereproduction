@@ -14,6 +14,7 @@ import svgIconUtils from '@/utils/svgIconUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   name: 'SvgIconView',
   data() {
     const icons = svgIconUtils.icons

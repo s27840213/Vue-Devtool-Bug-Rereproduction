@@ -42,6 +42,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import { Translation as I18nT } from 'vue-i18n'
 
 export default defineComponent({
+  emits: [],
   components: {
     I18nT
   },

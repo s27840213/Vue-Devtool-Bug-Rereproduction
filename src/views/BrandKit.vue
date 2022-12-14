@@ -66,6 +66,7 @@ import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } fro
 import uploadUtils from '@/utils/uploadUtils'
 
 export default defineComponent({
+  emits: [],
   name: 'BrandKit',
   components: {
     NuHeader,

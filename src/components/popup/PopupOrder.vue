@@ -19,6 +19,7 @@ import { mapMutations } from 'vuex'
 import vClickOutside from 'click-outside-vue3'
 
 export default defineComponent({
+  emits: [],
   props: {
     hasImage: {
       type: Boolean,

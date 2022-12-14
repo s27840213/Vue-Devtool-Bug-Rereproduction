@@ -49,6 +49,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import _ from 'lodash'
 
 export default defineComponent({
+  emits: [],
   components: { NuCurveText },
   props: {
     config: {

@@ -11,6 +11,7 @@ import { mapGetters, mapState, mapMutations } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
 
 export default defineComponent({
+  emits: [],
   name: 'Preview',
   components: {
     PageContent

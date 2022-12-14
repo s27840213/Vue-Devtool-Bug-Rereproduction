@@ -17,6 +17,7 @@ div(class="flip-to-square-random"
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   props: {
     size: {
       type: Number,

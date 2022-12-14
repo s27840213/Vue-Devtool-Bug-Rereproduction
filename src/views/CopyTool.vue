@@ -17,6 +17,7 @@ import { defineComponent } from 'vue'
 import _ from 'lodash'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
       css: '',

@@ -30,6 +30,7 @@ import { mapState } from 'vuex'
 import Animation from '@/components/Animation.vue'
 
 export default defineComponent({
+  emits: [],
   name: 'Block', // need rename
   components: {
     Animation

@@ -14,6 +14,7 @@ div(class="no-items-hint" :class="{mobile: mobile}")
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   props: {
     type: {
       type: String,

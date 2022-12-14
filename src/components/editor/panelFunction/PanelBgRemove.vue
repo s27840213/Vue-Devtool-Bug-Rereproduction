@@ -69,6 +69,7 @@ import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
       minBrushSize: 1,

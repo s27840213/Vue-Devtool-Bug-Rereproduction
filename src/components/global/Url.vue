@@ -11,6 +11,7 @@ router-link(v-else :to="url")
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   props: {
     url: {
       type: String

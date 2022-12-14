@@ -20,6 +20,7 @@ import textUtils from '@/utils/textUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 
 export default defineComponent({
+  emits: [],
   props: {
     config: {
       type: Object as PropType<IText>,

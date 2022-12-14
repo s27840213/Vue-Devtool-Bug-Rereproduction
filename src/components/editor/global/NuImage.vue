@@ -85,6 +85,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
 export default defineComponent({
+  emits: [],
   props: {
     config: {
       type: Object,

@@ -34,6 +34,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import modalUtils from '@/utils/modalUtils'
 
 export default defineComponent({
+  emits: [],
   name: 'ModalCard',
   computed: {
     ...mapGetters({

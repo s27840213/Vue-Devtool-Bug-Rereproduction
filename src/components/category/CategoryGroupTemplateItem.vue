@@ -27,7 +27,7 @@ import ProItem from '@/components/payment/ProItem.vue'
 import GeneralUtils from '@/utils/generalUtils'
 
 export default defineComponent({
-  emits: ['click'],
+  emits: ['clickGroupItem'],
   components: {
     ImageCarousel,
     ProItem
@@ -89,7 +89,7 @@ export default defineComponent({
       this.carouselIdx = idx
     },
     handleClickGroup () {
-      this.$emit('click', this.item)
+      this.$emit('clickGroupItem', this.item)
     },
     handleCarouse () {
       this.isHover = true

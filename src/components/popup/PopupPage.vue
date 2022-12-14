@@ -51,6 +51,7 @@ import imageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
 
 export default defineComponent({
+  emits: [],
   props: {
     updateOptions: Array as () => Array<IPopupOptions>
   },

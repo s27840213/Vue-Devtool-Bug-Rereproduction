@@ -13,6 +13,7 @@ import { defineComponent } from 'vue'
 import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
 export default defineComponent({
+  emits: [],
   components: {
     BtnNewDesign
   }

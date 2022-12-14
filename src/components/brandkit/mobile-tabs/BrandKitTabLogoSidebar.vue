@@ -40,6 +40,7 @@ import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import GalleryUtils from '@/utils/galleryUtils'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
       rows: [] as any[],

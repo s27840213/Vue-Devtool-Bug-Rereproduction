@@ -22,6 +22,7 @@ div(class="category-tags")
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   computed: {
     items () {
       return this.$refs.items as HTMLElement

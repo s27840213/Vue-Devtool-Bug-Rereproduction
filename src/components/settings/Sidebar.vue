@@ -27,6 +27,7 @@ import Avatar from '@/components/Avatar.vue'
 import paymentData from '@/utils/constantData'
 
 export default defineComponent({
+  emits: [],
   props: {
     current: {
       type: String,

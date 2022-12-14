@@ -72,6 +72,7 @@ import localeUtils, { ILocale } from '@/utils/localeUtils'
 import GeneralUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     PopupVerify,
     Avatar

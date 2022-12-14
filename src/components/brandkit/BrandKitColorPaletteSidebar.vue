@@ -25,6 +25,7 @@ import colorUtils from '@/utils/colorUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
     }

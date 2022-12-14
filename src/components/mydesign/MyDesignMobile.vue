@@ -105,6 +105,7 @@ interface ITabButton {
 }
 
 export default defineComponent({
+  emits: [],
   name: 'MyDesignMobile',
   data() {
     return {

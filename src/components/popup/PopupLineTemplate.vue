@@ -46,6 +46,7 @@ import { LineTemplatesType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 
 export default defineComponent({
+  emits: [],
   data() {
     const tmp = MappingUtils.mappingIconSet('lineTemplate')
     const lineTemplate1 = tmp.slice(0, 8)

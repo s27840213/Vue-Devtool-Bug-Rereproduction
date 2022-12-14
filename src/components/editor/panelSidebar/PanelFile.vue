@@ -43,6 +43,7 @@ import networkUtils from '@/utils/networkUtils'
 import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
 
 export default defineComponent({
+  emits: [],
   components: {
     SearchBar,
     GalleryPhoto,

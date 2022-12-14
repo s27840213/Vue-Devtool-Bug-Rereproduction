@@ -23,6 +23,7 @@ import SettingsPayment from '@/components/settings/SettingsPayment.vue'
 import SettingsBill from '@/components/settings/SettingsBill.vue'
 
 export default defineComponent({
+  emits: [],
   name: 'Settings',
   props: {
     view: {

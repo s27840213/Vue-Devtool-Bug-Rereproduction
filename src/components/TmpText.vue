@@ -24,6 +24,7 @@ import { IText } from '@/interfaces/layer'
 import textUtils from '@/utils/textUtils'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
       contents: [

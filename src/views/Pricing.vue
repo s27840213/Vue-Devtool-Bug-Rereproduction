@@ -69,6 +69,7 @@ const { mapFields } = createHelpers({
 })
 
 export default defineComponent({
+  emits: [],
   name: 'Pricing',
   components: {
     NuHeader,

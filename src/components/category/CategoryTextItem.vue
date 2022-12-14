@@ -20,6 +20,7 @@ import generalUtils from '@/utils/generalUtils'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 
 export default defineComponent({
+  emits: [],
   props: {
     src: {
       type: String

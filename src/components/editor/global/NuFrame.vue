@@ -29,6 +29,7 @@ import layerFactary from '@/utils/layerFactary'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: [],
   inheritAttrs: false,
   props: {
     config: {

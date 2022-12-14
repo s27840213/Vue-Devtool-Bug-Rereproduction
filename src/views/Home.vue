@@ -42,6 +42,7 @@ import _ from 'lodash'
 import blocklistData from '@/utils/homeBlockData'
 
 export default defineComponent({
+  emits: [],
   name: 'Home',
   components: {
     NuHeader,

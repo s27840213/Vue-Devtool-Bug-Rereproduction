@@ -37,6 +37,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: [],
   props: {
     // host: String,
     // preview: String,

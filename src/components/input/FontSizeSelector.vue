@@ -32,6 +32,7 @@ import vClickOutside from 'click-outside-vue3'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     ValueSelector
   },

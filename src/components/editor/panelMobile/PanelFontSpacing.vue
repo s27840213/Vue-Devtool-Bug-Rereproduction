@@ -26,6 +26,7 @@ import { mapState } from 'vuex'
 import textUtils from '@/utils/textUtils'
 import generalUtils from '@/utils/generalUtils'
 export default defineComponent({
+  emits: [],
   components: {
     MobileSlider
   },

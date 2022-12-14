@@ -62,6 +62,7 @@ import { PopupSliderEventType } from '@/store/types'
 import formatUtils from '@/utils/formatUtils'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
       ShortcutUtils,

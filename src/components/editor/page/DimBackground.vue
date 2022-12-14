@@ -57,6 +57,7 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     NuBackgroundController
   },

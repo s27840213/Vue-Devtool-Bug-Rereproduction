@@ -42,6 +42,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrandLogo } from '@/interfaces/brandkit'
 
 export default defineComponent({
+  emits: [],
   components: {
     BrandSelector,
     BrandKitTab

@@ -71,6 +71,7 @@ import generalUtils from '@/utils/generalUtils'
 import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
 export default defineComponent({
+  emits: [],
   name: 'ScrollList',
   components: {
     DesignItem,

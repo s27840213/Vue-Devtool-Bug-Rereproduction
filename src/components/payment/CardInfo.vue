@@ -22,6 +22,7 @@ import { mapActions } from 'vuex'
 import vClickOutside from 'click-outside-vue3'
 
 export default defineComponent({
+  emits: [],
   name: 'CardInfo',
   directives: {
     clickOutside: vClickOutside.directive

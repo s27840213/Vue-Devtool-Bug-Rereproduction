@@ -11,6 +11,7 @@ import MyDesignMobile from '@/components/mydesign/MyDesignMobile.vue'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: [],
   name: 'MyDesign',
   data() {
     return {

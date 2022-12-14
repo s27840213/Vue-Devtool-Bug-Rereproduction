@@ -88,6 +88,7 @@ const { mapFields } = createHelpers({
 })
 
 export default defineComponent({
+  emits: [],
   name: 'SettingsPayment',
   components: {
     Options,

@@ -6,6 +6,7 @@ img(class="pro" :src="require('@/assets/img/svg/pricing/pro.svg')" loading="lazy
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   name: 'ProItem'
 })
 </script>

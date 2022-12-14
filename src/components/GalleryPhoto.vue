@@ -50,6 +50,7 @@ import frameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
 
 export default defineComponent({
+  emits: [],
   name: 'GalleryPhoto',
   props: {
     photo: {

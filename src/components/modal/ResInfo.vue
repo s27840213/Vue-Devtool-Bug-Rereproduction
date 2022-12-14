@@ -72,6 +72,7 @@ import { mapMutations, mapActions } from 'vuex'
 const moduleName = 'unsplash'
 
 export default defineComponent({
+  emits: [],
   props: {
     info: {
       type: Object,

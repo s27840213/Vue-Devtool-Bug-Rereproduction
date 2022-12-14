@@ -17,6 +17,7 @@ import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
+  emits: [],
   computed: {
     ...mapGetters('imgControl', ['isBgImgCtrl', 'isImgCtrl'])
   },

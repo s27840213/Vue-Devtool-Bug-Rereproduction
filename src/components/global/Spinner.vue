@@ -11,6 +11,7 @@ import i18n from '@/i18n'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   props: {
     textContent: {
       type: String,

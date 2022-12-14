@@ -164,6 +164,7 @@ import paymentUtils from '@/utils/paymentUtils'
 const HEADER_HEIGHT = 72
 
 export default defineComponent({
+  emits: [],
   name: 'TemplateCenter',
   components: {
     NuHeader,

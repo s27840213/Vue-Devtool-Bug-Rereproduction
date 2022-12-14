@@ -125,6 +125,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import layerUtils from '@/utils/layerUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     MobileSlider,
     MarkerIcon

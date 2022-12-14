@@ -116,6 +116,7 @@ import localeUtils, { ILocale } from '@/utils/localeUtils'
 import paymentUtils from '@/utils/paymentUtils'
 
 export default defineComponent({
+  emits: [],
   props: {
     isHome: {
       type: Boolean,

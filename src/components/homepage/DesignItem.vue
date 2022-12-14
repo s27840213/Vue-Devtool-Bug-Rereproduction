@@ -24,6 +24,7 @@ import designUtils from '@/utils/designUtils'
 import { IDesign } from '@/interfaces/design'
 
 export default defineComponent({
+  emits: [],
   props: {
     config: {
       type: Object as PropType<IDesign>,

@@ -17,6 +17,7 @@ import PanelSize from '@/components/new-design/PanelSize.vue'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     PopupSize,
     PanelSize

@@ -21,6 +21,7 @@ div(class="tour-guide")
 import guideUtils from '@/utils/guideUtils'
 import { defineComponent } from 'vue'
 export default defineComponent({
+  emits: [],
   props: {
     startIndex: {
       type: Number,

@@ -21,6 +21,7 @@ import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
+  emits: [],
   components: {
     BrandSelector,
     BrandKitTab

@@ -24,6 +24,7 @@ import { mapGetters, mapState } from 'vuex'
 import { IGroup, ILayer } from '@/interfaces/layer'
 import stepsUtils from '@/utils/stepsUtils'
 export default defineComponent({
+  emits: [],
   components: {
     MobileSlider,
     FontSizeSelector

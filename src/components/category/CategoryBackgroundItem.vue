@@ -17,6 +17,7 @@ import imageUtils from '@/utils/imageUtils'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 
 export default defineComponent({
+  emits: [],
   props: {
     src: {
       type: String

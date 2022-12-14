@@ -33,6 +33,7 @@ import designUtils from '@/utils/designUtils'
 import MobileFolderItem from '@/components/mydesign/MobileFolderItem.vue'
 
 export default defineComponent({
+  emits: [],
   components: {
     MobileFolderItem
   },

@@ -20,6 +20,7 @@ div(class="component-log-item"
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   name: 'ComponentLogItem',
   props: {
     log: {

@@ -53,6 +53,7 @@ import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     Popup,
     'chrome-picker': Chrome,

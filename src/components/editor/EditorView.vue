@@ -14,7 +14,7 @@ div(class="editor-view"
         ref="canvas"
         @mousedown.left.self="outerClick($event)")
       template(v-if="!inBgRemoveMode")
-        nu-page(v-for="(page,index) in pages"
+        nu-page(v-for="(page,index) in pages || []"
                 :ref="`page-${index}`"
                 :key="`page-${index}`"
                 :pageIndex="index"
@@ -77,6 +77,7 @@ import generalUtils from '@/utils/generalUtils'
 import editorUtils from '@/utils/editorUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     EditorHeader,
     RulerHr,

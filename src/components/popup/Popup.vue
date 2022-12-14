@@ -31,6 +31,7 @@ import pageUtils from '@/utils/pageUtils'
 import modalUtils from '@/utils/modalUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     PopupOrder,
     PopupLayer,

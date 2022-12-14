@@ -50,6 +50,7 @@ const CROP_X_REG = new RegExp(`\\${CROP_X}`, 'g')
 const CROP_Y_REG = new RegExp(`\\${CROP_Y}`, 'g')
 
 export default defineComponent({
+  emits: [],
   props: {
     config: {
       type: Object as PropType<any>,

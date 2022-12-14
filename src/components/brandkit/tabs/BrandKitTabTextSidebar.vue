@@ -22,6 +22,7 @@ import assetUtils from '@/utils/assetUtils'
 import DragUtils from '@/utils/dragUtils'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
       MAPPING: {

@@ -1,10 +1,9 @@
 <template lang="pug">
 div(class="panel")
-  keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file', 'panel-brand']")
-    component(v-show="isSidebarPanelOpen && !isShowPagePreview && !bgRemoveMode"
-      class="p-10 border-box"
-      :style="panelStyles()"
-      :is="showPagePanel ? 'panel-page' : panelComponents[currPanel]")
+  component(v-show="isSidebarPanelOpen && !isShowPagePreview && !bgRemoveMode"
+    class="p-10 border-box"
+    :style="panelStyles()"
+    :is="showPagePanel ? 'panel-page' : panelComponents[currPanel]")
 </template>
 
 <script lang="ts">
@@ -23,6 +22,7 @@ import { SidebarPanelType } from '@/store/types'
 // import { CartType } from '@/store/types'
 
 export default defineComponent({
+  emits: [],
   components: {
     PanelTemplate,
     PanelPhoto,

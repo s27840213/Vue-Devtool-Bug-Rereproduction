@@ -24,6 +24,7 @@ const { mapFields } = createHelpers({
 })
 
 export default defineComponent({
+  emits: [],
   components: {
     Animation
   },

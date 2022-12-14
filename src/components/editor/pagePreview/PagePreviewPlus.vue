@@ -26,6 +26,7 @@ import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
 
 export default defineComponent({
+  emits: [],
   props: {
     index: {
       type: Number,

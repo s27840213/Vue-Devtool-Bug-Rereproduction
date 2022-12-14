@@ -19,6 +19,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     DesktopEditor,
     MobileEditor

@@ -53,6 +53,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 
 export default defineComponent({
+  emits: [],
   name: 'MobileEditor',
   components: {
     MobileEditorView,

@@ -28,6 +28,7 @@ import designUtils from '@/utils/designUtils'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
+  emits: [],
   name: 'mobile-structure-folder',
   props: {
     folder: {

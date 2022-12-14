@@ -26,6 +26,7 @@ import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
+  emits: [],
   props: {
     editorViewCanvas: {
       type: HTMLElement,

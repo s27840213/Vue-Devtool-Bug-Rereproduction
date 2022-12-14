@@ -29,6 +29,7 @@ import paymentUtils from '@/utils/paymentUtils'
  */
 
 export default defineComponent({
+  emits: [],
   components: {
     ImageCarousel,
     ProItem

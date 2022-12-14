@@ -19,6 +19,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
       MappingUtils

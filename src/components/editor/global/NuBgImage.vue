@@ -36,6 +36,7 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 
 export default defineComponent({
+  emits: [],
   props: {
     image: {
       type: Object,

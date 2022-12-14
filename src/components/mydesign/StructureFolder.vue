@@ -29,6 +29,7 @@ import designUtils from '@/utils/designUtils'
 import { mapActions, mapMutations } from 'vuex'
 
 export default defineComponent({
+  emits: [],
   name: 'structure-folder',
   props: {
     folder: {

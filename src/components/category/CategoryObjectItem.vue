@@ -26,6 +26,7 @@ import paymentUtils from '@/utils/paymentUtils'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     ProItem
   },

@@ -51,6 +51,7 @@ import editorUtils from '@/utils/editorUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     EditorHeader,
     BgRemoveArea

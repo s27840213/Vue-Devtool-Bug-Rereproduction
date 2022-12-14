@@ -29,6 +29,7 @@ import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: [],
   props: {
     config: {
       type: Object,

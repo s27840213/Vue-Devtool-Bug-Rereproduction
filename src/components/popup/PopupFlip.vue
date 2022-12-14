@@ -19,6 +19,7 @@ import MappingUtils from '@/utils/mappingUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: [],
   data() {
     return {
       MappingUtils,

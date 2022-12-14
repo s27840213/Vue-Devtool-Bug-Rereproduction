@@ -52,7 +52,7 @@ div(class="panel-template" ref="panel")
             :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
             :showId="inAdminMode"
             :item="item"
-            @click="handleShowGroup")
+            @clickGroupItem="handleShowGroup")
     template(v-slot:category-template-item="{ list, title }")
       div(v-if="title" class="panel-template__header") {{ title }}
       div(class="panel-template__items")
@@ -96,6 +96,7 @@ import listService from '@/apis/list'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  emits: [],
   components: {
     SearchBar,
     CategoryList,

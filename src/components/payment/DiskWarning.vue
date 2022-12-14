@@ -25,6 +25,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import paymentUtils from '@/utils/paymentUtils'
 
 export default defineComponent({
+  emits: [],
   name: 'DiskWarning',
   props: {
     size: {

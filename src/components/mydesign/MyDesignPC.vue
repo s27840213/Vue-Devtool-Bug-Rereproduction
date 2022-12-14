@@ -186,6 +186,7 @@ import designUtils from '@/utils/designUtils'
 import hintUtils from '@/utils/hintUtils'
 
 export default defineComponent({
+  emits: [],
   name: 'MyDesignPC',
   components: {
     Sidebar,

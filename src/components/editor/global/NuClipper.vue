@@ -16,6 +16,7 @@ import Svgpath from 'svgpath'
 import pageUtils from '@/utils/pageUtils'
 
 export default defineComponent({
+  emits: [],
   props: {
     config: {
       type: Object,

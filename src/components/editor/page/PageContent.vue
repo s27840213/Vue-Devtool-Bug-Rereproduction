@@ -102,6 +102,7 @@ import { ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 
 export default defineComponent({
+  emits: [],
   components: {
     NuBgImage,
     LazyLoad
