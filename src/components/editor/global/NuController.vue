@@ -26,11 +26,7 @@
           :type="config.type"
           :primaryLayerZindex="primaryLayerZindex()"
           :isMoved="isMoved"
-          :contentScaleRatio="contentScaleRatio"
-          @onSubDrop="onSubDrop"
-          @clickSubController="clickSubController"
-          @dblSubController="dblSubController"
-          @pointerDownSubController="pointerDownSubController")
+          :contentScaleRatio="contentScaleRatio")
 
       //- template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isDragging()")
       //-   div(class="sub-controller"

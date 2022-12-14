@@ -4,10 +4,7 @@
     div(class="nu-layer" :class="!config.locked ? `nu-layer--p${pageIndex}` : ''" :style="layerStyles()" ref="body" :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
         :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
         :data-p-index="pageIndex"
-        @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
-        @dragover.prevent
-        @dragleave.prevent
-        @dragenter.prevent)
+        @dragenter="dragEnter")
       div(class="layer-translate posAbs"
           :style="translateStyles()")
         div(class="layer-scale posAbs" ref="scale"
@@ -51,7 +48,7 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue'
-import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
+import { FunctionPanelType, ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
@@ -66,6 +63,13 @@ import LazyLoad from '@/components/LazyLoad.vue'
 import SubControllerUtils from '@/utils/subControllerUtils'
 import generalUtils from '@/utils/generalUtils'
 import { MovingUtils } from '@/utils/movingUtils'
+import DragUtils from '@/utils/dragUtils'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import i18n from '@/i18n'
+import imageShadowUtils from '@/utils/imageShadowUtils'
+import imageUtils from '@/utils/imageUtils'
+import eventUtils, { ImageEvent } from '@/utils/eventUtils'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   inheritAttrs: false,
@@ -147,7 +151,8 @@ export default Vue.extend({
       isDoingGestureAction: false,
       isHandleMovingHandler: false,
       isMoved: false,
-      isPointerDownFromSubController: false
+      isPointerDownFromSubController: false,
+      dragUtils: this.isSubLayer ? new DragUtils(layerUtils.getLayer(this.pageIndex, this.layerIndex).id, this.config.id) : new DragUtils(this.config.id)
     }
   },
   mounted() {
@@ -217,7 +222,8 @@ export default Vue.extend({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isUploadingShadowImg: 'shadow/isUploading',
       isHandling: 'shadow/isHandling',
-      isShowPagePanel: 'page/getShowPagePanel'
+      isShowPagePanel: 'page/getShowPagePanel',
+      isHandleShadow: 'shadow/isHandling'
     }),
     layerInfo(): ILayerInfo {
       return {
@@ -298,14 +304,14 @@ export default Vue.extend({
         return 'none'
       }
     },
-    onDrop(e: DragEvent) {
-      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos())
-      e.stopPropagation()
-    },
-    onDropClipper(e: DragEvent) {
-      MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos(), this.config.path, this.config.styles)
-      e.stopPropagation()
-    },
+    // onDrop(e: DragEvent) {
+    //   MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos())
+    //   e.stopPropagation()
+    // },
+    // onDropClipper(e: DragEvent) {
+    //   MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos(), this.config.path, this.config.styles)
+    //   e.stopPropagation()
+    // },
     toggleHighlighter(evt: MouseEvent, pageIndex: number, layerIndex: number, shown: boolean) {
       layerUtils.updateLayerProps(pageIndex, layerIndex, {
         shown
@@ -409,6 +415,74 @@ export default Vue.extend({
       if (generalUtils.isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
+      }
+    },
+    dragEnter(e: DragEvent) {
+      this.layerDragEnter(e)
+    },
+    layerDragEnter(e: DragEvent) {
+      const body = this.$refs.body as HTMLElement
+      const dragSrcObj = this.$store.state.currDraggedPhoto.srcObj
+      if (this.getLayerType === 'image' && dragSrcObj.assetId !== this.config.srcObj.assetId) {
+        body.addEventListener('dragleave', this.layerDragLeave)
+        body.addEventListener('drop', this.layerOnDrop)
+        const shadow = (this.config as IImage).styles.shadow
+        const shadowEffectNeedRedraw = shadow.isTransparent || shadow.currentEffect === ShadowEffectType.imageMatched
+        const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj?.type && shadow.srcObj?.type !== 'upload'
+        const handleWithNoCanvas = this.config.inProcess === 'imgShadow' && !hasShadowSrc
+        if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
+          this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
+        } else {
+          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          body.removeEventListener('dragleave', this.layerDragLeave)
+          body.removeEventListener('drop', this.layerOnDrop)
+        }
+      }
+    },
+    layerDragLeave(e: DragEvent) {
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener('dragleave', this.layerDragLeave)
+      body.removeEventListener('drop', this.layerOnDrop)
+      if (this.getLayerType === 'image') {
+        this.dragUtils.onImageDragLeave(e, this.pageIndex)
+      }
+    },
+    layerOnDrop(e: DragEvent) {
+      e.stopPropagation()
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener('dragleave', this.layerDragLeave)
+      body.removeEventListener('drop', this.layerOnDrop)
+
+      const dt = e.dataTransfer
+      if (e.dataTransfer?.getData('data')) {
+        if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
+          this.dragUtils.itemOnDrop(e, this.pageIndex)
+        } else if (this.getLayerType === 'image') {
+          if (this.isHandleShadow) {
+            const replacedImg = new Image()
+            replacedImg.crossOrigin = 'anonynous'
+            replacedImg.onload = () => {
+              const isTransparent = imageShadowUtils.isTransparentBg(replacedImg)
+              const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.layerIndex }
+              imageShadowUtils.updateEffectProps(layerInfo, { isTransparent })
+            }
+            const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
+            const src = imageUtils.getSrc(this.config, size)
+            replacedImg.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+            // return
+          } else {
+            eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
+          }
+        }
+        // GroupUtils.deselect()
+        // this.setLastSelectedLayerIndex(this.layerIndex)
+        // GroupUtils.select(this.pageIndex, [this.layerIndex])
+      } else if (dt && dt.files.length !== 0) {
+        const files = dt.files
+        this.setCurrSidebarPanel(SidebarPanelType.file)
+        uploadUtils.uploadAsset('image', files, {
+          addToPage: true
+        })
       }
     }
   }
