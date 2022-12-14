@@ -7,7 +7,7 @@
     div(v-for="line in closestSnaplines.h"
       class="snap-area__line snap-area__line--hr"
       :style="snapLineStyles('h', line)")
-    template(v-if="isShowGuideline && !isDetailPage")
+    template(v-if="isShowGuideline")
       div(v-for="(line,index) in guidelines.v"
         class="snap-area__line snap-area__line--vr"
         :style="snapLineStyles('v', line,true)"
@@ -60,9 +60,6 @@ export default Vue.extend({
     }),
     isShowGuideline(): boolean {
       return rulerUtils.showGuideline
-    },
-    isDetailPage(): boolean {
-      return this.groupType === 1
     },
     guidelines(): { [index: string]: Array<number> } {
       return (this.config as IPage).guidelines
