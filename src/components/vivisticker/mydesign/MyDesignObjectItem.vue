@@ -56,7 +56,7 @@ export default Vue.extend({
       if (this.item.assetInfo.isFrame) {
         vivistickerUtils.getAsset(`mydesign-${this.item.type}`, this.item.id, 'config').then(data => {
           const pages = generalUtils.deepCopy(data.pages)
-          vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0]), this.item.type, this.item.id)
+          vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0], this.item))
         })
       } else {
         vivistickerUtils.getAsset(`mydesign-${this.item.type}`, this.item.id, 'config').then(data => {

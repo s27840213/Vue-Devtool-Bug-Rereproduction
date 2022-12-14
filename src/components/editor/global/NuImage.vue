@@ -420,6 +420,7 @@ export default Vue.extend({
             this.src = ImageUtils.getSrc(this.config)
             window.requestAnimationFrame(() => {
               console.log(this.src)
+              vivistickerUtils.isAnyIOSImgOnError = true
               vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
             })
           }

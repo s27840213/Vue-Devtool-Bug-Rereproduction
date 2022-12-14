@@ -60,6 +60,18 @@ const VVSTK_CALLBACKS = [
   'uploadImageURL'
 ]
 
+const SCREENSHOT_CALLBACKS = [
+  'thumbDone',
+  'updateFileDone',
+  'informWebResult'
+]
+
+const CALLBACK_MAPS = {
+  router: ROUTER_CALLBACKS,
+  vvstk: VVSTK_CALLBACKS,
+  screenshot: SCREENSHOT_CALLBACKS
+}
+
 const MYDESIGN_TAGS = [{
   name: 'NN0005',
   tab: 'text'
@@ -70,6 +82,7 @@ const MYDESIGN_TAGS = [{
 
 class ViviStickerUtils {
   appLoadedSent = false
+  isAnyIOSImgOnError = false
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
   callbackMap = {} as {[key: string]: (data?: any) => void}
@@ -97,14 +110,8 @@ class ViviStickerUtils {
     return store.getters['vivisticker/getUserSettings']
   }
 
-  registerRouterCallbacks() {
-    for (const callbackName of ROUTER_CALLBACKS) {
-      (window as any)[callbackName] = (vivistickerUtils as any)[callbackName]
-    }
-  }
-
-  registerVvstkCallbacks() {
-    for (const callbackName of VVSTK_CALLBACKS) {
+  registerCallbacks(type: 'router' | 'vvstk' | 'screenshot') {
+    for (const callbackName of CALLBACK_MAPS[type]) {
       (window as any)[callbackName] = (vivistickerUtils as any)[callbackName]
     }
   }
@@ -185,9 +192,9 @@ class ViviStickerUtils {
     this.sendToIOS('DONE_LOADING', { width, height, options, needCrop })
   }
 
-  sendScreenshotUrl(query: string, action = 'copy', type?: string, id?: string) {
+  sendScreenshotUrl(query: string, action = 'copy') {
     console.log(query)
-    this.sendToIOS('SCREENSHOT', { params: query, action, type, id })
+    this.sendToIOS('SCREENSHOT', { params: query, action })
     if (this.isStandaloneMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
       window.open(url, '_blank')
@@ -221,10 +228,16 @@ class ViviStickerUtils {
     }
   }
 
-  createUrlForJSON(page?: IPage): string {
+  createUrlForJSON(page?: IPage, asset?: IMyDesign): string {
     page = page ?? pageUtils.getPage(0)
     // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
-    return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}`
+    const res = `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}`
+    if (asset) {
+      const key = this.mapEditorType2MyDesignKey(asset.type)
+      return res + `&thumbType=mydesign&designId=${asset.id}&key=${key}`
+    } else {
+      return res
+    }
   }
 
   setIsInCategory(tab: string, bool: boolean) {
@@ -828,6 +841,23 @@ class ViviStickerUtils {
 
   uploadImageURL(data: any) {
     vivistickerUtils.handleCallback('upload-image', data)
+  }
+
+  updateFileDone() {
+    vivistickerUtils.handleCallback('update-file')
+  }
+
+  informWebResult(info: any) {
+    const { event } = info
+    switch (event) {
+      case 'update-thumb':
+        vivistickerUtils.updateThumb(info)
+        break
+    }
+  }
+
+  updateThumb(info: { key: string, id: string }) {
+    store.commit('vivisticker/UPDATE_updateDesignThumb', { tab: info.key, id: info.id })
   }
 
   mapEditorType2MyDesignKey(editorType: string): string {

@@ -324,6 +324,15 @@ const mutations: MutationTree<IViviStickerState> = {
   //   design.ver = generalUtils.generateRandomString(12)
   //   list.unshift(design)
   // },
+  UPDATE_updateDesignThumb(state: IViviStickerState, updateInfo: { tab: string, id: string }) {
+    const list = state.myDesignFiles[updateInfo.tab]
+    if (!list) return
+    const designIndex = list.findIndex(d => d.id === updateInfo.id)
+    if (designIndex < 0) return
+    const design = list.splice(designIndex, 1)[0]
+    design.ver = generalUtils.generateRandomString(12)
+    list.unshift(design)
+  },
   UPDATE_selectDesign(state: IViviStickerState, design: IMyDesign) {
     Vue.set(state.selectedDesigns, design.id, design)
   },

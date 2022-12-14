@@ -23,6 +23,7 @@ import { IPage } from '@/interfaces/page'
 import mathUtils from '@/utils/mathUtils'
 import { IGroup, IImageStyle } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
+import uploadUtils from '@/utils/uploadUtils'
 
 declare let window: CustomWindow
 
@@ -50,6 +51,7 @@ export default Vue.extend({
         width: 0,
         height: 0
       },
+      extraData: undefined as any,
       options: ''
     }
   },
@@ -61,7 +63,7 @@ export default Vue.extend({
   },
   created() {
     window.fetchDesign = this.fetchDesign
-    window.resizePage = this.resizePage
+    vivistickerUtils.registerCallbacks('screenshot')
   },
   computed: {
     ...mapGetters({
@@ -90,6 +92,10 @@ export default Vue.extend({
         const ver = urlParams.get('ver')
         const width = urlParams.get('width')
         const height = urlParams.get('height')
+        const thumbType = urlParams.get('thumbType')
+        const designId = urlParams.get('designId')
+        const key = urlParams.get('key')
+        this.extraData = { thumbType, designId, key }
         switch (type) {
           case 'svg': {
             const json = await (await fetch(`https://template.vivipic.com/${type}/${id}/config.json?ver=${ver}`)).json()
@@ -285,11 +291,41 @@ export default Vue.extend({
       this.pageTranslate = { x: 0, y: 0 }
       this.pageScale = 1
       this.JSONcontentSize = { width: 0, height: 0 }
+      vivistickerUtils.isAnyIOSImgOnError = false
+      this.extraData = undefined
     },
     onload() {
       console.log('loaded')
       if (this.mode === ScreenShotMode.PAGE) {
         vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, true)
+        if (vivistickerUtils.isAnyIOSImgOnError) {
+          // Update thumbnail and design json of mydesign
+          vivistickerUtils.sendToIOS('UPDATE_FILE', {
+            path: `mydesign-${this.extraData.key}/${this.extraData.designId}`,
+            name: 'config',
+            content: uploadUtils.prepareJsonToUpload(pageUtils.getPages)
+          })
+          const width = window.innerWidth - 32
+          const height = Math.round(width * 420 / 358)
+          vivistickerUtils.callIOSAsAPI('GEN_THUMB', {
+            type: this.extraData.thumbType,
+            id: this.extraData.designId,
+            width,
+            height,
+            x: 0,
+            y: 0,
+            needCrop: this.extraData.key === 'text' ? 0 : 1
+          }, 'gen-thumb').then(() => {
+            vivistickerUtils.sendToIOS('INFORM_WEB', {
+              info: {
+                event: 'update-thumb',
+                key: this.extraData.key,
+                id: this.extraData.designId
+              },
+              to: 'UI'
+            })
+          })
+        }
       } else if ([ScreenShotMode.BG_IMG, ScreenShotMode.BG_COLOR].includes(this.mode)) {
         const element = this.$refs.target
         const target = (element as Vue).$el ? (element as Vue).$el : (element as HTMLElement)
@@ -298,38 +334,38 @@ export default Vue.extend({
       } else {
         vivistickerUtils.sendDoneLoading(window.innerWidth, window.innerHeight, this.options)
       }
-    },
-    fitPageToScreen(width: number, height: number): number {
-      const screenWidth = window.innerWidth
-      const screenHeight = window.innerHeight
-      const screenRatio = screenWidth / screenHeight
-      const objectRatio = width / height
-      if (screenRatio > objectRatio) {
-        this.JSONcontentSize = {
-          width: screenHeight * objectRatio,
-          height: screenHeight
-        }
-        return screenHeight / height
-      } else {
-        this.JSONcontentSize = {
-          width: screenWidth,
-          height: screenWidth / objectRatio
-        }
-        return screenWidth / width
-      }
-    },
-    resizePage(data: { x: number, y: number, width: number, height: number, options: string }) {
-      const { x, y, width, height, options } = data
-      this.options = options
-      this.pageTranslate = { x: -x, y: -y }
-      const page = pageUtils.getPage(0)
-      this.pageScale = this.fitPageToScreen(width, height)
-      pageUtils.resizePage({ width: page.width * this.pageScale, height: page.height * this.pageScale })
-      setTimeout(() => {
-        console.log('resized')
-        vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, false)
-      }, 100)
     }
+    // fitPageToScreen(width: number, height: number): number {
+    //   const screenWidth = window.innerWidth
+    //   const screenHeight = window.innerHeight
+    //   const screenRatio = screenWidth / screenHeight
+    //   const objectRatio = width / height
+    //   if (screenRatio > objectRatio) {
+    //     this.JSONcontentSize = {
+    //       width: screenHeight * objectRatio,
+    //       height: screenHeight
+    //     }
+    //     return screenHeight / height
+    //   } else {
+    //     this.JSONcontentSize = {
+    //       width: screenWidth,
+    //       height: screenWidth / objectRatio
+    //     }
+    //     return screenWidth / width
+    //   }
+    // },
+    // resizePage(data: { x: number, y: number, width: number, height: number, options: string }) {
+    //   const { x, y, width, height, options } = data
+    //   this.options = options
+    //   this.pageTranslate = { x: -x, y: -y }
+    //   const page = pageUtils.getPage(0)
+    //   this.pageScale = this.fitPageToScreen(width, height)
+    //   pageUtils.resizePage({ width: page.width * this.pageScale, height: page.height * this.pageScale })
+    //   setTimeout(() => {
+    //     console.log('resized')
+    //     vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, false)
+    //   }, 100)
+    // }
   }
 })
 </script>
