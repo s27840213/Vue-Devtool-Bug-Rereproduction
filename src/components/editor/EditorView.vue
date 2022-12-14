@@ -321,7 +321,6 @@ export default Vue.extend({
       }
     },
     selectStart(e: MouseEvent) {
-      console.log('select start')
       if (layerUtils.layerIndex !== -1) {
         /**
          * when the user click the control-region outsize the page,
@@ -329,9 +328,9 @@ export default Vue.extend({
          */
         if (ControlUtils.isClickOnController(e)) {
           const movingUtils = new MovingUtils({
-            _config: { config: layerUtils.getCurrConfig },
+            _config: { config: layerUtils.getCurrLayer },
             snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-            body: document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
+            body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
           })
           movingUtils.moveStart(e)
           return

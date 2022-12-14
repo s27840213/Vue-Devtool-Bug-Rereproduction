@@ -487,8 +487,8 @@ class Controller {
     return p1_p2.x * p1_c.y - p1_p2.y * p1_c.x > 0
   }
 
-  isClickOnController(e: MouseEvent, layerIndex = layerUtils.layerIndex): boolean {
-    const layer = document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerIndex}`) as HTMLElement
+  isClickOnController(e: MouseEvent, layerIndex = layerUtils.layerIndex, subLayerIdx = -1): boolean {
+    const layer = document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement
     if (layer) {
       const rect = layer.getBoundingClientRect()
       const c = { x: e.clientX, y: e.clientY }

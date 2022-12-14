@@ -32,7 +32,8 @@ export class MovingUtils {
   private isPointerDownFromSubController = false
   private _moving = null as unknown
   private _moveEnd = null as unknown
-  private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex }
+  private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as ILayerInfo
+
   private isTouchDevice = generalUtils.isTouchDevice()
   private isClickOnController = false
 
@@ -47,6 +48,7 @@ export class MovingUtils {
   private get getLayerType(): string { return this.config.type }
   private get pageIndex(): number { return this.layerInfo.pageIndex }
   private get layerIndex(): number { return this.layerInfo.layerIndex }
+  private get subLayerIdx(): number { return this.layerInfo.subLayerIdx ?? -1 }
   private get isLocked(): boolean { return this.config.locked }
   private get contentEditable(): boolean { return (this.config as any).contentEditable || false }
   private get getLayerPos(): ICoordinate { return { x: this.config.styles.x, y: this.config.styles.y } }
@@ -377,12 +379,12 @@ export class MovingUtils {
       }
     )
     const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
-    this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
+    // this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
     const totalOffset = {
-      // x: offsetPos.x,
-      // y: offsetPos.y
-      x: offsetPos.x + (offsetSnap.x * this.scaleRatio * 0.01),
-      y: offsetPos.y + (offsetSnap.y * this.scaleRatio * 0.01)
+      x: offsetPos.x,
+      y: offsetPos.y
+      // x: offsetPos.x + (offsetSnap.x * this.scaleRatio * 0.01),
+      // y: offsetPos.y + (offsetSnap.y * this.scaleRatio * 0.01)
     }
     this.initialPos.x += totalOffset.x
     this.initialPos.y += totalOffset.y

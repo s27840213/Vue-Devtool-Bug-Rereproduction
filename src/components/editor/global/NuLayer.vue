@@ -1,7 +1,7 @@
 <template lang="pug">
   //- @pointerdown="moveStart"
   div
-    div(class="nu-layer" :class="!config.locked ? `nu-layer--p${pageIndex}` : ''" :style="layerStyles()" ref="body" :id="`nu-layer-${pageIndex}-${layerIndex}`"
+    div(class="nu-layer" :class="!config.locked ? `nu-layer--p${pageIndex}` : ''" :style="layerStyles()" ref="body" :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
         :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
         :data-p-index="pageIndex"
         @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
@@ -157,7 +157,7 @@ export default Vue.extend({
      */
     const body = this.$refs.body as HTMLElement
     const props = this.$props
-    const layerInfo = { pageIndex: -1, layerIndex: -1 }
+    const layerInfo = {} as ILayerInfo
     Object.defineProperty(layerInfo, 'pageIndex', {
       get() {
         return props.pageIndex
@@ -195,6 +195,7 @@ export default Vue.extend({
     } else {
       const subCtrlUtils = new SubControllerUtils(data)
       const pointerdown = subCtrlUtils.onPointerdown.bind(subCtrlUtils)
+      console.log(subCtrlUtils)
       body.addEventListener('pointerdown', pointerdown)
       console.log('sub layer')
     }

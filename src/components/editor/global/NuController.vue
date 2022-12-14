@@ -12,6 +12,49 @@
                   iconColor="gray-2")
         div(class="nu-controller__object-hint__text")
           span {{ Math.round(hintAngle) % 360 }}
+      div(v-if="subLayer && subLayer.config" class="nu-controller__sublayer-container" :style="contentStyles")
+        //- :style="getLayerType === 'frame' ? '' : subControllerStyles(subLayer.type === 'image' && subLayer.imgControl)"
+        nu-sub-controller(v-if="subLayer.config.type !== 'image' || !subLayer.config.imgControl"
+          class="relative"
+          data-identifier="controller"
+          :key="`group-controller-${subLayer.config.id}`"
+          :pageIndex="pageIndex"
+          :layerIndex="subLayer.subLayerIdx"
+          :primaryLayerIndex="layerIndex"
+          :primaryLayer="config"
+          :config="getLayerType === 'frame' && !FrameUtils.isImageFrame(subLayer.config) ? frameLayerMapper(subLayer.config) : subLayer.config"
+          :type="config.type"
+          :primaryLayerZindex="primaryLayerZindex()"
+          :isMoved="isMoved"
+          :contentScaleRatio="contentScaleRatio"
+          @onSubDrop="onSubDrop"
+          @clickSubController="clickSubController"
+          @dblSubController="dblSubController"
+          @pointerDownSubController="pointerDownSubController")
+
+      //- template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isDragging()")
+      //-   div(class="sub-controller"
+      //-       :style="transformStyle")
+      //-     template(v-for="(layer,index) in getLayers()")
+      //-       nu-sub-controller(v-if="layer.type !== 'image' || !layer.imgControl"
+      //-         class="relative"
+      //-         data-identifier="controller"
+      //-         :style="getLayerType === 'frame' ? '' : subControllerStyles(layer.type === 'image' && layer.imgControl)"
+      //-         :key="`group-controller-${layer.id}`"
+      //-         :pageIndex="pageIndex"
+      //-         :layerIndex="index"
+      //-         :primaryLayerIndex="layerIndex"
+      //-         :primaryLayer="config"
+      //-         :config="getLayerType === 'frame' && !FrameUtils.isImageFrame(config) ? frameLayerMapper(layer) : layer"
+      //-         :type="config.type"
+      //-         :primaryLayerZindex="primaryLayerZindex()"
+      //-         :isMoved="isMoved"
+      //-         :contentScaleRatio="contentScaleRatio"
+      //-         @onSubDrop="onSubDrop"
+      //-         @clickSubController="clickSubController"
+      //-         @dblSubController="dblSubController"
+      //-         @pointerDownSubController="pointerDownSubController")
+
       //- div(class="nu-controller__content"
       //-   template(v-if="config.type === 'text' && isActive")
       //-     div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
@@ -47,7 +90,7 @@
       //- div(class="nu-controller__content"
       //-     ref="body"
       //-     :layer-index="`${layerIndex}`"
-      //-     :style="contentStyles"
+      //-     :style="ctrlContentStyles"
       //-     @dragenter="dragEnter($event)"
       //-     @dragover.prevent
       //-     @click.right.stop="onRightClick"
@@ -89,7 +132,7 @@
       //-       @click.native="MappingUtils.mappingIconAction('lock')")
       div(v-show="isActive && !isControlling && !isLocked() && !isImgControl"
           class="nu-controller__ctrl-points"
-          :style="contentStyles")
+          :style="ctrlContentStyles")
         div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
             class="control-point__corner-rotate scaler"
             :ref="`corner-rotate-${index}`"
@@ -100,7 +143,7 @@
       div(v-show="isActive && !isControlling && !isLocked() && !isImgControl"
             ref="body"
             class="nu-controller__ctrl-points"
-            :style="contentStyles")
+            :style="ctrlContentStyles")
           div(v-for="(end, index) in isLine() ? controlPoints.lineEnds : []"
               class="control-point"
               :key="index"
@@ -327,16 +370,31 @@ export default Vue.extend({
     subLayer(): any {
       if ([LayerType.group, LayerType.frame].includes(this.config.type)) {
         if (this.config.type === LayerType.group) {
-          return (this.config as IGroup).layers.find(l => l.active)
+          const subLayerIdx = (this.config as IGroup).layers.findIndex(l => l.active)
+          return {
+            config: (this.config as IGroup).layers[subLayerIdx],
+            subLayerIdx
+          }
         } else if ((this.config.type === LayerType.group)) {
-          return (this.config as IFrame).clips.find(c => c.active)
+          const subLayerIdx = (this.config as IFrame).clips.findIndex(l => l.active)
+          return {
+            config: (this.config as IFrame).clips[subLayerIdx],
+            subLayerIdx
+          }
         }
       }
+      return undefined
     },
     contentStyles(): any {
-      const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
-      const isGroup = (this.getLayerType === 'group') && this.currSelectedInfo.index === this.layerIndex
-      const zindex = (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType === LayerType.tmp ? 10000 : 100)
+      const { x, y, width, height } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
+      const transform = `translate(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px)`
+      return {
+        transform,
+        width: `${width * this.contentScaleRatio}px`,
+        height: `${height * this.contentScaleRatio}px`
+      }
+    },
+    ctrlContentStyles(): any {
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
       const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
@@ -345,7 +403,6 @@ export default Vue.extend({
         transform += ` rotate(${rotate}deg)`
       }
       return {
-        // ...this.transformStyle,
         transform,
         willChange: this.isDragging() ? 'transform' : '',
         width: `${width * this.contentScaleRatio}px`,
@@ -2256,6 +2313,15 @@ export default Vue.extend({
     justify-content: center;
     align-items: center;
     position: absolute;
+    touch-action: none;
+  }
+  &__sublayer-container {
+    display: relative;
+    // display: flex;
+    // justify-content: center;
+    // align-items: center;
+    position: absolute;
+    pointer-events: none;
     touch-action: none;
   }
   &__ctrl-points {
