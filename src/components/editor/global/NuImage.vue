@@ -380,6 +380,7 @@ export default Vue.extend({
       setImgConfig: 'imgControl/SET_CONFIG'
     }),
     onError() {
+      console.log('onerror')
       this.isOnError = true
       let updater
       const { srcObj, styles: { width, height } } = this.config
@@ -408,10 +409,19 @@ export default Vue.extend({
                 userId: ''
               }
             )
+            frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+              imgWidth: (this.config as IImage).styles.width,
+              imgHeight: (this.config as IImage).styles.height,
+              imgX: 0,
+              imgY: 0,
+              opacity: 100,
+              adjust: {}
+            })
             this.src = ImageUtils.getSrc(this.config)
-            setTimeout(() => {
+            window.requestAnimationFrame(() => {
+              console.log(this.src)
               vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
-            }, 0)
+            })
           }
         }
       }
@@ -485,10 +495,6 @@ export default Vue.extend({
       if (this.config.previewSrc) {
         return
       }
-      if (this.config.srcObj.type === 'local') {
-        this.src = this.config.srcObj.assetId
-        return
-      }
       let isPrimaryImgLoaded = false
       const urlId = ImageUtils.getImgIdentifier(this.config.srcObj)
       const panelPreviewSrc = this.config.panelPreviewSrc
@@ -506,10 +512,6 @@ export default Vue.extend({
           }
         })
       }
-
-      // const scale = (this.config.parentLayerStyles?.scale ?? 1)
-      // const { srcObj, styles: { imgWidth, imgHeight } } = this.config
-      // const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
       const currSize = this.getImgDimension
       const src = ImageUtils.getSrc(this.config, currSize)
       return new Promise<void>((resolve, reject) => {
@@ -520,17 +522,40 @@ export default Vue.extend({
             resolve()
           }
         }, () => {
+          const error = new Error(`cannot load the current image, src: ${this.src}`)
+          console.log(error)
           reject(new Error(`cannot load the current image, src: ${this.src}`))
-          fetch(src)
-            .then(res => {
-              const { status, statusText } = res
-              this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
-            })
-            .catch((e) => {
-              if (src.indexOf('data:image/png;base64') !== 0) {
-                this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
-              }
-            })
+          if (this.primaryLayer.type === LayerType.frame) {
+            if (this.config.srcObj.type === 'ios') {
+              frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex,
+                {
+                  type: 'frame',
+                  assetId: '',
+                  userId: ''
+                }
+              )
+              frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+                imgWidth: (this.config as IImage).styles.width,
+                imgHeight: (this.config as IImage).styles.height,
+                imgX: 0,
+                imgY: 0,
+                opacity: 100,
+                adjust: {}
+              })
+              this.src = ImageUtils.getSrc(this.config)
+            }
+          } else {
+            fetch(src)
+              .then(res => {
+                const { status, statusText } = res
+                this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
+              })
+              .catch((e) => {
+                if (src.indexOf('data:image/png;base64') !== 0) {
+                  this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
+                }
+              })
+          }
         })
       })
     },
