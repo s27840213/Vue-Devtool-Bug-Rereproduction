@@ -336,7 +336,7 @@ export default defineComponent({
         return false
       }
       const isCurrShadowEffectApplied = this.currentShadowEffect() !== ShadowEffectType.none
-      const isHandling = handleId?.pageId === pageUtils.getPage(pageIndex).id && (() => {
+      const isHandling = handleId?.pageId === pageUtils.getPage(pageIndex)?.id && (() => {
         if (subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined') {
           const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
           return primaryLayer.id === handleId.layerId && primaryLayer.layers[subLayerIndex].id === handleId.subLayerId

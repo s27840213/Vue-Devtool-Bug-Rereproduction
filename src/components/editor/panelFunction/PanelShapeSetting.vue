@@ -364,7 +364,7 @@ export default defineComponent({
       return this.markerListReady ? (this.currLayer as IShape).markerId?.[1] ?? 'none' : 'none'
     },
     focusDesignId(): string {
-      return this.currSelectedInfo.layers[0].designId ?? ''
+      return this.currSelectedInfo.layers[0]?.designId ?? ''
     },
     isObjectElement(): boolean {
       return !(this.currSelectedInfo.layers[0].db === 'text')
@@ -387,15 +387,6 @@ export default defineComponent({
         plan: ''
       }
       this.imgRandQuery = GeneralUtils.generateRandomString(5)
-    },
-    getDocumentColors: function () {
-      const currLayer = LayerUtils.getCurrLayer
-      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        if ((currLayer as IGroup).layers
-          .some(l => l.type === 'shape' && l.active && (l as IShape).color.length === 1)) {
-          this.currSelectedColorIndex = 0
-        }
-      }
     }
   },
   methods: {

@@ -69,7 +69,6 @@ class ShapeUtils {
         return [...(decoration?.color || []), ...(decorationTop?.color || [])]
       }
       default:
-        console.error('Wrong with the right-side-panel color')
         return []
     }
   }
