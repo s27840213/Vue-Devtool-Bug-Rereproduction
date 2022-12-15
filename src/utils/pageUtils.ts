@@ -101,9 +101,10 @@ class PageUtils {
     }
 
     // set physical size to px size if not exist
-    pageData.physicalWidth ||= pageData.width
-    pageData.physicalHeight ||= pageData.height
+    if (pageData.width) pageData.physicalWidth ||= pageData.width
+    if (pageData.height) pageData.physicalHeight ||= pageData.height
     pageData.unit ||= 'px'
+
     const defaultPage: IPage = {
       width: 1080,
       height: 1080,
@@ -140,6 +141,12 @@ class PageUtils {
         h: []
       },
       bleeds: {
+        up: 0,
+        down: 0,
+        left: 0,
+        right: 0
+      },
+      physicalBleeds: {
         up: 0,
         down: 0,
         left: 0,
@@ -205,13 +212,6 @@ class PageUtils {
 
   setPageSize(index: number, width: number, height: number) {
     store.commit('SET_pageSize', { index, width, height })
-  }
-
-  /**
-   * @param {Array<number>} bleeds [up, down, left, right]
-   */
-  setPageBleeds(pageIndex: number, bleeds: Array<number>) {
-    store.commit('SET_bleeds', { pageIndex, bleeds })
   }
 
   resizePage(format: { width: number, height: number }) {

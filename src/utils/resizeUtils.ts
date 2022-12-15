@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import { IBleed, IPage } from '@/interfaces/page'
 import frameUtils from '@/utils/frameUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import controlUtils from '@/utils/controlUtils'
@@ -8,7 +8,9 @@ import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from './rulerUtils'
+import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import store from '@/store'
+import { round } from 'lodash'
 
 class ResizeUtils {
   scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number) {
@@ -196,9 +198,26 @@ class ResizeUtils {
     format.physicalHeight ||= format.height
     format.unit ||= 'px'
 
+    // convert bleeds
+    let dpi: {width: number, height: number}
+    if (format.unit !== 'px') {
+      dpi = {
+        width: format.width / unitUtils.convert(format.physicalWidth, format.unit, 'in'),
+        height: format.height / unitUtils.convert(format.physicalHeight, format.unit, 'in')
+      }
+    } else {
+      dpi = {
+        width: format.width / unitUtils.convert(page.physicalWidth, page.unit, 'in'),
+        height: format.height / unitUtils.convert(page.physicalHeight, page.unit, 'in')
+      }
+    }
+    const unit = format.unit || 'px'
+    const physicalBleeds = Object.fromEntries(Object.entries(page.physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, page.unit, unit, (k === 'left' || k === 'right') ? dpi.width : dpi.height), unit === 'px' ? 0 : PRECISION)])) as IBleed
+    const bleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, unit, 'px', (k === 'left' || k === 'right') ? dpi.width : dpi.height))])) as IBleed
+
     store.commit('UPDATE_pageProps', {
       pageIndex: pageIndex,
-      props: { ...format }
+      props: { ...format, bleeds, physicalBleeds }
     })
   }
 

@@ -7,6 +7,13 @@ export interface IBackgroundImage {
   posY: number,
   newDisplayMode?: boolean
 }
+export interface IBleed {
+  [index: string]: number
+  up: number,
+  down: number,
+  left: number,
+  right: number
+}
 export interface IPage {
   [index: string]: unknown,
   id: string,
@@ -27,11 +34,7 @@ export interface IPage {
     v: Array<number>,
     h: Array<number>
   },
-  bleeds: {
-    up: number,
-    down: number,
-    left: number,
-    right: number
-  }
+  bleeds: IBleed,
+  physicalBleeds: IBleed
   isAutoResizeNeeded: boolean
 }

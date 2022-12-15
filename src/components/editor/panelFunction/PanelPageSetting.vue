@@ -34,25 +34,25 @@
                 iconColor="gray-2"
                 :style="expandIconStyles()")
       div(v-if="showBleedSettings" class="page-setting-row page-setting__bleed__content")
-        div(v-for="(bleed, idx) in bleedSettings" class='page-setting__bleed__content__item')
+        div(v-for="bleed in bleedsToShow" class='page-setting__bleed__content__item')
           div(class='page-setting__bleed__content__item__label')
             span(class="body-XS text-gray-2") {{bleed.label}}
           div(class='page-setting__bleed__content__item__input')
             div(class='page-setting__bleed__content__item__input__icon pointer'
-                @click="addBleed(idx, 1, isLocked)")
+                @click="addBleed(bleed.key, 1, isLocked)")
               svg-icon(iconName="chevron-up"
                 iconWidth="14px"
                 iconColor="gray-2")
             div(class='page-setting__bleed__content__item__input__icon pointer'
-                @click="addBleed(idx, -1, isLocked)")
+                @click="addBleed(bleed.key, -1, isLocked)")
               svg-icon(iconName="chevron-up"
                 iconWidth="14px"
                 iconColor="gray-2"
                 :style="{transform: 'scaleY(-1)'}")
             div(class='page-setting__bleed__content__item__input__value body-XS')
               input(type="number" min="0"
-                    :value="!isNaN(bleed.values[currentPageUnit]) ? bleed.values[currentPageUnit] : ''"
-                    @input="setBleed(idx, {evt: $event}, isLocked)"
+                    :value="!isNaN(bleed.value) ? bleed.value : ''"
+                    @input="setBleed(bleed.key, {evt: $event}, isLocked)"
                     @blur="handleBleedBlur()")
               span(class='text-gray-3') {{currentPageUnit}}
         div(class="page-setting__bleed__content__lock-icon")
@@ -249,11 +249,13 @@ import designApis from '@/apis/design-info'
 import GeneralUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
-import { IPage } from '@/interfaces/page'
+import { IBleed, IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import resizeUtils from '@/utils/resizeUtils'
 import unitUtils, { STR_UNITS, IMapUnit, PRECISION } from '@/utils/unitUtils'
 import { round } from 'lodash'
+import rulerUtils from '@/utils/rulerUtils'
 
 export default Vue.extend({
   components: {
@@ -305,24 +307,12 @@ export default Vue.extend({
       unsetThemeTemplate: [] as string[],
       showBleedSettings: true,
       unitOptions: STR_UNITS,
-      bleedSettings: [
-        {
-          label: '上',
-          values: {} as IMapUnit
-        },
-        {
-          label: '下',
-          values: {} as IMapUnit
-        },
-        {
-          label: '左',
-          values: {} as IMapUnit
-        },
-        {
-          label: '右',
-          values: {} as IMapUnit
-        }
-      ]
+      bleeds: {
+        up: 0,
+        down: 0,
+        left: 0,
+        right: 0
+      } as IBleed
     }
   },
   watch: {
@@ -363,15 +353,21 @@ export default Vue.extend({
       }
     },
     currFocusPageIndex: function () {
-      this.currentPageBleeds.forEach((val: number, idx: number) => {
-        this.setBleed(idx, { value: val, noRecord: true })
+      Object.keys(this.currentPageBleeds).forEach(key => {
+        this.bleeds[key] = this.currentPageBleeds[key]
       })
     },
-    currentPageBleeds: function (newVal) {
-      newVal.forEach((val: number, idx: number) => {
-        this.setBleed(idx, { value: val, noRecord: true })
+    currentPageBleeds: function () {
+      Object.keys(this.currentPageBleeds).forEach(key => {
+        this.bleeds[key] = this.currentPageBleeds[key]
       })
     },
+    // currentPageUnit: function (newVal, oldVal) {
+    //   const dpi = this.currentPageDPI
+    //   const physicalBleeds = Object.fromEntries(Object.entries(this.bleeds).map(([k, v]) => [k, unitUtils.convert(v, oldVal, newVal, k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+    //   const bleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, newVal, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+    //   this.$store.commit('SET_bleeds', { pageIndex: this.currFocusPageIndex, bleeds, physicalBleeds })
+    // },
     showBleed: function () {
       this.showBleedSettings = true
     },
@@ -394,7 +390,8 @@ export default Vue.extend({
       getPage: 'getPage',
       getPages: 'getPages',
       token: 'user/getToken',
-      groupId: 'getGroupId'
+      groupId: 'getGroupId',
+      getPageSizeWithoutBleeds: 'getPageSizeWithoutBleeds'
     }),
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
@@ -410,9 +407,46 @@ export default Vue.extend({
     currentPageUnit(): string {
       return this.getPage(pageUtils.currFocusPageIndex)?.unit ?? 'px'
     },
-    currentPageBleeds(): number[] {
-      const currBleeds = this.getPage(pageUtils.currFocusPageIndex)?.bleeds
-      return currBleeds ? [currBleeds.up ?? 0, currBleeds.down ?? 0, currBleeds.left ?? 0, currBleeds.right ?? 0] : [0, 0, 0, 0]
+    currentPageBleeds(): IBleed {
+      return this.getPage(pageUtils.currFocusPageIndex)?.bleeds ?? {
+        up: 0,
+        down: 0,
+        left: 0,
+        right: 0
+      }
+    },
+    currentPagePhysicalBleeds(): IBleed {
+      return this.getPage(pageUtils.currFocusPageIndex)?.physicalBleeds ?? this.getPage(pageUtils.currFocusPageIndex)?.bleeds ?? {
+        up: 0,
+        down: 0,
+        left: 0,
+        right: 0
+      }
+    },
+    bleedsToShow(): {key: string, label: string, value: number}[] {
+      const currBleeds = this.currentPagePhysicalBleeds
+      return [
+        {
+          key: 'up',
+          label: '上',
+          value: currBleeds.up
+        },
+        {
+          key: 'down',
+          label: '下',
+          value: currBleeds.down
+        },
+        {
+          key: 'left',
+          label: '左',
+          value: currBleeds.left
+        },
+        {
+          key: 'right',
+          label: '右',
+          value: currBleeds.right
+        }
+      ]
     },
     hasBleed(): boolean {
       return this.getPages.some((page: IPage) => page.bleeds.up || page.bleeds.down || page.bleeds.left || page.bleeds.right)
@@ -705,45 +739,73 @@ export default Vue.extend({
     expandIconStyles() {
       return this.showBleedSettings ? {} : { transform: 'scaleY(-1)' }
     },
-    setBleed(idx: number, opts: { evt?: Event, value?: number, noRecord?: boolean }, all = false) {
+    setBleed(key: string, opts: { evt?: Event, value?: number, noRecord?: boolean }, all = false) {
       let value: number
       if (typeof opts.value !== 'undefined' && !isNaN(opts.value)) value = opts.value
       else if (opts.evt) value = Math.max(parseFloat((opts.evt.target as HTMLInputElement).value), 0)
       else return
       if (all) {
-        this.bleedSettings = this.bleedSettings.map(bleed => {
-          bleed.values = unitUtils.convertAll(value, this.currentPageUnit)
-          return bleed
+        Object.keys(this.bleeds).forEach((key) => {
+          this.bleeds[key] = value
         })
-      } else {
-        this.bleedSettings[idx].values = unitUtils.convertAll(value, this.currentPageUnit)
+      } else if (this.bleeds[key] === value) return
+      else {
+        this.bleeds[key] = value
       }
       this.updateBleeds()
       // if (!opts.noRecord) stepsUtils.record()
     },
-    addBleed(idx: number, value: number, all = false) {
+    addBleed(key: string, value: number, all = false) {
+      console.log('add bleed', this.currentPagePhysicalBleeds)
       if (all) {
-        this.bleedSettings = this.bleedSettings.map(bleed => {
-          const newValue = Math.max(bleed.values[this.currentPageUnit] + value, 0)
-          bleed.values = unitUtils.convertAll(newValue, this.currentPageUnit)
-          return bleed
+        Object.keys(this.bleeds).forEach((key) => {
+          this.bleeds[key] = Math.max(this.bleeds[key] + value, 0)
         })
       } else {
-        const newValue = Math.max(this.bleedSettings[idx].values[this.currentPageUnit] + value, 0)
-        this.bleedSettings[idx].values = unitUtils.convertAll(newValue, this.currentPageUnit)
+        this.bleeds[key] = this.bleeds[key] + value
       }
       this.updateBleeds()
       stepsUtils.record()
     },
     updateBleeds(pageIndex = pageUtils.currFocusPageIndex) {
-      const pageUnit = this.getPage(pageIndex)?.unit ?? 'px'
-      const bleeds = this.bleedSettings.map((bleed) => !isNaN(bleed.values[pageUnit]) ? bleed.values[pageUnit] : 0)
-      pageUtils.setPageBleeds(pageIndex, bleeds)
+      console.log('updateBleeds')
+      const page = pageUtils.getPage(pageIndex)
+      const { width, height, physicalWidth, physicalHeight, unit } = this.getPageSizeWithoutBleeds(pageIndex)
+      const dpi = pageUtils.getPageDPI(this.currFocusPageIndex)
+      const bleeds = Object.fromEntries(Object.entries(this.bleeds).map(([k, v]) => [k, unitUtils.convert(v, unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+      const physicalBleeds = this.bleeds
+      const newSize = { width: width + bleeds.left + bleeds.right, height: height + bleeds.up + bleeds.down }
+      const aspectRatio = width / height
+      const targetAspectRatio = newSize.width / newSize.height
+      resizeUtils.scaleAndMoveLayers(pageIndex, page, 1, bleeds.left - page.bleeds.left, bleeds.up - page.bleeds.up)
+
+      if (Math.abs(targetAspectRatio - aspectRatio) < Number.EPSILON) {
+        const scale = targetAspectRatio > aspectRatio ? newSize.height / page.height : newSize.width / page.width
+        resizeUtils.scaleBackground(pageIndex, page, scale)
+      } else {
+        resizeUtils.centerBackground(pageIndex, page, newSize)
+      }
+      rulerUtils.removeInvalidGuides(pageIndex, newSize)
+
+      this.$store.commit('UPDATE_pageProps', {
+        pageIndex: pageIndex,
+        props: {
+          width: newSize.width,
+          height: newSize.height,
+          physicalWidth: physicalWidth + physicalBleeds.left + physicalBleeds.right,
+          physicalHeight: physicalHeight + physicalBleeds.up + physicalBleeds.down,
+          unit: unit
+        }
+      })
+      console.log({ ...newSize })
+      console.log({ ...bleeds })
+      console.log({ ...physicalBleeds })
+      this.$store.commit('SET_bleeds', { pageIndex, bleeds, physicalBleeds })
     },
     handleBleedBlur() {
       stepsUtils.record()
-      this.currentPageBleeds.forEach((val: number, idx: number) => {
-        this.setBleed(idx, { value: val, noRecord: true })
+      Object.keys(this.currentPageBleeds).forEach(key => {
+        this.bleeds[key] = this.currentPageBleeds[key]
       })
     }
   }

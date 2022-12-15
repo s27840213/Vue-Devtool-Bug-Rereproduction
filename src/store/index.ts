@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame, IImageStyle } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData, LayerType } from './types'
-import { IPage } from '@/interfaces/page'
+import { IBleed, IPage } from '@/interfaces/page'
 import zindexUtils from '@/utils/zindexUtils'
 
 import photos from '@/store/photos'
@@ -162,6 +162,18 @@ const getters: GetterTree<IEditorState, unknown> = {
         physicalWidth: state.pages[pageIndex].physicalWidth,
         physicalHeight: state.pages[pageIndex].physicalHeight,
         unit: state.pages[pageIndex].unit
+      }
+    }
+  },
+  getPageSizeWithoutBleeds(state: IEditorState) {
+    return (pageIndex: number): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } => {
+      const page = state.pages[pageIndex]
+      return {
+        width: page.width - page.bleeds.left - page.bleeds.right,
+        height: page.height - page.bleeds.up - page.bleeds.down,
+        physicalWidth: page.physicalWidth - page.physicalBleeds.left - page.physicalBleeds.right,
+        physicalHeight: page.physicalHeight - page.physicalBleeds.up - page.physicalBleeds.down,
+        unit: page.unit
       }
     }
   },
@@ -845,12 +857,11 @@ const mutations: MutationTree<IEditorState> = {
     pages[currFocusPageIndex].guidelines.v = []
     pages[currFocusPageIndex].guidelines.h = []
   },
-  SET_bleeds(state: IEditorState, { pageIndex, bleeds }) {
+  SET_bleeds(state: IEditorState, payload: { pageIndex: number, bleeds: IBleed, physicalBleeds: IBleed }) {
     const { pages } = state
-    pages[pageIndex].bleeds.up = bleeds[0]
-    pages[pageIndex].bleeds.down = bleeds[1]
-    pages[pageIndex].bleeds.left = bleeds[2]
-    pages[pageIndex].bleeds.right = bleeds[3]
+    const { pageIndex, bleeds, physicalBleeds } = payload
+    pages[pageIndex].bleeds = { ...bleeds }
+    pages[pageIndex].physicalBleeds = { ...physicalBleeds }
   },
   SET_showBleed(state: IEditorState, bool: boolean) {
     state.showBleed = bool

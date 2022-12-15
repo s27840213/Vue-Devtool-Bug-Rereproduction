@@ -31,6 +31,13 @@ export class Page implements IPage {
     right: number
   }
 
+  physicalBleeds: {
+    up: number
+    down: number
+    left: number
+    right: number
+  }
+
   isAutoResizeNeeded: boolean
 
   constructor() {
@@ -69,6 +76,12 @@ export class Page implements IPage {
       h: []
     }
     this.bleeds = {
+      up: 0,
+      down: 0,
+      left: 0,
+      right: 0
+    }
+    this.physicalBleeds = {
       up: 0,
       down: 0,
       left: 0,
