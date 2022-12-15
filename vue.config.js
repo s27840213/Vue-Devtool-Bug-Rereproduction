@@ -41,7 +41,7 @@ const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const { argv } = require('yargs')
 const { defineConfig } = require('@vue/cli-service')
 
-function resolve (dir) {
+function resolve(dir) {
     return path.join(__dirname, dir)
 }
 
@@ -236,7 +236,8 @@ module.exports = defineConfig({
                     sourceMap: false,
                     parallel: true
                 })
-            ]
+            ],
+            minimize: false
         }
     },
 
