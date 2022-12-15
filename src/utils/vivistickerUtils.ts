@@ -9,12 +9,12 @@ import stepsUtils from './stepsUtils'
 import uploadUtils from './uploadUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
 import { ColorEventType, LayerType } from '@/store/types'
-import { IGroup, ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import editorUtils from './editorUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import textPropUtils from './textPropUtils'
-import { IMyDesign, IMyDesignTag, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
+import { IIosImgData, IMyDesign, IMyDesignTag, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import localeUtils from './localeUtils'
 import listApis from '@/apis/list'
 import { IListServiceContentDataItem } from '@/interfaces/api'
@@ -56,7 +56,8 @@ const VVSTK_CALLBACKS = [
   'setStateDone',
   'addAssetDone',
   'deleteAssetDone',
-  'getAssetResult'
+  'getAssetResult',
+  'uploadImageURL'
 ]
 
 const MYDESIGN_TAGS = [{
@@ -184,9 +185,9 @@ class ViviStickerUtils {
     this.sendToIOS('DONE_LOADING', { width, height, options, needCrop })
   }
 
-  sendScreenshotUrl(query: string, action = 'copy') {
+  sendScreenshotUrl(query: string, action = 'copy', type?: string, id?: string) {
     console.log(query)
-    this.sendToIOS('SCREENSHOT', { params: query, action })
+    this.sendToIOS('SCREENSHOT', { params: query, action, type, id })
     if (this.isStandaloneMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
       window.open(url, '_blank')
@@ -329,6 +330,21 @@ class ViviStickerUtils {
         for (const [subIndex, subLayer] of (layer as IGroup).layers.entries()) {
           this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
         }
+        break
+      case LayerType.frame: {
+        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
+        const frame = layer as IFrame
+        const layers = frame.clips as Array<IImage | IShape>
+        if (frame.decoration) {
+          layers.unshift(frame.decoration)
+        }
+        if (frame.decorationTop) {
+          layers.push(frame.decorationTop)
+        }
+        for (const [subIndex, subLayer] of layers.entries()) {
+          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
+        }
+      }
         break
       default:
         this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
@@ -803,6 +819,15 @@ class ViviStickerUtils {
 
   getThumbSrc(type: string, id: string, ver: string) {
     return `vvstk://${type}/${id}?ver=${ver}`
+  }
+
+  async getIosImg(limit = 1): Promise<Array<string>> {
+    const { images } = await this.callIOSAsAPI('UPLOAD_IMAGE', { limit }, 'upload-image', 60000) as IIosImgData
+    return images
+  }
+
+  uploadImageURL(data: any) {
+    vivistickerUtils.handleCallback('upload-image', data)
   }
 
   mapEditorType2MyDesignKey(editorType: string): string {

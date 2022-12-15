@@ -106,7 +106,8 @@ export default Vue.extend({
     ...mapGetters({
       getDefaultFontsList: 'text/getDefaultFontsList',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer'
+      getLayer: 'getLayer',
+      controllerHidden: 'vivisticker/getControllerHidden'
     }),
     spanEffect(): Record<string, unknown> {
       return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
@@ -180,7 +181,18 @@ export default Vue.extend({
     },
     bodyStyles() {
       const { editing, contentEditable } = this.config
-      const opacity = editing ? (contentEditable ? ((this.isCurveText || this.isFlipped) ? 0.2 : 0) : 1) : 1
+      let opacity = 1
+      if (editing && !this.controllerHidden) {
+        if (this.isCurveText || this.isFlipped) {
+          if (contentEditable) {
+            opacity = 0.2
+          } else {
+            opacity = 1
+          }
+        } else {
+          opacity = 0
+        }
+      }
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
         width: isVertical ? 'auto' : '',

@@ -102,7 +102,7 @@ export default Vue.extend({
     },
     fontTabs(): Array<IFooterTab> {
       return [
-        { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || this.hasSubSelectedLayer || this.isGroup },
+        { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer) },
         { icon: 'plus-square', text: `${this.$t('STK0006')}`, panelType: 'text' },
         { icon: 'font', text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`), panelType: 'fonts' },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
@@ -456,11 +456,17 @@ export default Vue.extend({
               })
             }
 
-            tiptapUtils.focus({ scrollIntoView: false })
+            tiptapUtils.focus({ scrollIntoView: false }, currLayer.isEdited ? 'end' : null)
           } else {
-            /**
-             * @Todo handle the sub controler
-             */
+            const { subLayerIdx } = layerUtils
+            const subLayer = (currLayer as IGroup).layers[subLayerIdx]
+            if (subLayer.type === 'text') {
+              layerUtils.updateLayerProps(pageIndex, index, {
+                contentEditable: true
+              }, subLayerIdx)
+            }
+
+            tiptapUtils.focus({ scrollIntoView: false }, 'end')
           }
           break
         }
@@ -479,10 +485,29 @@ export default Vue.extend({
         }
         case 'photo':
         case 'replace': {
-          const { layerIndex, subLayerIdx } = layerUtils
-          const fileInput = document.getElementById(`input-${layerIndex}-${Math.max(subLayerIdx, 0)}`) as HTMLInputElement
-          vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
-          return fileInput.click()
+          const { pageIndex, layerIndex, subLayerIdx = 0 } = layerUtils
+          vivistickerUtils.getIosImg()
+            .then(async (images: Array<string>) => {
+              const { imgX, imgY, imgWidth, imgHeight } = await imageUtils
+                .getClipImgDimension((layerUtils.getCurrLayer as IFrame).clips[subLayerIdx], imageUtils.getSrc({
+                  type: 'ios',
+                  assetId: images[0],
+                  userId: ''
+                }))
+              frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
+                imgWidth,
+                imgHeight,
+                imgX,
+                imgY
+              })
+              frameUtils.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, {
+                type: 'ios',
+                assetId: images[0],
+                userId: ''
+              })
+              stepsUtils.record()
+            })
+          break
         }
         default: {
           break

@@ -22,7 +22,6 @@ import pageUtils from '@/utils/pageUtils'
 import { IPage } from '@/interfaces/page'
 import mathUtils from '@/utils/mathUtils'
 import { IGroup, IImageStyle } from '@/interfaces/layer'
-import assetUtils from '@/utils/assetUtils'
 import layerUtils from '@/utils/layerUtils'
 
 declare let window: CustomWindow
@@ -237,7 +236,7 @@ export default Vue.extend({
             break
           }
           case 'json': {
-            const page = JSON.parse(decodeURIComponent(id ?? '')) as IPage
+            const page = layerFactary.newTemplate(JSON.parse(decodeURIComponent(id ?? ''))) as IPage
             vivistickerUtils.initLoadingFlags(page, () => {
               this.onload()
             })

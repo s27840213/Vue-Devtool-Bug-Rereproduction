@@ -6,7 +6,7 @@
         div(class="nu-sub-controller__content"
             ref="body"
             :layer-index="`${layerIndex}`"
-            :style="styles('')"
+            :style="styles()"
             @dblclick="onDblClick($event)"
             @dragenter="onDragEnter($event)"
             @pointerdown="onPointerdown($event)")
@@ -40,14 +40,14 @@
                 @keydown.native.meta.shift.90.exact.stop.self
                 @update="handleTextChange"
                 @compositionend="handleTextCompositionEnd")
-        input(
-          type="file"
-          accept="image/jpeg, image/png"
-          ref="fileInput"
-          class="d-none"
-          :id="`input-${primaryLayerIndex}-${layerIndex}`"
-          :multiple="false"
-          @change="onImgFileChange")
+        //- input(
+        //-   type="file"
+        //-   accept="image/jpeg, image/png"
+        //-   ref="fileInput"
+        //-   class="d-none"
+        //-   :id="`input-${primaryLayerIndex}-${layerIndex}`"
+        //-   :multiple="false"
+        //-   @change="onImgFileChange")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -130,7 +130,27 @@ export default Vue.extend({
       }
     }
   },
-  mounted() {
+  async mounted() {
+    // if (this.config.srcObj.type === 'frame') {
+    //   const styles = await imageUtils.getClipImgDimension((this.primaryLayer as IFrame).clips[0], imageUtils.getSrc({
+    //     type: 'unsplash',
+    //     assetId: 'photo-1665686310974-2ed1eb7f57ac',
+    //     userId: ''
+    //   }))
+    //   const { imgX, imgY, imgWidth, imgHeight } = styles
+    //   FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, 0, {
+    //     imgWidth,
+    //     imgHeight,
+    //     imgX,
+    //     imgY
+    //   })
+    //   FrameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, 0, {
+    //     type: 'unsplash',
+    //     assetId: 'photo-1665686310974-2ed1eb7f57ac',
+    //     userId: ''
+    //   })
+    // }
+
     const body = this.$refs.body as HTMLElement
     if (body) {
       /**
@@ -146,15 +166,6 @@ export default Vue.extend({
         body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
       }
     }
-
-    // if (this.type === LayerType.frame && (this.primaryLayer as IFrame).clips.length === 1 && this.config.srcObj.type === 'frame') {
-    //   window.requestAnimationFrame(() => {
-    //     const input = this.$refs.fileInput as HTMLInputElement
-    //     if (input) {
-    //       input.click()
-    //     }
-    //   })
-    // }
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
@@ -172,6 +183,12 @@ export default Vue.extend({
     }),
     isControllerShown(): boolean {
       return this.config?.active && !this.controllerHidden
+    },
+    isCurveText(): boolean {
+      return this.checkIfCurve(this.config)
+    },
+    isFlipped(): boolean {
+      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     },
     isTextEditing(): boolean {
       return !this.isControlling && this.isControllerShown
@@ -212,6 +229,11 @@ export default Vue.extend({
         }
         popupUtils.closePopup()
       } else {
+        if (this.config.type === 'text') {
+          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+            editing: true
+          })
+        }
         TextUtils.setCurrTextInfo({
           config: this.config as IText,
           subLayerIndex: this.layerIndex
@@ -235,7 +257,7 @@ export default Vue.extend({
     'config.contentEditable'(newVal) {
       if (this.config.type !== 'text') return
       if (this.config.active) {
-        if (!newVal || !this.config.isEdited) {
+        if (!newVal) {
           tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
         }
         tiptapUtils.agent(editor => {
@@ -288,20 +310,28 @@ export default Vue.extend({
       }
     },
     textBodyStyle() {
-      const isVertical = this.config.styles.writingMode.includes('vertical')
-      return {
+      // const isVertical = this.config.styles.writingMode.includes('vertical')
+      // return {
+      //   width: `${this.config.styles.width / this.config.styles.scale}px`,
+      //   height: `${this.config.styles.height / this.config.styles.scale}px`,
+      //   userSelect: this.config.contentEditable ? 'text' : 'none',
+      //   opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
+      // }
+      const textstyles = {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
         userSelect: this.config.contentEditable ? 'text' : 'none',
-        opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
+        opacity: this.isTextEditing ? 1 : 0
       }
-    },
-    textStyles(styles: any) {
-      const textStyles = CssConveter.convertFontStyle(styles)
-      Object.assign(textStyles, {
-        'caret-color': this.config.contentEditable && !this.isControlling ? '' : '#00000000'
-      })
-      return textStyles
+      return !(this.isCurveText || this.isFlipped) ? textstyles
+        : {
+          width: `${this.config.styles.width / this.config.styles.scale}px`,
+          height: `${this.config.styles.height / this.config.styles.scale}px`,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
+        }
     },
     groupControllerStyle() {
       return {
@@ -393,12 +423,12 @@ export default Vue.extend({
       if (this.config.type === 'text') {
         this.posDiff.x = this.primaryLayer.styles.x - this.posDiff.x
         this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
-        if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
+        if (this.posDiff.x !== 0 || this.posDiff.y !== 0) {
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
         } else {
           if (this.config.contentEditable) {
             LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { isTyping: true }, this.layerIndex)
-            tiptapUtils.focus({ scrollIntoView: false })
+            tiptapUtils.focus({ scrollIntoView: false }, 'end')
           }
         }
       }
@@ -408,15 +438,36 @@ export default Vue.extend({
       }
       const hasActualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
       if (this.type === LayerType.frame && this.config.active && this.config.srcObj.type === 'frame' && !hasActualMove && !this.controllerHidden) {
-        const input = this.$refs.fileInput as HTMLInputElement
-        if (input) {
-          vivistickerUtils.sendToIOS('CHECK_CAMERA_REQUEST', vivistickerUtils.getEmptyMessage())
-          input.click()
-        }
+        this.iosPhotoSelect()
       }
       eventUtils.removePointerEvent('pointerup', this.onMouseup)
       this.isControlling = false
       this.onClickEvent(e)
+    },
+    iosPhotoSelect() {
+      vivistickerUtils.getIosImg()
+        .then(async (images: Array<string>) => {
+          if (images.length) {
+            const { imgX, imgY, imgWidth, imgHeight } = await imageUtils.getClipImgDimension((this.primaryLayer as IFrame).clips[this.layerIndex], imageUtils.getSrc({
+              type: 'ios',
+              assetId: images[0],
+              userId: ''
+            }))
+            console.log(imgX, imgY, imgWidth, imgHeight)
+            FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+              imgWidth,
+              imgHeight,
+              imgX,
+              imgY
+            })
+            FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+              type: 'ios',
+              assetId: images[0],
+              userId: ''
+            })
+            StepsUtils.record()
+          }
+        })
     },
     onImgFileChange(e: Event) {
       const target = e.target as HTMLInputElement
@@ -504,12 +555,14 @@ export default Vue.extend({
     styles() {
       const { isFrameImg } = this.config
       const zindex = this.type === 'group' ? this.isControllerShown ? this.getPrimaryLayerSubLayerNum : this.primaryLayerZindex : this.config.styles.zindex
+      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
 
       return {
         ...this.sizeStyle(),
         'pointer-events': 'initial',
         transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`,
-        ...TextEffectUtils.convertTextEffect(this.config)
+        ...textEffectStyles,
+        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
     sizeStyle() {

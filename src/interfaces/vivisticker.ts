@@ -29,3 +29,7 @@ export interface IMyDesignTag {
   name: string,
   tab: string
 }
+
+export interface IIosImgData {
+  images: Array<string>
+}
