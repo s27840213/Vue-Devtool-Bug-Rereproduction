@@ -848,7 +848,8 @@ class ViviStickerUtils {
     vivistickerUtils.handleCallback('update-file')
   }
 
-  informWebResult(info: any) {
+  informWebResult(data: { info: any }) {
+    const { info } = data
     const { event } = info
     switch (event) {
       case 'missing-image':
