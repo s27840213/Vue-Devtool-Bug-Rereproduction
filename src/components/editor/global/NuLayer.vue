@@ -1,10 +1,10 @@
 <template lang="pug">
-  //- @pointerdown="moveStart"
   div
-    div(class="nu-layer" :class="!config.locked ? `nu-layer--p${pageIndex}` : ''" :style="layerStyles()" ref="body" :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
+    div(class="nu-layer" :class="!config.locked ? `nu-layer--p${pageIndex}` : ''" :style="layerStyles" ref="body" :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
         :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
         :data-p-index="pageIndex"
-        @dragenter="dragEnter")
+        @dragenter="dragEnter"
+        @dblclick="dblClick")
       div(class="layer-translate posAbs"
           :style="translateStyles()")
         div(class="layer-scale posAbs" ref="scale"
@@ -32,18 +32,6 @@
                 v-bind="$attrs")
       div(v-if="showSpinner()" class="nu-layer__inProcess")
         square-loading
-    //- nu-controller(v-if="isActive && !forRender"
-    //-   data-identifier="controller"
-    //-   :key="`controller-${config.id}`"
-    //-   :layerIndex="layerIndex"
-    //-   :pageIndex="pageIndex"
-    //-   :config="config"
-    //-   :snapUtils="snapUtils"
-    //-   :contentScaleRatio="contentScaleRatio")
-        //- svg-icon(class="spiner"
-        //-   :iconName="'spiner'"
-        //-   :iconColor="'white'"
-        //-   :iconWidth="'150px'")
 </template>
 
 <script lang="ts">
@@ -70,6 +58,8 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import groupUtils from '@/utils/groupUtils'
+import controlUtils from '@/utils/controlUtils'
 
 export default Vue.extend({
   inheritAttrs: false,
@@ -83,6 +73,10 @@ export default Vue.extend({
     layerIndex: Number,
     imgControl: Boolean,
     snapUtils: Object,
+    primaryLayer: {
+      type: Object,
+      default: undefined
+    },
     subLayerIndex: {
       type: Number,
       default: -1
@@ -200,9 +194,7 @@ export default Vue.extend({
     } else {
       const subCtrlUtils = new SubControllerUtils(data)
       const pointerdown = subCtrlUtils.onPointerdown.bind(subCtrlUtils)
-      console.log(subCtrlUtils)
       body.addEventListener('pointerdown', pointerdown)
-      console.log('sub layer')
     }
   },
   computed: {
@@ -270,6 +262,38 @@ export default Vue.extend({
     },
     isLine(): boolean {
       return this.config.type === 'shape' && this.config.category === 'D'
+    },
+    layerStyles(): any {
+      const styles = Object.assign(
+        CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
+        {
+          outline: this.outlineStyles(),
+          willChange: !this.isSubLayer && this.isDragging ? 'transform' : ''
+        }
+      )
+      switch (this.config.type) {
+        case LayerType.text: {
+          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
+          const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
+          Object.assign(
+            styles,
+            textEffectStyles,
+            textBgStyles,
+            {
+              willChange: 'text-shadow' + (this.isDragging ? ', transform' : ''),
+              '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
+            }
+          )
+          break
+        }
+        case LayerType.shape: {
+          Object.assign(
+            styles,
+            { 'mix-blend-mode': this.config.styles.blendMode }
+          )
+        }
+      }
+      return styles
     }
   },
   methods: {
@@ -304,14 +328,6 @@ export default Vue.extend({
         return 'none'
       }
     },
-    // onDrop(e: DragEvent) {
-    //   MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos())
-    //   e.stopPropagation()
-    // },
-    // onDropClipper(e: DragEvent) {
-    //   MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos(), this.config.path, this.config.styles)
-    //   e.stopPropagation()
-    // },
     toggleHighlighter(evt: MouseEvent, pageIndex: number, layerIndex: number, shown: boolean) {
       layerUtils.updateLayerProps(pageIndex, layerIndex, {
         shown
@@ -319,41 +335,6 @@ export default Vue.extend({
     },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
-    },
-    layerStyles(): any {
-      const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
-        {
-          // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
-          // 'pointer-events': 'none',
-          outline: this.outlineStyles(),
-          transformStyle: this.enalble3dTransform ? 'preserve-3d' : 'initial',
-          willChange: !this.isSubLayer && this.isDragging ? 'transform' : ''
-        }
-      )
-      switch (this.config.type) {
-        case LayerType.text: {
-          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
-          const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
-          Object.assign(
-            styles,
-            textEffectStyles,
-            textBgStyles,
-            {
-              willChange: 'text-shadow' + (this.isDragging ? ', transform' : ''),
-              '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
-            }
-          )
-          break
-        }
-        case LayerType.shape: {
-          Object.assign(
-            styles,
-            { 'mix-blend-mode': this.config.styles.blendMode }
-          )
-        }
-      }
-      return styles
     },
     getLayerPos(): { x: number, y: number } {
       return {
@@ -401,13 +382,6 @@ export default Vue.extend({
       }
       return styles
     },
-    setCursorStyle(cursor: string) {
-      const layer = this.$el as HTMLElement
-      if (layer) {
-        layer.style.cursor = cursor
-        document.body.style.cursor = cursor
-      }
-    },
     isLocked(): boolean {
       return this.config.locked
     },
@@ -417,10 +391,53 @@ export default Vue.extend({
         e.stopPropagation()
       }
     },
-    dragEnter(e: DragEvent) {
-      this.layerDragEnter(e)
+    dblClick(e: MouseEvent) {
+      e.stopPropagation()
+      const isSubLayer = this.subLayerIndex !== -1
+      if (isSubLayer) {
+        if (!this.primaryLayer || this.isHandleShadow) return
+        let updateSubLayerProps = null as any
+        let target = undefined as ILayer | undefined
+        switch (this.primaryLayer.type) {
+          case LayerType.group:
+            target = (this.primaryLayer as IGroup).layers[this.subLayerIndex]
+            updateSubLayerProps = layerUtils.updateSubLayerProps
+            if (!target.active) {
+              return
+            }
+            break
+          case LayerType.frame:
+            target = (this.primaryLayer as IFrame).clips[this.subLayerIndex]
+            updateSubLayerProps = frameUtils.updateFrameLayerProps
+            if (!target.active || (target as IImage).srcObj.type === 'frame') {
+              return
+            }
+            break
+          case LayerType.image:
+          default:
+            return
+        }
+        if (target.type === LayerType.image && !target.inProcess) {
+          updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { imgControl: true })
+        }
+      } else {
+        if (this.getLayerType !== 'image' || this.isLocked()) return
+        if (this.currSelectedInfo.index < 0) {
+          groupUtils.select(this.pageIndex, [this.layerIndex])
+        }
+        switch (this.getLayerType) {
+          case LayerType.image: {
+            const { shadow } = (this.config as IImage).styles
+            const needRedrawShadow = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
+            if (!(this.isHandleShadow && needRedrawShadow)) {
+              controlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+            }
+          }
+        }
+      }
     },
-    layerDragEnter(e: DragEvent) {
+    dragEnter(e: DragEvent) {
+      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
       const body = this.$refs.body as HTMLElement
       const dragSrcObj = this.$store.state.currDraggedPhoto.srcObj
       if (this.getLayerType === 'image' && dragSrcObj.assetId !== this.config.srcObj.assetId) {
@@ -440,6 +457,7 @@ export default Vue.extend({
       }
     },
     layerDragLeave(e: DragEvent) {
+      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
       const body = this.$refs.body as HTMLElement
       body.removeEventListener('dragleave', this.layerDragLeave)
       body.removeEventListener('drop', this.layerOnDrop)

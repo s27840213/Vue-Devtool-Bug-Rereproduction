@@ -1,7 +1,6 @@
 <template lang="pug">
     div(:layer-index="`${layerIndex}`"
         class="nu-controller"
-        :style="transformStyle"
         ref="self")
       div(class="nu-controller__line-hint" :style="hintStyles()" v-if="isLineEndMoving")
         | {{ Math.round(hintLength) + ' | ' + Math.round(hintAngle) % 360  + '°' }}
@@ -15,7 +14,8 @@
       div(v-if="subLayer && subLayer.config" class="nu-controller__sublayer-container" :style="contentStyles")
         //- :style="getLayerType === 'frame' ? '' : subControllerStyles(subLayer.type === 'image' && subLayer.imgControl)"
         nu-sub-controller(v-if="subLayer.config.type !== 'image' || !subLayer.config.imgControl"
-          class="relative"
+          :style="subContentStyles"
+          class="relative nu-controller__subCtrlContent"
           data-identifier="controller"
           :key="`group-controller-${subLayer.config.id}`"
           :pageIndex="pageIndex"
@@ -382,24 +382,29 @@ export default Vue.extend({
       return undefined
     },
     contentStyles(): any {
-      const { x, y, width, height } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
-      const transform = `translate(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px)`
-      return {
-        transform,
-        width: `${width * this.contentScaleRatio}px`,
-        height: `${height * this.contentScaleRatio}px`
-      }
-    },
-    ctrlContentStyles(): any {
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
-      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
-      const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
       let transform = `translate(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px)`
       if (rotate) {
         transform += ` rotate(${rotate}deg)`
       }
       return {
         transform,
+        width: `${width * this.contentScaleRatio}px`,
+        height: `${height * this.contentScaleRatio}px`
+      }
+    },
+    subContentStyles(): any {
+      const transform = `scale(${this.config.styles.scale})`
+      return {
+        transform
+      }
+    },
+    ctrlContentStyles(): any {
+      const { width, height } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
+      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
+      const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
+      return {
+        ...this.contentStyles,
         willChange: this.isDragging() ? 'transform' : '',
         width: `${width * this.contentScaleRatio}px`,
         height: `${height * this.contentScaleRatio}px`,
@@ -449,11 +454,6 @@ export default Vue.extend({
     },
     isActive(): boolean {
       return this.config.active
-    },
-    transformStyle(): { [index: string]: string } {
-      return {
-        transformStyle: this.enalble3dTransform ? 'preserve-3d' : 'initial'
-      }
     },
     enalble3dTransform(): boolean {
       return this.pageIndex === pageUtils._3dEnabledPageIndex
@@ -2319,6 +2319,9 @@ export default Vue.extend({
     position: absolute;
     pointer-events: none;
     touch-action: none;
+  }
+  &__subCtrlContent {
+    transform-origin: 0;
   }
   &__ctrl-points {
     border-width: 0;

@@ -379,12 +379,10 @@ export class MovingUtils {
       }
     )
     const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
-    // this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
+    this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
     const totalOffset = {
-      x: offsetPos.x,
-      y: offsetPos.y
-      // x: offsetPos.x + (offsetSnap.x * this.scaleRatio * 0.01),
-      // y: offsetPos.y + (offsetSnap.y * this.scaleRatio * 0.01)
+      x: offsetPos.x + (offsetSnap.x * this.scaleRatio * 0.01),
+      y: offsetPos.y + (offsetSnap.y * this.scaleRatio * 0.01)
     }
     this.initialPos.x += totalOffset.x
     this.initialPos.y += totalOffset.y
@@ -409,7 +407,7 @@ export class MovingUtils {
       // eventUtils.removePointerEvent('pointerup', this._moveEnd)
       // eventUtils.removePointerEvent('pointermove', this._moving)
       this.isControlling = false
-      this.setCursorStyle(e, 'initial')
+      this.setCursorStyle(e, '')
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false
       })
@@ -506,7 +504,7 @@ export class MovingUtils {
       }
       this.isPointerDownFromSubController = false
       this.isControlling = false
-      this.setCursorStyle(e, 'initial')
+      this.setCursorStyle(e, '')
       // eventUtils.removePointerEvent('pointerup', this._moveEnd)
       // eventUtils.removePointerEvent('pointermove', this._moving)
     }
