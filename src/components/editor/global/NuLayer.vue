@@ -93,6 +93,14 @@ export default defineComponent({
     dataPindex: {
       default: '-1',
       type: String
+    },
+    inTmp: {
+      type: Boolean,
+      default: false
+    },
+    primaryScale: {
+      type: Number,
+      default: 1
     }
     /**
      * @Note Vuex Props
@@ -163,7 +171,8 @@ export default defineComponent({
           // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
           'pointer-events': 'none',
           transformStyle: this.enalble3dTransform ? 'preserve-3d' : 'initial',
-          willChange: !this.isSubLayer && this.isDragging ? 'transform' : 'none'
+          willChange: !this.isSubLayer && this.isDragging ? 'transform' : 'none',
+          ...this.subLayerInTmpStyles(this.config as ILayer)
         }
       )
       switch (this.config.type) {
@@ -195,6 +204,9 @@ export default defineComponent({
         x: this.config.styles.x,
         y: this.config.styles.y
       }
+    },
+    subLayerInTmpStyles(layer: ILayer) {
+      return (layer.type === 'shape' && layer.category === 'D') ? {} : { outline: this.inTmp ? `${2 / this.primaryScale}px solid #7190CC` : {} }
     },
     pageScaleRatio(): number {
       return pageUtils.scaleRatio / 100

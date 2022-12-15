@@ -9,7 +9,9 @@ div(class="nu-tmp"
     :contentScaleRatio="contentScaleRatio"
     :config="layer"
     :style="subLayerStyles(layer)"
-    :isSubLayer="true")
+    :isSubLayer="true"
+    :inTmp="true"
+    :primaryScale="this.config.styles.scale")
 </template>
 
 <script lang="ts">
