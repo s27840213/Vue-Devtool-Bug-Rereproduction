@@ -297,34 +297,19 @@ export default Vue.extend({
     onload() {
       console.log('loaded')
       if (this.mode === ScreenShotMode.PAGE) {
-        vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, true)
         if (vivistickerUtils.isAnyIOSImgOnError) {
-          // Update thumbnail and design json of mydesign
-          vivistickerUtils.sendToIOS('UPDATE_FILE', {
-            path: `mydesign-${this.extraData.key}/${this.extraData.designId}`,
-            name: 'config',
-            content: uploadUtils.prepareJsonToUpload(pageUtils.getPages)
+          // Inform UIWeb to handle missing img
+          vivistickerUtils.sendToIOS('INFORM_WEB', {
+            info: {
+              event: 'missing-image',
+              key: this.extraData.key,
+              id: this.extraData.designId,
+              thumbType: this.extraData.thumbType
+            },
+            to: 'UI'
           })
-          const width = window.innerWidth - 32
-          const height = Math.round(width * 420 / 358)
-          vivistickerUtils.callIOSAsAPI('GEN_THUMB', {
-            type: this.extraData.thumbType,
-            id: this.extraData.designId,
-            width,
-            height,
-            x: 0,
-            y: 0,
-            needCrop: this.extraData.key === 'text' ? 0 : 1
-          }, 'gen-thumb').then(() => {
-            vivistickerUtils.sendToIOS('INFORM_WEB', {
-              info: {
-                event: 'update-thumb',
-                key: this.extraData.key,
-                id: this.extraData.designId
-              },
-              to: 'UI'
-            })
-          })
+        } else {
+          vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, true)
         }
       } else if ([ScreenShotMode.BG_IMG, ScreenShotMode.BG_COLOR].includes(this.mode)) {
         const element = this.$refs.target

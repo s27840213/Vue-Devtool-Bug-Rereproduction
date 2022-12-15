@@ -851,14 +851,24 @@ class ViviStickerUtils {
   informWebResult(info: any) {
     const { event } = info
     switch (event) {
-      case 'update-thumb':
-        vivistickerUtils.updateThumb(info)
+      case 'missing-image':
+        vivistickerUtils.handleMissingImage(info)
         break
     }
   }
 
-  updateThumb(info: { key: string, id: string }) {
-    store.commit('vivisticker/UPDATE_updateDesignThumb', { tab: info.key, id: info.id })
+  handleMissingImage(info: { key: string, id: string, thumbType: string }) {
+    switch (info.thumbType) {
+      case 'mydesign':
+        // eslint-disable-next-line no-case-declarations
+        const designs = store.getters['vivisticker/getMyDesignFileList'](info.key) as IMyDesign[]
+        // eslint-disable-next-line no-case-declarations
+        const design = designs.find(d => d.id === info.id)
+        if (!design) break
+        this.initWithMyDesign(design)
+        // handle Dialog and File-selector
+        break
+    }
   }
 
   mapEditorType2MyDesignKey(editorType: string): string {
