@@ -11,7 +11,7 @@ then
         --header "Content-Type: application/json" \
         --header "Authorization: Basic '"${BITBUCKET_API_TOKEN}"'" \
         --data '{
-          "title": "Pull request to develop by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
+          "title": "Pull request to qa by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
           "source": {
             "branch": {
               "name": "'"${BITBUCKET_BRANCH}"'"
@@ -32,7 +32,7 @@ then
         --header "Content-Type: application/json" \
         --header "Authorization: Basic '"${BITBUCKET_API_TOKEN}"'" \
         --data '{
-          "title": "Pull request to develop by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
+          "title": "Pull request to master by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
           "source": {
             "branch": {
               "name": "'"${BITBUCKET_BRANCH}"'"
@@ -68,7 +68,7 @@ then
         --header "Content-Type: application/json" \
         --header "Authorization: Basic '"${BITBUCKET_API_TOKEN}"'" \
         --data '{
-          "title": "Pull request to develop by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
+          "title": "Pull request to qa by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
           "source": {
             "branch": {
               "name": "'"${BITBUCKET_BRANCH}"'"
@@ -89,7 +89,7 @@ then
         --header "Content-Type: application/json" \
         --header "Authorization: Basic '"${BITBUCKET_API_TOKEN}"'" \
         --data '{
-          "title": "Pull request to develop by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
+          "title": "Pull request to master by '"${BITBUCKET_TRIGGERER_USERNAME}"'",
           "source": {
             "branch": {
               "name": "'"${BITBUCKET_BRANCH}"'"
