@@ -122,7 +122,8 @@ const getDefaultState = (): IEditorState => ({
   defaultContentScaleRatio: 0.6,
   _3dEnabledPageIndex: -1,
   enalbleComponentLog: false,
-  inScreenshotPreviewRoute: false
+  inScreenshotPreviewRoute: false,
+  cursor: ''
 })
 
 const state = getDefaultState()
@@ -551,6 +552,11 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_hasCopiedFormat(state: IEditorState, value: boolean) {
     state.hasCopiedFormat = value
+    if (value) {
+      state.cursor = `url(${require('@/assets/img/svg/brush-paste-resized.svg')}) 2 2, pointer`
+    } else {
+      state.cursor = ''
+    }
   },
   ADD_newLayers(state: IEditorState, updateInfo: { pageIndex: number, layers: Array<IShape | IText | IImage | IGroup> }) {
     updateInfo.layers.forEach(layer => {
@@ -950,6 +956,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_inScreenshotPreview(state: IEditorState, bool: boolean) {
     state.inScreenshotPreviewRoute = bool
+  },
+  SET_cursor(state: IEditorState, cursor: string) {
+    state.cursor = cursor
   },
   ...imgShadowMutations,
   ADD_subLayer

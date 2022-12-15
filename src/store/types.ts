@@ -79,7 +79,8 @@ export interface IEditorState {
   _3dEnabledPageIndex: number,
   currFocusPageIndex: number,
   enalbleComponentLog: boolean,
-  inScreenshotPreviewRoute: boolean
+  inScreenshotPreviewRoute: boolean,
+  cursor: string
 }
 
 export enum SidebarPanelType {

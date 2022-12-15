@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="editor-view"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
-      :style="brushCursorStyles()"
+      :style="cursorStyles()"
       @pointerdown="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
       @wheel="handleWheel"
       @scroll.passive="!inBgRemoveMode ? scrollUpdate() : null"
@@ -227,6 +227,9 @@ export default Vue.extend({
     ...mapState('user', [
       'role',
       'adminMode']),
+    ...mapState({
+      cursor: 'cursor'
+    }),
     ...mapGetters({
       groupId: 'getGroupId',
       pagesState: 'getPagesState',
@@ -302,8 +305,9 @@ export default Vue.extend({
         'getRecently'
       ]
     ),
-    brushCursorStyles() {
-      return this.hasCopiedFormat ? { cursor: `url(${require('@/assets/img/svg/brush-paste-resized.svg')}) 2 2, pointer` } : {}
+    cursorStyles() {
+      const { cursor } = this
+      return cursor ? { cursor } : {}
     },
     setAdminMode() {
       this._setAdminMode(!this.adminMode)

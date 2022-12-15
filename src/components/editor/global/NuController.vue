@@ -1700,23 +1700,34 @@ export default Vue.extend({
         this.hintAngle = rotateAngle
         ControlUtils.updateLayerRotate(this.pageIndex, this.layerIndex, angle)
 
-        if (this.initCornerRotate !== -1) {
-          let cursorIndex = this.initCornerRotate
-          if (rotateAngle >= 22.5) {
-            cursorIndex++
-            cursorIndex += Math.floor((rotateAngle - 22.5) / 45)
-            if (cursorIndex > 7) {
-              cursorIndex = cursorIndex - 8
-            }
-          } else if (rotateAngle <= -22.5) {
-            cursorIndex--
-            cursorIndex -= Math.floor((-rotateAngle - 22.5) / 45)
-            if (cursorIndex < 0) {
-              cursorIndex = 8 + cursorIndex
-            }
-          }
-          this.setCursorStyle(ControlUtils.getCornerRataterMap[cursorIndex])
+        // if (this.initCornerRotate !== -1) {
+        //   let cursorIndex = this.initCornerRotate
+        //   if (rotateAngle >= 22.5) {
+        //     console.log(1)
+        //     cursorIndex++
+        //     cursorIndex += Math.floor((rotateAngle - 22.5) / 45)
+        //     if (cursorIndex > 7) {
+        //       cursorIndex = cursorIndex - 8
+        //     }
+        //   } else if (rotateAngle <= -22.5) {
+        //     console.log(1)
+        //     cursorIndex--
+        //     cursorIndex -= Math.floor((-rotateAngle - 22.5) / 45)
+        //     if (cursorIndex < 0) {
+        //       cursorIndex = 8 + cursorIndex
+        //     }
+        //   }
+        //   console.log(cursorIndex)
+        //   this.setCursorStyle(ControlUtils.getCornerRataterMap[cursorIndex])
+        // }
+        const _ang = angle > 0 ? angle : 360 + angle
+        let index = 6
+        if (_ang < 22.5) {
+          index = 5
+        } else {
+          index += Math.floor((_ang - 22.5) / 45)
         }
+        this.setCursorStyle(ControlUtils.getCornerRataterMap[index % 8])
       }
     },
     rotateEnd() {
@@ -1851,6 +1862,7 @@ export default Vue.extend({
       }
     },
     setCursorStyle(cursor: string) {
+      this.$store.commit('SET_cursor', cursor)
       // const layer = this.$el as HTMLElement
       // const body = this.$refs.body as HTMLElement
       // if (layer) {
