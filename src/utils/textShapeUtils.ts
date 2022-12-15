@@ -253,6 +253,10 @@ class Controller {
     body.style.width = 'max-content'
     body.style.height = 'max-content'
     body.style.writingMode = 'initial'
+    body.style.position = 'fixed'
+    body.style.top = '100%'
+    body.style.left = '100%'
+    body.style.opacity = '0'
     body.classList.add('nu-text')
     body.classList.add('curve')
     return { body, p }

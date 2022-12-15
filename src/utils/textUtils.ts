@@ -684,6 +684,10 @@ class TextUtils {
     }
     body.classList.add('nu-text')
     body.style.writingMode = content.styles.writingMode
+    body.style.position = 'fixed'
+    body.style.top = '100%'
+    body.style.left = '100%'
+    body.style.opacity = '0'
     return body
   }
 
