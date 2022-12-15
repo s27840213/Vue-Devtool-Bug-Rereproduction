@@ -37,9 +37,9 @@
           div(class="mobile-panel__btn-click-zone"
             @pointerdown="rightButtonAction"
             @touchstart="disableTouchEvent")
-      tabs(v-if="innerTabs.label" class="mobile-panel__inner-tab" theme="light"
-          :tabs="innerTabs.label" @switchTab="switchInnerTab")
     div(class="mobile-panel__bottom-section")
+      tabs(v-if="innerTabs.label" theme="light"
+          :tabs="innerTabs.label" @switchTab="switchInnerTab")
       keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
         //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
         component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
@@ -60,7 +60,6 @@ import Vue from 'vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
-import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
@@ -128,7 +127,6 @@ export default Vue.extend({
     PanelFile,
     PanelBrand,
     PanelPage,
-    ColorPanel,
     PanelPosition,
     PanelFlip,
     PanelOpacity,
@@ -244,7 +242,7 @@ export default Vue.extend({
       return this.whiteTheme
     },
     showLeftBtn(): boolean {
-      return this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize' || this.showExtraColorPanel)
+      return this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel)
     },
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop' || this.inSelectionState
@@ -316,11 +314,6 @@ export default Vue.extend({
             panelHistory: this.panelHistory
           })
         }
-        case 'resize': {
-          return Object.assign(defaultVal, {
-            ref: 'panelResize'
-          })
-        }
         case 'brand-list': {
           const brandDefaultVal = Object.assign(defaultVal, {
             panelHistory: this.panelHistory
@@ -356,63 +349,38 @@ export default Vue.extend({
       }
     },
     dynamicBindMethod(): { [index: string]: any } {
+      const pushHistory = (history: string) => {
+        this.panelHistory.push(history)
+      }
+      const openExtraColorModal = (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
+        this.showExtraColorPanel = true
+        this.extraColorEvent = colorEventType
+        this.panelHistory.push(initColorPanelType)
+      }
       switch (this.currActivePanel) {
-        case 'color': {
-          return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            }
-          }
-        }
+        case 'color':
+          return { pushHistory }
+        case 'background':
+          return { openExtraColorModal }
         case 'text-effect':
-        case 'photo-shadow': {
+        case 'photo-shadow':
+          return { pushHistory, openExtraColorModal }
+        case 'brand-list':
           return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            },
-            openExtraColorModal: (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
-              this.showExtraColorPanel = true
-              this.extraColorEvent = colorEventType
-              this.panelHistory.push(initColorPanelType)
-            }
-          }
-        }
-        case 'background': {
-          // bind listener to let the parent access the grandchild's event
-          // return this.$listeners
-
-          return {
-            openExtraColorModal: (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
-              this.showExtraColorPanel = true
-              this.extraColorEvent = colorEventType
-              this.panelHistory.push(initColorPanelType)
-            }
-          }
-        }
-        case 'brand-list': {
-          return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            },
+            pushHistory,
             back: () => {
               this.panelHistory.pop()
             }
           }
-        }
-        default: {
+        default:
           return {}
-        }
       }
     },
     leftBtnName(): string {
-      if (this.panelHistory.length > 0 && this.currActivePanel !== 'resize') {
-        return 'back-circle'
-      } else {
-        return 'close-circle'
-      }
+      return 'back-circle'
     },
     rightBtnName(): string {
-      if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop', 'resize'].includes(this.currActivePanel)) {
+      if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop'].includes(this.currActivePanel)) {
         return 'check-mobile-circle'
       } else {
         return 'close-circle'
@@ -473,11 +441,6 @@ export default Vue.extend({
                 imgControl: !this.backgroundImgControl
               })
             }
-            break
-          }
-
-          case 'resize': {
-            (this.$refs.panelResize as any).applySelectedFormat()
             break
           }
 
@@ -569,9 +532,6 @@ export default Vue.extend({
     },
     maxHeightPx() {
       return (this.$el.parentElement as HTMLElement).clientHeight
-    },
-    getMaxHeightPx(): number {
-      return parseFloat((this.$el as HTMLElement).style.maxHeight.split('px')[0])
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
       if (this.fixSize) {
@@ -684,10 +644,6 @@ export default Vue.extend({
     overflow-y: scroll;
     overflow-x: hidden;
     @include no-scrollbar;
-  }
-
-  &__inner-tab {
-    margin: 15px 0 14px 0;
   }
 
   &__title {

@@ -842,8 +842,7 @@ class DesignUtils {
 
   setDesign(design: IDesign) {
     const design_id = design.id ? design.id : this.getPrivateDesignId(design.signedUrl?.['config.json'])
-    const url = router.resolve({ name: 'Editor', query: { type: 'design', design_id, team_id: this.teamId } }).href
-    window.location.href = url
+    router.push({ name: 'Editor', query: { type: 'design', design_id, team_id: this.teamId } })
   }
 
   getPrivateDesignId(jsonUrl?: string): string {

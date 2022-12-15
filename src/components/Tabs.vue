@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="tabs")
+  div(class="tabs" :style="tabsStyle")
     div(v-for="(tab,index) in tabs"
         class="tabs__item"
         :style="tabStyle(index)"
@@ -43,8 +43,22 @@ export default Vue.extend({
         default:
           return {
             active: 'white',
-            inactive: '#969BAB'
+            inactive: '#9C9C9C'
           }
+        case 'dark-rect':
+          return {
+            active: '#18191F',
+            activeBG: '#E8E8E8',
+            inactive: '#9C9C9C',
+            inactiveBG: '#2E2E2E'
+          }
+      }
+    },
+    tabsStyle() {
+      const type = this.theme.split('-')[1]
+      return type === 'rect' ? {
+      } : {
+        marginBottom: '24px'
       }
     }
   },
@@ -52,11 +66,26 @@ export default Vue.extend({
     tabStyle(tabIndex: number) {
       const isActive = tabIndex === this.currActiveTabIndex
       const activeMode = isActive ? 'active' : 'inactive'
-      return {
-        color: this.colors[activeMode],
-        borderBottom: isActive ? `2px solid ${this.colors[activeMode]}` : 'none',
-        width: `${100 / this.tabs.length / 2}%`
-      }
+      const type = this.theme.split('-')[1]
+      return type === 'rect'
+        ? {
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          margin: '0 8px 0 8px',
+          width: `calc(100% / ${this.tabs.length} - 16px)`,
+          height: '36px',
+          borderRadius: '10px',
+          color: this.colors[activeMode],
+          backgroundColor: this.colors[`${activeMode}BG` as 'activeBG'|'inactiveBG']
+        }
+        : {
+          paddingBottom: '4px',
+          minWidth: 'fit-content',
+          color: this.colors[activeMode],
+          borderBottom: isActive ? `2px solid ${this.colors[activeMode]}` : '2px solid transparent',
+          width: `${100 / this.tabs.length / 2}%`
+        }
     },
     switchTab(tabIndex: number) {
       this.currActiveTabIndex = tabIndex
@@ -72,13 +101,9 @@ export default Vue.extend({
   display: flex;
   align-items: center;
   justify-content: space-around;
-  margin-bottom: 24px;
   &__item {
-    padding-bottom: 4px;
     box-sizing: border-box;
-    min-width: fit-content;
-    transition: border-color 0.2s, color 0.2s;
-    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
   }
 }
 </style>

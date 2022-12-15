@@ -5,11 +5,11 @@
     draggable="false")
     div(v-show="!isColorBackground")
       div(v-if="isAdjustImage" :style="frameStyles")
-        nu-adjust-image(:src="src"
+        nu-adjust-image(:src="finalSrc"
           @error="onError"
           :styles="adjustImgStyles"
           :contentScaleRatio="contentScaleRatio")
-      img(v-else-if="src" :src="src"
+      img(v-else-if="src" :src="finalSrc"
         draggable="false"
         :style="imgStyles()"
         class="body"
@@ -33,6 +33,7 @@ import { IImage, IImageStyle } from '@/interfaces/layer'
 import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 
 export default Vue.extend({
   props: {
@@ -58,6 +59,7 @@ export default Vue.extend({
           this.src = ''
         } else {
           this.previewAsLoading()
+          this.handleIsTransparent()
         }
       }
     },
@@ -88,6 +90,7 @@ export default Vue.extend({
       }
     }
 
+    this.handleIsTransparent()
     if (this.userId !== 'backendRendering') {
       this.previewAsLoading()
       const nextImg = new Image()
@@ -119,6 +122,12 @@ export default Vue.extend({
     ...mapState('user', ['imgSizeMap', 'userId']),
     configStyles(): IImageStyle {
       return this.image.config.styles
+    },
+    finalSrc(): string {
+      if (this.$route.name === 'Preview') {
+        return ImageUtils.appendCompQueryForVivipic(this.src)
+      }
+      return this.src
     },
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
@@ -230,6 +239,22 @@ export default Vue.extend({
           })
         } catch (error) {
         }
+      }
+    },
+    handleIsTransparent() {
+      const img = new Image()
+      const imgSize = ImageUtils.getSrcSize(this.image.config.srcObj, 100)
+      img.src = ImageUtils.getSrc(this.image.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      img.crossOrigin = 'anoynous'
+      img.onload = () => {
+        this.$store.commit('SET_backgroundImageStyles', {
+          pageIndex: this.pageIndex,
+          styles: {
+            shadow: {
+              isTransparent: imageShadowUtils.isTransparentBg(img)
+            }
+          }
+        })
       }
     },
     imgStyles(): Partial<IImage> {
