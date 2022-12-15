@@ -57,7 +57,8 @@ const VVSTK_CALLBACKS = [
   'addAssetDone',
   'deleteAssetDone',
   'getAssetResult',
-  'uploadImageURL'
+  'uploadImageURL',
+  'informWebResult'
 ]
 
 const SCREENSHOT_CALLBACKS = [
