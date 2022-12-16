@@ -546,6 +546,8 @@ export default Vue.extend({
         height: this.config.height,
         physicalWidth: this.config.physicalWidth,
         physicalHeight: this.config.physicalHeight,
+        bleeds: this.config.bleeds,
+        physicalBleeds: this.config.physicalBleeds,
         unit: this.config.unit
       }), this.pageIndex + 1)
       this.setCurrActivePageIndex(this.pageIndex + 1)
