@@ -174,7 +174,7 @@ class ResizeUtils {
   }
 
   resizePage(pageIndex: number, page: IPage, format: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
-    const { width, height } = page
+    const { width, height } = store.getters.getPageSizeWithBleeds(pageIndex)
     const aspectRatio = width / height
     const targetAspectRatio = format.width / format.height
     let scale: number
