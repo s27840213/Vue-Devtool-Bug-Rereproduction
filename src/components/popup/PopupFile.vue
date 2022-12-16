@@ -71,6 +71,10 @@ import Avatar from '@/components/Avatar.vue'
 import stepsUtils from '@/utils/stepsUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import page from '@/store/module/page'
+import resizeUtils from '@/utils/resizeUtils'
+import unitUtils, { PRECISION } from '@/utils/unitUtils'
+import { IBleed } from '@/interfaces/page'
+import { round } from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -92,7 +96,8 @@ export default Vue.extend({
       isLogin: 'user/isLogin',
       isAdmin: 'user/isAdmin',
       account: 'user/getAccount',
-      isFontLoading: 'text/getIsFontLoading'
+      isFontLoading: 'text/getIsFontLoading',
+      pagesLength: 'getPagesLength'
     }),
     pageSize(): { w: number, h: number } {
       return {
@@ -147,6 +152,29 @@ export default Vue.extend({
     },
     toggleBleed() {
       this.setShowBleed(!this.showBleed)
+      if (this.showBleed) {
+        for (let idx = 0; idx < this.pagesLength; idx++) {
+          const dpi = pageUtils.getPageDPI(idx)
+          const unit = pageUtils.getPage(idx).unit
+          const defaultBleeds = Object.fromEntries(Object.entries({
+            up: 3,
+            down: 3,
+            left: 3,
+            right: 3
+          }).map(([k, v]) => [k, round(unitUtils.convert(v, 'mm', unit, k === 'left' || k === 'right' ? dpi.width : dpi.height), unit === 'px' ? 0 : PRECISION)])) as IBleed
+          resizeUtils.resizeBleeds(idx, defaultBleeds)
+        }
+      } else {
+        for (let idx = 0; idx < this.pagesLength; idx++) {
+          resizeUtils.resizeBleeds(idx, {
+            up: 0,
+            down: 0,
+            left: 0,
+            right: 0
+          })
+        }
+      }
+      stepsUtils.record()
     },
     newDesign() {
       // designUtils.newDesign()

@@ -228,6 +228,43 @@ class ResizeUtils {
     })
   }
 
+  resizeBleeds(pageIndex: number, bleeds: IBleed) {
+    const page = pageUtils.currFocusPage
+    const { width, height, physicalWidth, physicalHeight, unit } = store.getters.getPageSizeWithBleeds(pageIndex)
+
+    // convert bleeds
+    const dpi = pageUtils.getPageDPI(pageIndex)
+    bleeds = Object.fromEntries(Object.entries(bleeds).map(([k, v]) => [k, isNaN(v) ? 0 : v])) as IBleed // map NaN to 0
+    const newBleeds = Object.fromEntries(Object.entries(bleeds).map(([k, v]) => [k, round(unitUtils.convert(v, unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height))])) as IBleed // convert bleed to px size
+    const newPhysicalBleeds = bleeds
+
+    // resize page
+    const newSize = { width: width + newBleeds.left + newBleeds.right, height: height + newBleeds.up + newBleeds.down }
+    const aspectRatio = width / height
+    const targetAspectRatio = newSize.width / newSize.height
+    this.scaleAndMoveLayers(pageIndex, page, 1, newBleeds.left - page.bleeds.left, newBleeds.up - page.bleeds.up)
+    if (Math.abs(targetAspectRatio - aspectRatio) < Number.EPSILON) {
+      const scale = targetAspectRatio > aspectRatio ? newSize.height / page.height : newSize.width / page.width
+      this.scaleBackground(pageIndex, page, scale)
+    } else {
+      this.centerBackground(pageIndex, page, newSize)
+    }
+    rulerUtils.removeInvalidGuides(pageIndex, newSize)
+
+    // update page size and bleeds
+    store.commit('UPDATE_pageProps', {
+      pageIndex: pageIndex,
+      props: {
+        width: newSize.width,
+        height: newSize.height,
+        physicalWidth: physicalWidth + newPhysicalBleeds.left + newPhysicalBleeds.right,
+        physicalHeight: physicalHeight + newPhysicalBleeds.up + newPhysicalBleeds.down,
+        unit: unit
+      }
+    })
+    store.commit('SET_bleeds', { pageIndex, bleeds: newBleeds, physicalBleeds: newPhysicalBleeds })
+  }
+
   testResizeAllPages() {
     const { getPages: pages } = pageUtils
 

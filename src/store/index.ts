@@ -596,9 +596,11 @@ const mutations: MutationTree<IEditorState> = {
     })
   },
   UPDATE_layerStyles(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, styles: { [key: string]: string | number } }) {
-    Object.entries(updateInfo.styles).forEach(([k, v]) => {
-      state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles[k] = v
-    })
+    if (state.pages[updateInfo.pageIndex].layers.length > 0) {
+      Object.entries(updateInfo.styles).forEach(([k, v]) => {
+        state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex].styles[k] = v
+      })
+    }
   },
   UPDATE_layerOrders(state: IEditorState, updateInfo: { pageIndex: number }) {
     state.pages[updateInfo.pageIndex].layers.sort((a, b) => a.styles.zindex - b.styles.zindex)
