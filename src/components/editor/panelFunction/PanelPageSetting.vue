@@ -4,11 +4,11 @@
       span(class="text-gray-2 label-mid") {{$t('NN0021')}}
     div(class="page-setting-row page-setting__size bg-gray-6 pointer" @click="toggleSuggestionPanel()")
       div(class="page-setting__size__box")
-        span(class="body-XS text-gray-2") {{ `${currentPageWidth} ${currentPageUnit}` }}
+        span(class="body-XS text-gray-2") {{ `${sizeToShow.width} ${sizeToShow.unit}` }}
       span(class="body-XS text-gray-3") W
       span(class="body-XS text-gray-2 text-center") x
       div(class="page-setting__size__box")
-        span(class="body-XS text-gray-2") {{ `${currentPageHeight} ${currentPageUnit}` }}
+        span(class="body-XS text-gray-2") {{ `${sizeToShow.height} ${sizeToShow.unit}` }}
       span(class="body-XS text-gray-3") H
     div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
         @click="toggleSuggestionPanel()")
@@ -52,9 +52,10 @@
             div(class='page-setting__bleed__content__item__input__value body-XS')
               input(type="number" min="0"
                     :value="!isNaN(bleed.value) ? bleed.value : ''"
-                    @input="setBleed(bleed.key, {evt: $event}, isLocked)"
-                    @blur="handleBleedBlur()")
-              span(class='text-gray-3') {{currentPageUnit}}
+                    @input="setBleed($event, bleed.key, isLocked)"
+                    @blur="handleBleedSubmit()"
+                    @keyup="handleBleedSubmit")
+              span(class='text-gray-3') {{sizeToShow.unit}}
         div(class="page-setting__bleed__content__lock-icon")
           div(class="page-setting__bleed__content__lock-icon__box"
               :style="isLocked ? {background: '#E7EFFF'} : {}")
@@ -315,6 +316,11 @@ export default Vue.extend({
       } as IBleed
     }
   },
+  mounted: function () {
+    Object.keys(this.currentPageBleeds).forEach(key => {
+      this.bleeds[key] = this.currentPageBleeds[key]
+    })
+  },
   watch: {
     key_id: function () {
       this.isGetTemplate = false
@@ -352,22 +358,11 @@ export default Vue.extend({
         groupThemes: []
       }
     },
-    currFocusPageIndex: function () {
-      Object.keys(this.currentPageBleeds).forEach(key => {
-        this.bleeds[key] = this.currentPageBleeds[key]
+    currentPageBleeds: function (newVal) {
+      Object.keys(newVal).forEach(key => {
+        this.bleeds[key] = newVal[key]
       })
     },
-    currentPageBleeds: function () {
-      Object.keys(this.currentPageBleeds).forEach(key => {
-        this.bleeds[key] = this.currentPageBleeds[key]
-      })
-    },
-    // currentPageUnit: function (newVal, oldVal) {
-    //   const dpi = this.currentPageDPI
-    //   const physicalBleeds = Object.fromEntries(Object.entries(this.bleeds).map(([k, v]) => [k, unitUtils.convert(v, oldVal, newVal, k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
-    //   const bleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, newVal, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
-    //   this.$store.commit('SET_bleeds', { pageIndex: this.currFocusPageIndex, bleeds, physicalBleeds })
-    // },
     showBleed: function () {
       this.showBleedSettings = true
     },
@@ -391,60 +386,46 @@ export default Vue.extend({
       getPages: 'getPages',
       token: 'user/getToken',
       groupId: 'getGroupId',
-      getPageSizeWithoutBleeds: 'getPageSizeWithoutBleeds'
+      getPageSizeWithBleeds: 'getPageSizeWithBleeds'
     }),
-    currFocusPageIndex(): number {
-      return pageUtils.currFocusPageIndex
-    },
-    currentPageWidth(): number {
-      const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return round(currPage?.physicalWidth ?? currPage?.width ?? 0, PRECISION)
-    },
-    currentPageHeight(): number {
-      const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      return round(currPage?.physicalHeight ?? currPage?.height ?? 0, PRECISION)
-    },
-    currentPageUnit(): string {
-      return this.getPage(pageUtils.currFocusPageIndex)?.unit ?? 'px'
-    },
     currentPageBleeds(): IBleed {
-      return this.getPage(pageUtils.currFocusPageIndex)?.bleeds ?? {
+      const currPage = pageUtils.currFocusPage
+      return currPage?.physicalBleeds ?? currPage?.bleeds ?? {
         up: 0,
         down: 0,
         left: 0,
         right: 0
       }
     },
-    currentPagePhysicalBleeds(): IBleed {
-      return this.getPage(pageUtils.currFocusPageIndex)?.physicalBleeds ?? this.getPage(pageUtils.currFocusPageIndex)?.bleeds ?? {
-        up: 0,
-        down: 0,
-        left: 0,
-        right: 0
+    sizeToShow(): {width: number, height: number, unit: string} {
+      const { width, height, physicalWidth, physicalHeight, unit } = this.getPageSizeWithBleeds(pageUtils.currFocusPageIndex)
+      return {
+        width: round(physicalWidth ?? width ?? 0, PRECISION),
+        height: round(physicalHeight ?? height ?? 0, PRECISION),
+        unit: unit ?? 'px'
       }
     },
     bleedsToShow(): {key: string, label: string, value: number}[] {
-      const currBleeds = this.currentPagePhysicalBleeds
       return [
         {
           key: 'up',
           label: '上',
-          value: currBleeds.up
+          value: round(this.bleeds.up, PRECISION)
         },
         {
           key: 'down',
           label: '下',
-          value: currBleeds.down
+          value: round(this.bleeds.down, PRECISION)
         },
         {
           key: 'left',
           label: '左',
-          value: currBleeds.left
+          value: round(this.bleeds.left, PRECISION)
         },
         {
           key: 'right',
           label: '右',
-          value: currBleeds.right
+          value: round(this.bleeds.right, PRECISION)
         }
       ]
     },
@@ -739,46 +720,47 @@ export default Vue.extend({
     expandIconStyles() {
       return this.showBleedSettings ? {} : { transform: 'scaleY(-1)' }
     },
-    setBleed(key: string, opts: { evt?: Event, value?: number, noRecord?: boolean }, all = false) {
-      let value: number
-      if (typeof opts.value !== 'undefined' && !isNaN(opts.value)) value = opts.value
-      else if (opts.evt) value = Math.max(parseFloat((opts.evt.target as HTMLInputElement).value), 0)
-      else return
+    setBleed(evt: Event, key: string, all = false) {
+      const value = Math.max(parseFloat((evt.target as HTMLInputElement).value), 0)
+      console.log('set bleed', { ...this.currentPageBleeds }, value)
       if (all) {
         Object.keys(this.bleeds).forEach((key) => {
           this.bleeds[key] = value
         })
-      } else if (this.bleeds[key] === value) return
-      else {
+      } else if (this.bleeds[key] !== value) {
         this.bleeds[key] = value
       }
-      this.updateBleeds()
-      // if (!opts.noRecord) stepsUtils.record()
+      this.applyBleeds()
     },
     addBleed(key: string, value: number, all = false) {
-      console.log('add bleed', this.currentPagePhysicalBleeds)
+      console.log('add bleed', { ...this.currentPageBleeds }, value)
       if (all) {
         Object.keys(this.bleeds).forEach((key) => {
           this.bleeds[key] = Math.max(this.bleeds[key] + value, 0)
         })
       } else {
-        this.bleeds[key] = this.bleeds[key] + value
+        this.bleeds[key] = Math.max(this.bleeds[key] + value, 0)
       }
-      this.updateBleeds()
+      this.applyBleeds()
       stepsUtils.record()
     },
-    updateBleeds(pageIndex = pageUtils.currFocusPageIndex) {
-      console.log('updateBleeds')
-      const page = pageUtils.getPage(pageIndex)
-      const { width, height, physicalWidth, physicalHeight, unit } = this.getPageSizeWithoutBleeds(pageIndex)
-      const dpi = pageUtils.getPageDPI(this.currFocusPageIndex)
-      const bleeds = Object.fromEntries(Object.entries(this.bleeds).map(([k, v]) => [k, unitUtils.convert(v, unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
-      const physicalBleeds = this.bleeds
-      const newSize = { width: width + bleeds.left + bleeds.right, height: height + bleeds.up + bleeds.down }
+    applyBleeds() {
+      console.log('applyBleeds', { ...this.currentPageBleeds })
+      const pageIndex = pageUtils.currFocusPageIndex
+      const page = pageUtils.currFocusPage
+      const { width, height, physicalWidth, physicalHeight, unit } = this.getPageSizeWithBleeds(pageIndex)
+
+      // convert bleeds
+      const dpi = pageUtils.getPageDPI(pageIndex)
+      const bleeds = Object.fromEntries(Object.entries(this.bleeds).map(([k, v]) => [k, isNaN(v) ? 0 : v])) as IBleed // map NaN to 0
+      const newBleeds = Object.fromEntries(Object.entries(bleeds).map(([k, v]) => [k, round(unitUtils.convert(v, unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height))])) as IBleed // convert bleed to px size
+      const newPhysicalBleeds = bleeds
+
+      // resize page
+      const newSize = { width: width + newBleeds.left + newBleeds.right, height: height + newBleeds.up + newBleeds.down }
       const aspectRatio = width / height
       const targetAspectRatio = newSize.width / newSize.height
-      resizeUtils.scaleAndMoveLayers(pageIndex, page, 1, bleeds.left - page.bleeds.left, bleeds.up - page.bleeds.up)
-
+      resizeUtils.scaleAndMoveLayers(pageIndex, page, 1, newBleeds.left - page.bleeds.left, newBleeds.up - page.bleeds.up)
       if (Math.abs(targetAspectRatio - aspectRatio) < Number.EPSILON) {
         const scale = targetAspectRatio > aspectRatio ? newSize.height / page.height : newSize.width / page.width
         resizeUtils.scaleBackground(pageIndex, page, scale)
@@ -787,26 +769,29 @@ export default Vue.extend({
       }
       rulerUtils.removeInvalidGuides(pageIndex, newSize)
 
+      // update page size and bleeds
+      console.log({ ...newSize })
       this.$store.commit('UPDATE_pageProps', {
         pageIndex: pageIndex,
         props: {
           width: newSize.width,
           height: newSize.height,
-          physicalWidth: physicalWidth + physicalBleeds.left + physicalBleeds.right,
-          physicalHeight: physicalHeight + physicalBleeds.up + physicalBleeds.down,
+          physicalWidth: physicalWidth + newPhysicalBleeds.left + newPhysicalBleeds.right,
+          physicalHeight: physicalHeight + newPhysicalBleeds.up + newPhysicalBleeds.down,
           unit: unit
         }
       })
-      console.log({ ...newSize })
-      console.log({ ...bleeds })
-      console.log({ ...physicalBleeds })
-      this.$store.commit('SET_bleeds', { pageIndex, bleeds, physicalBleeds })
+      console.log({ ...newBleeds })
+      console.log({ ...newPhysicalBleeds })
+      this.$store.commit('SET_bleeds', { pageIndex, bleeds: newBleeds, physicalBleeds: newPhysicalBleeds })
     },
-    handleBleedBlur() {
-      stepsUtils.record()
-      Object.keys(this.currentPageBleeds).forEach(key => {
-        this.bleeds[key] = this.currentPageBleeds[key]
-      })
+    handleBleedSubmit(evt?: KeyboardEvent) {
+      if (!evt || evt.key === 'Enter') {
+        Object.keys(this.bleeds).forEach(key => {
+          if (isNaN(this.bleeds[key])) this.bleeds[key] = 0
+        })
+        stepsUtils.record()
+      }
     }
   }
 })

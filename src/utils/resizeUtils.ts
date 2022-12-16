@@ -206,14 +206,21 @@ class ResizeUtils {
         height: format.height / unitUtils.convert(format.physicalHeight, format.unit, 'in')
       }
     } else {
+      const pxSize = unitUtils.convertSize(page.physicalWidth, page.physicalHeight, page.unit, 'px')
       dpi = {
-        width: format.width / unitUtils.convert(page.physicalWidth, page.unit, 'in'),
-        height: format.height / unitUtils.convert(page.physicalHeight, page.unit, 'in')
+        width: pxSize.width / unitUtils.convert(page.physicalWidth, page.unit, 'in'),
+        height: pxSize.height / unitUtils.convert(page.physicalHeight, page.unit, 'in')
       }
     }
     const unit = format.unit || 'px'
     const physicalBleeds = Object.fromEntries(Object.entries(page.physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, page.unit, unit, (k === 'left' || k === 'right') ? dpi.width : dpi.height), unit === 'px' ? 0 : PRECISION)])) as IBleed
     const bleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, unit, 'px', (k === 'left' || k === 'right') ? dpi.width : dpi.height))])) as IBleed
+
+    // add bleed to new size
+    format.width = format.width + bleeds.left + bleeds.right
+    format.height = format.height + bleeds.up + bleeds.down
+    format.physicalWidth = format.physicalWidth + physicalBleeds.left + physicalBleeds.right
+    format.physicalHeight = format.physicalHeight + physicalBleeds.up + physicalBleeds.down
 
     store.commit('UPDATE_pageProps', {
       pageIndex: pageIndex,

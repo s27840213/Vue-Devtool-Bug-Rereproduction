@@ -172,7 +172,8 @@ export default Vue.extend({
       groupId: 'getGroupId',
       groupType: 'getGroupType',
       pagesLength: 'getPagesLength',
-      getPageSize: 'getPageSize'
+      getPageSize: 'getPageSize',
+      getPageSizeWithBleeds: 'getPageSizeWithBleeds'
     }),
     isTouchDevice() {
       return generalUtils.isTouchDevice()
@@ -302,10 +303,10 @@ export default Vue.extend({
       return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description} ${format.unit ?? 'px'}`
     },
     handleCurrFocusPageIndexChange() {
-      const currPage = this.getPage(pageUtils.currFocusPageIndex)
-      this.selectedUnit = currPage?.unit ?? 'px'
-      this.pageWidth = currPage?.physicalWidth ?? currPage?.width ?? 0
-      this.pageHeight = currPage?.physicalHeight ?? currPage?.height ?? 0
+      const { width, height, physicalWidth, physicalHeight, unit } = this.getPageSizeWithBleeds(this.currFocusPageIndex)
+      this.selectedUnit = unit ?? 'px'
+      this.pageWidth = physicalWidth ?? width ?? 0
+      this.pageHeight = physicalHeight ?? height ?? 0
       this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
       this.aspectRatio = this.pageWidth / this.pageHeight
     },
@@ -490,8 +491,8 @@ export default Vue.extend({
     },
     fixSize(convert = true) {
       const fixedSize = this.fixedSize
-      if (this.lastFocusedInput === 'width' || this.isLocked) this.pageWidth = round(fixedSize.width, PRECISION)
-      if (this.lastFocusedInput === 'height' || this.isLocked) this.pageHeight = round(fixedSize.height, PRECISION)
+      if (this.lastFocusedInput === 'width' || this.isLocked) this.pageWidth = fixedSize.width
+      if (this.lastFocusedInput === 'height' || this.isLocked) this.pageHeight = fixedSize.height
       if (convert) this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     }
   }
