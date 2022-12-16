@@ -137,6 +137,7 @@
       div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
         class="page-highlighter"
         :style="wrapperStyles()")
+      div(v-if="showBleed && hasBleed" class="bleed-line" :style="bleedLineStyles()")
       div(v-if="(currActivePageIndex === pageIndex && isDetailPage)"
           class="page-resizer"
           ref="pageResizer"
@@ -265,7 +266,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['isMoving', 'currDraggedPhoto']),
+    ...mapState(['isMoving', 'currDraggedPhoto', 'showBleed']),
     ...mapState('shadow', ['handleId']),
     ...mapGetters({
       imgControlPageIdx: 'imgControl/imgControlPageIdx'
@@ -413,6 +414,9 @@ export default Vue.extend({
     },
     resizerHint(): string {
       return !this.isResizingPage ? '拖曳調整畫布高度' : `${round(this.config.physicalHeight, PRECISION)}${this.config.unit}`
+    },
+    hasBleed(): boolean {
+      return !!this.config.bleeds.up || !!this.config.bleeds.down || !!this.config.bleeds.left || !!this.config.bleeds.right
     }
   },
   methods: {
@@ -463,6 +467,15 @@ export default Vue.extend({
           transform: `translate(0,${pos}px)`,
           'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
         }
+    },
+    bleedLineStyles() {
+      const scaleRatio = this.scaleRatio / 100
+      return {
+        top: this.config.bleeds.up * scaleRatio + 'px',
+        bottom: this.config.bleeds.down * scaleRatio + 'px',
+        left: this.config.bleeds.left * scaleRatio + 'px',
+        right: this.config.bleeds.right * scaleRatio + 'px'
+      }
     },
     addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup): void {
       this.ADD_newLayers({
@@ -833,5 +846,15 @@ export default Vue.extend({
   position: absolute;
   bottom: -20px;
   left: 50%;
+}
+
+.bleed-line {
+  pointer-events: none;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  box-sizing: border-box;
+  border: 1px dashed white;
+  box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.15);
 }
 </style>
