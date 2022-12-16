@@ -157,8 +157,8 @@ export default Vue.extend({
           const dpi = pageUtils.getPageDPI(idx)
           const unit = pageUtils.getPage(idx).unit
           const defaultBleeds = Object.fromEntries(Object.entries({
-            up: 3,
-            down: 3,
+            top: 3,
+            bottom: 3,
             left: 3,
             right: 3
           }).map(([k, v]) => [k, round(unitUtils.convert(v, 'mm', unit, k === 'left' || k === 'right' ? dpi.width : dpi.height), unit === 'px' ? 0 : PRECISION)])) as IBleed
@@ -167,8 +167,8 @@ export default Vue.extend({
       } else {
         for (let idx = 0; idx < this.pagesLength; idx++) {
           resizeUtils.resizeBleeds(idx, {
-            up: 0,
-            down: 0,
+            top: 0,
+            bottom: 0,
             left: 0,
             right: 0
           })

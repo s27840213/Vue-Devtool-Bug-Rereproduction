@@ -25,15 +25,15 @@ export class Page implements IPage {
   }
 
   bleeds: {
-    up: number
-    down: number
+    top: number
+    bottom: number
     left: number
     right: number
   }
 
   physicalBleeds: {
-    up: number
-    down: number
+    top: number
+    bottom: number
     left: number
     right: number
   }
@@ -76,14 +76,14 @@ export class Page implements IPage {
       h: []
     }
     this.bleeds = {
-      up: 0,
-      down: 0,
+      top: 0,
+      bottom: 0,
       left: 0,
       right: 0
     }
     this.physicalBleeds = {
-      up: 0,
-      down: 0,
+      top: 0,
+      bottom: 0,
       left: 0,
       right: 0
     }

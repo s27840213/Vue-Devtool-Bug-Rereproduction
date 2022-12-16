@@ -309,8 +309,8 @@ export default Vue.extend({
       showBleedSettings: true,
       unitOptions: STR_UNITS,
       bleeds: {
-        up: 0,
-        down: 0,
+        top: 0,
+        bottom: 0,
         left: 0,
         right: 0
       } as IBleed
@@ -391,8 +391,8 @@ export default Vue.extend({
     currentPageBleeds(): IBleed {
       const currPage = pageUtils.currFocusPage
       return currPage?.physicalBleeds ?? currPage?.bleeds ?? {
-        up: 0,
-        down: 0,
+        top: 0,
+        bottom: 0,
         left: 0,
         right: 0
       }
@@ -408,14 +408,14 @@ export default Vue.extend({
     bleedsToShow(): {key: string, label: string, value: number}[] {
       return [
         {
-          key: 'up',
+          key: 'top',
           label: '上',
-          value: round(this.bleeds.up, PRECISION)
+          value: round(this.bleeds.top, PRECISION)
         },
         {
-          key: 'down',
+          key: 'bottom',
           label: '下',
-          value: round(this.bleeds.down, PRECISION)
+          value: round(this.bleeds.bottom, PRECISION)
         },
         {
           key: 'left',
@@ -430,7 +430,7 @@ export default Vue.extend({
       ]
     },
     hasBleed(): boolean {
-      return this.getPages.some((page: IPage) => page.bleeds.up || page.bleeds.down || page.bleeds.left || page.bleeds.right)
+      return this.getPages.some((page: IPage) => page.bleeds.top || page.bleeds.bottom || page.bleeds.left || page.bleeds.right)
     },
     inAdminMode(): boolean {
       return this.role === 0 && this.adminMode === true

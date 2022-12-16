@@ -416,7 +416,7 @@ export default Vue.extend({
       return !this.isResizingPage ? '拖曳調整畫布高度' : `${round(this.config.physicalHeight, PRECISION)}${this.config.unit}`
     },
     hasBleed(): boolean {
-      return !!this.config.bleeds.up || !!this.config.bleeds.down || !!this.config.bleeds.left || !!this.config.bleeds.right
+      return !!this.config.bleeds.top || !!this.config.bleeds.bottom || !!this.config.bleeds.left || !!this.config.bleeds.right
     }
   },
   methods: {
@@ -471,8 +471,8 @@ export default Vue.extend({
     bleedLineStyles() {
       const scaleRatio = this.scaleRatio / 100
       return {
-        top: this.config.bleeds.up * scaleRatio + 'px',
-        bottom: this.config.bleeds.down * scaleRatio + 'px',
+        top: this.config.bleeds.top * scaleRatio + 'px',
+        bottom: this.config.bleeds.bottom * scaleRatio + 'px',
         left: this.config.bleeds.left * scaleRatio + 'px',
         right: this.config.bleeds.right * scaleRatio + 'px'
       }

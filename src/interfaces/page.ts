@@ -9,8 +9,8 @@ export interface IBackgroundImage {
 }
 export interface IBleed {
   [index: string]: number
-  up: number,
-  down: number,
+  top: number,
+  bottom: number,
   left: number,
   right: number
 }

@@ -218,9 +218,9 @@ class ResizeUtils {
 
     // add bleed to new size
     format.width = format.width + bleeds.left + bleeds.right
-    format.height = format.height + bleeds.up + bleeds.down
+    format.height = format.height + bleeds.top + bleeds.bottom
     format.physicalWidth = format.physicalWidth + physicalBleeds.left + physicalBleeds.right
-    format.physicalHeight = format.physicalHeight + physicalBleeds.up + physicalBleeds.down
+    format.physicalHeight = format.physicalHeight + physicalBleeds.top + physicalBleeds.bottom
 
     store.commit('UPDATE_pageProps', {
       pageIndex: pageIndex,
@@ -239,10 +239,10 @@ class ResizeUtils {
     const newPhysicalBleeds = bleeds
 
     // resize page
-    const newSize = { width: width + newBleeds.left + newBleeds.right, height: height + newBleeds.up + newBleeds.down }
+    const newSize = { width: width + newBleeds.left + newBleeds.right, height: height + newBleeds.top + newBleeds.bottom }
     const aspectRatio = width / height
     const targetAspectRatio = newSize.width / newSize.height
-    this.scaleAndMoveLayers(pageIndex, page, 1, newBleeds.left - page.bleeds.left, newBleeds.up - page.bleeds.up)
+    this.scaleAndMoveLayers(pageIndex, page, 1, newBleeds.left - page.bleeds.left, newBleeds.top - page.bleeds.top)
     if (Math.abs(targetAspectRatio - aspectRatio) < Number.EPSILON) {
       const scale = targetAspectRatio > aspectRatio ? newSize.height / page.height : newSize.width / page.width
       this.scaleBackground(pageIndex, page, scale)
@@ -258,7 +258,7 @@ class ResizeUtils {
         width: newSize.width,
         height: newSize.height,
         physicalWidth: physicalWidth + newPhysicalBleeds.left + newPhysicalBleeds.right,
-        physicalHeight: physicalHeight + newPhysicalBleeds.up + newPhysicalBleeds.down,
+        physicalHeight: physicalHeight + newPhysicalBleeds.top + newPhysicalBleeds.bottom,
         unit: unit
       }
     })

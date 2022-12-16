@@ -171,9 +171,9 @@ const getters: GetterTree<IEditorState, unknown> = {
       const page = state.pages[pageIndex]
       return {
         width: page.width - page.bleeds.left - page.bleeds.right,
-        height: page.height - page.bleeds.up - page.bleeds.down,
+        height: page.height - page.bleeds.top - page.bleeds.bottom,
         physicalWidth: page.physicalWidth - page.physicalBleeds.left - page.physicalBleeds.right,
-        physicalHeight: page.physicalHeight - page.physicalBleeds.up - page.physicalBleeds.down,
+        physicalHeight: page.physicalHeight - page.physicalBleeds.top - page.physicalBleeds.bottom,
         bleeds: page.bleeds,
         physicalBleeds: page.physicalBleeds,
         unit: page.unit
