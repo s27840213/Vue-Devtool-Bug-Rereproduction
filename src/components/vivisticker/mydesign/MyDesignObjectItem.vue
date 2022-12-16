@@ -22,6 +22,12 @@ import vivistickerUtils from '@/utils/vivistickerUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
+import { IPage } from '@/interfaces/page'
+import { IFrame, ILayer } from '@/interfaces/layer'
+import i18n from '@/i18n'
+import frameUtils from '@/utils/frameUtils'
+import modalUtils from '@/utils/modalUtils'
+import { LayerType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -56,8 +62,49 @@ export default Vue.extend({
       if (this.item.assetInfo.isFrame) {
         vivistickerUtils.getAsset(`mydesign-${this.item.type}`, this.item.id, 'config').then(data => {
           if (vivistickerUtils.checkForEmptyFrame(data.pages)) {
-            vivistickerUtils.initWithMyDesign(this.item)
             // handle Dialog and File-selector
+            vivistickerUtils.initWithMyDesign(this.item, (pages: Array<IPage>) => {
+              const page = pages[0]
+              page.layers.forEach(l => {
+                l.initFromMydesign = true
+              })
+              vivistickerUtils.initLoadingFlags(page, () => {
+                const { layers } = page
+                const frames = (layers
+                  .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
+                const missingClips = frames
+                  .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
+                if (missingClips.length === 1) {
+                  const modalBtn = {
+                    msg: i18n.t('STK0023') as string,
+                    action: () => {
+                      let subLayerIdx = -1
+                      let layerIndex = -1
+                      const frame = layers
+                        .find((l, i) => {
+                          if (l.type === LayerType.frame && (l as IFrame).clips.some((c, i) => {
+                            if (c.srcObj.type === 'frame') {
+                              subLayerIdx = i
+                              return true
+                            }
+                            return false
+                          })) {
+                            layerIndex = i
+                            return true
+                          }
+                          return false
+                        }) as IFrame
+                      frameUtils.iosPhotoSelect({
+                        pageIndex: 0,
+                        layerIndex,
+                        subLayerIdx
+                      }, frame.clips[subLayerIdx])
+                    }
+                  }
+                  modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn)
+                }
+              })
+            })
           } else {
             const pages = generalUtils.deepCopy(data.pages)
             vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0], this.item))
