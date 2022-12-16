@@ -916,6 +916,28 @@ class ViviStickerUtils {
     }
   }
 
+  checkForEmptyFrame(pages: IPage[]) {
+    for (const page of pages) {
+      for (const layer of page.layers) {
+        switch (layer.type) {
+          case 'frame':
+            if ((layer as IFrame).clips.some(c => c.srcObj.type === 'frame')) {
+              return true
+            }
+            break
+          case 'group':
+          case 'tmp':
+            for (const subLayer of (layer as IGroup).layers) {
+              if (subLayer.type === 'frame' && (subLayer as any as IFrame).clips.some(c => c.srcObj.type === 'frame')) {
+                return true
+              }
+            }
+        }
+      }
+    }
+    return false
+  }
+
   mapEditorType2MyDesignKey(editorType: string): string {
     if (editorType === 'objectGroup') {
       return 'object'
