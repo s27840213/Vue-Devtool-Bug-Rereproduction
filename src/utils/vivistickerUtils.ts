@@ -8,7 +8,7 @@ import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
 import uploadUtils from './uploadUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
-import { ColorEventType, LayerType } from '@/store/types'
+import { ColorEventType, ILayerInfo, LayerType } from '@/store/types'
 import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import editorUtils from './editorUtils'
 import imageUtils from './imageUtils'
@@ -21,6 +21,8 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 import textUtils from './textUtils'
 import i18n from '@/i18n'
 import generalUtils from './generalUtils'
+import modalUtils from './modalUtils'
+import frameUtils from './frameUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '1.12',
@@ -348,7 +350,7 @@ class ViviStickerUtils {
       case LayerType.frame: {
         this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
         const frame = layer as IFrame
-        const layers = frame.clips as Array<IImage | IShape>
+        const layers = [...frame.clips] as Array<IImage | IShape>
         if (frame.decoration) {
           layers.unshift(frame.decoration)
         }
@@ -695,7 +697,7 @@ class ViviStickerUtils {
     }, id ?? '')
   }
 
-  initWithMyDesign(myDesign: IMyDesign) {
+  initWithMyDesign(myDesign: IMyDesign, callback?: (pages: Array<IPage>) => void) {
     const {
       id,
       type,
@@ -704,7 +706,12 @@ class ViviStickerUtils {
     const myDesignKey = this.mapEditorType2MyDesignKey(type)
     this.getAsset(`mydesign-${myDesignKey}`, id, 'config').then((data) => {
       this.startEditing(type, assetInfo ?? {}, this.getFetchDesignInitiator(() => {
-        store.commit('SET_pages', pageUtils.newPages(generalUtils.deepCopy(data.pages)))
+        const pages = pageUtils.newPages(generalUtils.deepCopy(data.pages))
+        if (callback) {
+          callback(pages)
+        }
+        store.commit('SET_pages', pages)
+        console.log(generalUtils.deepCopy(store.state.pages))
       }), () => {
         if (type === 'object') {
           groupUtils.select(0, [0])
@@ -860,15 +867,52 @@ class ViviStickerUtils {
 
   handleMissingImage(info: { key: string, id: string, thumbType: string }) {
     switch (info.thumbType) {
-      case 'mydesign':
+      case 'mydesign': {
         // eslint-disable-next-line no-case-declarations
         const designs = store.getters['vivisticker/getMyDesignFileList'](info.key) as IMyDesign[]
         // eslint-disable-next-line no-case-declarations
         const design = designs.find(d => d.id === info.id)
         if (!design) break
-        this.initWithMyDesign(design)
         // handle Dialog and File-selector
-        break
+        this.initWithMyDesign(design, (pages: Array<IPage>) => {
+          const page = pages[0]
+          this.initLoadingFlags(page, () => {
+            const { layers } = page
+            const missingClips = (layers
+              .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
+              .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
+            if (missingClips.length === 1) {
+              const modalBtn = {
+                msg: i18n.t('STK0023') as string,
+                action: () => {
+                  let subLayerIdx = -1
+                  let layerIndex = -1
+                  const frame = layers
+                    .find((l, i) => {
+                      if (l.type === LayerType.frame && (l as IFrame).clips.some((c, i) => {
+                        if (c.srcObj.type === 'frame') {
+                          subLayerIdx = i
+                          return true
+                        }
+                        return false
+                      })) {
+                        layerIndex = i
+                        return true
+                      }
+                      return false
+                    }) as IFrame
+                  frameUtils.iosPhotoSelect({
+                    pageIndex: 0,
+                    layerIndex,
+                    subLayerIdx
+                  }, frame.clips[subLayerIdx])
+                }
+              }
+              modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn)
+            }
+          })
+        })
+      }
     }
   }
 

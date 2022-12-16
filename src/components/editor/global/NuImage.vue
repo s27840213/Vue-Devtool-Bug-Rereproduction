@@ -322,10 +322,12 @@ export default Vue.extend({
       cache: false
     },
     finalSrc(): string {
+      let src = this.src
       if (this.$route.name === 'Preview') {
-        return ImageUtils.appendCompQueryForVivipic(this.src)
+        return ImageUtils.appendCompQueryForVivipic(src)
       }
-      return this.src
+      src = ImageUtils.appendQuery(src, `ver=${generalUtils.generateRandomString(4)}`)
+      return src
     },
     filterId(): string {
       const { styles: { adjust } } = this.config
@@ -419,9 +421,12 @@ export default Vue.extend({
             })
             this.src = ImageUtils.getSrc(this.config)
             window.requestAnimationFrame(() => {
-              console.log(this.src)
               vivistickerUtils.isAnyIOSImgOnError = true
-              vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+              let subLayerIdx = this.subLayerIndex
+              if ((this.primaryLayer as IFrame).decoration) {
+                subLayerIdx++
+              }
+              vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
             })
           }
         }
@@ -448,7 +453,11 @@ export default Vue.extend({
     },
     onLoad(e: Event, type?: string) {
       if (type === 'main') {
-        vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+        let subLayerIdx = this.subLayerIndex
+        if ((this.primaryLayer as IFrame).decoration) {
+          subLayerIdx++
+        }
+        vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
       }
       this.isOnError = false
       const img = e.target as HTMLImageElement
