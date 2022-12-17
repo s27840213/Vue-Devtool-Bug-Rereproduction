@@ -10,8 +10,7 @@ class EventQueue {
     this.eventIds = []
     this.eventMap = new Map()
     this.isHandlingAsyncTask = false
-    // this.batchNum = batchNum ?? 3
-    this.batchNum = batchNum ?? 999
+    this.batchNum = batchNum ?? 3
   }
 
   push(id: string, callback: () => Promise<void | number>, index?: number): void {

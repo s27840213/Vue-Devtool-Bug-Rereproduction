@@ -3,10 +3,8 @@
       :style="styles"
       ref="observer")
     transition(:name="anamationEnabled && !forceRender ? 'fade-in': ''" mode="out-in")
-      //- slot(v-if="forceRender || shoudBeRendered")
-      //- slot(v-else name="placeholder")
-      slot
-    slot(v-if="!forceRender && !shoudBeRendered" name="placeholder")
+      slot(v-if="forceRender || shoudBeRendered")
+      slot(v-else name="placeholder")
 </template>
 
 <script lang="ts">
@@ -42,7 +40,7 @@ export default Vue.extend({
     },
     unrenderDelay: {
       type: Number,
-      default: 0
+      default: 2000
     },
     pageIndex: {
       type: Number,
@@ -107,7 +105,7 @@ export default Vue.extend({
                   this.renderEventId = ''
                 }, this.pageIndex)
               },
-              0
+              this.handleUnrender ? 200 : 0
             )
 
             // this.consoleLog(`setup render timer: ${this.renderTimer}`)
