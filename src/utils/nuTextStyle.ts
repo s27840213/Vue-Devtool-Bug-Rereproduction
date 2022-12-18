@@ -1,7 +1,7 @@
 import Vue, { nextTick } from 'vue'
 import { IGroup, IText } from '@/interfaces/layer'
 import { Extension } from '@tiptap/core'
-import { Editor } from '@tiptap/vue-2'
+import { Editor } from '@tiptap/vue-3'
 import tiptapUtils from './tiptapUtils'
 import layerUtils from './layerUtils'
 import stepsUtils from './stepsUtils'

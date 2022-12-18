@@ -4,7 +4,7 @@ editor-content(:editor="editor")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Editor, EditorContent } from '@tiptap/vue-2'
+import { Editor, EditorContent } from '@tiptap/vue-3'
 import tiptapUtils from '@/utils/tiptapUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { IGroup, IText, ITmp } from '@/interfaces/layer'
@@ -68,7 +68,11 @@ export default defineComponent({
     const contentEditable = this.subLayerIndex === -1 ? (this.layerInfo.currLayer as IText).contentEditable : ((this.layerInfo.currLayer as IGroup).layers[this.subLayerIndex] as IText).contentEditable
 
     tiptapUtils.init(this.initText, contentEditable)
-    this.editor = tiptapUtils.editor
+    /**
+     * @Note why I use as any is bcz when I update the tiptap from vue2 ver to vue 3 ver, it throw some weird error
+     * If TingAn is avalible, maybe we could discuss and fix the error.
+     */
+    this.editor = tiptapUtils.editor as any
     tiptapUtils.on('update', ({ editor }) => {
       let toRecord = false
       const newText = tiptapUtils.getText(editor)
