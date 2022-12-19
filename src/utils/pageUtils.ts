@@ -1,7 +1,7 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import { IBleed, IPage } from '@/interfaces/page'
 import store from '@/store'
 import Vue from 'vue'
 import designUtils from './designUtils'
@@ -24,10 +24,12 @@ class PageUtils {
   get getPage(): (pageIndex: number) => IPage { return store.getters.getPage }
   get getPages(): Array<IPage> { return store.getters.getPages }
   get pageNum(): number { return this.getPages.length }
-  get getPageSize(): (pageIndex: number) => { width: number, height: number } { return store.getters.getPageSize }
+  get getPageSize(): (pageIndex: number) => { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } { return store.getters.getPageSize }
+  get getPageSizeWithBleeds(): (pageIndex: number) => { width: number, height: number, physicalWidth: number, physicalHeight: number, bleeds: IBleed, physicalBleeds: IBleed, unit: string } { return store.getters.getPageSizeWithBleeds }
   get pagesName(): string { return store.getters.getPagesName }
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get currFocusPageSize() { return store.getters.getPageSize(this.currFocusPageIndex) }
+  get currFocusPageSizeWithBleeds() { return store.getters.getPageSizeWithBleeds(this.currFocusPageIndex) }
   get isLastPage(): boolean {
     return this.pageNum - 1 === this.currFocusPageIndex
   }
@@ -565,11 +567,10 @@ class PageUtils {
 
   /**
    * Returns DPI of target page based on it's px size and physical size.
-   * @param pageIndex Index of target page, use current focused page's if undefined
+   * @param page Target page, use current focused page if undefined
    * @returns DPI of target page if target page is in physical size, otherwise 96 (default DPI)
    */
-  getPageDPI(pageIndex?: number): {width: number, height: number} {
-    const page = this.getPage(pageIndex ?? this.currFocusPageIndex)
+  getPageDPI(page = this.getPage(this.currFocusPageIndex)): {width: number, height: number} {
     return {
       width: page.width / unitUtils.convert(page.physicalWidth, page.unit, 'in'),
       height: page.height / unitUtils.convert(page.physicalHeight, page.unit, 'in')

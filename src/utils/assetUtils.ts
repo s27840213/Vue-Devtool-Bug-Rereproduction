@@ -17,13 +17,14 @@ import stepsUtils from './stepsUtils'
 import ZindexUtils from './zindexUtils'
 import GroupUtils from './groupUtils'
 import resizeUtils from './resizeUtils'
-import { IPage } from '@/interfaces/page'
+import { IBleed, IPage } from '@/interfaces/page'
 import gtmUtils from './gtmUtils'
 import editorUtils from './editorUtils'
 import errorHandleUtils from './errorHandleUtils'
 import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import mathUtils from './mathUtils'
+import unitUtils from './unitUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -157,17 +158,23 @@ class AssetUtils {
     }
   }
 
-  async addTemplate(json: any, attrs: IAssetProps = {}, recordStep = true) {
-    const { pageIndex, width, height } = attrs
-    const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
-    // const targetPage: IPage = this.getPage(targetPageIndex)
-
+  async addTemplate(json: any, attrs?: {pageIndex?: number, width?: number, height?: number, physicalWidth?: number, physicalHeight?: number, unit?: string}, recordStep = true) {
+    const targetPageIndex = attrs?.pageIndex ?? pageUtils.currFocusPageIndex
+    const targetPage: IPage = this.getPage(targetPageIndex)
     json = await this.updateBackground(generalUtils.deepCopy(json))
     pageUtils.setAutoResizeNeededForPage(json, true)
     const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
     pageUtils.updateSpecPage(targetPageIndex, newLayer)
-    if (width && height) {
-      resizeUtils.resizePage(targetPageIndex, newLayer, { width, height })
+    if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newLayer, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
+    if (targetPage.bleeds && targetPage.physicalBleeds) {
+      // convert bleeds to template unit
+      const dpi = pageUtils.getPageDPI(targetPage)
+      const physicalBleeds = targetPage.unit === 'px' ? targetPage.bleeds
+        : targetPage.unit === attrs?.unit ? targetPage.physicalBleeds
+          : Object.fromEntries(Object.entries(targetPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, targetPage.unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+
+      // apply bleeds of targetPage
+      resizeUtils.resizeBleeds(targetPageIndex, physicalBleeds)
     }
     store.commit('SET_currActivePageIndex', targetPageIndex)
     if (recordStep) {
@@ -570,7 +577,7 @@ class AssetUtils {
     stepsUtils.record()
   }
 
-  addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number }) {
+  addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
     const currGroupType = store.getters.getGroupType
     store.commit('SET_groupId', groupId)
@@ -618,6 +625,20 @@ class AssetUtils {
               const pageIndex = +idx + targetIndex
               const newSize = { height: height * pageWidth / width, width: pageWidth }
               resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
+            }
+          }
+
+          // apply bleeds of currFocusPage
+          if (currFocusPage.bleeds && currFocusPage.physicalBleeds) {
+            // convert bleeds to template unit
+            const dpi = pageUtils.getPageDPI(currFocusPage)
+            const physicalBleeds = currFocusPage.unit === 'px' ? currFocusPage.bleeds
+              : currFocusPage.unit === resize?.unit ? currFocusPage.physicalBleeds
+                : Object.fromEntries(Object.entries(currFocusPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, currFocusPage.unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+
+            for (const idx in jsonDataList) {
+              const pageIndex = +idx + targetIndex
+              resizeUtils.resizeBleeds(pageIndex, physicalBleeds)
             }
           }
           store.commit('SET_currActivePageIndex', targetIndex)

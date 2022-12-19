@@ -154,14 +154,14 @@ export default Vue.extend({
       this.setShowBleed(!this.showBleed)
       if (this.showBleed) {
         for (let idx = 0; idx < this.pagesLength; idx++) {
-          const dpi = pageUtils.getPageDPI(idx)
-          const unit = pageUtils.getPage(idx).unit
+          const page = pageUtils.getPage(idx)
+          const dpi = pageUtils.getPageDPI(page)
           const defaultBleeds = Object.fromEntries(Object.entries({
             top: 3,
             bottom: 3,
             left: 3,
             right: 3
-          }).map(([k, v]) => [k, round(unitUtils.convert(v, 'mm', unit, k === 'left' || k === 'right' ? dpi.width : dpi.height), unit === 'px' ? 0 : PRECISION)])) as IBleed
+          }).map(([k, v]) => [k, round(unitUtils.convert(v, 'mm', page.unit, k === 'left' || k === 'right' ? dpi.width : dpi.height), page.unit === 'px' ? 0 : PRECISION)])) as IBleed
           resizeUtils.resizeBleeds(idx, defaultBleeds)
         }
       } else {

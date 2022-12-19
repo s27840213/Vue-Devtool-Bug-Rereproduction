@@ -385,8 +385,7 @@ export default Vue.extend({
       getPage: 'getPage',
       getPages: 'getPages',
       token: 'user/getToken',
-      groupId: 'getGroupId',
-      getPageSizeWithBleeds: 'getPageSizeWithBleeds'
+      groupId: 'getGroupId'
     }),
     currentPageBleeds(): IBleed {
       const currPage = pageUtils.currFocusPage
@@ -398,7 +397,7 @@ export default Vue.extend({
       }
     },
     sizeToShow(): {width: number, height: number, unit: string} {
-      const { width, height, physicalWidth, physicalHeight, unit } = this.getPageSizeWithBleeds(pageUtils.currFocusPageIndex)
+      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.getPageSizeWithBleeds(pageUtils.currFocusPageIndex)
       return {
         width: round(physicalWidth ?? width ?? 0, PRECISION),
         height: round(physicalHeight ?? height ?? 0, PRECISION),

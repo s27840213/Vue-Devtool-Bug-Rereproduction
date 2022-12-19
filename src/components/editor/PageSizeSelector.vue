@@ -172,8 +172,7 @@ export default Vue.extend({
       groupId: 'getGroupId',
       groupType: 'getGroupType',
       pagesLength: 'getPagesLength',
-      getPageSize: 'getPageSize',
-      getPageSizeWithBleeds: 'getPageSizeWithBleeds'
+      getPageSize: 'getPageSize'
     }),
     isTouchDevice() {
       return generalUtils.isTouchDevice()
@@ -303,7 +302,7 @@ export default Vue.extend({
       return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description} ${format.unit ?? 'px'}`
     },
     handleCurrFocusPageIndexChange() {
-      const { width, height, physicalWidth, physicalHeight, unit } = this.getPageSizeWithBleeds(this.currFocusPageIndex)
+      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.getPageSizeWithBleeds(this.currFocusPageIndex)
       this.selectedUnit = unit ?? 'px'
       this.pageWidth = physicalWidth ?? width ?? 0
       this.pageHeight = physicalHeight ?? height ?? 0
