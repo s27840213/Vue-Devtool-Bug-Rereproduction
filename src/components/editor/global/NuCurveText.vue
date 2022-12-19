@@ -163,11 +163,11 @@ export default Vue.extend({
       // console.log('resize')
 
       if (typeof this.subLayerIndex === 'undefined') {
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, await TextShapeUtils.getTextHWsAsync(this.config))
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
       } else {
         const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, await TextShapeUtils.getTextHWsAsync(this.config))
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
         textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
         textUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
       }
