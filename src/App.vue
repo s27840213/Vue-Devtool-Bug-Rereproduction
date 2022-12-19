@@ -4,12 +4,8 @@ div(id="app" :style="appStyles()")
   link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
   link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
   link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
-  //- div(class="coordinate" ref="coordinate")
-  //-   div(class="coordinate__val coordinate__width")
-  //-     span {{coordinateWidth}}px
-  //-   div(class="coordinate__val coordinate__height")
-  //-     span {{coordinateHeight}}px
   router-view
+  div 12345678
   div(class="popup-area")
     popup
     res-info(v-show="currSelectedResInfo.type"
@@ -187,7 +183,7 @@ export default defineComponent({
 })
 </script>
 <style lang="scss">
-@use "~@/assets/scss/main.scss";
+@use "@/assets/scss/main.scss";
 
 #app {
   @include size(100%, 100%);

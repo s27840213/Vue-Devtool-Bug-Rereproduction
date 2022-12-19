@@ -244,7 +244,7 @@ module.exports = defineConfig({
         loaderOptions: {
             scss: {
                 // prependData: '@use "~@/assets/scss/utils" as *;'
-                additionalData: '@use "~@/assets/scss/utils" as *;'
+                additionalData: '@use "@/assets/scss/utils" as *;'
             }
         }
     },
