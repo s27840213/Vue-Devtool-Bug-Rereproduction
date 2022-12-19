@@ -259,7 +259,6 @@ class Controller {
     body.style.opacity = '0'
     body.classList.add('nu-text')
     body.classList.add('curve')
-    console.log('new div')
     return { body, p }
   }
 
