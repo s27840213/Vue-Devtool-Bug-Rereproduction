@@ -16,7 +16,7 @@
         :info="currSelectedResInfo"
         @blur.native="setCurrSelectedResInfo()"
         tabindex="0")
-    fps(v-if="isAdmin && !inScreenshotPreview")
+    fps(v-if="isAdmin && !inScreenshotPreview && enableAdminView")
     div(class="modal-container"
         v-if="isModalOpen")
       modal-card
@@ -82,7 +82,8 @@ export default Vue.extend({
     ...mapGetters({
       currSelectedResInfo: 'getCurrSelectedResInfo',
       isModalOpen: 'modal/getModalOpen',
-      inScreenshotPreview: 'getInScreenshotPreview'
+      inScreenshotPreview: 'getInScreenshotPreview',
+      enableAdminView: 'user/getEnableAdminView'
     }),
     ...mapGetters('user', {
       isAdmin: 'isAdmin'

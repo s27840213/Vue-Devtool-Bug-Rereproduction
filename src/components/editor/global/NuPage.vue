@@ -120,7 +120,7 @@
           div(class="scale-container relative"
               :style="scaleContainerStyles")
             page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio")
-            div(v-if="isAdmin" class="layer-num") Layer數量: {{config.layers.length}} (Admin User 才看得到）
+            div(v-if="isAdmin && enableAdminView" class="layer-num") Layer數量: {{config.layers.length}}
             div(class="page-control" :style="styles('control')")
               template(v-for="(layer, index) in config.layers")
                 nu-controller(v-if="(currDraggingIndex === -1 || currDraggingIndex === index || layer.type === 'frame') && (layer.type !== 'image' || !layer.imgControl) "
@@ -283,7 +283,8 @@ export default Vue.extend({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
       contentScaleRatio: 'getContentScaleRatio',
-      isAdmin: 'user/isAdmin'
+      isAdmin: 'user/isAdmin',
+      enableAdminView: 'user/getEnableAdminView'
     }),
     scaleContainerStyles(): { [index: string]: string } {
       return {
