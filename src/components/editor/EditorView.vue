@@ -313,7 +313,7 @@ export default Vue.extend({
       this._setAdminMode(!this.adminMode)
     },
     outerClick(e: MouseEvent) {
-      if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
+      if (!this.isSelecting && !this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         !this.isHandleShadow && GroupUtils.deselect()
         GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
@@ -322,6 +322,9 @@ export default Vue.extend({
         if (imageUtils.isImgControl()) {
           ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
         }
+      }
+      if (this.isSelecting) {
+        this.isSelecting = false
       }
     },
     selectStart(e: MouseEvent) {
@@ -412,7 +415,7 @@ export default Vue.extend({
         window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
         eventUtils.removePointerEvent('pointerup', this.selectEnd)
         if (this.isSelecting) {
-          this.isSelecting = false
+          // this.isSelecting = false
           const selectionArea = this.$refs.selectionArea as HTMLElement
           if (!this.isHandleShadow) {
             this.handleSelectionData(selectionArea.getBoundingClientRect())

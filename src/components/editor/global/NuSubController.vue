@@ -14,31 +14,31 @@
             :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
             g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
               :style="frameClipStyles()")
-          template(v-if="config.type === 'text' && config.active")
-            div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-              nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
-                :style="textBodyStyle()"
-                :pageIndex="pageIndex"
-                :layerIndex="primaryLayerIndex"
-                :subLayerIndex="layerIndex"
-                @keydown.native.37.stop
-                @keydown.native.38.stop
-                @keydown.native.39.stop
-                @keydown.native.40.stop
-                @keydown.native.ctrl.67.exact.stop.self
-                @keydown.native.meta.67.exact.stop.self
-                @keydown.native.ctrl.86.exact.stop.self
-                @keydown.native.meta.86.exact.stop.self
-                @keydown.native.ctrl.88.exact.stop.self
-                @keydown.native.meta.88.exact.stop.self
-                @keydown.native.ctrl.65.exact.stop.self
-                @keydown.native.meta.65.exact.stop.self
-                @keydown.native.ctrl.90.exact.stop.self
-                @keydown.native.meta.90.exact.stop.self
-                @keydown.native.ctrl.shift.90.exact.stop.self
-                @keydown.native.meta.shift.90.exact.stop.self
-                @update="handleTextChange"
-                @compositionend="handleTextCompositionEnd")
+          //- template(v-if="config.type === 'text' && config.active")
+          //-   div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
+          //-     nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
+          //-       :style="textBodyStyle()"
+          //-       :pageIndex="pageIndex"
+          //-       :layerIndex="primaryLayerIndex"
+          //-       :subLayerIndex="layerIndex"
+          //-       @keydown.native.37.stop
+          //-       @keydown.native.38.stop
+          //-       @keydown.native.39.stop
+          //-       @keydown.native.40.stop
+          //-       @keydown.native.ctrl.67.exact.stop.self
+          //-       @keydown.native.meta.67.exact.stop.self
+          //-       @keydown.native.ctrl.86.exact.stop.self
+          //-       @keydown.native.meta.86.exact.stop.self
+          //-       @keydown.native.ctrl.88.exact.stop.self
+          //-       @keydown.native.meta.88.exact.stop.self
+          //-       @keydown.native.ctrl.65.exact.stop.self
+          //-       @keydown.native.meta.65.exact.stop.self
+          //-       @keydown.native.ctrl.90.exact.stop.self
+          //-       @keydown.native.meta.90.exact.stop.self
+          //-       @keydown.native.ctrl.shift.90.exact.stop.self
+          //-       @keydown.native.meta.shift.90.exact.stop.self
+          //-       @update="handleTextChange"
+          //-       @compositionend="handleTextCompositionEnd")
 </template>
 <script lang="ts">
 import Vue from 'vue'
