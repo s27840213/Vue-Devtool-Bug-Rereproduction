@@ -240,8 +240,6 @@ export default Vue.extend({
         this.$nextTick(() => {
           pageUtils.fitPage()
         })
-      } else {
-        testUtils.initializeFlags('text')
       }
     },
     setPanelHeight(height: number) {

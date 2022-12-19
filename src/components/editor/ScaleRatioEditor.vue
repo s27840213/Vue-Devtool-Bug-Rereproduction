@@ -81,9 +81,6 @@ export default Vue.extend({
       this._setScaleRatio(ratio)
     },
     setIsShowPagePreview(show: boolean) {
-      if (show) {
-        testUtils.initializeFlags('text')
-      }
       this._setIsShowPagePreview(show)
       if (!show) {
         this._setShowPagePanel(false)

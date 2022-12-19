@@ -173,7 +173,6 @@ export default Vue.extend({
       }
 
       await this.computeDimensions(this.spans())
-      testUtils.setDoneFlag(this.pageIndex, this.layerIndex, this.subLayerIndex)
     }
   }
 })
