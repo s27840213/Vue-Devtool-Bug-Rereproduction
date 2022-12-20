@@ -3,6 +3,9 @@
     div(class="nu-layer" :class="!config.locked ? `nu-layer--p${pageIndex}` : ''" :style="layerStyles" ref="body" :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
         :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
         :data-p-index="pageIndex"
+        v-press="isTouchDevice()? onPress : -1"
+        @pointerdown="onPointerDown"
+        @click.right.stop="onRightClick"
         @dragenter="dragEnter"
         @dblclick="dblClick")
       div(class="layer-translate posAbs"
@@ -60,6 +63,9 @@ import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import groupUtils from '@/utils/groupUtils'
 import controlUtils from '@/utils/controlUtils'
+import { AnyTouchEvent } from '@any-touch/shared'
+import editorUtils from '@/utils/editorUtils'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   inheritAttrs: false,
@@ -138,15 +144,15 @@ export default Vue.extend({
       LayerType,
       eventTarget: null as unknown as HTMLElement,
       dblTabsFlag: false,
-      initialPos: { x: 0, y: 0 },
-      initTranslate: { x: 0, y: 0 },
+      initPos: { x: 0, y: 0 },
       movingByControlPoint: false,
       isControlling: false,
       isDoingGestureAction: false,
       isHandleMovingHandler: false,
       isMoved: false,
       isPointerDownFromSubController: false,
-      dragUtils: this.isSubLayer ? new DragUtils(layerUtils.getLayer(this.pageIndex, this.layerIndex).id, this.config.id) : new DragUtils(this.config.id)
+      dragUtils: this.isSubLayer ? new DragUtils(layerUtils.getLayer(this.pageIndex, this.layerIndex).id, this.config.id) : new DragUtils(this.config.id),
+      movingUtils: null as unknown as MovingUtils
     }
   },
   mounted() {
@@ -188,8 +194,8 @@ export default Vue.extend({
     }
 
     if (this.subLayerIndex === -1) {
-      const movingUtils = new MovingUtils(data)
-      const moveStart = movingUtils.moveStart.bind(movingUtils)
+      this.movingUtils = new MovingUtils(data)
+      const moveStart = this.movingUtils.moveStart.bind(this.movingUtils)
       body.addEventListener('pointerdown', moveStart)
     } else {
       const subCtrlUtils = new SubControllerUtils(data)
@@ -201,7 +207,10 @@ export default Vue.extend({
     ...mapState('text', ['sel', 'props']),
     ...mapState('shadow', ['processId', 'handleId']),
     ...mapState(['currDraggedPhoto']),
-    ...mapGetters('imgControl', ['isBgImgCtrl']),
+    ...mapState('imgControl', {
+      imgCtrlConfig: 'image'
+    }),
+    ...mapGetters('imgControl', ['isBgImgCtrl', 'isImgCtrl']),
     ...mapGetters('text', ['getDefaultFonts']),
     ...mapGetters({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
@@ -225,23 +234,6 @@ export default Vue.extend({
     },
     isDragging(): boolean {
       return (this.config as ILayer).dragging
-    },
-    isImgControl(): boolean {
-      switch (this.getLayerType) {
-        case 'image':
-          return this.config.imgControl
-        case 'group':
-          return (this.config as IGroup).layers
-            .some(layer => {
-              return layer.type === 'image' && layer.imgControl
-            })
-        case 'frame':
-          return (this.config as IFrame).clips
-            .some(layer => {
-              return layer.imgControl
-            })
-      }
-      return false
     },
     isActive(): boolean {
       return this.config.active
@@ -356,6 +348,9 @@ export default Vue.extend({
       const isHandleBgRemove = config.inProcess === 'bgRemove'
       return isHandleBgRemove || isHandleShadow
     },
+    isTouchDevice(): boolean {
+      return generalUtils.isTouchDevice()
+    },
     translateStyles(): { [index: string]: string } {
       const { zindex } = this.config.styles
       const { type } = this.config
@@ -384,6 +379,56 @@ export default Vue.extend({
     },
     isLocked(): boolean {
       return this.config.locked
+    },
+    onRightClick(event: MouseEvent) {
+      if (this.isTouchDevice()) {
+        // in touch device, right click will be triggered by long click
+        event.preventDefault()
+        return
+      }
+      /**
+       * If current-selected-layer is exact this layer, record the sub-active-layer.
+       * After deselecting, set it to active
+       */
+      const subLayerIdx = layerUtils.layerIndex === this.layerIndex ? layerUtils.subLayerIdx : -1
+
+      if (this.currSelectedInfo.pageIndex !== this.pageIndex || this.currSelectedInfo.index !== this.layerIndex) {
+        groupUtils.deselect()
+        groupUtils.select(this.pageIndex, [this.layerIndex])
+      }
+
+      if (this.getLayerType === 'frame') {
+        frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, subLayerIdx, { active: true })
+      }
+      this.$nextTick(() => {
+        popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
+      })
+    },
+    onPress(event: AnyTouchEvent) {
+      const initPos = { x: this.initPos.x, y: this.initPos.y }
+      this.initPos.x = -1
+      this.initPos.y = -1
+      if (this.config.styles.x - initPos.x !== 0 || this.config.styles.y - initPos.y !== 0) {
+        return
+      }
+      if (!this.isActive) {
+        groupUtils.deselect()
+        groupUtils.select(this.pageIndex, [this.layerIndex])
+      }
+      if (this.getLayerType === 'text') {
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
+      }
+
+      this.movingUtils && this.movingUtils.removeListener()
+      editorUtils.setInMultiSelectionMode(true)
+    },
+    onPointerDown(e: PointerEvent) {
+      e.stopPropagation()
+      if (this.isImgCtrl && this.imgCtrlConfig.id !== this.config.id) {
+        imageUtils.setImgControlDefault()
+      }
+      this.initPos.x = this.config.styles.x
+      this.initPos.y = this.config.styles.y
     },
     disableTouchEvent(e: TouchEvent) {
       if (generalUtils.isTouchDevice()) {

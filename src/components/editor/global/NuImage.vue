@@ -1113,7 +1113,10 @@ export default Vue.extend({
   align-items: center;
 
   &__picture {
+    touch-action: none;
     object-fit: cover;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
     position: absolute;
     top: 0px;
     left: 0px;
@@ -1122,6 +1125,9 @@ export default Vue.extend({
   }
 
   &__picture-shadow {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
     position: absolute;
     top: 0px;
     left: 0px;

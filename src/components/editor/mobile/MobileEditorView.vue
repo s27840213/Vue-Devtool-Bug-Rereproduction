@@ -295,7 +295,6 @@ export default Vue.extend({
          * the moving logic should be applied to the EditorView.
          */
         if (ControlUtils.isClickOnController(e)) {
-          console.log('click on contorl xxxxxxx')
           const movingUtils = new MovingUtils({
             _config: { config: layerUtils.getCurrConfig },
             snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,

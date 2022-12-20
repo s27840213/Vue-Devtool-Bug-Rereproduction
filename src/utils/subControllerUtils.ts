@@ -124,7 +124,6 @@ export default class SubControllerUtils {
   }
 
   onClickEvent(e: MouseEvent) {
-    // if (!this.isPrimaryActive) return
     if (!this.primaryLayer.active) return
 
     colorUtils.event.emit('closeColorPanel', false)
