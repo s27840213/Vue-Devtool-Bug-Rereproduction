@@ -553,13 +553,29 @@ export default Vue.extend({
     },
     dragEndH(e: MouseEvent) {
       RulerUtils.setIsDragging(false)
-      if (this.mapGuidelineToPage('h').outOfPage) {
-        this.isShowGuidelineH = false
-        StepsUtils.record()
+      if (this.from === -1) {
+        const guideline = this.$refs.guidelineH as HTMLElement
+        const overlappedPageIndex = RulerUtils.getOverlappedPageIndex(guideline, 'h')
+        if (overlappedPageIndex === -1) {
+          this.isShowGuidelineH = false
+          StepsUtils.record()
+        } else {
+          this.from = overlappedPageIndex
+          if (pageUtils.currFocusPageIndex !== overlappedPageIndex) {
+            GroupUtils.deselect()
+          }
+          this.setCurrActivePageIndex(overlappedPageIndex)
+          this.closeGuidelineH(true)
+        }
       } else {
-        // close EditorView guideline then put it into page
-        // or the record point will have some trouble
-        this.closeGuidelineH(true)
+        if (this.mapGuidelineToPage('h').outOfPage) {
+          this.isShowGuidelineH = false
+          StepsUtils.record()
+        } else {
+          // close EditorView guideline then put it into page
+          // or the record point will have some trouble
+          this.closeGuidelineH(true)
+        }
       }
       this.$nextTick(() => {
         window.removeEventListener('mousemove', this.draggingH)

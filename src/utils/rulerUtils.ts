@@ -138,15 +138,15 @@ class RulerUtils {
     this.eventHash[type] = callback
   }
 
-  mapGuidelineToPage(guildline: HTMLElement, type: string, from: number): { pos: number, outOfPage: boolean } {
-    const guildlineRect = guildline.getBoundingClientRect()
+  mapGuidelineToPage(guideline: HTMLElement, type: string, from: number): { pos: number, outOfPage: boolean } {
+    const guidelineRect = guideline.getBoundingClientRect()
     const targetPageIndex = from === -1 ? pageUtils.currFocusPageIndex : from
     const targetPage: IPage = from === -1 ? this.currFocusPage : pageUtils.getPage(targetPageIndex)
 
     switch (type) {
       case 'v': {
         const pageRect = document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
-        const mapResult = (guildlineRect.left - pageRect.left) / (this.scaleRatio / 100)
+        const mapResult = (guidelineRect.left - pageRect.left) / (this.scaleRatio / 100)
         return {
           pos: mapResult,
           outOfPage: mapResult < 0 || mapResult > targetPage.width
@@ -155,7 +155,7 @@ class RulerUtils {
       }
       case 'h': {
         const pageRect = document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
-        const mapResult = (guildlineRect.top - pageRect.top) / (this.scaleRatio / 100)
+        const mapResult = (guidelineRect.top - pageRect.top) / (this.scaleRatio / 100)
         return {
           pos: mapResult,
           outOfPage: mapResult < 0 || mapResult > targetPage.height
@@ -167,6 +167,31 @@ class RulerUtils {
       pos: -1,
       outOfPage: true
     }
+  }
+
+  getOverlappedPageIndex(guideline: HTMLElement, type: string): number {
+    const guidelineRect = guideline.getBoundingClientRect()
+    for (const [pageIndex, page] of pageUtils.getPages.entries()) {
+      switch (type) {
+        case 'v': {
+          const pageRect = document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
+          const mapResult = (guidelineRect.left - pageRect.left) / (this.scaleRatio / 100)
+          if (mapResult >= 0 && mapResult <= page.width) {
+            return pageIndex
+          }
+          break
+        }
+        case 'h': {
+          const pageRect = document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
+          const mapResult = (guidelineRect.top - pageRect.top) / (this.scaleRatio / 100)
+          if (mapResult >= 0 && mapResult <= page.height) {
+            return pageIndex
+          }
+          break
+        }
+      }
+    }
+    return -1
   }
 
   mapSnaplineToGuidelineArea(pos: number, type: string, pageIndex: number): number {
