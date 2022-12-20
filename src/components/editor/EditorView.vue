@@ -37,14 +37,14 @@ div(class="editor-view"
       class="editor-view__guidelines-area"
       ref="guidelinesArea")
     div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
-      :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
+      :style="{'cursor': `url(${'src/assets/img/svg/ruler-v.svg'}) 16 16, pointer`}"
       @pointerdown.stop="lockGuideline ? null: dragStartV($event)"
       @mouseout.stop="closeGuidelineV()"
       @click.right.stop.prevent="openGuidelinePopup($event)")
       div(class="guideline__pos guideline__pos--v" ref="guidelinePosV")
         span {{rulerVPos}}
     div(v-if="isShowGuidelineH" class="guideline guideline--h" ref="guidelineH"
-      :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
+      :style="{'cursor': `url(${'src/assets/img/svg/ruler-h.svg'}) 16 16, pointer`}"
       @pointerdown.stop="lockGuideline ? null : dragStartH($event)"
       @mouseout.stop="closeGuidelineH()"
       @click.right.stop.prevent="openGuidelinePopup($event)")
@@ -296,7 +296,7 @@ export default defineComponent({
       ]
     ),
     brushCursorStyles() {
-      return this.hasCopiedFormat ? { cursor: `url(${require('@/assets/img/svg/brush-paste-resized.svg')}) 2 2, pointer` } : {}
+      return this.hasCopiedFormat ? { cursor: `url(${'src/assets/img/svg/brush-paste-resized.svg'}) 2 2, pointer` } : {}
     },
     setAdminMode() {
       this._setAdminMode(!this.adminMode)

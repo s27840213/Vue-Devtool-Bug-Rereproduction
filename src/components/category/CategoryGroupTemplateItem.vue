@@ -77,7 +77,7 @@ export default defineComponent({
   },
   methods: {
     handleNotFound(event: Event) {
-      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
+      this.fallbackSrc = 'src/assets/img/svg/image-preview.svg' // prevent infinite refetching when network disconneted
     },
     copyId() {
       GeneralUtils.copyText(this.item.id)

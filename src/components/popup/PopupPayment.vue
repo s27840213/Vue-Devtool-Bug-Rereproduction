@@ -57,7 +57,7 @@ div(class="popup-window")
               @click="button.func()") {{button.label}}
       div(class="payment-right")
         img(class="payment-right-bg" loading="lazy"
-            :src="require(`@/assets/img/jpg/pricing/${locale}/${img}`)")
+            :src="`src/assets/img/jpg/pricing/${locale}/${img}`")
         img(v-if="view === 'pro-template'"
             class="payment-right-temp"  :src="templateImg")
       div(v-if="view === 'finish'" class="payment-finish")

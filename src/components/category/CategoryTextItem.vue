@@ -54,7 +54,7 @@ export default defineComponent({
   },
   methods: {
     handleNotFound(event: Event) {
-      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
+      this.fallbackSrc = 'src/assets/img/svg/image-preview.svg' // prevent infinite refetching when network disconneted
     },
     dragStart(e: DragEvent) {
       new DragUtils().itemDragStart(e, 'group', {

@@ -19,7 +19,7 @@ div(class="page-setting")
   transition(name="slide-fade")
     div(v-if="isPanelOpen"
       class="page-setting__suggestion-panel")
-      img(class="page-setting__suggestion-panel__arrow" :src="require('@/assets/img/svg/up-arrow.svg')")
+      img(class="page-setting__suggestion-panel__arrow" :src="'src/assets/img/svg/up-arrow.svg'")
       div(class="page-setting__suggestion-panel__body")
         div(class="page-setting__suggestion-panel__body__close pointer"
             @click="setSuggestionPanel(false)")

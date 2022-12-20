@@ -4,7 +4,7 @@ div(class="color-panel"
     v-click-outside="vcoConfig"
     ref="colorPanel")
   img(v-if="showPanelBtn" class="color-panel__btn"
-    :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
+    :src="`src/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`"
     @click="closePanel()")
   div(class="color-panel__scroll" :style="noPadding ? {padding:0} : {}")
     //- Recently colors

@@ -5,7 +5,7 @@ div(class="block" :style="blockStyle")
       span(v-html="content.title")
       img(v-for="cb in content.colorBlock.filter((i)=>!i.ref)"
         class="block__colorBlock"
-        :src="require('@/assets/img/svg/color-block/' + cb.name)"
+        :src="'src/assets/img/svg/color-block/' + cb.name"
         :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
     div(class="block-text__description text-gray-2")
       span {{content.description}}
@@ -20,7 +20,7 @@ div(class="block" :style="blockStyle")
       :height="(content.img.height ? content.img.height : content.img.width) * rwdModifier")
     img(v-for="cb in content.colorBlock.filter((i)=>i.ref)"
       class="block__colorBlock"
-      :src="require('@/assets/img/svg/color-block/' + cb.name)"
+      :src="'src/assets/img/svg/color-block/' + cb.name"
       :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
 </template>
 

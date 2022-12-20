@@ -41,7 +41,7 @@ export default defineComponent({
     },
     rulerRootStyles(): { [index: string]: string } {
       return {
-        cursor: `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`,
+        cursor: `url(${'src/assets/img/svg/ruler-v.svg'}) 16 16, pointer`,
         'z-index': `${pageUtils.pageNum + 10}`
       }
     },

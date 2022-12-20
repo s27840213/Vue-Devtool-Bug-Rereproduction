@@ -103,7 +103,7 @@ export default defineComponent({
       imgWidth: 150,
       imgHeight: 150,
       previewCheckReady: false,
-      previewPlaceholder: require('@/assets/img/svg/loading-large.svg'),
+      previewPlaceholder: 'src/assets/img/svg/loading-large.svg',
       showCarousel: false,
       carouselIdx: 0,
       waitTimer: 0,

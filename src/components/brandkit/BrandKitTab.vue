@@ -22,7 +22,7 @@ div(class="brand-kit-tab" :class="`${theme}-theme`" :style="gridStyles()")
     div
       img(class="brand-kit-tab__disconnect-image"
         :class="`${theme}-theme`"
-        :src="require('@/assets/img/png/brandkit/disconnect.png')")
+        :src="'src/assets/img/png/brandkit/disconnect.png'")
     span(class="brand-kit-tab__disconnect-title" :class="`${theme}-theme`") {{$t('NN0456')}}
     span(class="brand-kit-tab__disconnect-description1" :class="`${theme}-theme`") {{$t('NN0457')}}
     span(class="brand-kit-tab__disconnect-description2" :class="`${theme}-theme`") {{$t('NN0458')}}

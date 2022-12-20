@@ -8,7 +8,7 @@ div(class="category-list-rows")
   category-list-row
     div(v-for="item in list" :key="item.id")
       slot(name="preview" :item="item")
-        img(:src="require('@/assets/img/svg/image-preview.svg')")
+        img(:src="'src/assets/img/svg/image-preview.svg'")
 </template>
 
 <script lang="ts">
