@@ -41,6 +41,9 @@ export default Vue.extend({
     currFocusPage(): IPage {
       return pageUtils.currFocusPage
     },
+    currFocusPageSize() {
+      return pageUtils.currFocusPageSizeWithBleeds
+    },
     rulerRootStyles(): { [index: string]: string } {
       return {
         cursor: `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`,
@@ -49,17 +52,17 @@ export default Vue.extend({
     },
     rulerBodyStyles(): { [index: string]: number | string } {
       return {
-        width: `${this.currFocusPage.width * (this.pageScaleRatio / 100)}px`,
+        width: `${this.currFocusPageSize.width * (this.pageScaleRatio / 100)}px`,
         height: `${rulerUtils.RULER_SIZE}px`,
         transform: `translate3d(${this.rulerBodyOffset}px,0px,0px)`,
         'grid-template-columns': `repeat(${this.scaleCount},${this.scaleSpace}px) auto`
       }
     },
     pxScale(): number {
-      return unitUtils.convert(this.scale, this.currFocusPage.unit, 'px', pageUtils.getPageDPI().width)
+      return unitUtils.convert(this.scale, this.currFocusPageSize.unit, 'px', pageUtils.getPageDPI().width)
     },
     scaleCount(): number {
-      return Math.floor(this.currFocusPage.width / this.pxScale)
+      return Math.floor(this.currFocusPageSize.width / this.pxScale)
     },
     scaleSpace(): number {
       return this.pxScale * this.pageScaleRatio / 100
@@ -77,11 +80,7 @@ export default Vue.extend({
       this.calcRulerBodyOffset()
       this.scale = rulerUtils.adjRulerScale()
     },
-    'currFocusPage.width'() {
-      this.calcRulerBodyOffset()
-      this.scale = rulerUtils.adjRulerScale(this.scale)
-    },
-    'currFocusPage.unit'() {
+    currFocusPageSize() {
       this.calcRulerBodyOffset()
       this.scale = rulerUtils.adjRulerScale(this.scale)
     },

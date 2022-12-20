@@ -239,7 +239,7 @@ class ResizeUtils {
 
   resizeBleeds(pageIndex: number, physicalBleeds: IBleed) {
     const page = pageUtils.getPage(pageIndex)
-    const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.getPageSizeWithBleeds(pageIndex)
+    const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.getPageSizeWithBleeds(page)
 
     // convert bleeds
     const dpi = pageUtils.getPageDPI(page)

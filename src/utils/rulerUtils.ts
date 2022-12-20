@@ -126,22 +126,23 @@ class RulerUtils {
     const guildlineRect = guildline.getBoundingClientRect()
     const targetPageIndex = from === -1 ? pageUtils.currFocusPageIndex : from
     const targetPage: IPage = from === -1 ? this.currFocusPage : pageUtils.getPage(targetPageIndex)
+    const { width, height } = pageUtils.getPageSizeWithBleeds(targetPage)
 
     switch (type) {
       case 'v': {
-        const pageRect = document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
+        const pageRect = document.getElementsByClassName(`nu-page-bleed-${targetPageIndex}`)[0]?.getBoundingClientRect() ?? document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
         const mapResult = (guildlineRect.left - pageRect.left) / (this.scaleRatio / 100)
         return {
           pos: mapResult,
-          outOfPage: mapResult < 0 || mapResult > targetPage.width
+          outOfPage: mapResult < 0 || mapResult > width
         }
       }
       case 'h': {
-        const pageRect = document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
+        const pageRect = document.getElementsByClassName(`nu-page-bleed-${targetPageIndex}`)[0]?.getBoundingClientRect() ?? document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
         const mapResult = (guildlineRect.top - pageRect.top) / (this.scaleRatio / 100)
         return {
           pos: mapResult,
-          outOfPage: mapResult < 0 || mapResult > targetPage.height
+          outOfPage: mapResult < 0 || mapResult > height
         }
       }
     }
@@ -154,12 +155,13 @@ class RulerUtils {
   mapSnaplineToGuidelineArea(pos: number, type: string, pageIndex: number): number {
     switch (type) {
       case 'v': {
-        const pageRect = document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
+        const pageRect = document.getElementsByClassName(`nu-page-bleed-${pageIndex}`)[0]?.getBoundingClientRect() ?? document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
         const mapResult = pos * (this.scaleRatio / 100) + pageRect.left
+
         return mapResult
       }
       case 'h': {
-        const pageRect = document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
+        const pageRect = document.getElementsByClassName(`nu-page-bleed-${pageIndex}`)[0]?.getBoundingClientRect() ?? document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
         const mapResult = pos * (this.scaleRatio / 100) + pageRect.top
         return mapResult
       }

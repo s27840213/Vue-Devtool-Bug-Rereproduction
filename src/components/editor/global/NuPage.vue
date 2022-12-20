@@ -137,7 +137,7 @@
       div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
         class="page-highlighter"
         :style="wrapperStyles()")
-      div(v-if="showBleed && hasBleed" class="bleed-line" :style="bleedLineStyles()")
+      div(v-if="showBleed && hasBleed" :class="`bleed-line nu-page-bleed-${pageIndex}`" :style="bleedLineStyles()")
       div(v-if="(currActivePageIndex === pageIndex && isDetailPage)"
           class="page-resizer"
           ref="pageResizer"
