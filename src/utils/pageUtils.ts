@@ -25,11 +25,10 @@ class PageUtils {
   get getPages(): Array<IPage> { return store.getters.getPages }
   get pageNum(): number { return this.getPages.length }
   get getPageSize(): (pageIndex: number) => { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } { return store.getters.getPageSize }
-  get getPageSizeWithBleeds(): (pageIndex: number) => { width: number, height: number, physicalWidth: number, physicalHeight: number, bleeds: IBleed, physicalBleeds: IBleed, unit: string } { return store.getters.getPageSizeWithBleeds }
   get pagesName(): string { return store.getters.getPagesName }
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get currFocusPageSize() { return store.getters.getPageSize(this.currFocusPageIndex) }
-  get currFocusPageSizeWithBleeds() { return store.getters.getPageSizeWithBleeds(this.currFocusPageIndex) }
+  get currFocusPageSizeWithBleeds() { return this.getPageSizeWithBleeds(this.currFocusPage) }
   get isLastPage(): boolean {
     return this.pageNum - 1 === this.currFocusPageIndex
   }
@@ -570,10 +569,35 @@ class PageUtils {
    * @param page Target page, use current focused page if undefined
    * @returns DPI of target page if target page is in physical size, otherwise 96 (default DPI)
    */
-  getPageDPI(page = this.getPage(this.currFocusPageIndex)): {width: number, height: number} {
+  getPageDPI(page: IPage = this.currFocusPage): {width: number, height: number} {
     return {
       width: page.width / unitUtils.convert(page.physicalWidth, page.unit, 'in'),
       height: page.height / unitUtils.convert(page.physicalHeight, page.unit, 'in')
+    }
+  }
+
+  /**
+   * returns page size without bleeds and bleed sizes
+   * @param page Target page, use current focused page if undefined
+   * @returns
+   ** width, height, physicalWidth, physicalHeight: page size without bleeds
+   ** bleeds, physicalBleeds: page bleed sizes
+   ** unit: Unit for physical size and physical bleeds
+   */
+  getPageSizeWithBleeds(page: IPage): { width: number, height: number, physicalWidth: number, physicalHeight: number, bleeds: IBleed, physicalBleeds: IBleed, unit: string } {
+    const defaultBleed = { top: 0, bottom: 0, left: 0, right: 0 } as IBleed
+    const physicalWidth = page.physicalWidth ?? page.width
+    const physicalHeight = page.physicalHeight ?? page.height
+    const bleeds = page.bleeds ?? defaultBleed
+    const physicalBleeds = page.physicalBleeds ?? bleeds
+    return {
+      width: page.width - bleeds.left - bleeds.right,
+      height: page.height - bleeds.top - bleeds.bottom,
+      physicalWidth: physicalWidth - physicalBleeds.left - physicalBleeds.right,
+      physicalHeight: physicalHeight - physicalBleeds.top - physicalBleeds.bottom,
+      bleeds,
+      physicalBleeds,
+      unit: page.unit
     }
   }
 }

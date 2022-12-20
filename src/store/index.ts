@@ -165,21 +165,6 @@ const getters: GetterTree<IEditorState, unknown> = {
       }
     }
   },
-  getPageSizeWithBleeds(state: IEditorState) {
-    // returns page size without bleeds and bleed sizes
-    return (pageIndex: number): { width: number, height: number, physicalWidth: number, physicalHeight: number, bleeds: IBleed, physicalBleeds: IBleed, unit: string } => {
-      const page = state.pages[pageIndex]
-      return {
-        width: page.width - page.bleeds.left - page.bleeds.right,
-        height: page.height - page.bleeds.top - page.bleeds.bottom,
-        physicalWidth: page.physicalWidth - page.physicalBleeds.left - page.physicalBleeds.right,
-        physicalHeight: page.physicalHeight - page.physicalBleeds.top - page.physicalBleeds.bottom,
-        bleeds: page.bleeds,
-        physicalBleeds: page.physicalBleeds,
-        unit: page.unit
-      }
-    }
-  },
   getCurrSidebarPanelType(state: IEditorState): number {
     return state.currSidebarPanelType
   },

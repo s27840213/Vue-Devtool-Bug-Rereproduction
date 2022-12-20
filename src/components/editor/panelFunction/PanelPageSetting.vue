@@ -397,7 +397,7 @@ export default Vue.extend({
       }
     },
     sizeToShow(): {width: number, height: number, unit: string} {
-      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.getPageSizeWithBleeds(pageUtils.currFocusPageIndex)
+      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSizeWithBleeds
       return {
         width: round(physicalWidth ?? width ?? 0, PRECISION),
         height: round(physicalHeight ?? height ?? 0, PRECISION),
