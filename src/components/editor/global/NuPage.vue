@@ -193,6 +193,7 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
 import { round } from 'lodash'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
+import resizeUtils from '@/utils/resizeUtils'
 
 export default Vue.extend({
   components: {
@@ -287,7 +288,8 @@ export default Vue.extend({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
       contentScaleRatio: 'getContentScaleRatio',
-      isAdmin: 'user/isAdmin'
+      isAdmin: 'user/isAdmin',
+      pagesLength: 'getPagesLength'
     }),
     scaleContainerStyles(): { [index: string]: string } {
       return {
@@ -470,11 +472,32 @@ export default Vue.extend({
     },
     bleedLineStyles() {
       const scaleRatio = this.scaleRatio / 100
+      let boxShadow = '0 0 3px 1px rgba(0, 0, 0, 0.15)'
+      const borderSize = { top: 1, bottom: 1 }
+      if (this.isDetailPage && this.pages.length > 1) {
+        const maskTop = '0 -6px 0px 0px white, '
+        const maskBottom = '0 6px 0px 0px white, '
+        if (this.pageIndex === 0) {
+          boxShadow = maskBottom + boxShadow
+          borderSize.bottom = 0
+        } else if (this.pageIndex === this.pagesLength - 1) {
+          boxShadow = maskTop + boxShadow
+          borderSize.top = 0
+        } else {
+          boxShadow = maskBottom + maskTop + boxShadow
+          borderSize.bottom = 0
+          borderSize.top = 0
+        }
+      }
+
       return {
         top: this.config.bleeds.top * scaleRatio + 'px',
         bottom: this.config.bleeds.bottom * scaleRatio + 'px',
         left: this.config.bleeds.left * scaleRatio + 'px',
-        right: this.config.bleeds.right * scaleRatio + 'px'
+        right: this.config.bleeds.right * scaleRatio + 'px',
+        borderTop: borderSize.top + 'px dashed white',
+        borderBottom: borderSize.bottom + 'px dashed white',
+        boxShadow
       }
     },
     addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup): void {
@@ -550,6 +573,13 @@ export default Vue.extend({
         physicalBleeds: this.config.physicalBleeds,
         unit: this.config.unit
       }), this.pageIndex + 1)
+
+      // remove top and bottom bleeds for email marketing design
+      if (this.isDetailPage) {
+        resizeUtils.resizeBleeds(this.pageIndex + 1, { ...this.config.physicalBleeds, top: 0 })
+        resizeUtils.resizeBleeds(this.pageIndex, { ...this.config.physicalBleeds, bottom: 0 })
+      }
+
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })
       StepsUtils.record()
@@ -562,6 +592,19 @@ export default Vue.extend({
         this.setCurrActivePageIndex(this.pageIndex)
       }
       this._deletePage(this.pageIndex)
+
+      // add top and bottom bleeds for email marketing design
+      if (this.isDetailPage) {
+        if (this.pages.length === 1) {
+          resizeUtils.resizeBleeds(0, {
+            ...this.config.physicalBleeds,
+            top: this.pageIndex === 0 ? this.config.physicalBleeds.top : this.getPage(0).physicalBleeds.top,
+            bottom: this.pageIndex === 1 ? this.config.physicalBleeds.bottom : this.getPage(0).physicalBleeds.bottom
+          })
+        } else if (this.pageIndex === 0) resizeUtils.resizeBleeds(0, this.config.physicalBleeds)
+        else if (this.pageIndex === this.pages.length) resizeUtils.resizeBleeds(this.pages.length - 1, this.config.physicalBleeds)
+      }
+
       StepsUtils.record()
     },
     duplicatePage() {
@@ -582,6 +625,14 @@ export default Vue.extend({
       page.designId = ''
       page.id = generalUtils.generateRandomString(8)
       pageUtils.addPageToPos(page, this.pageIndex + 1)
+
+      // remove top and bottom bleeds for email marketing design
+      // TODO: resize bleeds before copy
+      if (this.isDetailPage) {
+        resizeUtils.resizeBleeds(this.pageIndex + 1, { ...page.physicalBleeds, top: 0 })
+        resizeUtils.resizeBleeds(this.pageIndex, { ...this.config.physicalBleeds, bottom: 0 })
+      }
+
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })
       StepsUtils.record()

@@ -385,16 +385,25 @@ export default Vue.extend({
       getPage: 'getPage',
       getPages: 'getPages',
       token: 'user/getToken',
-      groupId: 'getGroupId'
+      groupId: 'getGroupId',
+      groupType: 'getGroupType',
+      pagesLength: 'getPagesLength'
     }),
     currentPageBleeds(): IBleed {
       const currPage = pageUtils.currFocusPage
-      return currPage?.physicalBleeds ?? currPage?.bleeds ?? {
+      let bleeds = currPage?.physicalBleeds ?? currPage?.bleeds ?? {
         top: 0,
         bottom: 0,
         left: 0,
         right: 0
       }
+      bleeds = {
+        top: this.groupType === 1 ? this.getPage(0).physicalBleeds?.top ?? this.getPage(0).bleeds?.top ?? 0 : bleeds.top,
+        bottom: this.groupType === 1 ? this.getPage(this.pagesLength - 1).physicalBleeds?.bottom ?? this.getPage(this.pagesLength - 1).bleeds?.bottom ?? 0 : bleeds.bottom,
+        left: bleeds.left,
+        right: bleeds.right
+      }
+      return bleeds
     },
     sizeToShow(): {width: number, height: number, unit: string} {
       const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSizeWithBleeds
@@ -729,7 +738,7 @@ export default Vue.extend({
       } else if (this.bleeds[key] !== value) {
         this.bleeds[key] = value
       }
-      this.applyBleeds()
+      this.applyBleeds(key, all)
     },
     addBleed(key: string, value: number, all = false) {
       console.log('add bleed', { ...this.currentPageBleeds }, value)
@@ -740,12 +749,31 @@ export default Vue.extend({
       } else {
         this.bleeds[key] = Math.max(this.bleeds[key] + value, 0)
       }
-      this.applyBleeds()
+      this.applyBleeds(key, all)
       stepsUtils.record()
     },
-    applyBleeds() {
-      console.log('applyBleeds', { ...this.currentPageBleeds })
-      resizeUtils.resizeBleeds(pageUtils.currFocusPageIndex, this.bleeds)
+    applyBleeds(key: string, all: boolean) {
+      // resize all bleeds of all pages if is email marketing design
+      if (this.groupType === 1) {
+        if (!all && (key === 'top' || key === 'bottom')) {
+          const pageIndex = key === 'top' ? 0 : this.pagesLength - 1
+          resizeUtils.resizeBleeds(pageIndex, {
+            top: key === 'top' ? this.bleeds.top : 0,
+            bottom: key === 'bottom' ? this.bleeds.bottom : 0,
+            left: this.bleeds.left,
+            right: this.bleeds.right
+          })
+        } else {
+          for (let pageIndex = 0; pageIndex < this.pagesLength; pageIndex++) {
+            resizeUtils.resizeBleeds(pageIndex, {
+              top: pageIndex === 0 ? this.bleeds.top : 0,
+              bottom: pageIndex === this.pagesLength - 1 ? this.bleeds.bottom : 0,
+              left: this.bleeds.left,
+              right: this.bleeds.right
+            })
+          }
+        }
+      } else resizeUtils.resizeBleeds(pageUtils.currFocusPageIndex, this.bleeds)
     },
     handleBleedSubmit(evt?: KeyboardEvent) {
       if (!evt || evt.key === 'Enter') {

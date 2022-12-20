@@ -97,7 +97,8 @@ export default Vue.extend({
       isAdmin: 'user/isAdmin',
       account: 'user/getAccount',
       isFontLoading: 'text/getIsFontLoading',
-      pagesLength: 'getPagesLength'
+      pagesLength: 'getPagesLength',
+      groupType: 'getGroupType'
     }),
     pageSize(): { w: number, h: number } {
       return {
@@ -157,8 +158,8 @@ export default Vue.extend({
           const page = pageUtils.getPage(idx)
           const dpi = pageUtils.getPageDPI(page)
           const defaultBleeds = Object.fromEntries(Object.entries({
-            top: 3,
-            bottom: 3,
+            top: this.groupType === 1 ? idx === 0 ? 3 : 0 : 3,
+            bottom: this.groupType === 1 ? idx === this.pagesLength - 1 ? 3 : 0 : 3,
             left: 3,
             right: 3
           }).map(([k, v]) => [k, round(unitUtils.convert(v, 'mm', page.unit, k === 'left' || k === 'right' ? dpi.width : dpi.height), page.unit === 'px' ? 0 : PRECISION)])) as IBleed
