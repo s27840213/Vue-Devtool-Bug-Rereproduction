@@ -7,6 +7,7 @@
         @pointerdown="onPointerDown"
         @pointerup="onPointerUp"
         @click.right.stop="onRightClick"
+        @dragenter="dragEnter"
         @dblclick="dblClick")
       div(class="layer-translate posAbs"
           :style="translateStyles()")
@@ -33,6 +34,10 @@
                 :isPagePreview="isPagePreview"
                 :forRender="forRender"
                 v-bind="$attrs")
+          svg(class="clip-contour full-width" v-if="config.active && config.type === 'image' && (config.isFrame && !config.isFrameImg)"
+            :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
+            g(v-html="frameClipFormatter(config.clipPath)"
+              :style="frameClipStyles")
       div(v-if="showSpinner()" class="nu-layer__inProcess")
         square-loading
 </template>
@@ -154,7 +159,12 @@ export default Vue.extend({
       isMoved: false,
       isPointerDownFromSubController: false,
       dragUtils: this.isSubLayer ? new DragUtils(layerUtils.getLayer(this.pageIndex, this.layerIndex).id, this.config.id) : new DragUtils(this.config.id),
-      movingUtils: null as unknown as MovingUtils
+      movingUtils: null as unknown as MovingUtils,
+      imgBuff: {} as {
+        styles: { [key: string]: number | boolean },
+        srcObj: { type: string, assetId: string | number, userId: string },
+        panelPreviewSrc: ''
+      }
     }
   },
   mounted() {
@@ -257,8 +267,15 @@ export default Vue.extend({
     isLine(): boolean {
       return this.config.type === 'shape' && this.config.category === 'D'
     },
+    frameClipStyles(): any {
+      return {
+        fill: '#00000000',
+        stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
+        strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / this.primaryLayer.styles.scale * (100 / this.scaleRatio)}px`
+      }
+    },
     layerStyles(): any {
-      const clipPath = this.primaryLayer?.type === 'frame' ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
+      const clipPath = !this.forRender && this.primaryLayer?.type === 'frame' ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
       const styles = Object.assign(
         CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
         {
@@ -302,6 +319,9 @@ export default Vue.extend({
       setBgConfig: 'imgControl/SET_BG_CONFIG',
       setCurrDraggedPhoto: 'SET_currDraggedPhoto'
     }),
+    frameClipFormatter(clippath: string) {
+      return frameUtils.frameClipFormatter(clippath)
+    },
     outlineStyles() {
       const outlineColor = (() => {
         if (this.getLayerType === 'frame' && this.config.clips[0].isFrameImg) {
@@ -489,6 +509,148 @@ export default Vue.extend({
           }
         }
       }
+    },
+    dragEnter(e: DragEvent) {
+      if (this.primaryLayer && this.primaryLayer.type) {
+        return this.onFrameDragEnter(e)
+      }
+      this.onLayerDragEnter(e)
+    },
+    onFrameDragEnter(e: DragEvent) {
+      const { primaryLayer } = this
+      if (!primaryLayer.locked) {
+        const body = this.$refs.body as HTMLElement
+        body.addEventListener('dragleave', this.onFrameDragLeave)
+        body.addEventListener('drop', this.onFrameDrop)
+        e.stopPropagation()
+        if (this.currDraggedPhoto.srcObj.type !== '' && !this.currDraggedPhoto.isPreview) {
+          const clips = generalUtils.deepCopy(primaryLayer.clips) as Array<IImage>
+          const clip = clips[this.subLayerIndex]
+
+          Object.assign(this.imgBuff, {
+            srcObj: {
+              ...clips[this.subLayerIndex].srcObj
+            },
+            panelPreviewSrc: clips[this.subLayerIndex].panelPreviewSrc,
+            styles: {
+              imgX: clip.styles.imgX,
+              imgY: clip.styles.imgY,
+              imgWidth: clip.styles.imgWidth,
+              imgHeight: clip.styles.imgHeight,
+              adjust: clip.styles.adjust
+            }
+          })
+          frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex, this.currDraggedPhoto.srcObj)
+          frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { panelPreviewSrc: this.currDraggedPhoto.panelPreviewSrc })
+
+          Object.assign(clip.srcObj, this.currDraggedPhoto.srcObj)
+          const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
+            .clipperHandler(this.currDraggedPhoto, clip.clipPath, clip.styles).styles
+
+          frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+            imgWidth,
+            imgHeight,
+            imgX,
+            imgY
+          })
+        }
+      }
+    },
+    onFrameDragLeave(e: DragEvent) {
+      e.stopPropagation()
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener('dragleave', this.onFrameDragLeave)
+      body.removeEventListener('drop', this.onFrameDrop)
+      const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex) as IFrame
+      if (this.currDraggedPhoto.srcObj.type !== '' && !primaryLayer.locked) {
+        frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex, this.imgBuff.srcObj)
+        frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, this.imgBuff.styles)
+        frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { panelPreviewSrc: this.imgBuff.panelPreviewSrc })
+      }
+    },
+    onFrameDrop(e: DragEvent) {
+      e.stopPropagation()
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener('dragleave', this.onFrameDragLeave)
+      body.removeEventListener('drop', this.onFrameDrop)
+      stepsUtils.record()
+      this.setCurrDraggedPhoto({
+        srcObj: {
+          type: '',
+          assetId: '',
+          userId: ''
+        }
+      })
+      if (this.primaryLayer.locked) {
+        this.$emit('onSubDrop', { e })
+      }
+    },
+    onLayerDragEnter(e: DragEvent) {
+      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
+      const body = this.$refs.body as HTMLElement
+      const dragSrcObj = this.$store.state.currDraggedPhoto.srcObj
+      if (this.getLayerType === 'image' && dragSrcObj.assetId !== this.config.srcObj.assetId) {
+        body.addEventListener('dragleave', this.layerDragLeave)
+        body.addEventListener('drop', this.layerOnDrop)
+        const shadow = (this.config as IImage).styles.shadow
+        const shadowEffectNeedRedraw = shadow.isTransparent || shadow.currentEffect === ShadowEffectType.imageMatched
+        const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj?.type && shadow.srcObj?.type !== 'upload'
+        const handleWithNoCanvas = this.config.inProcess === 'imgShadow' && !hasShadowSrc
+        if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
+          this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
+        } else {
+          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          body.removeEventListener('dragleave', this.layerDragLeave)
+          body.removeEventListener('drop', this.layerOnDrop)
+        }
+      }
+    },
+    layerDragLeave(e: DragEvent) {
+      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener('dragleave', this.layerDragLeave)
+      body.removeEventListener('drop', this.layerOnDrop)
+      if (this.getLayerType === 'image') {
+        this.dragUtils.onImageDragLeave(e, this.pageIndex)
+      }
+    },
+    layerOnDrop(e: DragEvent) {
+      e.stopPropagation()
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener('dragleave', this.layerDragLeave)
+      body.removeEventListener('drop', this.layerOnDrop)
+
+      const dt = e.dataTransfer
+      if (e.dataTransfer?.getData('data')) {
+        if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
+          this.dragUtils.itemOnDrop(e, this.pageIndex)
+        } else if (this.getLayerType === 'image') {
+          if (this.isHandleShadow) {
+            const replacedImg = new Image()
+            replacedImg.crossOrigin = 'anonynous'
+            replacedImg.onload = () => {
+              const isTransparent = imageShadowUtils.isTransparentBg(replacedImg)
+              const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.layerIndex }
+              imageShadowUtils.updateEffectProps(layerInfo, { isTransparent })
+            }
+            const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
+            const src = imageUtils.getSrc(this.config, size)
+            replacedImg.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+            // return
+          } else {
+            eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
+          }
+        }
+        // GroupUtils.deselect()
+        // this.setLastSelectedLayerIndex(this.layerIndex)
+        // GroupUtils.select(this.pageIndex, [this.layerIndex])
+      } else if (dt && dt.files.length !== 0) {
+        const files = dt.files
+        this.setCurrSidebarPanel(SidebarPanelType.file)
+        uploadUtils.uploadAsset('image', files, {
+          addToPage: true
+        })
+      }
     }
   }
 })
@@ -563,6 +725,12 @@ export default Vue.extend({
   z-index: 100;
   display: flex;
   flex-direction: column;
+}
+
+.clip-contour {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .spiner {
