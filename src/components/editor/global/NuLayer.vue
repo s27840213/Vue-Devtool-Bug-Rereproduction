@@ -34,7 +34,7 @@
                 :isPagePreview="isPagePreview"
                 :forRender="forRender"
                 v-bind="$attrs")
-          svg(class="clip-contour full-width" v-if="config.active && config.type === 'image' && (config.isFrame && !config.isFrameImg)"
+          svg(class="clip-contour full-width" v-if="!forRender && config.active && config.type === 'image' && (config.isFrame && !config.isFrameImg)"
             :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
             g(v-html="frameClipFormatter(config.clipPath)"
               :style="frameClipStyles")
@@ -43,8 +43,8 @@
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-import { FunctionPanelType, ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
+import Vue from 'vue'
+import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
@@ -279,7 +279,7 @@ export default Vue.extend({
     },
     layerStyles(): any {
       const { isControlling } = this.movingUtils ?? {}
-      const clipPath = !this.forRender && this.primaryLayer?.type === 'frame' ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
+      const clipPath = !this.forRender && this.config.clipPath && this.primaryLayer?.type === 'frame' ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
       const styles = Object.assign(
         CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
         {
@@ -456,11 +456,19 @@ export default Vue.extend({
       editorUtils.setInMultiSelectionMode(true)
     },
     onPointerUp(e: PointerEvent) {
-      if (this.isImgCtrl && this.imgCtrlConfig.id !== this.config.id) {
-        imageUtils.setImgControlDefault()
-      }
+      // console.log(e.target)
+      // if (this.isImgCtrl && this.imgCtrlConfig.id !== this.config.id) {
+      //   imageUtils.setImgControlDefault()
+      // }
     },
     onPointerDown(e: PointerEvent) {
+      const target = e.target as HTMLElement
+      /**
+       * Prevent double clicking of img will propagate and set the img-ctrl to default immediately.
+       */
+      if (this.isImgCtrl && !['IMG', 'path'].includes(target.tagName)) {
+        imageUtils.setImgControlDefault()
+      }
       this.initPos.x = this.config.styles.x
       this.initPos.y = this.config.styles.y
     },
