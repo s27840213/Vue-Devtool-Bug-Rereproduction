@@ -277,15 +277,28 @@ export default Vue.extend({
         strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / this.primaryLayer.styles.scale * (100 / this.scaleRatio)}px`
       }
     },
-    layerStyles(): any {
+    getPointerEvents(): string {
       const { isControlling } = this.movingUtils ?? {}
+      switch (this.config.type) {
+        case LayerType.image:
+          return isControlling ? 'none' : ''
+        case LayerType.shape: {
+          if (this.primaryLayer && this.primaryLayer.type === LayerType.frame) {
+            return 'none'
+          }
+        }
+      }
+      return ''
+    },
+    layerStyles(): any {
       const clipPath = !this.forRender && this.config.clipPath && this.primaryLayer?.type === 'frame' ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
+      const pointerEvents = this.getPointerEvents
       const styles = Object.assign(
         CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
         {
           outline: this.outlineStyles(),
           willChange: !this.isSubLayer && this.isDragging ? 'transform' : '',
-          pointerEvents: isControlling && this.config.type === LayerType.image ? 'none' : '',
+          pointerEvents,
           clipPath
         }
       )
@@ -622,16 +635,19 @@ export default Vue.extend({
       this.onLayerDragEnter(e)
     },
     onFrameDragEnter(e: DragEvent) {
+      if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
+        return
+      }
       const { primaryLayer } = this
       if (!primaryLayer.locked) {
         const body = this.$refs.body as HTMLElement
         body.addEventListener('dragleave', this.onFrameDragLeave)
         body.addEventListener('drop', this.onFrameDrop)
         e.stopPropagation()
+
         if (this.currDraggedPhoto.srcObj.type !== '' && !this.currDraggedPhoto.isPreview) {
           const clips = generalUtils.deepCopy(primaryLayer.clips) as Array<IImage>
           const clip = clips[this.subLayerIndex]
-
           Object.assign(this.imgBuff, {
             srcObj: {
               ...clips[this.subLayerIndex].srcObj
