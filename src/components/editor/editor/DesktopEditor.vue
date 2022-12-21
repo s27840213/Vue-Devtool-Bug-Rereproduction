@@ -9,7 +9,7 @@
           div(class="content__editor")
             div(v-if="!inBgRemoveMode" class="header-container")
               editor-header
-            div(v-if="isAdmin" class="admin-options")
+            div(v-if="isAdmin && enableAdminView" class="admin-options")
               div(class="admin-options__sticky-container"
                   :style="stickyTopPos")
                 div(class="flex flex-column mr-10")
@@ -139,7 +139,8 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      enableComponentLog: 'getEnalbleComponentLog'
+      enableComponentLog: 'getEnalbleComponentLog',
+      enableAdminView: 'user/getEnableAdminView'
     }),
     ...mapGetters('user', {
       token: 'getToken',

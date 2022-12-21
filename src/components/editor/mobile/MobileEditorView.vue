@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="editor-view"
+  div(class="editor-view" v-touch
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="editorViewStyle"
       @wheel="handleWheel"
@@ -110,14 +110,6 @@ export default Vue.extend({
       this.mounted = true
     })
     this.getRecently()
-
-    const editorViewAt = new AnyTouch(this.$refs.editorView as HTMLElement, { preventDefault: false })
-    const canvasAt = new AnyTouch(this.$refs.canvas as HTMLElement, { preventDefault: false })
-    //  销毁
-    this.$on('hook:destroyed', () => {
-      editorViewAt.destroy()
-      canvasAt.destroy()
-    })
 
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement

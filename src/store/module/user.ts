@@ -26,6 +26,7 @@ export interface IUserModule {
   roleRaw: number,
   adminMode: boolean,
   isAuthenticated: boolean,
+  enableAdminView: boolean,
   account: string,
   email: string
   upassUpdate: string,
@@ -55,6 +56,7 @@ const getDefaultState = (): IUserModule => ({
   role: -1,
   roleRaw: -1,
   adminMode: true,
+  enableAdminView: true,
   isAuthenticated: false,
   account: '',
   email: '',
@@ -179,6 +181,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getUpdateDesignType() {
     return state.updateDesignType
+  },
+  getEnableAdminView() {
+    return state.enableAdminView
   }
 }
 
@@ -189,6 +194,7 @@ const mutations: MutationTree<IUserModule> = {
     localStorage.setItem('token', token)
   },
   [SET_STATE](state: IUserModule, data: Partial<IUserModule>) {
+    console.log(data)
     const newState = data || getDefaultState()
     const keys = Object.keys(newState) as Array<keyof IUserModule>
     keys

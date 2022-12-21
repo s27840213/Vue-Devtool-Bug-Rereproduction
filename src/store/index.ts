@@ -935,7 +935,9 @@ const mutations: MutationTree<IEditorState> = {
     Object.assign((state as any).pages[pageIndex].config.layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
   },
   CLEAR_state(state: IEditorState) {
+    const tmpUseMobileEditor = state.useMobileEditor
     Object.assign(state, getDefaultState())
+    state.useMobileEditor = tmpUseMobileEditor
   },
   SET_inGestureMode(state: IEditorState, bool: boolean) {
     state.inGestureToolMode = bool

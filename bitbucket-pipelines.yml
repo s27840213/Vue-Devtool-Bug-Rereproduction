@@ -670,6 +670,70 @@ pipelines:
               trigger: manual
               script:
                 - ./bash/create_pull_request.sh
+    qa:
+      - parallel:
+          - step:
+              name: "Verify build environment"
+              script: #show node and yarn version
+                - node -v
+                - yarn -v
+          - step:
+              name: "Start build with node module cache"
+              size: 2x
+              caches: #set caches for node modules to speed up building
+                - node
+              image: cypress/browsers:node14.17.0-chrome88-ff89
+              script:
+                - yarn install
+                - yarn build:prerender
+              artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+                - dist/**
+          # - step:
+          #     name: 'Run E2E Tests'
+          #     caches:
+          #       - node
+          #     image: cypress/browsers:node14.17.0-chrome88-ff89
+          #     script:
+          #       - npx cypress install
+          #       - yarn install
+          #       - yarn serve & npx wait-on http://localhost:8080
+          #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+      - parallel:
+          - step:
+              name: "deploy qa"
+              deployment: qa
+              trigger: manual
+              script:
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_QA
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_QA
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=* --include=app.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_QA
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
+                    DELETE_FLAG: "true"
+          - step:
+              name: "create pull request"
+              trigger: manual
+              script:
+                - ./bash/create_pull_request.sh
     hotfix: #for non-master and non-develop branch, i.e., feature or hotfix...
       - parallel:
           - step:
@@ -1090,6 +1154,186 @@ pipelines:
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                   S3_BUCKET: $AWS_BUCKET_DEV0
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "dev5s Alan"
+            deployment: dev5s
+            trigger: manual
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV5S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV5S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV5S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "dev4s Gary"
+            deployment: dev4s
+            trigger: manual
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV4S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV4S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV4S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "dev3s HsingChi"
+            deployment: dev3s
+            trigger: manual
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV3S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV3S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV3S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "dev2s TingAn"
+            deployment: dev2s
+            trigger: manual
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV2S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV2S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV2S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "dev1s Nathan"
+            deployment: dev1s
+            trigger: manual
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV1S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV1S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV1S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
+            name: "dev0s ZhengYan"
+            deployment: dev0s
+            trigger: manual
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV0S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV0S
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=app.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV0S
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"

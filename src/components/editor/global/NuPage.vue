@@ -119,13 +119,8 @@
             :threshold="[0,1]")
           div(class="scale-container relative"
               :style="scaleContainerStyles")
-            page-content(:config="config"
-              :pageIndex="pageIndex"
-              :contentScaleRatio="contentScaleRatio"
-              :snapUtils="snapUtils"
-              :lazyLoadTarget="'.editor-view'"
-              :forceRender="hasEditingText")
-            div(v-if="isAdmin" class="layer-num") Layer數量: {{config.layers.length}} (Admin User 才看得到）
+            page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+            div(v-if="isAdmin && enableAdminView" class="layer-num") Layer數量: {{config.layers.length}}
             div(v-if="currSelectedIndex !== -1" class="page-control" :style="styles('control')")
               nu-controller(v-if="currFocusPageIndex === pageIndex" data-identifier="controller"
                 :key="`controller-${currLayer.id}`"
@@ -133,19 +128,9 @@
                 :pageIndex="pageIndex"
                 :config="currLayer"
                 :snapUtils="snapUtils"
-                :contentScaleRatio="contentScaleRatio")
-            //- div(class="page-control" :style="styles('control')")
-            //-   template(v-for="(layer, index) in config.layers")
-            //-     nu-controller(v-if="(currDraggingIndex === -1 || currDraggingIndex === index || layer.type === 'frame') && (layer.type !== 'image' || !layer.imgControl) "
-            //-       data-identifier="controller"
-            //-       :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
-            //-       :layerIndex="index"
-            //-       :pageIndex="pageIndex"
-            //-       :config="layer"
-            //-       :snapUtils="snapUtils"
-            //-       :contentScaleRatio="contentScaleRatio"
-            //-       @setFocus="setFocus()"
-            //-       @isDragging="handleDraggingController")
+                :contentScaleRatio="contentScaleRatio"
+                @setFocus="setFocus()"
+                @isDragging="handleDraggingController")
             dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
       div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
         class="page-highlighter"
@@ -303,7 +288,8 @@ export default Vue.extend({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
       contentScaleRatio: 'getContentScaleRatio',
-      isAdmin: 'user/isAdmin'
+      isAdmin: 'user/isAdmin',
+      enableAdminView: 'user/getEnableAdminView'
     }),
     config(): IPage {
       return this.pageState.config

@@ -10,10 +10,10 @@
           //- @dblclick="onDblClick($event)"
           //- @dragenter="onDragEnter($event)"
           //- @pointerdown="onPointerdown($event)")
-          svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
-            :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
-            g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
-              :style="frameClipStyles()")
+          //- svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
+          //-   :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
+          //-   g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
+          //-     :style="frameClipStyles()")
           //- template(v-if="config.type === 'text' && config.active")
           //-   div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           //-     nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
@@ -200,9 +200,8 @@ export default Vue.extend({
 
       return {
         ...this.sizeStyle(),
-        // 'pointer-events': 'initial',
-        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`,
-        ...TextEffectUtils.convertTextEffect(this.config)
+        ...TextEffectUtils.convertTextEffect(this.config),
+        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`
       }
     },
     isTextEditing(): boolean {

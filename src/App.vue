@@ -16,9 +16,7 @@
         :info="currSelectedResInfo"
         @blur.native="setCurrSelectedResInfo()"
         tabindex="0")
-    div(v-if="isAdmin && !inScreenshotPreview" class="fps")
-      span FPS: {{fps}}
-      span {{` JS-Heap-Size: ${jsHeapSize / Math.pow(1000, 2)} MB`}}
+    fps(v-if="isAdmin && !inScreenshotPreview && enableAdminView")
     div(class="modal-container"
         v-if="isModalOpen")
       modal-card
@@ -48,6 +46,7 @@ import Popup from '@/components/popup/Popup.vue'
 import { Chrome } from 'vue-color'
 import ResInfo from '@/components/modal/ResInfo.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
+import Fps from '@/components/componentLog/Fps.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
@@ -57,7 +56,8 @@ export default Vue.extend({
     Popup,
     'chrome-picker': Chrome,
     ResInfo,
-    ModalCard
+    ModalCard,
+    Fps
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -66,10 +66,7 @@ export default Vue.extend({
     return {
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
-      coordinateHeight: 0,
-      fps: 0,
-      jsHeapSize: 0,
-      fpsInterval: 0
+      coordinateHeight: 0
     }
   },
   mounted() {
@@ -85,7 +82,8 @@ export default Vue.extend({
     ...mapGetters({
       currSelectedResInfo: 'getCurrSelectedResInfo',
       isModalOpen: 'modal/getModalOpen',
-      inScreenshotPreview: 'getInScreenshotPreview'
+      inScreenshotPreview: 'getInScreenshotPreview',
+      enableAdminView: 'user/getEnableAdminView'
     }),
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
@@ -95,13 +93,6 @@ export default Vue.extend({
     }),
     currLocale(): string {
       return localeUtils.currLocale()
-    }
-  },
-  watch: {
-    isAdmin(newVal) {
-      if (newVal && !this.inScreenshotPreview) {
-        this.showFps()
-      }
     }
   },
   methods: {
@@ -152,31 +143,6 @@ export default Vue.extend({
         events: ['dblclick', 'click', 'contextmenu']
         // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
       }
-    },
-    showFps() {
-      const times: Array<number> = []
-      const T = 1000
-      const refreshLoop = () => {
-        window.requestAnimationFrame(() => {
-          const now = performance.now()
-          while (times.length > 0 && times[0] <= now - T) {
-            times.shift()
-          }
-          times.push(now)
-          this.fps = times.length
-          this.jsHeapSize = (performance as any).memory ? (performance as any).memory.usedJSHeapSize : -1
-          if (this.inScreenshotPreview) {
-            clearInterval(this.fpsInterval)
-            return
-          }
-          refreshLoop()
-        })
-      }
-      refreshLoop()
-      // output to console once per second
-      this.fpsInterval = setInterval(() => {
-        this.fps *= 2000 / T
-      }, T)
     }
   }
 })
@@ -264,15 +230,6 @@ export default Vue.extend({
   &.error {
     background-color: setColor(red-2);
   }
-}
-
-.fps {
-  background: white;
-  padding: 2px;
-  position: absolute;
-  bottom: 60px;
-  right: 20px;
-  z-index: 1000;
 }
 // .vc-chrome-toggle-btn {
 //   display: none;
