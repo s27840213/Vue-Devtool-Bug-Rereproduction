@@ -17,6 +17,7 @@ import stepsUtils from './stepsUtils'
 import tiptapUtils from './tiptapUtils'
 
 export class MovingUtils {
+  isControlling = false
   private component = undefined as Vue | undefined
   private eventTarget = null as unknown as HTMLElement
   private dblTabsFlag = false
@@ -24,7 +25,6 @@ export class MovingUtils {
   private initialPos = { x: 0, y: 0 }
   private initTranslate = { x: 0, y: 0 }
   private movingByControlPoint = false
-  private isControlling = false
   private isDoingGestureAction = false
   private isHandleMovingHandler = false
   private snapUtils = null as any

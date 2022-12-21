@@ -214,11 +214,14 @@ export default Vue.extend({
       const pointerdown = subCtrlUtils.onPointerdown.bind(subCtrlUtils)
       body.addEventListener('pointerdown', pointerdown)
     }
+    if (this.primaryLayer && this.primaryLayer.type === LayerType.frame && this.config.type === LayerType.image) {
+      body.addEventListener(generalUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+    }
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
-    ...mapState('shadow', ['processId', 'handleId']),
-    ...mapState(['currDraggedPhoto']),
+    ...mapState('shadow', ['processId', 'handleId', 'uploadId']),
+    ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapState('imgControl', {
       imgCtrlConfig: 'image'
     }),
@@ -275,12 +278,14 @@ export default Vue.extend({
       }
     },
     layerStyles(): any {
+      const { isControlling } = this.movingUtils ?? {}
       const clipPath = !this.forRender && this.primaryLayer?.type === 'frame' ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
       const styles = Object.assign(
         CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
         {
           outline: this.outlineStyles(),
           willChange: !this.isSubLayer && this.isDragging ? 'transform' : '',
+          pointerEvents: isControlling && this.config.type === LayerType.image ? 'none' : '',
           clipPath
         }
       )
@@ -509,6 +514,100 @@ export default Vue.extend({
           }
         }
       }
+    },
+    onFrameMouseEnter(e: MouseEvent) {
+      if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
+        return
+      }
+      if (layerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
+        return
+      }
+      if (layerUtils.getLayer(this.pageIndex, this.layerIndex).locked && this.currDraggedPhoto.srcObj.type === '') {
+        return
+      }
+      if ((layerUtils.getCurrLayer as IImage).id === this.uploadId.layerId) {
+        return
+      }
+      e.stopPropagation()
+      const currLayer = layerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
+        const { srcObj, panelPreviewSrc } = this.config
+        const clips = generalUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
+        const clip = clips[this.layerIndex]
+
+        Object.assign(this.imgBuff, {
+          srcObj: {
+            ...srcObj
+          },
+          panelPreviewSrc,
+          styles: {
+            imgX: clip.styles.imgX,
+            imgY: clip.styles.imgY,
+            imgWidth: clip.styles.imgWidth,
+            imgHeight: clip.styles.imgHeight,
+            adjust: clip.styles.adjust
+            // horizontalFlip: clip.styles.horizontalFlip,
+            // verticalFlip: clip.styles.verticalFlip
+          }
+        })
+
+        frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+          srcObj: { ...currLayer.srcObj },
+          ...((currLayer as IImage).panelPreviewSrc && { panelPreviewSrc: (currLayer as IImage).panelPreviewSrc as string })
+        })
+        layerUtils.updateLayerStyles(layerUtils.pageIndex, layerUtils.layerIndex, { opacity: 35 })
+        layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { isHoveringFrame: true })
+
+        const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
+          .clipperHandler(layerUtils.getCurrLayer as IImage, clip.clipPath, clip.styles).styles
+
+        frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+          adjust: { ...currLayer.styles.adjust },
+          imgWidth,
+          imgHeight,
+          imgX,
+          imgY
+        })
+        const body = this.$refs.body as HTMLElement
+        body.addEventListener(generalUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+        body.addEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+      }
+    },
+    onFrameMouseLeave(e: MouseEvent) {
+      if (this.currDraggedPhoto.srcObj.type !== '') return
+      if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
+        return
+      }
+      e.stopPropagation()
+      const currLayer = layerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === LayerType.image && this.isMoving) {
+        layerUtils.updateLayerStyles(layerUtils.pageIndex, layerUtils.layerIndex, { opacity: 100 })
+        layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { isHoveringFrame: false })
+        frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+          srcObj: { ...this.imgBuff.srcObj }
+        })
+
+        frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+          ...this.imgBuff.styles
+        })
+      }
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+      body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+    },
+    onFrameMouseUp(e: MouseEvent) {
+      if (this.currDraggedPhoto.srcObj.type !== '') return
+      const currLayer = layerUtils.getCurrLayer as IImage
+      if (currLayer && currLayer.type === LayerType.image) {
+        layerUtils.deleteLayer(layerUtils.pageIndex, layerUtils.layerIndex)
+        const newIndex = this.layerIndex > layerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
+        groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer])
+        frameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.layerIndex, { active: true })
+        stepsUtils.record()
+      }
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+      body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
     },
     dragEnter(e: DragEvent) {
       if (this.primaryLayer && this.primaryLayer.type) {
