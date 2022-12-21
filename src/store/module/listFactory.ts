@@ -342,5 +342,5 @@ export default function (this: any) {
     getters,
     mutations,
     actions
-  } as ModuleTree<IListModuleState>
+  }
 }

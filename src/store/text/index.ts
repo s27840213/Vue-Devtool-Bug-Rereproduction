@@ -302,7 +302,7 @@ const randomizeVer = (url: string): string => {
   return url.replace(/ver=[0-9a-zA-Z]+/g, `ver=${generalUtils.generateRandomString(6)}`)
 }
 
-const getCssUrl = (urlMap: {[key:string]: string}, ver: number) => {
+const getCssUrl = (urlMap: { [key: string]: string }, ver: number) => {
   const cssUrl = urlMap.css
   return cssUrl ? addPlatform(`${cssUrl}&ver=${ver}&origin=true`) : ''
 }
@@ -321,4 +321,4 @@ export default {
   getters,
   mutations,
   actions
-} as ModuleTree<ITextState>
+}

@@ -108,4 +108,4 @@ export default {
   getters,
   mutations,
   actions
-} as ModuleTree<IPhotoState>
+}

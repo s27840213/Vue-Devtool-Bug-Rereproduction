@@ -388,4 +388,4 @@ export default {
   getters,
   mutations,
   actions
-} as ModuleTree<IUserModule>
+}

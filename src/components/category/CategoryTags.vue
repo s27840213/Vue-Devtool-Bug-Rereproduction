@@ -24,7 +24,7 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   emits: [],
   computed: {
-    items () {
+    items (): HTMLElement {
       return this.$refs.items as HTMLElement
     }
   },

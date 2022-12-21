@@ -68,7 +68,7 @@ div(class="color-panel"
             :style="colorStyles(color)"
             @click="handleColorEvent(color)")
           img(v-if="mode==='PanelBG'"
-            src="@/assets/img/svg/transparent.svg"
+            src="src/assets/img/svg/transparent.svg"
             width="100%" height="100%"
             @click="handleColorEvent('#ffffff00')")
   color-picker(v-if="openColorPicker"
