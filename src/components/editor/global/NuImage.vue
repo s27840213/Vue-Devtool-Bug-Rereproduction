@@ -85,6 +85,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
 export default Vue.extend({
+  inheritAttrs: false,
   props: {
     config: Object,
     pageIndex: Number,
@@ -540,10 +541,12 @@ export default Vue.extend({
       img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       img.crossOrigin = 'anoynous'
       img.onload = () => {
-        const isTransparent = imageShadowUtils.isTransparentBg(img)
-        imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
-        if (!isTransparent && this.config.styles.adjust.blur > 0) {
-          this.$forceUpdate()
+        if (!this.hasDestroyed) {
+          const isTransparent = imageShadowUtils.isTransparentBg(img)
+          imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
+          if (!isTransparent && this.config.styles.adjust.blur > 0) {
+            this.$forceUpdate()
+          }
         }
       }
     },
@@ -1114,7 +1117,10 @@ export default Vue.extend({
   align-items: center;
 
   &__picture {
+    touch-action: none;
     object-fit: cover;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
     position: absolute;
     top: 0px;
     left: 0px;
@@ -1123,6 +1129,9 @@ export default Vue.extend({
   }
 
   &__picture-shadow {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
     position: absolute;
     top: 0px;
     left: 0px;
