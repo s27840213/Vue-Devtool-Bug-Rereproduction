@@ -105,15 +105,17 @@ const routes: Array<RouteConfig> = [
         const teamId = urlParams.get('team_id')
         const token = urlParams.get('token')
         const dpi = +(urlParams.get('dpi') ?? -1)
+        const bleed = !!+(urlParams.get('bleed') ?? 0)
+        const trim = !!+(urlParams.get('trim') ?? 0)
 
         if (token && teamId && url) {
           // for new version
           // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET
-          store.commit('user/SET_STATE', { token, teamId })
+          store.commit('user/SET_STATE', { token, teamId, dpi, bleed, trim })
+          store.commit('user/SET_STATE', { userId: 'backendRendering' })
           const response = await (await fetch(`https://${url}`)).json()
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           store.commit('file/SET_setLayersDone')
-          store.commit('user/SET_STATE', { userId: 'backendRendering', dpi })
         } else if (url) {
           // for old version
           // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET
@@ -131,12 +133,14 @@ const routes: Array<RouteConfig> = [
             const token = querys.token
             const teamId = querys.team_id
             const dpi = +(querys.dpi ?? -1)
-            store.commit('user/SET_STATE', { token, teamId, dpi })
+            const bleed = !!+querys.bleed
+            const trim = !!+querys.trim
+            store.commit('user/SET_STATE', { token, teamId, dpi, bleed, trim })
           }
+          store.commit('user/SET_STATE', { userId: 'backendRendering' })
           const response = await (await fetch(`https://${src}`)).json()
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           store.commit('file/SET_setLayersDone')
-          store.commit('user/SET_STATE', { userId: 'backendRendering' })
         }
         next()
       } catch (error) {

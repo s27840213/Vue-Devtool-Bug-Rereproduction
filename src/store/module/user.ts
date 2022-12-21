@@ -45,7 +45,9 @@ export interface IUserModule {
   isUpdateDesignOpen: boolean,
   updateDesignId: string,
   updateDesignType: string,
-  dpi?: number
+  dpi?: number,
+  bleed?: boolean,
+  trim?: boolean
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -94,7 +96,9 @@ const getDefaultState = (): IUserModule => ({
   isUpdateDesignOpen: false,
   updateDesignId: '',
   updateDesignType: '',
-  dpi: -1
+  dpi: -1,
+  bleed: false,
+  trim: false
 })
 
 const state = getDefaultState()
@@ -183,6 +187,12 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getUpdateDesignType() {
     return state.updateDesignType
+  },
+  getBleed() {
+    return state.bleed
+  },
+  getTrim() {
+    return state.trim
   }
 }
 

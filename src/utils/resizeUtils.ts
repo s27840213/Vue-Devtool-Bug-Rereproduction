@@ -237,14 +237,14 @@ class ResizeUtils {
     }
   }
 
-  resizeBleeds(pageIndex: number, physicalBleeds: IBleed) {
+  resizeBleeds(pageIndex: number, physicalBleeds: IBleed, bleeds?: IBleed) {
     const page = pageUtils.getPage(pageIndex)
     const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.getPageSizeWithBleeds(page)
 
     // convert bleeds
     const dpi = pageUtils.getPageDPI(page)
     physicalBleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, isNaN(v) ? 0 : v])) as IBleed // map NaN to 0
-    const newBleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height))])) as IBleed // convert bleed to px size
+    const newBleeds = bleeds || Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height))])) as IBleed // convert bleed to px size
     const newPhysicalBleeds = physicalBleeds
 
     // resize page
