@@ -21,22 +21,22 @@ div(class="nu-sub-controller")
         //-       :pageIndex="pageIndex"
         //-       :layerIndex="primaryLayerIndex"
         //-       :subLayerIndex="layerIndex"
-        //-       @keydown.native.37.stop
-        //-       @keydown.native.38.stop
-        //-       @keydown.native.39.stop
-        //-       @keydown.native.40.stop
-        //-       @keydown.native.ctrl.67.exact.stop.self
-        //-       @keydown.native.meta.67.exact.stop.self
-        //-       @keydown.native.ctrl.86.exact.stop.self
-        //-       @keydown.native.meta.86.exact.stop.self
-        //-       @keydown.native.ctrl.88.exact.stop.self
-        //-       @keydown.native.meta.88.exact.stop.self
-        //-       @keydown.native.ctrl.65.exact.stop.self
-        //-       @keydown.native.meta.65.exact.stop.self
-        //-       @keydown.native.ctrl.90.exact.stop.self
-        //-       @keydown.native.meta.90.exact.stop.self
-        //-       @keydown.native.ctrl.shift.90.exact.stop.self
-        //-       @keydown.native.meta.shift.90.exact.stop.self
+        //-       @keydown.37.stop
+        //-       @keydown.38.stop
+        //-       @keydown.39.stop
+        //-       @keydown.40.stop
+        //-       @keydown.ctrl.67.exact.stop.self
+        //-       @keydown.meta.67.exact.stop.self
+        //-       @keydown.ctrl.86.exact.stop.self
+        //-       @keydown.meta.86.exact.stop.self
+        //-       @keydown.ctrl.88.exact.stop.self
+        //-       @keydown.meta.88.exact.stop.self
+        //-       @keydown.ctrl.65.exact.stop.self
+        //-       @keydown.meta.65.exact.stop.self
+        //-       @keydown.ctrl.90.exact.stop.self
+        //-       @keydown.meta.90.exact.stop.self
+        //-       @keydown.ctrl.shift.90.exact.stop.self
+        //-       @keydown.meta.shift.90.exact.stop.self
         //-       @update="handleTextChange"
         //-       @compositionend="handleTextCompositionEnd")
 </template>

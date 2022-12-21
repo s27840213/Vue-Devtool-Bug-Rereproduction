@@ -25,7 +25,7 @@ class TextUtils {
   get isFontLoading(): boolean { return (store.state as any).text.isFontLoading }
 
   observer: IntersectionObserver
-  observerCallbackMap: {[key: string]: (size: { width: number, height: number }) => void}
+  observerCallbackMap: { [key: string]: (size: { width: number, height: number }) => void }
   trashDivs: HTMLDivElement[] = []
   toRecordId: string
   toSetFlagId: string

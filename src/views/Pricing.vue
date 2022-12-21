@@ -6,7 +6,7 @@ div(class="pricing")
       span(class="text-H2 mb-20" v-html="$t('NN0505')")
       span(class="body-LG text-gray-2") {{$t('NN0506')}}
       img(v-for="cb in colorBlock" class="pricing-top__cb"
-          :src="require('@/assets/img/svg/color-block/' + cb.name)"
+          :src="'src/assets/img/svg/color-block/' + cb.name"
           :style="{'top': `${cb.top}px`, 'left': `${cb.left}px`}")
     div(class="pricing-plan")
       div(class="pricing-plan-left")
@@ -32,7 +32,7 @@ div(class="pricing")
           span(class="pricing-plan-right-price__dollar") {{'$ '}}
           span(class="text-H1") {{plans[planSelected][periodUi].now}}
           span {{' ' + $t('NN0516')}}
-        btn(class="pricing-plan-right-buy" type="light-lg" @click.native="tryAddCard()")
+        btn(class="pricing-plan-right-buy" type="light-lg" @click="tryAddCard()")
           span(class="btn-LG") {{buyLabel}}
     span(class="pricing-currency") {{$t('NN0519')}}
     div(class="pricing-compare")
