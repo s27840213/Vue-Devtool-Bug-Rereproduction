@@ -2,6 +2,7 @@ import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { LineTemplatesType } from '@/store/types'
 import { EventEmitter } from 'events'
+import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
 interface ITemplateSetting {
   v: Array<number>
@@ -192,6 +193,49 @@ class RulerUtils {
       }
     }
     return -1
+  }
+
+  getMouseOverPageIndex(e: PointerEvent): number {
+    const mousePos = mouseUtils.getMouseAbsPoint(e)
+    for (const pageIndex in pageUtils.getPages) {
+      const pageRect = document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
+      if (mousePos.x >= pageRect.x && mousePos.x <= pageRect.x + pageRect.width &&
+        mousePos.y >= pageRect.y && mousePos.y <= pageRect.y + pageRect.height) {
+        return parseInt(pageIndex, 10)
+      }
+    }
+    return -1
+  }
+
+  getMostlyOverlappedPageIndex(e: PointerEvent): number {
+    const editorRect = document.getElementsByClassName('editor-view')[0].getBoundingClientRect()
+    const mousePos = mouseUtils.getMouseAbsPoint(e)
+    let candidates = [] as { index: number, yDiff: number }[]
+    let maxOverlappedLen = -1
+    for (const pageIndex in pageUtils.getPages) {
+      const pageRect = document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
+      const pageIndexNum = parseInt(pageIndex, 10)
+      if (mousePos.x < pageRect.x || mousePos.x > pageRect.x + pageRect.width ||
+        pageRect.y > editorRect.height || pageRect.y + pageRect.height < 0) continue
+      const overlappedLen = Math.min(pageRect.y + pageRect.height, editorRect.height) - Math.max(pageRect.y, 0)
+      const item = { index: pageIndexNum, yDiff: Math.min(Math.abs(mousePos.y - pageRect.y), Math.abs(mousePos.y - pageRect.y - pageRect.height)) }
+      if (overlappedLen > maxOverlappedLen) {
+        maxOverlappedLen = overlappedLen
+        candidates = [item]
+      } else if (overlappedLen === maxOverlappedLen) {
+        candidates.push(item)
+      }
+    }
+    if (candidates.length === 0) return -1
+    let minYDiffPageIndex = -1
+    let minYDiff = Number.MAX_SAFE_INTEGER
+    for (const candidate of candidates) {
+      if (candidate.yDiff < minYDiff) {
+        minYDiffPageIndex = candidate.index
+        minYDiff = candidate.yDiff
+      }
+    }
+    return minYDiffPageIndex
   }
 
   mapSnaplineToGuidelineArea(pos: number, type: string, pageIndex: number): number {

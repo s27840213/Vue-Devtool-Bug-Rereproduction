@@ -482,11 +482,36 @@ export default Vue.extend({
     },
     dragEndV(e: PointerEvent) {
       RulerUtils.setIsDragging(false)
-      if (this.mapGuidelineToPage('v').outOfPage) {
-        this.isShowGuidelineV = false
-        StepsUtils.record()
+      if (this.from === -1) {
+        const mouseOverPageIndex = RulerUtils.getMouseOverPageIndex(e)
+        if (mouseOverPageIndex === -1) { // if no page contains mouse
+          const mostlyOverlappedPageIndex = RulerUtils.getMostlyOverlappedPageIndex(e)
+          if (mostlyOverlappedPageIndex === -1) {
+            this.isShowGuidelineV = false
+            StepsUtils.record()
+          } else {
+            this.from = mostlyOverlappedPageIndex
+            if (pageUtils.currFocusPageIndex !== mostlyOverlappedPageIndex) {
+              GroupUtils.deselect()
+            }
+            this.setCurrActivePageIndex(mostlyOverlappedPageIndex)
+            this.closeGuidelineV(true)
+          }
+        } else {
+          this.from = mouseOverPageIndex
+          if (pageUtils.currFocusPageIndex !== mouseOverPageIndex) {
+            GroupUtils.deselect()
+          }
+          this.setCurrActivePageIndex(mouseOverPageIndex)
+          this.closeGuidelineV(true)
+        }
       } else {
-        this.closeGuidelineV(true)
+        if (this.mapGuidelineToPage('v').outOfPage) {
+          this.isShowGuidelineV = false
+          StepsUtils.record()
+        } else {
+          this.closeGuidelineV(true)
+        }
       }
       this.$nextTick(() => {
         eventUtils.removePointerEvent('pointermove', this.draggingV)
