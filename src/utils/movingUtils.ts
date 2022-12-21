@@ -389,6 +389,7 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
+    this.isControlling = false
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
 
@@ -406,9 +407,6 @@ export class MovingUtils {
         this.setLastSelectedLayerIndex(this.layerIndex)
         groupUtils.select(this.pageIndex, [targetIndex])
       }
-      // eventUtils.removePointerEvent('pointerup', this._moveEnd)
-      // eventUtils.removePointerEvent('pointermove', this._moving)
-      this.isControlling = false
       this.setCursorStyle(e, '')
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false
@@ -507,8 +505,6 @@ export class MovingUtils {
       this.isPointerDownFromSubController = false
       this.isControlling = false
       this.setCursorStyle(e, '')
-      // eventUtils.removePointerEvent('pointerup', this._moveEnd)
-      // eventUtils.removePointerEvent('pointermove', this._moving)
     }
 
     if (this.isDragging) {
@@ -523,6 +519,7 @@ export class MovingUtils {
   }
 
   removeListener() {
+    this.isControlling = false
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
   }

@@ -541,7 +541,7 @@ export default Vue.extend({
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
         const { srcObj, panelPreviewSrc } = this.config
         const clips = generalUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
-        const clip = clips[this.layerIndex]
+        const clip = clips[this.subLayerIndex]
 
         Object.assign(this.imgBuff, {
           srcObj: {
@@ -554,8 +554,6 @@ export default Vue.extend({
             imgWidth: clip.styles.imgWidth,
             imgHeight: clip.styles.imgHeight,
             adjust: clip.styles.adjust
-            // horizontalFlip: clip.styles.horizontalFlip,
-            // verticalFlip: clip.styles.verticalFlip
           }
         })
 
@@ -610,7 +608,7 @@ export default Vue.extend({
         layerUtils.deleteLayer(layerUtils.pageIndex, layerUtils.layerIndex)
         const newIndex = this.layerIndex > layerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
         groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer])
-        frameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.layerIndex, { active: true })
+        frameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.subLayerIndex, { active: true })
         stepsUtils.record()
       }
       const body = this.$refs.body as HTMLElement
