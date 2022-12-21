@@ -6,6 +6,7 @@
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
       :subLayerIndex="index"
+      :primaryLayer="config"
       :contentScaleRatio="contentScaleRatio"
       :config="layer"
       :style="subLayerStyles(layer)"

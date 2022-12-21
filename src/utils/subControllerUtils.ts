@@ -33,6 +33,7 @@ export default class SubControllerUtils {
   }
 
   onPointerdown(e: PointerEvent) {
+    if (this.primaryLayer.type === 'tmp') return
     if (e.button !== 0) return
     if (imageUtils.isImgControl()) {
       imageUtils.setImgControlDefault()

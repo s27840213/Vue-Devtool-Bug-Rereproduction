@@ -5,8 +5,8 @@
         :data-p-index="pageIndex"
         v-press="isTouchDevice()? onPress : -1"
         @pointerdown="onPointerDown"
+        @pointerup="onPointerUp"
         @click.right.stop="onRightClick"
-        @dragenter="dragEnter"
         @dblclick="dblClick")
       div(class="layer-translate posAbs"
           :style="translateStyles()")
@@ -66,6 +66,8 @@ import controlUtils from '@/utils/controlUtils'
 import { AnyTouchEvent } from '@any-touch/shared'
 import editorUtils from '@/utils/editorUtils'
 import popupUtils from '@/utils/popupUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import Svgpath from 'svgpath'
 
 export default Vue.extend({
   inheritAttrs: false,
@@ -256,11 +258,13 @@ export default Vue.extend({
       return this.config.type === 'shape' && this.config.category === 'D'
     },
     layerStyles(): any {
+      const clipPath = this.primaryLayer?.type === 'frame' ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
       const styles = Object.assign(
         CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
         {
           outline: this.outlineStyles(),
-          willChange: !this.isSubLayer && this.isDragging ? 'transform' : ''
+          willChange: !this.isSubLayer && this.isDragging ? 'transform' : '',
+          clipPath
         }
       )
       switch (this.config.type) {
@@ -295,7 +299,8 @@ export default Vue.extend({
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
       setMoving: 'SET_moving',
       setImgConfig: 'imgControl/SET_CONFIG',
-      setBgConfig: 'imgControl/SET_BG_CONFIG'
+      setBgConfig: 'imgControl/SET_BG_CONFIG',
+      setCurrDraggedPhoto: 'SET_currDraggedPhoto'
     }),
     outlineStyles() {
       const outlineColor = (() => {
@@ -405,6 +410,9 @@ export default Vue.extend({
       })
     },
     onPress(event: AnyTouchEvent) {
+      if (this.primaryLayer && this.primaryLayer.type === 'tmp') {
+        return
+      }
       const initPos = { x: this.initPos.x, y: this.initPos.y }
       this.initPos.x = -1
       this.initPos.y = -1
@@ -422,11 +430,12 @@ export default Vue.extend({
       this.movingUtils && this.movingUtils.removeListener()
       editorUtils.setInMultiSelectionMode(true)
     },
-    onPointerDown(e: PointerEvent) {
-      e.stopPropagation()
+    onPointerUp(e: PointerEvent) {
       if (this.isImgCtrl && this.imgCtrlConfig.id !== this.config.id) {
         imageUtils.setImgControlDefault()
       }
+    },
+    onPointerDown(e: PointerEvent) {
       this.initPos.x = this.config.styles.x
       this.initPos.y = this.config.styles.y
     },
@@ -479,73 +488,6 @@ export default Vue.extend({
             }
           }
         }
-      }
-    },
-    dragEnter(e: DragEvent) {
-      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
-      const body = this.$refs.body as HTMLElement
-      const dragSrcObj = this.$store.state.currDraggedPhoto.srcObj
-      if (this.getLayerType === 'image' && dragSrcObj.assetId !== this.config.srcObj.assetId) {
-        body.addEventListener('dragleave', this.layerDragLeave)
-        body.addEventListener('drop', this.layerOnDrop)
-        const shadow = (this.config as IImage).styles.shadow
-        const shadowEffectNeedRedraw = shadow.isTransparent || shadow.currentEffect === ShadowEffectType.imageMatched
-        const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj?.type && shadow.srcObj?.type !== 'upload'
-        const handleWithNoCanvas = this.config.inProcess === 'imgShadow' && !hasShadowSrc
-        if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
-          this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
-        } else {
-          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
-          body.removeEventListener('dragleave', this.layerDragLeave)
-          body.removeEventListener('drop', this.layerOnDrop)
-        }
-      }
-    },
-    layerDragLeave(e: DragEvent) {
-      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
-      const body = this.$refs.body as HTMLElement
-      body.removeEventListener('dragleave', this.layerDragLeave)
-      body.removeEventListener('drop', this.layerOnDrop)
-      if (this.getLayerType === 'image') {
-        this.dragUtils.onImageDragLeave(e, this.pageIndex)
-      }
-    },
-    layerOnDrop(e: DragEvent) {
-      e.stopPropagation()
-      const body = this.$refs.body as HTMLElement
-      body.removeEventListener('dragleave', this.layerDragLeave)
-      body.removeEventListener('drop', this.layerOnDrop)
-
-      const dt = e.dataTransfer
-      if (e.dataTransfer?.getData('data')) {
-        if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
-          this.dragUtils.itemOnDrop(e, this.pageIndex)
-        } else if (this.getLayerType === 'image') {
-          if (this.isHandleShadow) {
-            const replacedImg = new Image()
-            replacedImg.crossOrigin = 'anonynous'
-            replacedImg.onload = () => {
-              const isTransparent = imageShadowUtils.isTransparentBg(replacedImg)
-              const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.layerIndex }
-              imageShadowUtils.updateEffectProps(layerInfo, { isTransparent })
-            }
-            const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
-            const src = imageUtils.getSrc(this.config, size)
-            replacedImg.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-            // return
-          } else {
-            eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
-          }
-        }
-        // GroupUtils.deselect()
-        // this.setLastSelectedLayerIndex(this.layerIndex)
-        // GroupUtils.select(this.pageIndex, [this.layerIndex])
-      } else if (dt && dt.files.length !== 0) {
-        const files = dt.files
-        this.setCurrSidebarPanel(SidebarPanelType.file)
-        uploadUtils.uploadAsset('image', files, {
-          addToPage: true
-        })
       }
     }
   }
