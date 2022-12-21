@@ -81,7 +81,7 @@
           dropdown(class="mt-5"
             :options="detailPageDownloadOptions"
             @select="handleDetailPageOption") {{ detailPageOptionLabel }}
-          div(v-if="selectedDetailPage.option === 'splice'"
+          div(v-if="selectedDetailPage.option === 'splice' && !selectedTypeVal.includes('pdf')"
             class="mt-10")
             download-check-button(type="radio"
               class="mb-10"
@@ -443,9 +443,10 @@ export default Vue.extend({
 
       if (this.isDetailPage) {
         this.selectedDetailPage.option === 'whole' && (fileInfo.merge = 1)
-        this.selectedDetailPage.option === 'splice' &&
-          !this.selectedDetailPage.noLimit &&
-          (fileInfo.splitSize = this.selectedDetailPage.height)
+        if (this.selectedDetailPage.option === 'splice') {
+          fileInfo.merge = 0
+          if (!this.selectedDetailPage.noLimit && !selectedTypeVal.includes('pdf')) fileInfo.splitSize = this.selectedDetailPage.height
+        }
       }
 
       if (['spec', 'current'].includes(rangeType)) {
