@@ -51,6 +51,32 @@
             min="1"
             v-ratio-change
             type="range")
+        div(v-if="'mark' in selected")
+          download-check-button(type="checkbox"
+            class="mb-10"
+            :label="'裁切標記'"
+            :default-checked="!!selected.mark"
+            @change="({ checked }) => {handleUpdate('mark', checked ? 1 : 0); if('bleed' in selected && checked && selected.bleed === 0) handleUpdate('bleed', 1)}")
+        div(v-if="'bleed' in selected")
+          download-check-button(type="checkbox"
+            class="mb-10"
+            :label="'出血'"
+            :default-checked="!!selected.bleed"
+            @change="({ checked }) => {handleUpdate('bleed', checked ? 1 : 0); if('mark' in selected && !checked && selected.mark === 1) handleUpdate('mark', 0)}")
+        div(v-if="'outline' in selected")
+          download-check-button(type="checkbox"
+            class="mb-10"
+            :label="'文字轉外框'"
+            :default-checked="!!selected.outline"
+            @change="({ checked }) => handleUpdate('outline', checked ? 1 : 0)")
+        div(v-if="selectedTypeVal.includes('pdf')"
+          class="flex items-center mb-10")
+          span {{`色彩模式`}}
+          dropdown(v-if="colorFormats[selectedTypeVal].length > 1" class="mx-5 popup-download__color-format"
+            :options="colorFormats[selectedTypeVal]"
+            @select="option => handleUpdate('cmyk', option === 'CMYK')") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
+          div(v-if="colorFormats[selectedTypeVal].length === 1" class="popup-download__color-format fixed")
+            span(class="body-XS") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
         div(v-if="isDetailPage" class="mb-10 pt-5") {{ $t('NN0344') }}
           dropdown(class="mt-5"
             :options="detailPageDownloadOptions"
@@ -149,7 +175,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import { ITypeOption } from '@/interfaces/download'
+import { IDownloadServiceParams, ITypeOption } from '@/interfaces/download'
 import DownloadUtil from '@/utils/downloadUtil'
 import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
 import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
@@ -209,6 +235,10 @@ export default Vue.extend({
       exportId: '',
       functionQueue: [] as Array<() => void>,
       scaleOptions: [0.5, 0.75, 1, 1.5, 2, 2.5, 3],
+      colorFormats: {
+        pdf_standard: ['RGB'],
+        pdf_print: ['RGB', 'CMYK']
+      },
       detailPageDownloadOptions: [
         { value: 'whole', label: this.$t('NN0347') as string },
         { value: 'splice', label: this.$t('NN0348') as string }
@@ -220,9 +250,9 @@ export default Vue.extend({
       },
       typeOptions: [
         { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
-        { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` }
-        // { value: 'pdf_stardand', name: 'PDF 標準', desc: '檔案大小：小 - 適合多頁文件' }
-        // { id: 'pdf_print', name: 'PDF 列印', desc: '檔案大小：高 - 適合多頁文件' },
+        { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` },
+        { value: 'pdf_standard', name: 'PDF 標準', desc: '檔案大小：小 - 適合電子數位' },
+        { value: 'pdf_print', name: 'PDF 列印', desc: '檔案大小：高 - 適合紙本列印' }
         // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
         // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
         // { id: 'gif', name: 'GIF', desc: '短片' }
@@ -400,12 +430,16 @@ export default Vue.extend({
       } = this
       this.handleSubmissionInfo()
 
-      const fileInfo = {
+      const fileInfo = Object.assign({}, {
         exportId,
         teamId: '',
-        format: selectedTypeVal,
+        format: selectedTypeVal.includes('pdf') ? 'pdf' : selectedTypeVal,
         ...selected
-      }
+      }, selectedTypeVal.includes('pdf') && {
+        pdfQuality: selectedTypeVal === 'pdf_standard' ? 0
+          : selectedTypeVal === 'pdf_print' ? 1
+            : undefined
+      }) as IDownloadServiceParams
 
       if (this.isDetailPage) {
         this.selectedDetailPage.option === 'whole' && (fileInfo.merge = 1)
@@ -511,6 +545,16 @@ export default Vue.extend({
   }
   &__size-scale {
     width: 65px;
+  }
+  &__color-format {
+    width: 65px;
+    &.fixed {
+      width: auto;
+      margin-left: 8px;
+      padding: 0px 8px;
+      border: 1px solid setColor(gray-4);
+      border-radius: 4px;
+    }
   }
   &__progress {
     width: 100%;

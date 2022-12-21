@@ -7,15 +7,23 @@ class DownloadUtil {
   private fileAttrs = {
     jpg: {
       scale: 1,
-      quality: 90
+      quality: 90,
+      bleed: 0
     },
     png: {
       scale: 1,
-      omitBackground: 0
+      omitBackground: 0,
+      bleed: 0
     },
-    pdf_standard: {},
+    pdf_standard: {
+      outline: 1,
+      cmyk: 0
+    },
     pdf_print: {
-      mark: false
+      mark: 0,
+      bleed: 1,
+      outline: 1,
+      cmyk: 0
     },
     svg: {
       omitBackground: 0

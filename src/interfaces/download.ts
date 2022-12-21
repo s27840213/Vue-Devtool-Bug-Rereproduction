@@ -2,7 +2,10 @@ export interface IDownloadTypeAttrs {
   scale?: number
   quality?: number
   omitBackground?: 0 | 1
-  mark?: boolean
+  mark?: 0 | 1,
+  bleed?: 0 | 1,
+  outline?: 0 | 1,
+  cmyk?: 0 | 1
 }
 
 export interface ITypeOption {
@@ -23,6 +26,9 @@ export interface IDownloadServiceParams {
   pdfQuality?: 0 | 1
   merge?: 1 | undefined
   splitSize?: number
+  bleed?: 0 | 1,
+  outline?: 0 | 1,
+  cmyk?: 0 | 1
 }
 
 export interface IDownloadServiceResponse {
