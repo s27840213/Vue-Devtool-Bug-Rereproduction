@@ -60,6 +60,7 @@ div(class="overflow-container"
         :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
         :dataIndex="`${index}`"
         :dataPindex="`${pageIndex}`"
+        :snapUtils="snapUtils"
         :layerIndex="index"
         :pageIndex="pageIndex"
         :config="layer"
@@ -76,8 +77,10 @@ div(class="overflow-container"
         :uploadId="uploadId"
         :handleId="handleId"
         :uploadShadowImgs="uploadShadowImgs"
-        :isPagePreview="true"
-        :forceRender="forceRender")
+        :isPagePreview="isPagePreview"
+        :forceRender="forceRender"
+        :lazyLoadTarget="lazyLoadTarget"
+        v-on="$listeners")
     template(v-else)
       div(class='pages-loading')
 </template>
@@ -108,6 +111,7 @@ export default defineComponent({
     LazyLoad
   },
   props: {
+    snapUtils: Object,
     config: {
       type: Object as PropType<IPage>,
       required: true
@@ -132,13 +136,9 @@ export default defineComponent({
       default: false,
       type: Boolean
     },
-    layerLazyLoad: {
-      default: false,
-      type: Boolean
-    },
     lazyLoadTarget: {
       type: String,
-      default: '.mobile-editor__page-preview'
+      default: '.editor-view'
     }
   },
   data() {

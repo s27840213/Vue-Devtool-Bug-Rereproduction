@@ -11,7 +11,8 @@ div(class="nu-tmp"
     :style="subLayerStyles(layer)"
     :isSubLayer="true"
     :inTmp="true"
-    :primaryScale="this.config.styles.scale")
+    :primaryScale="this.config.styles.scale"
+    :primaryLayer="config")
 </template>
 
 <script lang="ts">

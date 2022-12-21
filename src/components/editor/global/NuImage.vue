@@ -86,6 +86,7 @@ import NuAdjustImage from './NuAdjustImage.vue'
 
 export default defineComponent({
   emits: [],
+  inheritAttrs: false,
   props: {
     config: {
       type: Object,
@@ -558,10 +559,12 @@ export default defineComponent({
       img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       img.crossOrigin = 'anoynous'
       img.onload = () => {
-        const isTransparent = imageShadowUtils.isTransparentBg(img)
-        imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
-        if (!isTransparent && this.config.styles.adjust.blur > 0) {
-          this.$forceUpdate()
+        if (!this.hasDestroyed) {
+          const isTransparent = imageShadowUtils.isTransparentBg(img)
+          imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
+          if (!isTransparent && this.config.styles.adjust.blur > 0) {
+            this.$forceUpdate()
+          }
         }
       }
     },
@@ -1102,7 +1105,11 @@ export default defineComponent({
       if (!this.shadow() || !this.shadow().srcObj) {
         return ''
       }
-      return ImageUtils.getSrc(this.shadow().srcObj, ImageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension))
+      const src = ImageUtils.getSrc(this.shadow().srcObj, ImageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension))
+      if (this.$route.name === 'Preview') {
+        return ImageUtils.appendCompQueryForVivipic(src)
+      }
+      return src
     },
     id(): ILayerIdentifier {
       return {
@@ -1128,7 +1135,10 @@ export default defineComponent({
   align-items: center;
 
   &__picture {
+    touch-action: none;
     object-fit: cover;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
     position: absolute;
     top: 0px;
     left: 0px;
@@ -1137,6 +1147,9 @@ export default defineComponent({
   }
 
   &__picture-shadow {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
     position: absolute;
     top: 0px;
     left: 0px;

@@ -8,6 +8,7 @@ div(class="nu-group"
     :subLayerIndex="index"
     :contentScaleRatio="contentScaleRatio"
     :config="layer"
+    :primaryLayer="config"
     :isSubLayer="true")
 </template>
 

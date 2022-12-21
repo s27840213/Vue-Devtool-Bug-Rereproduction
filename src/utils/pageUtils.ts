@@ -1,7 +1,7 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import { IPage, IPageState } from '@/interfaces/page'
 import store from '@/store'
 import Vue, { nextTick } from 'vue'
 import designUtils from './designUtils'
@@ -13,6 +13,7 @@ import resizeUtils from './resizeUtils'
 import { throttle } from 'lodash'
 import groupUtils from './groupUtils'
 import { LayerType } from '@/store/types'
+import SnapUtils from './snapUtils'
 
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -21,6 +22,7 @@ class PageUtils {
   get inBgRemoveMode(): boolean { return store.getters['bgRemove/getInBgRemoveMode'] }
   get autoRemoveResult(): IBgRemoveInfo { return store.getters['bgRemove/getAutoRemoveResult'] }
   get getPage(): (pageIndex: number) => IPage { return store.getters.getPage }
+  get getPageState(): (pageIndex: number) => IPageState { return store.getters.getPageState }
   get getPages(): Array<IPage> { return store.getters.getPages }
   get pageNum(): number { return this.getPages.length }
   get getPageSize(): (pageIndex: number) => { width: number, height: number } { return store.getters.getPageSize }
@@ -101,6 +103,7 @@ class PageUtils {
     const defaultPage: IPage = {
       width: 1080,
       height: 1080,
+      // snapUtils: new SnapUtils(-1),
       backgroundColor: '#ffffff',
       backgroundImage: {
         config: layerFactary.newImage({
@@ -132,6 +135,7 @@ class PageUtils {
       },
       isAutoResizeNeeded: false
     }
+    // pageData.snapUtils && delete pageData.snapUtils
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))
   }
 

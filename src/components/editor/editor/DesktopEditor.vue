@@ -9,7 +9,7 @@ div(class="desktop-editor")
         div(class="content__editor")
           div(v-if="!inBgRemoveMode" class="header-container")
             editor-header
-          div(v-if="isAdmin" class="admin-options")
+          div(v-if="isAdmin && enableAdminView" class="admin-options")
             div(class="admin-options__sticky-container"
                 :style="stickyTopPos")
               div(class="flex flex-column mr-10")
@@ -33,8 +33,8 @@ div(class="desktop-editor")
         function-panel(@toggleColorPanel="toggleColorPanel")
         transition(name="panel-up")
           color-slips(v-if="isColorPanelOpen" mode="FunctionPanel"
-            class="content__panel__color-panel"
-            @toggleColorPanel="toggleColorPanel")
+              class="content__panel__color-panel"
+              @toggleColorPanel="toggleColorPanel")
       div(v-if="isShowPagePreview" class="content__pages")
         page-preview
   tour-guide(v-if="showEditorGuide")
@@ -140,7 +140,8 @@ export default defineComponent({
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      enableComponentLog: 'getEnalbleComponentLog'
+      enableComponentLog: 'getEnalbleComponentLog',
+      enableAdminView: 'user/getEnableAdminView'
     }),
     ...mapGetters('user', {
       token: 'getToken',

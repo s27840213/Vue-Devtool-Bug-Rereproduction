@@ -29,7 +29,6 @@ import networkUtils from './networkUtils'
 import _ from 'lodash'
 import editorUtils from './editorUtils'
 import designApis from '@/apis/design'
-
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
   UPDATE_DB,
@@ -562,7 +561,7 @@ class UploadUtils {
     }
   }
 
-  async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
+  async uploadDesign(putAssetDesignType?: PutAssetDesignType, params?: { clonedPages?: Array<IPage> }) {
     const typeMap = ['UPDATE_DB', 'UPDATE_PREV', 'UPDATE_BOTH']
     let type = router.currentRoute.value.query.type
     let designId = router.currentRoute.value.query.design_id
@@ -593,7 +592,9 @@ class UploadUtils {
     }
 
     store.commit('SET_assetId', assetId)
-    const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
+    const { clonedPages } = params || {}
+    const pages = clonedPages ?? generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
+    // const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
 
     logUtils.setLog(`Upload Design:
       Type: ${putAssetDesignType ? typeMap[putAssetDesignType] : 'UPLOAD JSON'}
@@ -602,7 +603,7 @@ class UploadUtils {
       PageNum: ${pages.length}`)
 
     const pagesJSON = pages.map((page: IPage) => {
-      const newPage = this.default(page)
+      const newPage = this.default(page, false)
       for (const [i, layer] of newPage.layers.entries()) {
         if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
           newPage.layers[i] = this.layerInfoFilter(layer)
@@ -1049,8 +1050,8 @@ class UploadUtils {
     }
   }
 
-  private default(page: any): IPage {
-    page = generalUtils.deepCopy(page)
+  private default(page: any, deepCopy = true): IPage {
+    page = deepCopy ? generalUtils.deepCopy(page) : page
     const basicDefault = (layer: any) => {
       layer.moved = false
       layer.shown = false
@@ -1515,7 +1516,13 @@ class UploadUtils {
         Url: ${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
 
       // this.resetControlStates(pagesJSON)
-      const blob = new Blob([JSON.stringify(this.getPageJson(json))], { type: 'application/json' })
+      const pagesJSON = this.getPageJson(json)
+      const resultJSON = {
+        pages: pagesJSON,
+        groupId: store.state.groupId,
+        groupType: store.state.groupType
+      }
+      const blob = new Blob([JSON.stringify(resultJSON)], { type: 'application/json' })
       if (formData.has('file')) {
         formData.set('file', blob)
       } else {

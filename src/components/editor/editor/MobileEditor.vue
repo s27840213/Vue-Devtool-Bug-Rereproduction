@@ -51,6 +51,7 @@ import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import testUtils from '@/utils/testUtils'
 
 export default defineComponent({
   emits: [],

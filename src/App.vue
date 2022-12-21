@@ -4,36 +4,38 @@ div(id="app" :style="appStyles()")
   link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
   link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
   link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
+  //- div(class="coordinate" ref="coordinate")
+  //-   div(class="coordinate__val coordinate__width")
+  //-     span {{coordinateWidth}}px
+  //-   div(class="coordinate__val coordinate__height")
+  //-     span {{coordinateHeight}}px
   router-view
-  div 12345678
   div(class="popup-area")
     popup
     res-info(v-show="currSelectedResInfo.type"
       :info="currSelectedResInfo"
-      @blur="setCurrSelectedResInfo()"
+      @blur.native="setCurrSelectedResInfo()"
       tabindex="0")
-  div(v-if="isAdmin && !inScreenshotPreview" class="fps")
-    span FPS: {{fps}}
-    span {{` JS-Heap-Size: ${jsHeapSize / Math.pow(1000, 2)} MB`}}
+  fps(v-if="isAdmin && !inScreenshotPreview && enableAdminView")
   div(class="modal-container"
       v-if="isModalOpen")
     modal-card
-  //- notifications(group="copy"
-  //-   position="top center"
-  //-   width="300px"
-  //-   :max="2"
-  //-   :duration="2000")
-  //-   template(v-slot:body="{ item }")
-  //-     div(class="notification copy"
-  //-       v-html="item.text")
-  //- notifications(group="error"
-  //-   position="top center"
-  //-   width="300px"
-  //-   :max="1"
-  //-   :duration="5000")
-  //-   template(v-slot:body="{ item }")
-  //-     div(class="notification error"
-  //-       v-html="item.text")
+  notifications(group="copy"
+    position="top center"
+    width="300px"
+    :max="2"
+    :duration="2000")
+    template(v-slot:body="{ item }")
+      div(class="notification copy"
+        v-html="item.text")
+  notifications(group="error"
+    position="top center"
+    width="300px"
+    :max="1"
+    :duration="5000")
+    template(v-slot:body="{ item }")
+      div(class="notification error"
+        v-html="item.text")
 </template>
 
 <script lang="ts">
@@ -44,6 +46,7 @@ import Popup from '@/components/popup/Popup.vue'
 import { Chrome } from 'vue-color'
 import ResInfo from '@/components/modal/ResInfo.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
+import Fps from '@/components/componentLog/Fps.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
@@ -54,7 +57,8 @@ export default defineComponent({
     Popup,
     'chrome-picker': Chrome,
     ResInfo,
-    ModalCard
+    ModalCard,
+    Fps
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -63,21 +67,11 @@ export default defineComponent({
     return {
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
-      coordinateHeight: 0,
-      fps: 0,
-      jsHeapSize: 0,
-      fpsInterval: 0,
-      fpsStarted: false
+      coordinateHeight: 0
     }
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
-    if (this.isAdmin) {
-      this.showFps()
-      this.fpsStarted = true
-    }
-
-    // document.dispatchEvent(new Event('render-event'))
   },
   beforeMount() {
     networkUtils.registerNetworkListener()
@@ -89,20 +83,17 @@ export default defineComponent({
     ...mapGetters({
       currSelectedResInfo: 'getCurrSelectedResInfo',
       isModalOpen: 'modal/getModalOpen',
-      inScreenshotPreview: 'getInScreenshotPreview'
+      inScreenshotPreview: 'getInScreenshotPreview',
+      enableAdminView: 'user/getEnableAdminView'
+    }),
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
     }),
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
     }),
     currLocale(): string {
       return localeUtils.currLocale()
-    }
-  },
-  watch: {
-    isAdmin(newVal) {
-      if (newVal && !this.inScreenshotPreview && !this.fpsStarted) {
-        this.showFps()
-      }
     }
   },
   methods: {
@@ -153,31 +144,6 @@ export default defineComponent({
         events: ['dblclick', 'click', 'contextmenu']
         // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
       }
-    },
-    showFps() {
-      const times: Array<number> = []
-      const T = 1000
-      const refreshLoop = () => {
-        window.requestAnimationFrame(() => {
-          const now = performance.now()
-          while (times.length > 0 && times[0] <= now - T) {
-            times.shift()
-          }
-          times.push(now)
-          this.fps = times.length
-          this.jsHeapSize = (performance as any).memory ? (performance as any).memory.usedJSHeapSize : -1
-          if (this.inScreenshotPreview) {
-            clearInterval(this.fpsInterval)
-            return
-          }
-          refreshLoop()
-        })
-      }
-      refreshLoop()
-      // output to console once per second
-      this.fpsInterval = setInterval(() => {
-        this.fps *= 2000 / T
-      }, T)
     }
   }
 })
@@ -265,15 +231,6 @@ export default defineComponent({
   &.error {
     background-color: setColor(red-2);
   }
-}
-
-.fps {
-  background: white;
-  padding: 2px;
-  position: absolute;
-  bottom: 60px;
-  right: 20px;
-  z-index: 1000;
 }
 // .vc-chrome-toggle-btn {
 //   display: none;

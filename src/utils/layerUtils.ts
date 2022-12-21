@@ -528,7 +528,7 @@ export default layerUtils
 
 export const DELETE_subLayer = function (state: IEditorState, layerInfo: ILayerInfo) {
   const { pageIndex, layerIndex, subLayerIdx } = layerInfo
-  const primaryL = state.pages[pageIndex].layers[layerIndex] as IGroup
+  const primaryL = state.pages[pageIndex].config.layers[layerIndex] as IGroup
   if (primaryL.type !== LayerType.group || typeof subLayerIdx === 'undefined' || subLayerIdx === -1) {
     return
   }
@@ -538,7 +538,7 @@ export const DELETE_subLayer = function (state: IEditorState, layerInfo: ILayerI
 export const ADD_subLayer = function (state: IEditorState, payload: { layerInfo: ILayerInfo, config: IImage | IShape | IText }) {
   const { layerInfo, config } = payload
   const { pageIndex, layerIndex, subLayerIdx } = layerInfo
-  const primaryL = state.pages[pageIndex].layers[layerIndex] as IGroup
+  const primaryL = state.pages[pageIndex].config.layers[layerIndex] as IGroup
   if (primaryL.type !== LayerType.group || typeof subLayerIdx === 'undefined' || subLayerIdx === -1) {
     return
   }

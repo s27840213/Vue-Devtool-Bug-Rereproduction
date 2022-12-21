@@ -507,7 +507,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     return {}
   },
   async updatePageFonts({ dispatch }, { pageIndex }: { pageIndex: number }) {
-    const { layers } = store.state.pages[pageIndex]
+    const { layers } = store.state.pages[pageIndex].config
     const fontToRequest = new Set<string>()
 
     for (const layer of layers) {
@@ -547,7 +547,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     }
   },
   async updatePageLogos({ dispatch }, { pageIndex }: { pageIndex: number }) {
-    const { layers, backgroundImage } = store.state.pages[pageIndex]
+    const { layers, backgroundImage } = store.state.pages[pageIndex].config
     const logoToRequest = new Set<string>()
 
     logoToRequest.add(isPrivate(backgroundImage.config.srcObj))

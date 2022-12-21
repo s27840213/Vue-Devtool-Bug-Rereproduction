@@ -22,6 +22,7 @@ div(class="snap-area"
 
 import { IPage } from '@/interfaces/page'
 import { ISnapline } from '@/interfaces/snap'
+import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import SnapUtils from '@/utils/snapUtils'

@@ -1,45 +1,44 @@
 <template lang="pug">
-div(class="nu-sub-controller"
-    :style="transformStyle")
+//- :style="transformStyle")
+div(class="nu-sub-controller")
   div(class="nu-sub-controller__wrapper" :style="positionStyles()")
-    div(class="nu-sub-controller__wrapper" :style="wrapperStyles()")
+    div(class="nu-sub-controller__wrapper" :style="wrapperStyles")
       div(class="nu-sub-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
-          :style="styles('')"
-          @dblclick="onDblClick($event)"
-          @dragenter="onDragEnter($event)"
-          @pointerdown="onPointerdown($event)")
-        //- @click.left.stop="onClickEvent($event)"
-        svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
-          :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
-          g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
-            :style="frameClipStyles()")
-        template(v-if="config.type === 'text' && config.active")
-          div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-            nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
-              :style="textBodyStyle()"
-              :pageIndex="pageIndex"
-              :layerIndex="primaryLayerIndex"
-              :subLayerIndex="layerIndex"
-              @keydown.37.stop
-              @keydown.38.stop
-              @keydown.39.stop
-              @keydown.40.stop
-              @keydown.ctrl.67.exact.stop.self
-              @keydown.meta.67.exact.stop.self
-              @keydown.ctrl.86.exact.stop.self
-              @keydown.meta.86.exact.stop.self
-              @keydown.ctrl.88.exact.stop.self
-              @keydown.meta.88.exact.stop.self
-              @keydown.ctrl.65.exact.stop.self
-              @keydown.meta.65.exact.stop.self
-              @keydown.ctrl.90.exact.stop.self
-              @keydown.meta.90.exact.stop.self
-              @keydown.ctrl.shift.90.exact.stop.self
-              @keydown.meta.shift.90.exact.stop.self
-              @update="handleTextChange"
-              @compositionend="handleTextCompositionEnd")
+          :style="styles")
+        //- @dblclick="onDblClick($event)"
+        //- @dragenter="onDragEnter($event)"
+        //- @pointerdown="onPointerdown($event)")
+        //- svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
+        //-   :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
+        //-   g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
+        //-     :style="frameClipStyles()")
+        //- template(v-if="config.type === 'text' && config.active")
+        //-   div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
+        //-     nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
+        //-       :style="textBodyStyle()"
+        //-       :pageIndex="pageIndex"
+        //-       :layerIndex="primaryLayerIndex"
+        //-       :subLayerIndex="layerIndex"
+        //-       @keydown.native.37.stop
+        //-       @keydown.native.38.stop
+        //-       @keydown.native.39.stop
+        //-       @keydown.native.40.stop
+        //-       @keydown.native.ctrl.67.exact.stop.self
+        //-       @keydown.native.meta.67.exact.stop.self
+        //-       @keydown.native.ctrl.86.exact.stop.self
+        //-       @keydown.native.meta.86.exact.stop.self
+        //-       @keydown.native.ctrl.88.exact.stop.self
+        //-       @keydown.native.meta.88.exact.stop.self
+        //-       @keydown.native.ctrl.65.exact.stop.self
+        //-       @keydown.native.meta.65.exact.stop.self
+        //-       @keydown.native.ctrl.90.exact.stop.self
+        //-       @keydown.native.meta.90.exact.stop.self
+        //-       @keydown.native.ctrl.shift.90.exact.stop.self
+        //-       @keydown.native.meta.shift.90.exact.stop.self
+        //-       @update="handleTextChange"
+        //-       @compositionend="handleTextCompositionEnd")
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
@@ -47,7 +46,8 @@ import { mapState, mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IText, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
+import { IControlPoints } from '@/interfaces/controller'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
@@ -57,13 +57,13 @@ import GeneralUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
-import { FunctionPanelType, LayerType, PopupSliderEventType } from '@/store/types'
+import { FunctionPanelType, ILayerInfo, LayerType, PopupSliderEventType } from '@/store/types'
 import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import DragUtils from '@/utils/dragUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import imageUtils from '@/utils/imageUtils'
-import formatUtils from '@/utils/formatUtils'
+import SubCtrlUtils from '@/utils/subControllerUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import colorUtils from '@/utils/colorUtils'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
@@ -119,6 +119,7 @@ export default defineComponent({
     return {
       MappingUtils,
       FrameUtils,
+      subLayerCtrlUtils: null as unknown as SubCtrlUtils,
       ShortcutUtils,
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
@@ -139,6 +140,34 @@ export default defineComponent({
   mounted() {
     const body = this.$refs.body as HTMLElement
     if (body) {
+      const props = this.$props
+      const layerInfo = { } as ILayerInfo
+      Object.defineProperty(layerInfo, 'pageIndex', {
+        get() {
+          return props.pageIndex
+        }
+      })
+      Object.defineProperty(layerInfo, 'layerIndex', {
+        get() {
+          return props.primaryLayerIndex
+        }
+      })
+      Object.defineProperty(layerInfo, 'subLayerIdx', {
+        get() {
+          return props.layerIndex
+        }
+      })
+      const _config = { config: { active: false } } as { config: ILayer }
+      Object.defineProperty(_config, 'config', {
+        get() {
+          return props.config
+        }
+      })
+      this.subLayerCtrlUtils = new SubCtrlUtils({
+        layerInfo,
+        _config,
+        body
+      })
       /**
        * Prevent the context menu from showing up when right click or Ctrl + left click on controller
        */
@@ -166,6 +195,34 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
     }),
+    wrapperStyles(): any {
+      const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      return {
+        transformOrigin: '0px 0px',
+        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer as IFrame) ? scale : 1})`,
+        ...this.transformStyle,
+        outline: this.outlineStyles(),
+        ...this.sizeStyle(),
+        ...(this.type === 'frame' && (() => {
+          const { styles: { width, height }, clipPath } = this.config
+          if (this.config.isFrameImg) {
+            return { clipPath: `path("M0,0h${width}v${height}h${-width}z")` }
+          } else {
+            return { clipPath: clipPath !== undefined ? `path('${new SvgPath(clipPath).scale(this.contentScaleRatio).toString()}')` : clipPath }
+          }
+        })())
+      }
+    },
+    styles(): any {
+      const { isFrameImg } = this.config
+      const zindex = this.type === 'group' ? this.config?.active ? this.getPrimaryLayerSubLayerNum : this.primaryLayerZindex : this.config.styles.zindex
+
+      return {
+        ...this.sizeStyle(),
+        ...TextEffectUtils.convertTextEffect(this.config as IText),
+        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`
+      }
+    },
     isTextEditing(): boolean {
       return !this.isControlling && this.config?.active
     },
@@ -311,72 +368,9 @@ export default defineComponent({
       }
     },
     onPointerdown(e: PointerEvent) {
-      if (e.button !== 0) return
-      const body = this.$refs.body as HTMLElement
-      // body.addEventListener('touchstart', this.disableTouchEvent)
-      if (GeneralUtils.isTouchDevice()) {
-        if (!this.dblTapFlag && this.config?.active && this.config.type === 'image') {
-          const touchtime = Date.now()
-          const interval = 500
-          const doubleTap = (e: PointerEvent) => {
-            e.preventDefault()
-            if (Date.now() - touchtime < interval && !this.dblTapFlag) {
-              /**
-               * This is the dbl-click callback block
-               */
-              if (this.config.type === LayerType.image) {
-                switch (this.type) {
-                  case LayerType.group:
-                    LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { imgControl: true }, this.layerIndex)
-                    break
-                  case LayerType.frame:
-                    FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { imgControl: true })
-                    break
-                }
-                eventUtils.emit(PanelEvent.switchTab, 'crop')
-              }
-              this.dblTapFlag = true
-            }
-          }
-          body.addEventListener('pointerdown', doubleTap)
-          setTimeout(() => {
-            body.removeEventListener('pointerdown', doubleTap)
-            this.dblTapFlag = false
-          }, interval)
-        }
-        this.$emit('pointerDownSubController')
-      }
-
-      if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
-        groupUtils.deselect()
-        groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
-        LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
-        eventUtils.emit(PanelEvent.showPhotoShadow)
-      }
-
-      this.isPrimaryActive = this.primaryLayer.active
-      formatUtils.applyFormatIfCopied(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
-      formatUtils.clearCopiedFormat()
-      if (this.type === 'tmp') {
-        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
-          groupUtils.deselectTargetLayer(this.layerIndex)
-        }
-        return
-      }
-      if (this.config.type === 'text') {
-        this.posDiff.x = this.primaryLayer.styles.x
-        this.posDiff.y = this.primaryLayer.styles.y
-        if (this.config?.active && this.config.contentEditable) return
-        else if (!this.config?.active) {
-          this.isControlling = true
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
-          eventUtils.addPointerEvent('pointerup', this.onMouseup)
-          return
-        }
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: true })
-      }
-      eventUtils.addPointerEvent('pointerup', this.onMouseup)
-      this.isControlling = true
+      // const
+      // e.stopPropagation()
+      this.subLayerCtrlUtils.onPointerdown(e)
     },
     onMouseup(e: PointerEvent) {
       e.stopPropagation()
@@ -418,37 +412,6 @@ export default defineComponent({
         height: `${this.config.styles.height * this.contentScaleRatio}px`,
         'pointer-events': 'none',
         ...this.transformStyle
-      }
-    },
-    wrapperStyles() {
-      // const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
-      const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
-
-      return {
-        transformOrigin: '0px 0px',
-        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer as IFrame) ? scale : 1})`,
-        ...this.transformStyle,
-        outline: this.outlineStyles(),
-        ...this.sizeStyle(),
-        ...(this.type === 'frame' && (() => {
-          const { styles: { width, height }, clipPath } = this.config
-          if (this.config.isFrameImg) {
-            return { clipPath: `path("M0,0h${width}v${height}h${-width}z")` }
-          } else {
-            return { clipPath: clipPath !== undefined ? `path('${new SvgPath(clipPath).scale(this.contentScaleRatio).toString()}')` : clipPath }
-          }
-        })())
-      }
-    },
-    styles() {
-      const { isFrameImg } = this.config
-      const zindex = this.type === 'group' ? this.config?.active ? this.getPrimaryLayerSubLayerNum : this.primaryLayerZindex : this.config.styles.zindex
-
-      return {
-        ...this.sizeStyle(),
-        'pointer-events': 'initial',
-        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`,
-        ...TextEffectUtils.convertTextEffect(this.config as IText)
       }
     },
     sizeStyle() {
@@ -807,6 +770,8 @@ export default defineComponent({
     touch-action: none;
   }
   &__content {
+    pointer-events: none;
+
     touch-action: none;
     display: flex;
     justify-content: center;

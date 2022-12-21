@@ -18,29 +18,29 @@ div(class="nu-page"
       svg-icon(class="pointer btn-line-template mr-15"
         :pageIndex="pageIndex"
         :iconName="'line-template'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-        @click="openLineTemplatePopup()"
+        @click.native="openLineTemplatePopup()"
         v-hint="$t('NN0138')"
       )
       //- svg-icon(class="pointer mr-5"
       //-   :iconName="'caret-up'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
-      //-   @click="")
+      //-   @click.native="")
       //- svg-icon(class="pointer mr-15"
       //-   :iconName="'caret-down'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
-      //-   @click="")
+      //-   @click.native="")
       svg-icon(class="pointer mr-10"
         :iconName="'add-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-        @click="addPage()"
+        @click.native="addPage()"
         v-hint="$t('NN0139')"
       )
       svg-icon(class="pointer"
         :class="[{'mr-10': getPageCount > 1}]"
         :iconName="'duplicate-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-        @click="duplicatePage()"
+        @click.native="duplicatePage()"
         v-hint="$t('NN0140')"
       )
       svg-icon(class="pointer"
         v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-        @click="deletePage()"
+        @click.native="deletePage()"
         v-hint="$t('NN0141')"
       )
   div(v-if="isDetailPage && !isMobile" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
@@ -49,19 +49,19 @@ div(class="nu-page"
         span {{pageIndex + 1}}
       //- svg-icon(class="pointer mt-10"
       //-   :iconName="'caret-up'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
-      //-   @click="")
+      //-   @click.native="")
       //- svg-icon(class="pointer mt-10"
       //-   :iconName="'caret-down'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
-      //-   @click="")
+      //-   @click.native="")
       svg-icon(class="pointer mt-15"
         :iconName="'add-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
-        @click="addPage()")
+        @click.native="addPage()")
       svg-icon(class="pointer mt-10"
         :iconName="'duplicate-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
-        @click="duplicatePage()")
+        @click.native="duplicatePage()")
       svg-icon(class="pointer mt-10"
         v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
-        @click="deletePage()")
+        @click.native="deletePage()")
   template(v-if="!isOutOfBound || hasEditingText")
     div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
@@ -119,20 +119,18 @@ div(class="nu-page"
           :threshold="[0,1]")
         div(class="scale-container relative"
             :style="scaleContainerStyles")
-          page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio")
-          div(v-if="isAdmin" class="layer-num") Layer數量: {{config.layers.length}} (Admin User 才看得到）
-          div(class="page-control" :style="styles('control')")
-            template(v-for="(layer, index) in config.layers")
-              nu-controller(v-if="(currDraggingIndex === -1 || currDraggingIndex === index || layer.type === 'frame') && (layer.type !== 'image' || !layer.imgControl) "
-                data-identifier="controller"
-                :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
-                :layerIndex="index"
-                :pageIndex="pageIndex"
-                :config="layer"
-                :snapUtils="snapUtils"
-                :contentScaleRatio="contentScaleRatio"
-                @setFocus="setFocus()"
-                @isDragging="handleDraggingController")
+          page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+          div(v-if="isAdmin && enableAdminView" class="layer-num") Layer數量: {{config.layers.length}}
+          div(v-if="currSelectedIndex !== -1" class="page-control" :style="styles('control')")
+            nu-controller(v-if="currFocusPageIndex === pageIndex" data-identifier="controller"
+              :key="`controller-${currLayer.id}`"
+              :layerIndex="currSelectedIndex"
+              :pageIndex="pageIndex"
+              :config="currLayer"
+              :snapUtils="snapUtils"
+              :contentScaleRatio="contentScaleRatio"
+              @setFocus="setFocus()"
+              @isDragging="handleDraggingController")
           dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
     div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
       class="page-highlighter"
@@ -179,7 +177,7 @@ import DimBackground from '@/components/editor/page/DimBackground.vue'
 import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import rulerUtils from '@/utils/rulerUtils'
-import { IPage } from '@/interfaces/page'
+import { IPage, IPageState } from '@/interfaces/page'
 import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
 import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -190,12 +188,16 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
 
 export default defineComponent({
+  inheritAttrs: false,
   components: {
     NuBackgroundController,
     PageContent,
     DimBackground,
     SnapLineArea,
     LazyLoad
+  },
+  created() {
+    this.pageState.modules.snapUtils.pageIndex = this.pageIndex
   },
   data() {
     return {
@@ -217,7 +219,7 @@ export default defineComponent({
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
       coordinateHeight: 0,
-      snapUtils: new SnapUtils(this.pageIndex),
+      // snapUtils: new SnapUtils(this.pageIndex),
       closestSnaplines: {
         v: [] as Array<number>,
         h: [] as Array<number>
@@ -228,8 +230,8 @@ export default defineComponent({
     }
   },
   props: {
-    config: {
-      type: Object as PropType<IPage>,
+    pageState: {
+      type: Object as PropType<IPageState>,
       required: true
     },
     pageIndex: {
@@ -259,6 +261,9 @@ export default defineComponent({
     })
   },
   watch: {
+    pageIndex(val) {
+      this.pageState.modules.snapUtils.pageIndex = val
+    },
     isOutOfBound(val) {
       if (val && this.currFunctionPanelType === FunctionPanelType.photoShadow && layerUtils.pageIndex === this.pageIndex) {
         GroupUtils.deselect()
@@ -297,57 +302,26 @@ export default defineComponent({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
       contentScaleRatio: 'getContentScaleRatio',
-      isAdmin: 'user/isAdmin'
+      isAdmin: 'user/isAdmin',
+      enableAdminView: 'user/getEnableAdminView'
     }),
+    config(): IPage {
+      return this.pageState.config
+    },
     scaleContainerStyles(): { [index: string]: string } {
       return {
         // transform: `scale(${1})`
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
         transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`,
-        willChange: this.isScaling ? 'transform' : 'none'
+        willChange: this.isScaling ? 'transform' : ''
       }
     },
-    getCurrLayer(): ILayer {
-      return generalUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
+    snapUtils(): SnapUtils {
+      return this.pageState.modules.snapUtils
     },
-    getCurrSubSelectedLayerShown(): IImage | undefined {
-      const layer = this.getCurrLayer
-      if (layer.type === 'group') {
-        const subLayer = generalUtils.deepCopy((this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]) as IImage
-        const scale = subLayer.styles.scale
-        subLayer.styles.scale = 1
-        subLayer.styles.x *= layer.styles.scale
-        subLayer.styles.y *= layer.styles.scale
-        const mappedLayer = GroupUtils
-          .mapLayersToPage([subLayer], this.getCurrLayer as ITmp)[0] as IImage
-        mappedLayer.styles.scale = scale
-        return Object.assign(mappedLayer, { forRender: true, pointerEvents: 'none' })
-      } else if (layer.type === 'frame') {
-        if (frameUtils.isImageFrame(layer as IFrame)) {
-          const image = generalUtils.deepCopy((layer as IFrame).clips[0]) as IImage
-          image.styles.x = layer.styles.x
-          image.styles.y = layer.styles.y
-          image.styles.scale = 1
-          // image.styles.imgWidth *= layer.styles.scale
-          // image.styles.imgHeight *= layer.styles.scale
-          return Object.assign(image, { forRender: true })
-        }
-        const primaryLayer = this.getCurrLayer as IFrame
-        const image = generalUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage
-        image.styles.x *= primaryLayer.styles.scale
-        image.styles.y *= primaryLayer.styles.scale
-        if (primaryLayer.styles.horizontalFlip || primaryLayer.styles.verticalFlip) {
-          const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
-          const [baselineX, baselineY] = [-(imgWidth - width) / 2, -(imgHeight - height) / 2]
-          const [translateX, translateY] = [imgX - baselineX, imgY - baselineY]
-          image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
-          image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
-        }
-        Object.assign(image, { forRender: true })
-        return GroupUtils.mapLayersToPage([image], this.getCurrLayer as ITmp)[0] as IImage
-      }
-      return undefined
+    currLayer(): ILayer {
+      return layerUtils.getCurrLayer
     },
     getPageCount(): number {
       return this.pages.length

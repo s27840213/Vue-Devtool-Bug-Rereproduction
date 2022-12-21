@@ -92,7 +92,6 @@ export default defineComponent({
   },
   computed: {
     ...mapState('fontTag', ['tags', 'showMore']),
-    ...mapState(['isMoving']),
     ...mapState('imgControl', ['image']),
     ...mapGetters('imgControl', ['isBgImgCtrl']),
     ...mapGetters({

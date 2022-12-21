@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="editor-view"
     :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
-    :style="brushCursorStyles()"
+    :style="cursorStyles()"
     @pointerdown="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
     @wheel="handleWheel"
     @scroll.passive="!inBgRemoveMode ? scrollUpdate() : null"
@@ -12,16 +12,16 @@ div(class="editor-view"
   div(class="editor-view__grid")
     div(class="editor-view__canvas"
         ref="canvas"
-        @mousedown.left.self="outerClick($event)")
+        @pointerdown.left.self="outerClick($event)")
       template(v-if="!inBgRemoveMode")
-        nu-page(v-for="(page,index) in pages || []"
-                :ref="`page-${index}`"
-                :key="`page-${index}`"
-                :pageIndex="index"
-                :overflowContainer="editorView"
-                :style="{'z-index': `${getPageZIndex(index)}`}"
-                :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
-                @stepChange="handleStepChange")
+        nu-page(v-for="(page,index) in pagesState || []"
+                  :ref="`page-${index}`"
+                  :key="`page-${page.config.id}`"
+                  :pageIndex="index"
+                  :overflowContainer="editorView"
+                  :style="{'z-index': `${getPageZIndex(index)}`}"
+                  :pageState="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
+                  @stepChange="handleStepChange")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea"
           :style="{'z-index': `${pageNum+1}`}")
       bg-remove-area(v-else :editorViewCanvas="editorViewCanvas")
@@ -61,7 +61,7 @@ import StepsUtils from '@/utils/stepsUtils'
 import ControlUtils from '@/utils/controlUtils'
 import pageUtils from '@/utils/pageUtils'
 import RulerUtils from '@/utils/rulerUtils'
-import { IPage } from '@/interfaces/page'
+import { IPage, IPageState } from '@/interfaces/page'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import RulerHr from '@/components/editor/ruler/RulerHr.vue'
 import RulerVr from '@/components/editor/ruler/RulerVr.vue'
@@ -74,6 +74,9 @@ import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import eventUtils from '@/utils/eventUtils'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
 import generalUtils from '@/utils/generalUtils'
+import { globalQueue } from '@/utils/queueUtils'
+import layerUtils from '@/utils/layerUtils'
+import { MovingUtils } from '@/utils/movingUtils'
 import editorUtils from '@/utils/editorUtils'
 
 export default defineComponent({
@@ -223,9 +226,12 @@ export default defineComponent({
     ...mapState('user', [
       'role',
       'adminMode']),
+    ...mapState({
+      cursor: 'cursor'
+    }),
     ...mapGetters({
       groupId: 'getGroupId',
-      pages: 'getPages',
+      pagesState: 'getPagesState',
       getMiddlemostPageIndex: 'getMiddlemostPageIndex',
       geCurrActivePageIndex: 'getCurrActivePageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
@@ -245,6 +251,9 @@ export default defineComponent({
       isSettingScaleRatio: 'getIsSettingScaleRatio',
       enableComponentLog: 'getEnalbleComponentLog'
     }),
+    pages(): Array<IPage> {
+      return (this.pagesState as Array<IPageState>).map(p => p.config)
+    },
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
       let res = false
@@ -295,15 +304,16 @@ export default defineComponent({
         'getRecently'
       ]
     ),
-    brushCursorStyles() {
-      return this.hasCopiedFormat ? { cursor: `url(${'src/assets/img/svg/brush-paste-resized.svg'}) 2 2, pointer` } : {}
+    cursorStyles() {
+      const { cursor } = this
+      return cursor ? { cursor } : {}
     },
     setAdminMode() {
       this._setAdminMode(!this.adminMode)
     },
     outerClick(e: MouseEvent) {
-      if (!this.inBgRemoveMode) {
-        // !this.isHandleShadow && GroupUtils.deselect()
+      if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
+        !this.isHandleShadow && GroupUtils.deselect()
         GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
         pageUtils.setBackgroundImageControlDefault()
@@ -314,6 +324,21 @@ export default defineComponent({
       }
     },
     selectStart(e: MouseEvent) {
+      if (layerUtils.layerIndex !== -1) {
+        /**
+         * when the user click the control-region outsize the page,
+         * the moving logic should be applied to the EditorView.
+         */
+        if (ControlUtils.isClickOnController(e)) {
+          const movingUtils = new MovingUtils({
+            _config: { config: layerUtils.getCurrLayer },
+            snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+            body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+          })
+          movingUtils.moveStart(e)
+          return
+        }
+      }
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()
       }
@@ -408,7 +433,6 @@ export default defineComponent({
           }
         })
       }
-
       if (layerIndexs.length > 0) {
         GroupUtils.select(pageUtils.currFocusPageIndex, layerIndexs)
       }

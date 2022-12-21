@@ -67,7 +67,8 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      isAdmin: 'user/isAdmin'
+      isAdmin: 'user/isAdmin',
+      enableAdminView: 'user/getEnableAdminView'
     }),
     ...mapState('objects', {
       categories: 'categories',
@@ -80,7 +81,7 @@ export default defineComponent({
       'adminMode'
     ]),
     inAdminMode(): boolean {
-      return this.isAdmin && this.adminMode
+      return this.isAdmin && this.adminMode && this.enableAdminView
     },
     keywordLabel():string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword

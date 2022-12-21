@@ -28,7 +28,7 @@ div(class="page-setting")
         keep-alive
           page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)" ref="pageSizeSelector")
   div(class="page-setting__footer")
-  div(v-if="inAdminMode"
+  div(v-if="inAdminMode && enableAdminView"
     class="template-information")
     div(class="template-information__divider pb-10")
     btn(:type="'primary-sm'" class="rounded my-5"
@@ -329,7 +329,8 @@ export default defineComponent({
     ...mapGetters({
       getPage: 'getPage',
       token: 'user/getToken',
-      groupId: 'getGroupId'
+      groupId: 'getGroupId',
+      enableAdminView: 'user/getEnableAdminView'
     }),
     currentPageWidth(): number {
       return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.width ?? 0)

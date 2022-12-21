@@ -10,7 +10,7 @@ div(class="panel-template" ref="panel")
       @click="handleClosePrompt")
   //- Group template UI
   panel-group-template(v-if="currentGroup"
-    :showId="inAdminMode"
+    :showId="inAdminMode && enableAdminView"
     :groupItem="currentGroup"
     @close="currentGroup = null")
   //- Search bar and themes
@@ -50,7 +50,7 @@ div(class="panel-template" ref="panel")
         template(v-slot:preview="{ item }")
           component(class="panel-template__item"
             :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
-            :showId="inAdminMode"
+            :showId="inAdminMode && enableAdminView"
             :item="item"
             @clickGroupItem="handleShowGroup")
     template(v-slot:category-template-item="{ list, title }")
@@ -79,7 +79,7 @@ div(class="panel-template" ref="panel")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { mapActions, mapState, mapMutations } from 'vuex'
+import { mapActions, mapState, mapMutations, mapGetters } from 'vuex'
 import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
@@ -151,6 +151,9 @@ export default defineComponent({
     }),
     ...mapState('user', ['userId', 'role', 'adminMode']),
     ...mapState(['themes']),
+    ...mapGetters({
+      enableAdminView: 'user/getEnableAdminView'
+    }),
     keywordLabel():string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },

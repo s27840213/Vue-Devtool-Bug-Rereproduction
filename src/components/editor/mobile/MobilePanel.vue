@@ -37,9 +37,9 @@ div(class="mobile-panel"
         div(class="mobile-panel__btn-click-zone"
           @pointerdown="rightButtonAction"
           @touchstart="disableTouchEvent")
-    tabs(v-if="innerTabs.label" class="mobile-panel__inner-tab" theme="light"
-        :tabs="innerTabs.label" @switchTab="switchInnerTab")
   div(class="mobile-panel__bottom-section")
+    tabs(v-if="innerTabs.label" theme="light"
+        :tabs="innerTabs.label" @switchTab="switchInnerTab")
     keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
       //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
       component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
@@ -645,10 +645,6 @@ export default defineComponent({
     overflow-y: scroll;
     overflow-x: hidden;
     @include no-scrollbar;
-  }
-
-  &__inner-tab {
-    margin: 15px 0 14px 0;
   }
 
   &__title {

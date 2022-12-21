@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="editor-view"
+div(class="editor-view"  v-touch
     :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
     :style="editorViewStyle"
     @wheel="handleWheel"
@@ -14,10 +14,11 @@ div(class="editor-view"
         @swipeup="swipeUpHandler"
         @swipedown="swipeDownHandler"
         :style="canvasStyle")
-      div(v-for="(page,index) in pages"
+      div(v-for="(page,index) in pagesState"
           :key="`page-${index}`"
           class="editor-view__card"
           :style="cardStyle"
+          @pointerdown="selectStart"
           @pointerdown.self.prevent="outerClick($event)"
           ref="card")
         nu-page(
@@ -25,7 +26,7 @@ div(class="editor-view"
           :pageIndex="index"
           :overflowContainer="editorView"
           :style="pageStyle(index)"
-          :config="page"
+          :pageState="page"
           :index="index"
           :inScaling="isScaling"
           :isAnyBackgroundImageControl="isBackgroundImageControl")
@@ -38,7 +39,7 @@ import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import ControlUtils from '@/utils/controlUtils'
 import pageUtils from '@/utils/pageUtils'
-import { IPage } from '@/interfaces/page'
+import { IPage, IPageState } from '@/interfaces/page'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import imageUtils from '@/utils/imageUtils'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
@@ -49,6 +50,7 @@ import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import layerUtils from '@/utils/layerUtils'
 import editorUtils from '@/utils/editorUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
+import { MovingUtils } from '@/utils/movingUtils'
 
 export default defineComponent({
   emits: [],
@@ -115,9 +117,6 @@ export default defineComponent({
     })
     this.getRecently()
 
-    this.editorViewAt = new AnyTouch(this.$refs.editorView as HTMLElement, { preventDefault: false })
-    this.canvasAt = new AnyTouch(this.$refs.canvas as HTMLElement, { preventDefault: false })
-
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
     this.editorCanvas = this.$refs.canvas as HTMLElement
@@ -181,7 +180,7 @@ export default defineComponent({
     }),
     ...mapGetters({
       groupId: 'getGroupId',
-      pages: 'getPages',
+      pagesState: 'getPagesState',
       getMiddlemostPageIndex: 'getMiddlemostPageIndex',
       geCurrActivePageIndex: 'getCurrActivePageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
@@ -197,6 +196,9 @@ export default defineComponent({
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       groupType: 'getGroupType'
     }),
+    pages(): Array<IPage> {
+      return this.pagesState.map((p: IPageState) => p.config)
+    },
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
       let res = false
@@ -238,7 +240,8 @@ export default defineComponent({
         height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
         padding: this.isDetailPage ? '0px' : '40px',
         flexDirection: this.isDetailPage ? 'column' : 'initial',
-        overflow: this.isDetailPage ? 'initial' : 'scroll',
+        'overflow-y': this.isDetailPage ? 'initial' : 'scroll',
+        // overflow: this.isDetailPage ? 'initial' : 'scroll',
         minHeight: this.isDetailPage ? 'none' : '100%'
       }
     },
@@ -275,7 +278,7 @@ export default defineComponent({
       this._setAdminMode(!this.adminMode)
     },
     outerClick(e: MouseEvent) {
-      if (!this.inBgRemoveMode) {
+      if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         editorUtils.setInBgSettingMode(false)
         GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
@@ -284,6 +287,22 @@ export default defineComponent({
         pageUtils.findCentralPageIndexInfo()
         if (imageUtils.isImgControl()) {
           ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+        }
+      }
+    },
+    selectStart(e: MouseEvent) {
+      if (layerUtils.layerIndex !== -1) {
+        /**
+         * when the user click the control-region outsize the page,
+         * the moving logic should be applied to the EditorView.
+         */
+        if (ControlUtils.isClickOnController(e)) {
+          const movingUtils = new MovingUtils({
+            _config: { config: layerUtils.getCurrConfig },
+            snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+            body: document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
+          })
+          movingUtils.moveStart(e)
         }
       }
     },
@@ -467,6 +486,7 @@ $REULER_SIZE: 20px;
 
   &__card {
     width: 100%;
+    touch-action: none;
     box-sizing: border-box;
     display: flex;
     align-items: center;

@@ -63,6 +63,7 @@ class EventQueue {
       targetIds.forEach((id) => {
         this.eventMap.delete(id)
       })
+
       this.handleAsyncTask()
     })
   }
