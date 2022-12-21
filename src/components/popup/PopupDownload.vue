@@ -51,18 +51,18 @@
             min="1"
             v-ratio-change
             type="range")
-        div(v-if="'mark' in selected")
+        div(v-if="'trim' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
             :label="'裁切標記'"
-            :default-checked="!!selected.mark"
-            @change="({ checked }) => {handleUpdate('mark', checked ? 1 : 0); if('bleed' in selected && checked && selected.bleed === 0) handleUpdate('bleed', 1)}")
+            :default-checked="!!selected.trim"
+            @change="({ checked }) => {handleUpdate('trim', checked ? 1 : 0); if('bleed' in selected && checked && selected.bleed === 0) handleUpdate('bleed', 1)}")
         div(v-if="'bleed' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
             :label="'出血'"
             :default-checked="!!selected.bleed"
-            @change="({ checked }) => {handleUpdate('bleed', checked ? 1 : 0); if('mark' in selected && !checked && selected.mark === 1) handleUpdate('mark', 0)}")
+            @change="({ checked }) => {handleUpdate('bleed', checked ? 1 : 0); if('trim' in selected && !checked && selected.trim === 1) handleUpdate('trim', 0)}")
         div(v-if="'outline' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
@@ -74,7 +74,7 @@
           span {{`色彩模式`}}
           dropdown(v-if="colorFormats[selectedTypeVal].length > 1" class="mx-5 popup-download__color-format"
             :options="colorFormats[selectedTypeVal]"
-            @select="option => handleUpdate('cmyk', option === 'CMYK')") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
+            @select="option => handleUpdate('cmyk', option === 'CMYK' ? 1 : 0)") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
           div(v-if="colorFormats[selectedTypeVal].length === 1" class="popup-download__color-format fixed")
             span(class="body-XS") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
         div(v-if="isDetailPage" class="mb-10 pt-5") {{ $t('NN0344') }}

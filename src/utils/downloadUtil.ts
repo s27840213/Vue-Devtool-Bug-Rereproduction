@@ -20,7 +20,7 @@ class DownloadUtil {
       cmyk: 0
     },
     pdf_print: {
-      mark: 0,
+      trim: 0,
       bleed: 1,
       outline: 1,
       cmyk: 0
