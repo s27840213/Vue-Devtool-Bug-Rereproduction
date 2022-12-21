@@ -110,17 +110,24 @@ module.exports = defineConfig({
       .loader('svg-sprite-loader')
       .options({ symbolId: '[name]' })
     /**
-     * 由於上面的代碼會讓 'src/assets/icon' 資料夾以外的svg全都不能用，
-     * 但並不是所有svg圖檔都要拿來當icon，故設定另外一個loader來處理其他svg
-     */
+         * 由於上面的代碼會讓 'src/assets/icon' 資料夾以外的svg全都不能用，
+         * 但並不是所有svg圖檔都要拿來當icon，故設定另外一個loader來處理其他svg
+         * 以下 API 已被棄用
+    */
+    // config.module
+    //     .rule('file-loader')
+    //     .test(/\.svg$/)
+    //     .exclude.add(resolve('src/assets/icon'))
+    //     .end()
+    //     .use('file-loader')
+    //     .loader('file-loader')
+
     config.module
-      .rule('file-loader')
-      .test(/\.svg$/)
+      .rule('image-assets')
+      .test(/\.(png|jpg|gif|svg|mp4)$/)
       .exclude.add(resolve('src/assets/icon'))
       .end()
-      .use('file-loader')
-      .loader('file-loader')
-
+      .type('asset/resource')
     // config.module
     //     .rule('babel-loader')
     //     .test(/\.js$/)
@@ -151,15 +158,15 @@ module.exports = defineConfig({
       })
 
     // if (process.env.CI && ['production', 'staging'].includes(process.env.NODE_ENV)) {
-    //   config.plugin('sentry')
-    //     .use(SentryWebpackPlugin, [{
-    //       authToken: process.env.SENTRY_AUTH_TOKEN,
-    //       release: process.env.VUE_APP_VERSION,
-    //       org: 'nuphoto',
-    //       project: 'vivipic',
-    //       include: './dist',
-    //       ignore: ['node_modules', 'vue.config.js']
-    //     }])
+    //     config.plugin('sentry')
+    //         .use(SentryWebpackPlugin, [{
+    //             authToken: process.env.SENTRY_AUTH_TOKEN,
+    //             release: process.env.VUE_APP_VERSION,
+    //             org: 'nuphoto',
+    //             project: 'vivipic',
+    //             include: './dist',
+    //             ignore: ['node_modules', 'vue.config.js']
+    //         }])
     // }
     if (process.env.BITBUCKET_BUILD_NUMBER) {
       config.plugin('define').tap(args => {
@@ -179,6 +186,7 @@ module.exports = defineConfig({
     }
 
     if (argv.PRERENDER) {
+      console.log('start prerender')
       // Tell Vue (CLI 3) to provide this file to Pre-SPA:
       config.plugin('html')
         .tap(args => {
@@ -191,14 +199,20 @@ module.exports = defineConfig({
           // Tell the Pre-SPA plugin not to use index.html as its template file.
           indexPath: path.join(__dirname, 'dist', 'app.html'),
           staticDir: path.join(__dirname, 'dist'),
-          routes: ['/', '/tw', '/us', '/jp', '/templates', '/tw/templates', '/us/templates', '/jp/templates', '/editor', '/pricing', '/brandkit'],
+          // routes: ['/', '/tw', '/us', '/jp', '/templates', '/tw/templates', '/us/templates', '/jp/templates', '/editor', '/pricing', '/brandkit'],
+          routes: ['/'],
+          minify: {
+            minifyCSS: true,
+            removeComments: true
+          },
           renderer: new Renderer({
             // The name of the property
             injectProperty: '__PRERENDER_INJECTED',
             // The values to have access to via `window.injectProperty` (the above property )
             inject: { PRERENDER: 1 },
-            renderAfterDocumentEvent: 'render-event',
-            headless: true
+            // renderAfterDocumentEvent: 'render-event',
+            headless: true,
+            renderAfterTime: 5000
           })
         }])
     }

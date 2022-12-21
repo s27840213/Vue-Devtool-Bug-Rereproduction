@@ -44,7 +44,7 @@ export default defineComponent({
   },
   methods: {
     handleNotFound(event: Event) {
-      this.fallbackSrc = 'src/assets/img/svg/image-preview.svg' // prevent infinite refetching when network disconneted
+      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addBackground() {
       if (this.locked) {

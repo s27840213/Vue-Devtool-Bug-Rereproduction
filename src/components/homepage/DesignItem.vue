@@ -38,7 +38,7 @@ export default defineComponent({
       imgWidth: 10,
       imgHeight: 10,
       previewCheckReady: false,
-      previewPlaceholder: 'src/assets/img/svg/loading-large.svg'
+      previewPlaceholder: require('@/assets/img/svg/loading-large.svg')
     }
   },
   directives: {

@@ -185,12 +185,12 @@ div(:layer-index="`${layerIndex}`"
           :style="`transform: scale(${100/scaleRatio * contentScaleRatio})`")
         svg-icon(class="control-point__rotater"
           :iconName="'rotate'" :iconWidth="`${20}px`"
-          :src="'src/assets/img/svg/rotate.svg'"
+          :src="require('@/assets/img/svg/rotate.svg')"
           :style='lineControlPointStyles()'
           @pointerdown.stop="lineRotateStart"
           @touchstart="lineRotateStart")
         img(class="control-point__mover"
-          :src="'src/assets/img/svg/move.svg'"
+          :src="require('@/assets/img/svg/move.svg')"
           :style='lineControlPointStyles()'
           @pointerdown="moveStart"
           @touchstart="disableTouchEvent")
@@ -200,7 +200,7 @@ div(:layer-index="`${layerIndex}`"
             :style="`transform: scale(${100/scaleRatio  * contentScaleRatio})`")
           svg-icon(class="control-point__rotater"
             :iconName="'rotate'" :iconWidth="`${20}px`"
-            :src="'src/assets/img/svg/rotate.svg'"
+            :src="require('@/assets/img/svg/rotate.svg')"
             :style='controlPointStyles()'
             @pointerdown.stop="rotateStart"
             @touchstart="disableTouchEvent")

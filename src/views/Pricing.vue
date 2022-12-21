@@ -6,7 +6,7 @@ div(class="pricing")
       span(class="text-H2 mb-20" v-html="$t('NN0505')")
       span(class="body-LG text-gray-2") {{$t('NN0506')}}
       img(v-for="cb in colorBlock" class="pricing-top__cb"
-          :src="'src/assets/img/svg/color-block/' + cb.name"
+          :src="require('@/assets/img/svg/color-block/' + cb.name)"
           :style="{'top': `${cb.top}px`, 'left': `${cb.left}px`}")
     div(class="pricing-plan")
       div(class="pricing-plan-left")

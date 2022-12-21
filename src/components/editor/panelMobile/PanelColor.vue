@@ -267,7 +267,7 @@ export default defineComponent({
           backgroundColor: origin,
           boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
         } : {
-          backgroundImage: `url(${'src/assets/img/jpg/multi-color.jpg'})`,
+          backgroundImage: `url(${require('@/assets/img/jpg/multi-color.jpg')})`,
           backgroundPosition: 'center center',
           backgroundSize: 'cover',
           boxShadow: '0 0 0 2px #808080, inset 0 0 0 1px #fff'

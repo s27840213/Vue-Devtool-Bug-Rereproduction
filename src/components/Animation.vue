@@ -5,7 +5,7 @@ div(class="animation")
     :style="lottieStyle" ref="lavContainer")
   video(v-if="isMp4"
     class="video"
-    :src="`src/assets/img/svg/homepage/${mp4FileName}`"
+    :src="require(`@/assets/img/svg/homepage/${mp4FileName}`)"
     :width="width"
     :height="height"
     type="video/mp4"
@@ -16,7 +16,7 @@ div(class="animation")
 import { defineComponent } from 'vue'
 import axios from 'axios'
 import lottie, { AnimationItem } from 'lottie-web'
-// :src="'src/assets/img/svg/homepage/tw/remover.mp4'"
+// :src="require('@/assets/img/svg/homepage/tw/remover.mp4')"
 
 export default defineComponent({
   props: {
@@ -100,7 +100,7 @@ export default defineComponent({
   methods: {
     async loadJsonData(path: string) {
       if (path.startsWith('@/')) {
-        return await `src/assets/img/svg/homepage/${this.mp4FileName}`
+        return await require(`@/assets/img/svg/homepage/${this.mp4FileName}`)
       } else {
         return await axios.get(path).then(response => {
           return response.data

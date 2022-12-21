@@ -93,12 +93,12 @@ app.use(VueRecyclerviewNew, vueColor)
 //   themes: tooltipUtils.themes
 // })
 
-app.use(VueGtm, {
-  id: 'GTM-T7LDWBP',
-  enabled: true,
-  // display console logs debugs or not (optional)
-  debug: false
-})
+// app.use(VueGtm, {
+//   id: 'GTM-T7LDWBP',
+//   enabled: true,
+//   // display console logs debugs or not (optional)
+//   debug: false
+// })
 
 app.component('RecycleScroller', RecycleScroller)
 
@@ -184,7 +184,6 @@ app.directive('header-border', {
   }
 })
 
-app.directive('press', longpress)
 // How to pass variable to unbind: https://github.com/vuejs/vue/issues/6385#issuecomment-323141918
 const anyTouchWeakMap = new WeakMap()
 app.directive('touch', {

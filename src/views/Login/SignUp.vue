@@ -4,7 +4,7 @@ div(style="position:relative;")
     div(v-if="currentPageIndex === 0"
       class="signup signup-p0")
       div
-        img(:src="'src/assets/img/svg/signup.svg'"
+        img(:src="require('@/assets/img/svg/signup.svg')"
           style="width: 180px; height: 133px;")
       div(class="text-center")
         span(class="text-blue-1 heading-5") {{$t('NN0300')}}
@@ -14,11 +14,11 @@ div(style="position:relative;")
       div
         btn(@click="onFacebookClicked()"
           :type="'icon-mid-body'")
-        img(:src="'src/assets/img/png/facebook.png'")
+        img(:src="require('@/assets/img/png/facebook.png')")
         span(class="body-2") {{$t('NN0303', {media:'Facebook'})}}
       div
         btn(@click="onGoogleClicked()" :type="'icon-mid-body'")
-        img(:src="'src/assets/img/png/google.png'")
+        img(:src="require('@/assets/img/png/google.png')")
         span(class="body-2") {{$t('NN0303', {media:'Google'})}}
       div
         btn(@click="onEmailClicked()" :type="'icon-mid-body text-white'") {{$t('NN0303', {media: $tc('NN0173', 2)})}}

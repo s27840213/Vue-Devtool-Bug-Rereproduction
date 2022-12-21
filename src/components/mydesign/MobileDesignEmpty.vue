@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="mobile-design-empty")
-    img(class="mobile-design-empty__img" :src="'src/assets/img/png/mydesign/empty-folder.png'")
+    img(class="mobile-design-empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
     span
       slot {{$t('NN0766')}}
     btn-new-design(v-slot="slotProps")

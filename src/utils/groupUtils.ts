@@ -163,6 +163,8 @@ class GroupUtils {
 
   select(pageIndex: number, layerIndexs: Array<number>) {
     // currSelectedIndex is smaller than 0 means there isn't any selected layer
+    console.log(pageIndex)
+    console.log(layerIndexs)
     if (this.currSelectedInfo.index < 0) {
       // When we only select one layer
       if (layerIndexs.length === 1) {
@@ -177,7 +179,7 @@ class GroupUtils {
       } else {
         // when we select multiple layer
         const layers = MappingUtils.mappingLayers(pageIndex, layerIndexs)
-          .filter(l => !l.locked)
+          .filter(l => !l?.locked)
         const tmpStyles = calcTmpProps(layers)
         const currSelectedLayers = this.mapLayersToTmp(layers, tmpStyles)
         const topIndex = Math.max(...layerIndexs)

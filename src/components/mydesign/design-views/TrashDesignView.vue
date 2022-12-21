@@ -10,7 +10,7 @@ div(class="trash-design-view")
               iconWidth="16px"
               iconColor="bu")
       transition(name="slide-fade-img")
-        img(v-if="isInfoOpen" class="trash-design-view__info__arrow" :src="'src/assets/img/svg/left-arrow.svg'")
+        img(v-if="isInfoOpen" class="trash-design-view__info__arrow" :src="require('@/assets/img/svg/left-arrow.svg')")
       transition(name="slide-fade-text")
         div(v-if="isInfoOpen" class="trash-design-view__info__text")
           span {{$t('NN0241')}}

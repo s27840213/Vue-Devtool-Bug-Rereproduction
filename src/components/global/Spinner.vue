@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="spinner popup-window")
   div
-    img(:src="'src/assets/img/gif/rocket-loading.gif'")
+    img(:src="require('@/assets/img/gif/rocket-loading.gif')")
     span {{textContent}}...
 </template>
 

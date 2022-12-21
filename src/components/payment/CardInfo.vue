@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="card")
-  img(:src="`src/assets/img/svg/card/${card.issuer}.svg`")
+  img(:src="require(`@/assets/img/svg/card/${card.issuer}.svg`)")
   span {{`**** ${card.last4}`}}
   span {{`Expires ${card.date}`}}
   svg-icon(v-if="canDelete" class="pointer" iconName="trash"

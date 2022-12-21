@@ -36,12 +36,12 @@ div(class="btnList" :style="BGstyle")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { defineComponent } from 'vue'
 import Nubtn from '@/components/global/Nubtn.vue'
 import Checkbox from '@/components/global/Checkbox.vue'
 import Options from '@/components/global/Options.vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'NubtnList',
   components: {
     Nubtn,
@@ -111,7 +111,7 @@ export default Vue.extend({
   },
   methods: {
     click() {
-      this.$notify({ group: 'copy', text: 'click!' })
+      // this.$notify({ group: 'copy', text: 'click!' })
     }
   }
 })

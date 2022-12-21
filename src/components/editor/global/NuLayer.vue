@@ -37,8 +37,7 @@ div
               :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
               :scaleRatio="scaleRatio"
               :isPagePreview="isPagePreview"
-              :forRender="forRender"
-              v-bind="$attrs")
+              :forRender="forRender")
         svg(class="clip-contour full-width" v-if="!forRender && config.active && config.type === 'image' && (config.isFrame && !config.isFrameImg)"
           :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
           g(v-html="frameClipFormatter(config.clipPath)"

@@ -29,8 +29,7 @@ export default defineComponent({
       type: Number
     },
     maxHeight: {
-      type: Number,
-      required: true
+      type: Number
     },
     minWidth: {
       type: Number

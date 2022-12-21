@@ -121,7 +121,7 @@ div(class="folder-design-view")
                 @menuAction="handleMenuAction"
                 @loadMore="handleLoadMore")
   div(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading" class="folder-design-view__empty")
-    img(class="folder-design-view__empty__img" :src="'src/assets/img/png/mydesign/empty-folder.png'")
+    img(class="folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
     span(class="folder-design-view__empty__text") {{$t('NN0239')}}
 </template>
 

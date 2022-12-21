@@ -242,7 +242,7 @@ const actions: ActionTree<ITextState, unknown> = {
 const getFontUrl = async (type: string, url: string, face: string, userId: string, assetId: string, ver = 0): Promise<string> => {
   let cssUrl
   let response
-  const isInPrevew = router.currentRoute.name === 'Preview'
+  const isInPrevew = router.currentRoute.value.name === 'Preview'
   switch (type) {
     case 'public':
       cssUrl = addPlatform(`https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`)

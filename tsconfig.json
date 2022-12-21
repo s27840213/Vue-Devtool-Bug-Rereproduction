@@ -30,7 +30,8 @@
       "esnext",
       "dom",
       "dom.iterable",
-      "scripthost"
+      "scripthost",
+      "webworker"
     ]
   },
   // "vueCompilerOptions": {
@@ -48,10 +49,10 @@
   ],
   "exclude": [
     "node_modules"
-  ],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    }
   ]
+  // "references": [
+  //   {
+  //     "path": "./tsconfig.node.json"
+  //   }
+  // ]
 }

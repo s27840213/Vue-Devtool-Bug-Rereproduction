@@ -30,9 +30,9 @@ div(ref="body"
               :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
               @update="handleUpdate"
               @search="handleSearch")
-    img(class="color-block vector-purple1" :src="'src/assets/img/svg/color-block/vector_purple1.svg'")
-    img(class="color-block oval-lightblue1 non-mobile-show" :src="'src/assets/img/svg/color-block/oval_lightblue1.svg'")
-    img(class="color-block oval-orange2 non-mobile-show" :src="'src/assets/img/svg/color-block/oval_orange2.svg'")
+    img(class="color-block vector-purple1" :src="require('@/assets/img/svg/color-block/vector_purple1.svg')")
+    img(class="color-block oval-lightblue1 non-mobile-show" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
+    img(class="color-block oval-orange2 non-mobile-show" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
   div(ref="mobileSearch" class="template-center__mobile-search__wrapper non-tab-show"
       :style="mobileSearchStyles()")
     div(class="template-center__mobile-search")
@@ -50,9 +50,9 @@ div(ref="body"
                 iconHeight="18.36px"
                 iconColor="white")
       transition(name="slide-up")
-        img(v-if="!mobileSnapToTop" class="color-block oval-lightblue1" :src="'src/assets/img/svg/color-block/oval_lightblue1.svg'")
+        img(v-if="!mobileSnapToTop" class="color-block oval-lightblue1" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
       transition(name="slide-up")
-        img(v-if="!mobileSnapToTop" class="color-block oval-orange2" :src="'src/assets/img/svg/color-block/oval_orange2.svg'")
+        img(v-if="!mobileSnapToTop" class="color-block oval-orange2" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
     div(class="template-center__filter non-tab-show"
         :style="{'max-height': isShowOptions ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions ? '1' : '0', 'pointer-events': isShowOptions ? 'initial' : 'none'}")
       hashtag-category-row(v-for="hashtag in hashtags"

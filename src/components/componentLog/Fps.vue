@@ -16,7 +16,7 @@ div(class="fps")
 <script lang="ts">
 import { Path, Point } from '@/utils/textBgUtils'
 import { filter, range } from 'lodash'
-import Vue from 'vue'
+import Vue, { defineComponent } from 'vue'
 
 class Valley {
   min: number
@@ -42,7 +42,7 @@ class Valley {
   }
 }
 
-export default Vue.extend({
+export default defineComponent({
   name: 'Fps',
   data() {
     return {

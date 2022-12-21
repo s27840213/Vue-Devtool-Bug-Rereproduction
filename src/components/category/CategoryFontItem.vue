@@ -118,7 +118,7 @@ export default defineComponent({
         })
         return
       }
-      this.fallbackSrc = 'src/assets/img/svg/image-preview.svg' // prevent infinite refetching when network disconneted
+      this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
       console.warn(this.item)
     },
     setFont() {

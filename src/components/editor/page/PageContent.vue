@@ -79,8 +79,7 @@ div(class="overflow-container"
         :uploadShadowImgs="uploadShadowImgs"
         :isPagePreview="isPagePreview"
         :forceRender="forceRender"
-        :lazyLoadTarget="lazyLoadTarget"
-        v-on="$listeners")
+        :lazyLoadTarget="lazyLoadTarget")
     template(v-else)
       div(class='pages-loading')
 </template>

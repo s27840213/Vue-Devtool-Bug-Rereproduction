@@ -2,7 +2,7 @@
 div(class="bill")
   div(class="bill__title") {{$t('NN0614')}}
   template(v-if="!historys.length")
-    img(:src="'src/assets/img/svg/pricing/E-payment.svg'")
+    img(:src="require('@/assets/img/svg/pricing/E-payment.svg')")
     p(class="text-H6") {{$t('NN0621')}}
   div(v-else class="bill-table")
     span {{$t('NN0615')}}
@@ -27,7 +27,7 @@ div(class="bill")
   div(v-if="historys.length" class="bill-invoice-wrapper")
     div(class="bill-invoice" id="bill-invoice")
       div(class="bill-invoice__title")
-        img(:src="'src/assets/img/jpg/logo.jpg'" style="height: 32px;")
+        img(:src="require('@/assets/img/jpg/logo.jpg')" style="height: 32px;")
         span {{'INVOICE'}}
       div {{`Invoice number: ${curInvoice.id}`}}
       div {{`Invoice date: ${curInvoice.date}`}}

@@ -18,7 +18,8 @@ import tiptapUtils from './tiptapUtils'
 
 export class MovingUtils {
   isControlling = false
-  private component = undefined as Vue | undefined
+  private component = undefined as any | undefined
+  // private component = undefined as Vue | undefined
   private eventTarget = null as unknown as HTMLElement
   private dblTabsFlag = false
   private _config = { config: null as unknown as ILayer }
@@ -71,7 +72,7 @@ export class MovingUtils {
     return false
   }
 
-  constructor({ _config, snapUtils, component, body, layerInfo }: { _config: { config: ILayer }, snapUtils: unknown, component?: Vue, body: HTMLElement, layerInfo?: ILayerInfo }) {
+  constructor({ _config, snapUtils, component, body, layerInfo }: { _config: { config: ILayer }, snapUtils: unknown, component?: any, body: HTMLElement, layerInfo?: ILayerInfo }) {
     this._config = _config
     this.snapUtils = snapUtils
     this.body = body
