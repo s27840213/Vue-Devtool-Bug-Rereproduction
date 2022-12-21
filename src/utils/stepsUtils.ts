@@ -152,14 +152,14 @@ class StepsUtils {
     return layer
   }
 
-  fillLoadingSize(layer: IText): IText {
+  async fillLoadingSize(layer: IText): Promise<IText> {
     const dimension = layer.styles.writingMode.includes('vertical') ? layer.styles.height : layer.styles.width
     const initSize = {
       width: layer.styles.width,
       height: layer.styles.height,
       widthLimit: layer.widthLimit === -1 ? -1 : dimension
     }
-    layer.widthLimit = textUtils.autoResize(layer, initSize)
+    layer.widthLimit = await textUtils.autoResize(layer, initSize)
     return layer
   }
 
@@ -172,7 +172,7 @@ class StepsUtils {
         return await this.refetchForShape(typedLayer)
       case 'text':
         typedLayer = layer as IText
-        return this.fillLoadingSize(typedLayer)
+        return await this.fillLoadingSize(typedLayer)
       case 'tmp':
       case 'group':
         typedLayer = layer as IGroup

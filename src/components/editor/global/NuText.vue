@@ -47,6 +47,7 @@ import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import _ from 'lodash'
+import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -93,8 +94,6 @@ export default Vue.extend({
       }, 100) // for the delay between font loading and dom rendering
     })
 
-    // this.resizeObserver = new ResizeObserver(this.resizeCallback)
-    // this.observeAllSpans()
     this.drawSvgBG()
   },
   computed: {
@@ -200,7 +199,7 @@ export default Vue.extend({
         'text-decoration-line', '-webkit-text-decoration-line'
       ])
     },
-    resizeCallback() {
+    async resizeCallback() {
       const config = generalUtils.deepCopy(this.config) as IText
       if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
 
@@ -208,11 +207,11 @@ export default Vue.extend({
 
       let widthLimit
       if (this.isLoading && this.isAutoResizeNeeded()) {
-        widthLimit = textUtils.autoResize(config, this.initSize)
+        widthLimit = await textUtils.autoResize(config, this.initSize)
       } else {
         widthLimit = config.widthLimit
       }
-      const textHW = textUtils.getTextHW(config, widthLimit)
+      const textHW = await textUtils.getTextHWAsync(config, widthLimit)
       if (typeof this.subLayerIndex === 'undefined') {
         let x = config.styles.x
         let y = config.styles.y
