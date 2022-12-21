@@ -4,6 +4,7 @@
     nu-layer(v-for="(layer,index) in config.layers"
       :key="`layer-${index}`"
       :pageIndex="pageIndex"
+      :primaryLayer="config"
       :layerIndex="layerIndex"
       :subLayerIndex="index"
       :contentScaleRatio="contentScaleRatio"
