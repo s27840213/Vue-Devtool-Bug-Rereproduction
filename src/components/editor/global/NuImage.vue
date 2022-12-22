@@ -405,21 +405,22 @@ export default Vue.extend({
       const img = e.target as HTMLImageElement
       const physicalRatio = img.naturalWidth / img.naturalHeight
       const layerRatio = this.config.styles.imgWidth / this.config.styles.imgHeight
-      if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1) {
-        const newW = this.config.styles.imgHeight * physicalRatio
-        const offsetW = this.config.styles.imgWidth - newW
-        if (this.primaryLayerType() === 'group') {
-          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-            imgWidth: newW,
-            imgX: this.config.styles.imgX + offsetW / 2
-          }, this.subLayerIndex)
-        } else {
-          frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
-            imgWidth: newW,
-            imgX: this.config.styles.imgX + offsetW / 2
-          })
-        }
-      }
+      // if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1) {
+      //   const newW = this.config.styles.imgHeight * physicalRatio
+      //   const offsetW = this.config.styles.imgWidth - newW
+      //   if (this.primaryLayerType() === 'frame') {
+      //     console.log(generalUtils.deepCopy(layerUtils.getLayer(this.pageIndex, this.layerIndex)))
+      //     frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+      //       imgWidth: newW,
+      //       imgX: this.config.styles.imgX + offsetW / 2
+      //     })
+      //   } else {
+      //     layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+      //       imgWidth: newW,
+      //       imgX: this.config.styles.imgX + offsetW / 2
+      //     }, this.subLayerIndex)
+      //   }
+      // }
     },
     onLoadShadow() {
       this.isOnError = false

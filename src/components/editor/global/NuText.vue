@@ -125,13 +125,13 @@ export default Vue.extend({
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
       setTimeout(() => {
         this.resizeCallback()
+        this.drawSvgBG()
         if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
           this.isLoading = false
         }
       }, 100) // for the delay between font loading and dom rendering
     })
-
-    this.drawSvgBG()
+    // this.drawSvgBG()
   },
   computed: {
     ...mapState(['isMoving']),
