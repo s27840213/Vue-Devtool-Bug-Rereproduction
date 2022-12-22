@@ -119,20 +119,18 @@
             :threshold="[0,1]")
           div(class="scale-container relative"
               :style="scaleContainerStyles")
-            page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio")
+            page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
             div(v-if="isAdmin && enableAdminView" class="layer-num") Layer數量: {{config.layers.length}}
-            div(class="page-control" :style="styles('control')")
-              template(v-for="(layer, index) in config.layers")
-                nu-controller(v-if="(currDraggingIndex === -1 || currDraggingIndex === index || layer.type === 'frame') && (layer.type !== 'image' || !layer.imgControl) "
-                  data-identifier="controller"
-                  :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
-                  :layerIndex="index"
-                  :pageIndex="pageIndex"
-                  :config="layer"
-                  :snapUtils="snapUtils"
-                  :contentScaleRatio="contentScaleRatio"
-                  @setFocus="setFocus()"
-                  @isDragging="handleDraggingController")
+            div(v-if="currSelectedIndex !== -1" class="page-control" :style="styles('control')")
+              nu-controller(v-if="currFocusPageIndex === pageIndex" data-identifier="controller"
+                :key="`controller-${currLayer.id}`"
+                :layerIndex="currSelectedIndex"
+                :pageIndex="pageIndex"
+                :config="currLayer"
+                :snapUtils="snapUtils"
+                :contentScaleRatio="contentScaleRatio"
+                @setFocus="setFocus()"
+                @isDragging="handleDraggingController")
             dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
       div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
         class="page-highlighter"
@@ -180,7 +178,7 @@ import DimBackground from '@/components/editor/page/DimBackground.vue'
 import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import rulerUtils from '@/utils/rulerUtils'
-import { IPage } from '@/interfaces/page'
+import { IPage, IPageState } from '@/interfaces/page'
 import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
 import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -192,6 +190,7 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
 
 export default Vue.extend({
+  inheritAttrs: false,
   components: {
     NuImage,
     NuBackgroundController,
@@ -199,6 +198,9 @@ export default Vue.extend({
     DimBackground,
     SnapLineArea,
     LazyLoad
+  },
+  created() {
+    this.pageState.modules.snapUtils.pageIndex = this.pageIndex
   },
   data() {
     return {
@@ -220,7 +222,7 @@ export default Vue.extend({
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
       coordinateHeight: 0,
-      snapUtils: new SnapUtils(this.pageIndex),
+      // snapUtils: new SnapUtils(this.pageIndex),
       closestSnaplines: {
         v: [] as Array<number>,
         h: [] as Array<number>
@@ -231,7 +233,7 @@ export default Vue.extend({
     }
   },
   props: {
-    config: Object as () => IPage,
+    pageState: Object as () => IPageState,
     pageIndex: Number,
     pageScaleRatio: Number,
     isAnyBackgroundImageControl: Boolean,
@@ -245,6 +247,9 @@ export default Vue.extend({
     })
   },
   watch: {
+    pageIndex(val) {
+      this.pageState.modules.snapUtils.pageIndex = val
+    },
     isOutOfBound(val) {
       if (val && this.currFunctionPanelType === FunctionPanelType.photoShadow && layerUtils.pageIndex === this.pageIndex) {
         GroupUtils.deselect()
@@ -286,55 +291,23 @@ export default Vue.extend({
       isAdmin: 'user/isAdmin',
       enableAdminView: 'user/getEnableAdminView'
     }),
+    config(): IPage {
+      return this.pageState.config
+    },
     scaleContainerStyles(): { [index: string]: string } {
       return {
         // transform: `scale(${1})`
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
         transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`,
-        willChange: this.isScaling ? 'transform' : 'none'
+        willChange: this.isScaling ? 'transform' : ''
       }
     },
-    getCurrLayer(): ILayer {
-      return generalUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
+    snapUtils(): SnapUtils {
+      return this.pageState.modules.snapUtils
     },
-    getCurrSubSelectedLayerShown(): IImage | undefined {
-      const layer = this.getCurrLayer
-      if (layer.type === 'group') {
-        const subLayer = generalUtils.deepCopy((this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]) as IImage
-        const scale = subLayer.styles.scale
-        subLayer.styles.scale = 1
-        subLayer.styles.x *= layer.styles.scale
-        subLayer.styles.y *= layer.styles.scale
-        const mappedLayer = GroupUtils
-          .mapLayersToPage([subLayer], this.getCurrLayer as ITmp)[0] as IImage
-        mappedLayer.styles.scale = scale
-        return Object.assign(mappedLayer, { forRender: true, pointerEvents: 'none' })
-      } else if (layer.type === 'frame') {
-        if (frameUtils.isImageFrame(layer as IFrame)) {
-          const image = generalUtils.deepCopy((layer as IFrame).clips[0]) as IImage
-          image.styles.x = layer.styles.x
-          image.styles.y = layer.styles.y
-          image.styles.scale = 1
-          // image.styles.imgWidth *= layer.styles.scale
-          // image.styles.imgHeight *= layer.styles.scale
-          return Object.assign(image, { forRender: true })
-        }
-        const primaryLayer = this.getCurrLayer as IFrame
-        const image = generalUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage
-        image.styles.x *= primaryLayer.styles.scale
-        image.styles.y *= primaryLayer.styles.scale
-        if (primaryLayer.styles.horizontalFlip || primaryLayer.styles.verticalFlip) {
-          const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
-          const [baselineX, baselineY] = [-(imgWidth - width) / 2, -(imgHeight - height) / 2]
-          const [translateX, translateY] = [imgX - baselineX, imgY - baselineY]
-          image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
-          image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
-        }
-        Object.assign(image, { forRender: true })
-        return GroupUtils.mapLayersToPage([image], this.getCurrLayer as ITmp)[0] as IImage
-      }
-      return undefined
+    currLayer(): ILayer {
+      return layerUtils.getCurrLayer
     },
     getPageCount(): number {
       return this.pages.length

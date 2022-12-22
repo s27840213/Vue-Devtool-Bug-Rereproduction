@@ -88,6 +88,9 @@ export default Vue.extend({
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
     }),
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
+    }),
     currLocale(): string {
       return localeUtils.currLocale()
     }
