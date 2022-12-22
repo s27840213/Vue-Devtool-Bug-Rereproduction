@@ -1,6 +1,6 @@
 <template lang="pug">
   div
-    div(class="nu-layer" :class="!config.locked ? `nu-layer--p${pageIndex}` : ''" :style="layerStyles" ref="body" :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
+    div(class="nu-layer" :class="!config.locked && subLayerIndex === -1 ? `nu-layer--p${pageIndex}` : ''" :style="layerStyles" ref="body" :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
         :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
         :data-p-index="pageIndex"
         v-press="isTouchDevice()? onPress : -1"

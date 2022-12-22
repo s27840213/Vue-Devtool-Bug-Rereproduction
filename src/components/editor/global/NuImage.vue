@@ -535,7 +535,7 @@ export default Vue.extend({
       })
     },
     handleIsTransparent() {
-      if (this.forRender || this.primaryLayerType() === 'frame') return
+      if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
       const img = new Image()
       const imgSize = ImageUtils.getSrcSize(this.config.srcObj, 100)
       img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
