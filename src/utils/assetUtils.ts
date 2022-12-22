@@ -34,6 +34,7 @@ export const STANDARD_TEXT_FONT: { [key: string]: string } = {
 export const RESIZE_RATIO_FRAME = 0.6
 export const RESIZE_RATIO_SVG = 0.55
 export const RESIZE_RATIO_IMAGE = 0.8
+export const RESIZE_RATIO_TEXT = 0.55
 class AssetUtils {
   host = 'https://template.vivipic.com'
   data = 'config.json'
@@ -425,18 +426,29 @@ class AssetUtils {
     json = generalUtils.deepCopy(json)
     const { pageIndex, styles = {} } = attrs
     const { x, y } = styles
-    const { width, height } = json.styles
+    const { width, height, scale } = json.styles
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
+    const currentPage = this.getPage(targePageIndex)
+    const resizeRatio = RESIZE_RATIO_TEXT
+    const pageAspectRatio = currentPage.width / currentPage.height
+    const textAspectRatio = width / height
+    const textWidth = textAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * textAspectRatio
+    const textHeight = textAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / textAspectRatio : currentPage.height * resizeRatio
+
     const config = {
       ...json,
+      widthLimit: json.widthLimit === -1 ? -1 : json.widthLimit * (textWidth / width),
       styles: {
-        ...json.styles
+        ...json.styles,
+        width: textWidth,
+        height: textHeight,
+        scale: scale * (textWidth / width)
       }
     }
     Object.assign(
       config.styles,
       typeof y === 'undefined' || typeof x === 'undefined'
-        ? TextUtils.getAddPosition(width, height, targePageIndex)
+        ? TextUtils.getAddPosition(textWidth, textHeight, targePageIndex)
         : { x, y }
     )
     const newLayer = config.type === 'group'
