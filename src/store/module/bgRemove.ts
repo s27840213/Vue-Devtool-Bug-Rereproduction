@@ -52,55 +52,55 @@ const getDefaultState = (): IBgRemoveState => ({
 
 const state = getDefaultState()
 const getters: GetterTree<IBgRemoveState, unknown> = {
-  getInBgRemoveMode() {
+  getInBgRemoveMode(state: IBgRemoveState) {
     return state.inBgRemoveMode
   },
-  getBrushSize() {
+  getBrushSize(state: IBgRemoveState) {
     return state.brushSize
   },
-  getShowInitImage() {
+  getShowInitImage(state: IBgRemoveState) {
     return state.showInitImage
   },
-  getClearMode() {
+  getClearMode(state: IBgRemoveState) {
     return state.clearMode
   },
-  getRestoreInitState() {
+  getRestoreInitState(state: IBgRemoveState) {
     return state.restoreInitState
   },
-  getCanvas() {
+  getCanvas(state: IBgRemoveState) {
     return state.canvas
   },
-  getAutoRemoveResult() {
+  getAutoRemoveResult(state: IBgRemoveState) {
     return state.autoRemoveResult
   },
-  getModifiedFlag() {
+  getModifiedFlag(state: IBgRemoveState) {
     return state.modifiedFlag
   },
-  getLoading() {
+  getLoading(state: IBgRemoveState) {
     return state.loading
   },
-  getPrevPageScaleRatio() {
+  getPrevPageScaleRatio(state: IBgRemoveState) {
     return state.prevPageScaleRatio
   },
-  getPrevScrollPos() {
+  getPrevScrollPos(state: IBgRemoveState) {
     return state.preScrollPos
   },
-  getSteps() {
+  getSteps(state: IBgRemoveState) {
     return state.steps
   },
-  getCurrStep(): number {
+  getCurrStep(state: IBgRemoveState): number {
     return state.currStep
   },
-  inLastStep(): boolean {
+  inLastStep(state: IBgRemoveState): boolean {
     return state.currStep === state.steps.length - 1
   },
-  inFirstStep(): boolean {
+  inFirstStep(state: IBgRemoveState): boolean {
     return state.currStep === 0
   },
-  getIsProcessing(): boolean {
+  getIsProcessing(state: IBgRemoveState): boolean {
     return state.isProcessing
   },
-  getIdInfo(): { pageId: number, layerId: number } {
+  getIdInfo(state: IBgRemoveState): { pageId: number, layerId: number } {
     return state.idInfo
   }
 }

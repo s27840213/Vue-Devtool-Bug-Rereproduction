@@ -530,7 +530,7 @@ export default defineComponent({
               this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
             } else {
-              // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+              // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
               body.removeEventListener('drop', this.onDrop)
             }
           }

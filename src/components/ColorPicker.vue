@@ -128,7 +128,7 @@ export default defineComponent({
     },
     eyeDropper() {
       if (!(window as any).EyeDropper) {
-        // Vue.notify({ group: 'error', text: `${i18n.t('NN0406')}` })
+        // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0406')}` })
         return
       }
 

@@ -1,29 +1,29 @@
 <template lang="pug">
 div(v-if="!isMoving && config.active"
     class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-    //- nu-text-editor(:initText="textHtml()" :id="subLayerIndex === -1 ? `text-${layerIndex}` : `text-sub-${layerIndex}-${subLayerIndex}`"
-    //-   :style="textBodyStyle()"
-    //-   :pageIndex="pageIndex"
-    //-   :layerIndex="layerIndex"
-    //-   :subLayerIndex="subLayerIndex"
-    //-   @keydown.37.stop
-    //-   @keydown.38.stop
-    //-   @keydown.39.stop
-    //-   @keydown.40.stop
-    //-   @keydown.ctrl.67.exact.stop.self
-    //-   @keydown.meta.67.exact.stop.self
-    //-   @keydown.ctrl.86.exact.stop.self
-    //-   @keydown.meta.86.exact.stop.self
-    //-   @keydown.ctrl.88.exact.stop.self
-    //-   @keydown.meta.88.exact.stop.self
-    //-   @keydown.ctrl.65.exact.stop.self
-    //-   @keydown.meta.65.exact.stop.self
-    //-   @keydown.ctrl.90.exact.stop.self
-    //-   @keydown.meta.90.exact.stop.self
-    //-   @keydown.ctrl.shift.90.exact.stop.self
-    //-   @keydown.meta.shift.90.exact.stop.self
-    //-   @update="handleTextChange"
-    //-   @compositionend="handleTextCompositionEnd")
+    nu-text-editor(:initText="textHtml()" :id="subLayerIndex === -1 ? `text-${layerIndex}` : `text-sub-${layerIndex}-${subLayerIndex}`"
+      :style="textBodyStyle()"
+      :pageIndex="pageIndex"
+      :layerIndex="layerIndex"
+      :subLayerIndex="subLayerIndex"
+      @keydown.37.stop
+      @keydown.38.stop
+      @keydown.39.stop
+      @keydown.40.stop
+      @keydown.ctrl.67.exact.stop.self
+      @keydown.meta.67.exact.stop.self
+      @keydown.ctrl.86.exact.stop.self
+      @keydown.meta.86.exact.stop.self
+      @keydown.ctrl.88.exact.stop.self
+      @keydown.meta.88.exact.stop.self
+      @keydown.ctrl.65.exact.stop.self
+      @keydown.meta.65.exact.stop.self
+      @keydown.ctrl.90.exact.stop.self
+      @keydown.meta.90.exact.stop.self
+      @keydown.ctrl.shift.90.exact.stop.self
+      @keydown.meta.shift.90.exact.stop.self
+      @update="handleTextChange"
+      @compositionend="handleTextCompositionEnd")
 //- div(v-else class="nu-text" :style="wrapperStyles()")
 div(v-else class="nu-text" :style="textWrapperStyle()")
   //- Svg BG for text effex gooey.

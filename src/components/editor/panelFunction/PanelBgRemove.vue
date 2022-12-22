@@ -142,7 +142,7 @@ export default defineComponent({
               layerInfo
             }
             imageShadowPanelUtils.handleShadowUpload(layerData, true)
-            // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+            // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           }
         }
         this.uploadMyfileImg(Object.assign({ assetId: this.autoRemoveResult.id }, this.autoRemoveResult))
@@ -194,7 +194,7 @@ export default defineComponent({
                   layerInfo
                 }
                 imageShadowPanelUtils.handleShadowUpload(layerData, true)
-                // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+                // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
               }
             }
             stepsUtils.record()

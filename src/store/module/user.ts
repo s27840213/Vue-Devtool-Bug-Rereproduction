@@ -273,10 +273,10 @@ const actions: ActionTree<IUserModule, unknown> = {
       }
       if (flag === 1) {
         logUtils.setLog(`Put asset failed: ${msg}`)
-        // Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+        // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
       } else if (flag === 2) {
         logUtils.setLog(`Token invalid!: ${msg}`)
-        // Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+        // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
       }
       return data
     } catch (error) {

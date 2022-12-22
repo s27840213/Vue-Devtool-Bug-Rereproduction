@@ -17,6 +17,7 @@ import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import generalUtils from './utils/generalUtils'
 import imageShadowUtils from './utils/imageShadowUtils'
+import Notifications from '@kyvg/vue3-notification'
 
 // global component section
 import SvgIcon from '@/components/global/SvgIcon.vue'
@@ -88,6 +89,7 @@ if (process.env.NODE_ENV !== 'production') {
   app.config.performance = true
 }
 app.use(VueRecyclerviewNew, vueColor)
+app.use(Notifications)
 // app.use(VueMeta)
 // app.use(FloatingVue, {
 //   themes: tooltipUtils.themes

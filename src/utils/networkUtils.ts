@@ -45,7 +45,7 @@ class NetworkUtils {
   }
 
   notifyNetworkError() {
-    // Vue.notify({ group: 'error', text: `${i18n.t('NN0351')}` })
+    // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0351')}` })
   }
 }
 

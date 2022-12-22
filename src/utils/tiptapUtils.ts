@@ -26,7 +26,7 @@ class TiptapUtils {
     this.eventHandler = undefined
   }
 
-  init(content: string, editable: boolean) {
+  init(content: any, editable: boolean) {
     this.editor = new Editor({
       content: content ?? '',
       extensions: [

@@ -399,7 +399,7 @@ export default defineComponent({
         if (!this.isHandleShadow) {
           GroupUtils.deselect()
         } else {
-          // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           imageUtils.setImgControlDefault(false)
         }
       }
@@ -424,8 +424,6 @@ export default defineComponent({
     handleSelectionData(selectionData: DOMRect) {
       const layers = [...document.querySelectorAll(`.nu-layer--p${pageUtils.currFocusPageIndex}`)]
       const layerIndexs: number[] = []
-      console.log('layer len' + layers.length)
-      console.log(layerIndexs.length)
       if (layers.length > 0) {
         layers.forEach((layer) => {
           const layerData = layer.getBoundingClientRect()
@@ -435,8 +433,6 @@ export default defineComponent({
           }
         })
       }
-      console.log(layerIndexs.length)
-      console.log(layerIndexs)
       if (layerIndexs.length > 0) {
         GroupUtils.select(pageUtils.currFocusPageIndex, layerIndexs)
       }

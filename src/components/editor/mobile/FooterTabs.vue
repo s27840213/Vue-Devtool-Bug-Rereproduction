@@ -549,7 +549,7 @@ export default defineComponent({
         }
         case 'effect': {
           if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
-            // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+            // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
             return
           }
           break

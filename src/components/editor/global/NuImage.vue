@@ -6,7 +6,8 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
   div(v-if="showCanvas"
     class="shadow__canvas-wrapper"
     :style="canvasWrapperStyle()")
-    canvas(ref="canvas" :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
+    canvas(ref="canvas"
+      :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
   div(v-if="shadowSrc() && !config.isFrameImg"
     :id="`nu-image-${config.id}__shadow`"
     class="shadow__picture"
@@ -685,7 +686,7 @@ export default defineComponent({
             await new Promise<void>((resolve) => {
               img.onerror = () => {
                 console.log('img load error')
-                // Vue.notify({ group: 'copy', text: `${i18n.t('NN0351')}` })
+                // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0351')}` })
                 resolve()
               }
               img.onload = async () => {

@@ -3,7 +3,6 @@ import { floor } from 'lodash'
 import pageUtils from '@/utils/pageUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
-import Vue from '*.vue'
 
 interface IPageState {
   isShowPagePreview: boolean,

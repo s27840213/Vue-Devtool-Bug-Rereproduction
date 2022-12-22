@@ -12,6 +12,7 @@ div
       @pointerdown="onPointerDown"
       @pointerup="onPointerUp"
       @click.right.stop="onRightClick"
+      @contextmenu.prevent
       @dragenter="dragEnter"
       @dblclick="dblClick")
     div(class="layer-translate posAbs"

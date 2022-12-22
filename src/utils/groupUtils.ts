@@ -163,8 +163,6 @@ class GroupUtils {
 
   select(pageIndex: number, layerIndexs: Array<number>) {
     // currSelectedIndex is smaller than 0 means there isn't any selected layer
-    console.log(pageIndex)
-    console.log(layerIndexs)
     if (this.currSelectedInfo.index < 0) {
       // When we only select one layer
       if (layerIndexs.length === 1) {

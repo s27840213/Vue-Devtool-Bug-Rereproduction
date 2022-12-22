@@ -249,7 +249,7 @@ export default defineComponent({
       return window.confirm('Do you really want to leave? you have unsaved changes!')
     },
     networkError(): void {
-      // Vue.notify({ group: 'error', text: `${i18n.t('NN0351')}` })
+      // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0351')}` })
       this.$emit('setIsLoading', false)
     }
   }

@@ -36,7 +36,7 @@ interface IBrandKitState {
 
 const NULL_BRAND = brandkitUtils.createNullBrand()
 const showNetworkError = () => {
-  // Vue.notify({ group: 'error', text: `${i18n.t('NN0242')}` })
+  // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0242')}` })
 }
 
 const getDefaultState = (): IBrandKitState => ({

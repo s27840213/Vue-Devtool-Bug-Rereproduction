@@ -9,7 +9,7 @@ class TestUtils {
     notify: boolean
   }>
 
-  flags: {[key: string]: boolean}[]
+  flags: { [key: string]: boolean }[]
 
   constructor() {
     this.timer = {}
@@ -66,7 +66,7 @@ class TestUtils {
     const layerIndexes = this.getlayerIndexes(pages, layerType)
     this.flags = []
     for (let i = 0; i < pageNum; i++) {
-      const pageArray = {} as {[key: string]: boolean}
+      const pageArray = {} as { [key: string]: boolean }
       for (let j = 0; j < layerIndexes[i].length; j++) {
         pageArray[layerIndexes[i][j]] = false
       }
