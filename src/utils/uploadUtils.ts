@@ -1554,8 +1554,17 @@ class UploadUtils {
         }
       }
       newPage.backgroundImage.config.imgControl = false
-      newPage.width = parseInt(newPage.width.toString(), 10)
-      newPage.height = parseInt(newPage.height.toString(), 10)
+      newPage.width = _.round(newPage.width)
+      newPage.height = _.round(newPage.height)
+      Object.keys(newPage.bleeds).forEach(key => {
+        newPage.bleeds[key] = _.round(newPage.bleeds[key])
+      })
+      const precision = newPage.unit === 'px' ? 0 : PRECISION
+      newPage.physicalWidth = _.round(newPage.physicalWidth, precision)
+      newPage.physicalHeight = _.round(newPage.physicalHeight, precision)
+      Object.keys(newPage.physicalBleeds).forEach(key => {
+        newPage.physicalBleeds[key] = _.round(newPage.physicalBleeds[key], precision)
+      })
       return newPage
     })
     return pagesJSON
