@@ -340,7 +340,8 @@ router.beforeEach(async (to, from, next) => {
       verUni: json.ver_uni,
       verApi: json.ver_api,
       imgSizeMap: json.image_size_map,
-      imgSizeMapExtra: json.image_size_map_extra
+      imgSizeMapExtra: json.image_size_map_extra,
+      dimensionMap: json.dimension_map
     })
     let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
 

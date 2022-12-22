@@ -1,3 +1,4 @@
+import store from '@/store'
 import { round } from 'lodash'
 
 interface IMapUnit {
@@ -26,6 +27,8 @@ function mulConvUnit(dpi = 96): number[][] {
 }
 
 class UnitUtils {
+  get dimensionMap() { return store.getters['user/getDimensionMap'] }
+
   /**
    * Convert value in source unit into target unit.
    * @param value Value to be convert
@@ -34,20 +37,38 @@ class UnitUtils {
    * @param dpi DPI for convertion between px and physical units
    * @returns Converted value
    */
-  convert(value: number, sourceUnit: string, targetUnit: string, dpi = 96): number {
+  convert(value: number, sourceUnit: string, targetUnit: string, dpi?: number): number {
+    if (dpi === undefined && this.dimensionMap[sourceUnit]?.[value]?.[targetUnit] !== undefined) return this.dimensionMap[sourceUnit][value][targetUnit]
     return value * mulConvUnit(dpi)[IDX_UNITS[sourceUnit]][IDX_UNITS[targetUnit]]
   }
 
-  convertAll(value: number, sourceUnit: string, dpi = 96): IMapUnit {
-    return Object.fromEntries(mulConvUnit(dpi)[IDX_UNITS[sourceUnit]].map((mulConvUnit, idxUnit) => [STR_UNITS[idxUnit], STR_UNITS[idxUnit] === 'px' ? round(value * mulConvUnit) : value * mulConvUnit]))
+  convertAll(value: number, sourceUnit: string, dpi?: number): IMapUnit {
+    return Object.fromEntries(mulConvUnit(dpi)[IDX_UNITS[sourceUnit]].map((mulConvUnit, idxUnit) => {
+      if (dpi === undefined && this.dimensionMap[sourceUnit]?.[value]?.[STR_UNITS[idxUnit]] !== undefined) {
+        return STR_UNITS[idxUnit] === 'px' ? round(this.dimensionMap[sourceUnit][value][STR_UNITS[idxUnit]])
+          : this.dimensionMap[sourceUnit][value][STR_UNITS[idxUnit]]
+      }
+      return STR_UNITS[idxUnit] === 'px' ? [STR_UNITS[idxUnit], round(value * mulConvUnit)]
+        : [STR_UNITS[idxUnit], value * mulConvUnit]
+    }))
   }
 
   convertSize(width: number, height: number, sourceUnit: string, targetUnit: string) {
     if (sourceUnit === targetUnit) return { width, height }
-    if (sourceUnit !== 'px' && targetUnit !== 'px') return { width: this.convert(width, sourceUnit, targetUnit, 96), height: this.convert(height, sourceUnit, targetUnit, 96) }
     const aspectRatio = width / height || 1
-    let longEdge = Math.max(width, height)
 
+    // return preset if found in dimensionMap
+    const widthFound = this.dimensionMap[sourceUnit]?.[width]?.[targetUnit]
+    const heightFound = this.dimensionMap[sourceUnit]?.[height]?.[targetUnit]
+    if (widthFound !== undefined || heightFound !== undefined) {
+      return targetUnit === 'px' ? { width: widthFound ?? round(heightFound * aspectRatio), height: heightFound ?? round(widthFound / aspectRatio) }
+        : { width: widthFound ?? heightFound * aspectRatio, height: heightFound ?? widthFound / aspectRatio }
+    }
+
+    // return converted value between physical units (DPI independent)
+    if (sourceUnit !== 'px' && targetUnit !== 'px') return { width: this.convert(width, sourceUnit, targetUnit, 96), height: this.convert(height, sourceUnit, targetUnit, 96) }
+
+    let longEdge = Math.max(width, height)
     // physical to px
     if (targetUnit === 'px' && sourceUnit !== 'px') {
       longEdge = this.convert(longEdge, sourceUnit, 'in', 96)

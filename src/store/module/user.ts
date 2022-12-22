@@ -45,6 +45,13 @@ export interface IUserModule {
   isUpdateDesignOpen: boolean,
   updateDesignId: string,
   updateDesignType: string,
+  dimensionMap: {
+    [key: string]: {
+      [key: number]: {
+        [key: string]: number
+      }
+    }
+  },
   dpi?: number,
   bleed?: boolean,
   trim?: boolean
@@ -96,6 +103,7 @@ const getDefaultState = (): IUserModule => ({
   isUpdateDesignOpen: false,
   updateDesignId: '',
   updateDesignType: '',
+  dimensionMap: {},
   dpi: -1,
   bleed: false,
   trim: false
@@ -187,6 +195,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getUpdateDesignType() {
     return state.updateDesignType
+  },
+  getDimensionMap() {
+    return state.dimensionMap
   },
   getBleed() {
     return state.bleed
