@@ -16,6 +16,10 @@ import { LayerType } from '@/store/types'
 import unitUtils from './unitUtils'
 
 class PageUtils {
+  get MAX_AREA() { return 6000 * 6000 }
+  get MAX_SIZE() { return 8000 }
+  get MIN_SIZE() { return 40 }
+
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get isDetailPage(): boolean { return store.getters.getGroupType === 1 }
   get isLogin(): boolean { return store.getters['user/isLogin'] }

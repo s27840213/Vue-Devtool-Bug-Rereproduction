@@ -191,7 +191,7 @@ import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
-import { round } from 'lodash'
+import { floor, round } from 'lodash'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import resizeUtils from '@/utils/resizeUtils'
 
@@ -689,7 +689,9 @@ export default Vue.extend({
       if (isShownScrollbar === this.isShownScrollBar) {
         const multiplier = isShownScrollbar ? 2 : 1
         const yDiff = (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
-        const newHeight = Math.max(Math.trunc(this.initialPageHeight + yDiff), 20)
+        const minHeight = Math.max(pageUtils.MIN_SIZE, this.config.bleeds?.top ?? 0 + this.config.bleeds?.bottom ?? 0)
+        const maxHeight = floor(pageUtils.MAX_AREA / this.config.width)
+        const newHeight = Math.min(Math.max(Math.trunc(this.initialPageHeight + yDiff), minHeight), maxHeight)
         const newPhysicalHeight = unitUtils.convert(newHeight / this.displayDPI, 'in', this.config.unit)
         pageUtils.updatePageProps({
           height: newHeight,
