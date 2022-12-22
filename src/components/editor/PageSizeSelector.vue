@@ -13,7 +13,7 @@
                     :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
           input(class="body-XS" type="number" min="0"
                 :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
-                :value="pageSizeToShow.width"
+                :value="this.valPageSize.width"
                 @input="setPageWidth"
                 @click="selectFormat('custom')"
                 @focus="lastFocusedInput = 'width'"
@@ -28,7 +28,7 @@
                     :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
           input(class="body-XS" type="number" min="0"
                 :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
-                :value="pageSizeToShow.height"
+                :value="this.valPageSize.height"
                 @input="setPageHeight"
                 @click="selectFormat('custom')"
                 @focus="lastFocusedInput = 'height'"
@@ -136,6 +136,7 @@ export default Vue.extend({
   data() {
     return {
       selectedFormat: '',
+      valPageSize: { width: '', height: '' },
       pageWidth: NaN,
       pageHeight: NaN,
       pageSizes: {} as IMapSize,
@@ -221,7 +222,7 @@ export default Vue.extend({
     },
     errMsg(): string {
       if (!this.pageWidth || !this.pageHeight || this.pageWidth <= 0 || this.pageHeight <= 0) return this.$t('NN0767', { num: 0 }).toString()
-      if (this.isOverSize()) return `Must be less than ${this.isLocked ? `${round(this.fixedSize.width, PRECISION)} x ${round(this.fixedSize.height, PRECISION)}` : round(this.fixedSize[this.lastFocusedInput], PRECISION)} ${this.selectedUnit} to stay within our maximum allowed area. `
+      if (this.isOverSize()) return `Must be less than ${this.isLocked ? `${floor(this.fixedSize.width, PRECISION)} x ${floor(this.fixedSize.height, PRECISION)}` : floor(this.fixedSize[this.lastFocusedInput], PRECISION)} ${this.selectedUnit} to stay within our maximum allowed area. `
       if (this.isOverSize(this.pageSizes.px.width) || this.isUnderSize(this.pageSizes.px.width) || this.isOverSize(this.pageSizes.px.height) || this.isUnderSize(this.pageSizes.px.height)) {
         if (this.selectedUnit === 'px') return 'Size must between 40px and 8000px.'
         const dpi = {
@@ -268,9 +269,6 @@ export default Vue.extend({
     },
     isLayoutReady(): boolean {
       return this.formatList.length !== 0
-    },
-    pageSizeToShow(): {width: number, height: number} {
-      return { width: round(this.pageWidth, PRECISION), height: round(this.pageHeight, PRECISION) }
     }
   },
   methods: {
@@ -333,11 +331,20 @@ export default Vue.extend({
       this.pageHeight = physicalHeight ?? height ?? 0
       this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
       this.aspectRatio = this.pageWidth / this.pageHeight
+      this.valPageSize.width = round(this.pageWidth, this.selectedUnit === 'px' ? 0 : PRECISION).toString()
+      this.valPageSize.height = round(this.pageHeight, this.selectedUnit === 'px' ? 0 : PRECISION).toString()
     },
     setPageWidth(event: Event) {
       const value = (event.target as HTMLInputElement).value
-      this.pageWidth = typeof value === 'string' ? parseFloat(value) : value
-      if (this.selectedUnit === 'px') this.pageWidth = round(this.pageWidth)
+      this.valPageSize.width = value
+      const numValue = typeof value === 'string' ? parseFloat(value) : value
+      const striped = numValue.toString() !== value
+      const roundedValue = round(numValue, this.selectedUnit === 'px' ? 0 : PRECISION)
+      const rounded = this.pageWidth !== roundedValue
+      this.pageWidth = roundedValue
+      // set input value to this.pageWidth if no trailing zeros in value or value has been rounded
+      if (!striped || rounded) this.valPageSize.width = this.pageWidth.toString()
+
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
@@ -346,14 +353,22 @@ export default Vue.extend({
         } else {
           this.pageHeight = this.pageWidth / this.aspectRatio
           if (this.selectedUnit === 'px') this.pageHeight = round(this.pageHeight)
+          this.valPageSize.height = round(this.pageHeight, PRECISION).toString()
         }
       }
       this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     },
     setPageHeight(event: Event) {
       const value = (event.target as HTMLInputElement).value
-      this.pageHeight = typeof value === 'string' ? parseFloat(value) : value
-      if (this.selectedUnit === 'px') this.pageHeight = round(this.pageHeight)
+      this.valPageSize.height = value
+      const numValue = typeof value === 'string' ? parseFloat(value) : value
+      const striped = numValue.toString() !== value
+      const roundedValue = round(numValue, this.selectedUnit === 'px' ? 0 : PRECISION)
+      const rounded = this.pageHeight !== roundedValue
+      this.pageHeight = roundedValue
+      // set input value to this.pageHeight if no trailing zeros in value or value has been rounded
+      if (!striped || rounded) this.valPageSize.height = this.pageHeight.toString()
+
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
@@ -361,7 +376,8 @@ export default Vue.extend({
           this.pageHeight = NaN
         } else {
           this.pageWidth = this.pageHeight * this.aspectRatio
-          if (this.selectedUnit === 'px') this.pageHeight = round(this.pageHeight)
+          if (this.selectedUnit === 'px') this.pageWidth = round(this.pageWidth)
+          this.valPageSize.width = round(this.pageWidth, PRECISION).toString()
         }
       }
       this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
@@ -380,8 +396,10 @@ export default Vue.extend({
         this.pageWidth = round(this.pageWidth)
         this.pageHeight = round(this.pageHeight)
       }
+      this.valPageSize.width = round(this.pageWidth, PRECISION).toString()
+      this.valPageSize.height = round(this.pageHeight, PRECISION).toString()
       this.selectedUnit = unit
-      this.fixSize(false)
+      // this.fixSize(false)
       this.isValidate = true
     },
     fetchLayouts() {
@@ -509,14 +527,26 @@ export default Vue.extend({
     },
     handleInputBlur(target: string) {
       this.isValidate = true
-      if ((target === 'width' || this.isLocked) && isNaN(this.pageWidth)) this.pageWidth = 0
-      if ((target === 'height' || this.isLocked) && isNaN(this.pageHeight)) this.pageHeight = 0
+      if ((target === 'width' || this.isLocked) && isNaN(this.pageWidth)) {
+        this.pageWidth = 0
+        this.valPageSize.width = '0'
+      }
+      if ((target === 'height' || this.isLocked) && isNaN(this.pageHeight)) {
+        this.pageHeight = 0
+        this.valPageSize.height = '0'
+      }
       this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     },
     fixSize(convert = true) {
       const fixedSize = this.fixedSize
-      if (this.lastFocusedInput === 'width' || this.isLocked) this.pageWidth = fixedSize.width
-      if (this.lastFocusedInput === 'height' || this.isLocked) this.pageHeight = fixedSize.height
+      if (this.lastFocusedInput === 'width' || this.isLocked) {
+        this.pageWidth = floor(fixedSize.width, PRECISION)
+        this.valPageSize.width = this.pageWidth.toString()
+      }
+      if (this.lastFocusedInput === 'height' || this.isLocked) {
+        this.pageHeight = floor(fixedSize.height, PRECISION)
+        this.valPageSize.height = this.pageHeight.toString()
+      }
       if (convert) this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     }
   }
