@@ -431,7 +431,6 @@ export default Vue.extend({
       ])
     },
     async resizeCallback() {
-      // this.drawSvgBG()
       const config = generalUtils.deepCopy(this.config) as IText
       if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
 

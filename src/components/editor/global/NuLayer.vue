@@ -291,7 +291,9 @@ export default Vue.extend({
       return ''
     },
     layerStyles(): any {
-      const clipPath = !this.forRender && this.config.clipPath && this.primaryLayer?.type === 'frame' ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
+      const clipPath = !this.forRender && this.config.clipPath &&
+        !this.config.isFrameImg && this.primaryLayer?.type === 'frame'
+        ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
       const pointerEvents = this.getPointerEvents
       const styles = Object.assign(
         CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),

@@ -403,11 +403,10 @@ export default Vue.extend({
     },
     onLoad(e: Event) {
       this.isOnError = false
-      this.initFlag = true
       const img = e.target as HTMLImageElement
       const physicalRatio = img.naturalWidth / img.naturalHeight
       const layerRatio = this.config.styles.imgWidth / this.config.styles.imgHeight
-      if (!this.initFlag && physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1) {
+      if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1) {
         const newW = this.config.styles.imgHeight * physicalRatio
         const offsetW = this.config.styles.imgWidth - newW
         if (this.primaryLayerType() === 'frame') {
@@ -962,7 +961,7 @@ export default Vue.extend({
       let scaleX = horizontalFlip ? -1 : 1
       let scaleY = verticalFlip ? -1 : 1
 
-      if (typeof this.subLayerIndex !== 'undefined') {
+      if (typeof this.subLayerIndex !== 'undefined' && this.subLayerIndex !== -1) {
         const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
         if (primaryLayer.type === 'frame' && this.config.srcObj.type === 'frame') {
           scaleX = primaryLayer.styles.horizontalFlip ? -1 : 1
@@ -1057,7 +1056,7 @@ export default Vue.extend({
     },
     flippedAnimation(): boolean {
       const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
-      if (typeof this.subLayerIndex !== 'undefined' && primaryLayer.type === 'frame') {
+      if (typeof this.subLayerIndex !== 'undefined' && this.subLayerIndex !== -1 && primaryLayer.type === 'frame') {
         return false
       } else {
         return true
