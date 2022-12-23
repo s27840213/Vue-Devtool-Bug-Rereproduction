@@ -6,6 +6,7 @@
         v-press="isTouchDevice()? onPress : -1"
         @pointerdown="onPointerDown"
         @pointerup="onPointerUp"
+        @contextmenu.prevent
         @click.right.stop="onRightClick"
         @dragenter="dragEnter"
         @dblclick="dblClick")

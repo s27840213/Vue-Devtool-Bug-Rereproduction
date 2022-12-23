@@ -15,8 +15,7 @@
         class="nu-image__picture-shadow"
         draggable="false"
         :src="shadowSrc()"
-        @error="onError"
-        @load="onLoad")
+        @error="onError")
     div(class="img-wrapper"
       :style="imgWrapperstyle()")
       div(class='nu-image__picture'
