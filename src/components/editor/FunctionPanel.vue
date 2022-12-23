@@ -133,7 +133,8 @@ export default Vue.extend({
       return new Set(types)
     },
     hasSubSelectedLayer(): boolean {
-      return this.currSubSelectedInfo.index !== -1
+      return LayerUtils.subLayerIdx !== -1
+      // return this.currSubSelectedInfo.index !== -1
     },
     subLayerType(): string {
       return this.currSubSelectedInfo.type

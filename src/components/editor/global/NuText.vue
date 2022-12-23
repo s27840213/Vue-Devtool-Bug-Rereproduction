@@ -1,31 +1,5 @@
 <template lang="pug">
-  div(v-if="!isMoving && config.active"
-      class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-      nu-text-editor(:initText="textHtml()" :id="subLayerIndex === -1 ? `text-${layerIndex}` : `text-sub-${layerIndex}-${subLayerIndex}`"
-        :style="textBodyStyle()"
-        :pageIndex="pageIndex"
-        :layerIndex="layerIndex"
-        :subLayerIndex="subLayerIndex"
-        @keydown.native.37.stop
-        @keydown.native.38.stop
-        @keydown.native.39.stop
-        @keydown.native.40.stop
-        @keydown.native.ctrl.67.exact.stop.self
-        @keydown.native.meta.67.exact.stop.self
-        @keydown.native.ctrl.86.exact.stop.self
-        @keydown.native.meta.86.exact.stop.self
-        @keydown.native.ctrl.88.exact.stop.self
-        @keydown.native.meta.88.exact.stop.self
-        @keydown.native.ctrl.65.exact.stop.self
-        @keydown.native.meta.65.exact.stop.self
-        @keydown.native.ctrl.90.exact.stop.self
-        @keydown.native.meta.90.exact.stop.self
-        @keydown.native.ctrl.shift.90.exact.stop.self
-        @keydown.native.meta.shift.90.exact.stop.self
-        @update="handleTextChange"
-        @compositionend="handleTextCompositionEnd")
-  //- div(v-else class="nu-text" :style="wrapperStyles()")
-  div(v-else class="nu-text" :style="textWrapperStyle()")
+  div(class="nu-text" :style="textWrapperStyle()" draggable="false")
     //- Svg BG for text effex gooey.
     svg(v-if="svgBG" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
       component(v-for="(elm, idx) in svgBG.content"
@@ -57,6 +31,37 @@
         :data-sindex="sIndex"
         :key="sIndex",
         :style="styles(span.styles)") {{ span.text }}
+    nu-text-editor(v-if="config.active" :initText="textHtml()" :id="subLayerIndex === -1 ? `text-${layerIndex}` : `text-sub-${layerIndex}-${subLayerIndex}`"
+      class="nu-text__editor"
+      :style="textBodyStyle()"
+      :pageIndex="pageIndex"
+      :layerIndex="layerIndex"
+      :subLayerIndex="subLayerIndex"
+      @keydown.native.37.stop
+      @keydown.native.38.stop
+      @keydown.native.39.stop
+      @keydown.native.40.stop
+      @keydown.native.ctrl.67.exact.stop.self
+      @keydown.native.meta.67.exact.stop.self
+      @keydown.native.ctrl.86.exact.stop.self
+      @keydown.native.meta.86.exact.stop.self
+      @keydown.native.ctrl.88.exact.stop.self
+      @keydown.native.meta.88.exact.stop.self
+      @keydown.native.ctrl.65.exact.stop.self
+      @keydown.native.meta.65.exact.stop.self
+      @keydown.native.ctrl.90.exact.stop.self
+      @keydown.native.meta.90.exact.stop.self
+      @keydown.native.ctrl.shift.90.exact.stop.self
+      @keydown.native.meta.shift.90.exact.stop.self
+      @update="handleTextChange"
+      @compositionend="handleTextCompositionEnd")
+    //- div(v-if="isCurveText" v-for="text, idx in duplicatedText" class="nu-text__body nu-text__curve-text-in-editing" ref="body")
+    //-   nu-curve-text(
+    //-     :config="config"
+    //-     :layerIndex="layerIndex"
+    //-     :pageIndex="pageIndex"
+    //-     :subLayerIndex="subLayerIndex"
+    //-     :isDuplicated="idx !== duplicatedText.length-1")
 </template>
 
 <script lang="ts">
@@ -125,7 +130,6 @@ export default Vue.extend({
         }
       }, 100) // for the delay between font loading and dom rendering
     })
-
     this.drawSvgBG()
   },
   computed: {
@@ -383,6 +387,9 @@ export default Vue.extend({
     },
     getOpacity() {
       const { editing, contentEditable } = this.config
+      if (this.isCurveText && this.config.active) {
+        return 0.2
+      }
       if (editing && !this.isMoving) {
         if (contentEditable) {
           if (this.isCurveText || this.isFlipped) {
@@ -436,7 +443,7 @@ export default Vue.extend({
         widthLimit = config.widthLimit
       }
       const textHW = await textUtils.getTextHWAsync(config, widthLimit)
-      if (typeof this.subLayerIndex === 'undefined') {
+      if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
         let x = config.styles.x
         let y = config.styles.y
         if (config.widthLimit === -1) {
@@ -484,6 +491,7 @@ export default Vue.extend({
     overflow: visible;
   }
   &__body {
+    pointer-events: none;
     outline: none;
     padding: 0;
     position: relative;
@@ -496,6 +504,10 @@ export default Vue.extend({
     overflow-wrap: break-word;
     position: relative;
   }
+  &__curve-text-in-editing {
+    pointer-events: none;
+    opacity: 0.2;
+  }
   &__observee {
     position: absolute;
     opacity: 0;
@@ -504,6 +516,11 @@ export default Vue.extend({
     & > span {
       display: inline-block;
     }
+  }
+  &__editor {
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 }
 </style>

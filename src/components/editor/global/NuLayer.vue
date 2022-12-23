@@ -1,11 +1,12 @@
 <template lang="pug">
   div
-    div(class="nu-layer" :class="!config.locked ? `nu-layer--p${pageIndex}` : ''" :style="layerStyles" ref="body" :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
+    div(class="nu-layer" :class="!config.locked && subLayerIndex === -1 ? `nu-layer--p${pageIndex}` : ''" :style="layerStyles" ref="body" :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
         :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
         :data-p-index="pageIndex"
         v-press="isTouchDevice()? onPress : -1"
         @pointerdown="onPointerDown"
         @pointerup="onPointerUp"
+        @contextmenu.prevent
         @click.right.stop="onRightClick"
         @dragenter="dragEnter"
         @dblclick="dblClick")
@@ -34,7 +35,7 @@
                 :isPagePreview="isPagePreview"
                 :forRender="forRender"
                 v-bind="$attrs")
-          svg(class="clip-contour full-width" v-if="!forRender && config.active && config.type === 'image' && (config.isFrame && !config.isFrameImg)"
+          svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
             :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
             g(v-html="frameClipFormatter(config.clipPath)"
               :style="frameClipStyles")
@@ -277,15 +278,30 @@ export default Vue.extend({
         strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / this.primaryLayer.styles.scale * (100 / this.scaleRatio)}px`
       }
     },
-    layerStyles(): any {
+    getPointerEvents(): string {
       const { isControlling } = this.movingUtils ?? {}
-      const clipPath = !this.forRender && this.config.clipPath && this.primaryLayer?.type === 'frame' ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
+      switch (this.config.type) {
+        case LayerType.image:
+          return isControlling ? 'none' : ''
+        case LayerType.shape: {
+          if (this.primaryLayer && this.primaryLayer.type === LayerType.frame) {
+            return 'none'
+          }
+        }
+      }
+      return ''
+    },
+    layerStyles(): any {
+      const clipPath = !this.forRender && this.config.clipPath &&
+        !this.config.isFrameImg && this.primaryLayer?.type === 'frame'
+        ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
+      const pointerEvents = this.getPointerEvents
       const styles = Object.assign(
         CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
         {
-          outline: this.outlineStyles(),
+          // outline: this.outlineStyles(),
           willChange: !this.isSubLayer && this.isDragging ? 'transform' : '',
-          pointerEvents: isControlling && this.config.type === LayerType.image ? 'none' : '',
+          pointerEvents,
           clipPath
         }
       )
@@ -622,16 +638,19 @@ export default Vue.extend({
       this.onLayerDragEnter(e)
     },
     onFrameDragEnter(e: DragEvent) {
+      if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
+        return
+      }
       const { primaryLayer } = this
       if (!primaryLayer.locked) {
         const body = this.$refs.body as HTMLElement
         body.addEventListener('dragleave', this.onFrameDragLeave)
         body.addEventListener('drop', this.onFrameDrop)
         e.stopPropagation()
+
         if (this.currDraggedPhoto.srcObj.type !== '' && !this.currDraggedPhoto.isPreview) {
           const clips = generalUtils.deepCopy(primaryLayer.clips) as Array<IImage>
           const clip = clips[this.subLayerIndex]
-
           Object.assign(this.imgBuff, {
             srcObj: {
               ...clips[this.subLayerIndex].srcObj

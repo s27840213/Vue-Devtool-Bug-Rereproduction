@@ -162,7 +162,7 @@ export default Vue.extend({
 
       // console.log('resize')
 
-      if (typeof this.subLayerIndex === 'undefined') {
+      if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
       } else {
         const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
