@@ -248,6 +248,7 @@ import { AnyTouchEvent } from 'any-touch'
 import textBgUtils from '@/utils/textBgUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
+import i18n from '@/i18n'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -1890,7 +1891,7 @@ export default defineComponent({
         if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
           this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
         } else {
-          // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+          this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           body.removeEventListener('dragleave', this.dragLeave)
           body.removeEventListener('drop', this.onDrop)
         }

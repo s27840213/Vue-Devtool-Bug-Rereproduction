@@ -11,6 +11,7 @@ import i18n from '@/i18n'
 // import apiUtils from '@/utils/apiUtils'
 import generalUtils from '@/utils/generalUtils'
 import logUtils from '@/utils/logUtils'
+import { notify } from '@kyvg/vue3-notification'
 
 const SET_TOKEN = 'SET_TOKEN' as const
 const SET_STATE = 'SET_STATE' as const
@@ -273,10 +274,10 @@ const actions: ActionTree<IUserModule, unknown> = {
       }
       if (flag === 1) {
         logUtils.setLog(`Put asset failed: ${msg}`)
-        // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
+        notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
       } else if (flag === 2) {
         logUtils.setLog(`Token invalid!: ${msg}`)
-        // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
+        notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
       }
       return data
     } catch (error) {

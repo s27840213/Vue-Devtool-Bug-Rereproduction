@@ -321,7 +321,7 @@ export default defineComponent({
       this.cancelApi(this.cancelReason).then(
         this.closePopup
       ).catch(msg => {
-        // Vue.notify({ group: 'error', text: msg })
+        this.$notify({ group: 'error', text: msg })
       })
     },
     closePopup() {

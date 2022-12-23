@@ -1,6 +1,7 @@
 import { IGroup } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
+import { notify } from '@kyvg/vue3-notification'
 import Vue from 'vue'
 
 class TestUtils {
@@ -30,10 +31,10 @@ class TestUtils {
     const result = `${key}: ${msg}, ${duration}`
     console.log(result)
     if (timer.notify) {
-      // Vue.notify({
-      //   group: 'copy',
-      //   text: result
-      // })P
+      notify({
+        group: 'copy',
+        text: result
+      })
     }
   }
 

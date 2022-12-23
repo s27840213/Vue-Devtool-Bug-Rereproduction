@@ -78,6 +78,7 @@ import { globalQueue } from '@/utils/queueUtils'
 import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import editorUtils from '@/utils/editorUtils'
+import i18n from '@/i18n'
 
 export default defineComponent({
   emits: [],
@@ -399,7 +400,7 @@ export default defineComponent({
         if (!this.isHandleShadow) {
           GroupUtils.deselect()
         } else {
-          // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+          this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           imageUtils.setImgControlDefault(false)
         }
       }
@@ -423,6 +424,7 @@ export default defineComponent({
     },
     handleSelectionData(selectionData: DOMRect) {
       const layers = [...document.querySelectorAll(`.nu-layer--p${pageUtils.currFocusPageIndex}`)]
+      console.log(layers)
       const layerIndexs: number[] = []
       if (layers.length > 0) {
         layers.forEach((layer) => {

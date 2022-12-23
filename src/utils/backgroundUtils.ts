@@ -1,6 +1,7 @@
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import { IBackgroundImage, IPage } from '@/interfaces/page'
 import store from '@/store'
+import { notify } from '@kyvg/vue3-notification'
 import Vue from 'vue'
 import assetUtils from './assetUtils'
 import editorUtils from './editorUtils'
@@ -103,7 +104,7 @@ class BackgroundUtils {
   }
 
   handleLockedNotify() {
-    // Vue.notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+    notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
   }
 
   setBgImage(props: { pageIndex: number, config: Partial<IImage> }) {

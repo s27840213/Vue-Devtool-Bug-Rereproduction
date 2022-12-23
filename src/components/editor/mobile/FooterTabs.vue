@@ -32,6 +32,7 @@ import mappingUtils from '@/utils/mappingUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import editorUtils from '@/utils/editorUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
+import i18n from '@/i18n'
 
 export default defineComponent({
   components: {
@@ -549,7 +550,7 @@ export default defineComponent({
         }
         case 'effect': {
           if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
-            // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+            this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
             return
           }
           break

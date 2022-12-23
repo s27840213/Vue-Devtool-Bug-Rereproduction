@@ -186,6 +186,7 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import generalUtils from '@/utils/generalUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
+import i18n from '@/i18n'
 
 export default defineComponent({
   inheritAttrs: false,
@@ -527,7 +528,7 @@ export default defineComponent({
     },
     duplicatePage() {
       if (this.isProcessingShadow) {
-        // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+        this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
         return
       }
       GroupUtils.deselect()

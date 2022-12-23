@@ -24,6 +24,7 @@ import errorHandleUtils from './errorHandleUtils'
 import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import mathUtils from './mathUtils'
+import { notify } from '@kyvg/vue3-notification'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -146,10 +147,10 @@ class AssetUtils {
           if (asset.type === 5 && error.message === '404') {
             errorHandleUtils.addMissingDesign('svg', asset.id)
           } else {
-            // Vue.notify({
-            //   group: 'error',
-            //   text: `網路異常，請確認網路正常後再嘗試。(ErrorCode: ${error.message === 'Failed to fetch' ? 19 : error.message})`
-            // })
+            notify({
+              group: 'error',
+              text: `網路異常，請確認網路正常後再嘗試。(ErrorCode: ${error.message === 'Failed to fetch' ? 19 : error.message})`
+            })
           }
           return asset
         })

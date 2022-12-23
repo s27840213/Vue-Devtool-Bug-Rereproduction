@@ -13,6 +13,7 @@ import userApis from '@/apis/user'
 import _ from 'lodash'
 import apiUtils from '@/utils/apiUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import { notify } from '@kyvg/vue3-notification'
 
 interface IBrandKitState {
   brands: IBrand[],
@@ -36,7 +37,7 @@ interface IBrandKitState {
 
 const NULL_BRAND = brandkitUtils.createNullBrand()
 const showNetworkError = () => {
-  // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0242')}` })
+  notify({ group: 'error', text: `${i18n.global.t('NN0242')}` })
 }
 
 const getDefaultState = (): IBrandKitState => ({

@@ -198,7 +198,7 @@ export default defineComponent({
       this.userCountryInfo = userCountryInfo
 
       if (userCountryInfo === 'tw') {
-        // Vue.notify({ group: 'error', text: '如要取消開立統編，請先取消訂閱後選擇台灣再次訂閱。' })
+        this.$notify({ group: 'error', text: '如要取消開立統編，請先取消訂閱後選擇台灣再次訂閱。' })
         this.$nextTick(() => {
           // userCountryInfo should be set to other value and set back to oldVal, or it will display tw in dropdown.
           this.userCountryInfo = oldVal

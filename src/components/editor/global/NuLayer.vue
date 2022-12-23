@@ -1,50 +1,48 @@
 <template lang="pug">
-div
-  div(class="nu-layer"
-      :class="!config.locked ? `nu-layer--p${pageIndex}` : ''"
-      :style="layerStyles"
-      ref="body"
-      :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
-      :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
-      :data-p-index="pageIndex"
-      :data-pindex="dataPindex"
-      v-press="isTouchDevice()? onPress : -1"
-      @pointerdown="onPointerDown"
-      @pointerup="onPointerUp"
-      @click.right.stop="onRightClick"
-      @contextmenu.prevent
-      @dragenter="dragEnter"
-      @dblclick="dblClick")
-    div(class="layer-translate posAbs"
-        :style="translateStyles()")
-      div(class="layer-scale posAbs" ref="scale"
-          :style="scaleStyles()")
-        nu-clipper(:config="config"
+div(class="nu-layer"
+    :style="layerStyles"
+    ref="body"
+    :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
+    :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
+    :data-p-index="pageIndex"
+    :data-pindex="dataPindex"
+    v-press="isTouchDevice()? onPress : -1"
+    @pointerdown="onPointerDown"
+    @pointerup="onPointerUp"
+    @click.right.stop="onRightClick"
+    @contextmenu.prevent
+    @dragenter="dragEnter"
+    @dblclick="dblClick")
+  div(class="layer-translate posAbs"
+      :style="translateStyles()")
+    div(class="layer-scale posAbs" ref="scale"
+        :style="scaleStyles()")
+      nu-clipper(:config="config"
+          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+          :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
+        lazy-load(:target="lazyLoadTarget"
+            :rootMargin="'300px 0px 300px 0px'"
+            :minHeight="config.styles.height * contentScaleRatio"
+            :minWidth="config.styles.width * contentScaleRatio"
+            :threshold="[0]"
+            :handleUnrender="handleUnrender"
+            :anamationEnabled="false"
+            :forceRender="isSubLayer || forceRender")
+          component(:is="`nu-${config.type}`"
+            class="transition-none"
+            :config="config"
+            :imgControl="imgControl"
+            :contentScaleRatio="contentScaleRatio"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-            :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
-          lazy-load(:target="lazyLoadTarget"
-              :rootMargin="'300px 0px 300px 0px'"
-              :minHeight="config.styles.height * contentScaleRatio"
-              :minWidth="config.styles.width * contentScaleRatio"
-              :threshold="[0]"
-              :handleUnrender="handleUnrender"
-              :anamationEnabled="false"
-              :forceRender="isSubLayer || forceRender")
-            component(:is="`nu-${config.type}`"
-              class="transition-none"
-              :config="config"
-              :imgControl="imgControl"
-              :contentScaleRatio="contentScaleRatio"
-              :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-              :scaleRatio="scaleRatio"
-              :isPagePreview="isPagePreview"
-              :forRender="forRender")
-        svg(class="clip-contour full-width" v-if="!forRender && config.active && config.type === 'image' && (config.isFrame && !config.isFrameImg)"
-          :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
-          g(v-html="frameClipFormatter(config.clipPath)"
-            :style="frameClipStyles")
-    div(v-if="showSpinner()" class="nu-layer__inProcess")
-      square-loading
+            :scaleRatio="scaleRatio"
+            :isPagePreview="isPagePreview"
+            :forRender="forRender")
+      svg(class="clip-contour full-width" v-if="!forRender && config.active && config.type === 'image' && (config.isFrame && !config.isFrameImg)"
+        :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
+        g(v-html="frameClipFormatter(config.clipPath)"
+          :style="frameClipStyles")
+  div(v-if="showSpinner()" class="nu-layer__inProcess")
+    square-loading
 </template>
 <script lang="ts">
 import Vue, { PropType, defineComponent } from 'vue'
@@ -80,7 +78,6 @@ import Svgpath from 'svgpath'
 
 export default defineComponent({
   emits: ['onSubDrop'],
-  inheritAttrs: false,
   components: {
     SquareLoading,
     LazyLoad
@@ -750,7 +747,7 @@ export default defineComponent({
         if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
           this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
         } else {
-          // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+          this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           body.removeEventListener('dragleave', this.layerDragLeave)
           body.removeEventListener('drop', this.layerOnDrop)
         }

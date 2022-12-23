@@ -39,6 +39,7 @@ import layerUtils from '@/utils/layerUtils'
 import { Chrome } from 'vue-color'
 import generalUtils from '@/utils/generalUtils'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
+import i18n from '@/i18n'
 
 export default defineComponent({
   props: {
@@ -128,7 +129,7 @@ export default defineComponent({
     },
     eyeDropper() {
       if (!(window as any).EyeDropper) {
-        // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0406')}` })
+        this.$notify({ group: 'error', text: `${i18n.global.t('NN0406')}` })
         return
       }
 

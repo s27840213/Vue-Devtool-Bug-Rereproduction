@@ -6,6 +6,7 @@ import { IPaymentView, IPaymentWarningView } from '@/interfaces/payment'
 import modalUtils from './modalUtils'
 import popupUtils from './popupUtils'
 import router from '@/router'
+import { notify } from '@kyvg/vue3-notification'
 
 class PaymentUtils {
   get status(): string { return store.getters['payment/getStatus'] }
@@ -127,8 +128,9 @@ class PaymentUtils {
           action: () => { this.openPayment('switch1') }
         })
         break
-      default:
-      // Vue.notify({ group: 'error', text: msg })
+      default: {
+        notify({ group: 'error', text: msg })
+      }
     }
   }
 }

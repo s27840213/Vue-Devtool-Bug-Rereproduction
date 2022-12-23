@@ -23,7 +23,7 @@ export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>, sc
   let maxWidth = Number.MIN_SAFE_INTEGER
   let maxHeight = Number.MIN_SAFE_INTEGER
   layers = JSON.parse(JSON.stringify(layers))
-
+  console.log(layers)
   layers.forEach((layer: IShape | IText | IImage | IGroup) => {
     if (layer.styles.rotate === 0) {
       minX = Math.min(minX, layer.styles.x)

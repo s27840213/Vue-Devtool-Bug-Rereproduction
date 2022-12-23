@@ -29,6 +29,7 @@ import networkUtils from './networkUtils'
 import _ from 'lodash'
 import editorUtils from './editorUtils'
 import designApis from '@/apis/design'
+import { notify } from '@kyvg/vue3-notification'
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
   UPDATE_DB,
@@ -507,10 +508,10 @@ class UploadUtils {
                   clearInterval(interval)
                   response.json().then((json: IUploadAssetLogoResponse) => {
                     if (json.flag === 0) {
-                      // Vue.notify({
-                      //   group: 'copy',
-                      //   text: `${i18n.global.t('NN0135')}`
-                      // })
+                      notify({
+                        group: 'copy',
+                        text: `${i18n.global.t('NN0135')}`
+                      })
                       console.log('Successfully upload the file')
                       brandkitUtils.replaceLogo(tempId, json.data, brandId)
                     } else {
@@ -657,7 +658,7 @@ class UploadUtils {
           })
           const { flag } = resPutAssetDesign
           if (flag !== 0) {
-            // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
+            notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
             return
           }
 
@@ -666,7 +667,7 @@ class UploadUtils {
           if (isNewDesign && path) {
             const designAssetIndex = (await store.dispatch('design/fetchDesign', { teamId, assetId })).asset_index?.toString()
             if (!designAssetIndex) {
-              // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
+              notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
               return
             }
             await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
@@ -677,7 +678,7 @@ class UploadUtils {
                   'delete', designAssetIndex, null, '2').catch(err => {
                     console.error(err)
                   })
-                // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
+                notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
               })
             // update design info
             designUtils.fetchDesign(teamId as string, assetId)
@@ -689,7 +690,7 @@ class UploadUtils {
             delete query.folderName
             router.replace({ query })
           }
-          // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0357')}` })
+          notify({ group: 'copy', text: `${i18n.global.t('NN0357')}` })
         }
       })
       .catch(async (error) => {

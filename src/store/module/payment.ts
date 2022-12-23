@@ -8,6 +8,7 @@ import generalUtils from '@/utils/generalUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import fbPixelUtils from '@/utils/fbPixelUtils'
 import * as type from '@/interfaces/payment'
+import { notify } from '@kyvg/vue3-notification'
 
 interface IPaymentState {
   isLoading: boolean
@@ -389,9 +390,9 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
     }).then(() => {
-      // Vue.notify({ group: 'copy', text: 'Success' })
+      notify({ group: 'copy', text: 'Success' })
     }).catch(msg => {
-      // Vue.notify({ group: 'error', text: msg })
+      notify({ group: 'error', text: msg })
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async init({ commit }) {
@@ -414,7 +415,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
           })
         })
       }).catch(msg => {
-        // Vue.notify({ group: 'error', text: msg })
+        notify({ group: 'error', text: msg })
       })
     })
   },
@@ -467,7 +468,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       prime: state.prime
     }).then((response) => {
       dispatch('getBillingInfo')
-      // Vue.notify({ group: 'copy', text: i18n.global.t('NN0630') as string })
+      notify({ group: 'copy', text: i18n.global.t('NN0630') as string })
       return response
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
@@ -475,7 +476,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
     commit('SET_state', { isLoading: true })
     return paymentApi.stripeUpdate().then((response) => {
       dispatch('getBillingInfo')
-      // Vue.notify({ group: 'copy', text: i18n.global.t('NN0630') as string })
+      notify({ group: 'copy', text: i18n.global.t('NN0630') as string })
       return response
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
@@ -490,7 +491,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
         switchPrice: data.price
       })
     }).catch(msg => {
-      // Vue.notify({ group: 'error', text: msg })
+      notify({ group: 'error', text: msg })
     })
   },
   async switch({ getters, dispatch, commit }) {
@@ -500,10 +501,10 @@ const actions: ActionTree<IPaymentState, unknown> = {
       is_bundle: 1 - Number(getters.getIsBundle)
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
-      // Vue.notify({ group: 'copy', text: i18n.global.t('NN0627', { period: getters.getIsBundle ? i18n.global.t('NN0514') : i18n.global.t('NN0515') }) as string })
+      notify({ group: 'copy', text: i18n.global.t('NN0627', { period: getters.getIsBundle ? i18n.global.t('NN0514') : i18n.global.t('NN0515') }) as string })
       dispatch('getBillingInfo')
     }).catch(msg => {
-      // Vue.notify({ group: 'error', text: msg })
+      notify({ group: 'error', text: msg })
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async cancel({ dispatch, commit }, reason: string) {
@@ -511,9 +512,9 @@ const actions: ActionTree<IPaymentState, unknown> = {
     return paymentApi.cancel(reason).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      // Vue.notify({ group: 'copy', text: i18n.global.t('NN0628') as string })
+      notify({ group: 'copy', text: i18n.global.t('NN0628') as string })
     }).catch(msg => {
-      // Vue.notify({ group: 'error', text: msg })
+      notify({ group: 'error', text: msg })
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async resume({ dispatch, commit }) {
@@ -521,9 +522,9 @@ const actions: ActionTree<IPaymentState, unknown> = {
     return paymentApi.resume().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      // Vue.notify({ group: 'copy', text: i18n.global.t('NN0629') as string })
+      notify({ group: 'copy', text: i18n.global.t('NN0629') as string })
     }).catch(msg => {
-      // Vue.notify({ group: 'error', text: msg })
+      notify({ group: 'error', text: msg })
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async deleteCard({ dispatch, commit }) {
@@ -531,9 +532,9 @@ const actions: ActionTree<IPaymentState, unknown> = {
     return paymentApi.deleteCard().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      // Vue.notify({ group: 'copy', text: i18n.global.t('NN0631') as string })
+      notify({ group: 'copy', text: i18n.global.t('NN0631') as string })
     }).catch(msg => {
-      // Vue.notify({ group: 'error', text: msg })
+      notify({ group: 'error', text: msg })
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   reloadDiskCapacity({ commit }) {
@@ -544,7 +545,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
     const callback = (event: MessageEvent) => {
       const payload = JSON.parse(JSON.parse(event.data).message).payload
       if (payload.flag) {
-        // Vue.notify({ group: 'error', text: payload.msg })
+        notify({ group: 'error', text: payload.msg })
       } else {
         commit('SET_state', {
           usage: Object.assign(state.usage, {
@@ -581,7 +582,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
         paymentPaidDate: string2Date(data.charge_time)
       })
     }).catch(msg => {
-      // Vue.notify({ group: 'error', text: msg })
+      notify({ group: 'error', text: msg })
     })
   },
   resetCouponResult({ commit }) {

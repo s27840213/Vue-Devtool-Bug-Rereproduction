@@ -686,7 +686,7 @@ export default defineComponent({
             await new Promise<void>((resolve) => {
               img.onerror = () => {
                 console.log('img load error')
-                // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0351')}` })
+                this.$notify({ group: 'copy', text: `${i18n.global.t('NN0351')}` })
                 resolve()
               }
               img.onload = async () => {

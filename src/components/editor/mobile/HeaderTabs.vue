@@ -38,6 +38,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import imageUtils from '@/utils/imageUtils'
+import i18n from '@/i18n'
 
 interface IIcon {
   icon: string,
@@ -195,7 +196,7 @@ export default defineComponent({
           if (!this.isHandleShadow) {
             this.$emit('switchTab', icon)
           } else {
-            // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+            this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           }
           break
         }

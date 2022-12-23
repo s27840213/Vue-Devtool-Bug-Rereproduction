@@ -66,6 +66,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import pageUtils from '@/utils/pageUtils'
 import ComponentLog from '@/components/componentLog/ComponentLog.vue'
 import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
+import i18n from '@/i18n'
 
 export default defineComponent({
   name: 'DesktopEditor',
@@ -249,7 +250,7 @@ export default defineComponent({
       return window.confirm('Do you really want to leave? you have unsaved changes!')
     },
     networkError(): void {
-      // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0351')}` })
+      this.$notify({ group: 'error', text: `${i18n.global.t('NN0351')}` })
       this.$emit('setIsLoading', false)
     }
   }

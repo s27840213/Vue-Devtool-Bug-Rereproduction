@@ -71,6 +71,7 @@ import { ShadowEffectType } from '@/interfaces/imgShadow'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import pageUtils from '@/utils/pageUtils'
 import SvgPath from 'svgpath'
+import i18n from '@/i18n'
 
 export default defineComponent({
   props: {
@@ -530,7 +531,7 @@ export default defineComponent({
               this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
             } else {
-              // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+              this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
               body.removeEventListener('drop', this.onDrop)
             }
           }
