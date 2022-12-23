@@ -16,7 +16,7 @@ div(class="popup-file")
     span {{$tc('NN0072')}}
   hr(class="popup-file__hr")
   div(class="popup-file__item " @click="toggleBleed()")
-    span {{showBleed ? "關閉印刷出血" : "開啟印刷出血"}}
+    span {{hasBleed ? "關閉印刷出血" : "開啟印刷出血"}}
   div(class="popup-file__item " @click="togglerRuler()")
     span {{$t('NN0073')}}
     svg-icon(v-if="isShownRuler" class="pointer"
@@ -64,17 +64,14 @@ import Vue from 'vue'
 import popupUtils from '@/utils/popupUtils'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
-import { mapGetters, mapState, mapMutations } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import shortcutHandler from '@/utils/shortcutUtils'
 import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
 import stepsUtils from '@/utils/stepsUtils'
 import gtmUtils from '@/utils/gtmUtils'
-import page from '@/store/module/page'
 import resizeUtils from '@/utils/resizeUtils'
-import unitUtils, { PRECISION } from '@/utils/unitUtils'
-import { IBleed } from '@/interfaces/page'
-import { round } from 'lodash'
+import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
   components: {
@@ -86,9 +83,6 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState([
-      'showBleed'
-    ]),
     ...mapState('user', [
       'uname'
     ]),
@@ -125,12 +119,12 @@ export default Vue.extend({
       } else {
         return this.uname
       }
+    },
+    hasBleed(): boolean {
+      return pageUtils.getPages.some((page: IPage) => page.isEnableBleed)
     }
   },
   methods: {
-    ...mapMutations({
-      setShowBleed: 'SET_showBleed'
-    }),
     closePopup() {
       popupUtils.closePopup()
     },
@@ -152,26 +146,26 @@ export default Vue.extend({
       rulerUtils.setLockGuideline(!rulerUtils.lockGuideline)
     },
     toggleBleed() {
-      this.setShowBleed(!this.showBleed)
-      if (this.showBleed) {
+      if (this.hasBleed) {
+        // disable bleeds for all pages
         for (let idx = 0; idx < this.pagesLength; idx++) {
-          const page = pageUtils.getPage(idx)
-          const dpi = pageUtils.getPageDPI(page)
-          const defaultBleeds = Object.fromEntries(Object.entries({
-            top: this.groupType === 1 ? idx === 0 ? 3 : 0 : 3,
-            bottom: this.groupType === 1 ? idx === this.pagesLength - 1 ? 3 : 0 : 3,
-            left: 3,
-            right: 3
-          }).map(([k, v]) => [k, round(unitUtils.convert(v, 'mm', page.unit, k === 'left' || k === 'right' ? dpi.width : dpi.height), page.unit === 'px' ? 0 : PRECISION)])) as IBleed
-          resizeUtils.resizeBleeds(idx, defaultBleeds)
+          resizeUtils.disableBleeds(idx)
         }
       } else {
+        // apply default bleeds for all pages
         for (let idx = 0; idx < this.pagesLength; idx++) {
-          resizeUtils.resizeBleeds(idx, {
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0
+          const page = pageUtils.getPage(idx)
+          const unit = page.unit ?? 'px'
+          const defaultBleeds = {
+            ...pageUtils.defaultBleed[unit],
+            top: this.groupType === 1 && idx !== 0 ? 0 : pageUtils.defaultBleed[unit].top,
+            bottom: this.groupType === 1 && idx !== this.pagesLength - 1 ? 0 : pageUtils.defaultBleed[unit].bottom
+          }
+          console.log({ ...defaultBleeds })
+          resizeUtils.resizeBleeds(idx, defaultBleeds)
+          this.$store.commit('UPDATE_pageProps', {
+            pageIndex: idx,
+            props: { isEnableBleed: true }
           })
         }
       }

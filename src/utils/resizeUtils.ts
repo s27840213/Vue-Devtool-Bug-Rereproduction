@@ -202,39 +202,49 @@ class ResizeUtils {
     format.physicalHeight ||= format.height
     format.unit ||= 'px'
 
-    if (format.unit !== page.unit && page.physicalBleeds) {
-      // convert bleeds
-      let dpi: {width: number, height: number}
-      if (format.unit !== 'px') {
-        dpi = {
-          width: format.width / unitUtils.convert(format.physicalWidth, format.unit, 'in'),
-          height: format.height / unitUtils.convert(format.physicalHeight, format.unit, 'in')
-        }
-      } else {
-        const pxSize = unitUtils.convertSize(page.physicalWidth, page.physicalHeight, page.unit, 'px')
-        dpi = {
-          width: pxSize.width / unitUtils.convert(page.physicalWidth, page.unit, 'in'),
-          height: pxSize.height / unitUtils.convert(page.physicalHeight, page.unit, 'in')
-        }
+    if (format.unit !== page.unit) {
+      if (!page.isEnableBleed) {
+          store.commit('UPDATE_pageProps', {
+          pageIndex: pageIndex,
+          props: { ...format, bleeds: pageUtils.defaultBleed.px, physicalBleeds: pageUtils.defaultBleed[format.unit] }
+        })
+        return
       }
-      const unit = format.unit || 'px'
-      const physicalBleeds = Object.fromEntries(Object.entries(page.physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, page.unit, unit, (k === 'left' || k === 'right') ? dpi.width : dpi.height), unit === 'px' ? 0 : PRECISION)])) as IBleed
-      const bleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, unit, 'px', (k === 'left' || k === 'right') ? dpi.width : dpi.height))])) as IBleed
-      // add bleed to new size
-      format.width = format.width + bleeds.left + bleeds.right
-      format.height = format.height + bleeds.top + bleeds.bottom
-      format.physicalWidth = format.physicalWidth + physicalBleeds.left + physicalBleeds.right
-      format.physicalHeight = format.physicalHeight + physicalBleeds.top + physicalBleeds.bottom
-      store.commit('UPDATE_pageProps', {
-        pageIndex: pageIndex,
-        props: { ...format, bleeds, physicalBleeds }
-      })
-    } else {
-      store.commit('UPDATE_pageProps', {
+      if (page.physicalBleeds) {
+        // convert bleeds
+        let dpi: { width: number, height: number }
+        if (format.unit !== 'px') {
+          dpi = {
+            width: format.width / unitUtils.convert(format.physicalWidth, format.unit, 'in'),
+            height: format.height / unitUtils.convert(format.physicalHeight, format.unit, 'in')
+          }
+        } else {
+          const pxSize = unitUtils.convertSize(page.physicalWidth, page.physicalHeight, page.unit, 'px')
+          dpi = {
+            width: pxSize.width / unitUtils.convert(page.physicalWidth, page.unit, 'in'),
+            height: pxSize.height / unitUtils.convert(page.physicalHeight, page.unit, 'in')
+          }
+        }
+        const unit = format.unit || 'px'
+        const physicalBleeds = Object.fromEntries(Object.entries(page.physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, page.unit, unit, (k === 'left' || k === 'right') ? dpi.width : dpi.height), unit === 'px' ? 0 : PRECISION)])) as IBleed
+        const bleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, unit, 'px', (k === 'left' || k === 'right') ? dpi.width : dpi.height))])) as IBleed
+        // add bleed to new size
+        format.width = format.width + bleeds.left + bleeds.right
+        format.height = format.height + bleeds.top + bleeds.bottom
+        format.physicalWidth = format.physicalWidth + physicalBleeds.left + physicalBleeds.right
+        format.physicalHeight = format.physicalHeight + physicalBleeds.top + physicalBleeds.bottom
+        store.commit('UPDATE_pageProps', {
+          pageIndex: pageIndex,
+          props: { ...format, bleeds, physicalBleeds }
+        })
+        return
+      }
+    }
+
+    store.commit('UPDATE_pageProps', {
       pageIndex: pageIndex,
       props: { ...format }
     })
-    }
   }
 
   resizeBleeds(pageIndex: number, physicalBleeds: IBleed, bleeds?: IBleed) {
@@ -251,7 +261,7 @@ class ResizeUtils {
     const newSize = { width: width + newBleeds.left + newBleeds.right, height: height + newBleeds.top + newBleeds.bottom }
     const aspectRatio = width / height
     const targetAspectRatio = newSize.width / newSize.height
-    this.scaleAndMoveLayers(pageIndex, page, 1, newBleeds.left - page.bleeds.left, newBleeds.top - page.bleeds.top)
+    this.scaleAndMoveLayers(pageIndex, page, 1, newBleeds.left - (page.isEnableBleed ? page.bleeds.left : 0), newBleeds.top - (page.isEnableBleed ? page.bleeds.top : 0))
     if (Math.abs(targetAspectRatio - aspectRatio) < Number.EPSILON) {
       const scale = targetAspectRatio > aspectRatio ? newSize.height / page.height : newSize.width / page.width
       this.scaleBackground(pageIndex, page, scale)
@@ -272,6 +282,50 @@ class ResizeUtils {
       }
     })
     store.commit('SET_bleeds', { pageIndex, bleeds: newBleeds, physicalBleeds: newPhysicalBleeds })
+  }
+
+  disableBleeds(pageIndex: number) {
+    const page = pageUtils.getPage(pageIndex)
+    const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.getPageSizeWithBleeds(page)
+
+    // resize page
+    const newSize = { width, height }
+    const aspectRatio = width / height
+    const targetAspectRatio = newSize.width / newSize.height
+    this.scaleAndMoveLayers(pageIndex, page, 1, -page.bleeds.left, -page.bleeds.top)
+    if (Math.abs(targetAspectRatio - aspectRatio) < Number.EPSILON) {
+      const scale = targetAspectRatio > aspectRatio ? newSize.height / page.height : newSize.width / page.width
+      this.scaleBackground(pageIndex, page, scale)
+    } else {
+      this.centerBackground(pageIndex, page, newSize)
+    }
+    rulerUtils.removeInvalidGuides(pageIndex, newSize)
+
+    const dpi = {
+      width: newSize.width / unitUtils.convert(physicalWidth, unit, 'in'),
+      height: newSize.height / unitUtils.convert(physicalHeight, unit, 'in')
+    }
+    const pxDefaultBleed = Object.fromEntries(Object.entries(pageUtils.defaultBleed[unit]).map(([k, v]) => [k, round(unitUtils.convert(v, unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height))])) as IBleed // convert bleed to px size
+
+    // update page size
+    store.commit('UPDATE_pageProps', {
+      pageIndex: pageIndex,
+      props: {
+        width: newSize.width,
+        height: newSize.height,
+        physicalWidth: physicalWidth,
+        physicalHeight: physicalHeight,
+        unit: unit,
+        bleeds: pxDefaultBleed,
+        physicalBleeds: pageUtils.defaultBleed[unit]
+      }
+    })
+
+    // disable bleed for page
+    store.commit('UPDATE_pageProps', {
+      pageIndex,
+      props: { isEnableBleed: false }
+    })
   }
 
   testResizeAllPages() {

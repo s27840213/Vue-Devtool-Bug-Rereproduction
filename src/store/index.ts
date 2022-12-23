@@ -103,7 +103,6 @@ const getDefaultState = (): IEditorState => ({
     body: []
   },
   isMoving: false,
-  showBleed: false,
   showRuler: localStorage.getItem('showRuler') === 'true' ?? false,
   showGuideline: true,
   lockGuideline: false,
@@ -852,9 +851,6 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, bleeds, physicalBleeds } = payload
     pages[pageIndex].bleeds = { ...bleeds }
     pages[pageIndex].physicalBleeds = { ...physicalBleeds }
-  },
-  SET_showBleed(state: IEditorState, bool: boolean) {
-    state.showBleed = bool
   },
   SET_showRuler(state: IEditorState, bool: boolean) {
     state.showRuler = bool

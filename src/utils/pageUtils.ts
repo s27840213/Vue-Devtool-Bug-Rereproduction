@@ -19,6 +19,20 @@ class PageUtils {
   get MAX_AREA() { return 6000 * 6000 }
   get MAX_SIZE() { return 8000 }
   get MIN_SIZE() { return 40 }
+  get defaultBleed() {
+    const toBleed = (val: number) => ({
+      top: val,
+      bottom: val,
+      left: val,
+      right: val
+    } as IBleed)
+    return {
+      px: toBleed(11),
+      cm: toBleed(0.3),
+      mm: toBleed(3),
+      in: toBleed(0.118)
+    } as {[index: string]: IBleed}
+  }
 
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get isDetailPage(): boolean { return store.getters.getGroupType === 1 }
@@ -145,18 +159,9 @@ class PageUtils {
         v: [],
         h: []
       },
-      bleeds: {
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0
-      },
-      physicalBleeds: {
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0
-      },
+      isEnableBleed: false,
+      bleeds: this.defaultBleed.px,
+      physicalBleeds: this.defaultBleed.px,
       isAutoResizeNeeded: false
     }
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))
@@ -568,6 +573,16 @@ class PageUtils {
     page.isAutoResizeNeeded = isAutoResizeNeeded
   }
 
+  setIsEnableBleedForPages(pages: IPage[], isEnableBleed: boolean) {
+    for (const page of pages) {
+      this.setIsEnableBleedForPage(page, isEnableBleed)
+    }
+  }
+
+  setIsEnableBleedForPage(page: IPage, isEnableBleed: boolean) {
+    page.isEnableBleed = isEnableBleed
+  }
+
   /**
    * Returns DPI of target page based on it's px size and physical size.
    * @param page Target page, use current focused page if undefined
@@ -589,19 +604,20 @@ class PageUtils {
    ** unit: Unit for physical size and physical bleeds
    */
   getPageSizeWithBleeds(page: IPage): { width: number, height: number, physicalWidth: number, physicalHeight: number, bleeds: IBleed, physicalBleeds: IBleed, unit: string } {
-    const defaultBleed = { top: 0, bottom: 0, left: 0, right: 0 } as IBleed
+    const noBleed = { top: 0, bottom: 0, left: 0, right: 0 } as IBleed
     const physicalWidth = page.physicalWidth ?? page.width
     const physicalHeight = page.physicalHeight ?? page.height
-    const bleeds = page.bleeds ?? defaultBleed
-    const physicalBleeds = page.physicalBleeds ?? bleeds
+    const bleeds = page.bleeds ?? this.defaultBleed.px
+    const physicalBleeds = page.physicalBleeds ?? page.bleeds ?? this.defaultBleed[page.unit ?? 'px']
+    const isEnableBleed = page.isEnableBleed
     return {
-      width: page.width - bleeds.left - bleeds.right,
-      height: page.height - bleeds.top - bleeds.bottom,
-      physicalWidth: physicalWidth - physicalBleeds.left - physicalBleeds.right,
-      physicalHeight: physicalHeight - physicalBleeds.top - physicalBleeds.bottom,
-      bleeds,
-      physicalBleeds,
-      unit: page.unit
+      width: isEnableBleed ? page.width - bleeds.left - bleeds.right : page.width,
+      height: isEnableBleed ? page.height - bleeds.top - bleeds.bottom : page.height,
+      physicalWidth: isEnableBleed ? physicalWidth - physicalBleeds.left - physicalBleeds.right : physicalWidth,
+      physicalHeight: isEnableBleed ? physicalHeight - physicalBleeds.top - physicalBleeds.bottom : physicalHeight,
+      bleeds: isEnableBleed ? bleeds : noBleed,
+      physicalBleeds: isEnableBleed ? physicalBleeds : noBleed,
+      unit: page.unit ?? 'px'
     }
   }
 

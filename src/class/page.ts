@@ -24,6 +24,7 @@ export class Page implements IPage {
     h: Array<number>
   }
 
+  isEnableBleed: boolean
   bleeds: {
     top: number
     bottom: number
@@ -43,8 +44,8 @@ export class Page implements IPage {
   constructor() {
     this.width = 1080
     this.height = 1080
-    this.physicalWidth = 28.575
-    this.physicalHeight = 28.575
+    this.physicalWidth = 1080
+    this.physicalHeight = 1080
     this.unit = 'px'
     this.backgroundColor = '#ffffff'
     this.backgroundImage = {
@@ -75,17 +76,18 @@ export class Page implements IPage {
       v: [],
       h: []
     }
+    this.isEnableBleed = false
     this.bleeds = {
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0
+      top: 11,
+      bottom: 11,
+      left: 11,
+      right: 11
     }
     this.physicalBleeds = {
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0
+      top: 11,
+      bottom: 11,
+      left: 11,
+      right: 11
     }
     this.isAutoResizeNeeded = false
   }

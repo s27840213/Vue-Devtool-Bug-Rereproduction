@@ -172,16 +172,14 @@ class AssetUtils {
       if (store.getters['user/getUserId'] === 'backendRendering' && !store.getters['user/getBleed'] && !store.getters['user/getTrim']) {
         // remove bleeds if disabled
         console.log('noBleed')
-        const noBleed = { top: 0, bottom: 0, left: 0, right: 0 }
-        resizeUtils.resizeBleeds(targetPageIndex, noBleed, noBleed)
+        resizeUtils.disableBleeds(targetPageIndex)
       } else if (json.bleeds && json.physicalBleeds && hasBleed(json.bleeds) && hasBleed(json.physicalBleeds)) {
         // use bleeds of template if it has
         resizeUtils.resizeBleeds(targetPageIndex, json.physicalBleeds, json.bleeds)
       } else {
         // use default bleeds if it has no bleeds
         console.log('defaultBleed')
-        const defaultBleeds = { top: 11, bottom: 11, left: 11, right: 11 }
-        resizeUtils.resizeBleeds(targetPageIndex, defaultBleeds, defaultBleeds)
+        resizeUtils.resizeBleeds(targetPageIndex, pageUtils.defaultBleed[json.unit ?? 'px'])
       }
     } else if (targetPage.bleeds && targetPage.physicalBleeds) {
       // convert bleeds to template unit

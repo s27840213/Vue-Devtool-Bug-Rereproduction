@@ -196,9 +196,6 @@ export default Vue.extend({
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
     },
-    hasBleed(): boolean {
-      return !!this.config.bleeds.top || !!this.config.bleeds.bottom || !!this.config.bleeds.left || !!this.config.bleeds.right
-    },
     bleedLineStyles() {
       // const borderSize = { top: 1, bottom: 1 }
       // if (this.isDetailPage && this.pages.length > 1) {

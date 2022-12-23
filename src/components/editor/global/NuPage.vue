@@ -137,7 +137,7 @@
       div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
         class="page-highlighter"
         :style="wrapperStyles()")
-      div(v-if="showBleed && hasBleed" :class="`bleed-line nu-page-bleed-${pageIndex}`" :style="bleedLineStyles()")
+      div(v-if="config.isEnableBleed && hasBleed" :class="`bleed-line nu-page-bleed-${pageIndex}`" :style="bleedLineStyles()")
       div(v-if="(currActivePageIndex === pageIndex && isDetailPage)"
           class="page-resizer"
           ref="pageResizer"
@@ -267,7 +267,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['isMoving', 'currDraggedPhoto', 'showBleed']),
+    ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapState('shadow', ['handleId']),
     ...mapGetters({
       imgControlPageIdx: 'imgControl/imgControlPageIdx'
@@ -569,6 +569,7 @@ export default Vue.extend({
         height: this.config.height,
         physicalWidth: this.config.physicalWidth,
         physicalHeight: this.config.physicalHeight,
+        isEnableBleed: this.config.isEnableBleed,
         bleeds: this.config.bleeds,
         physicalBleeds: this.config.physicalBleeds,
         unit: this.config.unit

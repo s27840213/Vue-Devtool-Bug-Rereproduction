@@ -65,7 +65,6 @@ export interface IEditorState {
     subheading: Array<string>,
     body: Array<string>
   },
-  showBleed: boolean,
   showRuler: boolean,
   showGuideline: boolean,
   lockGuideline: boolean,

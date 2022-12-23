@@ -34,6 +34,7 @@ export interface IPage {
     v: Array<number>,
     h: Array<number>
   },
+  isEnableBleed: boolean,
   bleeds: IBleed,
   physicalBleeds: IBleed
   isAutoResizeNeeded: boolean

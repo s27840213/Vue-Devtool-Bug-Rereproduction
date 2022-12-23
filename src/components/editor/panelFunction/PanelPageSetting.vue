@@ -25,7 +25,7 @@
                     iconName="close" iconWidth="19px" iconColor="white")
           keep-alive
             page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)" ref="pageSizeSelector")
-    div(v-if="showBleed" class="page-setting__bleed")
+    div(v-if="hasBleed" class="page-setting__bleed")
       div(class="page-setting-row page-setting__bleed__title pointer" @click="() => showBleedSettings = !showBleedSettings")
         span(class="text-gray-2 label-mid") {{'印刷出血設定'}}
         svg-icon(class='page-setting__bleed__expand-icon'
@@ -308,12 +308,7 @@ export default Vue.extend({
       unsetThemeTemplate: [] as string[],
       showBleedSettings: true,
       unitOptions: STR_UNITS,
-      bleeds: {
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0
-      } as IBleed
+      bleeds: pageUtils.defaultBleed.px
     }
   },
   mounted: function () {
@@ -363,17 +358,11 @@ export default Vue.extend({
         this.bleeds[key] = newVal[key]
       })
     },
-    showBleed: function () {
+    hasBleed: function () {
       this.showBleedSettings = true
-    },
-    hasBleed: function (newVal) {
-      if (!this.showBleed) this.setShowBleed(newVal)
     }
   },
   computed: {
-    ...mapState([
-      'showBleed'
-    ]),
     ...mapState('user', [
       'role',
       'adminMode'
@@ -391,12 +380,7 @@ export default Vue.extend({
     }),
     currentPageBleeds(): IBleed {
       const currPage = pageUtils.currFocusPage
-      let bleeds = currPage?.physicalBleeds ?? currPage?.bleeds ?? {
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0
-      }
+      let bleeds = currPage?.physicalBleeds ?? currPage?.bleeds ?? pageUtils.defaultBleed[currPage.unit]
       bleeds = {
         top: this.groupType === 1 ? this.getPage(0).physicalBleeds?.top ?? this.getPage(0).bleeds?.top ?? 0 : bleeds.top,
         bottom: this.groupType === 1 ? this.getPage(this.pagesLength - 1).physicalBleeds?.bottom ?? this.getPage(this.pagesLength - 1).bleeds?.bottom ?? 0 : bleeds.bottom,
@@ -438,7 +422,7 @@ export default Vue.extend({
       ]
     },
     hasBleed(): boolean {
-      return this.getPages.some((page: IPage) => page.bleeds.top || page.bleeds.bottom || page.bleeds.left || page.bleeds.right)
+      return this.getPages.some((page: IPage) => page.isEnableBleed)
     },
     inAdminMode(): boolean {
       return this.role === 0 && this.adminMode === true
@@ -459,8 +443,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       updatePageProps: 'UPDATE_pageProps',
-      setIsloading: 'SET_isGlobalLoading',
-      setShowBleed: 'SET_showBleed'
+      setIsloading: 'SET_isGlobalLoading'
     }),
     ...mapActions('layouts', [
       'getRecently'
