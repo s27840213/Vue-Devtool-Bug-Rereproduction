@@ -125,13 +125,12 @@ export default Vue.extend({
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
       setTimeout(() => {
         this.resizeCallback()
-        this.drawSvgBG()
         if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
           this.isLoading = false
         }
       }, 100) // for the delay between font loading and dom rendering
     })
-    // this.drawSvgBG()
+    this.drawSvgBG()
   },
   computed: {
     ...mapState(['isMoving']),
@@ -432,6 +431,7 @@ export default Vue.extend({
       ])
     },
     async resizeCallback() {
+      // this.drawSvgBG()
       const config = generalUtils.deepCopy(this.config) as IText
       if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
 
@@ -444,7 +444,7 @@ export default Vue.extend({
         widthLimit = config.widthLimit
       }
       const textHW = await textUtils.getTextHWAsync(config, widthLimit)
-      if (typeof this.subLayerIndex === 'undefined') {
+      if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
         let x = config.styles.x
         let y = config.styles.y
         if (config.widthLimit === -1) {

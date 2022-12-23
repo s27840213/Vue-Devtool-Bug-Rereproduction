@@ -164,6 +164,7 @@ export default Vue.extend({
       hasDestroyed: false,
       isOnError: false,
       src: '',
+      initFlag: false,
       shadowBuff: {
         canvasShadowImg: undefined as undefined | HTMLImageElement,
         canvasSize: { width: 0, height: 0 },
@@ -402,30 +403,30 @@ export default Vue.extend({
     },
     onLoad(e: Event) {
       this.isOnError = false
+      this.initFlag = true
       const img = e.target as HTMLImageElement
       const physicalRatio = img.naturalWidth / img.naturalHeight
       const layerRatio = this.config.styles.imgWidth / this.config.styles.imgHeight
-      // if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1) {
-      //   const newW = this.config.styles.imgHeight * physicalRatio
-      //   const offsetW = this.config.styles.imgWidth - newW
-      //   if (this.primaryLayerType() === 'frame') {
-      //     console.log(generalUtils.deepCopy(layerUtils.getLayer(this.pageIndex, this.layerIndex)))
-      //     frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
-      //       imgWidth: newW,
-      //       imgX: this.config.styles.imgX + offsetW / 2
-      //     })
-      //   } else {
-      //     layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-      //       imgWidth: newW,
-      //       imgX: this.config.styles.imgX + offsetW / 2
-      //     }, this.subLayerIndex)
-      //   }
-      // }
+      if (!this.initFlag && physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1) {
+        const newW = this.config.styles.imgHeight * physicalRatio
+        const offsetW = this.config.styles.imgWidth - newW
+        if (this.primaryLayerType() === 'frame') {
+          frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+            imgWidth: newW,
+            imgX: this.config.styles.imgX + offsetW / 2
+          })
+        } else {
+          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+            imgWidth: newW,
+            imgX: this.config.styles.imgX + offsetW / 2
+          }, this.subLayerIndex)
+        }
+      }
     },
     onLoadShadow() {
       this.isOnError = false
       const shadowImg = this.$refs['shadow-img'] as HTMLImageElement
-      if (!this.forRender && (!shadowImg.width || !shadowImg.height)) {
+      if (!this.initFlag && !this.forRender && (!shadowImg.width || !shadowImg.height)) {
         imageShadowUtils.updateShadowSrc(this.layerInfo(), { type: '', assetId: '', userId: '' })
         imageShadowUtils.setEffect(ShadowEffectType.none, {}, this.layerInfo())
       }
