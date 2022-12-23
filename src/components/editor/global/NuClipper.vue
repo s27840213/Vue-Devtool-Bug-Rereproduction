@@ -54,19 +54,12 @@ export default Vue.extend({
       return (this.config.vSize?.[1] ?? 0) + (this.config.pDiff?.[1])
     },
     styles(): any {
-      const { type, imgControl } = this.config
+      const { type } = this.config
       const { horizontalFlip, verticalFlip } = this.config.styles
       const flip = type === 'image' ? {} : cssConverter.convertFlipStyle(horizontalFlip, verticalFlip)
       let { width, height, scale } = this.config.styles
-      const layerPath = `path('M0,0h${width}v${height}h${-width}z`
-      let clipPath = ''
-
       switch (type) {
         case 'image':
-          if (this.config.isFrame) {
-            // clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
-            clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')`
-          }
           if (!this.config.isImageFrame && this.primaryLayer && (this.primaryLayer as IFrame).type === LayerType.frame) {
             width = `${width * this.contentScaleRatio}px`
             height = `${height * this.contentScaleRatio}px`
@@ -95,7 +88,6 @@ export default Vue.extend({
       return {
         width,
         height,
-        ...(!this.imgControl && this.config.type === 'image' && this.config.styles.shadow.currentEffect === ShadowEffectType.none && { clipPath }),
         ...flip,
         'transform-style': pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }

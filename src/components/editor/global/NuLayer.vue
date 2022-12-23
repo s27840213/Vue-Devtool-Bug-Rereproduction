@@ -296,7 +296,7 @@ export default Vue.extend({
       const styles = Object.assign(
         CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
         {
-          outline: this.outlineStyles(),
+          // outline: this.outlineStyles(),
           willChange: !this.isSubLayer && this.isDragging ? 'transform' : '',
           pointerEvents,
           clipPath
