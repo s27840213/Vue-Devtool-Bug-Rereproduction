@@ -78,6 +78,8 @@ import generalUtils from '@/utils/generalUtils'
 import editorUtils from '@/utils/editorUtils'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import { round } from 'lodash'
+import modalUtils from '@/utils/modalUtils'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   components: {
@@ -109,7 +111,8 @@ export default Vue.extend({
       from: -1,
       screenWidth: document.documentElement.clientWidth,
       screenHeight: document.documentElement.clientHeight,
-      scrollHeight: 0
+      scrollHeight: 0,
+      uploadUtils: uploadUtils
     }
   },
   created() {
@@ -152,6 +155,26 @@ export default Vue.extend({
             }
           })
         })
+      }
+    })
+
+    // check and auto resize pages oversized on design loaded
+    const unwatchPages = this.$watch('isGettingDesign', (newVal) => {
+      if (!newVal) {
+        if (this.pages.length > 0 && pageUtils.fixPageSize()) {
+          pageUtils.fitPage()
+          uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+          modalUtils.setModalInfo(
+            '像素尺寸超過上限',
+            ['此檔案中有頁面，像素尺寸超過上限6000x6000，系統會將頁面自動調小，建議您若要印刷，請設定實體尺寸，例如cm, mm, inch等，並下載時選用PDF列印格式，這樣印刷品質也會更好。'],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+          )
+        }
+        unwatchPages()
       }
     })
   },
@@ -245,7 +268,8 @@ export default Vue.extend({
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isSettingScaleRatio: 'getIsSettingScaleRatio',
-      enableComponentLog: 'getEnalbleComponentLog'
+      enableComponentLog: 'getEnalbleComponentLog',
+      pagesLength: 'getPagesLength'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -279,6 +303,9 @@ export default Vue.extend({
     },
     showRuler(): boolean {
       return this._showRuler && !this.inBgRemoveMode
+    },
+    isGettingDesign(): boolean {
+      return this.uploadUtils.isGettingDesign
     }
   },
   methods: {

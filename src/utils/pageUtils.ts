@@ -604,6 +604,30 @@ class PageUtils {
       unit: page.unit
     }
   }
+
+  /**
+   * Resize pages oversized to max size
+   * @returns Whether any page has been fixed
+   */
+  fixPageSize(): boolean {
+    const pages = this.getPages
+    let fixed = false
+    pages.forEach((page, index) => {
+      if (page.width * page.height > pageUtils.MAX_AREA) {
+        const format = { width: page.width, height: page.height, physicalWidth: page.physicalWidth ?? page.width, physicalHeight: page.physicalHeight ?? page.height, unit: page.unit ?? 'px' }
+        format.height = Math.sqrt(pageUtils.MAX_AREA / page.width * page.height)
+        format.width = format.height / page.height * page.width
+        format.width = Math.floor(format.width)
+        format.height = Math.floor(format.height)
+        const physicalSize = format.unit === 'px' ? { width: format.width, height: format.height } : unitUtils.convertSize(format.width, format.height, 'px', format.unit)
+        format.physicalWidth = physicalSize.width
+        format.physicalHeight = physicalSize.height
+        resizeUtils.resizePage(index, page, format)
+        fixed = true
+      }
+    })
+    return fixed
+  }
 }
 
 const pageUtils = new PageUtils()
