@@ -10,16 +10,16 @@ import FocusUtils from './focusUtils'
 import generalUtils from './generalUtils'
 import layerFactary from './layerFactary'
 import resizeUtils from './resizeUtils'
-import { throttle } from 'lodash'
+import { round, throttle } from 'lodash'
 import groupUtils from './groupUtils'
 import { LayerType } from '@/store/types'
-import unitUtils from './unitUtils'
+import unitUtils, { PRECISION } from './unitUtils'
 
 class PageUtils {
   get MAX_AREA() { return 6000 * 6000 }
   get MAX_SIZE() { return 8000 }
   get MIN_SIZE() { return 40 }
-  get defaultBleed() {
+  get defaultBleedMap() {
     const toBleed = (val: number) => ({
       top: val,
       bottom: val,
@@ -160,8 +160,8 @@ class PageUtils {
         h: []
       },
       isEnableBleed: false,
-      bleeds: this.defaultBleed.px,
-      physicalBleeds: this.defaultBleed.px,
+      bleeds: this.getDefaultBleeds('px'),
+      physicalBleeds: this.getDefaultBleeds('px'),
       isAutoResizeNeeded: false
     }
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))
@@ -607,8 +607,8 @@ class PageUtils {
     const noBleed = { top: 0, bottom: 0, left: 0, right: 0 } as IBleed
     const physicalWidth = page.physicalWidth ?? page.width
     const physicalHeight = page.physicalHeight ?? page.height
-    const bleeds = page.bleeds ?? this.defaultBleed.px
-    const physicalBleeds = page.physicalBleeds ?? page.bleeds ?? this.defaultBleed[page.unit ?? 'px']
+    const bleeds = page.bleeds ?? this.getDefaultBleeds('px')
+    const physicalBleeds = page.physicalBleeds ?? page.bleeds ?? this.getDefaultBleeds(page.unit ?? 'px')
     const isEnableBleed = page.isEnableBleed
     return {
       width: isEnableBleed ? page.width - bleeds.left - bleeds.right : page.width,
@@ -643,6 +643,18 @@ class PageUtils {
       }
     })
     return fixed
+  }
+
+  getDefaultBleeds(unit: string, dpi = { width: 96, height: 96 }) {
+    const defaultBleed = 3 // mm
+    const precision = unit === 'px' ? 0 : PRECISION
+    const res = {
+      top: round(unitUtils.convert(defaultBleed, 'mm', unit, dpi.height), precision),
+      bottom: round(unitUtils.convert(defaultBleed, 'mm', unit, dpi.height), precision),
+      left: round(unitUtils.convert(defaultBleed, 'mm', unit, dpi.width), precision),
+      right: round(unitUtils.convert(defaultBleed, 'mm', unit, dpi.width), precision)
+    } as IBleed
+    return res
   }
 }
 

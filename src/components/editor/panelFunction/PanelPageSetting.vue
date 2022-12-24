@@ -308,7 +308,7 @@ export default Vue.extend({
       unsetThemeTemplate: [] as string[],
       showBleedSettings: true,
       unitOptions: STR_UNITS,
-      bleeds: pageUtils.defaultBleed.px
+      bleeds: pageUtils.getDefaultBleeds('px')
     }
   },
   mounted: function () {
@@ -380,7 +380,7 @@ export default Vue.extend({
     }),
     currentPageBleeds(): IBleed {
       const currPage = pageUtils.currFocusPage
-      let bleeds = currPage?.physicalBleeds ?? currPage?.bleeds ?? pageUtils.defaultBleed[currPage.unit]
+      let bleeds = currPage?.physicalBleeds ?? currPage?.bleeds ?? pageUtils.getDefaultBleeds(currPage.unit)
       bleeds = {
         top: this.groupType === 1 ? this.getPage(0).physicalBleeds?.top ?? this.getPage(0).bleeds?.top ?? 0 : bleeds.top,
         bottom: this.groupType === 1 ? this.getPage(this.pagesLength - 1).physicalBleeds?.bottom ?? this.getPage(this.pagesLength - 1).bleeds?.bottom ?? 0 : bleeds.bottom,

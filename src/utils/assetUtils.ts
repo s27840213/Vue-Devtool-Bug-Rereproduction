@@ -179,7 +179,8 @@ class AssetUtils {
       } else {
         // use default bleeds if it has no bleeds
         console.log('defaultBleed')
-        resizeUtils.resizeBleeds(targetPageIndex, pageUtils.defaultBleed[json.unit ?? 'px'])
+        const page = this.getPage(targetPageIndex)
+        resizeUtils.resizeBleeds(targetPageIndex, pageUtils.getDefaultBleeds(page.unit, pageUtils.getPageDPI(page)))
       }
     } else if (targetPage.bleeds && targetPage.physicalBleeds) {
       // convert bleeds to template unit
