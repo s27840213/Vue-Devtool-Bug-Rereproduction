@@ -467,8 +467,8 @@ class ViviStickerUtils {
       this.editorStateBuffer.widthLimit = textLayer.widthLimit
       const ratio = Math.min(page.width / 2 / styles.width, page.height / styles.height)
       const scale = styles.scale * ratio
-      const x = styles.x + styles.width * (1 - ratio) / 2
-      const y = styles.y + styles.height * (1 - ratio) / 2
+      const x = (page.width - styles.width * ratio) / 2
+      const y = (page.height - styles.height * ratio) / 2
       layerUtils.updateLayerStyles(0, 0, { scale, x, y, width: styles.width * ratio, height: styles.height * ratio })
       layerUtils.updateLayerProps(0, 0, { widthLimit: textLayer.widthLimit * ratio })
     }
