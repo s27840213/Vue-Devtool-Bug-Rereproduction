@@ -181,7 +181,7 @@ export default Vue.extend({
       return pageUtils.currFocusPageIndex
     },
     isCustomValid(): boolean {
-      return this.widthValid && this.heightValid && !this.isOverSize()
+      return this.widthValid && this.heightValid && !this.isOverArea()
     },
     defaultTextColor(): string {
       return this.isDarkTheme ? 'text-white' : 'text-gray-2'
@@ -193,14 +193,14 @@ export default Vue.extend({
       if (!this.pageWidth) return false
       if (this.pageWidth < 0) return false
       if (this.isOverSize(this.pageSizes.px.width) || this.isUnderSize(this.pageSizes.px.width)) return false
-      if ((this.isOverSize() && (this.isLocked || this.lastFocusedInput === 'width'))) return false
+      if ((this.isOverArea() && (this.isLocked || this.lastFocusedInput === 'width'))) return false
       return true
     },
     heightValid(): boolean {
       if (!this.pageHeight) return false
       if (this.pageHeight < 0) return false
       if (this.isOverSize(this.pageSizes.px.height) || this.isUnderSize(this.pageSizes.px.height)) return false
-      if ((this.isOverSize() && (this.isLocked || this.lastFocusedInput === 'height'))) return false
+      if ((this.isOverArea() && (this.isLocked || this.lastFocusedInput === 'height'))) return false
       return true
     },
     fixedSize(): {[key: string]: number, width: number, height: number} {
@@ -208,7 +208,7 @@ export default Vue.extend({
         width: this.pageWidth,
         height: this.pageHeight
       }
-      if (this.isOverSize()) {
+      if (this.isOverArea()) {
         const pxSize = this.pageSizes.px
         if (this.isLocked) {
           res.height = Math.sqrt(pageUtils.MAX_AREA / pxSize.width * pxSize.height)
@@ -222,7 +222,6 @@ export default Vue.extend({
     },
     errMsg(): string {
       if (!this.pageWidth || !this.pageHeight || this.pageWidth <= 0 || this.pageHeight <= 0) return this.$t('NN0767', { num: 0 }).toString()
-      if (this.isOverSize()) return `Must be less than ${this.isLocked ? `${floor(this.fixedSize.width, PRECISION)} x ${floor(this.fixedSize.height, PRECISION)}` : floor(this.fixedSize[this.lastFocusedInput], PRECISION)} ${this.selectedUnit} to stay within our maximum allowed area. `
       if (this.isOverSize(this.pageSizes.px.width) || this.isUnderSize(this.pageSizes.px.width) || this.isOverSize(this.pageSizes.px.height) || this.isUnderSize(this.pageSizes.px.height)) {
         if (this.selectedUnit === 'px') return 'Size must between 40px and 8000px.'
         const dpi = {
@@ -239,6 +238,7 @@ export default Vue.extend({
         }
         return `Size must between ${round(minSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit} and ${round(maxSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit}.`
       }
+      if (this.isOverArea()) return `Must be less than ${this.isLocked ? `${floor(this.fixedSize.width, PRECISION)} x ${floor(this.fixedSize.height, PRECISION)}` : floor(this.fixedSize[this.lastFocusedInput], PRECISION)} ${this.selectedUnit} to stay within our maximum allowed area. `
       return ''
     },
     formatList(): ILayout[] {
@@ -285,9 +285,11 @@ export default Vue.extend({
         'getRecently'
       ]
     ),
-    isOverSize(size?: number): boolean {
-      if (size) return size > pageUtils.MAX_SIZE
+    isOverArea() {
       return this.pageSizes.px.width * this.pageSizes.px.height > pageUtils.MAX_AREA
+    },
+    isOverSize(size: number): boolean {
+      return size > pageUtils.MAX_SIZE
     },
     isUnderSize(size: number): boolean {
       return size < pageUtils.MIN_SIZE
