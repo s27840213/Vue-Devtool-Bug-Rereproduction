@@ -51,7 +51,7 @@
                 :style="{transform: 'scaleY(-1)'}")
             div(class='page-setting__bleed__content__item__input__value body-XS')
               input(type="number" min="0"
-                    :value="!isNaN(bleed.value) ? bleed.value : ''"
+                    :value="bleed.value"
                     @input="setBleed($event, bleed.key, isLocked)"
                     @blur="handleBleedSubmit()"
                     @keyup="handleBleedSubmit")
@@ -254,9 +254,8 @@ import { IBleed, IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import resizeUtils from '@/utils/resizeUtils'
-import unitUtils, { STR_UNITS, IMapUnit, PRECISION } from '@/utils/unitUtils'
+import { STR_UNITS, PRECISION } from '@/utils/unitUtils'
 import { round } from 'lodash'
-import rulerUtils from '@/utils/rulerUtils'
 
 export default Vue.extend({
   components: {
@@ -308,12 +307,35 @@ export default Vue.extend({
       unsetThemeTemplate: [] as string[],
       showBleedSettings: true,
       unitOptions: STR_UNITS,
-      bleeds: pageUtils.getDefaultBleeds('px')
+      bleeds: pageUtils.getDefaultBleeds('px'),
+      bleedsToShow: {
+        top: {
+          key: 'top',
+          label: '上',
+          value: ''
+        },
+        bottom: {
+          key: 'bottom',
+          label: '下',
+          value: ''
+        },
+        left: {
+          key: 'left',
+          label: '左',
+          value: ''
+        },
+        right: {
+          key: 'right',
+          label: '右',
+          value: ''
+        }
+      } as {[index: string]: {key: string, label: string, value: string}}
     }
   },
   mounted: function () {
     Object.keys(this.currentPageBleeds).forEach(key => {
       this.bleeds[key] = this.currentPageBleeds[key]
+      this.bleedsToShow[key].value = round(this.currentPageBleeds[key], this.sizeToShow.unit === 'px' ? 0 : PRECISION).toString()
     })
   },
   watch: {
@@ -358,6 +380,14 @@ export default Vue.extend({
         this.bleeds[key] = newVal[key]
       })
     },
+    bleeds: {
+      handler: function(newVal) {
+        Object.keys(newVal).forEach(key => {
+          this.bleedsToShow[key].value = round(newVal[key], this.sizeToShow.unit === 'px' ? 0 : PRECISION).toString()
+        })
+      },
+      deep: true
+    },
     hasBleed: function () {
       this.showBleedSettings = true
     }
@@ -396,30 +426,6 @@ export default Vue.extend({
         height: round(physicalHeight ?? height ?? 0, PRECISION),
         unit: unit ?? 'px'
       }
-    },
-    bleedsToShow(): {key: string, label: string, value: number}[] {
-      return [
-        {
-          key: 'top',
-          label: '上',
-          value: round(this.bleeds.top, PRECISION)
-        },
-        {
-          key: 'bottom',
-          label: '下',
-          value: round(this.bleeds.bottom, PRECISION)
-        },
-        {
-          key: 'left',
-          label: '左',
-          value: round(this.bleeds.left, PRECISION)
-        },
-        {
-          key: 'right',
-          label: '右',
-          value: round(this.bleeds.right, PRECISION)
-        }
-      ]
     },
     hasBleed(): boolean {
       return this.getPages.some((page: IPage) => page.isEnableBleed)
@@ -712,14 +718,22 @@ export default Vue.extend({
       return this.showBleedSettings ? {} : { transform: 'scaleY(-1)' }
     },
     setBleed(evt: Event, key: string, all = false) {
-      const value = Math.max(parseFloat((evt.target as HTMLInputElement).value), 0)
+      const value = (evt.target as HTMLInputElement).value
+      this.bleedsToShow[key].value = value
+      const numValue = typeof value === 'string' ? parseFloat(value) : value
+      const striped = numValue.toString() !== value
+      const roundedValue = round(numValue, this.sizeToShow.unit === 'px' ? 0 : PRECISION)
+      const rounded = this.bleeds[key] !== roundedValue
+      const strValue = !striped || rounded ? roundedValue.toString() : this.bleedsToShow[key].value
+      this.bleeds[key] = roundedValue
+      this.bleedsToShow[key].value = strValue
+
       console.log('set bleed', { ...this.currentPageBleeds }, value)
       if (all) {
         Object.keys(this.bleeds).forEach((key) => {
-          this.bleeds[key] = value
+          this.bleeds[key] = roundedValue
+          this.bleedsToShow[key].value = strValue
         })
-      } else if (this.bleeds[key] !== value) {
-        this.bleeds[key] = value
       }
       this.applyBleeds(key, all)
     },
@@ -728,9 +742,11 @@ export default Vue.extend({
       if (all) {
         Object.keys(this.bleeds).forEach((key) => {
           this.bleeds[key] = Math.max(this.bleeds[key] + value, 0)
+          this.bleedsToShow[key].value = this.bleeds[key].toString()
         })
       } else {
         this.bleeds[key] = Math.max(this.bleeds[key] + value, 0)
+        this.bleedsToShow[key].value = this.bleeds[key].toString()
       }
       this.applyBleeds(key, all)
       stepsUtils.record()
@@ -761,7 +777,10 @@ export default Vue.extend({
     handleBleedSubmit(evt?: KeyboardEvent) {
       if (!evt || evt.key === 'Enter') {
         Object.keys(this.bleeds).forEach(key => {
-          if (isNaN(this.bleeds[key])) this.bleeds[key] = 0
+          if (isNaN(this.bleeds[key])) {
+            this.bleeds[key] = 0
+            this.bleedsToShow[key].value = '0'
+          }
         })
         stepsUtils.record()
       }
