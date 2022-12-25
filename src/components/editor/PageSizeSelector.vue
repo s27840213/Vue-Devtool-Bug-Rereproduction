@@ -221,7 +221,7 @@ export default Vue.extend({
       return unitUtils.convertSize(floor(res.width), floor(res.height), 'px', this.selectedUnit)
     },
     errMsg(): string {
-      if (!this.pageWidth || !this.pageHeight || this.pageWidth <= 0 || this.pageHeight <= 0) return this.$t('NN0767', { num: 0 }).toString()
+      // if (!this.pageWidth || !this.pageHeight || this.pageWidth <= 0 || this.pageHeight <= 0) return this.$t('NN0767', { num: 0 }).toString()
       if (this.isOverSize(this.pageSizes.px.width) || this.isUnderSize(this.pageSizes.px.width) || this.isOverSize(this.pageSizes.px.height) || this.isUnderSize(this.pageSizes.px.height)) {
         if (this.selectedUnit === 'px') return 'Size must between 40px and 8000px.'
         const dpi = {
@@ -314,7 +314,7 @@ export default Vue.extend({
     },
     toggleLock() {
       this.isLocked = !this.isLocked
-      if (this.isLocked) this.aspectRatio = this.pageWidth / this.pageHeight
+      if (this.isLocked) this.aspectRatio = this.pageWidth * this.pageHeight <= 0 ? 1 : this.pageWidth / this.pageHeight
     },
     makeFormatTitle(format: ILayout) {
       if (format.id !== '') {

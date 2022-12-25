@@ -220,8 +220,8 @@ class PageUtils {
     designUtils.renameDesign(name)
   }
 
-  setPageSize(index: number, width: number, height: number) {
-    store.commit('SET_pageSize', { index, width, height })
+  setPageSize(index: number, width: number, height: number, physicalWidth = width, physicalHeight = height, unit = 'px') {
+    store.commit('SET_pageSize', { index, width, height, physicalWidth, physicalHeight, unit })
   }
 
   resizePage(format: { width: number, height: number }) {

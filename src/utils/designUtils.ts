@@ -14,6 +14,7 @@ import i18n from '@/i18n'
 import stepsUtils from './stepsUtils'
 import _ from 'lodash'
 import { EventEmitter } from 'events'
+import unitUtils from './unitUtils'
 
 interface Item {
   name: string,
@@ -769,12 +770,13 @@ class DesignUtils {
     return Array(pageNum).fill('').map((_, index) => this.getDesignPreview(assetId, scale, ver, signedUrl, index))
   }
 
-  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, id: number | string | undefined = undefined, path?: string, folderName?: string) {
+  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, unit = 'px', id: number | string | undefined = undefined, path?: string, folderName?: string) {
     // Redirect user to editor and create new design, will be use by login redirect.
     const query = {
       type: 'new-design-size',
       width: width.toString(),
       height: id?.toString() === '7' ? width.toString() : height.toString(),
+      unit,
       themeId: id ? id.toString() : undefined,
       path,
       folderName
@@ -787,16 +789,20 @@ class DesignUtils {
   }
 
   // Below function is used to update the page
-  async newDesign(width?: number, height?: number, newDesignType?: number, path?: string, folderName?: string) {
+  async newDesign(width = 1080, height = 1080, unit = 'px', newDesignType?: number, path?: string, folderName?: string) {
     store.commit('file/SET_setLayersDone')
+    const pxSize = unitUtils.convertSize(width, height, unit, 'px')
     pageUtils.setPages([pageUtils.newPage({
-      width: width ?? 1080,
-      height: height ?? 1080
+      width: pxSize.width,
+      height: pxSize.height,
+      physicalWidth: width,
+      physicalHeight: height,
+      unit
     })])
     pageUtils.clearPagesInfo()
     await themeUtils.refreshTemplateState(undefined, newDesignType)
     if (this.isLogin) {
-      router.replace({ query: { width: width?.toString(), height: height?.toString(), ...(path && { path }), ...(folderName && { folderName }) } })
+      router.replace({ query: { width: width?.toString(), height: height?.toString(), unit, ...(path && { path }), ...(folderName && { folderName }) } })
 
       // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
       // /**

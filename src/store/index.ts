@@ -336,9 +336,12 @@ const mutations: MutationTree<IEditorState> = {
   SET_pagesName(state: IEditorState, name: string) {
     state.name = name
   },
-  SET_pageSize(state: IEditorState, pageInfo: { index: number, width: number, height: number }) {
+  SET_pageSize(state: IEditorState, pageInfo: { index: number, width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string}) {
     state.pages[pageInfo.index].width = pageInfo.width
     state.pages[pageInfo.index].height = pageInfo.height
+    state.pages[pageInfo.index].physicalWidth = pageInfo.physicalWidth
+    state.pages[pageInfo.index].physicalHeight = pageInfo.physicalHeight
+    state.pages[pageInfo.index].unit = pageInfo.unit
   },
   SET_designId(state: IEditorState, designId: string) {
     state.designId = designId
