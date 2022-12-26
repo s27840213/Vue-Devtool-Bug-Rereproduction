@@ -265,7 +265,10 @@ export default Vue.extend({
         title: item.title ?? '',
         description: item.description ?? '',
         unit: item.unit ?? 'px'
-      })) : []
+      })).filter((layout: ILayout) => {
+        const pxSize = unitUtils.convertSize(layout.width, layout.height, layout.unit, 'px')
+        return !(pxSize.width * pxSize.height > pageUtils.MAX_AREA)
+      }) : []
     },
     isLayoutReady(): boolean {
       return this.formatList.length !== 0
@@ -403,36 +406,6 @@ export default Vue.extend({
       this.selectedUnit = unit
       // this.fixSize(false)
       this.isValidate = true
-    },
-    fetchLayouts() {
-      this.isLayoutReady = false
-      this.formatList = []
-      this.recentlyUsed = []
-      this.getRecently().then(() => {
-        for (const category of this.categories as IListServiceContentData[]) {
-          if (category.title === `${this.$t('NN0025')}`) {
-            this.formatList = category.list.map(item => ({
-              id: item.id,
-              width: item.width ?? 0,
-              height: item.height ?? 0,
-              title: item.title ?? '',
-              description: item.description ?? '',
-              unit: item.unit ?? 'px'
-            }))
-          }
-          if (category.title === `${this.$t('NN0024')}`) {
-            this.recentlyUsed = category.list.map(item => ({
-              id: item.id,
-              width: item.width ?? 0,
-              height: item.height ?? 0,
-              title: item.title ?? '',
-              description: item.description ?? '',
-              unit: item.unit ?? 'px'
-            }))
-          }
-        }
-        this.isLayoutReady = true
-      })
     },
     applySelectedFormat(record = true) {
       if (!this.isFormatApplicable) return
