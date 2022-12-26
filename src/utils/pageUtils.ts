@@ -222,6 +222,17 @@ class PageUtils {
 
   setPageSize(index: number, width: number, height: number, physicalWidth = width, physicalHeight = height, unit = 'px') {
     store.commit('SET_pageSize', { index, width, height, physicalWidth, physicalHeight, unit })
+
+    // update default bleeds with page dpi
+    if (!this.getPages[index].isEnableBleed) {
+      const inSize = unitUtils.convertSize(physicalWidth, physicalHeight, unit, 'in')
+      const dpi = {
+        width: width / inSize.width,
+        height: height / inSize.height
+      }
+      const bleeds = pageUtils.getDefaultBleeds('px', dpi)
+      store.commit('SET_bleeds', { pageIndex: index, bleeds, physicalBleeds: unit === 'px' ? bleeds : pageUtils.getDefaultBleeds(unit, dpi) })
+    }
   }
 
   resizePage(format: { width: number, height: number }) {

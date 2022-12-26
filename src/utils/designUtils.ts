@@ -792,11 +792,22 @@ class DesignUtils {
   async newDesign(width = 1080, height = 1080, unit = 'px', newDesignType?: number, path?: string, folderName?: string) {
     store.commit('file/SET_setLayersDone')
     const pxSize = unitUtils.convertSize(width, height, unit, 'px')
+    const inSize = unitUtils.convertSize(width, height, unit, 'in')
+
+    // get default bleeds with page dpi
+    const dpi = {
+      width: pxSize.width / inSize.width,
+      height: pxSize.height / inSize.height
+    }
+    const bleeds = pageUtils.getDefaultBleeds('px', dpi)
+
     pageUtils.setPages([pageUtils.newPage({
       width: pxSize.width,
       height: pxSize.height,
       physicalWidth: width,
       physicalHeight: height,
+      bleeds,
+      physicalBleeds: unit === 'px' ? bleeds : pageUtils.getDefaultBleeds(unit, dpi),
       unit
     })])
     pageUtils.clearPagesInfo()
