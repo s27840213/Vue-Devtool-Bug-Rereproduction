@@ -711,7 +711,6 @@ class UploadUtils {
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('temp.json')}`)
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
-    // console.log(this.loginOutput)
     const pagesJSON = store.getters.getPages
     const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
     if (formData.has('file')) {
@@ -1426,7 +1425,7 @@ class UploadUtils {
       }
       case 'frame': {
         const frame = layer as IFrame
-        const { type, designId, clips, decoration, decorationTop, styles } = frame
+        const { type, designId, clips, decoration, decorationTop, styles, blendLayers } = frame
         return {
           type,
           designId,
@@ -1449,6 +1448,9 @@ class UploadUtils {
             decorationTop: {
               color: decorationTop.color
             }
+          }),
+          ...(blendLayers && {
+            blendLayers: blendLayers.map(function(l) { return { color: l.color } })
           }),
           styles: this.styleFilter(styles, 'frame')
         }
