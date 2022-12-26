@@ -10,7 +10,7 @@ import FocusUtils from './focusUtils'
 import generalUtils from './generalUtils'
 import layerFactary from './layerFactary'
 import resizeUtils from './resizeUtils'
-import { round, throttle } from 'lodash'
+import { floor, round, throttle } from 'lodash'
 import groupUtils from './groupUtils'
 import { LayerType } from '@/store/types'
 import unitUtils, { PRECISION } from './unitUtils'
@@ -639,20 +639,46 @@ class PageUtils {
   fixPageSize(): boolean {
     const pages = this.getPages
     let fixed = false
-    pages.forEach((page, index) => {
-      if (page.width * page.height > pageUtils.MAX_AREA) {
-        const format = { width: page.width, height: page.height, physicalWidth: page.physicalWidth ?? page.width, physicalHeight: page.physicalHeight ?? page.height, unit: page.unit ?? 'px' }
-        format.height = Math.sqrt(pageUtils.MAX_AREA / page.width * page.height)
-        format.width = format.height / page.height * page.width
-        format.width = Math.floor(format.width)
-        format.height = Math.floor(format.height)
-        const physicalSize = format.unit === 'px' ? { width: format.width, height: format.height } : unitUtils.convertSize(format.width, format.height, 'px', format.unit)
-        format.physicalWidth = physicalSize.width
-        format.physicalHeight = physicalSize.height
-        resizeUtils.resizePage(index, page, format)
-        fixed = true
+    if (store.getters.getGroupType === 1) {
+      // resize all pages of email marketing design to minimum fixed width
+      let minFixedWidth = Number.POSITIVE_INFINITY
+      pages.forEach(page => {
+        if (page.width * page.height > pageUtils.MAX_AREA) {
+          const format = { width: page.width, height: page.height, physicalWidth: page.physicalWidth ?? page.width, physicalHeight: page.physicalHeight ?? page.height, unit: page.unit ?? 'px' }
+          format.height = Math.sqrt(pageUtils.MAX_AREA / page.width * page.height)
+          format.width = Math.floor(format.height / page.height * page.width)
+          minFixedWidth = Math.min(minFixedWidth, format.width)
+          fixed = true
+        }
+      })
+      if (fixed) {
+        pages.forEach((page, index) => {
+          const format = { width: page.width, height: page.height, physicalWidth: page.physicalWidth ?? page.width, physicalHeight: page.physicalHeight ?? page.height, unit: page.unit ?? 'px' }
+          const scaleRatio = minFixedWidth / format.width
+          const precision = format.unit === 'px' ? 0 : PRECISION
+          format.width = minFixedWidth
+          format.height = Math.floor(format.height * scaleRatio)
+          format.physicalWidth = floor(format.physicalWidth * scaleRatio, precision)
+          format.physicalHeight = floor(format.physicalHeight * scaleRatio, precision)
+          resizeUtils.resizePage(index, page, format)
+        })
       }
-    })
+    } else {
+      pages.forEach((page, index) => {
+        if (page.width * page.height > pageUtils.MAX_AREA) {
+          const format = { width: page.width, height: page.height, physicalWidth: page.physicalWidth ?? page.width, physicalHeight: page.physicalHeight ?? page.height, unit: page.unit ?? 'px' }
+          const precision = format.unit === 'px' ? 0 : PRECISION
+          format.height = Math.sqrt(pageUtils.MAX_AREA / page.width * page.height)
+          format.width = Math.floor(format.height / page.height * page.width)
+          format.height = Math.floor(format.height)
+          const physicalSize = format.unit === 'px' ? { width: format.width, height: format.height } : unitUtils.convertSize(format.width, format.height, 'px', format.unit)
+          format.physicalWidth = floor(physicalSize.width, precision)
+          format.physicalHeight = floor(physicalSize.height, precision)
+          resizeUtils.resizePage(index, page, format)
+          fixed = true
+        }
+      })
+    }
     return fixed
   }
 
