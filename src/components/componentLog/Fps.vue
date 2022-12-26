@@ -73,7 +73,7 @@ export default Vue.extend({
           this.historyLong.shift()
         }
         this.historyLong.push(now)
-        this.jsHeapSize = parseInt(`${(performance as any)?.memory.usedJSHeapSize / 1000000}`) ?? -1
+        this.jsHeapSize = parseInt(`${performance.memory?.usedJSHeapSize ?? -1000000 / 1000000}`)
         this.showFps()
       })
     },
