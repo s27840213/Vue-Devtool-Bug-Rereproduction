@@ -671,28 +671,32 @@ class UploadUtils {
 
           // move new design to path
           const path = router.currentRoute.query.path as string
-          if (isNewDesign && path) {
-            const designAssetIndex = (await store.dispatch('design/fetchDesign', { teamId, assetId })).asset_index?.toString()
-            if (!designAssetIndex) {
-              Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
-              return
-            }
-            await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-              'move', designAssetIndex, null, path).catch(async err => {
-              // remove design if move failed
-              console.error(err)
+          if (isNewDesign) {
+            // move design to path
+            if (path) {
+              const designAssetIndex = (await store.dispatch('design/fetchDesign', { teamId, assetId })).asset_index?.toString()
+              if (!designAssetIndex) {
+                Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+                return
+              }
               await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-                'delete', designAssetIndex, null, '2').catch(err => {
+                'move', designAssetIndex, null, path).catch(async err => {
+              // remove design if move failed
                 console.error(err)
+                await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+                  'delete', designAssetIndex, null, '2').catch(err => {
+                  console.error(err)
+                })
+                Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
               })
-              Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
-            })
-            // update design info
-            designUtils.fetchDesign(teamId as string, assetId)
+              // update design info
+              designUtils.fetchDesign(teamId as string, assetId)
+            }
             // remove query for new design
             const query = Object.assign({}, router.currentRoute.query)
             delete query.width
             delete query.height
+            delete query.unit
             delete query.path
             delete query.folderName
             router.replace({ query })
