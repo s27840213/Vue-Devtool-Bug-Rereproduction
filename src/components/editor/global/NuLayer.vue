@@ -19,6 +19,8 @@
               :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
             lazy-load(:target="lazyLoadTarget"
                 :rootMargin="'300px 0px 300px 0px'"
+                :minHeight="config.styles.height * contentScaleRatio"
+                :minWidth="config.styles.width * contentScaleRatio"
                 :threshold="[0]"
                 :handleUnrender="handleUnrender"
                 :anamationEnabled="false"
