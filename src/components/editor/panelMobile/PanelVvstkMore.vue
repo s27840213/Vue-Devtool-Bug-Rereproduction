@@ -17,20 +17,9 @@
                     iconWidth="24px"
                     iconColor="gray-3")
         span(class="panel-vvstk-more__option-title version") {{ `${$t('NN0743')} : v. ${appVersion} ${buildNumber}${domain}` }}
-    template(v-if="lastHistory === 'locale'")
+    template(v-else)
       div(class="panel-vvstk-more__options")
-        div(v-for="option in localeOptions"
-            class="panel-vvstk-more__option"
-            :class="{selected: handleOptionSelected(option.selected)}"
-            @click.prevent.stop="handleOptionAction(option.action)")
-          div(class="panel-vvstk-more__option-icon")
-            svg-icon(:iconName="option.icon"
-                      iconWidth="24px"
-                      iconColor="gray-2")
-          div(class="panel-vvstk-more__option-title") {{ option.text }}
-    template(v-if="lastHistory === 'domain'")
-      div(class="panel-vvstk-more__options")
-        div(v-for="option in domainOptions"
+        div(v-for="option in options"
             class="panel-vvstk-more__option"
             :class="{selected: handleOptionSelected(option.selected)}"
             @click.prevent.stop="handleOptionAction(option.action)")
@@ -103,6 +92,10 @@ export default Vue.extend({
           text: 'domain 選單',
           icon: 'vivisticker_global',
           action: this.handleDomainList
+        }, {
+          text: 'App 事件測試',
+          icon: 'vivisticker_global',
+          action: this.handleEventList
         }
       ] : []]
     },
@@ -157,6 +150,25 @@ export default Vue.extend({
         }
       })]
     },
+    eventOptions(): OptionConfig[] {
+      return ['A', 'B', 'C', 'D', 'E'].map(c => ({
+        text: c,
+        icon: 'vivisticker_global',
+        action: () => { this.sendTestEvent(c) }
+      }))
+    },
+    options(): OptionConfig[] {
+      switch (this.lastHistory) {
+        case 'locale':
+          return this.localeOptions
+        case 'domain':
+          return this.domainOptions
+        case 'event-test':
+          return this.eventOptions
+        default:
+          return []
+      }
+    },
     appVersion(): string {
       return this.userInfo.appVer
     },
@@ -204,6 +216,9 @@ export default Vue.extend({
     handleDomainList() {
       this.$emit('pushHistory', 'domain')
     },
+    handleEventList() {
+      this.$emit('pushHistory', 'event-test')
+    },
     handleOpenInfo() {
       let url = 'https://www.instagram.com/vivisticker/'
       switch (this.$i18n.locale) {
@@ -240,6 +255,9 @@ export default Vue.extend({
     },
     switchDomain(domain: string) {
       vivistickerUtils.sendToIOS('SWITCH_DOMAIN', { domain })
+    },
+    sendTestEvent(option: string) {
+      vivistickerUtils.sendToIOS('EVENT_TEST', { option })
     }
   }
 })
