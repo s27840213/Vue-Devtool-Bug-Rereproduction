@@ -211,7 +211,8 @@ export interface IUserDesignContentData {
   width: number
   signed_url?: { [key: string]: string },
   page_num: number,
-  polling: boolean
+  polling: boolean,
+  unit: string
 }
 
 export interface IAssetDesignParams {

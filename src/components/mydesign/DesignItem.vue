@@ -85,7 +85,7 @@
                 iconWidth="13px"
                 iconColor="gray-3")
     div(class="design-item__size")
-      span {{ `${sizeToShow.width}x${sizeToShow.height}` }}
+      span {{ `${sizeToShow.width} x ${sizeToShow.height} ${sizeToShow.unit}` }}
     div(class="dragged-thumbnail" :style="draggedImageContainerStyles()")
       div(class="relative")
         img(:src="appliedUrl" :style="draggedImageStyles()")
@@ -99,7 +99,6 @@ import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import vClickOutside from 'v-click-outside'
 import imageUtils from '@/utils/imageUtils'
 import designUtils from '@/utils/designUtils'
-import pageUtils from '@/utils/pageUtils'
 import { round } from 'lodash'
 import { PRECISION } from '@/utils/unitUtils'
 
@@ -176,11 +175,11 @@ export default Vue.extend({
       return this.config.thumbnail !== this.previewPlaceholder
     },
     sizeToShow(): {width: number, height: number, unit: string} {
-      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.getPageSizeWithBleeds(this.config)
+      const precision = this.config.unit === 'px' ? 0 : PRECISION
       return {
-        width: round(physicalWidth ?? width ?? 0, PRECISION),
-        height: round(physicalHeight ?? height ?? 0, PRECISION),
-        unit: unit ?? 'px'
+        width: round(this.config.width, precision),
+        height: round(this.config.height, precision),
+        unit: this.config.unit ?? 'px'
       }
     }
   },

@@ -56,6 +56,7 @@ class DesignUtils {
       name: design.name,
       width: design.width,
       height: design.height,
+      unit: design.unit,
       createdTime: design.create_time,
       lastUpdatedTime: design.update_time,
       favorite: design.favorite > 0,
