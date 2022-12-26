@@ -54,24 +54,24 @@
         div(v-if="'trim' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
-            :label="'裁切標記'"
+            :label="`${$t('NN0774')}`"
             :default-checked="!!selected.trim"
             @change="({ checked }) => {handleUpdate('trim', checked ? 1 : 0); if('bleed' in selected && checked && selected.bleed === 0) handleUpdate('bleed', 1)}")
         div(v-if="'bleed' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
-            :label="'出血'"
+            :label="`${$t('NN0775')}`"
             :default-checked="!!selected.bleed"
             @change="({ checked }) => {handleUpdate('bleed', checked ? 1 : 0); if('trim' in selected && !checked && selected.trim === 1) handleUpdate('trim', 0)}")
         div(v-if="'outline' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
-            :label="'文字轉外框'"
+            :label="`${$t('NN0776')}`"
             :default-checked="!!selected.outline"
             @change="({ checked }) => handleUpdate('outline', checked ? 1 : 0)")
         div(v-if="selectedTypeVal.includes('pdf')"
           class="flex items-center mb-10")
-          span {{`色彩模式`}}
+          span {{$t('NN0777')}}
           dropdown(v-if="colorFormats[selectedTypeVal].length > 1" class="mx-5 popup-download__color-format"
             :options="colorFormats[selectedTypeVal]"
             @select="option => handleUpdate('cmyk', option === 'CMYK' ? 1 : 0)") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
@@ -251,8 +251,8 @@ export default Vue.extend({
       typeOptions: [
         { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
         { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` },
-        { value: 'pdf_standard', name: 'PDF 標準', desc: '檔案大小：小 - 適合電子數位' },
-        { value: 'pdf_print', name: 'PDF 列印', desc: '檔案大小：高 - 適合紙本列印' }
+        { value: 'pdf_standard', name: `${this.$t('NN0770')}`, desc: `${this.$t('NN0772')}` },
+        { value: 'pdf_print', name: `${this.$t('NN0771')}`, desc: `${this.$t('NN0773')}` }
         // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
         // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
         // { id: 'gif', name: 'GIF', desc: '短片' }

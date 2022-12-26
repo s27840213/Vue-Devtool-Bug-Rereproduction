@@ -165,8 +165,8 @@ export default Vue.extend({
           pageUtils.fitPage()
           uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
           modalUtils.setModalInfo(
-            '像素尺寸超過上限',
-            ['此檔案中有頁面，像素尺寸超過上限6000x6000，系統會將頁面自動調小，建議您若要印刷，請設定實體尺寸，例如cm, mm, inch等，並下載時選用PDF列印格式，這樣印刷品質也會更好。'],
+            `${this.$t('NN0788')}`,
+            [`${this.$t('NN0789')}`],
             {
               msg: `${this.$t('NN0358')}`,
               class: 'btn-blue-mid',

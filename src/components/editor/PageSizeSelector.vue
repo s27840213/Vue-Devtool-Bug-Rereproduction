@@ -50,7 +50,7 @@
                   :class="`text-${isDarkTheme ? 'gray-1' : 'white'}`") {{unit}}
         div(v-if="selectedFormat === 'custom' && isValidate && !isCustomValid"
           class="page-size-selector__body__custom__err body-XS text-red") {{errMsg}}
-          span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{'Fix it for me.'}}
+          span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{$t('NN0787')}}
     div(class="page-size-selector__body__hr first bg-gray-4")
     div(class="page-size-selector__container")
         div(class="page-size-selector__body-row first-row")
@@ -234,7 +234,7 @@ export default Vue.extend({
         this.isOverSize(pxSize.height) ||
         this.isUnderSize(pxSize.height)
       ) {
-        if (this.selectedUnit === 'px') return 'Size must between 40px and 8000px.'
+        if (this.selectedUnit === 'px') return this.$t('NN0785', { size1: '40px', size2: '8000px' }).toString()
 
         const minSize: {[index: string]: number} = {
           width: unitUtils.convert(pageUtils.MIN_SIZE, 'px', this.selectedUnit),
@@ -244,9 +244,14 @@ export default Vue.extend({
           width: unitUtils.convert(pageUtils.MAX_SIZE, 'px', this.selectedUnit),
           height: unitUtils.convert(pageUtils.MAX_SIZE, 'px', this.selectedUnit)
         }
-        return `Size must between ${ceil(minSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit} and ${floor(maxSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit}.`
+        return this.$t('NN0785', { size1: `${ceil(minSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit}`, size2: `${floor(maxSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit}` }).toString()
       }
-      if (this.isOverArea()) return `Must be less than ${this.isLocked ? `${floor(this.fixedSize.width, PRECISION)} x ${floor(this.fixedSize.height, PRECISION)}` : floor(this.fixedSize[this.lastFocusedInput], PRECISION)} ${this.selectedUnit} to stay within our maximum allowed area. `
+      if (this.isOverArea()) {
+        return this.$t('NN0786', {
+          size: `${this.isLocked ? `${floor(this.fixedSize.width, PRECISION)} x ${floor(this.fixedSize.height, PRECISION)}`
+                : floor(this.fixedSize[this.lastFocusedInput], PRECISION)} ${this.selectedUnit}`
+        }).toString() + ' '
+      }
       return ''
     },
     formatList(): ILayout[] {

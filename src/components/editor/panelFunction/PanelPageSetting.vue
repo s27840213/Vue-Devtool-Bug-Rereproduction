@@ -27,7 +27,7 @@
             page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)" ref="pageSizeSelector")
     div(v-if="hasBleed" class="page-setting__bleed")
       div(class="page-setting-row page-setting__bleed__title pointer" @click="() => showBleedSettings = !showBleedSettings")
-        span(class="text-gray-2 label-mid") {{'印刷出血設定'}}
+        span(class="text-gray-2 label-mid") {{$t('NN0780')}}
         svg-icon(class='page-setting__bleed__expand-icon'
                 iconName="chevron-up"
                 iconWidth="14px"
@@ -311,22 +311,22 @@ export default Vue.extend({
       bleedsToShow: {
         top: {
           key: 'top',
-          label: '上',
+          label: `${this.$t('NN0781')}`,
           value: ''
         },
         bottom: {
           key: 'bottom',
-          label: '下',
+          label: `${this.$t('NN0782')}`,
           value: ''
         },
         left: {
           key: 'left',
-          label: '左',
+          label: `${this.$t('NN0783')}`,
           value: ''
         },
         right: {
           key: 'right',
-          label: '右',
+          label: `${this.$t('NN0784')}`,
           value: ''
         }
       } as {[index: string]: {key: string, label: string, value: string}}

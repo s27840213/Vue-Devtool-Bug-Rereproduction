@@ -16,7 +16,7 @@ div(class="popup-file")
     span {{$tc('NN0072')}}
   hr(class="popup-file__hr")
   div(class="popup-file__item " @click="toggleBleed()")
-    span {{hasBleed ? "關閉印刷出血" : "開啟印刷出血"}}
+    span {{hasBleed ? `${$t('NN0779')}` : `${$t('NN0778')}`}}
   div(class="popup-file__item " @click="togglerRuler()")
     span {{$t('NN0073')}}
     svg-icon(v-if="isShownRuler" class="pointer"
