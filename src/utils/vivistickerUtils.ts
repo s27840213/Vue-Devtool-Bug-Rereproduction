@@ -8,8 +8,8 @@ import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
 import uploadUtils from './uploadUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
-import { ColorEventType, ILayerInfo, LayerType } from '@/store/types'
-import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
+import { ColorEventType, LayerType } from '@/store/types'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import editorUtils from './editorUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
@@ -451,9 +451,8 @@ class ViviStickerUtils {
   }
 
   preCopyEditor() {
-    this.editorStateBuffer = {
-      controllerHidden: this.controllerHidden
-    }
+    this.handleTextResize()
+    this.editorStateBuffer.controllerHidden = this.controllerHidden
     this.hideController()
     store.commit('vivisticker/SET_isDuringCopy', true)
   }
@@ -462,8 +461,41 @@ class ViviStickerUtils {
     if (!this.editorStateBuffer.controllerHidden) {
       this.showController()
     }
+    this.handleTextUnresize()
     store.commit('vivisticker/SET_isDuringCopy', false)
     this.editorStateBuffer = {}
+  }
+
+  handleTextResize() {
+    const editorType = this.editorType
+    if (editorType === 'text') {
+      const page = pageUtils.getPage(0)
+      const layers = page.layers
+      if (layers.length !== 1 || layers[0].type !== 'text') return
+      const textLayer = layers[0] as IText
+      const styles = textLayer.styles
+      if (styles.textBg.name !== 'none' || styles.textEffect.name !== 'none' || styles.width >= page.width / 2) return
+      this.editorStateBuffer.scale = styles.scale
+      this.editorStateBuffer.x = styles.x
+      this.editorStateBuffer.y = styles.y
+      this.editorStateBuffer.width = styles.width
+      this.editorStateBuffer.height = styles.height
+      this.editorStateBuffer.widthLimit = textLayer.widthLimit
+      const ratio = Math.min(page.width / 2 / styles.width, page.height / styles.height)
+      const scale = styles.scale * ratio
+      const x = (page.width - styles.width * ratio) / 2
+      const y = (page.height - styles.height * ratio) / 2
+      layerUtils.updateLayerStyles(0, 0, { scale, x, y, width: styles.width * ratio, height: styles.height * ratio })
+      layerUtils.updateLayerProps(0, 0, { widthLimit: textLayer.widthLimit * ratio })
+    }
+  }
+
+  handleTextUnresize() {
+    const { scale, x, y, width, height, widthLimit } = this.editorStateBuffer
+    if (scale !== undefined && x !== undefined && y !== undefined && width !== undefined && height !== undefined && widthLimit !== undefined) {
+      layerUtils.updateLayerStyles(0, 0, { scale, x, y, width, height })
+      layerUtils.updateLayerProps(0, 0, { widthLimit })
+    }
   }
 
   setNewBgColor(color: string) {
