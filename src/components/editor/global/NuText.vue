@@ -24,13 +24,6 @@
           :key="span.id"
           :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
-    div(v-if="!isCurveText" class="nu-text__observee")
-      span(v-for="(span, sIndex) in spans()"
-        class="nu-text__span"
-        :class="`nu-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
-        :data-sindex="sIndex"
-        :key="sIndex",
-        :style="styles(span.styles)") {{ span.text }}
     nu-text-editor(v-if="config.active" :initText="textHtml()" :id="subLayerIndex === -1 ? `text-${layerIndex}` : `text-sub-${layerIndex}-${subLayerIndex}`"
       class="nu-text__editor"
       :style="textBodyStyle()"
@@ -101,7 +94,6 @@ export default Vue.extend({
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
     return {
       isDestroyed: false,
-      resizeObserver: undefined as ResizeObserver | undefined,
       initSize: {
         width: this.config.styles.width,
         height: this.config.styles.height,
@@ -117,8 +109,6 @@ export default Vue.extend({
   },
   destroyed() {
     this.isDestroyed = true
-    this.resizeObserver && this.resizeObserver.disconnect()
-    this.resizeObserver = undefined
   },
   mounted() {
     // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
@@ -466,14 +456,6 @@ export default Vue.extend({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
       this.drawSvgBG()
-    },
-    observeAllSpans() {
-      const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
-      spans.forEach(span => {
-        setTimeout(() => {
-          this.resizeObserver && this.resizeObserver.observe(span as Element)
-        }, 1)
-      })
     }
   }
 })
