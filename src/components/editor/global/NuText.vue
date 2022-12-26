@@ -270,7 +270,7 @@ export default Vue.extend({
           widthLimit = pageSize
         } else if (reachLeftLimit || reachRightLimit) {
           if (composing) this.widthLimitSetDuringComposition = true
-          widthLimit = getSize()
+          widthLimit = currTextSize
           textHW = textUtils.getTextHW(text, widthLimit)
           layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
         }
