@@ -22,7 +22,7 @@
           :defaultKeyword="keywordLabel"
           @search="handleSearch")
           svg-icon(class="ml-5 pointer panel-template__advanced"
-            :class="{ 'panel-template__advanced--active': theme }"
+            :class="{ 'panel-template__advanced--active': !allThemesChecked }"
             iconName="advanced"
             iconColor="gray-6"
             iconWidth="20px"
@@ -151,7 +151,9 @@ export default Vue.extend({
       sum: 'sum'
     }),
     ...mapState('user', ['userId', 'role', 'adminMode']),
-    ...mapState(['themes']),
+    ...mapGetters({
+      editorThemes: 'getEditThemes'
+    }),
     ...mapGetters({
       enableAdminView: 'user/getEnableAdminView'
     }),
@@ -223,6 +225,10 @@ export default Vue.extend({
       return themeUtils
         .getThemesBySize(pageSize.width, pageSize.height)
         .map(theme => theme.id)
+    },
+    allThemesChecked(): boolean {
+      const editorThemesString = _.sortBy((this.editorThemes as Itheme[]).map(theme => theme.id)).join(',')
+      return editorThemesString === this.theme
     }
   },
   activated() {
@@ -387,10 +393,7 @@ export default Vue.extend({
     text-align: left;
   }
   &__advanced--active {
-    color: setColor(gray-4);
-  }
-  &__advanced:hover {
-    color: #e0e0e0;
+    color: setColor(blue-3);
   }
   &__theme {
     position: absolute;

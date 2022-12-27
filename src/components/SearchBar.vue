@@ -1,8 +1,9 @@
 <template lang="pug">
+  //- Show search button on mobile, https://www.paddingleft.com/2019/09/18/Show-Search-on-mobile-devices-keyboar
   form(class="search-bar bg-gray-6"
-    @submit="onSearch")
+    action @submit="onSearch")
     input(class="search-bar__input body-2"
-      type="text"
+      type="search"
       v-model="keyword"
       @input="onUpdate"
       :placeholder="placeholder"
@@ -96,6 +97,7 @@ export default Vue.extend({
     flex: 1;
     margin-right: 10px;
     background-color: transparent;
+    -webkit-appearance: textfield;
   }
 }
 </style>
