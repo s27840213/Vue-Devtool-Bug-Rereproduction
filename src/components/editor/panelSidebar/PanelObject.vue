@@ -176,18 +176,18 @@ export default Vue.extend({
       'getMoreContent',
       'resetSearch'
     ]),
-    handleSearch(keyword: string) {
+    async handleSearch(keyword: string) {
       this.resetSearch()
       if (keyword) {
         this.panelParams = `http://vivipic.com/editor?panel=object&search=${keyword.replace(/&/g, '%26')}&type=new-design-size&width=1080&height=1080&themeId=1`
-        this.getTagContent({ keyword })
+        await this.getTagContent({ keyword })
       }
     },
-    handleCategorySearch(keyword: string, locale = '') {
+    async handleCategorySearch(keyword: string, locale = '') {
       this.resetSearch()
       if (keyword) {
         this.panelParams = `http://vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
-        this.getContent({ keyword, locale })
+        await this.getContent({ keyword, locale })
       }
     },
     handleLoadMore() {

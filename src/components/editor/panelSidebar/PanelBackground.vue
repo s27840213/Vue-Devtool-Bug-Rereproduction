@@ -207,16 +207,16 @@ export default Vue.extend({
         this.setCloseMobilePanelFlag(true)
       }
     },
-    handleSearch(keyword: string) {
+    async handleSearch(keyword: string) {
       this.resetSearch()
       if (keyword) {
-        this.getTagContent({ keyword })
+        await this.getTagContent({ keyword })
       }
     },
-    handleCategorySearch(keyword: string, locale = '') {
+    async handleCategorySearch(keyword: string, locale = '') {
       this.resetSearch()
       if (keyword) {
-        this.getContent({ keyword, locale })
+        await this.getContent({ keyword, locale })
       }
     },
     handleLoadMore() {
