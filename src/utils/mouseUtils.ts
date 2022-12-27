@@ -204,6 +204,7 @@ class MouseUtils {
       imgY: -img.height / 2 + clipperStyles.height / 2
     }
     Object.assign(layer.styles, newStyles)
+    clipPath = clipPath ?? ''
     layer.clipPath = clipPath.substring(0, 4) === 'path' ? clipPath : `path('${clipPath}')`
     return layer
   }

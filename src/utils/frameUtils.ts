@@ -13,6 +13,7 @@ import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import Vue from 'vue'
 import i18n from '@/i18n'
 import mathUtils from './mathUtils'
+import vivistickerUtils from './vivistickerUtils'
 class FrameUtils {
   isImageFrame(config: IFrame): boolean {
     return config.clips.length === 1 && (config.clips[0].isFrameImg as boolean)
@@ -159,6 +160,33 @@ class FrameUtils {
       zindexUtils.reassignZindex(pageIndex)
       stepsUtils.record()
     }
+  }
+
+  iosPhotoSelect(layerInfo: ILayerInfo, config: IImage) {
+    console.log(generalUtils.deepCopy(config))
+    const { pageIndex, layerIndex, subLayerIdx = 0 } = layerInfo
+    vivistickerUtils.getIosImg()
+      .then(async (images: Array<string>) => {
+        if (images.length) {
+          const { imgX, imgY, imgWidth, imgHeight } = await ImageUtils.getClipImgDimension(config, ImageUtils.getSrc({
+            type: 'ios',
+            assetId: images[0],
+            userId: ''
+          }))
+          this.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
+            imgWidth,
+            imgHeight,
+            imgX,
+            imgY
+          })
+          this.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, {
+            type: 'ios',
+            assetId: images[0],
+            userId: ''
+          })
+          stepsUtils.record()
+        }
+      })
   }
 
   updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle>) {

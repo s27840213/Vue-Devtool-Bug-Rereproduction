@@ -74,7 +74,7 @@ export default Vue.extend({
   created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
     textUtils.loadDefaultFonts()
-    vivistickerUtils.registerVvstkCallbacks()
+    vivistickerUtils.registerCallbacks('vvstk')
     if (this.userInfo.isFirstOpen) {
       this.setShowTutorial(true)
     }
