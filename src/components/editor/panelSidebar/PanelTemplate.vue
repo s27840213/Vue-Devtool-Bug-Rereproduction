@@ -69,12 +69,7 @@
           svg-icon(iconName="loading"
             iconColor="white"
             iconWidth="20px")
-        //- Search result too few msg
-        div(v-if="keyword && theme && !pending && resultGroupCounter<=3 && !allThemesChecked"
-            class="text-white text-left")
-          span {{resultTooFew[0]}}
-          span(class="set-all-templatebtn-btn pointer" @click="setAllTemplate") {{resultTooFew[1]}}
-          span {{resultTooFew[2]}}
+        //- Template wishing pool
         nubtn(v-if="keyword && theme && !pending && resultGroupCounter<=10"
               size="mid" class="mt-30")
           url(:url="$t('NN0791')")
@@ -228,13 +223,6 @@ export default Vue.extend({
       return themeUtils
         .getThemesBySize(pageSize.width, pageSize.height)
         .map(theme => theme.id)
-    },
-    resultTooFew(): string[] {
-      return (i18n.t('NN0398') as string).split('<html>')
-    },
-    allThemesChecked(): boolean {
-      const allThemeString = _.sortBy(this.themes.map((item: Itheme) => item.id)).join(',')
-      return allThemeString === this.theme
     }
   },
   activated() {
@@ -298,13 +286,6 @@ export default Vue.extend({
     },
     handleShowGroup(group: IListServiceContentDataItem) {
       this.currentGroup = group
-    },
-    setAllTemplate(): void {
-      const allTheme: { [key: string]: boolean } = {}
-      this.themes.forEach((theme: Itheme) => {
-        allTheme[theme.id] = true
-      })
-      this.handleTheme(allTheme)
     },
     async handleTheme(selected: { [key: string]: boolean }) {
       const theme = Object
