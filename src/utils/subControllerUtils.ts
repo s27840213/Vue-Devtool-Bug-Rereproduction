@@ -19,6 +19,7 @@ export default class SubControllerUtils {
   private dblTapFlag = false
   private posDiff = { x: 0, y: 0 }
   private _onMouseup = null as unknown
+  private primaryActive = false
 
   private get config(): ILayer { return this._config.config }
   private get pageIndex(): number { return this.layerInfo.pageIndex }
@@ -35,6 +36,8 @@ export default class SubControllerUtils {
   onPointerdown(e: PointerEvent) {
     if (this.primaryLayer.type === 'tmp') return
     if (e.button !== 0) return
+
+    this.primaryActive = this.primaryLayer.active
     if (imageUtils.isImgControl()) {
       imageUtils.setImgControlDefault()
     }
@@ -78,7 +81,6 @@ export default class SubControllerUtils {
       eventUtils.emit(PanelEvent.showPhotoShadow)
     }
 
-    // this.isPrimaryActive = this.primaryLayer.active
     formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex, this.subLayerIdx)
     formatUtils.clearCopiedFormat()
     if (this.primaryLayer.type === 'tmp') {
@@ -102,7 +104,6 @@ export default class SubControllerUtils {
     }
     this._onMouseup = this.onMouseup.bind(this)
     eventUtils.addPointerEvent('pointerup', this._onMouseup)
-    // this.isControlling = true
   }
 
   onMouseup(e: PointerEvent) {
@@ -122,14 +123,13 @@ export default class SubControllerUtils {
     eventUtils.removePointerEvent('pointerup', this._onMouseup)
     // this.isControlling = false
     this.onClickEvent(e)
+    this.primaryActive = false
   }
 
   onClickEvent(e: MouseEvent) {
     if (!this.primaryLayer.active) return
 
     colorUtils.event.emit('closeColorPanel', false)
-    // this.component && this.component.$emit('clickSubController', this.layerIndex, this.config.type, generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
-
     if (!this.primaryLayer.active) {
       return
     }
@@ -145,15 +145,12 @@ export default class SubControllerUtils {
         layers = (layerUtils.getCurrLayer as IFrame).clips
     }
 
-    if (!store.getters['shadow/isHandling']) {
+    if (!store.getters['shadow/isHandling'] && this.primaryActive) {
       if (layerUtils.layerIndex !== -1) {
         for (let idx = 0; idx < layers.length; idx++) {
           if (idx !== this.subLayerIdx) {
             updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
           }
-          // if (this.currSubSelectedInfo.type === 'image') {
-          //   updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
-          // }
         }
       }
       if ((this.primaryLayer.type === LayerType.frame && !(this.primaryLayer as IFrame).clips[this.subLayerIdx].active) ||
