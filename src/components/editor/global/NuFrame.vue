@@ -66,8 +66,21 @@ export default Vue.extend({
         json.decorationTop.color = [...config.decorationTop.color]
         Object.assign(config.decorationTop, json.decorationTop)
       }
-      if (config.blendLayers && json.blendLayers) {
+      if (json.blendLayers) {
+        if (!this.config.blendLayers) {
+          this.config.blendLayers = []
+        }
         json.blendLayers.forEach((l, i) => {
+          if (!this.config.blendLayers[i]) {
+            const styles = {
+              width: this.config.styles.width / this.config.styles.scale,
+              height: this.config.styles.height / this.config.styles.scale,
+              initWidth: this.config.styles.width / this.config.styles.scale,
+              initHeight: this.config.styles.height / this.config.styles.scale,
+              vSize: [this.config.styles.width / this.config.styles.scale, this.config.styles.height / this.config.styles.scale]
+            }
+            this.config.blendLayers.push(layerFactary.newShape({ styles }))
+          }
           l.color = this.config.blendLayers[i].color
           this.config.blendLayers[i].styles.blendMode = (json.blendLayers as IShape[])[i].blendMode
           Object.assign(this.config.blendLayers[i], (json.blendLayers as IShape[])[i])
