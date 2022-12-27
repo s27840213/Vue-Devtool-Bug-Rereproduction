@@ -45,18 +45,16 @@
           span(class="body-4 page-size-selector__body__custom__box__input-label"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
         property-bar(v-click-outside="() => {showUnitOptions = false}"
-                    class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
-                    :class="selectedFormatKey === 'custom' || showUnitOptions ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`"
-            @click.native="showUnitOptions = !showUnitOptions")
+                      class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
+                      @click.native="showUnitOptions = !showUnitOptions")
           span(class="page-size-selector__body__custom__unit__label body-XXS" :class="this.selectedFormatKey === 'custom' ? 'black' : defaultTextColor") {{selectedUnit}}
           svg-icon(class="page-size-selector__body__custom__unit__icon"
             iconName="chevron-down"
             iconWidth="16px"
-            :iconColor="selectedFormatKey === 'custom' ? 'black' : this.isDarkTheme ? 'white' : 'gray-3'")
-          div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option" :class="`bg-${this.isDarkTheme ? 'white' : 'gray-1-5'}`")
-            div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-gray-2" @click="selectUnit($event, unit)")
-              span(class="body-XS"
-                  :class="`text-${isDarkTheme ? 'gray-1' : 'white'}`") {{unit}}
+            :iconColor="selectedFormatKey === 'custom' ? 'black' : 'gray-3'")
+          div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option bg-white")
+            div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-black" @click="selectUnit($event, unit)")
+              span(class="body-XS text-black") {{unit}}
         div(v-if="selectedFormatKey === 'custom' && isValidate && !isCustomValid"
           class="page-size-selector__body__custom__err body-XS text-red") {{errMsg}}
           span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{'Fix it for me.'}}
