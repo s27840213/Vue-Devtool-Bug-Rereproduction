@@ -39,9 +39,11 @@ div(class="popup-file")
     //- div(class="popup-file__item" @click="testTrail()")
     //-   span 測試試用
   hr(class="popup-file__hr")
-  div(class="popup-file__item"
-      @click="onLogoutClicked()")
-      span {{$tc('NN0167',2)}}
+  div(class="popup-file__item")
+    url(:url="$t('NN0791')")
+      span {{$t('NN0790', {type: $tc('NN0793', 1)})}}
+  div(class="popup-file__item" @click="onLogoutClicked()")
+    span {{$tc('NN0167',2)}}
   div(class="popup-file__item" @click="gotoMobile()")
     span(class="text-gray-3") Version: {{buildNumber}}
   template(v-if="isAdmin")
@@ -68,13 +70,14 @@ import { mapGetters, mapMutations, mapState } from 'vuex'
 import shortcutHandler from '@/utils/shortcutUtils'
 import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
+import Url from '@/components/global/Url.vue'
 import stepsUtils from '@/utils/stepsUtils'
 import gtmUtils from '@/utils/gtmUtils'
-import page from '@/store/module/page'
 
 export default Vue.extend({
   components: {
-    Avatar
+    Avatar,
+    Url
   },
   data() {
     return {
@@ -190,9 +193,6 @@ export default Vue.extend({
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'
-    },
-    gotoMobile() { // TO-DELETE
-      window.location.href = this.$router.currentRoute.fullPath.replace('editor', 'mobile-editor')
     }
   }
 })
@@ -245,10 +245,11 @@ export default Vue.extend({
     padding: 0.35rem;
     border-radius: 0.25rem;
     position: relative;
+    cursor: pointer;
     &.disabled {
       color: setColor(gray-4);
     }
-    > span {
+    span {
       font-size: 0.75rem;
     }
     &:not(:last-child):not(.disabled) {

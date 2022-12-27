@@ -85,7 +85,8 @@ export default Vue.extend({
   cursor: pointer;
   user-select: none;
   &:not(.full) {
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
     width: fit-content;
   }
 }

@@ -5,7 +5,11 @@
       clear
       :defaultKeyword="keywordLabel"
       @search="handleSearch")
-    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+    div(v-if="emptyResultMessage" class="text-white text-left")
+      span {{ emptyResultMessage }}
+      nubtn(size="mid" class="mt-30")
+        url(:url="$t('NN0791')")
+          span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
     template(v-if="!keyword")
       template(v-if="isBrandkitAvailable")
         div(class="panel-text__brand-header relative")
@@ -71,6 +75,7 @@ import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
+import Url from '@/components/global/Url.vue'
 import AssetUtils from '@/utils/assetUtils'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import DragUtils from '@/utils/dragUtils'
@@ -87,7 +92,8 @@ export default Vue.extend({
     CategoryList,
     CategoryListRows,
     CategoryTextItem,
-    BrandSelector
+    BrandSelector,
+    Url
   },
   data() {
     return {

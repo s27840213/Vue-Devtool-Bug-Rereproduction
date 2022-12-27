@@ -3,7 +3,7 @@
     tabs(:tabs="[$tc('NN0002', 2),$t('NN0017')]" @switchTab="switchTab")
     //- Search bar
     search-bar(v-if="showImageTab" class="mb-15"
-      :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
+      :placeholder="$t('NN0092', {target: $tc('NN0004', 1)})"
       clear
       :defaultKeyword="keywordLabel"
       @search="handleSearch")
@@ -13,7 +13,11 @@
                 @selectColorEnd="recordChange"
                 @openColorPicker="openColorPicker")
     //- Search result empty msg
-    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+    div(v-if="emptyResultMessage" class="text-white text-left")
+      span {{ emptyResultMessage }}
+      nubtn(size="mid" class="mt-30")
+        url(:url="$t('NN0791')")
+          span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
     //- Search result and main content
     category-list(v-for="item in categoryListArray"
                   v-show="item.show" :ref="item.key" :key="item.key"
@@ -54,6 +58,7 @@ import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
 import Tabs from '@/components/Tabs.vue'
+import Url from '@/components/global/Url.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
@@ -67,7 +72,8 @@ export default Vue.extend({
     CategoryListRows,
     CategoryBackgroundItem,
     Tabs,
-    ColorSlips
+    ColorSlips,
+    Url
   },
   data() {
     return {

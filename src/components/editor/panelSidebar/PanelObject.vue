@@ -11,7 +11,11 @@
       input(type="text" placeholder="項目網址" v-model="panelParams")
       btn(@click.native="downloadAll") Download all
     //- Search result empty msg
-    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+    div(v-if="emptyResultMessage" class="text-white text-left")
+      span {{ emptyResultMessage }}
+      nubtn(size="mid" class="mt-30")
+        url(:url="$t('NN0791')")
+          span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
     //- Search result and main content
     category-list(v-for="item in categoryListArray"
                   v-show="item.show" :ref="item.key" :key="item.key"
@@ -44,6 +48,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
+import Url from '@/components/global/Url.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
@@ -53,7 +58,8 @@ export default Vue.extend({
     SearchBar,
     CategoryList,
     CategoryListRows,
-    CategoryObjectItem
+    CategoryObjectItem,
+    Url
   },
   data() {
     return {

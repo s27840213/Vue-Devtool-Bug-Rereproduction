@@ -75,6 +75,10 @@
           span {{resultTooFew[0]}}
           span(class="set-all-templatebtn-btn pointer" @click="setAllTemplate") {{resultTooFew[1]}}
           span {{resultTooFew[2]}}
+        nubtn(v-if="keyword && theme && !pending && resultGroupCounter<=10"
+              size="mid" class="mt-30")
+          url(:url="$t('NN0791')")
+            span {{$t('NN0790', {type: $tc('NN0001', 1)})}}
 </template>
 
 <script lang="ts">
@@ -89,6 +93,7 @@ import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue
 import PopupTheme from '@/components/popup/PopupTheme.vue'
 import PanelGroupTemplate from '@/components/editor/panelSidebar/PanelGroupTemplate.vue'
 import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
+import Url from '@/components/global/Url.vue'
 import themeUtils from '@/utils/themeUtils'
 import GalleryUtils from '@/utils/galleryUtils'
 import { Itheme } from '@/interfaces/theme'
@@ -104,7 +109,8 @@ export default Vue.extend({
     CategoryTemplateItem,
     PopupTheme,
     CategoryGroupTemplateItem,
-    PanelGroupTemplate
+    PanelGroupTemplate,
+    Url
   },
   data() {
     return {
