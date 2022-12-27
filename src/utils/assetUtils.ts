@@ -183,7 +183,7 @@ class AssetUtils {
         const page = this.getPage(targetPageIndex)
         resizeUtils.resizeBleeds(targetPageIndex, pageUtils.getDefaultBleeds(page.unit, pageUtils.getPageDPI(page)))
       }
-    } else if (targetPage.bleeds && targetPage.physicalBleeds) {
+    } else if (targetPage.isEnableBleed && targetPage.bleeds && targetPage.physicalBleeds) {
       // convert bleeds to template unit
       const dpi = pageUtils.getPageDPI(targetPage)
       const physicalBleeds = targetPage.unit === 'px' ? targetPage.bleeds
@@ -657,7 +657,7 @@ class AssetUtils {
           }
 
           // apply bleeds of currFocusPage
-          if (currFocusPage.bleeds && currFocusPage.physicalBleeds) {
+          if (currFocusPage.isEnableBleed && currFocusPage.bleeds && currFocusPage.physicalBleeds) {
             // convert bleeds to template unit
             const dpi = pageUtils.getPageDPI(currFocusPage)
             const physicalBleeds = currFocusPage.unit === 'px' ? currFocusPage.bleeds
