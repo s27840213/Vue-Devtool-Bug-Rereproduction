@@ -52,6 +52,7 @@ import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import unitUtils from '@/utils/unitUtils'
+import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   name: 'MobileEditor',

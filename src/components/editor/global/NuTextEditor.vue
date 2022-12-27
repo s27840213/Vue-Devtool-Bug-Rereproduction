@@ -145,6 +145,7 @@ export default Vue.extend({
 }
 
 .ProseMirror.non-selectable {
+  outline: none;
   white-space: pre-wrap;
   font-variant-ligatures: unset;
 }

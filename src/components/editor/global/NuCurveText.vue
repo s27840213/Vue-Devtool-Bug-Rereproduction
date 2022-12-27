@@ -18,6 +18,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import LayerUtils from '@/utils/layerUtils'
 import textUtils from '@/utils/textUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   props: {
@@ -35,39 +36,18 @@ export default Vue.extend({
       textWidth: [] as number[],
       textHeight: [] as number[],
       minHeight: 0,
-      isDestroyed: false,
-      resizeObserver: undefined as ResizeObserver | undefined
+      isDestroyed: false
     }
   },
-  created () {
-    this.computeDimensions(this.spans())
+  async created () {
+    await this.computeDimensions(this.spans())
     // textUtils.loadAllFonts(this.config, 1)
     textUtils.loadAllFonts(this.config)
   },
   destroyed() {
     this.isDestroyed = true
-    this.resizeObserver && this.resizeObserver.disconnect()
-    this.resizeObserver = undefined
   },
   mounted() {
-    // this.resizeObserver = new ResizeObserver(() => {
-    //   if (this.isDestroyed) return
-
-    //   // console.log('resize')
-
-    //   if (typeof this.subLayerIndex === 'undefined') {
-    //     LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
-    //   } else {
-    //     const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
-    //     if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
-    //     LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
-    //     textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
-    //     textUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
-    //   }
-
-    //   this.computeDimensions(this.spans())
-    // })
-    // this.observeAllSpans()
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
       setTimeout(() => {
         this.resizeCallback()
@@ -162,34 +142,28 @@ export default Vue.extend({
         bend >= 0 ? { top: baseline } : { bottom: baseline }
       )
     },
-    observeAllSpans() {
-      const spans = document.querySelectorAll(`.nu-curve-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
-      spans.forEach(span => {
-        this.resizeObserver && this.resizeObserver.observe(span as Element)
-      })
-    },
-    computeDimensions(spans: ISpan[]) {
-      const { textWidth, textHeight, minHeight } = TextShapeUtils.getTextHWsBySpans(spans)
+    async computeDimensions(spans: ISpan[]) {
+      const { textWidth, textHeight, minHeight } = await TextShapeUtils.getTextHWsBySpansAsync(spans)
       this.textWidth = textWidth
       this.textHeight = textHeight
       this.minHeight = minHeight
     },
-    resizeCallback() {
+    async resizeCallback() {
       if (this.isDestroyed) return
 
       // console.log('resize')
 
-      if (typeof this.subLayerIndex === 'undefined') {
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
+      if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
       } else {
         const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
         textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
         textUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
       }
 
-      this.computeDimensions(this.spans())
+      await this.computeDimensions(this.spans())
     }
   }
 })

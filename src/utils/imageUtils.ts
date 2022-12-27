@@ -12,15 +12,16 @@ import { AxiosPromise } from 'axios'
 import { IShadowAsset } from '@/store/module/shadow'
 import generalUtils from './generalUtils'
 import editorUtils from './editorUtils'
+import mouseUtils from './mouseUtils'
 
 class ImageUtils {
-  imgLoadHandler(src: string, cb: () => void, error?: () => void) {
+  imgLoadHandler(src: string, cb: (img: HTMLImageElement) => void, error?: () => void) {
     const image = new Image()
     image.src = src
     if (image.complete) {
-      cb()
+      cb(image)
     } else {
-      image.onload = cb
+      image.onload = () => cb(image)
       error && (image.onerror = error)
     }
   }
@@ -196,7 +197,7 @@ class ImageUtils {
     }
   }
 
-  getAssetId(src: string, type: string) {
+  getAssetId(src: string, type = this.getSrcType(src)) {
     switch (type) {
       case 'logo-public': {
         const keyStart = 'logo/'
@@ -515,6 +516,23 @@ class ImageUtils {
     const posX = (targetSize.width - width) / 2
     const posY = (targetSize.height - height) / 2
     return { width, height, posX, posY }
+  }
+
+  async getClipImgDimension(clip: IImage, src: string) {
+    return this.imgLoadHandler(src, (img: HTMLImageElement) => {
+      const imgData = {
+        srcObj: {
+          type: this.getSrcType(src),
+          userId: '',
+          assetId: this.getAssetId(src)
+        },
+        styles: {
+          width: img.width,
+          height: img.height
+        }
+      }
+      return mouseUtils.clipperHandler(imgData as IImage, clip.clipPath, clip.styles).styles
+    })
   }
 
   getBgRemoveInfo(image: IUserImageContentData, initSrc: string) {

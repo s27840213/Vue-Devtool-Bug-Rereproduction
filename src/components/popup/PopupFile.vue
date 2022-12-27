@@ -34,6 +34,8 @@ div(class="popup-file")
       span 匯入設計
     div(class="popup-file__item" @click="exportJSON()")
       span 匯出設計
+    div(class="popup-file__item" @click="toogleAdminView()")
+      span {{enableAdminView ? '隱藏管理員介面' : '顯示管理員介面'}}
     //- div(class="popup-file__item" @click="testSubscribe()")
     //-   span 測試訂閱
     //- div(class="popup-file__item" @click="testTrail()")
@@ -64,7 +66,7 @@ import Vue from 'vue'
 import popupUtils from '@/utils/popupUtils'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import shortcutHandler from '@/utils/shortcutUtils'
 import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
@@ -92,7 +94,8 @@ export default Vue.extend({
       account: 'user/getAccount',
       isFontLoading: 'text/getIsFontLoading',
       pagesLength: 'getPagesLength',
-      groupType: 'getGroupType'
+      groupType: 'getGroupType',
+      enableAdminView: 'user/getEnableAdminView'
     }),
     pageSize(): { w: number, h: number } {
       return {
@@ -106,7 +109,7 @@ export default Vue.extend({
     lockGuideline(): boolean {
       return rulerUtils.lockGuideline
     },
-    isShownRuler() {
+    isShownRuler(): boolean {
       return rulerUtils.showRuler
     },
     buildNumber(): string {
@@ -125,6 +128,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      setUserState: 'user/SET_STATE'
+    }),
     closePopup() {
       popupUtils.closePopup()
     },
@@ -192,6 +198,11 @@ export default Vue.extend({
     exportJSON() {
       fileUtils.export()
       // designUtils.newDesign()
+    },
+    toogleAdminView() {
+      this.setUserState({
+        enableAdminView: !this.enableAdminView
+      })
     },
     testSubscribe() {
       // fbPixelUtils.subscribe(false)

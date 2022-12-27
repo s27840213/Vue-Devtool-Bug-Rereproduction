@@ -15,8 +15,7 @@
         class="nu-image__picture-shadow"
         draggable="false"
         :src="shadowSrc()"
-        @error="onError"
-        @load="onLoad")
+        @error="onError")
     div(class="img-wrapper"
       :style="imgWrapperstyle()")
       div(class='nu-image__picture'
@@ -86,6 +85,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
 export default Vue.extend({
+  inheritAttrs: false,
   props: {
     config: Object,
     pageIndex: Number,
@@ -164,6 +164,7 @@ export default Vue.extend({
       hasDestroyed: false,
       isOnError: false,
       src: '',
+      initFlag: false,
       shadowBuff: {
         canvasShadowImg: undefined as undefined | HTMLImageElement,
         canvasSize: { width: 0, height: 0 },
@@ -429,23 +430,23 @@ export default Vue.extend({
       if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1) {
         const newW = this.config.styles.imgHeight * physicalRatio
         const offsetW = this.config.styles.imgWidth - newW
-        if (this.primaryLayerType() === 'group') {
-          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-            imgWidth: newW,
-            imgX: this.config.styles.imgX + offsetW / 2
-          }, this.subLayerIndex)
-        } else {
+        if (this.primaryLayerType() === 'frame') {
           frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
             imgWidth: newW,
             imgX: this.config.styles.imgX + offsetW / 2
           })
+        } else {
+          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+            imgWidth: newW,
+            imgX: this.config.styles.imgX + offsetW / 2
+          }, this.subLayerIndex)
         }
       }
     },
     onLoadShadow() {
       this.isOnError = false
       const shadowImg = this.$refs['shadow-img'] as HTMLImageElement
-      if (!this.forRender && (!shadowImg.width || !shadowImg.height)) {
+      if (!this.initFlag && !this.forRender && (!shadowImg.width || !shadowImg.height)) {
         imageShadowUtils.updateShadowSrc(this.layerInfo(), { type: '', assetId: '', userId: '' })
         imageShadowUtils.setEffect(ShadowEffectType.none, {}, this.layerInfo())
       }
@@ -556,16 +557,18 @@ export default Vue.extend({
       })
     },
     handleIsTransparent() {
-      if (this.forRender || this.primaryLayerType() === 'frame') return
+      if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
       const img = new Image()
       const imgSize = ImageUtils.getSrcSize(this.config.srcObj, 100)
       img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       img.crossOrigin = 'anoynous'
       img.onload = () => {
-        const isTransparent = imageShadowUtils.isTransparentBg(img)
-        imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
-        if (!isTransparent && this.config.styles.adjust.blur > 0) {
-          this.$forceUpdate()
+        if (!this.hasDestroyed) {
+          const isTransparent = imageShadowUtils.isTransparentBg(img)
+          imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
+          if (!isTransparent && this.config.styles.adjust.blur > 0) {
+            this.$forceUpdate()
+          }
         }
       }
     },
@@ -982,7 +985,7 @@ export default Vue.extend({
       let scaleX = horizontalFlip ? -1 : 1
       let scaleY = verticalFlip ? -1 : 1
 
-      if (typeof this.subLayerIndex !== 'undefined') {
+      if (typeof this.subLayerIndex !== 'undefined' && this.subLayerIndex !== -1) {
         const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
         if (primaryLayer.type === 'frame' && this.config.srcObj.type === 'frame') {
           scaleX = primaryLayer.styles.horizontalFlip ? -1 : 1
@@ -1078,7 +1081,7 @@ export default Vue.extend({
     },
     flippedAnimation(): boolean {
       const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
-      if (typeof this.subLayerIndex !== 'undefined' && primaryLayer.type === 'frame') {
+      if (typeof this.subLayerIndex !== 'undefined' && this.subLayerIndex !== -1 && primaryLayer.type === 'frame') {
         return false
       } else {
         return true
@@ -1140,7 +1143,10 @@ export default Vue.extend({
   align-items: center;
 
   &__picture {
+    touch-action: none;
     object-fit: cover;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
     position: absolute;
     top: 0px;
     left: 0px;
@@ -1149,6 +1155,9 @@ export default Vue.extend({
   }
 
   &__picture-shadow {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
     position: absolute;
     top: 0px;
     left: 0px;

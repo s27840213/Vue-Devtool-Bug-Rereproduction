@@ -1,7 +1,7 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
-import { IBleed, IPage } from '@/interfaces/page'
+import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import store from '@/store'
 import Vue from 'vue'
 import designUtils from './designUtils'
@@ -14,6 +14,7 @@ import { floor, round, throttle } from 'lodash'
 import groupUtils from './groupUtils'
 import { LayerType } from '@/store/types'
 import unitUtils, { PRECISION } from './unitUtils'
+import SnapUtils from './snapUtils'
 
 class PageUtils {
   get MAX_AREA() { return 6000 * 6000 }
@@ -40,6 +41,7 @@ class PageUtils {
   get inBgRemoveMode(): boolean { return store.getters['bgRemove/getInBgRemoveMode'] }
   get autoRemoveResult(): IBgRemoveInfo { return store.getters['bgRemove/getAutoRemoveResult'] }
   get getPage(): (pageIndex: number) => IPage { return store.getters.getPage }
+  get getPageState(): (pageIndex: number) => IPageState { return store.getters.getPageState }
   get getPages(): Array<IPage> { return store.getters.getPages }
   get pageNum(): number { return this.getPages.length }
   get getPageSize(): (pageIndex: number) => { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } { return store.getters.getPageSize }
@@ -130,6 +132,7 @@ class PageUtils {
       physicalWidth: 1080,
       physicalHeight: 1080,
       unit: 'px',
+      // snapUtils: new SnapUtils(-1),
       backgroundColor: '#ffffff',
       backgroundImage: {
         config: layerFactary.newImage({
@@ -164,6 +167,7 @@ class PageUtils {
       physicalBleeds: this.getDefaultBleeds('px'),
       isAutoResizeNeeded: false
     }
+    // pageData.snapUtils && delete pageData.snapUtils
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))
   }
 

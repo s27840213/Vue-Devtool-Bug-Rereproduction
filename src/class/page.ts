@@ -2,10 +2,12 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import { IBackgroundImage, IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import layerFactary from '@/utils/layerFactary'
+import SnapUtils from '@/utils/snapUtils'
 
 export class Page implements IPage {
   [index: string]: unknown
   id: string
+  snapUtils: SnapUtils
   width: number
   height: number
   physicalWidth: number
@@ -42,6 +44,7 @@ export class Page implements IPage {
   isAutoResizeNeeded: boolean
 
   constructor() {
+    this.snapUtils = new SnapUtils(-1)
     this.width = 1080
     this.height = 1080
     this.physicalWidth = 1080
