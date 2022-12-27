@@ -295,12 +295,6 @@ export default Vue.extend({
       setIsloading: 'SET_isGlobalLoading',
       updateRecentlyUsed: 'layouts/UPDATE_RECENTLY_PAGE'
     }),
-    ...mapActions('layouts',
-      [
-        'getCategories',
-        'getRecently'
-      ]
-    ),
     isOverArea() {
       return this.pageSizes.px.width * this.pageSizes.px.height > pageUtils.MAX_AREA
     },

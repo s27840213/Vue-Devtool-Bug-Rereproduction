@@ -404,7 +404,10 @@ export default Vue.extend({
               title: item.title ?? '',
               description: item.description ?? '',
               unit: item.unit ?? 'px'
-            }))
+            })).filter((layout: ILayout) => {
+              const pxSize = unitUtils.convertSize(layout.width, layout.height, layout.unit, 'px')
+              return !(pxSize.width * pxSize.height > pageUtils.MAX_AREA)
+            })
           }
         }
         if (this.formatList.length > 0) {
