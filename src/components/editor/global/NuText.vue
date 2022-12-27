@@ -24,44 +24,30 @@
           :key="span.id"
           :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
-    div(v-if="!isCurveText" class="nu-text__observee")
-      span(v-for="(span, sIndex) in spans()"
-        class="nu-text__span"
-        :class="`nu-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
-        :data-sindex="sIndex"
-        :key="sIndex",
-        :style="styles(span.styles)") {{ span.text }}
-    nu-text-editor(v-if="config.active" :initText="textHtml()" :id="subLayerIndex === -1 ? `text-${layerIndex}` : `text-sub-${layerIndex}-${subLayerIndex}`"
-      class="nu-text__editor"
-      :style="textBodyStyle()"
-      :pageIndex="pageIndex"
-      :layerIndex="layerIndex"
-      :subLayerIndex="subLayerIndex"
-      @keydown.native.37.stop
-      @keydown.native.38.stop
-      @keydown.native.39.stop
-      @keydown.native.40.stop
-      @keydown.native.ctrl.67.exact.stop.self
-      @keydown.native.meta.67.exact.stop.self
-      @keydown.native.ctrl.86.exact.stop.self
-      @keydown.native.meta.86.exact.stop.self
-      @keydown.native.ctrl.88.exact.stop.self
-      @keydown.native.meta.88.exact.stop.self
-      @keydown.native.ctrl.65.exact.stop.self
-      @keydown.native.meta.65.exact.stop.self
-      @keydown.native.ctrl.90.exact.stop.self
-      @keydown.native.meta.90.exact.stop.self
-      @keydown.native.ctrl.shift.90.exact.stop.self
-      @keydown.native.meta.shift.90.exact.stop.self
-      @update="handleTextChange"
-      @compositionend="handleTextCompositionEnd")
-    //- div(v-if="isCurveText" v-for="text, idx in duplicatedText" class="nu-text__body nu-text__curve-text-in-editing" ref="body")
-    //-   nu-curve-text(
-    //-     :config="config"
-    //-     :layerIndex="layerIndex"
-    //-     :pageIndex="pageIndex"
-    //-     :subLayerIndex="subLayerIndex"
-    //-     :isDuplicated="idx !== duplicatedText.length-1")
+    //- nu-text-editor(v-if="config.active" :initText="textHtml()" :id="subLayerIndex === -1 ? `text-${layerIndex}` : `text-sub-${layerIndex}-${subLayerIndex}`"
+    //-   class="nu-text__editor"
+    //-   :style="textBodyStyle()"
+    //-   :pageIndex="pageIndex"
+    //-   :layerIndex="layerIndex"
+    //-   :subLayerIndex="subLayerIndex"
+    //-   @keydown.native.37.stop
+    //-   @keydown.native.38.stop
+    //-   @keydown.native.39.stop
+    //-   @keydown.native.40.stop
+    //-   @keydown.native.ctrl.67.exact.stop.self
+    //-   @keydown.native.meta.67.exact.stop.self
+    //-   @keydown.native.ctrl.86.exact.stop.self
+    //-   @keydown.native.meta.86.exact.stop.self
+    //-   @keydown.native.ctrl.88.exact.stop.self
+    //-   @keydown.native.meta.88.exact.stop.self
+    //-   @keydown.native.ctrl.65.exact.stop.self
+    //-   @keydown.native.meta.65.exact.stop.self
+    //-   @keydown.native.ctrl.90.exact.stop.self
+    //-   @keydown.native.meta.90.exact.stop.self
+    //-   @keydown.native.ctrl.shift.90.exact.stop.self
+    //-   @keydown.native.meta.shift.90.exact.stop.self
+    //-   @update="handleTextChange"
+    //-   @compositionend="handleTextCompositionEnd")
 </template>
 
 <script lang="ts">
@@ -101,7 +87,6 @@ export default Vue.extend({
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
     return {
       isDestroyed: false,
-      resizeObserver: undefined as ResizeObserver | undefined,
       initSize: {
         width: this.config.styles.width,
         height: this.config.styles.height,
@@ -117,8 +102,6 @@ export default Vue.extend({
   },
   destroyed() {
     this.isDestroyed = true
-    this.resizeObserver && this.resizeObserver.disconnect()
-    this.resizeObserver = undefined
   },
   mounted() {
     // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
@@ -280,7 +263,7 @@ export default Vue.extend({
           widthLimit = pageSize
         } else if (reachLeftLimit || reachRightLimit) {
           if (composing) this.widthLimitSetDuringComposition = true
-          widthLimit = getSize()
+          widthLimit = currTextSize
           textHW = textUtils.getTextHW(text, widthLimit)
           layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
         }
@@ -365,7 +348,7 @@ export default Vue.extend({
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
-        opacity: `${this.config.styles.opacity / 100}`,
+        opacity: `${this.config.styles.opacity * 0.01}`,
         // transform: `scaleX(${this.config.styles.scale}) scaleY(${this.config.styles.scale})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode
@@ -386,12 +369,12 @@ export default Vue.extend({
       return tiptapUtils.textStylesRaw(styles)
     },
     getOpacity() {
-      const { editing, contentEditable } = this.config
-      if (this.isCurveText && this.config.active) {
+      const { editing, contentEditable, active } = this.config
+      if (this.isCurveText && active) {
         return 0.2
       }
       if (editing && !this.isMoving) {
-        if (contentEditable) {
+        if (contentEditable && active) {
           if (this.isCurveText || this.isFlipped) {
             return 0.2
           } else {
@@ -466,14 +449,6 @@ export default Vue.extend({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
       this.drawSvgBG()
-    },
-    observeAllSpans() {
-      const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
-      spans.forEach(span => {
-        setTimeout(() => {
-          this.resizeObserver && this.resizeObserver.observe(span as Element)
-        }, 1)
-      })
     }
   }
 })
