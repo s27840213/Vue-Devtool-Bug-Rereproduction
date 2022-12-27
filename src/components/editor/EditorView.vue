@@ -166,7 +166,7 @@ export default Vue.extend({
           uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
           modalUtils.setModalInfo(
             `${this.$t('NN0788')}`,
-            [`${this.$t('NN0789')}`],
+            [`${this.$t('NN0789', { size: '6000 x 6000' })}`],
             {
               msg: `${this.$t('NN0358')}`,
               class: 'btn-blue-mid',
