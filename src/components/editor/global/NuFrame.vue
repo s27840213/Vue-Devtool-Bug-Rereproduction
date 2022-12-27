@@ -6,7 +6,7 @@
         draggable="false"
         :src="shadowSrc()")
     nu-layer(v-for="(layer,index) in layers"
-      :key="`layer-${index}`"
+      :key="`layer-${layer.id}`"
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
       :isFrame="true"
@@ -27,8 +27,6 @@ import ImageUtils from '@/utils/imageUtils'
 import { mapGetters } from 'vuex'
 import layerFactary from '@/utils/layerFactary'
 import generalUtils from '@/utils/generalUtils'
-import layerUtils from '@/utils/layerUtils'
-import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   inheritAttrs: false,
@@ -68,14 +66,12 @@ export default Vue.extend({
         json.decorationTop.color = [...config.decorationTop.color]
         Object.assign(config.decorationTop, json.decorationTop)
       }
-      console.log(generalUtils.deepCopy(json))
       if (config.blendLayers && json.blendLayers) {
         json.blendLayers.forEach((l, i) => {
           l.color = this.config.blendLayers[i].color
           this.config.blendLayers[i].styles.blendMode = (json.blendLayers as IShape[])[i].blendMode
           Object.assign(this.config.blendLayers[i], (json.blendLayers as IShape[])[i])
         })
-        console.log(generalUtils.deepCopy(config))
       }
       config.needFetch = false
     }
