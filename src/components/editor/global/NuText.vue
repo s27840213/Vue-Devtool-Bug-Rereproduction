@@ -22,7 +22,7 @@
           class="nu-text__span"
           :data-sindex="sIndex"
           :key="span.id"
-          :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan)") {{ span.text }}
+          :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan, transParentStyles)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
     //- nu-text-editor(v-if="config.active" :initText="textHtml()" :id="subLayerIndex === -1 ? `text-${layerIndex}` : `text-sub-${layerIndex}-${subLayerIndex}`"
     //-   class="nu-text__editor"
@@ -79,6 +79,10 @@ export default Vue.extend({
       default: -1
     },
     isPagePreview: {
+      default: false,
+      type: Boolean
+    },
+    isTransparent: {
       default: false,
       type: Boolean
     }
@@ -166,6 +170,13 @@ export default Vue.extend({
         ...(duplicatedTextShadow ? [textShadowCss] : []),
         {} // Original text, don't have extra css
       ]
+    },
+    transParentStyles(): {[key: string]: any} {
+      return this.isTransparent ? {
+        color: 'rgba(0, 0, 0, 0)',
+        '-webkit-text-stroke-color': 'rgba(0, 0, 0, 0)',
+        'text-decoration-color': 'rgba(0, 0, 0, 0)'
+      } : {}
     }
   },
   watch: {
