@@ -237,7 +237,7 @@ export default function (this: any) {
       const { theme } = state
       const { keyword } = params
       const locale = localeUtils.currLocale()
-      commit('SET_STATE', { pending: true, locale })
+      commit('SET_STATE', { locale })
       try {
         const { data } = await this.api({
           token: store.getters['user/getToken'],

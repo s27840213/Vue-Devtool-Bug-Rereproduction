@@ -280,17 +280,17 @@ export default Vue.extend({
     ...mapMutations('templates', {
       _setTemplateState: 'SET_STATE'
     }),
-    handleSearch(keyword?: string) {
+    async handleSearch(keyword?: string) {
       this.resetSearch()
       if (keyword) {
-        this.getTagContent({ keyword })
+        await this.getTagContent({ keyword })
         if (this.inAdminMode) this.getSum({ keyword })
       }
     },
-    handleCategorySearch(keyword: string, locale = '') {
+    async handleCategorySearch(keyword: string, locale = '') {
       this.resetSearch()
       if (keyword) {
-        this.getContent({ keyword, locale })
+        await this.getContent({ keyword, locale })
       }
     },
     handleLoadMore() {
@@ -306,7 +306,7 @@ export default Vue.extend({
       })
       this.handleTheme(allTheme)
     },
-    handleTheme(selected: { [key: string]: boolean }) {
+    async handleTheme(selected: { [key: string]: boolean }) {
       const theme = Object
         .entries(selected)
         .reduce((prev, [id, checked]) => {
@@ -314,11 +314,15 @@ export default Vue.extend({
           return prev
         }, [] as string[])
         .join(',')
-      this._setTemplateState({ theme })
-      this.resetContent()
-      this.getRecAndCate()
+      const oldKeyword = this.keyword as string
+
       this.showTheme = false
       this.showPrompt = false
+      this._setTemplateState({ theme })
+      this.resetContent()
+      if (oldKeyword.startsWith('tag::')) await this.handleSearch(oldKeyword)
+      else if (oldKeyword) await this.handleCategorySearch(oldKeyword)
+      this.getRecAndCate({ reset: false })
     },
     handleClosePrompt() {
       const { userId } = this
