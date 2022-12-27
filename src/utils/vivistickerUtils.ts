@@ -729,7 +729,8 @@ class ViviStickerUtils {
     }, id ?? '')
   }
 
-  initWithMyDesign(myDesign: IMyDesign, callback?: (pages: Array<IPage>) => void) {
+  initWithMyDesign(myDesign: IMyDesign, option?: { callback?: (pages: Array<IPage>) => void, tab?: string }) {
+    const { callback, tab = 'opacity' } = option || {}
     const {
       id,
       type,
@@ -751,7 +752,7 @@ class ViviStickerUtils {
           if (firstObject.type === 'shape' && ((firstObject as IShape).color?.length ?? 0) > 0) {
             eventUtils.emit(PanelEvent.switchTab, 'color', { currColorEvent: ColorEventType.shape })
           } else {
-            eventUtils.emit(PanelEvent.switchTab, 'opacity')
+            tab && eventUtils.emit(PanelEvent.switchTab, tab)
           }
         }
       }, id ?? '')
@@ -906,43 +907,46 @@ class ViviStickerUtils {
         const design = designs.find(d => d.id === info.id)
         if (!design) break
         // handle Dialog and File-selector
-        this.initWithMyDesign(design, (pages: Array<IPage>) => {
-          const page = pages[0]
-          this.initLoadingFlags(page, () => {
-            const { layers } = page
-            const missingClips = (layers
-              .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
-              .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
-            if (missingClips.length === 1) {
-              const modalBtn = {
-                msg: i18n.t('STK0023') as string,
-                action: () => {
-                  let subLayerIdx = -1
-                  let layerIndex = -1
-                  const frame = layers
-                    .find((l, i) => {
-                      if (l.type === LayerType.frame && (l as IFrame).clips.some((c, i) => {
-                        if (c.srcObj.type === 'frame') {
-                          subLayerIdx = i
+        this.initWithMyDesign(design, {
+          callback: (pages: Array<IPage>) => {
+            const page = pages[0]
+            this.initLoadingFlags(page, () => {
+              const { layers } = page
+              const missingClips = (layers
+                .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
+                .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
+              if (missingClips.length === 1) {
+                const modalBtn = {
+                  msg: i18n.t('STK0023') as string,
+                  action: () => {
+                    let subLayerIdx = -1
+                    let layerIndex = -1
+                    const frame = layers
+                      .find((l, i) => {
+                        if (l.type === LayerType.frame && (l as IFrame).clips.some((c, i) => {
+                          if (c.srcObj.type === 'frame') {
+                            subLayerIdx = i
+                            return true
+                          }
+                          return false
+                        })) {
+                          layerIndex = i
                           return true
                         }
                         return false
-                      })) {
-                        layerIndex = i
-                        return true
-                      }
-                      return false
-                    }) as IFrame
-                  frameUtils.iosPhotoSelect({
-                    pageIndex: 0,
-                    layerIndex,
-                    subLayerIdx
-                  }, frame.clips[subLayerIdx])
+                      }) as IFrame
+                    frameUtils.iosPhotoSelect({
+                      pageIndex: 0,
+                      layerIndex,
+                      subLayerIdx
+                    }, frame.clips[subLayerIdx])
+                  }
                 }
+                modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn)
               }
-              modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn)
-            }
-          })
+            })
+          },
+          tab: ''
         })
       }
     }

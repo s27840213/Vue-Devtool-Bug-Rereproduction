@@ -63,47 +63,50 @@ export default Vue.extend({
         vivistickerUtils.getAsset(`mydesign-${this.item.type}`, this.item.id, 'config').then(data => {
           if (vivistickerUtils.checkForEmptyFrame(data.pages)) {
             // handle Dialog and File-selector
-            vivistickerUtils.initWithMyDesign(this.item, (pages: Array<IPage>) => {
-              const page = pages[0]
-              page.layers.forEach(l => {
-                l.initFromMydesign = true
-              })
-              vivistickerUtils.initLoadingFlags(page, () => {
-                const { layers } = page
-                const frames = (layers
-                  .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
-                const missingClips = frames
-                  .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
-                if (missingClips.length === 1) {
-                  const modalBtn = {
-                    msg: i18n.t('STK0023') as string,
-                    action: () => {
-                      let subLayerIdx = -1
-                      let layerIndex = -1
-                      const frame = layers
-                        .find((l, i) => {
-                          if (l.type === LayerType.frame && (l as IFrame).clips.some((c, i) => {
-                            if (c.srcObj.type === 'frame') {
-                              subLayerIdx = i
+            vivistickerUtils.initWithMyDesign(this.item, {
+              callback: (pages: Array<IPage>) => {
+                const page = pages[0]
+                page.layers.forEach(l => {
+                  l.initFromMydesign = true
+                })
+                vivistickerUtils.initLoadingFlags(page, () => {
+                  const { layers } = page
+                  const frames = (layers
+                    .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
+                  const missingClips = frames
+                    .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
+                  if (missingClips.length === 1) {
+                    const modalBtn = {
+                      msg: i18n.t('STK0023') as string,
+                      action: () => {
+                        let subLayerIdx = -1
+                        let layerIndex = -1
+                        const frame = layers
+                          .find((l, i) => {
+                            if (l.type === LayerType.frame && (l as IFrame).clips.some((c, i) => {
+                              if (c.srcObj.type === 'frame') {
+                                subLayerIdx = i
+                                return true
+                              }
+                              return false
+                            })) {
+                              layerIndex = i
                               return true
                             }
                             return false
-                          })) {
-                            layerIndex = i
-                            return true
-                          }
-                          return false
-                        }) as IFrame
-                      frameUtils.iosPhotoSelect({
-                        pageIndex: 0,
-                        layerIndex,
-                        subLayerIdx
-                      }, frame.clips[subLayerIdx])
+                          }) as IFrame
+                        frameUtils.iosPhotoSelect({
+                          pageIndex: 0,
+                          layerIndex,
+                          subLayerIdx
+                        }, frame.clips[subLayerIdx])
+                      }
                     }
+                    modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn)
                   }
-                  modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn)
-                }
-              })
+                })
+              },
+              tab: ''
             })
           } else {
             const pages = generalUtils.deepCopy(data.pages)
