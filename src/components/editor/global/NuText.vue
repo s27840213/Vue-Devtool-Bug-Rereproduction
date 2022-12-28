@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="nu-text" :style="textWrapperStyle()" draggable="false")
     //- Svg BG for text effex gooey.
-    svg(v-if="svgBG" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
+    svg(v-if="svgBG && !isTransparent" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
       component(v-for="(elm, idx) in svgBG.content"
                 :key="`textSvgBg${idx}`"
                 :is="elm.tag"
@@ -13,7 +13,8 @@
         :layerIndex="layerIndex"
         :pageIndex="pageIndex"
         :subLayerIndex="subLayerIndex"
-        :isDuplicated="idx !== duplicatedText.length-1")
+        :isDuplicated="idx !== duplicatedText.length-1"
+        :isTransparent="isTransparent")
       p(v-else
         v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
         :key="p.id"
