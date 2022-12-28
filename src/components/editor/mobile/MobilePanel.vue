@@ -208,9 +208,6 @@ export default Vue.extend({
     },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
-        case 'color': {
-          return this.currColorEvent === ColorEventType.shape && this.panelHistory.length === 0
-        }
         case 'text-effect': {
           return this.panelHistory.length === 0
         }

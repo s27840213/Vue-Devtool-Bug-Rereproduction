@@ -340,6 +340,9 @@ export default Vue.extend({
   box-sizing: border-box;
   filter: drop-shadow(0px -1px 5px setColor(white, 0.2));
   &__scroll {
+    .mobile-panel & { // only for mobile editor
+      @include no-scrollbar;
+    }
     @include hover-scrollbar(dark);
     box-sizing: border-box;
     height: 100%;

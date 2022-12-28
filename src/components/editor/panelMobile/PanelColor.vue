@@ -1,5 +1,14 @@
 <template lang="pug">
   div(class="panel-color px-5")
+    div(v-if="showDocumentColors")
+      div(class="text-left") {{$t('NN0003')}}{{$t('NN0017')}}
+      div(class="panel-color__document-colors" :style="colorsStyle"
+          @scroll.passive="updateColorsOverflow" ref="colors")
+        div(v-for="(color, index) in getDocumentColors"
+          class="panel-color__document-color"
+          :style="colorStyles(color, index)"
+          @click="selectColor(index)")
+      div(class="panel-color__hr")
     color-picker(
       v-if="showColorPicker"
       :isMobile="true" :aspectRatio="40"
@@ -11,15 +20,6 @@
       :allRecentlyControl="showAllRecently"
       @openColorPicker="openColorPicker"
       @openColorMore="openColorMore")
-    div(v-if="showDocumentColors" class="panel-color__document-colors")
-      div(v-if="hasMultiColors"
-        class="panel-color__document-color"
-        :style="groupColorStyles()"
-        @click="selectColor(0)")
-      div(v-else v-for="(color, index) in getDocumentColors"
-        class="panel-color__document-color"
-        :style="colorStyles(color, index)"
-        @click="selectColor(index)")
 </template>
 
 <script lang="ts">
@@ -46,7 +46,9 @@ export default Vue.extend({
     return {
       currColor: '#fff',
       colorUtils,
-      currSelectedColorIndex: 0
+      currSelectedColorIndex: 0,
+      leftOverflow: false,
+      rightOverflow: false
     }
   },
   props: {
@@ -87,6 +89,9 @@ export default Vue.extend({
     colorUtils.on(this.currEvent, this.handleColorUpdate)
     colorUtils.onStop(this.currEvent, this.recordChange)
   },
+  mounted() {
+    this.updateColorsOverflow()
+  },
   beforeDestroy() {
     colorUtils.event.off(this.currEvent, this.handleColorUpdate)
     colorUtils.offStop(this.currEvent, this.recordChange)
@@ -112,22 +117,32 @@ export default Vue.extend({
       return !this.inInitialState && this.lastHistory === 'color-picker'
     },
     showDocumentColors(): boolean {
-      return this.inInitialState && this.currEvent === ColorEventType.shape
+      return (this.showPalette && this.currEvent === ColorEventType.shape) &&
+        this.getDocumentColors.length > 1
     },
     showPalette(): boolean {
-      return ['color-palette', 'color-more'].includes(this.lastHistory) || (this.inInitialState && !this.showDocumentColors)
+      return ['color-palette', 'color-more'].includes(this.lastHistory) || this.inInitialState
     },
     showAllRecently(): boolean {
       return this.lastHistory === 'color-more'
     },
-    hasMultiColors(): boolean {
-      return shapeUtils.hasMultiColors
+    colorsStyle(): Record<string, string> {
+      // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
+      return {
+        gridTemplateColumns: `repeat(${this.getDocumentColors.length}, calc((100% - 30px) / 7))`,
+        maskImage: `linear-gradient(to right, transparent 0, black ${this.leftOverflow ? '48px' : 0}, black calc(100% - ${this.rightOverflow ? '48px' : '0px'}), transparent 100%)`
+      }
     },
     getDocumentColors(): string[] {
       return shapeUtils.getDocumentColors
     }
   },
   methods: {
+    updateColorsOverflow() {
+      const { scrollLeft, scrollWidth, offsetWidth } = this.$refs.colors as HTMLElement
+      this.leftOverflow = scrollLeft > 0
+      this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
+    },
     handleChangeStop(color: string) {
       window.requestAnimationFrame(() => {
         colorUtils.event.emit(colorUtils.currStopEvent, color)
@@ -240,43 +255,15 @@ export default Vue.extend({
     openColorPicker() {
       this.$emit('pushHistory', 'color-picker')
     },
-    openColorPalette() {
-      this.$emit('pushHistory', 'color-palette')
-    },
     colorStyles(color: string, index: number) {
       return {
         backgroundColor: color,
         boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #808080, inset 0 0 0 1.5px #fff' : ''
       }
     },
-    groupColorStyles() {
-      const currLayer = this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex)
-      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        const origin = currLayer.layers
-          .find((l: ILayer) => l.type === 'shape' && (l as IShape).color.length === 1).color[0]
-        const isGroupSameColor = (() => {
-          for (const layer of currLayer.layers) {
-            if (layer.type === 'shape' && (layer as IShape).color.length === 1 && (layer as IShape).color[0] !== origin) {
-              return false
-            }
-          }
-          return true
-        })()
-        return isGroupSameColor ? {
-          backgroundColor: origin,
-          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
-        } : {
-          backgroundImage: `url(${require('@/assets/img/jpg/multi-color.jpg')})`,
-          backgroundPosition: 'center center',
-          backgroundSize: 'cover',
-          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1px #fff'
-        }
-      }
-    },
     selectColor(index: number) {
       this.currSelectedColorIndex = index
       colorUtils.setCurrColor(this.getDocumentColors[index])
-      this.openColorPalette()
     }
   }
 })
@@ -285,18 +272,19 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel-color {
   width: 100%;
-  overflow-y: scroll;
+  height: 100%;
   box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-auto-columns: 100%;
 
   &__document-colors {
+    @include no-scrollbar;
     width: 100%;
     margin-top: 10px;
     display: grid;
-    grid-auto-rows: auto;
-    grid-template-columns: repeat(7, 1fr);
-    row-gap: 5px;
-    column-gap: 5px;
-    box-sizing: border-box;
+    gap: 5px;
+    overflow-x: auto;
   }
   &__document-color {
     width: 100%;
@@ -308,6 +296,11 @@ export default Vue.extend({
       box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff;
     }
     // transition: box-shadow 0.2s ease-in-out;
+  }
+  &__hr {
+    height: 1px;
+    margin: 16px 0;
+    background-color: setColor(gray-4);
   }
 }
 </style>
