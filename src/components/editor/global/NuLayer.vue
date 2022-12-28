@@ -19,8 +19,8 @@
               :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
             lazy-load(:target="lazyLoadTarget"
                 :rootMargin="'300px 0px 300px 0px'"
-                :minHeight="config.styles.height * contentScaleRatio"
-                :minWidth="config.styles.width * contentScaleRatio"
+                :minHeight="config.styles.height * contentScaleRatio / config.styles.scale"
+                :minWidth="config.styles.width * contentScaleRatio / config.styles.scale"
                 :threshold="[0]"
                 :handleUnrender="handleUnrender"
                 :anamationEnabled="false"
@@ -219,6 +219,9 @@ export default Vue.extend({
       body.addEventListener(generalUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
     }
   },
+  destroyed() {
+    this.movingUtils && this.movingUtils.removeListener()
+  },
   computed: {
     ...mapState('text', ['sel', 'props']),
     ...mapState('shadow', ['processId', 'handleId', 'uploadId']),
@@ -296,10 +299,11 @@ export default Vue.extend({
         !this.config.isFrameImg && this.primaryLayer?.type === 'frame'
         ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
       const pointerEvents = this.getPointerEvents
+      const outline = this.outlineStyles()
       const styles = Object.assign(
         CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
         {
-          // outline: this.outlineStyles(),
+          outline,
           willChange: !this.isSubLayer && this.isDragging ? 'transform' : '',
           pointerEvents,
           clipPath
@@ -344,26 +348,10 @@ export default Vue.extend({
       return frameUtils.frameClipFormatter(clippath)
     },
     outlineStyles() {
-      const outlineColor = (() => {
-        if (this.getLayerType === 'frame' && this.config.clips[0].isFrameImg) {
-          return '#F10994'
-        } else if (this.isLocked()) {
-          return '#EB5757'
-        } else {
-          return '#7190CC'
-        }
-      })()
-
-      if (this.isLine || (this.config.moving && this.currSelectedInfo.index !== this.layerIndex)) {
-        return 'none'
-      } else if (this.config.shown || this.isActive) {
-        if (this.config.type === 'tmp' || this.isControlling) {
-          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
-        } else {
-          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
-        }
+      if (this.primaryLayer && this.primaryLayer.type === 'tmp') {
+        return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`
       } else {
-        return 'none'
+        return ''
       }
     },
     toggleHighlighter(evt: MouseEvent, pageIndex: number, layerIndex: number, shown: boolean) {

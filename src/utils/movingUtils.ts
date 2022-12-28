@@ -95,14 +95,9 @@ export class MovingUtils {
     }
   }
 
-  private start = 0
-  private recorded = false
-
   moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y
-    this.start = Date.now()
-    this.recorded = false
     const currLayerIndex = layerUtils.layerIndex
     if (currLayerIndex !== this.layerIndex) {
       const layer = layerUtils.getLayer(this.pageIndex, currLayerIndex)
@@ -187,7 +182,6 @@ export class MovingUtils {
     }
 
     this.movingByControlPoint = false
-    // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
     const inCopyMode = (generalUtils.exact([event.altKey])) && !this.contentEditable
     const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable && !inCopyMode
     const { inMultiSelectionMode } = this
@@ -293,7 +287,6 @@ export class MovingUtils {
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
-    this.start = Date.now()
     const posDiff = {
       x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
       y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
@@ -383,6 +376,7 @@ export class MovingUtils {
     this.isControlling = false
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
+    if (!this.body.contains(e.target as HTMLElement)) return
 
     const posDiff = {
       x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
