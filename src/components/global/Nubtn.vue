@@ -3,7 +3,7 @@ div(:class="`nubtn ${theme} ${sizeClass} ${status}`"
     v-hint="hint"
     @click="click")
   svg-icon(v-if="theme.includes('icon')"
-          :iconName="icon" iconWidth="24px" :iconColor="iconColor")
+          :iconName="icon" :iconWidth="iconSize" :iconColor="iconColor")
   span(v-if="theme !== 'icon'")
     slot
 </template>
@@ -56,6 +56,9 @@ export default Vue.extend({
     iconColor(): string {
       return this.theme === 'icon_text' ? 'white'
         : this.status === 'disabled' ? 'gray-4' : 'gray-2'
+    },
+    iconSize(): string {
+      return this.size.startsWith('sm') ? '18px' : '24px'
     }
   },
   methods: {
@@ -151,8 +154,14 @@ export default Vue.extend({
   background-color: var(--blue);
 }
 .nubtn.icon {
-  width: 32px;
-  height: 32px;
+  &.sm {
+    width: 24px;
+    height: 24px;
+  }
+  &.mid {
+    width: 32px;
+    height: 32px;
+  }
   &.active {
     background-color: setColor(blue-3);
   }

@@ -21,12 +21,8 @@
           clear
           :defaultKeyword="keywordLabel"
           @search="handleSearch")
-          svg-icon(class="ml-5 pointer panel-template__advanced"
-            :class="{ 'panel-template__advanced--active': !allThemesChecked }"
-            iconName="advanced"
-            iconColor="gray-6"
-            iconWidth="20px"
-            @click.native="onAdvancedClicked()")
+          nubtn(theme="icon" icon="sliders" :status="!allThemesChecked?'active':'default'"
+              @click.native="onAdvancedClicked()")
         popup-theme(v-if="showTheme"
           class="panel-template__theme"
           :style="themeStyle()"

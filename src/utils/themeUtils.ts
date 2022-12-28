@@ -84,7 +84,7 @@ class ThemeUtils {
     return _.sortBy(themes, [
       (theme: Itheme) => this.themeRatioDifference(theme, currPageRatio),
       (theme: Itheme) => Math.abs(theme.width - width)
-    ])
+    ]).reverse()
   }
 
   getThemesBySize(width: number, height: number, newDesignType?: number) {
@@ -111,8 +111,8 @@ class ThemeUtils {
     const pageSize = this.getFocusPageSize()
     const sortedThemes = this.sortedThemes(pageSize.width, pageSize.height)
     return [
-      ...sortedThemes.filter(theme => selectedThemes.includes(theme.id)),
-      ...sortedThemes.filter(theme => !selectedThemes.includes(theme.id))
+      ...sortedThemes.filter(theme => !selectedThemes.includes(theme.id)),
+      ...sortedThemes.filter(theme => selectedThemes.includes(theme.id))
     ].map(theme => theme.id)
       .join(',')
   }

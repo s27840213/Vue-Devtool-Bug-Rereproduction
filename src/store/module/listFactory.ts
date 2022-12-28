@@ -355,9 +355,10 @@ export default function (this: any) {
   }
 
   const getters: GetterTree<IListModuleState, any> = {
-    nextParams(state) {
-      const { nextPage, nextSearch, keyword, theme, locale } = state
+    nextParams: (state) => {
+      let { nextPage, nextSearch, keyword, theme, locale } = state
       const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
+      if (keyword && this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
       return {
         token: needCache ? '1' : store.getters['user/getToken'],
         locale,

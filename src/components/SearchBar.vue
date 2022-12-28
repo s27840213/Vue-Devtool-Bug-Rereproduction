@@ -1,7 +1,10 @@
 <template lang="pug">
-  //- Show search button on mobile, https://www.paddingleft.com/2019/09/18/Show-Search-on-mobile-devices-keyboar
-  form(class="search-bar bg-gray-6"
-    action @submit="onSearch")
+  //- Show search button on mobile, https://www.paddingleft.com/2019/09/18/Show-Search-on-mobile-devices-keyboard
+  form(class="search-bar bg-gray-6" action @submit="onSearch")
+    svg-icon(class="pointer"
+      iconName="search"
+      :iconColor="color.search || 'gray-3'"
+      iconWidth="20px")
     input(class="search-bar__input body-2"
       type="search"
       v-model="keyword"
@@ -14,11 +17,6 @@
       :iconColor="color.close || 'gray-3'"
       iconWidth="20px"
       @click.native="onClear")
-    svg-icon(class="pointer"
-      iconName="search"
-      :iconColor="color.search || 'gray-3'"
-      iconWidth="20px"
-      @click.native="onSearch")
     slot
 </template>
 
@@ -95,9 +93,12 @@ export default Vue.extend({
   border-radius: 3px;
   &__input {
     flex: 1;
-    margin-right: 10px;
+    margin: 0 4px;
+    padding: 0;
     background-color: transparent;
+    // Remove webkit default magnifier & cancle icon for search input, https://stackoverflow.com/a/23296152
     -webkit-appearance: textfield;
+    &::-webkit-search-cancel-button { display: none; }
   }
 }
 </style>
