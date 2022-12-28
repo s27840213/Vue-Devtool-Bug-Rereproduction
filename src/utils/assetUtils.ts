@@ -168,18 +168,17 @@ class AssetUtils {
     pageUtils.updateSpecPage(targetPageIndex, newLayer)
     if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newLayer, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 
-    const hasBleed = (bleeds: IBleed) => !!bleeds.top || !!bleeds.bottom || !!bleeds.left || !!bleeds.right
     if (store.getters['user/getUserId'] === 'backendRendering') {
       if (store.getters['user/getUserId'] === 'backendRendering' && !store.getters['user/getBleed'] && !store.getters['user/getTrim']) {
         // remove bleeds if disabled
-        console.log('noBleed')
+        // console.log('noBleed')
         resizeUtils.disableBleeds(targetPageIndex)
-      } else if (json.bleeds && json.physicalBleeds && hasBleed(json.bleeds) && hasBleed(json.physicalBleeds)) {
+      } else if (json.isEnableBleed && json.bleeds && json.physicalBleeds) {
         // use bleeds of template if it has
         resizeUtils.resizeBleeds(targetPageIndex, json.physicalBleeds, json.bleeds)
       } else {
         // use default bleeds if it has no bleeds
-        console.log('defaultBleed')
+        // console.log('defaultBleed')
         const page = this.getPage(targetPageIndex)
         resizeUtils.resizeBleeds(targetPageIndex, pageUtils.getDefaultBleeds(page.unit, pageUtils.getPageDPI(page)))
       }

@@ -307,6 +307,7 @@ class ResizeUtils {
 
   disableBleeds(pageIndex: number) {
     const page = pageUtils.getPage(pageIndex)
+    if (!page.isEnableBleed) return
     const sizeWithoutBleed = pageUtils.getPageSizeWithBleeds(page)
     const unit = sizeWithoutBleed.unit
 
