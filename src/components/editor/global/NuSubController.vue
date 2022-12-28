@@ -437,7 +437,11 @@ export default Vue.extend({
         y: Math.abs(this.primaryLayer.styles.y - this.initTranslate.y)
       }
       const hasActualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
-      if (this.type === LayerType.frame && this.config.active && this.config.srcObj.type === 'frame' && !hasActualMove && !this.controllerHidden) {
+      const isEmptClipInFrame = this.type === LayerType.frame && this.config.srcObj.type === 'frame' &&
+        !hasActualMove && !this.controllerHidden
+      const isEmptClipInGroup = this.type === LayerType.group && this.config.type === LayerType.frame &&
+        this.primaryLayer.active && this.config.clips.length === 1 && this.config.clips[0].srcObj.type === 'frame'
+      if (isEmptClipInFrame || isEmptClipInGroup) {
         this.iosPhotoSelect()
       }
       eventUtils.removePointerEvent('pointerup', this.onMouseup)
