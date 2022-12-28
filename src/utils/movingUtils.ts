@@ -290,15 +290,10 @@ export class MovingUtils {
         }
       }
     }
-    // console.log('handle start', Date.now() - this.start)
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
-    // if (!this.recorded) {
-    //   // console.log(Date.now() - this.start)
-    //   // this.recorded = true
     this.start = Date.now()
-    // }
     const posDiff = {
       x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
       y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
@@ -330,10 +325,9 @@ export class MovingUtils {
     }
 
     this.isControlling = true
+    const updateConifgData = {} as Partial<ILayer>
     if (!this.isDragging) {
-      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-        dragging: true
-      })
+      updateConifgData.dragging = true
       this.component && this.component.$emit('isDragging', this.layerIndex)
     }
     if (this.isActive) {
@@ -345,10 +339,6 @@ export class MovingUtils {
         window.requestAnimationFrame(() => {
           this.movingHandler(e)
           this.isHandleMovingHandler = false
-          // if (!this.recorded) {
-          // console.log(Date.now() - this.start)
-          //   this.recorded = true
-          // }
         })
         this.isHandleMovingHandler = true
       }
@@ -358,11 +348,12 @@ export class MovingUtils {
       }
       if (!this.config.moving || !store.state.isMoving) {
         if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
-          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: true })
+          updateConifgData.moving = true
           this.setMoving(true)
         }
       }
     }
+    layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, updateConifgData)
   }
 
   movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
