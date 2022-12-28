@@ -145,7 +145,7 @@ export default class SubControllerUtils {
         layers = (layerUtils.getCurrLayer as IFrame).clips
     }
 
-    if (!store.getters['shadow/isHandling'] && this.primaryActive) {
+    if (!store.getters['shadow/isHandling'] && this.primaryActive && !store.state.isMoving) {
       if (layerUtils.layerIndex !== -1) {
         for (let idx = 0; idx < layers.length; idx++) {
           if (idx !== this.subLayerIdx) {

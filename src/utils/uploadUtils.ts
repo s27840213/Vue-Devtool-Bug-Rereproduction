@@ -207,7 +207,9 @@ class UploadUtils {
       img.src = evt.target?.result as string
       img.onload = (evt) => {
         store.commit('file/ADD_PREVIEW', {
-          imageFile: img,
+          width: img.width,
+          height: img.height,
+          src: img.src,
           assetId: assetId
         })
         assetUtils.addImage(img.src, img.width / img.height, {
@@ -247,12 +249,13 @@ class UploadUtils {
                 clearInterval(increaseInterval)
                 response.json().then((json: IUploadAssetResponse) => {
                   if (json.flag === 0) {
+                    const { width, height, asset_index } = json.data
                     console.log('Successfully upload the file')
                     store.commit('file/UPDATE_PROGRESS', {
                       assetId: assetId,
                       progress: 100
                     })
-                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index })
+                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: asset_index, width, height })
                     store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                     store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
                     // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot

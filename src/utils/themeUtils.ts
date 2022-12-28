@@ -32,12 +32,12 @@ class ThemeUtils {
 
   async fetchTemplateContent() {
     generalUtils.panelInit('template',
-      (keyword: string) => {
-        store.dispatch('templates/getTagContent', { keyword })
-      }, (keyword: string, locale: string) => {
-        store.dispatch('templates/getContent', { keyword, locale })
-      }, async () => {
-        store.dispatch('templates/getRecAndCate')
+      async (keyword: string) => {
+        await store.dispatch('templates/getTagContent', { keyword })
+      }, async (keyword: string, locale: string) => {
+        await store.dispatch('templates/getContent', { keyword, locale })
+      }, async ({ reset }: {reset: boolean}) => {
+        store.dispatch('templates/getRecAndCate', { reset })
       })
   }
 

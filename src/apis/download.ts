@@ -6,7 +6,7 @@ import { AxiosError } from 'axios'
 import designUtils from '@/utils/designUtils'
 import i18n from '@/i18n'
 class DownloadService {
-  createFile (params: IDownloadServiceParams, useDev = 0, newChrome = 0) {
+  createFile (params: IDownloadServiceParams, useDev = 0) {
     const data = {
       token: authToken().token || '',
       team_id: params.teamId,
@@ -25,7 +25,6 @@ class DownloadService {
       merge: params.merge,
       split_size: params.splitSize,
       new_test: useDev,
-      new_chrome: newChrome,
       locale: i18n.locale,
       title: designUtils.getDesignName()
     }

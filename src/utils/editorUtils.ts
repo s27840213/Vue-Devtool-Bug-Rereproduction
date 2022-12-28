@@ -61,7 +61,7 @@ class EditorUtils {
 
   setCurrActivePanel(panel: string): void {
     if (generalUtils.isTouchDevice()) {
-      store.commit('mobileEditor/SET_currActivePanel', panel)
+      store.commit('mobileEditor/SET_currActivePanel', panel.replace('bg', 'background'))
     }
   }
 
