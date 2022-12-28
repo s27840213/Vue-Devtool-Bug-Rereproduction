@@ -66,7 +66,7 @@
         div(v-if="'outline' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
-            :label="`${$t('NN0776')}`"
+            :label="`${$t('NN0794')}`"
             :default-checked="!!selected.outline"
             @change="({ checked }) => handleUpdate('outline', checked ? 1 : 0)")
         div(v-if="selectedTypeVal.includes('pdf')"
