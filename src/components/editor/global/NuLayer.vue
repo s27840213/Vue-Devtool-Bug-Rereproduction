@@ -297,15 +297,14 @@ export default Vue.extend({
       return ''
     },
     layerDivs() {
-      // if (this.$router.currentRoute.name === 'Preview' && this.config.type === 'text') {
-      //   return [
-      //     { noShadow: false, isTransparent: true },
-      //     { noShadow: true, isTransparent: false, main: true }
-      //   ]
-      // } else {
-      //   return [{ noShadow: false, isTransparent: false, main: true }]
-      // }
-      return [{ noShadow: false, isTransparent: false, main: true }]
+      if (this.$router.currentRoute.name === 'Preview' && this.$router.currentRoute.query.origin !== 'true' && this.config.type === 'text') {
+        return [
+          { noShadow: false, isTransparent: true },
+          { noShadow: true, isTransparent: false, main: true }
+        ]
+      } else {
+        return [{ noShadow: false, isTransparent: false, main: true }]
+      }
     }
   },
   methods: {
