@@ -649,8 +649,28 @@ class PageUtils {
       pages.forEach(page => {
         if (page.width * page.height > pageUtils.MAX_AREA) {
           const format = { width: page.width, height: page.height, physicalWidth: page.physicalWidth ?? page.width, physicalHeight: page.physicalHeight ?? page.height, unit: page.unit ?? 'px' }
-          format.height = Math.sqrt(pageUtils.MAX_AREA / page.width * page.height)
-          format.width = Math.floor(format.height / page.height * page.width)
+
+          // clamp aspect ratio within allowed range
+          const aspectRatio = Math.max(Math.min(format.width / format.height, pageUtils.MAX_SIZE / pageUtils.MIN_SIZE), pageUtils.MIN_SIZE / pageUtils.MAX_SIZE)
+
+          format.width = Math.sqrt(pageUtils.MAX_AREA * aspectRatio)
+          format.height = Math.floor(format.width / aspectRatio)
+          format.width = Math.floor(format.width)
+
+          // clamp fixed width within allowed range
+          if (Math.max(format.width, format.height) > pageUtils.MAX_SIZE) {
+            format.width = pageUtils.MAX_SIZE
+            if (aspectRatio < 1) {
+              format.width = Math.floor(format.width * aspectRatio)
+            }
+          }
+          if (Math.min(format.width, format.height) < pageUtils.MIN_SIZE) {
+            format.width = pageUtils.MIN_SIZE
+            if (aspectRatio < 1) {
+              format.width = Math.floor(format.width * aspectRatio)
+            }
+          }
+
           minFixedWidth = Math.min(minFixedWidth, format.width)
           fixed = true
         }
@@ -658,12 +678,16 @@ class PageUtils {
       if (fixed) {
         pages.forEach((page, index) => {
           const format = { width: page.width, height: page.height, physicalWidth: page.physicalWidth ?? page.width, physicalHeight: page.physicalHeight ?? page.height, unit: page.unit ?? 'px' }
-          const scaleRatio = minFixedWidth / format.width
+          const aspectRatio = format.width / format.height
           const precision = format.unit === 'px' ? 0 : PRECISION
           format.width = minFixedWidth
-          format.height = Math.floor(format.height * scaleRatio)
-          format.physicalWidth = floor(format.physicalWidth * scaleRatio, precision)
-          format.physicalHeight = floor(format.physicalHeight * scaleRatio, precision)
+          format.height = Math.max(Math.min(Math.floor(format.width / aspectRatio), pageUtils.MAX_SIZE), pageUtils.MIN_SIZE)
+
+          /**
+           * @Note don't use unitUtils.converSize() to get physical size, because DPI calculation for pages in email marketing designs is different.
+           */
+          format.physicalWidth = floor(format.physicalWidth * format.width / page.width, precision)
+          format.physicalHeight = floor(format.physicalHeight * format.height / page.height, precision)
           resizeUtils.resizePage(index, page, format)
         })
       }
@@ -672,9 +696,13 @@ class PageUtils {
         if (page.width * page.height > pageUtils.MAX_AREA) {
           const format = { width: page.width, height: page.height, physicalWidth: page.physicalWidth ?? page.width, physicalHeight: page.physicalHeight ?? page.height, unit: page.unit ?? 'px' }
           const precision = format.unit === 'px' ? 0 : PRECISION
-          format.height = Math.sqrt(pageUtils.MAX_AREA / page.width * page.height)
-          format.width = Math.floor(format.height / page.height * page.width)
-          format.height = Math.floor(format.height)
+          const aspectRatio = format.width / format.height
+          format.width = Math.sqrt(pageUtils.MAX_AREA * aspectRatio)
+          format.height = Math.floor(format.width / aspectRatio)
+          format.width = Math.floor(format.width)
+          const cap = this.clampSize(format.width, format.height)
+          format.width = cap.width
+          format.height = cap.height
           const physicalSize = format.unit === 'px' ? { width: format.width, height: format.height } : unitUtils.convertSize(format.width, format.height, 'px', format.unit)
           format.physicalWidth = floor(physicalSize.width, precision)
           format.physicalHeight = floor(physicalSize.height, precision)
@@ -684,6 +712,39 @@ class PageUtils {
       })
     }
     return fixed
+  }
+
+  clampSize(width: number, height: number) {
+    // resize oversized edge to limitation while preserves aspect ratio
+    const aspectRatio = width / height
+    if (Math.max(width, height) > pageUtils.MAX_SIZE) {
+      if (aspectRatio > 1) {
+        width = pageUtils.MAX_SIZE
+        height = Math.ceil(width / aspectRatio)
+      } else {
+        height = pageUtils.MAX_SIZE
+        width = Math.ceil(height * aspectRatio)
+      }
+    }
+    if (Math.min(width, height) < pageUtils.MIN_SIZE) {
+      if (aspectRatio > 1) {
+        height = pageUtils.MIN_SIZE
+        width = Math.floor(height * aspectRatio)
+      } else {
+        width = pageUtils.MIN_SIZE
+        height = Math.floor(width / aspectRatio)
+      }
+    }
+
+    // adjust aspect ratio to fit limitation if still oversize
+    if (Math.max(width, height) > pageUtils.MAX_SIZE) {
+      if (aspectRatio > 1) {
+        width = pageUtils.MAX_SIZE
+      } else {
+        height = pageUtils.MAX_SIZE
+      }
+    }
+    return { width, height }
   }
 
   getDefaultBleeds(unit: string, dpi = { width: 96, height: 96 }) {
