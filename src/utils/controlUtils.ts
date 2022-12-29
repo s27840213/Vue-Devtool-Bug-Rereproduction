@@ -176,7 +176,7 @@ class Controller {
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           left: '0',
-          transform: `translate(-50%, -50%) scale(${contentScaleRatio})`,
+          transform: `translate(-50%, 0) scale(${contentScaleRatio})`,
           opacity: isTouchArea ? '0' : '1'
         }
       },
@@ -187,7 +187,7 @@ class Controller {
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           right: '0',
-          transform: `translate(50%, -50%) scale(${contentScaleRatio})`,
+          transform: `translate(50%, 0) scale(${contentScaleRatio})`,
           opacity: isTouchArea ? '0' : '1'
         }
       },
@@ -198,7 +198,7 @@ class Controller {
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           bottom: '0',
-          transform: `translate(-50%, 50%) scale(${contentScaleRatio})`,
+          transform: `translate(0, 50%) scale(${contentScaleRatio})`,
           opacity: isTouchArea ? '0' : '1'
         }
       },
@@ -209,7 +209,7 @@ class Controller {
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           top: '0',
-          transform: `translate(-50%, -50%) scale(${contentScaleRatio})`,
+          transform: `translate(0, -50%) scale(${contentScaleRatio})`,
           opacity: isTouchArea ? '0' : '1'
         }
       }

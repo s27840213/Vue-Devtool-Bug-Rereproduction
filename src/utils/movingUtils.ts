@@ -339,10 +339,14 @@ export class MovingUtils {
         x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
         y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
       }
-      if (!this.config.moving || !store.state.isMoving) {
-        if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
+      const hasActualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
+      if (hasActualMove) {
+        if (!this.config.moving || !store.state.isMoving) {
           updateConifgData.moving = true
           this.setMoving(true)
+        }
+        if (this.getLayerType === 'text' && this.config.contentEditable) {
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
         }
       }
     }
@@ -376,6 +380,8 @@ export class MovingUtils {
     this.isControlling = false
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
+    layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
+    this.setMoving(false)
     if (!this.body.contains(e.target as HTMLElement)) return
 
     const posDiff = {
@@ -383,7 +389,6 @@ export class MovingUtils {
       y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
     }
     const hasActiualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
-
     if (!this.isDoingGestureAction && !this.isActive && !hasActiualMove) {
       this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
       if (!this.inMultiSelectionMode) {
@@ -401,14 +406,8 @@ export class MovingUtils {
       return
     }
 
-    layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
-    this.setMoving(false)
-
     if (this.isActive) {
       if (hasActiualMove) {
-        if (this.getLayerType === 'text') {
-          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
-        }
         // dragging to another page
         if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
           const layerNum = this.currSelectedInfo.layers.length

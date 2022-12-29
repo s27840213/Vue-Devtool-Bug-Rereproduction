@@ -346,8 +346,8 @@ export default Vue.extend({
     },
     getOpacity() {
       const { editing, contentEditable, active } = this.config
-      if (this.isCurveText && active) {
-        return 0.2
+      if (this.isCurveText) {
+        return contentEditable ? 0.2 : 1
       }
       if (editing && !this.isMoving) {
         if (contentEditable && active) {
