@@ -203,7 +203,6 @@ export default Vue.extend({
           this.isShowGuidelineH = true
           this.rulerHPos = Math.round(pagePos)
 
-          console.log(pos, pagePos, pos - guidelineAreaRect.top)
           this.$nextTick(() => {
             const guidelineH = this.$refs.guidelineH as HTMLElement
             guidelineH.style.transform = `translate(0px,${pos - guidelineAreaRect.top}px)`
