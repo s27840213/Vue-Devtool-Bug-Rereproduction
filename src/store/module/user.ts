@@ -44,7 +44,8 @@ export interface IUserModule {
   viewGuide: number,
   isUpdateDesignOpen: boolean,
   updateDesignId: string,
-  updateDesignType: string
+  updateDesignType: string,
+  renderForPDF: boolean
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -92,7 +93,8 @@ const getDefaultState = (): IUserModule => ({
   viewGuide: +localStorage.guest_view_guide || 0,
   isUpdateDesignOpen: false,
   updateDesignId: '',
-  updateDesignType: ''
+  updateDesignType: '',
+  renderForPDF: false
 })
 
 const state = getDefaultState()
@@ -184,6 +186,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getEnableAdminView() {
     return state.enableAdminView
+  },
+  getRenderForPDF() {
+    return state.renderForPDF
   }
 }
 
