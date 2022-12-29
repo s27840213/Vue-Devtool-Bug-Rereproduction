@@ -796,13 +796,12 @@ class DesignUtils {
     pageUtils.clearPagesInfo()
     await themeUtils.refreshTemplateState(undefined, newDesignType)
     if (this.isLogin) {
-      router.replace({ query: { width: width?.toString(), height: height?.toString(), ...(path && { path }), ...(folderName && { folderName }) } })
-
-      // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
-      // /**
-      //  * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
-      //  */
-      // router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: uploadUtils.assetId }) })
+      const query = router.currentRoute.query
+      if (path) query.path = path
+      if (width) query.width = width.toString()
+      if (height) query.height = height.toString()
+      if (folderName) query.folderName = folderName
+      router.replace({ query })
     }
   }
 

@@ -111,12 +111,6 @@
             dropdown(class="body-3 full-width"
                     :options="devs"
                     @select="handleDevSelect") {{ selectedDevLabel }}
-          download-check-button(
-            type="checkbox"
-            class="mb-20 body-3"
-            label="使用新後端瀏覽器"
-            :default-checked="newChrome"
-            @change="({ checked }) => handleNewChrome(checked)")
           div
             btn(class="full-width body-3 rounded"
               :disabled="isButtonDisabled"
@@ -185,7 +179,6 @@ export default Vue.extend({
       pageRange = [],
       selectedDetailPage,
       selectedDev = 1,
-      newChrome = false,
       ...prevSubmission
     } = JSON.parse(localStorage.getItem(submission) || '{}')
 
@@ -196,8 +189,7 @@ export default Vue.extend({
       selectedTypeVal: selectedTypeVal || 'jpg',
       rangeType,
       pageRange: rangeType === 'spec' ? pageRange : [],
-      selectedDev,
-      newChrome
+      selectedDev
     }
     const currentPageIndex = this.pageIndex || 0
     const host = window.location.hostname
@@ -364,9 +356,6 @@ export default Vue.extend({
     handleSubmission(checked: boolean) {
       this.saveSubmission = checked
     },
-    handleNewChrome(checked: boolean) {
-      this.newChrome = checked
-    },
     handleSubmit(useDev = false) {
       this.polling = true
       this.exportId ? this.handleDownload(useDev) : (this.functionQueue = [() => this.handleDownload(useDev)])
@@ -374,7 +363,7 @@ export default Vue.extend({
     handleSubmissionInfo() {
       const pageLimit = pageUtils.getPages.length - 1
       this.pageRange = this.pageRange.filter((pageIndex: number) => pageIndex <= pageLimit)
-      const { selectedDetailPage, saveSubmission, selected, selectedTypeVal, rangeType, pageRange, selectedDev, newChrome } = this
+      const { selectedDetailPage, saveSubmission, selected, selectedTypeVal, rangeType, pageRange, selectedDev } = this
 
       const info = {
         ...selected,
@@ -382,8 +371,7 @@ export default Vue.extend({
         rangeType,
         pageRange,
         selectedDetailPage,
-        selectedDev,
-        newChrome
+        selectedDev
       }
 
       saveSubmission
@@ -419,7 +407,7 @@ export default Vue.extend({
       }
       this.$emit('inprogress', true)
       DownloadUtil
-        .getFileUrl(fileInfo, ((this.isAdmin || this.onDev) && useDev) ? this.selectedDev : 0, this.newChrome ? 1 : 0)
+        .getFileUrl(fileInfo, ((this.isAdmin || this.onDev) && useDev) ? this.selectedDev : 0)
         .then(this.handleDownloadProgress)
     },
     handleDownloadProgress(response: any) {

@@ -294,23 +294,25 @@ class GeneralUtils {
   //   }
   // }
 
-  panelInit(panelName: string,
-    searchF: (keyword: string) => void,
-    categoryF: (keyword: string, locale: string) => void,
-    normalInit: () => void) { // May move to a new file panelUtils.ts
+  async panelInit(panelName: string,
+    searchF: (keyword: string) => Promise<void>,
+    categoryF: (keyword: string, locale: string) => Promise<void>,
+    normalInit: ({ reset }: { reset: boolean }) => void) { // May move to a new file panelUtils.ts
     const urlParams = new URLSearchParams(window.location.search)
     const panel = urlParams.get('panel')
     const category = urlParams.get('category')
     const category_locale = urlParams.get('category_locale')
     const search = urlParams.get('search')
     if (panel !== panelName) {
-      normalInit()
+      normalInit({ reset: true })
     } else if (category && category_locale) {
-      categoryF(category, category_locale)
+      await categoryF(category, category_locale)
+      normalInit({ reset: false })
     } else if (search) {
-      searchF(search)
+      await searchF(search)
+      normalInit({ reset: false })
     } else {
-      normalInit()
+      normalInit({ reset: true })
     }
 
     const query = _.omit(router.currentRoute.query,
