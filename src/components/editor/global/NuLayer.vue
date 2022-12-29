@@ -351,9 +351,9 @@ export default Vue.extend({
           if (noShadow) {
             styles.textShadow = 'none'
           }
-          if (isTransparent) {
-            styles['-webkit-filter'] = 'opacity(1)'
-          }
+          // if (isTransparent) {
+          //   styles['-webkit-filter'] = 'opacity(1)'
+          // }
           break
         }
         case LayerType.shape: {
