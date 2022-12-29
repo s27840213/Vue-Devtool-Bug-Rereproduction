@@ -139,6 +139,7 @@ export default Vue.extend({
   },
   methods: {
     updateColorsOverflow() {
+      if (!this.$refs.colors) return
       const { scrollLeft, scrollWidth, offsetWidth } = this.$refs.colors as HTMLElement
       this.leftOverflow = scrollLeft > 0
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth

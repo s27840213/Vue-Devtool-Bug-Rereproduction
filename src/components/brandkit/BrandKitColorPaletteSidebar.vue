@@ -4,15 +4,14 @@
       div(class="brand-kit-color-palette__name")
         span(:title="paletteName") {{ paletteName }}
     div(class="brand-kit-color-palette__colors")
-      div(v-for="(color, index) in colorPalette.colors"
-        class="brand-kit-color-palette__colors__color-wrapper")
-        div(class="brand-kit-color-palette__colors__color"
-          :style="backgroundColorStyles(color.color)"
-          @click="handleSetColor(color.color)")
+      color-btn(v-for="color in colorPalette.colors" :color="color.color"
+                :style="backgroundColorStyles"
+                @click="handleSetColor(color.color)")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrandColorPalette } from '@/interfaces/brandkit'
 import { mapMutations } from 'vuex'
@@ -22,9 +21,11 @@ import textPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import colorUtils from '@/utils/colorUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
 
 export default Vue.extend({
+  components: {
+    ColorBtn
+  },
   data() {
     return {
     }
@@ -53,15 +54,15 @@ export default Vue.extend({
         default:
           return ''
       }
+    },
+    backgroundColorStyles(): Record<string, string> {
+      return { cursor: (this.applicable) !== '' ? 'pointer' : 'not-allowed' }
     }
   },
   methods: {
     ...mapMutations({
       updateDocumentColors: 'UPDATE_documentColors'
     }),
-    backgroundColorStyles(color: string) {
-      return { backgroundColor: color, cursor: this.applicable !== '' ? 'pointer' : 'not-allowed' }
-    },
     getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {
       return brandkitUtils.getDisplayedPaletteName(colorPalette)
     },
@@ -128,22 +129,6 @@ export default Vue.extend({
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
     gap: 7px 8px;
-    &__color-wrapper {
-      position: relative;
-      width: 100%;
-      padding-top: 100%;
-      box-sizing: border-box;
-      border-radius: 10%;
-    }
-    &__color {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      box-sizing: border-box;
-      border-radius: 10%;
-    }
   }
 }
 </style>

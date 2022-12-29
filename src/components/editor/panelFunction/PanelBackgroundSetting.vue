@@ -60,6 +60,7 @@
         @update="handleChangeBgAdjust"
         v-click-outside="handleOutSide")
     div
+      //- TODO: ColorBtn
       div(class="bg-setting__current-color"
         @click="() => handleColorPicker()"
         :class="colorPickerClass"

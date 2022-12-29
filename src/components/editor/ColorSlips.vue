@@ -18,12 +18,9 @@
             span {{$t('NN0679')}}
           span(v-if="!showAllRecentlyColor" class="btn-LG" @click="moreRecently()") {{$t('NN0082')}}
         div
-          div(class="color-panel__add-color pointer"
-            @click="openColorPanel($event)")
-          div(v-for="color in recentlyColors"
-            class="color-panel__color"
-            :style="colorStyles(color)"
-            @click="handleColorEvent(color)")
+          color-btn(color="add" @click="openColorPanel($event)")
+          color-btn(v-for="color in recentlyColors" :color="color"
+                    @click="handleColorEvent(color)")
       template(v-if="!showAllRecentlyColor")
         template(v-if="isBrandkitAvailable")
           //- Brandkit select
@@ -43,30 +40,24 @@
             div(class="text-left mb-5")
               span {{getDisplayedPaletteName(palette)}}
             div
-              div(v-for="color in palette.colors"
-                class="color-panel__color"
-                :style="colorStyles(color.color)"
-                @click="handleColorEvent(color.color)")
+              color-btn(v-for="color in palette.colors" :color="color.color"
+                        @click="handleColorEvent(color.color)")
         //- Document colors
         div(class="color-panel__colors"
             :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
           div(class="text-left mb-5")
             span {{$t('NN0091')}}
           div
-            div(v-for="color in documentColors"
-              class="color-panel__color"
-              :style="colorStyles(color)"
-              @click="handleColorEvent(color)")
+            color-btn(v-for="color in documentColors" :color="color"
+                      @click="handleColorEvent(color)")
         //- Preset Colors
         div(class="color-panel__colors"
             :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
           div(class="text-left mb-5")
             span {{$t('NN0089')}}
           div
-            div(v-for="color in defaultColors"
-              class="color-panel__color"
-              :style="colorStyles(color)"
-              @click="handleColorEvent(color)")
+            color-btn(v-for="color in defaultColors" :color="color"
+                      @click="handleColorEvent(color)")
             img(v-if="mode==='PanelBG'"
               src="@/assets/img/svg/transparent.svg"
               width="100%" height="100%"
@@ -83,10 +74,11 @@
 <script lang="ts">
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
-import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
-import colorUtils from '@/utils/colorUtils'
+import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
+import colorUtils from '@/utils/colorUtils'
 import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import { LayerType, SidebarPanelType } from '@/store/types'
@@ -114,7 +106,8 @@ export default Vue.extend({
   },
   components: {
     ColorPicker,
-    BrandSelector
+    BrandSelector,
+    ColorBtn
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -380,24 +373,6 @@ export default Vue.extend({
       justify-content: center;
       align-items: center;
     }
-  }
-
-  &__add-color {
-    width: 100%;
-    // height: 100%;
-    padding-top: 100%;
-    background-image: url("~@/assets/img/svg/addColor.svg");
-    background-size: cover;
-    box-shadow: 0px 1px 4px setColor(gray-1-5, 0.2);
-  }
-
-  &__color {
-    width: 100%;
-    padding-top: calc(100% - 2px);
-    border-radius: 4px;
-    border: 1px solid setColor(gray-0, 0.2);
-    box-sizing: border-box;
-    cursor: pointer;
   }
 
   &__color-picker {
