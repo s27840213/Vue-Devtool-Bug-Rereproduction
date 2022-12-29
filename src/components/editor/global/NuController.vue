@@ -26,7 +26,7 @@
           :primaryLayerZindex="primaryLayerZindex()"
           :isMoved="isMoved"
           :contentScaleRatio="contentScaleRatio")
-      div(v-show="isActive && !isControlling && !isLocked() && !isImgControl"
+      div(v-show="isActive && !isLocked() && !isImgControl"
           :style="ctrlContentStyles"
           class="nu-controller__ctrl-points"
           ref="body"
@@ -64,11 +64,11 @@
         //-       :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
         //-   div(class="control-point resizer"
         //-       :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))")
-        //- div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
-        //-     @pointerdown="moveStart")
-        //-   div(class="control-point__resize-bar control-point__move-bar"
-        //-       :key="`resizer-text-${index}`"
-        //-       :style="resizerBarStyles(resizer.styles)")
+        div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
+            @pointerdown="moveStart")
+          div(class="control-point__resize-bar control-point__move-bar"
+              :key="`resizer-text-${index}`"
+              :style="resizerBarStyles(resizer.styles)")
         div(v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="`scaler-${index}`"
@@ -105,6 +105,11 @@
               :style='controlPointStyles()'
               @pointerdown.native.stop="rotateStart"
               @touchstart.native="disableTouchEvent")
+            img(class="control-point__mover"
+              :src="require('@/assets/img/svg/move.svg')"
+              :style='controlPointStyles()'
+              @pointerdown="moveStart"
+              @touchstart="disableTouchEvent")
         div(v-if="showTextEditor" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
             :style="textBodyStyle()"
@@ -134,12 +139,6 @@
             :style="lockIconStyles()")
           svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
             @click.native="MappingUtils.mappingIconAction('lock')")
-
-      //- img(class="control-point__mover"
-      //-   :src="require('@/assets/img/svg/move.svg')"
-      //-   :style='controlPointStyles()'
-      //-   @pointerdown="moveStart"
-      //-   @touchstart="disableTouchEvent")
 </template>
 <script lang="ts">
 import Vue from 'vue'
