@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="nu-text" :style="textWrapperStyle()" draggable="false")
     //- Svg BG for text effex gooey.
-    svg(v-if="svgBG && !isTransparent" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
+    svg(v-if="svgBG && !noShadow" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
       component(v-for="(elm, idx) in svgBG.content"
                 :key="`textSvgBg${idx}`"
                 :is="elm.tag"
@@ -84,6 +84,10 @@ export default Vue.extend({
       type: Boolean
     },
     isTransparent: {
+      default: false,
+      type: Boolean
+    },
+    noShadow: {
       default: false,
       type: Boolean
     }

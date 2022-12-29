@@ -18,7 +18,6 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import LayerUtils from '@/utils/layerUtils'
 import textUtils from '@/utils/textUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   props: {

@@ -39,6 +39,7 @@
                 :isPagePreview="isPagePreview"
                 :forRender="forRender"
                 :isTransparent="div.isTransparent"
+                :noShadow="div.noShadow"
                 v-bind="$attrs")
           svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
             :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
