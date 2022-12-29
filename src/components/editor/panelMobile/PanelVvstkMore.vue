@@ -74,7 +74,7 @@ export default Vue.extend({
       }, {
         text: `${this.$t('NN0174')}`,
         icon: 'vivisticker_global',
-        action: this.handleLocaleList
+        action: () => { this.handleList('locale') }
       }, {
         text: `${this.$t('NN0649')}`,
         icon: 'vivisticker_settings',
@@ -87,15 +87,21 @@ export default Vue.extend({
         text: `${this.$t('NN0742')}`,
         icon: 'vivisticker_mail',
         action: this.handleOpenInfo
-      }, ...this.debugMode ? [
+      }, ...vivistickerUtils.checkVersion('1.19') ? [
+        {
+          text: '訂閱功能',
+          icon: 'vivisticker_global',
+          action: () => { this.handleList('subscribe') }
+        }
+      ] : [], ...this.debugMode ? [
         {
           text: 'domain 選單',
           icon: 'vivisticker_global',
-          action: this.handleDomainList
+          action: () => { this.handleList('domain') }
         }, {
           text: 'App 事件測試',
           icon: 'vivisticker_global',
-          action: this.handleEventList
+          action: () => { this.handleList('event-test') }
         }
       ] : []]
     },
@@ -157,6 +163,21 @@ export default Vue.extend({
         action: () => { this.sendTestEvent(c) }
       }))
     },
+    subscribeOptions(): OptionConfig[] {
+      return [{
+        text: '月繳',
+        icon: 'vivisticker_global',
+        action: () => { vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'monthly' }) }
+      }, {
+        text: '年繳',
+        icon: 'vivisticker_global',
+        action: () => { vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'annually' }) }
+      }, {
+        text: '訂閱狀態',
+        icon: 'vivisticker_global',
+        action: () => { vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'checkState' }) }
+      }]
+    },
     options(): OptionConfig[] {
       switch (this.lastHistory) {
         case 'locale':
@@ -165,6 +186,8 @@ export default Vue.extend({
           return this.domainOptions
         case 'event-test':
           return this.eventOptions
+        case 'subscribe':
+          return this.subscribeOptions
         default:
           return []
       }
@@ -207,17 +230,11 @@ export default Vue.extend({
       this.setShowTutorial(true)
       editorUtils.setCloseMobilePanelFlag(true)
     },
-    handleLocaleList() {
-      this.$emit('pushHistory', 'locale')
-    },
     handleShowUserSettings() {
       this.setSlideType('slideUserSettings')
     },
-    handleDomainList() {
-      this.$emit('pushHistory', 'domain')
-    },
-    handleEventList() {
-      this.$emit('pushHistory', 'event-test')
+    handleList(listType: string) {
+      this.$emit('pushHistory', listType)
     },
     handleOpenInfo() {
       let url = 'https://www.instagram.com/vivisticker/'

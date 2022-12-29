@@ -162,7 +162,7 @@ class ViviStickerUtils {
   }
 
   sendToIOS(messageType: string, message: any) {
-    // console.log(messageType, message)
+    console.log(messageType, message)
     try {
       const webkit = (window as any).webkit
       if (!webkit) return
