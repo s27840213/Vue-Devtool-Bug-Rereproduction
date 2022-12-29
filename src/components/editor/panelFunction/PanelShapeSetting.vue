@@ -137,14 +137,13 @@
             div(:style="`font-size: ${$i18n.locale === 'us' ? '12px': ''}`") {{$t('NN0086')}}
     //- Shape color setting
     div(class="shape-setting__colors")
-      div(v-if="hasMultiColors"
-        class="shape-setting__color"
-        :style="groupColorStyles()"
-        @click="selectColor(0)")
-      div(v-else v-for="(color, index) in getDocumentColors"
-        class="shape-setting__color"
-        :style="colorStyles(color, index)"
-        @click="selectColor(index)")
+      color-btn(v-if="hasMultiColors"
+                :color="groupColor()"
+                :active="true"
+                @click="selectColor(0)")
+      color-btn(v-else v-for="(color, index) in getDocumentColors" :color="color"
+                :active="index === currSelectedColorIndex"
+                @click="selectColor(index)")
     //- 管理介面
     div(class="shape-setting__info")
       div(v-if="inAdminMode && isObjectElement")
@@ -201,7 +200,6 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
-import markers from '@/store/module/markers'
 import vClickOutside from 'v-click-outside'
 import SearchBar from '@/components/SearchBar.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
@@ -214,9 +212,10 @@ import AssetUtils from '@/utils/assetUtils'
 import { IMarker } from '@/interfaces/shape'
 import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import LabelWithRange from '@/components/LabelWithRange.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import controlUtils from '@/utils/controlUtils'
-import { ColorEventType, LayerType, PopupSliderEventType } from '@/store/types'
-import colorUtils, { getDocumentColor } from '@/utils/colorUtils'
+import { ColorEventType, PopupSliderEventType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -231,7 +230,8 @@ export default Vue.extend({
     ColorPicker,
     GeneralValueSelector,
     MarkerIcon,
-    LabelWithRange
+    LabelWithRange,
+    ColorBtn
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -406,18 +406,12 @@ export default Vue.extend({
         'getCategories'
       ]
     ),
-    colorStyles(color: string, index: number) {
-      return {
-        backgroundColor: color,
-        boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #808080, inset 0 0 0 1.5px #fff' : ''
-      }
-    },
     boundValue(value: number, min: number, max: number): string {
       if (value < min) return min.toString()
       else if (value > max) return max.toString()
       return value.toString()
     },
-    groupColorStyles() {
+    groupColor() {
       const currLayer = this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex)
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
         const origin = currLayer.layers
@@ -430,15 +424,7 @@ export default Vue.extend({
           }
           return true
         })()
-        return isGroupSameColor ? {
-          backgroundColor: origin,
-          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
-        } : {
-          backgroundImage: `url(${require('@/assets/img/jpg/multi-color.jpg')})`,
-          backgroundPosition: 'center center',
-          backgroundSize: 'cover',
-          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1px #fff'
-        }
+        return isGroupSameColor ? origin : 'multi'
       }
     },
     handleColorModalOn(e: MouseEvent) {
@@ -720,17 +706,6 @@ export default Vue.extend({
     @media (max-width: 1260px) {
       gap: 10px;
     }
-  }
-  &__color {
-    width: 100%;
-    padding-top: calc(100% - 3px);
-    border: 1.5px solid setColor(gray-4);
-    border-radius: 4px;
-    box-sizing: border-box;
-    &:hover {
-      box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff;
-    }
-    transition: box-shadow 0.2s ease-in-out;
   }
   &__value-selector {
     position: absolute;

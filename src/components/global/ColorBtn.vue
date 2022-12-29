@@ -1,9 +1,9 @@
 <template lang="pug">
 div(class="color-btn")
   div(class="color-btn__wrapper" :class="{active: active || focus}"
-      @click="selectColor(color)")
-    div(v-if="color === 'add'" class="color-btn__add-color"
-        @click="add")
+    @click="$emit('click', $event)")
+    div(v-if="color === 'add'" class="color-btn__add-color")
+    div(v-else-if="color === 'multi'" class="color-btn__multi-color")
     div(v-else class="color-btn__color" :style="{backgroundColor: color}")
     svg-icon(v-if="focus" iconName="item-check" iconWidth="40%")
 </template>
@@ -57,6 +57,12 @@ export default Vue.extend({
     background-image: url("~@/assets/img/svg/addColor.svg");
     background-size: cover;
   }
+  &__multi-color {
+    height: 100%;
+    background-image: url("~@/assets/img/jpg/multi-color.jpg");
+    background-size: cover;
+    border-radius: 4px;
+  }
   &__color {
     box-sizing: border-box;
     height: 100%;
@@ -82,6 +88,7 @@ export default Vue.extend({
       right: -11%;
       bottom: -11%;
     }
+    transition: border 0.2s ease-in-out;
   }
 }
 </style>

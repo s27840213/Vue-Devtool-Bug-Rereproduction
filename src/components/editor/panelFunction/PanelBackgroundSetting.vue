@@ -59,12 +59,10 @@
         :imageAdjust="backgroundAdjust"
         @update="handleChangeBgAdjust"
         v-click-outside="handleOutSide")
-    div
-      //- TODO: ColorBtn
-      div(class="bg-setting__current-color"
-        @click="() => handleColorPicker()"
-        :class="colorPickerClass"
-        :style="colorPickerStyle")
+    div(class="bg-setting__current-colors" :class="{lock: backgroundLocked}")
+      color-btn(:color="colorSlipsIcon"
+                :active="colorSlipsIcon !== 'multi'"
+                @click="handleColorPicker()")
 </template>
 
 <script lang="ts">
@@ -72,17 +70,21 @@ import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
 import { mapGetters, mapMutations } from 'vuex'
 import { IPage } from '@/interfaces/page'
-import { ColorEventType, PopupSliderEventType } from '@/store/types'
+import { ColorEventType, PopupSliderEventType, SidebarPanelType } from '@/store/types'
 import MappingUtils from '@/utils/mappingUtils'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import colorUtils from '@/utils/colorUtils'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import pageUtils from '@/utils/pageUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 
 export default Vue.extend({
-  components: { PopupAdjust },
+  components: {
+    PopupAdjust,
+    ColorBtn
+  },
   directives: {
     clickOutside: vClickOutside.directive
   },
@@ -130,17 +132,9 @@ export default Vue.extend({
     isShowImage(): boolean {
       return this.backgroundImage.assetId
     },
-    colorPickerStyle(): any {
-      if (this.backgroundColor && !this.backgroundImage.assetId) {
-        return { background: this.backgroundColor }
-      }
-      return {}
-    },
-    colorPickerClass(): any {
-      return {
-        'bg-setting__current-color--selected': this.colorPickerStyle.background,
-        'bg-setting__current-color--disabled': this.backgroundLocked
-      }
+    colorSlipsIcon(): string {
+      if (this.backgroundImage.assetId) return 'multi'
+      else return this.backgroundColor
     }
   },
   mounted() {
@@ -160,7 +154,7 @@ export default Vue.extend({
       removeBg: 'REMOVE_background',
       setBgOpacity: 'SET_backgroundOpacity',
       setBgImageControl: 'SET_backgroundImageControl',
-      setBgImageStyles: 'SET_backgroundImageStyles'
+      setBgImageStyles: 'SET_backgroundImageStyles',
     }),
     handleDeleteBackground() {
       backgroundUtils.handleDeleteBackground()
@@ -252,20 +246,11 @@ export default Vue.extend({
     row-gap: 10px;
     column-gap: 20px;
   }
-  &__current-color {
-    width: 40px;
-    height: 40px;
-    border-radius: 4px;
-    cursor: pointer;
-    background: center/contain no-repeat
-      url("~@/assets/img/png/defaultColor.png");
-    &--selected {
-      box-shadow: rgb(128 128 128) 0px 0px 0px 2px,
-        rgb(255 255 255) 0px 0px 0px 1.5px inset;
-    }
-    &--disabled {
-      opacity: 0.3;
-    }
+  &__current-colors {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    &.lock { opacity: 0.3; }
   }
   .btn {
     &.active {

@@ -18,8 +18,10 @@
             span {{$t('NN0679')}}
           span(v-if="!showAllRecentlyColor" class="btn-LG" @click="moreRecently()") {{$t('NN0082')}}
         div
-          color-btn(color="add" @click="openColorPanel($event)")
-          color-btn(v-for="color in recentlyColors" :color="color"
+          color-btn(color="add" :active="openColorPicker"
+                    @click="openColorPanel($event)")
+          color-btn(v-for="color in recentlyColors" :color="color" :key="color"
+                    :active="color === selectedColor"
                     @click="handleColorEvent(color)")
       template(v-if="!showAllRecentlyColor")
         template(v-if="isBrandkitAvailable")
@@ -41,6 +43,7 @@
               span {{getDisplayedPaletteName(palette)}}
             div
               color-btn(v-for="color in palette.colors" :color="color.color"
+                        :active="color.color === selectedColor"
                         @click="handleColorEvent(color.color)")
         //- Document colors
         div(class="color-panel__colors"
@@ -48,7 +51,8 @@
           div(class="text-left mb-5")
             span {{$t('NN0091')}}
           div
-            color-btn(v-for="color in documentColors" :color="color"
+            color-btn(v-for="color in documentColors" :color="color" :key="color"
+                      :active="color === selectedColor"
                       @click="handleColorEvent(color)")
         //- Preset Colors
         div(class="color-panel__colors"
@@ -56,7 +60,8 @@
           div(class="text-left mb-5")
             span {{$t('NN0089')}}
           div
-            color-btn(v-for="color in defaultColors" :color="color"
+            color-btn(v-for="color in defaultColors" :color="color" :key="color"
+                      :active="color === selectedColor"
                       @click="handleColorEvent(color)")
             img(v-if="mode==='PanelBG'"
               src="@/assets/img/svg/transparent.svg"
@@ -102,6 +107,10 @@ export default Vue.extend({
     allRecentlyControl: {
       type: Boolean,
       required: false
+    },
+    selectedColor: {
+      type: String,
+      default: ''
     }
   },
   components: {
@@ -166,12 +175,6 @@ export default Vue.extend({
     },
     isColorPanelHandling(): boolean {
       return this.isBrandkitAvailable && (this.currPanel !== SidebarPanelType.brand || this.selectedTab !== 'color')
-    },
-    isShape(): boolean {
-      return layerUtils.getCurrConfig.type === LayerType.shape
-    },
-    isFrame(): boolean {
-      return layerUtils.getCurrConfig.type === LayerType.frame
     },
     isText(): boolean {
       return this.currSelectedInfo.types.has('text') && this.currSelectedInfo.layers.length === 1
@@ -278,9 +281,9 @@ export default Vue.extend({
       this.$emit('toggleColorPanel', false)
     },
     middleware(event: MouseEvent): boolean {
-      return this.mode === 'PanelBG' ? false
-        : this.isShape || this.isFrame
-          ? (event.target as HTMLElement).className !== 'shape-setting__color' : true
+      return this.mode === 'PanelBG' ? false // Never close in PanelBG
+        // Don't close when selecting color target
+        : !(event.target as HTMLElement).matches('.function-panel .color-btn *')
     },
     closePanel(): void {
       this.$emit('toggleColorPanel', false)

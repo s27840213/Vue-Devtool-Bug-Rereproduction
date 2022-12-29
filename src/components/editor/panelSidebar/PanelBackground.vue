@@ -9,6 +9,7 @@
       @search="handleSearch")
     //- BG color tab content
     color-slips(v-show="showColorTab" class="panel-bg__color-sets" mode="PanelBG"
+                :selectedColor="currentPageBackgroundColor"
                 @selectColor="setBgColor"
                 @selectColorEnd="recordChange"
                 @openColorPicker="openColorPicker")
@@ -56,6 +57,7 @@ import ColorSlips from '@/components/editor/ColorSlips.vue'
 import Tabs from '@/components/Tabs.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import { IPage } from '@/interfaces/page'
 import stepsUtils from '@/utils/stepsUtils'
 import pageUtils from '@/utils/pageUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -135,9 +137,16 @@ export default Vue.extend({
         key: 'mainContent'
       }]
     },
+    currPage(): IPage {
+      return this.getPage(pageUtils.currFocusPageIndex)
+    },
     currentPageBackgroundLocked(): boolean {
-      const { backgroundImage } = this.getPage(pageUtils.currFocusPageIndex) || {}
+      const { backgroundImage } = this.currPage || {}
       return backgroundImage && backgroundImage.config.locked
+    },
+    currentPageBackgroundColor(): string {
+      if (this.currPage.backgroundImage.config?.srcObj.assetId) return ''
+      return this.currPage.backgroundColor
     },
     emptyResultMessage(): string {
       const { keyword, pending } = this
