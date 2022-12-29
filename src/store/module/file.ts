@@ -133,7 +133,7 @@ const actions: ActionTree<IFileState, unknown> = {
     }
   },
   async updatePageImages({ dispatch }, { pageIndex }: { pageIndex: number }) {
-    const { layers, backgroundImage } = store.state.pages[pageIndex]
+    const { layers, backgroundImage } = store.state.pages[pageIndex].config
     const imgToRequest = new Set<string>()
 
     imgToRequest.add(isPrivate(backgroundImage.config.srcObj))

@@ -190,8 +190,8 @@ export default Vue.extend({
     generalUtils.panelInit('text',
       this.handleSearch,
       this.handleCategorySearch,
-      async () => {
-        this.getRecAndCate()
+      async ({ reset }: {reset: boolean}) => {
+        this.getRecAndCate({ reset })
         this.getContent()
         textUtils.loadDefaultFonts(this.extractFonts)
       })
@@ -245,16 +245,16 @@ export default Vue.extend({
       res.fontFamily = textStyle.isDefault ? brandkitUtils.getDefaultFontId(this.$i18n.locale) : textStyle.fontId
       return res
     },
-    handleSearch(keyword: string) {
+    async handleSearch(keyword: string) {
       this.resetSearch()
       if (keyword) {
-        this.getTagContent({ keyword })
+        await this.getTagContent({ keyword })
       }
     },
-    handleCategorySearch(keyword: string, locale = '') {
+    async handleCategorySearch(keyword: string, locale = '') {
       this.resetSearch()
       if (keyword) {
-        this.getContent({ keyword, locale })
+        await this.getContent({ keyword, locale })
       }
     },
     handleLoadMore() {

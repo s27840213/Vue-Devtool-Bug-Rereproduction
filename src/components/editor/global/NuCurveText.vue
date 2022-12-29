@@ -36,8 +36,7 @@ export default Vue.extend({
       textWidth: [] as number[],
       textHeight: [] as number[],
       minHeight: 0,
-      isDestroyed: false,
-      resizeObserver: undefined as ResizeObserver | undefined
+      isDestroyed: false
     }
   },
   async created () {
@@ -47,8 +46,6 @@ export default Vue.extend({
   },
   destroyed() {
     this.isDestroyed = true
-    this.resizeObserver && this.resizeObserver.disconnect()
-    this.resizeObserver = undefined
   },
   mounted() {
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
@@ -145,12 +142,6 @@ export default Vue.extend({
         bend >= 0 ? { top: baseline } : { bottom: baseline }
       )
     },
-    observeAllSpans() {
-      const spans = document.querySelectorAll(`.nu-curve-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
-      spans.forEach(span => {
-        this.resizeObserver && this.resizeObserver.observe(span as Element)
-      })
-    },
     async computeDimensions(spans: ISpan[]) {
       const { textWidth, textHeight, minHeight } = await TextShapeUtils.getTextHWsBySpansAsync(spans)
       this.textWidth = textWidth
@@ -162,7 +153,7 @@ export default Vue.extend({
 
       // console.log('resize')
 
-      if (typeof this.subLayerIndex === 'undefined') {
+      if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
       } else {
         const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup

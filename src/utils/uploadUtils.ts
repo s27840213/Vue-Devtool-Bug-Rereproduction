@@ -28,7 +28,6 @@ import networkUtils from './networkUtils'
 import _ from 'lodash'
 import editorUtils from './editorUtils'
 import designApis from '@/apis/design'
-
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
   UPDATE_DB,
@@ -206,7 +205,9 @@ class UploadUtils {
       img.src = evt.target?.result as string
       img.onload = (evt) => {
         store.commit('file/ADD_PREVIEW', {
-          imageFile: img,
+          width: img.width,
+          height: img.height,
+          src: img.src,
           assetId: assetId
         })
         assetUtils.addImage(img.src, img.width / img.height, {
@@ -246,12 +247,13 @@ class UploadUtils {
                 clearInterval(increaseInterval)
                 response.json().then((json: IUploadAssetResponse) => {
                   if (json.flag === 0) {
+                    const { width, height, asset_index } = json.data
                     console.log('Successfully upload the file')
                     store.commit('file/UPDATE_PROGRESS', {
                       assetId: assetId,
                       progress: 100
                     })
-                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index })
+                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: asset_index, width, height })
                     store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                     store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
                     // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot
@@ -561,7 +563,7 @@ class UploadUtils {
     }
   }
 
-  async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
+  async uploadDesign(putAssetDesignType?: PutAssetDesignType, params?: { clonedPages?: Array<IPage> }) {
     const typeMap = ['UPDATE_DB', 'UPDATE_PREV', 'UPDATE_BOTH']
     let type = router.currentRoute.query.type
     let designId = router.currentRoute.query.design_id
@@ -592,7 +594,9 @@ class UploadUtils {
     }
 
     store.commit('SET_assetId', assetId)
-    const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
+    const { clonedPages } = params || {}
+    const pages = clonedPages ?? generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
+    // const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
 
     logUtils.setLog(`Upload Design:
       Type: ${putAssetDesignType ? typeMap[putAssetDesignType] : 'UPLOAD JSON'}
@@ -601,7 +605,7 @@ class UploadUtils {
       PageNum: ${pages.length}`)
 
     const pagesJSON = pages.map((page: IPage) => {
-      const newPage = this.default(page)
+      const newPage = this.default(page, false)
       for (const [i, layer] of newPage.layers.entries()) {
         if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
           newPage.layers[i] = this.layerInfoFilter(layer)
@@ -710,7 +714,6 @@ class UploadUtils {
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('temp.json')}`)
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
-    // console.log(this.loginOutput)
     const pagesJSON = store.getters.getPages
     const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
     if (formData.has('file')) {
@@ -1048,8 +1051,8 @@ class UploadUtils {
     }
   }
 
-  private default(page: any): IPage {
-    page = generalUtils.deepCopy(page)
+  private default(page: any, deepCopy = true): IPage {
+    page = deepCopy ? generalUtils.deepCopy(page) : page
     const basicDefault = (layer: any) => {
       layer.moved = false
       layer.shown = false
@@ -1425,7 +1428,7 @@ class UploadUtils {
       }
       case 'frame': {
         const frame = layer as IFrame
-        const { type, designId, clips, decoration, decorationTop, styles } = frame
+        const { type, designId, clips, decoration, decorationTop, styles, blendLayers } = frame
         return {
           type,
           designId,
@@ -1448,6 +1451,9 @@ class UploadUtils {
             decorationTop: {
               color: decorationTop.color
             }
+          }),
+          ...(blendLayers && {
+            blendLayers: blendLayers.map(function(l) { return { color: l.color } })
           }),
           styles: this.styleFilter(styles, 'frame')
         }

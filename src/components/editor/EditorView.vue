@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="editor-view"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
-      :style="brushCursorStyles()"
+      :style="cursorStyles()"
       @pointerdown="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
       @wheel="handleWheel"
       @scroll.passive="!inBgRemoveMode ? scrollUpdate() : null"
@@ -12,15 +12,16 @@
     div(class="editor-view__grid")
       div(class="editor-view__canvas"
           ref="canvas"
-          @mousedown.left.self="outerClick($event)")
+          @pointerdown.left.self="outerClick($event)")
+        //- @mousedown.left.self="outerClick($event)")
         template(v-if="!inBgRemoveMode")
-          nu-page(v-for="(page,index) in pages"
+          nu-page(v-for="(page,index) in pagesState"
                   :ref="`page-${index}`"
-                  :key="`page-${index}`"
+                  :key="`page-${page.config.id}`"
                   :pageIndex="index"
                   :overflowContainer="editorView"
                   :style="{'z-index': `${getPageZIndex(index)}`}"
-                  :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
+                  :pageState="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
                   @stepChange="handleStepChange")
           div(v-show="isSelecting" class="selection-area" ref="selectionArea"
             :style="{'z-index': `${pageNum+1}`}")
@@ -37,17 +38,17 @@
         class="editor-view__guidelines-area"
         ref="guidelinesArea")
       div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
-        :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
-        @pointerdown.stop="lockGuideline ? null: dragStartV($event)"
-        @mouseout.stop="closeGuidelineV()"
-        @click.right.stop.prevent="openGuidelinePopup($event)")
+          :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
+          @pointerdown.left.stop="lockGuideline ? null: dragStartV($event)"
+          @mouseout.stop="closeGuidelineV()"
+          @pointerup.right.stop.prevent="openGuidelinePopup($event)")
         div(class="guideline__pos guideline__pos--v" ref="guidelinePosV")
           span {{rulerVPos}}
       div(v-if="isShowGuidelineH" class="guideline guideline--h" ref="guidelineH"
-        :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
-        @pointerdown.stop="lockGuideline ? null : dragStartH($event)"
-        @mouseout.stop="closeGuidelineH()"
-        @click.right.stop.prevent="openGuidelinePopup($event)")
+          :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
+          @pointerdown.left.stop="lockGuideline ? null : dragStartH($event)"
+          @mouseout.stop="closeGuidelineH()"
+          @pointerup.right.stop.prevent="openGuidelinePopup($event)")
         div(class="guideline__pos guideline__pos--h" ref="guidelinePosH")
           span {{rulerHPos}}
 </template>
@@ -61,7 +62,7 @@ import StepsUtils from '@/utils/stepsUtils'
 import ControlUtils from '@/utils/controlUtils'
 import pageUtils from '@/utils/pageUtils'
 import RulerUtils from '@/utils/rulerUtils'
-import { IPage } from '@/interfaces/page'
+import { IPage, IPageState } from '@/interfaces/page'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import RulerHr from '@/components/editor/ruler/RulerHr.vue'
 import RulerVr from '@/components/editor/ruler/RulerVr.vue'
@@ -75,6 +76,9 @@ import eventUtils from '@/utils/eventUtils'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
+import { globalQueue } from '@/utils/queueUtils'
+import layerUtils from '@/utils/layerUtils'
+import { MovingUtils } from '@/utils/movingUtils'
 import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
@@ -180,6 +184,10 @@ export default Vue.extend({
       }
       switch (type) {
         case 'v': {
+          if (this.isShowGuidelineV) {
+            this.closeGuidelineV()
+          }
+
           this.isShowGuidelineV = true
           this.rulerVPos = Math.round(pagePos)
           this.$nextTick(() => {
@@ -189,8 +197,12 @@ export default Vue.extend({
           break
         }
         case 'h': {
+          if (this.isShowGuidelineH) {
+            this.closeGuidelineH()
+          }
           this.isShowGuidelineH = true
           this.rulerHPos = Math.round(pagePos)
+
           this.$nextTick(() => {
             const guidelineH = this.$refs.guidelineH as HTMLElement
             guidelineH.style.transform = `translate(0px,${pos - guidelineAreaRect.top}px)`
@@ -223,9 +235,12 @@ export default Vue.extend({
     ...mapState('user', [
       'role',
       'adminMode']),
+    ...mapState({
+      cursor: 'cursor'
+    }),
     ...mapGetters({
       groupId: 'getGroupId',
-      pages: 'getPages',
+      pagesState: 'getPagesState',
       getMiddlemostPageIndex: 'getMiddlemostPageIndex',
       geCurrActivePageIndex: 'getCurrActivePageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
@@ -245,6 +260,9 @@ export default Vue.extend({
       isSettingScaleRatio: 'getIsSettingScaleRatio',
       enableComponentLog: 'getEnalbleComponentLog'
     }),
+    pages(): Array<IPage> {
+      return (this.pagesState as Array<IPageState>).map(p => p.config)
+    },
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
       let res = false
@@ -295,15 +313,16 @@ export default Vue.extend({
         'getRecently'
       ]
     ),
-    brushCursorStyles() {
-      return this.hasCopiedFormat ? { cursor: `url(${require('@/assets/img/svg/brush-paste-resized.svg')}) 2 2, pointer` } : {}
+    cursorStyles() {
+      const { cursor } = this
+      return cursor ? { cursor } : {}
     },
     setAdminMode() {
       this._setAdminMode(!this.adminMode)
     },
     outerClick(e: MouseEvent) {
-      if (!this.inBgRemoveMode) {
-        // !this.isHandleShadow && GroupUtils.deselect()
+      if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
+        !this.isHandleShadow && GroupUtils.deselect()
         GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
         pageUtils.setBackgroundImageControlDefault()
@@ -314,6 +333,21 @@ export default Vue.extend({
       }
     },
     selectStart(e: MouseEvent) {
+      if (layerUtils.layerIndex !== -1) {
+        /**
+         * when the user click the control-region outsize the page,
+         * the moving logic should be applied to the EditorView.
+         */
+        if (ControlUtils.isClickOnController(e)) {
+          const movingUtils = new MovingUtils({
+            _config: { config: layerUtils.getCurrLayer },
+            snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+            body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+          })
+          movingUtils.moveStart(e)
+          return
+        }
+      }
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()
       }
@@ -408,7 +442,6 @@ export default Vue.extend({
           }
         })
       }
-
       if (layerIndexs.length > 0) {
         GroupUtils.select(pageUtils.currFocusPageIndex, layerIndexs)
       }

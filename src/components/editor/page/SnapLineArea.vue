@@ -11,7 +11,8 @@
       div(v-for="(line,index) in guidelines.v"
         class="snap-area__line snap-area__line--vr"
         :style="snapLineStyles('v', line,true)"
-        @mouseover="lockGuideline ? null : showGuideline(line,'v',index)")
+        @mouseover="lockGuideline ? null : showGuideline(line,'v',index)"
+        @mouseout="closeGuidelineTimer")
       div(v-for="(line,index) in guidelines.h"
         class="snap-area__line snap-area__line--hr"
         :style="snapLineStyles('h', line,true)"
@@ -22,6 +23,7 @@
 
 import { IPage } from '@/interfaces/page'
 import { ISnapline } from '@/interfaces/snap'
+import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import SnapUtils from '@/utils/snapUtils'
@@ -33,14 +35,15 @@ export default Vue.extend({
     config: Object as () => IPage,
     pageIndex: Number,
     pageScaleRatio: Number,
-    snapUtils: SnapUtils
+    snapUtils: Object as () => SnapUtils
   },
   data() {
     return {
       closestSnaplines: {
         v: [] as Array<number>,
         h: [] as Array<number>
-      }
+      },
+      guidelineTimer: -1
     }
   },
   mounted() {
@@ -109,13 +112,18 @@ export default Vue.extend({
       this.closestSnaplines.h = []
     },
     showGuideline(pos: number, type: string, index: number) {
-      if (!rulerUtils.isDragging) {
-        rulerUtils.deleteGuideline(
-          index,
-          type,
-          this.pageIndex)
-        rulerUtils.event.emit('showGuideline', pos, rulerUtils.mapSnaplineToGuidelineArea(pos, type, this.pageIndex), type, this.pageIndex)
-      }
+      this.guidelineTimer = setTimeout(() => {
+        if (!rulerUtils.isDragging) {
+          rulerUtils.deleteGuideline(
+            index,
+            type,
+            this.pageIndex)
+          rulerUtils.event.emit('showGuideline', pos, rulerUtils.mapSnaplineToGuidelineArea(pos, type, this.pageIndex), type, this.pageIndex)
+        }
+      }, 100)
+    },
+    closeGuidelineTimer() {
+      clearTimeout(this.guidelineTimer)
     }
   }
 })

@@ -2,8 +2,9 @@
   div(class="nu-group"
       :style="styles()")
     nu-layer(v-for="(layer,index) in config.layers"
-      :key="`layer-${index}`"
+      :key="`layer-${layer.id}`"
       :pageIndex="pageIndex"
+      :primaryLayer="config"
       :layerIndex="layerIndex"
       :subLayerIndex="index"
       :contentScaleRatio="contentScaleRatio"
@@ -28,8 +29,8 @@ export default Vue.extend({
   methods: {
     styles() {
       return {
-        width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
-        height: `${this.config.styles.initHeight * this.contentScaleRatio}px`,
+        // width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
+        // height: `${this.config.styles.initHeight * this.contentScaleRatio}px`,
         transform: `scale(${1 / this.contentScaleRatio})`,
         transformOrigin: 'top left'
       }

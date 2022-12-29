@@ -19,11 +19,11 @@ const imgShadowMutations = {
     const { pageIndex, layerIndex, subLayerIdx } = layerInfo
     if (pageIndex === -1 || layerIndex === -1) return
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
-      Object.assign(((state.pages[pageIndex].layers[layerIndex] as IGroup)
+      Object.assign(((state.pages[pageIndex].config.layers[layerIndex] as IGroup)
         .layers[subLayerIdx] as IImage)
         .styles.shadow.effects, payload)
     } else {
-      Object.assign((state.pages[pageIndex].layers[layerIndex] as IImage)
+      Object.assign((state.pages[pageIndex].config.layers[layerIndex] as IImage)
         .styles.shadow.effects, payload)
     }
   },
@@ -32,14 +32,14 @@ const imgShadowMutations = {
     const { pageIndex, layerIndex, subLayerIdx } = layerInfo
     if (pageIndex === -1 || layerIndex === -1) return
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
-      const shadow = ((state.pages[pageIndex].layers[layerIndex] as IGroup).layers[subLayerIdx] as IImage).styles.shadow
+      const shadow = ((state.pages[pageIndex].config.layers[layerIndex] as IGroup).layers[subLayerIdx] as IImage).styles.shadow
       if (shadow) {
         Object.assign(shadow, payload)
       } else {
-        ((state.pages[pageIndex].layers[layerIndex] as IGroup).layers[subLayerIdx] as IImage).styles.shadow = payload as any
+        ((state.pages[pageIndex].config.layers[layerIndex] as IGroup).layers[subLayerIdx] as IImage).styles.shadow = payload as any
       }
     } else {
-      Object.assign((state.pages[pageIndex].layers[layerIndex] as IImage).styles.shadow, payload)
+      Object.assign((state.pages[pageIndex].config.layers[layerIndex] as IImage).styles.shadow, payload)
     }
   },
   [UPDATE_shadowProps](state: IEditorState, data: { layerInfo: ILayerInfo, payload: Partial<IShadowProps> }) {
@@ -47,12 +47,12 @@ const imgShadowMutations = {
     const { pageIndex, layerIndex, subLayerIdx } = layerInfo
     if (pageIndex === -1 || layerIndex === -1) return
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
-      const shadow = ((state.pages[pageIndex].layers[layerIndex] as IGroup)
+      const shadow = ((state.pages[pageIndex].config.layers[layerIndex] as IGroup)
         .layers[subLayerIdx] as IImage)
         .styles.shadow
       Object.assign(shadow, payload)
     } else {
-      Object.assign((state.pages[pageIndex].layers[layerIndex] as IImage).styles.shadow, payload)
+      Object.assign((state.pages[pageIndex].config.layers[layerIndex] as IImage).styles.shadow, payload)
     }
   },
   [UPDATE_shadowStyles](state: IEditorState, data: { layerInfo: ILayerInfo, payload: IShadowStyles }) {
@@ -60,12 +60,12 @@ const imgShadowMutations = {
     const { pageIndex, layerIndex, subLayerIdx } = layerInfo
     if (pageIndex === -1 || layerIndex === -1) return
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
-      const styles = ((state.pages[pageIndex].layers[layerIndex] as IGroup)
+      const styles = ((state.pages[pageIndex].config.layers[layerIndex] as IGroup)
         .layers[subLayerIdx] as IImage)
         .styles.shadow.styles
       Object.assign(styles, payload)
     } else {
-      Object.assign((state.pages[pageIndex].layers[layerIndex] as IImage).styles.shadow.styles, payload)
+      Object.assign((state.pages[pageIndex].config.layers[layerIndex] as IImage).styles.shadow.styles, payload)
     }
   },
   [SET_srcObj](state: IEditorState, data: { layerInfo: ILayerInfo, srcObj: SrcObj }) {
@@ -73,12 +73,12 @@ const imgShadowMutations = {
     const { pageIndex, layerIndex, subLayerIdx } = layerInfo
     if (pageIndex === -1 || layerIndex === -1) return
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
-      const _srcObj = ((state.pages[pageIndex].layers[layerIndex] as IGroup)
+      const _srcObj = ((state.pages[pageIndex].config.layers[layerIndex] as IGroup)
         .layers[subLayerIdx] as IImage)
         .styles.shadow.srcObj
       Object.assign(_srcObj, srcObj)
     } else {
-      Object.assign((state.pages[pageIndex].layers[layerIndex] as IImage).styles.shadow.srcObj, srcObj)
+      Object.assign((state.pages[pageIndex].config.layers[layerIndex] as IImage).styles.shadow.srcObj, srcObj)
     }
   },
   [SET_srcState](state: IEditorState, data: { layerInfo: ILayerInfo, effect: ShadowEffectType, effects: IShadowEffects, layerSrcObj: SrcObj, shadowSrcObj: SrcObj, layerState: Partial<IImageStyle> }) {
@@ -87,9 +87,9 @@ const imgShadowMutations = {
 
     let target
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
-      target = (state.pages[pageIndex].layers[layerIndex] as IGroup).layers[subLayerIdx] as IImage
+      target = (state.pages[pageIndex].config.layers[layerIndex] as IGroup).layers[subLayerIdx] as IImage
     } else {
-      target = state.pages[pageIndex].layers[layerIndex] as IImage
+      target = state.pages[pageIndex].config.layers[layerIndex] as IImage
     }
 
     if (target.styles.shadow.srcState) {
@@ -104,9 +104,9 @@ const imgShadowMutations = {
 
     let target
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
-      target = (state.pages[pageIndex].layers[layerIndex] as IGroup).layers[subLayerIdx] as IImage
+      target = (state.pages[pageIndex].config.layers[layerIndex] as IGroup).layers[subLayerIdx] as IImage
     } else {
-      target = state.pages[pageIndex].layers[layerIndex] as IImage
+      target = state.pages[pageIndex].config.layers[layerIndex] as IImage
     }
     target.styles.shadow.old = {
       currentEffect: target.styles.shadow.currentEffect,

@@ -7,6 +7,8 @@ import themeUtils from '@/utils/themeUtils'
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
+import editorUtils from '@/utils/editorUtils'
+import Vue from 'vue'
 
 export async function editorRouteHandler(_to: Route, from: Route, next: NavigationGuardNext<Vue>) {
   try {
@@ -63,6 +65,10 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
 
     if (panel && panel in SidebarPanelType) {
       store.commit('SET_currSidebarPanelType', SidebarPanelType[panel as any])
+      Vue.nextTick(() => {
+        editorUtils.setShowMobilePanel(true)
+        editorUtils.setCurrActivePanel(panel.replace('bg', 'background'))
+      })
     }
 
     // reset (close) page preview mode
