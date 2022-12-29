@@ -246,7 +246,8 @@ export default Vue.extend({
       isUploadingShadowImg: 'shadow/isUploading',
       isHandling: 'shadow/isHandling',
       isShowPagePanel: 'page/getShowPagePanel',
-      isHandleShadow: 'shadow/isHandling'
+      isHandleShadow: 'shadow/isHandling',
+      renderForPDF: 'user/renderForPDF'
     }),
     layerInfo(): ILayerInfo {
       return {
@@ -298,7 +299,7 @@ export default Vue.extend({
       return ''
     },
     layerDivs() {
-      if (this.$router.currentRoute.name === 'Preview' && this.$router.currentRoute.query.origin !== 'true' && this.config.type === 'text') {
+      if (this.$router.currentRoute.name === 'Preview' && this.renderForPDF && this.config.type === 'text') {
         return [
           { noShadow: false, isTransparent: true },
           { noShadow: true, isTransparent: false, main: true }
@@ -351,9 +352,9 @@ export default Vue.extend({
           if (noShadow) {
             styles.textShadow = 'none'
           }
-          // if (isTransparent) {
-          //   styles['-webkit-filter'] = 'opacity(1)'
-          // }
+          if (isTransparent) {
+            styles['-webkit-filter'] = 'opacity(1)'
+          }
           break
         }
         case LayerType.shape: {
