@@ -89,7 +89,7 @@ export default Vue.extend({
         action: this.handleOpenInfo
       }, ...vivistickerUtils.checkVersion('1.19') ? [
         {
-          text: '訂閱功能',
+          text: `${this.$t('STK0025')}`,
           icon: 'vivisticker_global',
           action: () => { this.handleList('subscribe') }
         }
@@ -165,15 +165,15 @@ export default Vue.extend({
     },
     subscribeOptions(): OptionConfig[] {
       return [{
-        text: '月繳',
+        text: `${this.$t('STK0026')}`,
         icon: 'vivisticker_global',
         action: () => { vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'monthly' }) }
       }, {
-        text: '年繳',
+        text: `${this.$t('STK0027')}`,
         icon: 'vivisticker_global',
         action: () => { vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'annually' }) }
       }, {
-        text: '訂閱狀態',
+        text: `${this.$t('STK0028')}`,
         icon: 'vivisticker_global',
         action: () => { vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'checkState' }) }
       }]
