@@ -105,8 +105,8 @@ export default function (this: any) {
     },
 
     // For panel initial, get recently and categories at the same time.
-    getRecAndCate: async ({ dispatch, commit }) => {
-      dispatch('resetContent')
+    getRecAndCate: async ({ dispatch, commit }, { reset = true } = {}) => {
+      if (reset) dispatch('resetContent')
       await Promise.all([
         dispatch('getRecently', false),
         dispatch('getCategories', false)
@@ -137,7 +137,7 @@ export default function (this: any) {
           listCategory: 0,
           cache: needCache
         })
-        commit('SET_CONTENT', data.data)
+        commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
         captureException(error)
       }
@@ -159,7 +159,7 @@ export default function (this: any) {
           listCategory: 0,
           cache: needCache
         })
-        commit('SET_CONTENT', data.data)
+        commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
         captureException(error)
       }
@@ -183,7 +183,7 @@ export default function (this: any) {
           listCategory: 0,
           cache: needCache
         })
-        commit('SET_CONTENT', data.data)
+        commit('SET_CONTENT', { objects: data.data, isSearch: true })
       } catch (error) {
         captureException(error)
       }
@@ -288,8 +288,7 @@ export default function (this: any) {
         targetCategory.unshift(format)
       }
     },
-    SET_CONTENT(state: IListModuleState, objects: IListServiceData) {
-      const isSearch = Boolean(state.keyword)
+    SET_CONTENT(state: IListModuleState, { objects, isSearch = false }: {objects: IListServiceData, isSearch: boolean}) {
       const {
         content = [],
         // host = '',

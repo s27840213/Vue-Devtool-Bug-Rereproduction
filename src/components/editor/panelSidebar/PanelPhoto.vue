@@ -61,7 +61,7 @@ export default Vue.extend({
   mounted() {
     generalUtils.panelInit('photo',
       this.handleSearch,
-      () => { /**/ },
+      async () => { /**/ },
       () => this.getPhotos({ keyword: '' })
     )
   },
@@ -91,10 +91,10 @@ export default Vue.extend({
       'getMorePhotos',
       'resetSearch'
     ]),
-    handleSearch(keyword?: string) {
+    async handleSearch(keyword?: string) {
       this.resetSearch()
       if (keyword) {
-        this.getPhotos({ keyword })
+        await this.getPhotos({ keyword })
       }
     },
     handleLoadMore() {
