@@ -28,6 +28,14 @@
                       iconWidth="24px"
                       iconColor="gray-2")
           div(class="panel-vvstk-more__option-title") {{ option.text }}
+      template(v-if="lastHistory === 'subscribe'")
+        div(class="horizontal-rule")
+        div(class="panel-vvstk-more__option version")
+          i18n(class="panel-vvstk-more__option-title version" tag="span" path="STK0029")
+            template(#privacyPolicy)
+              span(class="panel-vvstk-more__option-link" @click="handleOpenUrl('privacyPolicy')") {{ $t('STK0030') }}
+            template(#termOfUse)
+              span(class="panel-vvstk-more__option-link" @click="handleOpenUrl('termOfUse')") {{ $t('STK0031') }}
 </template>
 
 <script lang="ts">
@@ -248,6 +256,10 @@ export default Vue.extend({
       }
       window.open(url, '_blank')
     },
+    handleOpenUrl(key: string) {
+      const locale = this.$i18n.locale
+      window.open(vivistickerUtils.getDocumentUrl(locale, key), '_blank')
+    },
     handleUpdateLocale(locale: string) {
       if (locale === this.$i18n.locale) return
       vivistickerUtils.updateLocale(locale).then(() => {
@@ -313,6 +325,10 @@ export default Vue.extend({
     &.version {
       color: setColor(gray-3);
     }
+  }
+  &__option-link {
+    @include body-SM;
+    color: setColor(gray-1);
   }
 }
 
