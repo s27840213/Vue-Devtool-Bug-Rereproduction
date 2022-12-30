@@ -377,17 +377,19 @@ export default Vue.extend({
       const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
       this.updateStyleNode(styleText)
       this.paramsReady = true
-      let subLayerIdx = -1
       const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex) as IFrame | IGroup
       if (primaryLayer.type === LayerType.frame) {
+        let subLayerIdx = -1
         if (primaryLayer.decoration && (primaryLayer.decoration as IShape).id === this.config.id) {
           subLayerIdx++
         }
         if (primaryLayer.decorationTop && (primaryLayer.decorationTop as IShape).id === this.config.id) {
           subLayerIdx += (primaryLayer as IFrame).clips.length + 1
         }
+        vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+      } else {
+        vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
       }
-      vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
     },
     getFilterTemplate(): string {
       if (this.config.category === 'C') {
