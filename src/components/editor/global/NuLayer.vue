@@ -649,6 +649,7 @@ export default Vue.extend({
       this.onLayerDragEnter(e)
     },
     onFrameDragEnter(e: DragEvent) {
+      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
       if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
         return
       }
@@ -692,6 +693,7 @@ export default Vue.extend({
       }
     },
     onFrameDragLeave(e: DragEvent) {
+      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
       e.stopPropagation()
       const body = (this.$refs.body as HTMLElement[])[0]
       body.removeEventListener('dragleave', this.onFrameDragLeave)
