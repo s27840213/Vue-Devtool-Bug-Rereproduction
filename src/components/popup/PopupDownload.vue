@@ -51,11 +51,37 @@
             min="1"
             v-ratio-change
             type="range")
+        div(v-if="'trim' in selected")
+          download-check-button(type="checkbox"
+            class="mb-10"
+            :label="`${$t('NN0774')}`"
+            :default-checked="!!selected.trim"
+            @change="({ checked }) => {handleUpdate('trim', checked ? 1 : 0); if('bleed' in selected && checked && selected.bleed === 0) handleUpdate('bleed', 1)}")
+        div(v-if="'bleed' in selected")
+          download-check-button(type="checkbox"
+            class="mb-10"
+            :label="`${$t('NN0775')}`"
+            :default-checked="!!selected.bleed"
+            @change="({ checked }) => {handleUpdate('bleed', checked ? 1 : 0); if('trim' in selected && !checked && selected.trim === 1) handleUpdate('trim', 0)}")
+        div(v-if="'outline' in selected")
+          download-check-button(type="checkbox"
+            class="mb-10"
+            :label="`${$t('NN0794')}`"
+            :default-checked="!!selected.outline"
+            @change="({ checked }) => handleUpdate('outline', checked ? 1 : 0)")
+        div(v-if="selectedTypeVal.includes('pdf')"
+          class="flex items-center mb-10")
+          span {{$t('NN0777')}}
+          dropdown(v-if="colorFormats[selectedTypeVal].length > 1" class="mx-5 popup-download__color-format"
+            :options="colorFormats[selectedTypeVal]"
+            @select="option => handleUpdate('cmyk', option === 'CMYK' ? 1 : 0)") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
+          div(v-if="colorFormats[selectedTypeVal].length === 1" class="popup-download__color-format fixed")
+            span(class="body-XS") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
         div(v-if="isDetailPage" class="mb-10 pt-5") {{ $t('NN0344') }}
           dropdown(class="mt-5"
             :options="detailPageDownloadOptions"
             @select="handleDetailPageOption") {{ detailPageOptionLabel }}
-          div(v-if="selectedDetailPage.option === 'splice'"
+          div(v-if="selectedDetailPage.option === 'splice' && !selectedTypeVal.includes('pdf')"
             class="mt-10")
             download-check-button(type="radio"
               class="mb-10"
@@ -143,7 +169,7 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import { ITypeOption } from '@/interfaces/download'
+import { IDownloadServiceParams, ITypeOption } from '@/interfaces/download'
 import DownloadUtil from '@/utils/downloadUtil'
 import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
 import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
@@ -201,6 +227,10 @@ export default Vue.extend({
       exportId: '',
       functionQueue: [] as Array<() => void>,
       scaleOptions: [0.5, 0.75, 1, 1.5, 2, 2.5, 3],
+      colorFormats: {
+        pdf_standard: ['RGB'],
+        pdf_print: ['RGB', 'CMYK']
+      },
       detailPageDownloadOptions: [
         { value: 'whole', label: this.$t('NN0347') as string },
         { value: 'splice', label: this.$t('NN0348') as string }
@@ -212,9 +242,9 @@ export default Vue.extend({
       },
       typeOptions: [
         { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
-        { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` }
-        // { value: 'pdf_stardand', name: 'PDF 標準', desc: '檔案大小：小 - 適合多頁文件' }
-        // { id: 'pdf_print', name: 'PDF 列印', desc: '檔案大小：高 - 適合多頁文件' },
+        { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` },
+        { value: 'pdf_standard', name: `${this.$t('NN0770')}`, desc: `${this.$t('NN0772')}` },
+        { value: 'pdf_print', name: `${this.$t('NN0771')}`, desc: `${this.$t('NN0773')}` }
         // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
         // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
         // { id: 'gif', name: 'GIF', desc: '短片' }
@@ -388,18 +418,23 @@ export default Vue.extend({
       } = this
       this.handleSubmissionInfo()
 
-      const fileInfo = {
+      const fileInfo = Object.assign({}, {
         exportId,
         teamId: '',
-        format: selectedTypeVal,
+        format: selectedTypeVal.includes('pdf') ? 'pdf' : selectedTypeVal,
         ...selected
-      }
+      }, selectedTypeVal.includes('pdf') && {
+        pdfQuality: selectedTypeVal === 'pdf_standard' ? 0
+          : selectedTypeVal === 'pdf_print' ? 1
+            : undefined
+      }) as IDownloadServiceParams
 
       if (this.isDetailPage) {
         this.selectedDetailPage.option === 'whole' && (fileInfo.merge = 1)
-        this.selectedDetailPage.option === 'splice' &&
-          !this.selectedDetailPage.noLimit &&
-          (fileInfo.splitSize = this.selectedDetailPage.height)
+        if (this.selectedDetailPage.option === 'splice') {
+          fileInfo.merge = 0
+          if (!this.selectedDetailPage.noLimit && !selectedTypeVal.includes('pdf')) fileInfo.splitSize = this.selectedDetailPage.height
+        }
       }
 
       if (['spec', 'current'].includes(rangeType)) {
@@ -499,6 +534,16 @@ export default Vue.extend({
   }
   &__size-scale {
     width: 65px;
+  }
+  &__color-format {
+    width: 65px;
+    &.fixed {
+      width: auto;
+      margin-left: 8px;
+      padding: 0px 8px;
+      border: 1px solid setColor(gray-4);
+      border-radius: 4px;
+    }
   }
   &__progress {
     width: 100%;
