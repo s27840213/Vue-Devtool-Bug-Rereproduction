@@ -47,7 +47,7 @@ export default Vue.extend({
           return ((currLayer as IShape).color?.length ?? 0) === 1 ? 'shape' : ''
         case 'group':
           if (subLayerIdx === -1) return ''
-          subLayer = (currLayer as IGroup).layers[subLayerIdx]
+          subLayer = currLayer.layers[subLayerIdx]
           if (subLayer.type === 'text') return 'text'
           if (subLayer.type === 'shape' && ((subLayer as IShape).color?.length ?? 0) === 1) return 'shape'
           return ''

@@ -192,13 +192,13 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.isSettingScaleRatio
   },
   getLayer(state: IEditorState) {
-    return (pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | IFrame | undefined => {
+    return (pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | IFrame | ITmp => {
       const page = state.pages[pageIndex]?.config
       return page?.layers[layerIndex] ?? {}
     }
   },
   getLayers(state: IEditorState) {
-    return (pageIndex: number): Array<IShape | IText | IImage | IGroup | IFrame> => {
+    return (pageIndex: number): Array<IShape | IText | IImage | IGroup | IFrame | ITmp> => {
       return state.pages[pageIndex] ? state.pages[pageIndex].config.layers : []
     }
   },
@@ -235,13 +235,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   getClipboard(state: IEditorState): Array<ITmp> {
     return state.clipboard
   },
-  getCurrSelectedInfo(state: IEditorState): {
-    pageIndex: number,
-    index: number,
-    layers: Array<IShape | IText | IImage | IGroup | ITmp>,
-    types: Set<string>,
-    id: string
-  } {
+  getCurrSelectedInfo(state: IEditorState): ICurrSelectedInfo {
     return state.currSelectedInfo
   },
   getCurrSubSelectedInfo(state: IEditorState): ICurrSubSelectedInfo {
@@ -613,7 +607,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   UPDATE_groupLayerProps(state: IEditorState, updateInfo: { props: { [key: string]: string | number | boolean | number[] } }) {
     Object.entries(updateInfo.props).forEach(([k, v]) => {
-      (state.pages[state.middlemostPageIndex].config.layers[state.currSelectedInfo.index] as IGroup).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+      (state.pages[state.middlemostPageIndex].config.layers[state.currSelectedInfo.index] as IGroup).layers.forEach((layer) => {
         layer[k] = v
       })
     })
@@ -700,7 +694,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   UPDATE_groupLayerStyles(state: IEditorState, updateInfo: { styles: { [key: string]: string | number } }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
-      (state.pages[state.middlemostPageIndex].config.layers[state.currSelectedInfo.index] as IGroup).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+      (state.pages[state.middlemostPageIndex].config.layers[state.currSelectedInfo.index] as IGroup).layers.forEach((layer) => {
         layer.styles[k] = v
       })
     })
@@ -710,28 +704,28 @@ const mutations: MutationTree<IEditorState> = {
       if (typeof updateInfo.layerIndex !== 'undefined') {
         (state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.layerIndex].styles[k] = v
       } else {
-        (state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+        (state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index] as ITmp).layers.forEach((layer) => {
           layer.styles[k] = v
         })
       }
     })
-    if ((state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index] as ITmp).type === 'group') {
-      state.currSelectedInfo.layers = [state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index] as ITmp]
+    if (state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index].type === 'group') {
+      state.currSelectedInfo.layers = [state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index] as IShape | IText | IImage | IGroup | IFrame]
     } else {
       state.currSelectedInfo.layers = (state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index] as ITmp).layers
     }
   },
   UPDATE_selectedTextParagraphs(state: IEditorState, updateInfo: { tmpLayerIndex: number, paragraphs: [IParagraph] }) {
     ((state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index] as ITmp).layers[updateInfo.tmpLayerIndex] as IText).paragraphs = updateInfo.paragraphs
-    if ((state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index] as ITmp).type === 'group') {
-      state.currSelectedInfo.layers = [state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index] as ITmp]
+    if (state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index].type === 'group') {
+      state.currSelectedInfo.layers = [state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index] as IShape | IText | IImage | IGroup | IFrame]
     } else {
       state.currSelectedInfo.layers = (state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index] as ITmp).layers
     }
   },
   UPDATE_tmpLayersZindex(state: IEditorState) {
     const tmpLayer = state.pages[state.currSelectedInfo.pageIndex].config.layers[state.currSelectedInfo.index] as ITmp
-    tmpLayer.layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+    tmpLayer.layers.forEach((layer) => {
       layer.styles.zindex = state.currSelectedInfo.index + 1
     })
     Object.assign(state.currSelectedInfo, {
@@ -846,7 +840,7 @@ const mutations: MutationTree<IEditorState> = {
     }
   },
   DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex }) {
-    const handler = (l: IShape | IText | IImage | IGroup | IFrame) => {
+    const handler = (l: IShape | IText | IImage | IGroup | IFrame | ITmp) => {
       switch (l.type) {
         case LayerType.image:
           if ((l as IImage).srcObj.assetId === assetId && l.previewSrc) {

@@ -154,7 +154,7 @@ export default Vue.extend({
       removeBg: 'REMOVE_background',
       setBgOpacity: 'SET_backgroundOpacity',
       setBgImageControl: 'SET_backgroundImageControl',
-      setBgImageStyles: 'SET_backgroundImageStyles',
+      setBgImageStyles: 'SET_backgroundImageStyles'
     }),
     handleDeleteBackground() {
       backgroundUtils.handleDeleteBackground()

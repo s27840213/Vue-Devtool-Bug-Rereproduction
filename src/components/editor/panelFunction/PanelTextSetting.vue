@@ -152,7 +152,7 @@ export default Vue.extend({
     popupUtils.on(PopupSliderEventType.stop, () => {
       const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
       if (currLayer.type === 'text' || (currLayer.type === 'group' && subLayerIdx !== -1 &&
-        (currLayer as IGroup).layers[subLayerIdx].type === 'text)')) {
+        currLayer.layers[subLayerIdx].type === 'text')) {
         tiptapUtils.focus({ scrollIntoView: false })
       }
     })

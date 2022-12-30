@@ -127,7 +127,7 @@ export default Vue.extend({
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup, index: number) => {
+      const types = groupLayer.layers.map((layer) => {
         return layer.type
       })
       return new Set(types)
@@ -197,7 +197,7 @@ export default Vue.extend({
         targetLayerType: (() => {
           if (subLayerIdx !== -1) {
             return currLayer.type === LayerType.group
-              ? (currLayer as IGroup).layers[subLayerIdx].type : LayerType.image
+              ? currLayer.layers[subLayerIdx].type : LayerType.image
           }
           return currLayer.type
         })()
