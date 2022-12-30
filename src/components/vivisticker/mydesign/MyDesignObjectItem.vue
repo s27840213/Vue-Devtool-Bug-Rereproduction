@@ -23,7 +23,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import { IPage } from '@/interfaces/page'
-import { IFrame, ILayer } from '@/interfaces/layer'
+import { IFrame, IGroup, ILayer } from '@/interfaces/layer'
 import i18n from '@/i18n'
 import frameUtils from '@/utils/frameUtils'
 import modalUtils from '@/utils/modalUtils'
@@ -61,6 +61,7 @@ export default Vue.extend({
       }
       if (this.item.assetInfo.isFrame) {
         vivistickerUtils.getAsset(`mydesign-${this.item.type}`, this.item.id, 'config').then(data => {
+          console.log(generalUtils.deepCopy(data))
           if (vivistickerUtils.checkForEmptyFrame(data.pages)) {
             // handle Dialog and File-selector
             vivistickerUtils.initWithMyDesign(this.item, {
@@ -72,7 +73,18 @@ export default Vue.extend({
                 vivistickerUtils.initLoadingFlags(page, () => {
                   const { layers } = page
                   const frames = (layers
-                    .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
+                    .flatMap((l: ILayer) => {
+                      if (l.type === 'frame') {
+                        return [l]
+                      } else if (l.type === 'group') {
+                        const frames = (l as any).layers
+                          .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>
+                        return frames
+                      }
+                      return []
+                    }) as Array<IFrame>)
+                  console.log('init loading flag', frames)
+                  // .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
                   const missingClips = frames
                     .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
                   if (missingClips.length === 1) {
@@ -115,6 +127,7 @@ export default Vue.extend({
         })
       } else {
         vivistickerUtils.getAsset(`mydesign-${this.item.type}`, this.item.id, 'config').then(data => {
+          console.log(generalUtils.deepCopy(data))
           const pages = generalUtils.deepCopy(data.pages)
           vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0]))
         })

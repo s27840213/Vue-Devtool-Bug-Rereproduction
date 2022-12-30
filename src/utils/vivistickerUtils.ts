@@ -336,15 +336,15 @@ class ViviStickerUtils {
     }
   }
 
-  makeFlagKey(layerIndex: number, subLayerIndex = -1) {
-    return subLayerIndex === -1 ? `i${layerIndex}` : `i${layerIndex}_s${subLayerIndex}`
+  makeFlagKey(layerIndex: number, subLayerIndex = -1, clipIndex = -1) {
+    return subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}_c${clipIndex}`)
   }
 
-  initLoadingFlagsForLayer(layer: ILayer, layerIndex: number, subLayerIndex = -1) {
+  initLoadingFlagsForLayer(layer: ILayer, layerIndex: number, subLayerIndex = -1, clipIndex = -1) {
     switch (layer.type) {
       case LayerType.group:
         for (const [subIndex, subLayer] of (layer as IGroup).layers.entries()) {
-          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
+          this.initLoadingFlagsForLayer(subLayer, layerIndex, clipIndex)
         }
         break
       case LayerType.frame: {
@@ -358,12 +358,13 @@ class ViviStickerUtils {
           layers.push(frame.decorationTop)
         }
         for (const [subIndex, subLayer] of layers.entries()) {
-          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
+          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex, clipIndex)
         }
       }
         break
       default:
-        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
+        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, clipIndex)] = false
+        console.log(generalUtils.deepCopy(this.loadingFlags))
     }
   }
 
@@ -373,11 +374,12 @@ class ViviStickerUtils {
     this.loadingFlags[this.makeFlagKey(0, -1)] = false
   }
 
-  setLoadingFlag(layerIndex: number, subLayerIndex = -1) {
-    const key = this.makeFlagKey(layerIndex, subLayerIndex)
+  setLoadingFlag(layerIndex: number, subLayerIndex = -1, clipIndex = -1) {
+    const key = this.makeFlagKey(layerIndex, subLayerIndex, clipIndex)
     if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
       this.loadingFlags[key] = true
     }
+    console.log(generalUtils.deepCopy(this.loadingFlags))
     if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
       this.loadingCallback()
       this.loadingFlags = {}

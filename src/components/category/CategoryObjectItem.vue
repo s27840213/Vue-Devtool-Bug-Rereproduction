@@ -8,7 +8,7 @@
       img(class="category-object-item__img" draggable="false" @tap="clickObject" v-press="addSvg"
         :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
       //- pro-item(v-if="item.plan")
-      div(v-if="![8, 16].includes(item.type)" class="category-object-item__icon" @click.stop.prevent="handleEditObject")
+      div(v-if="showEditor" class="category-object-item__icon" @click.stop.prevent="handleEditObject")
         svg-icon(iconName="pen" iconColor="white" iconWidth="18px")
       div(v-if="item.type === 16" class="category-object-item__icon" @click.stop.prevent="openGiphyMore")
         svg-icon(iconName="more_vertical" :iconColor="'white'" iconWidth="18px")
@@ -37,6 +37,9 @@ export default Vue.extend({
   computed: {
     isTouchDevice(): boolean {
       return generalUtils.isTouchDevice()
+    },
+    showEditor(): boolean {
+      return ![8, 16].includes(this.item.type)
     }
   },
   methods: {

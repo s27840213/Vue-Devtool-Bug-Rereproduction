@@ -18,6 +18,7 @@ import { IFrame, IGroup, IShape } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { LayerType } from '@/store/types'
+import generalUtils from '@/utils/generalUtils'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'
@@ -258,6 +259,14 @@ export default Vue.extend({
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    primaryLayer: {
+      type: Object,
+      default: () => { return undefined }
+    },
+    primaryLayerIndex: {
+      type: Number,
+      default: -1
     }
   },
   methods: {
@@ -378,7 +387,7 @@ export default Vue.extend({
       this.updateStyleNode(styleText)
       this.paramsReady = true
       let subLayerIdx = -1
-      const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex) as IFrame | IGroup
+      const { primaryLayer } = this
       if (primaryLayer.type === LayerType.frame) {
         if (primaryLayer.decoration && (primaryLayer.decoration as IShape).id === this.config.id) {
           subLayerIdx++
@@ -387,7 +396,7 @@ export default Vue.extend({
           subLayerIdx += (primaryLayer as IFrame).clips.length + 1
         }
       }
-      vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+      vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx, this.primaryLayerIndex)
     },
     getFilterTemplate(): string {
       if (this.config.category === 'C') {

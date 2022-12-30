@@ -13,6 +13,7 @@
       :inImageFrame="inImageFrame()"
       :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
       :contentScaleRatio="contentScaleRatio"
+      :primaryLayerIndex="subLayerIndex !== -1 ? layerIndex : undefined"
       :primaryLayer="config"
       :config="layer"
       :isSubLayer="true")
@@ -35,6 +36,10 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     layerIndex: Number,
+    subLayerIndex: {
+      type: Number,
+      default: -1
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -95,7 +100,7 @@ export default Vue.extend({
         })
       }
       config.needFetch = false
-      vivistickerUtils.setLoadingFlag(this.layerIndex)
+      vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
     }
   },
   watch: {

@@ -104,6 +104,10 @@ export default Vue.extend({
     primaryLayer: {
       type: Object,
       default: () => { return undefined }
+    },
+    primaryLayerIndex: {
+      type: Number,
+      default: -1
     }
   },
   async created() {
@@ -426,7 +430,7 @@ export default Vue.extend({
               if ((this.primaryLayer as IFrame).decoration) {
                 subLayerIdx++
               }
-              vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+              vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx, this.primaryLayerIndex)
             })
           }
         }
@@ -454,10 +458,11 @@ export default Vue.extend({
     onLoad(e: Event, type?: string) {
       if (type === 'main') {
         let subLayerIdx = this.subLayerIndex
-        if ((this.primaryLayer as IFrame).decoration) {
+        if (this.primaryLayer && (this.primaryLayer as IFrame).decoration) {
           subLayerIdx++
         }
-        vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+        console.log(this.subLayerIndex)
+        vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx, this.primaryLayerIndex)
       }
       this.isOnError = false
       const img = e.target as HTMLImageElement
