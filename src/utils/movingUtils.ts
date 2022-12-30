@@ -382,7 +382,6 @@ export class MovingUtils {
     eventUtils.removePointerEvent('pointermove', this._moving)
     layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
     this.setMoving(false)
-    if (!this.body.contains(e.target as HTMLElement)) return
 
     const posDiff = {
       x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
