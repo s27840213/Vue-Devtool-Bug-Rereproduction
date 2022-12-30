@@ -14,9 +14,10 @@
 <script lang="ts">
 import Vue from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
-import { IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, IShape } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { LayerType } from '@/store/types'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'
@@ -376,7 +377,17 @@ export default Vue.extend({
       const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
       this.updateStyleNode(styleText)
       this.paramsReady = true
-      vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+      let subLayerIdx = -1
+      const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex) as IFrame | IGroup
+      if (primaryLayer.type === LayerType.frame) {
+        if (primaryLayer.decoration && (primaryLayer.decoration as IShape).id === this.config.id) {
+          subLayerIdx++
+        }
+        if (primaryLayer.decorationTop && (primaryLayer.decorationTop as IShape).id === this.config.id) {
+          subLayerIdx += (primaryLayer as IFrame).clips.length + 1
+        }
+      }
+      vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
     },
     getFilterTemplate(): string {
       if (this.config.category === 'C') {

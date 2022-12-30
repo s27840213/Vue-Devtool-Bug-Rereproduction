@@ -21,6 +21,8 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 import textUtils from './textUtils'
 import i18n from '@/i18n'
 import generalUtils from './generalUtils'
+import modalUtils from './modalUtils'
+import frameUtils from './frameUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '1.12',
@@ -57,8 +59,21 @@ const VVSTK_CALLBACKS = [
   'addAssetDone',
   'deleteAssetDone',
   'getAssetResult',
-  'uploadImageURL'
+  'uploadImageURL',
+  'informWebResult'
 ]
+
+const SCREENSHOT_CALLBACKS = [
+  'thumbDone',
+  'updateFileDone',
+  'informWebResult'
+]
+
+const CALLBACK_MAPS = {
+  router: ROUTER_CALLBACKS,
+  vvstk: VVSTK_CALLBACKS,
+  screenshot: SCREENSHOT_CALLBACKS
+}
 
 const MYDESIGN_TAGS = [{
   name: 'NN0005',
@@ -70,6 +85,7 @@ const MYDESIGN_TAGS = [{
 
 class ViviStickerUtils {
   appLoadedSent = false
+  isAnyIOSImgOnError = false
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
   callbackMap = {} as {[key: string]: (data?: any) => void}
@@ -97,14 +113,8 @@ class ViviStickerUtils {
     return store.getters['vivisticker/getUserSettings']
   }
 
-  registerRouterCallbacks() {
-    for (const callbackName of ROUTER_CALLBACKS) {
-      (window as any)[callbackName] = (vivistickerUtils as any)[callbackName]
-    }
-  }
-
-  registerVvstkCallbacks() {
-    for (const callbackName of VVSTK_CALLBACKS) {
+  registerCallbacks(type: 'router' | 'vvstk' | 'screenshot') {
+    for (const callbackName of CALLBACK_MAPS[type]) {
       (window as any)[callbackName] = (vivistickerUtils as any)[callbackName]
     }
   }
@@ -162,7 +172,7 @@ class ViviStickerUtils {
   }
 
   sendToIOS(messageType: string, message: any) {
-    // console.log(messageType, message)
+    console.log(messageType, message)
     try {
       const webkit = (window as any).webkit
       if (!webkit) return
@@ -185,9 +195,9 @@ class ViviStickerUtils {
     this.sendToIOS('DONE_LOADING', { width, height, options, needCrop })
   }
 
-  sendScreenshotUrl(query: string, action = 'copy', type?: string, id?: string) {
+  sendScreenshotUrl(query: string, action = 'copy') {
     console.log(query)
-    this.sendToIOS('SCREENSHOT', { params: query, action, type, id })
+    this.sendToIOS('SCREENSHOT', { params: query, action })
     if (this.isStandaloneMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
       window.open(url, '_blank')
@@ -221,10 +231,16 @@ class ViviStickerUtils {
     }
   }
 
-  createUrlForJSON(page?: IPage): string {
+  createUrlForJSON(page?: IPage, asset?: IMyDesign): string {
     page = page ?? pageUtils.getPage(0)
     // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
-    return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}`
+    const res = `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}`
+    if (asset) {
+      const key = this.mapEditorType2MyDesignKey(asset.type)
+      return res + `&thumbType=mydesign&designId=${asset.id}&key=${key}`
+    } else {
+      return res
+    }
   }
 
   setIsInCategory(tab: string, bool: boolean) {
@@ -334,7 +350,7 @@ class ViviStickerUtils {
       case LayerType.frame: {
         this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
         const frame = layer as IFrame
-        const layers = frame.clips as Array<IImage | IShape>
+        const layers = [...frame.clips] as Array<IImage | IShape>
         if (frame.decoration) {
           layers.unshift(frame.decoration)
         }
@@ -713,7 +729,8 @@ class ViviStickerUtils {
     }, id ?? '')
   }
 
-  initWithMyDesign(myDesign: IMyDesign) {
+  initWithMyDesign(myDesign: IMyDesign, option?: { callback?: (pages: Array<IPage>) => void, tab?: string }) {
+    const { callback, tab = 'opacity' } = option || {}
     const {
       id,
       type,
@@ -722,7 +739,12 @@ class ViviStickerUtils {
     const myDesignKey = this.mapEditorType2MyDesignKey(type)
     this.getAsset(`mydesign-${myDesignKey}`, id, 'config').then((data) => {
       this.startEditing(type, assetInfo ?? {}, this.getFetchDesignInitiator(() => {
-        store.commit('SET_pages', pageUtils.newPages(generalUtils.deepCopy(data.pages)))
+        const pages = pageUtils.newPages(generalUtils.deepCopy(data.pages))
+        if (callback) {
+          callback(pages)
+        }
+        store.commit('SET_pages', pages)
+        console.log(generalUtils.deepCopy(store.state.pages))
       }), () => {
         if (type === 'object') {
           groupUtils.select(0, [0])
@@ -730,7 +752,7 @@ class ViviStickerUtils {
           if (firstObject.type === 'shape' && ((firstObject as IShape).color?.length ?? 0) > 0) {
             eventUtils.emit(PanelEvent.switchTab, 'color', { currColorEvent: ColorEventType.shape })
           } else {
-            eventUtils.emit(PanelEvent.switchTab, 'opacity')
+            tab && eventUtils.emit(PanelEvent.switchTab, tab)
           }
         }
       }, id ?? '')
@@ -860,6 +882,96 @@ class ViviStickerUtils {
 
   uploadImageURL(data: any) {
     vivistickerUtils.handleCallback('upload-image', data)
+  }
+
+  updateFileDone() {
+    vivistickerUtils.handleCallback('update-file')
+  }
+
+  informWebResult(data: { info: any }) {
+    const { info } = data
+    const { event } = info
+    switch (event) {
+      case 'missing-image':
+        vivistickerUtils.handleMissingImage(info)
+        break
+    }
+  }
+
+  handleMissingImage(info: { key: string, id: string, thumbType: string }) {
+    switch (info.thumbType) {
+      case 'mydesign': {
+        // eslint-disable-next-line no-case-declarations
+        const designs = store.getters['vivisticker/getMyDesignFileList'](info.key) as IMyDesign[]
+        // eslint-disable-next-line no-case-declarations
+        const design = designs.find(d => d.id === info.id)
+        if (!design) break
+        // handle Dialog and File-selector
+        this.initWithMyDesign(design, {
+          callback: (pages: Array<IPage>) => {
+            const page = pages[0]
+            this.initLoadingFlags(page, () => {
+              const { layers } = page
+              const missingClips = (layers
+                .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
+                .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
+              if (missingClips.length === 1) {
+                const modalBtn = {
+                  msg: i18n.t('STK0023') as string,
+                  action: () => {
+                    let subLayerIdx = -1
+                    let layerIndex = -1
+                    const frame = layers
+                      .find((l, i) => {
+                        if (l.type === LayerType.frame && (l as IFrame).clips.some((c, i) => {
+                          if (c.srcObj.type === 'frame') {
+                            subLayerIdx = i
+                            return true
+                          }
+                          return false
+                        })) {
+                          layerIndex = i
+                          return true
+                        }
+                        return false
+                      }) as IFrame
+                    frameUtils.iosPhotoSelect({
+                      pageIndex: 0,
+                      layerIndex,
+                      subLayerIdx
+                    }, frame.clips[subLayerIdx])
+                  }
+                }
+                modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn)
+              }
+            })
+          },
+          tab: ''
+        })
+      }
+    }
+  }
+
+  checkForEmptyFrame(pages: IPage[]) {
+    for (const page of pages) {
+      for (const layer of page.layers) {
+        switch (layer.type) {
+          case 'frame':
+            if ((layer as IFrame).clips.some(c => c.srcObj.type === 'frame')) {
+              return true
+            }
+            break
+          case 'group':
+          case 'tmp':
+            for (const subLayer of (layer as IGroup).layers) {
+              if (subLayer.type === 'frame' && (subLayer as any as IFrame).clips.some(c => c.srcObj.type === 'frame')) {
+                return true
+              }
+            }
+        }
+      }
+    }
+    return false
   }
 
   mapEditorType2MyDesignKey(editorType: string): string {

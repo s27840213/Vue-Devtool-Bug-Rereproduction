@@ -117,7 +117,7 @@ const router = new VueRouter({
           logUtils.uploadLog()
         }
         logUtils.setLog('App Start')
-        vivistickerUtils.registerRouterCallbacks()
+        vivistickerUtils.registerCallbacks('router')
         const urlParams = new URLSearchParams(window.location.search)
         const standalone = urlParams.get('standalone')
         if (standalone) {
