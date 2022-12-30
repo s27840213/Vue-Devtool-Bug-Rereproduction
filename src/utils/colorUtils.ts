@@ -3,7 +3,9 @@ import { EventEmitter } from 'events'
 import store from '@/store'
 import { IPage } from '@/interfaces/page'
 import pageUtils from './pageUtils'
-import { clamp } from 'lodash'
+import layerUtils from '@/utils/layerUtils'
+import shapeUtils from '@/utils/shapeUtils'
+import { clamp, filter, flatten, uniq } from 'lodash'
 
 const STOP_POSTFIX = '_st'
 
@@ -25,6 +27,39 @@ class ColorUtils {
   }
 
   get currStopEvent(): string { return this.currEvent + STOP_POSTFIX }
+
+  get globalSelectedColor(): { textColor: string, color: string /* for shape/bg */ } {
+    const currPage = layerUtils.getCurrPage
+    const currLayer = layerUtils.getCurrLayer
+    switch (currLayer.type) {
+      case 'text': {
+        const textColors = uniq(flatten(currLayer.paragraphs.map(p => p.spans.map(s => s.styles.color))))
+        return { textColor: textColors.length > 1 ? 'multi' : textColors[0], color: '' }
+      }
+      case 'frame': {
+        const frameColors = shapeUtils.getDocumentColors
+        return { textColor: '', color: frameColors.length > 1 ? 'multi' : frameColors[0] }
+      }
+      case 'shape':
+        return { textColor: '', color: currLayer.color.length > 1 ? 'multi' : currLayer.color[0] }
+      case 'tmp':
+      case 'group': {
+        const singleColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length === 1) as IShape[]
+        const shapeColors = uniq(singleColorShapes.map(s => s.color[0]))
+        const texts = filter(currLayer.layers, { type: 'text' }) as IText[]
+        const textColors = uniq(flatten(flatten(texts.map(t => t.paragraphs.map(p => p.spans.map(s => s.styles.color))))))
+        return {
+          textColor: textColors.length > 1 ? 'multi' : textColors[0],
+          color: shapeColors.length > 1 ? 'multi' : shapeColors[0]
+        }
+      }
+      default: {
+        const bgColor = currPage.backgroundImage.config.srcObj.assetId ? 'multi' : currPage.backgroundColor
+        const color = store.getters['mobileEditor/getInBgSettingMode'] ? bgColor : ''
+        return { textColor: '', color }
+      }
+    }
+  }
 
   on(type: string, callback: (color: string) => void) {
     // replace origin event

@@ -6,10 +6,14 @@
             class="footer-tabs__item"
             :class="{'click-disabled': (tab.disabled || isLocked)}"
             @click="handleTabAction(tab)")
-          svg-icon(class="mb-5 click-disabled"
+          div(v-if="tab.icon === 'color'" style="width: 22px; height: 22px;"
+              class="mb-5 click-disabled")
+            color-btn(:color="globalSelectedColor.color")
+          svg-icon(v-else class="mb-5 click-disabled"
             :iconName="tab.icon"
             :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
-            :iconWidth="'22px'")
+            :iconWidth="'22px'"
+            :style="iconStyle")
           span(class="body-3 no-wrap click-disabled"
           :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
@@ -18,8 +22,9 @@ import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
-import stepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, LayerType } from '@/store/types'
+import ColorBtn from '@/components/global/ColorBtn.vue'
+import stepsUtils from '@/utils/stepsUtils'
 import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -33,9 +38,11 @@ import backgroundUtils from '@/utils/backgroundUtils'
 import editorUtils from '@/utils/editorUtils'
 import i18n from '@/i18n'
 import brandkitUtils from '@/utils/brandkitUtils'
+import colorUtils from '@/utils/colorUtils'
 
 export default Vue.extend({
   components: {
+    ColorBtn
   },
   props: {
     currTab: {
@@ -115,7 +122,8 @@ export default Vue.extend({
       ]
     },
     frameTabs(): Array<IFooterTab> {
-      const frame = layerUtils.getCurrLayer as IFrame
+      const frame = layerUtils.getCurrLayer
+      if (frame.type !== 'frame') return []
       const showReplace = frame.clips.length === 1 || frame.clips.some(c => c.active)
       const replace = showReplace ? [{ icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' }] : []
       return [
@@ -140,7 +148,7 @@ export default Vue.extend({
         { icon: 'font', text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`), panelType: 'fonts' },
         { icon: 'font-size', text: `${this.$t('NN0122')}`, panelType: 'font-size' },
         {
-          icon: 'color',
+          icon: 'text-color-mobile',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
           props: {
@@ -274,6 +282,18 @@ export default Vue.extend({
         return this.bgSettingTab
       } else {
         return this.homeTabs
+      }
+    },
+    globalSelectedColor(): { textColor: string, color: string } {
+      return colorUtils.globalSelectedColor
+    },
+    iconStyle(): Record<string, string> {
+      const textColor = this.globalSelectedColor.textColor
+      return textColor === 'multi' ? {
+        '--multi-text-color': '1' // For svg icon 'text-color-mobile.svg' rect fill multi-color
+      } : {
+        '--multi-text-color': '0',
+        '--text-color': textColor // For svg icon 'text-color-mobile.svg' rect fill color
       }
     },
     isWholeGroup(): boolean {
