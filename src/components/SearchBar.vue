@@ -5,7 +5,7 @@
       iconName="search"
       :iconColor="color.search || 'gray-3'"
       iconWidth="20px")
-    input(class="search-bar__input body-2"
+    input(class="search-bar__input body-2" ref="searchbar"
       type="search"
       v-model="keyword"
       @input="onUpdate"
@@ -68,7 +68,8 @@ export default Vue.extend({
       return { fontFamily: this.fontFamily }
     },
     onSearch(event: Event) {
-      event.preventDefault()
+      event.preventDefault();
+      (this.$refs.searchbar as HTMLElement).blur()
       this.$emit('search', this.keyword)
     },
     onClear() {
