@@ -396,7 +396,11 @@ export default Vue.extend({
           subLayerIdx += (primaryLayer as IFrame).clips.length + 1
         }
       }
-      vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx, this.primaryLayerIndex)
+      if (this.primaryLayerIndex !== -1) {
+        vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)
+      } else {
+        vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+      }
     },
     getFilterTemplate(): string {
       if (this.config.category === 'C') {

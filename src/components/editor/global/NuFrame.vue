@@ -8,7 +8,7 @@
     nu-layer(v-for="(layer,index) in layers"
       :key="`layer-${layer.id}`"
       :pageIndex="pageIndex"
-      :layerIndex="layerIndex"
+      :layerIndex="subLayerIndex !== -1 ? subLayerIndex : layerIndex"
       :isFrame="true"
       :inImageFrame="inImageFrame()"
       :subLayerIndex="Math.max(index - layerIdxOffset, 0)"

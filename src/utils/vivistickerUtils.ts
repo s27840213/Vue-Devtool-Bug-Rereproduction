@@ -172,7 +172,7 @@ class ViviStickerUtils {
   }
 
   sendToIOS(messageType: string, message: any) {
-    // console.log(messageType, message)
+    console.log(messageType, message)
     try {
       const webkit = (window as any).webkit
       if (!webkit) return
@@ -344,7 +344,7 @@ class ViviStickerUtils {
     switch (layer.type) {
       case LayerType.group:
         for (const [subIndex, subLayer] of (layer as IGroup).layers.entries()) {
-          this.initLoadingFlagsForLayer(subLayer, layerIndex, clipIndex)
+          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex, clipIndex)
         }
         break
       case LayerType.frame: {
@@ -357,8 +357,8 @@ class ViviStickerUtils {
         if (frame.decorationTop) {
           layers.push(frame.decorationTop)
         }
-        for (const [subIndex, subLayer] of layers.entries()) {
-          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex, clipIndex)
+        for (const [_clipIndex, subLayer] of layers.entries()) {
+          this.initLoadingFlagsForLayer(subLayer, layerIndex, subLayerIndex, _clipIndex)
         }
       }
         break
@@ -379,6 +379,7 @@ class ViviStickerUtils {
     if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
       this.loadingFlags[key] = true
     }
+    console.log('current: ', key)
     console.log(generalUtils.deepCopy(this.loadingFlags))
     if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
       this.loadingCallback()

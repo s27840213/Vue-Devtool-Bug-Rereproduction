@@ -2,7 +2,7 @@
   div(class="nu-group"
       :style="styles()")
     nu-layer(v-for="(layer,index) in config.layers"
-      :key="`layer-${index}`"
+      :key="`layer-${layer.id}`"
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
       :subLayerIndex="index"
@@ -12,6 +12,7 @@
 </template>
 
 <script lang="ts">
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import Vue from 'vue'
 
 export default Vue.extend({

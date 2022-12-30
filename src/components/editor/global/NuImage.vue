@@ -430,7 +430,11 @@ export default Vue.extend({
               if ((this.primaryLayer as IFrame).decoration) {
                 subLayerIdx++
               }
-              vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx, this.primaryLayerIndex)
+              if (this.primaryLayerIndex !== -1) {
+                vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)
+              } else {
+                vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+              }
             })
           }
         }
@@ -461,8 +465,11 @@ export default Vue.extend({
         if (this.primaryLayer && (this.primaryLayer as IFrame).decoration) {
           subLayerIdx++
         }
-        console.log(this.subLayerIndex)
-        vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx, this.primaryLayerIndex)
+        if (this.primaryLayerIndex !== -1) {
+          vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)
+        } else {
+          vivistickerUtils.setLoadingFlag(this.layerIndex, subLayerIdx)
+        }
       }
       this.isOnError = false
       const img = e.target as HTMLImageElement
