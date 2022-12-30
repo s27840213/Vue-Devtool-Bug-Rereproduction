@@ -176,7 +176,7 @@ class Controller {
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           left: '0',
-          transform: `translate(-50%, -50%) scale(${contentScaleRatio})`,
+          transform: `translate(-50%, 0) scale(${contentScaleRatio})`,
           opacity: isTouchArea ? '0' : '1'
         }
       },
@@ -187,7 +187,7 @@ class Controller {
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           right: '0',
-          transform: `translate(50%, -50%) scale(${contentScaleRatio})`,
+          transform: `translate(50%, 0) scale(${contentScaleRatio})`,
           opacity: isTouchArea ? '0' : '1'
         }
       },
@@ -198,7 +198,7 @@ class Controller {
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           bottom: '0',
-          transform: `translate(-50%, 50%) scale(${contentScaleRatio})`,
+          transform: `translate(0, 50%) scale(${contentScaleRatio})`,
           opacity: isTouchArea ? '0' : '1'
         }
       },
@@ -209,7 +209,7 @@ class Controller {
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           top: '0',
-          transform: `translate(-50%, -50%) scale(${contentScaleRatio})`,
+          transform: `translate(0, -50%) scale(${contentScaleRatio})`,
           opacity: isTouchArea ? '0' : '1'
         }
       }
@@ -493,8 +493,8 @@ class Controller {
       const rect = layer.getBoundingClientRect()
       const c = { x: e.clientX, y: e.clientY }
       const { x: x0, y: y0, width: W, height: H } = rect
-      const sinT = mathUtils.sin(layerUtils.getCurrLayer.styles.rotate % 90)
-      const cosT = mathUtils.cos(layerUtils.getCurrLayer.styles.rotate % 90)
+      const sinT = mathUtils.sin((layerUtils.getCurrLayer.styles.rotate + 360) % 90)
+      const cosT = mathUtils.cos((layerUtils.getCurrLayer.styles.rotate + 360) % 90)
       const w = (H * sinT - W * cosT) / (sinT * sinT - cosT * cosT)
       const h = (H * cosT - W * sinT) / (cosT * cosT - sinT * sinT)
       const yt = y0

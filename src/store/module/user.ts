@@ -46,6 +46,7 @@ export interface IUserModule {
   isUpdateDesignOpen: boolean,
   updateDesignId: string,
   updateDesignType: string,
+  renderForPDF: boolean,
   dimensionMap: {
     [key: string]: {
       [key: number]: {
@@ -108,7 +109,8 @@ const getDefaultState = (): IUserModule => ({
   dimensionMap: {},
   dpi: -1,
   bleed: false,
-  trim: false
+  trim: false,
+  renderForPDF: false
 })
 
 const state = getDefaultState()
@@ -209,6 +211,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getEnableAdminView() {
     return state.enableAdminView
+  },
+  getRenderForPDF() {
+    return state.renderForPDF
   }
 }
 
