@@ -27,9 +27,11 @@
           :isMoved="isMoved"
           :contentScaleRatio="contentScaleRatio")
       div(v-show="isActive && !isControlling && !isLocked() && !isImgControl"
-          ref="body"
+          :style="ctrlContentStyles"
           class="nu-controller__ctrl-points"
-          :style="ctrlContentStyles")
+          ref="body"
+          @contextmenu.prevent
+          @click.right.stop="onRightClick")
         div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
             class="control-point__corner-rotate scaler"
             :ref="`corner-rotate-${index}`"
@@ -45,26 +47,28 @@
             @pointerdown.stop="lineEndMoveStart"
             @touchstart="disableTouchEvent")
         div(v-for="(resizer, index) in resizer(controlPoints)"
+            class="control-point__resize-bar-wrapper"
             @pointerdown.prevent.stop="!isTouchDevice() ? resizeStart($event) : null"
             @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
-          div(class="control-point__resize-bar"
+          div(class="control-point resizer"
               :key="`resizer-${index}`"
               :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
           div(class="control-point resizer"
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
-        div(v-if="isTouchDevice()" v-for="(resizer, index) in resizer(controlPoints, false, true)"
-            @pointerdown.prevent.stop="resizeStart"
-            @touchstart="disableTouchEvent")
-          div(class="control-point__resize-bar"
-              :key="`resizer-touch-${index}`"
-              :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
-          div(class="control-point resizer"
-              :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))")
-        div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
-            @pointerdown="moveStart")
-          div(class="control-point__resize-bar control-point__move-bar"
-              :key="`resizer-text-${index}`"
-              :style="resizerBarStyles(resizer.styles)")
+        //- div(v-if="isTouchDevice()" v-for="(resizer, index) in resizer(controlPoints, false, true)"
+        //-     class="control-point__resize-bar-wrapper"
+        //-     @pointerdown.prevent.stop="resizeStart"
+        //-     @touchstart="disableTouchEvent")
+        //-   div(class="control-point resizer"
+        //-       :key="`resizer-touch-${index}`"
+        //-       :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
+        //-   div(class="control-point resizer"
+        //-       :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))")
+        //- div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
+        //-     @pointerdown="moveStart")
+        //-   div(class="control-point__resize-bar control-point__move-bar"
+        //-       :key="`resizer-text-${index}`"
+        //-       :style="resizerBarStyles(resizer.styles)")
         div(v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="`scaler-${index}`"
@@ -101,7 +105,7 @@
               :style='controlPointStyles()'
               @pointerdown.native.stop="rotateStart"
               @touchstart.native="disableTouchEvent")
-        div(v-if="config.type === 'text' && isActive && !isMoving" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
+        div(v-if="showTextEditor" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
             :style="textBodyStyle()"
             :pageIndex="pageIndex"
@@ -300,6 +304,12 @@ export default Vue.extend({
       }
       return undefined
     },
+    showTextEditor(): boolean {
+      if (this.config.type === 'text' && this.isActive) {
+        return !this.isMoving
+      }
+      return false
+    },
     contentStyles(): any {
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
       let transform = `translate(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px)`
@@ -459,7 +469,8 @@ export default Vue.extend({
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
         width: isHorizon ? `${this.getLayerWidth() - scalerOffset * 100 / this.scaleRatio}px` : `${width * this.contentScaleRatio * resizeBarScale}px`,
-        height: !isHorizon ? `${this.getLayerHeight() - scalerOffset * 100 / this.scaleRatio}px` : `${height * this.contentScaleRatio * resizeBarScale}px`
+        height: !isHorizon ? `${this.getLayerHeight() - scalerOffset * 100 / this.scaleRatio}px` : `${height * this.contentScaleRatio * resizeBarScale}px`,
+        opacity: 0
       }
       return Object.assign(resizerStyle, HW)
     },
@@ -538,7 +549,6 @@ export default Vue.extend({
           resizers = resizers.filter(r => r.type !== 'V')
         }
       }
-
       return resizers
     },
     scaler(scalers: any) {
@@ -577,11 +587,18 @@ export default Vue.extend({
       }
     },
     textBodyStyle() {
+      let opacity = 1
+      if (this.isTextEditing && this.contentEditable) {
+        opacity = 1
+      } else {
+        opacity = 0
+      }
+
       const textstyles = {
         width: '100%',
         height: '100%',
         userSelect: this.contentEditable ? 'text' : 'none',
-        opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
+        opacity
       }
       return !this.isCurveText ? textstyles
         : {
@@ -590,7 +607,7 @@ export default Vue.extend({
           position: 'absolute',
           top: 0,
           left: 0,
-          opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
+          opacity: this.isTextEditing && this.contentEditable ? 1 : 0
         }
     },
     groupControllerStyle() {
@@ -1980,20 +1997,6 @@ export default Vue.extend({
         event.preventDefault()
         return
       }
-      /**
-       * If current-selected-layer is exact this layer, record the sub-active-layer.
-       * After deselecting, set it to active
-       */
-      const subLayerIdx = LayerUtils.layerIndex === this.layerIndex ? LayerUtils.subLayerIdx : -1
-
-      if (this.currSelectedInfo.pageIndex !== this.pageIndex || this.currSelectedInfo.index !== this.layerIndex) {
-        GroupUtils.deselect()
-        GroupUtils.select(this.pageIndex, [this.layerIndex])
-      }
-
-      if (this.getLayerType === 'frame') {
-        FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, subLayerIdx, { active: true })
-      }
       this.$nextTick(() => {
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
@@ -2282,6 +2285,14 @@ export default Vue.extend({
     pointer-events: auto;
     border: 2px solid #00000000;
     color: "#00000000";
+    &-wrapper {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   }
   &__rotater-wrapper {
     @include widget-point-wrapper;
