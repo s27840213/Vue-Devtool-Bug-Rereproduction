@@ -27,14 +27,14 @@
   div(v-else-if="isBgImgCtrl")
     div(class="background-control"
         :style="backgroundControlStyles")
-      nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio")
+      nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio" :pageIndex="pageIndex" :layerIndex="layerIndex")
       nu-background-controller(:config="image"
         :pageIndex="pageIndex"
         :contentScaleRatio="contentScaleRatio")
     div(class="page-window")
       div(class="background-control"
       :style="backgroundControlStyles")
-        nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio")
+        nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio" :pageIndex="pageIndex" :layerIndex="layerIndex")
       component(v-for="(elm, idx) in getHalation"
         :key="idx"
         :is="elm.tag"
