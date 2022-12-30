@@ -160,25 +160,7 @@ export default Vue.extend({
       } else {
         // apply default bleeds for all pages
         for (let idx = 0; idx < this.pagesLength; idx++) {
-          const page = pageUtils.getPage(idx)
-          if (page.physicalBleeds && page.bleeds) resizeUtils.resizeBleeds(idx, page.physicalBleeds, page.bleeds)
-          else {
-            const unit = page.unit ?? 'px'
-            const defaultBleeds = pageUtils.getDefaultBleeds('px')
-            defaultBleeds.top = this.groupType === 1 && idx !== 0 ? 0 : defaultBleeds.top
-            defaultBleeds.bottom = this.groupType === 1 && idx !== this.pagesLength - 1 ? 0 : defaultBleeds.bottom
-
-            const defaultPhysicalBleeds = unit === 'px' ? defaultBleeds : pageUtils.getDefaultBleeds(unit, pageUtils.getPageDPI(page))
-            if (unit !== 'px') {
-              defaultPhysicalBleeds.top = this.groupType === 1 && idx !== 0 ? 0 : defaultPhysicalBleeds.top
-              defaultPhysicalBleeds.bottom = this.groupType === 1 && idx !== this.pagesLength - 1 ? 0 : defaultPhysicalBleeds.bottom
-            }
-            resizeUtils.resizeBleeds(idx, defaultPhysicalBleeds, defaultBleeds)
-          }
-          this.$store.commit('UPDATE_pageProps', {
-            pageIndex: idx,
-            props: { isEnableBleed: true }
-          })
+          resizeUtils.enableBleeds(idx)
         }
       }
       stepsUtils.record()

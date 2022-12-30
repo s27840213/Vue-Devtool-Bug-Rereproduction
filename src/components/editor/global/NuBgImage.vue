@@ -157,13 +157,7 @@ export default Vue.extend({
       return ImageUtils.getSrcSize(srcObj, Math.max(renderW, renderH) * (this.scaleRatio / 100))
     },
     pageSizeData(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return {
-        width: pageUtils.getPage(this.pageIndex).width,
-        height: pageUtils.getPage(this.pageIndex).height,
-        physicalWidth: pageUtils.getPage(this.pageIndex).physicalWidth,
-        physicalHeight: pageUtils.getPage(this.pageIndex).physicalHeight,
-        unit: pageUtils.getPage(this.pageIndex).unit
-      }
+      return this.getPageSize(this.pageIndex)
     },
     srcObj(): SrcObj {
       return this.image.config.srcObj
@@ -375,6 +369,7 @@ export default Vue.extend({
     width: 100%;
     height: 100%;
   }
+  text-align: left;
 }
 
 .body {

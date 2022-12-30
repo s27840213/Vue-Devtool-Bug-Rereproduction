@@ -179,7 +179,7 @@ class BackgroundUtils {
       //   pageIndex: pageIndex,
       //   config: image
       // })
-      const { width, height, posX, posY } = imageUtils.adaptToSize(image.styles, pageUtils.getPage(pageIndex))
+      const { width, height, posX, posY } = imageUtils.adaptToPage(image.styles, pageUtils.getPage(pageIndex))
       const { adjust, horizontalFlip, verticalFlip } = image.styles
       pageUtils.updateBackgroundImageStyles(pageIndex, {
         width,

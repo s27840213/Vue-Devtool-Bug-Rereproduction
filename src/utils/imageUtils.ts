@@ -13,6 +13,8 @@ import { IShadowAsset } from '@/store/module/shadow'
 import generalUtils from './generalUtils'
 import editorUtils from './editorUtils'
 import mouseUtils from './mouseUtils'
+import { IPage } from '@/interfaces/page'
+import pageUtils from './pageUtils'
 
 class ImageUtils {
   imgLoadHandler(src: string, cb: (img: HTMLImageElement) => void, error?: () => void) {
@@ -515,6 +517,26 @@ class ImageUtils {
     }
     const posX = (targetSize.width - width) / 2
     const posY = (targetSize.height - height) / 2
+    return { width, height, posX, posY }
+  }
+
+  /**
+   * Adapt to size without bleeds if page is in pixel unit, or size with bleeds if page is in physical unit.
+   * @param srcSize Source size
+   * @param page Target page
+   * @returns Adapted size and position
+   */
+  adaptToPage(srcSize: { width: number, height: number }, page: IPage): { width: number, height: number, posX: number, posY: number } {
+    // let { width, height, posX, posY } = this.adaptToSize(srcSize, pageUtils.getPageSizeWithBleeds(page))
+    let { width, height, posX, posY } = this.adaptToSize(srcSize, page.unit === 'px' ? page : pageUtils.getPageSizeWithBleeds(page))
+    if (page.isEnableBleed && page.unit === 'px') {
+      posX += page.bleeds.left
+      posY += page.bleeds.top
+    }
+    if (!page.isEnableBleed && page.unit !== 'px') {
+      posX -= page.bleeds.left
+      posY -= page.bleeds.top
+    }
     return { width, height, posX, posY }
   }
 

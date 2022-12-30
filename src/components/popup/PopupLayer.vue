@@ -374,7 +374,7 @@ export default Vue.extend({
       _image.styles.rotate = 0
       _image.styles.imgX = 0
       _image.styles.imgY = 0
-      const { width, height, posX, posY } = imageUtils.adaptToSize(_image.styles, this.getPage(pageIndex))
+      const { width, height, posX, posY } = imageUtils.adaptToPage(_image.styles, this.getPage(pageIndex))
       const { adjust, horizontalFlip, verticalFlip } = _image.styles
       pageUtils.updateBackgroundImageStyles(pageIndex, {
         width,

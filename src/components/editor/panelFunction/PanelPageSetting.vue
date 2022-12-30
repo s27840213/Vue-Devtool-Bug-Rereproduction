@@ -421,7 +421,7 @@ export default Vue.extend({
       return bleeds
     },
     sizeToShow(): {width: number, height: number, unit: string} {
-      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSizeWithBleeds
+      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSize
       return {
         width: round(physicalWidth ?? width ?? 0, PRECISION),
         height: round(physicalHeight ?? height ?? 0, PRECISION),

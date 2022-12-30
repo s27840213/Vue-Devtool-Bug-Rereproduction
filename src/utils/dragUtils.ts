@@ -125,7 +125,7 @@ class DragUtils {
         assetUtils.addStandardText(textType, text, locale, pageIndex, { styles }, spanStyles)
       } else {
         if (data.type === 6) {
-          const pageSize = pageUtils.currFocusPageSizeWithBleeds
+          const pageSize = pageUtils.currFocusPageSize
           const newPageIndex = data.groupChildId ? data.content_ids.findIndex((content: any) => content.id === data.groupChildId) : 0
           const aspectRatio = data.content_ids[newPageIndex].height / data.content_ids[newPageIndex].width
           const resize = {

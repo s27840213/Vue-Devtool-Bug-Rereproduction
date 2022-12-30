@@ -298,7 +298,11 @@ export default Vue.extend({
       enableAdminView: 'user/getEnableAdminView'
     }),
     config(): IPage {
-      return this.pageState.config
+      if (!this.pageState.config.isEnableBleed) return this.pageState.config
+      return {
+        ...this.pageState.config,
+        ...pageUtils.getPageSizeWithBleeds(this.pageState.config)
+      }
     },
     scaleContainerStyles(): { [index: string]: string } {
       return {

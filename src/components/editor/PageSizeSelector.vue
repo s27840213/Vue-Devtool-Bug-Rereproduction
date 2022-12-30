@@ -337,7 +337,7 @@ export default Vue.extend({
       return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description} ${format.unit ?? 'px'}`
     },
     handleCurrFocusPageIndexChange() {
-      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSizeWithBleeds
+      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSize
       this.selectedUnit = unit ?? 'px'
       this.pageWidth = physicalWidth ?? width ?? 0
       this.pageHeight = physicalHeight ?? height ?? 0

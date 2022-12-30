@@ -171,14 +171,12 @@ class AssetUtils {
     if (store.getters['user/getUserId'] === 'backendRendering') {
       if (store.getters['user/getUserId'] === 'backendRendering' && !store.getters['user/getBleed'] && !store.getters['user/getTrim']) {
         // remove bleeds if disabled
-        // console.log('noBleed')
         resizeUtils.disableBleeds(targetPageIndex)
       } else if (json.isEnableBleed && json.bleeds && json.physicalBleeds) {
         // use bleeds of template if it has
         resizeUtils.resizeBleeds(targetPageIndex, json.physicalBleeds, json.bleeds)
       } else {
         // use default bleeds if it has no bleeds
-        // console.log('defaultBleed')
         const page = this.getPage(targetPageIndex)
         resizeUtils.resizeBleeds(targetPageIndex, pageUtils.getDefaultBleeds(page.unit, pageUtils.getPageDPI(page)))
       }
@@ -372,7 +370,7 @@ class AssetUtils {
     const { width: assetWidth = 0, height: assetHeight = 0 } = styles
     const { width: srcWidth = 0, height: srcHeight = 0 } = imgSrcSize || { width: 0, height: 0 }
     const page = store.getters.getPage(targetPageIndex)
-    const { width, height, posX, posY } = ImageUtils.adaptToSize({
+    const { width, height, posX, posY } = ImageUtils.adaptToPage({
       width: srcWidth,
       height: srcHeight
     }, page)
@@ -421,7 +419,7 @@ class AssetUtils {
   async updateBackground(json: any): Promise<any> {
     if ((json.backgroundImage.config.srcObj?.assetId ?? '') !== '' && !json.backgroundImage.newDisplayMode) {
       const { width: srcWidth, height: srcHeight } = await ImageUtils.getImageSize(ImageUtils.getSrc(json.backgroundImage.config), json.backgroundImage.config.styles.width, json.backgroundImage.config.styles.height)
-      const { width, height, posX, posY } = ImageUtils.adaptToSize({
+      const { width, height, posX, posY } = ImageUtils.adaptToPage({
         width: srcWidth,
         height: srcHeight
       }, json)

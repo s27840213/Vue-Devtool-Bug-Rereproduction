@@ -489,7 +489,7 @@ class PageUtils {
     const { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
     const { width: targetWidth, height: targetHeight }: { width: number, height: number } =
       (this.inBgRemoveMode ? this.autoRemoveResult
-        : this.currFocusPageSize)
+        : this.currFocusPageSizeWithBleeds)
 
     // Calculate and do resize
     const resizeRatio = Math.min(
@@ -619,20 +619,19 @@ class PageUtils {
    ** unit: Unit for physical size and physical bleeds
    */
   getPageSizeWithBleeds(page: IPage): { width: number, height: number, physicalWidth: number, physicalHeight: number, bleeds: IBleed, physicalBleeds: IBleed, unit: string } {
-    const noBleed = { top: 0, bottom: 0, left: 0, right: 0 } as IBleed
     const physicalWidth = page.physicalWidth ?? page.width
     const physicalHeight = page.physicalHeight ?? page.height
+    const unit = page.unit ?? 'px'
     const bleeds = page.bleeds ?? this.getDefaultBleeds('px')
     const physicalBleeds = page.physicalBleeds ?? page.bleeds ?? this.getDefaultBleeds(page.unit ?? 'px')
-    const isEnableBleed = page.isEnableBleed
     return {
-      width: isEnableBleed ? page.width - bleeds.left - bleeds.right : page.width,
-      height: isEnableBleed ? page.height - bleeds.top - bleeds.bottom : page.height,
-      physicalWidth: isEnableBleed ? physicalWidth - physicalBleeds.left - physicalBleeds.right : physicalWidth,
-      physicalHeight: isEnableBleed ? physicalHeight - physicalBleeds.top - physicalBleeds.bottom : physicalHeight,
-      bleeds: isEnableBleed ? bleeds : noBleed,
-      physicalBleeds: isEnableBleed ? physicalBleeds : noBleed,
-      unit: page.unit ?? 'px'
+      width: page.width + bleeds.left + bleeds.right,
+      height: page.height + bleeds.top + bleeds.bottom,
+      physicalWidth: physicalWidth + physicalBleeds.left + physicalBleeds.right,
+      physicalHeight: physicalHeight + physicalBleeds.top + physicalBleeds.bottom,
+      bleeds,
+      physicalBleeds,
+      unit
     }
   }
 
