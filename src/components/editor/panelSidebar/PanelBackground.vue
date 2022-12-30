@@ -268,7 +268,7 @@ export default Vue.extend({
   &__color-sets {
     filter: none;
     height: calc(100% - 53px);
-    &::v-deep .color-panel__scroll {
+    .panel &::v-deep .color-panel__scroll { // push scroll only in desktop
       @include push-scrollbar10;
     }
   }

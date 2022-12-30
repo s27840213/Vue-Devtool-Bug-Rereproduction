@@ -500,22 +500,15 @@ export default Vue.extend({
       return {
         handler: this.closeMobilePanel,
         middleware: this.middleware,
-        events: ['contextmenu', 'touchstart', 'pointerdown']
+        events: ['touchstart', 'pointerdown',
+          ...window.location.host === 'localhost:8080' ? [] : ['contextmenu']]
       }
-    },
-    keepPanel(target: HTMLElement): boolean {
-      if (!target || target.id === 'app') return false
-      // If target is modal or panel-icon, don't close Panel.
-      else if (target.className.includes?.('modal')) return true
-      else if (target.className.includes?.('panel-icon')) return true
-      return this.keepPanel(target.parentNode as HTMLElement)
     },
     middleware(event: MouseEvent | TouchEvent | PointerEvent) {
       const target = event.target as HTMLElement
-      // If target is a Svg <use>, its class will be SVGAnimatedString obj.
-      // Ignor its className check using optional chaining "?.includes()"
-      return !(this.keepPanel(target) ||
-        target.className.includes?.('footer-tabs') ||
+      return !(target.matches('.header-bar .panel-icon *') || // Skip header-bar icon
+        target.matches('.modal-container, .modal-container *') || // Skip modal-card
+        target.className.includes?.('footer-tabs') || // Skip footer-bar icon
         target.className === 'inputNode'
       )
     },

@@ -4,10 +4,9 @@
       div(class="text-left") {{$t('NN0003')}}{{$t('NN0017')}}
       div(class="panel-color__document-colors" :style="colorsStyle"
           @scroll.passive="updateColorsOverflow" ref="colors")
-        div(v-for="(color, index) in getDocumentColors"
-          class="panel-color__document-color"
-          :style="colorStyles(color, index)"
-          @click="selectColor(index)")
+        color-btn(v-for="(color, index) in getDocumentColors"
+                  :color="color" :focus="index === currSelectedColorIndex"
+                  @click="selectColor(index)")
       div(class="panel-color__hr")
     color-picker(
       v-if="showColorPicker"
@@ -26,6 +25,8 @@
 import Vue, { PropType } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
+import ColorSlips from '@/components/editor/ColorSlips.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import colorUtils, { checkAndConvertToHex } from '@/utils/colorUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { mapGetters, mapState } from 'vuex'
@@ -33,7 +34,6 @@ import layerUtils from '@/utils/layerUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
-import ColorSlips from '@/components/editor/ColorSlips.vue'
 import { ColorEventType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -64,7 +64,8 @@ export default Vue.extend({
   components: {
     MobileSlider,
     ColorPicker,
-    ColorSlips
+    ColorSlips,
+    ColorBtn
   },
   created() {
     colorUtils.setCurrEvent(this.currEvent)
@@ -256,12 +257,6 @@ export default Vue.extend({
     openColorPicker() {
       this.$emit('pushHistory', 'color-picker')
     },
-    colorStyles(color: string, index: number) {
-      return {
-        backgroundColor: color,
-        boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #808080, inset 0 0 0 1.5px #fff' : ''
-      }
-    },
     selectColor(index: number) {
       this.currSelectedColorIndex = index
       colorUtils.setCurrColor(this.getDocumentColors[index])
@@ -286,17 +281,6 @@ export default Vue.extend({
     display: grid;
     gap: 5px;
     overflow-x: auto;
-  }
-  &__document-color {
-    width: 100%;
-    padding-top: calc(100% - 3px);
-    border: 1.5px solid setColor(gray-4);
-    border-radius: 4px;
-    box-sizing: border-box;
-    &:hover {
-      box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff;
-    }
-    // transition: box-shadow 0.2s ease-in-out;
   }
   &__hr {
     height: 1px;
