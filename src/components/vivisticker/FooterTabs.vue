@@ -16,7 +16,7 @@
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import stepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -31,6 +31,8 @@ import shapeUtils from '@/utils/shapeUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import i18n from '@/i18n'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import eventUtils from '@/utils/eventUtils'
+import _ from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -519,6 +521,9 @@ export default Vue.extend({
           this.$emit('switchTab', tab.panelType, tab.props)
         } else {
           this.$emit('switchMainTab', tab.panelType, tab.props)
+          if (this.currTab === tab.panelType) {
+            eventUtils.emit(`scrollPanel${_.startCase(this.currTab)}ToTop`)
+          }
         }
       }
     },

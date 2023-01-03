@@ -676,6 +676,7 @@ class ViviStickerUtils {
   }
 
   async getState(key: string): Promise<any> {
+    if (this.isStandaloneMode) return
     return await vivistickerUtils.callIOSAsAPI('GET_STATE', { key }, 'getState')
   }
 
