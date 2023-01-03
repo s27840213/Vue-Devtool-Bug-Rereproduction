@@ -16,7 +16,8 @@
       div(v-for="(line,index) in guidelines.h"
         class="snap-area__line snap-area__line--hr"
         :style="snapLineStyles('h', line,true)"
-        @mouseover="lockGuideline ? null : showGuideline(line,'h',index)")
+        @mouseover="lockGuideline ? null : showGuideline(line,'h',index)"
+        @mouseout="closeGuidelineTimer")
 </template>
 
 <script lang="ts">
