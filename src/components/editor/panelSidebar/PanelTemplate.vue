@@ -22,7 +22,7 @@
           :defaultKeyword="keywordLabel"
           @search="handleSearch")
           nubtn(theme="icon" icon="sliders" :status="!allThemesChecked?'active':'default'"
-              @click.native="onAdvancedClicked()")
+              @click.native="onAdvancedClicked()" :hint="$t('NN0795')")
         popup-theme(v-if="showTheme"
           class="panel-template__theme"
           :style="themeStyle()"
