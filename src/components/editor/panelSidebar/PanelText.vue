@@ -1,15 +1,15 @@
 <template lang="pug">
   div(class="panel-text")
+    //- Search bar
     search-bar(class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
       clear
       :defaultKeyword="keywordLabel"
       @search="handleSearch")
-    div(v-if="emptyResultMessage" class="text-white text-left")
+    //- Search result empty msg
+    div(v-if="emptyResultMessage")
       span {{ emptyResultMessage }}
-      nubtn(size="mid" class="mt-30")
-        url(:url="$t('NN0791')")
-          span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
+    //- Default text preset & brandkit text preset
     template(v-if="!keyword")
       template(v-if="isBrandkitAvailable")
         div(class="panel-text__brand-header relative")
@@ -37,14 +37,10 @@
             :style="getFontStyles(config.type.toLowerCase())"
             :type="`text-${config.type.toLowerCase()}`"
             @click.native="handleAddText(config)") {{ config.text }}
+    //- Search result and main content
     category-list(v-for="item in categoryListArray"
                   v-show="item.show" :ref="item.key" :key="item.key"
                   :list="item.content" @loadMore="handleLoadMore")
-      template(v-if="pending" #after)
-        div(class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
           v-if="!keyword"
@@ -64,6 +60,18 @@
             class="panel-text__item"
             :key="item.id"
             :item="item")
+      template(#after)
+        //- Loading icon
+        div(v-if="pending" class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
+        //- Text wishing pool
+        div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
+          span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
+          nubtn(size="mid" class="mt-30")
+            url(:url="$t('NN0791')")
+              span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 </template>
 
 <script lang="ts">
@@ -340,6 +348,8 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  color: white;
+  text-align: left;
   &__brand-header {
     margin-top: 10px;
     margin-bottom: 13px;

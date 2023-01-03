@@ -12,7 +12,7 @@
       :placeholder="placeholder"
       :style="inputStyles()")
     svg-icon(v-if="clear && keyword"
-      class="pointer mr-5"
+      class="pointer"
       iconName="close"
       :iconColor="color.close || 'gray-3'"
       iconWidth="20px"
@@ -86,15 +86,16 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .search-bar {
   @include size(100%, 42px);
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: auto 1fr;
   align-items: center;
+  gap: 4px;
   padding: 5px 16px;
   box-sizing: border-box;
   border-radius: 3px;
   &__input {
     flex: 1;
-    margin: 0 4px;
     padding: 0;
     background-color: transparent;
     // Remove webkit default magnifier & cancle icon for search input, https://stackoverflow.com/a/23296152

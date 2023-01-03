@@ -31,10 +31,10 @@
           @close="showTheme = false")
       div(v-if="showTheme" class="panel-template__wrap")
     //- Search result empty msg
-    div(v-if="theme && emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+    div(v-if="theme && emptyResultMessage") {{ emptyResultMessage }}
     //- Search result counter (only for admin)
     div(v-if="inAdminMode && keyword && !pending && !emptyResultMessage"
-      class="text-white text-left pb-10")
+      class="pb-10")
       span {{sum}} {{sum === 1 ? 'item' : 'items'}} in total (not work for category search)
     //- Search result and main content
     category-list(v-for="item in categoryListArray"
@@ -66,10 +66,11 @@
             iconColor="white"
             iconWidth="20px")
         //- Template wishing pool
-        nubtn(v-if="keyword && theme && !pending && resultGroupCounter<=10"
-              size="mid" class="mt-30")
-          url(:url="$t('NN0791')")
-            span {{$t('NN0790', {type: $tc('NN0001', 3)})}}
+        div(v-if="keyword && theme && !pending && resultGroupCounter<=10")
+          span {{$t('NN0796', {type: $tc('NN0001', 3)})}}
+          nubtn(size="mid" class="mt-30")
+            url(:url="$t('NN0791')")
+              span {{$t('NN0790', {type: $tc('NN0001', 3)})}}
 </template>
 
 <script lang="ts">
@@ -326,7 +327,7 @@ export default Vue.extend({
     },
     themeStyle(): Record<string, string> {
       return {
-        maxHeight: `${this.$refs.panel.clientHeight - 80}px`
+        maxHeight: `${this.$refs.panel.clientHeight - 60}px`
       }
     },
     processListResult(list = [] as IAssetTemplate[], isSearch: boolean): ICategoryItem[] {
@@ -372,6 +373,8 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  color: white;
+  text-align: left;
   &__item {
     text-align: center;
     vertical-align: middle;

@@ -50,7 +50,9 @@ export default Vue.extend({
         middleware: (event: MouseEvent) => {
           // Prevent v-click-outside if user press advanced svg to close it.
           // It will cause error because mobile click event call by pointerdown have delay.
-          return ((event.target as HTMLElement).attributes.getNamedItem('xlink:href') as Attr)?.nodeValue !== '#advanced'
+          return !(event.target as HTMLElement).matches(
+            '.panel-template .search-bar .nubtn, .panel-template .search-bar .nubtn *'
+          )
         }
       },
       selected: {} as { [key: string]: boolean }

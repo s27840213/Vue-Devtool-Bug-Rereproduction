@@ -13,11 +13,8 @@
                 @selectColorEnd="recordChange"
                 @openColorPicker="openColorPicker")
     //- Search result empty msg
-    div(v-if="emptyResultMessage" class="text-white text-left")
+    div(v-if="emptyResultMessage")
       span {{ emptyResultMessage }}
-      nubtn(size="mid" class="mt-30")
-        url(:url="$t('NN0791')")
-          span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
     //- Search result and main content
     category-list(v-for="item in categoryListArray"
                   v-show="item.show" :ref="item.key" :key="item.key"
@@ -40,11 +37,18 @@
             :key="item.id"
             :item="item"
             :locked="currentPageBackgroundLocked")
-      template(v-if="pending" #after)
-        div(class="text-center")
+      template(#after)
+        //- Loading icon
+        div(v-if="pending" class="text-center")
           svg-icon(iconName="loading"
             iconColor="white"
             iconWidth="20px")
+        //- BG wishing pool
+        div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
+          span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
+          nubtn(size="mid" class="mt-30")
+            url(:url="$t('NN0791')")
+              span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 
 </template>
 
@@ -262,6 +266,8 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  color: white;
+  text-align: left;
   &__color-sets {
     filter: none;
     height: calc(100% - 53px);
