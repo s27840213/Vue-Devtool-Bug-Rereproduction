@@ -896,9 +896,9 @@ const mutations: MutationTree<IEditorState> = {
     const { pages } = state
     pages[pageIndex].config.guidelines[type].splice(index, 1)
   },
-  CLEAR_guideline(state: IEditorState) {
+  CLEAR_guideline(state: IEditorState, targetIndex?: number) {
     const { pages } = state
-    const currFocusPageIndex = pageUtils.currFocusPageIndex
+    const currFocusPageIndex = targetIndex ?? pageUtils.currFocusPageIndex
     pages[currFocusPageIndex].config.guidelines.v = []
     pages[currFocusPageIndex].config.guidelines.h = []
   },

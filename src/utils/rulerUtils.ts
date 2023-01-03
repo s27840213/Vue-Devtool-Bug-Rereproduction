@@ -268,8 +268,8 @@ class RulerUtils {
     })
   }
 
-  clearGuidelines() {
-    store.commit('CLEAR_guideline')
+  clearGuidelines(useLastMapped = false) {
+    store.commit('CLEAR_guideline', useLastMapped ? this.lastMapedInfo.pageIndex : undefined)
   }
 
   setShowRuler(bool: boolean) {
