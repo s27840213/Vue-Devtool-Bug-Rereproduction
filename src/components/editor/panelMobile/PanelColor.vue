@@ -15,6 +15,7 @@
       @update="handleDragUpdate"
       @final="handleChangeStop")
     color-slips(v-if="showPalette"
+      :class="{'show-document-colors': showDocumentColors}"
       mode="PanelColor"
       :allRecentlyControl="showAllRecently"
       @openColorPicker="openColorPicker"
@@ -118,8 +119,8 @@ export default Vue.extend({
       return !this.inInitialState && this.lastHistory === 'color-picker'
     },
     showDocumentColors(): boolean {
-      return (this.showPalette && this.currEvent === ColorEventType.shape) &&
-        this.getDocumentColors.length > 1
+      return this.showPalette && this.currEvent === ColorEventType.shape &&
+        this.getDocumentColors.length > 1 && !this.showAllRecently
     },
     showPalette(): boolean {
       return ['color-palette', 'color-more'].includes(this.lastHistory) || this.inInitialState
@@ -284,8 +285,11 @@ export default Vue.extend({
   }
   &__hr {
     height: 1px;
-    margin: 16px 0;
+    margin-top: 16px;
     background-color: setColor(gray-4);
+  }
+  & .show-document-colors::v-deep .color-panel__scroll {
+    padding-top: 16px;
   }
 }
 </style>

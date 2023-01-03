@@ -6,7 +6,7 @@
     img(v-if="showPanelBtn" class="color-panel__btn"
       :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
       @click="closePanel()")
-    div(class="color-panel__scroll" :style="noPadding ? {padding:0} : {}")
+    div(class="color-panel__scroll" :class="{'p-0': noPadding}")
       //- Recently colors
       div(class="color-panel__colors"
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
@@ -77,7 +77,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { PropType } from 'vue'
 import vClickOutside from 'v-click-outside'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
@@ -96,9 +96,8 @@ export default Vue.extend({
   name: 'ColorSlips',
   props: {
     // Defind some style or logic difference.
-    // Valid value: FunctionPanel, PanelBG, PanelColor
     mode: {
-      type: String,
+      type: String as PropType<'FunctionPanel' | 'PanelBG' | 'PanelColor'>,
       required: true
     },
     /**
@@ -342,7 +341,9 @@ export default Vue.extend({
     @include hover-scrollbar(dark);
     box-sizing: border-box;
     height: 100%;
-    padding: 20px 4px 20px 14px; // padding-right: 14 - 10(scrollbar width)
+    &:not(.p-0) {
+      padding: 20px 4px 20px 14px; // padding-right: 14 - 10(scrollbar width)
+    }
     > div + div {
       margin-top: 8px;
     }
