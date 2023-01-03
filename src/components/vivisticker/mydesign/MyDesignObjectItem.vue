@@ -70,51 +70,7 @@ export default Vue.extend({
                   l.initFromMydesign = true
                 })
                 vivistickerUtils.initLoadingFlags(page, () => {
-                  const { layers } = page
-                  const frames = (layers
-                    .flatMap((l: ILayer) => {
-                      if (l.type === 'frame') {
-                        return [l]
-                      } else if (l.type === 'group') {
-                        const frames = (l as any).layers
-                          .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>
-                        return frames
-                      }
-                      return []
-                    }) as Array<IFrame>)
-                  console.log('init loading flag', frames)
-                  // .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
-                  const missingClips = frames
-                    .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
-                  if (missingClips.length === 1) {
-                    const modalBtn = {
-                      msg: i18n.t('STK0023') as string,
-                      action: () => {
-                        let subLayerIdx = -1
-                        let layerIndex = -1
-                        const frame = layers
-                          .find((l, i) => {
-                            if (l.type === LayerType.frame && (l as IFrame).clips.some((c, i) => {
-                              if (c.srcObj.type === 'frame') {
-                                subLayerIdx = i
-                                return true
-                              }
-                              return false
-                            })) {
-                              layerIndex = i
-                              return true
-                            }
-                            return false
-                          }) as IFrame
-                        frameUtils.iosPhotoSelect({
-                          pageIndex: 0,
-                          layerIndex,
-                          subLayerIdx
-                        }, frame.clips[subLayerIdx])
-                      }
-                    }
-                    modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn)
-                  }
+                  vivistickerUtils.handleFrameClipError(page)
                 })
               },
               tab: ''

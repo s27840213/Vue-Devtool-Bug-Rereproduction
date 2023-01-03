@@ -441,7 +441,7 @@ export default Vue.extend({
         !hasActualMove && !this.controllerHidden
       const isEmptClipInGroup = this.type === LayerType.group && this.config.type === LayerType.frame &&
         this.primaryLayer.active && this.config.clips.length === 1 && this.config.clips[0].srcObj.type === 'frame'
-      if (isEmptClipInFrame || isEmptClipInGroup) {
+      if (!hasActualMove && (isEmptClipInFrame || isEmptClipInGroup)) {
         this.iosPhotoSelect()
       }
       eventUtils.removePointerEvent('pointerup', this.onMouseup)

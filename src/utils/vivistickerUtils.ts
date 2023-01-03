@@ -272,7 +272,6 @@ class ViviStickerUtils {
 
   getAssetInitiator(asset: IAsset, ...args: any[]): () => Promise<any> {
     return async () => {
-      // console.log('start editing', asset)
       if (asset.type === 15) {
         await assetUtils.addAsset(asset, ...args)
         return true
@@ -372,14 +371,19 @@ class ViviStickerUtils {
         if (frame.decorationTop) {
           layers.push(frame.decorationTop)
         }
-        for (const [_clipIndex, subLayer] of layers.entries()) {
-          this.initLoadingFlagsForLayer(subLayer, layerIndex, subLayerIndex, _clipIndex)
+        if (subLayerIndex === -1) {
+          for (const [_clipIndex, subLayer] of layers.entries()) {
+            this.initLoadingFlagsForLayer(subLayer, layerIndex, _clipIndex, -1)
+          }
+        } else {
+          for (const [_clipIndex, subLayer] of layers.entries()) {
+            this.initLoadingFlagsForLayer(subLayer, layerIndex, subLayerIndex, _clipIndex)
+          }
         }
       }
         break
       default:
         this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex, clipIndex)] = false
-        console.log(generalUtils.deepCopy(this.loadingFlags))
     }
   }
 
@@ -394,8 +398,7 @@ class ViviStickerUtils {
     if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
       this.loadingFlags[key] = true
     }
-    console.log('current: ', key)
-    console.log(generalUtils.deepCopy(this.loadingFlags))
+    // console.warn(generalUtils.deepCopy(this.loadingFlags))
     if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
       this.loadingCallback()
       this.loadingFlags = {}
@@ -763,7 +766,6 @@ class ViviStickerUtils {
           callback(pages)
         }
         store.commit('SET_pages', pages)
-        console.log(generalUtils.deepCopy(store.state.pages))
       }), () => {
         if (type === 'object') {
           groupUtils.select(0, [0])
@@ -930,44 +932,62 @@ class ViviStickerUtils {
           callback: (pages: Array<IPage>) => {
             const page = pages[0]
             this.initLoadingFlags(page, () => {
-              const { layers } = page
-              const missingClips = (layers
-                .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
-                .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
-              if (missingClips.length === 1) {
-                const modalBtn = {
-                  msg: i18n.t('STK0023') as string,
-                  action: () => {
-                    let subLayerIdx = -1
-                    let layerIndex = -1
-                    const frame = layers
-                      .find((l, i) => {
-                        if (l.type === LayerType.frame && (l as IFrame).clips.some((c, i) => {
-                          if (c.srcObj.type === 'frame') {
-                            subLayerIdx = i
-                            return true
-                          }
-                          return false
-                        })) {
-                          layerIndex = i
-                          return true
-                        }
-                        return false
-                      }) as IFrame
-                    frameUtils.iosPhotoSelect({
-                      pageIndex: 0,
-                      layerIndex,
-                      subLayerIdx
-                    }, frame.clips[subLayerIdx])
-                  }
-                }
-                modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn)
-              }
+              this.handleFrameClipError(page)
             })
           },
           tab: ''
         })
       }
+    }
+  }
+
+  handleFrameClipError(page: IPage) {
+    const { layers } = page
+    const frames = (layers
+      .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
+    //   .flatMap((l: ILayer) => {
+    //     if (l.type === 'frame') {
+    //       return [l]
+    //     } else if (l.type === 'group') {
+    //       const frames = (l as any).layers
+    //         .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>
+    //       return frames
+    //     }
+    //     return []
+    //   }) as Array<IFrame>)
+    // console.log('init loading flag', frames)
+    const missingClips = frames
+      .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
+    if (missingClips.length) {
+      const action = missingClips.length !== 1 ? undefined : () => {
+        let subLayerIdx = -1
+        let layerIndex = -1
+        const frame = layers
+          .find((l, i) => {
+            if (l.type === LayerType.frame && (l as IFrame).clips.some((c, i) => {
+              if (c.srcObj.type === 'frame') {
+                subLayerIdx = i
+                return true
+              }
+              return false
+            })) {
+              layerIndex = i
+              return true
+            }
+            return false
+          }) as IFrame
+        frameUtils.iosPhotoSelect({
+          pageIndex: 0,
+          layerIndex,
+          subLayerIdx
+        }, frame.clips[subLayerIdx])
+      }
+
+      const modalBtn = {
+        msg: i18n.t('STK0023') as string,
+        action
+      }
+      modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn)
     }
   }
 
