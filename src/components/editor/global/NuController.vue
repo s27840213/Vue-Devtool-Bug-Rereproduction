@@ -338,7 +338,7 @@ export default Vue.extend({
         height: `${height * this.contentScaleRatio}px`,
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
-        pointerEvents: this.config.type === LayerType.text && this.config.active ? 'initil' : 'none',
+        pointerEvents: this.config.type === LayerType.text && this.config.active && !this.isMoving ? '' : 'none',
         /**
          * @Note - set touchAction to none because pointer event will be canceled by touch action
          * So, if we want to control the layer, we need to set it to none.
