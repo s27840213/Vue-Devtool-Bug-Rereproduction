@@ -15,6 +15,12 @@
         @keydown.ctrl.67.exact.stop
         @keydown.meta.67.exact.stop
         v-html="text")
+        div(v-if="modalInfo.checkboxText !== ''" class="modal-card__checkbox-container")
+          div(class="modal-card__checkbox"
+              :class="{checked: modalInfo.checked}"
+              @click="handleToggleChecked")
+            svg-icon(v-if="modalInfo.checked" iconName="done" iconColor="white" iconWidth="20.7px")
+          span {{ $t('STK0010') }}
       svg-icon(v-if="pending"
         :iconName="'loading'"
         :iconColor="'gray-2'"
@@ -74,6 +80,11 @@ export default Vue.extend({
     },
     handleImgLoad() {
       this.isImgLoaded = true
+    },
+    handleToggleChecked() {
+      const target = !this.modalInfo.checked
+      modalUtils.updateModalInfo({ checked: target })
+      this.modalInfo.onCheckedChange(target)
     }
   }
 })
@@ -143,6 +154,36 @@ export default Vue.extend({
     flex-direction: column;
     align-items: center;
     text-align: center;
+  }
+
+  &__checkbox-container {
+    position: relative;
+    margin-top: 24px;
+    color: setColor(black-5);
+    display: flex;
+    align-items: flex-start;
+    > span {
+      display: block;
+      @include body-XS;
+      line-height: 22px;
+    }
+  }
+
+  &__checkbox {
+    margin-top: 2px;
+    margin-right: 12px;
+    @include size(18px);
+    border: 1px solid setColor(black-5);
+    border-radius: 2px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &.checked {
+      background: setColor(black-3);
+      border: none;
+      border-radius: 2px;
+    }
   }
 
   &__button {

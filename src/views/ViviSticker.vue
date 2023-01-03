@@ -20,8 +20,6 @@
     transition(name="slide-left")
       component(v-if="isSlideShown" :is="slideType" class="vivisticker__slide")
     tutorial(v-if="showTutorial")
-    div(v-if="showSaveDesignPopup" class="dim-background")
-      popup-save-design
 </template>
 
 <script lang="ts">
@@ -33,7 +31,6 @@ import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
 import FooterTabs from '@/components/vivisticker/FooterTabs.vue'
 import Tutorial from '@/components/vivisticker/Tutorial.vue'
 import MyDesign from '@/components/vivisticker/MyDesign.vue'
-import PopupSaveDesign from '@/components/popup/PopupSaveDesign.vue'
 import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import stepsUtils from '@/utils/stepsUtils'
@@ -61,7 +58,6 @@ export default Vue.extend({
     HeaderTabs,
     FooterTabs,
     Tutorial,
-    PopupSaveDesign,
     SlideUserSettings
   },
   data() {
@@ -190,7 +186,6 @@ export default Vue.extend({
       userInfo: 'vivisticker/getUserInfo',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
-      showSaveDesignPopup: 'vivisticker/getShowSaveDesignPopup',
       slideType: 'vivisticker/getSlideType',
       isSlideShown: 'vivisticker/getIsSlideShown',
       modalInfo: 'vivisticker/getModalInfo'

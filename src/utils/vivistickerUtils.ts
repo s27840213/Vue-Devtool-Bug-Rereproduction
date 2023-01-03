@@ -343,10 +343,6 @@ class ViviStickerUtils {
     store.commit('vivisticker/SET_editorType', 'none')
   }
 
-  setShowSaveDesignPopup(bool: boolean) {
-    store.commit('vivisticker/SET_showSaveDesignPopup', bool)
-  }
-
   initLoadingFlags(page: IPage | { layers: ILayer[] }, callback?: () => void) {
     this.loadingFlags = {}
     this.loadingCallback = callback

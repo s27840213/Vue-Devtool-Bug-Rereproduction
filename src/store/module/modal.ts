@@ -1,4 +1,4 @@
-import { IModalInfo } from '@/interfaces/modal'
+import { IModalButton, IModalInfo } from '@/interfaces/modal'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 
 interface IModalState {
@@ -10,6 +10,7 @@ interface IModalState {
 const SET_MODAL_INFO = 'SET_MODAL_INFO' as const
 const SET_MODAL_OPEN = 'SET_MODAL_OPEN' as const
 const SET_IS_PENDING = 'SET_IS_PENDING' as const
+const UPDATE_BUTTON = 'UPDATE_BUTTON' as const
 
 const getDefaultState = (): IModalState => ({
   modalInfo: {
@@ -31,7 +32,12 @@ const getDefaultState = (): IModalState => ({
     noClose: false,
     noCloseIcon: false,
     backdropStyle: {},
-    cardStyle: {}
+    cardStyle: {},
+    checkboxText: '',
+    checked: false,
+    onCheckedChange: (checked) => {
+      return false
+    }
   },
   modalOpen: false,
   pending: false
@@ -61,6 +67,21 @@ const mutations: MutationTree<IModalState> = {
   },
   [SET_IS_PENDING](state: IModalState, pending: boolean) {
     state.pending = pending
+  },
+  [UPDATE_BUTTON](state: IModalState, updateInfo: { type: string, button: Partial<IModalButton> }) {
+    if (!state.modalInfo) return
+    switch (updateInfo.type) {
+      case 'confirm':
+        Object.entries(updateInfo.button).forEach(([k, v]) => {
+          (state.modalInfo.confirmButton as {[key: string]: any})[k] = v
+        })
+        break
+      case 'cancel':
+        Object.entries(updateInfo.button).forEach(([k, v]) => {
+          (state.modalInfo.cancelButton as {[key: string]: any})[k] = v
+        })
+        break
+    }
   }
 }
 
