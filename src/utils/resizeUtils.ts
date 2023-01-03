@@ -231,12 +231,10 @@ class ResizeUtils {
     let scale: number
     if (targetAspectRatio > aspectRatio) {
       scale = format.height / page.height
-      const offsetBleed = page.isEnableBleed ? { left: bleeds.left - page.bleeds.left * scale, top: bleeds.top - page.bleeds.top * scale } : { left: 0, top: 0 }
-      this.scaleAndMoveLayers(pageIndex, page, scale, ((page.height * targetAspectRatio - page.width) / 2) * scale + offsetBleed.left, offsetBleed.top)
+      this.scaleAndMoveLayers(pageIndex, page, scale, ((page.height * targetAspectRatio - page.width) / 2) * scale, 0)
     } else {
       scale = format.width / page.width
-      const offsetBleed = page.isEnableBleed ? { left: bleeds.left - page.bleeds.left * scale, top: bleeds.top - page.bleeds.top * scale } : { left: 0, top: 0 }
-      this.scaleAndMoveLayers(pageIndex, page, scale, offsetBleed.left, ((page.width / targetAspectRatio - page.height) / 2) * scale + offsetBleed.top)
+      this.scaleAndMoveLayers(pageIndex, page, scale, 0, ((page.width / targetAspectRatio - page.height) / 2) * scale)
     }
 
     // add bleeds to new size
@@ -251,18 +249,13 @@ class ResizeUtils {
     // update background
     if (Math.abs(targetAspectRatio - aspectRatio) < Number.EPSILON) {
       this.scaleBackground(pageIndex, page, scale)
-      if (page.isEnableBleed) pageUtils.updateBackgroundImagePos(pageIndex, page.backgroundImage.posX + page.bleeds.left * (1 - scale), page.backgroundImage.posY + page.bleeds.top * (1 - scale))
     } else {
       // adapt to new size without bleeds if page is in pixel unit, or new size with bleeds if page is in physical unit.
       let { width, height, posX, posY } = imageUtils.adaptToSize({
         width: page.backgroundImage.config.styles.initWidth || page.backgroundImage.config.styles.width,
         height: page.backgroundImage.config.styles.initHeight || page.backgroundImage.config.styles.height
       }, format.unit === 'px' ? format : newSize)
-      if (page.isEnableBleed && format.unit === 'px') {
-        posX += page.bleeds.left
-        posY += page.bleeds.top
-      }
-      if (!page.isEnableBleed && format.unit !== 'px') {
+      if (format.unit !== 'px') {
         posX -= page.bleeds.left
         posY -= page.bleeds.top
       }
@@ -292,22 +285,12 @@ class ResizeUtils {
     physicalBleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, isNaN(v) ? 0 : v])) as IBleed // map NaN to 0
     const newBleeds = bleeds || Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, page.unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height))])) as IBleed // convert bleed to px size
     const newPhysicalBleeds = physicalBleeds
-
-    // resize page
-    const newSize = { width: page.width + newBleeds.left + newBleeds.right, height: page.height + newBleeds.top + newBleeds.bottom }
-    this.scaleAndMoveLayers(pageIndex, page, 1, newBleeds.left - (page.isEnableBleed ? page.bleeds.left : 0), newBleeds.top - (page.isEnableBleed ? page.bleeds.top : 0))
-    rulerUtils.removeInvalidGuides(pageIndex, newSize)
-
-    // update background position
-    if (page.isEnableBleed) pageUtils.updateBackgroundImagePos(pageIndex, page.backgroundImage.posX + newBleeds.left - page.bleeds.left, page.backgroundImage.posY + newBleeds.top - page.bleeds.top)
-
     store.commit('SET_bleeds', { pageIndex, bleeds: newBleeds, physicalBleeds: newPhysicalBleeds })
   }
 
   enableBleeds(pageIndex: number) {
     const page = pageUtils.getPage(pageIndex)
     if (page.physicalBleeds && page.bleeds) this.resizeBleeds(pageIndex, page.physicalBleeds, page.bleeds)
-    pageUtils.updateBackgroundImagePos(pageIndex, page.backgroundImage.posX + page.bleeds.left, page.backgroundImage.posY + page.bleeds.top)
     // else {
     //   const unit = page.unit ?? 'px'
     //   const defaultBleeds = pageUtils.getDefaultBleeds('px')
@@ -330,17 +313,10 @@ class ResizeUtils {
   disableBleeds(pageIndex: number) {
     const page = pageUtils.getPage(pageIndex)
     if (!page.isEnableBleed) return
+
+    // update default bleeds
     const sizeWithoutBleed = pageUtils.getPageSize(pageIndex)
     const unit = sizeWithoutBleed.unit
-
-    // resize page
-    this.scaleAndMoveLayers(pageIndex, page, 1, -page.bleeds.left, -page.bleeds.top)
-    rulerUtils.removeInvalidGuides(pageIndex, sizeWithoutBleed)
-
-    // update background position
-    pageUtils.updateBackgroundImagePos(pageIndex, page.backgroundImage.posX - page.bleeds.left, page.backgroundImage.posY - page.bleeds.top)
-
-    // get default bleeds with page dpi
     let dpi: { width: number, height: number }
     if (unit !== 'px') {
       dpi = {
@@ -355,14 +331,12 @@ class ResizeUtils {
       }
     }
     const bleeds = pageUtils.getDefaultBleeds('px', dpi)
-
-    // set page bleed to default
     store.commit('UPDATE_pageProps', {
       pageIndex: pageIndex,
       props: {
+        isEnableBleed: false,
         bleeds,
-        physicalBleeds: unit === 'px' ? bleeds : pageUtils.getDefaultBleeds(unit, dpi),
-        isEnableBleed: false
+        physicalBleeds: unit === 'px' ? bleeds : pageUtils.getDefaultBleeds(unit, dpi)
       }
     })
   }

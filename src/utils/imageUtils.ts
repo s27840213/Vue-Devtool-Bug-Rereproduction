@@ -527,13 +527,8 @@ class ImageUtils {
    * @returns Adapted size and position
    */
   adaptToPage(srcSize: { width: number, height: number }, page: IPage): { width: number, height: number, posX: number, posY: number } {
-    // let { width, height, posX, posY } = this.adaptToSize(srcSize, pageUtils.getPageSizeWithBleeds(page))
     let { width, height, posX, posY } = this.adaptToSize(srcSize, page.unit === 'px' ? page : pageUtils.getPageSizeWithBleeds(page))
-    if (page.isEnableBleed && page.unit === 'px') {
-      posX += page.bleeds.left
-      posY += page.bleeds.top
-    }
-    if (!page.isEnableBleed && page.unit !== 'px') {
+    if (page.unit !== 'px') {
       posX -= page.bleeds.left
       posY -= page.bleeds.top
     }

@@ -1,9 +1,7 @@
 <template lang="pug">
-  div(v-if="!image.config.imgContorl" class="nu-background-image"
-    :style="mainStyles"
-    @pointerdown="setInBgSettingMode"
-    draggable="false")
-    div(v-show="!isColorBackground")
+  div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false")
+    div(class="nu-background-image__color" :style="mainStyles" @pointerdown="setInBgSettingMode")
+    div(class="nu-background-image__image" v-show="!isColorBackground")
       div(v-if="isAdjustImage" :style="frameStyles")
         nu-adjust-image(:src="finalSrc"
           @error="onError"
@@ -176,11 +174,23 @@ export default Vue.extend({
       }
     },
     mainStyles(): any {
-      const { image, color } = this
-      return {
+      const { image, color, pageIndex } = this
+      const page = pageUtils.getPage(pageIndex)
+      const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
+      const res = {
         opacity: image.config.styles.opacity / 100,
         backgroundColor: color
       }
+      if (page.isEnableBleed && bleeds) {
+        return {
+          ...res,
+          top: -bleeds.top * this.contentScaleRatio + 'px',
+          bottom: -bleeds.bottom * this.contentScaleRatio + 'px',
+          left: -bleeds.left * this.contentScaleRatio + 'px',
+          right: -bleeds.right * this.contentScaleRatio + 'px'
+        }
+      }
+      return res
     },
     isAdjustImage(): boolean {
       const { styles } = this.image.config
@@ -370,6 +380,18 @@ export default Vue.extend({
     height: 100%;
   }
   text-align: left;
+
+  &__color {
+    position: absolute;
+  }
+
+  &__image{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
 }
 
 .body {

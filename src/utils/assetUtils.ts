@@ -175,20 +175,38 @@ class AssetUtils {
       } else if (json.isEnableBleed && json.bleeds && json.physicalBleeds) {
         // use bleeds of template if it has
         resizeUtils.resizeBleeds(targetPageIndex, json.physicalBleeds, json.bleeds)
-      } else {
-        // use default bleeds if it has no bleeds
-        const page = this.getPage(targetPageIndex)
-        resizeUtils.resizeBleeds(targetPageIndex, pageUtils.getDefaultBleeds(page.unit, pageUtils.getPageDPI(page)))
       }
-    } else if (targetPage.isEnableBleed && targetPage.bleeds && targetPage.physicalBleeds) {
-      // convert bleeds to template unit
-      const dpi = pageUtils.getPageDPI(targetPage)
-      const physicalBleeds = targetPage.unit === 'px' ? targetPage.bleeds
-        : targetPage.unit === attrs?.unit ? targetPage.physicalBleeds
-          : Object.fromEntries(Object.entries(targetPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, targetPage.unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+    } else {
+      if (targetPage.isEnableBleed && targetPage.bleeds && targetPage.physicalBleeds) {
+        const resizedPage = this.getPage(targetPageIndex)
 
-      // apply bleeds of targetPage
-      resizeUtils.resizeBleeds(targetPageIndex, physicalBleeds)
+        // convert bleeds to template unit
+        const dpi = pageUtils.getPageDPI(resizedPage)
+        const physicalBleeds = resizedPage.unit === 'px' ? targetPage.bleeds
+          : targetPage.unit === attrs?.unit ? targetPage.physicalBleeds
+            : Object.fromEntries(Object.entries(targetPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, targetPage.unit, resizedPage.unit, k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+
+        // apply bleeds of targetPage
+        resizeUtils.enableBleeds(targetPageIndex)
+        resizeUtils.resizeBleeds(targetPageIndex, physicalBleeds)
+      }
+
+      // adapt background to page
+      if (json.backgroundImage.config.srcObj.assetId) {
+        const page = this.getPage(targetPageIndex)
+        const { width, height, posX, posY } = ImageUtils.adaptToPage({
+          width: json.backgroundImage.config.styles.initWidth || json.backgroundImage.config.styles.width,
+          height: json.backgroundImage.config.styles.initHeight || json.backgroundImage.config.styles.height
+        }, page)
+        pageUtils.updateBackgroundImagePos(targetPageIndex, posX, posY)
+        pageUtils.updateBackgroundImageStyles(
+          targetPageIndex, {
+            width,
+            height,
+            imgWidth: width,
+            imgHeight: height
+          })
+      }
     }
     store.commit('SET_currActivePageIndex', targetPageIndex)
     if (recordStep) {

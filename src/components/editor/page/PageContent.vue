@@ -14,12 +14,6 @@ div(class="overflow-container"
         @dblclick="pageDblClickHandler()"
         @mouseover="togglePageHighlighter(true)"
         @mouseout="togglePageHighlighter(false)")
-      nu-bg-image(:image="this.config.backgroundImage"
-        :pageIndex="pageIndex"
-        :color="this.config.backgroundColor"
-        :key="this.config.backgroundImage.id"
-        @mousedown.native.left="pageClickHandler()"
-        :contentScaleRatio="contentScaleRatio")
       //- lazy-load(v-for="(layer,index) in config.layers"
       //-     :key="layer.id"
       //-     target=".editor-view"
@@ -54,33 +48,40 @@ div(class="overflow-container"
       //-       :isPagePreview="true"
       //-       :forceRender="forceRender")
       //- template(v-else)
-      nu-layer(
-        v-for="(layer,index) in config.layers"
-        :key="layer.id"
-        :data-index="`${index}`"
-        :data-pindex="`${pageIndex}`"
-        :snapUtils="snapUtils"
-        :layerIndex="index"
-        :pageIndex="pageIndex"
-        :config="layer"
-        :currSelectedInfo="currSelectedInfo"
-        :contentScaleRatio="contentScaleRatio"
-        :scaleRatio="scaleRatio"
-        :getCurrFunctionPanelType="getCurrFunctionPanelType"
-        :isUploadingShadowImg="isUploadingShadowImg"
-        :isHandling="isHandling"
-        :isShowPagePanel="isShowPagePanel"
-        :imgSizeMap="imgSizeMap"
-        :userId="userId"
-        :verUni="verUni"
-        :uploadId="uploadId"
-        :handleId="handleId"
-        :uploadShadowImgs="uploadShadowImgs"
-        :isPagePreview="isPagePreview"
-        :forceRender="forceRender"
-        :lazyLoadTarget="lazyLoadTarget"
-        v-on="$listeners")
-      div(v-if="this.userId === 'backendRendering' && (this.bleed || this.trim)" class="bleed-line" :style="bleedLineStyles")
+      div(class="content" :style="contentStyles")
+        nu-bg-image(:image="this.config.backgroundImage"
+          :pageIndex="pageIndex"
+          :color="this.config.backgroundColor"
+          :key="this.config.backgroundImage.id"
+          @mousedown.native.left="pageClickHandler()"
+          :contentScaleRatio="contentScaleRatio")
+        nu-layer(
+          v-for="(layer,index) in config.layers"
+          :key="layer.id"
+          :data-index="`${index}`"
+          :data-pindex="`${pageIndex}`"
+          :snapUtils="snapUtils"
+          :layerIndex="index"
+          :pageIndex="pageIndex"
+          :config="layer"
+          :currSelectedInfo="currSelectedInfo"
+          :contentScaleRatio="contentScaleRatio"
+          :scaleRatio="scaleRatio"
+          :getCurrFunctionPanelType="getCurrFunctionPanelType"
+          :isUploadingShadowImg="isUploadingShadowImg"
+          :isHandling="isHandling"
+          :isShowPagePanel="isShowPagePanel"
+          :imgSizeMap="imgSizeMap"
+          :userId="userId"
+          :verUni="verUni"
+          :uploadId="uploadId"
+          :handleId="handleId"
+          :uploadShadowImgs="uploadShadowImgs"
+          :isPagePreview="isPagePreview"
+          :forceRender="forceRender"
+          :lazyLoadTarget="lazyLoadTarget"
+          v-on="$listeners")
+      div(v-if="isShowBleed" class="bleed-line" :style="bleedLineStyles")
       div(v-if="this.userId === 'backendRendering' && this.trim" class="trim")
         div(class="trim__tl" :style="trimStyles.tl")
         div(class="trim__tr" :style="trimStyles.tr")
@@ -195,53 +196,87 @@ export default Vue.extend({
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
     },
+    isShowBleed() {
+      if (this.userId === 'backendRendering') {
+        if (this.bleed || this.trim) return true
+      } else if (this.config.isEnableBleed) return true
+      return false
+    },
+    contentStyles() {
+      if (!this.config.isEnableBleed) {
+        return {
+          top: '0px',
+          bottom: '0px',
+          left: '0px',
+          right: '0px'
+        }
+      }
+      return {
+        top: this.config.bleeds.top * this.contentScaleRatio + 'px',
+        bottom: this.config.bleeds.bottom * this.contentScaleRatio + 'px',
+        left: this.config.bleeds.left * this.contentScaleRatio + 'px',
+        right: this.config.bleeds.right * this.contentScaleRatio + 'px'
+      }
+    },
     bleedLineStyles() {
+      // let boxShadow = '0 0 3px 1px rgba(0, 0, 0, 0.15)'
       // const borderSize = { top: 1, bottom: 1 }
       // if (this.isDetailPage && this.pages.length > 1) {
+      //   const maskTop = '0 -6px 0px 0px white, '
+      //   const maskBottom = '0 6px 0px 0px white, '
       //   if (this.pageIndex === 0) {
+      //     boxShadow = maskBottom + boxShadow
       //     borderSize.bottom = 0
       //   } else if (this.pageIndex === this.pagesLength - 1) {
+      //     boxShadow = maskTop + boxShadow
       //     borderSize.top = 0
       //   } else {
+      //     boxShadow = maskBottom + maskTop + boxShadow
       //     borderSize.bottom = 0
       //     borderSize.top = 0
       //   }
       // }
 
       return {
-        top: this.config.bleeds.top * this.contentScaleRatio + 'px',
-        bottom: this.config.bleeds.bottom * this.contentScaleRatio + 'px',
-        left: this.config.bleeds.left * this.contentScaleRatio + 'px',
-        right: this.config.bleeds.right * this.contentScaleRatio + 'px'
-        // borderTop: borderSize.top + 'px solid white',
-        // borderBottom: borderSize.bottom + 'px solid white'
+        top: (this.config.bleeds.top - 1) * this.contentScaleRatio + 'px',
+        bottom: (this.config.bleeds.bottom - 1) * this.contentScaleRatio + 'px',
+        left: (this.config.bleeds.left - 1) * this.contentScaleRatio + 'px',
+        right: (this.config.bleeds.right - 1) * this.contentScaleRatio + 'px',
+        border: this.userId === 'backendRendering' ? `${this.contentScaleRatio}px solid white` : `${this.config.isEnableBleed ? this.contentScaleRatio : 0}px dashed white`,
+        boxShadow: this.userId === 'backendRendering' ? 'none' : '0 0 3px 1px rgba(0, 0, 0, 0.15)'
+      // borderTop: borderSize.top + 'px solid white',
+      // borderBottom: borderSize.bottom + 'px solid white'
       }
     },
     trimStyles() {
       return {
         tl: {
           top: '-1px',
-          bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio - 1}px`,
+          bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio}px`,
           left: '-1px',
-          right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio - 1}px`
+          right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio}px`,
+          borderWidth: `${this.contentScaleRatio}px`
         },
         tr: {
           top: '-1px',
-          bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio - 1}px`,
-          left: `${(this.config.width - this.config.bleeds.right) * this.contentScaleRatio - 1}px`,
-          right: '-1px'
+          bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio}px`,
+          left: `${(this.config.width - this.config.bleeds.right) * this.contentScaleRatio}px`,
+          right: '-1px',
+          borderWidth: `${this.contentScaleRatio}px`
         },
         bl: {
-          top: `${(this.config.height - this.config.bleeds.bottom) * this.contentScaleRatio - 1}px`,
+          top: `${(this.config.height - this.config.bleeds.bottom) * this.contentScaleRatio}px`,
           bottom: '-1px',
           left: '-1px',
-          right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio - 1}px`
+          right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio}px`,
+          borderWidth: `${this.contentScaleRatio}px`
         },
         br: {
-          top: `${(this.config.height - this.config.bleeds.bottom) * this.contentScaleRatio - 1}px`,
+          top: `${(this.config.height - this.config.bleeds.bottom) * this.contentScaleRatio}px`,
           bottom: '-1px',
-          left: `${(this.config.width - this.config.bleeds.right) * this.contentScaleRatio - 1}px`,
-          right: '-1px'
+          left: `${(this.config.width - this.config.bleeds.right) * this.contentScaleRatio}px`,
+          right: '-1px',
+          borderWidth: `${this.contentScaleRatio}px`
         }
       }
     }
@@ -399,6 +434,13 @@ export default Vue.extend({
   background-color: setColor(gray-4);
 }
 
+.content {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  box-sizing: border-box;
+}
+
 .bleed-line {
   pointer-events: none;
   position: absolute;
@@ -409,7 +451,6 @@ export default Vue.extend({
 }
 
 .trim {
-  pointer-events: none;
   >div {
   position: absolute;
   left: 0px;

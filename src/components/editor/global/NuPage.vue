@@ -135,7 +135,8 @@
       div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
         class="page-highlighter"
         :style="wrapperStyles()")
-      div(v-if="config.isEnableBleed && hasBleed" :class="`bleed-line nu-page-bleed-${pageIndex}`" :style="bleedLineStyles()")
+      //- for ruler to get rectangle of page content (without bleeds)
+      div(v-if="config.isEnableBleed" :class="`nu-page-bleed-${pageIndex}`" :style="bleedLineAreaStyles()")
       div(v-if="(currActivePageIndex === pageIndex && isDetailPage)"
           class="page-resizer"
           ref="pageResizer"
@@ -394,9 +395,6 @@ export default Vue.extend({
     },
     resizerHint(): string {
       return !this.isResizingPage ? '拖曳調整畫布高度' : `${round(this.config.physicalHeight, PRECISION)}${this.config.unit}`
-    },
-    hasBleed(): boolean {
-      return !!this.config.bleeds.top || !!this.config.bleeds.bottom || !!this.config.bleeds.left || !!this.config.bleeds.right
     }
   },
   methods: {
@@ -448,34 +446,21 @@ export default Vue.extend({
           'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
         }
     },
-    bleedLineStyles() {
-      const scaleRatio = this.scaleRatio / 100
-      let boxShadow = '0 0 3px 1px rgba(0, 0, 0, 0.15)'
-      const borderSize = { top: 1, bottom: 1 }
-      if (this.isDetailPage && this.pages.length > 1) {
-        const maskTop = '0 -6px 0px 0px white, '
-        const maskBottom = '0 6px 0px 0px white, '
-        if (this.pageIndex === 0) {
-          boxShadow = maskBottom + boxShadow
-          borderSize.bottom = 0
-        } else if (this.pageIndex === this.pagesLength - 1) {
-          boxShadow = maskTop + boxShadow
-          borderSize.top = 0
-        } else {
-          boxShadow = maskBottom + maskTop + boxShadow
-          borderSize.bottom = 0
-          borderSize.top = 0
+    bleedLineAreaStyles() {
+      if (!this.config.isEnableBleed) {
+        return {
+          top: '0px',
+          bottom: '0px',
+          left: '0px',
+          right: '0px'
         }
       }
-
+      const scaleRatio = this.scaleRatio / 100
       return {
         top: this.config.bleeds.top * scaleRatio + 'px',
         bottom: this.config.bleeds.bottom * scaleRatio + 'px',
         left: this.config.bleeds.left * scaleRatio + 'px',
-        right: this.config.bleeds.right * scaleRatio + 'px',
-        borderTop: borderSize.top + 'px dashed white',
-        borderBottom: borderSize.bottom + 'px dashed white',
-        boxShadow
+        right: this.config.bleeds.right * scaleRatio + 'px'
       }
     },
     addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup): void {
@@ -882,13 +867,10 @@ export default Vue.extend({
   left: 50%;
 }
 
-.bleed-line {
+div[class*="nu-page-bleed"] {
   pointer-events: none;
   position: absolute;
   left: 0px;
   top: 0px;
-  box-sizing: border-box;
-  border: 1px dashed white;
-  box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.15);
 }
 </style>
