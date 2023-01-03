@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame, IImageStyle } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData, LayerType } from './types'
-import { IPage, IPageState } from '@/interfaces/page'
+import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import zindexUtils from '@/utils/zindexUtils'
 
 import photos from '@/store/photos'
@@ -169,10 +169,13 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.folderInfo
   },
   getPageSize(state: IEditorState) {
-    return (pageIndex: number): { width: number, height: number } => {
+    return (pageIndex: number): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string} => {
       return {
         width: state.pages[pageIndex].config.width,
-        height: state.pages[pageIndex].config.height
+        height: state.pages[pageIndex].config.height,
+        physicalWidth: state.pages[pageIndex].config.physicalWidth,
+        physicalHeight: state.pages[pageIndex].config.physicalHeight,
+        unit: state.pages[pageIndex].config.unit
       }
     }
   },
@@ -389,9 +392,12 @@ const mutations: MutationTree<IEditorState> = {
   SET_pagesName(state: IEditorState, name: string) {
     state.name = name
   },
-  SET_pageSize(state: IEditorState, pageInfo: { index: number, width: number, height: number }) {
+  SET_pageSize(state: IEditorState, pageInfo: { index: number, width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string}) {
     state.pages[pageInfo.index].config.width = pageInfo.width
     state.pages[pageInfo.index].config.height = pageInfo.height
+    state.pages[pageInfo.index].config.physicalWidth = pageInfo.physicalWidth
+    state.pages[pageInfo.index].config.physicalHeight = pageInfo.physicalHeight
+    state.pages[pageInfo.index].config.unit = pageInfo.unit
   },
   SET_designId(state: IEditorState, designId: string) {
     state.designId = designId
@@ -901,6 +907,12 @@ const mutations: MutationTree<IEditorState> = {
     const currFocusPageIndex = targetIndex ?? pageUtils.currFocusPageIndex
     pages[currFocusPageIndex].config.guidelines.v = []
     pages[currFocusPageIndex].config.guidelines.h = []
+  },
+  SET_bleeds(state: IEditorState, payload: { pageIndex: number, bleeds: IBleed, physicalBleeds: IBleed }) {
+    const { pages } = state
+    const { pageIndex, bleeds, physicalBleeds } = payload
+    pages[pageIndex].config.bleeds = { ...bleeds }
+    pages[pageIndex].config.physicalBleeds = { ...physicalBleeds }
   },
   SET_showRuler(state: IEditorState, bool: boolean) {
     state.showRuler = bool

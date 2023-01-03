@@ -51,6 +51,7 @@ import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import unitUtils from '@/utils/unitUtils'
 import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
@@ -116,8 +117,10 @@ export default Vue.extend({
     // load size from query for new design
     const newDesignWidth = parseInt(this.$route.query.width as string)
     const newDesignHeight = parseInt(this.$route.query.height as string)
+    const newDesignUnit = (this.$route.query.unit || 'px') as string
     if (newDesignWidth && newDesignHeight) {
-      pageUtils.setPageSize(0, newDesignWidth, newDesignHeight)
+      const pxSize = unitUtils.convertSize(newDesignWidth, newDesignHeight, newDesignUnit, 'px')
+      pageUtils.setPageSize(0, pxSize.width, pxSize.height, newDesignWidth, newDesignHeight, newDesignUnit)
       pageUtils.fitPage()
     }
   },

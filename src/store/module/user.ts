@@ -36,6 +36,7 @@ export interface IUserModule {
   verUni: string,
   verApi: string,
   imgSizeMap: Array<{ [key: string]: string | number }>,
+  imgSizeMapExtra: Array<{ [key: string]: string | number }>,
   avatar: {
     prev: string,
     prev_2x: string,
@@ -44,7 +45,18 @@ export interface IUserModule {
   viewGuide: number,
   isUpdateDesignOpen: boolean,
   updateDesignId: string,
-  updateDesignType: string
+  updateDesignType: string,
+  renderForPDF: boolean,
+  dimensionMap: {
+    [key: string]: {
+      [key: number]: {
+        [key: string]: number
+      }
+    }
+  },
+  dpi?: number,
+  bleed?: boolean,
+  trim?: boolean
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -84,6 +96,7 @@ const getDefaultState = (): IUserModule => ({
   verUni: '',
   verApi: '',
   imgSizeMap: [],
+  imgSizeMapExtra: [],
   avatar: {
     prev: '',
     prev_2x: '',
@@ -92,7 +105,12 @@ const getDefaultState = (): IUserModule => ({
   viewGuide: +localStorage.guest_view_guide || 0,
   isUpdateDesignOpen: false,
   updateDesignId: '',
-  updateDesignType: ''
+  updateDesignType: '',
+  dimensionMap: {},
+  dpi: -1,
+  bleed: false,
+  trim: false,
+  renderForPDF: false
 })
 
 const state = getDefaultState()
@@ -182,8 +200,20 @@ const getters: GetterTree<IUserModule, any> = {
   getUpdateDesignType() {
     return state.updateDesignType
   },
+  getDimensionMap() {
+    return state.dimensionMap
+  },
+  getBleed() {
+    return state.bleed
+  },
+  getTrim() {
+    return state.trim
+  },
   getEnableAdminView() {
     return state.enableAdminView
+  },
+  getRenderForPDF() {
+    return state.renderForPDF
   }
 }
 

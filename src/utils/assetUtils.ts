@@ -17,13 +17,14 @@ import stepsUtils from './stepsUtils'
 import ZindexUtils from './zindexUtils'
 import GroupUtils from './groupUtils'
 import resizeUtils from './resizeUtils'
-import { IPage } from '@/interfaces/page'
+import { IBleed, IPage } from '@/interfaces/page'
 import gtmUtils from './gtmUtils'
 import editorUtils from './editorUtils'
 import errorHandleUtils from './errorHandleUtils'
 import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import mathUtils from './mathUtils'
+import unitUtils from './unitUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -158,21 +159,38 @@ class AssetUtils {
     }
   }
 
-  async addTemplate(json: any, attrs: IAssetProps = {}, recordStep = true) {
-    const { pageIndex, width, height } = attrs
-    const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
-    // const targetPage: IPage = this.getPage(targetPageIndex)
-
+  async addTemplate(json: any, attrs?: {pageIndex?: number, width?: number, height?: number, physicalWidth?: number, physicalHeight?: number, unit?: string}, recordStep = true) {
+    const targetPageIndex = attrs?.pageIndex ?? pageUtils.currFocusPageIndex
+    const targetPage: IPage = this.getPage(targetPageIndex)
     json = await this.updateBackground(generalUtils.deepCopy(json))
     pageUtils.setAutoResizeNeededForPage(json, true)
     const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
     pageUtils.updateSpecPage(targetPageIndex, newLayer)
-    if (width && height) {
-      resizeUtils.resizePage(targetPageIndex, newLayer, { width, height })
-      store.commit('UPDATE_pageProps', {
-        pageIndex: targetPageIndex,
-        props: { width, height }
-      })
+    if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newLayer, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
+
+    if (store.getters['user/getUserId'] === 'backendRendering') {
+      if (store.getters['user/getUserId'] === 'backendRendering' && !store.getters['user/getBleed'] && !store.getters['user/getTrim']) {
+        // remove bleeds if disabled
+        // console.log('noBleed')
+        resizeUtils.disableBleeds(targetPageIndex)
+      } else if (json.isEnableBleed && json.bleeds && json.physicalBleeds) {
+        // use bleeds of template if it has
+        resizeUtils.resizeBleeds(targetPageIndex, json.physicalBleeds, json.bleeds)
+      } else {
+        // use default bleeds if it has no bleeds
+        // console.log('defaultBleed')
+        const page = this.getPage(targetPageIndex)
+        resizeUtils.resizeBleeds(targetPageIndex, pageUtils.getDefaultBleeds(page.unit, pageUtils.getPageDPI(page)))
+      }
+    } else if (targetPage.isEnableBleed && targetPage.bleeds && targetPage.physicalBleeds) {
+      // convert bleeds to template unit
+      const dpi = pageUtils.getPageDPI(targetPage)
+      const physicalBleeds = targetPage.unit === 'px' ? targetPage.bleeds
+        : targetPage.unit === attrs?.unit ? targetPage.physicalBleeds
+          : Object.fromEntries(Object.entries(targetPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, targetPage.unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+
+      // apply bleeds of targetPage
+      resizeUtils.resizeBleeds(targetPageIndex, physicalBleeds)
     }
     store.commit('SET_currActivePageIndex', targetPageIndex)
     if (recordStep) {
@@ -192,10 +210,6 @@ class AssetUtils {
       pageUtils.updateSpecPage(i, newLayer)
       if (width && height) {
         resizeUtils.resizePage(i, newLayer, { width, height })
-        store.commit('UPDATE_pageProps', {
-          pageIndex: i,
-          props: { width, height }
-        })
       }
     }
 
@@ -590,7 +604,7 @@ class AssetUtils {
     stepsUtils.record()
   }
 
-  addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number }) {
+  addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
     const currGroupType = store.getters.getGroupType
     store.commit('SET_groupId', groupId)
@@ -629,10 +643,6 @@ class AssetUtils {
           // @TODO: resize page/layer before adding to the store.
           if (resize) {
             resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
-            store.commit('UPDATE_pageProps', {
-              pageIndex: targetIndex,
-              props: resize
-            })
           }
           if ((groupType === 1 || currGroupType === 1) && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
@@ -642,10 +652,20 @@ class AssetUtils {
               const pageIndex = +idx + targetIndex
               const newSize = { height: height * pageWidth / width, width: pageWidth }
               resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
-              store.commit('UPDATE_pageProps', {
-                pageIndex,
-                props: newSize
-              })
+            }
+          }
+
+          // apply bleeds of currFocusPage
+          if (currFocusPage.isEnableBleed && currFocusPage.bleeds && currFocusPage.physicalBleeds) {
+            // convert bleeds to template unit
+            const dpi = pageUtils.getPageDPI(currFocusPage)
+            const physicalBleeds = currFocusPage.unit === 'px' ? currFocusPage.bleeds
+              : currFocusPage.unit === resize?.unit ? currFocusPage.physicalBleeds
+                : Object.fromEntries(Object.entries(currFocusPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, currFocusPage.unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+
+            for (const idx in jsonDataList) {
+              const pageIndex = +idx + targetIndex
+              resizeUtils.resizeBleeds(pageIndex, physicalBleeds)
             }
           }
           store.commit('SET_currActivePageIndex', targetIndex)

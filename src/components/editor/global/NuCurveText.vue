@@ -6,7 +6,7 @@
       class="nu-curve-text__span"
       :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
       :key="sIndex",
-      :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan)") {{ span.text }}
+      :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan, transParentStyles)") {{ span.text }}
 </template>
 
 <script lang="ts">
@@ -18,7 +18,6 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import LayerUtils from '@/utils/layerUtils'
 import textUtils from '@/utils/textUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   props: {
@@ -29,6 +28,10 @@ export default Vue.extend({
     isDuplicated: {
       type: Boolean,
       default: false
+    },
+    isTransparent: {
+      default: false,
+      type: Boolean
     }
   },
   data () {
@@ -63,6 +66,13 @@ export default Vue.extend({
       const textShadow = textEffectUtils.convertTextEffect(this.config)
       return this.isDuplicated ? {
         ...textShadow.duplicatedSpan
+      } : {}
+    },
+    transParentStyles(): {[key: string]: any} {
+      return this.isTransparent ? {
+        color: 'rgba(0, 0, 0, 0)',
+        '-webkit-text-stroke-color': 'rgba(0, 0, 0, 0)',
+        'text-decoration-color': 'rgba(0, 0, 0, 0)'
       } : {}
     }
   },
