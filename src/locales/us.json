@@ -1,5 +1,5 @@
 {
-  "NN0001": "templates|Templates",
+  "NN0001": "templates|Templates|template|Template",
   "NN0002": "photos|Photos",
   "NN0003": "objects|Objects",
   "NN0004": "backgrounds|Background",
@@ -800,6 +800,7 @@
   "NN0793": "feature|Feature",
   "NN0794": "Convert text to outlines",
   "NN0795": "Filters",
+  "NN0796": "",
   "STK0001": "Add a text",
   "STK0002": "Tap to copy",
   "STK0003": "Press and hold to share",

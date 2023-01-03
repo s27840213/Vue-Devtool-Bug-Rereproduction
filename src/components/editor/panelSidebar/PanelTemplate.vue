@@ -69,7 +69,7 @@
         nubtn(v-if="keyword && theme && !pending && resultGroupCounter<=10"
               size="mid" class="mt-30")
           url(:url="$t('NN0791')")
-            span {{$t('NN0790', {type: $tc('NN0001', 1)})}}
+            span {{$t('NN0790', {type: $tc('NN0001', 3)})}}
 </template>
 
 <script lang="ts">

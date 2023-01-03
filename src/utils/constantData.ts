@@ -94,7 +94,7 @@ class ConstantData {
           url: 'https://blog.vivipic.com/tw/invitation-card/'
         },
         ...[20, 19, 18, 22].map((id) => themeItem(id)), {
-          label: i18n.t('NN0790', { type: i18n.tc('NN0001', 1) }),
+          label: i18n.t('NN0790', { type: i18n.tc('NN0001', 3) }),
           url: i18n.t('NN0791')
         }]
       }],
@@ -124,7 +124,7 @@ class ConstantData {
           label: 'Polaroid Frame',
           url: 'https://blog.vivipic.com/us/free-polaroid-frame-templates/'
         }, {
-          label: i18n.t('NN0790', { type: i18n.tc('NN0001', 1) }),
+          label: i18n.t('NN0790', { type: i18n.tc('NN0001', 3) }),
           url: i18n.t('NN0791')
         }]
       }],
@@ -148,7 +148,7 @@ class ConstantData {
           label: '招待状',
           url: 'https://blog.vivipic.com/jp/invitation/'
         }, {
-          label: i18n.t('NN0790', { type: i18n.tc('NN0001', 1) }),
+          label: i18n.t('NN0790', { type: i18n.tc('NN0001', 3) }),
           url: i18n.t('NN0791')
         }]
       }]
