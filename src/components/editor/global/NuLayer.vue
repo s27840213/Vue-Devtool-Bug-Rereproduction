@@ -250,7 +250,7 @@ export default Vue.extend({
       isHandling: 'shadow/isHandling',
       isShowPagePanel: 'page/getShowPagePanel',
       isHandleShadow: 'shadow/isHandling',
-      renderForPDF: 'user/renderForPDF'
+      renderForPDF: 'user/getRenderForPDF'
     }),
     layerInfo(): ILayerInfo {
       return {
