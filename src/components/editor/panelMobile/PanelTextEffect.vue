@@ -52,9 +52,8 @@
         div(v-if="option.type === 'color'"
           class="panel-text-effect__color")
           div {{option.label}}
-          div(class="panel-text-effect__color-slip"
-              :style="colorParser(currentStyle[currCategory.name][option.key])"
-              @click="openColorPanel(option.key)")
+          color-btn(:color="currentStyle[currCategory.name][option.key]"
+                  size="24px" @click="openColorPanel(option.key)")
       span(class="panel-text-effect__reset label-mid"
           @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
@@ -62,6 +61,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import textEffectUtils from '@/utils/textEffectUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
@@ -74,7 +74,8 @@ import _ from 'lodash'
 
 export default Vue.extend({
   components: {
-    MobileSlider
+    MobileSlider,
+    ColorBtn
   },
   props: {
     panelHistory: {
@@ -295,11 +296,6 @@ export default Vue.extend({
     align-items: center;
     position: relative;
     color: setColor(gray-3);
-    &-slip {
-      height: 24px;
-      width: 32px;
-      box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.2);
-    }
   }
 
   &__reset {

@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="color-btn")
+div(class="color-btn" :style="wrapperStyle")
   div(class="color-btn__wrapper" :class="{active: active || focus}"
     @click="$emit('click', $event)")
     div(v-if="color === 'add'" class="color-btn__add-color")
@@ -18,11 +18,24 @@ export default Vue.extend({
       type: String,
       required: true
     },
+    size: {
+      type: String,
+      default: ''
+    },
     active: {
       type: Boolean
     },
     focus: {
       type: Boolean
+    }
+  },
+  computed: {
+    wrapperStyle() {
+      return this.size ? {
+        width: this.size,
+        height: this.size,
+        paddingTop: 0
+      } : {}
     }
   },
   methods: {

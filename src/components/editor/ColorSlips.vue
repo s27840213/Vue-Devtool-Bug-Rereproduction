@@ -276,9 +276,11 @@ export default Vue.extend({
       this.closePanel()
     },
     middleware(event: MouseEvent): boolean {
+      const target = event.target as HTMLElement
       return this.mode === 'PanelBG' ? false // Never close in PanelBG
         // Don't close when selecting color target
-        : !(event.target as HTMLElement).matches('.function-panel .color-btn *')
+        : !(target.matches('.function-panel .color-btn *') || // Object, BG, text effect color
+        target.matches('.function-panel .text-setting__color *')) // Text color
     },
     closePanel(): void {
       editorUtils.toggleColorSlips(false)

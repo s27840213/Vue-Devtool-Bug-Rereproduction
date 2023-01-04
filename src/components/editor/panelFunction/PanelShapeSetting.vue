@@ -101,12 +101,12 @@
     div(class="shape-setting__basic-shape-action" v-if="isBasicShape")
       div(class="action-bar flex-around basic-shape-actions" style="padding: 8px 0")
         div(class="shape-setting__line-action-wrapper")
-          svg-icon(class="pointer feature-button"
+          svg-icon(class="pointer feature-button" v-hint="$t('NN0681')"
                   iconName="line-width" iconWidth="24px" iconColor="gray-2"
                   @click.native="openBasicShapeSliderPopup")
         div(class="shape-setting__line-action-wrapper")
-          svg-icon(class="pointer feature-button"
-                  v-if="filled"
+          svg-icon(v-if="filled" v-hint="$t('NN0797')"
+                  class="pointer feature-button"
                   iconName="filled" iconWidth="24px" iconColor="gray-2"
                   @click.native="handleValueModal('isFilled')")
           svg-icon(class="pointer feature-button"

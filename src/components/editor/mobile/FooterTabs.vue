@@ -6,9 +6,9 @@
             class="footer-tabs__item"
             :class="{'click-disabled': (tab.disabled || isLocked)}"
             @click="handleTabAction(tab)")
-          div(v-if="tab.icon === 'color'" style="width: 22px; height: 22px;"
-              class="mb-5 click-disabled")
-            color-btn(:color="globalSelectedColor.color")
+          color-btn(v-if="tab.icon === 'color'" size="22px"
+                    class="mb-5 click-disabled"
+                    :color="globalSelectedColor.color")
           svg-icon(v-else class="mb-5 click-disabled"
             :iconName="tab.icon"
             :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"

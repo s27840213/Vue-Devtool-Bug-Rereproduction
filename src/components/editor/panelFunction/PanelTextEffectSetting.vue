@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="text-effect-setting mt-25")
+  div(class="text-effect-setting mt-25" v-click-outside="vcoConfig()")
     //- Tabs to choose effect category: shadow, shape and bg.
     div(class="text-effect-setting-tabs")
       span(v-for="category in textEffects"
@@ -53,10 +53,10 @@
                 v-ratio-change
                 type="range")
             //- Option type color
-            template(v-if="option.type === 'color'")
-              div(class="text-effect-setting-options__field--btn"
-                :style="colorParser(currentStyle[currCategory.name][option.key])"
-                @click="handleColorModal(currCategory.name, option.key)")
+            color-btn(v-if="option.type === 'color'" size="25px"
+              :color="currentStyle[currCategory.name][option.key]"
+              :active="option.key === colorTarget.key && colorUtilsCurrEvent === 'setTextEffectColor'"
+              @click="handleColorModal(currCategory.name, option.key)")
           div(class="text-effect-setting-options__field")
             span
             span(class="text-effect-setting-options__field--reset"
@@ -70,6 +70,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
@@ -82,7 +83,8 @@ import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   components: {
-    ColorPicker
+    ColorPicker,
+    ColorBtn
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -92,6 +94,7 @@ export default Vue.extend({
       openColorPicker: false,
       currTab: localStorageUtils.get('textEffectSetting', 'tab') as 'shadow'|'bg'|'shape',
       textEffects: constantData.textEffects(),
+      colorUtilsCurrEvent: '',
       colorTarget: {
         category: '',
         key: ''
@@ -120,11 +123,20 @@ export default Vue.extend({
     colorUtils.offStop(ColorEventType.textEffect, this.recordChange)
   },
   methods: {
+    vcoConfig() {
+      return {
+        // Update colorUtils.currEvent manully, because it cannot be computed.
+        handler: () => {
+          this.colorUtilsCurrEvent = colorUtils.currEvent
+        }
+      }
+    },
     handleColorModal(category: string, key: string) {
       this.colorTarget = { category, key }
       editorUtils.toggleColorSlips(true)
       colorUtils.setCurrEvent(ColorEventType.textEffect)
       colorUtils.setCurrColor(this.currentStyle.shadow.color as string)
+      this.colorUtilsCurrEvent = colorUtils.currEvent
     },
     switchTab(category: 'shadow'|'bg'|'shape') {
       this.currTab = category
@@ -270,13 +282,6 @@ export default Vue.extend({
       padding: 0;
     }
     &--number,
-    &--btn {
-      box-sizing: border-box;
-      width: 30px;
-      height: 25px;
-      border: 1px solid setColor(gray-4);;
-      border-radius: 3px;
-    }
     &--select {
       svg + svg {
         margin-left: 8px
