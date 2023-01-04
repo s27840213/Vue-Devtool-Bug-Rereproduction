@@ -5,7 +5,7 @@
           :tabs="[$tc('NN0002', 2),$t('NN0017')]"
           :defaultTab="currActiveTabIndex"
           @switchTab="switchTab")
-    template(v-if="showImageTab")
+    template(v-show="showImageTab")
       search-bar(v-if="!isInCategory" class="panel-bg__searchbar"
         :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
         clear
@@ -43,7 +43,7 @@
             svg-icon(iconName="loading"
               iconColor="white"
               iconWidth="20px")
-    div(v-else class="panel-bg__color-tab")
+    div(v-show="!showImageTab" class="panel-bg__color-tab")
       div(class="panel-bg__color-tab-wrapper" :style="colorTabWrapperStyles()")
         div(class="panel-bg__color-area")
           div(class="panel-bg__color-row")
@@ -110,14 +110,14 @@ import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import stepsUtils from '@/utils/stepsUtils'
 import colorUtils from '@/utils/colorUtils'
-import { ColorEventType, MobileColorPanelType } from '@/store/types'
-import pageUtils from '@/utils/pageUtils'
+import { ColorEventType } from '@/store/types'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import Tabs from '@/components/Tabs.vue'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 
 export default Vue.extend({
   components: {
@@ -254,6 +254,7 @@ export default Vue.extend({
   },
   mounted() {
     colorUtils.on(ColorEventType.background, this.handleNewBgColor)
+    eventUtils.on(PanelEvent.scrollPanelBackgroundToTop, this.scrollToTop)
 
     generalUtils.panelInit('bg',
       this.handleSearch,
@@ -275,6 +276,7 @@ export default Vue.extend({
   },
   beforeDestroy() {
     colorUtils.event.off(ColorEventType.background, this.handleNewBgColor)
+    eventUtils.off(PanelEvent.scrollPanelBackgroundToTop)
   },
   watch: {
     opacity(newVal) {
@@ -295,6 +297,14 @@ export default Vue.extend({
           this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
         })
       }
+    },
+    showImageTab() {
+      this.$nextTick(() => {
+        const ref = this.$refs as Record<string, Vue[]>
+        for (const name of ['mainContent', 'searchResult']) {
+          ref[name][0].$el.scrollTop = this.scrollTop[name as 'mainContent'|'searchResult']
+        }
+      })
     }
   },
   methods: {
@@ -314,6 +324,13 @@ export default Vue.extend({
       addRecentlyBgColor: 'vivisticker/UPDATE_addRecentlyBgColor',
       setNewBgColor: 'vivisticker/SET_newBgColor'
     }),
+    scrollToTop() {
+      for (const list of this.categoryListArray) {
+        if (list.show) {
+          (this.$refs[list.key] as Vue[])[0].$el.scrollTop = 0
+        }
+      }
+    },
     colorStyles(color: string) {
       return {
         backgroundColor: this.getColorOverlappingWhite(color)

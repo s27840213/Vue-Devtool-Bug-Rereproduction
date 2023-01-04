@@ -26,7 +26,6 @@ interface IViviStickerState {
   isInMyDesign: boolean,
   myDesignTab: string,
   isInSelectionMode: boolean,
-  showSaveDesignPopup: boolean,
   slideType: string,
   myDesignFiles: {[key: string]: IMyDesign[]},
   myDesignNextPages: {[key: string]: number},
@@ -70,7 +69,6 @@ const getDefaultState = (): IViviStickerState => ({
   isInMyDesign: false,
   myDesignTab: 'text',
   isInSelectionMode: false,
-  showSaveDesignPopup: false,
   slideType: 'none',
   myDesignFiles: vivistickerUtils.getDefaultMyDesignFiles(),
   myDesignNextPages: vivistickerUtils.getDefaultMyDesignNextPages(),
@@ -148,9 +146,6 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getIsInSelectionMode(state: IViviStickerState): boolean {
     return state.isInSelectionMode
-  },
-  getShowSaveDesignPopup(state: IViviStickerState): boolean {
-    return state.showSaveDesignPopup
   },
   getSlideType(state: IViviStickerState): string {
     return state.slideType
@@ -255,9 +250,6 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_isInSelectionMode(state: IViviStickerState, isInSelectionMode: boolean) {
     state.isInSelectionMode = isInSelectionMode
-  },
-  SET_showSaveDesignPopup(state: IViviStickerState, showSaveDesignPopup: boolean) {
-    state.showSaveDesignPopup = showSaveDesignPopup
   },
   SET_slideType(state: IViviStickerState, slideType: string) {
     state.slideType = slideType

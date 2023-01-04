@@ -1,8 +1,8 @@
-import { IModalButton } from '@/interfaces/modal'
+import { IModalButton, IModalInfo } from '@/interfaces/modal'
 import store from '@/store'
 
 class ModalUtils {
-  setModalInfo(title?: string, content?: Array<string> | string, confirmButton?: IModalButton, cancelButton?: IModalButton, imgSrc = '', noClose = false, noCloseIcon = false, backdropStyle = {}, cardStyle = {}) {
+  setModalInfo(title?: string, content?: Array<string> | string, confirmButton?: IModalButton, cancelButton?: IModalButton, imgSrc = '', noClose = false, noCloseIcon = false, backdropStyle = {}, cardStyle = {}, checkboxText = '', checked = false, onCheckedChange?: (checked: boolean) => void) {
     if (typeof content === 'string') content = [content]
     store.commit('modal/SET_MODAL_INFO', {
       title,
@@ -13,7 +13,10 @@ class ModalUtils {
       noClose,
       noCloseIcon,
       backdropStyle,
-      cardStyle
+      cardStyle,
+      checkboxText,
+      checked,
+      onCheckedChange: onCheckedChange === undefined ? this.generateOnCheckedChangeTemplate() : onCheckedChange
     })
     store.commit('modal/SET_MODAL_OPEN', true)
   }
@@ -24,6 +27,14 @@ class ModalUtils {
 
   setIsModalOpen(open: boolean) {
     store.commit('modal/SET_MODAL_OPEN', open)
+  }
+
+  updateModalInfo(info: Partial<IModalInfo>) {
+    store.commit('modal/SET_MODAL_INFO', info)
+  }
+
+  updateButton(type: string, button: Partial<IModalButton>) {
+    store.commit('modal/UPDATE_BUTTON', { type, button })
   }
 
   clearModalInfo() {
@@ -56,6 +67,10 @@ class ModalUtils {
         return false
       }
     }
+  }
+
+  private generateOnCheckedChangeTemplate() {
+    return (checked: boolean) => { console.log(checked) }
   }
 }
 

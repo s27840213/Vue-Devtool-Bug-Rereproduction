@@ -51,6 +51,21 @@ type OptionConfig = {
   selected?: () => boolean
 }
 
+const PRICES = {
+  tw: {
+    monthly: '140',
+    annually: '799'
+  },
+  us: {
+    monthly: '4.99',
+    annually: '26.90'
+  },
+  jp: {
+    monthly: '600',
+    annually: '3590'
+  }
+} as {[key: string]: { monthly: string, annually: string }}
+
 export default Vue.extend({
   data() {
     return {
@@ -172,12 +187,13 @@ export default Vue.extend({
       }))
     },
     subscribeOptions(): OptionConfig[] {
+      const locale = this.$i18n.locale
       return [{
-        text: `${this.$t('STK0026')}`,
+        text: `${this.$t('STK0026')} - ${this.localizedPrice(PRICES[locale].monthly, locale)}`,
         icon: 'vivisticker_global',
         action: () => { vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'monthly' }) }
       }, {
-        text: `${this.$t('STK0027')}`,
+        text: `${this.$t('STK0027')} - ${this.localizedPrice(PRICES[locale].annually, locale)}`,
         icon: 'vivisticker_global',
         action: () => { vivistickerUtils.sendToIOS('SUBSCRIBE', { option: 'annually' }) }
       }, {
@@ -287,6 +303,18 @@ export default Vue.extend({
     },
     sendTestEvent(option: string) {
       vivistickerUtils.sendToIOS('EVENT_TEST', { option })
+    },
+    localizedPrice(price: string, locale: string): string {
+      switch (locale) {
+        case 'tw':
+          return `${price}元`
+        case 'us':
+          return `$${price}`
+        case 'jp':
+          return `¥${price}円(税込)`
+        default:
+          return price
+      }
     }
   }
 })

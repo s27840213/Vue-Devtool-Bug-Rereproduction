@@ -82,7 +82,8 @@ export default Vue.extend({
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       editorBg: 'vivisticker/getEditorBg',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
-      isInSelectionMode: 'vivisticker/getIsInSelectionMode'
+      isInSelectionMode: 'vivisticker/getIsInSelectionMode',
+      userSettings: 'vivisticker/getUserSettings'
     }),
     isInCategory(): boolean {
       return this.isCurrentInCategory(this.currActiveTab)
@@ -177,7 +178,8 @@ export default Vue.extend({
       resetGifCategoryContent: 'giphy/resetCategoryContent',
       resetGifTagContent: 'giphy/resetTagContent',
       resetBackgroundsSearch: 'background/resetSearch',
-      resetTextsSearch: 'textStock/resetSearch'
+      resetTextsSearch: 'textStock/resetSearch',
+      updateUserSettings: 'vivisticker/updateUserSettings'
     }),
     ...mapMutations({
       setIsInCategory: 'vivisticker/SET_isInCategory',
@@ -232,7 +234,54 @@ export default Vue.extend({
             vivistickerUtils.endEditing()
           })
         } else {
-          vivistickerUtils.setShowSaveDesignPopup(true)
+          modalUtils.setModalInfo(
+            `${this.$t('STK0008')}`,
+            `${this.$t('STK0009')}`,
+            {
+              msg: `${this.$t('STK0004')}`,
+              action: () => {
+                vivistickerUtils.saveAsMyDesign().then(() => {
+                  vivistickerUtils.endEditing()
+                })
+              }
+            },
+            {
+              msg: `${this.$t('STK0011')}`,
+              action: () => { vivistickerUtils.endEditing() },
+              style: {
+                color: '#474A57',
+                backgroundColor: '#D9DBE1'
+              }
+            },
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            `${this.$t('STK0010')}`,
+            this.userSettings.autoSave,
+            (checked: boolean) => {
+              this.updateUserSettings({
+                autoSave: checked
+              })
+              if (checked) {
+                modalUtils.updateButton('cancel', {
+                  style: {
+                    color: '#9C9C9C',
+                    backgroundColor: '#D9DBE1',
+                    pointerEvents: 'none'
+                  }
+                })
+              } else {
+                modalUtils.updateButton('cancel', {
+                  style: {
+                    color: '#474A57',
+                    backgroundColor: '#D9DBE1'
+                  }
+                })
+              }
+            }
+          )
         }
       } else {
         vivistickerUtils.endEditing()
