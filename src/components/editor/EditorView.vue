@@ -856,8 +856,8 @@ $REULER_SIZE: 20px;
       transform: rotate(180deg);
       border-radius: 50px;
       color: setColor(white);
-      padding: 0.2rem 0.4rem;
-      font-size: 0.325rem;
+      padding: 3.2px 6.4px;
+      font-size: 12px;
       top: 5px;
       left: 0;
     }
@@ -866,8 +866,8 @@ $REULER_SIZE: 20px;
       left: 5px;
       border-radius: 50px;
       color: setColor(white);
-      padding: 0.2rem 0.4rem;
-      font-size: 0.325rem;
+      padding: 3.2px 6.4px;
+      font-size: 12px;
     }
   }
 }
