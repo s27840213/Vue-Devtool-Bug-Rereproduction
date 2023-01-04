@@ -427,7 +427,7 @@ export default Vue.extend({
       const img = e.target as HTMLImageElement
       const physicalRatio = img.naturalWidth / img.naturalHeight
       const layerRatio = this.config.styles.imgWidth / this.config.styles.imgHeight
-      if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1) {
+      if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1 && this.config.srcObj.type !== 'frame') {
         const newW = this.config.styles.imgHeight * physicalRatio
         const offsetW = this.config.styles.imgWidth - newW
         if (this.primaryLayerType() === 'frame') {

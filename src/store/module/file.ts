@@ -106,6 +106,7 @@ const actions: ActionTree<IFileState, unknown> = {
       const rawData = await apiUtils.requestWithRetry(() => file.getFiles({ pageIndex }))
       addMyfile(rawData.data.data.image.content, rawData.data.next_page)
     } catch (error) {
+      console.error(error)
       captureException(error)
     }
   },

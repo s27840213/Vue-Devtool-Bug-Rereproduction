@@ -63,7 +63,7 @@ export default Vue.extend({
         },
         // { name: 'preset', label: `${this.$t('NN0041')}`, show: '' },
         {
-          name: 'adjust',
+          name: 'sliders',
           label: `${this.$t('NN0042')}`,
           show: 'popup-adjust'
         },
