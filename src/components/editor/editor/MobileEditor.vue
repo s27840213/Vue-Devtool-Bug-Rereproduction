@@ -77,6 +77,9 @@ export default Vue.extend({
   created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
   },
+  beforeDestroy() {
+    eventUtils.off(PanelEvent.switchTab)
+  },
   mounted() {
     /**
      * @Note the codes below is used to prevent the zoom in/out effect of mobile phone, especially for the "IOS"

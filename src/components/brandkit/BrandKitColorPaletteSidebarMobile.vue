@@ -5,7 +5,6 @@
         span(:title="paletteName") {{ paletteName }}
     div(class="brand-kit-color-palette__colors")
       color-btn(v-for="color in colorPalette.colors" :color="color.color"
-                :style="backgroundColorStyles"
                 @click="handleSetColor(color.color)")
 </template>
 
@@ -36,9 +35,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    backgroundColorStyles(color: string) {
-      return { backgroundColor: color }
-    },
     getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {
       return brandkitUtils.getDisplayedPaletteName(colorPalette)
     },

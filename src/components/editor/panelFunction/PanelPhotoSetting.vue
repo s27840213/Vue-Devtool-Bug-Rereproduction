@@ -96,6 +96,7 @@ export default Vue.extend({
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoSetting)
   },
   destroyed() {
+    eventUtils.off(PanelEvent.showPhotoShadow)
     document.removeEventListener('mouseup', this.handleClick)
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.none)
   },

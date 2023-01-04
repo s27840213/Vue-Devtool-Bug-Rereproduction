@@ -588,9 +588,9 @@ const mutations: MutationTree<IPaymentState> = {
     const keys = Object.keys(newState) as Array<keyof IPaymentState>
     keys.forEach(key => {
       if (['paymentPaidDate', 'myPaidDate', 'switchPaidDate'].includes(key) && newState[key]) {
-        (state[key] as any) = string2Date(newState[key] as string)
+        (state[key] as unknown) = string2Date(newState[key] as string)
       } else if (key in state) {
-        (state[key] as any) = newState[key]
+        (state[key] as unknown) = newState[key]
       }
     })
   },

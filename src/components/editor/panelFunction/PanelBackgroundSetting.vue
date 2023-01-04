@@ -70,11 +70,10 @@ import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
 import { mapGetters, mapMutations } from 'vuex'
 import { IPage } from '@/interfaces/page'
-import { ColorEventType, PopupSliderEventType, SidebarPanelType } from '@/store/types'
+import { PopupSliderEventType } from '@/store/types'
 import MappingUtils from '@/utils/mappingUtils'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import colorUtils from '@/utils/colorUtils'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import pageUtils from '@/utils/pageUtils'
@@ -139,18 +138,13 @@ export default Vue.extend({
   },
   mounted() {
     popupUtils.on(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
-    colorUtils.on(ColorEventType.background, this.handleChangeBgColor)
-    colorUtils.onStop(ColorEventType.background, this.recordChange)
   },
   beforeDestroy() {
     popupUtils.event.off(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
-    colorUtils.event.off(ColorEventType.background, this.handleChangeBgColor)
-    colorUtils.offStop(ColorEventType.background, this.recordChange)
   },
   methods: {
     ...mapMutations({
       updateLayerStyles: 'UPDATE_layerStyles',
-      setBgColor: 'SET_backgroundColor',
       removeBg: 'REMOVE_background',
       setBgOpacity: 'SET_backgroundOpacity',
       setBgImageControl: 'SET_backgroundImageControl',
@@ -161,12 +155,6 @@ export default Vue.extend({
     },
     handleLockBackground() {
       backgroundUtils.handleLockBackground()
-    },
-    handleChangeBgColor(color: string) {
-      this.setBgColor({
-        pageIndex: pageUtils.currFocusPageIndex,
-        color
-      })
     },
     handleChangeBgOpacity(opacity: number) {
       this.setBgOpacity({
@@ -209,9 +197,10 @@ export default Vue.extend({
     },
     handleColorPicker() {
       if (this.backgroundLocked) return this.handleLockedNotify()
-      colorUtils.setCurrEvent(ColorEventType.background)
-      colorUtils.setCurrColor(this.backgroundColor)
-      this.$emit('toggleColorPanel', true)
+      // Switch to PanelBg and switch PanelBG inner tab.
+      this.colorSlipsIcon === 'multi'
+        ? backgroundUtils.switchPanelBgTab(0)
+        : backgroundUtils.switchPanelBgTab(1)
     },
     handleImageFlip(flipIcon: string) {
       const [h, v] = this.backgroundImgFlip
@@ -229,9 +218,6 @@ export default Vue.extend({
     },
     handleOutSide() {
       this.show = ''
-    },
-    recordChange() {
-      stepsUtils.record()
     }
   }
 })

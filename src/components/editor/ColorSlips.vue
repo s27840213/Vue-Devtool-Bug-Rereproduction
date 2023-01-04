@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="color-panel"
-      :class="[whiteTheme ? 'bg-white': 'bg-gray-1-5']"
+      :style="bgStyle"
       v-click-outside="vcoConfig"
       ref="colorPanel")
     img(v-if="showPanelBtn" class="color-panel__btn"
@@ -178,6 +178,13 @@ export default Vue.extend({
     isText(): boolean {
       return this.currSelectedInfo.types.has('text') && this.currSelectedInfo.layers.length === 1
     },
+    bgStyle(): Record<string, string> {
+      return this.mode === 'FunctionPanel' ? {
+        background: '#2C2F43'// gray-1-5
+      } : {
+        background: 'transparent'
+      }
+    },
     whiteTheme(): boolean {
       return ['PanelColor'].includes(this.mode)
     },
@@ -223,11 +230,6 @@ export default Vue.extend({
     }),
     handleOpenSettings() {
       this.setSettingsOpen(true)
-    },
-    colorStyles(color: string) {
-      return {
-        backgroundColor: color
-      }
     },
     getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {
       return brandkitUtils.getDisplayedPaletteName(colorPalette)

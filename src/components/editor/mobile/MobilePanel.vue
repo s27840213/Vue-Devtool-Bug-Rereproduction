@@ -39,7 +39,7 @@
             @touchstart="disableTouchEvent")
     div(class="mobile-panel__bottom-section")
       tabs(v-if="innerTabs.label" theme="light"
-          :tabs="innerTabs.label" @switchTab="switchInnerTab")
+          :tabs="innerTabs.label" v-model="innerTabIndex")
       keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
         //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
         component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
@@ -155,7 +155,7 @@ export default Vue.extend({
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
       currSubColorEvent: '',
-      innerTab: '',
+      innerTabIndex: 0,
       fitPage: _.debounce(() => {
         this.$nextTick(() => {
           pageUtils.fitPage()
@@ -254,6 +254,9 @@ export default Vue.extend({
             ? 'initial' : this.panelHeight + 'px'
         }
       )
+    },
+    innerTab(): string {
+      return this.innerTabs.key[this.innerTabIndex]
     },
     innerTabs(): Record<string, string[]> {
       switch (this.currActivePanel) {
@@ -463,7 +466,7 @@ export default Vue.extend({
     },
     currActivePanel(newVal) {
       this.panelHistory = []
-      this.innerTab = this.innerTabs.key[0]
+      this.innerTabIndex = 0
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
       this.panelHeight = newVal === 'none' ? 0 : this.initHeightPx()
@@ -571,9 +574,6 @@ export default Vue.extend({
           }
         }
       }
-    },
-    switchInnerTab(panelIndex: number) {
-      this.innerTab = this.innerTabs.key[panelIndex]
     }
   }
 })
