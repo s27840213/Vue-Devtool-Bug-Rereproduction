@@ -301,11 +301,14 @@ export default Vue.extend({
       return this.pageState.config
     },
     scaleContainerStyles(): { [index: string]: string } {
+      let transform = `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`
+      if (generalUtils.isTouchDevice()) {
+        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)` + transform
+      }
       return {
-        // transform: `scale(${1})`
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
-        transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`,
+        transform,
         willChange: this.isScaling ? 'transform' : ''
       }
     },

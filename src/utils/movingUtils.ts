@@ -24,6 +24,7 @@ export class MovingUtils {
   private _config = { config: null as unknown as ILayer }
   private initialPos = { x: 0, y: 0 }
   private initTranslate = { x: 0, y: 0 }
+  private initPageTranslate = { x: 0, y: 0 }
   private movingByControlPoint = false
   private isDoingGestureAction = false
   private isHandleMovingHandler = false
@@ -98,6 +99,8 @@ export class MovingUtils {
   moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y
+    this.initPageTranslate.x = pageUtils.getCurrPage.x
+    this.initPageTranslate.y = pageUtils.getCurrPage.y
     const currLayerIndex = layerUtils.layerIndex
     if (currLayerIndex !== this.layerIndex) {
       const layer = layerUtils.getLayer(this.pageIndex, currLayerIndex)
@@ -287,6 +290,7 @@ export class MovingUtils {
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
+    this.isControlling = true
     const posDiff = {
       x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
       y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
@@ -298,26 +302,6 @@ export class MovingUtils {
         }
     }
 
-    if (this.isTouchDevice && !this.isLocked) {
-      if (!this.isActive) {
-        if (posDiff.x > 1 || posDiff.y > 1) {
-          this.isDoingGestureAction = true
-          if (layerUtils.layerIndex !== this.layerIndex && this.isClickOnController) {
-            window.requestAnimationFrame(() => {
-              this.movingHandler(e)
-              this.isHandleMovingHandler = false
-            })
-          }
-          return
-        }
-      } else {
-        if (posDiff.x < 1 && posDiff.y < 1) {
-          return
-        }
-      }
-    }
-
-    this.isControlling = true
     const updateConifgData = {} as Partial<ILayer>
     if (!this.isDragging) {
       updateConifgData.dragging = true
@@ -350,6 +334,29 @@ export class MovingUtils {
         }
       }
     }
+    if (!this.isActive) {
+      if (this.isTouchDevice && !this.isLocked) {
+        if (layerUtils.layerIndex !== this.layerIndex && this.isClickOnController) {
+          if (posDiff.x > 1 || posDiff.y > 1) {
+            this.isDoingGestureAction = true
+            window.requestAnimationFrame(() => {
+              this.movingHandler(e)
+              this.isHandleMovingHandler = false
+            })
+            return
+          }
+        }
+        if (layerUtils.layerIndex === -1) {
+          window.requestAnimationFrame(() => {
+            this.pageMovingHandler(e)
+          })
+        }
+      } else {
+        if (posDiff.x < 1 && posDiff.y < 1) {
+          return
+        }
+      }
+    }
     layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, updateConifgData)
   }
 
@@ -376,6 +383,17 @@ export class MovingUtils {
     this.initialPos.y += totalOffset.y
   }
 
+  pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
+    const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
+    // const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
+    this.initialPos.x += offsetPos.x
+    this.initialPos.y += offsetPos.y
+    pageUtils.updatePagePos(this.pageIndex, {
+      x: offsetPos.x + pageUtils.getCurrPage.x,
+      y: offsetPos.y + pageUtils.getCurrPage.y
+    })
+  }
+
   moveEnd(e: MouseEvent | TouchEvent) {
     this.isControlling = false
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
@@ -387,33 +405,20 @@ export class MovingUtils {
       x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
       y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
     }
-    const hasActiualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
-    if (!this.isDoingGestureAction && !this.isActive && !hasActiualMove) {
-      this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
-      if (!this.inMultiSelectionMode) {
-        groupUtils.deselect()
-        const targetIndex = this.config.styles.zindex - 1
-        this.setLastSelectedLayerIndex(this.layerIndex)
-        groupUtils.select(this.pageIndex, [targetIndex])
-      }
-      this.setCursorStyle(e, '')
-      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-        dragging: false
-      })
-      this.isDoingGestureAction = false
-      this.snapUtils.event.emit('clearSnapLines')
-      return
+    const pagePosDiff = {
+      x: Math.abs(pageUtils.getCurrPage.x - this.initPageTranslate.x),
+      y: Math.abs(pageUtils.getCurrPage.y - this.initPageTranslate.y)
     }
-
+    const hasActualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
+    const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
     if (this.isActive) {
-      if (hasActiualMove) {
+      if (hasActualMove) {
         // dragging to another page
         if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
           const layerNum = this.currSelectedInfo.layers.length
           if (layerNum > 1) {
             groupUtils.group()
           }
-
           const layerTmp = generalUtils.deepCopy(layerUtils.getCurrLayer)
           const { top, left } = this.body.getBoundingClientRect()
           const targetPageRect = (document.querySelector(`.nu-page-${this.currHoveredPageIndex}`) as HTMLLIElement)?.getBoundingClientRect()
@@ -430,7 +435,6 @@ export class MovingUtils {
           // The layerUtils.addLayers will trigger a record function, so we don't need to record the extra step here
         } else {
           if (!(this.config as IImage).isHoveringFrame) {
-            // stepsUtils.record()
             stepsUtils.asyncRecord()
           }
         }
@@ -467,27 +471,31 @@ export class MovingUtils {
           }
         }
       }
-
-      // if (this.isTouchDevice && !this.isPointerDownFromSubController && !hasActiualMove) {
-      //   /**
-      //    * This function is used for mobile-control, as one of the sub-controller is active
-      //    * tap at the primary-controller should set the sub-controller to non-active
-      //    */
-      //   if (this.config.type === LayerType.group) {
-      //     const primary = this.config as IGroup
-      //     for (let i = 0; i < (this.config as IGroup).layers.length; i++) {
-      //       if (primary.layers[i].active) {
-      //         if (primary.layers[i].type === LayerType.text) {
-      //           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false }, i)
-      //         }
-      //         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: false }, i)
-      //       }
-      //     }
-      //   }
-      // }
       this.isPointerDownFromSubController = false
       this.isControlling = false
       this.setCursorStyle(e, '')
+    }
+
+    if (!this.isActive) {
+      if (hasActualPageMove) {
+        console.log('has actual')
+        return
+      } else if (!this.isDoingGestureAction && !hasActualMove) {
+        this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
+        if (!this.inMultiSelectionMode) {
+          groupUtils.deselect()
+          const targetIndex = this.config.styles.zindex - 1
+          this.setLastSelectedLayerIndex(this.layerIndex)
+          groupUtils.select(this.pageIndex, [targetIndex])
+        }
+        this.setCursorStyle(e, '')
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+          dragging: false
+        })
+        this.isDoingGestureAction = false
+        this.snapUtils.event.emit('clearSnapLines')
+        return
+      }
     }
 
     if (this.isDragging) {

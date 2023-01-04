@@ -974,6 +974,16 @@ const mutations: MutationTree<IEditorState> = {
   SET_cursor(state: IEditorState, cursor: string) {
     state.cursor = cursor
   },
+  UPDATE_pagePos(state: IEditorState, data: { pageIndex: number, styles: { [key: string]: number } }) {
+    const { pageIndex, styles } = data
+    const page = state.pages[pageIndex]
+    Object.entries(styles)
+      .forEach(([k, v]) => {
+        if (Object.prototype.hasOwnProperty.call(page.config, k)) {
+          page.config[k] = v
+        }
+      })
+  },
   ...imgShadowMutations,
   ADD_subLayer
 }
