@@ -369,7 +369,7 @@ export default Vue.extend({
          */
         if (ControlUtils.isClickOnController(e)) {
           const movingUtils = new MovingUtils({
-            _config: { config: layerUtils.getCurrLayer },
+            _config: { config: generalUtils.deepCopy(layerUtils.getCurrLayer) },
             snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
             body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
           })

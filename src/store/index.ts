@@ -169,7 +169,7 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.folderInfo
   },
   getPageSize(state: IEditorState) {
-    return (pageIndex: number): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string} => {
+    return (pageIndex: number): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } => {
       return {
         width: state.pages[pageIndex].config.width,
         height: state.pages[pageIndex].config.height,
@@ -392,7 +392,7 @@ const mutations: MutationTree<IEditorState> = {
   SET_pagesName(state: IEditorState, name: string) {
     state.name = name
   },
-  SET_pageSize(state: IEditorState, pageInfo: { index: number, width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string}) {
+  SET_pageSize(state: IEditorState, pageInfo: { index: number, width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string }) {
     state.pages[pageInfo.index].config.width = pageInfo.width
     state.pages[pageInfo.index].config.height = pageInfo.height
     state.pages[pageInfo.index].config.physicalWidth = pageInfo.physicalWidth

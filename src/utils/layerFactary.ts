@@ -9,7 +9,6 @@ import textPropUtils from './textPropUtils'
 import ZindexUtils from './zindexUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import mouseUtils from './mouseUtils'
-import { IPage } from '@/interfaces/page'
 
 class LayerFactary {
   newImage(config: any): IImage {
