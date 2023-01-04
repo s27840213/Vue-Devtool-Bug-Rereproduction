@@ -383,6 +383,10 @@ export default Vue.extend({
 
   &__color {
     position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 
   &__image{
