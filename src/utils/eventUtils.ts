@@ -15,7 +15,10 @@ const mobileHash = {
 
 export enum PanelEvent {
   showPhotoShadow = 'showPhotoShadow',
-  switchTab = 'switchTab'
+  switchTab = 'switchTab',
+  scrollPanelObjectToTop = 'scrollPanelObjectToTop',
+  scrollPanelTextToTop = 'scrollPanelTextToTop',
+  scrollPanelBackgroundToTop = 'scrollPanelBackgroundToTop',
 }
 
 export enum ImageEvent {

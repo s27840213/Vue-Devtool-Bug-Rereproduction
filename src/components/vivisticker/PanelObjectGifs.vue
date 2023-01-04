@@ -273,6 +273,14 @@ export default Vue.extend({
           (this.$refs.mainContent as Vue[])[0].$el.scrollTop = this.scrollTop.mainContent
         })
       }
+    },
+    categoryListArray() {
+      this.$nextTick(() => {
+        const ref = this.$refs as Record<string, Vue[]>
+        for (const name of this.targets) {
+          ref[name][0].$el.scrollTop = this.scrollTop[name]
+        }
+      })
     }
   },
   methods: {
@@ -291,6 +299,13 @@ export default Vue.extend({
       'searchMoreFavorites',
       'searchTagInFavoritesCategory'
     ]),
+    scrollToTop() {
+      for (const list of this.categoryListArray) {
+        if (list.show) {
+          (this.$refs[list.key] as Vue[])[0].$el.scrollTop = 0
+        }
+      }
+    },
     handleSearch(keyword: string) {
       if (this.showFav) {
         this.searchTagInFavoritesCategory(keyword)

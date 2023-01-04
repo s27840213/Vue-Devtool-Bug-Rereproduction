@@ -56,6 +56,7 @@ import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceCont
 import VueI18n from 'vue-i18n'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 
 export default Vue.extend({
   components: {
@@ -186,6 +187,10 @@ export default Vue.extend({
       async () => {
         await this.getRecAndCate('textStock')
       })
+    eventUtils.on(PanelEvent.scrollPanelTextToTop, this.scrollToTop)
+  },
+  beforeDestroy() {
+    eventUtils.off(PanelEvent.scrollPanelTextToTop)
   },
   activated() {
     const mainContent = (this.$refs.mainContent as Vue[])[0].$el
@@ -224,6 +229,13 @@ export default Vue.extend({
     ...mapMutations({
       setSettingsOpen: 'brandkit/SET_isSettingsOpen'
     }),
+    scrollToTop() {
+      for (const list of this.categoryListArray) {
+        if (list.show) {
+          (this.$refs[list.key] as Vue[])[0].$el.scrollTop = 0
+        }
+      }
+    },
     handleSearch(keyword: string) {
       this.resetSearch()
       if (keyword) {

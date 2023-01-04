@@ -13,8 +13,10 @@
       svg-icon(iconName="info-reverse" iconWidth="24px" iconColor="white"
               @click.native="doubleTapTips")
     keep-alive
-      panel-object-static(v-if="isStatic || isFavoritesStatic" :showFav="isFavoritesStatic")
-      panel-object-gifs(v-if="isGifs || isFavoritesGifs" :showFav="isFavoritesGifs")
+      panel-object-static(v-if="isStatic || isFavoritesStatic"
+        :showFav="isFavoritesStatic" ref="static")
+      panel-object-gifs(v-if="isGifs || isFavoritesGifs"
+        :showFav="isFavoritesGifs" ref="gif")
 </template>
 
 <script lang="ts">
@@ -25,6 +27,7 @@ import Tabs from '@/components/Tabs.vue'
 import PanelObjectStatic from '@/components/vivisticker/PanelObjectStatic.vue'
 import PanelObjectGifs from '@/components/vivisticker/PanelObjectGifs.vue'
 import modalUtils from '@/utils/modalUtils'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 
 export default Vue.extend({
   components: {
@@ -37,6 +40,12 @@ export default Vue.extend({
       currActiveTabIndex: 0,
       currActiveFavoritesIndex: 0
     }
+  },
+  mounted() {
+    eventUtils.on(PanelEvent.scrollPanelObjectToTop, this.scrollToTop)
+  },
+  beforeDestroy() {
+    eventUtils.off(PanelEvent.scrollPanelObjectToTop)
   },
   computed: {
     ...mapGetters({
@@ -52,6 +61,15 @@ export default Vue.extend({
     isFavoritesGifs(): boolean { return this.currActiveTabIndex === 2 && this.currActiveFavoritesIndex === 1 }
   },
   methods: {
+    scrollToTop() {
+      if (this.isStatic || this.isFavoritesStatic) {
+        // @ts-expect-error: Call vue child component method
+        (this.$refs.static as Vue[]).scrollToTop()
+      } else {
+        // @ts-expect-error: Call vue child component method
+        (this.$refs.gif as Vue).scrollToTop()
+      }
+    },
     switchTab(tabIndex: number) {
       this.currActiveTabIndex = tabIndex
     },
