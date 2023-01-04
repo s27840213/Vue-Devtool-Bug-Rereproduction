@@ -366,7 +366,7 @@ export class MovingUtils {
         y: moveOffset.offsetY
       }
     )
-    const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
+    const offsetSnap = this.snapUtils.calcMoveSnap(this.config, layerUtils.layerIndex)
     this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
     const totalOffset = {
       x: offsetPos.x + (offsetSnap.x * this.scaleRatio * 0.01),

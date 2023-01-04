@@ -37,14 +37,12 @@ div(class="btnList" :style="BGstyle")
 
 <script lang="ts">
 import Vue from 'vue'
-import Nubtn from '@/components/global/Nubtn.vue'
 import Checkbox from '@/components/global/Checkbox.vue'
 import Options from '@/components/global/Options.vue'
 
 export default Vue.extend({
   name: 'NubtnList',
   components: {
-    Nubtn,
     Checkbox,
     Options
   },

@@ -39,6 +39,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       const { data: { data } } = await photos.getUnsplash({ locale, pageIndex, keyword })
       commit('SET_CONTENT', { data, isSearch: !!keyword })
     } catch (error) {
+      console.error(error)
       captureException(error)
     }
   },
@@ -50,6 +51,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       const { data: { data } } = await photos.getUnsplash({ locale, pageIndex, keyword })
       commit('SET_CONTENT', { data, isSearch: !!keyword })
     } catch (error) {
+      console.error(error)
       captureException(error)
     }
   },
