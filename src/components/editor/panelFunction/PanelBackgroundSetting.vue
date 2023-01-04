@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="bg-setting")
+  div(class="bg-setting" v-click-outside="handleOutSide")
     span(class="bg-setting__title text-blue-1 label-lg") {{$t('NN0142')}}
     div(class="action-bar flex-evenly my-10")
       svg-icon(class="btn-opacity pointer p-5 feature-button"
@@ -61,7 +61,7 @@
         v-click-outside="handleOutSide")
     div(class="bg-setting__current-colors" :class="{lock: backgroundLocked}")
       color-btn(:color="colorSlipsIcon"
-                :active="colorSlipsIcon !== 'multi'"
+                :active="bgColorSelected"
                 @click="handleColorPicker()")
 </template>
 
@@ -93,7 +93,8 @@ export default Vue.extend({
       popupDatas: [
         { icon: 'flip-h', text: `${this.$t('NN0053')}` },
         { icon: 'flip-v', text: `${this.$t('NN0054')}` }
-      ]
+      ],
+      bgColorSelected: false
     }
   },
   computed: {
@@ -197,6 +198,7 @@ export default Vue.extend({
     },
     handleColorPicker() {
       if (this.backgroundLocked) return this.handleLockedNotify()
+      this.bgColorSelected = true
       // Switch to PanelBg and switch PanelBG inner tab.
       this.colorSlipsIcon === 'multi'
         ? backgroundUtils.switchPanelBgTab(0)
@@ -216,7 +218,12 @@ export default Vue.extend({
     handleLockedNotify() {
       this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
     },
-    handleOutSide() {
+    handleOutSide(e: Event) {
+      const target = e.target as HTMLElement
+      if (!target.matches('.panel-bg, .panel-bg *') &&
+        !target.matches('.bg-setting, .bg-setting *')) {
+        this.bgColorSelected = false
+      }
       this.show = ''
     }
   }
