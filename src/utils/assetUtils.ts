@@ -169,13 +169,11 @@ class AssetUtils {
     if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newLayer, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 
     if (store.getters['user/getUserId'] === 'backendRendering') {
-      if (store.getters['user/getUserId'] === 'backendRendering' && !store.getters['user/getBleed'] && !store.getters['user/getTrim']) {
-        // remove bleeds if disabled
-        resizeUtils.disableBleeds(targetPageIndex)
-      } else if (json.isEnableBleed && json.bleeds && json.physicalBleeds) {
-        // use bleeds of template if it has
-        resizeUtils.resizeBleeds(targetPageIndex, json.physicalBleeds, json.bleeds)
-      }
+      if (store.getters['user/getBleed'] || store.getters['user/getTrim']) {
+        // use bleeds of page if it has
+        resizeUtils.enableBleeds(targetPageIndex)
+        if (json.bleeds && json.physicalBleeds) resizeUtils.resizeBleeds(targetPageIndex, json.physicalBleeds, json.bleeds)
+      } else resizeUtils.disableBleeds(targetPageIndex)
     } else {
       if (targetPage.isEnableBleed && targetPage.bleeds && targetPage.physicalBleeds) {
         const resizedPage = this.getPage(targetPageIndex)
@@ -675,12 +673,13 @@ class AssetUtils {
           if (currFocusPage.isEnableBleed && currFocusPage.bleeds && currFocusPage.physicalBleeds) {
             // convert bleeds to template unit
             const dpi = pageUtils.getPageDPI(currFocusPage)
-            const physicalBleeds = currFocusPage.unit === 'px' ? currFocusPage.bleeds
-              : currFocusPage.unit === resize?.unit ? currFocusPage.physicalBleeds
-                : Object.fromEntries(Object.entries(currFocusPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, currFocusPage.unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+            const unit = resize?.unit ?? jsonDataList[0]?.unit ?? 'px'
+            const physicalBleeds = currFocusPage.unit === unit ? currFocusPage.physicalBleeds
+              : Object.fromEntries(Object.entries(currFocusPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, currFocusPage.unit, unit, k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
 
             for (const idx in jsonDataList) {
               const pageIndex = +idx + targetIndex
+              resizeUtils.enableBleeds(pageIndex)
               resizeUtils.resizeBleeds(pageIndex, physicalBleeds)
             }
           }
