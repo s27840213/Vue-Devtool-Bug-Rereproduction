@@ -80,6 +80,10 @@ import { globalQueue } from '@/utils/queueUtils'
 import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import editorUtils from '@/utils/editorUtils'
+import unitUtils, { PRECISION } from '@/utils/unitUtils'
+import { round } from 'lodash'
+import modalUtils from '@/utils/modalUtils'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   components: {
@@ -111,7 +115,8 @@ export default Vue.extend({
       from: -1,
       screenWidth: document.documentElement.clientWidth,
       screenHeight: document.documentElement.clientHeight,
-      scrollHeight: 0
+      scrollHeight: 0,
+      uploadUtils: uploadUtils
     }
   },
   created() {
@@ -156,6 +161,26 @@ export default Vue.extend({
         })
       }
     })
+
+    // check and auto resize pages oversized on design loaded
+    const unwatchPages = this.$watch('isGettingDesign', (newVal) => {
+      if (!newVal) {
+        if (this.pages.length > 0 && pageUtils.fixPageSize()) {
+          pageUtils.fitPage()
+          uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+          modalUtils.setModalInfo(
+            `${this.$t('NN0788')}`,
+            [`${this.$t('NN0789', { size: '6000 x 6000' })}`],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+          )
+        }
+        unwatchPages()
+      }
+    })
   },
   mounted() {
     // window.addEventListener('keydown', this.handleKeydown)
@@ -189,7 +214,7 @@ export default Vue.extend({
           }
 
           this.isShowGuidelineV = true
-          this.rulerVPos = Math.round(pagePos)
+          this.rulerVPos = round(unitUtils.convert(round(pagePos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().width), PRECISION)
           this.$nextTick(() => {
             const guidelineV = this.$refs.guidelineV as HTMLElement
             guidelineV.style.transform = `translate(${pos - guidelineAreaRect.left}px,0px)`
@@ -201,7 +226,7 @@ export default Vue.extend({
             this.closeGuidelineH()
           }
           this.isShowGuidelineH = true
-          this.rulerHPos = Math.round(pagePos)
+          this.rulerHPos = round(unitUtils.convert(round(pagePos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().height), PRECISION)
 
           this.$nextTick(() => {
             const guidelineH = this.$refs.guidelineH as HTMLElement
@@ -258,7 +283,8 @@ export default Vue.extend({
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isSettingScaleRatio: 'getIsSettingScaleRatio',
-      enableComponentLog: 'getEnalbleComponentLog'
+      enableComponentLog: 'getEnalbleComponentLog',
+      pagesLength: 'getPagesLength'
     }),
     pages(): Array<IPage> {
       return (this.pagesState as Array<IPageState>).map(p => p.config)
@@ -295,6 +321,9 @@ export default Vue.extend({
     },
     showRuler(): boolean {
       return this._showRuler && !this.inBgRemoveMode
+    },
+    isGettingDesign(): boolean {
+      return this.uploadUtils.isGettingDesign
     }
   },
   methods: {
@@ -340,7 +369,7 @@ export default Vue.extend({
          */
         if (ControlUtils.isClickOnController(e)) {
           const movingUtils = new MovingUtils({
-            _config: { config: layerUtils.getCurrLayer },
+            _config: { config: generalUtils.deepCopy(layerUtils.getCurrLayer) },
             snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
             body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
           })
@@ -509,7 +538,7 @@ export default Vue.extend({
       eventUtils.addPointerEvent('pointerup', this.dragEndV)
     },
     draggingV(e: PointerEvent) {
-      this.rulerVPos = Math.trunc(this.mapGuidelineToPage('v').pos)
+      this.rulerVPos = round(unitUtils.convert(Math.trunc(this.mapGuidelineToPage('v').pos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().width), PRECISION)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineV(this.currentRelPos)
     },
@@ -580,7 +609,7 @@ export default Vue.extend({
       window.addEventListener('mouseup', this.dragEndH)
     },
     draggingH(e: MouseEvent) {
-      this.rulerHPos = Math.trunc(this.mapGuidelineToPage('h').pos)
+      this.rulerHPos = round(unitUtils.convert(Math.trunc(this.mapGuidelineToPage('h').pos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().height), PRECISION)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineH(this.currentRelPos)
     },
