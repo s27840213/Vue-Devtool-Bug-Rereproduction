@@ -18,6 +18,7 @@
       :class="{'show-document-colors': showDocumentColors}"
       mode="PanelColor"
       :allRecentlyControl="showAllRecently"
+      :selectedColor="selectedColor"
       @openColorPicker="openColorPicker"
       @openColorMore="openColorMore")
 </template>
@@ -127,6 +128,20 @@ export default Vue.extend({
     },
     showAllRecently(): boolean {
       return this.lastHistory === 'color-more'
+    },
+    selectedColor(): string {
+      switch (this.currEvent) {
+        case ColorEventType.text:
+          return colorUtils.globalSelectedColor.textColor
+        case ColorEventType.textEffect:
+          return textEffectUtils.currColor
+        case ColorEventType.textBg:
+          return textBgUtils.currColor
+        case ColorEventType.shape:
+          return this.getDocumentColors[this.currSelectedColorIndex]
+        default:
+          return colorUtils.globalSelectedColor.color
+      }
     },
     colorsStyle(): Record<string, string> {
       // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847

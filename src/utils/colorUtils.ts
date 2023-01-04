@@ -40,6 +40,10 @@ class ColorUtils {
         const frameColors = shapeUtils.getDocumentColors
         return { textColor: '', color: frameColors.length > 1 ? 'multi' : frameColors[0] }
       }
+      case 'image': {
+        const color = currLayer.styles.shadow.effects.color
+        return { textColor: '', color, currEventColor }
+      }
       case 'shape':
         return { textColor: '', color: currLayer.color.length > 1 ? 'multi' : currLayer.color[0] }
       case 'tmp':

@@ -104,7 +104,7 @@ export default Vue.extend({
     currentStyle(): { shadow: ITextEffect, bg: ITextBgEffect, shape: ITextShape } {
       const { styles } = textEffectUtils.getCurrentLayer()
       return {
-        shadow: Object.assign({ name: 'none' }, styles.textEffect as ITextEffect),
+        shadow: Object.assign({ name: 'none' }, styles?.textEffect as ITextEffect),
         bg: styles.textBg as ITextBgEffect,
         shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
       }

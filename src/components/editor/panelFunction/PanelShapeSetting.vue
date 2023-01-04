@@ -732,7 +732,7 @@ export default Vue.extend({
 
     &-filled {
       @extend .shape-setting__value-selector;
-      left: 0;
+      left: -70%;
     }
   }
   &__color-picker {

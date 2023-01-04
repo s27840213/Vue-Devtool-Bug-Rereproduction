@@ -131,11 +131,11 @@ export default Vue.extend({
         }
       }
     },
-    handleColorModal(category: string, key: string) {
+    handleColorModal(category: 'shadow'|'bg', key: string) {
       this.colorTarget = { category, key }
       editorUtils.toggleColorSlips(true)
       colorUtils.setCurrEvent(ColorEventType.textEffect)
-      colorUtils.setCurrColor(this.currentStyle.shadow.color as string)
+      colorUtils.setCurrColor((this.currentStyle[category] as Record<string, string>)[key])
       this.colorUtilsCurrEvent = colorUtils.currEvent
     },
     switchTab(category: 'shadow'|'bg'|'shape') {
