@@ -528,14 +528,14 @@ export default Vue.extend({
       GroupUtils.reset()
 
       pageUtils.addPageToPos(pageUtils.newPage({
-        width: this.config.width,
-        height: this.config.height,
-        physicalWidth: this.config.physicalWidth,
-        physicalHeight: this.config.physicalHeight,
-        isEnableBleed: this.config.isEnableBleed,
-        bleeds: this.config.bleeds,
-        physicalBleeds: this.config.physicalBleeds,
-        unit: this.config.unit
+        width: this.pageState.config.width,
+        height: this.pageState.config.height,
+        physicalWidth: this.pageState.config.physicalWidth,
+        physicalHeight: this.pageState.config.physicalHeight,
+        isEnableBleed: this.pageState.config.isEnableBleed,
+        bleeds: this.pageState.config.bleeds,
+        physicalBleeds: this.pageState.config.physicalBleeds,
+        unit: this.pageState.config.unit
       }), this.pageIndex + 1)
 
       // remove top and bottom bleeds for email marketing design
