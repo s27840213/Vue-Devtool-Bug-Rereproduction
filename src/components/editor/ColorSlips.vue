@@ -91,6 +91,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   name: 'ColorSlips',
@@ -271,15 +272,8 @@ export default Vue.extend({
       this.openColorPicker = false
     },
     clickOutside(): void {
-      const sel = window.getSelection()
-      if (sel && sel.rangeCount) {
-        const target = sel?.getRangeAt(0).startContainer
-        if (target && target instanceof HTMLElement && target.classList.contains('input-color')) {
-          return
-        }
-      }
       this.closeColorModal()
-      this.$emit('toggleColorPanel', false)
+      this.closePanel()
     },
     middleware(event: MouseEvent): boolean {
       return this.mode === 'PanelBG' ? false // Never close in PanelBG
@@ -287,7 +281,7 @@ export default Vue.extend({
         : !(event.target as HTMLElement).matches('.function-panel .color-btn *')
     },
     closePanel(): void {
-      this.$emit('toggleColorPanel', false)
+      editorUtils.toggleColorSlips(false)
     },
     openColorPanel(event: MouseEvent) {
       if (generalUtils.isTouchDevice()) {

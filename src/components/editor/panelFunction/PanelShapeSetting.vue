@@ -139,10 +139,10 @@
     div(class="shape-setting__colors")
       color-btn(v-if="hasMultiColors"
                 :color="groupColor()"
-                :active="true"
+                :active="showColorSlips"
                 @click="selectColor(0)")
       color-btn(v-else v-for="(color, index) in getDocumentColors" :color="color"
-                :active="index === currSelectedColorIndex"
+                :active="showColorSlips && index === currSelectedColorIndex"
                 @click="selectColor(index)")
     //- 管理介面
     div(class="shape-setting__info")
@@ -223,6 +223,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import designApis from '@/apis/design-info'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   components: {
@@ -315,12 +316,9 @@ export default Vue.extend({
     ...mapState('user', [
       'role',
       'adminMode']),
-    ...mapState(
-      'markers',
-      [
-        'categories'
-      ]
-    ),
+    ...mapState('markers', [
+      'categories'
+    ]),
     inAdminMode(): boolean {
       return this.role === 0 && this.adminMode === true
     },
@@ -343,6 +341,9 @@ export default Vue.extend({
     },
     currLayer(): ILayer {
       return this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex) as ILayer
+    },
+    showColorSlips(): boolean {
+      return editorUtils.showColorSlips
     },
     hasMultiColors(): boolean {
       return shapeUtils.hasMultiColors
@@ -439,7 +440,7 @@ export default Vue.extend({
     selectColor(index: number) {
       this.currSelectedColorIndex = index
       colorUtils.setCurrColor(this.getDocumentColors[index])
-      this.$emit('toggleColorPanel', true)
+      editorUtils.toggleColorSlips(true)
     },
     openLineSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineWidth)

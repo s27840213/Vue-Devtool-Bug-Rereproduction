@@ -34,11 +34,11 @@
       panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
       panel-general(v-if="showGeneral")
       panel-page-setting(v-if="showPageSetting")
-      panel-background-setting(v-if="showPageSetting" @toggleColorPanel="toggleColorPanel")
-      panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel" @toggleColorPanel="toggleColorPanel")
+      panel-background-setting(v-if="showPageSetting")
+      panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel")
       panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
-      panel-photo-setting(v-if="showPhotoSetting" @toggleColorPanel="toggleColorPanel")
-      panel-shape-setting(v-if="showShapeSetting" @toggleColorPanel="toggleColorPanel")
+      panel-photo-setting(v-if="showPhotoSetting")
+      panel-shape-setting(v-if="showShapeSetting")
       panel-img-ctrl(v-if="isImgCtrl")
 </template>
 
@@ -212,9 +212,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    toggleColorPanel(bool: boolean) {
-      this.$emit('toggleColorPanel', bool)
-    },
     targetIs(type: string): boolean {
       if (this.isGroup) {
         if (this.hasSubSelectedLayer) {

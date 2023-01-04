@@ -123,13 +123,6 @@ export default Vue.extend({
         this.handleColor = true
         this.$emit('openExtraColorModal', ColorEventType.photoShadow, MobileColorPanelType.palette)
       }
-      // TODO
-      // if (tab.panelType !== undefined) {
-      //   this.$emit('switchTab', tab.panelType, tab.props)
-      // }
-      // this.$emit('toggleColorPanel', true)
-      // colorUtils.setCurrEvent(ColorEventType.photoShadow)
-      // colorUtils.setCurrColor(this.currentStyle.shadow.effects.color)
     }
   }
 })

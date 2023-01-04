@@ -66,6 +66,7 @@ const getDefaultState = (): IEditorState => ({
   name: '',
   currSidebarPanelType: SidebarPanelType.template,
   mobileSidebarPanelOpen: false,
+  showColorSlips: false,
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
   isSettingScaleRatio: false,
@@ -306,6 +307,16 @@ const getters: GetterTree<IEditorState, unknown> = {
 }
 
 const mutations: MutationTree<IEditorState> = {
+  SET_STATE(state: IEditorState, data: Partial<IEditorState>) {
+    const newState = data || getDefaultState()
+    const keys = Object.keys(newState) as Array<keyof IEditorState>
+    keys
+      .forEach(key => {
+        if (key in state) {
+          (state[key] as unknown) = newState[key]
+        }
+      })
+  },
   SET_pages(state: IEditorState, newPageConfigs: Array<IPage> | { name: string, pages: Array<IPage>, loadDesign: boolean, groupId: string, groupType: number, exportIds: string }) {
     groupUtils.reset()
     if (Array.isArray(newPageConfigs)) {

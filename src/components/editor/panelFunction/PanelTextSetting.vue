@@ -93,6 +93,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   components: {
@@ -289,7 +290,7 @@ export default Vue.extend({
       const input = this.$refs['input-color'] as HTMLInputElement
       input.focus()
       input.select()
-      this.$emit('toggleColorPanel', true)
+      editorUtils.toggleColorSlips(true)
       this.updateLayerProps({ isEdited: true })
     },
     handleColorUpdate(color: string) {

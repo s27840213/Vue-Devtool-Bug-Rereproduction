@@ -78,6 +78,7 @@ import constantData, { IEffect, IEffectCategory, IEffectOption } from '@/utils/c
 import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 import localStorageUtils from '@/utils/localStorageUtils'
 import _ from 'lodash'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   components: {
@@ -121,7 +122,7 @@ export default Vue.extend({
   methods: {
     handleColorModal(category: string, key: string) {
       this.colorTarget = { category, key }
-      this.$emit('toggleColorPanel', true)
+      editorUtils.toggleColorSlips(true)
       colorUtils.setCurrEvent(ColorEventType.textEffect)
       colorUtils.setCurrColor(this.currentStyle.shadow.color as string)
     },
