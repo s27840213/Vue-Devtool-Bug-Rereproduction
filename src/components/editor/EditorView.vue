@@ -361,7 +361,8 @@ export default Vue.extend({
         }
       }
     },
-    selectStart(e: MouseEvent) {
+    selectStart(e: PointerEvent) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return
       if (layerUtils.layerIndex !== -1) {
         /**
          * when the user click the control-region outsize the page,
@@ -544,11 +545,36 @@ export default Vue.extend({
     },
     dragEndV(e: PointerEvent) {
       RulerUtils.setIsDragging(false)
-      if (this.mapGuidelineToPage('v').outOfPage) {
-        this.isShowGuidelineV = false
-        StepsUtils.record()
+      if (this.from === -1) {
+        const mouseOverPageIndex = RulerUtils.getMouseOverPageIndex(e)
+        if (mouseOverPageIndex === -1) { // if no page contains mouse
+          const mostlyOverlappedPageIndex = RulerUtils.getMostlyOverlappedPageIndex(e)
+          if (mostlyOverlappedPageIndex === -1) {
+            this.isShowGuidelineV = false
+            StepsUtils.record()
+          } else {
+            this.from = mostlyOverlappedPageIndex
+            if (pageUtils.currFocusPageIndex !== mostlyOverlappedPageIndex) {
+              GroupUtils.deselect()
+            }
+            this.setCurrActivePageIndex(mostlyOverlappedPageIndex)
+            this.closeGuidelineV(true)
+          }
+        } else {
+          this.from = mouseOverPageIndex
+          if (pageUtils.currFocusPageIndex !== mouseOverPageIndex) {
+            GroupUtils.deselect()
+          }
+          this.setCurrActivePageIndex(mouseOverPageIndex)
+          this.closeGuidelineV(true)
+        }
       } else {
-        this.closeGuidelineV(true)
+        if (this.mapGuidelineToPage('v').outOfPage) {
+          this.isShowGuidelineV = false
+          StepsUtils.record()
+        } else {
+          this.closeGuidelineV(true)
+        }
       }
       this.$nextTick(() => {
         eventUtils.removePointerEvent('pointermove', this.draggingV)
@@ -615,13 +641,29 @@ export default Vue.extend({
     },
     dragEndH(e: MouseEvent) {
       RulerUtils.setIsDragging(false)
-      if (this.mapGuidelineToPage('h').outOfPage) {
-        this.isShowGuidelineH = false
-        StepsUtils.record()
+      if (this.from === -1) {
+        const guideline = this.$refs.guidelineH as HTMLElement
+        const overlappedPageIndex = RulerUtils.getOverlappedPageIndex(guideline, 'h')
+        if (overlappedPageIndex === -1) {
+          this.isShowGuidelineH = false
+          StepsUtils.record()
+        } else {
+          this.from = overlappedPageIndex
+          if (pageUtils.currFocusPageIndex !== overlappedPageIndex) {
+            GroupUtils.deselect()
+          }
+          this.setCurrActivePageIndex(overlappedPageIndex)
+          this.closeGuidelineH(true)
+        }
       } else {
-        // close EditorView guideline then put it into page
-        // or the record point will have some trouble
-        this.closeGuidelineH(true)
+        if (this.mapGuidelineToPage('h').outOfPage) {
+          this.isShowGuidelineH = false
+          StepsUtils.record()
+        } else {
+          // close EditorView guideline then put it into page
+          // or the record point will have some trouble
+          this.closeGuidelineH(true)
+        }
       }
       this.$nextTick(() => {
         window.removeEventListener('mousemove', this.draggingH)
@@ -814,8 +856,8 @@ $REULER_SIZE: 20px;
       transform: rotate(180deg);
       border-radius: 50px;
       color: setColor(white);
-      padding: 0.2rem 0.4rem;
-      font-size: 0.325rem;
+      padding: 3.2px 6.4px;
+      font-size: 12px;
       top: 5px;
       left: 0;
     }
@@ -824,8 +866,8 @@ $REULER_SIZE: 20px;
       left: 5px;
       border-radius: 50px;
       color: setColor(white);
-      padding: 0.2rem 0.4rem;
-      font-size: 0.325rem;
+      padding: 3.2px 6.4px;
+      font-size: 12px;
     }
   }
 }
