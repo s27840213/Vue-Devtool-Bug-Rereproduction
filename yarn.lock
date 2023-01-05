@@ -5709,10 +5709,10 @@ flatted@^2.0.0:
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-2.0.2.tgz#4575b21e2bcee7434aa9be662f4b7b5f9c2b5138"
   integrity sha512-r5wGx7YeOwNWNlCA0wQ86zKyDLMQr+/RB8xy74M4hTphfmjlijTSSXGuH8rnvKZnfT9i+75zmd8jcKdMR4O6jA==
 
-floating-vue@^1.0.0-beta.5:
-  version "1.0.0-beta.18"
-  resolved "https://registry.yarnpkg.com/floating-vue/-/floating-vue-1.0.0-beta.18.tgz#48a9fb79c425db2ec4374059f5a3b9ffa060ea3a"
-  integrity sha512-mRFc78szc1BTbhlCa4okb7wAGPuH/IID+yqJ+yrTMQ038H8WIAsPV/WFgWCaXqe8d1Z12LkMqiHDVorCJy8M2A==
+floating-vue@^1.0.0-beta.19:
+  version "1.0.0-beta.19"
+  resolved "https://registry.yarnpkg.com/floating-vue/-/floating-vue-1.0.0-beta.19.tgz#9ba42675bada14fc3523e0972731d4bbc67fb534"
+  integrity sha512-OcM7z5Ua4XAykqolmvPj3l1s+KqUKj6Xz2t66eqjgaWfNBjtuifmxO5+4rRXakIch/Crt8IH+vKdKcR3jOUaoQ==
   dependencies:
     "@floating-ui/dom" "^0.1.10"
     vue-resize "^1.0.0"
