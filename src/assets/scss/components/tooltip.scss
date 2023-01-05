@@ -1,6 +1,6 @@
 @use '@/assets/scss/utils' as *;
 
-.v-popper--theme-hint {
+.v-popper--theme-hint, .v-popper--theme-hint-menu{
 	color: setColor(white);
 
 	.v-popper__inner {

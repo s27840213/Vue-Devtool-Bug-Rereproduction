@@ -63,12 +63,32 @@
             :label="`${$t('NN0775')}`"
             :default-checked="!!selected.bleed"
             @change="({ checked }) => {handleUpdate('bleed', checked ? 1 : 0); if('trim' in selected && !checked && selected.trim === 1) handleUpdate('trim', 0)}")
-        div(v-if="'outline' in selected")
+        div(v-if="selectedTypeVal.includes('pdf_print') && 'outline' in selected" style='display: flex; gap: 8px;')
           download-check-button(type="checkbox"
             class="mb-10"
             :label="`${$t('NN0794')}`"
-            :default-checked="!!selected.outline"
+            :default-checked="selected.outline===1"
             @change="({ checked }) => handleUpdate('outline', checked ? 1 : 0)")
+          v-tooltip(theme="hint-menu")
+            svg-icon(iconName="info"
+              :iconWidth="'16px'"
+              :iconColor="'gray-2'")
+            template(#popper)
+              span {{'此為印刷廠一般要求。'}}
+                a(class="text-white" href="https://vivipic.com/" target="_blank") {{'了解更多'}}
+        div(v-if="'outline' in selected" style='display: flex; gap: 8px;')
+          download-check-button(type="checkbox"
+            class="mb-10"
+            :label="`${$t('NN0776')}`"
+            :default-checked="selected.outline===2"
+            @change="({ checked }) => handleUpdate('outline', checked ? 2 : 0)")
+          v-tooltip(theme="hint-menu")
+            svg-icon(iconName="info"
+              :iconWidth="'16px'"
+              :iconColor="'gray-2'")
+            template(#popper)
+              span {{'轉為點陣圖檔。'}}
+                a(class="text-white" href="https://vivipic.com/" target="_blank") {{'了解更多'}}
         div(v-if="selectedTypeVal.includes('pdf')"
           class="flex items-center mb-10")
           span {{$t('NN0777')}}
@@ -178,6 +198,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import pageUtils from '@/utils/pageUtils'
 import gtmUtils from '@/utils/gtmUtils'
+import { Tooltip } from 'floating-vue'
 
 const submission = `${process.env.VUE_APP_VERSION}::download_submission`
 
@@ -185,7 +206,8 @@ export default Vue.extend({
   components: {
     DownloadCheckButton,
     DownloadTypeOption,
-    DownloadPageSelection
+    DownloadPageSelection,
+    VTooltip: Tooltip
   },
   directives: {
     clickOutside: vClickOutside.directive
