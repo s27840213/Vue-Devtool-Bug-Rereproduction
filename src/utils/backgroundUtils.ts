@@ -200,6 +200,22 @@ class BackgroundUtils {
       editorUtils.setInBgSettingMode(true)
     }
   }
+
+  fitPageBackground(pageIndex: number) {
+    const page = pageUtils.getPage(pageIndex)
+    const { width, height, posX, posY } = imageUtils.adaptToPage({
+      width: page.backgroundImage.config.styles.initWidth || page.backgroundImage.config.styles.width,
+      height: page.backgroundImage.config.styles.initHeight || page.backgroundImage.config.styles.height
+    }, page)
+    pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
+    pageUtils.updateBackgroundImageStyles(
+      pageIndex, {
+        width,
+        height,
+        imgWidth: width,
+        imgHeight: height
+      })
+  }
 }
 
 const backgroundUtils = new BackgroundUtils()

@@ -25,6 +25,7 @@ import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import mathUtils from './mathUtils'
 import unitUtils from './unitUtils'
+import backgroundUtils from './backgroundUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -189,22 +190,8 @@ class AssetUtils {
         resizeUtils.resizeBleeds(targetPageIndex, physicalBleeds)
       }
 
-      // adapt background to page
-      if (json.backgroundImage.config.srcObj.assetId) {
-        const page = this.getPage(targetPageIndex)
-        const { width, height, posX, posY } = ImageUtils.adaptToPage({
-          width: json.backgroundImage.config.styles.initWidth || json.backgroundImage.config.styles.width,
-          height: json.backgroundImage.config.styles.initHeight || json.backgroundImage.config.styles.height
-        }, page)
-        pageUtils.updateBackgroundImagePos(targetPageIndex, posX, posY)
-        pageUtils.updateBackgroundImageStyles(
-          targetPageIndex, {
-            width,
-            height,
-            imgWidth: width,
-            imgHeight: height
-          })
-      }
+      // fit page background if the template has background image
+      if (json.backgroundImage.config.srcObj.assetId) backgroundUtils.fitPageBackground(targetPageIndex)
     }
     store.commit('SET_currActivePageIndex', targetPageIndex)
     if (recordStep) {
@@ -657,6 +644,7 @@ class AssetUtils {
           // @TODO: resize page/layer before adding to the store.
           if (resize) {
             resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
+            backgroundUtils.fitPageBackground(targetIndex)
           }
           if ((groupType === 1 || currGroupType === 1) && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
