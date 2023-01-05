@@ -257,12 +257,12 @@ export default Vue.extend({
       switch (config.type) {
         case LayerType.image:
           return {
-            width: config.styles.height * contentScaleRatio,
+            width: config.styles.width * contentScaleRatio,
             height: config.styles.height * contentScaleRatio
           }
         default: {
           return {
-            width: config.styles.height * contentScaleRatio / config.styles.scale,
+            width: config.styles.width * contentScaleRatio / config.styles.scale,
             height: config.styles.height * contentScaleRatio / config.styles.scale
           }
         }
