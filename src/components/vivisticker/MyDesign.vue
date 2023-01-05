@@ -118,11 +118,9 @@ export default Vue.extend({
   watch: {
     isInMyDesign(newVal) {
       if (newVal) {
-        this.refreshDesigns(this.myDesignTab).then((refetched) => {
-          if (!refetched) {
-            this.restoreScrollTop(this.myDesignTab)
-          }
-        })
+        this.refreshDesigns(this.myDesignTab)
+        const content = this.$refs.content as Vue
+        content.$el.scrollTop = 0
       }
     },
     isInEditor(newVal) {

@@ -18,6 +18,7 @@
                   v-show="item.show" :ref="item.key" :key="item.key"
                   :list="item.content" @loadMore="item.loadMore")
       template(#before)
+        div(class="panel-static__top-item")
         tags(v-if="!isInCategory && tags && tags.length" class="panel-static__tags" style="margin-top: 0"
             :tags="tags" theme="dark" @search="handleSearch")
         //- Search result empty msg
@@ -304,7 +305,9 @@ export default Vue.extend({
     scrollToTop() {
       for (const list of this.categoryListArray) {
         if (list.show) {
-          (this.$refs[list.key] as Vue[])[0].$el.scrollTop = 0
+          const categoryList = (this.$refs[list.key] as Vue[])[0]
+          const top = categoryList.$el.querySelector('.panel-static__top-item') as HTMLElement
+          top.scrollIntoView({ behavior: 'smooth' })
         }
       }
     },

@@ -6,7 +6,7 @@
           :defaultTab="currActiveTabIndex"
           @switchTab="switchTab")
     template(v-show="showImageTab")
-      search-bar(v-if="!isInCategory" class="panel-bg__searchbar"
+      search-bar(v-if="!isInCategory && showImageTab" class="panel-bg__searchbar"
         :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
         clear
         :defaultKeyword="keywordLabel"
@@ -18,6 +18,8 @@
                   v-show="item.show" :ref="item.key" :key="item.key"
                   class="panel-bg__list"
                   :list="item.content" @loadMore="handleLoadMore")
+        template(#before)
+          div(class="panel-bg__top-item")
         template(v-slot:category-list-rows="{ list, title }")
           category-list-rows(
             :list="list"
@@ -327,7 +329,9 @@ export default Vue.extend({
     scrollToTop() {
       for (const list of this.categoryListArray) {
         if (list.show) {
-          (this.$refs[list.key] as Vue[])[0].$el.scrollTop = 0
+          const categoryList = (this.$refs[list.key] as Vue[])[0]
+          const top = categoryList.$el.querySelector('.panel-bg__top-item') as HTMLElement
+          top.scrollIntoView({ behavior: 'smooth' })
         }
       }
     },
