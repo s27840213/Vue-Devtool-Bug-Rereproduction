@@ -16,7 +16,7 @@ class DownloadUtil {
       // bleed: 0
     },
     pdf_standard: {
-      outline: 1,
+      outline: 0,
       cmyk: 0
     },
     pdf_print: {
