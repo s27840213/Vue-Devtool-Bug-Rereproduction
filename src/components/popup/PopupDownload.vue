@@ -182,7 +182,9 @@
             iconName="loading"
             iconColor="white"
             iconWidth="20px")
-          span(v-else) {{$t('NN0010')}}
+          span(v-else class="popup-download__btn")
+            svg-icon(v-if="selectedTypeVal === 'pdf_print'" iconName="pro" iconWidth="22px" iconColor="alarm")
+            span {{$t('NN0010')}}
 </template>
 
 <script lang="ts">
@@ -199,6 +201,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import pageUtils from '@/utils/pageUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import { Tooltip } from 'floating-vue'
+import paymentUtils from '@/utils/paymentUtils'
 
 const submission = `${process.env.VUE_APP_VERSION}::download_submission`
 
@@ -266,7 +269,7 @@ export default Vue.extend({
         { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
         { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` },
         { value: 'pdf_standard', name: `${this.$t('NN0770')}`, desc: `${this.$t('NN0772')}` },
-        { value: 'pdf_print', name: `${this.$t('NN0771')}`, desc: `${this.$t('NN0773')}` }
+        { value: 'pdf_print', name: `${this.$t('NN0771')}`, desc: `${this.$t('NN0773')}`, tag: 'pro' }
         // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
         // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
         // { id: 'gif', name: 'GIF', desc: '短片' }
@@ -409,6 +412,7 @@ export default Vue.extend({
       this.saveSubmission = checked
     },
     handleSubmit(useDev = false) {
+      if (this.selectedTypeVal === 'pdf_print' && !paymentUtils.checkPro({ plan: 1 }, 'export-pdf-print')) return
       this.polling = true
       this.exportId ? this.handleDownload(useDev) : (this.functionQueue = [() => this.handleDownload(useDev)])
     },
@@ -583,6 +587,11 @@ export default Vue.extend({
     transition: 0.3s;
     border-radius: 4px;
     background-color: setColor(blue-1);
+  }
+  &__btn{
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
   .property-bar,
   .btn {

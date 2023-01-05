@@ -195,6 +195,7 @@ export default Vue.extend({
     async changeView(name: IPaymentView) {
       this.view = name
       switch (name) {
+        case 'export-pdf-print':
         case 'page-resize':
         case 'brandkit':
         case 'bgrm':
