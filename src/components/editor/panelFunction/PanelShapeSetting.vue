@@ -136,14 +136,16 @@
             svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
             div(:style="`font-size: ${$i18n.locale === 'us' ? '12px': ''}`") {{$t('NN0086')}}
     //- Shape color setting
-    div(class="shape-setting__colors")
-      color-btn(v-if="hasMultiColors"
-                :color="groupColor()"
-                :active="showColorSlips"
-                @click="selectColor(0)")
-      color-btn(v-else v-for="(color, index) in getDocumentColors" :color="color"
-                :active="showColorSlips && index === currSelectedColorIndex"
-                @click="selectColor(index)")
+    div(class="shape-setting__shape-colors")
+      span {{$t('NN0798')}}
+      div(class="shape-setting__colors")
+        color-btn(v-if="hasMultiColors"
+                  :color="groupColor()"
+                  :active="showColorSlips"
+                  @click="selectColor(0)")
+        color-btn(v-else v-for="(color, index) in getDocumentColors" :color="color"
+                  :active="showColorSlips && index === currSelectedColorIndex"
+                  @click="selectColor(index)")
     //- 管理介面
     div(class="shape-setting__info")
       div(v-if="inAdminMode && isObjectElement")
@@ -698,9 +700,14 @@ export default Vue.extend({
   > div {
     margin-top: 10px;
   }
+  &__shape-colors {
+    @include text-H6;
+    color: setColor(blue-1);
+    text-align: left;
+  }
   &__colors {
     width: 100%;
-    margin-top: 10px;
+    margin-top: 15px;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 12px;

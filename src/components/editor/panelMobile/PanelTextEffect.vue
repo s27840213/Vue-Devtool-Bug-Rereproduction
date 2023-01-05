@@ -52,7 +52,7 @@
         div(v-if="option.type === 'color'"
           class="panel-text-effect__color")
           div {{option.label}}
-          color-btn(:color="currentStyle[currCategory.name][option.key]"
+          color-btn(:color="colorParser(currentStyle[currCategory.name][option.key])"
                   size="24px" @click="openColorPanel(option.key)")
       span(class="panel-text-effect__reset label-mid"
           @click="resetTextEffect()") {{$t('NN0754')}}
@@ -193,7 +193,7 @@ export default Vue.extend({
       }
     },
     colorParser(color: string) {
-      return { backgroundColor: textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer()) }
+      return textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer())
     }
   }
 })

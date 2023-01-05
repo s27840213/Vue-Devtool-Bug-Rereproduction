@@ -12,8 +12,6 @@ const STOP_POSTFIX = '_st'
 class ColorUtils {
   event: any
   eventHash: { [index: string]: (color: string) => void }
-  currEvent: string
-  currColor: string
 
   get currPageBackgroundColor() {
     return pageUtils.currFocusPage.backgroundColor
@@ -22,30 +20,31 @@ class ColorUtils {
   constructor() {
     this.event = new EventEmitter()
     this.eventHash = {}
-    this.currEvent = ''
-    this.currColor = '#ffffff'
   }
 
+  get currEvent(): string { return store.getters['color/currEvent'] }
+  get currColor(): string { return store.getters['color/currColor'] }
   get currStopEvent(): string { return this.currEvent + STOP_POSTFIX }
 
-  get globalSelectedColor(): { textColor: string, color: string /* for shape/bg */ } {
+  get globalSelectedColor(): { textColor: string, color: string /* for shape/bg */, currEventColor: string } {
     const currPage = layerUtils.getCurrPage
     const currLayer = layerUtils.getCurrLayer
+    const currEventColor = this.currColor
     switch (currLayer.type) {
       case 'text': {
         const textColors = uniq(flatten(currLayer.paragraphs.map(p => p.spans.map(s => s.styles.color))))
-        return { textColor: textColors.length > 1 ? 'multi' : textColors[0], color: '' }
+        return { textColor: textColors.length > 1 ? 'multi' : textColors[0], color: '', currEventColor }
       }
       case 'frame': {
         const frameColors = shapeUtils.getDocumentColors
-        return { textColor: '', color: frameColors.length > 1 ? 'multi' : frameColors[0] }
+        return { textColor: '', color: frameColors.length > 1 ? 'multi' : frameColors[0], currEventColor }
       }
       case 'image': {
         const color = currLayer.styles.shadow.effects.color
         return { textColor: '', color, currEventColor }
       }
       case 'shape':
-        return { textColor: '', color: currLayer.color.length > 1 ? 'multi' : currLayer.color[0] }
+        return { textColor: '', color: currLayer.color.length > 1 ? 'multi' : currLayer.color[0], currEventColor }
       case 'tmp':
       case 'group': {
         const singleColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length === 1) as IShape[]
@@ -54,13 +53,14 @@ class ColorUtils {
         const textColors = uniq(flatten(flatten(texts.map(t => t.paragraphs.map(p => p.spans.map(s => s.styles.color))))))
         return {
           textColor: textColors.length > 1 ? 'multi' : textColors[0],
-          color: shapeColors.length > 1 ? 'multi' : shapeColors[0]
+          color: shapeColors.length > 1 ? 'multi' : shapeColors[0],
+          currEventColor
         }
       }
       default: {
         const bgColor = currPage.backgroundImage.config.srcObj.assetId ? 'multi' : currPage.backgroundColor
         const color = store.getters['mobileEditor/getInBgSettingMode'] ? bgColor : ''
-        return { textColor: '', color }
+        return { textColor: '', color, currEventColor }
       }
     }
   }
@@ -84,12 +84,12 @@ class ColorUtils {
   }
 
   setCurrEvent(event: string) {
-    this.currEvent = event
+    store.commit('color/SET_STATE', { currEvent: event })
   }
 
   setCurrColor(color: string) {
     if (/^#[0-9A-F]{6}$/i.test(color)) {
-      this.currColor = color
+      store.commit('color/SET_STATE', { currColor: color })
     }
   }
 

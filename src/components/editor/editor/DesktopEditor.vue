@@ -33,6 +33,7 @@
           function-panel
           transition(name="panel-up")
             color-slips(v-if="showColorSlips" mode="FunctionPanel"
+              :selectedColor="currEventColor()"
               class="content__panel__color-panel")
         div(v-if="isShowPagePreview" class="content__pages")
           page-preview
@@ -223,6 +224,9 @@ export default Vue.extend({
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'
     }),
+    currEventColor(): string {
+      return colorUtils.globalSelectedColor.currEventColor
+    },
     setAdminMode() {
       this._setAdminMode(!this.adminMode)
     },

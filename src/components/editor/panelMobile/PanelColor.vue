@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="panel-color px-5")
     div(v-if="showDocumentColors")
-      div(class="text-left") {{$t('NN0003')}}{{$t('NN0017')}}
+      div(class="text-left") {{$t('NN0798')}}
       div(class="panel-color__document-colors" :style="colorsStyle"
           @scroll.passive="updateColorsOverflow" ref="colors")
         color-btn(v-for="(color, index) in getDocumentColors"

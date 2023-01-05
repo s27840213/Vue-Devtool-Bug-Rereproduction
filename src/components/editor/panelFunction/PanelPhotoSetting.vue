@@ -3,16 +3,15 @@
     span(class="photo-setting__title text-blue-1 subtitle-1") {{$t('NN0039')}}
     div(class="photo-setting__grid mb-10")
       template(v-for="btn in btns")
-        div(v-hint="disableBtn(btn) ? btn.hint : ''")
-          btn(v-if="!btn.condition || btn.condition()"
-            class="full-width"
-            :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0]"
-            type="gray-mid"
-            ref="btn"
-            :disabled="disableBtn(btn)"
-            :key="btn.name"
-            @click.native="handleShow(btn.show)") {{ btn.label }}
-            //- v-hint="(btn.hint && btn.hint.condition()) ? btn.hint.content : ''"
+        btn(v-if="!btn.condition || btn.condition()"
+          class="full-width"
+          :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0]"
+          type="gray-mid"
+          ref="btn"
+          :disabled="disableBtn(btn)"
+          :key="btn.name"
+          v-hint="disableBtn(btn) ? btn.hint : ''"
+          @click.native="handleShow(btn.show)") {{ btn.label }}
       btn(v-if="isImage && !isFrame"
         class="full-width"
         type="gray-mid"
