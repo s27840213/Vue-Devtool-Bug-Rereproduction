@@ -6,7 +6,7 @@
           :defaultTab="currActiveTabIndex"
           @switchTab="switchTab")
     template(v-show="showImageTab")
-      search-bar(v-if="!isInCategory" class="panel-bg__searchbar"
+      search-bar(v-if="!isInCategory && showImageTab" class="panel-bg__searchbar"
         :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
         clear
         :defaultKeyword="keywordLabel"
