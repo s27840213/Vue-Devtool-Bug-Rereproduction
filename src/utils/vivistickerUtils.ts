@@ -25,7 +25,7 @@ import modalUtils from './modalUtils'
 import frameUtils from './frameUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
-  appVer: '1.12',
+  appVer: '100.0',
   locale: 'us',
   isFirstOpen: false,
   editorBg: ''

@@ -19,6 +19,8 @@
     category-list(v-for="item in categoryListArray"
       v-show="item.show" :ref="item.key" :key="item.key"
       :list="item.content" @loadMore="handleLoadMore")
+      template(#before)
+        div(class="panel-text__top-item")
       template(v-if="pending" #after)
         div(class="text-center")
           svg-icon(iconName="loading"
@@ -232,7 +234,9 @@ export default Vue.extend({
     scrollToTop() {
       for (const list of this.categoryListArray) {
         if (list.show) {
-          (this.$refs[list.key] as Vue[])[0].$el.scrollTop = 0
+          const categoryList = (this.$refs[list.key] as Vue[])[0]
+          const top = categoryList.$el.querySelector('.panel-text__top-item') as HTMLElement
+          top.scrollIntoView({ behavior: 'smooth' })
         }
       }
     },
