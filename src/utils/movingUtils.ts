@@ -96,6 +96,25 @@ export class MovingUtils {
     }
   }
 
+  pageMoveStart(e: PointerEvent) {
+    this.initPageTranslate.x = pageUtils.getCurrPage.x
+    this.initPageTranslate.y = pageUtils.getCurrPage.y
+    this.initialPos = mouseUtils.getMouseAbsPoint(e)
+    this._moving = this.pageMoving.bind(this)
+    this._moveEnd = this.pageMoveEnd.bind(this)
+    eventUtils.addPointerEvent('pointerup', this._moveEnd)
+    eventUtils.addPointerEvent('pointermove', this._moving)
+  }
+
+  pageMoving(e: PointerEvent) {
+    this.pageMovingHandler(e)
+  }
+
+  pageMoveEnd(e: PointerEvent) {
+    eventUtils.removePointerEvent('pointerup', this._moveEnd)
+    eventUtils.removePointerEvent('pointermove', this._moving)
+  }
+
   moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y
@@ -291,10 +310,6 @@ export class MovingUtils {
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
     this.isControlling = true
-    const posDiff = {
-      x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
-      y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
-    }
     switch (this.config.type) {
       case LayerType.group:
         if ((this.config as IGroup).layers.some(l => l.active && l.type === LayerType.text && l.contentEditable && l.isTyping)) {
@@ -335,6 +350,10 @@ export class MovingUtils {
       }
     }
     if (!this.isActive) {
+      const posDiff = {
+        x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
+        y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
+      }
       if (this.isTouchDevice && !this.isLocked) {
         if (layerUtils.layerIndex !== this.layerIndex && this.isClickOnController) {
           if (posDiff.x > 1 || posDiff.y > 1) {
@@ -346,7 +365,10 @@ export class MovingUtils {
             return
           }
         }
-        if (layerUtils.layerIndex === -1) {
+        const { pageRect, editorRect } = pageUtils.getEditorRenderSize
+        const isPageFullyInsideEditor = pageRect.width + 30 < editorRect.width
+        // const isPageReachEdge = pageRect.width + pageUtils.getCurrPage.x + 15
+        if (layerUtils.layerIndex === -1 && !isPageFullyInsideEditor) {
           window.requestAnimationFrame(() => {
             this.pageMovingHandler(e)
           })
@@ -384,12 +406,20 @@ export class MovingUtils {
   }
 
   pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
+    if (this.scaleRatio <= 29) return
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
-    // const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
+
+    const newPageSize = (this.scaleRatio / 29) * 313
+    const newOriginX = -(newPageSize - 390) * 0.5
+    console.log(newOriginX)
+    const isReachRightEdge = pageUtils.getCurrPage.x < 0 &&
+      offsetPos.x < 0 &&
+      Math.abs(pageUtils.getCurrPage.x + offsetPos.x) >= Math.abs(newOriginX) + 30
+
     this.initialPos.x += offsetPos.x
     this.initialPos.y += offsetPos.y
     pageUtils.updatePagePos(this.pageIndex, {
-      x: offsetPos.x + pageUtils.getCurrPage.x,
+      x: (isReachRightEdge ? 0 : offsetPos.x) + pageUtils.getCurrPage.x,
       y: offsetPos.y + pageUtils.getCurrPage.y
     })
   }
@@ -478,7 +508,6 @@ export class MovingUtils {
 
     if (!this.isActive) {
       if (hasActualPageMove) {
-        console.log('has actual')
         return
       } else if (!this.isDoingGestureAction && !hasActualMove) {
         this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)

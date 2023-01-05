@@ -4,6 +4,7 @@
       :style="editorViewStyle"
       @wheel="handleWheel"
       @scroll="!inBgRemoveMode ? scrollUpdate() : null"
+      @pointerdown="selectStart"
       @mousewheel="handleWheel"
       @pinch="pinchHandler"
       ref="editorView")
@@ -18,7 +19,6 @@
             :key="`page-${index}`"
             class="editor-view__card"
             :style="cardStyle"
-            @pointerdown="selectStart"
             @pointerdown.self.prevent="outerClick($event)"
             ref="card")
           nu-page(
@@ -40,7 +40,7 @@ import StepsUtils from '@/utils/stepsUtils'
 import ControlUtils from '@/utils/controlUtils'
 import pageUtils from '@/utils/pageUtils'
 import { IPage, IPageState } from '@/interfaces/page'
-import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import imageUtils from '@/utils/imageUtils'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -307,20 +307,21 @@ export default Vue.extend({
         }
       }
     },
-    selectStart(e: MouseEvent) {
-      if (layerUtils.layerIndex !== -1) {
-        /**
-         * when the user click the control-region outsize the page,
-         * the moving logic should be applied to the EditorView.
-         */
-        if (ControlUtils.isClickOnController(e)) {
-          const movingUtils = new MovingUtils({
-            _config: { config: layerUtils.getCurrConfig },
-            snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
-            body: document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
-          })
-          movingUtils.moveStart(e)
-        }
+    selectStart(e: PointerEvent) {
+      if (ControlUtils.isClickOnController(e)) {
+        const movingUtils = new MovingUtils({
+          _config: { config: layerUtils.getCurrLayer },
+          snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+          body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+        })
+        movingUtils.moveStart(e)
+      } else if (layerUtils.layerIndex === -1) {
+        const movingUtils = new MovingUtils({
+          _config: { config: {} as ILayer },
+          snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+          body: this.$refs.editorView as HTMLElement
+        })
+        movingUtils.pageMoveStart(e)
       }
     },
     scrollUpdate() {

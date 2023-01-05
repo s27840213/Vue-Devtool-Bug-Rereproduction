@@ -96,6 +96,15 @@ class PageUtils {
     }
   }
 
+  get getEditorRenderSize(): { pageRect: DOMRect, editorRect: DOMRect } {
+    const page = document.getElementById(`nu-page_${layerUtils.pageIndex}`) as HTMLElement
+    const editor = document.getElementById('mobile-editor__content') as HTMLElement
+    return {
+      pageRect: page.getBoundingClientRect(),
+      editorRect: editor.getBoundingClientRect()
+    }
+  }
+
   topBound: number
   bottomBound: number
   mobileMinScaleRatio: number
@@ -501,6 +510,7 @@ class PageUtils {
       (editorHeight - mobilePanelHeight) / (targetHeight * (this.scaleRatio / 100))
     ) * 0.8
     const newRatio = Math.max(3, Math.round(this.scaleRatio * resizeRatio))
+    console.log(newRatio)
 
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
       store.commit('SET_pageScaleRatio', 100)

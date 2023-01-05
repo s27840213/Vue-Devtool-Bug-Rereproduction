@@ -5,7 +5,7 @@
         @showAllPages="showAllPages"
         :currTab="currActivePanel"
         :inAllPagesMode="inAllPagesMode")
-      div(class="mobile-editor__content" :style="contentStyle")
+      div(class="mobile-editor__content" :style="contentStyle" id="mobile-editor__content")
         keep-alive
           component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
             :currActivePanel="currActivePanel"

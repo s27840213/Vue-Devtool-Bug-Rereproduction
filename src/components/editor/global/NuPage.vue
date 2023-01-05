@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-page"
+  div(class="nu-page" :id="`nu-page_${this.pageIndex}`"
       :style="pageRootStyles"
       ref="page")
     div(v-if="!isDetailPage && !isMobile"
@@ -301,10 +301,7 @@ export default Vue.extend({
       return this.pageState.config
     },
     scaleContainerStyles(): { [index: string]: string } {
-      let transform = `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`
-      if (generalUtils.isTouchDevice()) {
-        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)` + transform
-      }
+      const transform = `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`
       return {
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
@@ -350,7 +347,12 @@ export default Vue.extend({
       return this.groupType === 1
     },
     pageRootStyles(): { [index: string]: string } {
+      let transform = ''
+      if (generalUtils.isTouchDevice()) {
+        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
+      }
       return {
+        transform,
         margin: this.isDetailPage ? '0px auto' : '25px auto',
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
