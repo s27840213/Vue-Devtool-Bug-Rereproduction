@@ -12,6 +12,13 @@
       :iconWidth="iconSize")
     slot
       span(class="download-check-button__label") {{ label }}
+        v-tooltip(v-if="info" class="download-check-button__label__icon-info" theme="hint-menu")
+          svg-icon(iconName="info"
+            :iconWidth="'16px'"
+            :iconColor="'gray-2'")
+          template(v-slot:popper)
+            span {{info}}
+              a(v-if="infoUrl" class="text-white" :href="infoUrl" target="_blank") {{'了解更多'}}
     input(class="download-check-button__input"
       :type="type"
       :value="value"
@@ -32,6 +39,14 @@ export default Vue.extend({
     iconSize: {
       type: String,
       default: '16px'
+    },
+    info: {
+      type: String,
+      default: ''
+    },
+    infoUrl: {
+      type: String,
+      default: ''
     },
     groupName: String,
     type: String,
@@ -70,6 +85,14 @@ export default Vue.extend({
     cursor: pointer;
     height: 0;
     width: 0;
+  }
+  &__label {
+    display: flex;
+    gap: 8px;
+    &__icon-info {
+      display: flex;
+      align-items: center;
+    }
   }
 }
 </style>

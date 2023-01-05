@@ -31,7 +31,7 @@ class TooltipUtils {
         $resetCss: true,
         placement: 'bottom',
         popperTriggers: ['hover', 'focus'],
-        distance: -3,
+        distance: 7,
         delay: {
           show: 200,
           hide: 200

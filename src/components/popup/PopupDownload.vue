@@ -63,32 +63,22 @@
             :label="`${$t('NN0775')}`"
             :default-checked="!!selected.bleed"
             @change="({ checked }) => {handleUpdate('bleed', checked ? 1 : 0); if('trim' in selected && !checked && selected.trim === 1) handleUpdate('trim', 0)}")
-        div(v-if="selectedTypeVal.includes('pdf_print') && 'outline' in selected" style='display: flex; gap: 8px;')
+        div(v-if="selectedTypeVal === 'pdf_print' && 'outline' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
             :label="`${$t('NN0794')}`"
             :default-checked="selected.outline===1"
+            info="此為印刷廠一般要求。"
+            infoUrl="https://vivipic.com/"
             @change="({ checked }) => handleUpdate('outline', checked ? 1 : 0)")
-          v-tooltip(theme="hint-menu")
-            svg-icon(iconName="info"
-              :iconWidth="'16px'"
-              :iconColor="'gray-2'")
-            template(#popper)
-              span {{'此為印刷廠一般要求。'}}
-                a(class="text-white" href="https://vivipic.com/" target="_blank") {{'了解更多'}}
-        div(v-if="'outline' in selected" style='display: flex; gap: 8px;')
+        div(v-if="'outline' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
             :label="`${$t('NN0776')}`"
             :default-checked="selected.outline===2"
+            info="轉為點陣圖檔。"
+            infoUrl="https://vivipic.com/"
             @change="({ checked }) => handleUpdate('outline', checked ? 2 : 0)")
-          v-tooltip(theme="hint-menu")
-            svg-icon(iconName="info"
-              :iconWidth="'16px'"
-              :iconColor="'gray-2'")
-            template(#popper)
-              span {{'轉為點陣圖檔。'}}
-                a(class="text-white" href="https://vivipic.com/" target="_blank") {{'了解更多'}}
         div(v-if="selectedTypeVal.includes('pdf')"
           class="flex items-center mb-10")
           span {{$t('NN0777')}}
