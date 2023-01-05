@@ -23,8 +23,8 @@
               :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
             lazy-load(:target="lazyLoadTarget"
                 :rootMargin="'300px 0px 300px 0px'"
-                :minHeight="config.styles.height * contentScaleRatio / config.styles.scale"
-                :minWidth="config.styles.width * contentScaleRatio / config.styles.scale"
+                :minHeight="lazyloadSize.height"
+                :minWidth="lazyloadSize.width"
                 :threshold="[0]"
                 :handleUnrender="handleUnrender"
                 :anamationEnabled="false"
@@ -252,6 +252,22 @@ export default Vue.extend({
       isHandleShadow: 'shadow/isHandling',
       renderForPDF: 'user/getRenderForPDF'
     }),
+    lazyloadSize(): { height: number, width: number } {
+      const { config, contentScaleRatio } = this
+      switch (config.type) {
+        case LayerType.image:
+          return {
+            width: config.styles.height * contentScaleRatio,
+            height: config.styles.height * contentScaleRatio
+          }
+        default: {
+          return {
+            width: config.styles.height * contentScaleRatio / config.styles.scale,
+            height: config.styles.height * contentScaleRatio / config.styles.scale
+          }
+        }
+      }
+    },
     layerInfo(): ILayerInfo {
       return {
         pageIndex: this.pageIndex,
