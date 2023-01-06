@@ -3,6 +3,7 @@ import { IListServiceData } from '@/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
 import localeUtils from '@/utils/localeUtils'
+import themeUtils from '@/utils/themeUtils'
 import store from '@/store'
 import i18n from '@/i18n'
 
@@ -74,6 +75,7 @@ export default function (this: any) {
         if (writeBack) commit('SET_RECENTLY', data.data)
         else return data.data
       } catch (error) {
+        console.error(error)
         captureException(error)
       }
     },
@@ -100,13 +102,14 @@ export default function (this: any) {
           dispatch('getMoreContent')
         }
       } catch (error) {
+        console.error(error)
         captureException(error)
       }
     },
 
     // For panel initial, get recently and categories at the same time.
-    getRecAndCate: async ({ dispatch, commit }) => {
-      dispatch('resetContent')
+    getRecAndCate: async ({ dispatch, commit }, { reset = true } = {}) => {
+      if (reset) dispatch('resetContent')
       await Promise.all([
         dispatch('getRecently', false),
         dispatch('getCategories', false)
@@ -121,11 +124,12 @@ export default function (this: any) {
 
     // For all item or single category search result.
     getContent: async ({ commit, state }, params = {}) => {
-      const { theme } = state
+      let { theme } = state
       const { keyword } = params
       const locale = params.locale || localeUtils.currLocale()
       commit('SET_STATE', { pending: true, locale })
       if (keyword)commit('SET_STATE', { keyword })
+      if (keyword && this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
       try {
         const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
@@ -137,8 +141,9 @@ export default function (this: any) {
           listCategory: 0,
           cache: needCache
         })
-        commit('SET_CONTENT', data.data)
+        commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
+        console.error(error)
         captureException(error)
       }
     },
@@ -159,19 +164,21 @@ export default function (this: any) {
           listCategory: 0,
           cache: needCache
         })
-        commit('SET_CONTENT', data.data)
+        commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
+        console.error(error)
         captureException(error)
       }
     },
 
     // For search result.
     getTagContent: async ({ commit, state }, params = {}) => {
-      const { theme } = state
+      let { theme } = state
       let { keyword } = params
       const locale = localeUtils.currLocale()
       keyword = keyword.includes('::') ? keyword : `tag::${keyword}`
       commit('SET_STATE', { pending: true, keyword, locale })
+      if (this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
       try {
         const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
@@ -183,8 +190,9 @@ export default function (this: any) {
           listCategory: 0,
           cache: needCache
         })
-        commit('SET_CONTENT', data.data)
+        commit('SET_CONTENT', { objects: data.data, isSearch: true })
       } catch (error) {
+        console.error(error)
         captureException(error)
       }
     },
@@ -209,6 +217,7 @@ export default function (this: any) {
         const { data } = await this.api(nextParams)
         commit('SET_MORE_CONTENT', data.data)
       } catch (error) {
+        console.error(error)
         captureException(error)
       }
     },
@@ -234,10 +243,11 @@ export default function (this: any) {
     },
 
     getSum: async ({ commit, state }, params = {}) => {
-      const { theme } = state
+      let { theme } = state
       const { keyword } = params
       const locale = localeUtils.currLocale()
-      commit('SET_STATE', { pending: true, locale })
+      commit('SET_STATE', { locale, sum: -1 })
+      if (keyword && this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
       try {
         const { data } = await this.api({
           token: store.getters['user/getToken'],
@@ -249,6 +259,7 @@ export default function (this: any) {
         })
         commit('SET_STATE', { sum: data.data.sum })
       } catch (error) {
+        console.error(error)
         captureException(error)
       }
     }
@@ -288,8 +299,7 @@ export default function (this: any) {
         targetCategory.unshift(format)
       }
     },
-    SET_CONTENT(state: IListModuleState, objects: IListServiceData) {
-      const isSearch = Boolean(state.keyword)
+    SET_CONTENT(state: IListModuleState, { objects, isSearch = false }: {objects: IListServiceData, isSearch: boolean}) {
       const {
         content = [],
         // host = '',
@@ -345,9 +355,10 @@ export default function (this: any) {
   }
 
   const getters: GetterTree<IListModuleState, any> = {
-    nextParams(state) {
-      const { nextPage, nextSearch, keyword, theme, locale } = state
+    nextParams: (state) => {
+      let { nextPage, nextSearch, keyword, theme, locale } = state
       const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
+      if (keyword && this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
       return {
         token: needCache ? '1' : store.getters['user/getToken'],
         locale,

@@ -18,8 +18,6 @@ import VueGtm from '@gtm-support/vue2-gtm'
 import svgIconUtils from './utils/svgIconUtils'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
-import generalUtils from './utils/generalUtils'
-import imageShadowUtils from './utils/imageShadowUtils'
 import AnyTouch from 'any-touch'
 
 window.onerror = function (msg, url, line) {
@@ -30,32 +28,6 @@ window.onerror = function (msg, url, line) {
   ].join(' - ')
   logUtils.setLog(message)
 }
-
-// const _console = console as any
-// if (_console.everything === undefined) {
-//   _console.everything = []
-
-//   _console.defaultLog = console.log.bind(console)
-//   _console.log = function() {
-//     _console.everything.push({ type: 'log', datetime: Date().toLocaleString(), value: Array.from(arguments) })
-//     _console.defaultLog.apply(console, arguments)
-//   }
-//   _console.defaultError = console.error.bind(console)
-//   _console.error = function() {
-//     _console.everything.push({ type: 'error', datetime: Date().toLocaleString(), value: Array.from(arguments) })
-//     _console.defaultError.apply(console, arguments)
-//   }
-//   _console.defaultWarn = console.warn.bind(console)
-//   _console.warn = function() {
-//     _console.everything.push({ type: 'warn', datetime: Date().toLocaleString(), value: Array.from(arguments) })
-//     _console.defaultWarn.apply(console, arguments)
-//   }
-//   _console.defaultDebug = console.debug.bind(console)
-//   _console.debug = function() {
-//     _console.everything.push({ type: 'debug', datetime: Date().toLocaleString(), value: Array.from(arguments)})
-//     _console.defaultDebug.apply(_console, arguments)
-//   }
-// }
 
 const tooltipUtils = new TooltipUtils()
 
@@ -70,12 +42,12 @@ Vue.use(FloatingVue, {
   themes: tooltipUtils.themes
 })
 
-// Vue.use(VueGtm, {
-//   id: 'GTM-T7LDWBP',
-//   enabled: true,
-//   // display console logs debugs or not (optional)
-//   debug: false
-// })
+Vue.use(VueGtm, {
+  id: 'GTM-T7LDWBP',
+  enabled: true,
+  // display console logs debugs or not (optional)
+  debug: false
+})
 
 Vue.component('RecycleScroller', RecycleScroller)
 
@@ -148,7 +120,7 @@ Vue.directive('touch', {
   bind(el, binding) {
     anyTouchWeakMap.set(el, new AnyTouch(el, { preventDefault: Boolean(binding.value) }))
   },
-  unbind(el){
+  unbind(el) {
     (anyTouchWeakMap.get(el) as AnyTouch).destroy()
     anyTouchWeakMap.delete(el)
   }

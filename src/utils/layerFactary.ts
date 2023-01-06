@@ -9,7 +9,6 @@ import textPropUtils from './textPropUtils'
 import ZindexUtils from './zindexUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import mouseUtils from './mouseUtils'
-import { IPage } from '@/interfaces/page'
 
 class LayerFactary {
   newImage(config: any): IImage {
@@ -431,7 +430,8 @@ class LayerFactary {
     return tmp
   }
 
-  newShape(config: any): IShape {
+  newShape(config?: any): IShape {
+    config = config || {}
     const { styles = {} } = GeneralUtils.deepCopy(config)
     const basicConfig = {
       type: 'shape',
@@ -443,7 +443,7 @@ class LayerFactary {
       size: [],
       styleArray: [],
       svg: '',
-      vSize: [0, 0],
+      vSize: styles.vSize ?? [0, 0],
       cSize: [0, 0],
       pSize: [0, 0],
       pDiff: [0, 0],

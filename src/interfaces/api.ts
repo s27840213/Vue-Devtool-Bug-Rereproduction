@@ -149,7 +149,8 @@ export interface IListServiceContentDataItem {
   user_id?: string
   asset_index?: number
   asset_id?: string
-  src?: string
+  src?: string,
+  unit?: string,
   valid?: number
 }
 
@@ -210,7 +211,8 @@ export interface IUserDesignContentData {
   width: number
   signed_url?: { [key: string]: string },
   page_num: number,
-  polling: boolean
+  polling: boolean,
+  unit: string
 }
 
 export interface IAssetDesignParams {

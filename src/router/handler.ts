@@ -7,6 +7,8 @@ import themeUtils from '@/utils/themeUtils'
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
+import editorUtils from '@/utils/editorUtils'
+import Vue from 'vue'
 
 export async function editorRouteHandler(_to: Route, from: Route, next: NavigationGuardNext<Vue>) {
   try {
@@ -19,6 +21,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     const url = urlParams.get('url')
     const width = urlParams.get('width')
     const height = urlParams.get('height')
+    const unit = urlParams.get('unit')
     const themeId = urlParams.get('themeId')
     const groupId = urlParams.get('group_id')
     const path = urlParams.get('path')
@@ -45,6 +48,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
       designUtils.newDesign(
         parseInt(width),
         parseInt(height === '0' ? width : height),
+        unit || 'px',
         parseInt(themeId as string),
         path === null ? undefined : path,
         folderName === null ? undefined : folderName
@@ -63,6 +67,10 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
 
     if (panel && panel in SidebarPanelType) {
       store.commit('SET_currSidebarPanelType', SidebarPanelType[panel as any])
+      Vue.nextTick(() => {
+        editorUtils.setShowMobilePanel(true)
+        editorUtils.setCurrActivePanel(panel.replace('bg', 'background'))
+      })
     }
 
     // reset (close) page preview mode

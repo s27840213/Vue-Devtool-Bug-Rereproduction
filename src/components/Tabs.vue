@@ -103,6 +103,7 @@ export default Vue.extend({
   justify-content: space-around;
   &__item {
     box-sizing: border-box;
+    text-align: center;
     transition: all 0.2s;
   }
 }

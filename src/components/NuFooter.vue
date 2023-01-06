@@ -175,7 +175,7 @@ export default Vue.extend({
       window.location.href = page
     },
     newDesign(item: Itheme) {
-      designUtils.newDesignWithLoginRedirect(item.width, item.height, item.id)
+      designUtils.newDesignWithLoginRedirect(item.width, item.height, 'px', item.id)
     },
     expandItems(index: number, expand: boolean) {
       Vue.set(this.featureExpand, index, expand)

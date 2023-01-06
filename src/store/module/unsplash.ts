@@ -33,11 +33,13 @@ const actions: ActionTree<IPhotoState, unknown> = {
     let { locale = browserLocale, pageIndex = 1, keyword } = params
     // if japanese keyword
     keyword && REGEX_JAPANESE.test(keyword) && (locale = 'ja')
-    commit(SET_STATE, { pending: true, locale, keyword })
+    commit(SET_STATE, { pending: true, locale })
+    if (keyword)commit('SET_STATE', { keyword })
     try {
       const { data: { data } } = await photos.getUnsplash({ locale, pageIndex, keyword })
-      commit('SET_CONTENT', data)
+      commit('SET_CONTENT', { data, isSearch: !!keyword })
     } catch (error) {
+      console.error(error)
       captureException(error)
     }
   },
@@ -47,8 +49,9 @@ const actions: ActionTree<IPhotoState, unknown> = {
     commit(SET_STATE, { pending: true })
     try {
       const { data: { data } } = await photos.getUnsplash({ locale, pageIndex, keyword })
-      commit('SET_CONTENT', data)
+      commit('SET_CONTENT', { data, isSearch: !!keyword })
     } catch (error) {
+      console.error(error)
       captureException(error)
     }
   },
@@ -71,12 +74,12 @@ const mutations: MutationTree<IPhotoState> = {
         }
       })
   },
-  SET_CONTENT(state: IPhotoState, data: IPhotoServiceData) {
-    const { keyword, searchResult, content } = state
+  SET_CONTENT(state: IPhotoState, { data, isSearch }: {data: IPhotoServiceData, isSearch: boolean}) {
+    const { searchResult, content } = state
     const { next_page } = data
 
-    const result = (keyword ? searchResult : content).concat(data.content[0].list)
-    if (state.keyword) {
+    const result = (isSearch ? searchResult : content).concat(data.content[0].list)
+    if (isSearch) {
       state.searchResult = result
       state.nextSearch = next_page
     } else {

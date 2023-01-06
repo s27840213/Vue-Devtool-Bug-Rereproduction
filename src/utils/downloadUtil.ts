@@ -8,14 +8,22 @@ class DownloadUtil {
     jpg: {
       scale: 1,
       quality: 90
+      // bleed: 0
     },
     png: {
       scale: 1,
       omitBackground: 0
+      // bleed: 0
     },
-    pdf_standard: {},
+    pdf_standard: {
+      outline: 1,
+      cmyk: 0
+    },
     pdf_print: {
-      mark: false
+      // trim: 0,
+      // bleed: 1,
+      outline: 1,
+      cmyk: 0
     },
     svg: {
       omitBackground: 0
@@ -30,10 +38,10 @@ class DownloadUtil {
     return { ...this.fileAttrs[type] }
   }
 
-  async getFileUrl (params: IDownloadServiceParams, useDev = 0, newChrome = 0) {
+  async getFileUrl (params: IDownloadServiceParams, useDev = 0) {
     params.teamId = params.teamId || this.userId
     try {
-      const { data: { url } } = await download.createFile(params, useDev, newChrome)
+      const { data: { url } } = await download.createFile(params, useDev)
       if (!url) { throw new Error('Could not get the json url') }
       const fileResult = await this.getFileStatus(url)
       return fileResult

@@ -35,7 +35,7 @@ export default Vue.extend({
           text: `${this.$t('NN0075')}`,
           shortcutText: '',
           action: () => {
-            rulerUtils.clearGuidelines()
+            rulerUtils.clearGuidelines(true)
           }
         },
         {

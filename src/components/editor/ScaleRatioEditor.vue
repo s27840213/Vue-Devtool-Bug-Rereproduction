@@ -35,6 +35,7 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
+import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   data() {

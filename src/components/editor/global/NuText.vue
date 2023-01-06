@@ -1,7 +1,7 @@
 <template lang="pug">
-  div(class="nu-text" :style="wrapperStyles()")
+  div(class="nu-text" :style="textWrapperStyle()" draggable="false")
     //- Svg BG for text effex gooey.
-    svg(v-if="svgBG" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
+    svg(v-if="svgBG && !noShadow" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
       component(v-for="(elm, idx) in svgBG.content"
                 :key="`textSvgBg${idx}`"
                 :is="elm.tag"
@@ -13,7 +13,8 @@
         :layerIndex="layerIndex"
         :pageIndex="pageIndex"
         :subLayerIndex="subLayerIndex"
-        :isDuplicated="idx !== duplicatedText.length-1")
+        :isDuplicated="idx !== duplicatedText.length-1"
+        :isTransparent="isTransparent")
       p(v-else
         v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
         :key="p.id"
@@ -22,21 +23,14 @@
           class="nu-text__span"
           :data-sindex="sIndex"
           :key="span.id"
-          :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan)") {{ span.text }}
+          :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan, transParentStyles)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
-    div(v-if="!isCurveText" class="nu-text__observee")
-      span(v-for="(span, sIndex) in spans()"
-        class="nu-text__span"
-        :class="`nu-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
-        :data-sindex="sIndex"
-        :key="sIndex",
-        :style="styles(span.styles)") {{ span.text }}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { IGroup, ISpan, IText } from '@/interfaces/layer'
-import { mapGetters } from 'vuex'
+import { IGroup, IParagraph, ISpan, IText } from '@/interfaces/layer'
+import { mapGetters, mapState } from 'vuex'
 import textUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
@@ -46,16 +40,30 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import _ from 'lodash'
+import controlUtils from '@/utils/controlUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
-  components: { NuCurveText },
+  components: { NuCurveText, NuTextEditor },
   props: {
     config: Object,
     pageIndex: Number,
     layerIndex: Number,
-    subLayerIndex: Number,
+    subLayerIndex: {
+      type: Number,
+      default: -1
+    },
     isPagePreview: {
+      default: false,
+      type: Boolean
+    },
+    isTransparent: {
+      default: false,
+      type: Boolean
+    },
+    noShadow: {
       default: false,
       type: Boolean
     }
@@ -64,14 +72,14 @@ export default Vue.extend({
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
     return {
       isDestroyed: false,
-      resizeObserver: undefined as ResizeObserver | undefined,
       initSize: {
         width: this.config.styles.width,
         height: this.config.styles.height,
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
       isLoading: true,
-      svgBG: {} as Record<string, unknown> | null
+      svgBG: {} as Record<string, unknown> | null,
+      widthLimitSetDuringComposition: false
     }
   },
   created() {
@@ -79,8 +87,6 @@ export default Vue.extend({
   },
   destroyed() {
     this.isDestroyed = true
-    this.resizeObserver && this.resizeObserver.disconnect()
-    this.resizeObserver = undefined
   },
   mounted() {
     // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
@@ -92,17 +98,23 @@ export default Vue.extend({
         }
       }, 100) // for the delay between font loading and dom rendering
     })
-
-    // this.resizeObserver = new ResizeObserver(this.resizeCallback)
-    // this.observeAllSpans()
     this.drawSvgBG()
   },
   computed: {
+    ...mapState(['isMoving']),
     ...mapGetters({
+      scaleRatio: 'getPageScaleRatio',
       getDefaultFontsList: 'text/getDefaultFontsList',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer'
     }),
+    primaryLayer(): IGroup | undefined {
+      if (this.subLayerIndex === -1) {
+        return undefined
+      } else {
+        return LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
+      }
+    },
     spanEffect(): Record<string, unknown> {
       return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
     },
@@ -139,6 +151,13 @@ export default Vue.extend({
         ...(duplicatedTextShadow ? [textShadowCss] : []),
         {} // Original text, don't have extra css
       ]
+    },
+    transParentStyles(): {[key: string]: any} {
+      return this.isTransparent ? {
+        color: 'rgba(0, 0, 0, 0)',
+        '-webkit-text-stroke-color': 'rgba(0, 0, 0, 0)',
+        'text-decoration-color': 'rgba(0, 0, 0, 0)'
+      } : {}
     }
   },
   watch: {
@@ -159,6 +178,174 @@ export default Vue.extend({
     }
   },
   methods: {
+    handleTextCompositionEnd(toRecord: boolean) {
+      if (this.widthLimitSetDuringComposition && this.subLayerIndex === -1) {
+        this.widthLimitSetDuringComposition = false
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
+        this.textSizeRefresh(this.config, false)
+      }
+      if (toRecord) {
+        this.waitFontLoadingAndRecord()
+      }
+    },
+    waitFontLoadingAndRecord() {
+      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const layerId = this.config.id
+      textUtils.waitFontLoadingAndRecord(this.config.paragraphs, () => {
+        const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
+        if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+        textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+      })
+    },
+    waitFontLoadingAndResize() {
+      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const layerId = this.primaryLayer ? this.primaryLayer.id : this.config.id
+      const subLayerId = this.primaryLayer ? this.config.id : ''
+      textUtils.untilFontLoaded(this.config.paragraphs).then(() => {
+        setTimeout(() => {
+          const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+          if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+          textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+        }, 100)
+      })
+    },
+    checkIfCurve(config: IText): boolean {
+      const { textShape } = config.styles
+      return textShape && textShape.name === 'curve'
+    },
+    calcSize(config: IText, composing: boolean) {
+      if (this.subLayerIndex === -1) {
+        this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, composing)
+      } else {
+        this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex, this.subLayerIndex)
+      }
+    },
+    curveTextSizeRefresh(text: IText) {
+      if (this.subLayerIndex === -1) {
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textShapeUtils.getCurveTextProps(text))
+      } else {
+        const { height: heightOri } = text.styles
+        const curveTextHW = textShapeUtils.getCurveTextHW(text)
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, textShapeUtils.getCurveTextPropsByHW(text, curveTextHW))
+        textUtils.asSubLayerSizeRefresh(this.pageIndex, this.layerIndex, this.subLayerIndex, curveTextHW.areaHeight, heightOri)
+        textUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
+      }
+    },
+    textSizeRefresh(text: IText, composing: boolean) {
+      const isVertical = this.config.styles.writingMode.includes('vertical')
+      const getSize = () => isVertical ? this.config.styles.height : this.config.styles.width
+      let widthLimit = this.config.rotate ? getSize() : this.config.widthLimit
+      let textHW = textUtils.getTextHW(text, widthLimit)
+      let layerX = this.config.styles.x
+      let layerY = this.config.styles.y
+      if (widthLimit === -1) {
+        // const pageSize = (this.$parent.$el as HTMLElement)
+        //   .getBoundingClientRect()[isVertical ? 'height' : 'width'] / (this.scaleRatio * 0.01)
+        const pageSize = pageUtils.getPage(this.pageIndex)[isVertical ? 'height' : 'width']
+        const currTextSize = textHW[isVertical ? 'height' : 'width']
+
+        let layerPos = this.config.styles[isVertical ? 'y' : 'x'] - (currTextSize - getSize()) / 2
+        const reachLeftLimit = layerPos <= 0
+        const reachRightLimit = layerPos + currTextSize >= pageSize
+
+        if (reachLeftLimit && reachRightLimit) {
+          if (composing) this.widthLimitSetDuringComposition = true
+          textHW = textUtils.getTextHW(text, pageSize)
+          layerPos = 0
+          widthLimit = pageSize
+        } else if (reachLeftLimit || reachRightLimit) {
+          if (composing) this.widthLimitSetDuringComposition = true
+          widthLimit = currTextSize
+          textHW = textUtils.getTextHW(text, widthLimit)
+          layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
+        }
+        layerX = isVertical ? layerX : layerPos
+        layerY = isVertical ? layerPos : layerY
+      } else {
+        const initData = {
+          xSign: 1,
+          ySign: 1,
+          x: this.config.styles.x,
+          y: this.config.styles.y,
+          angle: this.config.styles.rotate * Math.PI / 180
+        }
+        const offsetSize = {
+          width: isVertical ? textHW.width - this.config.styles.width : 0,
+          height: isVertical ? 0 : textHW.height - this.config.styles.height
+        }
+        const trans = controlUtils.getTranslateCompensation(initData, offsetSize)
+        layerX = trans.x
+        layerY = trans.y
+      }
+
+      if (isVertical && textHW.width < 5) {
+        textHW.width = this.config.styles.width
+      } else if (!isVertical && textHW.height < 5) {
+        const config = generalUtils.deepCopy(text) as IText
+        config.paragraphs[0].spans[0].text = '|'
+        config.paragraphs.splice(1)
+        textHW.height = textUtils.getTextHW(config).height
+      }
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
+      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+        width: textHW.width,
+        height: textHW.height,
+        x: layerX,
+        y: layerY
+      })
+    },
+    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
+      const config = generalUtils.deepCopy(this.config)
+      config.paragraphs = payload.paragraphs
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs }, this.subLayerIndex)
+      this.calcSize(config, !!tiptapUtils.editor?.view?.composing)
+      if (payload.toRecord) {
+        this.waitFontLoadingAndRecord()
+      } else {
+        this.waitFontLoadingAndResize()
+      }
+      if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
+        // if composing starts from empty line, isSetContentRequired will be true in the first typing.
+        // However, setContent will break the composing, so skip setContent when composing.
+        // setContent will be done when 'composeend' (in NuTextEditor.vue)
+        this.$nextTick(() => {
+          tiptapUtils.agent(editor => {
+            editor.chain().setContent(tiptapUtils.toJSON(payload.paragraphs)).selectPrevious().run()
+          })
+        })
+      }
+    },
+    textBodyStyle() {
+      const textstyles = {
+        width: '100%',
+        height: '100%',
+        userSelect: this.config.contentEditable ? 'text' : 'none'
+        // opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
+      }
+      return !this.isCurveText ? textstyles
+        : {
+          width: 'auto',
+          height: 'auto',
+          position: 'absolute',
+          outline: 'none',
+          top: 0,
+          left: 0
+          // opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
+        }
+    },
+    textHtml(): any {
+      return tiptapUtils.toJSON(this.config.paragraphs)
+    },
+    textWrapperStyle() {
+      return {
+        width: `${this.config.styles.width / this.config.styles.scale}px`,
+        height: `${this.config.styles.height / this.config.styles.scale}px`,
+        opacity: `${this.config.styles.opacity * 0.01}`,
+        // transform: `scaleX(${this.config.styles.scale}) scaleY(${this.config.styles.scale})`,
+        textAlign: this.config.styles.align,
+        writingMode: this.config.styles.writingMode
+      }
+    },
     drawSvgBG() {
       this.$nextTick(() => {
         this.svgBG = textBgUtils.drawSvgBg(this.config, this.$refs.body as Element[])
@@ -173,9 +360,27 @@ export default Vue.extend({
     styles(styles: any) {
       return tiptapUtils.textStylesRaw(styles)
     },
+    getOpacity() {
+      const { editing, contentEditable, active } = this.config
+      if (this.isCurveText) {
+        return contentEditable ? 0.2 : 1
+      }
+      if (editing && !this.isMoving) {
+        if (contentEditable && active) {
+          if (this.isCurveText || this.isFlipped) {
+            return 0.2
+          } else {
+            return 0
+          }
+        } else {
+          return 1
+        }
+      } else {
+        return 1
+      }
+    },
     bodyStyles() {
-      const { editing, contentEditable } = this.config
-      const opacity = editing ? (contentEditable ? ((this.isCurveText || this.isFlipped) ? 0.2 : 0) : 1) : 1
+      const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
         width: isVertical ? 'auto' : '',
@@ -200,7 +405,7 @@ export default Vue.extend({
         'text-decoration-line', '-webkit-text-decoration-line'
       ])
     },
-    resizeCallback() {
+    async resizeCallback() {
       const config = generalUtils.deepCopy(this.config) as IText
       if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
 
@@ -208,12 +413,12 @@ export default Vue.extend({
 
       let widthLimit
       if (this.isLoading && this.isAutoResizeNeeded()) {
-        widthLimit = textUtils.autoResize(config, this.initSize)
+        widthLimit = await textUtils.autoResize(config, this.initSize)
       } else {
         widthLimit = config.widthLimit
       }
-      const textHW = textUtils.getTextHW(config, widthLimit)
-      if (typeof this.subLayerIndex === 'undefined') {
+      const textHW = await textUtils.getTextHWAsync(config, widthLimit)
+      if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
         let x = config.styles.x
         let y = config.styles.y
         if (config.widthLimit === -1) {
@@ -236,14 +441,6 @@ export default Vue.extend({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
       this.drawSvgBG()
-    },
-    observeAllSpans() {
-      const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
-      spans.forEach(span => {
-        setTimeout(() => {
-          this.resizeObserver && this.resizeObserver.observe(span as Element)
-        }, 1)
-      })
     }
   }
 })
@@ -261,6 +458,7 @@ export default Vue.extend({
     overflow: visible;
   }
   &__body {
+    pointer-events: none;
     outline: none;
     padding: 0;
     position: relative;
@@ -273,6 +471,10 @@ export default Vue.extend({
     overflow-wrap: break-word;
     position: relative;
   }
+  &__curve-text-in-editing {
+    pointer-events: none;
+    opacity: 0.2;
+  }
   &__observee {
     position: absolute;
     opacity: 0;
@@ -281,6 +483,11 @@ export default Vue.extend({
     & > span {
       display: inline-block;
     }
+  }
+  &__editor {
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 }
 </style>

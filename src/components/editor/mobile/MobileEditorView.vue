@@ -14,10 +14,11 @@
           @swipeup="swipeUpHandler"
           @swipedown="swipeDownHandler"
           :style="canvasStyle")
-        div(v-for="(page,index) in pages"
+        div(v-for="(page,index) in pagesState"
             :key="`page-${index}`"
             class="editor-view__card"
             :style="cardStyle"
+            @pointerdown="selectStart"
             @pointerdown.self.prevent="outerClick($event)"
             ref="card")
           nu-page(
@@ -25,7 +26,7 @@
             :pageIndex="index"
             :overflowContainer="editorView"
             :style="pageStyle(index)"
-            :config="page"
+            :pageState="page"
             :index="index"
             :inScaling="isScaling"
             :isAnyBackgroundImageControl="isBackgroundImageControl")
@@ -38,7 +39,7 @@ import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import ControlUtils from '@/utils/controlUtils'
 import pageUtils from '@/utils/pageUtils'
-import { IPage } from '@/interfaces/page'
+import { IPage, IPageState } from '@/interfaces/page'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import imageUtils from '@/utils/imageUtils'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
@@ -49,6 +50,9 @@ import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import layerUtils from '@/utils/layerUtils'
 import editorUtils from '@/utils/editorUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
+import modalUtils from '@/utils/modalUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { MovingUtils } from '@/utils/movingUtils'
 
 export default Vue.extend({
   components: {
@@ -94,8 +98,30 @@ export default Vue.extend({
       cardWidth: 0,
       editorViewResizeObserver: null as unknown as ResizeObserver,
       isSwiping: false,
-      isScaling: false
+      isScaling: false,
+      uploadUtils: uploadUtils
     }
+  },
+  created() {
+    // check and auto resize pages oversized on design loaded
+    const unwatchPages = this.$watch('isGettingDesign', (newVal) => {
+      if (!newVal) {
+        if (this.pages.length > 0 && pageUtils.fixPageSize()) {
+          pageUtils.fitPage()
+          uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+          modalUtils.setModalInfo(
+            `${this.$t('NN0788')}`,
+            [`${this.$t('NN0789', { size: '6000 x 6000' })}`],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+          )
+        }
+        unwatchPages()
+      }
+    })
   },
   mounted() {
     this.$nextTick(() => {
@@ -168,7 +194,7 @@ export default Vue.extend({
     }),
     ...mapGetters({
       groupId: 'getGroupId',
-      pages: 'getPages',
+      pagesState: 'getPagesState',
       getMiddlemostPageIndex: 'getMiddlemostPageIndex',
       geCurrActivePageIndex: 'getCurrActivePageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
@@ -184,6 +210,9 @@ export default Vue.extend({
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       groupType: 'getGroupType'
     }),
+    pages(): Array<IPage> {
+      return this.pagesState.map((p: IPageState) => p.config)
+    },
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
       let res = false
@@ -223,9 +252,10 @@ export default Vue.extend({
       return {
         width: `${this.cardWidth}px`,
         height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
-        padding: this.isDetailPage ? '0px' : '40px',
+        padding: this.isDetailPage ? '0px' : `${pageUtils.MOBILE_CARD_PADDING}px`,
         flexDirection: this.isDetailPage ? 'column' : 'initial',
-        overflow: this.isDetailPage ? 'initial' : 'scroll',
+        'overflow-y': this.isDetailPage ? 'initial' : 'scroll',
+        // overflow: this.isDetailPage ? 'initial' : 'scroll',
         minHeight: this.isDetailPage ? 'none' : '100%'
       }
     },
@@ -240,6 +270,9 @@ export default Vue.extend({
         transform: this.isDetailPage ? 'initail' : `translate3d(0, -${this.currCardIndex * this.cardHeight}px,0)`,
         transition: `transform ${transformDuration}s`
       }
+    },
+    isGettingDesign(): boolean {
+      return this.uploadUtils.isGettingDesign
     }
   },
   methods: {
@@ -262,7 +295,7 @@ export default Vue.extend({
       this._setAdminMode(!this.adminMode)
     },
     outerClick(e: MouseEvent) {
-      if (!this.inBgRemoveMode) {
+      if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         editorUtils.setInBgSettingMode(false)
         GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
@@ -271,6 +304,22 @@ export default Vue.extend({
         pageUtils.findCentralPageIndexInfo()
         if (imageUtils.isImgControl()) {
           ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+        }
+      }
+    },
+    selectStart(e: MouseEvent) {
+      if (layerUtils.layerIndex !== -1) {
+        /**
+         * when the user click the control-region outsize the page,
+         * the moving logic should be applied to the EditorView.
+         */
+        if (ControlUtils.isClickOnController(e)) {
+          const movingUtils = new MovingUtils({
+            _config: { config: layerUtils.getCurrConfig },
+            snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+            body: document.getElementById(`nu-layer-${layerUtils.pageIndex}-${layerUtils.layerIndex}`) as HTMLElement
+          })
+          movingUtils.moveStart(e)
         }
       }
     },
@@ -454,6 +503,7 @@ $REULER_SIZE: 20px;
 
   &__card {
     width: 100%;
+    touch-action: none;
     box-sizing: border-box;
     display: flex;
     align-items: center;
