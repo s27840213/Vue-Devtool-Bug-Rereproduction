@@ -1,4 +1,5 @@
 export interface IDownloadTypeAttrs {
+  [key: string]: number | undefined
   scale?: number
   quality?: number
   omitBackground?: 0 | 1

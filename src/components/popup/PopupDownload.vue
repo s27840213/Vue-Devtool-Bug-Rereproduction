@@ -223,10 +223,15 @@ export default Vue.extend({
       ...prevSubmission
     } = JSON.parse(localStorage.getItem(submission) || '{}')
 
+    const defaultOptions = DownloadUtil.getTypeAttrs(selectedTypeVal || 'jpg')
+    Object.keys(defaultOptions).forEach(key => {
+      defaultOptions[key] = (key in prevSubmission ? prevSubmission : defaultOptions)[key]
+    })
+
     const prevInfo = {
       saveSubmission: true,
       // saveSubmission: !!selectedTypeVal,
-      selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('jpg'),
+      selected: defaultOptions,
       selectedTypeVal: selectedTypeVal || 'jpg',
       rangeType,
       pageRange: rangeType === 'spec' ? pageRange : [],
