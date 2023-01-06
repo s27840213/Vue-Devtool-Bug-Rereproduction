@@ -86,9 +86,11 @@ export default Vue.extend({
     },
     snapLineStyles(dir: string, pos: number, isGuideline?: string) {
       const { bleeds } = pageUtils.getPageSizeWithBleeds(this.config)
-      pos += dir === 'v' ? bleeds.left
-        : dir === 'h' ? bleeds.top
-          : 0
+      if (this.config.isEnableBleed) {
+        pos += dir === 'v' ? bleeds.left
+          : dir === 'h' ? bleeds.top
+            : 0
+      }
       pos = pos * (this.scaleRatio / 100)
       return dir === 'v' ? {
         height: '100%',

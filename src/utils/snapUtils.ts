@@ -83,8 +83,6 @@ class SnapUtils {
         }
       }
     })
-    console.log(v, h)
-
     return {
       v,
       h
