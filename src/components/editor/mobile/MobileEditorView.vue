@@ -252,7 +252,7 @@ export default Vue.extend({
       return {
         width: `${this.cardWidth}px`,
         height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
-        padding: this.isDetailPage ? '0px' : '40px',
+        padding: this.isDetailPage ? '0px' : `${pageUtils.MOBILE_CARD_PADDING}px`,
         flexDirection: this.isDetailPage ? 'column' : 'initial',
         'overflow-y': this.isDetailPage ? 'initial' : 'scroll',
         // overflow: this.isDetailPage ? 'initial' : 'scroll',
