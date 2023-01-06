@@ -223,6 +223,7 @@ export default Vue.extend({
     }
     if (this.primaryLayer && this.primaryLayer.type === LayerType.frame && this.config.type === LayerType.image) {
       body.addEventListener(generalUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+      body.addEventListener(generalUtils.isTouchDevice() ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
     }
   },
   destroyed() {
@@ -566,7 +567,14 @@ export default Vue.extend({
         }
       }
     },
-    onFrameMouseEnter(e: MouseEvent) {
+    onFrameMouseMove(e: MouseEvent | PointerEvent) {
+      // console.log('on frame mouse move')
+    },
+    onFrameMouseEnter(e: MouseEvent | PointerEvent) {
+      // body.addEventListener(generalUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+      this.handleFrameMouseEnter(e)
+    },
+    handleFrameMouseEnter(e: MouseEvent | PointerEvent) {
       if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
         return
       }
@@ -622,7 +630,7 @@ export default Vue.extend({
         body.addEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
       }
     },
-    onFrameMouseLeave(e: MouseEvent) {
+    onFrameMouseLeave(e: MouseEvent | PointerEvent) {
       if (this.currDraggedPhoto.srcObj.type !== '') return
       if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
         return

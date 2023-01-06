@@ -49,8 +49,8 @@ class LayerFactary {
         initHeight: height,
         imgX: 0,
         imgY: 0,
-        imgWidth: imgWidth || initWidth || width,
-        imgHeight: imgHeight || initHeight || height,
+        imgWidth: initWidth || width,
+        imgHeight: initHeight || height,
         zindex: zindex ?? -1,
         opacity: opacity || 100,
         horizontalFlip: false,
@@ -79,7 +79,7 @@ class LayerFactary {
     if (config.styles.shadow && !Object.prototype.hasOwnProperty.call(config.styles.shadow, 'srcObj')) {
       config.styles.shadow = basicConfig.styles.shadow
     }
-    const isImgSizeWrong = !imgWidth || !imgHeight || imgWidth + 5 < Math.abs(imgX) + width || imgHeight + 5 < Math.abs(imgY) + height
+    const isImgSizeWrong = !imgWidth || !imgHeight || imgWidth + 1 < Math.abs(imgX) + width || imgHeight + 1 < Math.abs(imgY) + height
     if (isImgSizeWrong) {
       const layer = { styles: { width: basicConfig.styles.imgWidth, height: basicConfig.styles.imgHeight } } as unknown as IImage
       const clipperStyles = { width: basicConfig.styles.width, height: basicConfig.styles.height, scale: 1 } as IStyle
