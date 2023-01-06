@@ -40,7 +40,7 @@ export interface IImageStyle extends IStyle {
 
 export interface ILayer<T extends IStyle = IStyle> {
   [key: string]: unknown,
-  type: string,
+  type: 'shape' | 'text' | 'image' | 'frame' | 'group' | 'tmp',
   active: boolean,
   shown: boolean,
   locked: boolean,
