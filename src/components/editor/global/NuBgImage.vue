@@ -1,7 +1,7 @@
 <template lang="pug">
   div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false")
     div(class="nu-background-image__color" :style="mainStyles" @pointerdown="setInBgSettingMode")
-    div(class="nu-background-image__image" v-show="!isColorBackground")
+    div(class="nu-background-image__image" v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)")
       div(v-if="isAdjustImage" :style="frameStyles")
         nu-adjust-image(:src="finalSrc"
           @error="onError"
@@ -120,7 +120,9 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize',
-      getEditorViewImages: 'file/getEditorViewImages'
+      getEditorViewImages: 'file/getEditorViewImages',
+      imgControlPageIdx: 'imgControl/imgControlPageIdx',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'dpi']),
     configStyles(): IImageStyle {

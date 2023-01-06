@@ -132,7 +132,7 @@
                 @setFocus="setFocus()"
                 @isDragging="handleDraggingController")
             dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
-      div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
+      div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex)"
         class="page-highlighter"
         :style="wrapperStyles()")
       //- for ruler to get rectangle of page content (without bleeds)
@@ -296,7 +296,8 @@ export default Vue.extend({
       contentScaleRatio: 'getContentScaleRatio',
       isAdmin: 'user/isAdmin',
       pagesLength: 'getPagesLength',
-      enableAdminView: 'user/getEnableAdminView'
+      enableAdminView: 'user/getEnableAdminView',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
     config(): IPage {
       if (!this.pageState.config.isEnableBleed) return this.pageState.config
@@ -837,24 +838,6 @@ export default Vue.extend({
   background: red;
   opacity: 0.5;
   pointer-events: none;
-}
-
-.dim-background {
-  position: absolute;
-  transform: translateZ(1000px);
-  top: 0px;
-  left: 0px;
-  background: rgba(0, 0, 0, 0.4);
-  pointer-events: none;
-  transform-style: preserve-3d;
-}
-
-.background-control {
-  position: absolute;
-  // transform: translateZ(1000px);
-  z-index: 1000;
-  background-color: rgba(0, 0, 0, 0.6);
-  color: white;
 }
 
 .skeleton {

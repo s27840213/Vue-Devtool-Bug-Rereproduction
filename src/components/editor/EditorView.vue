@@ -1,6 +1,5 @@
 <template lang="pug">
-  div(class="editor-view"
-      :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
+  div(class="editor-view bg-gray-5"
       :style="cursorStyles()"
       @pointerdown="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
       @wheel="handleWheel"
@@ -838,9 +837,5 @@ $REULER_SIZE: 20px;
   width: $REULER_SIZE;
   height: $REULER_SIZE;
   background: #dfe1e7;
-}
-
-.dim-background {
-  background-color: rgba(0, 0, 0, 0.4);
 }
 </style>
