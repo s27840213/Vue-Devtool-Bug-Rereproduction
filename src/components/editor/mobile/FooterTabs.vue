@@ -8,12 +8,12 @@
             @click="handleTabAction(tab)")
           color-btn(v-if="tab.icon === 'color'" size="22px"
                     class="mb-5 click-disabled"
-                    :color="globalSelectedColor.color")
+                    :color="globalSelectedColor")
           svg-icon(v-else class="mb-5 click-disabled"
             :iconName="tab.icon"
             :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
             :iconWidth="'22px'"
-            :style="iconStyle")
+            :style="textIconStyle")
           span(class="body-3 no-wrap click-disabled"
           :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
@@ -21,7 +21,7 @@
 import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import stepsUtils from '@/utils/stepsUtils'
@@ -32,7 +32,6 @@ import { IFooterTab } from '@/interfaces/editor'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import shapeUtils from '@/utils/shapeUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -133,7 +132,7 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: shapeUtils.getDocumentColors.length === 0,
+          hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.shape
           }
@@ -173,6 +172,7 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
+          hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.background
           },
@@ -200,7 +200,7 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: shapeUtils.getSingleColorObjNum === 0 && !this.hasSubSelectedLayer,
+          hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.shape
           }
@@ -214,7 +214,7 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: shapeUtils.getDocumentColors.length === 0,
+          hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.shape
           }
@@ -254,14 +254,19 @@ export default Vue.extend({
     tabs(): Array<IFooterTab> {
       if (this.inAllPagesMode) {
         return this.pageTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
-        /** tmp layer treated as group */
+      // A group that only has images
+      } else if (this.isGroupOrTmp && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
         return this.multiPhotoTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
+      } else if (this.isGroupOrTmp && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
         return this.photoInGroupTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('text')) {
+      // text + shape color
+      } else if (this.isGroupOrTmp && this.targetIs('text') && this.globalSelectedColor !== 'none') {
+        return [...this.multiObjectTabs, ...this.fontTabs]
+      // only text
+      } else if (this.isGroupOrTmp && this.targetIs('text')) {
         return this.multiFontTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('shape') && this.singleTargetType()) {
+      // only shape
+      } else if (this.isGroupOrTmp && this.targetIs('shape') && this.singleTargetType()) {
         return this.multiObjectTabs
       } else if ((this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer)) && !this.singleTargetType()) {
         return this.multiGeneralTabs
@@ -276,19 +281,17 @@ export default Vue.extend({
         return this.frameTabs
       } else if (this.showShapeSetting) {
         return this.objectTabs.concat(this.genearlLayerTabs)
-      } else if (this.showGeneralTabs) {
-        return [this.mainMenu, ...this.genearlLayerTabs]
       } else if (this.inBgSettingMode) {
         return this.bgSettingTab
       } else {
         return this.homeTabs
       }
     },
-    globalSelectedColor(): { textColor: string, color: string } {
-      return colorUtils.globalSelectedColor
+    globalSelectedColor(): string {
+      return colorUtils.globalSelectedColor.color
     },
-    iconStyle(): Record<string, string> {
-      const textColor = this.globalSelectedColor.textColor
+    textIconStyle(): Record<string, string> {
+      const textColor = colorUtils.globalSelectedColor.textColor
       return textColor === 'multi' ? {
         '--multi-text-color': '1' // For svg icon 'text-color-mobile.svg' rect fill multi-color
       } : {
@@ -312,7 +315,11 @@ export default Vue.extend({
       return layerUtils.getTmpLayer().locked
     },
     isGroup(): boolean {
-      return (layerUtils.getCurrLayer.type === LayerType.tmp || this.currSelectedInfo.types.has('group')) && this.currSelectedInfo.layers.length === 1
+      return layerUtils.getCurrLayer.type === LayerType.group
+    },
+    isGroupOrTmp(): boolean {
+      return (layerUtils.getCurrLayer.type === LayerType.tmp ||
+      layerUtils.getCurrLayer.type === LayerType.group)
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup

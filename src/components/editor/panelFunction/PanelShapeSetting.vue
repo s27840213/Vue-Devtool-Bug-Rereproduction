@@ -351,7 +351,7 @@ export default Vue.extend({
       return shapeUtils.hasMultiColors
     },
     getDocumentColors(): string[] {
-      return shapeUtils.getDocumentColors
+      return colorUtils.globalSelectedColor.colors
     },
     isLine(): boolean {
       return this.currLayer.type === 'shape' && this.currLayer.category === 'D'

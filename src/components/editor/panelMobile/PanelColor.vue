@@ -35,11 +35,10 @@ import { mapGetters, mapState } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IShape } from '@/interfaces/layer'
 import { ColorEventType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
-import shapeUtils from '@/utils/shapeUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import textBgUtils from '@/utils/textBgUtils'
 
@@ -151,7 +150,7 @@ export default Vue.extend({
       }
     },
     getDocumentColors(): string[] {
-      return shapeUtils.getDocumentColors
+      return colorUtils.globalSelectedColor.colors
     }
   },
   methods: {
