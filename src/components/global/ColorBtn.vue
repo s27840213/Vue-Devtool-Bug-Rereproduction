@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="color-btn" :style="wrapperStyle")
-  div(class="color-btn__wrapper" :class="{active: active || focus}"
+  div(class="color-btn__wrapper" :class="{active: active || focus, mobile: isMobileEditor}"
     @click="$emit('click', $event)")
     div(v-if="color === 'add'" class="color-btn__add-color")
     div(v-else-if="color === 'multi'" class="color-btn__multi-color")
@@ -9,6 +9,7 @@ div(class="color-btn" :style="wrapperStyle")
 </template>
 
 <script lang="ts">
+import generalUtils from '@/utils/generalUtils'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -36,7 +37,8 @@ export default Vue.extend({
         height: this.size,
         paddingTop: 0
       } : {}
-    }
+    },
+    isMobileEditor() { return generalUtils.isTouchDevice() }
   },
   methods: {
     add(event: Event) {
@@ -84,7 +86,7 @@ export default Vue.extend({
     border: 1px solid setColor(gray-0, 0.2);
   }
   &__wrapper {
-    &.focus, &.active, &:hover {
+    &.focus, &.active, &:not(.mobile):hover {
       padding: 1px;
       & > .color-btn__color, & > .color-btn__add-color {
         border-radius: 2px;
@@ -94,7 +96,7 @@ export default Vue.extend({
     &.focus, &.active {
       border: 2px solid setColor(blue-1);
     }
-    &:hover {
+    &:not(.mobile):hover {
       border: 2px solid setColor(blue-hover);
     }
     > svg {

@@ -44,6 +44,7 @@ import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import textBgUtils from '@/utils/textBgUtils'
+import { cloneDeep } from 'lodash'
 
 export default Vue.extend({
   data() {
@@ -175,6 +176,9 @@ export default Vue.extend({
       })
     },
     handleColorUpdate(newColor: string) {
+      const newDocumentColors = cloneDeep(this.getDocumentColors)
+      newDocumentColors[this.currSelectedColorIndex] = newColor
+
       switch (this.currEvent) {
         case ColorEventType.text: {
           if (newColor === this.props.color) return
@@ -186,18 +190,28 @@ export default Vue.extend({
           const currLayer = layerUtils.getCurrLayer
           switch (currLayer.type) {
             case 'shape': {
-              const color = [...this.getDocumentColors]
-              color[this.currSelectedColorIndex] = newColor
-              layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color })
+              layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color: newDocumentColors })
               break
             }
             case 'tmp':
             case 'group': {
               const { subLayerIdx } = layerUtils
               if (subLayerIdx === -1) {
-                for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
-                  if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
-                    layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: [newColor] })
+                const singleColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length === 1) as IShape[]
+                const multiColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length !== 1) as IShape[]
+                // For one multiple-color shape
+                if (singleColorShapes.length === 0 && multiColorShapes.length === 1) {
+                  for (const [i, layer] of currLayer.layers.entries()) {
+                    if (layer.type === 'shape' && layer.color.length !== 1) {
+                      layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: newDocumentColors })
+                    }
+                  }
+                  // For one or more single-color shape
+                } else if (singleColorShapes.length !== 0) {
+                  for (const [i, layer] of currLayer.layers.entries()) {
+                    if (layer.type === 'shape' && layer.color.length === 1) {
+                      layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: [newColor] })
+                    }
                   }
                 }
               } else {
@@ -206,9 +220,7 @@ export default Vue.extend({
                   this.handleFrameColorUpdate(newColor)
                 }
                 if (subLayerType === 'shape') {
-                  const color = [...this.getDocumentColors]
-                  color[this.currSelectedColorIndex] = newColor
-                  layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { color })
+                  layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { color: newDocumentColors })
                 }
               }
               break
