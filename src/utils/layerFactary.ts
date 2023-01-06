@@ -11,8 +11,11 @@ import { ShadowEffectType } from '@/interfaces/imgShadow'
 import mouseUtils from './mouseUtils'
 
 class LayerFactary {
-  newImage(config: any): IImage {
-    const { width = 0, height = 0, initWidth = 0, initHeight = 0, zindex = 0, opacity = 0, scale = 1 } = config.styles
+  newImage(config: any, parentLayer?: any): IImage {
+    const {
+      width = 0, height = 0, initWidth = 0, initHeight = 0, imgWidth = 0, imgHeight = 0, imgX = 0, imgY = 0, zindex = 0, opacity = 0, scale = 1
+    } = config.styles
+
     const basicConfig = {
       type: 'image',
       ...(config.previewSrc && { previewSrc: config.previewSrc }),
@@ -46,8 +49,8 @@ class LayerFactary {
         initHeight: height,
         imgX: 0,
         imgY: 0,
-        imgWidth: initWidth || width,
-        imgHeight: initHeight || height,
+        imgWidth: imgWidth || initWidth || width,
+        imgHeight: imgHeight || initHeight || height,
         zindex: zindex ?? -1,
         opacity: opacity || 100,
         horizontalFlip: false,
@@ -76,8 +79,7 @@ class LayerFactary {
     if (config.styles.shadow && !Object.prototype.hasOwnProperty.call(config.styles.shadow, 'srcObj')) {
       config.styles.shadow = basicConfig.styles.shadow
     }
-    const { styles: { imgWidth, imgX, imgHeight, imgY } } = config
-    const isImgSizeWrong = !imgWidth || !imgHeight || imgWidth < Math.abs(imgX) + width || imgHeight < Math.abs(imgY) + height
+    const isImgSizeWrong = !imgWidth || !imgHeight || imgWidth + 5 < Math.abs(imgX) + width || imgHeight + 5 < Math.abs(imgY) + height
     if (isImgSizeWrong) {
       const layer = { styles: { width: basicConfig.styles.imgWidth, height: basicConfig.styles.imgHeight } } as unknown as IImage
       const clipperStyles = { width: basicConfig.styles.width, height: basicConfig.styles.height, scale: 1 } as IStyle
@@ -119,7 +121,7 @@ class LayerFactary {
             userId: ''
           }
         }
-        Object.assign(img, this.newImage(imgConfig))
+        Object.assign(img, this.newImage(imgConfig, config))
       })
     } else if (clips.length) {
       // Template frame with image, need to copy the info of the image
@@ -146,7 +148,7 @@ class LayerFactary {
           userId: ''
         },
         isFrameImg: true
-      }))
+      }, config))
     }
     if (clips.some(img => img.styles.rotate !== 0)) {
       const img = clips.find(img => img.styles.rotate !== 0) as IImage
@@ -526,7 +528,7 @@ class LayerFactary {
     return config
   }
 
-  newByLayerType(config: any): IShape | IText | IImage | IFrame | IGroup | ITmp {
+  newByLayerType(config: any, parentLayer? : any): IShape | IText | IImage | IFrame | IGroup | ITmp {
     this.paramsExaminer(config)
     switch (config.type) {
       case 'shape':
@@ -534,14 +536,14 @@ class LayerFactary {
       case 'text':
         return this.newText(config)
       case 'image':
-        return this.newImage(config)
+        return this.newImage(config, parentLayer)
       case 'frame':
         return this.newFrame(config)
       case 'group':
         return this.newGroup(config, config.layers)
       case 'tmp':
         for (const layerIndex in config.layers) {
-          config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
+          config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex], config)
         }
         console.error('Basically, the template should not have the layer type of tmp')
         return this.newTmp(config.styles, config.layers)

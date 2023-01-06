@@ -428,18 +428,34 @@ export default Vue.extend({
       const physicalRatio = img.naturalWidth / img.naturalHeight
       const layerRatio = this.config.styles.imgWidth / this.config.styles.imgHeight
       if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1 && this.config.srcObj.type !== 'frame') {
-        const newW = this.config.styles.imgHeight * physicalRatio
-        const offsetW = this.config.styles.imgWidth - newW
-        if (this.primaryLayerType() === 'frame') {
-          frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
-            imgWidth: newW,
-            imgX: this.config.styles.imgX + offsetW / 2
-          })
+        if (physicalRatio > 1) {
+          const newW = this.config.styles.imgHeight * physicalRatio
+          const offsetW = this.config.styles.imgWidth - newW
+          if (this.primaryLayerType() === 'frame') {
+            frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+              imgWidth: newW,
+              imgX: this.config.styles.imgX + offsetW / 2
+            })
+          } else {
+            layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+              imgWidth: newW,
+              imgX: this.config.styles.imgX + offsetW / 2
+            }, this.subLayerIndex)
+          }
         } else {
-          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-            imgWidth: newW,
-            imgX: this.config.styles.imgX + offsetW / 2
-          }, this.subLayerIndex)
+          const newH = this.config.styles.imgWidth / physicalRatio
+          const offsetH = this.config.styles.imgHeight - newH
+          if (this.primaryLayerType() === 'frame') {
+            frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+              imgHeight: newH,
+              imgY: this.config.styles.imgY + offsetH / 2
+            })
+          } else {
+            layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+              imgHeight: newH,
+              imgY: this.config.styles.imgY + offsetH / 2
+            }, this.subLayerIndex)
+          }
         }
       }
     },
