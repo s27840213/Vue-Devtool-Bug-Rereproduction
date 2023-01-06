@@ -20,6 +20,7 @@
     transition(name="slide-left")
       component(v-if="isSlideShown" :is="slideType" class="vivisticker__slide")
     tutorial(v-if="showTutorial")
+    full-page(v-if="fullPageType !== 'none'" class="vivisticker__full-page")
 </template>
 
 <script lang="ts">
@@ -30,6 +31,7 @@ import MobilePanel from '@/components/vivisticker/MobilePanel.vue'
 import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
 import FooterTabs from '@/components/vivisticker/FooterTabs.vue'
 import Tutorial from '@/components/vivisticker/Tutorial.vue'
+import FullPage from '@/components/vivisticker/FullPage.vue'
 import MyDesign from '@/components/vivisticker/MyDesign.vue'
 import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -58,6 +60,7 @@ export default Vue.extend({
     HeaderTabs,
     FooterTabs,
     Tutorial,
+    FullPage,
     SlideUserSettings
   },
   data() {
@@ -183,6 +186,7 @@ export default Vue.extend({
       isInEditor: 'vivisticker/getIsInEditor',
       isInBgShare: 'vivisticker/getIsInBgShare',
       showTutorial: 'vivisticker/getShowTutorial',
+      fullPageType: 'vivisticker/getFullPageType',
       userInfo: 'vivisticker/getUserInfo',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
       isInMyDesign: 'vivisticker/getIsInMyDesign',

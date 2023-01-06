@@ -28,7 +28,8 @@ const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '100.0',
   locale: 'us',
   isFirstOpen: false,
-  editorBg: ''
+  editorBg: '',
+  osVer: '100.0'
 }
 
 const USER_SETTINGS_CONFIG: {[key: string]: {default: any, description: string}} = {
@@ -444,8 +445,17 @@ class ViviStickerUtils {
   }
 
   checkVersion(targetVersion: string) {
+    // targetVersion must be in format: <main>.<sub> e.g. 1.18
     const [targetMain, targetSub] = targetVersion.split('.')
     const [currMain, currSub] = store.getters['vivisticker/getUserInfo'].appVer.split('.')
+    return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
+  }
+
+  checkOSVersion(targetVersion: string) {
+    // targetVersion must be in format: <main>.<sub> e.g. 1.18
+    const [targetMain, targetSub] = targetVersion.split('.')
+    const [currMain, currSubRaw] = store.getters['vivisticker/getUserInfo'].osVer.split('.')
+    const currSub = currSubRaw ?? '0'
     return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
   }
 

@@ -20,6 +20,7 @@ interface IViviStickerState {
   controllerHidden: boolean,
   isStandaloneMode: boolean,
   showTutorial: boolean,
+  fullPageType: string,
   recentlyBgColors: string[],
   newBgColor: string,
   isDuringCopy: boolean,
@@ -63,6 +64,7 @@ const getDefaultState = (): IViviStickerState => ({
   controllerHidden: false,
   isStandaloneMode: false,
   showTutorial: false,
+  fullPageType: 'none',
   recentlyBgColors: [],
   newBgColor: '',
   isDuringCopy: false,
@@ -128,6 +130,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getShowTutorial(state: IViviStickerState): boolean {
     return state.showTutorial
+  },
+  getFullPageType(state: IViviStickerState): string {
+    return state.fullPageType
   },
   getRecentlyBgColors(state: IViviStickerState): string[] {
     return state.recentlyBgColors
@@ -232,6 +237,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_showTutorial(state: IViviStickerState, showTutorial: boolean) {
     state.showTutorial = showTutorial
+  },
+  SET_fullPageType(state: IViviStickerState, fullPageType: string) {
+    state.fullPageType = fullPageType
   },
   SET_recentlyBgColors(state: IViviStickerState, recentlyBgColors: string[]) {
     state.recentlyBgColors = recentlyBgColors
