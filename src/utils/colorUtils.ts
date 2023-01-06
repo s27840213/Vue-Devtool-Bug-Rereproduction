@@ -63,8 +63,8 @@ class ColorUtils {
         const multiColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length !== 1) as IShape[]
         const hasImages = (currLayer.layers.filter(l => l.type === 'image') as IImage[]).length !== 0
         const shapeColors = uniq(singleColorShapes.map(s => s.color[0]))
-        colors = hasImages || (shapeColors.length === 0 && multiColorShapes.length !== 1) ? []
-          : shapeColors.length === 0 && multiColorShapes.length === 1 ? multiColorShapes[0].color
+        colors = hasImages || (singleColorShapes.length === 0 && multiColorShapes.length !== 1) ? []
+          : singleColorShapes.length === 0 && multiColorShapes.length === 1 ? multiColorShapes[0].color
             : shapeColors
         const texts = filter(currLayer.layers, { type: 'text' }) as IText[]
         textColors = uniq(flatten(flatten(texts.map(t => t.paragraphs.map(p => p.spans.map(s => s.styles.color))))))
