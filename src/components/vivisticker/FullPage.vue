@@ -2,7 +2,8 @@
   transition(name="panel-up")
     div(ref="main" class="full-page relative")
       template(v-if="fullPageType === 'iOS16Video'")
-        div(class="full-page__close"
+        div(v-if="showCloseButton"
+            class="full-page__close"
             @click.prevent.stop="handleClose")
           svg-icon(iconName="vivisticker_close"
                   iconColor="white"
@@ -18,11 +19,23 @@ import { mapGetters, mapMutations } from 'vuex'
 export default Vue.extend({
   data() {
     return {
+      showCloseButton: false
+    }
+  },
+  mounted() {
+    this.initialize()
+  },
+  watch: {
+    fullPageType() {
+      this.$nextTick(() => {
+        this.initialize()
+      })
     }
   },
   computed: {
     ...mapGetters({
-      fullPageType: 'vivisticker/getFullPageType'
+      fullPageType: 'vivisticker/getFullPageType',
+      fullPageParams: 'vivisticker/getFullPageParams'
     }),
     videoSource(): string {
       return `https://template.vivipic.com/static/video/${this.$i18n.locale.toUpperCase()}_IOS16.mp4`
@@ -33,10 +46,25 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setFullPageType: 'vivisticker/SET_fullPageType'
+      clearFullPageConfig: 'vivisticker/UPDATE_clearFullPageConfig'
     }),
+    initialize() {
+      this.showCloseButton = false
+      switch (this.fullPageType) {
+        case 'iOS16Video':
+          // eslint-disable-next-line no-case-declarations
+          const fromModal = this.fullPageParams.fromModal ?? false
+          if (fromModal) {
+            setTimeout(() => {
+              this.showCloseButton = true
+            }, 5000)
+          } else {
+            this.showCloseButton = true
+          }
+      }
+    },
     handleClose() {
-      this.setFullPageType('none')
+      this.clearFullPageConfig()
     }
   }
 })

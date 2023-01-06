@@ -244,7 +244,7 @@ export default Vue.extend({
     ...mapMutations({
       setShowTutorial: 'vivisticker/SET_showTutorial',
       setSlideType: 'vivisticker/SET_slideType',
-      setFullPageType: 'vivisticker/SET_fullPageType'
+      setFullPageConfig: 'vivisticker/SET_fullPageConfig'
     }),
     handleOptionAction(action?: () => void) {
       if (action) {
@@ -263,7 +263,7 @@ export default Vue.extend({
       editorUtils.setCloseMobilePanelFlag(true)
     },
     handleShowIOS16Tutorial() {
-      this.setFullPageType('iOS16Video')
+      this.setFullPageConfig({ type: 'iOS16Video', params: { fromModal: false } })
     },
     handleShowUserSettings() {
       this.setSlideType('slideUserSettings')

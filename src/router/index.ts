@@ -58,6 +58,9 @@ const routes: Array<RouteConfig> = [
           if (userSettings) {
             store.commit('vivisticker/SET_userSettings', userSettings)
           }
+          const hasCopied = await vivistickerUtils.getState('hasCopied')
+          vivistickerUtils.hasCopied = hasCopied?.data ?? false
+          vivistickerUtils.setState('hasCopied', { data: vivistickerUtils.hasCopied })
           vivistickerUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
           const tempDesign = await vivistickerUtils.fetchDesign()
           if (tempDesign) {

@@ -21,6 +21,7 @@ interface IViviStickerState {
   isStandaloneMode: boolean,
   showTutorial: boolean,
   fullPageType: string,
+  fullPageParams: {[key: string]: any},
   recentlyBgColors: string[],
   newBgColor: string,
   isDuringCopy: boolean,
@@ -65,6 +66,7 @@ const getDefaultState = (): IViviStickerState => ({
   isStandaloneMode: false,
   showTutorial: false,
   fullPageType: 'none',
+  fullPageParams: {},
   recentlyBgColors: [],
   newBgColor: '',
   isDuringCopy: false,
@@ -133,6 +135,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getFullPageType(state: IViviStickerState): string {
     return state.fullPageType
+  },
+  getFullPageParams(state: IViviStickerState): {[key: string]: any} {
+    return state.fullPageParams
   },
   getRecentlyBgColors(state: IViviStickerState): string[] {
     return state.recentlyBgColors
@@ -240,6 +245,17 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_fullPageType(state: IViviStickerState, fullPageType: string) {
     state.fullPageType = fullPageType
+  },
+  SET_fullPageParams(state: IViviStickerState, fullPageParams: {[key: string]: any}) {
+    state.fullPageParams = fullPageParams
+  },
+  SET_fullPageConfig(state: IViviStickerState, data: { type: string, params?: {[key: string]: any} }) {
+    state.fullPageType = data.type
+    state.fullPageParams = data.params ?? {}
+  },
+  UPDATE_clearFullPageConfig(state: IViviStickerState) {
+    state.fullPageType = 'none'
+    state.fullPageParams = {}
   },
   SET_recentlyBgColors(state: IViviStickerState, recentlyBgColors: string[]) {
     state.recentlyBgColors = recentlyBgColors
