@@ -2,12 +2,15 @@
   div(class="panel-color px-5")
     div(v-if="showDocumentColors")
       div(class="text-left") {{$t('NN0798')}}
-      div(class="panel-color__document-colors" :style="colorsStyle"
+      div(class="panel-color__shape-colors" :style="colorsStyle"
           @scroll.passive="updateColorsOverflow" ref="colors")
         color-btn(v-for="(color, index) in getDocumentColors"
                   :color="color" :focus="index === currSelectedColorIndex"
                   @click="selectColor(index)")
       div(class="panel-color__hr")
+    //- There is no row-gap in MobilePanel while active PanelColor.
+    //- Instead, control gap by PanelColor itself.
+    div(v-else class="mt-10")
     color-picker(
       v-if="showColorPicker"
       :isMobile="true" :aspectRatio="40"
@@ -289,17 +292,16 @@ export default Vue.extend({
   grid-template-rows: auto minmax(0, 1fr);
   grid-auto-columns: 100%;
 
-  &__document-colors {
+  &__shape-colors {
     @include no-scrollbar;
     width: 100%;
-    margin-top: 10px;
+    padding: 10px 0 16px 0;
     display: grid;
     gap: 5px;
     overflow-x: auto;
   }
   &__hr {
     height: 1px;
-    margin-top: 16px;
     background-color: setColor(gray-4);
   }
   & .show-document-colors::v-deep .color-panel__scroll {

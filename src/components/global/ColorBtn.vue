@@ -52,6 +52,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .color-btn { // Keep aspect ratio, https://stackoverflow.com/a/6615994
   width: 100%;
+  height: 0;
   padding-top: 100%;
   display: inline-block;
   position: relative;

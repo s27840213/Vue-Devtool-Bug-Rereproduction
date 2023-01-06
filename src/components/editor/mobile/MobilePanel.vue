@@ -244,11 +244,14 @@ export default Vue.extend({
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop' || this.inSelectionState
     },
+    noRowGap(): boolean {
+      return this.inSelectionState || ['crop', 'color'].includes(this.currActivePanel)
+    },
     panelStyle(): { [index: string]: string } {
       return Object.assign(
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
-          'row-gap': this.hideDynamicComp ? '0px' : '10px',
+          'row-gap': this.noRowGap ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
             ? 'initial' : this.panelHeight + 'px'
