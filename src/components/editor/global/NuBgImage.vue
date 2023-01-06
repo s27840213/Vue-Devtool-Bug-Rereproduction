@@ -168,11 +168,17 @@ export default Vue.extend({
     },
     imageSize(): { width: number, height: number, x: number, y: number } {
       const { image } = this
+      const offset = 1
+      const aspectRatio = image.config.styles.imgWidth / image.config.styles.imgHeight
+      const width = image.config.styles.imgWidth + (aspectRatio < 1 ? offset * 2 : offset * 2 * aspectRatio)
+      const height = image.config.styles.imgHeight + (aspectRatio > 1 ? offset * 2 : offset * 2 / aspectRatio)
+      const x = image.posX - (aspectRatio < 1 ? offset : offset * aspectRatio)
+      const y = image.posY - (aspectRatio > 1 ? offset : offset / aspectRatio)
       return {
-        width: image.config.styles.imgWidth * this.contentScaleRatio,
-        height: image.config.styles.imgHeight * this.contentScaleRatio,
-        x: image.posX * this.contentScaleRatio,
-        y: image.posY * this.contentScaleRatio
+        width: width * this.contentScaleRatio,
+        height: height * this.contentScaleRatio,
+        x: x * this.contentScaleRatio,
+        y: y * this.contentScaleRatio
       }
     },
     mainStyles(): any {
