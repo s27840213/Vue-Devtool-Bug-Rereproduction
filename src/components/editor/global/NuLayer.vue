@@ -171,7 +171,8 @@ export default Vue.extend({
         styles: { [key: string]: number | boolean },
         srcObj: { type: string, assetId: string | number, userId: string },
         panelPreviewSrc: ''
-      }
+      },
+      hasHandledFrameMouseEnter: false
     }
   },
   mounted() {
@@ -327,6 +328,21 @@ export default Vue.extend({
       } else {
         return [{ noShadow: false, isTransparent: false, main: true }]
       }
+    },
+    isOk2HandleFrameMouseEnter(): boolean {
+      if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
+        return false
+      }
+      if (layerUtils.getLayer(this.pageIndex, this.layerIndex).locked) {
+        return false
+      }
+      if (layerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
+        return false
+      }
+      if ((layerUtils.getCurrLayer as IImage).id === this.uploadId.layerId) {
+        return false
+      }
+      return layerUtils.getCurrLayer.type === LayerType.image && this.isMoving
     }
   },
   methods: {
@@ -568,25 +584,18 @@ export default Vue.extend({
       }
     },
     onFrameMouseMove(e: MouseEvent | PointerEvent) {
-      // console.log('on frame mouse move')
+      if (!this.hasHandledFrameMouseEnter && this.isOk2HandleFrameMouseEnter) {
+        this.hasHandledFrameMouseEnter = true
+        this.handleFrameMouseEnter(e)
+      }
     },
     onFrameMouseEnter(e: MouseEvent | PointerEvent) {
-      // body.addEventListener(generalUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
-      this.handleFrameMouseEnter(e)
+      if (!this.hasHandledFrameMouseEnter && this.isOk2HandleFrameMouseEnter) {
+        this.hasHandledFrameMouseEnter = true
+        this.handleFrameMouseEnter(e)
+      }
     },
     handleFrameMouseEnter(e: MouseEvent | PointerEvent) {
-      if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
-        return
-      }
-      if (layerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
-        return
-      }
-      if (layerUtils.getLayer(this.pageIndex, this.layerIndex).locked && this.currDraggedPhoto.srcObj.type === '') {
-        return
-      }
-      if ((layerUtils.getCurrLayer as IImage).id === this.uploadId.layerId) {
-        return
-      }
       e.stopPropagation()
       const currLayer = layerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
@@ -631,6 +640,7 @@ export default Vue.extend({
       }
     },
     onFrameMouseLeave(e: MouseEvent | PointerEvent) {
+      this.hasHandledFrameMouseEnter = false
       if (this.currDraggedPhoto.srcObj.type !== '') return
       if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
         return
@@ -653,6 +663,7 @@ export default Vue.extend({
       body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
     },
     onFrameMouseUp(e: MouseEvent) {
+      this.hasHandledFrameMouseEnter = false
       if (this.currDraggedPhoto.srcObj.type !== '') return
       const currLayer = layerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image) {
