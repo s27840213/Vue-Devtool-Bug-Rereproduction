@@ -11,14 +11,18 @@
       :iconName="checked ? 'radio-checked' : 'radio'"
       :iconWidth="iconSize")
     slot
-      span(class="download-check-button__label") {{ label }}
-        v-tooltip(v-if="info" class="download-check-button__label__icon-info" theme="hint-menu")
-          svg-icon(iconName="info"
-            :iconWidth="'16px'"
-            :iconColor="'gray-2'")
-          template(v-slot:popper)
-            span {{info}}
-              a(v-if="infoUrl" class="text-white" :href="infoUrl" target="_blank") {{`${$t('NN0801')}`}}
+      div(class="download-check-button__label")
+          span(v-if="label.split(' ').length === 1") {{ label }}
+          span(v-else) {{ label.split(' ').slice(0, -1).join(' ') }}
+          nobr
+            span(v-if="label.split(' ').length > 1") {{ ' ' + label.split(' ').at(-1) }}
+            v-tooltip(v-if="info" class="download-check-button__label__icon-info" theme="hint-menu")
+              svg-icon(iconName="info"
+                :iconWidth="'16px'"
+                :iconColor="'gray-2'")
+              template(v-slot:popper)
+                span {{info}}
+                  a(v-if="infoUrl" class="text-white" :href="infoUrl" target="_blank") {{`${$t('NN0801')}`}}
     input(class="download-check-button__input"
       :type="type"
       :value="value"
@@ -87,11 +91,13 @@ export default Vue.extend({
     width: 0;
   }
   &__label {
-    display: flex;
-    gap: 8px;
     &__icon-info {
-      display: flex;
-      align-items: center;
+      display: inline-block;
+      margin-left: 8px;
+      >svg {
+        position: relative;
+        top: 4px;
+      }
     }
   }
 }
