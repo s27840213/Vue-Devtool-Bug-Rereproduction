@@ -68,16 +68,16 @@
             class="mb-10"
             :label="`${$t('NN0794')}`"
             :default-checked="selected.outline===1"
-            info="此為印刷廠一般要求。"
-            infoUrl="https://vivipic.com/"
+            :info="`${$t('NN0799')}`"
+            :infoUrl="`${$t('NN0802')}`"
             @change="({ checked }) => handleUpdate('outline', checked ? 1 : 0)")
         div(v-if="'outline' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
             :label="`${$t('NN0776')}`"
             :default-checked="selected.outline===2"
-            info="轉為點陣圖檔。"
-            infoUrl="https://vivipic.com/"
+            :info="`${$t('NN0800')}`"
+            :infoUrl="`${$t('NN0803')}`"
             @change="({ checked }) => handleUpdate('outline', checked ? 2 : 0)")
         div(v-if="selectedTypeVal.includes('pdf')"
           class="flex items-center mb-10")

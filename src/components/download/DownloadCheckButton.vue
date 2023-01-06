@@ -18,7 +18,7 @@
             :iconColor="'gray-2'")
           template(v-slot:popper)
             span {{info}}
-              a(v-if="infoUrl" class="text-white" :href="infoUrl" target="_blank") {{'了解更多'}}
+              a(v-if="infoUrl" class="text-white" :href="infoUrl" target="_blank") {{`${$t('NN0801')}`}}
     input(class="download-check-button__input"
       :type="type"
       :value="value"
