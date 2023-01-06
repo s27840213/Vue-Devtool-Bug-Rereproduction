@@ -2,7 +2,7 @@
   div(class="footer-tabs" ref="tabs")
     div(class="footer-tabs__container" :style="containerStyles"  ref="container")
       template(v-for="(tab, index) in tabs")
-        div(v-if="!tab.hidden"
+        div(v-if="!tab.hidden" :key="tab.icon"
             class="footer-tabs__item"
             :class="{'click-disabled': (tab.disabled || isLocked)}"
             @click="handleTabAction(tab)")
@@ -11,17 +11,17 @@
                     :color="globalSelectedColor")
           svg-icon(v-else class="mb-5 click-disabled"
             :iconName="tab.icon"
-            :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
+            :iconColor="(tab.disabled || isLocked) ? 'gray-2' : tabActive(tab) ? 'blue-1' :'white'"
             :iconWidth="'22px'"
             :style="textIconStyle")
           span(class="body-3 no-wrap click-disabled"
-          :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
+          :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-import { IFrame, IGroup, IImage, ILayer } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, ITmp } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import stepsUtils from '@/utils/stepsUtils'
@@ -38,6 +38,7 @@ import editorUtils from '@/utils/editorUtils'
 import i18n from '@/i18n'
 import brandkitUtils from '@/utils/brandkitUtils'
 import colorUtils from '@/utils/colorUtils'
+import { cloneDeep } from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -260,7 +261,7 @@ export default Vue.extend({
       } else if (this.isGroupOrTmp && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
         return this.photoInGroupTabs
       // text + shape color
-      } else if (this.isGroupOrTmp && this.targetIs('text') && this.globalSelectedColor !== 'none') {
+      } else if (this.isGroupOrTmp && this.targetIs('text') && this.showObjectColorAndFontTabs) {
         return [...this.multiObjectTabs, ...this.fontTabs]
       // only text
       } else if (this.isGroupOrTmp && this.targetIs('text')) {
@@ -355,6 +356,16 @@ export default Vue.extend({
     showPhotoTabs(): boolean {
       return (!this.inBgRemoveMode && !this.isFontsPanelOpened &&
         this.targetIs('image') && this.singleTargetType()) || this.hasFrameClipActive
+    },
+    showObjectColorAndFontTabs(): boolean {
+      const { subLayerIdx } = layerUtils
+      const currLayer = layerUtils.getCurrLayer
+      if (!(currLayer.type === 'group' || currLayer.type === 'tmp') || subLayerIdx !== -1) return false
+      const singleColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length === 1) as IShape[]
+      const multiColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length !== 1) as IShape[]
+      const hasImages = (currLayer.layers.filter(l => l.type === 'image') as IImage[]).length !== 0
+      if (hasImages || (singleColorShapes.length === 0 && multiColorShapes.length !== 1)) return false
+      else return true
     },
     hasFrameClipActive(): boolean {
       const layer = layerUtils.getCurrLayer
@@ -621,6 +632,13 @@ export default Vue.extend({
       } else {
         return this.currSelectedInfo.types.size === 1
       }
+    },
+    tabActive(tab: IFooterTab): boolean {
+      if (this.currTab === 'color') {
+        return this.currTab === tab.panelType &&
+          ((colorUtils.currEvent === 'setTextColor' && tab.icon === 'text-color-mobile') ||
+          (colorUtils.currEvent !== 'setTextColor' && tab.icon === 'color'))
+      } else return this.currTab === tab.panelType
     },
     handleLockedNotify() {
       this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
