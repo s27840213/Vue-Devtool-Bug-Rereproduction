@@ -87,8 +87,12 @@ export default Vue.extend({
     },
     backgroundControlStyles() {
       const backgroundImage = this.image
-      const imgX = this.config.isEnableBleed ? backgroundImage.styles.imgX + this.config.bleeds.left : backgroundImage.styles.imgX
-      const imgY = this.config.isEnableBleed ? backgroundImage.styles.imgY + this.config.bleeds.top : backgroundImage.styles.imgY
+      let imgX = backgroundImage.styles.imgX
+      let imgY = backgroundImage.styles.imgY
+      if (this.config.isEnableBleed) {
+        imgX += this.config.bleeds.left
+        imgY += this.config.bleeds.top
+      }
       return {
         width: `${backgroundImage.styles.imgWidth * this.contentScaleRatio}px`,
         height: `${backgroundImage.styles.imgHeight * this.contentScaleRatio}px`,
@@ -129,6 +133,7 @@ export default Vue.extend({
       return imageAdjustUtil.getHalation(adjust.halation, position)
     },
     contentAreaStyles() {
+      if (!this.config.isEnableBleed) return {}
       return {
         top: this.config.bleeds.top * this.contentScaleRatio + 'px',
         bottom: this.config.bleeds.bottom * this.contentScaleRatio + 'px',
