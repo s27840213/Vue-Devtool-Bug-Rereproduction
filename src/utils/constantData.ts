@@ -244,6 +244,22 @@ class ConstantData {
       }]
     }
 
+    const pricing = i18n.locale === 'tw' ? {
+      singleLayer: true,
+      label: i18n.t('NN0643'),
+      content: [{
+        label: i18n.t('NN0643'),
+        url: '/pricing'
+      }, {
+        label: '政府輔助方案',
+        url: 'https://blog.vivipic.com/tw/tcloud/'
+      }]
+    } : {
+      name: 'Pricing',
+      url: '/pricing',
+      label: i18n.t('NN0643')
+    }
+
     const list = [{
       label: i18n.t('NN0666'),
       content: templateType[i18n.locale as keyof typeof templateType]
@@ -254,11 +270,9 @@ class ConstantData {
     }, {
       label: i18n.t('NN0670'),
       content: resource[i18n.locale as keyof typeof resource]
-    }, {
-      name: 'Pricing',
-      url: '/pricing',
-      label: i18n.t('NN0643')
-    }, {
+    },
+    ...[pricing],
+    {
       hidden: !this.isLogin,
       name: 'MyDesign',
       url: '/mydesign',

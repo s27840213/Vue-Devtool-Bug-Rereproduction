@@ -17,8 +17,10 @@
               url(:url="item.url") {{item.label}}
               svg-icon(v-if="item.content" iconName="chevron-down"
                       iconColor="gray-1" iconWidth="16px")
-              div(v-if="item.content" class="nu-header__container-link-more")
-                div(v-for="it in item.content" class="nu-header__container-link-more-col")
+              div(v-if="item.singleLayer" class="nu-header__container-link__single-layer")
+                url(v-for="it in item.content" :url="it.url") {{it.label}}
+              div(v-else-if="item.content" class="nu-header__container-link__more")
+                div(v-for="it in item.content" class="nu-header__container-link__more-col")
                   url(:url="it.url") {{it.label}}
                   url(v-for="i in it.content" :url="i.url") {{i.label}}
         div(v-else class="body-2" key="no-navigation")
@@ -294,12 +296,28 @@ export default Vue.extend({
   a:hover {
     color: setColor(blue-hover);
   }
-  &:hover > &-more {
+  &:hover > &__more, &:hover > &__single-layer {
     visibility: visible;
   }
 }
 
-.nu-header__container-link-more {
+.nu-header__container-link__single-layer {
+  visibility: hidden;
+  display: grid;
+  grid-auto-flow: row;
+  gap: 30px;
+  position: absolute;
+  top: 100%;
+  transform: translateX(-15px);
+  width: 200px;
+  padding: 30px 15px;
+  background-color: setColor(white);
+  box-shadow: 0px 10px 25px 0px rgba(0, 0, 0, 0.1);
+  cursor: default;
+  text-align: left;
+}
+
+.nu-header__container-link__more {
   visibility: hidden;
   display: grid;
   grid-auto-flow: column;
