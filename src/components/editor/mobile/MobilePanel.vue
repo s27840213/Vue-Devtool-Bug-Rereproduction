@@ -453,6 +453,9 @@ export default Vue.extend({
             }
           }
         }
+        if (this.showExtraColorPanel) {
+          this.addRecentlyColors(colorUtils.currColor)
+        }
         this.closeMobilePanel()
 
         if (this.inMultiSelectionMode && this.inSelectionState) {
