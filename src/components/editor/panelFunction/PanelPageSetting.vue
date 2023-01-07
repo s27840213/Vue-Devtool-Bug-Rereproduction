@@ -726,8 +726,6 @@ export default Vue.extend({
       const strValue = !striped || rounded ? roundedValue.toString() : this.bleedsToShow[key].value
       this.bleeds[key] = roundedValue
       this.bleedsToShow[key].value = strValue
-
-      console.log('set bleed', { ...this.currentPageBleeds }, value)
       if (all) {
         Object.keys(this.bleeds).forEach((key) => {
           this.bleeds[key] = roundedValue
@@ -737,7 +735,6 @@ export default Vue.extend({
       this.applyBleeds(key, all)
     },
     addBleed(key: string, value: number, all = false) {
-      console.log('add bleed', { ...this.currentPageBleeds }, value)
       if (all) {
         Object.keys(this.bleeds).forEach((key) => {
           this.bleeds[key] = Math.max(this.bleeds[key] + value, 0)
