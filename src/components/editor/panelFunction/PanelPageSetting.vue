@@ -253,7 +253,7 @@ import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 import { IBleed, IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { STR_UNITS, PRECISION } from '@/utils/unitUtils'
+import { PRECISION } from '@/utils/unitUtils'
 import { round } from 'lodash'
 
 export default Vue.extend({
@@ -305,8 +305,7 @@ export default Vue.extend({
       groupErrorMsg: '',
       unsetThemeTemplate: [] as string[],
       showBleedSettings: true,
-      unitOptions: STR_UNITS,
-      bleeds: pageUtils.getDefaultBleeds('px'),
+      bleeds: pageUtils.getPageDefaultBleeds(),
       bleedsToShow: {
         top: {
           key: 'top',
@@ -410,7 +409,7 @@ export default Vue.extend({
     }),
     currentPageBleeds(): IBleed {
       const currPage = pageUtils.currFocusPage
-      let bleeds = currPage?.physicalBleeds ?? currPage?.bleeds ?? pageUtils.getPageDefaultBleeds(currPage)
+      let bleeds = currPage?.physicalBleeds ?? currPage?.bleeds
       bleeds = {
         top: this.groupType === 1 ? this.getPage(0).physicalBleeds?.top ?? this.getPage(0).bleeds?.top ?? 0 : bleeds.top,
         bottom: this.groupType === 1 ? this.getPage(this.pagesLength - 1).physicalBleeds?.bottom ?? this.getPage(this.pagesLength - 1).bleeds?.bottom ?? 0 : bleeds.bottom,

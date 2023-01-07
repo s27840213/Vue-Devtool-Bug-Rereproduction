@@ -142,7 +142,6 @@ export default Vue.extend({
       pageSizes: {} as IMapSize,
       aspectRatio: NaN,
       isLocked: true,
-      unitOptions: STR_UNITS,
       selectedUnit: '',
       showUnitOptions: false,
       copyBeforeApply: true,
@@ -176,6 +175,9 @@ export default Vue.extend({
     }),
     isTouchDevice() {
       return generalUtils.isTouchDevice()
+    },
+    unitOptions(): string[] {
+      return this.groupType === 1 ? ['px'] : STR_UNITS
     },
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
@@ -265,7 +267,10 @@ export default Vue.extend({
         title: item.title ?? '',
         description: item.description ?? '',
         unit: item.unit ?? 'px'
-      })) : []
+      })).filter((layout: ILayout) => {
+        if (this.groupType === 1 && layout.unit !== 'px') return false
+        return true
+      }) : []
     },
     recentlyUsed(): ILayout[] {
       const targetCategory = this.categories.find((category: any) => {
@@ -280,7 +285,9 @@ export default Vue.extend({
         unit: item.unit ?? 'px'
       })).filter((layout: ILayout) => {
         const pxSize = unitUtils.convertSize(layout.width, layout.height, layout.unit, 'px')
-        return !(pxSize.width * pxSize.height > pageUtils.MAX_AREA)
+        if (pxSize.width * pxSize.height > pageUtils.MAX_AREA) return false
+        if (this.groupType === 1 && layout.unit !== 'px') return false
+        return true
       }) : []
     },
     isLayoutReady(): boolean {
