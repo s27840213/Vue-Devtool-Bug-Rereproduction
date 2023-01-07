@@ -11,7 +11,7 @@ interface IMobileEditorState {
 }
 class EditorUtils {
   get mobileAllPageMode() {
-    return store.getters['mobileEditor/mobileAllPageMode']
+    return store.getters['mobileEditor/getMobileAllPageMode']
   }
 
   get currActivePanel() {
