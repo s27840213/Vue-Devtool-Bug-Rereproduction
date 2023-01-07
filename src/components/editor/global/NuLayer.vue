@@ -205,7 +205,6 @@ export default Vue.extend({
       body
     }
 
-    console.log(this.isSubLayer, this.subLayerIndex)
     if (this.subLayerIndex === -1) {
       this.movingUtils = new MovingUtils(data)
       const moveStart = this.movingUtils.moveStart.bind(this.movingUtils)
