@@ -39,6 +39,7 @@ import editorUtils from '@/utils/editorUtils'
 import i18n from '@/i18n'
 import brandkitUtils from '@/utils/brandkitUtils'
 import colorUtils from '@/utils/colorUtils'
+import { isEqual } from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -446,8 +447,8 @@ export default Vue.extend({
       }
     },
     tabs: {
-      handler() {
-        if (this.disableTabScroll) {
+      handler(newVal, oldVal) {
+        if (this.disableTabScroll || isEqual(newVal, oldVal)) {
           this.disableTabScroll = false
           return
         }
