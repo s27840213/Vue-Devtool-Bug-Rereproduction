@@ -106,10 +106,6 @@ export default Vue.extend({
       default: 'none',
       type: String
     },
-    currColorEvent: {
-      default: 'text',
-      type: String
-    },
     isSubPanel: {
       default: false,
       type: Boolean
@@ -313,7 +309,6 @@ export default Vue.extend({
         }
         case 'color': {
           return Object.assign(defaultVal, {
-            currEvent: this.currColorEvent,
             panelHistory: this.panelHistory
           })
         }

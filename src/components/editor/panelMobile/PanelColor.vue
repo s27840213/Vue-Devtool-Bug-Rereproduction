@@ -38,7 +38,7 @@ import { mapGetters, mapState } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import { IFrame, IGroup, IImage, IShape } from '@/interfaces/layer'
+import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import { ColorEventType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -57,10 +57,6 @@ export default Vue.extend({
     }
   },
   props: {
-    currEvent: {
-      type: String,
-      required: true
-    },
     panelHistory: {
       type: Array as PropType<string[]>,
       default: () => []
@@ -73,25 +69,6 @@ export default Vue.extend({
     ColorBtn
   },
   created() {
-    colorUtils.setCurrEvent(this.currEvent)
-    switch (this.currEvent) {
-      case ColorEventType.text: {
-        colorUtils.setCurrColor(this.props.color)
-        break
-      }
-      case ColorEventType.shape: {
-        colorUtils.setCurrColor(this.getDocumentColors[this.currSelectedColorIndex])
-        break
-      }
-      case ColorEventType.background: {
-        colorUtils.setCurrColor(colorUtils.currPageBackgroundColor)
-        break
-      }
-      default: {
-        break
-      }
-    }
-
     colorUtils.on(this.currEvent, this.handleColorUpdate)
     colorUtils.onStop(this.currEvent, this.recordChange)
   },
@@ -101,6 +78,15 @@ export default Vue.extend({
   beforeDestroy() {
     colorUtils.event.off(this.currEvent, this.handleColorUpdate)
     colorUtils.offStop(this.currEvent, this.recordChange)
+  },
+  watch: {
+    // For switch PanelColor event target without close MobilePanel. Ex: shape color and text color in group
+    currEvent(newVal, oldVal) {
+      colorUtils.event.off(oldVal, this.handleColorUpdate)
+      colorUtils.offStop(oldVal, this.recordChange)
+      colorUtils.on(newVal, this.handleColorUpdate)
+      colorUtils.onStop(newVal, this.recordChange)
+    }
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
@@ -131,6 +117,9 @@ export default Vue.extend({
     },
     showAllRecently(): boolean {
       return this.lastHistory === 'color-more'
+    },
+    currEvent(): string {
+      return colorUtils.currEvent
     },
     selectedColor(): string {
       switch (this.currEvent) {
@@ -171,7 +160,7 @@ export default Vue.extend({
     },
     handleDragUpdate(color: string) {
       window.requestAnimationFrame(() => {
-        colorUtils.event.emit(colorUtils.currEvent, color)
+        colorUtils.event.emit(this.currEvent, color)
         colorUtils.setCurrColor(color)
       })
     },

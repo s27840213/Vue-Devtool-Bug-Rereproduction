@@ -70,6 +70,7 @@ import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import constantData, { IEffect, IEffectCategory, IEffectOption } from '@/utils/constantData'
 import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 import textBgUtils from '@/utils/textBgUtils'
+import colorUtils from '@/utils/colorUtils'
 import _ from 'lodash'
 
 export default Vue.extend({
@@ -127,9 +128,11 @@ export default Vue.extend({
     },
     openColorPanel(key: string) {
       if (this.currCategory.name === 'shadow') {
+        colorUtils.setCurrEvent(ColorEventType.textEffect)
         this.$emit('openExtraColorModal', ColorEventType.textEffect, MobileColorPanelType.palette)
         textEffectUtils.setColorKey(key)
       } else { // Text BG
+        colorUtils.setCurrEvent(ColorEventType.textBg)
         this.$emit('openExtraColorModal', ColorEventType.textBg, MobileColorPanelType.palette)
         textBgUtils.setColorKey(key)
       }

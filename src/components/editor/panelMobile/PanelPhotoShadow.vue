@@ -120,6 +120,7 @@ export default Vue.extend({
     },
     handleColorModal() {
       if (generalUtils.isTouchDevice()) {
+        colorUtils.setCurrEvent(ColorEventType.photoShadow)
         this.handleColor = true
         this.$emit('openExtraColorModal', ColorEventType.photoShadow, MobileColorPanelType.palette)
       }
