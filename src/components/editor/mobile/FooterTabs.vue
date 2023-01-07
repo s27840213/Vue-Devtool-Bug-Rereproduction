@@ -1,6 +1,7 @@
 <template lang="pug">
-  div(class="footer-tabs" ref="tabs")
-    div(class="footer-tabs__container" :style="containerStyles"  ref="container")
+  div(class="footer-tabs" ref="tabs" :style="rootStyles")
+    div(class="footer-tabs__container" :style="containerStyles"
+        @scroll.passive="updateContainerOverflow" ref="container")
       template(v-for="(tab, index) in tabs")
         div(v-if="!tab.hidden" :key="tab.icon"
             class="footer-tabs__item"
@@ -21,7 +22,7 @@
 import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-import { IFrame, IGroup, IImage, ILayer, IShape, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import stepsUtils from '@/utils/stepsUtils'
@@ -38,7 +39,6 @@ import editorUtils from '@/utils/editorUtils'
 import i18n from '@/i18n'
 import brandkitUtils from '@/utils/brandkitUtils'
 import colorUtils from '@/utils/colorUtils'
-import { cloneDeep } from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -61,6 +61,8 @@ export default Vue.extend({
       mainMenu,
       isFontsPanelOpened: false,
       disableTabScroll: false,
+      leftOverflow: false,
+      rightOverflow: false,
       homeTabs: [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
         { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
@@ -405,10 +407,20 @@ export default Vue.extend({
     contentEditable(): boolean {
       return this.currSelectedInfo.layers[0]?.contentEditable
     },
-    containerStyles(): { [index: string]: any } {
+    rootStyles(): Record<string, string> {
+      return {
+        backgroundColor: this.contentEditable ? '#EEEFF4' : '#14182A'
+      }
+    },
+    containerStyles(): { [index: string]: string } {
+      // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
       return {
         transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
-        opacity: `${this.contentEditable ? 0 : 1}`
+        opacity: `${this.contentEditable ? 0 : 1}`,
+        maskImage: this.contentEditable ? 'none'
+          : `linear-gradient(to right, 
+          transparent 0, black ${this.leftOverflow ? '56px' : 0}, 
+          black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
       }
     },
     currLayer(): ILayer {
@@ -461,6 +473,11 @@ export default Vue.extend({
       _setIsShowPagePreview: 'page/SET_isShowPagePreview',
       setBgImageControl: 'SET_backgroundImageControl'
     }),
+    updateContainerOverflow() {
+      const { scrollLeft, scrollWidth, offsetWidth } = this.$refs.container as HTMLElement
+      this.leftOverflow = scrollLeft > 0
+      this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
+    },
     handleTabAction(tab: IFooterTab) {
       switch (tab.icon) {
         case 'crop': {
@@ -654,7 +671,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .footer-tabs {
   overflow: hidden;
-  background-color: setColor(gray-5);
   &__container {
     overflow: scroll;
     display: grid;
