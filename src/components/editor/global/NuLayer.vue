@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(:style="[{transform: isImgCtrl ? {} : `translateZ(${this.config.styles.zindex}px)`},...transformStyle]")
+  div(:style="[{transform: isImgCtrl || inFrame ? {} : `translateZ(${this.config.styles.zindex}px)`},...transformStyle]")
     div(v-for="div in layerDivs"
         class="nu-layer" :class="!config.locked && subLayerIndex === -1 ? `nu-layer--p${pageIndex}` : ''"
         :style="layerStyles(div.noShadow, div.isTransparent)"
@@ -97,7 +97,7 @@ export default Vue.extend({
       type: Boolean,
       default: false
     },
-    isFrame: {
+    inFrame: {
       type: Boolean,
       default: false
     },
