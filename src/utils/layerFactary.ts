@@ -399,7 +399,7 @@ class LayerFactary {
     return group
   }
 
-  newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
+  newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup | IFrame>) {
     const tmp: ITmp = {
       type: 'tmp',
       id: GeneralUtils.generateRandomString(8),
