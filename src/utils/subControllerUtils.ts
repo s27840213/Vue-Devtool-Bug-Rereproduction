@@ -34,7 +34,12 @@ export default class SubControllerUtils {
   }
 
   onPointerdown(e: PointerEvent) {
-    if (this.primaryLayer.type === 'tmp') return
+    if (this.primaryLayer.type === 'tmp') {
+      if (generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || store.getters['mobileEditor/getInMultiSelectionMode']) {
+        groupUtils.deselectTargetLayer(this.layerIndex)
+      }
+      return
+    }
     if (e.button !== 0) return
 
     this.primaryActive = this.primaryLayer.active
@@ -154,7 +159,7 @@ export default class SubControllerUtils {
         }
       }
       if ((this.primaryLayer.type === LayerType.frame && !(this.primaryLayer as IFrame).clips[this.subLayerIdx].active) ||
-      (this.primaryLayer.type === LayerType.group && !(this.primaryLayer as IGroup).layers[this.subLayerIdx].active)) {
+        (this.primaryLayer.type === LayerType.group && !(this.primaryLayer as IGroup).layers[this.subLayerIdx].active)) {
         updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { active: true })
       }
       layerUtils.setCurrSubSelectedInfo(this.subLayerIdx, this.config.type)
