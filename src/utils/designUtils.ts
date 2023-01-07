@@ -14,6 +14,7 @@ import i18n from '@/i18n'
 import stepsUtils from './stepsUtils'
 import _ from 'lodash'
 import { EventEmitter } from 'events'
+import unitUtils from './unitUtils'
 
 interface Item {
   name: string,
@@ -55,6 +56,7 @@ class DesignUtils {
       name: design.name,
       width: design.width,
       height: design.height,
+      unit: design.unit,
       createdTime: design.create_time,
       lastUpdatedTime: design.update_time,
       favorite: design.favorite > 0,
@@ -769,12 +771,13 @@ class DesignUtils {
     return Array(pageNum).fill('').map((_, index) => this.getDesignPreview(assetId, scale, ver, signedUrl, index))
   }
 
-  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, id: number | string | undefined = undefined, path?: string, folderName?: string) {
+  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, unit = 'px', id: number | string | undefined = undefined, path?: string, folderName?: string) {
     // Redirect user to editor and create new design, will be use by login redirect.
     const query = {
       type: 'new-design-size',
       width: width.toString(),
       height: id?.toString() === '7' ? width.toString() : height.toString(),
+      unit,
       themeId: id ? id.toString() : undefined,
       path,
       folderName
@@ -787,19 +790,35 @@ class DesignUtils {
   }
 
   // Below function is used to update the page
-  async newDesign(width?: number, height?: number, newDesignType?: number, path?: string, folderName?: string) {
+  async newDesign(width = 1080, height = 1080, unit = 'px', newDesignType?: number, path?: string, folderName?: string) {
     store.commit('file/SET_setLayersDone')
+    const pxSize = unitUtils.convertSize(width, height, unit, 'px')
+    const inSize = unitUtils.convertSize(width, height, unit, 'in')
+
+    // get default bleeds with page dpi
+    const dpi = {
+      width: pxSize.width / inSize.width,
+      height: pxSize.height / inSize.height
+    }
+    const bleeds = pageUtils.getDefaultBleeds('px', dpi)
+
     pageUtils.setPages([pageUtils.newPage({
-      width: width ?? 1080,
-      height: height ?? 1080
+      width: pxSize.width,
+      height: pxSize.height,
+      physicalWidth: width,
+      physicalHeight: height,
+      bleeds,
+      physicalBleeds: unit === 'px' ? bleeds : pageUtils.getDefaultBleeds(unit, dpi),
+      unit
     })])
     pageUtils.clearPagesInfo()
     await themeUtils.refreshTemplateState(undefined, newDesignType)
     if (this.isLogin) {
       const query = router.currentRoute.query
+      query.width = width.toString()
+      query.height = height.toString()
+      query.unit = unit
       if (path) query.path = path
-      if (width) query.width = width.toString()
-      if (height) query.height = height.toString()
       if (folderName) query.folderName = folderName
       router.replace({ query })
     }

@@ -1,40 +1,39 @@
 <template lang="pug">
-  div
-    div(class="nu-layer" :class="!config.locked && subLayerIndex === -1 ? `nu-layer--p${pageIndex}` : ''" :style="layerStyles" ref="body" :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
+  div(:style="[{transform: isImgCtrl || inFrame ? {} : `translateZ(${this.config.styles.zindex}px)`},...transformStyle]"
+      :class="[{'click-disabled': isPagePreview}]")
+    div(v-for="div in layerDivs"
+        class="nu-layer" :class="!config.locked && subLayerIndex === -1 ? `nu-layer--p${pageIndex}` : ''"
+        :style="layerStyles(div.noShadow, div.isTransparent)"
+        :ref="div.main ? 'body' : null"
+        :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : null"
         :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
         :data-p-index="pageIndex"
-        v-press="isTouchDevice()? onPress : -1"
-        @pointerdown="onPointerDown"
-        @pointerup="onPointerUp"
+        v-press="isTouchDevice() && div.main ? onPress : -1"
+        @pointerdown="div.main ? onPointerDown($event) : null"
+        @pointerup="div.main ? onPointerUp($event) : null"
         @contextmenu.prevent
-        @click.right.stop="onRightClick"
-        @dragenter="dragEnter"
-        @dblclick="dblClick")
+        @click.right.stop="div.main ? onRightClick($event) : null"
+        @dragenter="div.main ? dragEnter($event) : null"
+        @dblclick="div.main ? dblClick($event) : null")
       div(class="layer-translate posAbs"
           :style="translateStyles()")
-        div(class="layer-scale posAbs" ref="scale"
+        div(class="layer-scale posAbs" :ref="div.main ? 'scale' : null"
             :style="scaleStyles()")
           nu-clipper(:config="config"
               :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
               :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
-            lazy-load(:target="lazyLoadTarget"
-                :rootMargin="'300px 0px 300px 0px'"
-                :minHeight="config.styles.height * contentScaleRatio"
-                :minWidth="config.styles.width * contentScaleRatio"
-                :threshold="[0]"
-                :handleUnrender="handleUnrender"
-                :anamationEnabled="false"
-                :forceRender="isSubLayer || forceRender")
-              component(:is="`nu-${config.type}`"
-                class="transition-none"
-                :config="config"
-                :imgControl="imgControl"
-                :contentScaleRatio="contentScaleRatio"
-                :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-                :scaleRatio="scaleRatio"
-                :isPagePreview="isPagePreview"
-                :forRender="forRender"
-                v-bind="$attrs")
+            component(:is="`nu-${config.type}`"
+              class="transition-none"
+              :config="config"
+              :imgControl="imgControl"
+              :contentScaleRatio="contentScaleRatio"
+              :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+              :scaleRatio="scaleRatio"
+              :isPagePreview="isPagePreview"
+              :forRender="forRender"
+              :isTransparent="div.isTransparent"
+              :noShadow="div.noShadow"
+              v-bind="$attrs")
           svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
             :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
             g(v-html="frameClipFormatter(config.clipPath)"
@@ -99,7 +98,7 @@ export default Vue.extend({
       type: Boolean,
       default: false
     },
-    isFrame: {
+    inFrame: {
       type: Boolean,
       default: false
     },
@@ -165,7 +164,8 @@ export default Vue.extend({
         styles: { [key: string]: number | boolean },
         srcObj: { type: string, assetId: string | number, userId: string },
         panelPreviewSrc: ''
-      }
+      },
+      hasHandledFrameMouseEnter: false
     }
   },
   mounted() {
@@ -173,7 +173,7 @@ export default Vue.extend({
      * Use definedProperty to bind some props of the vue.$props with the movingUtils
      * thus, we are unnecessary to watching these props and update them manually
      */
-    const body = this.$refs.body as HTMLElement
+    const body = (this.$refs.body as HTMLElement[])[0]
     const props = this.$props
     const layerInfo = {} as ILayerInfo
     Object.defineProperty(layerInfo, 'pageIndex', {
@@ -217,7 +217,11 @@ export default Vue.extend({
     }
     if (this.primaryLayer && this.primaryLayer.type === LayerType.frame && this.config.type === LayerType.image) {
       body.addEventListener(generalUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+      body.addEventListener(generalUtils.isTouchDevice() ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
     }
+  },
+  destroyed() {
+    this.movingUtils && this.movingUtils.removeListener()
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -240,8 +244,25 @@ export default Vue.extend({
       isUploadingShadowImg: 'shadow/isUploading',
       isHandling: 'shadow/isHandling',
       isShowPagePanel: 'page/getShowPagePanel',
-      isHandleShadow: 'shadow/isHandling'
+      isHandleShadow: 'shadow/isHandling',
+      renderForPDF: 'user/getRenderForPDF'
     }),
+    lazyloadSize(): { height: number, width: number } {
+      const { config, contentScaleRatio } = this
+      switch (config.type) {
+        case LayerType.image:
+          return {
+            width: config.styles.width * contentScaleRatio,
+            height: config.styles.height * contentScaleRatio
+          }
+        default: {
+          return {
+            width: config.styles.width * contentScaleRatio / config.styles.scale,
+            height: config.styles.height * contentScaleRatio / config.styles.scale
+          }
+        }
+      }
+    },
     layerInfo(): ILayerInfo {
       return {
         pageIndex: this.pageIndex,
@@ -291,43 +312,30 @@ export default Vue.extend({
       }
       return ''
     },
-    layerStyles(): any {
-      const clipPath = !this.forRender && this.config.clipPath &&
-        !this.config.isFrameImg && this.primaryLayer?.type === 'frame'
-        ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
-      const pointerEvents = this.getPointerEvents
-      const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
-        {
-          // outline: this.outlineStyles(),
-          willChange: !this.isSubLayer && this.isDragging ? 'transform' : '',
-          pointerEvents,
-          clipPath
-        }
-      )
-      switch (this.config.type) {
-        case LayerType.text: {
-          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
-          const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
-          Object.assign(
-            styles,
-            textEffectStyles,
-            textBgStyles,
-            {
-              willChange: 'text-shadow' + (this.isDragging ? ', transform' : ''),
-              '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
-            }
-          )
-          break
-        }
-        case LayerType.shape: {
-          Object.assign(
-            styles,
-            { 'mix-blend-mode': this.config.styles.blendMode }
-          )
-        }
+    layerDivs() {
+      if (this.$router.currentRoute.name === 'Preview' && this.renderForPDF && this.config.type === 'text') {
+        return [
+          { noShadow: false, isTransparent: true },
+          { noShadow: true, isTransparent: false, main: true }
+        ]
+      } else {
+        return [{ noShadow: false, isTransparent: false, main: true }]
       }
-      return styles
+    },
+    isOk2HandleFrameMouseEnter(): boolean {
+      if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
+        return false
+      }
+      if (layerUtils.getLayer(this.pageIndex, this.layerIndex).locked) {
+        return false
+      }
+      if (layerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
+        return false
+      }
+      if ((layerUtils.getCurrLayer as IImage).id === this.uploadId.layerId) {
+        return false
+      }
+      return layerUtils.getCurrLayer.type === LayerType.image && this.isMoving
     }
   },
   methods: {
@@ -343,27 +351,57 @@ export default Vue.extend({
     frameClipFormatter(clippath: string) {
       return frameUtils.frameClipFormatter(clippath)
     },
+    layerStyles(noShadow: boolean, isTransparent: boolean): any {
+      const clipPath = !this.forRender && this.config.clipPath &&
+        !this.config.isFrameImg && this.primaryLayer?.type === 'frame'
+        ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
+      const pointerEvents = this.getPointerEvents
+      const outline = this.outlineStyles()
+      const styles = Object.assign(
+        CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
+        {
+          outline,
+          willChange: !this.isSubLayer && this.isDragging ? 'transform' : '',
+          pointerEvents,
+          clipPath,
+          ...this.transformStyle
+        }
+      )
+      switch (this.config.type) {
+        case LayerType.text: {
+          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
+          const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
+          Object.assign(
+            styles,
+            textEffectStyles,
+            textBgStyles,
+            {
+              willChange: 'text-shadow' + (this.isDragging ? ', transform' : ''),
+              '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
+            }
+          )
+          if (noShadow) {
+            styles.textShadow = 'none'
+          }
+          if (isTransparent) {
+            styles['-webkit-filter'] = 'opacity(1)'
+          }
+          break
+        }
+        case LayerType.shape: {
+          Object.assign(
+            styles,
+            { 'mix-blend-mode': this.config.styles.blendMode }
+          )
+        }
+      }
+      return styles
+    },
     outlineStyles() {
-      const outlineColor = (() => {
-        if (this.getLayerType === 'frame' && this.config.clips[0].isFrameImg) {
-          return '#F10994'
-        } else if (this.isLocked()) {
-          return '#EB5757'
-        } else {
-          return '#7190CC'
-        }
-      })()
-
-      if (this.isLine || (this.config.moving && this.currSelectedInfo.index !== this.layerIndex)) {
-        return 'none'
-      } else if (this.config.shown || this.isActive) {
-        if (this.config.type === 'tmp' || this.isControlling) {
-          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
-        } else {
-          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
-        }
+      if (this.primaryLayer && this.primaryLayer.type === 'tmp') {
+        return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`
       } else {
-        return 'none'
+        return ''
       }
     },
     toggleHighlighter(evt: MouseEvent, pageIndex: number, layerIndex: number, shown: boolean) {
@@ -539,19 +577,19 @@ export default Vue.extend({
         }
       }
     },
-    onFrameMouseEnter(e: MouseEvent) {
-      if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
-        return
+    onFrameMouseMove(e: MouseEvent | PointerEvent) {
+      if (!this.hasHandledFrameMouseEnter && this.isOk2HandleFrameMouseEnter) {
+        this.hasHandledFrameMouseEnter = true
+        this.handleFrameMouseEnter(e)
       }
-      if (layerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
-        return
+    },
+    onFrameMouseEnter(e: MouseEvent | PointerEvent) {
+      if (!this.hasHandledFrameMouseEnter && this.isOk2HandleFrameMouseEnter) {
+        this.hasHandledFrameMouseEnter = true
+        this.handleFrameMouseEnter(e)
       }
-      if (layerUtils.getLayer(this.pageIndex, this.layerIndex).locked && this.currDraggedPhoto.srcObj.type === '') {
-        return
-      }
-      if ((layerUtils.getCurrLayer as IImage).id === this.uploadId.layerId) {
-        return
-      }
+    },
+    handleFrameMouseEnter(e: MouseEvent | PointerEvent) {
       e.stopPropagation()
       const currLayer = layerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
@@ -590,12 +628,13 @@ export default Vue.extend({
           imgX,
           imgY
         })
-        const body = this.$refs.body as HTMLElement
+        const body = (this.$refs.body as HTMLElement[])[0]
         body.addEventListener(generalUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
         body.addEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
       }
     },
-    onFrameMouseLeave(e: MouseEvent) {
+    onFrameMouseLeave(e: MouseEvent | PointerEvent) {
+      this.hasHandledFrameMouseEnter = false
       if (this.currDraggedPhoto.srcObj.type !== '') return
       if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
         return
@@ -613,11 +652,12 @@ export default Vue.extend({
           ...this.imgBuff.styles
         })
       }
-      const body = this.$refs.body as HTMLElement
+      const body = (this.$refs.body as HTMLElement[])[0]
       body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
       body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
     },
     onFrameMouseUp(e: MouseEvent) {
+      this.hasHandledFrameMouseEnter = false
       if (this.currDraggedPhoto.srcObj.type !== '') return
       const currLayer = layerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image) {
@@ -627,7 +667,7 @@ export default Vue.extend({
         frameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.subLayerIndex, { active: true })
         stepsUtils.record()
       }
-      const body = this.$refs.body as HTMLElement
+      const body = (this.$refs.body as HTMLElement[])[0]
       body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
       body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
     },
@@ -638,12 +678,13 @@ export default Vue.extend({
       this.onLayerDragEnter(e)
     },
     onFrameDragEnter(e: DragEvent) {
+      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
       if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
         return
       }
       const { primaryLayer } = this
       if (!primaryLayer.locked) {
-        const body = this.$refs.body as HTMLElement
+        const body = (this.$refs.body as HTMLElement[])[0]
         body.addEventListener('dragleave', this.onFrameDragLeave)
         body.addEventListener('drop', this.onFrameDrop)
         e.stopPropagation()
@@ -681,8 +722,9 @@ export default Vue.extend({
       }
     },
     onFrameDragLeave(e: DragEvent) {
+      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
       e.stopPropagation()
-      const body = this.$refs.body as HTMLElement
+      const body = (this.$refs.body as HTMLElement[])[0]
       body.removeEventListener('dragleave', this.onFrameDragLeave)
       body.removeEventListener('drop', this.onFrameDrop)
       const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex) as IFrame
@@ -694,7 +736,7 @@ export default Vue.extend({
     },
     onFrameDrop(e: DragEvent) {
       e.stopPropagation()
-      const body = this.$refs.body as HTMLElement
+      const body = (this.$refs.body as HTMLElement[])[0]
       body.removeEventListener('dragleave', this.onFrameDragLeave)
       body.removeEventListener('drop', this.onFrameDrop)
       stepsUtils.record()
@@ -711,7 +753,7 @@ export default Vue.extend({
     },
     onLayerDragEnter(e: DragEvent) {
       if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
-      const body = this.$refs.body as HTMLElement
+      const body = (this.$refs.body as HTMLElement[])[0]
       const dragSrcObj = this.$store.state.currDraggedPhoto.srcObj
       if (this.getLayerType === 'image' && dragSrcObj.assetId !== this.config.srcObj.assetId) {
         body.addEventListener('dragleave', this.layerDragLeave)
@@ -731,7 +773,7 @@ export default Vue.extend({
     },
     layerDragLeave(e: DragEvent) {
       if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
-      const body = this.$refs.body as HTMLElement
+      const body = (this.$refs.body as HTMLElement[])[0]
       body.removeEventListener('dragleave', this.layerDragLeave)
       body.removeEventListener('drop', this.layerOnDrop)
       if (this.getLayerType === 'image') {
@@ -740,7 +782,7 @@ export default Vue.extend({
     },
     layerOnDrop(e: DragEvent) {
       e.stopPropagation()
-      const body = this.$refs.body as HTMLElement
+      const body = (this.$refs.body as HTMLElement[])[0]
       body.removeEventListener('dragleave', this.layerDragLeave)
       body.removeEventListener('drop', this.layerOnDrop)
 

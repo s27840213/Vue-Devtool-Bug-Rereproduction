@@ -3,7 +3,7 @@
     tabs(:tabs="[$tc('NN0002', 2),$t('NN0017')]" v-model="tabIndex")
     //- Search bar
     search-bar(v-if="showImageTab" class="mb-15"
-      :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
+      :placeholder="$t('NN0092', {target: $tc('NN0004', 1)})"
       clear
       :defaultKeyword="keywordLabel"
       @search="handleSearch")
@@ -14,7 +14,8 @@
                 @selectColorEnd="recordChange"
                 @openColorPicker="openColorPicker")
     //- Search result empty msg
-    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+    div(v-if="emptyResultMessage")
+      span {{ emptyResultMessage }}
     //- Search result and main content
     category-list(v-for="item in categoryListArray"
                   v-show="item.show" :ref="item.key" :key="item.key"
@@ -37,11 +38,18 @@
             :key="item.id"
             :item="item"
             :locked="currentPageBackgroundLocked")
-      template(v-if="pending" #after)
-        div(class="text-center")
+      template(#after)
+        //- Loading icon
+        div(v-if="pending" class="text-center")
           svg-icon(iconName="loading"
             iconColor="white"
             iconWidth="20px")
+        //- BG wishing pool
+        div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
+          span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
+          nubtn(size="mid" class="mt-30")
+            url(:url="$t('NN0791')")
+              span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 
 </template>
 
@@ -55,6 +63,7 @@ import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
 import Tabs from '@/components/Tabs.vue'
+import Url from '@/components/global/Url.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import { IPage } from '@/interfaces/page'
@@ -70,7 +79,8 @@ export default Vue.extend({
     CategoryListRows,
     CategoryBackgroundItem,
     Tabs,
-    ColorSlips
+    ColorSlips,
+    Url
   },
   data() {
     return {
@@ -274,6 +284,8 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  color: white;
+  text-align: left;
   &__color-sets {
     filter: none;
     height: calc(100% - 54px);

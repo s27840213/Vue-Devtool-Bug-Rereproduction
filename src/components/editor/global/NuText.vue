@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="nu-text" :style="textWrapperStyle()" draggable="false")
     //- Svg BG for text effex gooey.
-    svg(v-if="svgBG" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
+    svg(v-if="svgBG && !noShadow" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
       component(v-for="(elm, idx) in svgBG.content"
                 :key="`textSvgBg${idx}`"
                 :is="elm.tag"
@@ -13,7 +13,8 @@
         :layerIndex="layerIndex"
         :pageIndex="pageIndex"
         :subLayerIndex="subLayerIndex"
-        :isDuplicated="idx !== duplicatedText.length-1")
+        :isDuplicated="idx !== duplicatedText.length-1"
+        :isTransparent="isTransparent")
       p(v-else
         v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
         :key="p.id"
@@ -22,32 +23,8 @@
           class="nu-text__span"
           :data-sindex="sIndex"
           :key="span.id"
-          :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan)") {{ span.text }}
+          :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan, transParentStyles)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
-    //- nu-text-editor(v-if="config.active" :initText="textHtml()" :id="subLayerIndex === -1 ? `text-${layerIndex}` : `text-sub-${layerIndex}-${subLayerIndex}`"
-    //-   class="nu-text__editor"
-    //-   :style="textBodyStyle()"
-    //-   :pageIndex="pageIndex"
-    //-   :layerIndex="layerIndex"
-    //-   :subLayerIndex="subLayerIndex"
-    //-   @keydown.native.37.stop
-    //-   @keydown.native.38.stop
-    //-   @keydown.native.39.stop
-    //-   @keydown.native.40.stop
-    //-   @keydown.native.ctrl.67.exact.stop.self
-    //-   @keydown.native.meta.67.exact.stop.self
-    //-   @keydown.native.ctrl.86.exact.stop.self
-    //-   @keydown.native.meta.86.exact.stop.self
-    //-   @keydown.native.ctrl.88.exact.stop.self
-    //-   @keydown.native.meta.88.exact.stop.self
-    //-   @keydown.native.ctrl.65.exact.stop.self
-    //-   @keydown.native.meta.65.exact.stop.self
-    //-   @keydown.native.ctrl.90.exact.stop.self
-    //-   @keydown.native.meta.90.exact.stop.self
-    //-   @keydown.native.ctrl.shift.90.exact.stop.self
-    //-   @keydown.native.meta.shift.90.exact.stop.self
-    //-   @update="handleTextChange"
-    //-   @compositionend="handleTextCompositionEnd")
 </template>
 
 <script lang="ts">
@@ -79,6 +56,14 @@ export default Vue.extend({
       default: -1
     },
     isPagePreview: {
+      default: false,
+      type: Boolean
+    },
+    isTransparent: {
+      default: false,
+      type: Boolean
+    },
+    noShadow: {
       default: false,
       type: Boolean
     }
@@ -166,6 +151,13 @@ export default Vue.extend({
         ...(duplicatedTextShadow ? [textShadowCss] : []),
         {} // Original text, don't have extra css
       ]
+    },
+    transParentStyles(): {[key: string]: any} {
+      return this.isTransparent ? {
+        color: 'rgba(0, 0, 0, 0)',
+        '-webkit-text-stroke-color': 'rgba(0, 0, 0, 0)',
+        'text-decoration-color': 'rgba(0, 0, 0, 0)'
+      } : {}
     }
   },
   watch: {
@@ -370,8 +362,8 @@ export default Vue.extend({
     },
     getOpacity() {
       const { editing, contentEditable, active } = this.config
-      if (this.isCurveText && active) {
-        return 0.2
+      if (this.isCurveText) {
+        return contentEditable ? 0.2 : 1
       }
       if (editing && !this.isMoving) {
         if (contentEditable && active) {

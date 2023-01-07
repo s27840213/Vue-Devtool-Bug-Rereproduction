@@ -28,18 +28,19 @@
 
 <script lang="ts">
 import Vue, { PropType } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
+import { IFrame, IImage, IShape } from '@/interfaces/layer'
+import { ColorEventType } from '@/store/types'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 import colorUtils, { checkAndConvertToHex } from '@/utils/colorUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { mapGetters, mapState } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import { IFrame, IImage, IShape } from '@/interfaces/layer'
-import { ColorEventType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
@@ -237,7 +238,11 @@ export default Vue.extend({
 
         case ColorEventType.photoShadow: {
           const { styles: { shadow: { currentEffect } } } = layerUtils.getCurrConfig as IImage
-          imageShadowUtils.setEffect(currentEffect, { color: newColor })
+          if (currentEffect === ShadowEffectType.frame) {
+            imageShadowUtils.setEffect(currentEffect, { frameColor: newColor })
+          } else {
+            imageShadowUtils.setEffect(currentEffect, { color: newColor })
+          }
           break
         }
       }

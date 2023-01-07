@@ -15,6 +15,8 @@ import logUtils from './logUtils'
 import tiptapUtils from './tiptapUtils'
 import pageUtils from './pageUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
+import layerFactary from './layerFactary'
+import { ICalculatedGroupStyle } from '@/interfaces/group'
 
 class ShortcutUtils {
   copySourcePageIndex: number
@@ -41,9 +43,9 @@ class ShortcutUtils {
     this.copySourcePageIndex = -1
   }
 
-  private regenerateLayerInfo(layer: IText | IShape | IImage | IGroup | ITmp | IFrame, props: { toCenter?: boolean, offset?: number, targetPageIndex?: number }) {
+  private regenerateLayerInfo(_layer: IText | IShape | IImage | IGroup | ITmp | IFrame, props: { toCenter?: boolean, offset?: number, targetPageIndex?: number }) {
     const { toCenter = false, offset = 10, targetPageIndex } = props
-
+    const layer = GeneralUtils.deepCopy(_layer)
     if (toCenter && targetPageIndex !== undefined) {
       const targetPage = pageUtils.getPage(targetPageIndex)
       const { x, y, width, height } = layer.styles
@@ -62,10 +64,10 @@ class ShortcutUtils {
     switch (layer.type) {
       case 'image':
         layer.imgControl = false
-        break
+        return layerFactary.newImage(layer)
       case 'shape':
         layer.className = ShapeUtils.classGenerator()
-        break
+        return layerFactary.newShape(layer)
       case 'group':
         layer.layers
           .forEach(l => {
@@ -74,7 +76,7 @@ class ShortcutUtils {
             }
             l.id = GeneralUtils.generateRandomString(8)
           })
-        break
+        return layerFactary.newGroup(layer as IGroup, (layer as IGroup).layers)
       case 'tmp':
         layer.layers
           .forEach(l => {
@@ -83,7 +85,9 @@ class ShortcutUtils {
             }
             l.id = GeneralUtils.generateRandomString(8)
           })
-        break
+        return layerFactary.newTmp((layer as ITmp).styles as ICalculatedGroupStyle, (layer as ITmp).layers)
+      case 'text':
+        return layerFactary.newText(layer as IText)
     }
     return layer
   }
@@ -220,6 +224,7 @@ class ShortcutUtils {
   }
 
   altDuplicate(targetPageIndex: number, targetLayerIndex: number, config: ILayer) {
+    const ori_config = config as any
     const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(config as IShape | IText | IImage | IGroup | IFrame), { offset: 0 })
     newLayer.active = false
 
@@ -237,7 +242,7 @@ class ShortcutUtils {
       return
     } else {
       store.commit('ADD_layersToPos', { pageIndex: currFocusPageIndex, layers: [newLayer], pos: tmpIndex })
-      GroupUtils.set(currFocusPageIndex, tmpIndex + 1, [newLayer])
+      GroupUtils.set(currFocusPageIndex, tmpIndex + 1, [ori_config])
     }
     ZindexUtils.reassignZindex(currFocusPageIndex)
   }

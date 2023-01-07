@@ -21,6 +21,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     const url = urlParams.get('url')
     const width = urlParams.get('width')
     const height = urlParams.get('height')
+    const unit = urlParams.get('unit')
     const themeId = urlParams.get('themeId')
     const groupId = urlParams.get('group_id')
     const path = urlParams.get('path')
@@ -47,6 +48,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
       designUtils.newDesign(
         parseInt(width),
         parseInt(height === '0' ? width : height),
+        unit || 'px',
         parseInt(themeId as string),
         path === null ? undefined : path,
         folderName === null ? undefined : folderName

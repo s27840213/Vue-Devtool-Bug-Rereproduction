@@ -15,6 +15,8 @@ div(class="popup-file")
   div(class="popup-file__item" @click="newDesign()")
     span {{$tc('NN0072')}}
   hr(class="popup-file__hr")
+  //- div(class="popup-file__item " @click="toggleBleed()")
+  //-   span {{hasBleed ? `${$t('NN0779')}` : `${$t('NN0778')}`}}
   div(class="popup-file__item " @click="togglerRuler()")
     span {{$t('NN0073')}}
     svg-icon(v-if="isShownRuler" class="pointer"
@@ -39,9 +41,11 @@ div(class="popup-file")
     //- div(class="popup-file__item" @click="testTrail()")
     //-   span 測試試用
   hr(class="popup-file__hr")
-  div(class="popup-file__item"
-      @click="onLogoutClicked()")
-      span {{$tc('NN0167',2)}}
+  div(class="popup-file__item")
+    url(:url="$t('NN0791')")
+      span {{$t('NN0790', {type: $tc('NN0793', 1)})}}
+  div(class="popup-file__item" @click="onLogoutClicked()")
+    span {{$tc('NN0167',2)}}
   div(class="popup-file__item" @click="gotoMobile()")
     span(class="text-gray-3") Version: {{buildNumber}}
   template(v-if="isAdmin")
@@ -68,13 +72,16 @@ import { mapGetters, mapMutations, mapState } from 'vuex'
 import shortcutHandler from '@/utils/shortcutUtils'
 import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
+import Url from '@/components/global/Url.vue'
 import stepsUtils from '@/utils/stepsUtils'
 import gtmUtils from '@/utils/gtmUtils'
-import page from '@/store/module/page'
+import resizeUtils from '@/utils/resizeUtils'
+import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
   components: {
-    Avatar
+    Avatar,
+    Url
   },
   data() {
     return {
@@ -90,6 +97,8 @@ export default Vue.extend({
       isAdmin: 'user/isAdmin',
       account: 'user/getAccount',
       isFontLoading: 'text/getIsFontLoading',
+      pagesLength: 'getPagesLength',
+      groupType: 'getGroupType',
       enableAdminView: 'user/getEnableAdminView'
     }),
     pageSize(): { w: number, h: number } {
@@ -117,6 +126,9 @@ export default Vue.extend({
       } else {
         return this.uname
       }
+    },
+    hasBleed(): boolean {
+      return pageUtils.getPages.some((page: IPage) => page.isEnableBleed)
     }
   },
   methods: {
@@ -142,6 +154,38 @@ export default Vue.extend({
     },
     togglelockGuideline() {
       rulerUtils.setLockGuideline(!rulerUtils.lockGuideline)
+    },
+    toggleBleed() {
+      if (this.hasBleed) {
+        // disable bleeds for all pages
+        for (let idx = 0; idx < this.pagesLength; idx++) {
+          resizeUtils.disableBleeds(idx)
+        }
+      } else {
+        // apply default bleeds for all pages
+        for (let idx = 0; idx < this.pagesLength; idx++) {
+          const page = pageUtils.getPage(idx)
+          if (page.physicalBleeds && page.bleeds) resizeUtils.resizeBleeds(idx, page.physicalBleeds, page.bleeds)
+          else {
+            const unit = page.unit ?? 'px'
+            const defaultBleeds = pageUtils.getDefaultBleeds('px')
+            defaultBleeds.top = this.groupType === 1 && idx !== 0 ? 0 : defaultBleeds.top
+            defaultBleeds.bottom = this.groupType === 1 && idx !== this.pagesLength - 1 ? 0 : defaultBleeds.bottom
+
+            const defaultPhysicalBleeds = unit === 'px' ? defaultBleeds : pageUtils.getDefaultBleeds(unit, pageUtils.getPageDPI(page))
+            if (unit !== 'px') {
+              defaultPhysicalBleeds.top = this.groupType === 1 && idx !== 0 ? 0 : defaultPhysicalBleeds.top
+              defaultPhysicalBleeds.bottom = this.groupType === 1 && idx !== this.pagesLength - 1 ? 0 : defaultPhysicalBleeds.bottom
+            }
+            resizeUtils.resizeBleeds(idx, defaultPhysicalBleeds, defaultBleeds)
+          }
+          this.$store.commit('UPDATE_pageProps', {
+            pageIndex: idx,
+            props: { isEnableBleed: true }
+          })
+        }
+      }
+      stepsUtils.record()
     },
     newDesign() {
       // designUtils.newDesign()
@@ -190,9 +234,6 @@ export default Vue.extend({
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'
-    },
-    gotoMobile() { // TO-DELETE
-      window.location.href = this.$router.currentRoute.fullPath.replace('editor', 'mobile-editor')
     }
   }
 })
@@ -245,10 +286,11 @@ export default Vue.extend({
     padding: 0.35rem;
     border-radius: 0.25rem;
     position: relative;
+    cursor: pointer;
     &.disabled {
       color: setColor(gray-4);
     }
-    > span {
+    span {
       font-size: 0.75rem;
     }
     &:not(:last-child):not(.disabled) {

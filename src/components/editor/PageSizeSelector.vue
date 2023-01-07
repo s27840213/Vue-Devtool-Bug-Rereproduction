@@ -3,31 +3,54 @@
     div(class="page-size-selector__body-row first-row")
       span(class="page-size-selector__body__title subtitle-2"
         :class="defaultTextColor") {{$t('NN0023')}}
-    div(class="page-size-selector__body-row")
-      radio-btn(class="page-size-selector__body__radio"
-                :isSelected="selectedFormat === 'custom'",
-                :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                formatKey="custom",
-                @select="selectFormat")
-      div(class="page-size-selector__body__custom")
+    div(class="page-size-selector__body__custom")
+        radio-btn(class="page-size-selector__body__radio"
+                  :isSelected="selectedFormat === 'custom'",
+                  :circleColor="isDarkTheme ? 'white' : 'gray-2'"
+                  formatKey="custom",
+                  @select="selectFormat")
         property-bar(class="page-size-selector__body__custom__box"
-                    :class="selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`")
-          input(class="body-3" type="number" min="0"
+                    :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
+          input(class="body-XS" type="number" min="0"
                 :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
-                :value="pageWidth" @input="setPageWidth" @click="selectFormat('custom')")
-          span(class="body-4"
+                :value="this.valPageSize.width"
+                @input="setPageWidth"
+                @click="selectFormat('custom')"
+                @focus="lastFocusedInput = 'width'"
+                @blur="handleInputBlur('width')")
+          span(class="body-XS"
               :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") W
         svg-icon(class="pointer"
             :iconName="isLocked ? 'lock' : 'unlock'"
             iconWidth="15px" :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'blue'"
             @click.native="toggleLock()")
         property-bar(class="page-size-selector__body__custom__box"
-                    :class="selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`")
-          input(class="body-3" type="number" min="0"
+                    :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
+          input(class="body-XS" type="number" min="0"
                 :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
-                :value="pageHeight" @input="setPageHeight" @click="selectFormat('custom')")
-          span(class="body-4"
+                :value="this.valPageSize.height"
+                @input="setPageHeight"
+                @click="selectFormat('custom')"
+                @focus="lastFocusedInput = 'height'"
+                @blur="() => handleInputBlur('height')")
+          span(class="body-XS"
               :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") H
+        property-bar(v-click-outside="() => {showUnitOptions = false}"
+                    class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
+                    :class="selectedFormat === 'custom' || showUnitOptions ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`"
+            @click.native="showUnitOptions = !showUnitOptions")
+          span(class="page-size-selector__body__custom__unit__label body-XXS" :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{selectedUnit}}
+          svg-icon(class="page-size-selector__body__custom__unit__icon"
+            iconName="chevron-down"
+            iconWidth="16px"
+            :iconColor="selectedFormat === 'custom' ? 'blue-1' : this.isDarkTheme ? 'white' : 'gray-2'")
+          div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option" :class="`bg-${this.isDarkTheme ? 'white' : 'gray-1-5'}`")
+            div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-gray-2" @click="selectUnit($event, unit)")
+              span(class="body-XS"
+                  :class="`text-${isDarkTheme ? 'gray-1' : 'white'}`") {{unit}}
+        div(v-if="selectedFormat === 'custom' && isValidate && !isCustomValid"
+          class="page-size-selector__body__custom__err body-XS text-red") {{errMsg}}
+          span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{$t('NN0787')}}
     div(class="page-size-selector__body__hr first bg-gray-4")
     div(class="page-size-selector__container")
         div(class="page-size-selector__body-row first-row")
@@ -44,14 +67,13 @@
                     @select="selectFormat")
           span(class="page-size-selector__body__recently body-3 pointer"
                 :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor"
-                @click="selectFormat(`recent-${index}`)") {{ makeFormatString(format) }}
-        div(class="mt-10")
+                @click="selectFormat(`recent-${index}`)") {{ makeFormatTitle(format) }}
         div(class="page-size-selector__body-row first-row")
           span(class="page-size-selector__body__title subtitle-2"
               :class="defaultTextColor") {{$t('NN0025')}}
         div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
           svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
-        div(v-for="(format, index) in formatList" class="page-size-selector__body-row pointer"
+        div(v-for="(format, index) in formatList" class="page-size-selector__body-row typical-row pointer"
             @click="selectFormat(`preset-${index}`)")
           radio-btn(class="page-size-selector__body__radio"
                     :isSelected="selectedFormat === `preset-${index}`",
@@ -61,10 +83,11 @@
           span(class="page-size-selector__body__typical-name body-4"
                 :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
           span(class="page-size-selector__body__typical-size body-4"
-                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.description }}
+                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
     div(class="page-size-selector__body__hr second bg-gray-4")
     div(class="page-size-selector__body__submit")
-      checkbox(v-model="copyBeforeApply") {{$t('NN0211')}}
+      div(class="page-size-selector__body__submit__option body-XS")
+        checkbox(v-model="copyBeforeApply" class="pointer") {{$t('NN0211')}}
       btn(class="page-size-selector__body__button"
           :disabled="!isFormatApplicable"
           @click.native="submit")
@@ -74,6 +97,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import vClickOutside from 'v-click-outside'
 import SearchBar from '@/components/SearchBar.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import Checkbox from '@/components/global/Checkbox.vue'
@@ -88,7 +112,8 @@ import generalUtils from '@/utils/generalUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import editorUtils from '@/utils/editorUtils'
-import { throttle } from 'lodash'
+import unitUtils, { STR_UNITS, IMapSize, PRECISION } from '@/utils/unitUtils'
+import { throttle, round, floor, ceil } from 'lodash'
 
 export default Vue.extend({
   props: {
@@ -97,32 +122,37 @@ export default Vue.extend({
       default: true
     }
   },
+  directives: {
+    clickOutside: vClickOutside.directive
+  },
   components: {
     SearchBar,
     RadioBtn,
     Checkbox
   },
   mounted() {
-    this.pageWidth = this.currentPageWidth
-    this.pageHeight = this.currentPageHeight
+    this.handleCurrFocusPageIndexChange()
   },
   data() {
     return {
       selectedFormat: '',
-      pageWidth: '' as string | number,
-      pageHeight: '' as string | number,
+      valPageSize: { width: '', height: '' },
+      pageWidth: NaN,
+      pageHeight: NaN,
+      pageSizes: {} as IMapSize,
+      aspectRatio: NaN,
       isLocked: true,
-      copyBeforeApply: true
+      unitOptions: STR_UNITS,
+      selectedUnit: '',
+      showUnitOptions: false,
+      copyBeforeApply: true,
+      isValidate: false,
+      lastFocusedInput: 'width'
     }
   },
   watch: {
-    currentPageWidth: function (newVal) {
-      this.pageWidth = newVal
-      this.pageHeight = this.currentPageHeight
-    },
-    currentPageHeight: function (newVal) {
-      this.pageWidth = this.currentPageWidth
-      this.pageHeight = newVal
+    currFocusPageIndex: function () {
+      this.handleCurrFocusPageIndexChange()
     }
   },
   computed: {
@@ -147,23 +177,82 @@ export default Vue.extend({
     isTouchDevice() {
       return generalUtils.isTouchDevice()
     },
-    currentPageWidth(): number {
-      return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.width ?? 0)
-    },
-    currentPageHeight(): number {
-      return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.height ?? 0)
-    },
-    aspectRatio(): number {
-      return (this.getPage(pageUtils.currFocusPageIndex)?.width ?? 1) / this.getPage(pageUtils.currFocusPageIndex)?.height ?? 1
+    currFocusPageIndex(): number {
+      return pageUtils.currFocusPageIndex
     },
     isCustomValid(): boolean {
-      return this.pageWidth !== '' && this.pageHeight !== ''
+      return this.widthValid && this.heightValid && !this.isOverArea()
     },
     defaultTextColor(): string {
       return this.isDarkTheme ? 'text-white' : 'text-gray-2'
     },
     isFormatApplicable(): boolean {
       return this.selectedFormat === 'custom' ? this.isCustomValid : (this.selectedFormat !== '')
+    },
+    widthValid(): boolean {
+      if (!this.pageWidth) return false
+      if (this.pageWidth < 0) return false
+      const pxWidth = unitUtils.convert(this.pageWidth, this.selectedUnit, 'px')
+      if (this.isOverSize(pxWidth) || this.isUnderSize(pxWidth)) return false
+      if ((this.isOverArea() && (this.isLocked || this.lastFocusedInput === 'width'))) return false
+      return true
+    },
+    heightValid(): boolean {
+      if (!this.pageHeight) return false
+      if (this.pageHeight < 0) return false
+      const pxHeight = unitUtils.convert(this.pageHeight, this.selectedUnit, 'px')
+      if (this.isOverSize(pxHeight) || this.isUnderSize(pxHeight)) return false
+      if ((this.isOverArea() && (this.isLocked || this.lastFocusedInput === 'height'))) return false
+      return true
+    },
+    fixedSize(): {[key: string]: number, width: number, height: number} {
+      const res = {
+        width: this.pageWidth,
+        height: this.pageHeight
+      }
+      if (this.isOverArea()) {
+        const pxSize = this.pageSizes.px
+        if (this.isLocked) {
+          res.height = Math.sqrt(pageUtils.MAX_AREA / pxSize.width * pxSize.height)
+          res.width = res.height / pxSize.height * pxSize.width
+        } else {
+          res.height = pageUtils.MAX_AREA / pxSize.width
+          res.width = pageUtils.MAX_AREA / pxSize.height
+        }
+      } else return res
+      return unitUtils.convertSize(floor(res.width), floor(res.height), 'px', this.selectedUnit)
+    },
+    errMsg(): string {
+      // if (!this.pageWidth || !this.pageHeight || this.pageWidth <= 0 || this.pageHeight <= 0) return this.$t('NN0767', { num: 0 }).toString()
+      const pxSize = {
+        width: unitUtils.convert(this.pageWidth, this.selectedUnit, 'px'),
+        height: unitUtils.convert(this.pageHeight, this.selectedUnit, 'px')
+      }
+      if (
+        this.isOverSize(pxSize.width) ||
+        this.isUnderSize(pxSize.width) ||
+        this.isOverSize(pxSize.height) ||
+        this.isUnderSize(pxSize.height)
+      ) {
+        if (this.selectedUnit === 'px') return this.$t('NN0785', { size1: '40px', size2: '8000px' }).toString()
+
+        const minSize: {[index: string]: number} = {
+          width: unitUtils.convert(pageUtils.MIN_SIZE, 'px', this.selectedUnit),
+          height: unitUtils.convert(pageUtils.MIN_SIZE, 'px', this.selectedUnit)
+        }
+        const maxSize: {[index: string]: number} = {
+          width: unitUtils.convert(pageUtils.MAX_SIZE, 'px', this.selectedUnit),
+          height: unitUtils.convert(pageUtils.MAX_SIZE, 'px', this.selectedUnit)
+        }
+        return this.$t('NN0785', { size1: `${ceil(minSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit}`, size2: `${floor(maxSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit}` }).toString()
+      }
+      if (this.isOverArea()) {
+        return this.$t('NN0786', {
+          size: `${this.isLocked ? `${floor(this.fixedSize.width, PRECISION)} x ${floor(this.fixedSize.height, PRECISION)}`
+                : floor(this.fixedSize[this.lastFocusedInput], PRECISION)} ${this.selectedUnit}`
+        }).toString() + ' '
+      }
+      return ''
     },
     formatList(): ILayout[] {
       const targetCategory = this.categories.find((category: IListServiceContentData) => {
@@ -174,7 +263,8 @@ export default Vue.extend({
         width: item.width ?? 0,
         height: item.height ?? 0,
         title: item.title ?? '',
-        description: item.description ?? ''
+        description: item.description ?? '',
+        unit: item.unit ?? 'px'
       })) : []
     },
     recentlyUsed(): ILayout[] {
@@ -186,8 +276,12 @@ export default Vue.extend({
         width: item.width ?? 0,
         height: item.height ?? 0,
         title: item.title ?? '',
-        description: item.description ?? ''
-      })) : []
+        description: item.description ?? '',
+        unit: item.unit ?? 'px'
+      })).filter((layout: ILayout) => {
+        const pxSize = unitUtils.convertSize(layout.width, layout.height, layout.unit, 'px')
+        return !(pxSize.width * pxSize.height > pageUtils.MAX_AREA)
+      }) : []
     },
     isLayoutReady(): boolean {
       return this.formatList.length !== 0
@@ -201,23 +295,28 @@ export default Vue.extend({
       setIsloading: 'SET_isGlobalLoading',
       updateRecentlyUsed: 'layouts/UPDATE_RECENTLY_PAGE'
     }),
-    ...mapActions('layouts',
-      [
-        'getCategories',
-        'getRecently'
-      ]
-    ),
+    isOverArea() {
+      return this.pageSizes.px.width * this.pageSizes.px.height > pageUtils.MAX_AREA
+    },
+    isOverSize(size: number): boolean {
+      return size > pageUtils.MAX_SIZE
+    },
+    isUnderSize(size: number): boolean {
+      return size < pageUtils.MIN_SIZE
+    },
     getSelectedFormat(): ILayout | undefined {
       if (this.selectedFormat === 'custom') {
         if (!this.isCustomValid) return undefined
-        return { id: '', width: this.pageWidth as number, height: this.pageHeight as number, title: '', description: '' }
+        return { id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.selectedUnit }
       } else if (this.selectedFormat.startsWith('recent')) {
         const [type, index] = this.selectedFormat.split('-')
         const format = this.recentlyUsed[parseInt(index)]
+        this.pageSizes = unitUtils.convertAllSize(format.width, format.height, format.unit)
         return format
       } else if (this.selectedFormat.startsWith('preset')) {
         const [type, index] = this.selectedFormat.split('-')
         const format = this.formatList[parseInt(index)]
+        this.pageSizes = unitUtils.convertAllSize(format.width, format.height, format.unit)
         return format
       } else {
         return undefined
@@ -225,81 +324,148 @@ export default Vue.extend({
     },
     toggleLock() {
       this.isLocked = !this.isLocked
+      if (this.isLocked) this.aspectRatio = this.pageWidth * this.pageHeight <= 0 ? 1 : this.pageWidth / this.pageHeight
     },
-    makeFormatString(format: ILayout) {
+    makeFormatTitle(format: ILayout) {
       if (format.id !== '') {
-        return `${format.title} ${format.description}`
+        return `${format.title} ${this.makeFormatDescription(format)}`
       } else {
-        return `${format.width} x ${format.height}`
+        return `${format.width} x ${format.height} ${format.unit}`
       }
+    },
+    makeFormatDescription(format: ILayout): string {
+      return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description} ${format.unit ?? 'px'}`
+    },
+    handleCurrFocusPageIndexChange() {
+      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSizeWithBleeds
+      this.selectedUnit = unit ?? 'px'
+      this.pageWidth = physicalWidth ?? width ?? 0
+      this.pageHeight = physicalHeight ?? height ?? 0
+      this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
+      this.aspectRatio = this.pageWidth / this.pageHeight
+      this.valPageSize.width = round(this.pageWidth, this.selectedUnit === 'px' ? 0 : PRECISION).toString()
+      this.valPageSize.height = round(this.pageHeight, this.selectedUnit === 'px' ? 0 : PRECISION).toString()
     },
     setPageWidth(event: Event) {
       const value = (event.target as HTMLInputElement).value
-      this.pageWidth = typeof value === 'string' ? parseInt(value) : value
+      this.valPageSize.width = value
+      const numValue = typeof value === 'string' ? parseFloat(value) : value
+      const striped = numValue.toString() !== value
+      const roundedValue = round(numValue, this.selectedUnit === 'px' ? 0 : PRECISION)
+      const rounded = this.pageWidth !== roundedValue
+      this.pageWidth = roundedValue
+      // set input value to this.pageWidth if no trailing zeros in value or value has been rounded
+      if (!striped || rounded) this.valPageSize.width = this.pageWidth.toString()
+
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
-          this.pageHeight = ''
+          this.pageWidth = NaN
+          this.pageHeight = NaN
         } else {
-          this.pageHeight = Math.round(parseInt(value) / this.aspectRatio)
+          this.pageHeight = this.pageWidth / this.aspectRatio
+          if (this.selectedUnit === 'px') this.pageHeight = round(this.pageHeight)
+          this.valPageSize.height = round(this.pageHeight, PRECISION).toString()
         }
       }
+      this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     },
     setPageHeight(event: Event) {
       const value = (event.target as HTMLInputElement).value
-      this.pageHeight = typeof value === 'string' ? parseInt(value) : value
+      this.valPageSize.height = value
+      const numValue = typeof value === 'string' ? parseFloat(value) : value
+      const striped = numValue.toString() !== value
+      const roundedValue = round(numValue, this.selectedUnit === 'px' ? 0 : PRECISION)
+      const rounded = this.pageHeight !== roundedValue
+      this.pageHeight = roundedValue
+      // set input value to this.pageHeight if no trailing zeros in value or value has been rounded
+      if (!striped || rounded) this.valPageSize.height = this.pageHeight.toString()
+
       this.selectedFormat = 'custom'
       if (this.isLocked) {
         if (value === '') {
-          this.pageWidth = ''
+          this.pageWidth = NaN
+          this.pageHeight = NaN
         } else {
-          this.pageWidth = Math.round(parseInt(value) * this.aspectRatio)
+          this.pageWidth = this.pageHeight * this.aspectRatio
+          if (this.selectedUnit === 'px') this.pageWidth = round(this.pageWidth)
+          this.valPageSize.width = round(this.pageWidth, PRECISION).toString()
         }
       }
+      this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     },
     selectFormat(key: string) {
       this.selectedFormat = key
     },
-    fetchLayouts() {
-      this.isLayoutReady = false
-      this.formatList = []
-      this.recentlyUsed = []
-      this.getRecently().then(() => {
-        for (const category of this.categories as IListServiceContentData[]) {
-          if (category.title === `${this.$t('NN0025')}`) {
-            this.formatList = category.list.map(item => ({
-              id: item.id,
-              width: item.width ?? 0,
-              height: item.height ?? 0,
-              title: item.title ?? '',
-              description: item.description ?? ''
-            }))
-          }
-          if (category.title === `${this.$t('NN0024')}`) {
-            this.recentlyUsed = category.list.map(item => ({
-              id: item.id,
-              width: item.width ?? 0,
-              height: item.height ?? 0,
-              title: item.title ?? '',
-              description: item.description ?? ''
-            }))
-          }
-        }
-        this.isLayoutReady = true
-      })
+    selectUnit(evt: Event, unit: string) {
+      evt.stopPropagation()
+      this.selectedFormat = 'custom'
+      this.showUnitOptions = false
+      if (this.selectedUnit === unit) return
+      this.pageWidth = this.pageSizes[unit].width
+      this.pageHeight = this.pageSizes[unit].height
+      if (unit === 'px') {
+        this.pageWidth = round(this.pageWidth)
+        this.pageHeight = round(this.pageHeight)
+      }
+      this.valPageSize.width = round(this.pageWidth, PRECISION).toString()
+      this.valPageSize.height = round(this.pageHeight, PRECISION).toString()
+      this.selectedUnit = unit
+      // this.fixSize(false)
+      this.isValidate = true
     },
     applySelectedFormat(record = true) {
       if (!this.isFormatApplicable) return
       const format = this.getSelectedFormat()
       if (!format) return
-      this.resizePage(format)
-      if (this.groupType === 1) {
+      if (this.groupType !== 1) {
+        // resize page with px size
+        const { width, height } = this.pageSizes.px
+        this.resizePage({
+          width,
+          height,
+          physicalWidth: format.width,
+          physicalHeight: format.height,
+          unit: format.unit
+        })
+      } else {
         // resize電商詳情頁時 其他頁面要依width做resize
-        this.resizeOtherPages([pageUtils.currFocusPageIndex], { width: format.width })
+        const { pagesLength, getPageSize } = this
+        const resizingPage = pageUtils.getPage(this.currFocusPageIndex)
+        for (let pageIndex = 0; pageIndex < pagesLength; pageIndex++) {
+          if (pageIndex === this.currFocusPageIndex) {
+            this.resizePage({
+              width: format.unit === 'px' ? format.width : resizingPage.width,
+              height: format.unit === 'px' ? format.height : Math.round(resizingPage.width / format.width * format.height),
+              physicalWidth: format.width,
+              physicalHeight: format.height,
+              unit: format.unit
+            })
+            continue
+          }
+          const { physicalWidth, physicalHeight, unit } = getPageSize(pageIndex)
+          if (format.unit === 'px') {
+            const newWidth = format.width
+            const newHeight = Math.round(newWidth / physicalWidth * physicalHeight)
+            resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), {
+              width: newWidth,
+              height: newHeight,
+              physicalWidth: unit === 'px' ? newWidth : physicalWidth,
+              physicalHeight: unit === 'px' ? newHeight : physicalHeight,
+              unit
+            })
+          }
+        }
       }
+
+      // update recently used size
+      const precision = format.unit === 'px' ? 0 : PRECISION
+      format.width = round(format.width, precision)
+      format.height = round(format.height, precision)
+
       listApi.addDesign(format.id, 'layout', format)
       const index = this.recentlyUsed.findIndex((recent) => {
-        return format.id === recent.id && format.width === recent.width && format.height === recent.height
+        return format.id === recent.id && format.width === recent.width && format.height === recent.height && format.unit === recent.unit
       })
       this.updateRecentlyUsed({
         index,
@@ -338,31 +504,32 @@ export default Vue.extend({
       editorUtils.setShowMobilePanel(false) // For mobile
       this.$emit('close') // For PC
     }, 2000, { trailing: false }),
-    resizePage(format: { width: number, height: number }) {
+    resizePage(format: { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string}) {
       resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
-      this.updatePageProps({
-        pageIndex: pageUtils.currFocusPageIndex,
-        props: {
-          width: format.width,
-          height: format.height
-        }
-      })
     },
-    resizeOtherPages(excludes: number[] = [], format: { [key: string]: number }) {
-      const { pagesLength, getPageSize } = this
-      for (let pageIndex = 0; pageIndex < pagesLength; pageIndex++) {
-        if (excludes.includes(pageIndex)) continue
-        const { width, height } = getPageSize(pageIndex)
-        const newSize = {
-          width: format.width || width * (format.height / height),
-          height: format.height || height * (format.width / width)
-        }
-        resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
-        this.updatePageProps({
-          pageIndex,
-          props: newSize
-        })
+    handleInputBlur(target: string) {
+      this.isValidate = true
+      if ((target === 'width' || this.isLocked) && isNaN(this.pageWidth)) {
+        this.pageWidth = 0
+        this.valPageSize.width = '0'
       }
+      if ((target === 'height' || this.isLocked) && isNaN(this.pageHeight)) {
+        this.pageHeight = 0
+        this.valPageSize.height = '0'
+      }
+      this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
+    },
+    fixSize(convert = true) {
+      const fixedSize = this.fixedSize
+      if (this.lastFocusedInput === 'width' || this.isLocked) {
+        this.pageWidth = floor(fixedSize.width, PRECISION)
+        this.valPageSize.width = this.pageWidth.toString()
+      }
+      if (this.lastFocusedInput === 'height' || this.isLocked) {
+        this.pageHeight = floor(fixedSize.height, PRECISION)
+        this.valPageSize.height = this.pageHeight.toString()
+      }
+      if (convert) this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     }
   }
 })
@@ -385,13 +552,15 @@ export default Vue.extend({
     border-radius: 4px;
     padding: 11.57px;
     &-row {
-      display: flex;
-      justify-content: space-between;
-      width: 87%;
-      margin-left: auto;
-      margin-top: 15px;
-      margin-right: 10px;
+      display: grid;
+      grid-template-columns: 12px auto;
+      grid-template-rows: auto;
+      column-gap: 12px;
+      width: 100%;
+      padding: 3px 22px 3px 10px;
       align-items: center;
+      box-sizing: border-box;
+      text-align: left;
       &-center {
         margin-top: 20px;
         display: flex;
@@ -399,7 +568,18 @@ export default Vue.extend({
         justify-content: center;
       }
       &.first-row {
-        margin-top: 0px;
+        display: block;
+        padding: 0px;
+        margin: 0px;
+        > span {
+          display: block;
+          height: 16px;
+          word-spacing: 1.5px;
+          text-transform: uppercase;
+        }
+      }
+      &.typical-row  {
+        grid-template-columns: 12px calc((100% - 36px) * 0.5) auto;
       }
     }
     &__close {
@@ -409,17 +589,17 @@ export default Vue.extend({
     }
     &__title {
       font-weight: 700;
-      margin-left: -16px;
     }
     &__custom {
       display: grid;
-      grid-template-columns: 1fr auto 1fr;
+      grid-template-columns: 12px auto 15px auto 50px;
       grid-template-rows: auto;
-      column-gap: 5px;
+      column-gap: 6px;
       align-items: center;
-      width: 85%;
+      margin-top: 16px;
+      margin-left: 10px;
       &__box {
-        height: 26px;
+        height: 28px;
         box-sizing: border-box;
         padding: 5px 5px;
         & input {
@@ -427,33 +607,64 @@ export default Vue.extend({
           background-color: transparent;
         }
       }
+      &__unit {
+        display: flex;
+        align-items: center;
+        position: relative;
+        &__label {
+          height: 18px;
+          line-height: 18px;
+        }
+        &__option {
+          position: absolute;
+          top: 36px;
+          left: 0px;
+          right: 0px;
+          border-radius: 4px;
+          box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
+          display: grid;
+          overflow: hidden;
+          padding: 4px;
+          &__item {
+            height: 30px;
+            padding: 4px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            &:hover {
+              background-color: setColor(blue-3);
+            }
+            > span {
+              display: block;
+              text-align: left;
+              height: 100%;
+            }
+          }
+        }
+      }
+      &__err{
+        grid-column: 2 / span 4;
+        > span {
+          cursor: pointer;
+          text-decoration: underline;
+        }
+      }
     }
     &__hr {
       width: 100%;
       height: 1px;
       :not(.isTouchDevice) > &.first {
-        margin: 20px 0;
+        margin: 16px 0;
       }
       .isTouchDevice > &.first {
-        margin: 24px 0 16px 0;
+        margin: 20px 0 12px 0;
       }
       :not(.isTouchDevice) > &.second {
         height: 0px;
-        margin: 10px 0;
+        margin: 8px 0;
       }
       .isTouchDevice > &.second {
         margin: 0 0 15.5px 0;
       }
-    }
-    &__recently {
-      width: 88%;
-    }
-    &__typical-name {
-      width: 37%;
-    }
-    &__typical-size {
-      width: 45%;
-      white-space: nowrap;
     }
     &__buttons {
       display: flex;
@@ -478,7 +689,12 @@ export default Vue.extend({
       }
     }
     &__submit {
+      display: grid;
+      gap: 16px;
       width: 100%;
+      &__option {
+        padding: 3px 0px;
+      }
       > .checkbox {
         @include body-SM;
         margin: 0 auto 20px 0;
@@ -502,8 +718,8 @@ export default Vue.extend({
     height: 20px;
   }
   &__container {
-    margin-right: -5px;
-    padding-right: 5px;
+    display: grid;
+    gap: 4px;
     overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
     :not(.isTouchDevice) > & {
@@ -534,5 +750,20 @@ export default Vue.extend({
 .slide-fade-leave-to {
   transform: translateY(-10px);
   opacity: 0;
+}
+
+.border-blue-1 {
+  border: 1px solid setColor(blue-1);
+}
+
+.input-invalid {
+  border: 1px solid setColor(red) !important;
+  > * {
+    color: setColor(red);
+  }
+}
+
+@media (max-width: 1260px) {
+
 }
 </style>

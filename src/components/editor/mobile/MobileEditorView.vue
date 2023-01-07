@@ -50,6 +50,8 @@ import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import layerUtils from '@/utils/layerUtils'
 import editorUtils from '@/utils/editorUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
+import modalUtils from '@/utils/modalUtils'
+import uploadUtils from '@/utils/uploadUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 
 export default Vue.extend({
@@ -96,8 +98,30 @@ export default Vue.extend({
       cardWidth: 0,
       editorViewResizeObserver: null as unknown as ResizeObserver,
       isSwiping: false,
-      isScaling: false
+      isScaling: false,
+      uploadUtils: uploadUtils
     }
+  },
+  created() {
+    // check and auto resize pages oversized on design loaded
+    const unwatchPages = this.$watch('isGettingDesign', (newVal) => {
+      if (!newVal) {
+        if (this.pages.length > 0 && pageUtils.fixPageSize()) {
+          pageUtils.fitPage()
+          uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+          modalUtils.setModalInfo(
+            `${this.$t('NN0788')}`,
+            [`${this.$t('NN0789', { size: '6000 x 6000' })}`],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+          )
+        }
+        unwatchPages()
+      }
+    })
   },
   mounted() {
     this.$nextTick(() => {
@@ -228,7 +252,7 @@ export default Vue.extend({
       return {
         width: `${this.cardWidth}px`,
         height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
-        padding: this.isDetailPage ? '0px' : '40px',
+        padding: this.isDetailPage ? '0px' : `${pageUtils.MOBILE_CARD_PADDING}px`,
         flexDirection: this.isDetailPage ? 'column' : 'initial',
         'overflow-y': this.isDetailPage ? 'initial' : 'scroll',
         // overflow: this.isDetailPage ? 'initial' : 'scroll',
@@ -246,6 +270,9 @@ export default Vue.extend({
         transform: this.isDetailPage ? 'initail' : `translate3d(0, -${this.currCardIndex * this.cardHeight}px,0)`,
         transition: `transform ${transformDuration}s`
       }
+    },
+    isGettingDesign(): boolean {
+      return this.uploadUtils.isGettingDesign
     }
   },
   methods: {

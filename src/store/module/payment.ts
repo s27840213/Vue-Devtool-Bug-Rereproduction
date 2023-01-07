@@ -93,7 +93,8 @@ const ITrialStatue = {
 const IPayType = {
   0: '',
   1: 'tappay',
-  2: 'stripe'
+  2: 'stripe',
+  3: 'tcloud' // 雲市集 政府輔助方案
 }
 
 const ICouponError = [

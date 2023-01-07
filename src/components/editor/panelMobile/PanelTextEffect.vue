@@ -21,7 +21,7 @@
                 iconWidth="100%" iconColor="gray-5")
         div(v-if="currEffect.key === effect.key && effect.key !== 'none'"
             class="panel-text-effect__effects--more")
-          svg-icon(iconName="adjust" iconWidth="20px" iconColor="white")
+          svg-icon(iconName="sliders" iconWidth="20px" iconColor="white")
     //- To set effect optoin, ex: distance, color.
     div(v-if="state === 'options'"
         class="w-full panel-text-effect__form")

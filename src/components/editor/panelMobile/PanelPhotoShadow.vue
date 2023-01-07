@@ -57,11 +57,7 @@ export default Vue.extend({
   mounted() {
     imageShadowPanelUtils.mount()
   },
-  // beforeDestroy() {
-  //   imageShadowPanelUtils.handleShadowUpload()
-  // },
   computed: {
-    // ...mapState('mobileEditor', { mobilePanel: 'currActivePanel' }),
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',

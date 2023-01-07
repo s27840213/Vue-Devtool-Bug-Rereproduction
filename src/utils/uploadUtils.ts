@@ -28,6 +28,8 @@ import networkUtils from './networkUtils'
 import _ from 'lodash'
 import editorUtils from './editorUtils'
 import designApis from '@/apis/design'
+import { PRECISION } from '@/utils/unitUtils'
+
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
   UPDATE_DB,
@@ -614,8 +616,18 @@ class UploadUtils {
         }
       }
       newPage.backgroundImage.config.imgControl = false
-      newPage.width = parseInt(newPage.width.toString(), 10)
-      newPage.height = parseInt(newPage.height.toString(), 10)
+      newPage.width = _.round(newPage.width)
+      newPage.height = _.round(newPage.height)
+      newPage.bleeds && Object.keys(newPage.bleeds).forEach(key => {
+        newPage.bleeds[key] = _.round(newPage.bleeds[key])
+      })
+
+      const precision = newPage.unit === 'px' ? 0 : PRECISION
+      if (newPage.physicalWidth) newPage.physicalWidth = _.round(newPage.physicalWidth, precision)
+      if (newPage.physicalHeight) newPage.physicalHeight = _.round(newPage.physicalHeight, precision)
+      newPage.physicalBleeds && Object.keys(newPage.physicalBleeds).forEach(key => {
+        newPage.physicalBleeds[key] = _.round(newPage.physicalBleeds[key], precision)
+      })
       return newPage
     })
 
@@ -665,28 +677,32 @@ class UploadUtils {
 
           // move new design to path
           const path = router.currentRoute.query.path as string
-          if (isNewDesign && path) {
-            const designAssetIndex = (await store.dispatch('design/fetchDesign', { teamId, assetId })).asset_index?.toString()
-            if (!designAssetIndex) {
-              Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
-              return
-            }
-            await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-              'move', designAssetIndex, null, path).catch(async err => {
-              // remove design if move failed
-              console.error(err)
+          if (isNewDesign) {
+            // move design to path
+            if (path) {
+              const designAssetIndex = (await store.dispatch('design/fetchDesign', { teamId, assetId })).asset_index?.toString()
+              if (!designAssetIndex) {
+                Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+                return
+              }
               await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-                'delete', designAssetIndex, null, '2').catch(err => {
+                'move', designAssetIndex, null, path).catch(async err => {
+              // remove design if move failed
                 console.error(err)
+                await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+                  'delete', designAssetIndex, null, '2').catch(err => {
+                  console.error(err)
+                })
+                Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
               })
-              Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
-            })
-            // update design info
-            designUtils.fetchDesign(teamId as string, assetId)
+              // update design info
+              designUtils.fetchDesign(teamId as string, assetId)
+            }
             // remove query for new design
             const query = Object.assign({}, router.currentRoute.query)
             delete query.width
             delete query.height
+            delete query.unit
             delete query.path
             delete query.folderName
             router.replace({ query })
@@ -1550,8 +1566,17 @@ class UploadUtils {
         }
       }
       newPage.backgroundImage.config.imgControl = false
-      newPage.width = parseInt(newPage.width.toString(), 10)
-      newPage.height = parseInt(newPage.height.toString(), 10)
+      newPage.width = _.round(newPage.width)
+      newPage.height = _.round(newPage.height)
+      Object.keys(newPage.bleeds).forEach(key => {
+        newPage.bleeds[key] = _.round(newPage.bleeds[key])
+      })
+      const precision = newPage.unit === 'px' ? 0 : PRECISION
+      newPage.physicalWidth = _.round(newPage.physicalWidth, precision)
+      newPage.physicalHeight = _.round(newPage.physicalHeight, precision)
+      Object.keys(newPage.physicalBleeds).forEach(key => {
+        newPage.physicalBleeds[key] = _.round(newPage.physicalBleeds[key], precision)
+      })
       return newPage
     })
     return pagesJSON

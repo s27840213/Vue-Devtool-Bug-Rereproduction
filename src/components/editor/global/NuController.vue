@@ -1,148 +1,151 @@
 <template lang="pug">
-    div(:layer-index="`${layerIndex}`"
-        class="nu-controller"
-        ref="self")
-      div(class="nu-controller__line-hint" :style="hintStyles()" v-if="isLineEndMoving")
-        | {{ Math.round(hintLength) + ' | ' + Math.round(hintAngle) % 360  + '°' }}
-      div(class="nu-controller__object-hint" :style="hintStyles()" v-if="isRotating")
-        div(class="nu-controller__object-hint__icon")
-          svg-icon(iconName="angle"
-                  iconWidth="12px"
-                  iconColor="gray-2")
-        div(class="nu-controller__object-hint__text")
-          span {{ Math.round(hintAngle) % 360 }}
-      div(v-if="subLayer && subLayer.config" class="nu-controller__sublayer-container" :style="contentStyles")
-        nu-sub-controller(v-if="subLayer.config.type !== 'image' || !subLayer.config.imgControl"
-          :style="subContentStyles"
-          class="relative nu-controller__subCtrlContent"
-          data-identifier="controller"
-          :key="`group-controller-${subLayer.config.id}`"
-          :pageIndex="pageIndex"
-          :layerIndex="subLayer.subLayerIdx"
-          :primaryLayerIndex="layerIndex"
-          :primaryLayer="config"
-          :config="getLayerType === 'frame' && !FrameUtils.isImageFrame(subLayer.config) ? frameLayerMapper(subLayer.config) : subLayer.config"
-          :type="config.type"
-          :primaryLayerZindex="primaryLayerZindex()"
-          :isMoved="isMoved"
-          :contentScaleRatio="contentScaleRatio")
-      div(v-show="isActive && !isControlling && !isLocked() && !isImgControl"
-          ref="body"
-          class="nu-controller__ctrl-points"
-          :style="ctrlContentStyles")
-        div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
-            class="control-point__corner-rotate scaler"
-            :ref="`corner-rotate-${index}`"
-            :key="`corner-rotate-${index}`"
-            :style="ctrlPointerStyles(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
-            @pointerdown.stop="rotateStart($event, index)"
-            @touchstart="disableTouchEvent")
-        div(v-for="(end, index) in isLine() ? controlPoints.lineEnds : []"
-            class="control-point"
-            :key="index"
-            :marker-index="index"
-            :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
-            @pointerdown.stop="lineEndMoveStart"
-            @touchstart="disableTouchEvent")
-        div(v-for="(resizer, index) in resizer(controlPoints)"
-            @pointerdown.prevent.stop="!isTouchDevice() ? resizeStart($event) : null"
-            @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
-          div(class="control-point__resize-bar"
-              :key="`resizer-${index}`"
-              :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
-          div(class="control-point resizer"
-              :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
-        div(v-if="isTouchDevice()" v-for="(resizer, index) in resizer(controlPoints, false, true)"
-            @pointerdown.prevent.stop="resizeStart"
-            @touchstart="disableTouchEvent")
-          div(class="control-point__resize-bar"
-              :key="`resizer-touch-${index}`"
-              :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
-          div(class="control-point resizer"
-              :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))")
-        div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
-            @pointerdown="moveStart")
-          div(class="control-point__resize-bar control-point__move-bar"
-              :key="`resizer-text-${index}`"
-              :style="resizerBarStyles(resizer.styles)")
-        div(v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalers) : []"
-            class="control-point scaler"
-            :key="`scaler-${index}`"
-            :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
-            @pointerdown.prevent.stop="!isTouchDevice() ? scaleStart($event) : null"
-            @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
-        div(v-if="isTouchDevice()" v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalerTouchAreas) : []"
-            class="control-point scaler"
-            :key="`scaler-touch-${index}`"
-            :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
-            @pointerdown.prevent.stop="scaleStart"
-            @touchstart="disableTouchEvent")
-        div(class="control-point__line-controller-wrapper"
-            v-if="isLine()"
-            :style="`transform: scale(${100/scaleRatio * contentScaleRatio})`")
-          svg-icon(class="control-point__rotater"
-            :iconName="'rotate'" :iconWidth="`${20}px`"
-            :src="require('@/assets/img/svg/rotate.svg')"
-            :style='lineControlPointStyles()'
-            @pointerdown.native.stop="lineRotateStart"
-            @touchstart.native="lineRotateStart")
-          img(class="control-point__mover"
-            :src="require('@/assets/img/svg/move.svg')"
-            :style='lineControlPointStyles()'
-            @pointerdown="moveStart"
-            @touchstart="disableTouchEvent")
-        template(v-else)
-          div(class="control-point__controller-wrapper"
-              ref="rotater"
-              :style="`transform: scale(${100/scaleRatio  * contentScaleRatio})`")
-            svg-icon(class="control-point__rotater"
-              :iconName="'rotate'" :iconWidth="`${20}px`"
-              :src="require('@/assets/img/svg/rotate.svg')"
-              :style='controlPointStyles()'
-              @pointerdown.native.stop="rotateStart"
-              @touchstart.native="disableTouchEvent")
-        div(v-if="config.type === 'text' && isActive && !isMoving" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-          nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
-            :style="textBodyStyle()"
-            :pageIndex="pageIndex"
-            :layerIndex="layerIndex"
-            :subLayerIndex="-1"
-            @keydown.native.37.stop
-            @keydown.native.38.stop
-            @keydown.native.39.stop
-            @keydown.native.40.stop
-            @keydown.native.ctrl.67.exact.stop.self
-            @keydown.native.meta.67.exact.stop.self
-            @keydown.native.ctrl.86.exact.stop.self
-            @keydown.native.meta.86.exact.stop.self
-            @keydown.native.ctrl.88.exact.stop.self
-            @keydown.native.meta.88.exact.stop.self
-            @keydown.native.ctrl.65.exact.stop.self
-            @keydown.native.meta.65.exact.stop.self
-            @keydown.native.ctrl.90.exact.stop.self
-            @keydown.native.meta.90.exact.stop.self
-            @keydown.native.ctrl.shift.90.exact.stop.self
-            @keydown.native.meta.shift.90.exact.stop.self
-            @update="handleTextChange"
-            @compositionend="handleTextCompositionEnd")
-        div(v-if="isActive && isLocked() && (scaleRatio >20)"
-            class="nu-controller__lock-icon"
-            :style="lockIconStyles()")
-          svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
-            @click.native="MappingUtils.mappingIconAction('lock')")
-
-      //- img(class="control-point__mover"
-      //-   :src="require('@/assets/img/svg/move.svg')"
-      //-   :style='controlPointStyles()'
-      //-   @pointerdown="moveStart"
-      //-   @touchstart="disableTouchEvent")
+div(:layer-index="`${layerIndex}`"
+    class="nu-controller"
+    ref="self")
+  div(class="nu-controller__line-hint" :style="hintStyles()" v-if="isLineEndMoving")
+    | {{ Math.round(hintLength) + ' | ' + Math.round(hintAngle) % 360  + '°' }}
+  div(class="nu-controller__object-hint" :style="hintStyles()" v-if="isRotating")
+    div(class="nu-controller__object-hint__icon")
+      svg-icon(iconName="angle"
+              iconWidth="12px"
+              iconColor="gray-2")
+    div(class="nu-controller__object-hint__text")
+      span {{ Math.round(hintAngle) % 360 }}
+  div(v-if="subLayer && subLayer.config" class="nu-controller__sublayer-container" :style="contentStyles")
+    nu-sub-controller(v-if="subLayer.config.type !== 'image' || !subLayer.config.imgControl"
+      :style="subContentStyles"
+      class="relative nu-controller__subCtrlContent"
+      data-identifier="controller"
+      :key="`group-controller-${subLayer.config.id}`"
+      :pageIndex="pageIndex"
+      :layerIndex="subLayer.subLayerIdx"
+      :primaryLayerIndex="layerIndex"
+      :primaryLayer="config"
+      :config="getLayerType === 'frame' && !FrameUtils.isImageFrame(subLayer.config) ? frameLayerMapper(subLayer.config) : subLayer.config"
+      :type="config.type"
+      :primaryLayerZindex="primaryLayerZindex()"
+      :isMoved="isMoved"
+      :contentScaleRatio="contentScaleRatio")
+  div(v-show="isActive && !isLocked() && !isImgControl"
+      :style="ctrlContentStyles"
+      class="nu-controller__ctrl-points"
+      ref="body"
+      @contextmenu.prevent
+      @click.right.stop="onRightClick")
+    div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
+        class="control-point__corner-rotate scaler"
+        :ref="`corner-rotate-${index}`"
+        :key="`corner-rotate-${index}`"
+        :style="ctrlPointerStyles(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
+        @pointerdown.stop="rotateStart($event, index)"
+        @touchstart="disableTouchEvent")
+    div(v-for="(end, index) in isLine() ? controlPoints.lineEnds : []"
+        class="control-point"
+        :key="index"
+        :marker-index="index"
+        :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
+        @pointerdown.stop="lineEndMoveStart"
+        @touchstart="disableTouchEvent")
+    div(v-for="(resizer, index) in resizer(controlPoints)"
+        class="control-point__resize-bar-wrapper"
+        @pointerdown.prevent.stop="!isTouchDevice() ? resizeStart($event) : null"
+        @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
+      div(class="control-point resizer"
+          :key="`resizer-${index}`"
+          :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
+      div(class="control-point resizer"
+          :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
+    //- div(v-if="isTouchDevice()" v-for="(resizer, index) in resizer(controlPoints, false, true)"
+    //-     class="control-point__resize-bar-wrapper"
+    //-     @pointerdown.prevent.stop="resizeStart"
+    //-     @touchstart="disableTouchEvent")
+    //-   div(class="control-point resizer"
+    //-       :key="`resizer-touch-${index}`"
+    //-       :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
+    //-   div(class="control-point resizer"
+    //-       :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))")
+    div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
+        @pointerdown="moveStart")
+      div(class="control-point__resize-bar control-point__move-bar"
+          :key="`resizer-text-${index}`"
+          :style="resizerBarStyles(resizer.styles)")
+    div(v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalers) : []"
+        class="control-point scaler"
+        :key="`scaler-${index}`"
+        :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
+        @pointerdown.prevent.stop="!isTouchDevice() ? scaleStart($event) : null"
+        @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
+    div(v-if="isTouchDevice()" v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalerTouchAreas) : []"
+        class="control-point scaler"
+        :key="`scaler-touch-${index}`"
+        :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
+        @pointerdown.prevent.stop="scaleStart"
+        @touchstart="disableTouchEvent")
+    div(class="control-point__line-controller-wrapper"
+        v-if="isLine()"
+        :style="`transform: scale(${100/scaleRatio * contentScaleRatio})`")
+      svg-icon(class="control-point__rotater"
+        :iconName="'rotate'" :iconWidth="`${20}px`"
+        :src="require('@/assets/img/svg/rotate.svg')"
+        :style='lineControlPointStyles()'
+        @pointerdown.native.stop="lineRotateStart"
+        @touchstart.native="lineRotateStart")
+      img(class="control-point__mover"
+        :src="require('@/assets/img/svg/move.svg')"
+        :style='lineControlPointStyles()'
+        @pointerdown="moveStart"
+        @touchstart="disableTouchEvent")
+    template(v-else)
+      div(class="control-point__controller-wrapper"
+          ref="rotater"
+          :style="`transform: scale(${100/scaleRatio  * contentScaleRatio})`")
+        svg-icon(class="control-point__rotater"
+          :iconName="'rotate'" :iconWidth="`${20}px`"
+          :src="require('@/assets/img/svg/rotate.svg')"
+          :style='controlPointStyles()'
+          @pointerdown.native.stop="rotateStart"
+          @touchstart.native="disableTouchEvent")
+        img(class="control-point__mover"
+          :src="require('@/assets/img/svg/move.svg')"
+          :style='controlPointStyles()'
+          @pointerdown="moveStart"
+          @touchstart="disableTouchEvent")
+    div(v-if="showTextEditor" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
+      nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
+        :style="textBodyStyle()"
+        :pageIndex="pageIndex"
+        :layerIndex="layerIndex"
+        :subLayerIndex="-1"
+        @keydown.native.37.stop
+        @keydown.native.38.stop
+        @keydown.native.39.stop
+        @keydown.native.40.stop
+        @keydown.native.ctrl.67.exact.stop.self
+        @keydown.native.meta.67.exact.stop.self
+        @keydown.native.ctrl.86.exact.stop.self
+        @keydown.native.meta.86.exact.stop.self
+        @keydown.native.ctrl.88.exact.stop.self
+        @keydown.native.meta.88.exact.stop.self
+        @keydown.native.ctrl.65.exact.stop.self
+        @keydown.native.meta.65.exact.stop.self
+        @keydown.native.ctrl.90.exact.stop.self
+        @keydown.native.meta.90.exact.stop.self
+        @keydown.native.ctrl.shift.90.exact.stop.self
+        @keydown.native.meta.shift.90.exact.stop.self
+        @update="handleTextChange"
+        @compositionend="handleTextCompositionEnd")
+    div(v-if="isActive && isLocked() && (scaleRatio >20)"
+        class="nu-controller__lock-icon"
+        :style="lockIconStyles()")
+      svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
+        @click.native="MappingUtils.mappingIconAction('lock')")
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { ICoordinate } from '@/interfaces/frame'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
-import { IControlPoints, IResizer } from '@/interfaces/controller'
+import { IResizer } from '@/interfaces/controller'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import ControlUtils from '@/utils/controlUtils'
@@ -172,10 +175,8 @@ import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import i18n from '@/i18n'
 import editorUtils from '@/utils/editorUtils'
-import { AnyTouchEvent } from 'any-touch'
 import textBgUtils from '@/utils/textBgUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -269,7 +270,6 @@ export default Vue.extend({
     ...mapState('shadow', ['processId', 'handleId']),
     ...mapState(['currDraggedPhoto']),
     ...mapGetters('imgControl', ['isBgImgCtrl']),
-    ...mapGetters('text', ['getDefaultFonts']),
     ...mapGetters({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
@@ -300,6 +300,12 @@ export default Vue.extend({
       }
       return undefined
     },
+    showTextEditor(): boolean {
+      if (this.config.type === 'text' && this.isActive) {
+        return !this.isMoving
+      }
+      return false
+    },
     contentStyles(): any {
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
       let transform = `translate(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px)`
@@ -329,7 +335,7 @@ export default Vue.extend({
         height: `${height * this.contentScaleRatio}px`,
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
-        pointerEvents: this.config.type === LayerType.text && this.config.active ? 'initil' : 'none',
+        pointerEvents: this.config.type === LayerType.text && this.config.active && !this.isMoving ? '' : 'none',
         /**
          * @Note - set touchAction to none because pointer event will be canceled by touch action
          * So, if we want to control the layer, we need to set it to none.
@@ -459,7 +465,8 @@ export default Vue.extend({
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
         width: isHorizon ? `${this.getLayerWidth() - scalerOffset * 100 / this.scaleRatio}px` : `${width * this.contentScaleRatio * resizeBarScale}px`,
-        height: !isHorizon ? `${this.getLayerHeight() - scalerOffset * 100 / this.scaleRatio}px` : `${height * this.contentScaleRatio * resizeBarScale}px`
+        height: !isHorizon ? `${this.getLayerHeight() - scalerOffset * 100 / this.scaleRatio}px` : `${height * this.contentScaleRatio * resizeBarScale}px`,
+        opacity: 0
       }
       return Object.assign(resizerStyle, HW)
     },
@@ -538,7 +545,6 @@ export default Vue.extend({
           resizers = resizers.filter(r => r.type !== 'V')
         }
       }
-
       return resizers
     },
     scaler(scalers: any) {
@@ -577,11 +583,18 @@ export default Vue.extend({
       }
     },
     textBodyStyle() {
+      let opacity = 1
+      if (this.isTextEditing && this.contentEditable) {
+        opacity = 1
+      } else {
+        opacity = 0
+      }
+
       const textstyles = {
         width: '100%',
         height: '100%',
         userSelect: this.contentEditable ? 'text' : 'none',
-        opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
+        opacity
       }
       return !this.isCurveText ? textstyles
         : {
@@ -590,7 +603,7 @@ export default Vue.extend({
           position: 'absolute',
           top: 0,
           left: 0,
-          opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
+          opacity: this.isTextEditing && this.contentEditable ? 1 : 0
         }
     },
     groupControllerStyle() {
@@ -602,7 +615,7 @@ export default Vue.extend({
       }
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
-      if (this.isLine || this.isTouchDevice()) return
+      if (this.isLine() || this.isTouchDevice()) return
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
         shown
       })
@@ -1980,20 +1993,6 @@ export default Vue.extend({
         event.preventDefault()
         return
       }
-      /**
-       * If current-selected-layer is exact this layer, record the sub-active-layer.
-       * After deselecting, set it to active
-       */
-      const subLayerIdx = LayerUtils.layerIndex === this.layerIndex ? LayerUtils.subLayerIdx : -1
-
-      if (this.currSelectedInfo.pageIndex !== this.pageIndex || this.currSelectedInfo.index !== this.layerIndex) {
-        GroupUtils.deselect()
-        GroupUtils.select(this.pageIndex, [this.layerIndex])
-      }
-
-      if (this.getLayerType === 'frame') {
-        FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, subLayerIdx, { active: true })
-      }
       this.$nextTick(() => {
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
@@ -2282,6 +2281,14 @@ export default Vue.extend({
     pointer-events: auto;
     border: 2px solid #00000000;
     color: "#00000000";
+    &-wrapper {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   }
   &__rotater-wrapper {
     @include widget-point-wrapper;
