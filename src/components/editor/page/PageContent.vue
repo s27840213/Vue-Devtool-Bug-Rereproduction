@@ -87,8 +87,6 @@ div(class="overflow-container"
         div(class="trim__tr" :style="trimStyles.tr")
         div(class="trim__bl" :style="trimStyles.bl")
         div(class="trim__br" :style="trimStyles.br")
-    template(v-else)
-      div(class='pages-loading')
 </template>
 
 <script lang="ts">
