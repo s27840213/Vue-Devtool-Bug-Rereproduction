@@ -253,7 +253,6 @@ import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 import { IBleed, IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import resizeUtils from '@/utils/resizeUtils'
 import { STR_UNITS, PRECISION } from '@/utils/unitUtils'
 import { round } from 'lodash'
 
@@ -411,7 +410,7 @@ export default Vue.extend({
     }),
     currentPageBleeds(): IBleed {
       const currPage = pageUtils.currFocusPage
-      let bleeds = currPage?.physicalBleeds ?? currPage?.bleeds ?? pageUtils.getDefaultBleeds(currPage.unit)
+      let bleeds = currPage?.physicalBleeds ?? currPage?.bleeds ?? pageUtils.getPageDefaultBleeds(currPage)
       bleeds = {
         top: this.groupType === 1 ? this.getPage(0).physicalBleeds?.top ?? this.getPage(0).bleeds?.top ?? 0 : bleeds.top,
         bottom: this.groupType === 1 ? this.getPage(this.pagesLength - 1).physicalBleeds?.bottom ?? this.getPage(this.pagesLength - 1).bleeds?.bottom ?? 0 : bleeds.bottom,
@@ -757,7 +756,7 @@ export default Vue.extend({
       if (this.groupType === 1) {
         if (!all && (key === 'top' || key === 'bottom')) {
           const pageIndex = key === 'top' ? 0 : this.pagesLength - 1
-          resizeUtils.resizeBleeds(pageIndex, {
+          pageUtils.setBleeds(pageIndex, {
             top: key === 'top' ? this.bleeds.top : 0,
             bottom: key === 'bottom' ? this.bleeds.bottom : 0,
             left: this.bleeds.left,
@@ -765,7 +764,7 @@ export default Vue.extend({
           })
         } else {
           for (let pageIndex = 0; pageIndex < this.pagesLength; pageIndex++) {
-            resizeUtils.resizeBleeds(pageIndex, {
+            pageUtils.setBleeds(pageIndex, {
               top: pageIndex === 0 ? this.bleeds.top : 0,
               bottom: pageIndex === this.pagesLength - 1 ? this.bleeds.bottom : 0,
               left: this.bleeds.left,
@@ -773,7 +772,7 @@ export default Vue.extend({
             })
           }
         }
-      } else resizeUtils.resizeBleeds(pageUtils.currFocusPageIndex, this.bleeds)
+      } else pageUtils.setBleeds(pageUtils.currFocusPageIndex, this.bleeds)
     },
     handleBleedSubmit(evt?: KeyboardEvent) {
       if (!evt || evt.key === 'Enter') {

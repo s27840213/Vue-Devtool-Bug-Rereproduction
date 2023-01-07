@@ -192,7 +192,6 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
 import { floor, round } from 'lodash'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
-import resizeUtils from '@/utils/resizeUtils'
 
 export default Vue.extend({
   inheritAttrs: false,
@@ -541,8 +540,8 @@ export default Vue.extend({
 
       // remove top and bottom bleeds for email marketing design
       if (this.isDetailPage) {
-        resizeUtils.resizeBleeds(this.pageIndex + 1, { ...this.config.physicalBleeds, top: 0 })
-        resizeUtils.resizeBleeds(this.pageIndex, { ...this.config.physicalBleeds, bottom: 0 })
+        pageUtils.setBleeds(this.pageIndex + 1, { ...this.config.physicalBleeds, top: 0 })
+        pageUtils.setBleeds(this.pageIndex, { ...this.config.physicalBleeds, bottom: 0 })
       }
 
       this.setCurrActivePageIndex(this.pageIndex + 1)
@@ -561,13 +560,13 @@ export default Vue.extend({
       // add top and bottom bleeds for email marketing design
       if (this.isDetailPage) {
         if (this.pages.length === 1) {
-          resizeUtils.resizeBleeds(0, {
+          pageUtils.setBleeds(0, {
             ...this.config.physicalBleeds,
             top: this.pageIndex === 0 ? this.config.physicalBleeds.top : this.getPage(0).physicalBleeds.top,
             bottom: this.pageIndex === 1 ? this.config.physicalBleeds.bottom : this.getPage(0).physicalBleeds.bottom
           })
-        } else if (this.pageIndex === 0) resizeUtils.resizeBleeds(0, this.config.physicalBleeds)
-        else if (this.pageIndex === this.pages.length) resizeUtils.resizeBleeds(this.pages.length - 1, this.config.physicalBleeds)
+        } else if (this.pageIndex === 0) pageUtils.setBleeds(0, this.config.physicalBleeds)
+        else if (this.pageIndex === this.pages.length) pageUtils.setBleeds(this.pages.length - 1, this.config.physicalBleeds)
       }
 
       StepsUtils.record()
@@ -594,8 +593,8 @@ export default Vue.extend({
       // remove top and bottom bleeds for email marketing design
       // TODO: resize bleeds before copy
       if (this.isDetailPage) {
-        resizeUtils.resizeBleeds(this.pageIndex + 1, { ...page.physicalBleeds, top: 0 })
-        resizeUtils.resizeBleeds(this.pageIndex, { ...this.config.physicalBleeds, bottom: 0 })
+        pageUtils.setBleeds(this.pageIndex + 1, { ...page.physicalBleeds, top: 0 })
+        pageUtils.setBleeds(this.pageIndex, { ...this.config.physicalBleeds, bottom: 0 })
       }
 
       this.setCurrActivePageIndex(this.pageIndex + 1)

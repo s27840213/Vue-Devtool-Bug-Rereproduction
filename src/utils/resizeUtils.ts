@@ -199,29 +199,6 @@ class ResizeUtils {
           props: { bleeds, physicalBleeds }
         })
       }
-    } else {
-      // update default bleeds with new dpi
-      let dpi: { width: number, height: number }
-      if (format.unit !== 'px') {
-        dpi = {
-          width: format.width / unitUtils.convert(format.physicalWidth, format.unit, 'in'),
-          height: format.height / unitUtils.convert(format.physicalHeight, format.unit, 'in')
-        }
-      } else {
-        const inSize = unitUtils.convertSize(format.physicalWidth, format.physicalHeight, format.unit, 'in')
-        dpi = {
-          width: format.width / inSize.width,
-          height: format.height / inSize.height
-        }
-      }
-      const bleeds = pageUtils.getDefaultBleeds('px', dpi)
-      store.commit('UPDATE_pageProps', {
-        pageIndex: pageIndex,
-        props: {
-          bleeds,
-          physicalBleeds: format.unit === 'px' ? bleeds : pageUtils.getDefaultBleeds(format.unit, dpi)
-        }
-      })
     }
 
     // update layers
@@ -241,8 +218,8 @@ class ResizeUtils {
     const newSize = {
       width: format.width + sizeWithBleeds.bleeds.left + sizeWithBleeds.bleeds.right,
       height: format.height + sizeWithBleeds.bleeds.top + sizeWithBleeds.bleeds.bottom,
-      physicalWidth: format.width + sizeWithBleeds.physicalBleeds.left + sizeWithBleeds.physicalBleeds.right,
-      physicalHeight: format.height + sizeWithBleeds.physicalBleeds.top + sizeWithBleeds.physicalBleeds.bottom,
+      physicalWidth: format.physicalWidth + sizeWithBleeds.physicalBleeds.left + sizeWithBleeds.physicalBleeds.right,
+      physicalHeight: format.physicalHeight + sizeWithBleeds.physicalBleeds.top + sizeWithBleeds.physicalBleeds.bottom,
       unit: format.unit
     }
 
@@ -269,76 +246,8 @@ class ResizeUtils {
       })
     }
 
-    rulerUtils.removeInvalidGuides(pageIndex, newSize)
-
-    store.commit('UPDATE_pageProps', {
-      pageIndex: pageIndex,
-      props: { ...format }
-    })
-  }
-
-  resizeBleeds(pageIndex: number, physicalBleeds: IBleed, bleeds?: IBleed) {
-    const page = pageUtils.getPage(pageIndex)
-
-    // convert bleeds
-    const dpi = pageUtils.getPageDPI(page)
-    physicalBleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, isNaN(v) ? 0 : v])) as IBleed // map NaN to 0
-    const newBleeds = bleeds || Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, page.unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height))])) as IBleed // convert bleed to px size
-    const newPhysicalBleeds = physicalBleeds
-    store.commit('SET_bleeds', { pageIndex, bleeds: newBleeds, physicalBleeds: newPhysicalBleeds })
-  }
-
-  enableBleeds(pageIndex: number) {
-    const page = pageUtils.getPage(pageIndex)
-    if (page.physicalBleeds && page.bleeds) this.resizeBleeds(pageIndex, page.physicalBleeds, page.bleeds)
-    // else {
-    //   const unit = page.unit ?? 'px'
-    //   const defaultBleeds = pageUtils.getDefaultBleeds('px')
-    //   defaultBleeds.top = this.groupType === 1 && pageIndex !== 0 ? 0 : defaultBleeds.top
-    //   defaultBleeds.bottom = this.groupType === 1 && pageIndex !== this.pagesLength - 1 ? 0 : defaultBleeds.bottom
-
-    //   const defaultPhysicalBleeds = unit === 'px' ? defaultBleeds : pageUtils.getDefaultBleeds(unit, pageUtils.getPageDPI(page))
-    //   if (unit !== 'px') {
-    //     defaultPhysicalBleeds.top = this.groupType === 1 && pageIndex !== 0 ? 0 : defaultPhysicalBleeds.top
-    //     defaultPhysicalBleeds.bottom = this.groupType === 1 && pageIndex !== this.pagesLength - 1 ? 0 : defaultPhysicalBleeds.bottom
-    //   }
-    //   this.resizeBleeds(pageIndex, defaultPhysicalBleeds, defaultBleeds)
-    // }
-    store.commit('UPDATE_pageProps', {
-      pageIndex,
-      props: { isEnableBleed: true }
-    })
-  }
-
-  disableBleeds(pageIndex: number) {
-    const page = pageUtils.getPage(pageIndex)
-    if (!page.isEnableBleed) return
-
-    // update default bleeds
-    const sizeWithoutBleed = pageUtils.getPageSize(pageIndex)
-    const unit = sizeWithoutBleed.unit
-    let dpi: { width: number, height: number }
-    if (unit !== 'px') {
-      dpi = {
-        width: sizeWithoutBleed.width / unitUtils.convert(sizeWithoutBleed.physicalWidth, unit, 'in'),
-        height: sizeWithoutBleed.height / unitUtils.convert(sizeWithoutBleed.physicalHeight, unit, 'in')
-      }
-    } else {
-      const inSize = unitUtils.convertSize(sizeWithoutBleed.physicalWidth, sizeWithoutBleed.physicalHeight, page.unit, 'in')
-      dpi = {
-        width: sizeWithoutBleed.width / inSize.width,
-        height: sizeWithoutBleed.height / inSize.height
-      }
-    }
-    const bleeds = pageUtils.getDefaultBleeds('px', dpi)
-    store.commit('UPDATE_pageProps', {
-      pageIndex: pageIndex,
-      props: {
-        isEnableBleed: false,
-        bleeds,
-        physicalBleeds: unit === 'px' ? bleeds : pageUtils.getDefaultBleeds(unit, dpi)
-      }
-    })
+    rulerUtils.removeInvalidGuides(pageIndex, format)
+    pageUtils.setPageSize(pageIndex, format.width, format.height, format.physicalWidth, format.physicalHeight, format.unit)
   }
 
   testResizeAllPages() {

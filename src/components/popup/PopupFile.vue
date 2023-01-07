@@ -75,7 +75,6 @@ import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
 import stepsUtils from '@/utils/stepsUtils'
 import gtmUtils from '@/utils/gtmUtils'
-import resizeUtils from '@/utils/resizeUtils'
 import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
@@ -156,16 +155,10 @@ export default Vue.extend({
       rulerUtils.setLockGuideline(!rulerUtils.lockGuideline)
     },
     toggleBleed() {
-      if (this.hasBleed) {
-        // disable bleeds for all pages
-        for (let idx = 0; idx < this.pagesLength; idx++) {
-          resizeUtils.disableBleeds(idx)
-        }
-      } else {
-        // apply default bleeds for all pages
-        for (let idx = 0; idx < this.pagesLength; idx++) {
-          resizeUtils.enableBleeds(idx)
-        }
+      const isEnableBleed = !this.hasBleed
+      for (let idx = 0; idx < this.pagesLength; idx++) {
+        pageUtils.setIsEnableBleed(isEnableBleed, idx)
+        if (!isEnableBleed) pageUtils.resetBleeds(idx)
       }
       stepsUtils.record()
     },

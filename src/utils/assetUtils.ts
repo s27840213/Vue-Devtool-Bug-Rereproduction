@@ -172,9 +172,9 @@ class AssetUtils {
     if (store.getters['user/getUserId'] === 'backendRendering') {
       if (store.getters['user/getBleed'] || store.getters['user/getTrim']) {
         // use bleeds of page if it has
-        resizeUtils.enableBleeds(targetPageIndex)
-        if (json.bleeds && json.physicalBleeds) resizeUtils.resizeBleeds(targetPageIndex, json.physicalBleeds, json.bleeds)
-      } else resizeUtils.disableBleeds(targetPageIndex)
+        pageUtils.setIsEnableBleed(true, targetPageIndex)
+        if (json.bleeds && json.physicalBleeds) pageUtils.setBleeds(targetPageIndex, json.physicalBleeds, json.bleeds)
+      } else pageUtils.setIsEnableBleed(false, targetPageIndex)
     } else {
       if (targetPage.isEnableBleed && targetPage.bleeds && targetPage.physicalBleeds) {
         const resizedPage = this.getPage(targetPageIndex)
@@ -186,8 +186,8 @@ class AssetUtils {
             : Object.fromEntries(Object.entries(targetPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, targetPage.unit, resizedPage.unit, k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
 
         // apply bleeds of targetPage
-        resizeUtils.enableBleeds(targetPageIndex)
-        resizeUtils.resizeBleeds(targetPageIndex, physicalBleeds)
+        pageUtils.setIsEnableBleed(true, targetPageIndex)
+        pageUtils.setBleeds(targetPageIndex, physicalBleeds)
       }
 
       // fit page background if the template has background image
@@ -667,8 +667,8 @@ class AssetUtils {
 
             for (const idx in jsonDataList) {
               const pageIndex = +idx + targetIndex
-              resizeUtils.enableBleeds(pageIndex)
-              resizeUtils.resizeBleeds(pageIndex, physicalBleeds)
+              pageUtils.setIsEnableBleed(true, pageIndex)
+              pageUtils.setBleeds(pageIndex, physicalBleeds)
             }
           }
           store.commit('SET_currActivePageIndex', targetIndex)
