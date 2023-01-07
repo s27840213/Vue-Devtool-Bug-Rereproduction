@@ -186,8 +186,8 @@ export default Vue.extend({
     generalUtils.panelInit('text',
       this.handleSearch,
       this.handleCategorySearch,
-      async () => {
-        await this.getRecAndCate('textStock')
+      async ({ reset }: {reset: boolean}) => {
+        await this.getRecAndCate({ reset, key: 'textStock' })
       })
     eventUtils.on(PanelEvent.scrollPanelTextToTop, this.scrollToTop)
   },

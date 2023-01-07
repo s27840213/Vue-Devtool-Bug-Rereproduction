@@ -261,9 +261,9 @@ export default Vue.extend({
     generalUtils.panelInit('bg',
       this.handleSearch,
       this.handleCategorySearch,
-      () => {
-        this.getRecAndCate('background')
-        vivistickerUtils.listAsset('backgroundColor')
+      async ({ reset }: {reset: boolean}) => {
+        await this.getRecAndCate({ reset, key: 'background' })
+        await vivistickerUtils.listAsset('backgroundColor')
       })
   },
   activated() {

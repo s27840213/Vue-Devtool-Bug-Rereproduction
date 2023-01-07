@@ -250,8 +250,8 @@ export default Vue.extend({
     generalUtils.panelInit('object',
       this.handleSearch,
       this.handleCategorySearch,
-      async () => {
-        this.getRecAndCate('objects')
+      async ({ reset }: {reset: boolean}) => {
+        await this.getRecAndCate({ reset, key: 'objects' })
         this.initFavorites()
       }
     )
