@@ -1,5 +1,6 @@
 <template lang="pug">
-  div
+  div(:style="[{transform: isImgCtrl || inFrame ? {} : `translateZ(${this.config.styles.zindex}px)`},...transformStyle]"
+      :class="[{'click-disabled': isPagePreview}]")
     div(v-for="div in layerDivs"
         class="nu-layer" :class="!config.locked && subLayerIndex === -1 ? `nu-layer--p${pageIndex}` : ''"
         :style="layerStyles(div.noShadow, div.isTransparent)"
@@ -21,26 +22,18 @@
           nu-clipper(:config="config"
               :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
               :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
-            lazy-load(:target="lazyLoadTarget"
-                :rootMargin="'300px 0px 300px 0px'"
-                :minHeight="lazyloadSize.height"
-                :minWidth="lazyloadSize.width"
-                :threshold="[0]"
-                :handleUnrender="handleUnrender"
-                :anamationEnabled="false"
-                :forceRender="isSubLayer || forceRender")
-              component(:is="`nu-${config.type}`"
-                class="transition-none"
-                :config="config"
-                :imgControl="imgControl"
-                :contentScaleRatio="contentScaleRatio"
-                :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-                :scaleRatio="scaleRatio"
-                :isPagePreview="isPagePreview"
-                :forRender="forRender"
-                :isTransparent="div.isTransparent"
-                :noShadow="div.noShadow"
-                v-bind="$attrs")
+            component(:is="`nu-${config.type}`"
+              class="transition-none"
+              :config="config"
+              :imgControl="imgControl"
+              :contentScaleRatio="contentScaleRatio"
+              :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+              :scaleRatio="scaleRatio"
+              :isPagePreview="isPagePreview"
+              :forRender="forRender"
+              :isTransparent="div.isTransparent"
+              :noShadow="div.noShadow"
+              v-bind="$attrs")
           svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
             :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
             g(v-html="frameClipFormatter(config.clipPath)"
@@ -105,7 +98,7 @@ export default Vue.extend({
       type: Boolean,
       default: false
     },
-    isFrame: {
+    inFrame: {
       type: Boolean,
       default: false
     },
@@ -370,7 +363,8 @@ export default Vue.extend({
           outline,
           willChange: !this.isSubLayer && this.isDragging ? 'transform' : '',
           pointerEvents,
-          clipPath
+          clipPath,
+          ...this.transformStyle
         }
       )
       switch (this.config.type) {
