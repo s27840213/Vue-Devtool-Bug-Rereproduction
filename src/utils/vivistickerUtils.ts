@@ -194,7 +194,7 @@ class ViviStickerUtils {
 
   sendToIOS(messageType: string, message: any) {
     console.log(messageType, message)
-    if (messageType === 'SCREENSHOT' && !this.hasCopied) {
+    if (messageType === 'SCREENSHOT' && !this.hasCopied && this.checkOSVersion('16.0')) {
       this.hasCopied = true
       this.setState('hasCopied', { data: this.hasCopied })
       modalUtils.setModalInfo(i18n.t('STK0033').toString(), i18n.t('STK0034').toString(), {
@@ -469,7 +469,7 @@ class ViviStickerUtils {
   checkOSVersion(targetVersion: string) {
     // targetVersion must be in format: <main>.<sub> e.g. 1.18
     const [targetMain, targetSub] = targetVersion.split('.')
-    const [currMain, currSubRaw] = store.getters['vivisticker/getUserInfo'].osVer.split('.')
+    const [currMain, currSubRaw] = (store.getters['vivisticker/getUserInfo'].osVer ?? '0.0').split('.')
     const currSub = currSubRaw ?? '0'
     return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
   }
