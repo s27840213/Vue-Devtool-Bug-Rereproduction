@@ -128,7 +128,7 @@ export class MovingUtils {
     this.eventTarget = (event.target as HTMLElement)
     this.eventTarget.releasePointerCapture((event as PointerEvent).pointerId)
 
-    if (this.isTouchDevice) {
+    if (this.isTouchDevice && !this.config.locked) {
       this.isClickOnController = controlUtils.isClickOnController(event as MouseEvent)
       event.stopPropagation()
       if (!this.dblTabsFlag && this.isActive) {
