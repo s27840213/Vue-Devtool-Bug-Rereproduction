@@ -233,8 +233,7 @@ export default Vue.extend({
       },
       generalUtils,
       pageUtils,
-      currDraggingIndex: -1,
-      displayDPI: 96
+      currDraggingIndex: -1
     }
   },
   props: {
@@ -394,7 +393,7 @@ export default Vue.extend({
       return this.currSelectedInfo.layers.length
     },
     resizerHint(): string {
-      return !this.isResizingPage ? '拖曳調整畫布高度' : `${round(this.config.physicalHeight, PRECISION)}${this.config.unit}`
+      return !this.isResizingPage ? '拖曳調整畫布高度' : `${round(this.pageState.config.physicalHeight, PRECISION)}${this.config.unit}`
     }
   },
   methods: {
@@ -636,11 +635,10 @@ export default Vue.extend({
       window.dispatchEvent(event)
     },
     pageResizeStart(e: PointerEvent) {
-      this.initialPageHeight = (this.config as IPage).height
+      this.initialPageHeight = this.pageState.config.height
       this.isResizingPage = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-      this.displayDPI = this.config.height / unitUtils.convert(this.config.physicalHeight, this.config.unit, 'in')
       eventUtils.addPointerEvent('pointermove', this.pageResizing)
       this.overflowContainer.addEventListener('scroll', this.scrollUpdate, { capture: true })
       eventUtils.addPointerEvent('pointerup', this.pageResizeEnd)
@@ -656,26 +654,24 @@ export default Vue.extend({
         const minHeight = Math.max(pageUtils.MIN_SIZE, this.config.bleeds?.top ?? 0 + this.config.bleeds?.bottom ?? 0)
         const maxHeight = floor(pageUtils.MAX_AREA / this.config.width)
         const newHeight = Math.min(Math.max(Math.trunc(this.initialPageHeight + yDiff), minHeight), maxHeight)
-        const newPhysicalHeight = unitUtils.convert(newHeight / this.displayDPI, 'in', this.config.unit)
         pageUtils.updatePageProps({
           height: newHeight,
-          physicalHeight: newPhysicalHeight
+          physicalHeight: newHeight
         })
       } else {
         this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
         this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-        this.initialPageHeight = (this.config as IPage).height
+        this.initialPageHeight = this.pageState.config.height
       }
       this.isShownScrollBar = isShownScrollbar
     },
     pageResizeEnd(e: PointerEvent) {
-      this.initialPageHeight = (this.config as IPage).height
+      this.initialPageHeight = this.pageState.config.height
       this.isResizingPage = false
-      const newHeight = Math.round(this.config.height)
-      const newPhysicalHeight = unitUtils.convert(newHeight / this.displayDPI, 'in', this.config.unit)
+      const newHeight = Math.round(this.pageState.config.height)
       pageUtils.updatePageProps({
         height: newHeight,
-        physicalHeight: newPhysicalHeight
+        physicalHeight: newHeight
       })
       StepsUtils.record()
       this.$nextTick(() => {
