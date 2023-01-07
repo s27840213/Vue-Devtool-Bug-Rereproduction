@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="photo-setting")
-    span(class="photo-setting__title text-blue-1 subtitle-1") {{$t('NN0039')}}
+    span(class="photo-setting__title text-blue-1 text-H6") {{$t('NN0039')}}
     div(class="photo-setting__grid mb-10")
       template(v-for="btn in btns")
         btn(v-if="!btn.condition || btn.condition()"
@@ -422,7 +422,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .photo-setting {
   position: relative;
-  text-align: center;
+  text-align: left;
   &__grid {
     margin-top: 15px;
     display: grid;

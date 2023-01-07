@@ -1,6 +1,5 @@
 <template lang="pug">
   div(class="shape-setting")
-    //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
     //- Line shape setting
     div(class="action-bar flex-around line-actions" style="padding: 8px 0"
               v-if="isLine")

@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="text-setting" ref='body'
       @mousedown.capture="textInfoRecorder()")
-    span(class="text-setting__title text-blue-1 label-lg") {{$t('NN0062')}}
+    span(class="text-setting__title text-blue-1 text-H6") {{$t('NN0062')}}
     div(class="text-setting__row1")
       div(class="property-bar pointer record-selection" @click="openFontsPanel")
         img(v-if="props.font[0] !== '_'" class="text-setting__text-preview" :src="fontPrevUrl" @error="onError")
@@ -575,6 +575,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .text-setting {
+  text-align: left;
   &__title {
     margin-bottom: 30px;
   }

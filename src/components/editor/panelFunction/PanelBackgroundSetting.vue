@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="bg-setting" v-click-outside="handleOutSide")
-    span(class="bg-setting__title text-blue-1 label-lg") {{$t('NN0142')}}
+    span(class="bg-setting__title text-blue-1 text-H6") {{$t('NN0142')}}
     div(class="action-bar flex-evenly my-10")
       svg-icon(class="btn-opacity pointer p-5 feature-button"
         iconName="transparency" :iconWidth="'20px'"
@@ -232,6 +232,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .bg-setting {
+  text-align: left;
   &__grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
