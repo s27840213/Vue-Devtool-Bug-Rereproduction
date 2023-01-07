@@ -2,6 +2,7 @@ import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { LineTemplatesType } from '@/store/types'
 import { EventEmitter } from 'events'
+import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
 import unitUtils from './unitUtils'
 interface ITemplateSetting {
@@ -122,15 +123,15 @@ class RulerUtils {
     this.eventHash[type] = callback
   }
 
-  mapGuidelineToPage(guildline: HTMLElement, type: string, from: number): { pos: number, outOfPage: boolean } {
-    const guildlineRect = guildline.getBoundingClientRect()
+  mapGuidelineToPage(guideline: HTMLElement, type: string, from: number): { pos: number, outOfPage: boolean } {
+    const guidelineRect = guideline.getBoundingClientRect()
     const targetPageIndex = from === -1 ? pageUtils.currFocusPageIndex : from
     const targetPage: IPage = from === -1 ? this.currFocusPage : pageUtils.getPage(targetPageIndex)
 
     switch (type) {
       case 'v': {
         const pageRect = document.getElementsByClassName(`nu-page-bleed-${targetPageIndex}`)[0]?.getBoundingClientRect() ?? document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
-        const mapResult = (guildlineRect.left - pageRect.left) / (this.scaleRatio / 100)
+        const mapResult = (guidelineRect.left - pageRect.left) / (this.scaleRatio / 100)
         return {
           pos: mapResult,
           outOfPage: mapResult < 0 || mapResult > targetPage.width
@@ -138,7 +139,7 @@ class RulerUtils {
       }
       case 'h': {
         const pageRect = document.getElementsByClassName(`nu-page-bleed-${targetPageIndex}`)[0]?.getBoundingClientRect() ?? document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
-        const mapResult = (guildlineRect.top - pageRect.top) / (this.scaleRatio / 100)
+        const mapResult = (guidelineRect.top - pageRect.top) / (this.scaleRatio / 100)
         return {
           pos: mapResult,
           outOfPage: mapResult < 0 || mapResult > targetPage.height
@@ -149,6 +150,74 @@ class RulerUtils {
       pos: -1,
       outOfPage: true
     }
+  }
+
+  getOverlappedPageIndex(guideline: HTMLElement, type: string): number {
+    const guidelineRect = guideline.getBoundingClientRect()
+    for (const [pageIndex, page] of pageUtils.getPages.entries()) {
+      switch (type) {
+        case 'v': {
+          const pageRect = document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
+          const mapResult = (guidelineRect.left - pageRect.left) / (this.scaleRatio / 100)
+          if (mapResult >= 0 && mapResult <= page.width) {
+            return pageIndex
+          }
+          break
+        }
+        case 'h': {
+          const pageRect = document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
+          const mapResult = (guidelineRect.top - pageRect.top) / (this.scaleRatio / 100)
+          if (mapResult >= 0 && mapResult <= page.height) {
+            return pageIndex
+          }
+          break
+        }
+      }
+    }
+    return -1
+  }
+
+  getMouseOverPageIndex(e: PointerEvent): number {
+    const mousePos = mouseUtils.getMouseAbsPoint(e)
+    for (const pageIndex in pageUtils.getPages) {
+      const pageRect = document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
+      if (mousePos.x >= pageRect.x && mousePos.x <= pageRect.x + pageRect.width &&
+        mousePos.y >= pageRect.y && mousePos.y <= pageRect.y + pageRect.height) {
+        return parseInt(pageIndex, 10)
+      }
+    }
+    return -1
+  }
+
+  getMostlyOverlappedPageIndex(e: PointerEvent): number {
+    const editorRect = document.getElementsByClassName('editor-view')[0].getBoundingClientRect()
+    const mousePos = mouseUtils.getMouseAbsPoint(e)
+    let candidates = [] as { index: number, yDiff: number }[]
+    let maxOverlappedLen = -1
+    for (const pageIndex in pageUtils.getPages) {
+      const pageRect = document.getElementsByClassName(`nu-page-${pageIndex}`)[0].getBoundingClientRect()
+      const pageIndexNum = parseInt(pageIndex, 10)
+      if (mousePos.x < pageRect.x || mousePos.x > pageRect.x + pageRect.width ||
+        pageRect.y > editorRect.height || pageRect.y + pageRect.height < 0) continue
+      const overlappedLen = Math.min(pageRect.y + pageRect.height, editorRect.height) - Math.max(pageRect.y, 0)
+      const item = { index: pageIndexNum, yDiff: Math.min(Math.abs(mousePos.y - pageRect.y), Math.abs(mousePos.y - pageRect.y - pageRect.height)) }
+      if (overlappedLen > maxOverlappedLen) {
+        maxOverlappedLen = overlappedLen
+        candidates = [item]
+      } else if (overlappedLen === maxOverlappedLen) {
+        candidates.push(item)
+      }
+    }
+    if (candidates.length === 0) return -1
+    let minYDiffPageIndex = -1
+    let minYDiff = Number.MAX_SAFE_INTEGER
+    for (const candidate of candidates) {
+      if (candidate.yDiff < minYDiff) {
+        minYDiffPageIndex = candidate.index
+        minYDiff = candidate.yDiff
+      }
+    }
+    return minYDiffPageIndex
   }
 
   mapSnaplineToGuidelineArea(pos: number, type: string, pageIndex: number): number {
@@ -180,8 +249,8 @@ class RulerUtils {
     })
   }
 
-  clearGuidelines() {
-    store.commit('CLEAR_guideline')
+  clearGuidelines(useLastMapped = false) {
+    store.commit('CLEAR_guideline', useLastMapped ? this.lastMapedInfo.pageIndex : undefined)
   }
 
   setShowRuler(bool: boolean) {

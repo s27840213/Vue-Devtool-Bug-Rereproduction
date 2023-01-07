@@ -65,7 +65,7 @@ export default Vue.extend({
       return unitUtils.convert(this.scale, this.currFocusPageSize.unit, 'px', pageUtils.getPageDPI().width)
     },
     scaleCount(): number {
-      return Math.floor(this.currFocusPageSize.width / this.pxScale)
+      return Math.ceil(this.currFocusPageSize.width / this.pxScale)
     },
     scaleSpace(): number {
       return this.pxScale * this.pageScaleRatio / 100
@@ -133,7 +133,7 @@ export default Vue.extend({
     position: absolute;
     left: 0;
     top: 20%;
-    font-size: 2px;
+    font-size: 12px;
     transform: scale(0.8);
   }
 

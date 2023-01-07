@@ -9,7 +9,7 @@
       :key="`layer-${layer.id}`"
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
-      :isFrame="true"
+      :inFrame="true"
       :inImageFrame="inImageFrame()"
       :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
       :contentScaleRatio="contentScaleRatio"

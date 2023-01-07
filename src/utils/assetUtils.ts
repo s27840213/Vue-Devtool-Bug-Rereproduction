@@ -753,7 +753,7 @@ class AssetUtils {
       editorUtils.setCloseMobilePanelFlag(true)
       this.addAssetToRecentlyUsed(asset)
     } catch (error) {
-      console.log(error)
+      console.error(error)
       captureException(error)
     }
   }

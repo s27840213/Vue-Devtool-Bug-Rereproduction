@@ -37,6 +37,7 @@ const actions: ActionTree<IHomeTemplateState, unknown> = {
       })
       return Promise.resolve(data)
     } catch (error) {
+      console.error(error)
       captureException(error)
     }
   }

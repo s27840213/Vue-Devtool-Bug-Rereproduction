@@ -20,6 +20,7 @@ class PageUtils {
   get MAX_AREA() { return 6000 * 6000 }
   get MAX_SIZE() { return 8000 }
   get MIN_SIZE() { return 40 }
+  get MOBILE_CARD_PADDING() { return 16 }
   get defaultBleedMap() {
     const toBleed = (val: number) => ({
       top: val,
@@ -32,7 +33,7 @@ class PageUtils {
       cm: toBleed(0.3),
       mm: toBleed(3),
       in: toBleed(0.118)
-    } as {[index: string]: IBleed}
+    } as { [index: string]: IBleed }
   }
 
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -475,8 +476,10 @@ class PageUtils {
     if (editorUtils.mobileAllPageMode || this.isSwitchingToEditor) {
       return
     }
+
+    const isMobile = generalUtils.isTouchDevice()
     // If mobile user zoom in page, don't fitPage.
-    if (generalUtils.isTouchDevice() && !minRatioFiRestricttDisable && pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
+    if (isMobile && !minRatioFiRestricttDisable && pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
       return
     }
 
@@ -486,16 +489,23 @@ class PageUtils {
     const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight ?? 0
 
     if (!editorViewBox) return
-    const { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
+    let { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
     const { width: targetWidth, height: targetHeight }: { width: number, height: number } =
       (this.inBgRemoveMode ? this.autoRemoveResult
         : this.currFocusPageSizeWithBleeds)
+
+    const RESIZE_MULTIPLIER = isMobile ? 1 : 0.8
+
+    if (isMobile) {
+      editorWidth -= this.MOBILE_CARD_PADDING * 2
+      editorHeight -= this.MOBILE_CARD_PADDING * 2
+    }
 
     // Calculate and do resize
     const resizeRatio = Math.min(
       editorWidth / (targetWidth * (this.scaleRatio / 100)),
       (editorHeight - mobilePanelHeight) / (targetHeight * (this.scaleRatio / 100))
-    ) * 0.8
+    ) * RESIZE_MULTIPLIER
     const newRatio = Math.max(3, Math.round(this.scaleRatio * resizeRatio))
 
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
@@ -603,7 +613,7 @@ class PageUtils {
    * @param page Target page, use current focused page if undefined
    * @returns DPI of target page if target page is in physical size, otherwise 96 (default DPI)
    */
-  getPageDPI(page: IPage = this.currFocusPage): {width: number, height: number} {
+  getPageDPI(page: IPage = this.currFocusPage): { width: number, height: number } {
     return {
       width: page.width / unitUtils.convert(page.physicalWidth, page.unit, 'in'),
       height: page.height / unitUtils.convert(page.physicalHeight, page.unit, 'in')

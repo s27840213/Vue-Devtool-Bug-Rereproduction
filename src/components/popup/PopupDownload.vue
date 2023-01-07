@@ -276,9 +276,10 @@ export default Vue.extend({
         { value: 4, label: 'dev3' },
         { value: 5, label: 'dev4' },
         { value: 6, label: 'dev5' },
+        { value: 998, label: 'qa' },
         { value: 999, label: 'rd' }
       ],
-      onDev: host.startsWith('rd') || host.startsWith('dev') || host.startsWith('localhost')
+      onDev: host.startsWith('qa') || host.startsWith('rd') || host.startsWith('dev') || host.startsWith('localhost')
     }
   },
   computed: {

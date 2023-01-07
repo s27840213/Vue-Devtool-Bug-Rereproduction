@@ -119,7 +119,7 @@ const getDefaultState = (): IEditorState => ({
   isLargeDesktop: false,
   isGlobalLoading: false,
   useMobileEditor: false,
-  defaultContentScaleRatio: 0.6,
+  defaultContentScaleRatio: 1,
   _3dEnabledPageIndex: -1,
   enalbleComponentLog: false,
   inScreenshotPreviewRoute: false,
@@ -902,9 +902,9 @@ const mutations: MutationTree<IEditorState> = {
     const { pages } = state
     pages[pageIndex].config.guidelines[type].splice(index, 1)
   },
-  CLEAR_guideline(state: IEditorState) {
+  CLEAR_guideline(state: IEditorState, targetIndex?: number) {
     const { pages } = state
-    const currFocusPageIndex = pageUtils.currFocusPageIndex
+    const currFocusPageIndex = targetIndex ?? pageUtils.currFocusPageIndex
     pages[currFocusPageIndex].config.guidelines.v = []
     pages[currFocusPageIndex].config.guidelines.h = []
   },
