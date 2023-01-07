@@ -22,6 +22,7 @@
         :style="imgStyles()")
         svg(v-if="isAdjustImage()"
           :style="flipStyles()"
+          class="nu-image__svg"
           :class="{'layer-flip': flippedAnimation() }"
           :viewBox="svgViewBox()"
           :width="svgImageWidth()"
@@ -1163,6 +1164,10 @@ export default Vue.extend({
     left: 0px;
     width: 100%;
     height: 100%;
+  }
+
+  &__svg {
+    display: block;
   }
 
   .img-wrapper {
