@@ -27,6 +27,7 @@ import ImageUtils from '@/utils/imageUtils'
 import { mapGetters } from 'vuex'
 import layerFactary from '@/utils/layerFactary'
 import generalUtils from '@/utils/generalUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   inheritAttrs: false,
@@ -137,7 +138,8 @@ export default Vue.extend({
     }),
     ...mapGetters('user', ['getVerUni']),
     ...mapGetters({
-      scaleRatio: 'getPageScaleRatio'
+      scaleRatio: 'getPageScaleRatio',
+      isShowPagePreview: 'page/getIsShowPagePreview'
     }),
     layers() {
       const config = this.config as IFrame
@@ -183,7 +185,7 @@ export default Vue.extend({
       return {
         width: isFrameImg ? '' : `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio}px`,
         height: isFrameImg ? '' : `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio}px`,
-        pointerEvents: ImageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial',
+        pointerEvents: ImageUtils.isImgControl(this.pageIndex) || this.isShowPagePreview || editorUtils.mobileAllPageMode ? 'none' : 'initial',
         transform: isFrameImg ? '' : `scale(${1 / this.contentScaleRatio})`,
         transformOrigin: isFrameImg ? '' : 'top left'
       }
