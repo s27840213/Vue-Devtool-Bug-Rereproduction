@@ -57,7 +57,7 @@ export default Vue.extend({
       if (!(this.$refs.pageSizeSelector as any).isFormatApplicable) return // TODO: disable submit button
       const path = this.$route.name === 'MyDesign' ? this.currLocation.split('/').slice(1).join(',') : undefined
       const foldername = this.$route.name === 'MyDesign' ? designUtils.search(this.folders, designUtils.makePath(this.currLocation))?.name : undefined
-      designUtils.newDesignWithLoginRedirect(this.selectedFormat.width, this.selectedFormat.height, undefined, path, foldername)
+      designUtils.newDesignWithLoginRedirect(this.selectedFormat.width, this.selectedFormat.height, this.selectedFormat.unit, undefined, path, foldername)
     }
   }
 })

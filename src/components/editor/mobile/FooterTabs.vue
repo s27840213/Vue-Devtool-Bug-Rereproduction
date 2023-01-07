@@ -93,7 +93,7 @@ export default Vue.extend({
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
@@ -104,7 +104,7 @@ export default Vue.extend({
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         ...(this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
         { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
         ...this.genearlLayerTabs,
@@ -160,7 +160,7 @@ export default Vue.extend({
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !hasBgImage, disabled: this.backgroundLocked },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -176,7 +176,7 @@ export default Vue.extend({
     multiPhotoTabs(): Array<IFooterTab> {
       return [
         ...this.multiGeneralTabs,
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' }
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' }
       ]
     },
     multiFontTabs(): Array<IFooterTab> {

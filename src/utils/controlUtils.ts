@@ -6,6 +6,7 @@ import generalUtils from '@/utils/generalUtils'
 import layerUtils from './layerUtils'
 import editorUtils from './editorUtils'
 import { svg1, svg2, svg3, svg4, svg5, svg6, svg7, svg8 } from './cornerRotate'
+import mathUtils from './mathUtils'
 
 const blob1 = new Blob([svg1], { type: 'image/svg+xml' })
 const blob2 = new Blob([svg2], { type: 'image/svg+xml' })
@@ -469,6 +470,59 @@ class Controller {
       }
     }
     return [width, height]
+  }
+
+  /**
+   * This function determine if the point 'c' is on the left-hand-side of the line p1_p2
+   */
+  private isOnLeftHandSide(p1: ICoordinate, p2: ICoordinate, c: ICoordinate) {
+    const p1_p2 = {
+      x: p2.x - p1.x,
+      y: p2.y - p1.y
+    }
+    const p1_c = {
+      x: c.x - p1.x,
+      y: c.y - p1.y
+    }
+    return p1_p2.x * p1_c.y - p1_p2.y * p1_c.x > 0
+  }
+
+  isClickOnController(e: MouseEvent, layerIndex = layerUtils.layerIndex, subLayerIdx = layerUtils.subLayerIdx): boolean {
+    const layer = document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement
+    if (layer) {
+      const rect = layer.getBoundingClientRect()
+      const c = { x: e.clientX, y: e.clientY }
+      const { x: x0, y: y0, width: W, height: H } = rect
+      const sinT = mathUtils.sin((layerUtils.getCurrLayer.styles.rotate + 360) % 90)
+      const cosT = mathUtils.cos((layerUtils.getCurrLayer.styles.rotate + 360) % 90)
+      const w = (H * sinT - W * cosT) / (sinT * sinT - cosT * cosT)
+      const h = (H * cosT - W * sinT) / (cosT * cosT - sinT * sinT)
+      const yt = y0
+      const yb = y0 + H
+      const xl = x0
+      const xr = x0 + W
+      const p1 = {
+        x: xl + h * sinT,
+        y: yt
+      }
+      const p2 = {
+        x: xr,
+        y: yt + w * sinT
+      }
+      const p3 = {
+        x: xr - h * sinT,
+        y: yb
+      }
+      const p4 = {
+        x: xl,
+        y: yb - w * sinT
+      }
+      return this.isOnLeftHandSide(p1, p2, c) &&
+        this.isOnLeftHandSide(p2, p3, c) &&
+        this.isOnLeftHandSide(p3, p4, c) &&
+        this.isOnLeftHandSide(p4, p1, c)
+    }
+    return false
   }
 
   updateImgPos(pageIndex: number, layerIndex: number, imgX: number, imgY: number) {

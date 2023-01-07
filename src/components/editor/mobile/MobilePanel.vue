@@ -37,9 +37,9 @@
           div(class="mobile-panel__btn-click-zone"
             @pointerdown="rightButtonAction"
             @touchstart="disableTouchEvent")
-      tabs(v-if="innerTabs.label" class="mobile-panel__inner-tab" theme="light"
-          :tabs="innerTabs.label" @switchTab="switchInnerTab")
     div(class="mobile-panel__bottom-section")
+      tabs(v-if="innerTabs.label" theme="light"
+          :tabs="innerTabs.label" @switchTab="switchInnerTab")
       keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
         //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
         component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
@@ -242,7 +242,7 @@ export default Vue.extend({
       return this.whiteTheme
     },
     showLeftBtn(): boolean {
-      return this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize' || this.showExtraColorPanel)
+      return this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel)
     },
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop' || this.inSelectionState
@@ -314,11 +314,6 @@ export default Vue.extend({
             panelHistory: this.panelHistory
           })
         }
-        case 'resize': {
-          return Object.assign(defaultVal, {
-            ref: 'panelResize'
-          })
-        }
         case 'brand-list': {
           const brandDefaultVal = Object.assign(defaultVal, {
             panelHistory: this.panelHistory
@@ -382,14 +377,10 @@ export default Vue.extend({
       }
     },
     leftBtnName(): string {
-      if (this.panelHistory.length > 0 && this.currActivePanel !== 'resize') {
-        return 'back-circle'
-      } else {
-        return 'close-circle'
-      }
+      return 'back-circle'
     },
     rightBtnName(): string {
-      if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop', 'resize'].includes(this.currActivePanel)) {
+      if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop'].includes(this.currActivePanel)) {
         return 'check-mobile-circle'
       } else {
         return 'close-circle'
@@ -450,11 +441,6 @@ export default Vue.extend({
                 imgControl: !this.backgroundImgControl
               })
             }
-            break
-          }
-
-          case 'resize': {
-            (this.$refs.panelResize as any).applySelectedFormat()
             break
           }
 
@@ -546,9 +532,6 @@ export default Vue.extend({
     },
     maxHeightPx() {
       return (this.$el.parentElement as HTMLElement).clientHeight
-    },
-    getMaxHeightPx(): number {
-      return parseFloat((this.$el as HTMLElement).style.maxHeight.split('px')[0])
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
       if (this.fixSize) {
@@ -661,10 +644,6 @@ export default Vue.extend({
     overflow-y: scroll;
     overflow-x: hidden;
     @include no-scrollbar;
-  }
-
-  &__inner-tab {
-    margin: 15px 0 14px 0;
   }
 
   &__title {

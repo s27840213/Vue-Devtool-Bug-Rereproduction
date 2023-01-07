@@ -20,6 +20,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 a {
   color: inherit;
+  text-decoration: unset;
   cursor: pointer;
 }
 </style>

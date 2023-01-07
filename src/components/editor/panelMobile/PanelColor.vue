@@ -40,6 +40,7 @@ import frameUtils from '@/utils/frameUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import textBgUtils from '@/utils/textBgUtils'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default Vue.extend({
   data() {
@@ -201,7 +202,11 @@ export default Vue.extend({
 
         case ColorEventType.photoShadow: {
           const { styles: { shadow: { currentEffect } } } = layerUtils.getCurrConfig as IImage
-          imageShadowUtils.setEffect(currentEffect, { color: newColor })
+          if (currentEffect === ShadowEffectType.frame) {
+            imageShadowUtils.setEffect(currentEffect, { frameColor: newColor })
+          } else {
+            imageShadowUtils.setEffect(currentEffect, { color: newColor })
+          }
           break
         }
       }

@@ -9,7 +9,7 @@
           div(class="content__editor")
             div(v-if="!inBgRemoveMode" class="header-container")
               editor-header
-            div(v-if="isAdmin" class="admin-options")
+            div(v-if="isAdmin && enableAdminView" class="admin-options")
               div(class="admin-options__sticky-container"
                   :style="stickyTopPos")
                 div(class="flex flex-column mr-10")
@@ -67,6 +67,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import pageUtils from '@/utils/pageUtils'
 import ComponentLog from '@/components/componentLog/ComponentLog.vue'
 import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
+import unitUtils from '@/utils/unitUtils'
 
 export default Vue.extend({
   name: 'DesktopEditor',
@@ -139,7 +140,8 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      enableComponentLog: 'getEnalbleComponentLog'
+      enableComponentLog: 'getEnalbleComponentLog',
+      enableAdminView: 'user/getEnableAdminView'
     }),
     ...mapGetters('user', {
       token: 'getToken',
@@ -216,8 +218,10 @@ export default Vue.extend({
     // load size from query for new design
     const newDesignWidth = parseInt(this.$route.query.width as string)
     const newDesignHeight = parseInt(this.$route.query.height as string)
+    const newDesignUnit = (this.$route.query.unit || 'px') as string
     if (newDesignWidth && newDesignHeight) {
-      pageUtils.setPageSize(0, newDesignWidth, newDesignHeight)
+      const pxSize = unitUtils.convertSize(newDesignWidth, newDesignHeight, newDesignUnit, 'px')
+      pageUtils.setPageSize(0, pxSize.width, pxSize.height, newDesignWidth, newDesignHeight, newDesignUnit)
       pageUtils.fitPage()
     }
   },

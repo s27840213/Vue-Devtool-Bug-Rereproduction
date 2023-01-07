@@ -58,9 +58,9 @@ div(class="overflow-container"
       nu-layer(
         v-for="(layer,index) in config.layers"
         :key="layer.id"
-        :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
         :data-index="`${index}`"
         :data-pindex="`${pageIndex}`"
+        :snapUtils="snapUtils"
         :layerIndex="index"
         :pageIndex="pageIndex"
         :config="layer"
@@ -77,8 +77,18 @@ div(class="overflow-container"
         :uploadId="uploadId"
         :handleId="handleId"
         :uploadShadowImgs="uploadShadowImgs"
-        :isPagePreview="true"
-        :forceRender="forceRender")
+        :isPagePreview="isPagePreview"
+        :forceRender="forceRender"
+        :lazyLoadTarget="lazyLoadTarget"
+        v-on="$listeners")
+      div(v-if="this.userId === 'backendRendering' && (this.bleed || this.trim)" class="bleed-line" :style="bleedLineStyles")
+      div(v-if="this.userId === 'backendRendering' && this.trim" class="trim")
+        div(class="trim__tl" :style="trimStyles.tl")
+        div(class="trim__tr" :style="trimStyles.tr")
+        div(class="trim__bl" :style="trimStyles.bl")
+        div(class="trim__br" :style="trimStyles.br")
+    template(v-else)
+      div(class='pages-loading')
 </template>
 
 <script lang="ts">
@@ -107,6 +117,7 @@ export default Vue.extend({
     LazyLoad
   },
   props: {
+    snapUtils: Object,
     config: {
       type: Object,
       required: true
@@ -135,13 +146,9 @@ export default Vue.extend({
       default: false,
       type: Boolean
     },
-    layerLazyLoad: {
-      default: false,
-      type: Boolean
-    },
     lazyLoadTarget: {
       type: String,
-      default: '.mobile-editor__page-preview'
+      default: '.editor-view'
     }
   },
   data() {
@@ -161,7 +168,7 @@ export default Vue.extend({
       isShowPagePanel: 'page/getShowPagePanel',
       currSelectedPageIndex: 'getCurrSelectedPageIndex'
     }),
-    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'bleed', 'trim']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     isHandleShadow(): boolean {
       return this.isProcessImgShadow || this.isUploadImgShadow
@@ -191,6 +198,56 @@ export default Vue.extend({
     },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
+    },
+    bleedLineStyles(): {[key: string]: string} {
+      // const borderSize = { top: 1, bottom: 1 }
+      // if (this.isDetailPage && this.pages.length > 1) {
+      //   if (this.pageIndex === 0) {
+      //     borderSize.bottom = 0
+      //   } else if (this.pageIndex === this.pagesLength - 1) {
+      //     borderSize.top = 0
+      //   } else {
+      //     borderSize.bottom = 0
+      //     borderSize.top = 0
+      //   }
+      // }
+
+      return {
+        top: this.config.bleeds.top * this.contentScaleRatio + 'px',
+        bottom: this.config.bleeds.bottom * this.contentScaleRatio + 'px',
+        left: this.config.bleeds.left * this.contentScaleRatio + 'px',
+        right: this.config.bleeds.right * this.contentScaleRatio + 'px'
+        // borderTop: borderSize.top + 'px solid white',
+        // borderBottom: borderSize.bottom + 'px solid white'
+      }
+    },
+    trimStyles(): {[key: string]: {[key: string]: string}} {
+      return {
+        tl: {
+          top: '-1px',
+          bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio - 1}px`,
+          left: '-1px',
+          right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio - 1}px`
+        },
+        tr: {
+          top: '-1px',
+          bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio - 1}px`,
+          left: `${(this.config.width - this.config.bleeds.right) * this.contentScaleRatio - 1}px`,
+          right: '-1px'
+        },
+        bl: {
+          top: `${(this.config.height - this.config.bleeds.bottom) * this.contentScaleRatio - 1}px`,
+          bottom: '-1px',
+          left: '-1px',
+          right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio - 1}px`
+        },
+        br: {
+          top: `${(this.config.height - this.config.bleeds.bottom) * this.contentScaleRatio - 1}px`,
+          bottom: '-1px',
+          left: `${(this.config.width - this.config.bleeds.right) * this.contentScaleRatio - 1}px`,
+          right: '-1px'
+        }
+      }
     }
   },
   mounted() {
@@ -296,5 +353,25 @@ export default Vue.extend({
   width: 100%;
   height: 100%;
   background-color: setColor(gray-4);
+}
+
+.bleed-line {
+  pointer-events: none;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  box-sizing: border-box;
+  border: 1px solid white
+}
+
+.trim {
+  pointer-events: none;
+  >div {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  box-sizing: border-box;
+  border: 1px solid setColor(gray-2)
+  }
 }
 </style>
