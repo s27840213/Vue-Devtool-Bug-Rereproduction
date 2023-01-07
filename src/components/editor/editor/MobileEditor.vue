@@ -219,7 +219,12 @@ export default Vue.extend({
       fetchBrands: 'brandkit/fetchBrands'
     }),
     switchTab(panelType: string, props?: IFooterTabProps) {
-      if (this.currActivePanel === panelType || panelType === 'none') {
+      // Switch between color and text-color panel without close panel
+      if (this.currActivePanel === panelType && panelType === 'color' &&
+        props?.currColorEvent && this.currColorEvent !== props.currColorEvent) {
+        this.currColorEvent = props.currColorEvent
+      // Close panel if re-click
+      } else if (this.currActivePanel === panelType || panelType === 'none') {
         editorUtils.setShowMobilePanel(false)
         editorUtils.setInMultiSelectionMode(false)
       } else {
