@@ -406,7 +406,7 @@ export default Vue.extend({
         this.getTagContent({ keyword })
       }
     },
-    handleCategorySearch(keyword: string, locale = '') {
+    async handleCategorySearch(keyword: string, locale = '') {
       this.resetSearch()
       if (keyword) {
         if (keyword === `${this.$t('NN0024')}`) {

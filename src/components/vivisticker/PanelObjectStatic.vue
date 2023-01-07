@@ -311,7 +311,7 @@ export default Vue.extend({
         }
       }
     },
-    handleSearch(keyword: string) {
+    async handleSearch(keyword: string) {
       if (this.showFav) {
         this.searchTagInFavoritesCategory(keyword)
       } else {
@@ -321,7 +321,7 @@ export default Vue.extend({
         }
       }
     },
-    handleCategorySearch(keyword: string, locale = '') {
+    async handleCategorySearch(keyword: string, locale = '') {
       if (this.showFav) {
         this.searchFavorites(keyword)
         vivistickerUtils.setIsInCategory('object', true)
