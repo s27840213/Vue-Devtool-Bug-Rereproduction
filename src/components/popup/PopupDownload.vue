@@ -223,16 +223,33 @@ export default Vue.extend({
       ...prevSubmission
     } = JSON.parse(localStorage.getItem(submission) || '{}')
 
-    const defaultOptions = DownloadUtil.getTypeAttrs(selectedTypeVal || 'jpg')
-    Object.keys(defaultOptions).forEach(key => {
-      defaultOptions[key] = (key in prevSubmission ? prevSubmission : defaultOptions)[key]
-    })
+    const typeOptions = [
+      { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
+      { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` },
+      { value: 'pdf_standard', name: `${this.$t('NN0770')}`, desc: `${this.$t('NN0772')}` },
+      { value: 'pdf_print', name: `${this.$t('NN0771')}`, desc: `${this.$t('NN0773')}`, tag: 'pro' }
+      // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
+      // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
+      // { id: 'gif', name: 'GIF', desc: '短片' }
+    ] as ITypeOption[]
+
+    let defaultSelectedTypeVal = 'jpg'
+    let defaultOptions = DownloadUtil.getTypeAttrs(defaultSelectedTypeVal)
+
+    // apply saved options if exist
+    if (typeOptions.map(v => v.value).includes(selectedTypeVal)) {
+      defaultSelectedTypeVal = selectedTypeVal
+      defaultOptions = DownloadUtil.getTypeAttrs(selectedTypeVal)
+      Object.keys(defaultOptions).forEach(key => {
+        defaultOptions[key] = (key in prevSubmission ? prevSubmission : defaultOptions)[key]
+      })
+    }
 
     const prevInfo = {
       saveSubmission: true,
       // saveSubmission: !!selectedTypeVal,
       selected: defaultOptions,
-      selectedTypeVal: selectedTypeVal || 'jpg',
+      selectedTypeVal: defaultSelectedTypeVal,
       rangeType,
       pageRange: rangeType === 'spec' ? pageRange : [],
       selectedDev
@@ -260,15 +277,7 @@ export default Vue.extend({
         noLimit: false,
         height: 1500
       },
-      typeOptions: [
-        { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
-        { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` },
-        { value: 'pdf_standard', name: `${this.$t('NN0770')}`, desc: `${this.$t('NN0772')}` },
-        { value: 'pdf_print', name: `${this.$t('NN0771')}`, desc: `${this.$t('NN0773')}`, tag: 'pro' }
-        // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
-        // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
-        // { id: 'gif', name: 'GIF', desc: '短片' }
-      ] as ITypeOption[],
+      typeOptions,
       devs: [
         { value: 1, label: 'dev0' },
         { value: 2, label: 'dev1' },
