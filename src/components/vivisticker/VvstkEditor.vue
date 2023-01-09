@@ -2,7 +2,7 @@
   div(class="vvstk-editor" :style="copyingStyles()")
     div(class="vvstk-editor__pseudo-page" :style="styles('page')")
       div(class="vvstk-editor__scale-container" :style="styles('scale')")
-        page-content(id="vvstk-editor" :config="config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio")
+        page-content(id="vvstk-editor" :config="config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
         div(class="page-control" :style="styles('control')")
           template(v-for="(layer, index) in config.layers")
             nu-controller(v-if="layer.type !== 'image' || !layer.imgControl"
@@ -36,13 +36,15 @@ export default Vue.extend({
   data() {
     return {
       pageIndex: 0,
-      snapUtils: new SnapUtils(0),
       closestSnaplines: {
         v: [] as Array<number>,
         h: [] as Array<number>
       },
       imageUtils
     }
+  },
+  created() {
+    this.pagesState[this.pageIndex].modules.snapUtils.pageIndex = this.pageIndex
   },
   computed: {
     ...mapGetters({
@@ -51,7 +53,7 @@ export default Vue.extend({
       currActivePageIndex: 'getCurrActivePageIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
-      pages: 'getPages',
+      pagesState: 'getPagesState',
       getLayer: 'getLayer',
       editorBg: 'vivisticker/getEditorBg',
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
@@ -59,7 +61,10 @@ export default Vue.extend({
       isDuringCopy: 'vivisticker/getIsDuringCopy'
     }),
     config(): IPage {
-      return this.pages[this.pageIndex]
+      return this.pagesState[this.pageIndex].config
+    },
+    snapUtils(): SnapUtils {
+      return this.pagesState[this.pageIndex].modules.snapUtils
     },
     getCurrLayer(): ILayer {
       return generalUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))

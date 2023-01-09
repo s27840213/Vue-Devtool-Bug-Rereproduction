@@ -10,11 +10,12 @@ div(class="overflow-container"
         @dragenter.prevent
         @contextmenu.prevent
         @click.right.stop="onRightClick"
-        @mousedown.left.stop="pageClickHandler()"
         @dblclick="pageDblClickHandler()"
         @mouseover="togglePageHighlighter(true)"
         @mouseout="togglePageHighlighter(false)")
-      nu-bg-image(v-if="!noBg"
+      div(v-if="noBg" class="page-content__pseudo-bg"
+        @mousedown.left.stop="pageClickHandler()")
+      nu-bg-image(v-else
         :image="this.config.backgroundImage"
         :pageIndex="pageIndex"
         :color="this.config.backgroundColor"
@@ -345,6 +346,13 @@ export default Vue.extend({
   position: absolute;
   box-sizing: border-box;
   background-repeat: no-repeat;
+  &__pseudo-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .pages-loading {
