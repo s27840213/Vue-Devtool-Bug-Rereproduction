@@ -141,7 +141,6 @@ export default Vue.extend({
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust },
         ...this.genearlLayerTabs
       ]
     },
