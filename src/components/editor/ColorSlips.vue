@@ -1,12 +1,12 @@
 <template lang="pug">
   div(class="color-panel"
-      :class="[whiteTheme ? 'bg-white': 'bg-gray-1-5']"
+      :style="bgStyle"
       v-click-outside="vcoConfig"
       ref="colorPanel")
     img(v-if="showPanelBtn" class="color-panel__btn"
       :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
       @click="closePanel()")
-    div(class="color-panel__scroll" :style="noPadding ? {padding:0} : {}")
+    div(class="color-panel__scroll" :class="{'p-0': noPadding}")
       //- Recently colors
       div(class="color-panel__colors"
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
@@ -18,12 +18,11 @@
             span {{$t('NN0679')}}
           span(v-if="!showAllRecentlyColor" class="btn-LG" @click="moreRecently()") {{$t('NN0082')}}
         div
-          div(class="color-panel__add-color pointer"
-            @click="openColorPanel($event)")
-          div(v-for="color in recentlyColors"
-            class="color-panel__color"
-            :style="colorStyles(color)"
-            @click="handleColorEvent(color)")
+          color-btn(color="add" :active="openColorPicker"
+                    @click="openColorPanel($event)")
+          color-btn(v-for="color in recentlyColors" :color="color" :key="color"
+                    :active="color === selectedColor"
+                    @click="handleColorEvent(color)")
       template(v-if="!showAllRecentlyColor")
         template(v-if="isBrandkitAvailable")
           //- Brandkit select
@@ -43,30 +42,27 @@
             div(class="text-left mb-5")
               span {{getDisplayedPaletteName(palette)}}
             div
-              div(v-for="color in palette.colors"
-                class="color-panel__color"
-                :style="colorStyles(color.color)"
-                @click="handleColorEvent(color.color)")
+              color-btn(v-for="color in palette.colors" :color="color.color"
+                        :active="color.color === selectedColor"
+                        @click="handleColorEvent(color.color)")
         //- Document colors
         div(class="color-panel__colors"
             :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
           div(class="text-left mb-5")
             span {{$t('NN0091')}}
           div
-            div(v-for="color in documentColors"
-              class="color-panel__color"
-              :style="colorStyles(color)"
-              @click="handleColorEvent(color)")
+            color-btn(v-for="color in documentColors" :color="color" :key="color"
+                      :active="color === selectedColor"
+                      @click="handleColorEvent(color)")
         //- Preset Colors
         div(class="color-panel__colors"
             :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
           div(class="text-left mb-5")
             span {{$t('NN0089')}}
           div
-            div(v-for="color in defaultColors"
-              class="color-panel__color"
-              :style="colorStyles(color)"
-              @click="handleColorEvent(color)")
+            color-btn(v-for="color in defaultColors" :color="color" :key="color"
+                      :active="color === selectedColor"
+                      @click="handleColorEvent(color)")
             img(v-if="mode==='PanelBG'"
               src="@/assets/img/svg/transparent.svg"
               width="100%" height="100%"
@@ -81,27 +77,28 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { PropType } from 'vue'
 import vClickOutside from 'v-click-outside'
-import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
-import colorUtils from '@/utils/colorUtils'
+import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
+import colorUtils from '@/utils/colorUtils'
 import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
-import { LayerType, SidebarPanelType } from '@/store/types'
+import { SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   name: 'ColorSlips',
   props: {
     // Defind some style or logic difference.
-    // Valid value: FunctionPanel, PanelBG, PanelColor
     mode: {
-      type: String,
+      type: String as PropType<'FunctionPanel' | 'PanelBG' | 'PanelColor'>,
       required: true
     },
     /**
@@ -110,11 +107,16 @@ export default Vue.extend({
     allRecentlyControl: {
       type: Boolean,
       required: false
+    },
+    selectedColor: {
+      type: String,
+      default: ''
     }
   },
   components: {
     ColorPicker,
-    BrandSelector
+    BrandSelector,
+    ColorBtn
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -174,14 +176,15 @@ export default Vue.extend({
     isColorPanelHandling(): boolean {
       return this.isBrandkitAvailable && (this.currPanel !== SidebarPanelType.brand || this.selectedTab !== 'color')
     },
-    isShape(): boolean {
-      return layerUtils.getCurrConfig.type === LayerType.shape
-    },
-    isFrame(): boolean {
-      return layerUtils.getCurrConfig.type === LayerType.frame
-    },
     isText(): boolean {
       return this.currSelectedInfo.types.has('text') && this.currSelectedInfo.layers.length === 1
+    },
+    bgStyle(): Record<string, string> {
+      return this.mode === 'FunctionPanel' ? {
+        background: '#2C2F43'// gray-1-5
+      } : {
+        background: 'transparent'
+      }
     },
     whiteTheme(): boolean {
       return ['PanelColor'].includes(this.mode)
@@ -229,11 +232,6 @@ export default Vue.extend({
     handleOpenSettings() {
       this.setSettingsOpen(true)
     },
-    colorStyles(color: string) {
-      return {
-        backgroundColor: color
-      }
-    },
     getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {
       return brandkitUtils.getDisplayedPaletteName(colorPalette)
     },
@@ -274,23 +272,18 @@ export default Vue.extend({
       this.openColorPicker = false
     },
     clickOutside(): void {
-      const sel = window.getSelection()
-      if (sel && sel.rangeCount) {
-        const target = sel?.getRangeAt(0).startContainer
-        if (target && target instanceof HTMLElement && target.classList.contains('input-color')) {
-          return
-        }
-      }
       this.closeColorModal()
-      this.$emit('toggleColorPanel', false)
+      this.closePanel()
     },
     middleware(event: MouseEvent): boolean {
-      return this.mode === 'PanelBG' ? false
-        : this.isShape || this.isFrame
-          ? (event.target as HTMLElement).className !== 'shape-setting__color' : true
+      const target = event.target as HTMLElement
+      return this.mode === 'PanelBG' ? false // Never close in PanelBG
+        // Don't close when selecting color target
+        : !(target.matches('.function-panel .color-btn *') || // Object, BG, text effect color
+        target.matches('.function-panel .text-setting__color *')) // Text color
     },
     closePanel(): void {
-      this.$emit('toggleColorPanel', false)
+      editorUtils.toggleColorSlips(false)
     },
     openColorPanel(event: MouseEvent) {
       if (generalUtils.isTouchDevice()) {
@@ -340,10 +333,15 @@ export default Vue.extend({
   box-sizing: border-box;
   filter: drop-shadow(0px -1px 5px setColor(white, 0.2));
   &__scroll {
+    .mobile-panel & { // only for mobile editor
+      @include no-scrollbar;
+    }
     @include hover-scrollbar(dark);
     box-sizing: border-box;
     height: 100%;
-    padding: 20px 4px 20px 14px; // padding-right: 14 - 10(scrollbar width)
+    &:not(.p-0) {
+      padding: 20px 4px 20px 14px; // padding-right: 14 - 10(scrollbar width)
+    }
     > div + div {
       margin-top: 8px;
     }
@@ -377,24 +375,6 @@ export default Vue.extend({
       justify-content: center;
       align-items: center;
     }
-  }
-
-  &__add-color {
-    width: 100%;
-    // height: 100%;
-    padding-top: 100%;
-    background-image: url("~@/assets/img/svg/addColor.svg");
-    background-size: cover;
-    box-shadow: 0px 1px 4px setColor(gray-1-5, 0.2);
-  }
-
-  &__color {
-    width: 100%;
-    padding-top: calc(100% - 2px);
-    border-radius: 4px;
-    border: 1px solid setColor(gray-0, 0.2);
-    box-sizing: border-box;
-    cursor: pointer;
   }
 
   &__color-picker {
