@@ -71,6 +71,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import pageUtils from '@/utils/pageUtils'
 import generalUtils from '@/utils/generalUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import groupUtils from '@/utils/groupUtils'
 
 export default Vue.extend({
   components: {
@@ -214,14 +215,19 @@ export default Vue.extend({
     ]),
     ...mapMutations({
       _setBgColor: 'SET_backgroundColor',
+      setCurrActivePageIndex: 'SET_currActivePageIndex',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag'
     }),
     setBgColor(color: string) {
       if (this.currentPageBackgroundLocked) {
         return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
+      if (pageUtils.currFocusPageIndex !== pageUtils.addAssetTargetPageIndex) {
+        groupUtils.deselect()
+        this.setCurrActivePageIndex(pageUtils.addAssetTargetPageIndex)
+      }
       this._setBgColor({
-        pageIndex: pageUtils.currFocusPageIndex,
+        pageIndex: pageUtils.addAssetTargetPageIndex,
         color: color
       })
 
