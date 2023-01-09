@@ -158,16 +158,23 @@ class ResizeUtils {
   }
 
   /**
-   * Resize page and update bleeds.
+   * Resize page and update bleeds. set page to px size if any of physical format (physicalWidth, physicalHeight, unit) unspecified.
    * @param pageIndex Target page index
    * @param page Target page
    * @param format New size without bleeds
+   * @param format.width New page width
+   * @param format.height New page height
+   * @param format.physicalWidth New psysical width, will be set to width if any of physical format unspecified
+   * @param format.physicalHeight New psysical height, will be set to height if any of physical format unspecified
+   * @param format.unit Unit of new size, will be set to px if any of physical format unspecified
    */
   resizePage(pageIndex: number, page: IPage, format: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
     // set physical size to px size if not exist
-    format.physicalWidth ||= format.width
-    format.physicalHeight ||= format.height
-    format.unit ||= 'px'
+    if (!(format.physicalWidth && format.physicalHeight && format.unit)) {
+      format.physicalWidth = format.width
+      format.physicalHeight = format.height
+      format.unit = 'px'
+    }
 
     const noBleed = { top: 0, bottom: 0, left: 0, right: 0 } as IBleed
     let bleeds = noBleed
