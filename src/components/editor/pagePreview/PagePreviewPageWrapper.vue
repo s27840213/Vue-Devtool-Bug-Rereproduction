@@ -22,7 +22,7 @@
         page-content(
           class="click-disabled"
           :style="contentScaleStyles()"
-          :config="config"
+          :config="this.configWithBleed()"
           :pageIndex="index"
           :contentScaleRatio="scaleRatio()"
           :handleSequentially="true"
@@ -140,6 +140,13 @@ export default Vue.extend({
       _setIsDragged: 'page/SET_IsDragged',
       _setIsShowPagePreview: 'page/SET_isShowPagePreview'
     }),
+    configWithBleed() {
+      if (!this.config.isEnableBleed) return this.config
+      return {
+        ...this.config,
+        ...pageUtils.getPageSizeWithBleeds(this.config)
+      }
+    },
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen
     },
@@ -243,10 +250,10 @@ export default Vue.extend({
     },
     // computed -> methods
     pageWidth(): number {
-      return this.config.width
+      return this.configWithBleed().width
     },
     pageHeight(): number {
-      return this.config.height
+      return this.configWithBleed().height
     },
     scaleRatio(): number {
       return this.itemSize ? this.itemSize / this.pageWidth() : this.contentWidth / this.pageWidth()
