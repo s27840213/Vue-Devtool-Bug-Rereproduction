@@ -102,12 +102,6 @@ class ImageUtils {
           return `https://template.vivipic.com/admin/${userId}/asset/logo/${brandId}/${assetId}/${size}?origin=true`
         }
       case 'logo-private': {
-        // if ((size as string).includes('ext')) {
-        //   return `https://template.vivipic.com/pdf/${userId}/asset/logo/${brandId}/${assetId}/${size}?token=${store.getters['user/getToken']}`
-        // } else {
-        //   const editorLogo = store.getters['brandkit/getEditorViewLogos']
-        //   return editorLogo(assetId) ? editorLogo(assetId)[size as string] + '&origin=true' : ''
-        // }
         const editorLogo = store.getters['brandkit/getEditorViewLogos']
         return editorLogo(assetId) ? editorLogo(assetId)[size as string] + '&origin=true' : ''
       }
@@ -116,8 +110,7 @@ class ImageUtils {
       case 'pexels':
         return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.jpeg?auto=compress&cs=tinysrgb&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
       case 'background':
-
-        return `https://template.vivipic.com/background/${assetId}/${size || 'full'}?origin=true` + (ver ? `&ver=${ver}` : '')
+        return `https://template.vivipic.com/background/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']}`
       case 'frame':
         return require('@/assets/img/svg/frame.svg')
       case 'shadow-private': {
@@ -130,7 +123,7 @@ class ImageUtils {
         return ''
       }
       case 'svg':
-        return `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true` + (ver ? `&ver=${ver}` : '')
+        return `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']}`
       default:
         return ''
     }
