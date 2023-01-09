@@ -109,7 +109,7 @@ export default Vue.extend({
       return (['tappay', 'tcloud'].includes(his.payType) && his.url !== '') || his.payType === 'stripe'
     },
     async pdf(index: number, his: type.IBillingHistory) {
-      if (his.payType === 'tappay') {
+      if (['tappay', 'tcloud'].includes(his.payType)) {
         location.href = his.url
         return
       }
