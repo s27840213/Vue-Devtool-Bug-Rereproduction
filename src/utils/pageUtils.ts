@@ -215,6 +215,34 @@ class PageUtils {
       newPage,
       pos
     })
+
+    // remove top and bottom bleeds for email marketing design
+    if (this.isDetailPage) {
+      if (pos !== 0) {
+        this.setBleeds(pos, { ...newPage.physicalBleeds, top: 0, ...(pos !== this.pageNum - 1 && { bottom: 0 }) })
+        this.setBleeds(pos - 1, { ...this.getPage(pos - 1).physicalBleeds, bottom: 0 })
+      } else if (this.pageNum > 1) {
+        this.setBleeds(pos, { ...newPage.physicalBleeds, top: this.getPage(this.pageNum - 1).physicalBleeds.bottom, bottom: 0 })
+        this.setBleeds(1, { ...this.getPage(1).physicalBleeds, top: 0 })
+      }
+    }
+  }
+
+  deletePage(pageIndex: number) {
+    const page = this.getPage(pageIndex)
+    store.commit('DELETE_page', pageIndex)
+
+    // add top and bottom bleeds for email marketing design
+    if (this.isDetailPage) {
+      if (this.pageNum === 1) {
+        pageUtils.setBleeds(0, {
+          ...page.physicalBleeds,
+          top: pageIndex === 0 ? page.physicalBleeds.top : this.getPage(0).physicalBleeds.top,
+          bottom: pageIndex === 1 ? page.physicalBleeds.bottom : this.getPage(0).physicalBleeds.bottom
+        })
+      } else if (pageIndex === 0) pageUtils.setBleeds(0, page.physicalBleeds)
+      else if (pageIndex === this.pageNum) pageUtils.setBleeds(this.pageNum - 1, page.physicalBleeds)
+    }
   }
 
   setPages(pages = [this.newPage({})]) {

@@ -293,7 +293,6 @@ export default Vue.extend({
       isProcessingShadow: 'shadow/isProcessing',
       contentScaleRatio: 'getContentScaleRatio',
       isAdmin: 'user/isAdmin',
-      pagesLength: 'getPagesLength',
       enableAdminView: 'user/getEnableAdminView',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
@@ -401,8 +400,6 @@ export default Vue.extend({
       ADD_newLayers: 'ADD_newLayers',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setDropdown: 'popup/SET_STATE',
-      _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page',
       setPanelType: 'SET_currFunctionPanelType',
       setSidebarType: 'SET_currSidebarPanelType',
       setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
@@ -536,13 +533,6 @@ export default Vue.extend({
         physicalBleeds: this.pageState.config.physicalBleeds,
         unit: this.pageState.config.unit
       }), this.pageIndex + 1)
-
-      // remove top and bottom bleeds for email marketing design
-      if (this.isDetailPage) {
-        pageUtils.setBleeds(this.pageIndex + 1, { ...this.config.physicalBleeds, top: 0 })
-        pageUtils.setBleeds(this.pageIndex, { ...this.config.physicalBleeds, bottom: 0 })
-      }
-
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })
       StepsUtils.record()
@@ -554,20 +544,7 @@ export default Vue.extend({
       } else {
         this.setCurrActivePageIndex(this.pageIndex)
       }
-      this._deletePage(this.pageIndex)
-
-      // add top and bottom bleeds for email marketing design
-      if (this.isDetailPage) {
-        if (this.pages.length === 1) {
-          pageUtils.setBleeds(0, {
-            ...this.config.physicalBleeds,
-            top: this.pageIndex === 0 ? this.config.physicalBleeds.top : this.getPage(0).physicalBleeds.top,
-            bottom: this.pageIndex === 1 ? this.config.physicalBleeds.bottom : this.getPage(0).physicalBleeds.bottom
-          })
-        } else if (this.pageIndex === 0) pageUtils.setBleeds(0, this.config.physicalBleeds)
-        else if (this.pageIndex === this.pages.length) pageUtils.setBleeds(this.pages.length - 1, this.config.physicalBleeds)
-      }
-
+      pageUtils.deletePage(this.pageIndex)
       StepsUtils.record()
     },
     duplicatePage() {
@@ -588,14 +565,6 @@ export default Vue.extend({
       page.designId = ''
       page.id = generalUtils.generateRandomString(8)
       pageUtils.addPageToPos(page, this.pageIndex + 1)
-
-      // remove top and bottom bleeds for email marketing design
-      // TODO: resize bleeds before copy
-      if (this.isDetailPage) {
-        pageUtils.setBleeds(this.pageIndex + 1, { ...page.physicalBleeds, top: 0 })
-        pageUtils.setBleeds(this.pageIndex, { ...this.config.physicalBleeds, bottom: 0 })
-      }
-
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })
       StepsUtils.record()

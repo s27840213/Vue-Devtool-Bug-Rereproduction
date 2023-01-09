@@ -313,8 +313,6 @@ export default Vue.extend({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
       setDropdown: 'popup/SET_STATE',
-      _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page',
       updatePageProps: 'UPDATE_pageProps'
     }),
     ...mapActions({
