@@ -36,7 +36,7 @@ export default class SubControllerUtils {
   onPointerdown(e: PointerEvent) {
     if (this.primaryLayer.type === 'tmp') {
       if (generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || store.getters['mobileEditor/getInMultiSelectionMode']) {
-        groupUtils.deselectTargetLayer(this.layerIndex)
+        groupUtils.deselectTargetLayer(this.subLayerIdx)
       }
       return
     }
