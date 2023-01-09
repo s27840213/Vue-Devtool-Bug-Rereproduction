@@ -1,6 +1,6 @@
 <template lang="pug">
-  div(class="panel-bg")
-    tabs(:tabs="[$tc('NN0002', 2),$t('NN0017')]" @switchTab="switchTab")
+  div(class="panel-bg" :class="{'panel-flash': panelFlash}" @animationend="panelFlash = false")
+    tabs(:tabs="[$tc('NN0002', 2),$t('NN0017')]" v-model="tabIndex")
     //- Search bar
     search-bar(v-if="showImageTab" class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0004', 1)})"
@@ -9,6 +9,7 @@
       @search="handleSearch")
     //- BG color tab content
     color-slips(v-show="showColorTab" class="panel-bg__color-sets" mode="PanelBG"
+                :selectedColor="currentPageBackgroundColor"
                 @selectColor="setBgColor"
                 @selectColorEnd="recordChange"
                 @openColorPicker="openColorPicker")
@@ -65,9 +66,11 @@ import Tabs from '@/components/Tabs.vue'
 import Url from '@/components/global/Url.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import { IPage } from '@/interfaces/page'
 import stepsUtils from '@/utils/stepsUtils'
 import pageUtils from '@/utils/pageUtils'
 import generalUtils from '@/utils/generalUtils'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 
 export default Vue.extend({
   components: {
@@ -85,7 +88,8 @@ export default Vue.extend({
         mainContent: 0,
         searchResult: 0
       },
-      currActiveTabIndex: 0
+      tabIndex: 0,
+      panelFlash: false
     }
   },
   computed: {
@@ -145,9 +149,16 @@ export default Vue.extend({
         key: 'mainContent'
       }]
     },
+    currPage(): IPage {
+      return this.getPage(pageUtils.currFocusPageIndex)
+    },
     currentPageBackgroundLocked(): boolean {
-      const { backgroundImage } = this.getPage(pageUtils.currFocusPageIndex) || {}
+      const { backgroundImage } = this.currPage || {}
       return backgroundImage && backgroundImage.config.locked
+    },
+    currentPageBackgroundColor(): string {
+      if (this.currPage.backgroundImage.config?.srcObj.assetId) return ''
+      return this.currPage.backgroundColor
     },
     emptyResultMessage(): string {
       const { keyword, pending } = this
@@ -157,14 +168,21 @@ export default Vue.extend({
           target: i18n.tc('NN0004', 1)
         })}`
     },
-    showImageTab(): boolean { return this.currActiveTabIndex === 0 },
-    showColorTab(): boolean { return this.currActiveTabIndex === 1 }
+    showImageTab(): boolean { return this.tabIndex === 0 },
+    showColorTab(): boolean { return this.tabIndex === 1 }
   },
   mounted() {
     generalUtils.panelInit('bg',
       this.handleSearch,
       this.handleCategorySearch,
       this.getRecAndCate)
+    eventUtils.on(PanelEvent.switchPanelBgInnerTab, (tabIndex: number) => {
+      this.switchTab(tabIndex)
+      this.panelFlash = true
+    })
+  },
+  beforeDestroy() {
+    eventUtils.off(PanelEvent.switchPanelBgInnerTab)
   },
   activated() {
     this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
@@ -233,7 +251,7 @@ export default Vue.extend({
       this.$nextTick(() => stepsUtils.record())
     },
     switchTab(tabIndex: number) {
-      this.currActiveTabIndex = tabIndex
+      this.tabIndex = tabIndex
     },
     openColorPicker() { // @openColorPicker will only be trigger in mobile.
       this.$emit('openExtraColorModal', ColorEventType.background, MobileColorPanelType.picker)
@@ -270,8 +288,8 @@ export default Vue.extend({
   text-align: left;
   &__color-sets {
     filter: none;
-    height: calc(100% - 53px);
-    &::v-deep .color-panel__scroll {
+    height: calc(100% - 54px);
+    .panel &::v-deep .color-panel__scroll { // push scroll only in desktop
       @include push-scrollbar10;
     }
   }
@@ -297,5 +315,18 @@ export default Vue.extend({
   &::v-deep .vue-recycle-scroller__item-view:first-child {
     z-index: 1;
   }
+}
+
+@keyframes flash {
+  0%, 50%, 100% {
+    background: setColor(gray-1-5);
+  }
+  25%, 75% {
+    background: #353951;
+  }
+}
+.panel-flash {
+  animation-name: flash;
+  animation-duration: 1s;
 }
 </style>
