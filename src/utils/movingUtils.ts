@@ -1,5 +1,5 @@
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
 import Vue from 'vue'
@@ -128,7 +128,7 @@ export class MovingUtils {
     this.eventTarget = (event.target as HTMLElement)
     this.eventTarget.releasePointerCapture((event as PointerEvent).pointerId)
 
-    if (this.isTouchDevice) {
+    if (this.isTouchDevice && !this.config.locked) {
       this.isClickOnController = controlUtils.isClickOnController(event as MouseEvent)
       event.stopPropagation()
       if (!this.dblTabsFlag && this.isActive) {
@@ -318,7 +318,7 @@ export class MovingUtils {
     }
 
     this.isControlling = true
-    const updateConifgData = {} as Partial<ILayer>
+    const updateConifgData = {} as Partial<IShape | IText | IImage | IGroup>
     if (!this.isDragging) {
       updateConifgData.dragging = true
       this.component && this.component.$emit('isDragging', this.layerIndex)

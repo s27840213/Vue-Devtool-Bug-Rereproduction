@@ -630,6 +630,10 @@ class TextBg {
     this.setTextBg(effectName, { [this.currColorKey]: color })
   }
 
+  get currColor(): string {
+    return (textEffectUtils.getCurrentLayer().styles.textBg as Record<string, string>)[this.currColorKey]
+  }
+
   getEffectMainColor(effect: ITextBgEffect) {
     if (isITextBox(effect) &&
       ['square-hollow', 'rounded-hollow'].includes(effect.name)) {

@@ -1,6 +1,6 @@
 
 import store from '@/store'
-import { IShape, IText, IImage, IGroup, ITmp, IStyle, ILayer } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, IStyle, ILayer, IFrame } from '@/interfaces/layer'
 import GroupUtils from '@/utils/groupUtils'
 import mathUtils from './mathUtils'
 import { IBounding } from '@/interfaces/math'
@@ -18,7 +18,7 @@ class AlignUtils {
     return store.getters.getPage(this.currSelectedInfo.pageIndex)
   }
 
-  private getTmpAlignPos(tmpStyles: IStyle, layer: IShape | IText | IImage | IGroup | ITmp, type: string): { [key: string]: number } {
+  private getTmpAlignPos(tmpStyles: IStyle, layer: IShape | IText | IImage | IGroup | IFrame | ITmp, type: string): { [key: string]: number } {
     const bouding = mathUtils.getBounding(layer)
     const layerWidth = layer.styles.width
     const layerHeight = layer.styles.height
@@ -126,7 +126,7 @@ class AlignUtils {
       }
       // Step 4 -> align layers to target position, and then reselect to get the correct bounding rect.
 
-      this.currSelectedInfo.layers.forEach((layer: IShape | IText | IImage | IGroup | ITmp) => {
+      this.currSelectedInfo.layers.forEach((layer) => {
         Object.assign(layer.styles, this.getTmpAlignPos(tmpStyles, layer, type))
       })
       GroupUtils.reselect()
@@ -163,18 +163,18 @@ class AlignUtils {
       tmpStyles = LayerUtils.getTmpLayer().styles
     }
     const totalWidth = tmpStyles.width
-    const totalLayersWidth = this.currSelectedInfo.layers.reduce((acc: number, layer: IShape | IText | IImage | IGroup | ITmp) => {
+    const totalLayersWidth = this.currSelectedInfo.layers.reduce((acc: number, layer) => {
       return acc + layer.styles.width
     }, 0)
     const spacing = (totalWidth - totalLayersWidth) / (this.currSelectedInfo.layers.length - 1)
     // first sort the selected array accroding to x
-    this.currSelectedInfo.layers.sort((a: IShape | IText | IImage | IGroup | ITmp, b: IShape | IText | IImage | IGroup | ITmp) => a.styles.x - b.styles.x)
+    this.currSelectedInfo.layers.sort((a, b) => a.styles.x - b.styles.x)
     for (let i = 0; i < this.currSelectedInfo.layers.length; i++) {
       Object.assign(this.currSelectedInfo.layers[i].styles, {
         x: i === 0 ? 0 : this.currSelectedInfo.layers[i - 1].styles.x + this.currSelectedInfo.layers[i - 1].styles.width + spacing
       })
     }
-    this.currSelectedInfo.layers.sort((a: IShape | IText | IImage | IGroup | ITmp, b: IShape | IText | IImage | IGroup | ITmp) => a.styles.zindex - b.styles.zindex)
+    this.currSelectedInfo.layers.sort((a, b) => a.styles.zindex - b.styles.zindex)
   }
 
   distribueVr(): void {
@@ -185,18 +185,18 @@ class AlignUtils {
       tmpStyles = LayerUtils.getTmpLayer().styles
     }
     const totalHeight = tmpStyles.height
-    const totalLayersHeight = this.currSelectedInfo.layers.reduce((acc: number, layer: IShape | IText | IImage | IGroup | ITmp) => {
+    const totalLayersHeight = this.currSelectedInfo.layers.reduce((acc: number, layer) => {
       return acc + layer.styles.height
     }, 0)
     const spacing = (totalHeight - totalLayersHeight) / (this.currSelectedInfo.layers.length - 1)
     // first sort the selected array accroding to x
-    this.currSelectedInfo.layers.sort((a: IShape | IText | IImage | IGroup | ITmp, b: IShape | IText | IImage | IGroup | ITmp) => a.styles.y - b.styles.y)
+    this.currSelectedInfo.layers.sort((a, b) => a.styles.y - b.styles.y)
     for (let i = 0; i < this.currSelectedInfo.layers.length; i++) {
       Object.assign(this.currSelectedInfo.layers[i].styles, {
         y: i === 0 ? 0 : this.currSelectedInfo.layers[i - 1].styles.y + this.currSelectedInfo.layers[i - 1].styles.height + spacing
       })
     }
-    this.currSelectedInfo.layers.sort((a: IShape | IText | IImage | IGroup | ITmp, b: IShape | IText | IImage | IGroup | ITmp) => a.styles.zindex - b.styles.zindex)
+    this.currSelectedInfo.layers.sort((a, b) => a.styles.zindex - b.styles.zindex)
   }
 }
 

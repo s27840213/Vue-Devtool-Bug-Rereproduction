@@ -11,7 +11,7 @@ interface IMobileEditorState {
 }
 class EditorUtils {
   get mobileAllPageMode() {
-    return store.getters['mobileEditor/mobileAllPageMode']
+    return store.getters['mobileEditor/getMobileAllPageMode']
   }
 
   get currActivePanel() {
@@ -32,6 +32,14 @@ class EditorUtils {
 
   get contentScaleRatio(): number {
     return store.getters.getContentScaleRatio
+  }
+
+  get showColorSlips(): boolean {
+    return store.state.showColorSlips
+  }
+
+  toggleColorSlips(bool: boolean) {
+    store.commit('SET_STATE', { showColorSlips: bool })
   }
 
   private setState(props: Partial<IMobileEditorState>) {

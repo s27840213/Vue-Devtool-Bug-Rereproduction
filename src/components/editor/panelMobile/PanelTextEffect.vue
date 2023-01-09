@@ -52,9 +52,8 @@
         div(v-if="option.type === 'color'"
           class="panel-text-effect__color")
           div {{option.label}}
-          div(class="panel-text-effect__color-slip"
-              :style="colorParser(currentStyle[currCategory.name][option.key])"
-              @click="openColorPanel(option.key)")
+          color-btn(:color="colorParser(currentStyle[currCategory.name][option.key])"
+                  size="24px" @click="openColorPanel(option.key)")
       span(class="panel-text-effect__reset label-mid"
           @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
@@ -62,6 +61,7 @@
 <script lang="ts">
 import Vue, { PropType } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import textEffectUtils from '@/utils/textEffectUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
@@ -70,11 +70,13 @@ import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import constantData, { IEffect, IEffectCategory, IEffectOption } from '@/utils/constantData'
 import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 import textBgUtils from '@/utils/textBgUtils'
+import colorUtils from '@/utils/colorUtils'
 import _ from 'lodash'
 
 export default Vue.extend({
   components: {
-    MobileSlider
+    MobileSlider,
+    ColorBtn
   },
   props: {
     panelHistory: {
@@ -103,7 +105,7 @@ export default Vue.extend({
     currentStyle(): { shadow: ITextEffect, bg: ITextBgEffect, shape: ITextShape } {
       const { styles } = textEffectUtils.getCurrentLayer()
       return {
-        shadow: Object.assign({ name: 'none' }, styles.textEffect as ITextEffect),
+        shadow: Object.assign({ name: 'none' }, styles?.textEffect as ITextEffect),
         bg: styles.textBg as ITextBgEffect,
         shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
       }
@@ -126,9 +128,11 @@ export default Vue.extend({
     },
     openColorPanel(key: string) {
       if (this.currCategory.name === 'shadow') {
+        colorUtils.setCurrEvent(ColorEventType.textEffect)
         this.$emit('openExtraColorModal', ColorEventType.textEffect, MobileColorPanelType.palette)
         textEffectUtils.setColorKey(key)
       } else { // Text BG
+        colorUtils.setCurrEvent(ColorEventType.textBg)
         this.$emit('openExtraColorModal', ColorEventType.textBg, MobileColorPanelType.palette)
         textBgUtils.setColorKey(key)
       }
@@ -192,7 +196,7 @@ export default Vue.extend({
       }
     },
     colorParser(color: string) {
-      return { backgroundColor: textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer()) }
+      return textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer())
     }
   }
 })
@@ -295,11 +299,6 @@ export default Vue.extend({
     align-items: center;
     position: relative;
     color: setColor(gray-3);
-    &-slip {
-      height: 24px;
-      width: 32px;
-      box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.2);
-    }
   }
 
   &__reset {

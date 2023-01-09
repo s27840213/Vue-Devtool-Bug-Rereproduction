@@ -1,5 +1,6 @@
 <template lang="pug">
-  div
+  div(:style="[isImgCtrl || inFrame ? {} : {transform: `translateZ(${this.config.styles.zindex}px)`,...transformStyle}]"
+      :class="[{'click-disabled': isPagePreview}]")
     div(v-for="div in layerDivs"
         class="nu-layer" :class="!config.locked && subLayerIndex === -1 ? `nu-layer--p${pageIndex}` : ''"
         :style="layerStyles(div.noShadow, div.isTransparent)"
@@ -21,26 +22,18 @@
           nu-clipper(:config="config"
               :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
               :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
-            lazy-load(:target="lazyLoadTarget"
-                :rootMargin="'300px 0px 300px 0px'"
-                :minHeight="lazyloadSize.height"
-                :minWidth="lazyloadSize.width"
-                :threshold="[0]"
-                :handleUnrender="handleUnrender"
-                :anamationEnabled="false"
-                :forceRender="isSubLayer || forceRender")
-              component(:is="`nu-${config.type}`"
-                class="transition-none"
-                :config="config"
-                :imgControl="imgControl"
-                :contentScaleRatio="contentScaleRatio"
-                :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-                :scaleRatio="scaleRatio"
-                :isPagePreview="isPagePreview"
-                :forRender="forRender"
-                :isTransparent="div.isTransparent"
-                :noShadow="div.noShadow"
-                v-bind="$attrs")
+            component(:is="`nu-${config.type}`"
+              class="transition-none"
+              :config="config"
+              :imgControl="imgControl"
+              :contentScaleRatio="contentScaleRatio"
+              :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+              :scaleRatio="scaleRatio"
+              :isPagePreview="isPagePreview"
+              :forRender="forRender"
+              :isTransparent="div.isTransparent"
+              :noShadow="div.noShadow"
+              v-bind="$attrs")
           svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
             :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
             g(v-html="frameClipFormatter(config.clipPath)"
@@ -105,7 +98,7 @@ export default Vue.extend({
       type: Boolean,
       default: false
     },
-    isFrame: {
+    inFrame: {
       type: Boolean,
       default: false
     },
@@ -171,7 +164,8 @@ export default Vue.extend({
         styles: { [key: string]: number | boolean },
         srcObj: { type: string, assetId: string | number, userId: string },
         panelPreviewSrc: ''
-      }
+      },
+      hasHandledFrameMouseEnter: false
     }
   },
   mounted() {
@@ -223,6 +217,7 @@ export default Vue.extend({
     }
     if (this.primaryLayer && this.primaryLayer.type === LayerType.frame && this.config.type === LayerType.image) {
       body.addEventListener(generalUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+      body.addEventListener(generalUtils.isTouchDevice() ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
     }
   },
   destroyed() {
@@ -326,6 +321,21 @@ export default Vue.extend({
       } else {
         return [{ noShadow: false, isTransparent: false, main: true }]
       }
+    },
+    isOk2HandleFrameMouseEnter(): boolean {
+      if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
+        return false
+      }
+      if (layerUtils.getLayer(this.pageIndex, this.layerIndex).locked) {
+        return false
+      }
+      if (layerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
+        return false
+      }
+      if ((layerUtils.getCurrLayer as IImage).id === this.uploadId.layerId) {
+        return false
+      }
+      return layerUtils.getCurrLayer.type === LayerType.image && this.isMoving
     }
   },
   methods: {
@@ -353,7 +363,8 @@ export default Vue.extend({
           outline,
           willChange: !this.isSubLayer && this.isDragging ? 'transform' : '',
           pointerEvents,
-          clipPath
+          clipPath,
+          ...this.transformStyle
         }
       )
       switch (this.config.type) {
@@ -566,19 +577,19 @@ export default Vue.extend({
         }
       }
     },
-    onFrameMouseEnter(e: MouseEvent) {
-      if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
-        return
+    onFrameMouseMove(e: MouseEvent | PointerEvent) {
+      if (!this.hasHandledFrameMouseEnter && this.isOk2HandleFrameMouseEnter) {
+        this.hasHandledFrameMouseEnter = true
+        this.handleFrameMouseEnter(e)
       }
-      if (layerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
-        return
+    },
+    onFrameMouseEnter(e: MouseEvent | PointerEvent) {
+      if (!this.hasHandledFrameMouseEnter && this.isOk2HandleFrameMouseEnter) {
+        this.hasHandledFrameMouseEnter = true
+        this.handleFrameMouseEnter(e)
       }
-      if (layerUtils.getLayer(this.pageIndex, this.layerIndex).locked && this.currDraggedPhoto.srcObj.type === '') {
-        return
-      }
-      if ((layerUtils.getCurrLayer as IImage).id === this.uploadId.layerId) {
-        return
-      }
+    },
+    handleFrameMouseEnter(e: MouseEvent | PointerEvent) {
       e.stopPropagation()
       const currLayer = layerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
@@ -622,7 +633,8 @@ export default Vue.extend({
         body.addEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
       }
     },
-    onFrameMouseLeave(e: MouseEvent) {
+    onFrameMouseLeave(e: MouseEvent | PointerEvent) {
+      this.hasHandledFrameMouseEnter = false
       if (this.currDraggedPhoto.srcObj.type !== '') return
       if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
         return
@@ -645,6 +657,7 @@ export default Vue.extend({
       body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
     },
     onFrameMouseUp(e: MouseEvent) {
+      this.hasHandledFrameMouseEnter = false
       if (this.currDraggedPhoto.srcObj.type !== '') return
       const currLayer = layerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image) {

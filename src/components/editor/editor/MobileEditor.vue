@@ -17,7 +17,6 @@
                 @after-leave="afterLeave")
         mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
-          :currColorEvent="currColorEvent"
           @switchTab="switchTab"
           @panelHeight="setPanelHeight")
       //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
@@ -77,6 +76,9 @@ export default Vue.extend({
   },
   created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
+  },
+  beforeDestroy() {
+    eventUtils.off(PanelEvent.switchTab)
   },
   mounted() {
     /**
@@ -171,7 +173,7 @@ export default Vue.extend({
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup) => {
+      const types = groupLayer.layers.map((layer) => {
         return layer.type
       })
       return new Set(types)
@@ -219,16 +221,19 @@ export default Vue.extend({
       fetchBrands: 'brandkit/fetchBrands'
     }),
     switchTab(panelType: string, props?: IFooterTabProps) {
-      if (this.currActivePanel === panelType || panelType === 'none') {
+      // Switch between color and text-color panel without close panel
+      if (this.currActivePanel === panelType && panelType === 'color' &&
+        props?.currColorEvent && this.currColorEvent !== props.currColorEvent) {
+        this.currColorEvent = props.currColorEvent
+      // Close panel if re-click
+      } else if (this.currActivePanel === panelType || panelType === 'none') {
         editorUtils.setShowMobilePanel(false)
         editorUtils.setInMultiSelectionMode(false)
       } else {
         editorUtils.setShowMobilePanel(true)
         this.setCurrActivePanel(panelType)
-        if (props) {
-          if (panelType === 'color' && props.currColorEvent) {
-            this.currColorEvent = props.currColorEvent
-          }
+        if (panelType === 'color' && props?.currColorEvent) {
+          this.currColorEvent = props.currColorEvent
         }
       }
 
