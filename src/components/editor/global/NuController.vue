@@ -32,6 +32,30 @@ div(:layer-index="`${layerIndex}`"
         ref="body"
         @contextmenu.prevent
         @click.right.stop="onRightClick")
+        div(v-if="showTextEditor" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
+          nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
+            :style="textBodyStyle()"
+            :pageIndex="pageIndex"
+            :layerIndex="layerIndex"
+            :subLayerIndex="-1"
+            @keydown.native.37.stop
+            @keydown.native.38.stop
+            @keydown.native.39.stop
+            @keydown.native.40.stop
+            @keydown.native.ctrl.67.exact.stop.self
+            @keydown.native.meta.67.exact.stop.self
+            @keydown.native.ctrl.86.exact.stop.self
+            @keydown.native.meta.86.exact.stop.self
+            @keydown.native.ctrl.88.exact.stop.self
+            @keydown.native.meta.88.exact.stop.self
+            @keydown.native.ctrl.65.exact.stop.self
+            @keydown.native.meta.65.exact.stop.self
+            @keydown.native.ctrl.90.exact.stop.self
+            @keydown.native.meta.90.exact.stop.self
+            @keydown.native.ctrl.shift.90.exact.stop.self
+            @keydown.native.meta.shift.90.exact.stop.self
+            @update="handleTextChange"
+            @compositionend="handleTextCompositionEnd")
         div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
             class="control-point__corner-rotate scaler"
             :ref="`corner-rotate-${index}`"
@@ -47,14 +71,27 @@ div(:layer-index="`${layerIndex}`"
             @pointerdown.stop="lineEndMoveStart"
             @touchstart="disableTouchEvent")
         div(v-for="(resizer, index) in resizer(controlPoints)"
-            class="control-point__resize-bar-wrapper"
-            @pointerdown.prevent.stop="!isTouchDevice() ? resizeStart($event) : null"
-            @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
+            class="control-point__resize-bar-wrapper")
           div(class="control-point resizer"
               :key="`resizer-${index}`"
-              :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
+              :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
+              @pointerdown.prevent.stop="!isTouchDevice() ? resizeStart($event) : null"
+              @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
           div(class="control-point resizer"
-              :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
+              :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
+              @pointerdown.prevent.stop="!isTouchDevice() ? resizeStart($event) : null"
+              @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
+        div(v-if="isTouchDevice()" v-for="(resizer, index) in resizer(controlPoints, false, true)"
+            class="control-point__resize-bar-wrapper")
+          div(class="control-point resizer"
+              :key="`resizer-touch-${index}`"
+              :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
+              @pointerdown.prevent.stop="resizeStart"
+              @touchstart="disableTouchEvent")
+          div(class="control-point resizer"
+              :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))"
+              @pointerdown.prevent.stop="resizeStart"
+              @touchstart="disableTouchEvent")
         div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
             @pointerdown="moveStart")
           div(class="control-point__resize-bar control-point__move-bar"
@@ -101,30 +138,6 @@ div(:layer-index="`${layerIndex}`"
               :style='controlPointStyles()'
               @pointerdown="moveStart"
               @touchstart="disableTouchEvent")
-        div(v-if="showTextEditor" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-          nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
-            :style="textBodyStyle()"
-            :pageIndex="pageIndex"
-            :layerIndex="layerIndex"
-            :subLayerIndex="-1"
-            @keydown.native.37.stop
-            @keydown.native.38.stop
-            @keydown.native.39.stop
-            @keydown.native.40.stop
-            @keydown.native.ctrl.67.exact.stop.self
-            @keydown.native.meta.67.exact.stop.self
-            @keydown.native.ctrl.86.exact.stop.self
-            @keydown.native.meta.86.exact.stop.self
-            @keydown.native.ctrl.88.exact.stop.self
-            @keydown.native.meta.88.exact.stop.self
-            @keydown.native.ctrl.65.exact.stop.self
-            @keydown.native.meta.65.exact.stop.self
-            @keydown.native.ctrl.90.exact.stop.self
-            @keydown.native.meta.90.exact.stop.self
-            @keydown.native.ctrl.shift.90.exact.stop.self
-            @keydown.native.meta.shift.90.exact.stop.self
-            @update="handleTextChange"
-            @compositionend="handleTextCompositionEnd")
     div(v-if="isActive && isLocked() && (scaleRatio >20)"
         class="nu-controller__lock-icon"
         :style="lockIconStyles()"
@@ -461,11 +474,10 @@ export default Vue.extend({
         resizerStyle.transform += ` scaleX(${100 / this.scaleRatio})`
       }
       const scalerOffset = generalUtils.isTouchDevice() ? 36 : 20
-      const resizeBarScale = generalUtils.isTouchDevice() ? 2.5 : 1
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: isHorizon ? `${this.getLayerWidth() - scalerOffset * 100 / this.scaleRatio}px` : `${width * this.contentScaleRatio * resizeBarScale}px`,
-        height: !isHorizon ? `${this.getLayerHeight() - scalerOffset * 100 / this.scaleRatio}px` : `${height * this.contentScaleRatio * resizeBarScale}px`,
+        width: isHorizon ? `${this.getLayerWidth() - scalerOffset * 100 / this.scaleRatio}px` : `${width * this.contentScaleRatio}px`,
+        height: !isHorizon ? `${this.getLayerHeight() - scalerOffset * 100 / this.scaleRatio}px` : `${height * this.contentScaleRatio}px`,
         opacity: 0
       }
       return Object.assign(resizerStyle, HW)
@@ -483,15 +495,19 @@ export default Vue.extend({
       // resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
       const width = parseFloat(resizerStyle.width.replace('px', ''))
       const height = parseFloat(resizerStyle.height.replace('px', ''))
-      const scale = isTouchArea ? 3 : 1
+      const scale = isTouchArea ? 2 : 1
       const aspectRatio = this.isTouchDevice() ? 0.24 : 0.16
+
+      const isHorizon = width > height
+      const sizeForWidth = this.getLayerWidth() * this.contentScaleRatio - 10
+      const sizeForHeight = this.getLayerHeight() * this.contentScaleRatio - 10
 
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: width > height && tooSmall ? `${(this.getLayerWidth() * this.contentScaleRatio - 10) * scale}px`
-          : (tooSmall ? `${(this.getLayerHeight() * this.contentScaleRatio - 10) * aspectRatio * scale}px` : resizerStyle.width),
-        height: width < height && tooSmall ? `${(this.getLayerHeight() * this.contentScaleRatio - 10) * scale}px`
-          : (tooSmall ? `${(this.getLayerWidth() * this.contentScaleRatio - 10) * aspectRatio * scale}px` : resizerStyle.height)
+        width: isHorizon && tooSmall ? `${sizeForWidth * scale}px`
+          : (tooSmall ? `${sizeForHeight * aspectRatio * scale}px` : resizerStyle.width),
+        height: !isHorizon && tooSmall ? `${sizeForHeight * scale}px`
+          : (tooSmall ? `${sizeForWidth * aspectRatio * scale}px` : resizerStyle.height)
       }
       return Object.assign(resizerStyle, HW)
     },
@@ -2290,6 +2306,7 @@ export default Vue.extend({
       display: flex;
       justify-content: center;
       align-items: center;
+      pointer-events: none;
     }
   }
   &__rotater-wrapper {
