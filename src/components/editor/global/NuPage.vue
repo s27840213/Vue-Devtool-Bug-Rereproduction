@@ -623,9 +623,11 @@ export default Vue.extend({
         const minHeight = Math.max(pageUtils.MIN_SIZE, this.config.bleeds?.top ?? 0 + this.config.bleeds?.bottom ?? 0)
         const maxHeight = floor(pageUtils.MAX_AREA / this.config.width)
         const newHeight = Math.min(Math.max(Math.trunc(this.initialPageHeight + yDiff), minHeight), maxHeight)
+        const dpi = pageUtils.getPageDPI(this.pageState.config)
+        const newPhysicalHeight = unitUtils.convert(newHeight / dpi.height, 'in', this.config.unit)
         pageUtils.updatePageProps({
           height: newHeight,
-          physicalHeight: newHeight
+          physicalHeight: newPhysicalHeight
         })
       } else {
         this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
@@ -638,9 +640,11 @@ export default Vue.extend({
       this.initialPageHeight = this.pageState.config.height
       this.isResizingPage = false
       const newHeight = Math.round(this.pageState.config.height)
+      const dpi = pageUtils.getPageDPI(this.pageState.config)
+      const newPhysicalHeight = unitUtils.convert(newHeight / dpi.height, 'in', this.config.unit)
       pageUtils.updatePageProps({
         height: newHeight,
-        physicalHeight: newHeight
+        physicalHeight: newPhysicalHeight
       })
       StepsUtils.record()
       this.$nextTick(() => {

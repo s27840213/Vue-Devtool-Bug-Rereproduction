@@ -623,10 +623,10 @@ class PageUtils {
    * @param page Target page, use current focused page if undefined
    * @returns DPI of target page if target page is in physical size, otherwise 96 (default DPI)
    */
-  getPageDPI(page: IPage = this.currFocusPage): { width: number, height: number } {
+  getPageDPI(pageSize: {width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string} = this.currFocusPageSize): { width: number, height: number } {
     return {
-      width: page.width / unitUtils.convert(page.physicalWidth, page.unit, 'in'),
-      height: page.height / unitUtils.convert(page.physicalHeight, page.unit, 'in')
+      width: pageSize.width / unitUtils.convert(pageSize.physicalWidth, pageSize.unit, 'in'),
+      height: pageSize.height / unitUtils.convert(pageSize.physicalHeight, pageSize.unit, 'in')
     }
   }
 
