@@ -67,6 +67,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import vClickOutside from 'v-click-outside'
 import { mapGetters, mapMutations } from 'vuex'
 import { IPage } from '@/interfaces/page'
@@ -216,7 +217,7 @@ export default Vue.extend({
       stepsUtils.record()
     },
     handleLockedNotify() {
-      this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+      this.$notify({ group: 'copy', text: i18n.tc('NN0804') })
     },
     handleOutSide(e: Event) {
       const target = e.target as HTMLElement

@@ -1,11 +1,14 @@
 module.exports = {
     root: true,
-
+    plugins: [
+        "cypress"
+    ],
     env: {
+        "cypress/globals": true,
         node: true
     },
-
     extends: [
+        "plugin:cypress/recommended",
         'plugin:vue/essential',
         '@vue/standard',
         '@vue/typescript/recommended'
