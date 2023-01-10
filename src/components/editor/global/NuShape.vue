@@ -301,7 +301,7 @@ export default Vue.extend({
       /**
        * Check if the fetched svg.config's color array is changed,
        */
-      if (!['D', 'E'].includes(config.category)) {
+      if (!['D', 'E'].includes(config.category) && this.config.designId) {
         shape = await shapeUtils.fetchSvg(this.config)
         if (config.color && shape.color) {
           if (config.color.length > shape.color.length) {
