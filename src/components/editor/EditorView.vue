@@ -531,7 +531,11 @@ export default Vue.extend({
         /**
          * @Note if the page was focused, make it bring the highest z-index to prevent from being blocking by other page's layer
          */
-        return pageUtils.currFocusPageIndex === index ? this.pageNum + 1 : this.pageNum - index
+        if (pageUtils.currFocusPageIndex === index) return this.pageNum + 2
+
+        // if the page was hovered, make it bring the 2nd highest z-index to prevent highlighter from being blocking by other pages
+        if (pageUtils.currHoveredPageIndex === index) return this.pageNum + 1
+        return this.pageNum - index
       }
     },
     dragStartV(e: PointerEvent) {
