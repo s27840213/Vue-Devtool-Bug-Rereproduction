@@ -110,15 +110,21 @@ export default Vue.extend({
         text: `${this.$t('NN0742')}`,
         icon: 'vivisticker_mail',
         action: this.handleOpenInfo
-      }, ...this.debugMode ? [
+      }, ...vivistickerUtils.checkVersion('1.20') ? [
+        {
+          text: `${this.$t('STK0025')}`,
+          icon: 'vivisticker_global',
+          action: () => { this.handleList('subscribe') }
+        }
+      ] : [], ...this.debugMode ? [
         {
           text: 'domain 選單',
           icon: 'vivisticker_global',
           action: () => { this.handleList('domain') }
-        }, {
-          text: `${this.$t('STK0025')}`,
-          icon: 'vivisticker_global',
-          action: () => { this.handleList('subscribe') }
+        // }, {
+        //   text: `${this.$t('STK0025')}`,
+        //   icon: 'vivisticker_global',
+        //   action: () => { this.handleList('subscribe') }
         }, {
           text: 'App 事件測試',
           icon: 'vivisticker_global',
