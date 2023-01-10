@@ -10,7 +10,7 @@ import pageUtils from '@/utils/pageUtils'
 import rulerUtils from './rulerUtils'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import store from '@/store'
-import { round, isEqual } from 'lodash'
+import { round, isEqual, floor } from 'lodash'
 
 class ResizeUtils {
   scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number) {
@@ -184,27 +184,25 @@ class ResizeUtils {
       physicalBleeds = page.physicalBleeds
       // convert bleeds if unit changes
       if (format.unit !== page.unit) {
-        let dpi: { width: number, height: number }
-        if (format.unit !== 'px') {
-          dpi = {
-            width: format.width / unitUtils.convert(format.physicalWidth, format.unit, 'in'),
-            height: format.height / unitUtils.convert(format.physicalHeight, format.unit, 'in')
-          }
-        } else {
-          const pxSize = unitUtils.convertSize(page.physicalWidth, page.physicalHeight, page.unit, 'px')
-          dpi = {
-            width: pxSize.width / unitUtils.convert(page.physicalWidth, page.unit, 'in'),
-            height: pxSize.height / unitUtils.convert(page.physicalHeight, page.unit, 'in')
-          }
-        }
         const unit = format.unit || 'px'
-        physicalBleeds = page.unit !== 'px' && unit !== 'px' && isEqual(pageUtils.defaultBleedMap[page.unit], physicalBleeds) ? pageUtils.defaultBleedMap[unit]
-                          : Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, page.unit, unit, (k === 'left' || k === 'right') ? dpi.width : dpi.height), unit === 'px' ? 0 : PRECISION)])) as IBleed
-        bleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, unit, 'px', (k === 'left' || k === 'right') ? dpi.width : dpi.height))])) as IBleed
-        store.commit('UPDATE_pageProps', {
-          pageIndex: pageIndex,
-          props: { bleeds, physicalBleeds }
+        const dpi = unit === 'px' ? unitUtils.getConvertDpi({
+          physicalWidth: format.physicalWidth,
+          physicalHeight: format.physicalHeight,
+          unit: format.unit
+        }) : pageUtils.getPageDPI({
+          width: format.width,
+          height: format.height,
+          physicalWidth: format.physicalWidth,
+          physicalHeight: format.physicalHeight,
+          unit: format.unit
         })
+        const precision = unit === 'px' ? 0 : PRECISION
+        const bleedDPI = (key: string): number => (key === 'left' || key === 'right') ? dpi.width : dpi.height
+        const maxBleed = (key: string): number => floor(unitUtils.convert(20, 'mm', unit, bleedDPI(key)), precision)
+        physicalBleeds = page.unit !== 'px' && unit !== 'px' && isEqual(pageUtils.defaultBleedMap[page.unit], physicalBleeds) ? pageUtils.defaultBleedMap[unit]
+                          : Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, Math.min(round(unitUtils.convert(v, page.unit, unit, bleedDPI(k)), precision), maxBleed(k))])) as IBleed
+        bleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, unit, 'px', bleedDPI(k)))])) as IBleed
+        store.commit('SET_bleeds', { pageIndex, bleeds, physicalBleeds })
       }
     }
 

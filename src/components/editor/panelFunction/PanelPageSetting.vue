@@ -253,8 +253,8 @@ import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 import { IBleed, IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { PRECISION } from '@/utils/unitUtils'
-import { round } from 'lodash'
+import unitUtils, { PRECISION } from '@/utils/unitUtils'
+import { floor, round } from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -716,33 +716,40 @@ export default Vue.extend({
     expandIconStyles() {
       return this.showBleedSettings ? {} : { transform: 'scaleY(-1)' }
     },
+    maxBleed(key: string) {
+      const dpi = unitUtils.getConvertDpi(pageUtils.currFocusPageSize)
+      return floor(unitUtils.convert(20, 'mm', this.sizeToShow.unit, (key === 'left' || key === 'right') ? dpi.width : dpi.height), this.sizeToShow.unit === 'px' ? 0 : PRECISION)
+    },
     setBleed(evt: Event, key: string, all = false) {
       const value = (evt.target as HTMLInputElement).value
       this.bleedsToShow[key].value = value
-      const numValue = typeof value === 'string' ? parseFloat(value) : value
+      const numValue = parseFloat(value)
       const striped = numValue.toString() !== value
       const roundedValue = round(numValue, this.sizeToShow.unit === 'px' ? 0 : PRECISION)
       const rounded = this.bleeds[key] !== roundedValue
-      const strValue = !striped || rounded ? roundedValue.toString() : this.bleedsToShow[key].value
-      this.bleeds[key] = roundedValue
-      this.bleedsToShow[key].value = strValue
+      const numBleed = Math.min(roundedValue, this.maxBleed(key))
+      const strBleed = !striped || rounded ? numBleed.toString() : this.bleedsToShow[key].value
+      this.bleeds[key] = numBleed
+      this.bleedsToShow[key].value = strBleed
       if (all) {
         Object.keys(this.bleeds).forEach((key) => {
-          this.bleeds[key] = roundedValue
-          this.bleedsToShow[key].value = strValue
+          this.bleeds[key] = numBleed
+          this.bleedsToShow[key].value = strBleed
         })
       }
       this.applyBleeds(key, all)
     },
     addBleed(key: string, value: number, all = false) {
+      const numBleed = Math.min(Math.max(this.bleeds[key] + value, 0), this.maxBleed(key))
+      const strBleed = this.bleeds[key].toString()
       if (all) {
         Object.keys(this.bleeds).forEach((key) => {
-          this.bleeds[key] = Math.max(this.bleeds[key] + value, 0)
-          this.bleedsToShow[key].value = this.bleeds[key].toString()
+          this.bleeds[key] = numBleed
+          this.bleedsToShow[key].value = strBleed
         })
       } else {
-        this.bleeds[key] = Math.max(this.bleeds[key] + value, 0)
-        this.bleedsToShow[key].value = this.bleeds[key].toString()
+        this.bleeds[key] = numBleed
+        this.bleedsToShow[key].value = strBleed
       }
       this.applyBleeds(key, all)
       stepsUtils.record()
