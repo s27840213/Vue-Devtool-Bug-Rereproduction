@@ -220,7 +220,7 @@ export default Vue.extend({
     }),
     setBgColor(color: string) {
       if (this.currentPageBackgroundLocked) {
-        return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+        return this.$notify({ group: 'copy', text: i18n.tc('NN0804') })
       }
       if (pageUtils.currFocusPageIndex !== pageUtils.addAssetTargetPageIndex) {
         groupUtils.deselect()

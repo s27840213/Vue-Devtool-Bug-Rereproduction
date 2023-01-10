@@ -240,7 +240,7 @@ class LayerFactary {
       dragging: false,
       designId: '',
       isEdited: false,
-      contentEditable: false,
+      contentEditable: config.contentEditable ?? false,
       styles: {
         x: config.styles?.x,
         y: config.styles?.y,
@@ -476,8 +476,11 @@ class LayerFactary {
         blendMode: config.blendMode || ''
       }
     }
+    if (config.category === 'A' && styles.scale && styles.initWidth && styles.initHeight) {
+      basicConfig.styles.width = styles.initWidth * styles.scale
+      basicConfig.styles.height = styles.initHeight * styles.scale
+    }
     delete config.styles
-    delete config.id
     delete config.blendMode
     return Object.assign(basicConfig, config)
   }

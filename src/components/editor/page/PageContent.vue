@@ -12,48 +12,14 @@ div(class="overflow-container"
         @contextmenu.prevent
         @click.right.stop="onRightClick"
         @dblclick="pageDblClickHandler()"
-        @mouseover="togglePageHighlighter(true)"
-        @mouseout="togglePageHighlighter(false)")
+        @tap="tapPageContent")
+      //- @dblclick will not be trigger in mobile, use @tap + doubleTapUtils instead.
       nu-bg-image(:image="this.config.backgroundImage"
         :pageIndex="pageIndex"
         :color="this.config.backgroundColor"
         :key="this.config.backgroundImage.id"
         @mousedown.native.left="pageClickHandler()"
         :contentScaleRatio="contentScaleRatio")
-      //- lazy-load(v-for="(layer,index) in config.layers"
-      //-     :key="layer.id"
-      //-     target=".editor-view"
-      //-     :threshold="[0,1]")
-      //- template(v-if="layerLazyLoad")
-      //-   lazy-load(v-for="(layer,index) in config.layers"
-      //-       :key="layer.id"
-      //-       :target="lazyLoadTarget"
-      //-       :minHeight="layer.styles.height * contentScaleRatio"
-      //-       :minWidth="layer.styles.width * contentScaleRatio"
-      //-       :threshold="[0]")
-      //-     nu-layer(
-      //-       :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
-      //-       :data-index="`${index}`"
-      //-       :data-pindex="`${pageIndex}`"
-      //-       :layerIndex="index"
-      //-       :pageIndex="pageIndex"
-      //-       :config="layer"
-      //-       :currSelectedInfo="currSelectedInfo"
-      //-       :contentScaleRatio="contentScaleRatio"
-      //-       :scaleRatio="scaleRatio"
-      //-       :getCurrFunctionPanelType="getCurrFunctionPanelType"
-      //-       :isUploadingShadowImg="isUploadingShadowImg"
-      //-       :isHandling="isHandling"
-      //-       :isShowPagePanel="isShowPagePanel"
-      //-       :imgSizeMap="imgSizeMap"
-      //-       :userId="userId"
-      //-       :verUni="verUni"
-      //-       :uploadId="uploadId"
-      //-       :handleId="handleId"
-      //-       :uploadShadowImgs="uploadShadowImgs"
-      //-       :isPagePreview="true"
-      //-       :forceRender="forceRender")
-      //- template(v-else)
       nu-layer(
         v-for="(layer,index) in config.layers"
         :key="layer.id"
@@ -76,7 +42,6 @@ div(class="overflow-container"
         :uploadId="uploadId"
         :handleId="handleId"
         :uploadShadowImgs="uploadShadowImgs"
-        :isPagePreview="isPagePreview"
         :forceRender="forceRender"
         :lazyLoadTarget="lazyLoadTarget"
         v-on="$listeners")
@@ -92,6 +57,7 @@ div(class="overflow-container"
 
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
@@ -107,6 +73,7 @@ import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
 import { ILayer } from '@/interfaces/layer'
+import doubleTapUtils from '@/utils/doubleTapUtils'
 
 export default Vue.extend({
   components: {
@@ -122,10 +89,6 @@ export default Vue.extend({
     pageIndex: {
       type: Number,
       required: true
-    },
-    isPagePreview: {
-      type: Boolean,
-      required: false
     },
     handleSequentially: {
       type: Boolean,
@@ -147,8 +110,7 @@ export default Vue.extend({
   data() {
     return {
       imgLoaded: false,
-      imgLoading: false,
-      pageIsHover: false
+      imgLoading: false
     }
   },
   computed: {
@@ -319,12 +281,7 @@ export default Vue.extend({
         }
       }
     },
-    togglePageHighlighter(isHover: boolean): void {
-      if (this.isPagePreview) return
-      this.pageIsHover = isHover
-    },
     pageClickHandler(e: PointerEvent): void {
-      if (this.isPagePreview) return
       groupUtils.deselect()
       // imageUtils.setImgControlDefault(false)
       editorUtils.setInMultiSelectionMode(false)
@@ -339,7 +296,6 @@ export default Vue.extend({
       }
     },
     onRightClick(event: MouseEvent) {
-      if (this.isPagePreview) return
       if (generalUtils.isTouchDevice()) {
         return
       }
@@ -350,18 +306,22 @@ export default Vue.extend({
       }
       popupUtils.openPopup('page', { event })
     },
+    tapPageContent(e: Event): void {
+      const target = e.target as HTMLElement
+      if (!target.matches('.nu-background-image img')) return
+      doubleTapUtils.click(e, { doubleClickCallback: this.pageDblClickHandler })
+    },
     pageDblClickHandler(): void {
-      if (this.isPagePreview) return
-
       if (this.isHandleShadow) {
         return
       }
       const { srcObj, locked } = this.config.backgroundImage.config
       if ((srcObj?.assetId ?? '') !== '' && !locked) {
         pageUtils.startBackgroundImageControl(this.pageIndex)
+        editorUtils.setCurrActivePanel('crop')
       }
       if ((srcObj?.assetId ?? '') !== '' && locked) {
-        this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+        this.$notify({ group: 'copy', text: i18n.tc('NN0804') })
       }
     },
     async handleFontLoading() {

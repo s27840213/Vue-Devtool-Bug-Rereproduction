@@ -315,8 +315,10 @@ export default Vue.extend({
             this.src = src
             resolve()
           }
-        }, () => {
-          reject(new Error('cannot load the current image'))
+        }, {
+          error: () => {
+            reject(new Error('cannot load the current image'))
+          }
         })
       })
     },
@@ -329,6 +331,28 @@ export default Vue.extend({
     },
     setInBgSettingMode() {
       editorUtils.setInBgSettingMode(true)
+      //   if (!this.dblTabsFlag && this.isActive) {
+      //   const touchtime = Date.now()
+      //   const interval = 500
+      //   const doubleTap = (e: PointerEvent) => {
+      //     e.preventDefault()
+      //     if (Date.now() - touchtime < interval && !this.dblTabsFlag) {
+      //       /**
+      //        * This is the dbl-click callback block
+      //        */
+      //       if (this.getLayerType === LayerType.image) {
+      //         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+      //         setTimeout(() => eventUtils.emit(PanelEvent.switchTab, 'crop'), 0)
+      //       }
+      //       this.dblTabsFlag = true
+      //     }
+      //   }
+      //   this.eventTarget.addEventListener('pointerdown', doubleTap)
+      //   setTimeout(() => {
+      //     this.eventTarget.removeEventListener('pointerdown', doubleTap)
+      //     this.dblTabsFlag = false
+      //   }, interval)
+      // }
     },
     handleDimensionUpdate(newVal: number, oldVal: number) {
       if (this.image.config.previewSrc === undefined) {
