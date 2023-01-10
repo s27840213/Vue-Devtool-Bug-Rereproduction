@@ -141,13 +141,12 @@ export default Vue.extend({
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust },
         ...this.genearlLayerTabs
       ]
     },
     fontTabs(): Array<IFooterTab> {
       return [
-        { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || this.hasSubSelectedLayer || this.isGroup },
+        { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer) },
         { icon: 'font', text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`), panelType: 'fonts' },
         { icon: 'font-size', text: `${this.$t('NN0122')}`, panelType: 'font-size' },
         {
@@ -581,11 +580,19 @@ export default Vue.extend({
               })
             }
 
-            tiptapUtils.focus({ scrollIntoView: false })
+            tiptapUtils.focus({ scrollIntoView: false }, currLayer.isEdited ? 'end' : null)
           } else {
             /**
              * @Todo handle the sub controler
              */
+            const { subLayerIdx } = layerUtils
+            const subLayer = (currLayer as IGroup).layers[subLayerIdx]
+            if (subLayer.type === 'text') {
+              layerUtils.updateLayerProps(pageIndex, index, {
+                contentEditable: true
+              }, subLayerIdx)
+            }
+            tiptapUtils.focus({ scrollIntoView: false }, 'end')
           }
           break
         }

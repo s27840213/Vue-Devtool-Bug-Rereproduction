@@ -190,11 +190,13 @@ export default Vue.extend({
     styles(): any {
       const { isFrameImg } = this.config
       const zindex = this.type === 'group' ? this.config?.active ? this.getPrimaryLayerSubLayerNum : this.primaryLayerZindex : this.config.styles.zindex
+      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
 
       return {
         ...this.sizeStyle(),
-        ...TextEffectUtils.convertTextEffect(this.config),
-        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`
+        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`,
+        ...textEffectStyles,
+        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
     isTextEditing(): boolean {
@@ -236,6 +238,11 @@ export default Vue.extend({
         }
         popupUtils.closePopup()
       } else {
+        if (this.config.type === 'text') {
+          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+            editing: true
+          })
+        }
         TextUtils.setCurrTextInfo({
           config: this.config as IText,
           subLayerIndex: this.layerIndex

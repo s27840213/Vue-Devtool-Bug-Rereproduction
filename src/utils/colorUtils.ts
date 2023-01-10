@@ -28,9 +28,11 @@ class ColorUtils {
   get globalSelectedColor(): { textColor: string, textColors: string[], color: string, colors: string[], currEventColor: string } {
     const currPage = layerUtils.getCurrPage
     const { subLayerIdx } = layerUtils
-    const currLayer = subLayerIdx !== -1
-      ? (layerUtils.getCurrLayer as IGroup | ITmp).layers[subLayerIdx]
-      : layerUtils.getCurrLayer
+    let currLayer = layerUtils.getCurrLayer
+    // In group or tmp and selecting sub layer
+    if ((currLayer.type === 'group' || currLayer.type === 'tmp') && subLayerIdx !== -1) {
+      currLayer = currLayer.layers[subLayerIdx]
+    }
 
     let textColors = [] as string[]
     let colors = [] as string[]

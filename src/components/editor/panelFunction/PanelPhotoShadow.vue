@@ -114,7 +114,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      isAdmin: 'user/isAdmin',
       currFunctionPanelType: 'getCurrFunctionPanelType'
     }),
     shadowOption(): string[] {

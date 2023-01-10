@@ -186,9 +186,6 @@ export default Vue.extend({
   },
 
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapState({
       mobileAllPageMode: 'mobileEditor/mobileAllPageMode'
     }),
@@ -280,7 +277,6 @@ export default Vue.extend({
       addLayer: 'ADD_selectedLayer',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setPageScaleRatio: 'SET_pageScaleRatio',
-      _setAdminMode: 'user/SET_ADMIN_MODE',
       setInBgRemoveMode: 'SET_inBgRemoveMode',
       addPage: 'ADD_page',
       setCurrCardIndex: 'mobileEditor/SET_currCardIndex'
@@ -291,9 +287,6 @@ export default Vue.extend({
         'getRecently'
       ]
     ),
-    setAdminMode() {
-      this._setAdminMode(!this.adminMode)
-    },
     outerClick(e: MouseEvent) {
       if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         editorUtils.setInBgSettingMode(false)
