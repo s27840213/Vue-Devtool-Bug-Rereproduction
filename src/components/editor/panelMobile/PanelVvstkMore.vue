@@ -90,7 +90,14 @@ export default Vue.extend({
       userInfo: 'vivisticker/getUserInfo'
     }),
     mainOptions(): OptionConfig[] {
-      return [{
+      return [...vivistickerUtils.checkOSVersion('16.0') ? [
+        {
+          text: `${this.$t('STK0032')}`,
+          icon: 'vivisticker_play-circle',
+          action: this.handleShowIOS16Tutorial
+        }
+      ] : [],
+      {
         text: `${this.$t('NN0146')}`,
         icon: 'vivisticker_play-circle',
         action: this.handleShowTutorial
@@ -240,7 +247,8 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setShowTutorial: 'vivisticker/SET_showTutorial',
-      setSlideType: 'vivisticker/SET_slideType'
+      setSlideType: 'vivisticker/SET_slideType',
+      setFullPageConfig: 'vivisticker/SET_fullPageConfig'
     }),
     handleOptionAction(action?: () => void) {
       if (action) {
@@ -257,6 +265,9 @@ export default Vue.extend({
     handleShowTutorial() {
       this.setShowTutorial(true)
       editorUtils.setCloseMobilePanelFlag(true)
+    },
+    handleShowIOS16Tutorial() {
+      this.setFullPageConfig({ type: 'iOS16Video', params: { fromModal: false } })
     },
     handleShowUserSettings() {
       this.setSlideType('slideUserSettings')
