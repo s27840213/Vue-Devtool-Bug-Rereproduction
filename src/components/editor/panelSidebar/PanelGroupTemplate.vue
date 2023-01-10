@@ -7,7 +7,7 @@
         @click.native="$emit('close')")
       button(class="panel-group-template__apply lead-2"
         @click="handleApplyGroupTemplate") {{ $t('NN0392', { num: count })}}
-      svg-icon(v-if="isAdmin"
+      svg-icon(v-if="showAdminTool"
         class="panel-group-template__delete pointer"
         iconName="trash"
         iconColor="white"
@@ -40,7 +40,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       token: 'user/getToken',
-      isAdmin: 'user/isAdmin'
+      showAdminTool: 'user/showAdminTool'
     }),
     count(): number {
       return this.groupItem.content_ids.length
@@ -76,7 +76,6 @@ export default Vue.extend({
         })
     },
     handleDeleteGroupTemplate() {
-      if (!this.isAdmin) return
       modalUtils.setModalInfo(
         this.isDetailPage ? '確認刪除詳情頁模板？' : '確認刪除群組模板？',
         [],

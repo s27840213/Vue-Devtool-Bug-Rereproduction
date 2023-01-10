@@ -120,7 +120,7 @@
           div(class="scale-container relative"
               :style="scaleContainerStyles")
             page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
-            div(v-if="isAdmin && enableAdminView" class="layer-num") Layer數量: {{config.layers.length}}
+            div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
             div(v-if="currSelectedIndex !== -1" class="page-control" :style="styles('control')")
               nu-controller(v-if="currFocusPageIndex === pageIndex" data-identifier="controller"
                 :key="`controller-${currLayer.id}`"
@@ -293,9 +293,8 @@ export default Vue.extend({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
       contentScaleRatio: 'getContentScaleRatio',
-      isAdmin: 'user/isAdmin',
       pagesLength: 'getPagesLength',
-      enableAdminView: 'user/getEnableAdminView'
+      showAllAdminTool: 'user/showAllAdminTool'
     }),
     config(): IPage {
       return this.pageState.config
@@ -487,18 +486,6 @@ export default Vue.extend({
     toggleResizerHint(isHover: boolean): void {
       this.isShownResizerHint = isHover
     },
-    pageClickHandler(): void {
-      // const sel = window.getSelection()
-      // if (sel) {
-      //   sel.empty()
-      //   sel.removeAllRanges()
-      // }
-    },
-    pageDblClickHandler(): void {
-      // if ((this.config.backgroundImage.config.srcObj?.assetId ?? '') !== '') {
-      //   pageUtils.startBackgroundImageControl(this.pageIndex)
-      // }
-    },
     setFocus(): void {
       this.$nextTick(() => {
         const currPage = this.$refs.page as HTMLElement
@@ -633,7 +620,6 @@ export default Vue.extend({
       return cssConverter.convertFlipStyle(horizontalFlip, verticalFlip)
     },
     openLineTemplatePopup() {
-      this.pageClickHandler()
       popupUtils.openPopup('line-template', {
         target: `.btn-line-template[pageIndex="${this.pageIndex}"]`,
         posX: 'right'

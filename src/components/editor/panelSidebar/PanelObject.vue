@@ -7,7 +7,7 @@
       :defaultKeyword="keywordLabel"
       @search="handleSearch")
     //- Admin tool
-    div(v-if="inAdminMode" class="panel-objects-2html")
+    div(v-if="showAdminTool" class="panel-objects-2html")
       input(type="text" placeholder="項目網址" v-model="panelParams")
       btn(@click.native="downloadAll") Download all
     //- Search result empty msg
@@ -77,8 +77,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      isAdmin: 'user/isAdmin',
-      enableAdminView: 'user/getEnableAdminView'
+      showAdminTool: 'user/showAdminTool'
     }),
     ...mapState('objects', {
       categories: 'categories',
@@ -87,12 +86,6 @@ export default Vue.extend({
       pending: 'pending',
       keyword: 'keyword'
     }),
-    ...mapState('user', [
-      'adminMode'
-    ]),
-    inAdminMode(): boolean {
-      return this.isAdmin && this.adminMode && this.enableAdminView
-    },
     keywordLabel():string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },

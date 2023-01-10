@@ -156,9 +156,6 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapState(
       'layouts',
       [
@@ -483,6 +480,7 @@ export default Vue.extend({
       if (!this.isFormatApplicable) return
       const page = generalUtils.deepCopy(this.getPage(pageUtils.currFocusPageIndex))
       page.designId = ''
+      page.id = generalUtils.generateRandomString(8)
       this.addPageToPos({
         newPage: page,
         pos: pageUtils.currFocusPageIndex + 1

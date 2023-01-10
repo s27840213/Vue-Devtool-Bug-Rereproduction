@@ -68,8 +68,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     if (panel && panel in SidebarPanelType) {
       store.commit('SET_currSidebarPanelType', SidebarPanelType[panel as any])
       Vue.nextTick(() => {
-        editorUtils.setShowMobilePanel(true)
-        editorUtils.setCurrActivePanel(panel.replace('bg', 'background'))
+        editorUtils.setCurrActivePanel(panel)
       })
     }
 

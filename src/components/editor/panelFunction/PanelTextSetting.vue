@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="text-setting" ref='body'
       @mousedown.capture="textInfoRecorder()")
-    span(class="text-setting__title text-blue-1 label-lg") {{$t('NN0062')}}
+    span(class="text-setting__title text-blue-1 text-H6") {{$t('NN0062')}}
     div(class="text-setting__row1")
       div(class="property-bar pointer record-selection" @click="openFontsPanel")
         img(v-if="props.font[0] !== '_'" class="text-setting__text-preview" :src="fontPrevUrl" @error="onError")
@@ -93,6 +93,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   components: {
@@ -152,7 +153,7 @@ export default Vue.extend({
     popupUtils.on(PopupSliderEventType.stop, () => {
       const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
       if (currLayer.type === 'text' || (currLayer.type === 'group' && subLayerIdx !== -1 &&
-        (currLayer as IGroup).layers[subLayerIdx].type === 'text)')) {
+        currLayer.layers[subLayerIdx].type === 'text')) {
         tiptapUtils.focus({ scrollIntoView: false })
       }
     })
@@ -289,7 +290,7 @@ export default Vue.extend({
       const input = this.$refs['input-color'] as HTMLInputElement
       input.focus()
       input.select()
-      this.$emit('toggleColorPanel', true)
+      editorUtils.toggleColorSlips(true)
       this.updateLayerProps({ isEdited: true })
     },
     handleColorUpdate(color: string) {
@@ -574,6 +575,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .text-setting {
+  text-align: left;
   &__title {
     margin-bottom: 30px;
   }

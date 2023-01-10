@@ -11,9 +11,10 @@ import rulerUtils from './rulerUtils'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import store from '@/store'
 import { round, isEqual } from 'lodash'
+import generalUtils from './generalUtils'
 
 class ResizeUtils {
-  scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number) {
+  scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number, reScaleShapeStrokeWidth = false) {
     if (!targetLayer.moved) {
       targetLayer.moved = true
     }
@@ -74,7 +75,11 @@ class ResizeUtils {
         if (layer.category === 'D') {
           const quadrant = shapeUtils.getLineQuadrant(layer.point ?? [])
           const { width: lineWidth, height: lineHeight } = shapeUtils.lineDimension(layer.point ?? [])
-          const { point, realWidth, realHeight } = shapeUtils.computePointForDimensions(quadrant, layer.size?.[0] ?? 1, lineWidth * targetScale, lineHeight * targetScale)
+          const { size } = layer
+          if (!size) break
+          const strokeWidth = size[0]
+          const newStrokeWidth = reScaleShapeStrokeWidth ? Math.round(strokeWidth * targetScale) : strokeWidth
+          const { point, realWidth, realHeight } = shapeUtils.computePointForDimensions(quadrant, newStrokeWidth, lineWidth * targetScale, lineHeight * targetScale)
           controlUtils.updateShapeLinePoint(pageIndex, layerIndex, point)
           width = realWidth
           height = realHeight
@@ -83,12 +88,21 @@ class ResizeUtils {
             initHeight: height
           })
           scale = layer.styles.scale
+          layerUtils.updateLayerProps(pageIndex, layerIndex, {
+            size: [newStrokeWidth]
+          })
         }
         if (layer.category === 'E') {
+          const { size } = layer
+          if (!size) break
+          const strokeWidth = size[0]
+          const newStrokeWidth = reScaleShapeStrokeWidth ? Math.round(strokeWidth * targetScale) : strokeWidth
           scale = 1
-          const corRad = controlUtils.getCorRadValue([width, height], controlUtils.getCorRadPercentage(layer.vSize, layer.size ?? [], layer.shapeType ?? ''), layer.shapeType ?? '')
+          const corRad = controlUtils.getCorRadValue([width, height], controlUtils.getCorRadPercentage(layer.vSize, size, layer.shapeType ?? ''), layer.shapeType ?? '')
           controlUtils.updateShapeVSize(pageIndex, layerIndex, [width, height])
-          controlUtils.updateShapeCorRad(pageIndex, layerIndex, layer.size ?? [], corRad)
+          layerUtils.updateLayerProps(pageIndex, layerIndex, {
+            size: [newStrokeWidth, corRad]
+          })
         }
         break
       case 'group':
@@ -97,20 +111,22 @@ class ResizeUtils {
           if (subLayer.type === 'shape') {
             subLayer = subLayer as IShape
             if (subLayer.category === 'D') {
-              const [lineWidth] = subLayer.size ?? [1]
+              const [strokeWidth] = subLayer.size ?? [1]
+              const newStrokeWidth = reScaleShapeStrokeWidth ? strokeWidth : Math.round(strokeWidth / targetScale)
               layerUtils.updateSubLayerProps(pageIndex, layerIndex, index, {
-                size: [lineWidth / targetScale]
+                size: [newStrokeWidth]
               })
-              const trans = shapeUtils.getTranslateCompensationForLineWidth(subLayer.point ?? [], subLayer.styles, lineWidth, lineWidth / targetScale)
+              const trans = shapeUtils.getTranslateCompensationForLineWidth(subLayer.point ?? [], subLayer.styles, strokeWidth, newStrokeWidth)
               layerUtils.updateSubLayerStyles(pageIndex, layerIndex, index, {
                 x: trans.x,
                 y: trans.y
               })
             }
             if (subLayer.category === 'E') {
-              const [lineWidth, corRad] = subLayer.size ?? [1, 0]
+              const [strokeWidth, corRad] = subLayer.size ?? [1, 0]
+              const newStrokeWidth = reScaleShapeStrokeWidth ? strokeWidth : Math.round(strokeWidth / targetScale)
               layerUtils.updateSubLayerProps(pageIndex, layerIndex, index, {
-                size: [lineWidth / targetScale, corRad]
+                size: [newStrokeWidth, corRad]
               })
             }
           }
@@ -133,9 +149,9 @@ class ResizeUtils {
     guidelines.h = guidelines.h.map(hl => hl * scale + yOffset)
   }
 
-  scaleAndMoveLayers(pageIndex: number, page: IPage, scale: number, xOffset: number, yOffset: number): IPage {
+  scaleAndMoveLayers(pageIndex: number, page: IPage, scale: number, xOffset: number, yOffset: number, reScaleShapeStrokeWidth = false): IPage {
     page.layers.forEach((layer, index) => {
-      this.scaleAndMoveLayer(pageIndex, index, layer, scale, xOffset, yOffset)
+      this.scaleAndMoveLayer(pageIndex, index, layer, scale, xOffset, yOffset, reScaleShapeStrokeWidth)
     })
     if (page.guidelines) {
       this.scaleAndMoveGuideLines(page.guidelines, scale, xOffset, yOffset)
@@ -159,8 +175,10 @@ class ResizeUtils {
 
   centerBackground(pageIndex: number, page: IPage, format: { width: number, height: number }) {
     const { width, height, posX, posY } = imageUtils.adaptToSize({
-      width: page.backgroundImage.config.styles.initWidth || page.backgroundImage.config.styles.width,
-      height: page.backgroundImage.config.styles.initHeight || page.backgroundImage.config.styles.height
+      width: page.backgroundImage.config.styles.imgWidth || page.backgroundImage.config.styles.width || page.width,
+      height: page.backgroundImage.config.styles.imgHeight || page.backgroundImage.config.styles.height || page.height
+      // width: page.backgroundImage.config.styles.initWidth || page.backgroundImage.config.styles.width || page.width,
+      // height: page.backgroundImage.config.styles.initHeight || page.backgroundImage.config.styles.height || page.height
     }, format)
     pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
     pageUtils.updateBackgroundImageStyles(
@@ -173,7 +191,7 @@ class ResizeUtils {
     )
   }
 
-  resizePage(pageIndex: number, page: IPage, format: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
+  resizePage(pageIndex: number, page: IPage, format: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }, reScaleShapeStrokeWidth = false) {
     // set physical size to px size if not exist
     format.physicalWidth ||= format.width
     format.physicalHeight ||= format.height
@@ -241,11 +259,11 @@ class ResizeUtils {
     if (targetAspectRatio > aspectRatio) {
       scale = format.height / sizeWithoutBleed.height
       const offsetBleed = page.isEnableBleed ? { left: bleeds.left - page.bleeds.left * scale, top: bleeds.top - page.bleeds.top * scale } : { left: 0, top: 0 }
-      this.scaleAndMoveLayers(pageIndex, page, scale, ((sizeWithoutBleed.height * targetAspectRatio - sizeWithoutBleed.width) / 2) * scale + offsetBleed.left, offsetBleed.top)
+      this.scaleAndMoveLayers(pageIndex, page, scale, ((sizeWithoutBleed.height * targetAspectRatio - sizeWithoutBleed.width) / 2) * scale + offsetBleed.left, offsetBleed.top, reScaleShapeStrokeWidth)
     } else {
       scale = format.width / sizeWithoutBleed.width
       const offsetBleed = page.isEnableBleed ? { left: bleeds.left - page.bleeds.left * scale, top: bleeds.top - page.bleeds.top * scale } : { left: 0, top: 0 }
-      this.scaleAndMoveLayers(pageIndex, page, scale, offsetBleed.left, ((sizeWithoutBleed.width / targetAspectRatio - sizeWithoutBleed.height) / 2) * scale + offsetBleed.top)
+      this.scaleAndMoveLayers(pageIndex, page, scale, offsetBleed.left, ((sizeWithoutBleed.width / targetAspectRatio - sizeWithoutBleed.height) / 2) * scale + offsetBleed.top, reScaleShapeStrokeWidth)
     }
 
     // add bleed to new size

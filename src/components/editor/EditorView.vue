@@ -2,7 +2,7 @@
   div(class="editor-view"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="cursorStyles()"
-      @pointerdown="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
+      @pointerdown="!inBgRemoveMode ? !getInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
       @wheel="handleWheel"
       @scroll.passive="!inBgRemoveMode ? scrollUpdate() : null"
       @mousewheel="handleWheel"
@@ -261,9 +261,6 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapState({
       cursor: 'cursor'
     }),
@@ -283,12 +280,13 @@ export default Vue.extend({
       hasCopiedFormat: 'getHasCopiedFormat',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       prevScrollPos: 'bgRemove/getPrevScrollPos',
-      getInInGestureMode: 'getInGestureToolMode',
+      getInGestureMode: 'getInGestureToolMode',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isSettingScaleRatio: 'getIsSettingScaleRatio',
       enableComponentLog: 'getEnalbleComponentLog',
-      pagesLength: 'getPagesLength'
+      pagesLength: 'getPagesLength',
+      isImgCtrl: 'imgControl/isImgCtrl'
     }),
     pages(): Array<IPage> {
       return (this.pagesState as Array<IPageState>).map(p => p.config)
@@ -335,7 +333,6 @@ export default Vue.extend({
       addLayer: 'ADD_selectedLayer',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setPageScaleRatio: 'SET_pageScaleRatio',
-      _setAdminMode: 'user/SET_ADMIN_MODE',
       setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
       setInGestureMode: 'SET_inGestureMode'
@@ -349,9 +346,6 @@ export default Vue.extend({
     cursorStyles() {
       const { cursor } = this
       return cursor ? { cursor } : {}
-    },
-    setAdminMode() {
-      this._setAdminMode(!this.adminMode)
     },
     outerClick(e: MouseEvent) {
       if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
@@ -367,6 +361,7 @@ export default Vue.extend({
     },
     selectStart(e: PointerEvent) {
       if (e.pointerType === 'mouse' && e.button !== 0) return
+      if (this.isImgCtrl || this.getInGestureMode) return
       if (layerUtils.layerIndex !== -1) {
         /**
          * when the user click the control-region outsize the page,
@@ -385,7 +380,6 @@ export default Vue.extend({
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()
       }
-      if (this.getInInGestureMode) return
       if (imageUtils.isImgControl()) {
         ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
@@ -685,7 +679,8 @@ export default Vue.extend({
     mapGuidelineToPage(type: string): { pos: number, outOfPage: boolean } {
       // just has two options: ['v','h']
       const guideline = type === 'v' ? this.$refs.guidelineV as HTMLElement : this.$refs.guidelineH as HTMLElement
-      const result = RulerUtils.mapGuidelineToPage(guideline, type, this.from)
+      const from = type === 'v' ? this.from : RulerUtils.getOverlappedPageIndex(guideline, 'h')
+      const result = RulerUtils.mapGuidelineToPage(guideline, type, from)
       return result
     },
     closeGuidelineH(need2Record = false) {
@@ -727,7 +722,7 @@ export default Vue.extend({
     //   if (e.key === ' ') {
     //     e.preventDefault()
     //     if (!e.repeat) {
-    //       this.setInGestureMode(!this.getInInGestureMode)
+    //       this.setInGestureMode(!this.getInGestureMode)
     //     }
     //   }
     // }
