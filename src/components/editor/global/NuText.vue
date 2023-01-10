@@ -55,10 +55,6 @@ export default Vue.extend({
       type: Number,
       default: -1
     },
-    isPagePreview: {
-      default: false,
-      type: Boolean
-    },
     isTransparent: {
       default: false,
       type: Boolean

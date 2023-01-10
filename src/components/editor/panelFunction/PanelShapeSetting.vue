@@ -147,7 +147,7 @@
                   @click="selectColor(index)")
     //- 管理介面
     div(class="shape-setting__info")
-      div(v-if="inAdminMode && isObjectElement")
+      div(v-if="showAdminTool && isObjectElement")
         div(class="shape-setting__info__divider pb-10")
         btn(:type="'primary-sm'"
           class="shape-setting__info__button rounded my-5"
@@ -313,17 +313,12 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
-      token: 'user/getToken'
+      token: 'user/getToken',
+      showAdminTool: 'user/showAdminTool'
     }),
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapState('markers', [
       'categories'
     ]),
-    inAdminMode(): boolean {
-      return this.role === 0 && this.adminMode === true
-    },
     lineWidth(): number {
       const { currLayer } = this
       return (currLayer as IShape).size?.[0] ?? 0

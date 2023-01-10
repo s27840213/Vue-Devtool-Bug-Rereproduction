@@ -90,7 +90,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('user', [
-      'uname'
+      'uname',
+      'enableAdminView'
     ]),
     ...mapGetters({
       isLogin: 'user/isLogin',
@@ -98,8 +99,7 @@ export default Vue.extend({
       account: 'user/getAccount',
       isFontLoading: 'text/getIsFontLoading',
       pagesLength: 'getPagesLength',
-      groupType: 'getGroupType',
-      enableAdminView: 'user/getEnableAdminView'
+      groupType: 'getGroupType'
     }),
     pageSize(): { w: number, h: number } {
       return {
@@ -204,9 +204,7 @@ export default Vue.extend({
       // designUtils.newDesign()
     },
     toogleAdminView() {
-      this.setUserState({
-        enableAdminView: !this.enableAdminView
-      })
+      this.setUserState({ enableAdminView: !this.enableAdminView })
     },
     testSubscribe() {
       // fbPixelUtils.subscribe(false)

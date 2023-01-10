@@ -11,6 +11,7 @@ import rulerUtils from './rulerUtils'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import store from '@/store'
 import { round, isEqual } from 'lodash'
+import generalUtils from './generalUtils'
 
 class ResizeUtils {
   scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number) {
@@ -159,8 +160,10 @@ class ResizeUtils {
 
   centerBackground(pageIndex: number, page: IPage, format: { width: number, height: number }) {
     const { width, height, posX, posY } = imageUtils.adaptToSize({
-      width: page.backgroundImage.config.styles.initWidth || page.backgroundImage.config.styles.width,
-      height: page.backgroundImage.config.styles.initHeight || page.backgroundImage.config.styles.height
+      width: page.backgroundImage.config.styles.imgWidth || page.backgroundImage.config.styles.width || page.width,
+      height: page.backgroundImage.config.styles.imgHeight || page.backgroundImage.config.styles.height || page.height
+      // width: page.backgroundImage.config.styles.initWidth || page.backgroundImage.config.styles.width || page.width,
+      // height: page.backgroundImage.config.styles.initHeight || page.backgroundImage.config.styles.height || page.height
     }, format)
     pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
     pageUtils.updateBackgroundImageStyles(

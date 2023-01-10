@@ -5,7 +5,7 @@
       template(v-for="btn in btns")
         btn(v-if="!btn.condition || btn.condition()"
           class="full-width"
-          :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0]"
+          :class="[activeBtn(btn) ? 'active' : '']"
           type="gray-mid"
           ref="btn"
           :disabled="disableBtn(btn)"
@@ -116,13 +116,9 @@ export default Vue.extend({
       currSelectedLayers: 'getCurrSelectedLayers',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
-      isAdmin: 'user/isAdmin',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling'
-    }),
-    ...mapState('user', {
-      isSuperUser: 'role'
     }),
     ...mapState('shadow', {
       handleId: 'handleId'
