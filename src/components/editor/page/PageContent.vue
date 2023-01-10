@@ -318,6 +318,7 @@ export default Vue.extend({
       const { srcObj, locked } = this.config.backgroundImage.config
       if ((srcObj?.assetId ?? '') !== '' && !locked) {
         pageUtils.startBackgroundImageControl(this.pageIndex)
+        editorUtils.setCurrActivePanel('crop')
       }
       if ((srcObj?.assetId ?? '') !== '' && locked) {
         this.$notify({ group: 'copy', text: i18n.tc('NN0804') })

@@ -99,9 +99,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapMutations({
-      setCurrActivePanel: 'mobileEditor/SET_currActivePanel'
-    }),
     getFieldValue(field: string): number | boolean {
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     },

@@ -486,18 +486,6 @@ export default Vue.extend({
     toggleResizerHint(isHover: boolean): void {
       this.isShownResizerHint = isHover
     },
-    pageClickHandler(): void {
-      // const sel = window.getSelection()
-      // if (sel) {
-      //   sel.empty()
-      //   sel.removeAllRanges()
-      // }
-    },
-    pageDblClickHandler(): void {
-      // if ((this.config.backgroundImage.config.srcObj?.assetId ?? '') !== '') {
-      //   pageUtils.startBackgroundImageControl(this.pageIndex)
-      // }
-    },
     setFocus(): void {
       this.$nextTick(() => {
         const currPage = this.$refs.page as HTMLElement
@@ -632,7 +620,6 @@ export default Vue.extend({
       return cssConverter.convertFlipStyle(horizontalFlip, verticalFlip)
     },
     openLineTemplatePopup() {
-      this.pageClickHandler()
       popupUtils.openPopup('line-template', {
         target: `.btn-line-template[pageIndex="${this.pageIndex}"]`,
         posX: 'right'
