@@ -92,11 +92,13 @@ div(:layer-index="`${layerIndex}`"
               :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="resizeStart"
               @touchstart="disableTouchEvent")
-        div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
-            @pointerdown="moveStart")
-          div(class="control-point__resize-bar control-point__move-bar"
+        div(v-if="config.type === 'text' && contentEditable"
+            class="control-point__resize-bar-wrapper")
+          div(v-for="(resizer, index) in resizer(controlPoints, true)"
+              class="control-point resizer control-point__move-bar"
               :key="`resizer-text-${index}`"
-              :style="resizerBarStyles(resizer.styles)")
+              :style="resizerBarStyles(resizer.styles)"
+              @pointerdown="moveStart")
         div(v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="`scaler-${index}`"
@@ -202,7 +204,7 @@ export default Vue.extend({
     LazyLoad
   },
   created() {
-    LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false, editing: false })
+    // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false })
     this.cornerRotaters = generalUtils.deepCopy(this.controlPoints.cornerRotaters)
     this.cornerRotaterbaffles = generalUtils.deepCopy(this.controlPoints.cornerRotaters)
   },
@@ -306,7 +308,7 @@ export default Vue.extend({
     },
     showTextEditor(): boolean {
       if (this.config.type === 'text' && this.isActive) {
-        return !this.isMoving
+        return true
       }
       return false
     },
@@ -380,11 +382,14 @@ export default Vue.extend({
     isCurveText(): boolean {
       return this.checkIfCurve(this.config)
     },
-    isTextEditing(): boolean {
-      // return !this.isControlling && this.contentEditable
-      // @Test
-      return !this.isControlling
+    isFlipped(): boolean {
+      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     },
+    // isTextEditing(): boolean {
+    //   // return !this.isControlling && this.contentEditable
+    //   // @Test
+    //   return !this.isControlling
+    // },
     contentEditable(): boolean {
       return this.config.contentEditable
     },
@@ -410,7 +415,7 @@ export default Vue.extend({
         this.isControlling = false
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { shown: false, contentEditable: false, isTyping: false })
         }
         popupUtils.closePopup()
       } else {
@@ -420,17 +425,17 @@ export default Vue.extend({
         }
       }
     },
-    isTextEditing(editing) {
-      if (this.getLayerType === 'text') {
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-          editing
-        })
-      }
-    },
+    // isTextEditing(editing) {
+    //   if (this.getLayerType === 'text') {
+    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+    //       editing
+    //     })
+    //   }
+    // },
     contentEditable(newVal) {
       if (this.config.type !== 'text') return
       if (this.config.active) {
-        if (!newVal || !this.config.isEdited) {
+        if (!newVal) {
           tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
         }
         tiptapUtils.agent(editor => {
@@ -445,7 +450,7 @@ export default Vue.extend({
      * While image is setted to frame, these event-listener should be removed
      */
     if (this.getLayerType === 'text') {
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { shown: false, contentEditable: false, isTyping: false })
     }
     eventUtils.removePointerEvent('pointerup', this.moveEnd)
     eventUtils.removePointerEvent('pointermove', this.moving)
@@ -599,27 +604,20 @@ export default Vue.extend({
       }
     },
     textBodyStyle() {
-      let opacity = 1
-      if (this.isTextEditing && this.contentEditable) {
-        opacity = 1
-      } else {
-        opacity = 0
-      }
-
       const textstyles = {
         width: '100%',
         height: '100%',
         userSelect: this.contentEditable ? 'text' : 'none',
-        opacity
+        opacity: 1
       }
-      return !this.isCurveText ? textstyles
+      return !(this.isCurveText || this.isFlipped) ? textstyles
         : {
           width: 'auto',
           height: 'auto',
           position: 'absolute',
           top: 0,
           left: 0,
-          opacity: this.isTextEditing && this.contentEditable ? 1 : 0
+          opacity: this.contentEditable ? 1 : 0
         }
     },
     groupControllerStyle() {
@@ -944,9 +942,12 @@ export default Vue.extend({
           x: Math.abs(this.getLayerPos().x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos().y - this.initTranslate.y)
         }
-        if ((Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
+        if (posDiff.x !== 0 || posDiff.y !== 0) {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: true })
           this.setMoving(true)
+          if (this.getLayerType === 'text' && this.config.contentEditable) {
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+          }
         }
       }
     },
@@ -1012,8 +1013,8 @@ export default Vue.extend({
           x: Math.abs(this.getLayerPos().x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos().y - this.initTranslate.y)
         }
-        const hasActiualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
-        if (hasActiualMove) {
+        const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
+        if (hasActualMove) {
           if (this.getLayerType === 'text') {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
           }
@@ -1054,6 +1055,11 @@ export default Vue.extend({
             }
             if (this.config.contentEditable) {
               tiptapUtils.focus({ scrollIntoView: false })
+              if (!this.config.isEdited) {
+                setTimeout(() => {
+                  tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
+                }, 100) // wait for default behavior to set cursor position, then select (otherwise selection will be overwritten)
+              }
             }
           }
           this.isMoved = false
@@ -1081,7 +1087,7 @@ export default Vue.extend({
           }
         }
 
-        if (generalUtils.isTouchDevice() && !this.isPointerDownFromSubController && !hasActiualMove) {
+        if (generalUtils.isTouchDevice() && !this.isPointerDownFromSubController && !hasActualMove) {
           /**
            * This function is used for mobile-control, as one of the sub-controller is active
            * tap at the primary-controller should set the sub-controller to non-active
@@ -2024,7 +2030,7 @@ export default Vue.extend({
         GroupUtils.select(this.pageIndex, [this.layerIndex])
       }
       if (this.getLayerType === 'text') {
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { shown: false, contentEditable: false, isTyping: false })
       }
 
       eventUtils.removePointerEvent('pointermove', this.moving)
