@@ -9,13 +9,13 @@
           div(class="content__editor")
             div(v-if="!inBgRemoveMode" class="header-container")
               editor-header
-            div(v-if="isAdmin && enableAdminView" class="admin-options")
+            div(v-if="showAllAdminTool" class="admin-options")
               div(class="admin-options__sticky-container"
                   :style="stickyTopPos")
                 div(class="flex flex-column mr-10")
                   span(class="ml-10 text-bold text-orange") {{templateText}}
                   span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
-                svg-icon(v-if="isAdmin"
+                svg-icon(
                   class="mr-10"
                   :iconName="`user-admin${getAdminModeText}`"
                   :iconWidth="'20px'"
@@ -127,7 +127,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('user', [
-      'role',
       'adminMode',
       'viewGuide']),
     ...mapGetters({
@@ -138,7 +137,7 @@ export default Vue.extend({
       groupType: 'getGroupType',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       enableComponentLog: 'getEnalbleComponentLog',
-      enableAdminView: 'user/getEnableAdminView'
+      showAllAdminTool: 'user/showAllAdminTool'
     }),
     ...mapGetters('user', {
       token: 'getToken',
@@ -165,9 +164,6 @@ export default Vue.extend({
     },
     isLogin(): boolean {
       return store.getters['user/isLogin']
-    },
-    isAdmin(): boolean {
-      return this.role === 0
     },
     getAdminModeText(): string {
       return this.adminMode ? '' : '-disable'

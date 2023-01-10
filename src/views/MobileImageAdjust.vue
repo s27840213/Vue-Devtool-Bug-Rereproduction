@@ -185,11 +185,7 @@ export default Vue.extend({
       getLayer: 'getLayer',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedLayers: 'getCurrSelectedLayers',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      isAdmin: 'user/isAdmin'
-    }),
-    ...mapState('user', {
-      isSuperUser: 'role'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     isCropping(): boolean {
       return imageUtils.isImgControl()

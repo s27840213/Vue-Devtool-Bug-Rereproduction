@@ -120,7 +120,7 @@
           div(class="scale-container relative"
               :style="scaleContainerStyles")
             page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
-            div(v-if="isAdmin && enableAdminView" class="layer-num") Layer數量: {{config.layers.length}}
+            div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
             div(v-if="currSelectedIndex !== -1" class="page-control" :style="styles('control')")
               nu-controller(v-if="currFocusPageIndex === pageIndex" data-identifier="controller"
                 :key="`controller-${currLayer.id}`"
@@ -293,9 +293,8 @@ export default Vue.extend({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
       contentScaleRatio: 'getContentScaleRatio',
-      isAdmin: 'user/isAdmin',
       pagesLength: 'getPagesLength',
-      enableAdminView: 'user/getEnableAdminView'
+      showAllAdminTool: 'user/showAllAdminTool'
     }),
     config(): IPage {
       return this.pageState.config
