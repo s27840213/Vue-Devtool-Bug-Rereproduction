@@ -137,7 +137,7 @@
         :style="wrapperStyles()")
       //- for ruler to get rectangle of page content (without bleeds)
       div(v-if="config.isEnableBleed" :class="`nu-page-bleed-${pageIndex}`" :style="bleedLineAreaStyles()")
-      div(v-if="(currActivePageIndex === pageIndex && isDetailPage)"
+      div(v-if="(currActivePageIndex === pageIndex && isDetailPage && !isImgCtrl && !isBgImgCtrl)"
           class="page-resizer"
           ref="pageResizer"
           @pointerdown.left.stop="pageResizeStart($event)"
@@ -294,6 +294,7 @@ export default Vue.extend({
       contentScaleRatio: 'getContentScaleRatio',
       isAdmin: 'user/isAdmin',
       enableAdminView: 'user/getEnableAdminView',
+      isImgCtrl: 'imgControl/isImgCtrl',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
     config(): IPage {
