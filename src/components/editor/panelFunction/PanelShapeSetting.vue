@@ -364,7 +364,7 @@ export default Vue.extend({
       return this.currSelectedInfo.layers[0].designId ?? ''
     },
     isObjectElement(): boolean {
-      return this.currLayer.type === 'group' && !(this.currSelectedInfo.layers[0].db === 'text')
+      return this.currSelectedInfo.layers[0].db !== 'text'
     }
   },
   watch: {
