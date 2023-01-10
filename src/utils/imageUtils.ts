@@ -15,15 +15,21 @@ import editorUtils from './editorUtils'
 import mouseUtils from './mouseUtils'
 
 class ImageUtils {
-  imgLoadHandler(src: string, cb: (img: HTMLImageElement) => void, error?: () => void) {
-    const image = new Image()
-    image.src = src
-    if (image.complete) {
-      cb(image)
-    } else {
-      image.onload = () => cb(image)
-      error && (image.onerror = error)
-    }
+  async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: () => void, crossOrigin?: boolean }) {
+    const { error, crossOrigin = false } = options || {}
+    return new Promise<T>((resolve) => {
+      const image = new Image()
+      image.src = src
+      if (crossOrigin) {
+        image.crossOrigin = 'anoynous'
+      }
+      if (image.complete) {
+        resolve(cb(image))
+      } else {
+        image.onload = () => resolve(cb(image))
+        error && (image.onerror = error)
+      }
+    })
   }
 
   getImgIdentifier(srcObj: SrcObj, ...attrs: Array<string>): string {
@@ -303,9 +309,6 @@ class ImageUtils {
         }
       }
     }
-    // if (editorUtils.currActivePanel === 'crop') {
-    //   editorUtils.setCloseMobilePanelFlag(true)
-    // }
   }
 
   initLayerSize: ISize = {

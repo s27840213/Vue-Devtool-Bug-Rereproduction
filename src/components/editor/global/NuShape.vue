@@ -296,25 +296,28 @@ export default Vue.extend({
     },
     async checkAndFetchSvg(useConfig = true) {
       const svg = useConfig ? this.config.svg : undefined
-      const shape = await shapeUtils.fetchSvg(this.config) as IShape
+      let shape = null as unknown as IShape
       const config = this.config as IShape
       /**
        * Check if the fetched svg.config's color array is changed,
        */
-      if (config.color && shape.color) {
-        if (config.color.length > shape.color.length) {
-          const newColor = [...config.color].slice(0, shape.color.length)
-          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: newColor }, this.subLayerIndex)
-        } else if (config.color.length < shape.color.length) {
-          const appendColors = [...shape.color].slice(config.color.length)
-          const newColor = [...config.color, ...appendColors]
-          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: newColor }, this.subLayerIndex)
+      if (!['D', 'E'].includes(config.category)) {
+        shape = await shapeUtils.fetchSvg(this.config)
+        if (config.color && shape.color) {
+          if (config.color.length > shape.color.length) {
+            const newColor = [...config.color].slice(0, shape.color.length)
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: newColor }, this.subLayerIndex)
+          } else if (config.color.length < shape.color.length) {
+            const appendColors = [...shape.color].slice(config.color.length)
+            const newColor = [...config.color, ...appendColors]
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: newColor }, this.subLayerIndex)
+          }
+        } else if (!config.color && shape.color) {
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: [...shape.color] }, this.subLayerIndex)
         }
-      } else if (!config.color && shape.color) {
-        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: [...shape.color] }, this.subLayerIndex)
       }
 
-      switch (this.config.category) {
+      switch (config.category) {
         case 'C': {
           // should be deleted after the new json format stablize
           if (!svg && this.config.designId) {
