@@ -29,7 +29,6 @@ export class MovingUtils {
   private isHandleMovingHandler = false
   private snapUtils = null as any
   private body = undefined as unknown as HTMLElement
-  private isPointerDownFromSubController = false
   private _moving = null as unknown
   private _moveEnd = null as unknown
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as ILayerInfo
@@ -485,7 +484,6 @@ export class MovingUtils {
       //     }
       //   }
       // }
-      this.isPointerDownFromSubController = false
       this.isControlling = false
       this.setCursorStyle(e, '')
     }
