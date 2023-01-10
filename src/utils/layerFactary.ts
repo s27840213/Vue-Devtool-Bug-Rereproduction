@@ -240,7 +240,7 @@ class LayerFactary {
       dragging: false,
       designId: '',
       isEdited: false,
-      contentEditable: false,
+      contentEditable: config.contentEditable ?? false,
       styles: {
         x: config.styles?.x,
         y: config.styles?.y,

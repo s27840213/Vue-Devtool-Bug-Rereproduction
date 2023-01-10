@@ -679,7 +679,8 @@ export default Vue.extend({
     mapGuidelineToPage(type: string): { pos: number, outOfPage: boolean } {
       // just has two options: ['v','h']
       const guideline = type === 'v' ? this.$refs.guidelineV as HTMLElement : this.$refs.guidelineH as HTMLElement
-      const result = RulerUtils.mapGuidelineToPage(guideline, type, this.from)
+      const from = type === 'v' ? this.from : RulerUtils.getOverlappedPageIndex(guideline, 'h')
+      const result = RulerUtils.mapGuidelineToPage(guideline, type, from)
       return result
     },
     closeGuidelineH(need2Record = false) {

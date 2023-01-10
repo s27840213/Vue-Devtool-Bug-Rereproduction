@@ -209,7 +209,6 @@ export default Vue.extend({
     ...mapMutations({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
-      setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
     }),
     ...mapActions({
@@ -225,8 +224,7 @@ export default Vue.extend({
         editorUtils.setShowMobilePanel(false)
         editorUtils.setInMultiSelectionMode(false)
       } else {
-        editorUtils.setShowMobilePanel(true)
-        this.setCurrActivePanel(panelType)
+        editorUtils.setCurrActivePanel(panelType)
         if (panelType === 'color' && props?.currColorEvent) {
           this.currColorEvent = props.currColorEvent
         }
@@ -252,7 +250,7 @@ export default Vue.extend({
       this.showMobilePanelAfterTransitoin = true
     },
     afterLeave() {
-      this.setCurrActivePanel('none')
+      editorUtils.setCurrActivePanel('none')
       setTimeout(() => {
         this.showMobilePanelAfterTransitoin = false
       }, 300)

@@ -121,6 +121,9 @@ export default Vue.extend({
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     },
+    isLocked(): boolean {
+      return this.config.locked
+    },
     // Use duplicated of text to do some text effect, define their difference css here.
     duplicatedText() {
       const duplicatedBodyBasicCss = {
@@ -357,19 +360,12 @@ export default Vue.extend({
       return tiptapUtils.textStylesRaw(styles)
     },
     getOpacity() {
-      const { editing, contentEditable, active } = this.config
-      if (this.isCurveText) {
-        return contentEditable ? 0.2 : 1
-      }
-      if (editing && !this.isMoving) {
-        if (contentEditable && active) {
-          if (this.isCurveText || this.isFlipped) {
-            return 0.2
-          } else {
-            return 0
-          }
+      const { active, contentEditable } = this.config
+      if (active && !this.isLocked) {
+        if (this.isCurveText || this.isFlipped) {
+          return contentEditable ? 0.2 : 1
         } else {
-          return 1
+          return 0
         }
       } else {
         return 1
