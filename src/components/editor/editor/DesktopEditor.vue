@@ -30,11 +30,11 @@
             scale-ratio-editor(@toggleSidebarPanel="toggleSidebarPanel")
         div(class="content__panel"
             :style="contentPanelStyles")
-          function-panel(@toggleColorPanel="toggleColorPanel")
+          function-panel
           transition(name="panel-up")
-            color-slips(v-if="isColorPanelOpen" mode="FunctionPanel"
-              class="content__panel__color-panel"
-              @toggleColorPanel="toggleColorPanel")
+            color-slips(v-if="showColorSlips" mode="FunctionPanel"
+              :selectedColor="currEventColor()"
+              class="content__panel__color-panel")
         div(v-if="isShowPagePreview" class="content__pages")
           page-preview
     tour-guide(v-if="showEditorGuide")
@@ -67,6 +67,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import pageUtils from '@/utils/pageUtils'
 import ComponentLog from '@/components/componentLog/ComponentLog.vue'
 import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
+import editorUtils from '@/utils/editorUtils'
 import unitUtils from '@/utils/unitUtils'
 
 export default Vue.extend({
@@ -90,10 +91,6 @@ export default Vue.extend({
       FunctionPanelType,
       isSidebarPanelOpen: true,
       inputLocale: i18n.locale,
-      // isColorPanelOpen: false
-      colorPanelOpenState: {
-        val: false
-      },
       componentLogs: [] as Array<IComponentUpdatedLog>
     }
   },
@@ -150,13 +147,8 @@ export default Vue.extend({
     ...mapGetters('brandkit', {
       isBrandSettingsOpen: 'getIsSettingsOpen'
     }),
-    isColorPanelOpen: {
-      get: function (): boolean {
-        return this.colorPanelOpenState ? this.colorPanelOpenState.val : false
-      },
-      set: function (newVal: boolean) {
-        this.colorPanelOpenState.val = newVal
-      }
+    showColorSlips(): boolean {
+      return editorUtils.showColorSlips
     },
     isShape(): boolean {
       return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
@@ -165,7 +157,7 @@ export default Vue.extend({
       return SidebarPanelType.page === this.currPanel
     },
     contentPanelStyles(): { [index: string]: string } {
-      return this.isColorPanelOpen ? {
+      return this.showColorSlips ? {
         'grid-template-rows': '1fr 1fr'
       } : {
         'grid-template-rows': '1fr'
@@ -209,7 +201,7 @@ export default Vue.extend({
     logUtils.setLog('Editor mounted')
     this.clearBgRemoveState()
     colorUtils.on('closeColorPanel', () => {
-      this.colorPanelOpenState.val = false
+      editorUtils.toggleColorSlips(false)
     })
     if (brandkitUtils.isBrandkitAvailable) {
       brandkitUtils.fetchBrands(this.fetchBrands)
@@ -235,14 +227,14 @@ export default Vue.extend({
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'
     }),
+    currEventColor(): string {
+      return colorUtils.globalSelectedColor.currEventColor
+    },
     setAdminMode() {
       this._setAdminMode(!this.adminMode)
     },
     setPanelType(type: number) {
       this.setCurrFunctionPanel(type)
-    },
-    toggleColorPanel(bool: boolean) {
-      this.isColorPanelOpen = bool
     },
     toggleSidebarPanel(bool: boolean) {
       this.isSidebarPanelOpen = bool

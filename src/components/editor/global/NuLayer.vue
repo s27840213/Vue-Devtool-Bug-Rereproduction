@@ -1,5 +1,6 @@
 <template lang="pug">
-  div(:style="[{transform: isImgCtrl || inFrame ? {} : `translateZ(${this.config.styles.zindex}px)`},...transformStyle]")
+  div(:style="[isImgCtrl || inFrame ? {} : {transform: `translateZ(${this.config.styles.zindex}px)`,...transformStyle}]"
+      :class="[{'click-disabled': isPagePreview}]")
     div(v-for="div in layerDivs"
         class="nu-layer" :class="!config.locked && subLayerIndex === -1 ? `nu-layer--p${pageIndex}` : ''"
         :style="layerStyles(div.noShadow, div.isTransparent)"

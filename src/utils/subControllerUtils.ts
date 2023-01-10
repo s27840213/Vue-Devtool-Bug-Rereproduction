@@ -25,7 +25,7 @@ export default class SubControllerUtils {
   private get pageIndex(): number { return this.layerInfo.pageIndex }
   private get layerIndex(): number { return this.layerInfo.layerIndex }
   private get subLayerIdx(): number { return this.layerInfo.subLayerIdx ?? -1 }
-  private get primaryLayer(): IGroup | IFrame { return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp }
+  private get primaryLayer(): IGroup | IFrame | ITmp { return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp }
 
   constructor({ _config, body, layerInfo }: { _config: { config: ILayer }, body: HTMLElement, layerInfo?: ILayerInfo, component?: Vue }) {
     this._config = _config
@@ -36,7 +36,7 @@ export default class SubControllerUtils {
   onPointerdown(e: PointerEvent) {
     if (this.primaryLayer.type === 'tmp') {
       if (generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || store.getters['mobileEditor/getInMultiSelectionMode']) {
-        groupUtils.deselectTargetLayer(this.layerIndex)
+        groupUtils.deselectTargetLayer(this.subLayerIdx)
       }
       return
     }
@@ -88,12 +88,6 @@ export default class SubControllerUtils {
 
     formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex, this.subLayerIdx)
     formatUtils.clearCopiedFormat()
-    if (this.primaryLayer.type === 'tmp') {
-      if (generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || store.getters['mobileEditor/getInMultiSelectionMode']) {
-        groupUtils.deselectTargetLayer(this.layerIndex)
-      }
-      return
-    }
     if (this.config.type === 'text') {
       this.posDiff.x = this.primaryLayer.styles.x
       this.posDiff.y = this.primaryLayer.styles.y

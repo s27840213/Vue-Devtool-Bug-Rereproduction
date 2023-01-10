@@ -1,17 +1,16 @@
-import { IGroup, ILayer, IShape, IText } from '@/interfaces/layer'
-import { EventEmitter } from 'events'
 import store from '@/store'
+import { IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import { EventEmitter } from 'events'
 import { IPage } from '@/interfaces/page'
 import pageUtils from './pageUtils'
-import { clamp } from 'lodash'
+import layerUtils from '@/utils/layerUtils'
+import { clamp, filter, flatten, uniq } from 'lodash'
 
 const STOP_POSTFIX = '_st'
 
 class ColorUtils {
-  event: any
+  event: EventEmitter
   eventHash: { [index: string]: (color: string) => void }
-  currEvent: string
-  currColor: string
 
   get currPageBackgroundColor() {
     return pageUtils.currFocusPage.backgroundColor
@@ -20,11 +19,69 @@ class ColorUtils {
   constructor() {
     this.event = new EventEmitter()
     this.eventHash = {}
-    this.currEvent = ''
-    this.currColor = '#ffffff'
   }
 
+  get currEvent(): string { return store.getters['color/currEvent'] }
+  get currColor(): string { return store.getters['color/currColor'] }
   get currStopEvent(): string { return this.currEvent + STOP_POSTFIX }
+
+  get globalSelectedColor(): { textColor: string, textColors: string[], color: string, colors: string[], currEventColor: string } {
+    const currPage = layerUtils.getCurrPage
+    const { subLayerIdx } = layerUtils
+    let currLayer = layerUtils.getCurrLayer
+    // In group or tmp and selecting sub layer
+    if ((currLayer.type === 'group' || currLayer.type === 'tmp') && subLayerIdx !== -1) {
+      currLayer = currLayer.layers[subLayerIdx]
+    }
+
+    let textColors = [] as string[]
+    let colors = [] as string[]
+    const currEventColor = this.currColor
+
+    function colorArray(colors: string[]) {
+      if (colors.length === 0) return 'none'
+      else if (colors.length === 1) return colors[0]
+      else return 'multi'
+    }
+
+    switch (currLayer.type) {
+      case 'text':
+        textColors = uniq(flatten(currLayer.paragraphs.map(p => p.spans.map(s => s.styles.color))))
+        break
+      case 'frame': {
+        const { decoration, decorationTop } = currLayer
+        colors = [...(decoration?.color || []), ...(decorationTop?.color || [])]
+        break
+      }
+      case 'image':
+        colors = [currLayer.styles.shadow.effects.color]
+        break
+      case 'shape':
+        colors = currLayer.color
+        break
+      case 'tmp':
+      case 'group': {
+        const singleColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length === 1) as IShape[]
+        const multiColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length !== 1) as IShape[]
+        const hasImages = (currLayer.layers.filter(l => l.type === 'image') as IImage[]).length !== 0
+        const shapeColors = uniq(singleColorShapes.map(s => s.color[0]))
+        colors = hasImages || (singleColorShapes.length === 0 && multiColorShapes.length !== 1) ? []
+          : singleColorShapes.length === 0 && multiColorShapes.length === 1 ? multiColorShapes[0].color
+            : shapeColors
+        const texts = filter(currLayer.layers, { type: 'text' }) as IText[]
+        textColors = uniq(flatten(flatten(texts.map(t => t.paragraphs.map(p => p.spans.map(s => s.styles.color))))))
+        break
+      }
+      default: {
+        const bgColor = currPage.backgroundImage.config.srcObj.assetId ? ['none', 'none'] : [currPage.backgroundColor]
+        colors = store.getters['mobileEditor/getInBgSettingMode'] ? bgColor : []
+      }
+    }
+
+    const textColor = colorArray(textColors)
+    const color = colorArray(colors)
+    return { textColor, textColors, color, colors, currEventColor }
+  }
 
   on(type: string, callback: (color: string) => void) {
     // replace origin event
@@ -45,12 +102,12 @@ class ColorUtils {
   }
 
   setCurrEvent(event: string) {
-    this.currEvent = event
+    store.commit('color/SET_STATE', { currEvent: event })
   }
 
   setCurrColor(color: string) {
     if (/^#[0-9A-F]{6}$/i.test(color)) {
-      this.currColor = color
+      store.commit('color/SET_STATE', { currColor: color })
     }
   }
 

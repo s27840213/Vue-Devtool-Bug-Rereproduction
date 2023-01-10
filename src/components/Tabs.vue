@@ -12,23 +12,23 @@
 import Vue, { PropType } from 'vue'
 
 export default Vue.extend({
+  model: {
+    prop: 'tabIndex',
+    event: 'switchTab'
+  },
   props: {
     tabs: {
       type: Array as PropType<string[]>,
       default: () => []
     },
-    defaultTab: {
+    // Use v-model to bind tabIndex.
+    tabIndex: {
       type: Number,
-      default: 0
+      required: true
     },
     theme: { // value: dark, light
       type: String,
       default: 'dark'
-    }
-  },
-  data() {
-    return {
-      currActiveTabIndex: this.defaultTab
     }
   },
   computed: {
@@ -64,7 +64,7 @@ export default Vue.extend({
   },
   methods: {
     tabStyle(tabIndex: number) {
-      const isActive = tabIndex === this.currActiveTabIndex
+      const isActive = tabIndex === this.tabIndex
       const activeMode = isActive ? 'active' : 'inactive'
       const type = this.theme.split('-')[1]
       return type === 'rect'
@@ -88,7 +88,6 @@ export default Vue.extend({
         }
     },
     switchTab(tabIndex: number) {
-      this.currActiveTabIndex = tabIndex
       this.$emit('switchTab', tabIndex)
     }
   }
