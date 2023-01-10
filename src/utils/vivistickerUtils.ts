@@ -28,7 +28,8 @@ const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '100.0',
   locale: 'us',
   isFirstOpen: false,
-  editorBg: ''
+  editorBg: '',
+  osVer: '100.0'
 }
 
 const USER_SETTINGS_CONFIG: {[key: string]: {default: any, description: string}} = {
@@ -47,7 +48,8 @@ export const MODULE_TYPE_MAPPING: {[key: string]: string} = {
 
 const ROUTER_CALLBACKS = [
   'loginResult',
-  'getStateResult'
+  'getStateResult',
+  'setStateDone'
 ]
 
 const VVSTK_CALLBACKS = [
@@ -55,7 +57,6 @@ const VVSTK_CALLBACKS = [
   'listAssetResult',
   'copyDone',
   'thumbDone',
-  'setStateDone',
   'addAssetDone',
   'deleteAssetDone',
   'getAssetResult',
@@ -101,6 +102,7 @@ const DOCUMENT_URLS = {
 class ViviStickerUtils {
   appLoadedSent = false
   isAnyIOSImgOnError = false
+  hasCopied = false
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
   callbackMap = {} as {[key: string]: (data?: any) => void}
@@ -192,6 +194,20 @@ class ViviStickerUtils {
 
   sendToIOS(messageType: string, message: any) {
     console.log(messageType, message)
+    if (messageType === 'SCREENSHOT' && !this.hasCopied && this.checkOSVersion('16.0')) {
+      this.hasCopied = true
+      this.setState('hasCopied', { data: this.hasCopied })
+      modalUtils.setModalInfo(i18n.t('STK0033').toString(), i18n.t('STK0034').toString(), {
+        msg: i18n.t('STK0035').toString(),
+        action: () => {
+          store.commit('vivisticker/SET_fullPageConfig', {
+            type: 'iOS16Video',
+            params: { fromModal: true }
+          })
+          modalUtils.clearModalInfo()
+        }
+      }, undefined, undefined, true, true)
+    }
     try {
       const webkit = (window as any).webkit
       if (!webkit) return
@@ -444,8 +460,17 @@ class ViviStickerUtils {
   }
 
   checkVersion(targetVersion: string) {
+    // targetVersion must be in format: <main>.<sub> e.g. 1.18
     const [targetMain, targetSub] = targetVersion.split('.')
     const [currMain, currSub] = store.getters['vivisticker/getUserInfo'].appVer.split('.')
+    return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
+  }
+
+  checkOSVersion(targetVersion: string) {
+    // targetVersion must be in format: <main>.<sub> e.g. 1.18
+    const [targetMain, targetSub] = targetVersion.split('.')
+    const [currMain, currSubRaw] = (store.getters['vivisticker/getUserInfo'].osVer ?? '0.0').split('.')
+    const currSub = currSubRaw ?? '0'
     return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
   }
 

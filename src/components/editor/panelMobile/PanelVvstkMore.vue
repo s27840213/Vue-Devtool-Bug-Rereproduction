@@ -90,7 +90,14 @@ export default Vue.extend({
       userInfo: 'vivisticker/getUserInfo'
     }),
     mainOptions(): OptionConfig[] {
-      return [{
+      return [...vivistickerUtils.checkOSVersion('16.0') ? [
+        {
+          text: `${this.$t('STK0032')}`,
+          icon: 'vivisticker_play-circle',
+          action: this.handleShowIOS16Tutorial
+        }
+      ] : [],
+      {
         text: `${this.$t('NN0146')}`,
         icon: 'vivisticker_play-circle',
         action: this.handleShowTutorial
@@ -110,15 +117,21 @@ export default Vue.extend({
         text: `${this.$t('NN0742')}`,
         icon: 'vivisticker_mail',
         action: this.handleOpenInfo
-      }, ...this.debugMode ? [
+      }, ...vivistickerUtils.checkVersion('1.20') ? [
+        {
+          text: `${this.$t('STK0025')}`,
+          icon: 'vivisticker_global',
+          action: () => { this.handleList('subscribe') }
+        }
+      ] : [], ...this.debugMode ? [
         {
           text: 'domain 選單',
           icon: 'vivisticker_global',
           action: () => { this.handleList('domain') }
-        }, {
-          text: `${this.$t('STK0025')}`,
-          icon: 'vivisticker_global',
-          action: () => { this.handleList('subscribe') }
+        // }, {
+        //   text: `${this.$t('STK0025')}`,
+        //   icon: 'vivisticker_global',
+        //   action: () => { this.handleList('subscribe') }
         }, {
           text: 'App 事件測試',
           icon: 'vivisticker_global',
@@ -234,7 +247,8 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setShowTutorial: 'vivisticker/SET_showTutorial',
-      setSlideType: 'vivisticker/SET_slideType'
+      setSlideType: 'vivisticker/SET_slideType',
+      setFullPageConfig: 'vivisticker/SET_fullPageConfig'
     }),
     handleOptionAction(action?: () => void) {
       if (action) {
@@ -251,6 +265,9 @@ export default Vue.extend({
     handleShowTutorial() {
       this.setShowTutorial(true)
       editorUtils.setCloseMobilePanelFlag(true)
+    },
+    handleShowIOS16Tutorial() {
+      this.setFullPageConfig({ type: 'iOS16Video', params: { fromModal: false } })
     },
     handleShowUserSettings() {
       this.setSlideType('slideUserSettings')
