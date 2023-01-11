@@ -495,7 +495,6 @@ export default defineComponent({
   methods: {
     ...mapMutations({
       setBgImageControl: 'SET_backgroundImageControl',
-      setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
     }),
     ...mapActions({
@@ -522,7 +521,7 @@ export default defineComponent({
     closeMobilePanel() {
       this.$emit('switchTab', 'none')
       this.panelHistory = []
-      this.setCurrActivePanel('none')
+      editorUtils.setCurrActivePanel('none')
     },
     initHeightPx() {
       return ((this.$el.parentElement as HTMLElement).clientHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)

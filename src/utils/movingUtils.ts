@@ -30,7 +30,6 @@ export class MovingUtils {
   private isHandleMovingHandler = false
   private snapUtils = null as any
   private body = undefined as unknown as HTMLElement
-  private isPointerDownFromSubController = false
   private _moving = null as unknown
   private _moveEnd = null as unknown
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as ILayerInfo
@@ -340,7 +339,7 @@ export class MovingUtils {
         x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
         y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
       }
-      const hasActualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
+      const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
       if (hasActualMove) {
         if (!this.config.moving || !store.state.isMoving) {
           updateConifgData.moving = true
@@ -388,8 +387,8 @@ export class MovingUtils {
       x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
       y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
     }
-    const hasActiualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
-    if (!this.isDoingGestureAction && !this.isActive && !hasActiualMove) {
+    const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
+    if (!this.isDoingGestureAction && !this.isActive && !hasActualMove) {
       this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
       if (!this.inMultiSelectionMode) {
         groupUtils.deselect()
@@ -407,7 +406,7 @@ export class MovingUtils {
     }
 
     if (this.isActive) {
-      if (hasActiualMove) {
+      if (hasActualMove) {
         // dragging to another page
         if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
           const layerNum = this.currSelectedInfo.layers.length
@@ -443,6 +442,11 @@ export class MovingUtils {
           }
           if (this.config.contentEditable) {
             tiptapUtils.focus({ scrollIntoView: false })
+            if (!this.config.isEdited) {
+              setTimeout(() => {
+                tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
+              }, 100) // wait for default behavior to set cursor position, then select (otherwise selection will be overwritten)
+            }
           }
         }
         if (this.inMultiSelectionMode) {
@@ -469,7 +473,7 @@ export class MovingUtils {
         }
       }
 
-      // if (this.isTouchDevice && !this.isPointerDownFromSubController && !hasActiualMove) {
+      // if (this.isTouchDevice && !this.isPointerDownFromSubController && !hasActualMove) {
       //   /**
       //    * This function is used for mobile-control, as one of the sub-controller is active
       //    * tap at the primary-controller should set the sub-controller to non-active
@@ -486,7 +490,6 @@ export class MovingUtils {
       //     }
       //   }
       // }
-      this.isPointerDownFromSubController = false
       this.isControlling = false
       this.setCursorStyle(e, '')
     }

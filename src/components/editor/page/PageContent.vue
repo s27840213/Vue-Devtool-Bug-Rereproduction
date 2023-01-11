@@ -11,7 +11,9 @@ div(class="overflow-container"
         @dragenter.prevent
         @contextmenu.prevent
         @click.right.stop="onRightClick"
-        @dblclick="pageDblClickHandler()")
+        @dblclick="pageDblClickHandler()"
+        @tap="tapPageContent")
+      //- @dblclick will not be trigger in mobile, use @tap + doubleTapUtils instead.
       nu-bg-image(:image="this.config.backgroundImage"
         :pageIndex="pageIndex"
         :color="this.config.backgroundColor"
@@ -72,6 +74,7 @@ import generalUtils from '@/utils/generalUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
 import { ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import doubleTapUtils from '@/utils/doubleTapUtils'
 
 export default defineComponent({
   emits: [],
@@ -305,6 +308,11 @@ export default defineComponent({
       }
       popupUtils.openPopup('page', { event })
     },
+    tapPageContent(e: Event): void {
+      const target = e.target as HTMLElement
+      if (!target.matches('.nu-background-image img')) return
+      doubleTapUtils.click(e, { doubleClickCallback: this.pageDblClickHandler })
+    },
     pageDblClickHandler(): void {
       if (this.isHandleShadow) {
         return
@@ -312,6 +320,7 @@ export default defineComponent({
       const { srcObj, locked } = this.config.backgroundImage.config
       if ((srcObj?.assetId ?? '') !== '' && !locked) {
         pageUtils.startBackgroundImageControl(this.pageIndex)
+        editorUtils.setCurrActivePanel('crop')
       }
       if ((srcObj?.assetId ?? '') !== '' && locked) {
         this.$notify({ group: 'copy', text: i18n.global.tc('NN0804') })

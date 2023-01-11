@@ -17,6 +17,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import { IShape } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
+import stepsUtils from '@/utils/stepsUtils'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'
@@ -309,23 +310,27 @@ export default defineComponent({
     async checkAndFetchSvg(useConfig = true) {
       const svg = useConfig ? this.config.svg : undefined
       let shape = null as unknown as IShape
+      let hasChanged = false
       const config = this.config as IShape
       /**
        * Check if the fetched svg.config's color array is changed,
        */
-      if (!['D', 'E'].includes(config.category)) {
+      if (!['D', 'E'].includes(config.category) && this.config.designId) {
         shape = await shapeUtils.fetchSvg(this.config)
         if (config.color && shape.color) {
           if (config.color.length > shape.color.length) {
             const newColor = [...config.color].slice(0, shape.color.length)
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: newColor }, this.subLayerIndex)
+            hasChanged = true
           } else if (config.color.length < shape.color.length) {
             const appendColors = [...shape.color].slice(config.color.length)
             const newColor = [...config.color, ...appendColors]
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: newColor }, this.subLayerIndex)
+            hasChanged = true
           }
         } else if (!config.color && shape.color) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: [...shape.color] }, this.subLayerIndex)
+          hasChanged = true
         }
       }
 
@@ -402,6 +407,11 @@ export default defineComponent({
             }, this.subLayerIndex)
           }
         }
+      }
+
+      if (hasChanged) {
+        stepsUtils.clearCurrStep()
+        stepsUtils.record()
       }
 
       const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)

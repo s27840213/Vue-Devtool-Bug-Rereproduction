@@ -481,6 +481,7 @@ export default defineComponent({
       if (!this.isFormatApplicable) return
       const page = generalUtils.deepCopy(this.getPage(pageUtils.currFocusPageIndex))
       page.designId = ''
+      page.id = generalUtils.generateRandomString(8)
       this.addPageToPos({
         newPage: page,
         pos: pageUtils.currFocusPageIndex + 1
