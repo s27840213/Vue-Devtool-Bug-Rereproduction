@@ -21,7 +21,6 @@ class DownloadUtil {
         cmyk: 0
       },
       pdf_print: {
-        ...(this.isAdmin && { trim: 0 }),
         ...(this.isAdmin && { bleed: 1 }),
         outline: 1,
         cmyk: 0

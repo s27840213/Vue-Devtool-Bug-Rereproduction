@@ -51,18 +51,18 @@
             min="1"
             v-ratio-change
             type="range")
-        div(v-if="'trim' in selected")
+        div(v-if="'bleed' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
             :label="`${$t('NN0774')}`"
-            :default-checked="!!selected.trim"
-            @change="({ checked }) => {handleUpdate('trim', checked ? 1 : 0); if('bleed' in selected && checked && selected.bleed === 0) handleUpdate('bleed', 1)}")
+            :default-checked="selected.bleed === 2"
+            @change="({ checked }) => handleUpdate('bleed', checked ? 2 : 0)")
         div(v-if="'bleed' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
             :label="`${$t('NN0775')}`"
-            :default-checked="!!selected.bleed"
-            @change="({ checked }) => {handleUpdate('bleed', checked ? 1 : 0); if('trim' in selected && !checked && selected.trim === 1) handleUpdate('trim', 0)}")
+            :default-checked="selected.bleed > 0"
+            @change="({ checked }) => handleUpdate('bleed', checked ? 1 : 0)")
         div(v-if="selectedTypeVal === 'pdf_print' && 'outline' in selected")
           download-check-button(type="checkbox"
             class="mb-10"

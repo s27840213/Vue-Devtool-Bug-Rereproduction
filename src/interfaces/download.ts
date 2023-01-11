@@ -3,9 +3,8 @@ export interface IDownloadTypeAttrs {
   scale?: number
   quality?: number
   omitBackground?: 0 | 1
-  trim?: 0 | 1
-  bleed?: 0 | 1
-  outline?: 0 | 1
+  bleed?: 0 | 1 | 2
+  outline?: 0 | 1 | 2
   cmyk?: 0 | 1
 }
 
@@ -27,9 +26,8 @@ export interface IDownloadServiceParams {
   pdfQuality?: 0 | 1
   merge?: 0 | 1
   splitSize?: number
-  trim?: 0 | 1,
-  bleed?: 0 | 1
-  outline?: 0 | 1
+  bleed?: 0 | 1 | 2
+  outline?: 0 | 1 | 2
   cmyk?: 0 | 1
 }
 
