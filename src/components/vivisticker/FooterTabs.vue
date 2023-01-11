@@ -21,7 +21,7 @@
 import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 import { mapGetters, mapState } from 'vuex'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer } from '@/interfaces/layer'
 import stepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, LayerType } from '@/store/types'
 import ColorBtn from '@/components/global/ColorBtn.vue'
@@ -32,13 +32,12 @@ import { IFooterTab } from '@/interfaces/editor'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import shapeUtils from '@/utils/shapeUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import i18n from '@/i18n'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import eventUtils from '@/utils/eventUtils'
-import _ from 'lodash'
 import colorUtils from '@/utils/colorUtils'
+import _ from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -146,7 +145,6 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          // hidden: shapeUtils.getSingleColorObjNum === 0,
           hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.shape
@@ -160,7 +158,6 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          // hidden: shapeUtils.getDocumentColors.length === 0,
           hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.shape

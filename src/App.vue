@@ -85,9 +85,6 @@ export default Vue.extend({
       isModalOpen: 'modal/getModalOpen',
       modalInfo: 'modal/getModalInfo',
       inScreenshotPreview: 'getInScreenshotPreview',
-      enableAdminView: 'user/getEnableAdminView'
-    }),
-    ...mapGetters('user', {
       showAllAdminTool: 'user/showAllAdminTool'
     }),
     currLocale(): string {

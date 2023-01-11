@@ -87,6 +87,8 @@ class PageUtils {
 
   get currFocusPageInViewRatio(): number {
     const focusPage = document.getElementsByClassName('nu-page')[this.currFocusPageIndex]
+    // Skip in view ratio check if no nu-page found in vvstk.
+    if (!focusPage) return 1
     const rect = focusPage.getBoundingClientRect()
     const windowHeight = window.innerHeight
     const topInView = Math.max(rect.top, 0)

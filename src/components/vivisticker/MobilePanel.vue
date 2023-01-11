@@ -577,7 +577,7 @@ export default Vue.extend({
     },
     currActivePanel(newVal) {
       this.panelHistory = []
-      this.innerTab = this.innerTabs.key[0]
+      this.innerTabIndex = 0
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
       this.panelHeight = this.initHeightPx()
