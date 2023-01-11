@@ -1,4 +1,4 @@
-import { IAsset, IAssetProps } from '@/interfaces/module'
+import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import Vue from 'vue'
@@ -23,6 +23,7 @@ import i18n from '@/i18n'
 import generalUtils from './generalUtils'
 import modalUtils from './modalUtils'
 import frameUtils from './frameUtils'
+import colorUtils from './colorUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '100.0',
@@ -292,7 +293,8 @@ class ViviStickerUtils {
     return (jsonData: any) => {
       if ([5, 11, 10].includes(asset.type)) {
         if (jsonData.color && jsonData.color.length > 0) {
-          eventUtils.emit(PanelEvent.switchTab, 'color', { currColorEvent: ColorEventType.shape })
+          colorUtils.setCurrEvent(ColorEventType.shape)
+          eventUtils.emit(PanelEvent.switchTab, 'color')
         } else {
           eventUtils.emit(PanelEvent.switchTab, 'opacity')
         }
