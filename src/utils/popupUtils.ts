@@ -57,7 +57,7 @@ class PopupUtils {
   }
 
   setSliderConfig(config: Partial<ISliderConfig>) {
-    this.sliderConfig = Object.assign(DEFAULT_SLIDER_CONFIG, config)
+    Object.assign(this.sliderConfig, config)
   }
 
   private openPopupNearTarget(target: string, pos: { x: 'left' | 'right', y: 'top' | 'bottom' }) {
@@ -150,6 +150,7 @@ class PopupUtils {
     if (this.popupEl) {
       this.popupEl.style.transform = ''
     }
+    this.sliderConfig = DEFAULT_SLIDER_CONFIG
   }
 }
 
