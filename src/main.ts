@@ -38,6 +38,7 @@ import NuSubController from '@/components/editor/global/NuSubController.vue'
 import NuShape from '@/components/editor/global/NuShape.vue'
 import NuImgController from '@/components/editor/global/NuImgController.vue'
 import NuFrame from '@/components/editor/global/NuFrame.vue'
+import Nubtn from '@/components/global/Nubtn.vue'
 import Spinner from '@/components/global/Spinner.vue'
 import Hint from '@/components/global/Hint.vue'
 import Dropdown from '@/components/global/Dropdown.vue'
@@ -123,6 +124,7 @@ app.component('nu-sub-controller', NuSubController)
 app.component('nu-shape', NuShape)
 app.component('nu-img-controller', NuImgController)
 app.component('nu-frame', NuFrame)
+app.component('nubtn', Nubtn)
 app.component('spinner', Spinner)
 app.component('hint', Hint)
 
