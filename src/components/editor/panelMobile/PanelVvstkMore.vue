@@ -117,7 +117,7 @@ export default Vue.extend({
         text: `${this.$t('NN0742')}`,
         icon: 'vivisticker_mail',
         action: this.handleOpenInfo
-      }, ...vivistickerUtils.checkVersion('1.20') ? [
+      }, ...vivistickerUtils.checkVersion('1.21') ? [
         {
           text: `${this.$t('STK0025')}`,
           icon: 'vivisticker_global',
