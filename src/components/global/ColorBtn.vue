@@ -5,7 +5,7 @@ div(class="color-btn" :style="wrapperStyle")
     div(v-if="color === 'add'" class="color-btn__add-color")
     div(v-else-if="color === 'multi'" class="color-btn__multi-color")
     div(v-else class="color-btn__color" :style="{backgroundColor: color}")
-    svg-icon(v-if="focus" iconName="item-check" iconWidth="40%")
+    svg-icon(v-if="focus" iconName="item-check" iconColor="black-3" iconWidth="40%")
 </template>
 
 <script lang="ts">
@@ -94,10 +94,10 @@ export default Vue.extend({
       }
     }
     &.focus, &.active {
-      border: 2px solid setColor(blue-1);
+      border: 2px solid setColor(black-5);
     }
     &:not(.mobile):hover {
-      border: 2px solid setColor(blue-hover);
+      border: 2px solid setColor(black-5);
     }
     > svg {
       position: absolute;
