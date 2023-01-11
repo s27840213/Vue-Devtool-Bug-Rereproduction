@@ -13,7 +13,7 @@
                 url(:url="it.url") {{it.label}}
                 svg-icon(v-if="it.content" iconName="chevron-down"
                   iconColor="gray-1" iconWidth="16px")
-              url(v-for="i in it.content" :url="i.url") {{i.label}}
+              url(v-for="i in it.content" :url="i.url" :newTab="i.newTab") {{i.label}}
     div(class="menu-bottom")
       template(v-if="!isLogin")
         div(class="menu-bottom__link")
