@@ -14,7 +14,7 @@ import { round, isEqual } from 'lodash'
 import generalUtils from './generalUtils'
 
 class ResizeUtils {
-  scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number, reScaleShapeStrokeWidth = false) {
+  scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number) {
     if (!targetLayer.moved) {
       targetLayer.moved = true
     }
@@ -78,7 +78,7 @@ class ResizeUtils {
           const { size } = layer
           if (!size) break
           const strokeWidth = size[0]
-          const newStrokeWidth = reScaleShapeStrokeWidth ? Math.round(strokeWidth * targetScale) : strokeWidth
+          const newStrokeWidth = Math.round(strokeWidth * targetScale)
           const { point, realWidth, realHeight } = shapeUtils.computePointForDimensions(quadrant, newStrokeWidth, lineWidth * targetScale, lineHeight * targetScale)
           controlUtils.updateShapeLinePoint(pageIndex, layerIndex, point)
           width = realWidth
@@ -96,7 +96,7 @@ class ResizeUtils {
           const { size } = layer
           if (!size) break
           const strokeWidth = size[0]
-          const newStrokeWidth = reScaleShapeStrokeWidth ? Math.round(strokeWidth * targetScale) : strokeWidth
+          const newStrokeWidth = Math.round(strokeWidth * targetScale)
           scale = 1
           const corRad = controlUtils.getCorRadValue([width, height], controlUtils.getCorRadPercentage(layer.vSize, size, layer.shapeType ?? ''), layer.shapeType ?? '')
           controlUtils.updateShapeVSize(pageIndex, layerIndex, [width, height])
@@ -104,33 +104,6 @@ class ResizeUtils {
             size: [newStrokeWidth, corRad]
           })
         }
-        break
-      case 'group':
-        layer = targetLayer as IGroup
-        layer.layers.forEach((subLayer, index) => {
-          if (subLayer.type === 'shape') {
-            subLayer = subLayer as IShape
-            if (subLayer.category === 'D') {
-              const [strokeWidth] = subLayer.size ?? [1]
-              const newStrokeWidth = reScaleShapeStrokeWidth ? strokeWidth : Math.round(strokeWidth / targetScale)
-              layerUtils.updateSubLayerProps(pageIndex, layerIndex, index, {
-                size: [newStrokeWidth]
-              })
-              const trans = shapeUtils.getTranslateCompensationForLineWidth(subLayer.point ?? [], subLayer.styles, strokeWidth, newStrokeWidth)
-              layerUtils.updateSubLayerStyles(pageIndex, layerIndex, index, {
-                x: trans.x,
-                y: trans.y
-              })
-            }
-            if (subLayer.category === 'E') {
-              const [strokeWidth, corRad] = subLayer.size ?? [1, 0]
-              const newStrokeWidth = reScaleShapeStrokeWidth ? strokeWidth : Math.round(strokeWidth / targetScale)
-              layerUtils.updateSubLayerProps(pageIndex, layerIndex, index, {
-                size: [newStrokeWidth, corRad]
-              })
-            }
-          }
-        })
         break
       case 'tmp':
         throw new Error('Unexpected tmp layer encountered')
@@ -149,9 +122,9 @@ class ResizeUtils {
     guidelines.h = guidelines.h.map(hl => hl * scale + yOffset)
   }
 
-  scaleAndMoveLayers(pageIndex: number, page: IPage, scale: number, xOffset: number, yOffset: number, reScaleShapeStrokeWidth = false): IPage {
+  scaleAndMoveLayers(pageIndex: number, page: IPage, scale: number, xOffset: number, yOffset: number): IPage {
     page.layers.forEach((layer, index) => {
-      this.scaleAndMoveLayer(pageIndex, index, layer, scale, xOffset, yOffset, reScaleShapeStrokeWidth)
+      this.scaleAndMoveLayer(pageIndex, index, layer, scale, xOffset, yOffset)
     })
     if (page.guidelines) {
       this.scaleAndMoveGuideLines(page.guidelines, scale, xOffset, yOffset)
@@ -191,7 +164,7 @@ class ResizeUtils {
     )
   }
 
-  resizePage(pageIndex: number, page: IPage, format: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }, reScaleShapeStrokeWidth = false) {
+  resizePage(pageIndex: number, page: IPage, format: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
     // set physical size to px size if not exist
     format.physicalWidth ||= format.width
     format.physicalHeight ||= format.height
@@ -259,11 +232,11 @@ class ResizeUtils {
     if (targetAspectRatio > aspectRatio) {
       scale = format.height / sizeWithoutBleed.height
       const offsetBleed = page.isEnableBleed ? { left: bleeds.left - page.bleeds.left * scale, top: bleeds.top - page.bleeds.top * scale } : { left: 0, top: 0 }
-      this.scaleAndMoveLayers(pageIndex, page, scale, ((sizeWithoutBleed.height * targetAspectRatio - sizeWithoutBleed.width) / 2) * scale + offsetBleed.left, offsetBleed.top, reScaleShapeStrokeWidth)
+      this.scaleAndMoveLayers(pageIndex, page, scale, ((sizeWithoutBleed.height * targetAspectRatio - sizeWithoutBleed.width) / 2) * scale + offsetBleed.left, offsetBleed.top)
     } else {
       scale = format.width / sizeWithoutBleed.width
       const offsetBleed = page.isEnableBleed ? { left: bleeds.left - page.bleeds.left * scale, top: bleeds.top - page.bleeds.top * scale } : { left: 0, top: 0 }
-      this.scaleAndMoveLayers(pageIndex, page, scale, offsetBleed.left, ((sizeWithoutBleed.width / targetAspectRatio - sizeWithoutBleed.height) / 2) * scale + offsetBleed.top, reScaleShapeStrokeWidth)
+      this.scaleAndMoveLayers(pageIndex, page, scale, offsetBleed.left, ((sizeWithoutBleed.width / targetAspectRatio - sizeWithoutBleed.height) / 2) * scale + offsetBleed.top)
     }
 
     // add bleed to new size
