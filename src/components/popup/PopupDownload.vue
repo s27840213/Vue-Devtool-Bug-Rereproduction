@@ -51,7 +51,7 @@
             min="1"
             v-ratio-change
             type="range")
-        div(v-if="'bleed' in selected")
+        div(v-if="selectedTypeVal === 'pdf_print' && 'bleed' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
             :label="`${$t('NN0774')}`"
