@@ -99,7 +99,9 @@ export default Vue.extend({
       editorViewResizeObserver: null as unknown as ResizeObserver,
       isSwiping: false,
       isScaling: false,
-      uploadUtils: uploadUtils
+      uploadUtils: uploadUtils,
+      hanleWheelTimer: -1,
+      handleWheelTransition: false
     }
   },
   created() {
@@ -363,10 +365,31 @@ export default Vue.extend({
       }
     },
     handleWheel(e: WheelEvent) {
-      if (e.metaKey || e.ctrlKey) {
-        e.preventDefault()
+      if ((e.metaKey || e.ctrlKey) && !this.handleWheelTransition) {
+        clearTimeout(this.hanleWheelTimer)
+        this.hanleWheelTimer = setTimeout(() => {
+          const { pageRect, editorRect } = pageUtils.getEditorRenderSize
+          console.log('reach limit', pageUtils.mobileMinScaleRatio)
+          if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
+            const page = document.getElementById(`nu-page_${layerUtils.pageIndex}`) as HTMLElement
+            page.style.transition = '0.3s linear'
+            this.handleWheelTransition = true
+            setTimeout(() => {
+              page.style.transition = ''
+              this.handleWheelTransition = false
+              // const editor = document.getElementById('mobile-editor__content') as HTMLElement
+              // console.log(page.offsetHeight && editor.offsetHeight)
+            }, 500)
+            pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
+          }
+        }, 500)
         const ratio = this.pageScaleRatio * (1 - e.deltaY * 0.005)
-        this.setPageScaleRatio(Math.min(Math.max(Math.round(ratio), 10), 500))
+        const newScaleRatio = Math.min(Math.max(Math.round(ratio), 10), 500)
+        if (newScaleRatio >= pageUtils.mobileMinScaleRatio || e.deltaY < 0) {
+          console.log('handle wheel')
+          e.preventDefault()
+          this.setPageScaleRatio(newScaleRatio)
+        }
       }
     },
     pinchHandler(event: AnyTouchEvent) {
@@ -508,6 +531,7 @@ $REULER_SIZE: 20px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
+    justify-content: center;
     @include no-scrollbar;
     // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container
     // justify-content: center;

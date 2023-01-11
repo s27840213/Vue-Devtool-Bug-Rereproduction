@@ -406,20 +406,20 @@ export class MovingUtils {
   }
 
   pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (this.scaleRatio <= 29) return
+    if (this.scaleRatio <= pageUtils.mobileMinScaleRatio) return
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
 
-    const newPageSize = (this.scaleRatio / 29) * 313
-    const newOriginX = -(newPageSize - 390) * 0.5
-    console.log(newOriginX)
-    const isReachRightEdge = pageUtils.getCurrPage.x < 0 &&
-      offsetPos.x < 0 &&
-      Math.abs(pageUtils.getCurrPage.x + offsetPos.x) >= Math.abs(newOriginX) + 30
+    const newPageSize = (this.scaleRatio / pageUtils.mobileMinScaleRatio) * 313
+    const newOriginX = (newPageSize - 390) * 0.5
+    const isReachRightEdge = pageUtils.getCurrPage.x < 0 && offsetPos.x < 0 &&
+      -(pageUtils.getCurrPage.x + offsetPos.x) >= newOriginX + 30
+    const isReachLeftEdge = pageUtils.getCurrPage.x > 0 && offsetPos.x > 0 &&
+      pageUtils.getCurrPage.x + offsetPos.x >= newOriginX + 30
 
     this.initialPos.x += offsetPos.x
     this.initialPos.y += offsetPos.y
     pageUtils.updatePagePos(this.pageIndex, {
-      x: (isReachRightEdge ? 0 : offsetPos.x) + pageUtils.getCurrPage.x,
+      x: (isReachRightEdge || isReachLeftEdge ? 0 : offsetPos.x) + pageUtils.getCurrPage.x,
       y: offsetPos.y + pageUtils.getCurrPage.y
     })
   }

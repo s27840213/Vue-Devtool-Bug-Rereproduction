@@ -79,6 +79,10 @@ export default Vue.extend({
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
   },
   mounted() {
+    const { pageRect, editorRect } = pageUtils.getEditorRenderSize
+    pageUtils.pageSize = { width: pageRect.width, height: pageRect.height }
+    pageUtils.editorSize = { width: editorRect.width, height: editorRect.height }
+    console.log(pageUtils.pageSize.width, pageUtils.pageSize.height, pageUtils.editorSize.width, pageUtils.editorSize.height)
     /**
      * @Note the codes below is used to prevent the zoom in/out effect of mobile phone, especially for the "IOS"
      * Remember to set passive to "false", or the preventDefault() function won't work.

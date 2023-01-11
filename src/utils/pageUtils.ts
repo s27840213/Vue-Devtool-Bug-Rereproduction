@@ -109,12 +109,16 @@ class PageUtils {
   bottomBound: number
   mobileMinScaleRatio: number
   isSwitchingToEditor: boolean
+  editorSize: { width: number, height: number }
+  pageSize: { width: number, height: number }
 
   constructor() {
     this.topBound = -1
     this.bottomBound = Number.MAX_SAFE_INTEGER
     this.mobileMinScaleRatio = 0
     this.isSwitchingToEditor = false
+    this.editorSize = { width: 0, height: 0 }
+    this.pageSize = { width: 0, height: 0 }
   }
 
   newPage(pageData: Partial<IPage>) {
@@ -510,7 +514,6 @@ class PageUtils {
       (editorHeight - mobilePanelHeight) / (targetHeight * (this.scaleRatio / 100))
     ) * 0.8
     const newRatio = Math.max(3, Math.round(this.scaleRatio * resizeRatio))
-    console.log(newRatio)
 
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
       store.commit('SET_pageScaleRatio', 100)
