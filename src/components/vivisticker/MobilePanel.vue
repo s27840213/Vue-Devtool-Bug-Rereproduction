@@ -40,7 +40,7 @@
             @pointerdown="rightButtonAction"
             @touchstart="disableTouchEvent")
       tabs(v-if="innerTabs.label" class="mobile-panel__inner-tab" theme="light"
-          :tabs="innerTabs.label" @switchTab="switchInnerTab")
+          :tabs="innerTabs.label" v-model="innerTabIndex")
     div(class="mobile-panel__bottom-section")
       //- keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-file']")
       //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
@@ -169,7 +169,7 @@ export default Vue.extend({
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
       currSubColorEvent: '',
-      innerTab: '',
+      innerTabIndex: 0,
       draggedPanelHeight: 0
     }
   },
@@ -290,6 +290,9 @@ export default Vue.extend({
         },
         this.isDuringCopy ? { padding: '0' } : {}
       )
+    },
+    innerTab(): string {
+      return this.innerTabs.key[this.innerTabIndex]
     },
     innerTabs(): Record<string, string[]> {
       switch (this.currActivePanel) {
@@ -695,9 +698,6 @@ export default Vue.extend({
           }
         }
       }
-    },
-    switchInnerTab(panelIndex: number) {
-      this.innerTab = this.innerTabs.key[panelIndex]
     },
     fitPage() {
       this.$nextTick(() => {

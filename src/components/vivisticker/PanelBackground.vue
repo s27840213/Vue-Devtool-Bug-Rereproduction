@@ -3,8 +3,7 @@
     tabs(v-if="!isInCategory"
           class="panel-bg__tabs"
           :tabs="[$tc('NN0002', 2),$t('NN0017')]"
-          :defaultTab="currActiveTabIndex"
-          @switchTab="switchTab")
+          v-model="tabIndex")
     template(v-show="showImageTab")
       search-bar(v-if="!isInCategory && showImageTab" class="panel-bg__searchbar"
         :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
@@ -138,7 +137,7 @@ export default Vue.extend({
         mainContent: 0,
         searchResult: 0
       },
-      currActiveTabIndex: 0,
+      tabIndex: 0,
       opacity: 100,
       showAllRecentlyBgColors: false,
       colorAreaHeight: window.innerHeight - 176
@@ -251,7 +250,7 @@ export default Vue.extend({
         })}`
     },
     showImageTab(): boolean {
-      return this.currActiveTabIndex === 0
+      return this.tabIndex === 0
     }
   },
   mounted() {
@@ -427,9 +426,6 @@ export default Vue.extend({
     },
     recordChange() {
       this.$nextTick(() => stepsUtils.record())
-    },
-    switchTab(tabIndex: number) {
-      this.currActiveTabIndex = tabIndex
     },
     handleShareImage(item: IAsset) {
       this.setShareItem(item)

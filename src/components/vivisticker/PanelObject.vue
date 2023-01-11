@@ -3,13 +3,11 @@
     tabs(v-if="!isInCategory"
         class="panel-objects__tabs"
         :tabs="[$t('NN0758'), 'GIFs', $t('NN0759')]"
-        :defaultTab="currActiveTabIndex"
-        @switchTab="switchTab")
+        v-model="tabIndex")
     //- Favorites tabs
     div(v-if="isFavorites && !isInCategory" class="panel-objects__favorites-tabs")
       tabs(:tabs="[$t('NN0758'), 'GIFs']" theme="dark-rect"
-          :defaultTab="currActiveFavoritesIndex"
-          @switchTab="switchFavorites")
+          v-model="favoritesTabIndex")
       svg-icon(iconName="info-reverse" iconWidth="24px" iconColor="white"
               @click.native="doubleTapTips")
     keep-alive
@@ -37,8 +35,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      currActiveTabIndex: 0,
-      currActiveFavoritesIndex: 0
+      tabIndex: 0,
+      favoritesTabIndex: 0
     }
   },
   mounted() {
@@ -54,11 +52,11 @@ export default Vue.extend({
     isInCategory(): boolean {
       return this.isTabInCategory('object')
     },
-    isStatic(): boolean { return this.currActiveTabIndex === 0 },
-    isGifs(): boolean { return this.currActiveTabIndex === 1 },
-    isFavorites(): boolean { return this.currActiveTabIndex === 2 },
-    isFavoritesStatic(): boolean { return this.currActiveTabIndex === 2 && this.currActiveFavoritesIndex === 0 },
-    isFavoritesGifs(): boolean { return this.currActiveTabIndex === 2 && this.currActiveFavoritesIndex === 1 }
+    isStatic(): boolean { return this.tabIndex === 0 },
+    isGifs(): boolean { return this.tabIndex === 1 },
+    isFavorites(): boolean { return this.tabIndex === 2 },
+    isFavoritesStatic(): boolean { return this.tabIndex === 2 && this.favoritesTabIndex === 0 },
+    isFavoritesGifs(): boolean { return this.tabIndex === 2 && this.favoritesTabIndex === 1 }
   },
   methods: {
     scrollToTop() {
@@ -69,12 +67,6 @@ export default Vue.extend({
         // @ts-expect-error: Call vue child component method
         (this.$refs.gif as Vue).scrollToTop()
       }
-    },
-    switchTab(tabIndex: number) {
-      this.currActiveTabIndex = tabIndex
-    },
-    switchFavorites(tabIndex: number) {
-      this.currActiveFavoritesIndex = tabIndex
     },
     doubleTapTips() {
       modalUtils.setModalInfo(
