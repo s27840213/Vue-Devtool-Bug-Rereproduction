@@ -56,7 +56,7 @@
             class="mb-10"
             :label="`${$t('NN0774')}`"
             :default-checked="selected.bleed === 2"
-            @change="({ checked }) => handleUpdate('bleed', checked ? 2 : 0)")
+            @change="({ checked }) => handleUpdate('bleed', checked ? 2 : 1)")
         div(v-if="'bleed' in selected")
           download-check-button(type="checkbox"
             class="mb-10"
