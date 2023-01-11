@@ -756,7 +756,7 @@ export default Vue.extend({
     },
     applyBleeds(key: string, all: boolean) {
       // resize all bleeds of all pages if is email marketing design
-      if (this.groupType === 1) {
+      if (this.groupType === 1 && pageUtils.pageNum > 1) {
         if (!all && (key === 'top' || key === 'bottom')) {
           const pageIndex = key === 'top' ? 0 : this.pagesLength - 1
           pageUtils.setBleeds(pageIndex, {
