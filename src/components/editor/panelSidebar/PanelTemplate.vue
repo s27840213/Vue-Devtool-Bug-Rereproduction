@@ -7,7 +7,7 @@ div(class="panel-template" ref="panel")
       iconColor="gray-2"
       iconName="close"
       iconWidth="24px"
-      @click.native="handleClosePrompt")
+      @click="handleClosePrompt")
   //- Group template UI
   panel-group-template(v-if="currentGroup"
     :showId="showAdminTool"
@@ -22,7 +22,7 @@ div(class="panel-template" ref="panel")
         :defaultKeyword="keywordLabel"
         @search="handleSearch")
         nubtn(theme="icon" icon="sliders" :status="!allThemesChecked?'active':'default'"
-            @click.native="onAdvancedClicked()" :hint="$t('NN0795')")
+            @click="onAdvancedClicked()" :hint="$t('NN0795')")
       popup-theme(v-if="showTheme"
         class="panel-template__theme"
         :style="themeStyle()"

@@ -26,7 +26,7 @@ div(class="panel-text")
           class="panel-text__text-button mb-10"
           :type="`text-${config.type.toLowerCase()}`"
           :fontFamily="localeFont()"
-          @click.native="handleAddText(config)") {{ config.text }}
+          @click="handleAddText(config)") {{ config.text }}
     template(v-else)
       div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText"
           :key="config.type"
@@ -36,7 +36,7 @@ div(class="panel-text")
           class="panel-text__text-button mb-10"
           :style="getFontStyles(config.type.toLowerCase())"
           :type="`text-${config.type.toLowerCase()}`"
-          @click.native="handleAddText(config)") {{ config.text }}
+          @click="handleAddText(config)") {{ config.text }}
   //- Search result and main content
   category-list(v-for="item in categoryListArray"
                 v-show="item.show" :ref="item.key" :key="item.key"

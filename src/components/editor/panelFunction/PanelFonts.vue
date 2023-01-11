@@ -8,7 +8,7 @@ div(class="panel-fonts")
       :iconName="'close'"
       :iconWidth="'30px'"
       :iconColor="'gray-2'"
-      @click.native="closeFontsPanel")
+      @click="closeFontsPanel")
   search-bar(placeholder="Search font"
     clear
     :defaultKeyword="keywordLabel"

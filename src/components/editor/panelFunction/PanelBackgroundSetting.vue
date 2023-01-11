@@ -6,7 +6,7 @@ div(class="bg-setting" v-click-outside="handleOutSide")
       iconName="transparency" :iconWidth="'20px'"
       :class="{ 'disabled': backgroundLocked }"
       :iconColor="'gray-2'"
-      @click.native="openSliderPopup()"
+      @click="openSliderPopup()"
       v-hint="$t('NN0030')"
     )
     svg-icon(class="pointer p-5 feature-button"
@@ -14,14 +14,14 @@ div(class="bg-setting" v-click-outside="handleOutSide")
       :iconName="backgroundLocked ? 'unlock' : 'lock'"
       :iconWidth="'20px'"
       :iconColor="'gray-2'"
-      @click.native="handleLockBackground"
+      @click="handleLockBackground"
       v-hint="backgroundLocked ? $t('NN0382'): $t('NN0143')"
     )
     svg-icon(class="pointer p-5 feature-button"
       :class="{ 'disabled': backgroundLocked }"
       :iconColor="'gray-2'"
       iconName="trash" :iconWidth="'20px'"
-      @click.native="handleDeleteBackground"
+      @click="handleDeleteBackground"
       v-hint="$t('NN0034')"
     )
   div(class="mb-10")
@@ -29,18 +29,18 @@ div(class="bg-setting" v-click-outside="handleOutSide")
       :class="backgroundImgControl ? 'active' : ''"
       type="gray-mid"
       :disabled="!isShowImage || backgroundLocked"
-      @click.native="() => handleControlBgImage()") {{$t('NN0040')}}
+      @click="() => handleControlBgImage()") {{$t('NN0040')}}
   div(class="bg-setting__grid mb-10")
     btn(class="full-width"
       :class="show === 'popup-flip' ? 'active' : ''"
       type="gray-mid"
       :disabled="!isShowImage || backgroundLocked"
-      @click.native="() => handleShow('popup-flip')") {{$t('NN0038')}}
+      @click="() => handleShow('popup-flip')") {{$t('NN0038')}}
     btn(class="full-width"
       :class="show === 'popup-adjust' ? 'active' : ''"
       type="gray-mid"
       :disabled="!isShowImage || backgroundLocked"
-      @click.native="handleShow('popup-adjust')") {{$t('NN0042')}}
+      @click="handleShow('popup-adjust')") {{$t('NN0042')}}
   div(class="mb-10 text-left")
     div(v-if="show === 'popup-flip'"
       class="popup-flip"

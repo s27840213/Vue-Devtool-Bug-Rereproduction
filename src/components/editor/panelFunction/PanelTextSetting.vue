@@ -42,15 +42,15 @@ div(class="text-setting" ref='body'
                 iconName="copy"
                 iconWidth="16px"
                 iconColor="gray-4"
-                @click.native="copyColor")
+                @click="copyColor")
     div(class="action-bar action-bar--small flex-evenly")
       svg-icon(class="pointer record-selection btn-lh feature-button p-5"
         :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click.native="openLineHeightSliderPopup('.btn-lh')"
+        @click="openLineHeightSliderPopup('.btn-lh')"
         v-hint="$t('NN0110')")
       svg-icon(class="pointer record-selection btn-ls feature-button p-5"
         :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click.native="openSpacingSliderPopup('.btn-ls')"
+        @click="openSpacingSliderPopup('.btn-ls')"
         v-hint="$t('NN0109')")
   div(class="action-bar flex-evenly")
     svg-icon(v-for="(icon,index) in mappingIcons('font')"
@@ -59,14 +59,14 @@ div(class="text-setting" ref='body'
       :key="`gp-action-icon-${index}`"
       :id="`icon-${icon}`"
       v-hint="hintMap[icon]"
-      :iconName="icon" :iconWidth="'20px'" :iconColor="iconClickable(icon) ? 'gray-2' : 'gray-4'" @mousedown.native="onPropertyClick(icon)")
+      :iconName="icon" :iconWidth="'20px'" :iconColor="iconClickable(icon) ? 'gray-2' : 'gray-4'" @mousedown="onPropertyClick(icon)")
   div(class="action-bar flex-evenly")
     svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
       class="pointer feature-button p-5"
       :class="{ active: iconIsActived(icon) }"
       :key="`gp-action-icon-${index}`"
       v-hint="hintMap[icon]"
-      :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
+      :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown="onParaPropsClick(icon)")
 </template>
 
 <script lang="ts">

@@ -192,31 +192,31 @@ const getters: GetterTree<IUserModule, any> = {
   getImgSizeMap(state): Array<{ [key: string]: string | number }> {
     return state.imgSizeMap
   },
-  getIsUpdateDesignOpen() {
+  getIsUpdateDesignOpen(state) {
     return state.isUpdateDesignOpen
   },
-  getUpdateDesignId() {
+  getUpdateDesignId(state) {
     return state.updateDesignId
   },
-  getUpdateDesignType() {
+  getUpdateDesignType(state) {
     return state.updateDesignType
   },
-  getDimensionMap() {
+  getDimensionMap(state) {
     return state.dimensionMap
   },
-  getBleed() {
+  getBleed(state) {
     return state.bleed
   },
-  getTrim() {
+  getTrim(state) {
     return state.trim
   },
-  getRenderForPDF() {
+  getRenderForPDF(state) {
     return state.renderForPDF
   },
-  showAdminTool() { // Partial admin tool
+  showAdminTool(state) { // Partial admin tool
     return state.role === 0 && state.adminMode && state.enableAdminView
   },
-  showAllAdminTool() {
+  showAllAdminTool(state) {
     return state.role === 0 && state.enableAdminView
   }
 }

@@ -16,7 +16,7 @@ form(class="search-bar bg-gray-6" action @submit="onSearch")
     iconName="close"
     :iconColor="color.close || 'gray-3'"
     iconWidth="20px"
-    @click.native="onClear")
+    @click="onClear")
   slot
 </template>
 

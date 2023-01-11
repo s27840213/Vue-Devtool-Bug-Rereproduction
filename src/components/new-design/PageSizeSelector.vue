@@ -25,7 +25,7 @@ div(class="page-size-selector")
       svg-icon(class="pointer"
           :iconName="isLocked ? 'lock' : 'unlock'"
           iconWidth="20px" :iconColor="selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-4')"
-          @click.native="toggleLock()")
+          @click="toggleLock()")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
         input(class="body-3 page-size-selector__body__custom__box__input" type="number" min="0" ref="inputHeight"
@@ -46,7 +46,7 @@ div(class="page-size-selector")
             :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
       property-bar(v-click-outside="() => {showUnitOptions = false}"
                     class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
-                    @click.native="showUnitOptions = !showUnitOptions")
+                    @click="showUnitOptions = !showUnitOptions")
         span(class="page-size-selector__body__custom__unit__label body-XXS" :class="this.selectedFormatKey === 'custom' ? 'black' : defaultTextColor") {{selectedUnit}}
         svg-icon(class="page-size-selector__body__custom__unit__icon"
           iconName="chevron-down"

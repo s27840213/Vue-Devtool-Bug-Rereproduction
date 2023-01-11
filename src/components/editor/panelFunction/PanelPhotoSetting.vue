@@ -11,13 +11,13 @@ div(class="photo-setting")
         :disabled="disableBtn(btn)"
         :key="btn.name"
         v-hint="disableBtn(btn) ? btn.hint : ''"
-        @click.native="handleShow(btn.show)") {{ btn.label }}
+        @click="handleShow(btn.show)") {{ btn.label }}
     btn(v-if="isImage && !isFrame"
       class="full-width"
       type="gray-mid"
       ref="btn"
       :disabled="isHandleShadow || show === 'panel-photo-shadow'"
-      @click.native="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
+      @click="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
   component(:is="show || 'div'"
     ref="popup"
     :imageAdjust="currLayerAdjust"

@@ -23,7 +23,7 @@ div(class="page-size-selector" :class="{isTouchDevice}")
       svg-icon(class="pointer"
           :iconName="isLocked ? 'lock' : 'unlock'"
           iconWidth="15px" :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'blue'"
-          @click.native="toggleLock()")
+          @click="toggleLock()")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
         input(class="body-XS" type="number" min="0"
@@ -38,7 +38,7 @@ div(class="page-size-selector" :class="{isTouchDevice}")
       property-bar(v-click-outside="() => {showUnitOptions = false}"
                   class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
                   :class="selectedFormat === 'custom' || showUnitOptions ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`"
-          @click.native="showUnitOptions = !showUnitOptions")
+          @click="showUnitOptions = !showUnitOptions")
         span(class="page-size-selector__body__custom__unit__label body-XXS" :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{selectedUnit}}
         svg-icon(class="page-size-selector__body__custom__unit__icon"
           iconName="chevron-down"
@@ -90,7 +90,7 @@ div(class="page-size-selector" :class="{isTouchDevice}")
       checkbox(v-model="copyBeforeApply" class="pointer") {{$t('NN0211')}}
     btn(class="page-size-selector__body__button"
         :disabled="!isFormatApplicable"
-        @click.native="submit")
+        @click="submit")
       svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm")
       span {{$t('NN0022')}}
 </template>

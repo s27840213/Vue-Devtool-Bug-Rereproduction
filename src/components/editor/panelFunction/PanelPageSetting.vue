@@ -63,14 +63,14 @@ div(class="page-setting")
                   :iconName="isLocked ? 'lock' : 'unlock'"
                   iconWidth="15px"
                   iconColor="gray-2"
-                  @click.native="toggleLock()")
+                  @click="toggleLock()")
   div(class="page-setting__footer")
   div(v-if="showAdminTool"
     class="template-information")
     div(class="template-information__divider pb-10")
     btn(:type="'primary-sm'" class="rounded my-5"
         style="padding: 8px 0; margin-left: 6%; width: 88%;"
-        @click.native="getDataClicked()") 取 得 群 組 / 模 板 資 料
+        @click="getDataClicked()") 取 得 群 組 / 模 板 資 料
     div(v-if="groupId.length > 0"
       class="pt-10")
       span(class="text-gray-1 label-lg") 群 組 資 訊
