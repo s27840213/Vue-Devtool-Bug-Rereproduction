@@ -251,31 +251,31 @@ export default Vue.extend({
     trimStyles() {
       return {
         tl: {
-          top: '-1px',
+          top: '-2px',
           bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio}px`,
-          left: '-1px',
+          left: '-2px',
           right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio}px`,
           borderWidth: `${this.contentScaleRatio}px`
         },
         tr: {
-          top: '-1px',
+          top: '-2px',
           bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio}px`,
           left: `${(this.config.width - this.config.bleeds.right) * this.contentScaleRatio}px`,
-          right: '-1px',
+          right: '-2px',
           borderWidth: `${this.contentScaleRatio}px`
         },
         bl: {
           top: `${(this.config.height - this.config.bleeds.bottom) * this.contentScaleRatio}px`,
-          bottom: '-1px',
-          left: '-1px',
+          bottom: '-2px',
+          left: '-2px',
           right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio}px`,
           borderWidth: `${this.contentScaleRatio}px`
         },
         br: {
           top: `${(this.config.height - this.config.bleeds.bottom) * this.contentScaleRatio}px`,
-          bottom: '-1px',
+          bottom: '-2px',
           left: `${(this.config.width - this.config.bleeds.right) * this.contentScaleRatio}px`,
-          right: '-1px',
+          right: '-2px',
           borderWidth: `${this.contentScaleRatio}px`
         }
       }
