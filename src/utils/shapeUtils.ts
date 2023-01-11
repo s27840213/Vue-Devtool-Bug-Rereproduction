@@ -10,6 +10,7 @@ import generalUtils from '@/utils/generalUtils'
 import pageUtils from './pageUtils'
 import zindexUtils from './zindexUtils'
 import layerFactary from './layerFactary'
+import _ from 'lodash'
 
 class ShapeUtils {
   get hasMultiColors() {
@@ -684,7 +685,7 @@ class ShapeUtils {
 
   setLineWidth(value: number) {
     const { min, max } = mappingUtils.mappingMinMax('lineWidth')
-    const lineWidth = parseInt(generalUtils.boundValue(value, min, max))
+    const lineWidth = _.floor(parseFloat(generalUtils.boundValue(value, min, max)), 2)
     const { getCurrLayer: currLayer } = layerUtils
     const { point, styles, size } = (currLayer as IShape)
 
