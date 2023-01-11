@@ -183,7 +183,7 @@ const getters: GetterTree<IUserModule, any> = {
   getAvatar(state) {
     return state.avatar
   },
-  hasAvatar(): boolean {
+  hasAvatar(state): boolean {
     return state.avatar.prev_2x !== undefined
   },
   getViewGuide(state): number {

@@ -48,7 +48,7 @@ div(class="panel-template" ref="panel")
             :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
             :showId="showAdminTool"
             :item="item"
-            @click="handleShowGroup")
+            @clickGroupItem="handleShowGroup")
     template(v-slot:category-template-item="{ list, title }")
       div(v-if="title" class="panel-template__header") {{ title }}
       div(class="panel-template__items")
@@ -58,7 +58,7 @@ div(class="panel-template" ref="panel")
           :showId="showAdminTool"
           :item="item"
           :key="item.group_id"
-          @click="handleShowGroup")
+          @clickGroupItem="handleShowGroup")
     template(#after)
       //- Loading icon
       div(v-if="!theme || pending" class="text-center")
