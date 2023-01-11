@@ -113,7 +113,7 @@ export default Vue.extend({
     },
     fontTabs(): Array<IFooterTab> {
       return [
-        { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || this.isGroup },
+        { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer) },
         { icon: 'plus-square', text: `${this.$t('STK0006')}`, panelType: 'text' },
         { icon: 'font', text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`), panelType: 'fonts' },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },

@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="vvstk-editor" :style="copyingStyles()")
+  div(class="vvstk-editor" :style="copyingStyles()" @pointerdown="selectStart")
     div(class="vvstk-editor__pseudo-page" :style="styles('page')")
       div(class="vvstk-editor__scale-container" :style="styles('scale')")
         page-content(id="vvstk-editor" :config="config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
@@ -31,6 +31,10 @@ import generalUtils from '@/utils/generalUtils'
 import { ISnapline } from '@/interfaces/snap'
 import groupUtils from '@/utils/groupUtils'
 import frameUtils from '@/utils/frameUtils'
+import layerUtils from '@/utils/layerUtils'
+import controlUtils from '@/utils/controlUtils'
+import { MovingUtils } from '@/utils/movingUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   data() {
@@ -50,6 +54,7 @@ export default Vue.extend({
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
+      getMiddlemostPageIndex: 'getMiddlemostPageIndex',
       currActivePageIndex: 'getCurrActivePageIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
@@ -58,7 +63,8 @@ export default Vue.extend({
       editorBg: 'vivisticker/getEditorBg',
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
       contentScaleRatio: 'getContentScaleRatio',
-      isDuringCopy: 'vivisticker/getIsDuringCopy'
+      isDuringCopy: 'vivisticker/getIsDuringCopy',
+      isImgCtrl: 'imgControl/isImgCtrl'
     }),
     config(): IPage {
       return this.pagesState[this.pageIndex].config
@@ -148,6 +154,30 @@ export default Vue.extend({
       this.snapUtils.clear()
       this.closestSnaplines.v = []
       this.closestSnaplines.h = []
+    },
+    selectStart(e: PointerEvent) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      if (this.isImgCtrl) return
+
+      if (layerUtils.layerIndex !== -1) {
+        /**
+         * when the user click the control-region outsize the page,
+         * the moving logic should be applied to the EditorView.
+         */
+        if (controlUtils.isClickOnController(e)) {
+          const movingUtils = new MovingUtils({
+            _config: { config: layerUtils.getCurrLayer },
+            snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+            body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+          })
+          movingUtils.moveStart(e)
+          return
+        }
+
+        if (imageUtils.isImgControl()) {
+          controlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+        }
+      }
     }
   }
 })
