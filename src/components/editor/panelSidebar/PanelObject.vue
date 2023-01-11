@@ -41,7 +41,7 @@
         div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
           span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
           nubtn(size="mid" class="mt-30")
-            url(:url="$t('NN0791')")
+            url(:url="$t('NN0791')" :newTab="true")
               span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 </template>
 
