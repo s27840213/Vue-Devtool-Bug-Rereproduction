@@ -10,7 +10,6 @@
       transition(name="panel-up")
         mobile-panel(v-show="showMobilePanel"
           :currActivePanel="currActivePanel"
-          :currColorEvent="currColorEvent"
           @switchTab="switchTab")
     footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
       @switchTab="switchTab"
@@ -268,18 +267,18 @@ export default Vue.extend({
       }
     },
     switchTab(panelType: string, props?: IFooterTabProps) {
-      if (this.currActivePanel === panelType || panelType === 'none') {
+      // Switch between color and text-color panel without close panel
+      if (this.currActivePanel === panelType && panelType === 'color' &&
+        props?.currColorEvent && this.currColorEvent !== props.currColorEvent) {
+        this.currColorEvent = props.currColorEvent
+      // Close panel if re-click
+      } else if (this.currActivePanel === panelType || panelType === 'none') {
         editorUtils.setShowMobilePanel(false)
         this.setCurrActivePanel('none')
       } else {
-        if (panelType !== 'replace') {
-          editorUtils.setShowMobilePanel(true)
-        }
-        this.setCurrActivePanel(panelType)
-        if (props) {
-          if (panelType === 'color' && props.currColorEvent) {
-            this.currColorEvent = props.currColorEvent
-          }
+        editorUtils.setCurrActivePanel(panelType)
+        if (panelType === 'color' && props?.currColorEvent) {
+          this.currColorEvent = props.currColorEvent
         }
       }
     },

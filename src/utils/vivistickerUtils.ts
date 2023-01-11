@@ -408,13 +408,10 @@ class ViviStickerUtils {
 
   hideController() {
     store.commit('vivisticker/SET_controllerHidden', true)
-    console.trace()
-    console.log('hide')
   }
 
   showController() {
     store.commit('vivisticker/SET_controllerHidden', false)
-    console.log('show')
   }
 
   enterStandaloneMode() {

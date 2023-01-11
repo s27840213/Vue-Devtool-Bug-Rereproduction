@@ -529,6 +529,10 @@ export default Vue.extend({
             })
           break
         }
+        case 'color':
+        case 'text-color-mobile':
+          colorUtils.setCurrEvent(tab?.props?.currColorEvent as string)
+          break
         default: {
           break
         }

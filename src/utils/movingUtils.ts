@@ -395,7 +395,6 @@ export class MovingUtils {
         const targetIndex = this.config.styles.zindex - 1
         this.setLastSelectedLayerIndex(this.layerIndex)
         groupUtils.select(this.pageIndex, [targetIndex])
-        console.log(this.pageIndex, targetIndex)
       }
       this.setCursorStyle(e, '')
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
