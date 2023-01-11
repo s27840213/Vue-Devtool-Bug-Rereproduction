@@ -57,7 +57,6 @@ div(class="mobile-panel"
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import Vue from 'vue'
 import i18n from '@/i18n'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'

@@ -13,71 +13,44 @@ div(class="editor-view"
     div(class="editor-view__canvas"
         ref="canvas"
         @pointerdown.left.self="outerClick($event)")
+      //- @mousedown.left.self="outerClick($event)")
       template(v-if="!inBgRemoveMode")
-        nu-page(v-for="(page,index) in pagesState || []"
-                  :ref="`page-${index}`"
-                  :key="`page-${page.config.id}`"
-                  :pageIndex="index"
-                  :overflowContainer="editorView"
-                  :style="{'z-index': `${getPageZIndex(index)}`}"
-                  :pageState="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
-                  @stepChange="handleStepChange")
+        nu-page(v-for="(page,index) in pagesState"
+                :ref="`page-${index}`"
+                :key="`page-${page.config.id}`"
+                :pageIndex="index"
+                :overflowContainer="editorView"
+                :style="{'z-index': `${getPageZIndex(index)}`}"
+                :pageState="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
+                @stepChange="handleStepChange")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea"
           :style="{'z-index': `${pageNum+1}`}")
       bg-remove-area(v-else :editorViewCanvas="editorViewCanvas")
     template(v-if="showRuler && !isShowPagePreview")
       ruler-hr(:canvasRect="canvasRect"
         :editorView="editorView"
-        @pointerdown.stop="dragStartH($event)")
+        @pointerdown.native.stop="dragStartH($event)")
       ruler-vr(:canvasRect="canvasRect"
         :editorView="editorView"
-        @pointerdown.stop="dragStartV($event)")
+        @pointerdown.native.stop="dragStartV($event)")
       div(class="corner-block")
   div(v-if="!inBgRemoveMode"
       class="editor-view__guidelines-area"
       ref="guidelinesArea")
     div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
-      :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
-      @pointerdown.stop="lockGuideline ? null: dragStartV($event)"
-      @mouseout.stop="closeGuidelineV()"
-      @click.right.stop.prevent="openGuidelinePopup($event)")
+        :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
+        @pointerdown.left.stop="lockGuideline ? null: dragStartV($event)"
+        @mouseout.stop="closeGuidelineV()"
+        @pointerup.right.stop.prevent="openGuidelinePopup($event)")
       div(class="guideline__pos guideline__pos--v" ref="guidelinePosV")
         span {{rulerVPos}}
     div(v-if="isShowGuidelineH" class="guideline guideline--h" ref="guidelineH"
-      :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
-      @pointerdown.stop="lockGuideline ? null : dragStartH($event)"
-      @mouseout.stop="closeGuidelineH()"
-      @click.right.stop.prevent="openGuidelinePopup($event)")
+        :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
+        @pointerdown.left.stop="lockGuideline ? null : dragStartH($event)"
+        @mouseout.stop="closeGuidelineH()"
+        @pointerup.right.stop.prevent="openGuidelinePopup($event)")
       div(class="guideline__pos guideline__pos--h" ref="guidelinePosH")
         span {{rulerHPos}}
-          div(v-show="isSelecting" class="selection-area" ref="selectionArea"
-            :style="{'z-index': `${pageNum+1}`}")
-        bg-remove-area(v-else :editorViewCanvas="editorViewCanvas")
-      template(v-if="showRuler && !isShowPagePreview")
-        ruler-hr(:canvasRect="canvasRect"
-          :editorView="editorView"
-          @pointerdown.native.stop="dragStartH($event)")
-        ruler-vr(:canvasRect="canvasRect"
-          :editorView="editorView"
-          @pointerdown.native.stop="dragStartV($event)")
-        div(class="corner-block")
-    div(v-if="!inBgRemoveMode"
-        class="editor-view__guidelines-area"
-        ref="guidelinesArea")
-      div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
-          :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
-          @pointerdown.left.stop="lockGuideline ? null: dragStartV($event)"
-          @mouseout.stop="closeGuidelineV()"
-          @pointerup.right.stop.prevent="openGuidelinePopup($event)")
-        div(class="guideline__pos guideline__pos--v" ref="guidelinePosV")
-          span {{rulerVPos}}
-      div(v-if="isShowGuidelineH" class="guideline guideline--h" ref="guidelineH"
-          :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
-          @pointerdown.left.stop="lockGuideline ? null : dragStartH($event)"
-          @mouseout.stop="closeGuidelineH()"
-          @pointerup.right.stop.prevent="openGuidelinePopup($event)")
-        div(class="guideline__pos guideline__pos--h" ref="guidelinePosH")
-          span {{rulerHPos}}
 </template>
 
 <script lang="ts">

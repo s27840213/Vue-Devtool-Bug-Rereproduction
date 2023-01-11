@@ -78,7 +78,7 @@ export default defineComponent({
   created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     eventUtils.off(PanelEvent.switchTab)
   },
   mounted() {

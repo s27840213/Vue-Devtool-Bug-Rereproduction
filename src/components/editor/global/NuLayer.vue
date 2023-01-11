@@ -1,55 +1,44 @@
 <template lang="pug">
-div(v-for="div in layerDivs"
-    class="nu-layer" :class="!config.locked && subLayerIndex === -1 ? `nu-layer--p${pageIndex}` : ''"
-    :style="layerStyles(div.noShadow, div.isTransparent)"
-    :ref="div.main ? 'body' : null"
-    :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : null"
-    :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
-    :data-p-index="pageIndex"
-    :data-pindex="dataPindex"
-    v-press="isTouchDevice() && div.main ? onPress : -1"
-    @pointerdown="div.main ? onPointerDown($event) : null"
-    @pointerup="div.main ? onPointerUp($event) : null"
-    @contextmenu.prevent
-    @click.right.stop="div.main ? onRightClick($event) : null"
-    @dragenter="div.main ? dragEnter($event) : null"
-    @dblclick="div.main ? dblClick($event) : null")
-  div(class="layer-translate posAbs"
-      :style="translateStyles()")
-    div(class="layer-scale posAbs" :ref="div.main ? 'scale' : null"
-        :style="scaleStyles()")
-      nu-clipper(:config="config"
-          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-          :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
-        lazy-load(:target="lazyLoadTarget"
-            :rootMargin="'300px 0px 300px 0px'"
-            :minHeight="config.styles.height * contentScaleRatio"
-            :minWidth="config.styles.width * contentScaleRatio"
-            :threshold="[0]"
-            :handleUnrender="handleUnrender"
-            :anamationEnabled="false"
-            :forceRender="isSubLayer || forceRender")
+div(:style="[isImgCtrl || inFrame ? {} : {transform: `translateZ(${this.config.styles.zindex}px)`,...transformStyle}]")
+  div(v-for="div in layerDivs"
+      class="nu-layer"
+      :class="!config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : ''"
+      :style="layerStyles(div.noShadow, div.isTransparent)"
+      :ref="div.main ? 'body' : null"
+      :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : null"
+      :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
+      :data-p-index="pageIndex"
+      v-press="isTouchDevice() && div.main ? onPress : -1"
+      @pointerdown="div.main ? onPointerDown($event) : null"
+      @pointerup="div.main ? onPointerUp($event) : null"
+      @contextmenu.prevent
+      @click.right.stop="div.main ? onRightClick($event) : null"
+      @dragenter="div.main ? dragEnter($event) : null"
+      @dblclick="div.main ? dblClick($event) : null")
+    div(class="layer-translate posAbs"
+        :style="translateStyles()")
+      div(class="layer-scale posAbs" :ref="div.main ? 'scale' : null"
+          :style="scaleStyles()")
+        nu-clipper(:config="config"
+            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+            :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
           component(:is="`nu-${config.type}`"
-              class="transition-none"
-              :config="config"
-              :imgControl="imgControl"
-              :contentScaleRatio="contentScaleRatio"
-              :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-              :scaleRatio="scaleRatio"
-              :forRender="forRender"
-              :isTransparent="div.isTransparent"
-              :noShadow="div.noShadow"
-              v-bind="$attrs")
-      svg(class="clip-contour full-width" v-if="!forRender && config.active && config.type === 'image' && (config.isFrame && !config.isFrameImg)"
-        :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
-        g(v-html="frameClipFormatter(config.clipPath)"
-          :style="frameClipStyles")
-      svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
-        :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
-        g(v-html="frameClipFormatter(config.clipPath)"
-          :style="frameClipStyles")
-  div(v-if="showSpinner()" class="nu-layer__inProcess")
-    square-loading
+            class="transition-none"
+            :config="config"
+            :imgControl="imgControl"
+            :contentScaleRatio="contentScaleRatio"
+            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+            :scaleRatio="scaleRatio"
+            :forRender="forRender"
+            :isTransparent="div.isTransparent"
+            :noShadow="div.noShadow"
+            v-bind="$attrs")
+        svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
+          :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
+          g(v-html="frameClipFormatter(config.clipPath)"
+            :style="frameClipStyles")
+    div(v-if="showSpinner()" class="nu-layer__inProcess")
+      square-loading
 </template>
 <script lang="ts">
 import Vue, { PropType, defineComponent } from 'vue'
@@ -247,7 +236,7 @@ export default defineComponent({
       body.addEventListener(generalUtils.isTouchDevice() ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
     }
   },
-  destroyed() {
+  unmounted() {
     this.movingUtils && this.movingUtils.removeListener()
   },
   computed: {

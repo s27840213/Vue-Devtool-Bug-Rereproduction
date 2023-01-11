@@ -42,7 +42,6 @@ export default defineComponent({
     //   next(false)
     //   return
     // }
-
     editorUtils.setCloseMobilePanelFlag(true)
     stepsUtils.clearSteps()
     if (uploadUtils.isLogin && this.$router.currentRoute.value.query.design_id && this.$router.currentRoute.value.query.type) {
@@ -51,14 +50,21 @@ export default defineComponent({
         uploadUtils.isGettingDesign = false
         logUtils.setLog('Leave editor')
         this.isSaving = false
-        this.clearState()
         next()
       })
     } else {
       logUtils.setLog('Leave editor')
-      this.clearState()
       next()
     }
+  },
+  beforeUnmount() {
+    /**
+     * Why clear state is putting here instead of beforeRouteLeave?
+     * The reason is bcz Vue 3 is too much fast than Vue 2,
+     * When beforeRouteLeave triggered, the component in Editor hasn't been unmounted(destroyed) yet
+     * So if we clear the state, some component watcher and computed will update and then throw lots of errors
+     */
+    this.clearState()
   },
   methods: {
     ...mapMutations({

@@ -678,7 +678,7 @@ class UploadUtils {
           }
 
           // move new design to path
-          const path = router.currentRoute.query.path as string
+          const path = router.currentRoute.value.query.path as string
           if (isNewDesign) {
             // move design to path
             if (path) {

@@ -17,7 +17,6 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   emits: [],
-  inheritAttrs: false,
   props: {
     config: {
       type: Object,

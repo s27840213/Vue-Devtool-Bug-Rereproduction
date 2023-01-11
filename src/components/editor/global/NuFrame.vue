@@ -31,7 +31,6 @@ import editorUtils from '@/utils/editorUtils'
 
 export default defineComponent({
   emits: [],
-  inheritAttrs: false,
   props: {
     config: {
       type: Object as PropType<IFrame>,

@@ -77,8 +77,7 @@ div(class="color-panel"
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import vClickOutside from 'click-outside-vue3'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'

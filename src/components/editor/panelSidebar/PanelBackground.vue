@@ -182,7 +182,7 @@ export default defineComponent({
       this.panelFlash = true
     })
   },
-  beforeDestroy() {
+  beforeUnmount() {
     eventUtils.off(PanelEvent.switchPanelBgInnerTab)
   },
   activated() {

@@ -100,7 +100,6 @@ div(class="page-size-selector")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'

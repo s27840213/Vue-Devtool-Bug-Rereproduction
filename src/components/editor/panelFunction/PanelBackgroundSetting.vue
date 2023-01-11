@@ -66,7 +66,6 @@ div(class="bg-setting" v-click-outside="handleOutSide")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import i18n from '@/i18n'
 import { defineComponent } from 'vue'
 import vClickOutside from 'click-outside-vue3'

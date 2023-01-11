@@ -166,8 +166,6 @@ export interface IFrame extends ILayer<IFrameStyle> {
   decorationTop?: IShape
   blendLayers?: Array<IShape>
 }
-
-export type LayerType = IShape | IText | IImage | IGroup | IFrame
 export interface IGroup extends ILayer<IStyle> {
   type: 'group'
   layers: Array<IShape | IText | IImage | IFrame>,
@@ -177,3 +175,5 @@ export interface ITmp extends ILayer<IStyle> {
   type: 'tmp'
   layers: Array<IShape | IText | IImage | IGroup | IFrame>
 }
+
+export type LayerType = IShape | IText | IImage | IGroup | IFrame
