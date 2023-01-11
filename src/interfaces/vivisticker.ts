@@ -1,4 +1,3 @@
-import { ICurrSelectedInfo } from './editor'
 import { IPage } from './page'
 
 export interface IUserInfo {
