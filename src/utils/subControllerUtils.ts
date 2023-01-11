@@ -25,7 +25,7 @@ export default class SubControllerUtils {
   private get pageIndex(): number { return this.layerInfo.pageIndex }
   private get layerIndex(): number { return this.layerInfo.layerIndex }
   private get subLayerIdx(): number { return this.layerInfo.subLayerIdx ?? -1 }
-  private get primaryLayer(): IGroup | IFrame { return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp }
+  private get primaryLayer(): IGroup | IFrame | ITmp { return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp }
 
   constructor({ _config, body, layerInfo }: { _config: { config: ILayer }, body: HTMLElement, layerInfo?: ILayerInfo, component?: Vue }) {
     this._config = _config
@@ -36,7 +36,7 @@ export default class SubControllerUtils {
   onPointerdown(e: PointerEvent) {
     if (this.primaryLayer.type === 'tmp') {
       if (generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || store.getters['mobileEditor/getInMultiSelectionMode']) {
-        groupUtils.deselectTargetLayer(this.layerIndex)
+        groupUtils.deselectTargetLayer(this.subLayerIdx)
       }
       return
     }
@@ -88,12 +88,6 @@ export default class SubControllerUtils {
 
     formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex, this.subLayerIdx)
     formatUtils.clearCopiedFormat()
-    if (this.primaryLayer.type === 'tmp') {
-      if (generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || store.getters['mobileEditor/getInMultiSelectionMode']) {
-        groupUtils.deselectTargetLayer(this.layerIndex)
-      }
-      return
-    }
     if (this.config.type === 'text') {
       this.posDiff.x = this.primaryLayer.styles.x
       this.posDiff.y = this.primaryLayer.styles.y
@@ -116,12 +110,16 @@ export default class SubControllerUtils {
     if (this.config.type === 'text') {
       this.posDiff.x = this.primaryLayer.styles.x - this.posDiff.x
       this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
-      if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
+      if (this.posDiff.x !== 0 || this.posDiff.y !== 0) {
         layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { contentEditable: false })
       } else {
         if (this.config.contentEditable) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true }, this.subLayerIdx)
-          tiptapUtils.focus({ scrollIntoView: false })
+          if (generalUtils.isTouchDevice()) {
+            tiptapUtils.focus({ scrollIntoView: false }, 'end')
+          } else {
+            tiptapUtils.focus({ scrollIntoView: false })
+          }
         }
       }
     }

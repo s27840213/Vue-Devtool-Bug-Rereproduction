@@ -16,10 +16,14 @@ import mouseUtils from './mouseUtils'
 import { reject } from 'lodash'
 
 class ImageUtils {
-  async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, error?: () => void) {
+  async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: () => void, crossOrigin?: boolean }) {
+    const { error, crossOrigin = false } = options || {}
     return new Promise<T>((resolve) => {
       const image = new Image()
       image.src = src
+      if (crossOrigin) {
+        image.crossOrigin = 'anoynous'
+      }
       if (image.complete) {
         resolve(cb(image))
       } else {
@@ -105,22 +109,15 @@ class ImageUtils {
           return `https://template.vivipic.com/admin/${userId}/asset/logo/${brandId}/${assetId}/${size}?origin=true`
         }
       case 'logo-private': {
-        // if ((size as string).includes('ext')) {
-        //   return `https://template.vivipic.com/pdf/${userId}/asset/logo/${brandId}/${assetId}/${size}?token=${store.getters['user/getToken']}`
-        // } else {
-        //   const editorLogo = store.getters['brandkit/getEditorViewLogos']
-        //   return editorLogo(assetId) ? editorLogo(assetId)[size as string] + '&origin=true' : ''
-        // }
         const editorLogo = store.getters['brandkit/getEditorViewLogos']
         return editorLogo(assetId) ? editorLogo(assetId)[size as string] + '&origin=true' : ''
       }
       case 'unsplash':
         return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
       case 'pexels':
-        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
+        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.jpeg?auto=compress&cs=tinysrgb&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
       case 'background':
-
-        return `https://template.vivipic.com/background/${assetId}/${size || 'full'}?origin=true` + (ver ? `&ver=${ver}` : '')
+        return `https://template.vivipic.com/background/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']}`
       case 'frame':
         return require('@/assets/img/svg/frame.svg')
       case 'shadow-private': {
@@ -135,7 +132,7 @@ class ImageUtils {
       case 'local':
         return assetId as string
       case 'svg':
-        return `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true` + (ver ? `&ver=${ver}` : '')
+        return `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']}`
       case 'ios':
         return `vvstk://${assetId}`
       default:
@@ -322,9 +319,6 @@ class ImageUtils {
         }
       }
     }
-    // if (editorUtils.currActivePanel === 'crop') {
-    //   editorUtils.setCloseMobilePanelFlag(true)
-    // }
   }
 
   initLayerSize: ISize = {

@@ -99,9 +99,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapMutations({
-      setCurrActivePanel: 'mobileEditor/SET_currActivePanel'
-    }),
     getFieldValue(field: string): number | boolean {
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     },
@@ -116,6 +113,7 @@ export default Vue.extend({
     },
     handleColorModal() {
       if (generalUtils.isTouchDevice()) {
+        colorUtils.setCurrEvent(ColorEventType.photoShadow)
         this.handleColor = true
         this.$emit('openExtraColorModal', ColorEventType.photoShadow, MobileColorPanelType.palette)
       }

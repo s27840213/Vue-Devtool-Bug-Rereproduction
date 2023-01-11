@@ -85,6 +85,19 @@ class PageUtils {
     return this.getPage(this.currFocusPageIndex)
   }
 
+  get currFocusPageInViewRatio(): number {
+    const focusPage = document.getElementsByClassName('nu-page')[this.currFocusPageIndex]
+    const rect = focusPage.getBoundingClientRect()
+    const windowHeight = window.innerHeight
+    const topInView = Math.max(rect.top, 0)
+    const bottomInView = Math.min(rect.bottom, windowHeight)
+    return (bottomInView - topInView) / windowHeight
+  }
+
+  get addAssetTargetPageIndex(): number {
+    return this.currFocusPageInViewRatio < 0.25 ? this.middlemostPageIndex : this.currFocusPageIndex
+  }
+
   get pageRect(): { [index: string]: number } {
     const { left, top, bottom, right } = document.getElementsByClassName(`nu-page-bleed-${this.currFocusPageIndex}`)[0]?.getBoundingClientRect() ?? document.getElementsByClassName(`nu-page-${this.currFocusPageIndex}`)[0].getBoundingClientRect()
     return {
@@ -254,18 +267,6 @@ class PageUtils {
   }
 
   activeMiddlemostPage(): number {
-    // pages.some((page: { top: number, bottom: number }, index: number) => {
-    //   if (page.top < centerLinePos && page.bottom > centerLinePos) {
-    //     targetIndex = index
-    //     return true
-    //   } else {
-    //     const dist = Math.min(Math.abs(centerLinePos - page.top), Math.abs(centerLinePos - page.bottom))
-    //     if (minDistance > dist) {
-    //       targetIndex = index
-    //       minDistance = dist
-    //     }
-    //   }
-    // })
     const targetIndex = generalUtils.isTouchDevice() && this.isDetailPage ? this.currActivePageIndex : this.middlemostPageIndex
     FocusUtils.focusElement(`.nu-page-${targetIndex}`, true)
     return this.middlemostPageIndex

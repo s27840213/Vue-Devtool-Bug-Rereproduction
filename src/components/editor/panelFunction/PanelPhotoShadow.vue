@@ -89,6 +89,7 @@ import { IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { mapActions, mapGetters } from 'vuex'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   components: {
@@ -113,7 +114,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      isAdmin: 'user/isAdmin',
       currFunctionPanelType: 'getCurrFunctionPanelType'
     }),
     shadowOption(): string[] {
@@ -156,7 +156,7 @@ export default Vue.extend({
       return { 'ml-auto': idx % 3 === 0, 'mx-16': idx % 3 === 1, 'mr-auto': idx % 3 === 2 }
     },
     handleColorModal() {
-      this.$emit('toggleColorPanel', true)
+      editorUtils.toggleColorSlips(true)
       colorUtils.setCurrEvent(ColorEventType.photoShadow)
       colorUtils.setCurrColor(this.currentStyle.shadow.effects.color)
     },

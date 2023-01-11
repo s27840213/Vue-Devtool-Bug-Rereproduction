@@ -22,6 +22,7 @@
         :style="imgStyles()")
         svg(v-if="isAdjustImage()"
           :style="flipStyles()"
+          class="nu-image__svg"
           :class="{'layer-flip': flippedAnimation() }"
           :viewBox="svgViewBox()"
           :width="svgImageWidth()"
@@ -566,40 +567,40 @@ export default Vue.extend({
             this.src = src
             resolve()
           }
-        }, () => {
-          const error = new Error(`cannot load the current image, src: ${this.src}`)
-          console.log(error)
-          reject(new Error(`cannot load the current image, src: ${this.src}`))
-          if (this.primaryLayer.type === LayerType.frame) {
-            if (this.config.srcObj.type === 'ios') {
-              frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex,
-                {
-                  type: 'frame',
-                  assetId: '',
-                  userId: ''
-                }
-              )
-              frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
-                imgWidth: (this.config as IImage).styles.width,
-                imgHeight: (this.config as IImage).styles.height,
-                imgX: 0,
-                imgY: 0,
-                opacity: 100,
-                adjust: {}
-              })
-              this.src = ImageUtils.getSrc(this.config)
+        }, {
+          error: () => {
+            reject(new Error(`cannot load the current image, src: ${this.src}`))
+            if (this.primaryLayer.type === LayerType.frame) {
+              if (this.config.srcObj.type === 'ios') {
+                frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex,
+                  {
+                    type: 'frame',
+                    assetId: '',
+                    userId: ''
+                  }
+                )
+                frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+                  imgWidth: (this.config as IImage).styles.width,
+                  imgHeight: (this.config as IImage).styles.height,
+                  imgX: 0,
+                  imgY: 0,
+                  opacity: 100,
+                  adjust: {}
+                })
+                this.src = ImageUtils.getSrc(this.config)
+              }
+            } else {
+              fetch(src)
+                .then(res => {
+                  const { status, statusText } = res
+                  this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
+                })
+                .catch((e) => {
+                  if (src.indexOf('data:image/png;base64') !== 0) {
+                    this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
+                  }
+                })
             }
-          } else {
-            fetch(src)
-              .then(res => {
-                const { status, statusText } = res
-                this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
-              })
-              .catch((e) => {
-                if (src.indexOf('data:image/png;base64') !== 0) {
-                  this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
-                }
-              })
           }
         })
       })
@@ -646,19 +647,19 @@ export default Vue.extend({
     },
     handleIsTransparent() {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
-      const img = new Image()
       const imgSize = ImageUtils.getSrcSize(this.config.srcObj, 100)
-      img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      img.crossOrigin = 'anoynous'
-      img.onload = () => {
-        if (!this.hasDestroyed) {
-          const isTransparent = imageShadowUtils.isTransparentBg(img)
-          imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
-          if (!isTransparent && this.config.styles.adjust.blur > 0) {
-            this.$forceUpdate()
+      const src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      ImageUtils.imgLoadHandler(src,
+        (img) => {
+          if (!this.hasDestroyed) {
+            const isTransparent = imageShadowUtils.isTransparentBg(img)
+            imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
+            if (!isTransparent && this.config.styles.adjust.blur > 0) {
+              this.$forceUpdate()
+            }
           }
-        }
-      }
+        }, { crossOrigin: true }
+      )
     },
     async handleInitLoad() {
       const { type } = this.config.srcObj
@@ -1251,6 +1252,10 @@ export default Vue.extend({
     left: 0px;
     width: 100%;
     height: 100%;
+  }
+
+  &__svg {
+    display: block;
   }
 
   .img-wrapper {

@@ -19,14 +19,14 @@ import backgroundUtils from './backgroundUtils'
 import vivistickerUtils from './vivistickerUtils'
 import { IPage } from '@/interfaces/page'
 
-export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>, scale = 1): ICalculatedGroupStyle {
+export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup | IFrame>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
   let minY = Number.MAX_SAFE_INTEGER
   let maxWidth = Number.MIN_SAFE_INTEGER
   let maxHeight = Number.MIN_SAFE_INTEGER
   layers = JSON.parse(JSON.stringify(layers))
 
-  layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+  layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame) => {
     if (layer.styles.rotate === 0) {
       minX = Math.min(minX, layer.styles.x)
       minY = Math.min(minY, layer.styles.y)
@@ -37,7 +37,7 @@ export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>, sc
     }
   })
 
-  layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+  layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame) => {
     if (layer.styles.rotate === 0) {
       maxWidth = Math.max(maxWidth, layer.styles.x + (layer.styles.width as number) - minX)
       maxHeight = Math.max(maxHeight, layer.styles.y + (layer.styles.height as number) - minY)
@@ -153,7 +153,7 @@ class GroupUtils {
 
   private ungroupInnerGroup() {
     while (this.currSelectedInfo.types.has('group')) {
-      const groupLayerIndex = this.currSelectedInfo.layers.findIndex((layer: IText | IImage | IShape | IGroup) => layer.type === 'group')
+      const groupLayerIndex = this.currSelectedInfo.layers.findIndex((layer) => layer.type === 'group')
       const selectedLayers = GeneralUtils.deepCopy(this.currSelectedInfo.layers)
       selectedLayers.splice(groupLayerIndex, 1, ...this.mapGroupLayersToTmp(this.currSelectedInfo.layers[groupLayerIndex] as IGroup))
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -338,7 +338,7 @@ class GroupUtils {
   }
 
   reselect() {
-    const selectedIndexs = this.currSelectedInfo.layers.map((layer: IShape | IText | IImage | IGroup, index: number) => {
+    const selectedIndexs = this.currSelectedInfo.layers.map((layer, index: number) => {
       return layer.styles.zindex - 1
     })
     const tmpPageIndex = this.currSelectedInfo.pageIndex
@@ -393,12 +393,6 @@ class GroupUtils {
     })
   }
 
-  updateTmpIndex() {
-    const { pageIndex, layers } = this.currSelectedInfo
-    const index = this.getLayer(this.pageIndex).findIndex((layer: ILayer) => layer.type === 'tmp')
-    this.set(pageIndex, index, layers)
-  }
-
   movingTmp(pageIndex: number, styles: { [index: string]: number }) {
     store.commit('UPDATE_tmpLayerStyles', {
       pageIndex: pageIndex,
@@ -422,7 +416,7 @@ class GroupUtils {
    * @param styles - the styles of tmp layer
    * @returns calculated layers in tmp layer
    */
-  mapLayersToPage(layers: Array<IShape | IText | IImage | IGroup>, tmpLayer: ITmp): Array<IShape | IText | IImage | IGroup> {
+  mapLayersToPage(layers: Array<IShape | IText | IImage | IFrame | IGroup>, tmpLayer: ITmp | IFrame | IGroup): Array<IShape | IText | IImage | IFrame | IGroup> {
     layers = JSON.parse(JSON.stringify(layers))
     layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame) => {
       // calculate scale offset

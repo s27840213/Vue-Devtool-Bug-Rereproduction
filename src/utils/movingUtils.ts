@@ -1,5 +1,5 @@
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
 import Vue from 'vue'
@@ -29,7 +29,6 @@ export class MovingUtils {
   private isHandleMovingHandler = false
   private snapUtils = null as any
   private body = undefined as unknown as HTMLElement
-  private isPointerDownFromSubController = false
   private _moving = null as unknown
   private _moveEnd = null as unknown
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as ILayerInfo
@@ -129,7 +128,7 @@ export class MovingUtils {
     this.eventTarget = (event.target as HTMLElement)
     this.eventTarget.releasePointerCapture((event as PointerEvent).pointerId)
 
-    if (this.isTouchDevice) {
+    if (this.isTouchDevice && !this.config.locked) {
       this.isClickOnController = controlUtils.isClickOnController(event as MouseEvent)
       event.stopPropagation()
       if (!this.dblTabsFlag && this.isControllerShown) {
@@ -319,7 +318,7 @@ export class MovingUtils {
     }
 
     this.isControlling = true
-    const updateConifgData = {} as Partial<ILayer>
+    const updateConifgData = {} as Partial<IShape | IText | IImage | IGroup>
     if (!this.isDragging) {
       updateConifgData.dragging = true
       this.component && this.component.$emit('isDragging', this.layerIndex)
@@ -444,6 +443,11 @@ export class MovingUtils {
           }
           if (this.config.contentEditable) {
             tiptapUtils.focus({ scrollIntoView: false })
+            if (!this.config.isEdited) {
+              setTimeout(() => {
+                tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
+              }, 100) // wait for default behavior to set cursor position, then select (otherwise selection will be overwritten)
+            }
           }
         }
         if (this.inMultiSelectionMode) {
@@ -487,7 +491,6 @@ export class MovingUtils {
       //     }
       //   }
       // }
-      this.isPointerDownFromSubController = false
       this.isControlling = false
       this.setCursorStyle(e, '')
     }

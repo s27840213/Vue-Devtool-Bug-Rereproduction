@@ -28,6 +28,7 @@ export interface IEditorState {
   },
   currSidebarPanelType: number,
   mobileSidebarPanelOpen: boolean,
+  showColorSlips: boolean
   currFunctionPanelType: number,
   pageScaleRatio: number,
   isSettingScaleRatio: boolean,

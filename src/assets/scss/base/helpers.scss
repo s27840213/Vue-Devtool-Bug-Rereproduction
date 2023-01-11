@@ -55,7 +55,8 @@
 
 // padding and margin
 $spacer: 5;
-@for $i from 1 through 24 {
+
+@for $i from 0 through 24 {
     $space: ($spacer * $i);
     .mt-#{$space} {
         margin-top: $space*1px;

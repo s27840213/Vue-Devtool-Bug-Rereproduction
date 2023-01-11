@@ -34,11 +34,11 @@
       panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
       panel-general(v-if="showGeneral")
       panel-page-setting(v-if="showPageSetting")
-      panel-background-setting(v-if="showPageSetting" @toggleColorPanel="toggleColorPanel")
-      panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel" @toggleColorPanel="toggleColorPanel")
+      panel-background-setting(v-if="showPageSetting")
+      panel-shape-setting(v-if="showShapeSetting")
+      panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel")
       panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
-      panel-photo-setting(v-if="showPhotoSetting" @toggleColorPanel="toggleColorPanel")
-      panel-shape-setting(v-if="showShapeSetting" @toggleColorPanel="toggleColorPanel")
+      panel-photo-setting(v-if="showPhotoSetting")
       panel-img-ctrl(v-if="isImgCtrl")
 </template>
 
@@ -59,13 +59,14 @@ import PanelImgCtrl from '@/components/editor/panelFunction/panelImgCtrl.vue'
 import DownloadBtn from '@/components/download/DownloadBtn.vue'
 import { mapGetters, mapState } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
-import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup } from '@/interfaces/layer'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
 import { LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
+import colorUtils from '@/utils/colorUtils'
 
 export default Vue.extend({
   components: {
@@ -127,7 +128,7 @@ export default Vue.extend({
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup, index: number) => {
+      const types = groupLayer.layers.map((layer) => {
         return layer.type
       })
       return new Set(types)
@@ -184,8 +185,9 @@ export default Vue.extend({
     showShapeSetting(): boolean {
       const { getCurrConfig } = LayerUtils
       const stateCondition = !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked
-      const typeConditon = (this.targetIs('shape') && this.singleTargetType()) || getCurrConfig.type === LayerType.frame
-      return stateCondition && typeConditon && !this.isImgCtrl
+      const typeConditon = [LayerType.shape, LayerType.frame, LayerType.group, LayerType.tmp].includes(getCurrConfig.type as LayerType)
+      const haveColorTarget = colorUtils.globalSelectedColor.color !== 'none'
+      return stateCondition && typeConditon && haveColorTarget && !this.isImgCtrl
     },
     isSuperUser(): boolean {
       return generalUtils.isSuperUser
@@ -197,7 +199,7 @@ export default Vue.extend({
         targetLayerType: (() => {
           if (subLayerIdx !== -1) {
             return currLayer.type === LayerType.group
-              ? (currLayer as IGroup).layers[subLayerIdx].type : LayerType.image
+              ? currLayer.layers[subLayerIdx].type : LayerType.image
           }
           return currLayer.type
         })()
@@ -212,9 +214,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    toggleColorPanel(bool: boolean) {
-      this.$emit('toggleColorPanel', bool)
-    },
     targetIs(type: string): boolean {
       if (this.isGroup) {
         if (this.hasSubSelectedLayer) {

@@ -12,6 +12,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import store from '@/store'
 import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'

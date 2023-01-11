@@ -180,18 +180,12 @@ export default Vue.extend({
       getLayer: 'getLayer',
       token: 'user/getToken'
     }),
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapState(
       'markers',
       [
         'categories'
       ]
     ),
-    inAdminMode(): boolean {
-      return this.role === 0 && this.adminMode === true
-    },
     lineWidth(): number {
       const { currLayer } = this
       return (currLayer as IShape).size?.[0] ?? 0

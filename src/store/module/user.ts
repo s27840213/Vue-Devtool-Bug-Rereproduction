@@ -24,9 +24,9 @@ export interface IUserModule {
   teamId: string,
   role: number,
   roleRaw: number,
-  adminMode: boolean,
+  adminMode: boolean, // Control in DesktopEditor
   isAuthenticated: boolean,
-  enableAdminView: boolean,
+  enableAdminView: boolean, // Control in PopupFile
   account: string,
   email: string
   upassUpdate: string,
@@ -209,11 +209,14 @@ const getters: GetterTree<IUserModule, any> = {
   getTrim() {
     return state.trim
   },
-  getEnableAdminView() {
-    return state.enableAdminView
-  },
   getRenderForPDF() {
     return state.renderForPDF
+  },
+  showAdminTool() { // Partial admin tool
+    return state.role === 0 && state.adminMode && state.enableAdminView
+  },
+  showAllAdminTool() {
+    return state.role === 0 && state.enableAdminView
   }
 }
 
@@ -224,13 +227,12 @@ const mutations: MutationTree<IUserModule> = {
     localStorage.setItem('token', token)
   },
   [SET_STATE](state: IUserModule, data: Partial<IUserModule>) {
-    console.log(data)
     const newState = data || getDefaultState()
     const keys = Object.keys(newState) as Array<keyof IUserModule>
     keys
       .forEach(key => {
         if (key in state) {
-          (state[key] as any) = newState[key]
+          (state[key] as unknown) = newState[key]
         }
       })
   },

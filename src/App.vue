@@ -16,7 +16,7 @@
         :info="currSelectedResInfo"
         @blur.native="setCurrSelectedResInfo()"
         tabindex="0")
-    fps(v-if="isAdmin && !inScreenshotPreview && enableAdminView")
+    fps(v-if="!inScreenshotPreview && showAllAdminTool")
     div(class="modal-container"
         v-if="isModalOpen"
         :style="modalInfo.backdropStyle")
@@ -88,7 +88,7 @@ export default Vue.extend({
       enableAdminView: 'user/getEnableAdminView'
     }),
     ...mapGetters('user', {
-      isAdmin: 'isAdmin'
+      showAllAdminTool: 'user/showAllAdminTool'
     }),
     currLocale(): string {
       return localeUtils.currLocale()

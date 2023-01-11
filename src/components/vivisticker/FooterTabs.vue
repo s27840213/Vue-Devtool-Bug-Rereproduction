@@ -6,10 +6,14 @@
             class="footer-tabs__item"
             :class="{'click-disabled': (tab.disabled || isLocked)}"
             @click="handleTabAction(tab)")
-          svg-icon(class="click-disabled"
+          color-btn(v-if="tab.icon === 'color'" size="22px"
+                    class="click-disabled"
+                    :color="globalSelectedColor")
+          svg-icon(v-else class="click-disabled"
             :iconName="tab.icon"
             :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'white' :'black-4'"
-            :iconWidth="'24px'")
+            :iconWidth="'24px'"
+            :style="textIconStyle")
           span(class="no-wrap click-disabled"
             :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-white' : 'text-black-4'") {{tab.text}}
 </template>
@@ -20,6 +24,7 @@ import { mapGetters, mapState } from 'vuex'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import stepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, LayerType } from '@/store/types'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -33,9 +38,11 @@ import i18n from '@/i18n'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import eventUtils from '@/utils/eventUtils'
 import _ from 'lodash'
+import colorUtils from '@/utils/colorUtils'
 
 export default Vue.extend({
   components: {
+    ColorBtn
   },
   props: {
     currTab: {
@@ -139,7 +146,8 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: shapeUtils.getSingleColorObjNum === 0,
+          // hidden: shapeUtils.getSingleColorObjNum === 0,
+          hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.shape
           }
@@ -152,7 +160,8 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: shapeUtils.getDocumentColors.length === 0,
+          // hidden: shapeUtils.getDocumentColors.length === 0,
+          hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.shape
           }
@@ -242,6 +251,18 @@ export default Vue.extend({
         return []
       }
     },
+    globalSelectedColor(): string {
+      return colorUtils.globalSelectedColor.color
+    },
+    textIconStyle(): Record<string, string> {
+      const textColor = colorUtils.globalSelectedColor.textColor
+      return textColor === 'multi' ? {
+        '--multi-text-color': '1' // For svg icon 'text-color-mobile.svg' rect fill multi-color
+      } : {
+        '--multi-text-color': '0',
+        '--text-color': textColor // For svg icon 'text-color-mobile.svg' rect fill color
+      }
+    },
     isWholeGroup(): boolean {
       /**
        * Select whole group and no sub-layer selected
@@ -262,7 +283,7 @@ export default Vue.extend({
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup) => {
+      const types = groupLayer.layers.map((layer) => {
         return layer.type
       })
       return new Set(types)

@@ -16,8 +16,6 @@ import layerFactary from './layerFactary'
 import textUtils from './textUtils'
 import vivistickerUtils from './vivistickerUtils'
 import workerUtils from './workerUtils'
-import { clone } from 'lodash'
-import layerUtils from './layerUtils'
 import uploadUtils from './uploadUtils'
 
 class StepsUtils {
@@ -379,6 +377,10 @@ class StepsUtils {
   clearSteps() {
     this.steps = []
     this.currStep = -1
+  }
+
+  clearCurrStep() {
+    this.steps.splice(this.currStep--, 1)
   }
 }
 

@@ -7,8 +7,9 @@
             ref="body"
             :layer-index="`${layerIndex}`"
             :style="styles")
-            div(v-if="config.type === 'text' && config.active && config.contentEditable"
-              class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
+            div(v-if="config.type === 'text' && config.active"
+              class="text text__wrapper" :style="textWrapperStyle()" draggable="false"
+              @pointerdown="onPointerdown")
               nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
                 :style="textBodyStyle()"
                 :pageIndex="pageIndex"
@@ -207,12 +208,6 @@ export default Vue.extend({
     isControllerShown(): boolean {
       return this.config?.active && !this.controllerHidden
     },
-    isCurveText(): boolean {
-      return this.checkIfCurve(this.config)
-    },
-    isFlipped(): boolean {
-      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
-    },
     wrapperStyles(): any {
       const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
       return {
@@ -234,12 +229,20 @@ export default Vue.extend({
     styles(): any {
       const { isFrameImg } = this.config
       const zindex = this.type === 'group' ? this.config?.active ? this.getPrimaryLayerSubLayerNum : this.primaryLayerZindex : this.config.styles.zindex
+      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
 
       return {
         ...this.sizeStyle(),
-        ...TextEffectUtils.convertTextEffect(this.config),
-        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`
+        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`,
+        ...textEffectStyles,
+        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
+    },
+    isCurveText(): boolean {
+      return this.checkIfCurve(this.config)
+    },
+    isFlipped(): boolean {
+      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     },
     isTextEditing(): boolean {
       return !this.isControlling && this.isControllerShown
@@ -372,7 +375,7 @@ export default Vue.extend({
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
         userSelect: this.config.contentEditable ? 'text' : 'none',
-        opacity: this.isTextEditing ? 1 : 0
+        opacity: 1
       }
       return !(this.isCurveText || this.isFlipped) ? textstyles
         : {
@@ -381,7 +384,7 @@ export default Vue.extend({
           position: 'absolute',
           top: 0,
           left: 0,
-          opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
+          opacity: this.config.contentEditable ? 1 : 0
         }
     },
     groupControllerStyle() {
@@ -413,7 +416,11 @@ export default Vue.extend({
         } else {
           if (this.config.contentEditable) {
             LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { isTyping: true }, this.layerIndex)
-            tiptapUtils.focus({ scrollIntoView: false }, 'end')
+            if (GeneralUtils.isTouchDevice()) {
+              tiptapUtils.focus({ scrollIntoView: false }, 'end')
+            } else {
+              tiptapUtils.focus({ scrollIntoView: false })
+            }
           }
         }
       }

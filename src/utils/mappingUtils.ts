@@ -147,8 +147,12 @@ class MappingUtils {
         if (backgroundUtils.inBgSettingMode) {
           backgroundUtils.handleLockBackground()
         } else {
-          const { index, pageIndex } = layerUtils.currSelectedInfo
-          layerUtils.updateLayerProps(pageIndex, index, { locked: false })
+          const { currSelectedInfo: { index, pageIndex }, getCurrConfig } = layerUtils
+          const props = { locked: false } as { [key: string]: string | boolean | number }
+          if (getCurrConfig.type === 'text') {
+            props.editing = false
+          }
+          layerUtils.updateLayerProps(pageIndex, index, props)
           stepsUtils.record()
         }
         break

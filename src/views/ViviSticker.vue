@@ -35,7 +35,7 @@ import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import stepsUtils from '@/utils/stepsUtils'
 import layerUtils from '@/utils/layerUtils'
-import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import { IGroup, IImage, IShape, IText, IFrame } from '@/interfaces/layer'
 import { IFooterTabProps } from '@/interfaces/editor'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -195,7 +195,7 @@ export default Vue.extend({
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup) => {
+      const types = groupLayer.layers.map((layer) => {
         return layer.type
       })
       return new Set(types)

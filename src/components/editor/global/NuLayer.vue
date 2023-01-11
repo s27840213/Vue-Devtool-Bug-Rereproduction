@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(:style="[{transform: isImgCtrl || inFrame ? {} : `translateZ(${this.config.styles.zindex}px)`},...transformStyle]")
+  div(:style="[isImgCtrl || inFrame ? {} : {transform: `translateZ(${this.config.styles.zindex}px)`,...transformStyle}]")
     div(v-for="div in layerDivs"
         class="nu-layer" :class="!config.locked && subLayerIndex === -1 ? `nu-layer--p${pageIndex}` : ''"
         :style="layerStyles(div.noShadow, div.isTransparent)"
@@ -28,7 +28,6 @@
               :contentScaleRatio="contentScaleRatio"
               :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
               :scaleRatio="scaleRatio"
-              :isPagePreview="isPagePreview"
               :forRender="forRender"
               :isTransparent="div.isTransparent"
               :noShadow="div.noShadow"
@@ -104,10 +103,6 @@ export default Vue.extend({
     contentScaleRatio: {
       default: 1,
       type: Number
-    },
-    isPagePreview: {
-      default: false,
-      type: Boolean
     },
     'data-index': {
       default: '-1',

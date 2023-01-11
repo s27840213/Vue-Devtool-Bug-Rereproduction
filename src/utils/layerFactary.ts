@@ -215,7 +215,7 @@ class LayerFactary {
         } as IStyle
         return decorationTop
       })()) : undefined
-    }
+    } as IFrame
     frame.clips.forEach(i => (i.parentLayerStyles = frame.styles))
     if (frame.decoration && !frame.decoration.svg) {
       (frame as any).needFetch = true
@@ -350,7 +350,7 @@ class LayerFactary {
     return Object.assign(basicConfig, config)
   }
 
-  newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
+  newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IFrame>): IGroup {
     const group: IGroup = {
       type: 'group',
       id: config.id || GeneralUtils.generateRandomString(8),
@@ -399,7 +399,7 @@ class LayerFactary {
     return group
   }
 
-  newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
+  newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup | IFrame>) {
     const tmp: ITmp = {
       type: 'tmp',
       id: GeneralUtils.generateRandomString(8),
@@ -476,8 +476,11 @@ class LayerFactary {
         blendMode: config.blendMode || ''
       }
     }
+    if (config.category === 'A' && styles.scale && styles.initWidth && styles.initHeight) {
+      basicConfig.styles.width = styles.initWidth * styles.scale
+      basicConfig.styles.height = styles.initHeight * styles.scale
+    }
     delete config.styles
-    delete config.id
     delete config.blendMode
     return Object.assign(basicConfig, config)
   }
