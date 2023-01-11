@@ -564,7 +564,8 @@ class ConstantData {
       i18n.t('NN0571'),
       i18n.t('NN0572'),
       i18n.t('NN0573'),
-      i18n.t('NN0769')
+      i18n.t('NN0769'),
+      i18n.t('NN0805')
     ]
   }
 
