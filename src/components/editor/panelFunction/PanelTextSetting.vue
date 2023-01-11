@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="text-setting" ref='body'
     @mousedown.capture="textInfoRecorder()")
-  span(class="text-setting__title text-blue-1 label-lg") {{$t('NN0062')}}
+  span(class="text-setting__title text-blue-1 text-H6") {{$t('NN0062')}}
   div(class="text-setting__row1")
     div(class="property-bar pointer record-selection" @click="openFontsPanel")
       img(v-if="props.font[0] !== '_'" class="text-setting__text-preview" :src="fontPrevUrl" @error="onError")
@@ -42,15 +42,15 @@ div(class="text-setting" ref='body'
                 iconName="copy"
                 iconWidth="16px"
                 iconColor="gray-4"
-                @click="copyColor")
+                @click.native="copyColor")
     div(class="action-bar action-bar--small flex-evenly")
       svg-icon(class="pointer record-selection btn-lh feature-button p-5"
         :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click="openLineHeightSliderPopup('.btn-lh')"
+        @click.native="openLineHeightSliderPopup('.btn-lh')"
         v-hint="$t('NN0110')")
       svg-icon(class="pointer record-selection btn-ls feature-button p-5"
         :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click="openSpacingSliderPopup('.btn-ls')"
+        @click.native="openSpacingSliderPopup('.btn-ls')"
         v-hint="$t('NN0109')")
   div(class="action-bar flex-evenly")
     svg-icon(v-for="(icon,index) in mappingIcons('font')"
@@ -59,14 +59,14 @@ div(class="text-setting" ref='body'
       :key="`gp-action-icon-${index}`"
       :id="`icon-${icon}`"
       v-hint="hintMap[icon]"
-      :iconName="icon" :iconWidth="'20px'" :iconColor="iconClickable(icon) ? 'gray-2' : 'gray-4'" @mousedown="onPropertyClick(icon)")
+      :iconName="icon" :iconWidth="'20px'" :iconColor="iconClickable(icon) ? 'gray-2' : 'gray-4'" @mousedown.native="onPropertyClick(icon)")
   div(class="action-bar flex-evenly")
     svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
       class="pointer feature-button p-5"
       :class="{ active: iconIsActived(icon) }"
       :key="`gp-action-icon-${index}`"
       v-hint="hintMap[icon]"
-      :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown="onParaPropsClick(icon)")
+      :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
 </template>
 
 <script lang="ts">
@@ -93,6 +93,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
+import editorUtils from '@/utils/editorUtils'
 
 export default defineComponent({
   components: {
@@ -153,7 +154,7 @@ export default defineComponent({
     popupUtils.on(PopupSliderEventType.stop, () => {
       const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
       if (currLayer.type === 'text' || (currLayer.type === 'group' && subLayerIdx !== -1 &&
-        (currLayer as IGroup).layers[subLayerIdx].type === 'text)')) {
+        currLayer.layers[subLayerIdx].type === 'text')) {
         tiptapUtils.focus({ scrollIntoView: false })
       }
     })
@@ -290,7 +291,7 @@ export default defineComponent({
       const input = this.$refs['input-color'] as HTMLInputElement
       input.focus()
       input.select()
-      this.$emit('toggleColorPanel', true)
+      editorUtils.toggleColorSlips(true)
       this.updateLayerProps({ isEdited: true })
     },
     handleColorUpdate(color: string) {
@@ -575,6 +576,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .text-setting {
+  text-align: left;
   &__title {
     margin-bottom: 30px;
   }

@@ -273,7 +273,6 @@ export default defineComponent({
         src,
         photoAspectRatio,
         {
-          pageIndex: pageUtils.currFocusPageIndex,
           panelPreviewSrc: this.panelPreviewSrc,
           ...((this.inFilePanel || this.inLogoPanel) && !photo.id && { assetIndex: photo.assetIndex }),
           ...((this.inFilePanel || this.inLogoPanel) && photo.id && { assetId: photo.id }),

@@ -17,7 +17,7 @@ import stepsUtils from './stepsUtils'
 import ZindexUtils from './zindexUtils'
 import GroupUtils from './groupUtils'
 import resizeUtils from './resizeUtils'
-import { IPage } from '@/interfaces/page'
+import { IBleed, IPage } from '@/interfaces/page'
 import gtmUtils from './gtmUtils'
 import editorUtils from './editorUtils'
 import errorHandleUtils from './errorHandleUtils'
@@ -25,6 +25,7 @@ import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import mathUtils from './mathUtils'
 import { notify } from '@kyvg/vue3-notification'
+import unitUtils from './unitUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -35,6 +36,7 @@ export const STANDARD_TEXT_FONT: { [key: string]: string } = {
 export const RESIZE_RATIO_FRAME = 0.6
 export const RESIZE_RATIO_SVG = 0.55
 export const RESIZE_RATIO_IMAGE = 0.8
+export const RESIZE_RATIO_TEXT = 0.55
 class AssetUtils {
   host = 'https://template.vivipic.com'
   data = 'config.json'
@@ -158,22 +160,40 @@ class AssetUtils {
     }
   }
 
-  async addTemplate(json: any, attrs: IAssetProps = {}, recordStep = true) {
-    const { pageIndex, width, height } = attrs
-    const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
-    // const targetPage: IPage = this.getPage(targetPageIndex)
-
+  async addTemplate(json: any, attrs?: { pageIndex?: number, width?: number, height?: number, physicalWidth?: number, physicalHeight?: number, unit?: string }, recordStep = true) {
+    const targetPageIndex = attrs?.pageIndex ?? pageUtils.addAssetTargetPageIndex
+    const targetPage: IPage = this.getPage(targetPageIndex)
     json = await this.updateBackground(generalUtils.deepCopy(json))
     pageUtils.setAutoResizeNeededForPage(json, true)
     const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
     pageUtils.updateSpecPage(targetPageIndex, newLayer)
-    if (width && height) {
-      resizeUtils.resizePage(targetPageIndex, newLayer, { width, height })
-      store.commit('UPDATE_pageProps', {
-        pageIndex: targetPageIndex,
-        props: { width, height }
-      })
+    if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newLayer, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
+
+    if (store.getters['user/getUserId'] === 'backendRendering') {
+      if (store.getters['user/getUserId'] === 'backendRendering' && !store.getters['user/getBleed'] && !store.getters['user/getTrim']) {
+        // remove bleeds if disabled
+        // console.log('noBleed')
+        resizeUtils.disableBleeds(targetPageIndex)
+      } else if (json.isEnableBleed && json.bleeds && json.physicalBleeds) {
+        // use bleeds of template if it has
+        resizeUtils.resizeBleeds(targetPageIndex, json.physicalBleeds, json.bleeds)
+      } else {
+        // use default bleeds if it has no bleeds
+        // console.log('defaultBleed')
+        const page = this.getPage(targetPageIndex)
+        resizeUtils.resizeBleeds(targetPageIndex, pageUtils.getDefaultBleeds(page.unit, pageUtils.getPageDPI(page)))
+      }
+    } else if (targetPage.isEnableBleed && targetPage.bleeds && targetPage.physicalBleeds) {
+      // convert bleeds to template unit
+      const dpi = pageUtils.getPageDPI(targetPage)
+      const physicalBleeds = targetPage.unit === 'px' ? targetPage.bleeds
+        : targetPage.unit === attrs?.unit ? targetPage.physicalBleeds
+          : Object.fromEntries(Object.entries(targetPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, targetPage.unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+
+      // apply bleeds of targetPage
+      resizeUtils.resizeBleeds(targetPageIndex, physicalBleeds)
     }
+    GroupUtils.deselect()
     store.commit('SET_currActivePageIndex', targetPageIndex)
     if (recordStep) {
       stepsUtils.record()
@@ -192,10 +212,6 @@ class AssetUtils {
       pageUtils.updateSpecPage(i, newLayer)
       if (width && height) {
         resizeUtils.resizePage(i, newLayer, { width, height })
-        store.commit('UPDATE_pageProps', {
-          pageIndex: i,
-          props: { width, height }
-        })
       }
     }
 
@@ -206,9 +222,9 @@ class AssetUtils {
 
   addSvg(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
+    const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const { vSize = [] } = json
-    const currentPage = this.getPage(targePageIndex)
+    const currentPage = this.getPage(targetPageIndex)
     const resizeRatio = RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = vSize ? ((vSize as number[])[0] / (vSize as number[])[1]) : 1
@@ -234,18 +250,18 @@ class AssetUtils {
     }
     const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     GroupUtils.deselect()
-    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
-    ZindexUtils.reassignZindex(targePageIndex)
-    GroupUtils.select(targePageIndex, [index])
+    LayerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newShape(config)], index)
+    ZindexUtils.reassignZindex(targetPageIndex)
+    GroupUtils.select(targetPageIndex, [index])
     stepsUtils.record()
   }
 
   async addLine(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
+    const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const oldPoint = json.point
     const { width, height } = ShapeUtils.lineDimension(oldPoint)
-    const currentPage = this.getPage(targePageIndex)
+    const currentPage = this.getPage(targetPageIndex)
     const resizeRatio = RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = width / height
@@ -274,17 +290,17 @@ class AssetUtils {
     }
     const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     GroupUtils.deselect()
-    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
-    ZindexUtils.reassignZindex(targePageIndex)
-    GroupUtils.select(targePageIndex, [index])
+    LayerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newShape(config)], index)
+    ZindexUtils.reassignZindex(targetPageIndex)
+    GroupUtils.select(targetPageIndex, [index])
     stepsUtils.record()
   }
 
   async addBasicShape(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
+    const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const { vSize = [] } = json
-    const currentPage = this.getPage(targePageIndex)
+    const currentPage = this.getPage(targetPageIndex)
     const resizeRatio = RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
     const svgAspectRatio = vSize ? ((vSize as number[])[0] / (vSize as number[])[1]) : 1
@@ -316,16 +332,16 @@ class AssetUtils {
     }
     const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     GroupUtils.deselect()
-    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newShape(config)], index)
-    ZindexUtils.reassignZindex(targePageIndex)
-    GroupUtils.select(targePageIndex, [index])
+    LayerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newShape(config)], index)
+    ZindexUtils.reassignZindex(targetPageIndex)
+    GroupUtils.select(targetPageIndex, [index])
     stepsUtils.record()
   }
 
   addFrame(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
-    const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
-    const currentPage = this.getPage(targePageIndex) as IPage
+    const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
+    const currentPage = this.getPage(targetPageIndex) as IPage
     const svgRatio = json.width / json.height
     const resizeRatio = ((svgRatio > 1 ? currentPage.width : currentPage.height) * 0.7) / (svgRatio > 1 ? json.width : json.height)
     const width = json.width * resizeRatio
@@ -346,15 +362,15 @@ class AssetUtils {
     }
     const index = LayerUtils.getObjectInsertionLayerIndex(currentPage.layers, config) + 1
     GroupUtils.deselect()
-    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newFrame(config)], index)
-    ZindexUtils.reassignZindex(targePageIndex)
-    GroupUtils.select(targePageIndex, [index])
+    LayerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newFrame(config)], index)
+    ZindexUtils.reassignZindex(targetPageIndex)
+    GroupUtils.select(targetPageIndex, [index])
     stepsUtils.record()
   }
 
   addBackground(url: string, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {}, ver, panelPreviewSrc, imgSrcSize } = attrs
-    const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
+    const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     const { width: assetWidth = 0, height: assetHeight = 0 } = styles
     const { width: srcWidth = 0, height: srcHeight = 0 } = imgSrcSize || { width: 0, height: 0 }
     const page = store.getters.getPage(targetPageIndex)
@@ -401,6 +417,7 @@ class AssetUtils {
       pageIndex: targetPageIndex,
       newDisplayMode: true
     })
+    GroupUtils.deselect()
     stepsUtils.record()
   }
 
@@ -426,28 +443,39 @@ class AssetUtils {
     json = generalUtils.deepCopy(json)
     const { pageIndex, styles = {} } = attrs
     const { x, y } = styles
-    const { width, height } = json.styles
-    const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
+    const { width, height, scale } = json.styles
+    const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
+    const currentPage = this.getPage(targetPageIndex)
+    const resizeRatio = RESIZE_RATIO_TEXT
+    const pageAspectRatio = currentPage.width / currentPage.height
+    const textAspectRatio = width / height
+    const textWidth = textAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * textAspectRatio
+    const textHeight = textAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / textAspectRatio : currentPage.height * resizeRatio
+
     const config = {
       ...json,
+      widthLimit: json.widthLimit === -1 ? -1 : json.widthLimit * (textWidth / width),
       styles: {
-        ...json.styles
+        ...json.styles,
+        width: textWidth,
+        height: textHeight,
+        scale: scale * (textWidth / width)
       }
     }
     Object.assign(
       config.styles,
       typeof y === 'undefined' || typeof x === 'undefined'
-        ? TextUtils.getAddPosition(width, height, targePageIndex)
+        ? TextUtils.getAddPosition(textWidth, textHeight, targetPageIndex)
         : { x, y }
     )
     const newLayer = config.type === 'group'
       ? LayerFactary.newGroup(config, (config as IGroup).layers)
       : LayerFactary.newText(config)
-    LayerUtils.addLayers(targePageIndex, [newLayer])
+    LayerUtils.addLayers(targetPageIndex, [newLayer])
   }
 
   addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}, spanStyles: Partial<ISpanStyle> = {}) {
-    const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
+    const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {
         const fieldMap = {
@@ -471,8 +499,8 @@ class AssetUtils {
           Object.assign(textLayer.paragraphs[0].spans[0].styles, spanStyles)
         }
 
-        TextUtils.resetTextField(textLayer, targePageIndex, field)
-        LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false }))])
+        TextUtils.resetTextField(textLayer, targetPageIndex, field)
+        LayerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false }))])
         editorUtils.setCloseMobilePanelFlag(true)
       })
       .catch(() => {
@@ -532,7 +560,7 @@ class AssetUtils {
       }
     }
 
-    const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
+    const targetPageIndex = pageIndex ?? pageUtils.addAssetTargetPageIndex
 
     let srcObj
     let assetId = '' as string | number | undefined
@@ -548,7 +576,7 @@ class AssetUtils {
     } else {
       srcObj = url as SrcObj
     }
-    const allLayers = this.getLayers(targePageIndex)
+    const allLayers = this.getLayers(targetPageIndex)
     // Check if there is any unchanged image layer with the same asset ID
     const imageLayers = allLayers.filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
       if (layer.type !== 'image') return false
@@ -571,15 +599,15 @@ class AssetUtils {
         ...newStyles
       }
     }
-    const index = LayerUtils.getObjectInsertionLayerIndex(this.getPage(targePageIndex).layers, config) + 1
+    const index = LayerUtils.getObjectInsertionLayerIndex(this.getPage(targetPageIndex).layers, config) + 1
     GroupUtils.deselect()
-    LayerUtils.addLayersToPos(targePageIndex, [LayerFactary.newImage(config)], index)
-    ZindexUtils.reassignZindex(targePageIndex)
-    GroupUtils.select(targePageIndex, [index])
+    LayerUtils.addLayersToPos(targetPageIndex, [LayerFactary.newImage(config)], index)
+    ZindexUtils.reassignZindex(targetPageIndex)
+    GroupUtils.select(targetPageIndex, [index])
     stepsUtils.record()
   }
 
-  addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number }) {
+  addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
     const currGroupType = store.getters.getGroupType
     store.commit('SET_groupId', groupId)
@@ -618,10 +646,6 @@ class AssetUtils {
           // @TODO: resize page/layer before adding to the store.
           if (resize) {
             resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
-            store.commit('UPDATE_pageProps', {
-              pageIndex: targetIndex,
-              props: resize
-            })
           }
           if ((groupType === 1 || currGroupType === 1) && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
@@ -631,10 +655,20 @@ class AssetUtils {
               const pageIndex = +idx + targetIndex
               const newSize = { height: height * pageWidth / width, width: pageWidth }
               resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
-              store.commit('UPDATE_pageProps', {
-                pageIndex,
-                props: newSize
-              })
+            }
+          }
+
+          // apply bleeds of currFocusPage
+          if (currFocusPage.isEnableBleed && currFocusPage.bleeds && currFocusPage.physicalBleeds) {
+            // convert bleeds to template unit
+            const dpi = pageUtils.getPageDPI(currFocusPage)
+            const physicalBleeds = currFocusPage.unit === 'px' ? currFocusPage.bleeds
+              : currFocusPage.unit === resize?.unit ? currFocusPage.physicalBleeds
+                : Object.fromEntries(Object.entries(currFocusPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, currFocusPage.unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+
+            for (const idx in jsonDataList) {
+              const pageIndex = +idx + targetIndex
+              resizeUtils.resizeBleeds(pageIndex, physicalBleeds)
             }
           }
           store.commit('SET_currActivePageIndex', targetIndex)
@@ -652,13 +686,7 @@ class AssetUtils {
     try {
       store.commit('SET_mobileSidebarPanelOpen', false)
       const asset = await this.get(item, attrs.db) as IAsset
-      // const data = await ImageUtils.getImageSize(ImageUtils.getSrc({
-      //   srcObj: {
-      //     type: 'background',
-      //     assetId: ImageUtils.getAssetId(asset.urls.prev, 'background'),
-      //     userId: ''
-      //   }
-      // }, 'prev', attrs.ver), asset.width ?? 0, asset.height ?? 0)
+
       switch (asset.type) {
         case 1: {
           if (!attrs.imgSrcSize?.width || !attrs.imgSrcSize.height) {
@@ -719,7 +747,7 @@ class AssetUtils {
       editorUtils.setCloseMobilePanelFlag(true)
       this.addAssetToRecentlyUsed(asset)
     } catch (error) {
-      console.log(error)
+      console.error(error)
       captureException(error)
     }
   }

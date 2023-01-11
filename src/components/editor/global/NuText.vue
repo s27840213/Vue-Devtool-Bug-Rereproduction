@@ -1,33 +1,7 @@
 <template lang="pug">
-div(v-if="!isMoving && config.active"
-    class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-    nu-text-editor(:initText="textHtml()" :id="subLayerIndex === -1 ? `text-${layerIndex}` : `text-sub-${layerIndex}-${subLayerIndex}`"
-      :style="textBodyStyle()"
-      :pageIndex="pageIndex"
-      :layerIndex="layerIndex"
-      :subLayerIndex="subLayerIndex"
-      @keydown.37.stop
-      @keydown.38.stop
-      @keydown.39.stop
-      @keydown.40.stop
-      @keydown.ctrl.67.exact.stop.self
-      @keydown.meta.67.exact.stop.self
-      @keydown.ctrl.86.exact.stop.self
-      @keydown.meta.86.exact.stop.self
-      @keydown.ctrl.88.exact.stop.self
-      @keydown.meta.88.exact.stop.self
-      @keydown.ctrl.65.exact.stop.self
-      @keydown.meta.65.exact.stop.self
-      @keydown.ctrl.90.exact.stop.self
-      @keydown.meta.90.exact.stop.self
-      @keydown.ctrl.shift.90.exact.stop.self
-      @keydown.meta.shift.90.exact.stop.self
-      @update="handleTextChange"
-      @compositionend="handleTextCompositionEnd")
-//- div(v-else class="nu-text" :style="wrapperStyles()")
-div(v-else class="nu-text" :style="textWrapperStyle()")
+div(class="nu-text" :style="textWrapperStyle()" draggable="false")
   //- Svg BG for text effex gooey.
-  svg(v-if="svgBG" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
+  svg(v-if="svgBG && !noShadow" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
     component(v-for="(elm, idx) in svgBG.content"
               :key="`textSvgBg${idx}`"
               :is="elm.tag"
@@ -39,7 +13,8 @@ div(v-else class="nu-text" :style="textWrapperStyle()")
       :layerIndex="layerIndex"
       :pageIndex="pageIndex"
       :subLayerIndex="subLayerIndex"
-      :isDuplicated="idx !== duplicatedText.length-1")
+      :isDuplicated="idx !== duplicatedText.length-1"
+      :isTransparent="isTransparent")
     p(v-else
       v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
       :key="p.id"
@@ -48,15 +23,8 @@ div(v-else class="nu-text" :style="textWrapperStyle()")
         class="nu-text__span"
         :data-sindex="sIndex"
         :key="span.id"
-        :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan)") {{ span.text }}
+        :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan, transParentStyles)") {{ span.text }}
         br(v-if="!span.text && p.spans.length === 1")
-  div(v-if="!isCurveText" class="nu-text__observee")
-    span(v-for="(span, sIndex) in spans()"
-      class="nu-text__span"
-      :class="`nu-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
-      :data-sindex="sIndex"
-      :key="sIndex",
-      :style="styles(span.styles)") {{ span.text }}
 </template>
 
 <script lang="ts">
@@ -100,7 +68,11 @@ export default defineComponent({
       type: Number,
       default: -1
     },
-    isPagePreview: {
+    isTransparent: {
+      default: false,
+      type: Boolean
+    },
+    noShadow: {
       default: false,
       type: Boolean
     }
@@ -109,7 +81,6 @@ export default defineComponent({
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
     return {
       isDestroyed: false,
-      resizeObserver: undefined as ResizeObserver | undefined,
       initSize: {
         width: this.config.styles.width,
         height: this.config.styles.height,
@@ -125,8 +96,6 @@ export default defineComponent({
   },
   unmounted() {
     this.isDestroyed = true
-    this.resizeObserver && this.resizeObserver.disconnect()
-    this.resizeObserver = undefined
   },
   mounted() {
     // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
@@ -138,7 +107,6 @@ export default defineComponent({
         }
       }, 100) // for the delay between font loading and dom rendering
     })
-
     this.drawSvgBG()
   },
   computed: {
@@ -192,6 +160,13 @@ export default defineComponent({
         ...(duplicatedTextShadow ? [textShadowCss] : []),
         {} // Original text, don't have extra css
       ]
+    },
+    transParentStyles(): {[key: string]: any} {
+      return this.isTransparent ? {
+        color: 'rgba(0, 0, 0, 0)',
+        '-webkit-text-stroke-color': 'rgba(0, 0, 0, 0)',
+        'text-decoration-color': 'rgba(0, 0, 0, 0)'
+      } : {}
     }
   },
   watch: {
@@ -289,7 +264,7 @@ export default defineComponent({
           widthLimit = pageSize
         } else if (reachLeftLimit || reachRightLimit) {
           if (composing) this.widthLimitSetDuringComposition = true
-          widthLimit = getSize()
+          widthLimit = currTextSize
           textHW = textUtils.getTextHW(text, widthLimit)
           layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
         }
@@ -374,7 +349,7 @@ export default defineComponent({
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
-        opacity: `${this.config.styles.opacity / 100}`,
+        opacity: `${this.config.styles.opacity * 0.01}`,
         // transform: `scaleX(${this.config.styles.scale}) scaleY(${this.config.styles.scale})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode
@@ -395,9 +370,12 @@ export default defineComponent({
       return tiptapUtils.textStylesRaw(styles)
     },
     getOpacity() {
-      const { editing, contentEditable } = this.config
+      const { editing, contentEditable, active } = this.config
+      if (this.isCurveText) {
+        return contentEditable ? 0.2 : 1
+      }
       if (editing && !this.isMoving) {
-        if (contentEditable) {
+        if (contentEditable && active) {
           if (this.isCurveText || this.isFlipped) {
             return 0.2
           } else {
@@ -449,7 +427,7 @@ export default defineComponent({
         widthLimit = config.widthLimit
       }
       const textHW = await textUtils.getTextHWAsync(config, widthLimit)
-      if (typeof this.subLayerIndex === 'undefined') {
+      if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
         let x = config.styles.x
         let y = config.styles.y
         if (config.widthLimit === -1) {
@@ -472,14 +450,6 @@ export default defineComponent({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
       this.drawSvgBG()
-    },
-    observeAllSpans() {
-      const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
-      spans.forEach(span => {
-        setTimeout(() => {
-          this.resizeObserver && this.resizeObserver.observe(span as Element)
-        }, 1)
-      })
     }
   }
 })
@@ -497,6 +467,7 @@ export default defineComponent({
     overflow: visible;
   }
   &__body {
+    pointer-events: none;
     outline: none;
     padding: 0;
     position: relative;
@@ -509,6 +480,10 @@ export default defineComponent({
     overflow-wrap: break-word;
     position: relative;
   }
+  &__curve-text-in-editing {
+    pointer-events: none;
+    opacity: 0.2;
+  }
   &__observee {
     position: absolute;
     opacity: 0;
@@ -517,6 +492,11 @@ export default defineComponent({
     & > span {
       display: inline-block;
     }
+  }
+  &__editor {
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 }
 </style>

@@ -36,7 +36,7 @@ div(class="btnList" :style="BGstyle")
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent } from 'vue'
+import { defineComponent } from 'vue'
 import Nubtn from '@/components/global/Nubtn.vue'
 import Checkbox from '@/components/global/Checkbox.vue'
 import Options from '@/components/global/Options.vue'
@@ -44,7 +44,6 @@ import Options from '@/components/global/Options.vue'
 export default defineComponent({
   name: 'NubtnList',
   components: {
-    Nubtn,
     Checkbox,
     Options
   },

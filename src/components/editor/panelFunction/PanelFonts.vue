@@ -8,7 +8,7 @@ div(class="panel-fonts")
       :iconName="'close'"
       :iconWidth="'30px'"
       :iconColor="'gray-2'"
-      @click="closeFontsPanel")
+      @click.native="closeFontsPanel")
   search-bar(placeholder="Search font"
     clear
     :defaultKeyword="keywordLabel"
@@ -29,19 +29,10 @@ div(class="panel-fonts")
       div(class="panel-fonts__category-title") {{ title }}
     template(v-slot:category-font-item="{ list }")
       category-font-item(v-for="item in list"
+        :key="item.id"
         :item="item"
         :textStyleType="textStyleType")
-  //- div(class="panel-fonts__upload")
-    transition(name="fade-in")
-      div(v-if="['uploading', 'success'].includes(fontUploadStatus)"
-          class="panel-fonts__upload-status")
-        svg-icon(class="mr-5"
-          :iconName="uploadStatusIcon"
-          :iconWidth="'30px'"
-          :iconColor="'green-2'")
-        span {{fontUploadStatus === 'uploading' ? `${$t('NN0136')}` : `${$t('NN0135')}`}}
-    btn(class="full-width" :type="'primary-mid'" @click="uploadFont()"
-      :disabled="fontUploadStatus === 'uploading'") Upload Font
+  div(v-if="showMore" class="cover-background")
 </template>
 
 <script lang="ts">
@@ -106,7 +97,7 @@ export default defineComponent({
       pending: 'pending',
       keyword: 'keyword'
     }),
-    ...mapState('fontTag', ['tags']),
+    ...mapState('fontTag', ['tags', 'showMore']),
     ...mapState('text', ['sel', 'props', 'fontPreset']),
     ...mapGetters('font', ['hasNextPage']),
     ...mapGetters('brandkit', {
@@ -258,9 +249,6 @@ export default defineComponent({
       'fetchFonts',
       'fetchMoreFonts'
     ]),
-    ...mapMutations('fontTag', {
-      setShowMore: 'SET_SHOW_MORE'
-    }),
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
     },
@@ -366,5 +354,10 @@ export default defineComponent({
 }
 .category-list::v-deep::-webkit-scrollbar-thumb {
   border: 3px solid #ffffff;
+}
+.cover-background {
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 </style>

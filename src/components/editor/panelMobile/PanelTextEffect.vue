@@ -7,7 +7,7 @@ div(class="panel-text-effect")
       svg-icon(:iconName="`text-${category.name}-none`"
               iconWidth="60px"
               iconColor="gray-5"
-              @click="pushHistory(category.name)")
+              @click.native="pushHistory(category.name)")
       span(class="body-3") {{category.label}}
   //- To choose effect, ex: hollow, splice or echo.
   div(v-if="state === 'effects'"
@@ -21,7 +21,7 @@ div(class="panel-text-effect")
               iconWidth="100%" iconColor="gray-5")
       div(v-if="currEffect.key === effect.key && effect.key !== 'none'"
           class="panel-text-effect__effects--more")
-        svg-icon(iconName="adjust" iconWidth="20px" iconColor="white")
+        svg-icon(iconName="sliders" iconWidth="20px" iconColor="white")
   //- To set effect optoin, ex: distance, color.
   div(v-if="state === 'options'"
       class="w-full panel-text-effect__form")
@@ -52,9 +52,8 @@ div(class="panel-text-effect")
       div(v-if="option.type === 'color'"
         class="panel-text-effect__color")
         div {{option.label}}
-        div(class="panel-text-effect__color-slip"
-            :style="colorParser(currentStyle[currCategory.name][option.key])"
-            @click="openColorPanel(option.key)")
+        color-btn(:color="colorParser(currentStyle[currCategory.name][option.key])"
+                size="24px" @click="openColorPanel(option.key)")
     span(class="panel-text-effect__reset label-mid"
         @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
@@ -62,6 +61,7 @@ div(class="panel-text-effect")
 <script lang="ts">
 import Vue, { PropType, defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import textEffectUtils from '@/utils/textEffectUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
@@ -70,11 +70,13 @@ import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import constantData, { IEffect, IEffectCategory, IEffectOption } from '@/utils/constantData'
 import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 import textBgUtils from '@/utils/textBgUtils'
+import colorUtils from '@/utils/colorUtils'
 import _ from 'lodash'
 
 export default defineComponent({
   components: {
-    MobileSlider
+    MobileSlider,
+    ColorBtn
   },
   props: {
     panelHistory: {
@@ -104,7 +106,7 @@ export default defineComponent({
     currentStyle(): { shadow: ITextEffect, bg: ITextBgEffect, shape: ITextShape } {
       const { styles } = textEffectUtils.getCurrentLayer()
       return {
-        shadow: Object.assign({ name: 'none' }, styles.textEffect as ITextEffect),
+        shadow: Object.assign({ name: 'none' }, styles?.textEffect as ITextEffect),
         bg: styles.textBg as ITextBgEffect,
         shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
       }
@@ -127,9 +129,11 @@ export default defineComponent({
     },
     openColorPanel(key: string) {
       if (this.currCategory.name === 'shadow') {
+        colorUtils.setCurrEvent(ColorEventType.textEffect)
         this.$emit('openExtraColorModal', ColorEventType.textEffect, MobileColorPanelType.palette)
         textEffectUtils.setColorKey(key)
       } else { // Text BG
+        colorUtils.setCurrEvent(ColorEventType.textBg)
         this.$emit('openExtraColorModal', ColorEventType.textBg, MobileColorPanelType.palette)
         textBgUtils.setColorKey(key)
       }
@@ -193,7 +197,7 @@ export default defineComponent({
       }
     },
     colorParser(color: string) {
-      return { backgroundColor: textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer()) }
+      return textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer())
     }
   }
 })
@@ -296,11 +300,6 @@ export default defineComponent({
     align-items: center;
     position: relative;
     color: setColor(gray-3);
-    &-slip {
-      height: 24px;
-      width: 32px;
-      box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.2);
-    }
   }
 
   &__reset {

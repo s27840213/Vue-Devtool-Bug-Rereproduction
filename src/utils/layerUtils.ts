@@ -23,10 +23,10 @@ class LayerUtils {
   get pageIndex(): number { return pageUtils.currFocusPageIndex }
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
-  get getCurrLayer(): IImage | IText | IShape | IGroup | IFrame { return this.getLayer(this.pageIndex, this.layerIndex) }
+  get getCurrLayer(): IImage | IText | IShape | IGroup | IFrame | ITmp { return this.getLayer(this.pageIndex, this.layerIndex) }
   get getPage(): (pageInde: number) => IPage { return store.getters.getPage }
   get getCurrPage(): IPage { return this.getPage(this.pageIndex) }
-  get getLayer(): (pageIndex: number, layerIndex: number) => IImage | IText | IShape | IGroup | IFrame {
+  get getLayer(): (pageIndex: number, layerIndex: number) => IImage | IText | IShape | IGroup | IFrame | ITmp {
     return store.getters.getLayer
   }
 
@@ -197,7 +197,7 @@ class LayerUtils {
     })
   }
 
-  replaceLayer(pageIndex: number, layerIndex: number, layer: IImage | IText | IShape | IGroup) {
+  replaceLayer(pageIndex: number, layerIndex: number, layer: IImage | IText | IShape | IGroup | IFrame) {
     store.commit('REPLACE_layer', {
       pageIndex,
       layerIndex,
@@ -227,7 +227,7 @@ class LayerUtils {
     }
   }
 
-  updateLayerProps(pageIndex: number, layerIndex: number, props: Partial<IImage | IText | IGroup | IShape> | { [key: string]: string | number | ITiptapSelection }, subLayerIdx = -1) {
+  updateLayerProps(pageIndex: number, layerIndex: number, props: Partial<IImage | IText | IGroup | IShape | ITmp> | { [key: string]: string | number | ITiptapSelection }, subLayerIdx = -1) {
     if (subLayerIdx === -1 || typeof subLayerIdx === 'undefined') {
       store.commit('UPDATE_layerProps', {
         pageIndex,
@@ -260,7 +260,7 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: Partial<IImage | IText | IGroup | IShape> | { [index: string]: number | string | boolean | number[] | IParagraph[] | SrcObj }) {
+  updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: Partial<IImage | IText | IGroup | IShape | ITmp> | { [index: string]: number | string | boolean | number[] | IParagraph[] | SrcObj }) {
     store.commit('UPDATE_subLayerProps', {
       pageIndex,
       layerIndex,

@@ -1,5 +1,5 @@
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
 import Vue from 'vue'
@@ -96,14 +96,9 @@ export class MovingUtils {
     }
   }
 
-  private start = 0
-  private recorded = false
-
   moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
     this.initTranslate.x = this.getLayerPos.x
     this.initTranslate.y = this.getLayerPos.y
-    this.start = Date.now()
-    this.recorded = false
     const currLayerIndex = layerUtils.layerIndex
     if (currLayerIndex !== this.layerIndex) {
       const layer = layerUtils.getLayer(this.pageIndex, currLayerIndex)
@@ -134,7 +129,7 @@ export class MovingUtils {
     this.eventTarget = (event.target as HTMLElement)
     this.eventTarget.releasePointerCapture((event as PointerEvent).pointerId)
 
-    if (this.isTouchDevice) {
+    if (this.isTouchDevice && !this.config.locked) {
       this.isClickOnController = controlUtils.isClickOnController(event as MouseEvent)
       event.stopPropagation()
       if (!this.dblTabsFlag && this.isActive) {
@@ -188,7 +183,6 @@ export class MovingUtils {
     }
 
     this.movingByControlPoint = false
-    // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
     const inCopyMode = (generalUtils.exact([event.altKey])) && !this.contentEditable
     const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable && !inCopyMode
     const { inMultiSelectionMode } = this
@@ -291,15 +285,9 @@ export class MovingUtils {
         }
       }
     }
-    // console.log('handle start', Date.now() - this.start)
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
-    // if (!this.recorded) {
-    //   // console.log(Date.now() - this.start)
-    //   // this.recorded = true
-    this.start = Date.now()
-    // }
     const posDiff = {
       x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
       y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
@@ -331,10 +319,9 @@ export class MovingUtils {
     }
 
     this.isControlling = true
+    const updateConifgData = {} as Partial<IShape | IText | IImage | IGroup>
     if (!this.isDragging) {
-      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-        dragging: true
-      })
+      updateConifgData.dragging = true
       this.component && this.component.$emit('isDragging', this.layerIndex)
     }
     if (this.isActive) {
@@ -346,10 +333,6 @@ export class MovingUtils {
         window.requestAnimationFrame(() => {
           this.movingHandler(e)
           this.isHandleMovingHandler = false
-          // if (!this.recorded) {
-          // console.log(Date.now() - this.start)
-          //   this.recorded = true
-          // }
         })
         this.isHandleMovingHandler = true
       }
@@ -357,13 +340,18 @@ export class MovingUtils {
         x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
         y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
       }
-      if (!this.config.moving || !store.state.isMoving) {
-        if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
-          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: true })
+      const hasActualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
+      if (hasActualMove) {
+        if (!this.config.moving || !store.state.isMoving) {
+          updateConifgData.moving = true
           this.setMoving(true)
+        }
+        if (this.getLayerType === 'text' && this.config.contentEditable) {
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
         }
       }
     }
+    layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, updateConifgData)
   }
 
   movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
@@ -379,7 +367,7 @@ export class MovingUtils {
         y: moveOffset.offsetY
       }
     )
-    const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
+    const offsetSnap = this.snapUtils.calcMoveSnap(this.config, layerUtils.layerIndex)
     this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
     const totalOffset = {
       x: offsetPos.x + (offsetSnap.x * this.scaleRatio * 0.01),
@@ -393,13 +381,14 @@ export class MovingUtils {
     this.isControlling = false
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
+    layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
+    this.setMoving(false)
 
     const posDiff = {
       x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
       y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
     }
     const hasActiualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
-
     if (!this.isDoingGestureAction && !this.isActive && !hasActiualMove) {
       this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
       if (!this.inMultiSelectionMode) {
@@ -417,14 +406,8 @@ export class MovingUtils {
       return
     }
 
-    layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
-    this.setMoving(false)
-
     if (this.isActive) {
       if (hasActiualMove) {
-        if (this.getLayerType === 'text') {
-          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
-        }
         // dragging to another page
         if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
           const layerNum = this.currSelectedInfo.layers.length

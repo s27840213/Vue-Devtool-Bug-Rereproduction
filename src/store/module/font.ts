@@ -25,6 +25,7 @@ actions.getMoreCategory = async ({ commit, getters, state }) => {
     const { data } = await list.getFont(nextParams)
     commit(SET_MORE_CATEGORY, data.data)
   } catch (error) {
+    console.error(error)
     captureException(error)
   }
 }

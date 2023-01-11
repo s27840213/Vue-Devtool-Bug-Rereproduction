@@ -1,4 +1,4 @@
-import { Editor, EditorEvents } from '@tiptap/vue-3'
+import { Editor, EditorEvents, FocusPosition } from '@tiptap/vue-3'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
@@ -425,9 +425,9 @@ class TiptapUtils {
     })
   }
 
-  focus(options = {} as { scrollIntoView?: boolean }) {
+  focus(options = {} as { scrollIntoView?: boolean }, pos?: FocusPosition) {
     if (this.editor) {
-      this.editor.commands.focus(null, options)
+      this.editor.commands.focus(pos, options)
     }
   }
 

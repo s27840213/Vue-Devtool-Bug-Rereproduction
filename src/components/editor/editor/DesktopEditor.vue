@@ -9,18 +9,18 @@ div(class="desktop-editor")
         div(class="content__editor")
           div(v-if="!inBgRemoveMode" class="header-container")
             editor-header
-          div(v-if="isAdmin && enableAdminView" class="admin-options")
+          div(v-if="showAllAdminTool" class="admin-options")
             div(class="admin-options__sticky-container"
                 :style="stickyTopPos")
               div(class="flex flex-column mr-10")
                 span(class="ml-10 text-bold text-orange") {{templateText}}
                 span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
-              svg-icon(v-if="isAdmin"
+              svg-icon(
                 class="mr-10"
                 :iconName="`user-admin${getAdminModeText}`"
                 :iconWidth="'20px'"
                 :iconColor="'gray-2'"
-                @click="setAdminMode()")
+                @click.native="setAdminMode()")
               div(class="flex flex-column")
                 select(class="locale-select" v-model="inputLocale")
                   option(v-for="locale in localeOptions" :value="locale") {{locale}}
@@ -30,11 +30,11 @@ div(class="desktop-editor")
           scale-ratio-editor(@toggleSidebarPanel="toggleSidebarPanel")
       div(class="content__panel"
           :style="contentPanelStyles")
-        function-panel(@toggleColorPanel="toggleColorPanel")
+        function-panel
         transition(name="panel-up")
-          color-slips(v-if="isColorPanelOpen" mode="FunctionPanel"
-              class="content__panel__color-panel"
-              @toggleColorPanel="toggleColorPanel")
+          color-slips(v-if="showColorSlips" mode="FunctionPanel"
+            :selectedColor="currEventColor()"
+            class="content__panel__color-panel")
       div(v-if="isShowPagePreview" class="content__pages")
         page-preview
   tour-guide(v-if="showEditorGuide")
@@ -67,6 +67,8 @@ import pageUtils from '@/utils/pageUtils'
 import ComponentLog from '@/components/componentLog/ComponentLog.vue'
 import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
 import i18n from '@/i18n'
+import editorUtils from '@/utils/editorUtils'
+import unitUtils from '@/utils/unitUtils'
 
 export default defineComponent({
   name: 'DesktopEditor',
@@ -89,11 +91,7 @@ export default defineComponent({
     return {
       FunctionPanelType,
       isSidebarPanelOpen: true,
-      inputLocale: '',
-      // isColorPanelOpen: false
-      colorPanelOpenState: {
-        val: false
-      },
+      inputLocale: i18n.global.locale,
       componentLogs: [] as Array<IComponentUpdatedLog>
     }
   },
@@ -131,7 +129,6 @@ export default defineComponent({
   },
   computed: {
     ...mapState('user', [
-      'role',
       'adminMode',
       'viewGuide']),
     ...mapGetters({
@@ -142,7 +139,7 @@ export default defineComponent({
       groupType: 'getGroupType',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       enableComponentLog: 'getEnalbleComponentLog',
-      enableAdminView: 'user/getEnableAdminView'
+      showAllAdminTool: 'user/showAllAdminTool'
     }),
     ...mapGetters('user', {
       token: 'getToken',
@@ -151,13 +148,8 @@ export default defineComponent({
     ...mapGetters('brandkit', {
       isBrandSettingsOpen: 'getIsSettingsOpen'
     }),
-    isColorPanelOpen: {
-      get: function (): boolean {
-        return this.colorPanelOpenState ? this.colorPanelOpenState.val : false
-      },
-      set: function (newVal: boolean) {
-        this.colorPanelOpenState.val = newVal
-      }
+    showColorSlips(): boolean {
+      return editorUtils.showColorSlips
     },
     isShape(): boolean {
       return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
@@ -166,7 +158,7 @@ export default defineComponent({
       return SidebarPanelType.page === this.currPanel
     },
     contentPanelStyles(): { [index: string]: string } {
-      return this.isColorPanelOpen ? {
+      return this.showColorSlips ? {
         'grid-template-rows': '1fr 1fr'
       } : {
         'grid-template-rows': '1fr'
@@ -174,9 +166,6 @@ export default defineComponent({
     },
     isLogin(): boolean {
       return store.getters['user/isLogin']
-    },
-    isAdmin(): boolean {
-      return this.role === 0
     },
     getAdminModeText(): string {
       return this.adminMode ? '' : '-disable'
@@ -210,7 +199,7 @@ export default defineComponent({
     logUtils.setLog('Editor mounted')
     this.clearBgRemoveState()
     colorUtils.on('closeColorPanel', () => {
-      this.colorPanelOpenState.val = false
+      editorUtils.toggleColorSlips(false)
     })
     if (brandkitUtils.isBrandkitAvailable) {
       brandkitUtils.fetchBrands(this.fetchBrands)
@@ -219,8 +208,10 @@ export default defineComponent({
     // load size from query for new design
     const newDesignWidth = parseInt(this.$route.query.width as string)
     const newDesignHeight = parseInt(this.$route.query.height as string)
+    const newDesignUnit = (this.$route.query.unit || 'px') as string
     if (newDesignWidth && newDesignHeight) {
-      pageUtils.setPageSize(0, newDesignWidth, newDesignHeight)
+      const pxSize = unitUtils.convertSize(newDesignWidth, newDesignHeight, newDesignUnit, 'px')
+      pageUtils.setPageSize(0, pxSize.width, pxSize.height, newDesignWidth, newDesignHeight, newDesignUnit)
       pageUtils.fitPage()
     }
   },
@@ -234,14 +225,14 @@ export default defineComponent({
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'
     }),
+    currEventColor(): string {
+      return colorUtils.globalSelectedColor.currEventColor
+    },
     setAdminMode() {
       this._setAdminMode(!this.adminMode)
     },
     setPanelType(type: number) {
       this.setCurrFunctionPanel(type)
-    },
-    toggleColorPanel(bool: boolean) {
-      this.isColorPanelOpen = bool
     },
     toggleSidebarPanel(bool: boolean) {
       this.isSidebarPanelOpen = bool

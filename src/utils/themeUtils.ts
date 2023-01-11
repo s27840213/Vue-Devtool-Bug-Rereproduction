@@ -32,12 +32,12 @@ class ThemeUtils {
 
   async fetchTemplateContent() {
     generalUtils.panelInit('template',
-      (keyword: string) => {
-        store.dispatch('templates/getTagContent', { keyword })
-      }, (keyword: string, locale: string) => {
-        store.dispatch('templates/getContent', { keyword, locale })
-      }, async () => {
-        store.dispatch('templates/getRecAndCate')
+      async (keyword: string) => {
+        await store.dispatch('templates/getTagContent', { keyword })
+      }, async (keyword: string, locale: string) => {
+        await store.dispatch('templates/getContent', { keyword, locale })
+      }, async ({ reset }: {reset: boolean}) => {
+        store.dispatch('templates/getRecAndCate', { reset })
       })
   }
 
@@ -76,17 +76,24 @@ class ThemeUtils {
     }
   }
 
+  sortedThemes(width: number, height: number) {
+    const { themes } = this
+    const currPageRatio = width / height
+
+    // Sort themes by ratio and size.
+    return _.sortBy(themes, [
+      (theme: Itheme) => this.themeRatioDifference(theme, currPageRatio),
+      (theme: Itheme) => Math.abs(theme.width - width)
+    ]).reverse()
+  }
+
   getThemesBySize(width: number, height: number, newDesignType?: number) {
     const { themes, groupType } = this
 
     if (groupType === 1) return themes.filter(theme => theme.id === 7)
 
-    // Sort themes by difference and filter low difference themes.
     const currPageRatio = width / height
-    let recommendation = _.sortBy(themes, [
-      (theme: Itheme) => this.themeRatioDifference(theme, currPageRatio),
-      (theme: Itheme) => Math.abs(theme.width - width)
-    ])
+    let recommendation = this.sortedThemes(width, height)
     recommendation = recommendation.filter(
       theme => this.themeRatioDifference(theme, currPageRatio) < 0.2
     )
@@ -96,7 +103,18 @@ class ThemeUtils {
       recommendation = recommendation.filter((item) => item.id === newDesignType).concat(
         recommendation.filter((item) => item.id !== newDesignType))
     }
-    return recommendation.length ? recommendation : [...themes]
+    return recommendation.length ? recommendation : themes
+  }
+
+  sortSelectedTheme(selectedThemesIndex: string) {
+    const selectedThemes = selectedThemesIndex.split(',').map(Number)
+    const pageSize = this.getFocusPageSize()
+    const sortedThemes = this.sortedThemes(pageSize.width, pageSize.height)
+    return [
+      ...sortedThemes.filter(theme => !selectedThemes.includes(theme.id)),
+      ...sortedThemes.filter(theme => selectedThemes.includes(theme.id))
+    ].map(theme => theme.id)
+      .join(',')
   }
 
   compareThemesWithPage(themes: string, pageIndex?: number) {

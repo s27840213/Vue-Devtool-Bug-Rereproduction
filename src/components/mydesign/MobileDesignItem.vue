@@ -55,7 +55,7 @@ div(class="mobile-design-item")
       span(:title="config.name") {{ config.name }}
   div(class="mobile-design-item__size"
       @click.prevent.stop)
-    span {{ `${config.width} x ${config.height}` }}
+    span {{ `${sizeToShow.width} x ${sizeToShow.height} ${sizeToShow.unit}` }}
 </template>
 
 <script lang="ts">
@@ -66,6 +66,8 @@ import vClickOutside from 'click-outside-vue3'
 import imageUtils from '@/utils/imageUtils'
 import designUtils from '@/utils/designUtils'
 import { IDesign } from '@/interfaces/design'
+import { PRECISION } from '@/utils/unitUtils'
+import { round } from 'lodash'
 
 export default defineComponent({
   components: {
@@ -144,6 +146,14 @@ export default defineComponent({
     },
     isTempDesign(): boolean {
       return (this.config.id ?? '').endsWith('_new')
+    },
+    sizeToShow(): {width: number, height: number, unit: string} {
+      const precision = this.config.unit === 'px' ? 0 : PRECISION
+      return {
+        width: round(this.config.width, precision),
+        height: round(this.config.height, precision),
+        unit: this.config.unit ?? 'px'
+      }
     }
   },
   methods: {

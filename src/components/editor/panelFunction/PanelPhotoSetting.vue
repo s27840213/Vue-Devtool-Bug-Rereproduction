@@ -1,28 +1,27 @@
 <template lang="pug">
 div(class="photo-setting")
-  span(class="photo-setting__title text-blue-1 subtitle-1") {{$t('NN0039')}}
+  span(class="photo-setting__title text-blue-1 text-H6") {{$t('NN0039')}}
   div(class="photo-setting__grid mb-10")
     template(v-for="btn in btns")
-      div(v-hint="disableBtn(btn) ? btn.hint : ''")
-        btn(v-if="!btn.condition || btn.condition()"
-          class="full-width"
-          :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0]"
-          type="gray-mid"
-          ref="btn"
-          :disabled="disableBtn(btn)"
-          :key="btn.name"
-          @click="handleShow(btn.show)") {{ btn.label }}
-          //- v-hint="(btn.hint && btn.hint.condition()) ? btn.hint.content : ''"
+      btn(v-if="!btn.condition || btn.condition()"
+        class="full-width"
+        :class="[activeBtn(btn) ? 'active' : '']"
+        type="gray-mid"
+        ref="btn"
+        :disabled="disableBtn(btn)"
+        :key="btn.name"
+        v-hint="disableBtn(btn) ? btn.hint : ''"
+        @click.native="handleShow(btn.show)") {{ btn.label }}
     btn(v-if="isImage && !isFrame"
       class="full-width"
       type="gray-mid"
       ref="btn"
       :disabled="isHandleShadow || show === 'panel-photo-shadow'"
-      @click="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
+      @click.native="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
   component(:is="show || 'div'"
     ref="popup"
     :imageAdjust="currLayerAdjust"
-    @update="handleAdjust" @toggleColorPanel="toggleColorPanel")
+    @update="handleAdjust")
 </template>
 
 <script lang="ts">
@@ -64,7 +63,7 @@ export default defineComponent({
         },
         // { name: 'preset', label: `${this.$t('NN0041')}`, show: '' },
         {
-          name: 'adjust',
+          name: 'sliders',
           label: `${this.$t('NN0042')}`,
           show: 'popup-adjust'
         },
@@ -97,6 +96,7 @@ export default defineComponent({
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoSetting)
   },
   unmounted() {
+    eventUtils.off(PanelEvent.showPhotoShadow)
     document.removeEventListener('mouseup', this.handleClick)
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.none)
   },
@@ -117,13 +117,9 @@ export default defineComponent({
       currSelectedLayers: 'getCurrSelectedLayers',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
-      isAdmin: 'user/isAdmin',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling'
-    }),
-    ...mapState('user', {
-      isSuperUser: 'role'
     }),
     ...mapState('shadow', {
       handleId: 'handleId'
@@ -211,9 +207,6 @@ export default defineComponent({
       if (btn.name === 'crop' && this.isCropping) return true
       if (btn.name === 'remove-bg' && this.inBgRemoveMode) return true
       return false
-    },
-    toggleColorPanel(bool: boolean) {
-      this.$emit('toggleColorPanel', bool)
     },
     handleShow(name: string) {
       const { pageIndex, layerIndex, subLayerIdx, getCurrLayer: currLayer } = layerUtils
@@ -432,7 +425,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .photo-setting {
   position: relative;
-  text-align: center;
+  text-align: left;
   &__grid {
     margin-top: 15px;
     display: grid;

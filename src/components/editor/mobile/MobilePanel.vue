@@ -39,7 +39,7 @@ div(class="mobile-panel"
           @touchstart="disableTouchEvent")
   div(class="mobile-panel__bottom-section")
     tabs(v-if="innerTabs.label" theme="light"
-        :tabs="innerTabs.label" @switchTab="switchInnerTab")
+      :tabs="innerTabs.label" v-model="innerTabIndex")
     keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
       //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
       component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
@@ -57,6 +57,8 @@ div(class="mobile-panel"
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
+import Vue from 'vue'
+import i18n from '@/i18n'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
@@ -106,10 +108,6 @@ export default defineComponent({
       default: 'none',
       type: String
     },
-    currColorEvent: {
-      default: 'text',
-      type: String
-    },
     isSubPanel: {
       default: false,
       type: Boolean
@@ -156,7 +154,7 @@ export default defineComponent({
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
       currSubColorEvent: '',
-      innerTab: '',
+      innerTabIndex: 0,
       fitPage: _.debounce(() => {
         this.$nextTick(() => {
           pageUtils.fitPage()
@@ -209,9 +207,6 @@ export default defineComponent({
     },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
-        case 'color': {
-          return this.currColorEvent === ColorEventType.shape && this.panelHistory.length === 0
-        }
         case 'text-effect': {
           return this.panelHistory.length === 0
         }
@@ -248,16 +243,22 @@ export default defineComponent({
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop' || this.inSelectionState
     },
+    noRowGap(): boolean {
+      return this.inSelectionState || ['crop', 'color'].includes(this.currActivePanel)
+    },
     panelStyle(): { [index: string]: string } {
       return Object.assign(
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
-          'row-gap': this.hideDynamicComp ? '0px' : '10px',
+          'row-gap': this.noRowGap ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
             ? 'initial' : this.panelHeight + 'px'
         }
       )
+    },
+    innerTab(): string {
+      return this.innerTabs.key[this.innerTabIndex]
     },
     innerTabs(): Record<string, string[]> {
       switch (this.currActivePanel) {
@@ -311,7 +312,6 @@ export default defineComponent({
         }
         case 'color': {
           return Object.assign(defaultVal, {
-            currEvent: this.currColorEvent,
             panelHistory: this.panelHistory
           })
         }
@@ -451,6 +451,9 @@ export default defineComponent({
             }
           }
         }
+        if (this.showExtraColorPanel) {
+          this.addRecentlyColors(colorUtils.currColor)
+        }
         this.closeMobilePanel()
 
         if (this.inMultiSelectionMode && this.inSelectionState) {
@@ -467,7 +470,7 @@ export default defineComponent({
     },
     currActivePanel(newVal) {
       this.panelHistory = []
-      this.innerTab = this.innerTabs.key[0]
+      this.innerTabIndex = 0
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
       this.panelHeight = newVal === 'none' ? 0 : this.initHeightPx()
@@ -504,22 +507,15 @@ export default defineComponent({
       return {
         handler: this.closeMobilePanel,
         middleware: this.middleware,
-        events: ['contextmenu', 'touchstart', 'pointerdown']
+        events: ['touchstart', 'pointerdown',
+          ...window.location.host === 'localhost:8080' ? [] : ['contextmenu']]
       }
-    },
-    keepPanel(target: HTMLElement): boolean {
-      if (!target || target.id === 'app') return false
-      // If target is modal or panel-icon, don't close Panel.
-      else if (target.className.includes?.('modal')) return true
-      else if (target.className.includes?.('panel-icon')) return true
-      return this.keepPanel(target.parentNode as HTMLElement)
     },
     middleware(event: MouseEvent | TouchEvent | PointerEvent) {
       const target = event.target as HTMLElement
-      // If target is a Svg <use>, its class will be SVGAnimatedString obj.
-      // Ignor its className check using optional chaining "?.includes()"
-      return !(this.keepPanel(target) ||
-        target.className.includes?.('footer-tabs') ||
+      return !(target.matches('.header-bar .panel-icon *') || // Skip header-bar icon
+        target.matches('.modal-container, .modal-container *') || // Skip modal-card
+        target.className.includes?.('footer-tabs') || // Skip footer-bar icon
         target.className === 'inputNode'
       )
     },
@@ -569,7 +565,7 @@ export default defineComponent({
       }
     },
     handleLockedNotify() {
-      // this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+      this.$notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     },
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActiveSubPanel === panelType) {
@@ -582,9 +578,6 @@ export default defineComponent({
           }
         }
       }
-    },
-    switchInnerTab(panelIndex: number) {
-      this.innerTab = this.innerTabs.key[panelIndex]
     }
   }
 })

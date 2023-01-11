@@ -23,6 +23,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 a {
   color: inherit;
+  text-decoration: unset;
   cursor: pointer;
 }
 </style>

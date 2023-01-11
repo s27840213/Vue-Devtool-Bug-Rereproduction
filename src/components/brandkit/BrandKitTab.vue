@@ -230,7 +230,7 @@ export default defineComponent({
   &__content {
     margin-top: 30px;
     &.editor-theme {
-      height: calc(100% - 150px);
+      height: calc(100% - 138px);
     }
     &.mobile-editor-theme {
       margin-top: 0;
