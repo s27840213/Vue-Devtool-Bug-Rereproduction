@@ -42,10 +42,6 @@ export default defineComponent({
     level: {
       type: Number,
       required: true
-    },
-    isPopup: {
-      type: Boolean,
-      required: true
     }
   },
   computed: {
