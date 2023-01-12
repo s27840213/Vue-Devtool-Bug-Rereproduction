@@ -24,7 +24,7 @@ transition-group(class="brand-kit-tab-logo" name="logo-list" tag="div")
                       key="sentinel"
                       :target="$route.name === 'Editor' ? '.popup-brand-settings__window' : undefined"
                       @callback="handleLoadMore")
-    div(v-else
+    div(v-else-if="(typeof logo !== 'string')"
       class="brand-kit-tab-logo__item relative"
       :class="{hovered: checkMenuOpen(logo)}"
       :key="logo.id.replace('new_', '')")

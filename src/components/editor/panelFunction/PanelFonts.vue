@@ -31,7 +31,7 @@ div(class="panel-fonts")
       category-font-item(v-for="item in list"
         :key="item.id"
         :item="item"
-        :textStyleType="textStyleType")
+        :textStyleType="textStyleType || ''")
   div(v-if="showMore" class="cover-background")
 </template>
 
@@ -67,7 +67,6 @@ export default defineComponent({
     },
     textStyleType: {
       type: String,
-      required: true
     }
   },
   emits: ['closeFontsPanel'],

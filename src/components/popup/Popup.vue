@@ -16,7 +16,6 @@ import PopupLayer from '@/components/popup/PopupLayer.vue'
 import PopupPage from '@/components/popup/PopupPage.vue'
 import PopupFlip from '@/components/popup/PopupFlip.vue'
 import PopupFile from '@/components/popup/PopupFile.vue'
-import PopupDownload from '@/components/popup/PopupDownload.vue'
 import PopupLineTemplate from '@/components/popup/PopupLineTemplate.vue'
 import PopupGuideline from '@/components/popup/PopupGuideline.vue'
 import PopupSlider from '@/components/popup/PopupSlider.vue'
@@ -42,7 +41,6 @@ export default defineComponent({
     PopupFile,
     PopupLineTemplate,
     PopupGuideline,
-    PopupDownload,
     PopupPageScale,
     PopupSubmit,
     PopupPayment

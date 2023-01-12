@@ -12,14 +12,14 @@ div(class="page-size-selector" :class="{isTouchDevice}")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
         input(class="body-XS" type="number" min="0"
-              :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
-              :value="this.valPageSize.width"
+              :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
+              :value="valPageSize.width"
               @input="setPageWidth"
               @click="selectFormat('custom')"
               @focus="lastFocusedInput = 'width'"
               @blur="handleInputBlur('width')")
         span(class="body-XS"
-            :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") W
+            :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") W
       svg-icon(class="pointer"
           :iconName="isLocked ? 'lock' : 'unlock'"
           iconWidth="15px" :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'blue'"
@@ -27,24 +27,24 @@ div(class="page-size-selector" :class="{isTouchDevice}")
       property-bar(class="page-size-selector__body__custom__box"
                   :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
         input(class="body-XS" type="number" min="0"
-              :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
-              :value="this.valPageSize.height"
+              :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
+              :value="valPageSize.height"
               @input="setPageHeight"
               @click="selectFormat('custom')"
               @focus="lastFocusedInput = 'height'"
               @blur="() => handleInputBlur('height')")
         span(class="body-XS"
-            :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") H
+            :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") H
       property-bar(v-click-outside="() => {showUnitOptions = false}"
                   class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
                   :class="selectedFormat === 'custom' || showUnitOptions ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`"
           @click="showUnitOptions = !showUnitOptions")
-        span(class="page-size-selector__body__custom__unit__label body-XXS" :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{selectedUnit}}
+        span(class="page-size-selector__body__custom__unit__label body-XXS" :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{selectedUnit}}
         svg-icon(class="page-size-selector__body__custom__unit__icon"
           iconName="chevron-down"
           iconWidth="16px"
-          :iconColor="selectedFormat === 'custom' ? 'blue-1' : this.isDarkTheme ? 'white' : 'gray-2'")
-        div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option" :class="`bg-${this.isDarkTheme ? 'white' : 'gray-1-5'}`")
+          :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'gray-2'")
+        div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option" :class="`bg-${isDarkTheme ? 'white' : 'gray-1-5'}`")
           div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-gray-2" @click="selectUnit($event, unit)")
             span(class="body-XS"
                 :class="`text-${isDarkTheme ? 'gray-1' : 'white'}`") {{unit}}

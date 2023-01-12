@@ -8,7 +8,7 @@ div(class="page-preview")
       :lazyLoadTarget="'.page-preview'")
     page-preview-plus(v-if="(idx+1) % getPagesPerRow === 0"
       :index="idx+1" :last="false")
-  page-preview-plus(:index="getPages.length" last=true)
+  page-preview-plus(:index="getPages.length" :last="true")
   div(class="page-preview-page-last pointer"
     @click="addPage()")
     svg-icon(class="pb-5"

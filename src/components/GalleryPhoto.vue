@@ -22,7 +22,7 @@ div(class="gallery-photo" :class="{border: deletable}")
     class="gallery-photo__img pointer"
     @dragstart="dragStart($event, photo)"
     @dragend="dragEnd"
-    @click="onClick($event, photo)")
+    @click="onClick($event, photo as IAssetPhoto)")
   div(v-if="isUploading"
       class="gallery-photo__progress")
     div(class="gallery-photo__progress-bar"
@@ -58,7 +58,7 @@ export default defineComponent({
       required: true
     },
     vendor: {
-      type: String as PropType<'default' | 'active' | 'hover' | 'disabled'>,
+      type: String as PropType<'unsplash' | 'myfile' | 'logo'>,
       required: true
     },
     inFilePanel: {

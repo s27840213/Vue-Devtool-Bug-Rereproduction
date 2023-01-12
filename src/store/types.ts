@@ -69,6 +69,7 @@ export interface IEditorState {
   showRuler: boolean,
   showGuideline: boolean,
   lockGuideline: boolean,
+  isDraggingGuideline: boolean,
   themes: Itheme[],
   hasCopiedFormat: boolean,
   inGestureToolMode: boolean,

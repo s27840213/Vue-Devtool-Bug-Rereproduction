@@ -162,10 +162,6 @@ div(class="my-design-pc")
             span {{$t('NN0203')}}
           div(class="delete-forever-message__confirm" @click.stop="confirmAction(deleteForeverConfirmed)")
             span {{$t('NN0200')}}
-    div(v-else-if="confirmMessage === 'download'" class="dim-background")
-      popup-download(class="my-design-pc__download"
-        :useExternelJSON="true"
-        @close="closeConfirmMessage")
   div(v-if="isMoveToFolderPanelOpen && isMovingSingleToFolder" class="dim-background")
 </template>
 
@@ -491,7 +487,8 @@ export default defineComponent({
       }
       return false
     },
-    deleteFolder(pathedFolder: IPathedFolder, callback?: () => void) {
+    deleteFolder(pathedFolder?: IPathedFolder, callback?: () => void) {
+      if (!pathedFolder) return
       this.pathedFolderBuffer = undefined
       designUtils.deleteFolder(pathedFolder).then(() => {
         if (callback) callback()

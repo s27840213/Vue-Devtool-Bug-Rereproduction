@@ -1,5 +1,5 @@
 <template lang="pug">
-div(v-if="showWarning" class="warning")
+div(v-if="!cur.hidden && !isAdmin" class="warning")
   div(v-if="size === 'small' && !dismissed" class="warning-small" :style="bgcolor")
     svg-icon(iconName="error" iconColor="white" iconWidth="24px")
     div(class="warning-small-title")
@@ -23,6 +23,28 @@ div(v-if="showWarning" class="warning")
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import paymentUtils from '@/utils/paymentUtils'
+
+type IWarningPreset = {
+  hidden: true
+} | {
+  hidden: false
+  title: string
+  bgcolor: string
+  large: {
+    desc: string
+    buttons: {
+      label: string
+      func: () => void
+      disabled?: boolean
+      type?: string
+    }[]
+  }
+  small: {
+    desc: string
+    buttonLabel: string
+    func: () => void
+  }
+}
 
 export default defineComponent({
   emits: [],
@@ -48,21 +70,19 @@ export default defineComponent({
       _diskPercent: 'payment/getDiskPercent',
       isAdmin: 'user/isAdmin'
     }),
-    showWarning(): boolean {
-      return !this.cur.hidden && !this.isAdmin
-    },
     diskPercent(): string {
       return (this._diskPercent * 100).toFixed(0)
     },
     recalc(): string {
       return (this.usage.diskLoading ? this.$t('NN0454') : this.$t('NN0641')) as string
     },
-    preset(): Record<string, Record<string, Record<string, unknown>>> {
+    preset(): Record<string, Record<number, IWarningPreset>> {
       return {
         pro: {
           0: { hidden: true },
           80: { hidden: true },
           100: {
+            hidden: false,
             title: this.$t('NN0635', { disk: this.diskPercent }),
             bgcolor: '#4EABE6',
             large: {
@@ -87,6 +107,7 @@ export default defineComponent({
         free: {
           0: { hidden: true },
           80: {
+            hidden: false,
             title: this.$t('NN0635', { disk: this.diskPercent }),
             bgcolor: '#FFBA49',
             large: {
@@ -107,6 +128,7 @@ export default defineComponent({
             }
           },
           100: {
+            hidden: false,
             title: this.$t('NN0635', { disk: this.diskPercent }),
             bgcolor: '#4EABE6',
             large: {
@@ -130,20 +152,21 @@ export default defineComponent({
         }
       }
     },
-    type(): string {
+    type(): 0 | 80 | 100 {
       return this._diskPercent > 1
-        ? '100'
+        ? 100
         : this._diskPercent >= 0.8
-          ? '80'
-          : '0'
+          ? 80
+          : 0
     },
-    cur(): Record<string, unknown> {
+    cur(): IWarningPreset {
       const plan = this.isPro ? 'pro' : 'free'
-      const type = this.skiped && !this.isPro && this.type === '80' && this.size === 'large' ? '0' : this.type
+      const type = this.skiped && !this.isPro && this.type === 80 && this.size === 'large' ? 0 : this.type
       return this.preset[plan][type]
     },
     bgcolor(): Record<string, string> {
-      return { 'background-color': this.cur.bgcolor as string }
+      if (!this.cur.hidden) return { 'background-color': this.cur.bgcolor }
+      else return {}
     },
     diskStyle(): Record<string, string> {
       return { width: `${Math.min(1, this._diskPercent) * 100}%` }

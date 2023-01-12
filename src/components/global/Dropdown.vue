@@ -12,10 +12,10 @@ div(class="relative dropdown")
     v-click-outside="handleClose"
     class="dropdown__options")
     div(v-for="option in options"
-      :key="option.value || option"
+      :key="typeof option === 'number' ? option : option.value"
       @click.stop="() => handleSelect(option)")
       slot(name="option" :data="option")
-        div(class="dropdown__option") {{ option.label || option }}
+        div(class="dropdown__option") {{ typeof option === 'number' ? option : option.label }}
   div(v-if="showDropdown && isCustomOptions"
     v-click-outside="handleClose"
     class="dropdown__options")
@@ -23,29 +23,34 @@ div(class="relative dropdown")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import vClickOutside from 'click-outside-vue3'
 
 export default defineComponent({
   props: {
     current: {
-      type: String
+      type: String,
+      required: true
     },
     placeholder: {
-      type: String
+      type: String,
+      required: true
     },
     options: {
-      type: Array,
+      type: Array as PropType<{value: string, label: string}[] | number[]>,
       default: () => []
     },
     closeAfterSelection: {
-      type: Boolean
+      type: Boolean,
+      default: true
     },
     isCustomOptions: {
-      type: Boolean
+      type: Boolean,
+      default: false
     },
     disabled: {
-      type: Boolean
+      type: Boolean,
+      default: false
     }
   },
   directives: {

@@ -8,10 +8,13 @@ export interface IDownloadTypeAttrs {
   cmyk?: 0 | 1
 }
 
+export type IOutputType = 'pdf_standard' | 'pdf_print' | 'jpg' | 'png'
+
 export interface ITypeOption {
-  value: string
+  value: IOutputType
   name: string
   desc: string
+  tag?: string
 }
 
 export interface IDownloadServiceParams {

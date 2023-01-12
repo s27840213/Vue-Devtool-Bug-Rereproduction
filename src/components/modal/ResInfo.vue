@@ -2,7 +2,7 @@
 div(class="res-info")
   strong(v-if="info.userName || info.vendor"
     class="res-info__desc")
-    i18n-t(v-if="this.info.type === 'photo'"
+    i18n-t(v-if="info.type === 'photo'"
       keypath="NN0364" tag="span")
         template(#author)
           a(v-if="info.userLink"

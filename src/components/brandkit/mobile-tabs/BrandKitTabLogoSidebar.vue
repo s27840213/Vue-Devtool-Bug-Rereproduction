@@ -9,19 +9,17 @@ div(v-else class="brand-kit-tab-logo" :style="minHeightStyles()")
         @callback="handleLoadMore(item)")
       div(class="brand-kit-tab-logo__row"
           :style="settingmode ? ' margin-top: 11px; margin-right: 11px' : ''")
-        template(v-for="logo in item.list")
+        template(v-for="logo in item.list" :key="logo.id")
           div(v-if="checkUploading(logo)"
             class="brand-kit-tab-logo__item pointer relative"
-            :style="imageStyle(logo.preview)"
-            :key="logo.id")
+            :style="imageStyle(logo.preview)")
             svg-icon(iconName="loading" iconWidth="24px" iconColor="gray-3")
           gallery-photo(v-else
             :style="imageStyle(logo.preview)"
             :photo="addPerviewUrl(item.brandId, logo)"
             vendor="logo"
             :inLogoPanel="true"
-            :deletable="settingmode"
-            :key="logo.id")
+            :deletable="settingmode")
     template(#after)
       div(v-if="isLogosLoading" class="brand-kit-tab-logo-loading")
         svg-icon(iconName="loading"

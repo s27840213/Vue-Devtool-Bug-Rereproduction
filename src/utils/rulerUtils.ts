@@ -25,6 +25,7 @@ class RulerUtils {
   get showRuler() { return store.getters.getShowRuler }
   get showGuideline() { return store.getters.getShowGuideline }
   get lockGuideline() { return store.getters.getLockGuideline }
+  get isDragging() { return store.getters.getIsDraggingGuideline }
 
   RULER_SIZE = 20
   event: any
@@ -36,7 +37,6 @@ class RulerUtils {
 
   fbCover: { v: Array<number>, h: Array<number> }
 
-  isDragging: boolean
   lastMapedInfo: {
     type: string,
     index: number,
@@ -51,7 +51,6 @@ class RulerUtils {
       index: -1,
       pageIndex: -1
     }
-    this.isDragging = false
     this.templates = {
       type1: [
         {
@@ -112,6 +111,11 @@ class RulerUtils {
       h: [120, 573]
     }
   }
+  /**
+   * @param type
+   * @param callback
+   * @param from - from which pageIndex
+   */
 
   on(type: string, callback: (pagePos: number, pos: number, type: string, from?: number) => void) {
     // replace origin event
@@ -267,7 +271,7 @@ class RulerUtils {
   }
 
   setIsDragging(bool: boolean) {
-    this.isDragging = bool
+    store.commit('SET_isDraggingGuideline', bool)
   }
 
   deleteGuideline(index: number, type: string, pageIndex: number) {

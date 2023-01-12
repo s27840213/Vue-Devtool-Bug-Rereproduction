@@ -171,7 +171,7 @@ export default defineComponent({
           text: `${this.$t('NN0194')}`,
           payload: ['update', true]
         }
-      ],
+      ] as { icon: string, style: string, text: string, payload: [string, boolean] }[],
       isNameEditing: false,
       editableName: '',
       messageTimer: -1,

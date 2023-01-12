@@ -19,7 +19,7 @@ div(class="brand-kit-tab-text")
                       class="no-trans"
                       key="sentinel"
                       @callback="handleLoadMore")
-      template(v-else)
+      template(v-else-if="(typeof font !== 'string')")
         div(v-if="checkUploading(font)"
           class="brand-kit-tab-text__font-column__item-uploading"
           :key="font.id.replace('new_', '')")

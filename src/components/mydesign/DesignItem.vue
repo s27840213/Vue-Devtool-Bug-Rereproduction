@@ -162,7 +162,7 @@ export default defineComponent({
       imgWidth: 150,
       imgHeight: 150,
       previewCheckReady: false,
-      previewPlaceholder: '@/assets/img/svg/loading-large.svg',
+      previewPlaceholder: require('@/assets/img/svg/loading-large.svg'),
       showCarousel: false,
       carouselIdx: 0,
       waitTimer: 0,
@@ -549,50 +549,6 @@ export default defineComponent({
     box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
     right: 8px;
     top: 35px;
-    & .design-menu-item {
-      position: relative;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: start;
-      gap: 5px;
-      padding: 8px 0;
-      cursor: pointer;
-      &:hover {
-        background-color: setColor(gray-5);
-      }
-      &__icon {
-        margin-left: 13px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 10px;
-        height: 10px;
-      }
-      &__text {
-        display: flex;
-        align-items: center;
-        justify-content: start;
-        height: 12px;
-        margin-right: 20px;
-        > span {
-          font-weight: 400;
-          font-size: 12px;
-          line-height: 12px;
-          color: setColor(gray-2);
-          white-space: nowrap;
-        }
-      }
-      &__right {
-        position: absolute;
-        right: 3px;
-        top: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transform: translateY(-50%);
-      }
-    }
   }
   &__favorite {
     position: absolute;

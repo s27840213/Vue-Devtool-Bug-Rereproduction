@@ -58,7 +58,7 @@ export default defineComponent({
       _setmiddlemostPageIndex: 'SET_middlemostPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
-    styles() {
+    styles(): Record<string, string> {
       if (this.isDragged) {
         return {
           'z-index': '2',
