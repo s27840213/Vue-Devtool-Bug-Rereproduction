@@ -19,7 +19,7 @@ div(class="font-tag" v-click-outside="clickOutsideHandler")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import vClickOutside from 'click-outside-vue3'
 import generalUtils from '@/utils/generalUtils'
 
@@ -29,7 +29,7 @@ export default defineComponent({
   },
   props: {
     tags: {
-      type: Array,
+      type: Array as PropType<string[]>,
       required: true
     }
   },

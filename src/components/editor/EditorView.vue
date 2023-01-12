@@ -24,7 +24,7 @@ div(class="editor-view"
                 :pageState="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
                 @stepChange="handleStepChange")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea"
-          :style="{'z-index': `${pageNum+1}`}")
+          :style="{zIndex: pageNum+1}")
       bg-remove-area(v-else :editorViewCanvas="editorViewCanvas")
     template(v-if="showRuler && !isShowPagePreview")
       ruler-hr(:canvasRect="canvasRect"

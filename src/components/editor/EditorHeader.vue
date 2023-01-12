@@ -39,13 +39,9 @@ import GeneralUtils from '@/utils/generalUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import networkUtils from '@/utils/networkUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { Translation as I18nT } from 'vue-i18n'
 
 export default defineComponent({
   emits: [],
-  components: {
-    I18nT
-  },
   data() {
     return {
       ShortcutUtils,
