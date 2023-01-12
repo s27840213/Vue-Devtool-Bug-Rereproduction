@@ -12,7 +12,7 @@ module.exports = {
     'plugin:vue/vue3-essential',
     '@vue/standard',
     '@vue/typescript/recommended',
-    'plugin:cypress/recommended'
+    'plugin:cypress/recommended',
   ],
   parserOptions: {
     ecmaVersion: 2020
@@ -31,8 +31,8 @@ module.exports = {
     'prefer-regex-literals': 'off',
     indent: 'off',
     'no-empty': 'off',
-    'no-unreachable-loop': 'off'
-    // 'comma-dangle': ['error', 'never'],
+    'no-unreachable-loop': 'off',
+    'comma-dangle': ['error', 'only-multiline'],
     // semi: 'off',
     // 'import/no-dynamic-require': 'off',
     // 'global-require': 0,
