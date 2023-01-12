@@ -234,13 +234,10 @@ export default defineComponent({
     'ed-in': editableInput
   },
   data() {
-    const tmp = _colorChange(this.value)
-
-    console.log(tmp)
     return {
       fieldsIndex: 0,
       highlight: false,
-      val: tmp
+      val: _colorChange(this.value)
     }
   },
   computed: {

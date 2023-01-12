@@ -256,7 +256,6 @@ export default defineComponent({
           this.show = ''
           return
         case 'remove-bg': {
-          console.log(this.inBgRemoveMode, this.isProcessing)
           const { layers, pageIndex, index } = this.currSelectedInfo as ICurrSelectedInfo
 
           this.setIsProcessing(true)
