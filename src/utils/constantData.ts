@@ -8,7 +8,7 @@ import _ from 'lodash'
 interface BillingInfoInput {
   label: TranslateResult
   ph?: TranslateResult
-  key?: string
+  key: string
   optional?: boolean
   error?: string
 }
