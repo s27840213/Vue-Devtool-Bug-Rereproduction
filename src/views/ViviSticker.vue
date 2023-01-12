@@ -36,7 +36,7 @@ import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import stepsUtils from '@/utils/stepsUtils'
 import layerUtils from '@/utils/layerUtils'
-import { IGroup, IImage, IShape, IText, IFrame } from '@/interfaces/layer'
+import { IGroup } from '@/interfaces/layer'
 import { IFooterTabProps } from '@/interfaces/editor'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -46,6 +46,7 @@ import vivistickerUtils from '@/utils/vivistickerUtils'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { ColorEventType } from '@/store/types'
 import modalUtils from '@/utils/modalUtils'
+import colorUtils from '@/utils/colorUtils'
 
 declare let window: CustomWindow
 
@@ -226,7 +227,7 @@ export default Vue.extend({
   watch: {
     closeMobilePanelFlag(newVal) {
       if (newVal) {
-        this.setCurrActivePanel('none')
+        editorUtils.setCurrActivePanel('none')
         this.setCurrActiveSubPanel('none')
         this.setCloseMobilePanelFlag(false)
         editorUtils.setShowMobilePanel(false)
@@ -242,7 +243,6 @@ export default Vue.extend({
     ...mapMutations({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
-      setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
       setCurrActiveTab: 'vivisticker/SET_currActiveTab',
       setShowTutorial: 'vivisticker/SET_showTutorial',
@@ -277,8 +277,7 @@ export default Vue.extend({
         this.currColorEvent = props.currColorEvent
       // Close panel if re-click
       } else if (this.currActivePanel === panelType || panelType === 'none') {
-        editorUtils.setShowMobilePanel(false)
-        this.setCurrActivePanel('none')
+        editorUtils.setCurrActivePanel('none')
       } else {
         editorUtils.setCurrActivePanel(panelType)
         if (panelType === 'color' && props?.currColorEvent) {
@@ -287,9 +286,8 @@ export default Vue.extend({
       }
     },
     handleOpenColorPicker() {
-      editorUtils.setShowMobilePanel(true)
-      this.setCurrActivePanel('color-picker')
-      this.currColorEvent = ColorEventType.background
+      editorUtils.setCurrActivePanel('color-picker')
+      colorUtils.setCurrEvent(ColorEventType.background)
     },
     switchMainTab(panelType: string) {
       this.setIsInMyDesign(false)
