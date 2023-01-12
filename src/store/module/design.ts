@@ -1040,6 +1040,12 @@ const mutations: MutationTree<IDesignState> = {
   SET_mobilePathBuffer(state: IDesignState, mobilePathBuffer: string[]) {
     state.mobilePathBuffer = mobilePathBuffer
   },
+  UPDATE_setDesignThumbnail(state: IDesignState, updateInfo: { id: string, thumbnail: string }) {
+    const design = state.allDesigns.find((design) => design.id === updateInfo.id)
+    if (design) {
+      design.thumbnail = updateInfo.thumbnail
+    }
+  },
   UPDATE_folders(state: IDesignState, updateInfo: { path: string, folders: IFolder[] }) {
     let pathNodes
     if (updateInfo.path === 'root') {
