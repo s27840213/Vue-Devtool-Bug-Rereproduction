@@ -38,7 +38,7 @@ export default defineComponent({
       } : {}
     },
     isMobileEditor() { return generalUtils.isTouchDevice() }
-  },
+  }
 })
 </script>
 
