@@ -206,7 +206,10 @@ class ViviStickerUtils {
           })
           modalUtils.clearModalInfo()
         }
-      }, undefined, undefined, true, true)
+      }, undefined, {
+        noClose: true,
+        noCloseIcon: true
+      })
     }
     try {
       const webkit = (window as any).webkit

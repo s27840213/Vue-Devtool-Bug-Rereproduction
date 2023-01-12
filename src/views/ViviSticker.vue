@@ -129,6 +129,18 @@ export default Vue.extend({
     // show popup
     const btn_txt = modalInfo.btn_txt
     if (btn_txt) {
+      const options = {
+        imgSrc: modalInfo.img_url,
+        noClose: !!exp,
+        noCloseIcon: true,
+        backdropStyle: {
+          backgroundColor: 'rgba(24,25,31,0.3)'
+        },
+        cardStyle: {
+          backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(255,255,255,0.9)'
+        }
+      }
       modalUtils.setModalInfo(
         modalInfo.title,
         modalInfo.msg,
@@ -152,16 +164,7 @@ export default Vue.extend({
             backgroundColor: '#D3D3D3'
           }
         },
-        modalInfo.img_url,
-        !!exp,
-        true,
-        {
-          backgroundColor: 'rgba(24,25,31,0.3)'
-        },
-        {
-          backdropFilter: 'blur(10px)',
-          backgroundColor: 'rgba(255,255,255,0.9)'
-        }
+        options
       )
     }
   },
