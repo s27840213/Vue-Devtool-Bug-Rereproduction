@@ -24,10 +24,12 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import AssetUtils from '@/utils/assetUtils'
 import ImageUtils from '@/utils/imageUtils'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import layerFactary from '@/utils/layerFactary'
 import generalUtils from '@/utils/generalUtils'
 import editorUtils from '@/utils/editorUtils'
+import frameUtils from '@/utils/frameUtils'
+import layerUtils from '@/utils/layerUtils'
 
 export default defineComponent({
   emits: [],
@@ -60,27 +62,33 @@ export default defineComponent({
 
       const json = (await AssetUtils.get(asset)).jsonData as IFrame
 
-      // eslint-disable-next-line vue/no-mutating-props
-      this.config.styles.initWidth = json.width as number
-      // eslint-disable-next-line vue/no-mutating-props
-      this.config.styles.initHeight = json.height as number
+      // this.config.styles.initWidth = json.width as number
+      // this.config.styles.initHeight = json.height as number
+      layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+        initWidth: json.width as number,
+        initHeight: json.height as number
+      })
 
       config.clips.forEach((img, idx) => {
         if (json.clips[idx]) {
-          img.clipPath = json.clips[idx].clipPath
+          frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, idx, { clipPath: json.clips[idx].clipPath })
+          // img.clipPath = json.clips[idx].clipPath
         }
       })
       if (config.decoration && json.decoration) {
         json.decoration.color = [...config.decoration.color]
-        Object.assign(config.decoration, json.decoration)
+        // Object.assign(config.decoration, json.decoration)
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: json.decoration })
       }
       if (config.decorationTop && json.decorationTop) {
         json.decorationTop.color = [...config.decorationTop.color]
-        Object.assign(config.decorationTop, json.decorationTop)
+        // Object.assign(config.decorationTop, json.decorationTop)
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: json.decorationTop })
       }
       if (json.blendLayers) {
         if (!this.config.blendLayers) {
-          this.config.blendLayers = []
+          // this.config.blendLayers = []
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { blendLayers: [] })
         }
         json.blendLayers.forEach((l, i) => {
           if (!this.config.blendLayers![i]) {
@@ -91,14 +99,33 @@ export default defineComponent({
               initHeight: this.config.styles.height / this.config.styles.scale,
               vSize: [this.config.styles.width / this.config.styles.scale, this.config.styles.height / this.config.styles.scale]
             }
-            this.config.blendLayers!.push(layerFactary.newShape({ styles }))
+            // this.config.blendLayers!.push(layerFactary.newShape({ styles }))
+            this.updateFrameBlendLayer({
+              pageIndex: this.pageIndex,
+              layerIndex: this.layerIndex,
+              subLayerIdx: -1,
+              shape: layerFactary.newShape({ styles })
+            })
           }
           l.color = this.config.blendLayers![i].color
-          this.config.blendLayers![i].styles.blendMode = (json.blendLayers as IShape[])[i].blendMode
-          Object.assign(this.config.blendLayers![i], (json.blendLayers as IShape[])[i])
+          // this.config.blendLayers![i].styles.blendMode = (json.blendLayers as IShape[])[i].blendMode
+          // Object.assign(this.config.blendLayers![i], (json.blendLayers as IShape[])[i])
+          const styles = {
+            ...this.config.blendLayers![i].styles,
+            blendMode: (json.blendLayers as IShape[])[i].blendMode
+          }
+          const blendLayer = (json.blendLayers as IShape[])[i]
+          blendLayer.styles = styles
+          this.updateFrameBlendLayer({
+            pageIndex: this.pageIndex,
+            layerIndex: this.layerIndex,
+            subLayerIdx: i,
+            shape: blendLayer
+          })
         })
       }
-      config.needFetch = false
+      // config.needFetch = false
+      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false })
     }
   },
   watch: {
@@ -195,6 +222,9 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapMutations({
+      updateFrameBlendLayer: 'UPDATE_frameBlendLayer'
+    }),
     styles() {
       const isFrameImg = this.config.clips.length === 1 && this.config.clips[0].isFrameImg
       return {
