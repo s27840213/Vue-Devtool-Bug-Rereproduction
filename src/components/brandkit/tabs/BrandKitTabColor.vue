@@ -10,7 +10,7 @@ div(class="brand-kit-tab-color")
         svg-icon(iconName="loading"
                 iconWidth="50px"
                 iconColor="gray-3")
-      brand-kit-color-palette(v-else
+      brand-kit-color-palette(v-else-if="(typeof colorPalette !== 'string')"
                               :key="colorPalette.id"
                               :colorPalette="colorPalette"
                               :selectedColor="selectedColor"

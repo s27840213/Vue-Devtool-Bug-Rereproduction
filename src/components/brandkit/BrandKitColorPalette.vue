@@ -23,7 +23,7 @@ div(class="brand-kit-color-palette")
         @click="handleAddColor(colorPalette.id)")
         div(class="brand-kit-color-palette__colors__color-add")
           svg-icon(iconName="plus-origin" iconWidth="16px" iconColor="gray-3")
-      div(v-else
+      div(v-else-if="(typeof color !== 'string')"
         class="brand-kit-color-palette__colors__color-wrapper"
         :class="{ selected: checkSelected(colorPalette.id, color) }"
         :key="color.id")
