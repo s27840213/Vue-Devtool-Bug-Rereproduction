@@ -56,6 +56,9 @@ export default defineComponent({
       jsHeapSize: 0
     }
   },
+  mounted() {
+    this.showFps()
+  },
   methods: {
     showFps() {
       window.requestAnimationFrame(() => {
