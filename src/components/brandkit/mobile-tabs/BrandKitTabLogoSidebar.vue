@@ -9,7 +9,7 @@ div(v-else class="brand-kit-tab-logo" :style="minHeightStyles()")
         @callback="handleLoadMore(item)")
       div(class="brand-kit-tab-logo__row"
           :style="settingmode ? ' margin-top: 11px; margin-right: 11px' : ''")
-        template(v-for="logo in item.list")
+        template(v-for="logo in item.list" :key="logo.id")
           div(v-if="checkUploading(logo)"
             class="brand-kit-tab-logo__item pointer relative"
             :style="imageStyle(logo.preview)")

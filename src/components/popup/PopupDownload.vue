@@ -193,10 +193,11 @@ export default defineComponent({
   props: {
     useExternelJSON: {
       type: Boolean,
-      required: true
+      default: false
     },
     pageIndex: {
-      type: Number
+      type: Number,
+      required: true
     },
     hideContainer: {
       default: false,

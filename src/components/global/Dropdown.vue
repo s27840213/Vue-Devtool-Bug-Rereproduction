@@ -29,23 +29,28 @@ import vClickOutside from 'click-outside-vue3'
 export default defineComponent({
   props: {
     current: {
-      type: String
+      type: String,
+      required: true
     },
     placeholder: {
-      type: String
+      type: String,
+      required: true
     },
     options: {
       type: Array as PropType<{value: string, label: string}[] | number[]>,
       default: () => []
     },
     closeAfterSelection: {
-      type: Boolean
+      type: Boolean,
+      default: true
     },
     isCustomOptions: {
-      type: Boolean
+      type: Boolean,
+      default: false
     },
     disabled: {
-      type: Boolean
+      type: Boolean,
+      default: false
     }
   },
   directives: {
