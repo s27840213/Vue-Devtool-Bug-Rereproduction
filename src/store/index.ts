@@ -111,6 +111,7 @@ const getDefaultState = (): IEditorState => ({
   showRuler: localStorage.getItem('showRuler') === 'true' ?? false,
   showGuideline: true,
   lockGuideline: false,
+  isDraggingGuideline: false,
   themes: [],
   hasCopiedFormat: false,
   inGestureToolMode: false,
@@ -272,6 +273,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getLockGuideline(state: IEditorState) {
     return state.lockGuideline
+  },
+  getIsDraggingGuideline(state: IEditorState) {
+    return state.isDraggingGuideline
   },
   getThemes(state: IEditorState) {
     return state.themes
@@ -926,6 +930,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_showGuideline(state: IEditorState, bool: boolean) {
     state.showGuideline = bool
+  },
+  SET_isDraggingGuideline(state: IEditorState, bool: boolean) {
+    state.isDraggingGuideline = bool
   },
   SET_lockGuideline(state: IEditorState, bool: boolean) {
     state.lockGuideline = bool
