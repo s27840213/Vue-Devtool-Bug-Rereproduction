@@ -35,7 +35,7 @@ div(class=" popup-layer bg-gray-6"
         :iconColor="'gray-1'")
       span(class="ml-10 body-2") {{detachImage().text}}
       span(class="shortcut ml-10 body-2 text-gray-3") {{''}}
-  hr(v-if="inAdminMode && isLogin" class="popup-layer__hr")
+  hr(v-if="showAdminTool && isLogin" class="popup-layer__hr")
   div(v-for="(data,index) in shortcutMenu()"
       :key="`popup-layer__shortcut-${index}`"
       class="popup-layer__item"
@@ -132,22 +132,17 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapState('popup', ['popupComponent']),
     ...mapGetters({
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
       isLogin: 'user/isLogin',
       token: 'user/getToken',
+      showAdminTool: 'user/showAdminTool',
       _layerNum: 'getLayersNum',
       groupId: 'getGroupId',
       isFontLoading: 'text/getIsFontLoading'
     }),
-    inAdminMode(): boolean {
-      return this.role === 0 && this.adminMode === true
-    },
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
     },
@@ -195,7 +190,7 @@ export default defineComponent({
         {
           icon: 'copy',
           text: `上傳 ${this.typeMap[this.updateType]}`,
-          condition: this.inAdminMode && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
+          condition: this.showAdminTool && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
           shortcutText: '',
           action: () => {
             uploadUtils.uploadLayer(this.updateType)
@@ -204,7 +199,7 @@ export default defineComponent({
         {
           icon: 'copy',
           text: `上傳 ${this.typeMap[this.updateType]} + ID`,
-          condition: this.inAdminMode && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
+          condition: this.showAdminTool && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
           shortcutText: '',
           action: (event?: MouseEvent) => {
             setTimeout(() => {
@@ -217,7 +212,7 @@ export default defineComponent({
         {
           icon: 'copy',
           text: '上傳 元素群組',
-          condition: this.inAdminMode && this.isLogin && (this.isGroup || this.isImage),
+          condition: this.showAdminTool && this.isLogin && (this.isGroup || this.isImage),
           shortcutText: '',
           action: () => {
             uploadUtils.uploadLayer('shape')
@@ -226,7 +221,7 @@ export default defineComponent({
         {
           icon: 'copy',
           text: '上傳 元素群組 + ID',
-          condition: this.inAdminMode && this.isLogin && (this.isGroup || this.isImage),
+          condition: this.showAdminTool && this.isLogin && (this.isGroup || this.isImage),
           shortcutText: '',
           action: (event?: MouseEvent) => {
             setTimeout(() => {
@@ -239,7 +234,7 @@ export default defineComponent({
         {
           icon: 'update',
           text: `更新 ${this.typeMap[this.updateType]}`,
-          condition: this.hasLayerDesignId && this.inAdminMode && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
+          condition: this.hasLayerDesignId && this.showAdminTool && this.isLogin && (this.isText || this.isShape || this.isTextGroup),
           shortcutText: '',
           action: () => {
             uploadUtils.updateLayer(this.updateType)
@@ -352,7 +347,7 @@ export default defineComponent({
       return {
         icon: 'copy',
         text: this.$t('NN0096'),
-        condition: this.inAdminMode && this.isLogin,
+        condition: this.showAdminTool && this.isLogin,
         shortcutText: '',
         action: frameUtils.updateImgToFrame
       }

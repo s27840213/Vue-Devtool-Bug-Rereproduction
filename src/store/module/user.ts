@@ -25,9 +25,9 @@ export interface IUserModule {
   teamId: string,
   role: number,
   roleRaw: number,
-  adminMode: boolean,
+  adminMode: boolean, // Control in DesktopEditor
   isAuthenticated: boolean,
-  enableAdminView: boolean,
+  enableAdminView: boolean, // Control in PopupFile
   account: string,
   email: string
   upassUpdate: string,
@@ -37,6 +37,7 @@ export interface IUserModule {
   verUni: string,
   verApi: string,
   imgSizeMap: Array<{ [key: string]: string | number }>,
+  imgSizeMapExtra: Array<{ [key: string]: string | number }>,
   avatar: {
     prev: string,
     prev_2x: string,
@@ -45,7 +46,18 @@ export interface IUserModule {
   viewGuide: number,
   isUpdateDesignOpen: boolean,
   updateDesignId: string,
-  updateDesignType: string
+  updateDesignType: string,
+  renderForPDF: boolean,
+  dimensionMap: {
+    [key: string]: {
+      [key: number]: {
+        [key: string]: number
+      }
+    }
+  },
+  dpi?: number,
+  bleed?: boolean,
+  trim?: boolean
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -85,6 +97,7 @@ const getDefaultState = (): IUserModule => ({
   verUni: '',
   verApi: '',
   imgSizeMap: [],
+  imgSizeMapExtra: [],
   avatar: {
     prev: '',
     prev_2x: '',
@@ -93,7 +106,12 @@ const getDefaultState = (): IUserModule => ({
   viewGuide: +localStorage.guest_view_guide || 0,
   isUpdateDesignOpen: false,
   updateDesignId: '',
-  updateDesignType: ''
+  updateDesignType: '',
+  dimensionMap: {},
+  dpi: -1,
+  bleed: false,
+  trim: false,
+  renderForPDF: false
 })
 
 const state = getDefaultState()
@@ -165,7 +183,7 @@ const getters: GetterTree<IUserModule, any> = {
   getAvatar(state) {
     return state.avatar
   },
-  hasAvatar(): boolean {
+  hasAvatar(state): boolean {
     return state.avatar.prev_2x !== undefined
   },
   getViewGuide(state): number {
@@ -174,17 +192,32 @@ const getters: GetterTree<IUserModule, any> = {
   getImgSizeMap(state): Array<{ [key: string]: string | number }> {
     return state.imgSizeMap
   },
-  getIsUpdateDesignOpen() {
+  getIsUpdateDesignOpen(state) {
     return state.isUpdateDesignOpen
   },
-  getUpdateDesignId() {
+  getUpdateDesignId(state) {
     return state.updateDesignId
   },
-  getUpdateDesignType() {
+  getUpdateDesignType(state) {
     return state.updateDesignType
   },
-  getEnableAdminView() {
-    return state.enableAdminView
+  getDimensionMap(state) {
+    return state.dimensionMap
+  },
+  getBleed(state) {
+    return state.bleed
+  },
+  getTrim(state) {
+    return state.trim
+  },
+  getRenderForPDF(state) {
+    return state.renderForPDF
+  },
+  showAdminTool(state) { // Partial admin tool
+    return state.role === 0 && state.adminMode && state.enableAdminView
+  },
+  showAllAdminTool(state) {
+    return state.role === 0 && state.enableAdminView
   }
 }
 
@@ -194,13 +227,12 @@ const mutations: MutationTree<IUserModule> = {
     localStorage.setItem('token', token)
   },
   [SET_STATE](state: IUserModule, data: Partial<IUserModule>) {
-    console.log(data)
     const newState = data || getDefaultState()
     const keys = Object.keys(newState) as Array<keyof IUserModule>
     keys
       .forEach(key => {
         if (key in state) {
-          (state[key] as any) = newState[key]
+          (state[key] as unknown) = newState[key]
         }
       })
   },

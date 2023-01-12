@@ -7,38 +7,32 @@ div(class="nu-sub-controller")
           ref="body"
           :layer-index="`${layerIndex}`"
           :style="styles")
-        //- @dblclick="onDblClick($event)"
-        //- @dragenter="onDragEnter($event)"
-        //- @pointerdown="onPointerdown($event)")
-        //- svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
-        //-   :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
-        //-   g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
-        //-     :style="frameClipStyles()")
-        //- template(v-if="config.type === 'text' && config.active")
-        //-   div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-        //-     nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
-        //-       :style="textBodyStyle()"
-        //-       :pageIndex="pageIndex"
-        //-       :layerIndex="primaryLayerIndex"
-        //-       :subLayerIndex="layerIndex"
-        //-       @keydown.37.stop
-        //-       @keydown.38.stop
-        //-       @keydown.39.stop
-        //-       @keydown.40.stop
-        //-       @keydown.ctrl.67.exact.stop.self
-        //-       @keydown.meta.67.exact.stop.self
-        //-       @keydown.ctrl.86.exact.stop.self
-        //-       @keydown.meta.86.exact.stop.self
-        //-       @keydown.ctrl.88.exact.stop.self
-        //-       @keydown.meta.88.exact.stop.self
-        //-       @keydown.ctrl.65.exact.stop.self
-        //-       @keydown.meta.65.exact.stop.self
-        //-       @keydown.ctrl.90.exact.stop.self
-        //-       @keydown.meta.90.exact.stop.self
-        //-       @keydown.ctrl.shift.90.exact.stop.self
-        //-       @keydown.meta.shift.90.exact.stop.self
-        //-       @update="handleTextChange"
-        //-       @compositionend="handleTextCompositionEnd")
+          div(v-if="config.type === 'text' && config.active"
+            class="text text__wrapper" :style="textWrapperStyle()" draggable="false"
+            @pointerdown="onPointerdown")
+            nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
+              :style="textBodyStyle()"
+              :pageIndex="pageIndex"
+              :layerIndex="primaryLayerIndex"
+              :subLayerIndex="layerIndex"
+              @keydown.37.stop
+              @keydown.38.stop
+              @keydown.39.stop
+              @keydown.40.stop
+              @keydown.ctrl.67.exact.stop.self
+              @keydown.meta.67.exact.stop.self
+              @keydown.ctrl.86.exact.stop.self
+              @keydown.meta.86.exact.stop.self
+              @keydown.ctrl.88.exact.stop.self
+              @keydown.meta.88.exact.stop.self
+              @keydown.ctrl.65.exact.stop.self
+              @keydown.meta.65.exact.stop.self
+              @keydown.ctrl.90.exact.stop.self
+              @keydown.meta.90.exact.stop.self
+              @keydown.ctrl.shift.90.exact.stop.self
+              @keydown.meta.shift.90.exact.stop.self
+              @update="handleTextChange"
+              @compositionend="handleTextCompositionEnd")
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
@@ -217,12 +211,20 @@ export default defineComponent({
     styles(): any {
       const { isFrameImg } = this.config
       const zindex = this.type === 'group' ? this.config?.active ? this.getPrimaryLayerSubLayerNum : this.primaryLayerZindex : this.config.styles.zindex
+      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
 
       return {
         ...this.sizeStyle(),
-        ...TextEffectUtils.convertTextEffect(this.config as IText),
-        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`
+        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`,
+        ...textEffectStyles,
+        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
+    },
+    isCurveText(): boolean {
+      return this.checkIfCurve(this.config as IText)
+    },
+    isFlipped(): boolean {
+      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     },
     isTextEditing(): boolean {
       return !this.isControlling && this.config?.active
@@ -263,6 +265,11 @@ export default defineComponent({
         }
         popupUtils.closePopup()
       } else {
+        if (this.config.type === 'text') {
+          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+            editing: true
+          })
+        }
         TextUtils.setCurrTextInfo({
           config: this.config as IText,
           subLayerIndex: this.layerIndex
@@ -286,7 +293,7 @@ export default defineComponent({
     'config.contentEditable'(newVal) {
       if (this.config.type !== 'text') return
       if (this.config.active) {
-        if (!newVal || !this.config.isEdited) {
+        if (!newVal) {
           tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
         }
         tiptapUtils.agent(editor => {
@@ -339,13 +346,28 @@ export default defineComponent({
       }
     },
     textBodyStyle() {
-      const isVertical = this.config.styles.writingMode.includes('vertical')
-      return {
+      // const isVertical = this.config.styles.writingMode.includes('vertical')
+      // return {
+      //   width: `${this.config.styles.width / this.config.styles.scale}px`,
+      //   height: `${this.config.styles.height / this.config.styles.scale}px`,
+      //   userSelect: this.config.contentEditable ? 'text' : 'none',
+      //   opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
+      // }
+      const textstyles = {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
         userSelect: this.config.contentEditable ? 'text' : 'none',
-        opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
+        opacity: 1
       }
+      return !(this.isCurveText || this.isFlipped) ? textstyles
+        : {
+          width: `${this.config.styles.width / this.config.styles.scale}px`,
+          height: `${this.config.styles.height / this.config.styles.scale}px`,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          opacity: this.config.contentEditable ? 1 : 0
+        }
     },
     textStyles(styles: any) {
       const textStyles = CssConveter.convertFontStyle(styles)
@@ -378,12 +400,16 @@ export default defineComponent({
       if (this.config.type === 'text') {
         this.posDiff.x = this.primaryLayer.styles.x - this.posDiff.x
         this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
-        if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
+        if (this.posDiff.x !== 0 || this.posDiff.y !== 0) {
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
         } else {
           if (this.config.contentEditable) {
             LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { isTyping: true }, this.layerIndex)
-            tiptapUtils.focus({ scrollIntoView: false })
+            if (GeneralUtils.isTouchDevice()) {
+              tiptapUtils.focus({ scrollIntoView: false }, 'end')
+            } else {
+              tiptapUtils.focus({ scrollIntoView: false })
+            }
           }
         }
       }
@@ -805,6 +831,7 @@ export default defineComponent({
   }
   &__wrapper {
     position: relative;
+    pointer-events: initial;
   }
   &__body {
     outline: none;

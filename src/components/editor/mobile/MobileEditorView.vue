@@ -50,6 +50,8 @@ import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import layerUtils from '@/utils/layerUtils'
 import editorUtils from '@/utils/editorUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
+import modalUtils from '@/utils/modalUtils'
+import uploadUtils from '@/utils/uploadUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 
 export default defineComponent({
@@ -102,8 +104,30 @@ export default defineComponent({
       isSwiping: false,
       isScaling: false,
       editorViewAt: null as unknown as AnyTouch,
-      canvasAt: null as unknown as AnyTouch
+      canvasAt: null as unknown as AnyTouch,
+      uploadUtils: uploadUtils
     }
+  },
+  created() {
+    // check and auto resize pages oversized on design loaded
+    const unwatchPages = this.$watch('isGettingDesign', (newVal) => {
+      if (!newVal) {
+        if (this.pages.length > 0 && pageUtils.fixPageSize()) {
+          pageUtils.fitPage()
+          uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+          modalUtils.setModalInfo(
+            `${this.$t('NN0788')}`,
+            [`${this.$t('NN0789', { size: '6000 x 6000' })}`],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+          )
+        }
+        unwatchPages()
+      }
+    })
   },
   mounted() {
     this.$nextTick(() => {
@@ -172,9 +196,6 @@ export default defineComponent({
   },
 
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapState({
       mobileAllPageMode: 'mobileEditor/mobileAllPageMode'
     }),
@@ -238,7 +259,7 @@ export default defineComponent({
       return {
         width: `${this.cardWidth}px`,
         height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
-        padding: this.isDetailPage ? '0px' : '40px',
+        padding: this.isDetailPage ? '0px' : `${pageUtils.MOBILE_CARD_PADDING}px`,
         flexDirection: this.isDetailPage ? 'column' : 'initial',
         'overflow-y': this.isDetailPage ? 'initial' : 'scroll',
         // overflow: this.isDetailPage ? 'initial' : 'scroll',
@@ -256,6 +277,9 @@ export default defineComponent({
         transform: this.isDetailPage ? 'initail' : `translate3d(0, -${this.currCardIndex * this.cardHeight}px,0)`,
         transition: `transform ${transformDuration}s`
       }
+    },
+    isGettingDesign(): boolean {
+      return this.uploadUtils.isGettingDesign
     }
   },
   methods: {
@@ -263,7 +287,6 @@ export default defineComponent({
       addLayer: 'ADD_selectedLayer',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setPageScaleRatio: 'SET_pageScaleRatio',
-      _setAdminMode: 'user/SET_ADMIN_MODE',
       setInBgRemoveMode: 'SET_inBgRemoveMode',
       addPage: 'ADD_page',
       setCurrCardIndex: 'mobileEditor/SET_currCardIndex'
@@ -274,9 +297,6 @@ export default defineComponent({
         'getRecently'
       ]
     ),
-    setAdminMode() {
-      this._setAdminMode(!this.adminMode)
-    },
     outerClick(e: MouseEvent) {
       if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         editorUtils.setInBgSettingMode(false)

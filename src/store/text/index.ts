@@ -109,7 +109,7 @@ const mutations: MutationTree<ITextState> = {
     keys
       .forEach(key => {
         if (key in state) {
-          (state[key] as any) = data[key]
+          (state[key] as unknown) = data[key]
         }
       })
   },

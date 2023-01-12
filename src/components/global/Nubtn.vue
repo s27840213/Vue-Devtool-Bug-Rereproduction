@@ -3,7 +3,7 @@ div(:class="`nubtn ${theme} ${sizeClass} ${status}`"
     v-hint="hint"
     @click="click")
   svg-icon(v-if="theme.includes('icon')"
-          :iconName="icon" iconWidth="24px" :iconColor="iconColor")
+          :iconName="icon" :iconWidth="iconSize" :iconColor="iconColor")
   span(v-if="theme !== 'icon'")
     slot
 </template>
@@ -56,6 +56,9 @@ export default defineComponent({
     iconColor(): string {
       return this.theme === 'icon_text' ? 'white'
         : this.status === 'disabled' ? 'gray-4' : 'gray-2'
+    },
+    iconSize(): string {
+      return this.size.startsWith('sm') ? '18px' : '24px'
     }
   },
   methods: {
@@ -65,11 +68,10 @@ export default defineComponent({
           : 'default'
       this.$emit('status', newStatus)
     },
-    click(event: Event) {
+    click() {
       if (this.status === 'disabled') return
       this.active = !this.active
       this.updateStatus()
-      this.$emit('click', event)
     }
   }
 })
@@ -85,7 +87,8 @@ export default defineComponent({
   cursor: pointer;
   user-select: none;
   &:not(.full) {
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
     width: fit-content;
   }
 }
@@ -150,8 +153,14 @@ export default defineComponent({
   background-color: var(--blue);
 }
 .nubtn.icon {
-  width: 32px;
-  height: 32px;
+  &.sm {
+    width: 24px;
+    height: 24px;
+  }
+  &.mid {
+    width: 32px;
+    height: 32px;
+  }
   &.active {
     background-color: setColor(blue-3);
   }

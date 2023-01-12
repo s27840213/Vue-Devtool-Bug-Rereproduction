@@ -54,7 +54,7 @@ const mutations: MutationTree<IMobileEditorState> = {
     keys
       .forEach(key => {
         if (key in state) {
-          (state[key] as any) = newState[key]
+          (state[key] as unknown) = newState[key]
         }
       })
   },

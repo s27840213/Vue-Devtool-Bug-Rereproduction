@@ -79,6 +79,11 @@
 
   overflow-y: scroll;
 
+  // If in vue-recycle-scroller, overwrite its overflow-y: auto css.
+  &.vue-recycle-scroller.direction-vertical:not(.page-mode) {
+    overflow-y: scroll;
+  }
+
   @if $showX ==true {
     overflow-x: scroll;
   }

@@ -14,17 +14,22 @@ import generalUtils from './generalUtils'
 import editorUtils from './editorUtils'
 import mouseUtils from './mouseUtils'
 
-const FORCE_UPDATE_VER = '&ver=20220719'
 class ImageUtils {
-  imgLoadHandler(src: string, cb: (img: HTMLImageElement) => void, error?: () => void) {
-    const image = new Image()
-    image.src = src
-    if (image.complete) {
-      cb(image)
-    } else {
-      image.onload = () => cb(image)
-      error && (image.onerror = error)
-    }
+  async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: () => void, crossOrigin?: boolean }) {
+    const { error, crossOrigin = false } = options || {}
+    return new Promise<T>((resolve) => {
+      const image = new Image()
+      image.src = src
+      if (crossOrigin) {
+        image.crossOrigin = 'anoynous'
+      }
+      if (image.complete) {
+        resolve(cb(image))
+      } else {
+        image.onload = () => resolve(cb(image))
+        error && (image.onerror = error)
+      }
+    })
   }
 
   getImgIdentifier(srcObj: SrcObj, ...attrs: Array<string>): string {
@@ -84,27 +89,34 @@ class ImageUtils {
 
     switch (type) {
       case 'public': {
-        const query = forBgRemove ? `?${FORCE_UPDATE_VER.substring(1)}` : `?origin=true${FORCE_UPDATE_VER}`
-        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}${query + (updateQuery || '')}`
+        if ((size as string).includes('ext')) {
+          return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
+        } else {
+          const query = forBgRemove ? '' : '?origin=true'
+          return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}${query + (updateQuery || '')}`
+        }
       }
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
-        const query = forBgRemove ? `${FORCE_UPDATE_VER}` : `&origin=true${FORCE_UPDATE_VER}`
-
+        const query = forBgRemove ? '' : '&origin=true'
         return editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
       }
       case 'logo-public':
-        return `https://template.vivipic.com/admin/${userId}/asset/logo/${brandId}/${assetId}/${size}?origin=true` + FORCE_UPDATE_VER
+        if ((size as string).includes('ext')) {
+          return `https://template.vivipic.com/admin/${userId}/asset/logo/${brandId}/${assetId}/${size}?origin=true`
+        } else {
+          return `https://template.vivipic.com/admin/${userId}/asset/logo/${brandId}/${assetId}/${size}?origin=true`
+        }
       case 'logo-private': {
         const editorLogo = store.getters['brandkit/getEditorViewLogos']
-        return editorLogo(assetId) ? editorLogo(assetId)[size as string] + '&origin=true' + FORCE_UPDATE_VER : ''
+        return editorLogo(assetId) ? editorLogo(assetId)[size as string] + '&origin=true' : ''
       }
       case 'unsplash':
         return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
       case 'pexels':
-        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
+        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.jpeg?auto=compress&cs=tinysrgb&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
       case 'background':
-        return `https://template.vivipic.com/background/${assetId}/${size || 'full'}?origin=true` + FORCE_UPDATE_VER + (ver ? `&ver=${ver}` : '')
+        return `https://template.vivipic.com/background/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']}`
       case 'frame':
         return require('@/assets/img/svg/frame.svg')
       case 'shadow-private': {
@@ -117,19 +129,22 @@ class ImageUtils {
         return ''
       }
       case 'svg':
-        return `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true` + FORCE_UPDATE_VER + (ver ? `&ver=${ver}` : '')
+        return `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true&ver=${store.getters['user/getVerUni']}`
       default:
         return ''
     }
   }
 
-  getSrcSize(srcObj: SrcObj, dimension: number, preload = '') {
+  getSrcSize(srcObj: SrcObj, dimension: number | string, preload = '') {
     const { type } = srcObj
     if (!type) {
       return 0
     }
     const key = type === 'pexels' || type === 'unsplash' ? 'size' : 'key'
-    const sizeMap = (store.state as any).user.imgSizeMap
+    const sizeMap = [...(store.state as any).user.imgSizeMap as Array<{ [key: string]: number | string }>]
+    if (store.getters['user/getUserId'] === 'backendRendering') {
+      sizeMap.unshift(...(store.state as any).user.imgSizeMapExtra)
+    }
     if (sizeMap?.length) {
       let i = 0
       if (typeof dimension === 'number') {
@@ -138,13 +153,13 @@ class ImageUtils {
         }
         i = Math.max(i - 1, 0)
       } else if (typeof dimension === 'string') {
-        i = Math.max(sizeMap.findIndex((m: { [x: string]: string }) => m[key] === dimension), 0)
+        i = Math.max(sizeMap.findIndex(m => m[key] === dimension, 0))
       }
       return preload
         ? preload === 'pre' ? sizeMap[i + 1 >= sizeMap.length - 1 ? sizeMap.length - 1 : i + 1][key] : sizeMap[i - 1 <= 0 ? 0 : i - 1][key]
         : sizeMap[i][key]
     }
-    return type === 'pexels' || type === 'unsplash' ? 1080 : 'full'
+    return (type === 'pexels' || type === 'unsplash') ? 1080 : 'full'
   }
 
   getSignificantDimension(width: number, height: number) {
@@ -294,9 +309,6 @@ class ImageUtils {
         }
       }
     }
-    // if (editorUtils.currActivePanel === 'crop') {
-    //   editorUtils.setCloseMobilePanelFlag(true)
-    // }
   }
 
   initLayerSize: ISize = {

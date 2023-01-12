@@ -7,15 +7,17 @@ div(class="snap-area"
   div(v-for="line in closestSnaplines.h"
     class="snap-area__line snap-area__line--hr"
     :style="snapLineStyles('h', line)")
-  template(v-if="isShowGuideline && !isDetailPage")
+  template(v-if="isShowGuideline")
     div(v-for="(line,index) in guidelines.v"
       class="snap-area__line snap-area__line--vr"
       :style="snapLineStyles('v', line,true)"
-      @mouseover="lockGuideline ? null : showGuideline(line,'v',index)")
+      @mouseover="lockGuideline ? null : showGuideline(line,'v',index)"
+      @mouseout="closeGuidelineTimer")
     div(v-for="(line,index) in guidelines.h"
       class="snap-area__line snap-area__line--hr"
       :style="snapLineStyles('h', line,true)"
-      @mouseover="lockGuideline ? null : showGuideline(line,'h',index)")
+      @mouseover="lockGuideline ? null : showGuideline(line,'h',index)"
+      @mouseout="closeGuidelineTimer")
 </template>
 
 <script lang="ts">
@@ -53,7 +55,8 @@ export default defineComponent({
       closestSnaplines: {
         v: [] as Array<number>,
         h: [] as Array<number>
-      }
+      },
+      guidelineTimer: -1
     }
   },
   mounted() {
@@ -73,9 +76,6 @@ export default defineComponent({
     }),
     isShowGuideline(): boolean {
       return rulerUtils.showGuideline
-    },
-    isDetailPage(): boolean {
-      return this.groupType === 1
     },
     guidelines(): { [index: string]: Array<number> } {
       return (this.config as IPage).guidelines
@@ -98,6 +98,10 @@ export default defineComponent({
       }
     },
     snapLineStyles(dir: string, pos: number, isGuideline?: string) {
+      const { bleeds } = pageUtils.getPageSizeWithBleeds(this.config)
+      pos += dir === 'v' ? bleeds.left
+        : dir === 'h' ? bleeds.top
+          : 0
       pos = pos * (this.scaleRatio / 100)
       return dir === 'v' ? {
         height: '100%',
@@ -122,13 +126,18 @@ export default defineComponent({
       this.closestSnaplines.h = []
     },
     showGuideline(pos: number, type: string, index: number) {
-      if (!rulerUtils.isDragging) {
-        rulerUtils.deleteGuideline(
-          index,
-          type,
-          this.pageIndex)
-        rulerUtils.event.emit('showGuideline', pos, rulerUtils.mapSnaplineToGuidelineArea(pos, type, this.pageIndex), type, this.pageIndex)
-      }
+      this.guidelineTimer = setTimeout(() => {
+        if (!rulerUtils.isDragging) {
+          rulerUtils.deleteGuideline(
+            index,
+            type,
+            this.pageIndex)
+          rulerUtils.event.emit('showGuideline', pos, rulerUtils.mapSnaplineToGuidelineArea(pos, type, this.pageIndex), type, this.pageIndex)
+        }
+      }, 100)
+    },
+    closeGuidelineTimer() {
+      clearTimeout(this.guidelineTimer)
     }
   }
 })
@@ -146,6 +155,8 @@ export default defineComponent({
     top: 0;
     left: 0;
     background-color: setColor("blue-1");
+  }
+  &__line--vr {
     &::before {
       content: "";
       position: absolute;
@@ -161,6 +172,24 @@ export default defineComponent({
       left: 0;
       width: 5px;
       height: 100%;
+    }
+  }
+  &__line--hr {
+    &::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+    }
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
     }
   }
 }

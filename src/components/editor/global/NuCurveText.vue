@@ -6,7 +6,7 @@ p(class="nu-curve-text__p" :style="pStyle()")
     class="nu-curve-text__span"
     :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
     :key="sIndex",
-    :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan)") {{ span.text }}
+    :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan, transParentStyles)") {{ span.text }}
 </template>
 
 <script lang="ts">
@@ -18,7 +18,6 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import LayerUtils from '@/utils/layerUtils'
 import textUtils from '@/utils/textUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import testUtils from '@/utils/testUtils'
 
 export default defineComponent({
   emits: [],
@@ -41,6 +40,10 @@ export default defineComponent({
     isDuplicated: {
       type: Boolean,
       default: false
+    },
+    isTransparent: {
+      default: false,
+      type: Boolean
     }
   },
   data () {
@@ -48,8 +51,7 @@ export default defineComponent({
       textWidth: [] as number[],
       textHeight: [] as number[],
       minHeight: 0,
-      isDestroyed: false,
-      resizeObserver: undefined as ResizeObserver | undefined
+      isDestroyed: false
     }
   },
   async created () {
@@ -59,8 +61,6 @@ export default defineComponent({
   },
   unmounted() {
     this.isDestroyed = true
-    this.resizeObserver && this.resizeObserver.disconnect()
-    this.resizeObserver = undefined
   },
   mounted() {
     textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
@@ -78,6 +78,13 @@ export default defineComponent({
       const textShadow = textEffectUtils.convertTextEffect(this.config)
       return this.isDuplicated ? {
         ...textShadow.duplicatedSpan
+      } : {}
+    },
+    transParentStyles(): {[key: string]: any} {
+      return this.isTransparent ? {
+        color: 'rgba(0, 0, 0, 0)',
+        '-webkit-text-stroke-color': 'rgba(0, 0, 0, 0)',
+        'text-decoration-color': 'rgba(0, 0, 0, 0)'
       } : {}
     }
   },
@@ -157,12 +164,6 @@ export default defineComponent({
         bend >= 0 ? { top: baseline } : { bottom: baseline }
       )
     },
-    observeAllSpans() {
-      const spans = document.querySelectorAll(`.nu-curve-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
-      spans.forEach(span => {
-        this.resizeObserver && this.resizeObserver.observe(span as Element)
-      })
-    },
     async computeDimensions(spans: ISpan[]) {
       const { textWidth, textHeight, minHeight } = await TextShapeUtils.getTextHWsBySpansAsync(spans)
       this.textWidth = textWidth
@@ -174,7 +175,7 @@ export default defineComponent({
 
       // console.log('resize')
 
-      if (typeof this.subLayerIndex === 'undefined') {
+      if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
       } else {
         const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup

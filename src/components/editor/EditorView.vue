@@ -2,7 +2,7 @@
 div(class="editor-view"
     :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
     :style="cursorStyles()"
-    @pointerdown="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
+    @pointerdown="!inBgRemoveMode ? !getInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
     @wheel="handleWheel"
     @scroll.passive="!inBgRemoveMode ? scrollUpdate() : null"
     @mousewheel="handleWheel"
@@ -13,15 +13,16 @@ div(class="editor-view"
     div(class="editor-view__canvas"
         ref="canvas"
         @pointerdown.left.self="outerClick($event)")
+      //- @mousedown.left.self="outerClick($event)")
       template(v-if="!inBgRemoveMode")
-        nu-page(v-for="(page,index) in pagesState || []"
-                  :ref="`page-${index}`"
-                  :key="`page-${page.config.id}`"
-                  :pageIndex="index"
-                  :overflowContainer="editorView"
-                  :style="{'z-index': `${getPageZIndex(index)}`}"
-                  :pageState="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
-                  @stepChange="handleStepChange")
+        nu-page(v-for="(page,index) in pagesState"
+                :ref="`page-${index}`"
+                :key="`page-${page.config.id}`"
+                :pageIndex="index"
+                :overflowContainer="editorView"
+                :style="{'z-index': `${getPageZIndex(index)}`}"
+                :pageState="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
+                @stepChange="handleStepChange")
         div(v-show="isSelecting" class="selection-area" ref="selectionArea"
           :style="{'z-index': `${pageNum+1}`}")
       bg-remove-area(v-else :editorViewCanvas="editorViewCanvas")
@@ -37,17 +38,17 @@ div(class="editor-view"
       class="editor-view__guidelines-area"
       ref="guidelinesArea")
     div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
-      :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
-      @pointerdown.stop="lockGuideline ? null: dragStartV($event)"
-      @mouseout.stop="closeGuidelineV()"
-      @click.right.stop.prevent="openGuidelinePopup($event)")
+        :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
+        @pointerdown.left.stop="lockGuideline ? null: dragStartV($event)"
+        @mouseout.stop="closeGuidelineV()"
+        @pointerup.right.stop.prevent="openGuidelinePopup($event)")
       div(class="guideline__pos guideline__pos--v" ref="guidelinePosV")
         span {{rulerVPos}}
     div(v-if="isShowGuidelineH" class="guideline guideline--h" ref="guidelineH"
-      :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
-      @pointerdown.stop="lockGuideline ? null : dragStartH($event)"
-      @mouseout.stop="closeGuidelineH()"
-      @click.right.stop.prevent="openGuidelinePopup($event)")
+        :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
+        @pointerdown.left.stop="lockGuideline ? null : dragStartH($event)"
+        @mouseout.stop="closeGuidelineH()"
+        @pointerup.right.stop.prevent="openGuidelinePopup($event)")
       div(class="guideline__pos guideline__pos--h" ref="guidelinePosH")
         span {{rulerHPos}}
 </template>
@@ -79,6 +80,10 @@ import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import editorUtils from '@/utils/editorUtils'
 import i18n from '@/i18n'
+import unitUtils, { PRECISION } from '@/utils/unitUtils'
+import { round } from 'lodash'
+import modalUtils from '@/utils/modalUtils'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default defineComponent({
   emits: [],
@@ -108,10 +113,13 @@ export default defineComponent({
       RulerUtils,
       rulerVPos: 0,
       rulerHPos: 0,
+      lastMappedVPos: 0,
+      lastMappedHPos: 0,
       from: -1,
       screenWidth: document.documentElement.clientWidth,
       screenHeight: document.documentElement.clientHeight,
-      scrollHeight: 0
+      scrollHeight: 0,
+      uploadUtils: uploadUtils
     }
   },
   created() {
@@ -156,6 +164,26 @@ export default defineComponent({
     //     })
     //   }
     // })
+
+    // check and auto resize pages oversized on design loaded
+    const unwatchPages = this.$watch('isGettingDesign', (newVal) => {
+      if (!newVal) {
+        if (this.pages.length > 0 && pageUtils.fixPageSize()) {
+          pageUtils.fitPage()
+          uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+          modalUtils.setModalInfo(
+            `${this.$t('NN0788')}`,
+            [`${this.$t('NN0789', { size: '6000 x 6000' })}`],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+          )
+        }
+        unwatchPages()
+      }
+    })
   },
   mounted() {
     // window.addEventListener('keydown', this.handleKeydown)
@@ -184,8 +212,13 @@ export default defineComponent({
       }
       switch (type) {
         case 'v': {
+          if (this.isShowGuidelineV) {
+            this.closeGuidelineV()
+          }
+
           this.isShowGuidelineV = true
-          this.rulerVPos = Math.round(pagePos)
+          this.lastMappedVPos = pagePos
+          this.rulerVPos = round(unitUtils.convert(Math.round(this.lastMappedVPos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().width), PRECISION)
           this.$nextTick(() => {
             const guidelineV = this.$refs.guidelineV as HTMLElement
             guidelineV.style.transform = `translate(${pos - guidelineAreaRect.left}px,0px)`
@@ -193,8 +226,13 @@ export default defineComponent({
           break
         }
         case 'h': {
+          if (this.isShowGuidelineH) {
+            this.closeGuidelineH()
+          }
           this.isShowGuidelineH = true
-          this.rulerHPos = Math.round(pagePos)
+          this.lastMappedHPos = pagePos
+          this.rulerHPos = round(unitUtils.convert(Math.round(this.lastMappedHPos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().height), PRECISION)
+
           this.$nextTick(() => {
             const guidelineH = this.$refs.guidelineH as HTMLElement
             guidelineH.style.transform = `translate(0px,${pos - guidelineAreaRect.top}px)`
@@ -224,9 +262,6 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapState({
       cursor: 'cursor'
     }),
@@ -246,11 +281,13 @@ export default defineComponent({
       hasCopiedFormat: 'getHasCopiedFormat',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       prevScrollPos: 'bgRemove/getPrevScrollPos',
-      getInInGestureMode: 'getInGestureToolMode',
+      getInGestureMode: 'getInGestureToolMode',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isSettingScaleRatio: 'getIsSettingScaleRatio',
-      enableComponentLog: 'getEnalbleComponentLog'
+      enableComponentLog: 'getEnalbleComponentLog',
+      pagesLength: 'getPagesLength',
+      isImgCtrl: 'imgControl/isImgCtrl'
     }),
     pages(): Array<IPage> {
       return (this.pagesState as Array<IPageState>).map(p => p.config)
@@ -287,6 +324,9 @@ export default defineComponent({
     },
     showRuler(): boolean {
       return this._showRuler && !this.inBgRemoveMode
+    },
+    isGettingDesign(): boolean {
+      return this.uploadUtils.isGettingDesign
     }
   },
   methods: {
@@ -294,7 +334,6 @@ export default defineComponent({
       addLayer: 'ADD_selectedLayer',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setPageScaleRatio: 'SET_pageScaleRatio',
-      _setAdminMode: 'user/SET_ADMIN_MODE',
       setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
       setInGestureMode: 'SET_inGestureMode'
@@ -309,9 +348,6 @@ export default defineComponent({
       const { cursor } = this
       return cursor ? { cursor } : {}
     },
-    setAdminMode() {
-      this._setAdminMode(!this.adminMode)
-    },
     outerClick(e: MouseEvent) {
       if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         !this.isHandleShadow && GroupUtils.deselect()
@@ -324,7 +360,9 @@ export default defineComponent({
         }
       }
     },
-    selectStart(e: MouseEvent) {
+    selectStart(e: PointerEvent) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      if (this.isImgCtrl || this.getInGestureMode) return
       if (layerUtils.layerIndex !== -1) {
         /**
          * when the user click the control-region outsize the page,
@@ -343,7 +381,6 @@ export default defineComponent({
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()
       }
-      if (this.getInInGestureMode) return
       if (imageUtils.isImgControl()) {
         ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
@@ -424,7 +461,6 @@ export default defineComponent({
     },
     handleSelectionData(selectionData: DOMRect) {
       const layers = [...document.querySelectorAll(`.nu-layer--p${pageUtils.currFocusPageIndex}`)]
-      console.log(layers)
       const layerIndexs: number[] = []
       if (layers.length > 0) {
         layers.forEach((layer) => {
@@ -502,17 +538,43 @@ export default defineComponent({
       eventUtils.addPointerEvent('pointerup', this.dragEndV)
     },
     draggingV(e: PointerEvent) {
-      this.rulerVPos = Math.trunc(this.mapGuidelineToPage('v').pos)
+      this.lastMappedVPos = this.mapGuidelineToPage('v').pos
+      this.rulerVPos = round(unitUtils.convert(Math.round(this.lastMappedVPos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().width), PRECISION)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineV(this.currentRelPos)
     },
     dragEndV(e: PointerEvent) {
       RulerUtils.setIsDragging(false)
-      if (this.mapGuidelineToPage('v').outOfPage) {
-        this.isShowGuidelineV = false
-        StepsUtils.record()
+      if (this.from === -1) {
+        const mouseOverPageIndex = RulerUtils.getMouseOverPageIndex(e)
+        if (mouseOverPageIndex === -1) { // if no page contains mouse
+          const mostlyOverlappedPageIndex = RulerUtils.getMostlyOverlappedPageIndex(e)
+          if (mostlyOverlappedPageIndex === -1) {
+            this.isShowGuidelineV = false
+            StepsUtils.record()
+          } else {
+            this.from = mostlyOverlappedPageIndex
+            if (pageUtils.currFocusPageIndex !== mostlyOverlappedPageIndex) {
+              GroupUtils.deselect()
+            }
+            this.setCurrActivePageIndex(mostlyOverlappedPageIndex)
+            this.closeGuidelineV(true)
+          }
+        } else {
+          this.from = mouseOverPageIndex
+          if (pageUtils.currFocusPageIndex !== mouseOverPageIndex) {
+            GroupUtils.deselect()
+          }
+          this.setCurrActivePageIndex(mouseOverPageIndex)
+          this.closeGuidelineV(true)
+        }
       } else {
-        this.closeGuidelineV(true)
+        if (this.mapGuidelineToPage('v').outOfPage) {
+          this.isShowGuidelineV = false
+          StepsUtils.record()
+        } else {
+          this.closeGuidelineV(true)
+        }
       }
       this.$nextTick(() => {
         eventUtils.removePointerEvent('pointermove', this.draggingV)
@@ -526,11 +588,12 @@ export default defineComponent({
     },
     closeGuidelineV(need2Record = false) {
       if (!this.isDragging) {
+        const pos = this.lastMappedVPos
         this.isShowGuidelineV = false
         if (this.from !== -1) {
-          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v').pos, 'v', this.from)
+          RulerUtils.addGuidelineToPage(pos, 'v', this.from)
         } else {
-          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v').pos, 'v')
+          RulerUtils.addGuidelineToPage(pos, 'v')
         }
         this.from = -1
         if (need2Record) {
@@ -573,19 +636,36 @@ export default defineComponent({
       window.addEventListener('mouseup', this.dragEndH)
     },
     draggingH(e: MouseEvent) {
-      this.rulerHPos = Math.trunc(this.mapGuidelineToPage('h').pos)
+      this.lastMappedHPos = this.mapGuidelineToPage('h').pos
+      this.rulerHPos = round(unitUtils.convert(Math.round(this.lastMappedHPos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().height), PRECISION)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineH(this.currentRelPos)
     },
     dragEndH(e: MouseEvent) {
       RulerUtils.setIsDragging(false)
-      if (this.mapGuidelineToPage('h').outOfPage) {
-        this.isShowGuidelineH = false
-        StepsUtils.record()
+      if (this.from === -1) {
+        const guideline = this.$refs.guidelineH as HTMLElement
+        const overlappedPageIndex = RulerUtils.getOverlappedPageIndex(guideline, 'h')
+        if (overlappedPageIndex === -1) {
+          this.isShowGuidelineH = false
+          StepsUtils.record()
+        } else {
+          this.from = overlappedPageIndex
+          if (pageUtils.currFocusPageIndex !== overlappedPageIndex) {
+            GroupUtils.deselect()
+          }
+          this.setCurrActivePageIndex(overlappedPageIndex)
+          this.closeGuidelineH(true)
+        }
       } else {
-        // close EditorView guideline then put it into page
-        // or the record point will have some trouble
-        this.closeGuidelineH(true)
+        if (this.mapGuidelineToPage('h').outOfPage) {
+          this.isShowGuidelineH = false
+          StepsUtils.record()
+        } else {
+          // close EditorView guideline then put it into page
+          // or the record point will have some trouble
+          this.closeGuidelineH(true)
+        }
       }
       this.$nextTick(() => {
         window.removeEventListener('mousemove', this.draggingH)
@@ -600,16 +680,18 @@ export default defineComponent({
     mapGuidelineToPage(type: string): { pos: number, outOfPage: boolean } {
       // just has two options: ['v','h']
       const guideline = type === 'v' ? this.$refs.guidelineV as HTMLElement : this.$refs.guidelineH as HTMLElement
-      const result = RulerUtils.mapGuidelineToPage(guideline, type, this.from)
+      const from = type === 'v' ? this.from : RulerUtils.getOverlappedPageIndex(guideline, 'h')
+      const result = RulerUtils.mapGuidelineToPage(guideline, type, from)
       return result
     },
     closeGuidelineH(need2Record = false) {
       if (!this.isDragging) {
         this.isShowGuidelineH = false
+        const pos = this.lastMappedHPos
         if (this.from !== -1) {
-          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h', this.from)
+          RulerUtils.addGuidelineToPage(pos, 'h', this.from)
         } else {
-          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h')
+          RulerUtils.addGuidelineToPage(pos, 'h')
         }
         this.from = -1
         if (need2Record) {
@@ -641,7 +723,7 @@ export default defineComponent({
     //   if (e.key === ' ') {
     //     e.preventDefault()
     //     if (!e.repeat) {
-    //       this.setInGestureMode(!this.getInInGestureMode)
+    //       this.setInGestureMode(!this.getInGestureMode)
     //     }
     //   }
     // }
@@ -778,8 +860,8 @@ $REULER_SIZE: 20px;
       transform: rotate(180deg);
       border-radius: 50px;
       color: setColor(white);
-      padding: 0.2rem 0.4rem;
-      font-size: 0.325rem;
+      padding: 3.2px 6.4px;
+      font-size: 12px;
       top: 5px;
       left: 0;
     }
@@ -788,8 +870,8 @@ $REULER_SIZE: 20px;
       left: 5px;
       border-radius: 50px;
       color: setColor(white);
-      padding: 0.2rem 0.4rem;
-      font-size: 0.325rem;
+      padding: 3.2px 6.4px;
+      font-size: 12px;
     }
   }
 }

@@ -9,16 +9,19 @@ div(class="general-value-selector")
           :style="{'min-width': `${itemMinWidth}px`}")
           div(class="general-value-selector__value flex-evenly" @click="setValue(index, i)" :style="{'height': `${buttonHeight}px`}")
             slot(:name="'g' + index + 'i' + index2") {{ 'g' + index + 'i' + index2 }}
-        div(class="horizontal-rule bg-gray-4" v-if="notLastSubArray(index)" :style="{'width': `${itemMinWidth * 2 / 3}px`}")
+        div(class="horizontal-rule bg-gray-4" v-if="notLastSubArray(index)" :style="{'width': `${Number(itemMinWidth) * 2 / 3}px`}")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   props: {
     valueArray: Array,
-    values: Array,
+    values: {
+      type: Array as PropType<number[]>,
+      required: true
+    },
     itemMinWidth: {
       type: String,
       default: '40'

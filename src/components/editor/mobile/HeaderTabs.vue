@@ -127,7 +127,7 @@ export default defineComponent({
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup, index: number) => {
+      const types = groupLayer.layers.map((layer) => {
         return layer.type
       })
       return new Set(types)

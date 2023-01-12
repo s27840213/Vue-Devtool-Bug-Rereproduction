@@ -36,7 +36,7 @@ div(class="color-picker" ref="colorPicker"
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
-import { Chrome } from 'vue-color'
+import Chrome from '@/components/colorPicker/Chrome.vue'
 import generalUtils from '@/utils/generalUtils'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
 import i18n from '@/i18n'
@@ -118,11 +118,6 @@ export default defineComponent({
     },
     onPaste(event: ClipboardEvent) {
       console.log(event.clipboardData)
-    },
-    colorStyles(color: string) {
-      return {
-        backgroundColor: color
-      }
     },
     onmouseup() {
       this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: this.color })

@@ -26,7 +26,6 @@ lazy-load(
         :pageIndex="index"
         :contentScaleRatio="scaleRatio()"
         :handleSequentially="true"
-        :isPagePreview="true"
         :lazyLoadTarget="lazyLoadTarget")
       div(class="page-preview-page__highlighter"
         :class="{'focused': currFocusPageIndex === index}"

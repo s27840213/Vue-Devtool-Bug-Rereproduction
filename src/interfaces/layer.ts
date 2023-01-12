@@ -41,7 +41,7 @@ export interface IImageStyle extends IStyle {
 
 export interface ILayer<T extends IStyle = IStyle> {
   [key: string]: unknown,
-  type: string,
+  type: 'shape' | 'text' | 'image' | 'frame' | 'group' | 'tmp',
   active: boolean,
   shown: boolean,
   locked: boolean,
@@ -94,6 +94,7 @@ export interface IParagraph {
 }
 
 export interface IText extends ILayer<ITextStyle> {
+  type: 'text'
   paragraphs: Array<IParagraph>,
   widthLimit: number,
   isHeading?: boolean,
@@ -107,6 +108,7 @@ export interface IText extends ILayer<ITextStyle> {
 }
 
 export interface IShape extends ILayer<IStyle> {
+  type: 'shape'
   // svgID: string,
   className: string,
   ratio: number,
@@ -135,6 +137,7 @@ export interface IShape extends ILayer<IStyle> {
   pDiffLimits?: number[]
 }
 export interface IImage extends ILayer<IImageStyle> {
+  type: 'image'
   previewSrc?: string,
   srcObj: SrcObj
   clipPath: string,
@@ -156,19 +159,21 @@ export interface IFrameStyle extends IStyle {
     styles: IShadowStyles
   }
 }
-export interface IGroup extends ILayer<IStyle> {
-  layers: Array<IShape | IText | IImage | IGroup>,
-  db?: 'svg' | 'text'
-}
-export interface ITmp extends ILayer<IStyle> {
-  layers: Array<IShape | IText | IImage | IGroup>
-}
-
 export interface IFrame extends ILayer<IFrameStyle> {
+  type: 'frame'
   clips: Array<IImage>
   decoration?: IShape,
   decorationTop?: IShape
   blendLayers?: Array<IShape>
+}
+export interface IGroup extends ILayer<IStyle> {
+  type: 'group'
+  layers: Array<IShape | IText | IImage | IFrame>,
+  db?: 'svg' | 'text'
+}
+export interface ITmp extends ILayer<IStyle> {
+  type: 'tmp'
+  layers: Array<IShape | IText | IImage | IGroup | IFrame>
 }
 
 export type LayerType = IShape | IText | IImage | IGroup | IFrame

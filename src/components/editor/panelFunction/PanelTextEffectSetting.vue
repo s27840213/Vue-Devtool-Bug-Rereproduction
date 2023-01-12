@@ -53,10 +53,10 @@ div(class="text-effect-setting mt-25")
               v-ratio-change
               type="range")
           //- Option type color
-          template(v-if="option.type === 'color'")
-            div(class="text-effect-setting-options__field--btn"
-              :style="colorParser(currentStyle[currCategory.name][option.key])"
-              @click="handleColorModal(currCategory.name, option.key)")
+          color-btn(v-if="option.type === 'color'" size="25px"
+            :color="colorParser(currentStyle[currCategory.name][option.key])"
+            :active="option.key === colorTarget.key && settingTextEffect"
+            @click="handleColorModal(currCategory.name, option.key)")
         div(class="text-effect-setting-options__field")
           span
           span(class="text-effect-setting-options__field--reset"
@@ -70,6 +70,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
@@ -77,14 +78,13 @@ import textPropUtils from '@/utils/textPropUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOption } from '@/utils/constantData'
 import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 import localStorageUtils from '@/utils/localStorageUtils'
+import editorUtils from '@/utils/editorUtils'
 import _ from 'lodash'
 
 export default defineComponent({
   components: {
-    ColorPicker
-  },
-  directives: {
-    clickOutside: vClickOutside.directive
+    ColorPicker,
+    ColorBtn
   },
   emits: ['toggleColorPanel'],
   data() {
@@ -109,6 +109,10 @@ export default defineComponent({
         bg: styles.textBg as ITextBgEffect,
         shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
       }
+    },
+    settingTextEffect(): boolean {
+      return colorUtils.currEvent === 'setTextEffectColor' &&
+        editorUtils.showColorSlips
     }
   },
   mounted() {
@@ -120,11 +124,15 @@ export default defineComponent({
     colorUtils.offStop(ColorEventType.textEffect, this.recordChange)
   },
   methods: {
-    handleColorModal(category: string, key: string) {
+    handleColorModal(category: 'shadow'|'bg', key: string) {
+      const currColor = this.colorParser(
+        (this.currentStyle[category] as Record<string, string>)[key]
+      )
+
       this.colorTarget = { category, key }
-      this.$emit('toggleColorPanel', true)
+      editorUtils.toggleColorSlips(true)
       colorUtils.setCurrEvent(ColorEventType.textEffect)
-      colorUtils.setCurrColor(this.currentStyle.shadow.color as string)
+      colorUtils.setCurrColor(currColor)
     },
     switchTab(category: 'shadow'|'bg'|'shape') {
       this.currTab = category
@@ -201,7 +209,7 @@ export default defineComponent({
       this.setEffect({ effect: { [key]: color } })
     },
     colorParser(color: string) {
-      return { backgroundColor: textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer()) }
+      return textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer())
     },
     recordChange() {
       stepsUtils.record()
@@ -269,8 +277,7 @@ export default defineComponent({
       height: 25px;
       padding: 0;
     }
-    &--number,
-    &--btn {
+    &--number {
       box-sizing: border-box;
       width: 30px;
       height: 25px;

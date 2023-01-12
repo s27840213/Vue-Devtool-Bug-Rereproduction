@@ -12,80 +12,39 @@ div(class="overflow-container"
         @contextmenu.prevent
         @click.right.stop="onRightClick"
         @dblclick="pageDblClickHandler()"
-        @mouseover="togglePageHighlighter(true)"
-        @mouseout="togglePageHighlighter(false)")
+        @tap="tapPageContent")
+      //- @dblclick will not be trigger in mobile, use @tap + doubleTapUtils instead.
       nu-bg-image(:image="this.config.backgroundImage"
         :pageIndex="pageIndex"
         :color="this.config.backgroundColor"
         :key="this.config.backgroundImage.id"
         @mousedown.left="pageClickHandler()"
         :contentScaleRatio="contentScaleRatio")
-      //- lazy-load(v-for="(layer,index) in config.layers"
-      //-     :key="layer.id"
-      //-     target=".editor-view"
-      //-     :threshold="[0,1]")
-      //- template(v-if="layerLazyLoad")
-      //-   lazy-load(v-for="(layer,index) in config.layers"
-      //-       :key="layer.id"
-      //-       :target="lazyLoadTarget"
-      //-       :minHeight="layer.styles.height * contentScaleRatio"
-      //-       :minWidth="layer.styles.width * contentScaleRatio"
-      //-       :threshold="[0]")
-      //-     nu-layer(
-      //-       :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
-      //-       :data-index="`${index}`"
-      //-       :data-pindex="`${pageIndex}`"
-      //-       :layerIndex="index"
-      //-       :pageIndex="pageIndex"
-      //-       :config="layer"
-      //-       :currSelectedInfo="currSelectedInfo"
-      //-       :contentScaleRatio="contentScaleRatio"
-      //-       :scaleRatio="scaleRatio"
-      //-       :getCurrFunctionPanelType="getCurrFunctionPanelType"
-      //-       :isUploadingShadowImg="isUploadingShadowImg"
-      //-       :isHandling="isHandling"
-      //-       :isShowPagePanel="isShowPagePanel"
-      //-       :imgSizeMap="imgSizeMap"
-      //-       :userId="userId"
-      //-       :verUni="verUni"
-      //-       :uploadId="uploadId"
-      //-       :handleId="handleId"
-      //-       :uploadShadowImgs="uploadShadowImgs"
-      //-       :isPagePreview="true"
-      //-       :forceRender="forceRender")
-      //- template(v-else)
       nu-layer(
         v-for="(layer,index) in config.layers"
         :key="layer.id"
-        :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
         :dataIndex="`${index}`"
         :dataPindex="`${pageIndex}`"
         :snapUtils="snapUtils"
         :layerIndex="index"
         :pageIndex="pageIndex"
         :config="layer"
-        :currSelectedInfo="currSelectedInfo"
         :contentScaleRatio="contentScaleRatio"
-        :scaleRatio="scaleRatio"
-        :getCurrFunctionPanelType="getCurrFunctionPanelType"
-        :isUploadingShadowImg="isUploadingShadowImg"
-        :isHandling="isHandling"
-        :isShowPagePanel="isShowPagePanel"
-        :imgSizeMap="imgSizeMap"
-        :userId="userId"
-        :verUni="verUni"
-        :uploadId="uploadId"
-        :handleId="handleId"
-        :uploadShadowImgs="uploadShadowImgs"
-        :isPagePreview="isPagePreview"
         :forceRender="forceRender"
         :lazyLoadTarget="lazyLoadTarget")
+      div(v-if="this.userId === 'backendRendering' && (this.bleed || this.trim)" class="bleed-line" :style="bleedLineStyles")
+      div(v-if="this.userId === 'backendRendering' && this.trim" class="trim")
+        div(class="trim__tl" :style="trimStyles.tl")
+        div(class="trim__tr" :style="trimStyles.tr")
+        div(class="trim__bl" :style="trimStyles.bl")
+        div(class="trim__br" :style="trimStyles.br")
     template(v-else)
       div(class='pages-loading')
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
+import i18n from '@/i18n'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
@@ -102,6 +61,7 @@ import generalUtils from '@/utils/generalUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
 import { ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import doubleTapUtils from '@/utils/doubleTapUtils'
 
 export default defineComponent({
   emits: [],
@@ -118,10 +78,6 @@ export default defineComponent({
     pageIndex: {
       type: Number,
       required: true
-    },
-    isPagePreview: {
-      type: Boolean,
-      required: false
     },
     handleSequentially: {
       type: Boolean,
@@ -143,8 +99,7 @@ export default defineComponent({
   data() {
     return {
       imgLoaded: false,
-      imgLoading: false,
-      pageIsHover: false
+      imgLoading: false
     }
   },
   computed: {
@@ -160,7 +115,7 @@ export default defineComponent({
       isShowPagePanel: 'page/getShowPagePanel',
       currSelectedPageIndex: 'getCurrSelectedPageIndex'
     }),
-    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'bleed', 'trim']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     isHandleShadow(): boolean {
       return this.isProcessImgShadow || this.isUploadImgShadow
@@ -190,6 +145,56 @@ export default defineComponent({
     },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
+    },
+    bleedLineStyles() {
+      // const borderSize = { top: 1, bottom: 1 }
+      // if (this.isDetailPage && this.pages.length > 1) {
+      //   if (this.pageIndex === 0) {
+      //     borderSize.bottom = 0
+      //   } else if (this.pageIndex === this.pagesLength - 1) {
+      //     borderSize.top = 0
+      //   } else {
+      //     borderSize.bottom = 0
+      //     borderSize.top = 0
+      //   }
+      // }
+
+      return {
+        top: this.config.bleeds.top * this.contentScaleRatio + 'px',
+        bottom: this.config.bleeds.bottom * this.contentScaleRatio + 'px',
+        left: this.config.bleeds.left * this.contentScaleRatio + 'px',
+        right: this.config.bleeds.right * this.contentScaleRatio + 'px'
+        // borderTop: borderSize.top + 'px solid white',
+        // borderBottom: borderSize.bottom + 'px solid white'
+      }
+    },
+    trimStyles() {
+      return {
+        tl: {
+          top: '-1px',
+          bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio - 1}px`,
+          left: '-1px',
+          right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio - 1}px`
+        },
+        tr: {
+          top: '-1px',
+          bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio - 1}px`,
+          left: `${(this.config.width - this.config.bleeds.right) * this.contentScaleRatio - 1}px`,
+          right: '-1px'
+        },
+        bl: {
+          top: `${(this.config.height - this.config.bleeds.bottom) * this.contentScaleRatio - 1}px`,
+          bottom: '-1px',
+          left: '-1px',
+          right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio - 1}px`
+        },
+        br: {
+          top: `${(this.config.height - this.config.bleeds.bottom) * this.contentScaleRatio - 1}px`,
+          bottom: '-1px',
+          left: `${(this.config.width - this.config.bleeds.right) * this.contentScaleRatio - 1}px`,
+          right: '-1px'
+        }
+      }
     }
   },
   mounted() {
@@ -265,12 +270,7 @@ export default defineComponent({
         }
       }
     },
-    togglePageHighlighter(isHover: boolean): void {
-      if (this.isPagePreview) return
-      this.pageIsHover = isHover
-    },
     pageClickHandler(e: PointerEvent): void {
-      if (this.isPagePreview) return
       groupUtils.deselect()
       // imageUtils.setImgControlDefault(false)
       editorUtils.setInMultiSelectionMode(false)
@@ -285,7 +285,6 @@ export default defineComponent({
       }
     },
     onRightClick(event: MouseEvent) {
-      if (this.isPagePreview) return
       if (generalUtils.isTouchDevice()) {
         return
       }
@@ -296,18 +295,22 @@ export default defineComponent({
       }
       popupUtils.openPopup('page', { event })
     },
+    tapPageContent(e: Event): void {
+      const target = e.target as HTMLElement
+      if (!target.matches('.nu-background-image img')) return
+      doubleTapUtils.click(e, { doubleClickCallback: this.pageDblClickHandler })
+    },
     pageDblClickHandler(): void {
-      if (this.isPagePreview) return
-
       if (this.isHandleShadow) {
         return
       }
       const { srcObj, locked } = this.config.backgroundImage.config
       if ((srcObj?.assetId ?? '') !== '' && !locked) {
         pageUtils.startBackgroundImageControl(this.pageIndex)
+        editorUtils.setCurrActivePanel('crop')
       }
       if ((srcObj?.assetId ?? '') !== '' && locked) {
-        // this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+        this.$notify({ group: 'copy', text: i18n.global.tc('NN0804') })
       }
     },
     async handleFontLoading() {
@@ -343,5 +346,25 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   background-color: setColor(gray-4);
+}
+
+.bleed-line {
+  pointer-events: none;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  box-sizing: border-box;
+  border: 1px solid white
+}
+
+.trim {
+  pointer-events: none;
+  >div {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  box-sizing: border-box;
+  border: 1px solid setColor(gray-2)
+  }
 }
 </style>

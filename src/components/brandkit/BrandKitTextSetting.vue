@@ -348,6 +348,7 @@ export default defineComponent({
     position: absolute;
     left: 0;
     top: 120px;
+    height: 45vh;
     width: 280px;
     background-color: white;
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);

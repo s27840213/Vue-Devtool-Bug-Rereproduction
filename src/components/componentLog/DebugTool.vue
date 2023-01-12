@@ -10,7 +10,7 @@ div(class="fps")
       div(v-for="valley in valleys" :style="{color: valley.color}") {{valley.text}}
   div(class="fps__value" @click="showGraph")
     span FPS: {{fps}}
-    span JS-Heap: {{jsHeapSize}}MB
+    span(v-if="jsHeapSize !== -1") JS-Heap: {{jsHeapSize}}MB
 </template>
 
 <script lang="ts">
@@ -43,7 +43,7 @@ class Valley {
 }
 
 export default defineComponent({
-  name: 'Fps',
+  name: 'DebugTool',
   data() {
     return {
       historySize: 30000,
@@ -73,7 +73,7 @@ export default defineComponent({
           this.historyLong.shift()
         }
         this.historyLong.push(now)
-        this.jsHeapSize = parseInt(`${(performance as any)?.memory.usedJSHeapSize / 1000000}`) ?? -1
+        this.jsHeapSize = parseInt(`${(performance.memory?.usedJSHeapSize ?? -1000000) / 1000000}`)
         this.showFps()
       })
     },

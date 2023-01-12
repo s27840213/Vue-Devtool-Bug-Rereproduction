@@ -6,10 +6,10 @@ div(class="nu-frame"
       draggable="false"
       :src="shadowSrc()")
   nu-layer(v-for="(layer,index) in layers"
-    :key="`layer-${index}`"
+    :key="`layer-${layer.id}`"
     :pageIndex="pageIndex"
     :layerIndex="layerIndex"
-    :isFrame="true"
+    :inFrame="true"
     :inImageFrame="inImageFrame()"
     :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
     :contentScaleRatio="contentScaleRatio"
@@ -27,10 +27,10 @@ import ImageUtils from '@/utils/imageUtils'
 import { mapGetters } from 'vuex'
 import layerFactary from '@/utils/layerFactary'
 import generalUtils from '@/utils/generalUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default defineComponent({
   emits: [],
-  inheritAttrs: false,
   props: {
     config: {
       type: Object as PropType<IFrame>,
@@ -77,6 +77,26 @@ export default defineComponent({
       if (config.decorationTop && json.decorationTop) {
         json.decorationTop.color = [...config.decorationTop.color]
         Object.assign(config.decorationTop, json.decorationTop)
+      }
+      if (json.blendLayers) {
+        if (!this.config.blendLayers) {
+          this.config.blendLayers = []
+        }
+        json.blendLayers.forEach((l, i) => {
+          if (!this.config.blendLayers![i]) {
+            const styles = {
+              width: this.config.styles.width / this.config.styles.scale,
+              height: this.config.styles.height / this.config.styles.scale,
+              initWidth: this.config.styles.width / this.config.styles.scale,
+              initHeight: this.config.styles.height / this.config.styles.scale,
+              vSize: [this.config.styles.width / this.config.styles.scale, this.config.styles.height / this.config.styles.scale]
+            }
+            this.config.blendLayers!.push(layerFactary.newShape({ styles }))
+          }
+          l.color = this.config.blendLayers![i].color
+          this.config.blendLayers![i].styles.blendMode = (json.blendLayers as IShape[])[i].blendMode
+          Object.assign(this.config.blendLayers![i], (json.blendLayers as IShape[])[i])
+        })
       }
       config.needFetch = false
     }
@@ -133,7 +153,8 @@ export default defineComponent({
     }),
     ...mapGetters('user', ['getVerUni']),
     ...mapGetters({
-      scaleRatio: 'getPageScaleRatio'
+      scaleRatio: 'getPageScaleRatio',
+      isShowPagePreview: 'page/getIsShowPagePreview'
     }),
     layers() {
       const config = this.config as IFrame
@@ -179,7 +200,8 @@ export default defineComponent({
       return {
         width: isFrameImg ? '' : `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio}px`,
         height: isFrameImg ? '' : `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio}px`,
-        pointerEvents: ImageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial',
+        // For controll pointer-events from parent, please don't add any pointer-events: initial to layer component.
+        ...ImageUtils.isImgControl(this.pageIndex) ? { pointerEvents: 'none' } : {},
         transform: isFrameImg ? '' : `scale(${1 / this.contentScaleRatio})`,
         transformOrigin: isFrameImg ? '' : 'top left'
       }

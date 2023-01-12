@@ -16,7 +16,7 @@ div(id="app" :style="appStyles()")
       :info="currSelectedResInfo"
       @blur="setCurrSelectedResInfo()"
       tabindex="0")
-  fps(v-if="isAdmin && !inScreenshotPreview && enableAdminView")
+  fps(v-if="!inScreenshotPreview && showAllAdminTool")
   div(class="modal-container"
       v-if="isModalOpen")
     modal-card
@@ -43,10 +43,9 @@ import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'click-outside-vue3'
 import Popup from '@/components/popup/Popup.vue'
-import { Chrome } from 'vue-color'
 import ResInfo from '@/components/modal/ResInfo.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
-import Fps from '@/components/componentLog/Fps.vue'
+import Fps from '@/components/componentLog/DebugTool.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
@@ -55,7 +54,6 @@ export default defineComponent({
   emits: [],
   components: {
     Popup,
-    'chrome-picker': Chrome,
     ResInfo,
     ModalCard,
     Fps
@@ -84,13 +82,7 @@ export default defineComponent({
       currSelectedResInfo: 'getCurrSelectedResInfo',
       isModalOpen: 'modal/getModalOpen',
       inScreenshotPreview: 'getInScreenshotPreview',
-      enableAdminView: 'user/getEnableAdminView'
-    }),
-    ...mapGetters('user', {
-      isAdmin: 'isAdmin'
-    }),
-    ...mapGetters('user', {
-      isAdmin: 'isAdmin'
+      showAllAdminTool: 'user/showAllAdminTool'
     }),
     currLocale(): string {
       return localeUtils.currLocale()

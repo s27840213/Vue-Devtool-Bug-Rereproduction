@@ -2,16 +2,14 @@
 div(class="page-setting")
   div(class="page-setting-row page-setting__title")
     span(class="text-gray-2 label-mid") {{$t('NN0021')}}
-  div(class="page-setting-row page-setting__size")
-    property-bar(class="page-setting__size__box pointer" @click="setSuggestionPanel(true)")
-      span(class="body-3 text-gray-2") {{ currentPageWidth }}
-      span(class="body-4 text-gray-3") W
-    svg-icon(class="pointer"
-        :iconName="isLocked ? 'lock' : 'unlock'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click="toggleLock()")
-    property-bar(class="page-setting__size__box pointer" @click="setSuggestionPanel(true)")
-      span(class="body-3 text-gray-2") {{ currentPageHeight }}
-      span(class="body-4 text-gray-3") H
+  div(class="page-setting-row page-setting__size bg-gray-6 pointer" @click="toggleSuggestionPanel()")
+    div(class="page-setting__size__box")
+      span(class="body-XS text-gray-2") {{ `${sizeToShow.width} ${sizeToShow.unit}` }}
+    span(class="body-XS text-gray-3") W
+    span(class="body-XS text-gray-2 text-center") x
+    div(class="page-setting__size__box")
+      span(class="body-XS text-gray-2") {{ `${sizeToShow.height} ${sizeToShow.unit}` }}
+    span(class="body-XS text-gray-3") H
   div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
       @click="toggleSuggestionPanel()")
     svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm" class="mr-10")
@@ -27,8 +25,47 @@ div(class="page-setting")
                   iconName="close" iconWidth="19px" iconColor="white")
         keep-alive
           page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)" ref="pageSizeSelector")
+  div(v-if="hasBleed" class="page-setting__bleed")
+    div(class="page-setting-row page-setting__bleed__title pointer" @click="() => showBleedSettings = !showBleedSettings")
+      span(class="text-gray-2 label-mid") {{$t('NN0780')}}
+      svg-icon(class='page-setting__bleed__expand-icon'
+              iconName="chevron-up"
+              iconWidth="14px"
+              iconColor="gray-2"
+              :style="expandIconStyles()")
+    div(v-if="showBleedSettings" class="page-setting-row page-setting__bleed__content")
+      div(v-for="bleed in bleedsToShow" class='page-setting__bleed__content__item')
+        div(class='page-setting__bleed__content__item__label')
+          span(class="body-XS text-gray-2") {{bleed.label}}
+        div(class='page-setting__bleed__content__item__input')
+          div(class='page-setting__bleed__content__item__input__icon pointer'
+              @click="addBleed(bleed.key, 1, isLocked)")
+            svg-icon(iconName="chevron-up"
+              iconWidth="14px"
+              iconColor="gray-2")
+          div(class='page-setting__bleed__content__item__input__icon pointer'
+              @click="addBleed(bleed.key, -1, isLocked)")
+            svg-icon(iconName="chevron-up"
+              iconWidth="14px"
+              iconColor="gray-2"
+              :style="{transform: 'scaleY(-1)'}")
+          div(class='page-setting__bleed__content__item__input__value body-XS')
+            input(type="number" min="0"
+                  :value="bleed.value"
+                  @input="setBleed($event, bleed.key, isLocked)"
+                  @blur="handleBleedSubmit()"
+                  @keyup="handleBleedSubmit")
+            span(class='text-gray-3') {{sizeToShow.unit}}
+      div(class="page-setting__bleed__content__lock-icon")
+        div(class="page-setting__bleed__content__lock-icon__box"
+            :style="isLocked ? {background: '#E7EFFF'} : {}")
+          svg-icon(class="pointer"
+                  :iconName="isLocked ? 'lock' : 'unlock'"
+                  iconWidth="15px"
+                  iconColor="gray-2"
+                  @click="toggleLock()")
   div(class="page-setting__footer")
-  div(v-if="inAdminMode && enableAdminView"
+  div(v-if="showAdminTool"
     class="template-information")
     div(class="template-information__divider pb-10")
     btn(:type="'primary-sm'" class="rounded my-5"
@@ -38,169 +75,115 @@ div(class="page-setting")
       class="pt-10")
       span(class="text-gray-1 label-lg") 群 組 資 訊
       div(class="template-information__line")
-        span(class="body-1") groupId
-        span(class="pl-15 body-2"
-          @click="copyText(groupId)") {{groupId}}
-      div(class="pt-5 text-red body-2") {{groupErrorMsg}}
-      div(v-for="id in unsetThemeTemplate"
-        class="pt-5 text-red body-2"
-        @click="copyText(id)") {{id}}
-      div(v-if="isGetGroup")
-        div(v-if="showDbGroup"
-          class="py-5 text-red body-2") 提醒：原有的設定不合法，已自動修正。請在下方修正版確認內容後按下更新按鈕
-        div(v-if="showDbGroup"
-          class="template-information__line")
-          span(class="body-1 text-red-1") 原設定內容
-        div(v-if="showDbGroup"
-          class="mb-10 square-wrapper wrong text-center")
-          div(v-if="dbGroupThemes.length === 0"
-            class="body-1") 尚未設定
-          div(v-else
-            class="pr-10 cover-option body-4")
-            span theme
-            span 封面頁碼
-          div(v-for="(item, idx) in dbGroupThemes"
-            class="pt-5 pr-10 cover-option")
-            span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
-            span 第{{item.coverIndex+1}}頁
-        div(v-if="showDbGroup"
-          class="template-information__line")
-          span(class="body-1 ") 修正版
-        div(class="square-wrapper text-center")
-          div(class="pr-10 cover-option body-4")
-            span theme
-            span 封面頁碼
-          div(v-for="(item, idx) in groupInfo.groupThemes"
-            class="pt-5 pr-10 cover-option")
-            span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
-            select(class="template-information__cover-select text-center"
-              v-model="item.coverIndex")
-              option(v-for="option in item.options" :value="option.index") 第{{option.index+1}}頁
-        div(class="pt-10")
-          btn(:type="'primary-sm'" class="rounded my-5"
-            style="padding: 8px 0; margin: 0 auto; width: 70%;"
-            @click="updateGroupClicked()") 更新
-    div(class="template-information__divider2")
-    span(class="text-gray-1 label-lg") 模 板 資 訊
-    div(class="template-information__content")
-      div(class="template-information__line" style="background: #eee;")
-        span(class="body-1") focus
-        span(class="pl-15 body-2" @click="copyText(key_id)") {{key_id}}
-      img(v-if="key_id.length > 0" style="margin: 0 auto;"
-        :src="`https://template.vivipic.com/template/${key_id}/prev?ver=${imgRandQuery}`")
-      div(v-if="isGetTemplate")
-        div(v-if="groupId.length > 0 && !isGroupMember"
-          class="text-red") 此模板不是上列群組的成員
+        span(class="body-1") key_id
+        span(class="pl-15 body-2" @click="copyText(templateInfo.key_id)") {{templateInfo.key_id}}
+      div(class="template-information__line")
+        span(class="body-1") 創建者
+        span(class="pl-15 body-2" @click="copyText(templateInfo.creator)") {{templateInfo.creator}}
+      div(class="template-information__line")
+        span(class="body-1") 修改者
+        span(class="pl-15 body-2" @click="copyText(templateInfo.author)") {{templateInfo.author}}
+      div(class="template-information__line")
+        span(class="body-1") 上次更新
+        span(class="pl-15 body-2") {{templateInfo.edit_time}}
+      div(class="template-information__line")
+        span(class="body-1") 模板尺寸
+        span(class="pl-15 body-2") {{templateInfo.width}} x {{templateInfo.height}}
+      div(class="pt-10") plan(0：預設一般 / 1：Pro)
+      div
+        property-bar
+          input(class="body-2 text-gray-2" min="0"
+            v-model="templateInfo.plan")
+      div(class="template-information__line")
+        span(class="body-1") Theme_ids
+      template(v-if="showDbTemplate")
+        div(class="py-5 text-red body-2") 提醒：主題設定有誤。請在下方修正版確認內容後按下更新按鈕
         div(class="template-information__line")
-          span(class="body-1") key_id
-          span(class="pl-15 body-2" @click="copyText(templateInfo.key_id)") {{templateInfo.key_id}}
-        div(class="template-information__line")
-          span(class="body-1") 創建者
-          span(class="pl-15 body-2" @click="copyText(templateInfo.creator)") {{templateInfo.creator}}
-        div(class="template-information__line")
-          span(class="body-1") 修改者
-          span(class="pl-15 body-2" @click="copyText(templateInfo.author)") {{templateInfo.author}}
-        div(class="template-information__line")
-          span(class="body-1") 上次更新
-          span(class="pl-15 body-2") {{templateInfo.edit_time}}
-        div(class="template-information__line")
-          span(class="body-1") 模板尺寸
-          span(class="pl-15 body-2") {{templateInfo.width}} x {{templateInfo.height}}
-        div(class="pt-10") plan(0：預設一般 / 1：Pro)
-        div
-          property-bar
-            input(class="body-2 text-gray-2" min="0"
-              v-model="templateInfo.plan")
-        div(class="template-information__line")
-          span(class="body-1") Theme_ids
-        template(v-if="showDbTemplate")
-          div(class="py-5 text-red body-2") 提醒：主題設定有誤。請在下方修正版確認內容後按下更新按鈕
-          div(class="template-information__line")
-            span(class="body-1 text-red-1") 原設定內容 (x表示設定錯誤)
-        div(v-if="showDbTemplate"
-          class="square-wrapper wrong")
-          template(v-for="(item, idx) in themeList")
-            div(v-if="dbTemplateThemes[item.id]"
-              class="pt-5 theme-option")
-              span(class="text-red-1 text-center") {{isDisabled(item.id, item.width, item.height) ? 'x' : ''}}
-              span(class="body-1") {{item.title}}
-              span(class="body-2 text-gray-2") {{item.description}}
-        div(v-if="showDbTemplate"
-          class="pt-10 template-information__line")
-          span(class="body-1 ") 修正版
-        div(class="square-wrapper")
-          div(v-for="(item, idx) in themeList"
+          span(class="body-1 text-red-1") 原設定內容 (x表示設定錯誤)
+      div(v-if="showDbTemplate"
+        class="square-wrapper wrong")
+        template(v-for="(item, idx) in themeList")
+          div(v-if="dbTemplateThemes[item.id]"
             class="pt-5 theme-option")
-            input(type="checkbox"
-              class="theme-option__check"
-              :disabled="isDisabled(item.id, item.width, item.height)"
-              v-model="templateThemes[item.id]")
+            span(class="text-red-1 text-center") {{isDisabled(item.id, item.width, item.height) ? 'x' : ''}}
             span(class="body-1") {{item.title}}
             span(class="body-2 text-gray-2") {{item.description}}
-        div(class="template-information__line pt-10")
-          span(class="body-1") 語系
-          select(class="template-information__select" v-model="templateInfo.locale")
-            option(v-for="locale in localeOptions" :value="locale") {{locale}}
-        div(class="pt-10") tags_tw
-        div
-          property-bar
-            input(class="body-2 text-gray-2" min="0"
-              v-model="templateInfo.tags_tw")
-        div(class="pt-10") tags_us
-        div
-          property-bar
-            input(class="body-2 text-gray-2" min="0"
-              v-model="templateInfo.tags_us")
-        div(class="pt-10") tags_jp
-        div
-          property-bar
-            input(class="body-2 text-gray-2" min="0"
-              v-model="templateInfo.tags_jp")
-        div(class="pt-10")
-          btn(:type="'primary-sm'" class="rounded my-5"
-            style="padding: 8px 0; margin: 0 auto; width: 70%;"
-            @click="updateDataClicked()") 更新
-        div(class="template-information__divider")
-        div(class="template-information__line bg-blue")
-          span(class="body-1") 父
-          span(class="pl-15 body-2"
-            @click="copyText(templateInfo.parent_id)") {{templateInfo.parent_id || '無'}}
-          span(class="text-blue-1") {{templateInfo.parent_locale}}
-        div(class="template-information__line bg-blue border-bottom pb-5")
-          span(class="body-1") 爺
-          span(class="pl-15 body-2"
-            @click="copyText(templateInfo.grandparent_id)") {{templateInfo.grandparent_id || '無'}}
-          span(class="text-blue-1") {{templateInfo.grandparent_locale}}
-        div(class="bg-blue")
-          div(v-for="(item) in templateInfo.grandchildren_id"
-            class="border-bottom py-5")
-            div(class="child-item")
-              span(class="body-1") 子
-              span(class="body-2"
-                @click="copyText(item.childrenId)") {{item.childrenId}}
-              span {{item.childrenLocale}}
-            div(v-for="(item2) in item.grandchildren"
-              class="child-item")
-              span 孫
-              span(class="body-2"
-                @click="copyText(item2.key_id)") {{item2.key_id}}
-              span {{item2.locale}}
-        div(class="template-information__line")
-          span(class="body-1 pt-10") parent_id (父模板)
-        div
-          property-bar
-            input(class="body-2 text-gray-2" min="0"
-              v-model="userParentId")
-          div(class="pt-5 text-red body-3") 注意: parent_id的修改會更新模板的json，請修改時注意模板內容有無更動，避免複寫
-        div(class="template-information__line pt-10")
-          div(style="width: 50%;")
-            input(type="checkbox"
-              class="template-information__check"
-              v-model="updateParentIdChecked")
-            label 確定修改
-          btn(:type="'primary-sm'" class="rounded my-5"
-            style="padding: 5px 40px;"
-            @click="updateParentIdClicked()") 修改
+      div(v-if="showDbTemplate"
+        class="pt-10 template-information__line")
+        span(class="body-1 ") 修正版
+      div(class="square-wrapper")
+        div(v-for="(item, idx) in themeList"
+          class="pt-5 theme-option")
+          input(type="checkbox"
+            class="theme-option__check"
+            :disabled="isDisabled(item.id, item.width, item.height)"
+            v-model="templateThemes[item.id]")
+          span(class="body-1") {{item.title}}
+          span(class="body-2 text-gray-2") {{item.description}}
+      div(class="template-information__line pt-10")
+        span(class="body-1") 語系
+        select(class="template-information__select" v-model="templateInfo.locale")
+          option(v-for="locale in localeOptions" :value="locale") {{locale}}
+      div(class="pt-10") tags_tw
+      div
+        property-bar
+          input(class="body-2 text-gray-2" min="0"
+            v-model="templateInfo.tags_tw")
+      div(class="pt-10") tags_us
+      div
+        property-bar
+          input(class="body-2 text-gray-2" min="0"
+            v-model="templateInfo.tags_us")
+      div(class="pt-10") tags_jp
+      div
+        property-bar
+          input(class="body-2 text-gray-2" min="0"
+            v-model="templateInfo.tags_jp")
+      div(class="pt-10")
+        btn(:type="'primary-sm'" class="rounded my-5"
+          style="padding: 8px 0; margin: 0 auto; width: 70%;"
+          @click="updateDataClicked()") 更新
+      div(class="template-information__divider")
+      div(class="template-information__line bg-blue")
+        span(class="body-1") 父
+        span(class="pl-15 body-2"
+          @click="copyText(templateInfo.parent_id)") {{templateInfo.parent_id || '無'}}
+        span(class="text-blue-1") {{templateInfo.parent_locale}}
+      div(class="template-information__line bg-blue border-bottom pb-5")
+        span(class="body-1") 爺
+        span(class="pl-15 body-2"
+          @click="copyText(templateInfo.grandparent_id)") {{templateInfo.grandparent_id || '無'}}
+        span(class="text-blue-1") {{templateInfo.grandparent_locale}}
+      div(class="bg-blue")
+        div(v-for="(item) in templateInfo.grandchildren_id"
+          class="border-bottom py-5")
+          div(class="child-item")
+            span(class="body-1") 子
+            span(class="body-2"
+              @click="copyText(item.childrenId)") {{item.childrenId}}
+            span {{item.childrenLocale}}
+          div(v-for="(item2) in item.grandchildren"
+            class="child-item")
+            span 孫
+            span(class="body-2"
+              @click="copyText(item2.key_id)") {{item2.key_id}}
+            span {{item2.locale}}
+      div(class="template-information__line")
+        span(class="body-1 pt-10") parent_id (父模板)
+      div
+        property-bar
+          input(class="body-2 text-gray-2" min="0"
+            v-model="userParentId")
+        div(class="pt-5 text-red body-3") 注意: parent_id的修改會更新模板的json，請修改時注意模板內容有無更動，避免複寫
+      div(class="template-information__line pt-10")
+        div(style="width: 50%;")
+          input(type="checkbox"
+            class="template-information__check"
+            v-model="updateParentIdChecked")
+          label 確定修改
+        btn(:type="'primary-sm'" class="rounded my-5"
+          style="padding: 5px 40px;"
+          @click="updateParentIdClicked()") 修改
 </template>
 
 <script lang="ts">
@@ -212,9 +195,13 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import designApis from '@/apis/design-info'
 import GeneralUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { ILayout } from '@/interfaces/layout'
 import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
+import { IBleed, IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import resizeUtils from '@/utils/resizeUtils'
+import { STR_UNITS, PRECISION } from '@/utils/unitUtils'
+import { round } from 'lodash'
 
 export default defineComponent({
   emits: [],
@@ -223,14 +210,8 @@ export default defineComponent({
     RadioBtn,
     PageSizeSelector
   },
-  mounted() {
-    this.pageWidth = this.currentPageWidth
-    this.pageHeight = this.currentPageHeight
-  },
   data() {
     return {
-      pageWidth: '' as string | number,
-      pageHeight: '' as string | number,
       isLocked: true,
       isPanelOpen: false,
       isGetGroup: false,
@@ -270,8 +251,39 @@ export default defineComponent({
       templateThemes: [] as boolean[],
       dbTemplateThemes: [] as boolean[],
       groupErrorMsg: '',
-      unsetThemeTemplate: [] as string[]
+      unsetThemeTemplate: [] as string[],
+      showBleedSettings: true,
+      unitOptions: STR_UNITS,
+      bleeds: pageUtils.getDefaultBleeds('px'),
+      bleedsToShow: {
+        top: {
+          key: 'top',
+          label: `${this.$t('NN0781')}`,
+          value: ''
+        },
+        bottom: {
+          key: 'bottom',
+          label: `${this.$t('NN0782')}`,
+          value: ''
+        },
+        left: {
+          key: 'left',
+          label: `${this.$t('NN0783')}`,
+          value: ''
+        },
+        right: {
+          key: 'right',
+          label: `${this.$t('NN0784')}`,
+          value: ''
+        }
+      } as {[index: string]: {key: string, label: string, value: string}}
     }
+  },
+  mounted: function () {
+    Object.keys(this.currentPageBleeds).forEach(key => {
+      this.bleeds[key] = this.currentPageBleeds[key]
+      this.bleedsToShow[key].value = round(this.currentPageBleeds[key], this.sizeToShow.unit === 'px' ? 0 : PRECISION).toString()
+    })
   },
   watch: {
     key_id: function () {
@@ -310,36 +322,57 @@ export default defineComponent({
         groupThemes: []
       }
     },
-    currentPageWidth: function (newVal) {
-      this.pageWidth = newVal
-      this.pageHeight = this.currentPageHeight
+    currentPageBleeds: function (newVal) {
+      Object.keys(newVal).forEach(key => {
+        this.bleeds[key] = newVal[key]
+      })
     },
-    currentPageHeight: function (newVal) {
-      this.pageWidth = this.currentPageWidth
-      this.pageHeight = newVal
+    bleeds: {
+      handler: function(newVal) {
+        Object.keys(newVal).forEach(key => {
+          this.bleedsToShow[key].value = round(newVal[key], this.sizeToShow.unit === 'px' ? 0 : PRECISION).toString()
+        })
+      },
+      deep: true
+    },
+    hasBleed: function () {
+      this.showBleedSettings = true
     }
   },
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapState('layouts', [
       'categories'
     ]),
     ...mapGetters({
       getPage: 'getPage',
+      getPages: 'getPages',
       token: 'user/getToken',
       groupId: 'getGroupId',
-      enableAdminView: 'user/getEnableAdminView'
+      groupType: 'getGroupType',
+      pagesLength: 'getPagesLength',
+      showAdminTool: 'user/showAdminTool'
     }),
-    currentPageWidth(): number {
-      return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.width ?? 0)
+    currentPageBleeds(): IBleed {
+      const currPage = pageUtils.currFocusPage
+      let bleeds = currPage?.physicalBleeds ?? currPage?.bleeds ?? pageUtils.getDefaultBleeds(currPage.unit)
+      bleeds = {
+        top: this.groupType === 1 ? this.getPage(0).physicalBleeds?.top ?? this.getPage(0).bleeds?.top ?? 0 : bleeds.top,
+        bottom: this.groupType === 1 ? this.getPage(this.pagesLength - 1).physicalBleeds?.bottom ?? this.getPage(this.pagesLength - 1).bleeds?.bottom ?? 0 : bleeds.bottom,
+        left: bleeds.left,
+        right: bleeds.right
+      }
+      return bleeds
     },
-    currentPageHeight(): number {
-      return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.height ?? 0)
+    sizeToShow(): {width: number, height: number, unit: string} {
+      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSizeWithBleeds
+      return {
+        width: round(physicalWidth ?? width ?? 0, PRECISION),
+        height: round(physicalHeight ?? height ?? 0, PRECISION),
+        unit: unit ?? 'px'
+      }
     },
-    inAdminMode(): boolean {
-      return this.role === 0 && this.adminMode === true
+    hasBleed(): boolean {
+      return this.getPages.some((page: IPage) => page.isEnableBleed)
     },
     key_id(): string {
       return this.getPage(pageUtils.currFocusPageIndex).designId
@@ -621,6 +654,77 @@ export default defineComponent({
         }
         return true
       }
+    },
+    expandIconStyles() {
+      return this.showBleedSettings ? {} : { transform: 'scaleY(-1)' }
+    },
+    setBleed(evt: Event, key: string, all = false) {
+      const value = (evt.target as HTMLInputElement).value
+      this.bleedsToShow[key].value = value
+      const numValue = typeof value === 'string' ? parseFloat(value) : value
+      const striped = numValue.toString() !== value
+      const roundedValue = round(numValue, this.sizeToShow.unit === 'px' ? 0 : PRECISION)
+      const rounded = this.bleeds[key] !== roundedValue
+      const strValue = !striped || rounded ? roundedValue.toString() : this.bleedsToShow[key].value
+      this.bleeds[key] = roundedValue
+      this.bleedsToShow[key].value = strValue
+
+      console.log('set bleed', { ...this.currentPageBleeds }, value)
+      if (all) {
+        Object.keys(this.bleeds).forEach((key) => {
+          this.bleeds[key] = roundedValue
+          this.bleedsToShow[key].value = strValue
+        })
+      }
+      this.applyBleeds(key, all)
+    },
+    addBleed(key: string, value: number, all = false) {
+      console.log('add bleed', { ...this.currentPageBleeds }, value)
+      if (all) {
+        Object.keys(this.bleeds).forEach((key) => {
+          this.bleeds[key] = Math.max(this.bleeds[key] + value, 0)
+          this.bleedsToShow[key].value = this.bleeds[key].toString()
+        })
+      } else {
+        this.bleeds[key] = Math.max(this.bleeds[key] + value, 0)
+        this.bleedsToShow[key].value = this.bleeds[key].toString()
+      }
+      this.applyBleeds(key, all)
+      stepsUtils.record()
+    },
+    applyBleeds(key: string, all: boolean) {
+      // resize all bleeds of all pages if is email marketing design
+      if (this.groupType === 1) {
+        if (!all && (key === 'top' || key === 'bottom')) {
+          const pageIndex = key === 'top' ? 0 : this.pagesLength - 1
+          resizeUtils.resizeBleeds(pageIndex, {
+            top: key === 'top' ? this.bleeds.top : 0,
+            bottom: key === 'bottom' ? this.bleeds.bottom : 0,
+            left: this.bleeds.left,
+            right: this.bleeds.right
+          })
+        } else {
+          for (let pageIndex = 0; pageIndex < this.pagesLength; pageIndex++) {
+            resizeUtils.resizeBleeds(pageIndex, {
+              top: pageIndex === 0 ? this.bleeds.top : 0,
+              bottom: pageIndex === this.pagesLength - 1 ? this.bleeds.bottom : 0,
+              left: this.bleeds.left,
+              right: this.bleeds.right
+            })
+          }
+        }
+      } else resizeUtils.resizeBleeds(pageUtils.currFocusPageIndex, this.bleeds)
+    },
+    handleBleedSubmit(evt?: KeyboardEvent) {
+      if (!evt || evt.key === 'Enter') {
+        Object.keys(this.bleeds).forEach(key => {
+          if (isNaN(this.bleeds[key])) {
+            this.bleeds[key] = 0
+            this.bleedsToShow[key].value = '0'
+          }
+        })
+        stepsUtils.record()
+      }
     }
   }
 })
@@ -644,16 +748,24 @@ export default defineComponent({
     }
   }
   &__size {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    grid-template-rows: auto;
-    column-gap: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border-radius: 4px;
     &__box {
-      height: 26px;
+      width: 64px;
+      height: 22px;
       box-sizing: border-box;
-      & input {
-        line-height: 16px;
+      display: flex;
+      align-items: center;
+      text-align: center;
+      & span {
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
       }
     }
   }
@@ -675,6 +787,69 @@ export default defineComponent({
       font-weight: 700;
       font-size: 12px;
       line-height: 16px;
+    }
+  }
+  &__bleed {
+    margin-top: 19px;
+    &__title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    &__content {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 24px;
+      gap: 8px;
+      &__item {
+        &__label {
+          height: 22px;
+          display: flex;
+          align-items: center;
+        }
+        &__input {
+          border: 1px solid setColor(gray-4);
+          border-radius: 4px;
+          display: grid;
+          grid-template-columns: 30px auto;
+          overflow: hidden;
+          &__icon {
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid setColor(gray-4);
+            &:active {
+              background: setColor(blue-4);
+            }
+          }
+          &__value {
+            padding: 6px;
+            grid-row: 1 / span 2;
+            grid-column: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          }
+        }
+      }
+      &__lock-icon {
+        grid-row: 1 / span 2;
+        grid-column: 3;
+        display: flex;
+        align-items: center;
+        padding-top: 22px;
+        &__box {
+          box-sizing: border-box;
+          width: 24px;
+          height: 24px;
+          border: 1px solid setColor(gray-4);
+          border-radius: 3px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
     }
   }
   &__hr {

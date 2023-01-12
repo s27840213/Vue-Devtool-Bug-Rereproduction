@@ -2,13 +2,13 @@
 div(class="nu-group"
     :style="styles()")
   nu-layer(v-for="(layer,index) in config.layers"
-    :key="`layer-${index}`"
+    :key="`layer-${layer.id}`"
     :pageIndex="pageIndex"
+    :primaryLayer="config"
     :layerIndex="layerIndex"
     :subLayerIndex="index"
     :contentScaleRatio="contentScaleRatio"
     :config="layer"
-    :primaryLayer="config"
     :isSubLayer="true")
 </template>
 
@@ -17,7 +17,6 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   emits: [],
-  inheritAttrs: false,
   props: {
     config: {
       type: Object,
@@ -39,8 +38,8 @@ export default defineComponent({
   methods: {
     styles() {
       return {
-        width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
-        height: `${this.config.styles.initHeight * this.contentScaleRatio}px`,
+        // width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
+        // height: `${this.config.styles.initHeight * this.contentScaleRatio}px`,
         transform: `scale(${1 / this.contentScaleRatio})`,
         transformOrigin: 'top left'
       }

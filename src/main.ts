@@ -6,7 +6,6 @@ import App from '@/App.vue'
 import router from './router'
 import store from './store'
 import i18n from './i18n'
-import vueColor from 'vue-color'
 import VueMeta from 'vue-meta'
 // import 'floating-vue/dist/style.css'
 // import FloatingVue from 'floating-vue'
@@ -21,9 +20,6 @@ import Notifications from '@kyvg/vue3-notification'
 
 // global component section
 import SvgIcon from '@/components/global/SvgIcon.vue'
-import TmpImages from '@/components/TmpImages.vue'
-import TmpText from '@/components/TmpText.vue'
-import TmpSvg from '@/components/TmpSvg.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
 import Btn from '@/components/global/Btn.vue'
 import NuPage from '@/components/editor/global/NuPage.vue'
@@ -38,6 +34,7 @@ import NuSubController from '@/components/editor/global/NuSubController.vue'
 import NuShape from '@/components/editor/global/NuShape.vue'
 import NuImgController from '@/components/editor/global/NuImgController.vue'
 import NuFrame from '@/components/editor/global/NuFrame.vue'
+import Nubtn from '@/components/global/Nubtn.vue'
 import Spinner from '@/components/global/Spinner.vue'
 import Hint from '@/components/global/Hint.vue'
 import Dropdown from '@/components/global/Dropdown.vue'
@@ -88,7 +85,7 @@ const tooltipUtils = new TooltipUtils()
 if (process.env.NODE_ENV !== 'production') {
   app.config.performance = true
 }
-app.use(VueRecyclerviewNew, vueColor)
+app.use(VueRecyclerviewNew)
 app.use(Notifications)
 // app.use(VueMeta)
 // app.use(FloatingVue, {
@@ -105,9 +102,6 @@ app.use(Notifications)
 app.component('RecycleScroller', RecycleScroller)
 
 app.component('svg-icon', SvgIcon)
-app.component('tmp-images', TmpImages)
-app.component('tmp-text', TmpText)
-app.component('tmp-svg', TmpSvg)
 app.component('btn', Btn)
 app.component('property-bar', PropertyBar)
 app.component('dropdown', Dropdown)
@@ -123,6 +117,7 @@ app.component('nu-sub-controller', NuSubController)
 app.component('nu-shape', NuShape)
 app.component('nu-img-controller', NuImgController)
 app.component('nu-frame', NuFrame)
+app.component('nubtn', Nubtn)
 app.component('spinner', Spinner)
 app.component('hint', Hint)
 

@@ -12,14 +12,19 @@ div(class="tabs" :style="tabsStyle")
 import Vue, { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
+  model: {
+    prop: 'tabIndex',
+    event: 'switchTab'
+  },
   props: {
     tabs: {
       type: Array as PropType<string[]>,
       default: () => []
     },
-    defaultTab: {
+    // Use v-model to bind tabIndex.
+    tabIndex: {
       type: Number,
-      default: 0
+      required: true
     },
     theme: {
       type: String as PropType<'dark'|'light'|'dark-rect'>,
@@ -65,7 +70,7 @@ export default defineComponent({
   },
   methods: {
     tabStyle(tabIndex: number) {
-      const isActive = tabIndex === this.currActiveTabIndex
+      const isActive = tabIndex === this.tabIndex
       const activeMode = isActive ? 'active' : 'inactive'
       const type = this.theme.split('-')[1]
       return type === 'rect'
@@ -89,7 +94,6 @@ export default defineComponent({
         }
     },
     switchTab(tabIndex: number) {
-      this.currActiveTabIndex = tabIndex
       this.$emit('switchTab', tabIndex)
     }
   }
@@ -104,6 +108,7 @@ export default defineComponent({
   justify-content: space-around;
   &__item {
     box-sizing: border-box;
+    text-align: center;
     transition: all 0.2s;
   }
 }

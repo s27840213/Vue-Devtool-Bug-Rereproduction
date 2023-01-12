@@ -10,7 +10,7 @@ div(class="panel-template" ref="panel")
       @click="handleClosePrompt")
   //- Group template UI
   panel-group-template(v-if="currentGroup"
-    :showId="inAdminMode && enableAdminView"
+    :showId="showAdminTool"
     :groupItem="currentGroup"
     @close="currentGroup = null")
   //- Search bar and themes
@@ -21,12 +21,8 @@ div(class="panel-template" ref="panel")
         clear
         :defaultKeyword="keywordLabel"
         @search="handleSearch")
-        svg-icon(class="ml-5 pointer panel-template__advanced"
-          :class="{ 'panel-template__advanced--active': theme }"
-          iconName="advanced"
-          iconColor="gray-6"
-          iconWidth="20px"
-          @click="onAdvancedClicked()")
+        nubtn(theme="icon" icon="sliders" :status="!allThemesChecked?'active':'default'"
+            @click="onAdvancedClicked()" :hint="$t('NN0795')")
       popup-theme(v-if="showTheme"
         class="panel-template__theme"
         :style="themeStyle()"
@@ -35,10 +31,10 @@ div(class="panel-template" ref="panel")
         @close="showTheme = false")
     div(v-if="showTheme" class="panel-template__wrap")
   //- Search result empty msg
-  div(v-if="theme && emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+  div(v-if="theme && emptyResultMessage") {{ emptyResultMessage }}
   //- Search result counter (only for admin)
-  div(v-if="inAdminMode && keyword && !pending && !emptyResultMessage"
-    class="text-white text-left pb-10")
+  div(v-if="showAdminTool && keyword && !pending && !emptyResultMessage"
+    class="pb-10")
     span {{sum}} {{sum === 1 ? 'item' : 'items'}} in total (not work for category search)
   //- Search result and main content
   category-list(v-for="item in categoryListArray"
@@ -50,7 +46,7 @@ div(class="panel-template" ref="panel")
         template(v-slot:preview="{ item }")
           component(class="panel-template__item"
             :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
-            :showId="inAdminMode && enableAdminView"
+            :showId="showAdminTool"
             :item="item"
             @clickGroupItem="handleShowGroup")
     template(v-slot:category-template-item="{ list, title }")
@@ -59,22 +55,22 @@ div(class="panel-template" ref="panel")
         component(v-for="item in list"
           class="panel-template__item"
           :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
-          :showId="inAdminMode"
+          :showId="showAdminTool"
           :item="item"
           :key="item.group_id"
-          @click="handleShowGroup")
+          @clickGroupItem="handleShowGroup")
     template(#after)
       //- Loading icon
       div(v-if="!theme || pending" class="text-center")
         svg-icon(iconName="loading"
           iconColor="white"
           iconWidth="20px")
-      //- Search result too few msg
-      div(v-if="keyword && theme && !pending && resultGroupCounter<=3 && !allThemesChecked"
-          class="text-white text-left")
-        span {{resultTooFew[0]}}
-        span(class="set-all-templatebtn-btn pointer" @click="setAllTemplate") {{resultTooFew[1]}}
-        span {{resultTooFew[2]}}
+      //- Template wishing pool
+      div(v-if="keyword && theme && !pending && resultGroupCounter<=10")
+        span {{$t('NN0796', {type: $tc('NN0001', 3)})}}
+        nubtn(size="mid" class="mt-30")
+          url(:url="$t('NN0791')")
+            span {{$t('NN0790', {type: $tc('NN0001', 3)})}}
 </template>
 
 <script lang="ts">
@@ -88,6 +84,7 @@ import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue
 import PopupTheme from '@/components/popup/PopupTheme.vue'
 import PanelGroupTemplate from '@/components/editor/panelSidebar/PanelGroupTemplate.vue'
 import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
+import Url from '@/components/global/Url.vue'
 import themeUtils from '@/utils/themeUtils'
 import GalleryUtils from '@/utils/galleryUtils'
 import { Itheme } from '@/interfaces/theme'
@@ -104,7 +101,8 @@ export default defineComponent({
     CategoryTemplateItem,
     PopupTheme,
     CategoryGroupTemplateItem,
-    PanelGroupTemplate
+    PanelGroupTemplate,
+    Url
   },
   data() {
     return {
@@ -149,19 +147,18 @@ export default defineComponent({
       theme: 'theme',
       sum: 'sum'
     }),
-    ...mapState('user', ['userId', 'role', 'adminMode']),
-    ...mapState(['themes']),
+    ...mapState('user', ['userId']),
     ...mapGetters({
-      enableAdminView: 'user/getEnableAdminView'
+      editorThemes: 'getEditThemes'
+    }),
+    ...mapGetters({
+      showAdminTool: 'user/showAdminTool'
     }),
     keywordLabel():string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
-    inAdminMode(): boolean {
-      return (this.role === 0) && this.adminMode
-    },
     itemHeight(): number {
-      return generalUtils.getListRowItemSize() + (this.inAdminMode ? 34 : 10)
+      return generalUtils.getListRowItemSize() + (this.showAdminTool ? 34 : 10)
     },
     listCategories(): ICategoryItem[] {
       const { categories, itemHeight } = this
@@ -223,12 +220,9 @@ export default defineComponent({
         .getThemesBySize(pageSize.width, pageSize.height)
         .map(theme => theme.id)
     },
-    resultTooFew(): string[] {
-      return (this.$t('NN0398') as string).split('<html>')
-    },
     allThemesChecked(): boolean {
-      const allThemeString = _.sortBy(this.themes.map((item: Itheme) => item.id)).join(',')
-      return allThemeString === this.theme
+      const editorThemesString = _.sortBy((this.editorThemes as Itheme[]).map(theme => theme.id)).join(',')
+      return editorThemesString === this.theme
     }
   },
   activated() {
@@ -279,17 +273,17 @@ export default defineComponent({
     ...mapMutations('templates', {
       _setTemplateState: 'SET_STATE'
     }),
-    handleSearch(keyword?: string) {
+    async handleSearch(keyword?: string) {
       this.resetSearch()
       if (keyword) {
-        this.getTagContent({ keyword })
-        if (this.inAdminMode) this.getSum({ keyword })
+        await this.getTagContent({ keyword })
+        if (this.showAdminTool) this.getSum({ keyword })
       }
     },
-    handleCategorySearch(keyword: string, locale = '') {
+    async handleCategorySearch(keyword: string, locale = '') {
       this.resetSearch()
       if (keyword) {
-        this.getContent({ keyword, locale })
+        await this.getContent({ keyword, locale })
       }
     },
     handleLoadMore() {
@@ -298,14 +292,7 @@ export default defineComponent({
     handleShowGroup(group: IListServiceContentDataItem) {
       this.currentGroup = group
     },
-    setAllTemplate(): void {
-      const allTheme: { [key: string]: boolean } = {}
-      this.themes.forEach((theme: Itheme) => {
-        allTheme[theme.id] = true
-      })
-      this.handleTheme(allTheme)
-    },
-    handleTheme(selected: { [key: string]: boolean }) {
+    async handleTheme(selected: { [key: string]: boolean }) {
       const theme = Object
         .entries(selected)
         .reduce((prev, [id, checked]) => {
@@ -313,11 +300,15 @@ export default defineComponent({
           return prev
         }, [] as string[])
         .join(',')
-      this._setTemplateState({ theme })
-      this.resetContent()
-      this.getRecAndCate()
+      const oldKeyword = this.keyword as string
+
       this.showTheme = false
       this.showPrompt = false
+      this._setTemplateState({ theme })
+      this.resetContent()
+      if (oldKeyword.startsWith('tag::')) await this.handleSearch(oldKeyword)
+      else if (oldKeyword) await this.handleCategorySearch(oldKeyword)
+      this.getRecAndCate({ reset: false })
     },
     handleClosePrompt() {
       const { userId } = this
@@ -337,8 +328,9 @@ export default defineComponent({
       return new Set([...set, ...subset]).size === set.length
     },
     themeStyle(): Record<string, string> {
+      const gapTop = generalUtils.isTouchDevice() ? 60 : 80
       return {
-        maxHeight: `${(this.$refs.panel as HTMLElement).clientHeight - 80}px`
+        maxHeight: `${(this.$refs.panel as HTMLElement).clientHeight - gapTop}px`
       }
     },
     processListResult(list = [] as IAssetTemplate[], isSearch: boolean): ICategoryItem[] {
@@ -350,7 +342,7 @@ export default defineComponent({
       } else {
         galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 30 : 300, 140, 10)
       }
-      const idContainerHeight = this.inAdminMode ? 24 : 0
+      const idContainerHeight = this.showAdminTool ? 24 : 0
       const result = galleryUtils
         .generate(list.map((template: IAssetTemplate) => ({
           ...template,
@@ -384,6 +376,8 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  color: white;
+  text-align: left;
   &__item {
     text-align: center;
     vertical-align: middle;
@@ -401,10 +395,7 @@ export default defineComponent({
     text-align: left;
   }
   &__advanced--active {
-    color: setColor(gray-4);
-  }
-  &__advanced:hover {
-    color: #e0e0e0;
+    color: setColor(blue-3);
   }
   &__theme {
     position: absolute;
