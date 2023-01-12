@@ -66,47 +66,40 @@ div(class="nu-page"
     div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
         :style="wrapperStyles()"
+        @keydown.self="handleSpecialCharacter"
         @keydown.delete.exact.self.prevent.stop="ShortcutUtils.del()"
-        @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.copy()"
-        @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.copy()"
-        @keydown.ctrl.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
-        @keydown.meta.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
-        @keydown.ctrl.88.exact.stop.prevent.self="ShortcutUtils.cut()"
-        @keydown.meta.88.exact.stop.prevent.self="ShortcutUtils.cut()"
-        @keydown.ctrl.83.exact.stop.prevent.self="ShortcutUtils.save()"
-        @keydown.meta.83.exact.stop.prevent.self="ShortcutUtils.save()"
-        @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
-        @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
-        @keydown.ctrl.71.exact.stop.prevent.self="ShortcutUtils.group()"
-        @keydown.meta.71.exact.stop.prevent.self="ShortcutUtils.group()"
-        @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
-        @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
-        @keydown.ctrl.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
-        @keydown.meta.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
-        @keydown.ctrl.90.exact.stop.prevent.self="undo()"
-        @keydown.meta.90.exact.stop.prevent.self="undo()"
-        @keydown.ctrl.shift.90.exact.stop.prevent.self="redo()"
-        @keydown.meta.shift.90.exact.stop.prevent.self="redo()"
-        @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-        @keydown.meta.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-        @keydown.ctrl.61.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-        @keydown.meta.61.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-        @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-        @keydown.meta.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-        @keydown.ctrl.107.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-        @keydown.meta.107.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-        @keydown.ctrl.109.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-        @keydown.meta.109.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-        @keydown.ctrl.173.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-        @keydown.meta.173.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-        @keydown.37.exact.stop.prevent.self="ShortcutUtils.left()"
-        @keydown.38.exact.stop.prevent.self="ShortcutUtils.up()"
-        @keydown.39.exact.stop.prevent.self="ShortcutUtils.right()"
-        @keydown.40.exact.stop.prevent.self="ShortcutUtils.down()"
-        @keydown.shift.37.exact.self.prevent.stop="ShortcutUtils.left(true)"
-        @keydown.shift.38.exact.self.prevent.stop="ShortcutUtils.up(true)"
-        @keydown.shift.39.exact.self.prevent.stop="ShortcutUtils.right(true)"
-        @keydown.shift.40.exact.self.prevent.stop="ShortcutUtils.down(true)"
+        @keydown.ctrl.c.exact.self.prevent.stop="ShortcutUtils.copy()"
+        @keydown.meta.c.exact.self.prevent.stop="ShortcutUtils.copy()"
+        @keydown.ctrl.d.exact.self.prevent.stop="ShortcutUtils.deselect()"
+        @keydown.meta.d.exact.self.prevent.stop="ShortcutUtils.deselect()"
+        @keydown.ctrl.x.exact.self.prevent.stop="ShortcutUtils.cut()"
+        @keydown.meta.x.exact.self.prevent.stop="ShortcutUtils.cut()"
+        @keydown.ctrl.s.exact.self.prevent.stop="ShortcutUtils.save()"
+        @keydown.meta.s.exact.self.prevent.stop="ShortcutUtils.save()"
+        @keydown.ctrl.v.exact.self.prevent.stop="ShortcutUtils.paste($event)"
+        @keydown.meta.v.exact.self.prevent.stop="ShortcutUtils.paste($event)"
+        @keydown.ctrl.g.exact.self.prevent.stop="ShortcutUtils.group()"
+        @keydown.meta.g.exact.self.prevent.stop="ShortcutUtils.group()"
+        @keydown.ctrl.a.exact.self.prevent.stop="ShortcutUtils.selectAll()"
+        @keydown.meta.a.exact.self.prevent.stop="ShortcutUtils.selectAll()"
+        @keydown.ctrl.shift.g.exact.self.prevent.stop="ShortcutUtils.ungroup()"
+        @keydown.meta.shift.g.exact.self.prevent.stop="ShortcutUtils.ungroup()"
+        @keydown.ctrl.z.exact.self.prevent.stop="undo()"
+        @keydown.meta.z.exact.self.prevent.stop="undo()"
+        @keydown.ctrl.shift.z.exact.self.prevent.stop="redo()"
+        @keydown.meta.shift.z.exact.self.prevent.stop="redo()"
+        @keydown.ctrl.-.exact.self.prevent.stop="ShortcutUtils.zoomOut()"
+        @keydown.meta.-.exact.self.prevent.stop="ShortcutUtils.zoomOut()"
+        @keydown.ctrl.+.exact.self.prevent.stop="ShortcutUtils.zoomIn()"
+        @keydown.meta.+.exact.self.prevent.stop="ShortcutUtils.zoomIn()"
+        @keydown.left.exact.self.prevent.stop="ShortcutUtils.left()"
+        @keydown.up.exact.self.prevent.stop="ShortcutUtils.up()"
+        @keydown.right.exact.self.prevent.stop="ShortcutUtils.right()"
+        @keydown.down.exact.self.prevent.stop="ShortcutUtils.down()"
+        @keydown.shift.left.exact.self.prevent.stop="ShortcutUtils.left(true)"
+        @keydown.shift.up.exact.self.prevent.stop="ShortcutUtils.up(true)"
+        @keydown.shift.right.exact.self.prevent.stop="ShortcutUtils.right(true)"
+        @keydown.shift.down.exact.self.prevent.stop="ShortcutUtils.down(true)"
         @mouseover="togglePageHighlighter(true)"
         @mouseleave="togglePageHighlighter(false)"
         tabindex="0")
@@ -419,6 +412,16 @@ export default defineComponent({
       setSidebarType: 'SET_currSidebarPanelType',
       setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
     }),
+    handleSpecialCharacter(e: KeyboardEvent) {
+      // For those using keyCode in their codebase, we recommend converting them to their kebab-cased named equivalents.
+      // The keys for some punctuation marks can just be included literally. e.g. For the , key:
+      // Limitations of the syntax prevent certain characters from being matched, such as ", ', /, =, >, and .. For those characters you should check event.key inside the listener instead.
+      if (e.key === '=' && e.ctrlKey) {
+        e.preventDefault()
+        e.stopPropagation()
+        ShortcutUtils.zoomIn()
+      }
+    },
     styles(type: string) {
       return type === 'content' ? {
         width: `${this.config.width * this.contentScaleRatio}px`,
