@@ -260,9 +260,6 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapState({
       cursor: 'cursor'
     }),
@@ -335,7 +332,6 @@ export default Vue.extend({
       addLayer: 'ADD_selectedLayer',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setPageScaleRatio: 'SET_pageScaleRatio',
-      _setAdminMode: 'user/SET_ADMIN_MODE',
       setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
       setInGestureMode: 'SET_inGestureMode'
@@ -349,9 +345,6 @@ export default Vue.extend({
     cursorStyles() {
       const { cursor } = this
       return cursor ? { cursor } : {}
-    },
-    setAdminMode() {
-      this._setAdminMode(!this.adminMode)
     },
     outerClick(e: MouseEvent) {
       if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
@@ -689,7 +682,8 @@ export default Vue.extend({
     mapGuidelineToPage(type: string): { pos: number, outOfPage: boolean } {
       // just has two options: ['v','h']
       const guideline = type === 'v' ? this.$refs.guidelineV as HTMLElement : this.$refs.guidelineH as HTMLElement
-      const result = RulerUtils.mapGuidelineToPage(guideline, type, this.from)
+      const from = type === 'v' ? this.from : RulerUtils.getOverlappedPageIndex(guideline, 'h')
+      const result = RulerUtils.mapGuidelineToPage(guideline, type, from)
       return result
     },
     closeGuidelineH(need2Record = false) {

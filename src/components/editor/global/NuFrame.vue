@@ -185,7 +185,8 @@ export default Vue.extend({
       return {
         width: isFrameImg ? '' : `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio}px`,
         height: isFrameImg ? '' : `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio}px`,
-        pointerEvents: ImageUtils.isImgControl(this.pageIndex) || this.isShowPagePreview || editorUtils.mobileAllPageMode ? 'none' : 'initial',
+        // For controll pointer-events from parent, please don't add any pointer-events: initial to layer component.
+        ...ImageUtils.isImgControl(this.pageIndex) ? { pointerEvents: 'none' } : {},
         transform: isFrameImg ? '' : `scale(${1 / this.contentScaleRatio})`,
         transformOrigin: isFrameImg ? '' : 'top left'
       }

@@ -3,6 +3,7 @@ import { IBackgroundImage, IPage } from '@/interfaces/page'
 import { SidebarPanelType } from '@/store/types'
 import store from '@/store'
 import Vue from 'vue'
+import i18n from '@/i18n'
 import assetUtils from './assetUtils'
 import editorUtils from './editorUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
@@ -110,7 +111,7 @@ class BackgroundUtils {
   }
 
   handleLockedNotify() {
-    Vue.notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+    Vue.notify({ group: 'copy', text: i18n.tc('NN0804') })
   }
 
   setBgImage(props: { pageIndex: number, config: Partial<IImage> }) {

@@ -673,7 +673,7 @@ export default Vue.extend({
       } else return this.currTab === tab.panelType
     },
     handleLockedNotify() {
-      this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+      this.$notify({ group: 'copy', text: i18n.tc('NN0804') })
     }
   }
 })

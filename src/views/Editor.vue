@@ -60,7 +60,6 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setCurrFunctionPanel: 'SET_currFunctionPanelType',
-      _setAdminMode: 'user/SET_ADMIN_MODE',
       clearState: 'CLEAR_state',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
     }),

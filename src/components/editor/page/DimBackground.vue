@@ -27,7 +27,7 @@
   div(v-else-if="isBgImgCtrl" class="dim-background")
     div(class="background-control"
         :style="backgroundControlStyles")
-      nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio" :pageIndex="pageIndex" :layerIndex="layerIndex")
+      nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio" :forRender="true" :pageIndex="pageIndex" :layerIndex="layerIndex")
       div(class="dim-background__content-area hollow" :style="contentAreaStyles")
         component(v-for="(elm, idx) in getHalation"
           :key="idx"

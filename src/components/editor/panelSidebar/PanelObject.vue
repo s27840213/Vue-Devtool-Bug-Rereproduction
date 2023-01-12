@@ -7,7 +7,7 @@
       :defaultKeyword="keywordLabel"
       @search="handleSearch")
     //- Admin tool
-    div(v-if="inAdminMode" class="panel-objects-2html")
+    div(v-if="showAdminTool" class="panel-objects-2html")
       input(type="text" placeholder="項目網址" v-model="panelParams")
       btn(@click.native="downloadAll") Download all
     //- Search result empty msg
@@ -41,7 +41,7 @@
         div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
           span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
           nubtn(size="mid" class="mt-30")
-            url(:url="$t('NN0791')")
+            url(:url="$t('NN0791')" :newTab="true")
               span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 </template>
 
@@ -77,8 +77,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      isAdmin: 'user/isAdmin',
-      enableAdminView: 'user/getEnableAdminView'
+      showAdminTool: 'user/showAdminTool'
     }),
     ...mapState('objects', {
       categories: 'categories',
@@ -87,12 +86,6 @@ export default Vue.extend({
       pending: 'pending',
       keyword: 'keyword'
     }),
-    ...mapState('user', [
-      'adminMode'
-    ]),
-    inAdminMode(): boolean {
-      return this.isAdmin && this.adminMode && this.enableAdminView
-    },
     keywordLabel():string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },

@@ -133,9 +133,8 @@ export default Vue.extend({
       mobilePanel: 'currActivePanel'
     }),
     ...mapState('user', [
-      'role',
-      'adminMode',
-      'viewGuide']),
+      'viewGuide'
+    ]),
     ...mapGetters({
       groupId: 'getGroupId',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -164,9 +163,6 @@ export default Vue.extend({
     },
     isLogin(): boolean {
       return store.getters['user/isLogin']
-    },
-    isAdmin(): boolean {
-      return this.role === 0
     },
     isLocked(): boolean {
       return layerUtils.getTmpLayer().locked
@@ -212,9 +208,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
-      _setAdminMode: 'user/SET_ADMIN_MODE',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
-      setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
     }),
     ...mapActions({
@@ -230,8 +224,7 @@ export default Vue.extend({
         editorUtils.setShowMobilePanel(false)
         editorUtils.setInMultiSelectionMode(false)
       } else {
-        editorUtils.setShowMobilePanel(true)
-        this.setCurrActivePanel(panelType)
+        editorUtils.setCurrActivePanel(panelType)
         if (panelType === 'color' && props?.currColorEvent) {
           this.currColorEvent = props.currColorEvent
         }
@@ -257,7 +250,7 @@ export default Vue.extend({
       this.showMobilePanelAfterTransitoin = true
     },
     afterLeave() {
-      this.setCurrActivePanel('none')
+      editorUtils.setCurrActivePanel('none')
       setTimeout(() => {
         this.showMobilePanelAfterTransitoin = false
       }, 300)

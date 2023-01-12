@@ -65,7 +65,7 @@
                     iconColor="gray-2"
                     @click.native="toggleLock()")
     div(class="page-setting__footer")
-    div(v-if="inAdminMode && enableAdminView"
+    div(v-if="showAdminTool"
       class="template-information")
       div(class="template-information__divider pb-10")
       btn(:type="'primary-sm'" class="rounded my-5"
@@ -391,10 +391,6 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode'
-    ]),
     ...mapState('layouts', [
       'categories'
     ]),
@@ -405,7 +401,7 @@ export default Vue.extend({
       groupId: 'getGroupId',
       groupType: 'getGroupType',
       pagesLength: 'getPagesLength',
-      enableAdminView: 'user/getEnableAdminView'
+      showAdminTool: 'user/showAdminTool'
     }),
     currentPageBleeds(): IBleed {
       const currPage = pageUtils.currFocusPage
@@ -428,9 +424,6 @@ export default Vue.extend({
     },
     hasBleed(): boolean {
       return this.getPages.some((page: IPage) => page.isEnableBleed)
-    },
-    inAdminMode(): boolean {
-      return this.role === 0 && this.adminMode === true
     },
     key_id(): string {
       return this.getPage(pageUtils.currFocusPageIndex).designId

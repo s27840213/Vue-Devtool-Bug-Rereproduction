@@ -10,7 +10,7 @@
         @click.native="handleClosePrompt")
     //- Group template UI
     panel-group-template(v-if="currentGroup"
-      :showId="inAdminMode && enableAdminView"
+      :showId="showAdminTool"
       :groupItem="currentGroup"
       @close="currentGroup = null")
     //- Search bar and themes
@@ -33,7 +33,7 @@
     //- Search result empty msg
     div(v-if="theme && emptyResultMessage") {{ emptyResultMessage }}
     //- Search result counter (only for admin)
-    div(v-if="inAdminMode && keyword && !pending && !emptyResultMessage"
+    div(v-if="showAdminTool && keyword && !pending && !emptyResultMessage"
       class="pb-10")
       span {{sum}} {{sum === 1 ? 'item' : 'items'}} in total (not work for category search)
     //- Search result and main content
@@ -46,7 +46,7 @@
           template(v-slot:preview="{ item }")
             component(class="panel-template__item"
               :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
-              :showId="inAdminMode && enableAdminView"
+              :showId="showAdminTool"
               :item="item"
               @click="handleShowGroup")
       template(v-slot:category-template-item="{ list, title }")
@@ -55,7 +55,7 @@
           component(v-for="item in list"
             class="panel-template__item"
             :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
-            :showId="inAdminMode && enableAdminView"
+            :showId="showAdminTool"
             :item="item"
             :key="item.group_id"
             @click="handleShowGroup")
@@ -69,7 +69,7 @@
         div(v-if="keyword && theme && !pending && resultGroupCounter<=10")
           span {{$t('NN0796', {type: $tc('NN0001', 3)})}}
           nubtn(size="mid" class="mt-30")
-            url(:url="$t('NN0791')")
+            url(:url="$t('NN0791')" :newTab="true")
               span {{$t('NN0790', {type: $tc('NN0001', 3)})}}
 </template>
 
@@ -147,21 +147,18 @@ export default Vue.extend({
       theme: 'theme',
       sum: 'sum'
     }),
-    ...mapState('user', ['userId', 'role', 'adminMode']),
+    ...mapState('user', ['userId']),
     ...mapGetters({
       editorThemes: 'getEditThemes'
     }),
     ...mapGetters({
-      enableAdminView: 'user/getEnableAdminView'
+      showAdminTool: 'user/showAdminTool'
     }),
     keywordLabel():string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
-    inAdminMode(): boolean {
-      return (this.role === 0) && this.adminMode
-    },
     itemHeight(): number {
-      return generalUtils.getListRowItemSize() + (this.inAdminMode ? 34 : 10)
+      return generalUtils.getListRowItemSize() + (this.showAdminTool ? 34 : 10)
     },
     listCategories(): ICategoryItem[] {
       const { categories, itemHeight } = this
@@ -275,7 +272,7 @@ export default Vue.extend({
       this.resetSearch()
       if (keyword) {
         await this.getTagContent({ keyword })
-        if (this.inAdminMode) this.getSum({ keyword })
+        if (this.showAdminTool) this.getSum({ keyword })
       }
     },
     async handleCategorySearch(keyword: string, locale = '') {
@@ -339,7 +336,7 @@ export default Vue.extend({
       } else {
         galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 30 : 300, 140, 10)
       }
-      const idContainerHeight = this.inAdminMode ? 24 : 0
+      const idContainerHeight = this.showAdminTool ? 24 : 0
       const result = galleryUtils
         .generate(list.map((template: IAssetTemplate) => ({
           ...template,

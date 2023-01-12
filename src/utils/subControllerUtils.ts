@@ -110,12 +110,16 @@ export default class SubControllerUtils {
     if (this.config.type === 'text') {
       this.posDiff.x = this.primaryLayer.styles.x - this.posDiff.x
       this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
-      if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
+      if (this.posDiff.x !== 0 || this.posDiff.y !== 0) {
         layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { contentEditable: false })
       } else {
         if (this.config.contentEditable) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true }, this.subLayerIdx)
-          tiptapUtils.focus({ scrollIntoView: false })
+          if (generalUtils.isTouchDevice()) {
+            tiptapUtils.focus({ scrollIntoView: false }, 'end')
+          } else {
+            tiptapUtils.focus({ scrollIntoView: false })
+          }
         }
       }
     }

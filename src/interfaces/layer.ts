@@ -115,7 +115,7 @@ export interface IShape extends ILayer<IStyle> {
   className: string,
   path?: string,
   ratio: number,
-  color: [string],
+  color: string[],
   vSize: number[],
   cSize?: number[],
   pSize?: number[],

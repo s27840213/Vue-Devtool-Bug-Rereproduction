@@ -57,21 +57,12 @@ export default Vue.extend({
     uploadUtils.offDesignUploadStatus()
   },
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapGetters({
       groupId: 'getGroupId',
       folderInfo: 'getFolderInfo'
     }),
     isLogin(): boolean {
       return store.getters['user/isLogin']
-    },
-    isAdmin(): boolean {
-      return this.role === 0
-    },
-    getAdminModeText(): string {
-      return this.adminMode ? '' : '-disable'
     },
     path(): string {
       return this.$route.path

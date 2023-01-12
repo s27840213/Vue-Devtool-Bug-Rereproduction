@@ -42,7 +42,7 @@ div(class="popup-file")
     //-   span 測試試用
   hr(class="popup-file__hr")
   div(class="popup-file__item")
-    url(:url="$t('NN0791')")
+    url(:url="$t('NN0791')" :newTab="true")
       span {{$t('NN0790', {type: $tc('NN0793', 1)})}}
   div(class="popup-file__item" @click="onLogoutClicked()")
     span {{$tc('NN0167',2)}}
@@ -89,7 +89,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('user', [
-      'uname'
+      'uname',
+      'enableAdminView'
     ]),
     ...mapGetters({
       isLogin: 'user/isLogin',
@@ -97,8 +98,7 @@ export default Vue.extend({
       account: 'user/getAccount',
       isFontLoading: 'text/getIsFontLoading',
       pagesLength: 'getPagesLength',
-      groupType: 'getGroupType',
-      enableAdminView: 'user/getEnableAdminView'
+      groupType: 'getGroupType'
     }),
     pageSize(): { w: number, h: number } {
       return {
@@ -179,9 +179,7 @@ export default Vue.extend({
       // designUtils.newDesign()
     },
     toogleAdminView() {
-      this.setUserState({
-        enableAdminView: !this.enableAdminView
-      })
+      this.setUserState({ enableAdminView: !this.enableAdminView })
     },
     testSubscribe() {
       // fbPixelUtils.subscribe(false)

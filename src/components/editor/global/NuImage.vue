@@ -488,9 +488,6 @@ export default Vue.extend({
         })
       }
 
-      // const scale = (this.config.parentLayerStyles?.scale ?? 1)
-      // const { srcObj, styles: { imgWidth, imgHeight } } = this.config
-      // const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
       const currSize = this.getImgDimension
       const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
       return new Promise<void>((resolve, reject) => {
@@ -500,25 +497,25 @@ export default Vue.extend({
             this.src = src
             resolve()
           }
-        }, () => {
-          reject(new Error(`cannot load the current image, src: ${this.src}`))
-          fetch(src)
-            .then(res => {
-              const { status, statusText } = res
-              this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
-            })
-            .catch((e) => {
-              if (src.indexOf('data:image/png;base64') !== 0) {
-                this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
-              }
-            })
+        }, {
+          error: () => {
+            reject(new Error(`cannot load the current image, src: ${this.src}`))
+            fetch(src)
+              .then(res => {
+                const { status, statusText } = res
+                this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
+              })
+              .catch((e) => {
+                if (src.indexOf('data:image/png;base64') !== 0) {
+                  this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
+                }
+              })
+          }
         })
       })
     },
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.config
-      // const scale = this.isInFrame() ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
-      // const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
       const currSize = this.getImgDimension
       if (!this.isOnError && this.config.previewSrc === undefined) {
         const { type } = this.config.srcObj
@@ -559,19 +556,19 @@ export default Vue.extend({
     },
     handleIsTransparent() {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
-      const img = new Image()
       const imgSize = ImageUtils.getSrcSize(this.config.srcObj, 100)
-      img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      img.crossOrigin = 'anoynous'
-      img.onload = () => {
-        if (!this.hasDestroyed) {
-          const isTransparent = imageShadowUtils.isTransparentBg(img)
-          imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
-          if (!isTransparent && this.config.styles.adjust.blur > 0) {
-            this.$forceUpdate()
+      const src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      ImageUtils.imgLoadHandler(src,
+        (img) => {
+          if (!this.hasDestroyed) {
+            const isTransparent = imageShadowUtils.isTransparentBg(img)
+            imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
+            if (!isTransparent && this.config.styles.adjust.blur > 0) {
+              this.$forceUpdate()
+            }
           }
-        }
-      }
+        }, { crossOrigin: true }
+      )
     },
     async handleInitLoad() {
       const { type } = this.config.srcObj
