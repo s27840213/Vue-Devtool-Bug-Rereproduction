@@ -461,7 +461,6 @@ export default defineComponent({
     },
     handleSelectionData(selectionData: DOMRect) {
       const layers = [...document.querySelectorAll(`.nu-layer--p${pageUtils.currFocusPageIndex}`)]
-      console.log(layers)
       const layerIndexs: number[] = []
       if (layers.length > 0) {
         layers.forEach((layer) => {

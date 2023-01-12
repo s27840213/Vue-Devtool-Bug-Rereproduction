@@ -37,7 +37,7 @@ div(class="function-panel"
     panel-background-setting(v-if="showPageSetting")
     panel-shape-setting(v-if="showShapeSetting")
     panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel")
-    panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
+    panel-text-effect-setting(v-if="showTextSetting")
     panel-photo-setting(v-if="showPhotoSetting")
     panel-img-ctrl(v-if="isImgCtrl")
 </template>

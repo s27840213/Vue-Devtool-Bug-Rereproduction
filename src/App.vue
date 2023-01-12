@@ -43,7 +43,6 @@ import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'click-outside-vue3'
 import Popup from '@/components/popup/Popup.vue'
-import { Chrome } from 'vue-color'
 import ResInfo from '@/components/modal/ResInfo.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
 import Fps from '@/components/componentLog/Fps.vue'
@@ -55,7 +54,6 @@ export default defineComponent({
   emits: [],
   components: {
     Popup,
-    'chrome-picker': Chrome,
     ResInfo,
     ModalCard,
     Fps

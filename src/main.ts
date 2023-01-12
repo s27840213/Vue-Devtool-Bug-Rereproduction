@@ -6,7 +6,6 @@ import App from '@/App.vue'
 import router from './router'
 import store from './store'
 import i18n from './i18n'
-import vueColor from 'vue-color'
 import VueMeta from 'vue-meta'
 // import 'floating-vue/dist/style.css'
 // import FloatingVue from 'floating-vue'
@@ -89,7 +88,7 @@ const tooltipUtils = new TooltipUtils()
 if (process.env.NODE_ENV !== 'production') {
   app.config.performance = true
 }
-app.use(VueRecyclerviewNew, vueColor)
+app.use(VueRecyclerviewNew)
 app.use(Notifications)
 // app.use(VueMeta)
 // app.use(FloatingVue, {
