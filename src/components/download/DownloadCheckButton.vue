@@ -16,7 +16,7 @@ label(class="download-check-button")
     :type="type"
     :value="value"
     :name="groupName"
-    :checked="checked"
+    :checked="!!checked"
     @change="handleChange")
 </template>
 
@@ -36,7 +36,6 @@ export default defineComponent({
     },
     groupName: {
       type: String,
-      required: true
     },
     type: {
       type: String,
@@ -48,7 +47,6 @@ export default defineComponent({
     },
     value: {
       type: String,
-      required: true
     }
   },
   data () {

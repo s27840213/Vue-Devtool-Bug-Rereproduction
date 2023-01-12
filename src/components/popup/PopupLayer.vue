@@ -104,7 +104,10 @@ import generalUtils from '@/utils/generalUtils'
 export default defineComponent({
   emits: [],
   props: {
-    updateOptions: Array as () => Array<IPopupOptions>
+    updateOptions: {
+      type: Array as () => Array<IPopupOptions>,
+      required: true
+    }
   },
   data() {
     return {
