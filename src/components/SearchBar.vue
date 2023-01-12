@@ -1,6 +1,6 @@
 <template lang="pug">
 //- Show search button on mobile, https://www.paddingleft.com/2019/09/18/Show-Search-on-mobile-devices-keyboard
-form(class="search-bar bg-gray-6" action @submit="onSearch")
+form(class="search-bar bg-gray-6" action="" @submit="onSearch")
   svg-icon(class="pointer"
     iconName="search"
     :iconColor="color.search || 'gray-3'"

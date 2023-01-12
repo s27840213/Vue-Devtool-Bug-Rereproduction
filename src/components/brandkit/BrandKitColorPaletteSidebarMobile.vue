@@ -42,7 +42,7 @@ export default defineComponent({
     getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {
       return brandkitUtils.getDisplayedPaletteName(colorPalette)
     },
-    handleSetColor(color: number) {
+    handleSetColor(color: string) {
       if (!this.settingmode) return
       console.log('change color for', `${this.colorPalette.id}::${color}`)
     }

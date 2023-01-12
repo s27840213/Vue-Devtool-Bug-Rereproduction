@@ -20,9 +20,6 @@ import Notifications from '@kyvg/vue3-notification'
 
 // global component section
 import SvgIcon from '@/components/global/SvgIcon.vue'
-import TmpImages from '@/components/TmpImages.vue'
-import TmpText from '@/components/TmpText.vue'
-import TmpSvg from '@/components/TmpSvg.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
 import Btn from '@/components/global/Btn.vue'
 import NuPage from '@/components/editor/global/NuPage.vue'
@@ -105,9 +102,6 @@ app.use(Notifications)
 app.component('RecycleScroller', RecycleScroller)
 
 app.component('svg-icon', SvgIcon)
-app.component('tmp-images', TmpImages)
-app.component('tmp-text', TmpText)
-app.component('tmp-svg', TmpSvg)
 app.component('btn', Btn)
 app.component('property-bar', PropertyBar)
 app.component('dropdown', Dropdown)
