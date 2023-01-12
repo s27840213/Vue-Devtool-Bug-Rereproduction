@@ -38,8 +38,8 @@ import Animation from '@/components/Animation.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
 import TaBlock from '@/components/homepage/TaBlock.vue'
 import NuFooter from '@/components/NuFooter.vue'
+import blocklistData, { IHomeBlockData } from '@/utils/homeBlockData'
 import _ from 'lodash'
-import blocklistData from '@/utils/homeBlockData'
 
 export default defineComponent({
   emits: [],
@@ -108,7 +108,7 @@ export default defineComponent({
     ...mapState({
       isMobile: 'isMobile'
     }),
-    blocklist(): ReturnType<typeof blocklistData.data> {
+    blocklist(): IHomeBlockData[] {
       const blocklist = blocklistData.data().filter((item) => {
         return !(this.$i18n.locale === 'us' && item.img.name === 'e-commerce.json')
       })
