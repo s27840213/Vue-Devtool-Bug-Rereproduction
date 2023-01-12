@@ -1,7 +1,28 @@
 import i18n from '@/i18n'
 
+export interface IHomeBlockData {
+  title: string
+  description: string
+  img: {
+    name: string
+    width: number
+    height?: number
+  },
+  colorBlock: {
+    name: string
+    top: number
+    left: number
+    ref?: 'img'
+  }[]
+  link?: {
+    text: string
+    to: string
+  },
+  align: string
+}
+
 class HomeBlockData {
-  data() {
+  data(): IHomeBlockData[] {
     return [{
       title: i18n.global.t('NN0466', { newline: '<br>' }),
       description: i18n.global.t('NN0467'),
@@ -45,7 +66,6 @@ class HomeBlockData {
       },
       colorBlock: [{
         name: 'vector_blue1.svg',
-
         top: -11,
         left: -77
       }],
