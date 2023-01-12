@@ -328,8 +328,9 @@ export default defineComponent({
       return new Set([...set, ...subset]).size === set.length
     },
     themeStyle(): Record<string, string> {
+      const gapTop = generalUtils.isTouchDevice() ? 60 : 80
       return {
-        maxHeight: `${(this.$refs.panel as HTMLElement).clientHeight - 60}px`
+        maxHeight: `${(this.$refs.panel as HTMLElement).clientHeight - gapTop}px`
       }
     },
     processListResult(list = [] as IAssetTemplate[], isSearch: boolean): ICategoryItem[] {

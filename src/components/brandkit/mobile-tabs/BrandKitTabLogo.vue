@@ -98,8 +98,8 @@ export default defineComponent({
     logos(): IBrandLogo[] {
       return (this.currentBrand as IBrand).logos
     },
-    renderedLogos(): (IBrandLogo | string)[] {
-      const res = ['add', ...this.logos]
+    renderedLogos(): (IBrandLogo | 'add' | 'loading' | 'sentinel')[] {
+      const res = ['add', ...this.logos] as (IBrandLogo | 'add' | 'loading' | 'sentinel')[]
       if (this.isLogosLoading) {
         res.push('loading')
       } else if (this.logosPageIndex >= 0) {

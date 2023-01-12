@@ -56,8 +56,8 @@ export default defineComponent({
     colorPalettes(): IBrandColorPalette[] {
       return (this.currentBrand as IBrand).colorPalettes
     },
-    renderedColorPalettes(): (IBrandColorPalette | string)[] {
-      const res = [...this.colorPalettes] as (IBrandColorPalette | string)[]
+    renderedColorPalettes(): (IBrandColorPalette | 'loading')[] {
+      const res = [...this.colorPalettes] as (IBrandColorPalette | 'loading')[]
       if (this.isPalettesLoading) {
         res.push('loading')
       }
