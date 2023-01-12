@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="mobile-panel p-15"
     :style="panelStyle"
-    v-click-outside="this.closeMobilePanel"
+    v-click-outside="closeMobilePanel"
     ref="panel"
     @touchmove="handleTouchMove")
   div(class="mobile-panel__top-section self-padding")
@@ -35,8 +35,9 @@ div(class="mobile-panel p-15"
       ref="pageSizeSelector"
       @select="selectFormat")
 </template>
+
 <script lang="ts">
-import Vue, { defineComponent } from 'vue'
+import { defineComponent } from 'vue'
 import designUtils from '@/utils/designUtils'
 import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
 
@@ -48,8 +49,6 @@ import { ILayout } from '@/interfaces/layout'
 
 export default defineComponent({
   name: 'panel-size',
-  props: {
-  },
   directives: {
     clickOutside: vClickOutside.directive
   },
