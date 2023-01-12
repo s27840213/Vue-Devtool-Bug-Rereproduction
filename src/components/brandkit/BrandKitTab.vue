@@ -97,7 +97,7 @@ export default defineComponent({
           action: () => { console.log('text') },
           margin: 16
         }
-      }
+      } as {[key: string]: { text: string, action: () => void, margin: number }}
     }
   },
   computed: {

@@ -26,7 +26,7 @@ div(v-if="allFolders.length > 0 || isFoldersLoading" class="mobile-folder-galler
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import { IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
@@ -48,7 +48,7 @@ export default defineComponent({
       required: true
     },
     allFolders: {
-      type: Array,
+      type: Array as PropType<IFolder[]>,
       required: true
     },
     selectedNum: {
@@ -57,7 +57,7 @@ export default defineComponent({
     },
     noHeader: {
       type: Boolean,
-      required: true
+      default: false
     }
   },
   computed: {

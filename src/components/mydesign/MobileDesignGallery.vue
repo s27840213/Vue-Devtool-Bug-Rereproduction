@@ -39,8 +39,7 @@ div(class="mobile-design-gallery")
 
 <script lang="ts">
 import { IDesign } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MobileDesignItem from '@/components/mydesign/MobileDesignItem.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -59,8 +58,12 @@ export default defineComponent({
   },
   props: {
     allDesigns: {
-      type: Array,
+      type: Array as PropType<IDesign[]>,
       required: true
+    },
+    folderLength: {
+      type: Number,
+      default: 0
     },
     selectedNum: {
       type: Number,
@@ -68,11 +71,11 @@ export default defineComponent({
     },
     limitFunctions: {
       type: Boolean,
-      required: true
+      default: false
     },
     noHeader: {
       type: Boolean,
-      required: true
+      default: false
     },
     noNewDesign: Boolean
   },

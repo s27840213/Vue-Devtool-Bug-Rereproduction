@@ -35,7 +35,7 @@ div(class="popup-download text-left"
         span {{`${$t('NN0122')} x`}}
         dropdown(class="mx-5 popup-download__size-scale"
           :options="scaleOptions"
-          @select="option => handleUpdate('scale', option)") {{ selected.scale }}
+          @select="(option:number) => handleUpdate('scale', option)") {{ selected.scale }}
         span {{$t('NN0123')}}
       div(v-if="'quality' in selected"
         class="flex flex-column items-center mb-10")
@@ -69,12 +69,12 @@ div(class="popup-download text-left"
           :label="`${$t('NN0794')}`"
           :default-checked="!!selected.outline"
           @change="({ checked }) => handleUpdate('outline', checked ? 1 : 0)")
-      div(v-if="selectedTypeVal.includes('pdf')"
+      div(v-if="selectedTypeVal !== 'jpg' && selectedTypeVal !== 'png'"
         class="flex items-center mb-10")
         span {{$t('NN0777')}}
         dropdown(v-if="colorFormats[selectedTypeVal].length > 1" class="mx-5 popup-download__color-format"
           :options="colorFormats[selectedTypeVal]"
-          @select="option => handleUpdate('cmyk', option === 'CMYK' ? 1 : 0)") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
+          @select="(option:string) => handleUpdate('cmyk', option === 'CMYK' ? 1 : 0)") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
         div(v-if="colorFormats[selectedTypeVal].length === 1" class="popup-download__color-format fixed")
           span(class="body-XS") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
       div(v-if="isDetailPage" class="mb-10 pt-5") {{ $t('NN0344') }}
@@ -169,7 +169,7 @@ div(class="popup-download text-left"
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'click-outside-vue3'
-import { IDownloadServiceParams, ITypeOption } from '@/interfaces/download'
+import { IDownloadServiceParams, ITypeOption, IOutputType } from '@/interfaces/download'
 import DownloadUtil from '@/utils/downloadUtil'
 import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
 import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
@@ -218,7 +218,7 @@ export default defineComponent({
       saveSubmission: true,
       // saveSubmission: !!selectedTypeVal,
       selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('jpg'),
-      selectedTypeVal: selectedTypeVal || 'jpg',
+      selectedTypeVal: (selectedTypeVal || 'jpg') as IOutputType,
       rangeType,
       pageRange: rangeType === 'spec' ? pageRange : [],
       selectedDev
@@ -251,9 +251,6 @@ export default defineComponent({
         { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` },
         { value: 'pdf_standard', name: `${this.$t('NN0770')}`, desc: `${this.$t('NN0772')}` },
         { value: 'pdf_print', name: `${this.$t('NN0771')}`, desc: `${this.$t('NN0773')}` }
-        // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
-        // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
-        // { id: 'gif', name: 'GIF', desc: '短片' }
       ] as ITypeOption[],
       devs: [
         { value: 1, label: 'dev0' },

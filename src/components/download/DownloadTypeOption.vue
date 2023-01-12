@@ -18,7 +18,6 @@ export default defineComponent({
     },
     tag: {
       type: String,
-      required: true
     }
   }
 })

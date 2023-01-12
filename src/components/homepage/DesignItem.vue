@@ -69,6 +69,9 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapMutations({
+      setDesignThumbnail: 'design/UPDATE_setDesignThumbnail'
+    }),
     containerStyles() {
       return (this.aspectRatio < 1.2 && this.aspectRatio > 0.83) ? { padding: '26px' } : { padding: '17px' }
     },
@@ -94,8 +97,7 @@ export default defineComponent({
       this.previewCheckReady = false
       if (this.config.polling) {
         this.previewCheckReady = true
-        // eslint-disable-next-line vue/no-mutating-props
-        this.config.thumbnail = this.previewPlaceholder
+        this.setDesignThumbnail({ id: this.config.id, thumbnail: this.previewPlaceholder })
         this.pollingStep()
       } else {
         imageUtils.getImageSize(this.configPreview, 150, 150, false).then((size) => {
@@ -103,8 +105,7 @@ export default defineComponent({
           this.imgWidth = width
           this.imgHeight = height
           this.previewCheckReady = true
-          // eslint-disable-next-line vue/no-mutating-props
-          this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
+          this.setDesignThumbnail({ id: this.config.id, thumbnail: exists ? this.configPreview : this.previewPlaceholder })
         })
       }
     },
@@ -122,8 +123,7 @@ export default defineComponent({
         this.imgWidth = width
         this.imgHeight = height
         if (exists) {
-          // eslint-disable-next-line vue/no-mutating-props
-          this.config.thumbnail = this.configPreview
+          this.setDesignThumbnail({ id: this.config.id, thumbnail: this.configPreview })
         } else if (step < 35) {
           setTimeout(() => {
             this.pollingStep(step + 1)

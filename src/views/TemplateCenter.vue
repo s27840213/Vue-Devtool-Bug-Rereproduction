@@ -563,7 +563,8 @@ export default defineComponent({
       this.isMobile = generalUtils.getWidth() <= 540
       this.isPC = generalUtils.getWidth() >= 976
     },
-    getPrevUrl(content: IContentTemplate, scale: number): string {
+    getPrevUrl(content?: IContentTemplate, scale?: number): string {
+      if (!content) return ''
       return templateCenterUtils.getPrevUrl(content, scale)
     },
     checkSelected(theme: Itheme): boolean {

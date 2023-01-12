@@ -8,8 +8,8 @@ div(class="page-size-selector")
                   :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
         input(class="body-3 page-size-selector__body__custom__box__input" type="number" min="0" ref="inputWidth"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
-              :style="{position: this.isInputFocused ? 'static' : 'fixed'}"
-              :value="this.valPageSize.width" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
+              :style="{position: isInputFocused ? 'static' : 'fixed'}"
+              :value="valPageSize.width" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
               @click="selectFormat('custom')"
               @input="setPageWidth"
               @focus="lastFocusedInput = 'width'"
@@ -18,7 +18,7 @@ div(class="page-size-selector")
               class="body-3 page-size-selector__body__custom__box__input dummy" type="number" min="0"
               readonly
               :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
-              :value="this.valPageSize.width" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
+              :value="valPageSize.width" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
               @click="handleDummyClick($event, $refs.inputWidth, 'width')")
         span(class="body-4 page-size-selector__body__custom__box__input-label"
             :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") W
@@ -30,8 +30,8 @@ div(class="page-size-selector")
                   :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
         input(class="body-3 page-size-selector__body__custom__box__input" type="number" min="0" ref="inputHeight"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
-              :style="{position: this.isInputFocused ? 'static' : 'fixed'}"
-              :value="this.valPageSize.height" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
+              :style="{position: isInputFocused ? 'static' : 'fixed'}"
+              :value="valPageSize.height" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
               @click="selectFormat('custom')"
               @input="setPageHeight"
               @focus="lastFocusedInput = 'height'"
@@ -40,14 +40,14 @@ div(class="page-size-selector")
               class="body-3 page-size-selector__body__custom__box__input dummy" type="number" min="0"
               readonly
               :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
-              :value="this.valPageSize.height" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
+              :value="valPageSize.height" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
               @click="handleDummyClick($event, $refs.inputHeight, 'height')")
         span(class="body-4 page-size-selector__body__custom__box__input-label"
             :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
       property-bar(v-click-outside="() => {showUnitOptions = false}"
                     class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
                     @click="showUnitOptions = !showUnitOptions")
-        span(class="page-size-selector__body__custom__unit__label body-XXS" :class="this.selectedFormatKey === 'custom' ? 'black' : defaultTextColor") {{selectedUnit}}
+        span(class="page-size-selector__body__custom__unit__label body-XXS" :class="selectedFormatKey === 'custom' ? 'black' : defaultTextColor") {{selectedUnit}}
         svg-icon(class="page-size-selector__body__custom__unit__icon"
           iconName="chevron-down"
           iconWidth="16px"
@@ -91,12 +91,12 @@ div(class="page-size-selector")
                   @select="selectFormat")
         div(v-if="isMobile" class="page-size-selector__body-row__content")
           span(class="page-size-selector__body__typical-name body-4"
-                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
+                :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
           span(class="page-size-selector__body__typical-size body-4"
-                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
+                :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
         div(v-else class="page-size-selector__body-row__content")
           span(class="page-size-selector__body__typical-name body-4"
-                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatTitle(format) }}
+                :class="selectedFormatKey === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatTitle(format) }}
 </template>
 
 <script lang="ts">

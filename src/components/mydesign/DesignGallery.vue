@@ -50,7 +50,7 @@ div(v-if="allDesigns.length > 0 || isDesignsLoading" class="design-gallery")
 <script lang="ts">
 import { IDesign } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import DesignItem from '@/components/mydesign/DesignItem.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -71,7 +71,7 @@ export default defineComponent({
       required: true
     },
     allDesigns: {
-      type: Array,
+      type: Array as PropType<IDesign[]>,
       required: true
     },
     selectedNum: {
@@ -80,15 +80,15 @@ export default defineComponent({
     },
     limitFunctions: {
       type: Boolean,
-      required: true
+      default: false
     },
     useDelete: {
       type: Boolean,
-      required: true
+      default: false
     },
     noHeader: {
       type: Boolean,
-      required: true
+      default: false
     }
   },
   emits: ['menuAction', 'loadMore'],
@@ -99,7 +99,7 @@ export default defineComponent({
       isDesignsLoading: 'getIsDesignsLoading',
       designsPageIndex: 'getDesignsPageIndex'
     }),
-    menuItemSlots(): {name: string, icon: string, text: string}[] {
+    menuItemSlots(): {name: string, icon: string, text: string, extendable?: boolean}[] {
       return (this.menuItems as {icon: string, text: string, extendable?: boolean}[]).map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
     },
     isAnySelected(): boolean {
@@ -202,6 +202,51 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     width: 100%;
+  }
+}
+
+.design-menu-item {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 5px;
+  padding: 8px 0;
+  cursor: pointer;
+  &:hover {
+    background-color: setColor(gray-5);
+  }
+  &__icon {
+    margin-left: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 10px;
+    height: 10px;
+  }
+  &__text {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    height: 12px;
+    margin-right: 20px;
+    > span {
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 12px;
+      color: setColor(gray-2);
+      white-space: nowrap;
+    }
+  }
+  &__right {
+    position: absolute;
+    right: 3px;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-50%);
   }
 }
 </style>

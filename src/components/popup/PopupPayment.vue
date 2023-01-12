@@ -45,9 +45,9 @@ div(class="popup-window")
           //- case cancel2
           template(v-if="view === 'cancel2'")
             div(v-for="can, idx in cancel2" class="payment-left-content-cancel")
-              radio-btn(:isSelected="reasonIndex === idx"
+              radio-btn(:isSelected="reasonIndex === String(idx)"
                         :formatKey="String(idx)" circleColor="gray-4"
-                        @select="selectCancelReason(idx)")
+                        @select="selectCancelReason(String(idx))")
               span {{can}}
             input(class="payment-left-content-cancel__other"
                   v-model="otherReason" :placeholder="$t('NN0584')")

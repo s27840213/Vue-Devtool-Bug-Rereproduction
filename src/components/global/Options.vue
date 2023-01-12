@@ -1,18 +1,19 @@
 <template lang="pug">
 select(class="select" :value="modelValue" autofocus required
-      @input="$emit('update:modelValue', $event.target.value)")
+      @input="input")
   option(v-if="ph" value="" disabled hidden selected) {{ph}}
-  option(v-for="op in options" :value="op.value || op") {{op.label || op}}
+  option(v-for="op in options"
+        :value="typeof op === 'string' ? op : op.value") {{typeof op === 'string' ? op : op.label}}
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   name: 'Options',
   props: {
     options: {
-      type: Array,
+      type: Array as PropType<{value: string, label: string}[] | string[]>,
       required: true
     },
     // Use v-model to two way bindings this props, don't use :modelValue.
@@ -26,7 +27,12 @@ export default defineComponent({
       type: String
     }
   },
-  emits: ['update:modelValue']
+  emits: ['update:modelValue'],
+  methods: {
+    input(e: Event) {
+      this.$emit('update:modelValue', (e.target as HTMLInputElement).value)
+    }
+  }
 })
 </script>
 

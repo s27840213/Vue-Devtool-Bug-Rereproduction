@@ -191,7 +191,7 @@ export default defineComponent({
       if (!paymentUtils.checkProTemplate(template)) return
       window.open(this.templateUrl(item), '_blank')
     },
-    templateImgStyle(match_cover: Record<string, number>): Record<string, string> {
+    templateImgStyle(match_cover: IAssetTemplate['match_cover']): Record<string, string> {
       const height = this.theme === '3' ? 284
         : this.theme === '7' ? 320
           : 160

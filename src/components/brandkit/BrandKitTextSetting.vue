@@ -82,7 +82,7 @@ export default defineComponent({
       isValueSelectorOpen: false,
       fontSizeBuffer: 0,
       fontSelectValue,
-      fontIcons: ['bold', 'underline', 'italic'],
+      fontIcons: ['bold', 'underline', 'italic'] as ('bold' | 'underline' | 'italic')[],
       hintMap: {
         bold: `${this.$t('NN0101')}`,
         underline: `${this.$t('NN0102')}`,
