@@ -8,7 +8,7 @@ import { captureException } from '@sentry/browser'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
 import { IFrame, IGroup, IImage } from '@/interfaces/layer'
 import { SrcObj } from '@/interfaces/gallery'
-import generalUtils from '@/utils/generalUtils'
+
 interface IFileState {
   myfileImages: Array<IAssetPhoto>,
   editorViewImages: Record<string, Record<string, string>>,
@@ -249,7 +249,7 @@ const mutations: MutationTree<IFileState> = {
         tiny: src
       }
     }
-    state.myfileImages.unshift(previewImage)
+    state.myfileImages = [previewImage, ...state.myfileImages]
   },
   DEL_PREVIEW(state: IFileState, { assetId }) {
     state.myfileImages = state.myfileImages.filter((it: IAssetPhoto) => {

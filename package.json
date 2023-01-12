@@ -35,7 +35,7 @@
     "@tiptap/extension-text-style": "^2.0.0-beta.23",
     "@tiptap/starter-kit": "^2.0.0-beta.209",
     "@tiptap/vue-3": "^2.0.0-beta.209",
-    "@volar/vue-language-plugin-pug": "^1.0.16",
+    "@volar/vue-language-plugin-pug": "^1.0.24",
     "@vue/compat": "^3.1.0",
     "@vue/composition-api": "^1.6.2",
     "any-touch": "^2.2.0",

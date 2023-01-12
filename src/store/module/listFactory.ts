@@ -291,12 +291,12 @@ export default function (this: any) {
       // state.preview2 = objects.preview2
     },
     UPDATE_RECENTLY_PAGE(state: IListModuleState, { index, format }) {
-      const targetCategory = state.categories.find((category: any) => {
+      let targetCategory = state.categories.find((category: any) => {
         return category.title === `${i18n.global.t('NN0024')}`
       })?.list
       if (targetCategory) {
         targetCategory.splice(index, 1)
-        targetCategory.unshift(format)
+        targetCategory = [format, ...targetCategory]
       }
     },
     SET_CONTENT(state: IListModuleState, { objects, isSearch = false }: { objects: IListServiceData, isSearch: boolean }) {
