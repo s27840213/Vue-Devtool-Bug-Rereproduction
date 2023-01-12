@@ -78,7 +78,7 @@ class ResizeUtils {
           const { size } = layer
           if (!size) break
           const strokeWidth = size[0]
-          const newStrokeWidth = Math.round(strokeWidth * targetScale)
+          const newStrokeWidth = round(strokeWidth * targetScale, 2)
           const { point, realWidth, realHeight } = shapeUtils.computePointForDimensions(quadrant, newStrokeWidth, lineWidth * targetScale, lineHeight * targetScale)
           controlUtils.updateShapeLinePoint(pageIndex, layerIndex, point)
           width = realWidth
@@ -96,7 +96,7 @@ class ResizeUtils {
           const { size } = layer
           if (!size) break
           const strokeWidth = size[0]
-          const newStrokeWidth = Math.round(strokeWidth * targetScale)
+          const newStrokeWidth = round(strokeWidth * targetScale, 2)
           scale = 1
           const corRad = controlUtils.getCorRadValue([width, height], controlUtils.getCorRadPercentage(layer.vSize, size, layer.shapeType ?? ''), layer.shapeType ?? '')
           controlUtils.updateShapeVSize(pageIndex, layerIndex, [width, height])

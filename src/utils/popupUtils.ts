@@ -9,7 +9,16 @@ interface ISliderConfig {
   value: number,
   min: number,
   max: number,
+  step: number,
   noText: boolean
+}
+
+const DEFAULT_SLIDER_CONFIG = {
+  value: 0,
+  min: 0,
+  max: 0,
+  step: 1,
+  noText: false
 }
 
 class PopupUtils {
@@ -20,13 +29,7 @@ class PopupUtils {
   event: any
   eventHash: { [index: string]: (value: number) => void }
   currEvent: string
-  sliderConfig: {
-    value: number
-    min: number,
-    max: number,
-    step: number,
-    noText: boolean
-  }
+  sliderConfig: ISliderConfig
 
   popupEl: HTMLElement
 
@@ -35,13 +38,7 @@ class PopupUtils {
     this.event = new EventEmitter()
     this.eventHash = {}
     this.currEvent = ''
-    this.sliderConfig = {
-      value: 0,
-      min: 0,
-      max: 0,
-      step: 1,
-      noText: false
-    }
+    this.sliderConfig = DEFAULT_SLIDER_CONFIG
     this.popupEl = null as unknown as HTMLElement
   }
 
@@ -153,6 +150,7 @@ class PopupUtils {
     if (this.popupEl) {
       this.popupEl.style.transform = ''
     }
+    this.sliderConfig = DEFAULT_SLIDER_CONFIG
   }
 }
 

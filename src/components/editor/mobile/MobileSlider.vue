@@ -83,6 +83,10 @@ export default Vue.extend({
         } else {
           this.$emit('update', val, this.name)
         }
+        // The below line is necessary for value that would be rounded.
+        // If a value is rounded and not changed compared to previous value after rounded,
+        // the value in this component will not be synced with the rounded value (since not change happens).
+        this.$forceUpdate()
       }
     }
   },

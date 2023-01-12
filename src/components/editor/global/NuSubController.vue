@@ -812,6 +812,10 @@ export default Vue.extend({
   &__wrapper {
     position: relative;
     pointer-events: initial;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
   }
   &__body {
     outline: none;
