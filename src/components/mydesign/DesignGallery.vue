@@ -50,7 +50,7 @@ div(v-if="allDesigns.length > 0 || isDesignsLoading" class="design-gallery")
 <script lang="ts">
 import { IDesign } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import DesignItem from '@/components/mydesign/DesignItem.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -71,7 +71,7 @@ export default defineComponent({
       required: true
     },
     allDesigns: {
-      type: Array,
+      type: Array as PropType<IDesign[]>,
       required: true
     },
     selectedNum: {
@@ -80,15 +80,15 @@ export default defineComponent({
     },
     limitFunctions: {
       type: Boolean,
-      required: true
+      default: false
     },
     useDelete: {
       type: Boolean,
-      required: true
+      default: false
     },
     noHeader: {
       type: Boolean,
-      required: true
+      default: false
     }
   },
   emits: ['menuAction', 'loadMore'],
@@ -99,7 +99,7 @@ export default defineComponent({
       isDesignsLoading: 'getIsDesignsLoading',
       designsPageIndex: 'getDesignsPageIndex'
     }),
-    menuItemSlots(): {name: string, icon: string, text: string}[] {
+    menuItemSlots(): {name: string, icon: string, text: string, extendable?: boolean}[] {
       return (this.menuItems as {icon: string, text: string, extendable?: boolean}[]).map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
     },
     isAnySelected(): boolean {

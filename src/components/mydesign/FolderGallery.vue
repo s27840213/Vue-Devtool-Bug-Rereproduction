@@ -45,7 +45,7 @@ div(v-if="allFolders.length > 0 || isFoldersLoading" class="folder-gallery")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import { IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
@@ -62,15 +62,15 @@ export default defineComponent({
   },
   props: {
     path: {
-      type: Array,
-      required: true
+      type: Array as PropType<string[]>,
+      default: [] as string[]
     },
     menuItems: {
       type: Array,
       required: true
     },
     allFolders: {
-      type: Array,
+      type: Array as PropType<IFolder[]>,
       required: true
     },
     selectedNum: {
@@ -79,15 +79,15 @@ export default defineComponent({
     },
     limitFunctions: {
       type: Boolean,
-      required: true
+      default: false
     },
     useDelete: {
       type: Boolean,
-      required: true
+      default: false
     },
     selectable: {
       type: Boolean,
-      required: true
+      default: false
     }
   },
   emits: ['menuAction', 'moveItem'],
@@ -97,7 +97,7 @@ export default defineComponent({
       selectedFolders: 'getSelectedFolders',
       isFoldersLoading: 'getIsFoldersLoading'
     }),
-    menuItemSlots(): {name: string, icon: string, text: string}[] {
+    menuItemSlots(): {name: string, icon: string, text: string, extendable?: boolean}[] {
       return (this.menuItems as {icon: string, text: string, extendable?: boolean}[]).map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
     },
     isAnySelected(): boolean {
