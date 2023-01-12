@@ -45,8 +45,7 @@ export default defineComponent({
       required: true
     },
     isPopup: {
-      type: Boolean,
-      required: true
+      type: Boolean
     }
   },
   computed: {

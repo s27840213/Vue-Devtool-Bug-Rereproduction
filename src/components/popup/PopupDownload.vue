@@ -196,8 +196,7 @@ export default defineComponent({
       required: true
     },
     pageIndex: {
-      type: Number,
-      required: true
+      type: Number
     },
     hideContainer: {
       default: false,
