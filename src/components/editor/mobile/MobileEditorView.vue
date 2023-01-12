@@ -53,6 +53,7 @@ import backgroundUtils from '@/utils/backgroundUtils'
 import modalUtils from '@/utils/modalUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { MovingUtils } from '@/utils/movingUtils'
+import store from '@/store'
 
 export default Vue.extend({
   components: {
@@ -101,7 +102,9 @@ export default Vue.extend({
       isScaling: false,
       uploadUtils: uploadUtils,
       hanleWheelTimer: -1,
-      handleWheelTransition: false
+      handleWheelTransition: false,
+      oriX: 0,
+      oriPageSize: 0
     }
   },
   created() {
@@ -148,6 +151,9 @@ export default Vue.extend({
 
     if (generalUtils.isTouchDevice()) {
       pageUtils.mobileMinScaleRatio = this.isDetailPage ? 20 : this.tmpScaleRatio
+      console.log(pageUtils.getPages[0].width * this.pageUtils.mobileMinScaleRatio * 0.01)
+      pageUtils.originPageSize.width = pageUtils.getPages[0].width * this.pageUtils.mobileMinScaleRatio * 0.01
+      pageUtils.originPageSize.height = pageUtils.getPages[0].height * this.pageUtils.mobileMinScaleRatio * 0.01
     }
 
     this.$nextTick(() => {
@@ -366,19 +372,21 @@ export default Vue.extend({
     },
     handleWheel(e: WheelEvent) {
       if ((e.metaKey || e.ctrlKey) && !this.handleWheelTransition) {
+        if (!store.state.isPageScaling) {
+          store.commit('SET_isPageScaling', true)
+        }
         clearTimeout(this.hanleWheelTimer)
         this.hanleWheelTimer = setTimeout(() => {
-          const { pageRect, editorRect } = pageUtils.getEditorRenderSize
+          store.commit('SET_isPageScaling', false)
           console.log('reach limit', pageUtils.mobileMinScaleRatio)
           if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
             const page = document.getElementById(`nu-page_${layerUtils.pageIndex}`) as HTMLElement
             page.style.transition = '0.3s linear'
             this.handleWheelTransition = true
+            this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
             setTimeout(() => {
               page.style.transition = ''
               this.handleWheelTransition = false
-              // const editor = document.getElementById('mobile-editor__content') as HTMLElement
-              // console.log(page.offsetHeight && editor.offsetHeight)
             }, 500)
             pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
           }
@@ -386,7 +394,6 @@ export default Vue.extend({
         const ratio = this.pageScaleRatio * (1 - e.deltaY * 0.005)
         const newScaleRatio = Math.min(Math.max(Math.round(ratio), 10), 500)
         if (newScaleRatio >= pageUtils.mobileMinScaleRatio || e.deltaY < 0) {
-          console.log('handle wheel')
           e.preventDefault()
           this.setPageScaleRatio(newScaleRatio)
         }
@@ -398,29 +405,54 @@ export default Vue.extend({
          * @Note the very first event won't fire start phase, it's very strange and need to pay attention
          */
         case 'start': {
+          this.oriX = pageUtils.getCurrPage.x
+          this.oriPageSize = (pageUtils.getCurrPage.width * (pageUtils.scaleRatio / 100))
           this.tmpScaleRatio = pageUtils.scaleRatio
           this.isScaling = true
+          store.commit('SET_isPageScaling', true)
           break
         }
         case 'move': {
           if (!this.isScaling) {
             this.isScaling = true
+            store.commit('SET_isPageScaling', true)
           }
-          const limitMultiplier = 4
-          if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
-            pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
-            return
-          }
-          pageUtils.setScaleRatio(Math.min(this.tmpScaleRatio * event.scale, pageUtils.mobileMinScaleRatio * limitMultiplier))
+          window.requestAnimationFrame(() => {
+            const limitMultiplier = 4
+            if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
+              pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
+              return
+            }
+            const newScaleRatio = Math.min(this.tmpScaleRatio * event.scale, pageUtils.mobileMinScaleRatio * limitMultiplier)
+            if (newScaleRatio >= pageUtils.mobileMinScaleRatio * 0.8) {
+              pageUtils.setScaleRatio(newScaleRatio)
+
+              const baseX = (pageUtils.getCurrPage.width * (newScaleRatio / 100) - this.oriPageSize) * 0.5
+              pageUtils.updatePagePos(0, {
+                x: this.oriX - baseX
+              })
+            }
+            clearTimeout(this.hanleWheelTimer)
+            this.hanleWheelTimer = setTimeout(() => {
+              if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
+                const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
+                page.style.transition = '0.2s linear'
+                this.handleWheelTransition = true
+                pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
+                this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
+                setTimeout(() => {
+                  page.style.transition = ''
+                  this.handleWheelTransition = false
+                }, 500)
+              }
+            }, 500)
+          })
           break
         }
 
         case 'end': {
-          if (pageUtils.scaleRatio < this.minScaleRatio) {
-            pageUtils.setScaleRatio(this.minScaleRatio)
-          }
-
           this.isScaling = false
+          store.commit('SET_isPageScaling', false)
           break
         }
       }
@@ -485,8 +517,8 @@ export default Vue.extend({
     },
     pageStyle(index: number) {
       return {
-        'z-index': `${this.getPageZIndex(index)}`,
-        margin: 'auto'
+        // 'z-index': `${this.getPageZIndex(index)}`,
+        // margin: 'auto'
       }
     }
   }
@@ -531,7 +563,7 @@ $REULER_SIZE: 20px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
-    justify-content: center;
+    // justify-content: center;
     @include no-scrollbar;
     // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container
     // justify-content: center;

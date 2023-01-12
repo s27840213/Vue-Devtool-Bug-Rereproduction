@@ -5,7 +5,7 @@
         @showAllPages="showAllPages"
         :currTab="currActivePanel"
         :inAllPagesMode="inAllPagesMode")
-      div(class="mobile-editor__content" :style="contentStyle" id="mobile-editor__content")
+      div(class="mobile-editor__content" :style="contentStyle" id="mobile-editor__content" ref="mobile-editor__content")
         keep-alive
           component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
             :currActivePanel="currActivePanel"
@@ -82,7 +82,10 @@ export default Vue.extend({
     const { pageRect, editorRect } = pageUtils.getEditorRenderSize
     pageUtils.pageSize = { width: pageRect.width, height: pageRect.height }
     pageUtils.editorSize = { width: editorRect.width, height: editorRect.height }
-    console.log(pageUtils.pageSize.width, pageUtils.pageSize.height, pageUtils.editorSize.width, pageUtils.editorSize.height)
+    // const el = this.$refs['mobile-editor__content'] as HTMLElement
+    // const pz = new PinchZoom(el, {
+    //   minZoom: (pageUtils.mobileMinScaleRatio * 0.01)
+    // })
     /**
      * @Note the codes below is used to prevent the zoom in/out effect of mobile phone, especially for the "IOS"
      * Remember to set passive to "false", or the preventDefault() function won't work.

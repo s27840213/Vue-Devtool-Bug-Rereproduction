@@ -111,6 +111,7 @@ class PageUtils {
   isSwitchingToEditor: boolean
   editorSize: { width: number, height: number }
   pageSize: { width: number, height: number }
+  originPageSize = { width: -1, height: -1 }
 
   constructor() {
     this.topBound = -1

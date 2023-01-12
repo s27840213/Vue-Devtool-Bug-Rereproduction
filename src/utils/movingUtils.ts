@@ -406,22 +406,57 @@ export class MovingUtils {
   }
 
   pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
-    if (this.scaleRatio <= pageUtils.mobileMinScaleRatio) return
+    if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) return
+    const { originPageSize, getCurrPage: currPage } = pageUtils
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
 
-    const newPageSize = (this.scaleRatio / pageUtils.mobileMinScaleRatio) * 313
-    const newOriginX = (newPageSize - 390) * 0.5
-    const isReachRightEdge = pageUtils.getCurrPage.x < 0 && offsetPos.x < 0 &&
-      -(pageUtils.getCurrPage.x + offsetPos.x) >= newOriginX + 30
-    const isReachLeftEdge = pageUtils.getCurrPage.x > 0 && offsetPos.x > 0 &&
-      pageUtils.getCurrPage.x + offsetPos.x >= newOriginX + 30
+    const newPageSize = {
+      w: this.scaleRatio * currPage.width * 0.01,
+      h: this.scaleRatio * currPage.height * 0.01
+    }
+    const base = {
+      x: -(newPageSize.w - originPageSize.width) * 0.5,
+      y: -(newPageSize.h - originPageSize.height) * 0.5
+    }
+    const limitRange = {
+      x: (newPageSize.w - originPageSize.width) * 0.5,
+      y: (newPageSize.h - originPageSize.height) * 0.5
+    }
+    const diff = {
+      x: Math.abs(currPage.x + offsetPos.x - base.x),
+      y: Math.abs(currPage.y + offsetPos.y - base.y)
+    }
+    const isReachRightEdge = currPage.x < 0 && offsetPos.x < 0 && diff.x > limitRange.x
+    const isReachLeftEdge = currPage.x >= 0 && offsetPos.x > 0 && diff.x > limitRange.x
+    // const isReachTopEdge = currPage.y > 0 && offsetPos.y > 0 && diff.y > limitRange.y
+    // const isReachBottomEdge = currPage.y <= 0 && offsetPos.y < 0 && diff.y > limitRange.y
 
-    this.initialPos.x += offsetPos.x
+    console.log(diff.y, limitRange.y)
+
+    if (isReachRightEdge || isReachLeftEdge) {
+      pageUtils.updatePagePos(this.pageIndex, {
+        x: isReachRightEdge ? originPageSize.width - newPageSize.w : 0,
+        y: offsetPos.y + currPage.y
+      })
+    } else {
+      pageUtils.updatePagePos(this.pageIndex, {
+        x: offsetPos.x + currPage.x,
+        y: offsetPos.y + currPage.y
+      })
+    }
+
+    // if (isReachTopEdge || isReachBottomEdge) {
+    //   pageUtils.updatePagePos(this.pageIndex, {
+    //     y: isReachTopEdge ? originPageSize.height - newPageSize.h : 0
+    //   })
+    // } else {
+    //   pageUtils.updatePagePos(this.pageIndex, {
+    //     y: offsetPos.y + currPage.y
+    //   })
+    // }
+    // this.initialPos.y += isReachTopEdge || isReachBottomEdge ? 0 : offsetPos.y
+    this.initialPos.x += isReachRightEdge || isReachLeftEdge ? 0 : offsetPos.x
     this.initialPos.y += offsetPos.y
-    pageUtils.updatePagePos(this.pageIndex, {
-      x: (isReachRightEdge || isReachLeftEdge ? 0 : offsetPos.x) + pageUtils.getCurrPage.x,
-      y: offsetPos.y + pageUtils.getCurrPage.y
-    })
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {

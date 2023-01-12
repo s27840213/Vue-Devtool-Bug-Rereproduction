@@ -193,7 +193,6 @@ import eventUtils from '@/utils/eventUtils'
 import { floor, round } from 'lodash'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import resizeUtils from '@/utils/resizeUtils'
-import PinchZoom from 'pinch-zoom-js'
 
 export default Vue.extend({
   inheritAttrs: false,
@@ -370,6 +369,7 @@ export default Vue.extend({
         transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
       }
       return {
+        ...this.sizeStyles,
         transform,
         ...this.sizeStyles
         // margin: this.isDetailPage ? '0px auto' : '25px auto'
