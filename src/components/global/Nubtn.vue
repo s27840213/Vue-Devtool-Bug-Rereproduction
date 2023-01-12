@@ -68,11 +68,10 @@ export default defineComponent({
           : 'default'
       this.$emit('status', newStatus)
     },
-    click(event: Event) {
+    click() {
       if (this.status === 'disabled') return
       this.active = !this.active
       this.updateStatus()
-      this.$emit('click', event)
     }
   }
 })

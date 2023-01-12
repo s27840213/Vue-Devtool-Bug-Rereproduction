@@ -1,8 +1,8 @@
 <template lang="pug">
 div(class="btnList" :style="BGstyle")
   div(class="btnList-options")
-    Checkbox(v-model="full") full size
-    Checkbox(v-model="darkBG") dark BG
+    checkbox(v-model="full") full size
+    checkbox(v-model="darkBG") dark BG
     div
       span {{'button text: '}}
       input(type="text" v-model="btnText")
@@ -14,7 +14,7 @@ div(class="btnList" :style="BGstyle")
     span(v-for="btn in btns") {{btn.theme}} ({{btn.size}})
     template(v-for="status in statuses")
       span {{status}}
-      Nubtn(v-for="btn in btns"
+      nubtn(v-for="btn in btns"
             :theme="btn.theme" :size="`${btn.size}${full?'-full':''}`"
             :status="status" :icon="btnIcon" :hint="btnText") {{btnText}}
   hr(style="width: 50%")
@@ -27,17 +27,16 @@ div(class="btnList" :style="BGstyle")
     div(class="flex-center")
       span 邏輯測試按鈕的主題：
       options(:options="themes" v-model="testBtnTheme")
-    Nubtn(:theme="testBtnTheme" v-model="testBtnStatus"
+    nubtn(:theme="testBtnTheme" v-model="testBtnStatus"
           icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，下拉選單可改變/觀察此按鈕狀態(此按鈕會切換active)
-    Nubtn(:theme="testBtnTheme" :status="testBtnStatus"
+    nubtn(:theme="testBtnTheme" :status="testBtnStatus"
           icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，下拉選單可改變/觀察此按鈕狀態(此按鈕不會active)
-    Nubtn(:theme="testBtnTheme"
+    nubtn(:theme="testBtnTheme"
           icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，此按鈕狀態沒有連動，僅hover
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import Nubtn from '@/components/global/Nubtn.vue'
 import Checkbox from '@/components/global/Checkbox.vue'
 import Options from '@/components/global/Options.vue'
 
