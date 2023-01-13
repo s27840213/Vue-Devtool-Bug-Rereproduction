@@ -309,10 +309,7 @@ export default defineComponent({
     handleNewFolder() {
       const folderId = designUtils.addNewFolder(this.path, true)
       this.$nextTick(() => {
-        const folderItemName = document.querySelector(`.folder-item__name[folderid="${folderId}"] span`)
-        if (folderItemName) {
-          setTimeout(() => { folderItemName.dispatchEvent(new MouseEvent('dblclick')) }, 0)
-        }
+        designUtils.emit(`edit-folder-${folderId}`)
       })
     },
     handleSortByClick(payload: [string, boolean]) {

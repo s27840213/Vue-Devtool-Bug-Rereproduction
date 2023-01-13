@@ -228,10 +228,7 @@ export default defineComponent({
     handleNewFolder() {
       const folderId = designUtils.addNewFolder([designUtils.ROOT])
       this.$nextTick(() => {
-        const folderItemName = document.querySelector(`.nav-folder[folderid="${folderId}"]`)
-        if (folderItemName) {
-          setTimeout(() => { folderItemName.dispatchEvent(new MouseEvent('contextmenu')) }, 0)
-        }
+        designUtils.emit(`edit-sidebar-${folderId}`)
       })
     }
   }
