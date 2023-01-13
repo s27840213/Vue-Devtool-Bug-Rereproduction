@@ -49,7 +49,6 @@ import cssConverter from '@/utils/cssConverter'
 import pageUtils from '@/utils/pageUtils'
 import { IImage } from '@/interfaces/layer'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
-import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
   emits: [],
@@ -122,7 +121,7 @@ export default defineComponent({
         'pointer-events': 'none'
       }
     },
-    getHalation(): unknown[] {
+    getHalation(): ReturnType<typeof imageAdjustUtil.getHalation> {
       const { styles: { adjust } } = this.config.backgroundImage.config as IImage
       const { width, height } = this.config
       const position = {

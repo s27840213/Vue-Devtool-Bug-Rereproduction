@@ -10,12 +10,12 @@ div(class="snap-area"
   template(v-if="isShowGuideline")
     div(v-for="(line,index) in guidelines.v"
       class="snap-area__line snap-area__line--vr"
-      :style="snapLineStyles('v', line,true)"
+      :style="snapLineStyles('v', line, true)"
       @mouseover="lockGuideline ? null : showGuideline(line,'v',index)"
       @mouseout="closeGuidelineTimer")
     div(v-for="(line,index) in guidelines.h"
       class="snap-area__line snap-area__line--hr"
-      :style="snapLineStyles('h', line,true)"
+      :style="snapLineStyles('h', line, true)"
       @mouseover="lockGuideline ? null : showGuideline(line,'h',index)"
       @mouseout="closeGuidelineTimer")
 </template>
@@ -90,14 +90,14 @@ export default defineComponent({
     }
   },
   methods: {
-    wrapperStyles() {
+    wrapperStyles(): Record<string, string> {
       return {
         width: `${this.config.width * (this.scaleRatio / 100)}px`,
         height: `${this.config.height * (this.scaleRatio / 100)}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
-    snapLineStyles(dir: string, pos: number, isGuideline?: string) {
+    snapLineStyles(dir: string, pos: number, isGuideline?: boolean): Record<string, string> {
       const { bleeds } = pageUtils.getPageSizeWithBleeds(this.config)
       pos += dir === 'v' ? bleeds.left
         : dir === 'h' ? bleeds.top

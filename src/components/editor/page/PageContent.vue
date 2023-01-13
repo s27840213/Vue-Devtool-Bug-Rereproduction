@@ -14,10 +14,9 @@ div(class="overflow-container"
         @dblclick="pageDblClickHandler()"
         @tap="tapPageContent")
       //- @dblclick will not be trigger in mobile, use @tap + doubleTapUtils instead.
-      nu-bg-image(:image="this.config.backgroundImage"
+      nu-bg-image(:image="config.backgroundImage"
         :pageIndex="pageIndex"
-        :color="this.config.backgroundColor"
-        :key="this.config.backgroundImage.id"
+        :color="config.backgroundColor"
         @mousedown.left="pageClickHandler()"
         :contentScaleRatio="contentScaleRatio")
       nu-layer(
@@ -32,8 +31,8 @@ div(class="overflow-container"
         :contentScaleRatio="contentScaleRatio"
         :forceRender="forceRender"
         :lazyLoadTarget="lazyLoadTarget")
-      div(v-if="this.userId === 'backendRendering' && (this.bleed || this.trim)" class="bleed-line" :style="bleedLineStyles")
-      div(v-if="this.userId === 'backendRendering' && this.trim" class="trim")
+      div(v-if="userId === 'backendRendering' && (bleed || trim)" class="bleed-line" :style="bleedLineStyles")
+      div(v-if="userId === 'backendRendering' && trim" class="trim")
         div(class="trim__tl" :style="trimStyles.tl")
         div(class="trim__tr" :style="trimStyles.tr")
         div(class="trim__bl" :style="trimStyles.bl")
@@ -271,7 +270,7 @@ export default defineComponent({
         }
       }
     },
-    pageClickHandler(e: PointerEvent): void {
+    pageClickHandler(): void {
       groupUtils.deselect()
       // imageUtils.setImgControlDefault(false)
       editorUtils.setInMultiSelectionMode(false)
