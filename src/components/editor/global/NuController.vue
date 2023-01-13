@@ -70,7 +70,7 @@ div(:layer-index="`${layerIndex}`"
             :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
             @pointerdown.stop="lineEndMoveStart"
             @touchstart="disableTouchEvent")
-        div(v-for="(resizer, index) in resizer(controlPoints)"
+        div(v-for="(resizer, index) in getResizer(controlPoints)"
             class="control-point__resize-bar-wrapper")
           div(class="control-point resizer"
               :key="`resizer-${index}`"
@@ -81,7 +81,7 @@ div(:layer-index="`${layerIndex}`"
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="!isTouchDevice() ? resizeStart($event) : null"
               @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
-        div(v-if="isTouchDevice()" v-for="(resizer, index) in resizer(controlPoints, false, true)"
+        div(v-if="isTouchDevice()" v-for="(resizer, index) in getResizer(controlPoints, false, true)"
             class="control-point__resize-bar-wrapper")
           div(class="control-point resizer"
               :key="`resizer-touch-${index}`"
@@ -94,18 +94,18 @@ div(:layer-index="`${layerIndex}`"
               @touchstart="disableTouchEvent")
         div(v-if="config.type === 'text' && contentEditable"
             class="control-point__resize-bar-wrapper")
-          div(v-for="(resizer, index) in resizer(controlPoints, true)"
+          div(v-for="(resizer, index) in getResizer(controlPoints, true)"
               class="control-point resizer control-point__move-bar"
               :key="`resizer-text-${index}`"
               :style="resizerBarStyles(resizer.styles)"
               @pointerdown="moveStart")
-        div(v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalers) : []"
+        div(v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="`scaler-${index}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
             @pointerdown.prevent.stop="!isTouchDevice() ? scaleStart($event) : null"
             @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
-        div(v-if="isTouchDevice()" v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalerTouchAreas) : []"
+        div(v-if="isTouchDevice()" v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalerTouchAreas) : []"
             class="control-point scaler"
             :key="`scaler-touch-${index}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
@@ -152,7 +152,7 @@ import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { ICoordinate } from '@/interfaces/frame'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IStyle, IText } from '@/interfaces/layer'
-import { IControlPoints, IResizer } from '@/interfaces/controller'
+import { IResizer } from '@/interfaces/controller'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import ControlUtils from '@/utils/controlUtils'
@@ -183,12 +183,13 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import editorUtils from '@/utils/editorUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
 import i18n from '@/i18n'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
 const RESIZER_SHOWN_MIN = 4000
+
+type ICP = ReturnType<typeof ControlUtils.getControlPoints>
 
 export default defineComponent({
   props: {
@@ -229,7 +230,9 @@ export default defineComponent({
       FrameUtils,
       ShortcutUtils,
       dragUtils: new DragUtils(this.config.id),
-      controlPoints: generalUtils.isTouchDevice() ? ControlUtils.getControlPoints(6, 25) : ControlUtils.getControlPoints(4, 25),
+      controlPoints: (generalUtils.isTouchDevice()
+        ? ControlUtils.getControlPoints(6, 25)
+        : ControlUtils.getControlPoints(4, 25)) as ICP,
       isControlling: false,
       isLineEndMoving: false,
       isRotating: false,
@@ -531,8 +534,8 @@ export default defineComponent({
       }
       return Object.assign(resizerStyle, HW)
     },
-    resizer(controlPoints: any, textMoveBar = false, isTouchArea = false) {
-      let resizers = (isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers) as Array<{ [key: string]: string | number }>
+    getResizer(controlPoints: ICP, textMoveBar = false, isTouchArea = false) {
+      let resizers = isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers
       const tooShort = this.getLayerHeight() * this.scaleRatio < RESIZER_SHOWN_MIN
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < RESIZER_SHOWN_MIN
       switch (this.getLayerType) {
@@ -583,7 +586,7 @@ export default defineComponent({
       }
       return resizers
     },
-    scaler(scalers: any) {
+    getScaler(scalers: any) {
       const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
       const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
@@ -1758,7 +1761,7 @@ export default defineComponent({
       eventUtils.removePointerEvent('pointerup', this.lineRotateEnd)
       this.$emit('setFocus')
     },
-    ctrlPointerStyles(ctrlPointerStyles: { [key: string]: string | number }, attrs?: { [key: string]: string | number }) {
+    ctrlPointerStyles(ctrlPointerStyles: { [key: string]: string | number | undefined }, attrs?: { [key: string]: string | number }) {
       return {
         ...ctrlPointerStyles,
         ...attrs

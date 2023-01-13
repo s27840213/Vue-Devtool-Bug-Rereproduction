@@ -1,6 +1,7 @@
 import store from '@/store'
 import { ICoordinate } from '@/interfaces/frame'
 import { IShape } from '@/interfaces/layer'
+import { IResizer } from '@/interfaces/controller'
 import shapeUtils from '@/utils/shapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from './layerUtils'
@@ -164,7 +165,11 @@ class Controller {
         },
         scalerSize
       }
-    ]
+    ] as {
+      cursor: number
+      styles: Record<string, string>
+      scalerSize: number
+    }[]
   }
 
   private getResizers = (resizerShort: number, resizerLong: number, contentScaleRatio: number, isTouchArea = false) => {
@@ -213,7 +218,11 @@ class Controller {
           opacity: isTouchArea ? '0' : '1'
         }
       }
-    ]
+    ] as {
+      type: 'V' | 'H',
+      cursor: number,
+      styles: IResizer
+    }[]
   }
 
   getControlPoints = (resizerShort: number, resizerLong: number) => {
