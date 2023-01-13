@@ -136,6 +136,7 @@ export default defineComponent({
           tiptapUtils.agent(editor => {
             layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
           })
+          tiptapUtils.forceUpdate(true)
           textPropUtils.updateTextPropsState({ fontSize: finalValue.toString() })
           textEffectUtils.refreshSize()
         })
