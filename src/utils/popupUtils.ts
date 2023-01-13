@@ -1,35 +1,18 @@
-import { IPopupComponent, IPopupProps } from '@/interfaces/popup'
+import { IPopupComponent, IPopupProps, ISliderConfig } from '@/interfaces/popup'
 import store from '@/store'
-import { PopupSliderEventType } from '@/store/types'
 import { EventEmitter } from 'events'
 import Vue, { nextTick } from 'vue'
 import MouseUtils from './mouseUtils'
 
-interface ISliderConfig {
-  value: number,
-  min: number,
-  max: number,
-  step: number,
-  noText: boolean
-}
-
-const DEFAULT_SLIDER_CONFIG = {
-  value: 0,
-  min: 0,
-  max: 0,
-  step: 1,
-  noText: false
-}
-
 class PopupUtils {
   get isPopupOpen(): boolean { return store.getters['popup/getIsPopupOpen'] }
   get popupComponent(): IPopupComponent { return store.getters['popup/getPopupComponent'] }
+  get sliderConfig(): ISliderConfig { return store.getters['popup/getSliderConfig'] }
 
   currPopupType: string
   event: any
   eventHash: { [index: string]: (value: number) => void }
   currEvent: string
-  sliderConfig: ISliderConfig
 
   popupEl: HTMLElement
 
@@ -38,7 +21,6 @@ class PopupUtils {
     this.event = new EventEmitter()
     this.eventHash = {}
     this.currEvent = ''
-    this.sliderConfig = DEFAULT_SLIDER_CONFIG
     this.popupEl = null as unknown as HTMLElement
   }
 
@@ -57,7 +39,11 @@ class PopupUtils {
   }
 
   setSliderConfig(config: Partial<ISliderConfig>) {
-    Object.assign(this.sliderConfig, config)
+    store.commit('popup/SET_sliderConfig', config)
+  }
+
+  clearSliderConfig() {
+    store.commit('popup/UPDATE_clearSliderConfig')
   }
 
   private openPopupNearTarget(target: string, pos: { x: 'left' | 'right', y: 'top' | 'bottom' }) {
@@ -150,7 +136,7 @@ class PopupUtils {
     if (this.popupEl) {
       this.popupEl.style.transform = ''
     }
-    this.sliderConfig = DEFAULT_SLIDER_CONFIG
+    this.clearSliderConfig()
   }
 }
 

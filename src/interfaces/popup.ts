@@ -21,3 +21,11 @@ export interface IPopupOptions {
   action: (event?: MouseEvent) => void,
   condition?: boolean
 }
+
+export interface ISliderConfig {
+  value: number,
+  min: number,
+  max: number,
+  step: number,
+  noText: boolean
+}
