@@ -236,7 +236,8 @@ module.exports = defineConfig({
                     sourceMap: false,
                     parallel: true
                 })
-            ]
+            ],
+            minimize: false
         }
     },
 
