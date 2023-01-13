@@ -414,6 +414,7 @@ class ImageShadowUtils {
   }
 
   drawShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+    console.log('start drawing')
     const canvas = canvas_s[0] || undefined
     const { timeout = DRAWING_TIMEOUT, cb } = params
     const { shadow } = config.styles
@@ -445,6 +446,7 @@ class ImageShadowUtils {
     } else {
       this.shadowHandler(canvas_s, img, config, params)
     }
+    console.log('end drawing')
   }
 
   shadowHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
@@ -479,6 +481,7 @@ class ImageShadowUtils {
       this.setIsProcess(layerInfo, true)
     }
 
+    console.log(1)
     setMark('shadow', 1)
     const isStaticShadow = !shadow.isTransparent
     const spreadF = isStaticShadow ? fieldRange.frame.spread.weighting : Math.min(layerWidth / _imgWidth, layerHeight / _imgHeight)
@@ -501,6 +504,7 @@ class ImageShadowUtils {
     ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
 
     setMark('shadow', 3)
+    console.log(2)
 
     ctxT.globalCompositeOperation = 'source-in'
     ctxT.globalAlpha = opacity * 0.01
@@ -508,6 +512,7 @@ class ImageShadowUtils {
     ctxT.fillRect(0, 0, canvasT.width, canvasT.height)
     ctxT.globalAlpha = 1
     ctxT.globalCompositeOperation = 'source-over'
+    console.log(3)
 
     canvas_s.forEach(c => {
       const ctx = c.getContext('2d') as CanvasRenderingContext2D
@@ -518,9 +523,12 @@ class ImageShadowUtils {
       timeout && this.setIsProcess(layerInfo, false)
     }
     this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
+    console.log(4)
+    const stime = Date.now()
     cb && cb()
-    setMark('shadow', 4)
-    logMark('shadow')
+    // setMark('shadow', 4)
+    // logMark('shadow')
+    console.log('end drawing in handling', Date.now() - stime)
   }
 
   clearHandler() {
