@@ -45,6 +45,7 @@ import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import textBgUtils from '@/utils/textBgUtils'
+import shapeUtils from '@/utils/shapeUtils'
 import { cloneDeep } from 'lodash'
 
 export default defineComponent({
@@ -109,7 +110,9 @@ export default defineComponent({
     },
     showDocumentColors(): boolean {
       return this.showPalette && this.currEvent === ColorEventType.shape &&
-        this.getDocumentColors.length > 1 && !this.showAllRecently
+        this.getDocumentColors.length > 1 && !this.showAllRecently &&
+        // Prevent show object colors if group has multiple single-color objects.
+        !shapeUtils.hasMultiColors
     },
     showPalette(): boolean {
       return ['color-palette', 'color-more'].includes(this.lastHistory) || this.inInitialState

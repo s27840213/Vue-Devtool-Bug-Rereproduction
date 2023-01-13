@@ -905,7 +905,7 @@ export const shadowPropI18nMap = {
     size: 'NN0422',
     _effectName: 'NN0420'
   }
-}
+} as Record<string, Record<string, string>>
 
 export const fieldRange = {
   shadow: {

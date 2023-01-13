@@ -33,13 +33,14 @@ div(class="color-picker" ref="colorPicker"
 </template>
 
 <script lang="ts">
+import i18n from '@/i18n'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+import { notify } from '@kyvg/vue3-notification'
 import layerUtils from '@/utils/layerUtils'
 import Chrome from '@/components/colorPicker/Chrome.vue'
 import generalUtils from '@/utils/generalUtils'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
-import i18n from '@/i18n'
 
 export default defineComponent({
   props: {
@@ -124,7 +125,7 @@ export default defineComponent({
     },
     eyeDropper() {
       if (!(window as any).EyeDropper) {
-        this.$notify({ group: 'error', text: `${i18n.global.t('NN0406')}` })
+        notify({ group: 'error', text: `${i18n.global.t('NN0406')}` })
         return
       }
 

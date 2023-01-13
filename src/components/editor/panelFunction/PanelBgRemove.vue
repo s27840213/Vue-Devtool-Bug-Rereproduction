@@ -49,7 +49,9 @@ div(class="panel-background-remove")
 </template>
 
 <script lang="ts">
+import i18n from '@/i18n'
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations } from 'vuex'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import store from '@/store'
@@ -65,7 +67,6 @@ import { IImage } from '@/interfaces/layer'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
-import i18n from '@/i18n'
 
 export default defineComponent({
   emits: [],
@@ -142,7 +143,7 @@ export default defineComponent({
               layerInfo
             }
             imageShadowPanelUtils.handleShadowUpload(layerData, true)
-            this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           }
         }
         this.uploadMyfileImg(Object.assign({ assetId: this.autoRemoveResult.id }, this.autoRemoveResult))
@@ -200,7 +201,7 @@ export default defineComponent({
                   layerInfo
                 }
                 imageShadowPanelUtils.handleShadowUpload(layerData, true)
-                this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+                notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
               }
             }
             stepsUtils.record()

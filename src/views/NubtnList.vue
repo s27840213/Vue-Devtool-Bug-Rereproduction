@@ -37,6 +37,7 @@ div(class="btnList" :style="BGstyle")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import Checkbox from '@/components/global/Checkbox.vue'
 import Options from '@/components/global/Options.vue'
 
@@ -109,7 +110,7 @@ export default defineComponent({
   },
   methods: {
     click() {
-      // this.$notify({ group: 'copy', text: 'click!' })
+      notify({ group: 'copy', text: 'click!' })
     }
   }
 })

@@ -69,6 +69,7 @@ div(class="bg-setting" v-click-outside="handleOutSide")
 import i18n from '@/i18n'
 import { defineComponent } from 'vue'
 import vClickOutside from 'click-outside-vue3'
+import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations } from 'vuex'
 import { IPage } from '@/interfaces/page'
 import { PopupSliderEventType } from '@/store/types'
@@ -218,7 +219,7 @@ export default defineComponent({
       stepsUtils.record()
     },
     handleLockedNotify() {
-      this.$notify({ group: 'copy', text: i18n.global.tc('NN0804') })
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     },
     handleOutSide(e: Event) {
       const target = e.target as HTMLElement

@@ -3,7 +3,7 @@ lazy-load(
     class="transition"
     :target="lazyLoadTarget"
     :threshold="[0,1]"
-    :minHeight="itemSize ? pageHeight * scaleRatio : contentWidth"
+    :minHeight="itemSize ? pageHeight() * scaleRatio() : contentWidth"
     @loaded="handleLoaded")
   div(class="page-preview-page"
     :style="styles2()"
@@ -60,10 +60,12 @@ lazy-load(
     div(v-if="itemSize" :style="loadingStyle()"
       :key="'placeholder'")
 </template>
+
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'click-outside-vue3'
+import { IPage } from '@/interfaces/page'
 import GroupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -84,7 +86,7 @@ export default defineComponent({
       required: true
     },
     config: {
-      type: Object,
+      type: Object as PropType<IPage>,
       required: true
     },
     showMoreBtn: {
@@ -311,7 +313,6 @@ export default defineComponent({
   justify-content: center;
   position: relative;
   max-width: 100%;
-  content-visibility: auto;
   &-content {
     position: relative;
     box-sizing: border-box;

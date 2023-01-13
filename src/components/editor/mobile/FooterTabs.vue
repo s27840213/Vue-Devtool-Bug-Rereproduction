@@ -21,6 +21,7 @@ div(class="footer-tabs" ref="tabs" :style="rootStyles")
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -613,7 +614,7 @@ export default defineComponent({
         }
         case 'effect': {
           if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
-            this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
             return
           }
           break
@@ -671,7 +672,7 @@ export default defineComponent({
       } else return this.currTab === tab.panelType
     },
     handleLockedNotify() {
-      this.$notify({ group: 'copy', text: i18n.global.tc('NN0804') })
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     }
   }
 })

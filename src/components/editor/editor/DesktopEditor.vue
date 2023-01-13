@@ -45,6 +45,7 @@ div(class="desktop-editor")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import Sidebar from '@/components/editor/Sidebar.vue'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
 import SidebarPanel from '@/components/editor/SidebarPanel.vue'
@@ -69,6 +70,7 @@ import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
 import i18n from '@/i18n'
 import editorUtils from '@/utils/editorUtils'
 import unitUtils from '@/utils/unitUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
   name: 'DesktopEditor',
@@ -240,8 +242,12 @@ export default defineComponent({
     confirmLeave() {
       return window.confirm('Do you really want to leave? you have unsaved changes!')
     },
+    copyText(text: string) {
+      generalUtils.copyText(text)
+      notify({ group: 'copy', text: `${text} 已複製` })
+    },
     networkError(): void {
-      this.$notify({ group: 'error', text: `${i18n.global.t('NN0351')}` })
+      notify({ group: 'error', text: `${i18n.global.t('NN0351')}` })
       this.$emit('setIsLoading', false)
     }
   }

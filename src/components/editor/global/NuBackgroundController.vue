@@ -96,13 +96,13 @@ export default defineComponent({
     getImgController(): ICoordinate {
       return this.config.styles.imgController
     },
-    dimBgStyles(): unknown {
+    dimBgStyles(): Record<string, string> {
       return {
         width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`
       }
     },
-    styles(): unknown {
+    styles(): Record<string, string> {
       // preserve in case the background image is needed to be rotatable in the future
       // const zindex = (this.pageIndex + 1) * 100
       // const pos = this.imgControllerPosHandler()
@@ -320,7 +320,7 @@ export default defineComponent({
       eventUtils.removePointerEvent('pointermove', this.scaling)
       eventUtils.removePointerEvent('pointerup', this.scaleEnd)
     },
-    cursorStyles(index: number, rotateAngle: number) {
+    cursorStyles(index: number, rotateAngle: number): Record<string, string> {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
       return { cursor: this.controlPoints.cursors[cursorIndex] }

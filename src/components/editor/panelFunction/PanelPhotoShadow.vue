@@ -117,8 +117,8 @@ export default defineComponent({
     ...mapGetters({
       currFunctionPanelType: 'getCurrFunctionPanelType'
     }),
-    shadowOption(): string[] {
-      return Object.keys(this.effects)
+    shadowOption(): ShadowEffectType[] {
+      return Object.keys(this.effects) as ShadowEffectType[]
     },
     shadowFields(): string[] {
       const { effects, currentEffect } = this

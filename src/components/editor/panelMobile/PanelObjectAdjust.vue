@@ -46,7 +46,7 @@ div(class="panel-object-adjust")
               marker-icon(iconWidth="18px" iconColor="#474A57" iconHeight="12px"
                 :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
                 :svg="markerContentMap[markerslot.marker].svg"
-                :trimWidth="markerContentMap[markerslot.marker].trimWidth"
+                :trimWidth="!!markerContentMap[markerslot.marker].trimWidth"
                 :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
                 :trimOffset="markerContentMap[markerslot.marker].trimOffset")
       div(v-if="currMode === 3" class="panel-object-adjust__markers")
@@ -57,7 +57,7 @@ div(class="panel-object-adjust")
             marker-icon(iconWidth="18px" iconColor="#474A57" iconHeight="12px"
               :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
               :svg="markerContentMap[markerslot.marker].svg"
-              :trimWidth="markerContentMap[markerslot.marker].trimWidth"
+              :trimWidth="!!markerContentMap[markerslot.marker].trimWidth"
               :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
               :trimOffset="markerContentMap[markerslot.marker].trimOffset"
               style="transform: rotate(180deg)")
@@ -129,8 +129,6 @@ export default defineComponent({
   components: {
     MobileSlider,
     MarkerIcon
-  },
-  props: {
   },
   data() {
     const { min: lineWidthMin, max: lineWidthMax } = mappingUtils.mappingMinMax('lineWidth')

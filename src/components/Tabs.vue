@@ -9,20 +9,16 @@ div(class="tabs" :style="tabsStyle")
 </template>
 
 <script lang="ts">
-import Vue, { PropType, defineComponent } from 'vue'
+import { PropType, defineComponent } from 'vue'
 
 export default defineComponent({
-  model: {
-    prop: 'tabIndex',
-    event: 'switchTab'
-  },
   props: {
     tabs: {
       type: Array as PropType<string[]>,
-      default: () => []
+      default: [] as string[]
     },
     // Use v-model to bind tabIndex.
-    tabIndex: {
+    modelValue: {
       type: Number,
       required: true
     },
@@ -31,13 +27,11 @@ export default defineComponent({
       default: 'dark'
     }
   },
-  emits: ['switchTab'],
-  data() {
-    return {
-      currActiveTabIndex: this.defaultTab
-    }
-  },
+  emits: ['update:modelValue'],
   computed: {
+    tabIndex() {
+      return this.modelValue
+    },
     colors() {
       switch (this.theme) {
         case 'light':
@@ -45,7 +39,6 @@ export default defineComponent({
             active: '#4EABE6',
             inactive: '#969BAB'
           }
-        case 'dark':
         case 'dark-rect':
           return {
             active: '#18191F',
@@ -53,6 +46,7 @@ export default defineComponent({
             inactive: '#9C9C9C',
             inactiveBG: '#2E2E2E'
           }
+        case 'dark':
         default:
           return {
             active: 'white',
@@ -94,7 +88,7 @@ export default defineComponent({
         }
     },
     switchTab(tabIndex: number) {
-      this.$emit('switchTab', tabIndex)
+      this.$emit('update:modelValue', tabIndex)
     }
   }
 })

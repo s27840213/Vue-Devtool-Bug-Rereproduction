@@ -24,10 +24,10 @@ div(class="category-fonts pointer feature-button"
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
-import StepsUtils from '@/utils/stepsUtils'
 import { ISelection } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -327,10 +327,10 @@ export default defineComponent({
       } catch (error: any) {
         const code = error.message === 'timeout' ? 'timeout' : error.code
         console.error(error)
-        // this.$notify({
-        //   group: 'error',
-        //   text: `${this.$t('NN0248')} (ErrorCode: ${code})`
-        // })
+        notify({
+          group: 'error',
+          text: `${this.$t('NN0248')} (ErrorCode: ${code})`
+        })
       } finally {
         tiptapUtils.agent(editor => editor.setEditable(true))
         const sel = window.getSelection()

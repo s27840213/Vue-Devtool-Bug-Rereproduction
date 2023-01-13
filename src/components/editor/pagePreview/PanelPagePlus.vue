@@ -17,6 +17,7 @@ div(class="panel-page-plus"
   div(v-if="actionType === 'drag'")
     div(class="panel-page-plus-drag")
 </template>
+
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -58,7 +59,7 @@ export default defineComponent({
       _setmiddlemostPageIndex: 'SET_middlemostPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
-    styles() {
+    styles(): Record<string, string> {
       if (this.isDragged) {
         return {
           'z-index': '2',

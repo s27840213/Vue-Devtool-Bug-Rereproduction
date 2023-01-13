@@ -17,12 +17,10 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       :isTransparent="isTransparent")
     p(v-else
       v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
-      :key="p.id"
       :style="pStyle(p.styles)")
       span(v-for="(span, sIndex) in p.spans"
         class="nu-text__span"
         :data-sindex="sIndex"
-        :key="span.id"
         :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan, transParentStyles)") {{ span.text }}
         br(v-if="!span.text && p.spans.length === 1")
 </template>
@@ -46,7 +44,6 @@ import controlUtils from '@/utils/controlUtils'
 import pageUtils from '@/utils/pageUtils'
 
 export default defineComponent({
-  emits: [],
   components: {
     NuCurveText,
     NuTextEditor
@@ -87,7 +84,7 @@ export default defineComponent({
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
       isLoading: true,
-      svgBG: {} as Record<string, unknown> | null,
+      svgBG: {} as ReturnType<typeof textBgUtils.drawSvgBg>,
       widthLimitSetDuringComposition: false
     }
   },
@@ -138,7 +135,7 @@ export default defineComponent({
       return this.config.locked
     },
     // Use duplicated of text to do some text effect, define their difference css here.
-    duplicatedText() {
+    duplicatedText(): (Record<string, Record<string, string> | never>)[] {
       const duplicatedBodyBasicCss = {
         position: 'absolute',
         top: '0px',
@@ -147,10 +144,10 @@ export default defineComponent({
         opacity: 1
       }
       const textShadow = textEffectUtils.convertTextEffect(this.config)
-      const duplicatedTextShadow = textShadow.duplicatedBody || textShadow.duplicatedSpan
+      const duplicatedTextShadow = (textShadow.duplicatedBody || textShadow.duplicatedSpan) as Record<string, string>
       const textShadowCss = {
-        extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody),
-        extraSpan: textShadow.duplicatedSpan
+        extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody as Record<string, string>),
+        extraSpan: textShadow.duplicatedSpan as Record<string, string>
       }
       // const textBgSpan = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
       // const duplicatedTextBgSpan = textBgSpan.duplicatedBody || textBgSpan.duplicatedSpan
@@ -348,7 +345,7 @@ export default defineComponent({
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
-    textWrapperStyle() {
+    textWrapperStyle(): Record<string, string> {
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
@@ -384,7 +381,7 @@ export default defineComponent({
         return 1
       }
     },
-    bodyStyles() {
+    bodyStyles(): Record<string, string|number> {
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
@@ -399,7 +396,7 @@ export default defineComponent({
         writingMode: this.config.styles.writingMode
       }
     },
-    spanStyle(spans: any, sIndex: number) {
+    spanStyle(spans: any, sIndex: number): Record<string, string> {
       const span = spans[sIndex]
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
         sIndex === spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {}

@@ -19,7 +19,7 @@ export default defineComponent({
   props: {
     valueArray: Array,
     values: {
-      type: Array as PropType<number[]>,
+      type: Array as PropType<(number | string)[]>,
       required: true
     },
     itemMinWidth: {

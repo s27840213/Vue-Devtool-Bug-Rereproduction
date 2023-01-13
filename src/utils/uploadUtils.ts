@@ -590,10 +590,10 @@ class UploadUtils {
       AssetId: ${assetId},
       TeamId: ${teamId}`)
       putAssetDesignType = PutAssetDesignType.UPDATE_BOTH
-      router.replace({ query: Object.assign({}, router.currentRoute.value.query, { type: 'design', design_id: assetId, team_id: this.teamId }) })
-      type = router.currentRoute.value.query.type
-      designId = router.currentRoute.value.query.design_id
-      teamId = router.currentRoute.value.query.team_id
+      type = 'design'
+      designId = assetId
+      teamId = this.teamId
+      router.replace({ query: Object.assign({}, router.currentRoute.value.query, { type, design_id: designId, team_id: teamId }) })
       isNewDesign = true
     }
 

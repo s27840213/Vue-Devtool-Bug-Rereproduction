@@ -34,6 +34,7 @@ div(class="field")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import Options from '@/components/global/Options.vue'
@@ -207,7 +208,7 @@ export default defineComponent({
           if (data.flag) throw Error(data.msg)
           this.close()
         }).catch(msg => {
-          this.$notify({ group: 'error', text: msg })
+          notify({ group: 'error', text: msg })
           this.isLoading = false
         })
       })
@@ -228,7 +229,7 @@ export default defineComponent({
         if (data.flag) throw Error(data.msg)
         this.close()
       }).catch(msg => {
-        this.$notify({ group: 'error', text: msg })
+        notify({ group: 'error', text: msg })
         this.isLoading = false
       })
     },

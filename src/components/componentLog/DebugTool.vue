@@ -5,7 +5,7 @@ div(class="fps")
       component(v-for="(elm, idx) in graph.content"
                 :key="`graph-${idx}`"
                 :is="elm.tag"
-                v-bind="elm.attrs") {{elm.text}}
+                v-bind="elm.attrs")
     div(class="fps-graph__valleys")
       div(v-for="valley in valleys" :style="{color: valley.color}") {{valley.text}}
   div(class="fps__value" @click="showGraph")
@@ -14,9 +14,9 @@ div(class="fps")
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue'
 import { Path, Point } from '@/utils/textBgUtils'
 import { filter, range } from 'lodash'
-import Vue, { defineComponent } from 'vue'
 
 class Valley {
   min: number
@@ -24,7 +24,7 @@ class Valley {
   start = -1
   text = ''
   color = ''
-  path = null as Path | null
+  path = {} as Path
 
   constructor(baseline: number) {
     this.min = baseline
@@ -42,6 +42,24 @@ class Valley {
   }
 }
 
+interface IFpsGraph {
+  attrs: {
+    viewBox: string
+    width: string
+  },
+  content: {
+    tag: string
+    attrs: {
+      style: string
+      d?: string
+      x1?: number
+      y1?: number
+      x2?: number
+      y2?: number
+    }
+  }[]
+}
+
 export default defineComponent({
   name: 'DebugTool',
   data() {
@@ -51,7 +69,7 @@ export default defineComponent({
       historyLong: [] as number[],
       fps: 0,
       pause: false,
-      graph: {},
+      graph: {} as IFpsGraph,
       valleys: [] as Valley[],
       jsHeapSize: 0
     }
@@ -116,7 +134,7 @@ export default defineComponent({
         tag: 'path',
         attrs: {
           style: `fill: ${valley.color};`,
-          d: valley.path?.result()
+          d: valley.path.result()
         }
       }))
       const scaleLine = range(0, baseline, 10).map(scale => ({

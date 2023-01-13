@@ -26,7 +26,7 @@ export interface IEffect {
   options: IEffectOption[]
 }
 export interface IEffectCategory {
-  name: string
+  name: 'shadow' | 'bg' | 'shape'
   label: string
   effects2d: IEffect[][]
 }
@@ -95,7 +95,8 @@ class ConstantData {
         },
         ...[20, 19, 18, 22].map((id) => themeItem(id)), {
           label: i18n.global.t('NN0790', { type: i18n.global.tc('NN0001', 3) }),
-          url: i18n.global.t('NN0791')
+          url: i18n.global.t('NN0791'),
+          newTab: true
         }]
       }],
       us: [{
@@ -125,7 +126,8 @@ class ConstantData {
           url: 'https://blog.vivipic.com/us/free-polaroid-frame-templates/'
         }, {
           label: i18n.global.t('NN0790', { type: i18n.global.tc('NN0001', 3) }),
-          url: i18n.global.t('NN0791')
+          url: i18n.global.t('NN0791'),
+          newTab: true
         }]
       }],
       jp: [{
@@ -149,7 +151,8 @@ class ConstantData {
           url: 'https://blog.vivipic.com/jp/invitation/'
         }, {
           label: i18n.global.t('NN0790', { type: i18n.global.tc('NN0001', 3) }),
-          url: i18n.global.t('NN0791')
+          url: i18n.global.t('NN0791'),
+          newTab: true
         }]
       }]
     }
@@ -170,7 +173,8 @@ class ConstantData {
           url: 'https://blog.vivipic.com/tw/features/'
         }, {
           label: i18n.global.t('NN0790', { type: i18n.global.tc('NN0793', 1) }),
-          url: i18n.global.t('NN0791')
+          url: i18n.global.t('NN0791'),
+          newTab: true
         }]
       }, {
         label: i18n.global.t('NN0674'),
@@ -204,7 +208,8 @@ class ConstantData {
           url: 'https://blog.vivipic.com/us/us-faq/'
         }, {
           label: i18n.global.t('NN0790', { type: i18n.global.tc('NN0793', 1) }),
-          url: i18n.global.t('NN0791')
+          url: i18n.global.t('NN0791'),
+          newTab: true
         }]
       }, {
         label: i18n.global.t('NN0671'),
@@ -233,7 +238,8 @@ class ConstantData {
           url: 'https://blog.vivipic.com/jp/4step/'
         }, {
           label: i18n.global.t('NN0790', { type: i18n.global.tc('NN0793', 1) }),
-          url: i18n.global.t('NN0791')
+          url: i18n.global.t('NN0791'),
+          newTab: true
         }]
       }, {
         label: i18n.global.t('NN0674'),

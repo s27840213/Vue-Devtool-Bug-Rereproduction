@@ -225,7 +225,7 @@ export default defineComponent({
     ...mapMutations({
       updateFrameBlendLayer: 'UPDATE_frameBlendLayer'
     }),
-    styles() {
+    styles(): Record<string, string> {
       const isFrameImg = this.config.clips.length === 1 && this.config.clips[0].isFrameImg
       return {
         width: isFrameImg ? '' : `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio}px`,

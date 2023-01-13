@@ -21,6 +21,8 @@ div(class="nu-header")
               url(v-for="it in item.content" :url="it.url") {{it.label}}
             div(v-else-if="item.content" class="nu-header__container-link__more")
               div(v-for="it in item.content" class="nu-header__container-link__more-col")
+                url(:url="it.url") {{it.label}}
+                url(v-for="i in it.content" :url="i.url" :newTab="i.newTab") {{i.label}}
       div(v-else class="body-2" key="no-navigation")
     div(class="body-2")
       search-bar(v-if="!noSearchbar"

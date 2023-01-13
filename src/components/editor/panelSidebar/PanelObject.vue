@@ -41,12 +41,13 @@ div(class="panel-objects")
       div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
         span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
         nubtn(size="mid" class="mt-30")
-          url(:url="$t('NN0791')")
+          url(:url="$t('NN0791')" :newTab="true")
             span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
@@ -201,7 +202,7 @@ export default defineComponent({
     },
     downloadAll() {
       generalUtils.copyText(this.panelParams)
-      // this.$notify({ group: 'copy', text: '已複製網址到剪貼簿' })
+      notify({ group: 'copy', text: '已複製網址到剪貼簿' })
       const links = this.mainContent.map((it) => {
         return it.list.map((it) => {
           return `https://template.vivipic.com/svg/${it.id}/prev?ver=${it.ver}`

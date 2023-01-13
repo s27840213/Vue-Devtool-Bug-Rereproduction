@@ -63,10 +63,14 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
 
 <script lang="ts">
 import i18n from '@/i18n'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
 import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
+import { AxiosError } from 'axios'
 import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -80,9 +84,6 @@ import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
 import unitUtils from '@/utils/unitUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { AxiosError } from 'axios'
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
 export default defineComponent({
@@ -721,7 +722,7 @@ export default defineComponent({
             await new Promise<void>((resolve) => {
               img.onerror = () => {
                 console.log('img load error')
-                this.$notify({ group: 'copy', text: `${i18n.global.t('NN0351')}` })
+                notify({ group: 'copy', text: `${i18n.global.t('NN0351')}` })
                 resolve()
               }
               img.onload = async () => {

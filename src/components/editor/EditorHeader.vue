@@ -30,9 +30,10 @@ div(class="editor-header" ref="header"
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
+import { mapMutations, mapGetters } from 'vuex'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import { mapState, mapMutations, mapGetters } from 'vuex'
 import store from '@/store'
 import pageUtils from '@/utils/pageUtils'
 import GeneralUtils from '@/utils/generalUtils'
@@ -102,9 +103,6 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapMutations({
-      _setPages: 'SET_pages'
-    }),
     setPagesName(event: Event) {
       const { value } = event.target as HTMLInputElement
       pageUtils.setPagesName(value)
@@ -115,7 +113,7 @@ export default defineComponent({
       }
       GeneralUtils.copyText(text)
         .then(() => {
-          // this.$notify({ group: 'copy', text: `${text} 已複製` })
+          notify({ group: 'copy', text: `${text} 已複製` })
         })
     }
   }

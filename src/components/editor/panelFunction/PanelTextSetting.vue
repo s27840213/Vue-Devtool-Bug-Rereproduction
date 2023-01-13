@@ -46,11 +46,11 @@ div(class="text-setting" ref='body'
     div(class="action-bar action-bar--small flex-evenly")
       svg-icon(class="pointer record-selection btn-lh feature-button p-5"
         :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click="openLineHeightSliderPopup('.btn-lh')"
+        @click="openLineHeightSliderPopup()"
         v-hint="$t('NN0110')")
       svg-icon(class="pointer record-selection btn-ls feature-button p-5"
         :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click="openSpacingSliderPopup('.btn-ls')"
+        @click="openSpacingSliderPopup()"
         v-hint="$t('NN0109')")
   div(class="action-bar flex-evenly")
     svg-icon(v-for="(icon,index) in mappingIcons('font')"
@@ -71,11 +71,12 @@ div(class="text-setting" ref='body'
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
-import { IGroup, ILayer, IParagraph, ISpan, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import vClickOutside from 'click-outside-vue3'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
@@ -130,7 +131,7 @@ export default defineComponent({
         'text-align-center': `${this.$t('NN0106')}`,
         'text-align-right': `${this.$t('NN0107')}`,
         'text-align-justify': `${this.$t('NN0108')}`
-      },
+      } as Record<string, string>,
       fontPrevUrl: ''
     }
   },
@@ -558,7 +559,7 @@ export default defineComponent({
     copyColor() {
       GeneralUtils.copyText(this.props.color)
         .then(() => {
-          // this.$notify({ group: 'copy', text: `${this.props.color} 已複製` })
+          notify({ group: 'copy', text: `${this.props.color} 已複製` })
         })
     },
     iconClickable(icon: string): boolean {

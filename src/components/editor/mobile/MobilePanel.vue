@@ -44,6 +44,7 @@ div(class="mobile-panel"
       //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
       component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
         class="border-box p-2"
+        :is="dynamicBindIs"
         v-bind="dynamicBindProps"
         v-on="dynamicBindMethod"
         @close="closeMobilePanel")
@@ -86,6 +87,7 @@ import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
 
 import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -278,73 +280,80 @@ export default defineComponent({
           }
       }
     },
+    dynamicBindIs(): string {
+      if (this.showExtraColorPanel) {
+        return 'panel-color'
+      }
+
+      const defaultVal = `panel-${this.currActivePanel}`
+
+      switch (this.currActivePanel) {
+        case 'download': {
+          return 'popup-download'
+        }
+        case 'replace': {
+          return `panel-${this.innerTab}`
+        }
+        case 'none':
+          return ''
+        default: {
+          return defaultVal
+        }
+      }
+    },
     dynamicBindProps(): { [index: string]: any } {
       if (this.showExtraColorPanel) {
         return {
-          is: 'panel-color',
           currEvent: this.extraColorEvent,
           panelHistory: this.panelHistory
         }
       }
 
-      const defaultVal = {
-        is: `panel-${this.currActivePanel}`
-      }
-
       switch (this.currActivePanel) {
         case 'fonts': {
-          return Object.assign(defaultVal, {
+          return {
             showTitle: false
-          })
+          }
         }
         case 'download': {
           return {
-            is: 'popup-download',
             hideContainer: true,
             pageIndex: pageUtils.currFocusPageIndex
           }
         }
         case 'text-effect': {
-          return Object.assign(defaultVal, {
+          return {
             panelHistory: this.panelHistory
-          })
+          }
         }
         case 'color': {
-          return Object.assign(defaultVal, {
+          return {
             panelHistory: this.panelHistory
-          })
+          }
         }
         case 'brand-list': {
-          const brandDefaultVal = Object.assign(defaultVal, {
+          const brandDefaultVal = {
             panelHistory: this.panelHistory
-          })
+          }
           if (editorUtils.currActivePanel === 'text') {
-            return Object.assign(brandDefaultVal, {
+            return {
               defaultOption: true
-            })
+            }
           }
           if (editorUtils.currActivePanel === 'brand') {
-            return Object.assign(brandDefaultVal, {
+            return {
               hasAddBrand: true
-            })
+            }
           }
           return brandDefaultVal
         }
         case 'brand': {
-          return Object.assign(defaultVal, {
+          return {
             maxheight: this.maxHeightPx()
-          })
+          }
         }
-        case 'replace':
-          return {
-            is: `panel-${this.innerTab}`
-          }
-        case 'none':
-          return {
-            is: ''
-          }
         default: {
-          return defaultVal
+          return {}
         }
       }
     },
@@ -563,7 +572,7 @@ export default defineComponent({
       }
     },
     handleLockedNotify() {
-      this.$notify({ group: 'copy', text: i18n.global.tc('NN0804') })
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     },
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActiveSubPanel === panelType) {

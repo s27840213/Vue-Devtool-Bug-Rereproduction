@@ -26,6 +26,7 @@ div(class="photo-setting")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import layerUtils from '@/utils/layerUtils'
@@ -42,7 +43,14 @@ import { FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import store from '@/store'
-import generalUtils from '@/utils/generalUtils'
+
+interface IBtn {
+  name: string
+  label: string
+  show: string
+  condition?: () => boolean
+  hint?: string
+}
 
 export default defineComponent({
   name: 'PanelPhotoSetting',
@@ -80,7 +88,7 @@ export default defineComponent({
             return currLayer.type === LayerType.image
           }
         }
-      ],
+      ] as IBtn[],
       bgRemoveBtn: { label: `${this.$t('NN0043')}`, show: 'remove-bg' }
     }
   },
@@ -183,7 +191,7 @@ export default defineComponent({
     ...mapActions({
       removeBg: 'user/removeBg'
     }),
-    disableBtn(btn: { [key: string]: string }): boolean {
+    disableBtn(btn: IBtn): boolean {
       const currLayer = layerUtils.getCurrConfig as IImage
       const { shadow } = currLayer.styles
       if (shadow) {
@@ -202,7 +210,7 @@ export default defineComponent({
       }
       return false
     },
-    activeBtn(btn: { [key: string]: string }): boolean {
+    activeBtn(btn: IBtn): boolean {
       if (this.show === btn.show) return true
       if (btn.name === 'crop' && this.isCropping) return true
       if (btn.name === 'remove-bg' && this.inBgRemoveMode) return true
@@ -317,7 +325,7 @@ export default defineComponent({
                       inProcess: LayerProcessType.none
                     })
 
-                    // this.$notify({ group: 'error', text: `${this.$t('NN0349')}` })
+                    notify({ group: 'error', text: `${this.$t('NN0349')}` })
                   }
 
                   return true

@@ -126,6 +126,8 @@ export default defineComponent({
       pageUtils.setPageSize(0, pxSize.width, pxSize.height, newDesignWidth, newDesignHeight, newDesignUnit)
       pageUtils.fitPage()
     }
+
+    this.setUserState({ enableAdminView: false })
   },
   computed: {
     ...mapState('mobileEditor', {
@@ -210,7 +212,8 @@ export default defineComponent({
     ...mapMutations({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
-      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
+      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
+      setUserState: 'user/SET_STATE'
     }),
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'
