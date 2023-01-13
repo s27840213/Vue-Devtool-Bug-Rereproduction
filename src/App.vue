@@ -16,7 +16,7 @@ div(id="app" :style="appStyles()")
       :info="currSelectedResInfo"
       @blur="setCurrSelectedResInfo()"
       tabindex="0")
-  fps(v-if="!inScreenshotPreview && showAllAdminTool")
+  debug-tool(v-if="!inScreenshotPreview && showAllAdminTool")
   div(class="modal-container"
       v-if="isModalOpen")
     modal-card
@@ -45,7 +45,7 @@ import vClickOutside from 'click-outside-vue3'
 import Popup from '@/components/popup/Popup.vue'
 import ResInfo from '@/components/modal/ResInfo.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
-import Fps from '@/components/componentLog/DebugTool.vue'
+import DebugTool from '@/components/componentLog/DebugTool.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
@@ -56,7 +56,7 @@ export default defineComponent({
     Popup,
     ResInfo,
     ModalCard,
-    Fps
+    DebugTool
   },
   directives: {
     clickOutside: vClickOutside.directive

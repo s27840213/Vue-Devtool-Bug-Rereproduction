@@ -19,6 +19,9 @@ div(class="panel-more")
   div(class="panel-more__item"
       @click="onLogoutClicked()")
       span(class="body-2 pointer") {{$tc('NN0167',2)}}
+  div(class="panel-more__item"
+      @click="toggleDebugTool")
+    span Toggle admin tool
   div(class="body-2 panel-more__item" @click="gotoDesktop")
     span(class="text-gray-3") Version: {{buildNumber}}
 </template>
@@ -29,6 +32,7 @@ import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import layerUtils from '@/utils/layerUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
 import pageUtils from '@/utils/pageUtils'
+import { mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -36,6 +40,9 @@ export default defineComponent({
   },
   emits: ['close'],
   computed: {
+    ...mapState('user', [
+      'enableAdminView'
+    ]),
     opacity(): number {
       return layerUtils.getCurrOpacity
     },
@@ -48,6 +55,9 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapMutations({
+      setUserState: 'user/SET_STATE'
+    }),
     updateLayerOpacity(val: number) {
       layerUtils.updateLayerOpacity(val)
     },
@@ -76,6 +86,9 @@ export default defineComponent({
     },
     gotoDesktop() { // TO-DELETE
       this.$router.push(this.$router.currentRoute.value.fullPath.replace('mobile-editor', 'editor'))
+    },
+    toggleDebugTool() {
+      this.setUserState({ enableAdminView: !this.enableAdminView })
     }
   }
 })

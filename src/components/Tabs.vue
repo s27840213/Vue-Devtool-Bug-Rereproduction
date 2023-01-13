@@ -23,8 +23,7 @@ export default defineComponent({
     },
     // Use v-model to bind tabIndex.
     tabIndex: {
-      type: Number,
-      required: true
+      type: Number
     },
     theme: {
       type: String as PropType<'dark'|'light'|'dark-rect'>,
