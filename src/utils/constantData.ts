@@ -26,7 +26,7 @@ export interface IEffect {
   options: IEffectOption[]
 }
 export interface IEffectCategory {
-  name: string
+  name: 'shadow' | 'bg' | 'shape'
   label: string
   effects2d: IEffect[][]
 }

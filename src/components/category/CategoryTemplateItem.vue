@@ -16,6 +16,7 @@ div(class="category-template-item" :style="itemStyle")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import AssetUtils from '@/utils/assetUtils'
@@ -166,7 +167,7 @@ export default defineComponent({
     copyId() {
       GeneralUtils.copyText(this.item.id)
         .then(() => {
-          // this.$notify({ group: 'copy', text: `${this.item.id} 已複製` })
+          notify({ group: 'copy', text: `${this.item.id} 已複製` })
         })
     }
   }

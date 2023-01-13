@@ -10,7 +10,7 @@ div(class="panel-text-effect")
               @click="pushHistory(category.name)")
       span(class="body-3") {{category.label}}
   //- To choose effect, ex: hollow, splice or echo.
-  div(v-if="state === 'effects'"
+  div(v-if="state === 'effects' && currEffect !== null"
       class="panel-text-effect__effects")
     div(v-for="effect in effectList"
         :key="`${currCategory.name}-${effect.key}`"
@@ -23,7 +23,7 @@ div(class="panel-text-effect")
           class="panel-text-effect__effects--more")
         svg-icon(iconName="sliders" iconWidth="20px" iconColor="white")
   //- To set effect optoin, ex: distance, color.
-  div(v-if="state === 'options'"
+  div(v-if="state === 'options' && currEffect !== null"
       class="w-full panel-text-effect__form")
     span(class="panel-text-effect__name") {{currEffect.label}}
     div(v-for="option in currEffect.options"
@@ -32,7 +32,7 @@ div(class="panel-text-effect")
       div(v-if="option.type === 'select'"
           class="panel-text-effect__select")
         div(v-for="sel in option.select"
-            :class="{'selected': currentStyle[currCategory.name].endpoint === sel.key }"
+            :class="{'selected': currentStyle.endpoint === sel.key }"
             @click="handleSelectInput(option.key, sel.key)")
           svg-icon(:iconName="`${option.key}-${sel.key}`"
             iconWidth="24px")
@@ -42,9 +42,9 @@ div(class="panel-text-effect")
         :borderTouchArea="true"
         :title="option.label"
         :name="option.key"
-        :value="currentStyle[currCategory.name][option.key]"
-        :max="option.max"
-        :min="option.min"
+        :value="currentStyle[option.key]"
+        :max="option.max ?? 100"
+        :min="option.min ?? 0"
         @update="(e)=>handleRangeInput(e, option)"
         @pointerdown="shapeFocus(true)"
         @pointerup="shapeFocus(false)")
@@ -52,7 +52,7 @@ div(class="panel-text-effect")
       div(v-if="option.type === 'color'"
         class="panel-text-effect__color")
         div {{option.label}}
-        color-btn(:color="colorParser(currentStyle[currCategory.name][option.key])"
+        color-btn(:color="colorParser(currentStyle[option.key])"
                 size="24px" @click="openColorPanel(option.key)")
     span(class="panel-text-effect__reset label-mid"
         @click="resetTextEffect()") {{$t('NN0754')}}
@@ -81,7 +81,7 @@ export default defineComponent({
   props: {
     panelHistory: {
       type: Array as PropType<string[]>,
-      default: () => []
+      default: [] as string[]
     }
   },
   emits: ['pushHistory', 'openExtraColorModal'],
@@ -101,15 +101,16 @@ export default defineComponent({
     currEffect(): IEffect | null {
       if (!this.currCategory) return null
       return _.find(this.effectList, ['key',
-        this.currentStyle[this.currCategory.name as 'shadow' | 'bg' | 'shape'].name]) as IEffect
+        this.currentStyle.name]) as IEffect
     },
-    currentStyle(): { shadow: ITextEffect, bg: ITextBgEffect, shape: ITextShape } {
+    currentStyle(): Record<string, string> {
       const { styles } = textEffectUtils.getCurrentLayer()
+      if (!this.currCategory) return { name: 'none' }
       return {
-        shadow: Object.assign({ name: 'none' }, styles?.textEffect as ITextEffect),
-        bg: styles.textBg as ITextBgEffect,
-        shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
-      }
+        shadow: Object.assign({ name: 'none' }, styles?.textEffect),
+        bg: styles.textBg,
+        shape: Object.assign({ name: 'none' }, styles.textShape)
+      }[this.currCategory.name] as Record<string, string>
     },
     historySize(): number {
       return this.panelHistory.length
@@ -143,6 +144,7 @@ export default defineComponent({
       effect?: Record<string, string|number|boolean>
     }) {
       let { effectName, effect } = options
+      const { textShape } = textEffectUtils.getCurrentLayer().styles
       if (!effectName) {
         effectName = this.currEffect?.key || 'none'
       }
@@ -154,7 +156,7 @@ export default defineComponent({
           break
         case 'bg':
           textBgUtils.setTextBg(effectName, Object.assign({}, effect))
-          if (this.currentStyle.shape.name !== 'none') {
+          if (textShape.name !== 'none') {
             textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
             textPropUtils.updateTextPropsState()
           }
@@ -173,7 +175,7 @@ export default defineComponent({
       this.recordChange()
     },
     onEffectClick(effectName: string): void {
-      if (effectName !== this.currentStyle[this.currCategory.name as 'shadow' | 'bg' | 'shape'].name) {
+      if (effectName !== this.currentStyle.name) {
         this.setEffect({ effectName })
         this.recordChange()
       } else if (effectName !== 'none') {

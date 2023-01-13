@@ -200,13 +200,14 @@ div(class="shape-setting")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
 import vClickOutside from 'click-outside-vue3'
 import SearchBar from '@/components/SearchBar.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import GeneralValueSelector from '@/components/GeneralValueSelector.vue'
 import LayerUtils from '@/utils/layerUtils'
-import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, ILayer, IShape } from '@/interfaces/layer'
 import shapeUtils from '@/utils/shapeUtils'
 import { IListServiceContentData } from '@/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
@@ -629,7 +630,7 @@ export default defineComponent({
       }
       GeneralUtils.copyText(text)
         .then(() => {
-          // this.$notify({ group: 'copy', text: `${text} 已複製` })
+          this.$notify({ group: 'copy', text: `${text} 已複製` })
         })
     },
     async getDataClicked() {
@@ -637,7 +638,7 @@ export default defineComponent({
 
       const data = {}
       if (this.focusDesignId.length === 0) {
-        // this.$notify({ group: 'copy', text: '無元素id' })
+        this.$notify({ group: 'copy', text: '無元素id' })
       }
 
       if (this.focusDesignId.length > 0) {
@@ -647,7 +648,7 @@ export default defineComponent({
           this.svgInfo = res.data.data
           this.svgInfo.edit_time = this.svgInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
         } else {
-          // this.$notify({ group: 'copy', text: '找不到模板資料' })
+          notify({ group: 'copy', text: '找不到模板資料' })
         }
       }
 
@@ -655,7 +656,7 @@ export default defineComponent({
     },
     async updateDataClicked() {
       if (!this.svgInfo.key_id) {
-        // this.$notify({ group: 'copy', text: '請先取得元素資料' })
+        notify({ group: 'copy', text: '請先取得元素資料' })
         return
       }
 
@@ -669,11 +670,11 @@ export default defineComponent({
       }
       const res = await designApis.updateDesignInfo(this.token, 'svg', this.svgInfo.key_id, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
-        // this.$notify({ group: 'copy', text: '元素資料更新成功' })
+        notify({ group: 'copy', text: '元素資料更新成功' })
         this.svgInfo = res.data.data
         this.svgInfo.edit_time = this.svgInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
       } else {
-        // this.$notify({ group: 'copy', text: '更新時發生錯誤' })
+        notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.isLoading = false
     },

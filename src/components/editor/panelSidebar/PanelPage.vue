@@ -10,12 +10,12 @@ div(class="panel-page")
   div(class="panel-page-items")
     template(v-for="(page, idx) in getPages")
       div(class="panel-page__plus")
-        panel-page-plus(:index="idx" last=false
+        panel-page-plus(:index="idx" :last="false"
           :class="{'pt-10': idx === 0}")
       page-preview-page-wrapper(:index="idx" :pagename="page.name" type="panel" :config="wrappedPage(page)" :lazyLoadTarget="'.panel-page'")
       div(v-if="idx+1 === getPageCount"
         class="panel-page__plus")
-        panel-page-plus(:index="idx+1" last=false)
+        panel-page-plus(:index="idx+1" :last="false")
 </template>
 
 <script lang="ts">
