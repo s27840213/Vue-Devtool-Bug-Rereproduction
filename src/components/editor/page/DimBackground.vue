@@ -63,13 +63,8 @@ export default defineComponent({
       type: Object,
       required: true
     },
-    pageScaleRatio: {
-      type: Number,
-      required: true
-    },
     isAnyBackgroundImageControl: {
       type: Boolean,
-      required: true
     },
     contentScaleRatio: {
       default: 1,

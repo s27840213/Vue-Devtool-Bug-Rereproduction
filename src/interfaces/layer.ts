@@ -58,6 +58,7 @@ export interface ITextStyle extends IStyle {
   textShape: ITextShape | Record<string, never>
   textEffect: ITextEffect | Record<string, never>
   textBg: ITextBgEffect
+  align: string
 }
 
 export interface IParagraphStyle {

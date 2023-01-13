@@ -295,7 +295,7 @@ export default defineComponent({
         })
       }
     },
-    imgStyles(): Partial<IImage> {
+    imgStyles(): Record<string, string> {
       return this.stylesConverter()
     },
     async previewAsLoading() {
