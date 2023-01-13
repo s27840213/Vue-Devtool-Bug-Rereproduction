@@ -1,9 +1,9 @@
+import { nextTick } from 'vue'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import { IBackgroundImage, IPage } from '@/interfaces/page'
 import { SidebarPanelType } from '@/store/types'
 import store from '@/store'
 import { notify } from '@kyvg/vue3-notification'
-import Vue from 'vue'
 import i18n from '@/i18n'
 import assetUtils from './assetUtils'
 import editorUtils from './editorUtils'
@@ -67,7 +67,7 @@ class BackgroundUtils {
 
   switchPanelBgTab(index: number) {
     store.commit('SET_currSidebarPanelType', SidebarPanelType.bg)
-    Vue.nextTick(() => { eventUtils.emit(PanelEvent.switchPanelBgInnerTab, index) })
+    nextTick(() => { eventUtils.emit(PanelEvent.switchPanelBgInnerTab, index) })
   }
 
   handleImageFlip(flipIcon: string) {
