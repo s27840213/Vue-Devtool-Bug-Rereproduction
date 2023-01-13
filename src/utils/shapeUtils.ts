@@ -1,19 +1,16 @@
 import store from '@/store'
 import { IListServiceContentDataItem } from '@/interfaces/api'
-import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
+import { IGroup, ILayer, IShape } from '@/interfaces/layer'
 import { IMarker } from '@/interfaces/shape'
 import AssetUtils from './assetUtils'
-import { IAsset } from '@/interfaces/module'
 import layerUtils from './layerUtils'
-import { ILayerInfo, LayerType } from '@/store/types'
+import { ILayerInfo } from '@/store/types'
 import mappingUtils from './mappingUtils'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from './pageUtils'
-import imageUtils from './imageUtils'
-import groupUtils from './groupUtils'
 import zindexUtils from './zindexUtils'
-import stepsUtils from './stepsUtils'
 import layerFactary from './layerFactary'
+import _ from 'lodash'
 
 class ShapeUtils {
   get hasMultiColors() {
@@ -35,42 +32,6 @@ class ShapeUtils {
       }
     }
     return oneColorObjNum
-  }
-
-  get getDocumentColors() {
-    const layer = layerUtils.getCurrLayer
-    switch (layer.type) {
-      case 'shape':
-        return (layer as IShape).color || []
-      case 'tmp':
-      case 'group': {
-        const { subLayerIdx } = layerUtils
-        if (subLayerIdx === -1) {
-          if (!this.hasMultiColors) {
-            const layers = (layer as IGroup).layers
-              .filter((l: ILayer) => l.type === 'shape' && (l as IShape).color && (l as IShape).color.length === 1)
-            return (layers.length ? layers[0].color : []) as string[]
-          } else return []
-        } else {
-          const subLayer = (layer as IGroup).layers[subLayerIdx]
-          if (subLayer.type === LayerType.frame) {
-            const { decoration, decorationTop } = subLayer as unknown as IFrame
-            return [...(decoration?.color || []), ...(decorationTop?.color || [])]
-          }
-          if (subLayer.type === LayerType.shape) {
-            const colors = (subLayer as IShape).color
-            return colors
-          }
-          return []
-        }
-      }
-      case 'frame': {
-        const { decoration, decorationTop } = layerUtils.getCurrLayer as IFrame
-        return [...(decoration?.color || []), ...(decorationTop?.color || [])]
-      }
-      default:
-        return []
-    }
   }
 
   addStyleTag(styleText: string): Text {
@@ -724,7 +685,7 @@ class ShapeUtils {
 
   setLineWidth(value: number) {
     const { min, max } = mappingUtils.mappingMinMax('lineWidth')
-    const lineWidth = parseInt(generalUtils.boundValue(value, min, max))
+    const lineWidth = _.floor(parseFloat(generalUtils.boundValue(value, min, max)), 2)
     const { getCurrLayer: currLayer } = layerUtils
     const { point, styles, size } = (currLayer as IShape)
 

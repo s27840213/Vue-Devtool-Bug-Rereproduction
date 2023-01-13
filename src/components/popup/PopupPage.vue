@@ -73,9 +73,6 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapGetters({
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -86,9 +83,6 @@ export default defineComponent({
     }),
     hasDesignId(): boolean {
       return this.getPage(pageUtils.currFocusPageIndex).designId !== ''
-    },
-    inAdminMode(): boolean {
-      return this.role === 0 && this.adminMode === true
     },
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex

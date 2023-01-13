@@ -29,7 +29,7 @@ import { GalleryImage } from '@/interfaces/gallery'
 export default defineComponent({
   props: {
     vendor: {
-      type: String,
+      type: String as PropType<'unsplash' | 'myfile'>,
       required: true
     },
     images: {

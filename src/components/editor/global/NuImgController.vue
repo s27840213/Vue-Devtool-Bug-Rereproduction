@@ -10,13 +10,13 @@ div(class="nu-img-controller")
     div(v-for="(scaler, index) in controlPoints.scalers"
         class="controller-point"
         :key="`scaler-${index}`"
-        :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' })"
+        :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
         @pointerdown.prevent.stop="isMobile ? null : scaleStart($event)"
         @touchstart="isMobile ? null : disableTouchEvent($event)")
     div(v-if="isMobile" v-for="(scaler, index) in controlPoints.scalerTouchAreas"
         class="controller-point"
         :key="`scaler-touch-${index}`"
-        :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' })"
+        :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
         @pointerdown.prevent.stop="scaleStart"
         @touchstart="disableTouchEvent")
 </template>

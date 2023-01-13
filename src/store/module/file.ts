@@ -8,6 +8,7 @@ import { captureException } from '@sentry/browser'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
 import { IFrame, IGroup, IImage } from '@/interfaces/layer'
 import { SrcObj } from '@/interfaces/gallery'
+
 interface IFileState {
   myfileImages: Array<IAssetPhoto>,
   editorViewImages: Record<string, Record<string, string>>,
@@ -105,6 +106,7 @@ const actions: ActionTree<IFileState, unknown> = {
       const rawData = await apiUtils.requestWithRetry(() => file.getFiles({ pageIndex }))
       addMyfile(rawData.data.data.image.content, rawData.data.next_page)
     } catch (error) {
+      console.error(error)
       captureException(error)
     }
   },
@@ -133,7 +135,7 @@ const actions: ActionTree<IFileState, unknown> = {
     }
   },
   async updatePageImages({ dispatch }, { pageIndex }: { pageIndex: number }) {
-    const { layers, backgroundImage } = store.state.pages[pageIndex]
+    const { layers, backgroundImage } = store.state.pages[pageIndex].config
     const imgToRequest = new Set<string>()
 
     imgToRequest.add(isPrivate(backgroundImage.config.srcObj))
@@ -172,9 +174,20 @@ const actions: ActionTree<IFileState, unknown> = {
     await apiUtils.requestWithRetry(() => userApis.getAllAssets(token, {
       asset_list: assetSet
     })).then((data) => {
-      commit('SET_STATE', {
-        editorViewImages: Object.assign({}, state.editorViewImages, data.data.url_map)
-      })
+      const url_map = data.data.url_map
+      if (store.getters['user/getUserId'] === 'backendRendering') {
+        const token = store.getters['user/getToken']
+        Object.entries(url_map).forEach(([k, v]: [string, any]) => {
+          const full = v.full as string
+          const user = full.substring('https://asset.vivipic.com/'.length, full.indexOf('/asset/image/'))
+          const id = full.substring(full.indexOf('/asset/image/') + '/asset/image/'.length, full.indexOf('/full?'))
+          url_map[k].ext1 = `https://template.vivipic.com/pdf/${user}/asset/image/${id}/ext1?token=${token}`
+          url_map[k].ext2 = `https://template.vivipic.com/pdf/${user}/asset/image/${id}/ext2?token=${token}`
+          url_map[k].ext3 = `https://template.vivipic.com/pdf/${user}/asset/image/${id}/ext3?token=${token}`
+        })
+      }
+      const editorViewImages = Object.assign({}, state.editorViewImages, data.data.url_map)
+      commit('SET_STATE', { editorViewImages })
     })
   },
   initImages(context, { imgs }: { 'imgs': [IUserImageContentData] }) {
@@ -196,7 +209,7 @@ const mutations: MutationTree<IFileState> = {
     keys
       .forEach(key => {
         if (key in state) {
-          (state[key] as any) = newState[key]
+          (state[key] as unknown) = newState[key]
         }
       })
   },
@@ -236,7 +249,7 @@ const mutations: MutationTree<IFileState> = {
         tiny: src
       }
     }
-    state.myfileImages.unshift(previewImage)
+    state.myfileImages = [previewImage, ...state.myfileImages]
   },
   DEL_PREVIEW(state: IFileState, { assetId }) {
     state.myfileImages = state.myfileImages.filter((it: IAssetPhoto) => {

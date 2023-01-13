@@ -16,6 +16,7 @@ div(class="category-template-item" :style="itemStyle")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import AssetUtils from '@/utils/assetUtils'
@@ -23,6 +24,8 @@ import GeneralUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import { PRECISION } from '@/utils/unitUtils'
+import { round } from 'lodash'
 
 /**
  * @Todo - fix the any type problems -> TingAn
@@ -107,8 +110,8 @@ export default defineComponent({
         .map(theme => theme.id).join(',')
       const isSameTheme = themeUtils.compareThemesWithPage(theme)
       */
-      const currPage = pageUtils.getPage(pageUtils.currFocusPageIndex)
-      const isSameSize = currPage.width === width && currPage.height === height
+      const pageSize = pageUtils.currFocusPageSizeWithBleeds
+      const isSameSize = pageSize.physicalWidth === width && pageSize.physicalHeight === height && pageSize.unit === 'px'
       const cb = this.groupItem
         ? (resize?: any) => {
           AssetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize)
@@ -141,13 +144,13 @@ export default defineComponent({
         }
         modalUtils.setModalInfo(
           this.$t('NN0695') as string,
-          [`${this.$t('NN0209', { tsize: `${width}x${height}`, psize: `${currPage.width}x${currPage.height}` })}`],
+          [`${this.$t('NN0209', { tsize: `${width}x${height} px`, psize: `${round(pageSize.physicalWidth, PRECISION)}x${round(pageSize.physicalHeight, PRECISION)} ${pageSize.unit}` })}`],
           {
             msg: `${this.$t('NN0021')}`,
             class: 'btn-light-mid',
             style: { border: '1px solid #4EABE6' },
             action: () => {
-              const resize = { width: currPage.width, height: currPage.height }
+              const resize = { width: pageSize.width, height: pageSize.height, physicalWidth: pageSize.physicalWidth, physicalHeight: pageSize.physicalHeight, unit: pageSize.unit }
               cb(resize)
             }
           },
@@ -157,14 +160,14 @@ export default defineComponent({
           }
         )
       } else {
-        const resize = { width: currPage.width, height: currPage.height }
+        const resize = { width: pageSize.width, height: pageSize.height }
         cb(resize)
       }
     },
     copyId() {
       GeneralUtils.copyText(this.item.id)
         .then(() => {
-          // this.$notify({ group: 'copy', text: `${this.item.id} 已複製` })
+          notify({ group: 'copy', text: `${this.item.id} 已複製` })
         })
     }
   }

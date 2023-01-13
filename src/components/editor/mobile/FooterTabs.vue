@@ -1,25 +1,32 @@
 <template lang="pug">
-div(class="footer-tabs" ref="tabs")
-  div(class="footer-tabs__container" :style="containerStyles"  ref="container")
+div(class="footer-tabs" ref="tabs" :style="rootStyles")
+  div(class="footer-tabs__container" :style="containerStyles"
+      @scroll.passive="updateContainerOverflow" ref="container")
     template(v-for="(tab, index) in tabs")
-      div(v-if="!tab.hidden"
+      div(v-if="!tab.hidden" :key="tab.icon"
           class="footer-tabs__item"
           :class="{'click-disabled': (tab.disabled || isLocked)}"
           @click="handleTabAction(tab)")
-        svg-icon(class="mb-5 click-disabled"
+        color-btn(v-if="tab.icon === 'color'" size="22px"
+                  class="mb-5 click-disabled"
+                  :color="globalSelectedColor")
+        svg-icon(v-else class="mb-5 click-disabled"
           :iconName="tab.icon"
-          :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
-          :iconWidth="'22px'")
+          :iconColor="(tab.disabled || isLocked) ? 'gray-2' : tabActive(tab) ? 'blue-1' :'white'"
+          :iconWidth="'22px'"
+          :style="textIconStyle")
         span(class="body-3 no-wrap click-disabled"
-        :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
+        :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
-import stepsUtils from '@/utils/stepsUtils'
+import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
+import ColorBtn from '@/components/global/ColorBtn.vue'
+import stepsUtils from '@/utils/stepsUtils'
 import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -27,14 +34,17 @@ import { IFooterTab } from '@/interfaces/editor'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import shapeUtils from '@/utils/shapeUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import editorUtils from '@/utils/editorUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
+import i18n from '@/i18n'
+import colorUtils from '@/utils/colorUtils'
+import { isEqual } from 'lodash'
 
 export default defineComponent({
   components: {
+    ColorBtn
   },
   props: {
     currTab: {
@@ -54,6 +64,8 @@ export default defineComponent({
       mainMenu,
       isFontsPanelOpened: false,
       disableTabScroll: false,
+      leftOverflow: false,
+      rightOverflow: false,
       homeTabs: [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
         { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
@@ -93,7 +105,7 @@ export default defineComponent({
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
@@ -104,7 +116,7 @@ export default defineComponent({
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         ...(this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
         { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
         ...this.genearlLayerTabs,
@@ -115,7 +127,8 @@ export default defineComponent({
       ]
     },
     frameTabs(): Array<IFooterTab> {
-      const frame = layerUtils.getCurrLayer as IFrame
+      const frame = layerUtils.getCurrLayer
+      if (frame.type !== 'frame') return []
       const showReplace = frame.clips.length === 1 || frame.clips.some(c => c.active)
       const replace = showReplace ? [{ icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' }] : []
       return [
@@ -125,22 +138,21 @@ export default defineComponent({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: shapeUtils.getDocumentColors.length === 0,
+          hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust },
         ...this.genearlLayerTabs
       ]
     },
     fontTabs(): Array<IFooterTab> {
       return [
-        { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || this.hasSubSelectedLayer || this.isGroup },
+        { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer) },
         { icon: 'font', text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`), panelType: 'fonts' },
         { icon: 'font-size', text: `${this.$t('NN0122')}`, panelType: 'font-size' },
         {
-          icon: 'color',
+          icon: 'text-color-mobile',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
           props: {
@@ -160,11 +172,12 @@ export default defineComponent({
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !hasBgImage, disabled: this.backgroundLocked },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
+          hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.background
           },
@@ -176,7 +189,7 @@ export default defineComponent({
     multiPhotoTabs(): Array<IFooterTab> {
       return [
         ...this.multiGeneralTabs,
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' }
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' }
       ]
     },
     multiFontTabs(): Array<IFooterTab> {
@@ -192,7 +205,7 @@ export default defineComponent({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: shapeUtils.getSingleColorObjNum === 0 && !this.hasSubSelectedLayer,
+          hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.shape
           }
@@ -206,7 +219,7 @@ export default defineComponent({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: shapeUtils.getDocumentColors.length === 0,
+          hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.shape
           }
@@ -246,14 +259,19 @@ export default defineComponent({
     tabs(): Array<IFooterTab> {
       if (this.inAllPagesMode) {
         return this.pageTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
-        /** tmp layer treated as group */
+      // A group that only has images
+      } else if (this.isGroupOrTmp && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
         return this.multiPhotoTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
+      } else if (this.isGroupOrTmp && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
         return this.photoInGroupTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('text')) {
+      // text + shape color
+      } else if (this.isGroupOrTmp && this.targetIs('text') && this.showObjectColorAndFontTabs) {
+        return [...this.multiObjectTabs, ...this.fontTabs]
+      // only text
+      } else if (this.isGroupOrTmp && this.targetIs('text')) {
         return this.multiFontTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('shape') && this.singleTargetType()) {
+      // only shape
+      } else if (this.isGroupOrTmp && this.targetIs('shape') && this.singleTargetType()) {
         return this.multiObjectTabs
       } else if ((this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer)) && !this.singleTargetType()) {
         return this.multiGeneralTabs
@@ -268,12 +286,22 @@ export default defineComponent({
         return this.frameTabs
       } else if (this.showShapeSetting) {
         return this.objectTabs.concat(this.genearlLayerTabs)
-      } else if (this.showGeneralTabs) {
-        return [this.mainMenu, ...this.genearlLayerTabs]
       } else if (this.inBgSettingMode) {
         return this.bgSettingTab
       } else {
         return this.homeTabs
+      }
+    },
+    globalSelectedColor(): string {
+      return colorUtils.globalSelectedColor.color
+    },
+    textIconStyle(): Record<string, string> {
+      const textColor = colorUtils.globalSelectedColor.textColor
+      return textColor === 'multi' ? {
+        '--multi-text-color': '1' // For svg icon 'text-color-mobile.svg' rect fill multi-color
+      } : {
+        '--multi-text-color': '0',
+        '--text-color': textColor // For svg icon 'text-color-mobile.svg' rect fill color
       }
     },
     isWholeGroup(): boolean {
@@ -292,11 +320,15 @@ export default defineComponent({
       return layerUtils.getTmpLayer().locked
     },
     isGroup(): boolean {
-      return (layerUtils.getCurrLayer.type === LayerType.tmp || this.currSelectedInfo.types.has('group')) && this.currSelectedInfo.layers.length === 1
+      return layerUtils.getCurrLayer.type === LayerType.group
+    },
+    isGroupOrTmp(): boolean {
+      return (layerUtils.getCurrLayer.type === LayerType.tmp ||
+      layerUtils.getCurrLayer.type === LayerType.group)
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup, index: number) => {
+      const types = groupLayer.layers.map((layer) => {
         return layer.type
       })
       return new Set(types)
@@ -328,6 +360,16 @@ export default defineComponent({
     showPhotoTabs(): boolean {
       return (!this.inBgRemoveMode && !this.isFontsPanelOpened &&
         this.targetIs('image') && this.singleTargetType()) || this.hasFrameClipActive
+    },
+    showObjectColorAndFontTabs(): boolean {
+      const { subLayerIdx } = layerUtils
+      const currLayer = layerUtils.getCurrLayer
+      if (!(currLayer.type === 'group' || currLayer.type === 'tmp') || subLayerIdx !== -1) return false
+      const singleColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length === 1) as IShape[]
+      const multiColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length !== 1) as IShape[]
+      const hasImages = (currLayer.layers.filter(l => l.type === 'image') as IImage[]).length !== 0
+      if (hasImages || (singleColorShapes.length === 0 && multiColorShapes.length !== 1)) return false
+      else return true
     },
     hasFrameClipActive(): boolean {
       const layer = layerUtils.getCurrLayer
@@ -367,10 +409,20 @@ export default defineComponent({
     contentEditable(): boolean {
       return this.currSelectedInfo.layers[0]?.contentEditable
     },
-    containerStyles(): { [index: string]: any } {
+    rootStyles(): Record<string, string> {
+      return {
+        backgroundColor: this.contentEditable ? '#EEEFF4' : '#14182A'
+      }
+    },
+    containerStyles(): { [index: string]: string } {
+      // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
       return {
         transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
-        opacity: `${this.contentEditable ? 0 : 1}`
+        opacity: `${this.contentEditable ? 0 : 1}`,
+        maskImage: this.contentEditable ? 'none'
+          : `linear-gradient(to right, 
+          transparent 0, black ${this.leftOverflow ? '56px' : 0}, 
+          black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
       }
     },
     currLayer(): ILayer {
@@ -396,8 +448,8 @@ export default defineComponent({
       }
     },
     tabs: {
-      handler() {
-        if (this.disableTabScroll) {
+      handler(newVal, oldVal) {
+        if (this.disableTabScroll || isEqual(newVal, oldVal)) {
           this.disableTabScroll = false
           return
         }
@@ -423,6 +475,11 @@ export default defineComponent({
       _setIsShowPagePreview: 'page/SET_isShowPagePreview',
       setBgImageControl: 'SET_backgroundImageControl'
     }),
+    updateContainerOverflow() {
+      const { scrollLeft, scrollWidth, offsetWidth } = this.$refs.container as HTMLElement
+      this.leftOverflow = scrollLeft > 0
+      this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
+    },
     handleTabAction(tab: IFooterTab) {
       switch (tab.icon) {
         case 'crop': {
@@ -525,11 +582,19 @@ export default defineComponent({
               })
             }
 
-            tiptapUtils.focus({ scrollIntoView: false })
+            tiptapUtils.focus({ scrollIntoView: false }, currLayer.isEdited ? 'end' : null)
           } else {
             /**
              * @Todo handle the sub controler
              */
+            const { subLayerIdx } = layerUtils
+            const subLayer = (currLayer as IGroup).layers[subLayerIdx]
+            if (subLayer.type === 'text') {
+              layerUtils.updateLayerProps(pageIndex, index, {
+                contentEditable: true
+              }, subLayerIdx)
+            }
+            tiptapUtils.focus({ scrollIntoView: false }, 'end')
           }
           break
         }
@@ -549,11 +614,15 @@ export default defineComponent({
         }
         case 'effect': {
           if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
-            // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
             return
           }
           break
         }
+        case 'color':
+        case 'text-color-mobile':
+          colorUtils.setCurrEvent(tab?.props?.currColorEvent as string)
+          break
         default: {
           break
         }
@@ -595,8 +664,15 @@ export default defineComponent({
         return this.currSelectedInfo.types.size === 1
       }
     },
+    tabActive(tab: IFooterTab): boolean {
+      if (this.currTab === 'color') {
+        return this.currTab === tab.panelType &&
+          ((colorUtils.currEvent === 'setTextColor' && tab.icon === 'text-color-mobile') ||
+          (colorUtils.currEvent !== 'setTextColor' && tab.icon === 'color'))
+      } else return this.currTab === tab.panelType
+    },
     handleLockedNotify() {
-      // this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     }
   }
 })
@@ -605,7 +681,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 .footer-tabs {
   overflow: hidden;
-  background-color: setColor(gray-5);
   &__container {
     overflow: scroll;
     display: grid;

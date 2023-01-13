@@ -66,7 +66,8 @@ export default defineComponent({
       isDraggedOver: false,
       isNameEditing: false,
       editableName: '',
-      draggedFolderCoordinate: { x: 0, y: 0 }
+      draggedFolderCoordinate: { x: 0, y: 0 },
+      lastOnId: ''
     }
   },
   props: {
@@ -92,7 +93,23 @@ export default defineComponent({
       if (newVal) {
         this.fetchStructuralFolders({ path: `${designUtils.appendPath(this.parents as string[], this.folder as IFolder).slice(1).join(',')}` })
       }
+    },
+    'folder.id': function(newVal) {
+      designUtils.off(`edit-sidebar-${this.lastOnId}`)
+      this.lastOnId = newVal
+      designUtils.on(`edit-sidebar-${newVal}`, () => {
+        this.handleNameEditStart()
+      })
     }
+  },
+  mounted() {
+    this.lastOnId = this.folder.id
+    designUtils.on(`edit-sidebar-${this.folder.id}`, () => {
+      this.handleNameEditStart()
+    })
+  },
+  unmounted() {
+    designUtils.off(this.lastOnId)
   },
   computed: {
     ...mapGetters('design', {

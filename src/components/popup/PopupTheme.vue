@@ -29,6 +29,7 @@ import Checkbox from '@/components/global/Checkbox.vue'
 import { Itheme } from '@/interfaces/theme'
 import themeUtils from '@/utils/themeUtils'
 import { mapValues } from 'lodash'
+import pageUtils from '@/utils/pageUtils'
 
 export default defineComponent({
   components: {
@@ -50,7 +51,9 @@ export default defineComponent({
         middleware: (event: MouseEvent) => {
           // Prevent v-click-outside if user press advanced svg to close it.
           // It will cause error because mobile click event call by pointerdown have delay.
-          return ((event.target as HTMLElement).attributes.getNamedItem('xlink:href') as Attr)?.nodeValue !== '#advanced'
+          return !(event.target as HTMLElement).matches(
+            '.panel-template .search-bar .nubtn, .panel-template .search-bar .nubtn *'
+          )
         }
       },
       selected: {} as { [key: string]: boolean }
@@ -88,7 +91,7 @@ export default defineComponent({
       this.$emit('close')
     },
     handleRecommend() {
-      const currFocusPageSize = themeUtils.getFocusPageSize()
+      const currFocusPageSize = pageUtils.currFocusPageSizeWithBleeds
       const themes = themeUtils.getThemesBySize(currFocusPageSize.width, currFocusPageSize.height)
       this.initSelected(themes.map(theme => `${theme.id}`))
     }

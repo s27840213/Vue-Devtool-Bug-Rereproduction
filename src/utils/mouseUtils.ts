@@ -131,7 +131,8 @@ class MouseUtils {
         opacity: 100,
         horizontalFlip: data.styles.horizontalFlip || false,
         verticalFlip: data.styles.verticalFlip || false
-      }
+      },
+      id: ''
     }
 
     switch (data.type) {
@@ -145,7 +146,6 @@ class MouseUtils {
         }
       }
       case 'shape': {
-        console.log(data.category)
         Object.assign(layerConfig, { category: data.category })
         return LayerFactary.newShape(layerConfig)
       }

@@ -1,6 +1,5 @@
 <template lang="pug">
 div(class="shape-setting")
-  //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
   //- Line shape setting
   div(class="action-bar flex-around line-actions" style="padding: 8px 0"
             v-if="isLine")
@@ -36,7 +35,7 @@ div(class="shape-setting")
       marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
         :styleFormat="markerContentMap[startMarker].styleArray[0]"
         :svg="markerContentMap[startMarker].svg"
-        :trimWidth="markerContentMap[startMarker].trimWidth"
+        :trimWidth="!!markerContentMap[startMarker].trimWidth"
         :markerWidth="markerContentMap[startMarker].vSize[0]"
         :trimOffset="markerContentMap[startMarker].trimOffset")
       general-value-selector(v-if="openValueSelector === 'start-marker' && markerListReady"
@@ -51,7 +50,7 @@ div(class="shape-setting")
           marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
             :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
             :svg="markerContentMap[markerslot.marker].svg"
-            :trimWidth="markerContentMap[markerslot.marker].trimWidth"
+            :trimWidth="!!markerContentMap[markerslot.marker].trimWidth"
             :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
             :trimOffset="markerContentMap[markerslot.marker].trimOffset")
       general-value-selector(v-if="openValueSelector === 'start-marker' && !markerListReady"
@@ -68,7 +67,7 @@ div(class="shape-setting")
       marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
         :styleFormat="markerContentMap[endMarker].styleArray[0]"
         :svg="markerContentMap[endMarker].svg"
-        :trimWidth="markerContentMap[endMarker].trimWidth"
+        :trimWidth="!!markerContentMap[endMarker].trimWidth"
         :markerWidth="markerContentMap[endMarker].vSize[0]"
         :trimOffset="markerContentMap[endMarker].trimOffset"
         style="transform: rotate(180deg)")
@@ -84,7 +83,7 @@ div(class="shape-setting")
           marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
             :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
             :svg="markerContentMap[markerslot.marker].svg"
-            :trimWidth="markerContentMap[markerslot.marker].trimWidth"
+            :trimWidth="!!markerContentMap[markerslot.marker].trimWidth"
             :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
             :trimOffset="markerContentMap[markerslot.marker].trimOffset"
             style="transform: rotate(180deg)")
@@ -101,12 +100,12 @@ div(class="shape-setting")
   div(class="shape-setting__basic-shape-action" v-if="isBasicShape")
     div(class="action-bar flex-around basic-shape-actions" style="padding: 8px 0")
       div(class="shape-setting__line-action-wrapper")
-        svg-icon(class="pointer feature-button"
+        svg-icon(class="pointer feature-button" v-hint="$t('NN0681')"
                 iconName="line-width" iconWidth="24px" iconColor="gray-2"
                 @click="openBasicShapeSliderPopup")
       div(class="shape-setting__line-action-wrapper")
-        svg-icon(class="pointer feature-button"
-                v-if="filled"
+        svg-icon(v-if="filled" v-hint="$t('NN0797')"
+                class="pointer feature-button"
                 iconName="filled" iconWidth="24px" iconColor="gray-2"
                 @click="handleValueModal('isFilled')")
         svg-icon(class="pointer feature-button"
@@ -136,18 +135,19 @@ div(class="shape-setting")
           svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
           div(:style="`font-size: ${$i18n.locale === 'us' ? '12px': ''}`") {{$t('NN0086')}}
   //- Shape color setting
-  div(class="shape-setting__colors")
-    div(v-if="hasMultiColors"
-      class="shape-setting__color"
-      :style="groupColorStyles()"
-      @click="selectColor(0)")
-    div(v-else v-for="(color, index) in getDocumentColors"
-      class="shape-setting__color"
-      :style="colorStyles(color, index)"
-      @click="selectColor(index)")
+  div(class="shape-setting__shape-colors")
+    span {{$t('NN0798')}}
+    div(class="shape-setting__colors")
+      color-btn(v-if="hasMultiColors"
+                :color="groupColor()"
+                :active="showColorSlips"
+                @click="selectColor(0)")
+      color-btn(v-else v-for="(color, index) in getDocumentColors" :color="color"
+                :active="showColorSlips && index === currSelectedColorIndex"
+                @click="selectColor(index)")
   //- 管理介面
   div(class="shape-setting__info")
-    div(v-if="inAdminMode && isObjectElement")
+    div(v-if="showAdminTool && isObjectElement")
       div(class="shape-setting__info__divider pb-10")
       btn(:type="'primary-sm'"
         class="shape-setting__info__button rounded my-5"
@@ -200,23 +200,24 @@ div(class="shape-setting")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
-import markers from '@/store/module/markers'
 import vClickOutside from 'click-outside-vue3'
 import SearchBar from '@/components/SearchBar.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import GeneralValueSelector from '@/components/GeneralValueSelector.vue'
 import LayerUtils from '@/utils/layerUtils'
-import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, ILayer, IShape } from '@/interfaces/layer'
 import shapeUtils from '@/utils/shapeUtils'
 import { IListServiceContentData } from '@/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
 import { IMarker } from '@/interfaces/shape'
 import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import LabelWithRange from '@/components/LabelWithRange.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import controlUtils from '@/utils/controlUtils'
-import { ColorEventType, LayerType, PopupSliderEventType } from '@/store/types'
-import colorUtils, { getDocumentColor } from '@/utils/colorUtils'
+import { ColorEventType, PopupSliderEventType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -224,6 +225,8 @@ import GeneralUtils from '@/utils/generalUtils'
 import designApis from '@/apis/design-info'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
+import editorUtils from '@/utils/editorUtils'
+import { cloneDeep } from 'lodash'
 
 export default defineComponent({
   components: {
@@ -231,7 +234,8 @@ export default defineComponent({
     ColorPicker,
     GeneralValueSelector,
     MarkerIcon,
-    LabelWithRange
+    LabelWithRange,
+    ColorBtn
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -311,20 +315,12 @@ export default defineComponent({
       currSelectedIndex: 'getCurrSelectedIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
-      token: 'user/getToken'
+      token: 'user/getToken',
+      showAdminTool: 'user/showAdminTool'
     }),
-    ...mapState('user', [
-      'role',
-      'adminMode']),
-    ...mapState(
-      'markers',
-      [
-        'categories'
-      ]
-    ),
-    inAdminMode(): boolean {
-      return this.role === 0 && this.adminMode === true
-    },
+    ...mapState('markers', [
+      'categories'
+    ]),
     lineWidth(): number {
       const { currLayer } = this
       return (currLayer as IShape).size?.[0] ?? 0
@@ -345,11 +341,14 @@ export default defineComponent({
     currLayer(): ILayer {
       return this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex) as ILayer
     },
+    showColorSlips(): boolean {
+      return editorUtils.showColorSlips
+    },
     hasMultiColors(): boolean {
       return shapeUtils.hasMultiColors
     },
     getDocumentColors(): string[] {
-      return shapeUtils.getDocumentColors
+      return colorUtils.globalSelectedColor.colors
     },
     isLine(): boolean {
       return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
@@ -367,7 +366,7 @@ export default defineComponent({
       return this.currSelectedInfo.layers[0]?.designId ?? ''
     },
     isObjectElement(): boolean {
-      return !(this.currSelectedInfo.layers[0].db === 'text')
+      return this.currSelectedInfo.layers[0].db !== 'text'
     }
   },
   watch: {
@@ -398,18 +397,12 @@ export default defineComponent({
         'getCategories'
       ]
     ),
-    colorStyles(color: string, index: number) {
-      return {
-        backgroundColor: color,
-        boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #808080, inset 0 0 0 1.5px #fff' : ''
-      }
-    },
     boundValue(value: number, min: number, max: number): string {
       if (value < min) return min.toString()
       else if (value > max) return max.toString()
       return value.toString()
     },
-    groupColorStyles() {
+    groupColor() {
       const currLayer = this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex)
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
         const origin = currLayer.layers
@@ -422,15 +415,7 @@ export default defineComponent({
           }
           return true
         })()
-        return isGroupSameColor ? {
-          backgroundColor: origin,
-          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
-        } : {
-          backgroundImage: `url(${require('@/assets/img/jpg/multi-color.jpg')})`,
-          backgroundPosition: 'center center',
-          backgroundSize: 'cover',
-          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1px #fff'
-        }
+        return isGroupSameColor ? origin : 'multi'
       }
     },
     handleColorModalOn(e: MouseEvent) {
@@ -445,7 +430,7 @@ export default defineComponent({
     selectColor(index: number) {
       this.currSelectedColorIndex = index
       colorUtils.setCurrColor(this.getDocumentColors[index])
-      this.$emit('toggleColorPanel', true)
+      editorUtils.toggleColorSlips(true)
     },
     openLineSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineWidth)
@@ -466,20 +451,32 @@ export default defineComponent({
     },
     setColor(newColor: string) {
       const currLayer = LayerUtils.getCurrLayer
+      const newDocumentColors = cloneDeep(this.getDocumentColors)
+      newDocumentColors[this.currSelectedColorIndex] = newColor
+
       switch (currLayer.type) {
-        case 'shape': {
-          const color = [...this.getDocumentColors]
-          color[this.currSelectedColorIndex] = newColor
-          LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color })
+        case 'shape':
+          LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color: newDocumentColors })
           break
-        }
         case 'tmp':
         case 'group': {
           const { subLayerIdx } = LayerUtils
           if (subLayerIdx === -1) {
-            for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
-              if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
-                LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: [newColor] })
+            const singleColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length === 1) as IShape[]
+            const multiColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length !== 1) as IShape[]
+            // For one multiple-color shape
+            if (singleColorShapes.length === 0 && multiColorShapes.length === 1) {
+              for (const [i, layer] of currLayer.layers.entries()) {
+                if (layer.type === 'shape' && layer.color.length !== 1) {
+                  LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: newDocumentColors })
+                }
+              }
+            // For one or more single-color shape
+            } else if (singleColorShapes.length !== 0) {
+              for (const [i, layer] of currLayer.layers.entries()) {
+                if (layer.type === 'shape' && layer.color.length === 1) {
+                  LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: [newColor] })
+                }
               }
             }
           } else {
@@ -488,9 +485,7 @@ export default defineComponent({
               this.handleFrameColorUpdate(newColor)
             }
             if (subLayerType === 'shape') {
-              const color = [...this.getDocumentColors]
-              color[this.currSelectedColorIndex] = newColor
-              LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { color })
+              LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { color: newDocumentColors })
             }
           }
           break
@@ -526,6 +521,9 @@ export default defineComponent({
     },
     setLineWidth(value: number) {
       shapeUtils.setLineWidth(value)
+      this.$nextTick(() => {
+        popupUtils.setSliderConfig({ value: this.lineWidth })
+      })
     },
     handleLineDashEdgeUpdate(index: number, value: number) {
       if (index === 0) {
@@ -635,7 +633,7 @@ export default defineComponent({
       }
       GeneralUtils.copyText(text)
         .then(() => {
-          // this.$notify({ group: 'copy', text: `${text} 已複製` })
+          notify({ group: 'copy', text: `${text} 已複製` })
         })
     },
     async getDataClicked() {
@@ -643,7 +641,7 @@ export default defineComponent({
 
       const data = {}
       if (this.focusDesignId.length === 0) {
-        // this.$notify({ group: 'copy', text: '無元素id' })
+        notify({ group: 'copy', text: '無元素id' })
       }
 
       if (this.focusDesignId.length > 0) {
@@ -653,7 +651,7 @@ export default defineComponent({
           this.svgInfo = res.data.data
           this.svgInfo.edit_time = this.svgInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
         } else {
-          // this.$notify({ group: 'copy', text: '找不到模板資料' })
+          notify({ group: 'copy', text: '找不到模板資料' })
         }
       }
 
@@ -661,7 +659,7 @@ export default defineComponent({
     },
     async updateDataClicked() {
       if (!this.svgInfo.key_id) {
-        // this.$notify({ group: 'copy', text: '請先取得元素資料' })
+        notify({ group: 'copy', text: '請先取得元素資料' })
         return
       }
 
@@ -675,11 +673,11 @@ export default defineComponent({
       }
       const res = await designApis.updateDesignInfo(this.token, 'svg', this.svgInfo.key_id, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
-        // this.$notify({ group: 'copy', text: '元素資料更新成功' })
+        notify({ group: 'copy', text: '元素資料更新成功' })
         this.svgInfo = res.data.data
         this.svgInfo.edit_time = this.svgInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
       } else {
-        // this.$notify({ group: 'copy', text: '更新時發生錯誤' })
+        notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.isLoading = false
     },
@@ -704,26 +702,20 @@ export default defineComponent({
   > div {
     margin-top: 10px;
   }
+  &__shape-colors {
+    @include text-H6;
+    color: setColor(blue-1);
+    text-align: left;
+  }
   &__colors {
     width: 100%;
-    margin-top: 10px;
+    margin-top: 15px;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 12px;
     @media (max-width: 1260px) {
       gap: 10px;
     }
-  }
-  &__color {
-    width: 100%;
-    padding-top: calc(100% - 3px);
-    border: 1.5px solid setColor(gray-4);
-    border-radius: 4px;
-    box-sizing: border-box;
-    &:hover {
-      box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff;
-    }
-    transition: box-shadow 0.2s ease-in-out;
   }
   &__value-selector {
     position: absolute;
@@ -749,7 +741,7 @@ export default defineComponent({
 
     &-filled {
       @extend .shape-setting__value-selector;
-      left: 0;
+      left: -70%;
     }
   }
   &__color-picker {

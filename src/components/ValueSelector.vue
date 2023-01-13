@@ -9,12 +9,15 @@ div(class="value-selector")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapState } from 'vuex'
 
 export default defineComponent({
   props: {
-    valueArray: Array,
+    valueArray: {
+      type: Array as PropType<number[]>,
+      required: true
+    },
     value: String
   },
   emits: ['update'],

@@ -13,7 +13,7 @@ div(class="menu")
               url(:url="it.url") {{it.label}}
               svg-icon(v-if="it.content" iconName="chevron-down"
                 iconColor="gray-1" iconWidth="16px")
-            url(v-for="i in it.content" :url="i.url") {{i.label}}
+            url(v-for="i in it.content" :url="i.url" :newTab="i.newTab") {{i.label}}
   div(class="menu-bottom")
     template(v-if="!isLogin")
       div(class="menu-bottom__link")
@@ -140,6 +140,7 @@ export default defineComponent({
   summary:focus > svg {
     // Set color when user click summary
     color: setColor(blue-hover);
+    outline: none; // For Safari 14.3, which have a summary outline by default.
   }
   span,
   a {

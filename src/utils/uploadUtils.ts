@@ -29,6 +29,8 @@ import networkUtils from './networkUtils'
 import _ from 'lodash'
 import editorUtils from './editorUtils'
 import designApis from '@/apis/design'
+import { notify } from '@kyvg/vue3-notification'
+import { PRECISION } from '@/utils/unitUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -207,7 +209,9 @@ class UploadUtils {
       img.src = evt.target?.result as string
       img.onload = (evt) => {
         store.commit('file/ADD_PREVIEW', {
-          imageFile: img,
+          width: img.width,
+          height: img.height,
+          src: img.src,
           assetId: assetId
         })
         assetUtils.addImage(img.src, img.width / img.height, {
@@ -247,12 +251,13 @@ class UploadUtils {
                 clearInterval(increaseInterval)
                 response.json().then((json: IUploadAssetResponse) => {
                   if (json.flag === 0) {
+                    const { width, height, asset_index } = json.data
                     console.log('Successfully upload the file')
                     store.commit('file/UPDATE_PROGRESS', {
                       assetId: assetId,
                       progress: 100
                     })
-                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index })
+                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: asset_index, width, height })
                     store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                     store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
                     // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot
@@ -508,10 +513,10 @@ class UploadUtils {
                   clearInterval(interval)
                   response.json().then((json: IUploadAssetLogoResponse) => {
                     if (json.flag === 0) {
-                      // Vue.notify({
-                      //   group: 'copy',
-                      //   text: `${i18n.global.t('NN0135')}`
-                      // })
+                      notify({
+                        group: 'copy',
+                        text: `${i18n.global.t('NN0135')}`
+                      })
                       console.log('Successfully upload the file')
                       brandkitUtils.replaceLogo(tempId, json.data, brandId)
                     } else {
@@ -562,7 +567,7 @@ class UploadUtils {
     }
   }
 
-  async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
+  async uploadDesign(putAssetDesignType?: PutAssetDesignType, params?: { clonedPages?: Array<IPage> }) {
     const typeMap = ['UPDATE_DB', 'UPDATE_PREV', 'UPDATE_BOTH']
     let type = router.currentRoute.value.query.type
     let designId = router.currentRoute.value.query.design_id
@@ -585,15 +590,17 @@ class UploadUtils {
       AssetId: ${assetId},
       TeamId: ${teamId}`)
       putAssetDesignType = PutAssetDesignType.UPDATE_BOTH
-      router.replace({ query: Object.assign({}, router.currentRoute.value.query, { type: 'design', design_id: assetId, team_id: this.teamId }) })
-      type = router.currentRoute.value.query.type
-      designId = router.currentRoute.value.query.design_id
-      teamId = router.currentRoute.value.query.team_id
+      type = 'design'
+      designId = assetId
+      teamId = this.teamId
+      router.replace({ query: Object.assign({}, router.currentRoute.value.query, { type, design_id: designId, team_id: teamId }) })
       isNewDesign = true
     }
 
     store.commit('SET_assetId', assetId)
-    const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
+    const { clonedPages } = params || {}
+    const pages = clonedPages ?? generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
+    // const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
 
     logUtils.setLog(`Upload Design:
       Type: ${putAssetDesignType ? typeMap[putAssetDesignType] : 'UPLOAD JSON'}
@@ -602,7 +609,7 @@ class UploadUtils {
       PageNum: ${pages.length}`)
 
     const pagesJSON = pages.map((page: IPage) => {
-      const newPage = this.default(page)
+      const newPage = this.default(page, false)
       for (const [i, layer] of newPage.layers.entries()) {
         if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
           newPage.layers[i] = this.layerInfoFilter(layer)
@@ -611,8 +618,18 @@ class UploadUtils {
         }
       }
       newPage.backgroundImage.config.imgControl = false
-      newPage.width = parseInt(newPage.width.toString(), 10)
-      newPage.height = parseInt(newPage.height.toString(), 10)
+      newPage.width = _.round(newPage.width)
+      newPage.height = _.round(newPage.height)
+      newPage.bleeds && Object.keys(newPage.bleeds).forEach(key => {
+        newPage.bleeds[key] = _.round(newPage.bleeds[key])
+      })
+
+      const precision = newPage.unit === 'px' ? 0 : PRECISION
+      if (newPage.physicalWidth) newPage.physicalWidth = _.round(newPage.physicalWidth, precision)
+      if (newPage.physicalHeight) newPage.physicalHeight = _.round(newPage.physicalHeight, precision)
+      newPage.physicalBleeds && Object.keys(newPage.physicalBleeds).forEach(key => {
+        newPage.physicalBleeds[key] = _.round(newPage.physicalBleeds[key], precision)
+      })
       return newPage
     })
 
@@ -656,39 +673,43 @@ class UploadUtils {
           })
           const { flag } = resPutAssetDesign
           if (flag !== 0) {
-            // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
+            notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
             return
           }
 
           // move new design to path
           const path = router.currentRoute.value.query.path as string
-          if (isNewDesign && path) {
-            const designAssetIndex = (await store.dispatch('design/fetchDesign', { teamId, assetId })).asset_index?.toString()
-            if (!designAssetIndex) {
-              // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
-              return
+          if (isNewDesign) {
+            // move design to path
+            if (path) {
+              const designAssetIndex = (await store.dispatch('design/fetchDesign', { teamId, assetId })).asset_index?.toString()
+              if (!designAssetIndex) {
+                notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
+                return
+              }
+              await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+                'move', designAssetIndex, null, path).catch(async err => {
+                  // remove design if move failed
+                  console.error(err)
+                  await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
+                    'delete', designAssetIndex, null, '2').catch(err => {
+                      console.error(err)
+                    })
+                  notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
+                })
+              // update design info
+              designUtils.fetchDesign(teamId as string, assetId)
             }
-            await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-              'move', designAssetIndex, null, path).catch(async err => {
-                // remove design if move failed
-                console.error(err)
-                await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
-                  'delete', designAssetIndex, null, '2').catch(err => {
-                    console.error(err)
-                  })
-                // Vue.notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
-              })
-            // update design info
-            designUtils.fetchDesign(teamId as string, assetId)
             // remove query for new design
             const query = Object.assign({}, router.currentRoute.value.query)
             delete query.width
             delete query.height
+            delete query.unit
             delete query.path
             delete query.folderName
             router.replace({ query })
           }
-          // Vue.notify({ group: 'copy', text: `${i18n.global.t('NN0357')}` })
+          notify({ group: 'copy', text: `${i18n.global.t('NN0357')}` })
         }
       })
       .catch(async (error) => {
@@ -711,7 +732,6 @@ class UploadUtils {
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('temp.json')}`)
     formData.append('x-amz-meta-tn', this.userId)
     const xhr = new XMLHttpRequest()
-    // console.log(this.loginOutput)
     const pagesJSON = store.getters.getPages
     const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
     if (formData.has('file')) {
@@ -1049,8 +1069,8 @@ class UploadUtils {
     }
   }
 
-  private default(page: any): IPage {
-    page = generalUtils.deepCopy(page)
+  private default(page: any, deepCopy = true): IPage {
+    page = deepCopy ? generalUtils.deepCopy(page) : page
     const basicDefault = (layer: any) => {
       layer.moved = false
       layer.shown = false
@@ -1426,7 +1446,7 @@ class UploadUtils {
       }
       case 'frame': {
         const frame = layer as IFrame
-        const { type, designId, clips, decoration, decorationTop, styles } = frame
+        const { type, designId, clips, decoration, decorationTop, styles, blendLayers } = frame
         return {
           type,
           designId,
@@ -1449,6 +1469,9 @@ class UploadUtils {
             decorationTop: {
               color: decorationTop.color
             }
+          }),
+          ...(blendLayers && {
+            blendLayers: blendLayers.map(function (l) { return { color: l.color } })
           }),
           styles: this.styleFilter(styles, 'frame')
         }
@@ -1515,7 +1538,13 @@ class UploadUtils {
         Url: ${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
 
       // this.resetControlStates(pagesJSON)
-      const blob = new Blob([JSON.stringify(this.getPageJson(json))], { type: 'application/json' })
+      const pagesJSON = this.getPageJson(json)
+      const resultJSON = {
+        pages: pagesJSON,
+        groupId: store.state.groupId,
+        groupType: store.state.groupType
+      }
+      const blob = new Blob([JSON.stringify(resultJSON)], { type: 'application/json' })
       if (formData.has('file')) {
         formData.set('file', blob)
       } else {
@@ -1539,8 +1568,17 @@ class UploadUtils {
         }
       }
       newPage.backgroundImage.config.imgControl = false
-      newPage.width = parseInt(newPage.width.toString(), 10)
-      newPage.height = parseInt(newPage.height.toString(), 10)
+      newPage.width = _.round(newPage.width)
+      newPage.height = _.round(newPage.height)
+      Object.keys(newPage.bleeds).forEach(key => {
+        newPage.bleeds[key] = _.round(newPage.bleeds[key])
+      })
+      const precision = newPage.unit === 'px' ? 0 : PRECISION
+      newPage.physicalWidth = _.round(newPage.physicalWidth, precision)
+      newPage.physicalHeight = _.round(newPage.physicalHeight, precision)
+      Object.keys(newPage.physicalBleeds).forEach(key => {
+        newPage.physicalBleeds[key] = _.round(newPage.physicalBleeds[key], precision)
+      })
       return newPage
     })
     return pagesJSON

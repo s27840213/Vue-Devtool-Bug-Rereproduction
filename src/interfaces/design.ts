@@ -5,6 +5,7 @@ export interface IDesign {
   name: string,
   width: number,
   height: number,
+  unit: string,
   thumbnail: string,
   createdTime: string,
   lastUpdatedTime: string,

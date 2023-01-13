@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="mobile-panel p-15"
     :style="panelStyle"
-    v-click-outside="this.closeMobilePanel"
+    v-click-outside="closeMobilePanel"
     ref="panel"
     @touchmove="handleTouchMove")
   div(class="mobile-panel__top-section self-padding")
@@ -35,8 +35,9 @@ div(class="mobile-panel p-15"
       ref="pageSizeSelector"
       @select="selectFormat")
 </template>
+
 <script lang="ts">
-import Vue, { defineComponent } from 'vue'
+import { defineComponent } from 'vue'
 import designUtils from '@/utils/designUtils'
 import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
 
@@ -48,8 +49,6 @@ import { ILayout } from '@/interfaces/layout'
 
 export default defineComponent({
   name: 'panel-size',
-  props: {
-  },
   directives: {
     clickOutside: vClickOutside.directive
   },
@@ -102,7 +101,7 @@ export default defineComponent({
         if (!(this.$refs.pageSizeSelector as any).isFormatApplicable) return // TODO: disable submit button
         const path = this.$route.name === 'MyDesign' ? this.currLocation.split('/').slice(1).join(',') : undefined
         const foldername = this.$route.name === 'MyDesign' ? designUtils.search(this.folders, designUtils.makePath(this.currLocation))?.name : undefined
-        designUtils.newDesignWithLoginRedirect(this.selectedFormat.width, this.selectedFormat.height, undefined, path, foldername)
+        designUtils.newDesignWithLoginRedirect(this.selectedFormat.width, this.selectedFormat.height, this.selectedFormat.unit, undefined, path, foldername)
       }
     }
   },

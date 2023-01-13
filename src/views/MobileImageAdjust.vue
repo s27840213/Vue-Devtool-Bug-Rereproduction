@@ -51,7 +51,7 @@ export default defineComponent({
       btns: [
         // { name: 'crop', label: `${this.$t('NN0040')}`, show: 'crop' },
         // { name: 'preset', label: `${this.$t('NN0041')}`, show: '' },
-        { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' }
+        { name: 'sliders', label: `${this.$t('NN0042')}`, show: 'popup-adjust' }
         // { name: 'shadow', label: `${this.$t('NN0429')}`, show: 'panel-photo-shadow' }
       ],
       bgRemoveBtn: { label: `${this.$t('NN0043')}`, show: 'remove-bg' }
@@ -186,11 +186,7 @@ export default defineComponent({
       getLayer: 'getLayer',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedLayers: 'getCurrSelectedLayers',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      isAdmin: 'user/isAdmin'
-    }),
-    ...mapState('user', {
-      isSuperUser: 'role'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     isCropping(): boolean {
       return imageUtils.isImgControl()

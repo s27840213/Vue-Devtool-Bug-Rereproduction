@@ -1,37 +1,47 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
     "strict": true,
     "jsx": "preserve",
     "importHelpers": true,
-    "moduleResolution": "node",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
     "baseUrl": ".",
     "types": [
       "webpack-env",
-      "@vueuse/gesture",
+      // "@vueuse/gesture",
       "resize-observer-browser",
       "tpdirect"
     ],
     "paths": {
       "@/*": [
-        "src/*"
+        "./src/*"
       ]
     },
     "lib": [
       "esnext",
       "dom",
       "dom.iterable",
-      "scripthost"
+      "scripthost",
+      "webworker"
+    ]
+  },
+  "vueCompilerOptions": {
+    "plugins": [
+      "@volar/vue-language-plugin-pug"
     ]
   },
   "include": [
     "src/**/*.ts",
+    "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
@@ -40,4 +50,9 @@
   "exclude": [
     "node_modules"
   ]
+  // "references": [
+  //   {
+  //     "path": "./tsconfig.node.json"
+  //   }
+  // ]
 }

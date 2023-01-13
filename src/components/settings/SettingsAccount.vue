@@ -63,6 +63,7 @@ div(class="settings-account")
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapState, mapGetters } from 'vuex'
 import PopupVerify from '@/components/popup/PopupVerify.vue'
 import Avatar from '@/components/Avatar.vue'
@@ -255,7 +256,7 @@ export default defineComponent({
       }
       GeneralUtils.copyText(text)
         .then(() => {
-          // this.$notify({ group: 'copy', text: `${text} 已複製` })
+          notify({ group: 'copy', text: `${text} 已複製` })
         })
     }
   }

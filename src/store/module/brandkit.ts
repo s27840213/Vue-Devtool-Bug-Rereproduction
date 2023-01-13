@@ -13,6 +13,7 @@ import userApis from '@/apis/user'
 import _ from 'lodash'
 import apiUtils from '@/utils/apiUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import { notify } from '@kyvg/vue3-notification'
 
 interface IBrandKitState {
   brands: IBrand[],
@@ -36,7 +37,7 @@ interface IBrandKitState {
 
 const NULL_BRAND = brandkitUtils.createNullBrand()
 const showNetworkError = () => {
-  // Vue.notify({ group: 'error', text: `${i18n.t('NN0242')}` })
+  notify({ group: 'error', text: `${i18n.global.t('NN0242')}` })
 }
 
 const getDefaultState = (): IBrandKitState => ({
@@ -507,7 +508,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     return {}
   },
   async updatePageFonts({ dispatch }, { pageIndex }: { pageIndex: number }) {
-    const { layers } = store.state.pages[pageIndex]
+    const { layers } = store.state.pages[pageIndex].config
     const fontToRequest = new Set<string>()
 
     for (const layer of layers) {
@@ -547,7 +548,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     }
   },
   async updatePageLogos({ dispatch }, { pageIndex }: { pageIndex: number }) {
-    const { layers, backgroundImage } = store.state.pages[pageIndex]
+    const { layers, backgroundImage } = store.state.pages[pageIndex].config
     const logoToRequest = new Set<string>()
 
     logoToRequest.add(isPrivate(backgroundImage.config.srcObj))

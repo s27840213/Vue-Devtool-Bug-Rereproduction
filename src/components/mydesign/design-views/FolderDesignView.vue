@@ -188,7 +188,7 @@ export default defineComponent({
           text: `${this.$t('NN0195')}`,
           payload: ['update', false]
         }
-      ]
+      ] as { icon: string, style: string, text: string, payload: [string, boolean] }[]
     }
   },
   directives: {
@@ -258,7 +258,7 @@ export default defineComponent({
       setSortByField: 'SET_sortByField',
       setSortByDescending: 'SET_sortByDescending'
     }),
-    newFolderStyles() {
+    newFolderStyles(): {[key: string]: string} {
       return this.isMaxLevelReached ? { pointerEvents: 'none' } : {}
     },
     nodeStyles(isCurrent: boolean) {
@@ -309,10 +309,7 @@ export default defineComponent({
     handleNewFolder() {
       const folderId = designUtils.addNewFolder(this.path, true)
       this.$nextTick(() => {
-        const folderItemName = document.querySelector(`.folder-item__name[folderid="${folderId}"] span`)
-        if (folderItemName) {
-          setTimeout(() => { folderItemName.dispatchEvent(new MouseEvent('dblclick')) }, 0)
-        }
+        designUtils.emit(`edit-folder-${folderId}`)
       })
     },
     handleSortByClick(payload: [string, boolean]) {

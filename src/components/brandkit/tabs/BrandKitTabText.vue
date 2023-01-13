@@ -19,7 +19,7 @@ div(class="brand-kit-tab-text")
                       class="no-trans"
                       key="sentinel"
                       @callback="handleLoadMore")
-      template(v-else)
+      template(v-else-if="(typeof font !== 'string')")
         div(v-if="checkUploading(font)"
           class="brand-kit-tab-text__font-column__item-uploading"
           :key="font.id.replace('new_', '')")
@@ -52,6 +52,7 @@ div(class="brand-kit-tab-text")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
+import { notify } from '@kyvg/vue3-notification'
 import BrandKitTextSetting from '@/components/brandkit/BrandKitTextSetting.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
@@ -78,16 +79,16 @@ export default defineComponent({
     this.refreshFontUrls()
     uploadUtils.onFontUploadStatus((status) => {
       if (status === 'success') {
-        // this.$notify({
-        //   group: 'copy',
-        //   text: `${this.$t('NN0135')}`
-        // })
+        notify({
+          group: 'copy',
+          text: `${this.$t('NN0135')}`
+        })
       }
       if (status === 'fail') { // Fail will not goto here
-        // this.$notify({
-        //   group: 'error',
-        //   text: `${this.$t('NN0137')}`
-        // })
+        notify({
+          group: 'error',
+          text: `${this.$t('NN0137')}`
+        })
       }
     })
   },

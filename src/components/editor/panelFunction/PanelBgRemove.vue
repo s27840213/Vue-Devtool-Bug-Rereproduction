@@ -49,7 +49,9 @@ div(class="panel-background-remove")
 </template>
 
 <script lang="ts">
+import i18n from '@/i18n'
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations } from 'vuex'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import store from '@/store'
@@ -65,8 +67,6 @@ import { IImage } from '@/interfaces/layer'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
-import generalUtils from '@/utils/generalUtils'
-import imageUtils from '@/utils/imageUtils'
 
 export default defineComponent({
   emits: [],
@@ -112,7 +112,8 @@ export default defineComponent({
       setLoading: 'bgRemove/SET_loading',
       setIsProcessing: 'bgRemove/SET_isProcessing',
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
-      uploadMyfileImg: 'file/UPDATE_IMAGE_URLS'
+      uploadMyfileImg: 'file/UPDATE_IMAGE_URLS',
+      deletePreviewSrc: 'DELETE_previewSrc'
     }),
     toggleShowInitImage(val: boolean): void {
       this.setShowInitImage(!val)
@@ -142,7 +143,7 @@ export default defineComponent({
               layerInfo
             }
             imageShadowPanelUtils.handleShadowUpload(layerData, true)
-            // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           }
         }
         this.uploadMyfileImg(Object.assign({ assetId: this.autoRemoveResult.id }, this.autoRemoveResult))
@@ -185,6 +186,12 @@ export default defineComponent({
               srcObj,
               trace: 1
             })
+            this.deletePreviewSrc({
+              type: this.isAdmin ? 'public' : 'private',
+              userId: teamId,
+              assetId: this.isAdmin ? json.data.id : json.data.asset_index,
+              assetIndex: json.data.asset_index
+            })
             const image = layerUtils.getLayer(pageIndex, index) as IImage
             if (image.type === LayerType.image) {
               if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
@@ -194,7 +201,7 @@ export default defineComponent({
                   layerInfo
                 }
                 imageShadowPanelUtils.handleShadowUpload(layerData, true)
-                // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+                notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
               }
             }
             stepsUtils.record()

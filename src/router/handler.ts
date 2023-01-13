@@ -1,4 +1,5 @@
-import VueRouter, { NavigationGuardNext } from 'vue-router'
+import { nextTick } from 'vue'
+import VueRouter from 'vue-router'
 import uploadUtils from '@/utils/uploadUtils'
 import assetUtils from '@/utils/assetUtils'
 import { SidebarPanelType } from '@/store/types'
@@ -7,7 +8,7 @@ import themeUtils from '@/utils/themeUtils'
 import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
-import router from '.'
+import editorUtils from '@/utils/editorUtils'
 
 export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized, from: VueRouter.RouteLocationNormalized, next: VueRouter.NavigationGuardNext) {
   try {
@@ -25,6 +26,7 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
     const url = urlParams.get('url')
     const width = urlParams.get('width')
     const height = urlParams.get('height')
+    const unit = urlParams.get('unit')
     const themeId = urlParams.get('themeId')
     const groupId = urlParams.get('group_id')
     const path = urlParams.get('path')
@@ -51,6 +53,7 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
       designUtils.newDesign(
         parseInt(width),
         parseInt(height === '0' ? width : height),
+        unit || 'px',
         parseInt(themeId as string),
         path === null ? undefined : path,
         folderName === null ? undefined : folderName,
@@ -70,6 +73,9 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
 
     if (panel && panel in SidebarPanelType) {
       store.commit('SET_currSidebarPanelType', SidebarPanelType[panel as any])
+      nextTick(() => {
+        editorUtils.setCurrActivePanel(panel)
+      })
     }
 
     // reset (close) page preview mode

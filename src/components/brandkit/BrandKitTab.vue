@@ -97,7 +97,7 @@ export default defineComponent({
           action: () => { console.log('text') },
           margin: 16
         }
-      }
+      } as {[key: string]: { text: string, action: () => void, margin: number }}
     }
   },
   computed: {
@@ -230,7 +230,7 @@ export default defineComponent({
   &__content {
     margin-top: 30px;
     &.editor-theme {
-      height: calc(100% - 150px);
+      height: calc(100% - 138px);
     }
     &.mobile-editor-theme {
       margin-top: 0;

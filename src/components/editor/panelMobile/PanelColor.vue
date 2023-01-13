@@ -1,5 +1,16 @@
 <template lang="pug">
 div(class="panel-color px-5")
+  div(v-if="showDocumentColors")
+    div(class="text-left") {{$t('NN0798')}}
+    div(class="panel-color__shape-colors" :style="colorsStyle"
+        @scroll.passive="updateColorsOverflow" ref="colors")
+      color-btn(v-for="(color, index) in getDocumentColors"
+                :color="color" :focus="index === currSelectedColorIndex"
+                @click="selectColor(index)")
+    div(class="panel-color__hr")
+  //- There is no row-gap in MobilePanel while active PanelColor.
+  //- Instead, control gap by PanelColor itself.
+  div(v-else class="mt-10")
   color-picker(
     v-if="showColorPicker"
     :isMobile="true" :aspectRatio="40"
@@ -7,53 +18,47 @@ div(class="panel-color px-5")
     @update="handleDragUpdate"
     @final="handleChangeStop")
   color-slips(v-if="showPalette"
+    :class="{'show-document-colors': showDocumentColors}"
     mode="PanelColor"
     :allRecentlyControl="showAllRecently"
+    :selectedColor="selectedColor"
     @openColorPicker="openColorPicker"
     @openColorMore="openColorMore")
-  div(v-if="showDocumentColors" class="panel-color__document-colors")
-    div(v-if="hasMultiColors"
-      class="panel-color__document-color"
-      :style="groupColorStyles()"
-      @click="selectColor(0)")
-    div(v-else v-for="(color, index) in getDocumentColors"
-      class="panel-color__document-color"
-      :style="colorStyles(color, index)"
-      @click="selectColor(index)")
 </template>
 
 <script lang="ts">
 import Vue, { PropType, defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
+import ColorSlips from '@/components/editor/ColorSlips.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
+import { IFrame, IImage, IShape } from '@/interfaces/layer'
+import { ColorEventType } from '@/store/types'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 import colorUtils, { checkAndConvertToHex } from '@/utils/colorUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { mapGetters, mapState } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
-import ColorSlips from '@/components/editor/ColorSlips.vue'
-import { ColorEventType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
-import shapeUtils from '@/utils/shapeUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import textBgUtils from '@/utils/textBgUtils'
+import shapeUtils from '@/utils/shapeUtils'
+import { cloneDeep } from 'lodash'
 
 export default defineComponent({
   data() {
     return {
       currColor: '#fff',
       colorUtils,
-      currSelectedColorIndex: 0
+      currSelectedColorIndex: 0,
+      leftOverflow: false,
+      rightOverflow: false
     }
   },
   props: {
-    currEvent: {
-      type: String,
-      required: true
-    },
     panelHistory: {
       type: Array as PropType<string[]>,
       default: () => []
@@ -63,34 +68,25 @@ export default defineComponent({
   components: {
     MobileSlider,
     ColorPicker,
-    ColorSlips
+    ColorSlips,
+    ColorBtn
   },
   created() {
-    colorUtils.setCurrEvent(this.currEvent)
-    switch (this.currEvent) {
-      case ColorEventType.text: {
-        colorUtils.setCurrColor(this.props.color)
-        break
-      }
-      case ColorEventType.shape: {
-        colorUtils.setCurrColor(this.getDocumentColors[this.currSelectedColorIndex])
-        break
-      }
-      case ColorEventType.background: {
-        colorUtils.setCurrColor(colorUtils.currPageBackgroundColor)
-        break
-      }
-      default: {
-        break
-      }
-    }
-
     colorUtils.on(this.currEvent, this.handleColorUpdate)
     colorUtils.onStop(this.currEvent, this.recordChange)
   },
   beforeUnmount() {
     colorUtils.event.off(this.currEvent, this.handleColorUpdate)
     colorUtils.offStop(this.currEvent, this.recordChange)
+  },
+  watch: {
+    // For switch PanelColor event target without close MobilePanel. Ex: shape color and text color in group
+    currEvent(newVal, oldVal) {
+      colorUtils.event.off(oldVal, this.handleColorUpdate)
+      colorUtils.offStop(oldVal, this.recordChange)
+      colorUtils.on(newVal, this.handleColorUpdate)
+      colorUtils.onStop(newVal, this.recordChange)
+    }
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
@@ -113,22 +109,52 @@ export default defineComponent({
       return !this.inInitialState && this.lastHistory === 'color-picker'
     },
     showDocumentColors(): boolean {
-      return this.inInitialState && this.currEvent === ColorEventType.shape
+      return this.showPalette && this.currEvent === ColorEventType.shape &&
+        this.getDocumentColors.length > 1 && !this.showAllRecently &&
+        // Prevent show object colors if group has multiple single-color objects.
+        !shapeUtils.hasMultiColors
     },
     showPalette(): boolean {
-      return ['color-palette', 'color-more'].includes(this.lastHistory) || (this.inInitialState && !this.showDocumentColors)
+      return ['color-palette', 'color-more'].includes(this.lastHistory) || this.inInitialState
     },
     showAllRecently(): boolean {
       return this.lastHistory === 'color-more'
     },
-    hasMultiColors(): boolean {
-      return shapeUtils.hasMultiColors
+    currEvent(): string {
+      return colorUtils.currEvent
+    },
+    selectedColor(): string {
+      switch (this.currEvent) {
+        case ColorEventType.text:
+          return colorUtils.globalSelectedColor.textColor
+        case ColorEventType.textEffect:
+          return textEffectUtils.currColor
+        case ColorEventType.textBg:
+          return textBgUtils.currColor
+        case ColorEventType.shape:
+          return this.getDocumentColors[this.currSelectedColorIndex]
+        default:
+          return colorUtils.globalSelectedColor.color
+      }
+    },
+    colorsStyle(): Record<string, string> {
+      // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
+      return {
+        gridTemplateColumns: `repeat(${this.getDocumentColors.length}, calc((100% - 30px) / 7))`,
+        maskImage: `linear-gradient(to right, transparent 0, black ${this.leftOverflow ? '48px' : 0}, black calc(100% - ${this.rightOverflow ? '48px' : '0px'}), transparent 100%)`
+      }
     },
     getDocumentColors(): string[] {
-      return shapeUtils.getDocumentColors
+      return colorUtils.globalSelectedColor.colors
     }
   },
   methods: {
+    updateColorsOverflow() {
+      if (!this.$refs.colors) return
+      const { scrollLeft, scrollWidth, offsetWidth } = this.$refs.colors as HTMLElement
+      this.leftOverflow = scrollLeft > 0
+      this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
+    },
     handleChangeStop(color: string) {
       window.requestAnimationFrame(() => {
         colorUtils.event.emit(colorUtils.currStopEvent, color)
@@ -136,11 +162,14 @@ export default defineComponent({
     },
     handleDragUpdate(color: string) {
       window.requestAnimationFrame(() => {
-        colorUtils.event.emit(colorUtils.currEvent, color)
+        colorUtils.event.emit(this.currEvent, color)
         colorUtils.setCurrColor(color)
       })
     },
     handleColorUpdate(newColor: string) {
+      const newDocumentColors = cloneDeep(this.getDocumentColors)
+      newDocumentColors[this.currSelectedColorIndex] = newColor
+
       switch (this.currEvent) {
         case ColorEventType.text: {
           if (newColor === this.props.color) return
@@ -152,18 +181,28 @@ export default defineComponent({
           const currLayer = layerUtils.getCurrLayer
           switch (currLayer.type) {
             case 'shape': {
-              const color = [...this.getDocumentColors]
-              color[this.currSelectedColorIndex] = newColor
-              layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color })
+              layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color: newDocumentColors })
               break
             }
             case 'tmp':
             case 'group': {
               const { subLayerIdx } = layerUtils
               if (subLayerIdx === -1) {
-                for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
-                  if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
-                    layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: [newColor] })
+                const singleColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length === 1) as IShape[]
+                const multiColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length !== 1) as IShape[]
+                // For one multiple-color shape
+                if (singleColorShapes.length === 0 && multiColorShapes.length === 1) {
+                  for (const [i, layer] of currLayer.layers.entries()) {
+                    if (layer.type === 'shape' && layer.color.length !== 1) {
+                      layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: newDocumentColors })
+                    }
+                  }
+                  // For one or more single-color shape
+                } else if (singleColorShapes.length !== 0) {
+                  for (const [i, layer] of currLayer.layers.entries()) {
+                    if (layer.type === 'shape' && layer.color.length === 1) {
+                      layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: [newColor] })
+                    }
                   }
                 }
               } else {
@@ -172,9 +211,7 @@ export default defineComponent({
                   this.handleFrameColorUpdate(newColor)
                 }
                 if (subLayerType === 'shape') {
-                  const color = [...this.getDocumentColors]
-                  color[this.currSelectedColorIndex] = newColor
-                  layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { color })
+                  layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { color: newDocumentColors })
                 }
               }
               break
@@ -202,7 +239,11 @@ export default defineComponent({
 
         case ColorEventType.photoShadow: {
           const { styles: { shadow: { currentEffect } } } = layerUtils.getCurrConfig as IImage
-          imageShadowUtils.setEffect(currentEffect, { color: newColor })
+          if (currentEffect === ShadowEffectType.frame) {
+            imageShadowUtils.setEffect(currentEffect, { frameColor: newColor })
+          } else {
+            imageShadowUtils.setEffect(currentEffect, { color: newColor })
+          }
           break
         }
       }
@@ -241,43 +282,9 @@ export default defineComponent({
     openColorPicker() {
       this.$emit('pushHistory', 'color-picker')
     },
-    openColorPalette() {
-      this.$emit('pushHistory', 'color-palette')
-    },
-    colorStyles(color: string, index: number) {
-      return {
-        backgroundColor: color,
-        boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #808080, inset 0 0 0 1.5px #fff' : ''
-      }
-    },
-    groupColorStyles() {
-      const currLayer = this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex)
-      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        const origin = currLayer.layers
-          .find((l: ILayer) => l.type === 'shape' && (l as IShape).color.length === 1).color[0]
-        const isGroupSameColor = (() => {
-          for (const layer of currLayer.layers) {
-            if (layer.type === 'shape' && (layer as IShape).color.length === 1 && (layer as IShape).color[0] !== origin) {
-              return false
-            }
-          }
-          return true
-        })()
-        return isGroupSameColor ? {
-          backgroundColor: origin,
-          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
-        } : {
-          backgroundImage: `url(${require('@/assets/img/jpg/multi-color.jpg')})`,
-          backgroundPosition: 'center center',
-          backgroundSize: 'cover',
-          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1px #fff'
-        }
-      }
-    },
     selectColor(index: number) {
       this.currSelectedColorIndex = index
       colorUtils.setCurrColor(this.getDocumentColors[index])
-      this.openColorPalette()
     }
   }
 })
@@ -286,29 +293,26 @@ export default defineComponent({
 <style lang="scss" scoped>
 .panel-color {
   width: 100%;
-  overflow-y: scroll;
+  height: 100%;
   box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-auto-columns: 100%;
 
-  &__document-colors {
+  &__shape-colors {
+    @include no-scrollbar;
     width: 100%;
-    margin-top: 10px;
+    padding: 10px 0 16px 0;
     display: grid;
-    grid-auto-rows: auto;
-    grid-template-columns: repeat(7, 1fr);
-    row-gap: 5px;
-    column-gap: 5px;
-    box-sizing: border-box;
+    gap: 5px;
+    overflow-x: auto;
   }
-  &__document-color {
-    width: 100%;
-    padding-top: calc(100% - 3px);
-    border: 1.5px solid setColor(gray-4);
-    border-radius: 4px;
-    box-sizing: border-box;
-    &:hover {
-      box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff;
-    }
-    // transition: box-shadow 0.2s ease-in-out;
+  &__hr {
+    height: 1px;
+    background-color: setColor(gray-4);
+  }
+  & .show-document-colors::v-deep .color-panel__scroll {
+    padding-top: 16px;
   }
 }
 </style>

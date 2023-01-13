@@ -85,7 +85,7 @@ div(class="design-item")
               iconWidth="13px"
               iconColor="gray-3")
   div(class="design-item__size")
-    span {{ `${config.width}x${config.height}` }}
+    span {{ `${sizeToShow.width} x ${sizeToShow.height} ${sizeToShow.unit}` }}
   div(class="dragged-thumbnail" :style="draggedImageContainerStyles()")
     div(class="relative")
       img(:src="appliedUrl" :style="draggedImageStyles()")
@@ -100,6 +100,8 @@ import vClickOutside from 'click-outside-vue3'
 import imageUtils from '@/utils/imageUtils'
 import designUtils from '@/utils/designUtils'
 import { IDesign } from '@/interfaces/design'
+import { round } from 'lodash'
+import { PRECISION } from '@/utils/unitUtils'
 
 export default defineComponent({
   components: {
@@ -203,6 +205,14 @@ export default defineComponent({
     },
     isThumbnailFound(): boolean {
       return this.config.thumbnail !== this.previewPlaceholder
+    },
+    sizeToShow(): {width: number, height: number, unit: string} {
+      const precision = this.config.unit === 'px' ? 0 : PRECISION
+      return {
+        width: round(this.config.width, precision),
+        height: round(this.config.height, precision),
+        unit: this.config.unit ?? 'px'
+      }
     }
   },
   methods: {
@@ -539,50 +549,6 @@ export default defineComponent({
     box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
     right: 8px;
     top: 35px;
-    & .design-menu-item {
-      position: relative;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: start;
-      gap: 5px;
-      padding: 8px 0;
-      cursor: pointer;
-      &:hover {
-        background-color: setColor(gray-5);
-      }
-      &__icon {
-        margin-left: 13px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 10px;
-        height: 10px;
-      }
-      &__text {
-        display: flex;
-        align-items: center;
-        justify-content: start;
-        height: 12px;
-        margin-right: 20px;
-        > span {
-          font-weight: 400;
-          font-size: 12px;
-          line-height: 12px;
-          color: setColor(gray-2);
-          white-space: nowrap;
-        }
-      }
-      &__right {
-        position: absolute;
-        right: 3px;
-        top: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transform: translateY(-50%);
-      }
-    }
   }
   &__favorite {
     position: absolute;

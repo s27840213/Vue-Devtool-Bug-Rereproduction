@@ -13,7 +13,7 @@ div(class="panel-shadow")
       div(class="photo-shadow__options__option-font") {{$t(shadowPropI18nMap[icon]._effectName)}}
   div(class="photo-shadow__attrs" :style="shadowAttrsStyles")
     div(v-for="field in shadowFields" :key="field")
-      mobile-slider(:title="`${$t(shadowPropI18nMap[currentEffect][field])}`"
+      mobile-slider(:title="`${$t(shadowPropI18nMap[currentEffect][field] as string)}`"
         :borderTouchArea="true"
         :name="field"
         :value="getFieldValue(field)"
@@ -30,11 +30,12 @@ div(class="panel-shadow")
       div(class="photo-shadow__reset")
         button(class="label-mid" @click="imageShadowPanelUtils.reset()") {{$t('NN0754')}}
 </template>
+
 <script lang="ts">
 import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
@@ -58,19 +59,15 @@ export default defineComponent({
   mounted() {
     imageShadowPanelUtils.mount()
   },
-  // beforeUnmount() {
-  //   imageShadowPanelUtils.handleShadowUpload()
-  // },
   computed: {
-    // ...mapState('mobileEditor', { mobilePanel: 'currActivePanel' }),
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedLayers: 'getCurrSelectedLayers'
     }),
-    shadowOptions(): string[] {
-      return Object.keys(this.effects)
+    shadowOptions(): ShadowEffectType[] {
+      return Object.keys(this.effects) as ShadowEffectType[]
     },
     shadowFields(): string[] {
       const { effects, currentEffect } = this
@@ -104,10 +101,7 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapMutations({
-      setCurrActivePanel: 'mobileEditor/SET_currActivePanel'
-    }),
-    getFieldValue(field: string): number | boolean {
+    getFieldValue(field: string): number {
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     },
     onEffectClick(effectName: ShadowEffectType): void {
@@ -121,16 +115,10 @@ export default defineComponent({
     },
     handleColorModal() {
       if (generalUtils.isTouchDevice()) {
+        colorUtils.setCurrEvent(ColorEventType.photoShadow)
         this.handleColor = true
         this.$emit('openExtraColorModal', ColorEventType.photoShadow, MobileColorPanelType.palette)
       }
-      // TODO
-      // if (tab.panelType !== undefined) {
-      //   this.$emit('switchTab', tab.panelType, tab.props)
-      // }
-      // this.$emit('toggleColorPanel', true)
-      // colorUtils.setCurrEvent(ColorEventType.photoShadow)
-      // colorUtils.setCurrColor(this.currentStyle.shadow.effects.color)
     }
   }
 })

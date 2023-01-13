@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="text-setting" ref='body'
     @mousedown.capture="textInfoRecorder()")
-  span(class="text-setting__title text-blue-1 label-lg") {{$t('NN0062')}}
+  span(class="text-setting__title text-blue-1 text-H6") {{$t('NN0062')}}
   div(class="text-setting__row1")
     div(class="property-bar pointer record-selection" @click="openFontsPanel")
       img(v-if="props.font[0] !== '_'" class="text-setting__text-preview" :src="fontPrevUrl" @error="onError")
@@ -46,11 +46,11 @@ div(class="text-setting" ref='body'
     div(class="action-bar action-bar--small flex-evenly")
       svg-icon(class="pointer record-selection btn-lh feature-button p-5"
         :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click="openLineHeightSliderPopup('.btn-lh')"
+        @click="openLineHeightSliderPopup()"
         v-hint="$t('NN0110')")
       svg-icon(class="pointer record-selection btn-ls feature-button p-5"
         :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click="openSpacingSliderPopup('.btn-ls')"
+        @click="openSpacingSliderPopup()"
         v-hint="$t('NN0109')")
   div(class="action-bar flex-evenly")
     svg-icon(v-for="(icon,index) in mappingIcons('font')"
@@ -71,11 +71,12 @@ div(class="text-setting" ref='body'
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
-import { IGroup, ILayer, IParagraph, ISpan, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import vClickOutside from 'click-outside-vue3'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
@@ -93,6 +94,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
+import editorUtils from '@/utils/editorUtils'
 
 export default defineComponent({
   components: {
@@ -129,7 +131,7 @@ export default defineComponent({
         'text-align-center': `${this.$t('NN0106')}`,
         'text-align-right': `${this.$t('NN0107')}`,
         'text-align-justify': `${this.$t('NN0108')}`
-      },
+      } as Record<string, string>,
       fontPrevUrl: ''
     }
   },
@@ -153,7 +155,7 @@ export default defineComponent({
     popupUtils.on(PopupSliderEventType.stop, () => {
       const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
       if (currLayer.type === 'text' || (currLayer.type === 'group' && subLayerIdx !== -1 &&
-        (currLayer as IGroup).layers[subLayerIdx].type === 'text)')) {
+        currLayer.layers[subLayerIdx].type === 'text')) {
         tiptapUtils.focus({ scrollIntoView: false })
       }
     })
@@ -290,7 +292,7 @@ export default defineComponent({
       const input = this.$refs['input-color'] as HTMLInputElement
       input.focus()
       input.select()
-      this.$emit('toggleColorPanel', true)
+      editorUtils.toggleColorSlips(true)
       this.updateLayerProps({ isEdited: true })
     },
     handleColorUpdate(color: string) {
@@ -557,7 +559,7 @@ export default defineComponent({
     copyColor() {
       GeneralUtils.copyText(this.props.color)
         .then(() => {
-          // this.$notify({ group: 'copy', text: `${this.props.color} 已複製` })
+          notify({ group: 'copy', text: `${this.props.color} 已複製` })
         })
     },
     iconClickable(icon: string): boolean {
@@ -575,6 +577,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .text-setting {
+  text-align: left;
   &__title {
     margin-bottom: 30px;
   }

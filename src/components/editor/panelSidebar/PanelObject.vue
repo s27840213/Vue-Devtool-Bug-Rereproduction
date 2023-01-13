@@ -7,11 +7,12 @@ div(class="panel-objects")
     :defaultKeyword="keywordLabel"
     @search="handleSearch")
   //- Admin tool
-  div(v-if="inAdminMode" class="panel-objects-2html")
+  div(v-if="showAdminTool" class="panel-objects-2html")
     input(type="text" placeholder="項目網址" v-model="panelParams")
     btn(@click="downloadAll") Download all
   //- Search result empty msg
-  div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+  div(v-if="emptyResultMessage")
+    span {{ emptyResultMessage }}
   //- Search result and main content
   category-list(v-for="item in categoryListArray"
                 v-show="item.show" :ref="item.key" :key="item.key"
@@ -30,22 +31,32 @@ div(class="panel-objects")
           class="panel-objects__item"
           :key="item.id"
           :item="item")
-    template(v-if="pending" #after)
-      div(class="text-center")
+    template(#after)
+      //- Loading icon
+      div(v-if="pending" class="text-center")
         svg-icon(iconName="loading"
           iconColor="white"
           iconWidth="20px")
+      //- Object wishing pool
+      div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
+        span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
+        nubtn(size="mid" class="mt-30")
+          url(:url="$t('NN0791')" :newTab="true")
+            span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
+import Url from '@/components/global/Url.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import generalUtils from '@/utils/generalUtils'
+import i18n from '@/i18n'
 
 export default defineComponent({
   emits: [],
@@ -53,7 +64,8 @@ export default defineComponent({
     SearchBar,
     CategoryList,
     CategoryListRows,
-    CategoryObjectItem
+    CategoryObjectItem,
+    Url
   },
   data() {
     return {
@@ -67,7 +79,7 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      isAdmin: 'user/isAdmin'
+      showAdminTool: 'user/showAdminTool'
     }),
     ...mapState('objects', {
       categories: 'categories',
@@ -76,12 +88,6 @@ export default defineComponent({
       pending: 'pending',
       keyword: 'keyword'
     }),
-    ...mapState('user', [
-      'adminMode'
-    ]),
-    inAdminMode(): boolean {
-      return this.isAdmin && this.adminMode
-    },
     keywordLabel():string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
@@ -174,18 +180,18 @@ export default defineComponent({
       'getMoreContent',
       'resetSearch'
     ]),
-    handleSearch(keyword: string) {
+    async handleSearch(keyword: string) {
       this.resetSearch()
       if (keyword) {
         this.panelParams = `http://vivipic.com/editor?panel=object&search=${keyword.replace(/&/g, '%26')}&type=new-design-size&width=1080&height=1080&themeId=1`
-        this.getTagContent({ keyword })
+        await this.getTagContent({ keyword })
       }
     },
-    handleCategorySearch(keyword: string, locale = '') {
+    async handleCategorySearch(keyword: string, locale = '') {
       this.resetSearch()
       if (keyword) {
-        this.panelParams = `http://vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${this.$i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
-        this.getContent({ keyword, locale })
+        this.panelParams = `http://vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.global.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
+        await this.getContent({ keyword, locale })
       }
     },
     handleLoadMore() {
@@ -196,7 +202,7 @@ export default defineComponent({
     },
     downloadAll() {
       generalUtils.copyText(this.panelParams)
-      // this.$notify({ group: 'copy', text: '已複製網址到剪貼簿' })
+      notify({ group: 'copy', text: '已複製網址到剪貼簿' })
       const links = this.mainContent.map((it) => {
         return it.list.map((it) => {
           return `https://template.vivipic.com/svg/${it.id}/prev?ver=${it.ver}`
@@ -230,6 +236,8 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  color: white;
+  text-align: left;
   &__item {
     width: 80px;
     height: 80px;

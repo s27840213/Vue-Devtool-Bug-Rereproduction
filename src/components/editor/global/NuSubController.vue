@@ -1,22 +1,15 @@
 <template lang="pug">
-div(class="nu-sub-controller"
-    :style="transformStyle")
+//- :style="transformStyle")
+div(class="nu-sub-controller")
   div(class="nu-sub-controller__wrapper" :style="positionStyles()")
-    div(class="nu-sub-controller__wrapper" :style="wrapperStyles()")
+    div(class="nu-sub-controller__wrapper" :style="wrapperStyles")
       div(class="nu-sub-controller__content"
           ref="body"
           :layer-index="`${layerIndex}`"
-          :style="styles('')"
-          @dblclick="onDblClick($event)"
-          @dragenter="onDragEnter($event)"
-          @pointerdown="onPointerdown($event)")
-        //- @click.left.stop="onClickEvent($event)"
-        svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
-          :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
-          g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
-            :style="frameClipStyles()")
-        template(v-if="config.type === 'text' && config.active")
-          div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
+          :style="styles")
+          div(v-if="config.type === 'text' && config.active"
+            class="text text__wrapper" :style="textWrapperStyle()" draggable="false"
+            @pointerdown="onPointerdown")
             nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
               :style="textBodyStyle()"
               :pageIndex="pageIndex"
@@ -43,11 +36,12 @@ div(class="nu-sub-controller"
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IText, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
@@ -57,20 +51,21 @@ import GeneralUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
-import { FunctionPanelType, LayerType, PopupSliderEventType } from '@/store/types'
+import { ILayerInfo, LayerType } from '@/store/types'
 import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import DragUtils from '@/utils/dragUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import imageUtils from '@/utils/imageUtils'
-import formatUtils from '@/utils/formatUtils'
+import SubCtrlUtils from '@/utils/subControllerUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import colorUtils from '@/utils/colorUtils'
-import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
+import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import pageUtils from '@/utils/pageUtils'
 import SvgPath from 'svgpath'
+import i18n from '@/i18n'
 
 export default defineComponent({
   props: {
@@ -119,6 +114,7 @@ export default defineComponent({
     return {
       MappingUtils,
       FrameUtils,
+      subLayerCtrlUtils: null as unknown as SubCtrlUtils,
       ShortcutUtils,
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
@@ -139,6 +135,34 @@ export default defineComponent({
   mounted() {
     const body = this.$refs.body as HTMLElement
     if (body) {
+      const props = this.$props
+      const layerInfo = { } as ILayerInfo
+      Object.defineProperty(layerInfo, 'pageIndex', {
+        get() {
+          return props.pageIndex
+        }
+      })
+      Object.defineProperty(layerInfo, 'layerIndex', {
+        get() {
+          return props.primaryLayerIndex
+        }
+      })
+      Object.defineProperty(layerInfo, 'subLayerIdx', {
+        get() {
+          return props.layerIndex
+        }
+      })
+      const _config = { config: { active: false } } as { config: ILayer }
+      Object.defineProperty(_config, 'config', {
+        get() {
+          return props.config
+        }
+      })
+      this.subLayerCtrlUtils = new SubCtrlUtils({
+        layerInfo,
+        _config,
+        body
+      })
       /**
        * Prevent the context menu from showing up when right click or Ctrl + left click on controller
        */
@@ -166,6 +190,42 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
     }),
+    wrapperStyles(): any {
+      const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      return {
+        transformOrigin: '0px 0px',
+        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer as IFrame) ? scale : 1})`,
+        ...this.transformStyle,
+        outline: this.outlineStyles(),
+        ...this.sizeStyle(),
+        ...(this.type === 'frame' && (() => {
+          const { styles: { width, height }, clipPath } = this.config
+          if (this.config.isFrameImg) {
+            return { clipPath: `path("M0,0h${width}v${height}h${-width}z")` }
+          } else {
+            return { clipPath: clipPath !== undefined ? `path('${new SvgPath(clipPath).scale(this.contentScaleRatio).toString()}')` : clipPath }
+          }
+        })())
+      }
+    },
+    styles(): any {
+      const { isFrameImg } = this.config
+      const zindex = this.type === 'group' ? this.config?.active ? this.getPrimaryLayerSubLayerNum : this.primaryLayerZindex : this.config.styles.zindex
+      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
+
+      return {
+        ...this.sizeStyle(),
+        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`,
+        ...textEffectStyles,
+        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
+      }
+    },
+    isCurveText(): boolean {
+      return this.checkIfCurve(this.config as IText)
+    },
+    isFlipped(): boolean {
+      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
+    },
     isTextEditing(): boolean {
       return !this.isControlling && this.config?.active
     },
@@ -205,6 +265,11 @@ export default defineComponent({
         }
         popupUtils.closePopup()
       } else {
+        if (this.config.type === 'text') {
+          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+            editing: true
+          })
+        }
         TextUtils.setCurrTextInfo({
           config: this.config as IText,
           subLayerIndex: this.layerIndex
@@ -228,7 +293,7 @@ export default defineComponent({
     'config.contentEditable'(newVal) {
       if (this.config.type !== 'text') return
       if (this.config.active) {
-        if (!newVal || !this.config.isEdited) {
+        if (!newVal) {
           tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
         }
         tiptapUtils.agent(editor => {
@@ -281,13 +346,28 @@ export default defineComponent({
       }
     },
     textBodyStyle() {
-      const isVertical = this.config.styles.writingMode.includes('vertical')
-      return {
+      // const isVertical = this.config.styles.writingMode.includes('vertical')
+      // return {
+      //   width: `${this.config.styles.width / this.config.styles.scale}px`,
+      //   height: `${this.config.styles.height / this.config.styles.scale}px`,
+      //   userSelect: this.config.contentEditable ? 'text' : 'none',
+      //   opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
+      // }
+      const textstyles = {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
         userSelect: this.config.contentEditable ? 'text' : 'none',
-        opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
+        opacity: 1
       }
+      return !(this.isCurveText || this.isFlipped) ? textstyles
+        : {
+          width: `${this.config.styles.width / this.config.styles.scale}px`,
+          height: `${this.config.styles.height / this.config.styles.scale}px`,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          opacity: this.config.contentEditable ? 1 : 0
+        }
     },
     textStyles(styles: any) {
       const textStyles = CssConveter.convertFontStyle(styles)
@@ -311,84 +391,25 @@ export default defineComponent({
       }
     },
     onPointerdown(e: PointerEvent) {
-      if (e.button !== 0) return
-      const body = this.$refs.body as HTMLElement
-      // body.addEventListener('touchstart', this.disableTouchEvent)
-      if (GeneralUtils.isTouchDevice()) {
-        if (!this.dblTapFlag && this.config?.active && this.config.type === 'image') {
-          const touchtime = Date.now()
-          const interval = 500
-          const doubleTap = (e: PointerEvent) => {
-            e.preventDefault()
-            if (Date.now() - touchtime < interval && !this.dblTapFlag) {
-              /**
-               * This is the dbl-click callback block
-               */
-              if (this.config.type === LayerType.image) {
-                switch (this.type) {
-                  case LayerType.group:
-                    LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { imgControl: true }, this.layerIndex)
-                    break
-                  case LayerType.frame:
-                    FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { imgControl: true })
-                    break
-                }
-                eventUtils.emit(PanelEvent.switchTab, 'crop')
-              }
-              this.dblTapFlag = true
-            }
-          }
-          body.addEventListener('pointerdown', doubleTap)
-          setTimeout(() => {
-            body.removeEventListener('pointerdown', doubleTap)
-            this.dblTapFlag = false
-          }, interval)
-        }
-        this.$emit('pointerDownSubController')
-      }
-
-      if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
-        groupUtils.deselect()
-        groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
-        LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
-        eventUtils.emit(PanelEvent.showPhotoShadow)
-      }
-
-      this.isPrimaryActive = this.primaryLayer.active
-      formatUtils.applyFormatIfCopied(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
-      formatUtils.clearCopiedFormat()
-      if (this.type === 'tmp') {
-        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
-          groupUtils.deselectTargetLayer(this.layerIndex)
-        }
-        return
-      }
-      if (this.config.type === 'text') {
-        this.posDiff.x = this.primaryLayer.styles.x
-        this.posDiff.y = this.primaryLayer.styles.y
-        if (this.config?.active && this.config.contentEditable) return
-        else if (!this.config?.active) {
-          this.isControlling = true
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
-          eventUtils.addPointerEvent('pointerup', this.onMouseup)
-          return
-        }
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: true })
-      }
-      eventUtils.addPointerEvent('pointerup', this.onMouseup)
-      this.isControlling = true
+      // const
+      // e.stopPropagation()
+      this.subLayerCtrlUtils.onPointerdown(e)
     },
     onMouseup(e: PointerEvent) {
       e.stopPropagation()
       if (this.config.type === 'text') {
         this.posDiff.x = this.primaryLayer.styles.x - this.posDiff.x
         this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
-        if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
+        if (this.posDiff.x !== 0 || this.posDiff.y !== 0) {
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
         } else {
           if (this.config.contentEditable) {
             LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { isTyping: true }, this.layerIndex)
-            tiptapUtils.focus({ scrollIntoView: false })
+            if (GeneralUtils.isTouchDevice()) {
+              tiptapUtils.focus({ scrollIntoView: false }, 'end')
+            } else {
+              tiptapUtils.focus({ scrollIntoView: false })
+            }
           }
         }
       }
@@ -396,7 +417,7 @@ export default defineComponent({
       this.isControlling = false
       this.onClickEvent(e)
     },
-    positionStyles() {
+    positionStyles(): Record<string, string> {
       const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
       let { x, y } = this.config.styles
 
@@ -418,37 +439,6 @@ export default defineComponent({
         height: `${this.config.styles.height * this.contentScaleRatio}px`,
         'pointer-events': 'none',
         ...this.transformStyle
-      }
-    },
-    wrapperStyles() {
-      // const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
-      const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
-
-      return {
-        transformOrigin: '0px 0px',
-        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer as IFrame) ? scale : 1})`,
-        ...this.transformStyle,
-        outline: this.outlineStyles(),
-        ...this.sizeStyle(),
-        ...(this.type === 'frame' && (() => {
-          const { styles: { width, height }, clipPath } = this.config
-          if (this.config.isFrameImg) {
-            return { clipPath: `path("M0,0h${width}v${height}h${-width}z")` }
-          } else {
-            return { clipPath: clipPath !== undefined ? `path('${new SvgPath(clipPath).scale(this.contentScaleRatio).toString()}')` : clipPath }
-          }
-        })())
-      }
-    },
-    styles() {
-      const { isFrameImg } = this.config
-      const zindex = this.type === 'group' ? this.config?.active ? this.getPrimaryLayerSubLayerNum : this.primaryLayerZindex : this.config.styles.zindex
-
-      return {
-        ...this.sizeStyle(),
-        'pointer-events': 'initial',
-        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} ${this.enalble3dTransform ? `translateZ(${zindex}px` : ''})`,
-        ...TextEffectUtils.convertTextEffect(this.config as IText)
       }
     },
     sizeStyle() {
@@ -567,7 +557,7 @@ export default defineComponent({
               this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
             } else {
-              // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
               body.removeEventListener('drop', this.onDrop)
             }
           }
@@ -807,6 +797,8 @@ export default defineComponent({
     touch-action: none;
   }
   &__content {
+    pointer-events: none;
+
     touch-action: none;
     display: flex;
     justify-content: center;
@@ -839,6 +831,11 @@ export default defineComponent({
   }
   &__wrapper {
     position: relative;
+    pointer-events: initial;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
   }
   &__body {
     outline: none;

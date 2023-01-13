@@ -11,18 +11,18 @@ div(class="no-items-hint" :class="{mobile: mobile}")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   emits: [],
   props: {
     type: {
-      type: String,
+      type: String as PropType<'logo' | 'color'>,
       required: true
     },
     mobile: {
       type: Boolean,
-      required: true
+      default: false
     }
   },
   data() {

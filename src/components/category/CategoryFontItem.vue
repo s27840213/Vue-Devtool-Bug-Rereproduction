@@ -24,10 +24,10 @@ div(class="category-fonts pointer feature-button"
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
-import StepsUtils from '@/utils/stepsUtils'
 import { ISelection } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -77,11 +77,11 @@ export default defineComponent({
       const { getCurrLayer: currLayer, layerIndex } = layerUtils
       switch (currLayer.type) {
         case 'group': {
-          const activeIdx = (currLayer as IGroup).layers
+          const activeIdx = currLayer.layers
             .findIndex(l => l.type === 'text' && l.active)
           if (activeIdx !== -1) {
             return {
-              layer: (currLayer as IGroup).layers[activeIdx] as IText,
+              layer: currLayer.layers[activeIdx] as IText,
               layerIndex: activeIdx,
               primaryLayerIndex: layerIndex,
               pageIndex: layerUtils.pageIndex
@@ -273,7 +273,7 @@ export default defineComponent({
         }
 
         const currLayer = layerUtils.getCurrLayer
-        if ((!currLayer.active || currLayer.id !== id || (currLayer.type === 'group' && !(currLayer as IGroup).layers[subLayerIdx].active))) {
+        if ((!currLayer.active || currLayer.id !== id || (currLayer.type === 'group' && !currLayer.layers[subLayerIdx].active))) {
           const newConfig = TextPropUtils.spanParagraphPropertyHandler('fontFamily', updateItem, start, end, config as IText)
           this.updateLayerProps(currLayerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
           if (currLayer.active) {
@@ -327,10 +327,10 @@ export default defineComponent({
       } catch (error: any) {
         const code = error.message === 'timeout' ? 'timeout' : error.code
         console.error(error)
-        // this.$notify({
-        //   group: 'error',
-        //   text: `${this.$t('NN0248')} (ErrorCode: ${code})`
-        // })
+        notify({
+          group: 'error',
+          text: `${this.$t('NN0248')} (ErrorCode: ${code})`
+        })
       } finally {
         tiptapUtils.agent(editor => editor.setEditable(true))
         const sel = window.getSelection()

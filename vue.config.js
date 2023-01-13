@@ -78,6 +78,26 @@ module.exports = defineConfig({
             .include.add(/node_modules/)
             .end()
 
+        // set worker-loader
+        config.module
+            .rule('worker')
+            .test(/\.worker\.(j|t)s$/)
+            .exclude.add(/node_modules/)
+            .end()
+            .use('worker-loader')
+            .loader('worker-loader')
+            .end()
+        // config.module
+        //     .rule('worker')
+        //     .test(/\.worker\.ts$/)
+        // .use('ts-loader')
+        // .loader('ts-loader')
+        // .end()
+
+        // 解决：worker 热更新问题
+        // config.module.rule('js').exclude.add(/\.worker\.js$/)
+        config.module.rule('ts').exclude.add(/\.worker\.ts$/)
+
         // 先刪除預設的svg配置，否則svg-sprite-loader會失效
         config.module.rules.delete('svg')
         // 新增 svg-sprite-loader 設定
@@ -236,16 +256,16 @@ module.exports = defineConfig({
                     sourceMap: false,
                     parallel: true
                 })
-            ],
-            minimize: false
-        }
+            ]
+        },
+        minimize: false
     },
 
     css: {
         loaderOptions: {
             scss: {
                 // prependData: '@use "~@/assets/scss/utils" as *;'
-                additionalData: '@use "~@/assets/scss/utils" as *;'
+                additionalData: '@use "@/assets/scss/utils" as *;'
             }
         }
     },

@@ -14,12 +14,12 @@ div(class="text-effect-setting mt-25")
           :iconName="`text-${currCategory.name}-${effect.key}`"
           @click="onEffectClick(effect.key)"
           class="text-effect-setting__effect pointer"
-          :class="{'selected': currentStyle[currCategory.name].name === effect.key }"
+          :class="{'selected': currentStyle.name === effect.key }"
           iconWidth="60px"
           iconColor="white"
           v-hint="effect.label")
       //- Effect option UI.
-      div(v-if="getOptions(effects1d) && getOptions(effects1d).length !== 0"
+      div(v-if="getOptions(effects1d) && getOptions(effects1d)?.length !== 0"
           class="text-effect-setting-options")
         div(v-for="option in getOptions(effects1d)"
             :key="option.key"
@@ -31,19 +31,19 @@ div(class="text-effect-setting mt-25")
             svg-icon(v-for="sel in option.select"
               :iconName="`${option.key}-${sel.key}`"
               iconWidth="24px"
-              :class="{'selected': currentStyle[currCategory.name].endpoint === sel.key }"
+              :class="{'selected': currentStyle.endpoint === sel.key }"
               @click="handleSelectInput(option.key, sel.key)")
           //- Option type range
           template(v-if="option.type === 'range'")
             input(class="text-effect-setting-options__field--number"
-              :value="currentStyle[currCategory.name][option.key]"
+              :value="currentStyle[option.key]"
               :name="option.key"
               :max="option.max"
               :min="option.min"
               @change="(e)=>{handleRangeInput(e, option);recordChange()}"
               type="number")
             input(class="text-effect-setting-options__field--range input__slider--range"
-              :value="currentStyle[currCategory.name][option.key]"
+              :value="currentStyle[option.key]"
               :name="option.key"
               :max="option.max"
               :min="option.min"
@@ -53,10 +53,10 @@ div(class="text-effect-setting mt-25")
               v-ratio-change
               type="range")
           //- Option type color
-          template(v-if="option.type === 'color'")
-            div(class="text-effect-setting-options__field--btn"
-              :style="colorParser(currentStyle[currCategory.name][option.key])"
-              @click="handleColorModal(currCategory.name, option.key)")
+          color-btn(v-if="option.type === 'color'" size="25px"
+            :color="colorParser(currentStyle[option.key])"
+            :active="option.key === colorTarget.key && settingTextEffect"
+            @click="handleColorModal(currCategory.name, option.key)")
         div(class="text-effect-setting-options__field")
           span
           span(class="text-effect-setting-options__field--reset"
@@ -65,11 +65,11 @@ div(class="text-effect-setting mt-25")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import vClickOutside from 'click-outside-vue3'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
@@ -77,14 +77,13 @@ import textPropUtils from '@/utils/textPropUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOption } from '@/utils/constantData'
 import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 import localStorageUtils from '@/utils/localStorageUtils'
+import editorUtils from '@/utils/editorUtils'
 import _ from 'lodash'
 
 export default defineComponent({
   components: {
-    ColorPicker
-  },
-  directives: {
-    clickOutside: vClickOutside.directive
+    ColorPicker,
+    ColorBtn
   },
   emits: ['toggleColorPanel'],
   data() {
@@ -102,13 +101,17 @@ export default defineComponent({
     currCategory():IEffectCategory {
       return _.find(this.textEffects, ['name', this.currTab]) as IEffectCategory
     },
-    currentStyle(): { shadow: ITextEffect, bg: ITextBgEffect, shape: ITextShape } {
+    currentStyle(): Record<string, string> {
       const { styles } = textEffectUtils.getCurrentLayer()
       return {
         shadow: Object.assign({ name: 'none' }, styles.textEffect as ITextEffect),
         bg: styles.textBg as ITextBgEffect,
         shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
-      }
+      }[this.currTab] as Record<string, string>
+    },
+    settingTextEffect(): boolean {
+      return colorUtils.currEvent === 'setTextEffectColor' &&
+        editorUtils.showColorSlips
     }
   },
   mounted() {
@@ -120,11 +123,13 @@ export default defineComponent({
     colorUtils.offStop(ColorEventType.textEffect, this.recordChange)
   },
   methods: {
-    handleColorModal(category: string, key: string) {
+    handleColorModal(category: 'shadow'|'bg'|'shape', key: string) {
+      const currColor = this.colorParser(this.currentStyle[key])
+
       this.colorTarget = { category, key }
-      this.$emit('toggleColorPanel', true)
+      editorUtils.toggleColorSlips(true)
       colorUtils.setCurrEvent(ColorEventType.textEffect)
-      colorUtils.setCurrColor(this.currentStyle.shadow.color as string)
+      colorUtils.setCurrColor(currColor)
     },
     switchTab(category: 'shadow'|'bg'|'shape') {
       this.currTab = category
@@ -132,15 +137,16 @@ export default defineComponent({
     },
     getOptions(effects1d: IEffect[]) {
       return _.find(effects1d, ['key',
-        this.currentStyle[this.currTab].name])?.options
+        this.currentStyle.name])?.options
     },
     setEffect(options:{
       effectName?: string,
       effect?: Record<string, string|number|boolean>
     }) {
       let { effectName, effect } = options
+      const { textShape } = textEffectUtils.getCurrentLayer().styles
       if (!effectName) {
-        effectName = this.currentStyle[this.currTab].name || 'none'
+        effectName = this.currentStyle.name || 'none'
       }
 
       switch (this.currTab) {
@@ -150,7 +156,7 @@ export default defineComponent({
           break
         case 'bg':
           textBgUtils.setTextBg(effectName, Object.assign({}, effect))
-          if (this.currentStyle.shape.name !== 'none') {
+          if (textShape.name !== 'none') {
             textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
             textPropUtils.updateTextPropsState()
           }
@@ -201,7 +207,7 @@ export default defineComponent({
       this.setEffect({ effect: { [key]: color } })
     },
     colorParser(color: string) {
-      return { backgroundColor: textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer()) }
+      return textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer())
     },
     recordChange() {
       stepsUtils.record()
@@ -223,7 +229,7 @@ export default defineComponent({
       justify-content: center;
       align-items: center;
       height: 100%;
-      &[selected] {
+      &[selected=true] {
         background-color: setColor(gray-6);
       }
     }
@@ -269,8 +275,7 @@ export default defineComponent({
       height: 25px;
       padding: 0;
     }
-    &--number,
-    &--btn {
+    &--number {
       box-sizing: border-box;
       width: 30px;
       height: 25px;

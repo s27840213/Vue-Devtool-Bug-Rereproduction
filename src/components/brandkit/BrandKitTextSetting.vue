@@ -82,7 +82,7 @@ export default defineComponent({
       isValueSelectorOpen: false,
       fontSizeBuffer: 0,
       fontSelectValue,
-      fontIcons: ['bold', 'underline', 'italic'],
+      fontIcons: ['bold', 'underline', 'italic'] as ('bold' | 'underline' | 'italic')[],
       hintMap: {
         bold: `${this.$t('NN0101')}`,
         underline: `${this.$t('NN0102')}`,
@@ -348,6 +348,7 @@ export default defineComponent({
     position: absolute;
     left: 0;
     top: 120px;
+    height: 45vh;
     width: 280px;
     background-color: white;
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);

@@ -1,10 +1,10 @@
 <template lang="pug">
-editor-content(:editor="editor")
+editor-content(:editor="(editor as Editor)")
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Editor, EditorContent } from '@tiptap/vue-2'
+import { Editor, EditorContent } from '@tiptap/vue-3'
 import tiptapUtils from '@/utils/tiptapUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { IGroup, IText, ITmp } from '@/interfaces/layer'
@@ -17,7 +17,7 @@ export default defineComponent({
   },
   props: {
     initText: {
-      type: String,
+      type: Object,
       required: true
     },
     pageIndex: {
@@ -68,7 +68,11 @@ export default defineComponent({
     const contentEditable = this.subLayerIndex === -1 ? (this.layerInfo.currLayer as IText).contentEditable : ((this.layerInfo.currLayer as IGroup).layers[this.subLayerIndex] as IText).contentEditable
 
     tiptapUtils.init(this.initText, contentEditable)
-    this.editor = tiptapUtils.editor
+    /**
+     * @Note why I use as any is bcz when I update the tiptap from vue2 ver to vue 3 ver, it throw some weird error
+     * If TingAn is avalible, maybe we could discuss and fix the error.
+     */
+    this.editor = tiptapUtils.editor as any
     tiptapUtils.on('update', ({ editor }) => {
       let toRecord = false
       const newText = tiptapUtils.getText(editor)
@@ -86,8 +90,11 @@ export default defineComponent({
       this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord })
     })
     tiptapUtils.on('create', ({ editor }) => {
-      if (!this.config?.isEdited && !generalUtils.isTouchDevice()) {
-        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
+      // if (!this.config?.isEdited && !generalUtils.isTouchDevice()) {
+      //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
+      //   editor.commands.focus()
+      // }
+      if (this.config?.contentEditable) {
         editor.commands.focus()
       }
       const editorDiv = editor.view.dom as HTMLDivElement
@@ -158,6 +165,7 @@ export default defineComponent({
 }
 
 .ProseMirror.non-selectable {
+  outline: none;
   white-space: pre-wrap;
   font-variant-ligatures: unset;
 }

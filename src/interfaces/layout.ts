@@ -4,4 +4,5 @@ export interface ILayout {
     height: number;
     title: string;
     description: string;
+    unit: string;
 }

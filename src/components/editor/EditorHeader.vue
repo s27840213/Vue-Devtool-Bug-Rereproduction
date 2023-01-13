@@ -30,22 +30,19 @@ div(class="editor-header" ref="header"
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
+import { mapMutations, mapGetters } from 'vuex'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import { mapState, mapMutations, mapGetters } from 'vuex'
 import store from '@/store'
 import pageUtils from '@/utils/pageUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import networkUtils from '@/utils/networkUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { Translation as I18nT } from 'vue-i18n'
 
 export default defineComponent({
   emits: [],
-  components: {
-    I18nT
-  },
   data() {
     return {
       ShortcutUtils,
@@ -62,21 +59,12 @@ export default defineComponent({
     uploadUtils.offDesignUploadStatus()
   },
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapGetters({
       groupId: 'getGroupId',
       folderInfo: 'getFolderInfo'
     }),
     isLogin(): boolean {
       return store.getters['user/isLogin']
-    },
-    isAdmin(): boolean {
-      return this.role === 0
-    },
-    getAdminModeText(): string {
-      return this.adminMode ? '' : '-disable'
     },
     path(): string {
       return this.$route.path
@@ -115,9 +103,6 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapMutations({
-      _setPages: 'SET_pages'
-    }),
     setPagesName(event: Event) {
       const { value } = event.target as HTMLInputElement
       pageUtils.setPagesName(value)
@@ -128,7 +113,7 @@ export default defineComponent({
       }
       GeneralUtils.copyText(text)
         .then(() => {
-          // this.$notify({ group: 'copy', text: `${text} 已複製` })
+          notify({ group: 'copy', text: `${text} 已複製` })
         })
     }
   }

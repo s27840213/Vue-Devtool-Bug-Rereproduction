@@ -62,7 +62,7 @@ div(class="popup-verify"
     div
       property-bar(:class="{'input-invalid': !resetPasswordValid}")
         input(class="body-2 text-gray-2"
-          v-model="newPass" type="password" name="newPass"
+          v-model="newPass" name="newPass"
           :placeholder="$t('NN0163', { term: $t('NN0292') })"
           @input="onUpdate"
           :type="togglePeerPasswordInput")
@@ -120,7 +120,6 @@ export default defineComponent({
   props: {
     account: {
       type: String,
-      required: true
     },
     type: {
       type: String,
@@ -233,7 +232,7 @@ export default defineComponent({
     }),
     async onResendClicked() {
       this.isLoading = true
-      if (this.account.length === 0) {
+      if (!this.account || this.account.length === 0) {
         this.isLoading = false
         return
       }
@@ -268,7 +267,7 @@ export default defineComponent({
     async onEnterCodeDoneClicked() {
       this.isVcodeClicked = true
       this.isLoading = true
-      if (this.account.length === 0) {
+      if (!this.account || this.account.length === 0) {
         this.isLoading = false
         return
       }

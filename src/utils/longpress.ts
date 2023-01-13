@@ -7,7 +7,7 @@ const start = (callback: (e: PointerEvent) => void) => {
   return (e: PointerEvent) => {
     if (pressTimer === -1) {
       pressTimer = setTimeout((e: PointerEvent) => {
-        const isImgControl = store.getters['imgControl/isImgControl']
+        const isImgControl = store.getters['imgControl/isImgCtrl']
         if (!isImgControl) {
           callback(e)
         }

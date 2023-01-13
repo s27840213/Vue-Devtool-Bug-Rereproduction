@@ -446,7 +446,7 @@ export default new class ImageShadowPanelUtils {
       const oldEffect = generalUtils.deepCopy((layerUtils.getCurrConfig as IImage).styles.shadow.effects[currentEffect])
       imageShadowUtils.setEffect(currentEffect, {
         [currentEffect]:
-          Object.assign(oldEffect, { [name]: +value > max ? max : (+value < min ? min : +value) })
+          Object.assign(oldEffect as any, { [name]: +value > max ? max : (+value < min ? min : +value) })
       })
     }
   }

@@ -9,6 +9,7 @@ import TemplateCenter from '@/views/TemplateCenter.vue'
 import MobileWarning from '@/views/MobileWarning.vue'
 import Preview from '@/views/Preview.vue'
 import SvgIconView from '@/views/SvgIconView.vue'
+import NubtnList from '@/views/NubtnList.vue'
 import BrandKit from '@/views/BrandKit.vue'
 import Pricing from '@/views/Pricing.vue'
 import CopyTool from '@/views/CopyTool.vue'
@@ -70,23 +71,48 @@ const routes: Array<RouteRecordRaw> = [
       try {
         const urlParams = new URLSearchParams(window.location.search)
         const url = urlParams.get('url')
+        const teamId = urlParams.get('team_id')
+        const token = urlParams.get('token')
+        const dpi = +(urlParams.get('dpi') ?? -1)
+        const bleed = !!+(urlParams.get('bleed') ?? 0)
+        const trim = !!+(urlParams.get('trim') ?? 0)
+        const renderForPDF = urlParams.get('renderForPDF')
 
-        if (url) {
+        if (token && teamId && url) {
+          // for new version
+          // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET
+          store.commit('user/SET_STATE', { token, teamId, dpi, bleed, trim })
+          store.commit('user/SET_STATE', { userId: 'backendRendering' })
+          const response = await (await fetch(`https://${url}`)).json()
+          await assetUtils.addTemplate(response, { pageIndex: 0 })
+          store.commit('file/SET_setLayersDone')
+          store.commit('user/SET_STATE', { userId: 'backendRendering', dpi, renderForPDF: renderForPDF === 'true' })
+        } else if (url) {
+          // for old version
           // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET
           const hasToken = url.indexOf('token=') !== -1
           let tokenKey = ''
           let src = url
           if (hasToken) {
             tokenKey = url.match('&token') ? '&token=' : '?token='
-            src = url.substring(0, hasToken ? url.indexOf(tokenKey) : undefined)
-            const token = url.substring((src + tokenKey).length, url.indexOf('&team_id='))
-            const teamId = url.substr((src + tokenKey + token + '&team_id=').length)
-            store.commit('user/SET_STATE', { token, teamId })
+            src = url.substring(0, url.indexOf(tokenKey))
+            const querys: { [index: string]: string } = {}
+            url.split('?')[1].split('&').forEach((query: string) => {
+              const [key, val] = query.split('=')
+              querys[key] = val
+            })
+            const token = querys.token
+            const teamId = querys.team_id
+            const dpi = +(querys.dpi ?? -1)
+            const bleed = !!+querys.bleed
+            const trim = !!+querys.trim
+            store.commit('user/SET_STATE', { token, teamId, dpi, bleed, trim })
           }
+          store.commit('user/SET_STATE', { userId: 'backendRendering' })
           const response = await (await fetch(`https://${src}`)).json()
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           store.commit('file/SET_setLayersDone')
-          store.commit('user/SET_STATE', { userId: 'backendRendering' })
+          store.commit('user/SET_STATE', { userId: 'backendRendering', renderForPDF: renderForPDF === 'true' })
         }
         next()
       } catch (error) {
@@ -177,7 +203,7 @@ const routes: Array<RouteRecordRaw> = [
   }
 ]
 
-if (process.env.NODE_ENV !== 'production') {
+if (window.location.host !== 'vivipic.com') {
   routes.push({
     path: 'svgicon',
     name: 'SvgIconView',
@@ -187,6 +213,11 @@ if (process.env.NODE_ENV !== 'production') {
     path: 'copytool',
     name: 'CopyTool',
     component: CopyTool
+  })
+  routes.push({
+    path: 'nubtnlist',
+    name: 'NubtnList',
+    component: NubtnList
   })
 }
 
@@ -280,7 +311,9 @@ router.beforeEach(async (to, from, next) => {
     store.commit('user/SET_STATE', {
       verUni: json.ver_uni,
       verApi: json.ver_api,
-      imgSizeMap: json.image_size_map
+      imgSizeMap: json.image_size_map,
+      imgSizeMapExtra: json.image_size_map_extra,
+      dimensionMap: json.dimension_map
     })
     let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
 

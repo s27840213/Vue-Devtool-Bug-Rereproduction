@@ -21,8 +21,7 @@ div(class="brand-kit-tab-text")
                       @callback="handleLoadMore")
       template(v-else)
         div(v-if="checkUploading(font)"
-          class="brand-kit-tab-text__font-column__item-uploading"
-          :key="font.id.replace('new_', '')")
+          class="brand-kit-tab-text__font-column__item-uploading")
           div(class="brand-kit-tab-text__font-column__item-uploading-imgs")
             div(class="brand-kit-tab-text__font-column__font-img loading")
               svg-icon(iconName="loading" iconWidth="34px" iconColor="gray-3")
@@ -31,8 +30,7 @@ div(class="brand-kit-tab-text")
           div(class="brand-kit-tab-text__font-column__item-uploading-text")
             span {{ $t('NN0503') }}
         div(v-else
-          class="brand-kit-tab-text__font-column__item pointer relative"
-          :key="font.id")
+          class="brand-kit-tab-text__font-column__item pointer relative")
           div(class="brand-kit-tab-text__font-column__font-img")
             img(:src="font.namePrevUrl" @error="onError(font)")
           div(class="brand-kit-tab-text__font-column__font-img")
@@ -52,6 +50,7 @@ div(class="brand-kit-tab-text")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
+import { notify } from '@kyvg/vue3-notification'
 import BrandKitTextSetting from '@/components/brandkit/BrandKitTextSetting.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
@@ -78,16 +77,16 @@ export default defineComponent({
     this.refreshFontUrls()
     uploadUtils.onFontUploadStatus((status) => {
       if (status === 'success') {
-        // this.$notify({
-        //   group: 'copy',
-        //   text: `${this.$t('NN0135')}`
-        // })
+        notify({
+          group: 'copy',
+          text: `${this.$t('NN0135')}`
+        })
       }
       if (status === 'fail') { // Fail will not goto here
-        // this.$notify({
-        //   group: 'error',
-        //   text: `${this.$t('NN0137')}`
-        // })
+        notify({
+          group: 'error',
+          text: `${this.$t('NN0137')}`
+        })
       }
     })
   },
@@ -111,8 +110,8 @@ export default defineComponent({
     textStyleSetting(): IBrandTextStyleSetting {
       return (this.currentBrand as IBrand).textStyleSetting
     },
-    renderedFonts(): (IUrledFont | string)[] {
-      const res = ['add', ...this.fonts]
+    renderedFonts(): (IUrledFont | 'add' | 'loading' | 'sentinel')[] {
+      const res = ['add', ...this.fonts] as (IUrledFont | 'add' | 'loading' | 'sentinel')[]
       if (this.isFontsLoading) {
         res.push('loading')
       } else if (this.fontsPageIndex >= 0) {

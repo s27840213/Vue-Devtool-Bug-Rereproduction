@@ -6,7 +6,6 @@ import App from '@/App.vue'
 import router from './router'
 import store from './store'
 import i18n from './i18n'
-import vueColor from 'vue-color'
 import VueMeta from 'vue-meta'
 // import 'floating-vue/dist/style.css'
 // import FloatingVue from 'floating-vue'
@@ -17,12 +16,10 @@ import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import generalUtils from './utils/generalUtils'
 import imageShadowUtils from './utils/imageShadowUtils'
+import Notifications from '@kyvg/vue3-notification'
 
 // global component section
 import SvgIcon from '@/components/global/SvgIcon.vue'
-import TmpImages from '@/components/TmpImages.vue'
-import TmpText from '@/components/TmpText.vue'
-import TmpSvg from '@/components/TmpSvg.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
 import Btn from '@/components/global/Btn.vue'
 import NuPage from '@/components/editor/global/NuPage.vue'
@@ -37,11 +34,13 @@ import NuSubController from '@/components/editor/global/NuSubController.vue'
 import NuShape from '@/components/editor/global/NuShape.vue'
 import NuImgController from '@/components/editor/global/NuImgController.vue'
 import NuFrame from '@/components/editor/global/NuFrame.vue'
+import Nubtn from '@/components/global/Nubtn.vue'
 import Spinner from '@/components/global/Spinner.vue'
 import Hint from '@/components/global/Hint.vue'
 import Dropdown from '@/components/global/Dropdown.vue'
 import { RecycleScroller } from 'vue-virtual-scroller'
 // global component section
+import AnyTouch from 'any-touch'
 
 window.onerror = function (msg, url, line) {
   const message = [
@@ -86,13 +85,14 @@ const tooltipUtils = new TooltipUtils()
 if (process.env.NODE_ENV !== 'production') {
   app.config.performance = true
 }
-app.use(VueRecyclerviewNew, vueColor)
+app.use(VueRecyclerviewNew)
+app.use(Notifications)
 // app.use(VueMeta)
 // app.use(FloatingVue, {
 //   themes: tooltipUtils.themes
 // })
 
-// Vue.use(VueGtm, {
+// app.use(VueGtm, {
 //   id: 'GTM-T7LDWBP',
 //   enabled: true,
 //   // display console logs debugs or not (optional)
@@ -102,9 +102,6 @@ app.use(VueRecyclerviewNew, vueColor)
 app.component('RecycleScroller', RecycleScroller)
 
 app.component('svg-icon', SvgIcon)
-app.component('tmp-images', TmpImages)
-app.component('tmp-text', TmpText)
-app.component('tmp-svg', TmpSvg)
 app.component('btn', Btn)
 app.component('property-bar', PropertyBar)
 app.component('dropdown', Dropdown)
@@ -120,6 +117,7 @@ app.component('nu-sub-controller', NuSubController)
 app.component('nu-shape', NuShape)
 app.component('nu-img-controller', NuImgController)
 app.component('nu-frame', NuFrame)
+app.component('nubtn', Nubtn)
 app.component('spinner', Spinner)
 app.component('hint', Hint)
 
@@ -183,14 +181,29 @@ app.directive('header-border', {
   }
 })
 
+// How to pass variable to unbind: https://github.com/vuejs/vue/issues/6385#issuecomment-323141918
+const anyTouchWeakMap = new WeakMap()
+app.directive('touch', {
+  /**
+   * Useage: div(v-touch @tap="..." @swipeleft="...")
+   * If you want to prevetDefault, use: div(v-touch="true" ...)
+   */
+  mounted: (el, binding, vnode) => {
+    anyTouchWeakMap.set(el, new AnyTouch(el, { preventDefault: Boolean(binding.value) }))
+  },
+  unmounted: (el, binding, vnode) => {
+    (anyTouchWeakMap.get(el) as AnyTouch).destroy()
+    anyTouchWeakMap.delete(el)
+  }
+})
 app.directive('press', longpress)
 
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
 const req = require.context('@/assets/icon', true, /\.svg$/)
 
-if (process.env.NODE_ENV !== 'production') {
+if (window.location.host !== 'vivipic.com') {
   svgIconUtils.setIcons(requireAll(req).map((context: any) => {
-    return context.default.id
+    return context.default?.id ?? ''
   }))
 } else {
   requireAll(req)

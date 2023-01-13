@@ -10,8 +10,10 @@ img(class="pointer"
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
+import i18n from '@/i18n'
 import store from '@/store'
 import { mapGetters } from 'vuex'
+import { notify } from '@kyvg/vue3-notification'
 import AssetUtils from '@/utils/assetUtils'
 import imageUtils from '@/utils/imageUtils'
 import { IListServiceContentDataItem } from '@/interfaces/api'
@@ -48,7 +50,7 @@ export default defineComponent({
     },
     addBackground() {
       if (this.locked) {
-        // return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+        return notify({ group: 'copy', text: i18n.global.tc('NN0804') })
       }
       const img = this.$refs.img as HTMLImageElement
       if (!img) {

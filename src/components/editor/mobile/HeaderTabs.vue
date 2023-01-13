@@ -32,12 +32,14 @@ div(class="header-bar" @pointerdown.stop)
 import layerUtils from '@/utils/layerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
+import { notify } from '@kyvg/vue3-notification'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import mappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import imageUtils from '@/utils/imageUtils'
+import i18n from '@/i18n'
 
 interface IIcon {
   icon: string,
@@ -126,7 +128,7 @@ export default defineComponent({
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup, index: number) => {
+      const types = groupLayer.layers.map((layer) => {
         return layer.type
       })
       return new Set(types)
@@ -195,7 +197,7 @@ export default defineComponent({
           if (!this.isHandleShadow) {
             this.$emit('switchTab', icon)
           } else {
-            // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           }
           break
         }

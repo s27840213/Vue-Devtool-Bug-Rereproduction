@@ -11,13 +11,13 @@ import _ from 'lodash'
 /**
  * Usage1: Text slide toggle
  * options: [{
-      label: i18n.t('NN0514'),
+      label: i18n.global.t('NN0514'),
       value: 'monthly'
     }, {
-      label: i18n.t('NN0515'),
+      label: i18n.global.t('NN0515'),
       value: 'yearly'
     }, {
-      label: i18n.t('?'),
+      label: i18n.global.t('?'),
       value: '?'
     }]
  * slide-toggle(:options="options" v-model="test" bgColor="#F4F5F7")

@@ -28,7 +28,7 @@ div(class="template-waterfall__wrapper")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import ScrollableTemplatePreview from '@/components/templates/ScrollableTemplatePreview.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
@@ -39,7 +39,7 @@ import { Itheme } from '@/interfaces/theme'
 export default defineComponent({
   props: {
     waterfallTemplates: {
-      type: Array,
+      type: Array as PropType<ITemplate[][]>,
       required: true
     },
     isTemplateReady: {

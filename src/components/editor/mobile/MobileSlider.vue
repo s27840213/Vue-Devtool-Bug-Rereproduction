@@ -18,7 +18,7 @@ div(class="mobile-slider")
       v-ratio-change
       type="range"
       @pointerdown="!borderTouchArea ? $emit('pointerdown', $event) : null"
-      @pointerup="!borderTouchArea ? handlePointerup() : null")
+      @pointerup="!borderTouchArea ? handlePointerup : null")
     input(v-if="borderTouchArea"
       class="mobile-slider__range-input mobile-slider__range-input-top input-top__slider--range"
       v-model.number="propsVal"
@@ -48,7 +48,6 @@ export default defineComponent({
     },
     name: {
       type: String,
-      required: true
     },
     borderTouchArea: {
       type: Boolean,
@@ -89,6 +88,10 @@ export default defineComponent({
         } else {
           this.$emit('update', val, this.name)
         }
+        // The below line is necessary for value that would be rounded.
+        // If a value is rounded and not changed compared to previous value after rounded,
+        // the value in this component will not be synced with the rounded value (since not change happens).
+        this.$forceUpdate()
       }
     }
   },

@@ -8,7 +8,8 @@ import listFactory from './listFactory'
 const SET_MORE_CATEGORY = 'SET_MORE_CATEGORY' as const
 
 const font = listFactory.apply({
-  api: (params: IListServiceParams) => list.getFont(params)
+  api: (params: IListServiceParams) => list.getFont(params),
+  namespace: 'font'
 })
 
 const actions = font.actions as ActionTree<IListModuleState, unknown>
@@ -24,6 +25,7 @@ actions.getMoreCategory = async ({ commit, getters, state }) => {
     const { data } = await list.getFont(nextParams)
     commit(SET_MORE_CATEGORY, data.data)
   } catch (error) {
+    console.error(error)
     captureException(error)
   }
 }

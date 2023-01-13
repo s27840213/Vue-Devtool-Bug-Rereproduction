@@ -125,7 +125,8 @@ export default defineComponent({
       editableName: '',
       isShowHint: false,
       messageTimer: -1,
-      draggedFolderCoordinate: { x: 0, y: 0 }
+      draggedFolderCoordinate: { x: 0, y: 0 },
+      lastOnId: ''
     }
   },
   computed: {
@@ -153,7 +154,23 @@ export default defineComponent({
       handler: function (newVal) {
         this.editableName = newVal
       }
+    },
+    'config.id': function(newVal) {
+      designUtils.off(`edit-folder-${this.lastOnId}`)
+      this.lastOnId = newVal
+      designUtils.on(`edit-folder-${newVal}`, () => {
+        this.handleNameEditStart()
+      })
     }
+  },
+  mounted() {
+    this.lastOnId = this.config.id
+    designUtils.on(`edit-folder-${this.config.id}`, () => {
+      this.handleNameEditStart()
+    })
+  },
+  unmounted() {
+    designUtils.off(this.lastOnId)
   },
   methods: {
     ...mapMutations('design', {

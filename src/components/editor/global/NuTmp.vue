@@ -11,11 +11,13 @@ div(class="nu-tmp"
     :style="subLayerStyles(layer)"
     :isSubLayer="true"
     :inTmp="true"
-    :primaryScale="this.config.styles.scale")
+    :primaryScale="config.styles.scale"
+    :primaryLayer="config")
 </template>
 
 <script lang="ts">
 import { ILayer, ITmp } from '@/interfaces/layer'
+import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import textPropUtils from '@/utils/textPropUtils'
