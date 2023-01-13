@@ -92,7 +92,7 @@ div(:layer-index="`${layerIndex}`"
               :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="resizeStart"
               @touchstart="disableTouchEvent")
-        div(v-if="config.type === 'text' && contentEditable"
+        div(v-if="config.type === 'text' && contentEditable && !isTouchDevice()"
             class="control-point__resize-bar-wrapper")
           div(v-for="(resizer, index) in getResizer(controlPoints, true)"
               class="control-point resizer control-point__move-bar"

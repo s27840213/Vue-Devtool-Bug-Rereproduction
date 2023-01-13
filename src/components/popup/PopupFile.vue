@@ -42,7 +42,7 @@ div(class="popup-file")
     //-   span 測試試用
   hr(class="popup-file__hr")
   div(class="popup-file__item")
-    url(:url="$t('NN0791')")
+    url(:url="$t('NN0791')" :newTab="true")
       span {{$t('NN0790', {type: $tc('NN0793', 1)})}}
   div(class="popup-file__item" @click="onLogoutClicked()")
     span {{$tc('NN0167',2)}}

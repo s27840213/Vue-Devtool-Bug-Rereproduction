@@ -176,7 +176,7 @@ export default defineComponent({
     },
     templateUrl(item: IAssetTemplate): string {
       return this.$router.resolve({
-        name: generalUtils.isTouchDevice() && this.theme === '7' ? 'MobileEditor' : 'Editor',
+        name: 'Editor',
         query: {
           type: this.theme === '7' ? 'product-page-template' : 'new-design-template',
           design_id: this.theme === '7' ? item.group_id : item.match_cover.id,

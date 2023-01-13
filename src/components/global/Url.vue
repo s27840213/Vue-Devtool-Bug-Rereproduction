@@ -1,7 +1,7 @@
 <template lang="pug">
 span(v-if="!url")
   slot
-a(v-else-if="url.startsWith('http')" :href="url")
+a(v-else-if="url.startsWith('http')" :href="url" :target="newTab ? '_blank' : '_self'")
   slot
 router-link(v-else :to="url")
   slot
@@ -15,6 +15,10 @@ export default defineComponent({
   props: {
     url: {
       type: String
+    },
+    newTab: {
+      type: Boolean,
+      default: false
     }
   }
 })

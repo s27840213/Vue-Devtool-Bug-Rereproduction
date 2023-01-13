@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="editor-view"  v-touch
+div(class="editor-view" v-touch
     :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
     :style="editorViewStyle"
     @wheel="handleWheel"
@@ -103,8 +103,6 @@ export default defineComponent({
       editorViewResizeObserver: null as unknown as ResizeObserver,
       isSwiping: false,
       isScaling: false,
-      editorViewAt: null as unknown as AnyTouch,
-      canvasAt: null as unknown as AnyTouch,
       uploadUtils: uploadUtils
     }
   },
@@ -168,10 +166,6 @@ export default defineComponent({
   },
   beforeUnmount() {
     this.editorViewResizeObserver.disconnect()
-  },
-  unmounted() {
-    this.editorViewAt.destroy()
-    this.canvasAt.destroy()
   },
   watch: {
     pageScaleRatio() {
