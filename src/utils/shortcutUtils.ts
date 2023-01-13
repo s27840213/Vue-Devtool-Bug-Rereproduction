@@ -271,15 +271,19 @@ class ShortcutUtils {
       const spans = text.split('\n')
       let chainedCommands = editor.chain().deleteSelection()
       spans.forEach((line, index) => {
-        const spanText = `<span>${line === ''
+        const spanText = `<p><span>${line === ''
           ? '<br/>'
           : line.replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;')
-          }</span>`
-        chainedCommands = chainedCommands.insertContent(spanText)
+        }</span></p>`
+        chainedCommands = chainedCommands.insertContent(spanText, {
+          parseOptions: {
+            preserveWhitespace: true
+          }
+        })
         if (index !== spans.length - 1) {
           chainedCommands = chainedCommands.enter()
         }
