@@ -9,9 +9,10 @@ div(class="svg-icon-view bg-nav")
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import generalUtils from '@/utils/generalUtils'
 import svgIconUtils from '@/utils/svgIconUtils'
-import { defineComponent } from 'vue'
 
 export default defineComponent({
   emits: [],
@@ -26,7 +27,7 @@ export default defineComponent({
     copyText(text: string) {
       generalUtils.copyText(text)
         .then(() => {
-          // this.$notify({ group: 'copy', text: `${text} 已複製` })
+          notify({ group: 'copy', text: `${text} 已複製` })
         })
     }
   }

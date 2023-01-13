@@ -71,11 +71,12 @@ div(class="text-setting" ref='body'
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
-import { IGroup, ILayer, IParagraph, ISpan, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import vClickOutside from 'click-outside-vue3'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
@@ -558,7 +559,7 @@ export default defineComponent({
     copyColor() {
       GeneralUtils.copyText(this.props.color)
         .then(() => {
-          // this.$notify({ group: 'copy', text: `${this.props.color} 已複製` })
+          notify({ group: 'copy', text: `${this.props.color} 已複製` })
         })
     },
     iconClickable(icon: string): boolean {

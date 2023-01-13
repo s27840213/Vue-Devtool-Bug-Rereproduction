@@ -47,6 +47,7 @@ div(class="panel-objects")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
@@ -201,7 +202,7 @@ export default defineComponent({
     },
     downloadAll() {
       generalUtils.copyText(this.panelParams)
-      // this.$notify({ group: 'copy', text: '已複製網址到剪貼簿' })
+      notify({ group: 'copy', text: '已複製網址到剪貼簿' })
       const links = this.mainContent.map((it) => {
         return it.list.map((it) => {
           return `https://template.vivipic.com/svg/${it.id}/prev?ver=${it.ver}`

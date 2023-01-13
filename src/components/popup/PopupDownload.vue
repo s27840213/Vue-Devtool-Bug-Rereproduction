@@ -167,6 +167,7 @@ div(class="popup-download text-left"
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'click-outside-vue3'
 import { IDownloadServiceParams, ITypeOption, IOutputType } from '@/interfaces/download'
@@ -344,7 +345,7 @@ export default defineComponent({
             this.$router.replace({ query: Object.assign({}, this.$router.currentRoute.value.query, { export_ids: this.exportIds }) })
             uploadUtils.uploadDesign()
           } else {
-            // this.$notify({ group: 'error', text: `${this.$t('NN0461')} (status: ${status})` })
+            notify({ group: 'error', text: `${this.$t('NN0461')} (status: ${status})` })
             this.$emit('close')
           }
         })
@@ -488,7 +489,7 @@ export default defineComponent({
           }, 1000)
           break
         case 1:
-          // this.$notify({ group: 'error', text: `${this.$t('NN0462')} (${msg})` })
+          notify({ group: 'error', text: `${this.$t('NN0462')} (${msg})` })
           this.$emit('close')
           break
         case 2:

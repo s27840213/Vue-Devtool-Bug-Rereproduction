@@ -26,6 +26,7 @@ div(class="photo-setting")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import layerUtils from '@/utils/layerUtils'
@@ -42,7 +43,6 @@ import { FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import store from '@/store'
-import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
   name: 'PanelPhotoSetting',
@@ -317,7 +317,7 @@ export default defineComponent({
                       inProcess: LayerProcessType.none
                     })
 
-                    // this.$notify({ group: 'error', text: `${this.$t('NN0349')}` })
+                    notify({ group: 'error', text: `${this.$t('NN0349')}` })
                   }
 
                   return true
