@@ -42,9 +42,6 @@ export default defineComponent({
       type: Number,
       required: true
     },
-    pageScaleRatio: {
-      type: Number
-    },
     snapUtils: {
       type: SnapUtils,
       required: true

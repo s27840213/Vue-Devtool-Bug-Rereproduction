@@ -108,12 +108,12 @@ class Controller {
     ]
   }
 
-  private getScalers = (scalerSize: number, cursors?: Array<number | string>, isTouchArea = false) => {
+  private getScalers = (scalerSize: number, isTouchArea = false) => {
     const contentScaleRatio = editorUtils.contentScaleRatio
     const scaleRatio = store.getters.getPageScaleRatio
     return [
       {
-        cursor: cursors?.[0] ?? 0,
+        cursor: 0,
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
@@ -126,7 +126,7 @@ class Controller {
         scalerSize
       },
       {
-        cursor: cursors?.[1] ?? 2,
+        cursor: 2,
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
@@ -139,7 +139,7 @@ class Controller {
         scalerSize
       },
       {
-        cursor: cursors?.[2] ?? 4,
+        cursor: 4,
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
@@ -152,7 +152,7 @@ class Controller {
         scalerSize
       },
       {
-        cursor: cursors?.[3] ?? 6,
+        cursor: 6,
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
@@ -224,7 +224,7 @@ class Controller {
 
     return {
       scalers: this.getScalers(scalerSize),
-      scalerTouchAreas: this.getScalers(scalerSize * 3, undefined, true),
+      scalerTouchAreas: this.getScalers(scalerSize * 3, true),
       cornerRotaters: this.getCornerRatater(scalerSize * 4),
       lineEnds: [
         {

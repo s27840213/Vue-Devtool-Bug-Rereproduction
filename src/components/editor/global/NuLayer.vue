@@ -1,11 +1,11 @@
 <template lang="pug">
-div(:style="[isImgCtrl || inFrame ? {} : {transform: `translateZ(${this.config.styles.zindex}px)`,...transformStyle}]")
+div(:style="[isImgCtrl || inFrame ? {} : {transform: `translateZ(${config.styles.zindex}px)`,...transformStyle}]")
   div(v-for="div in layerDivs"
       class="nu-layer"
       :class="!config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : ''"
       :style="layerStyles(div.noShadow, div.isTransparent)"
-      :ref="div.main ? 'body' : null"
-      :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : null"
+      :ref="div.main ? 'body' : ''"
+      :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : ''"
       :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
       :data-p-index="pageIndex"
       v-press="isTouchDevice() && div.main ? onPress : -1"
@@ -17,7 +17,7 @@ div(:style="[isImgCtrl || inFrame ? {} : {transform: `translateZ(${this.config.s
       @dblclick="div.main ? dblClick($event) : null")
     div(class="layer-translate posAbs"
         :style="translateStyles()")
-      div(class="layer-scale posAbs" :ref="div.main ? 'scale' : null"
+      div(class="layer-scale posAbs" :ref="div.main ? 'scale' : ''"
           :style="scaleStyles()")
         nu-clipper(:config="config"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"

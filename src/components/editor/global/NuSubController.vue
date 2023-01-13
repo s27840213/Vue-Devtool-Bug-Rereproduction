@@ -41,8 +41,7 @@ import { mapState, mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import { IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
-import { IControlPoints } from '@/interfaces/controller'
+import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
@@ -52,7 +51,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
-import { FunctionPanelType, ILayerInfo, LayerType, PopupSliderEventType } from '@/store/types'
+import { ILayerInfo, LayerType } from '@/store/types'
 import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import DragUtils from '@/utils/dragUtils'
@@ -61,7 +60,7 @@ import imageUtils from '@/utils/imageUtils'
 import SubCtrlUtils from '@/utils/subControllerUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import colorUtils from '@/utils/colorUtils'
-import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
+import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -418,7 +417,7 @@ export default defineComponent({
       this.isControlling = false
       this.onClickEvent(e)
     },
-    positionStyles() {
+    positionStyles(): Record<string, string> {
       const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
       let { x, y } = this.config.styles
 
