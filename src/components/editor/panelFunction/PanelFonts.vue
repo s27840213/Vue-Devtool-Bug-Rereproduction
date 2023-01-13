@@ -43,7 +43,6 @@ import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 import FileUtils from '@/utils/fileUtils'
 import TextUtils from '@/utils/textUtils'
 import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
-import CategoryListFont from '@/components/category/CategoryListFont.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import { IListServiceContentData, IListServiceContentDataItem, ICategoryItem, ICategoryList } from '@/interfaces/api'
 import uploadUtils from '@/utils/uploadUtils'
@@ -57,7 +56,6 @@ export default defineComponent({
     SearchBar,
     CategoryList,
     CategoryFontItem,
-    CategoryListFont,
     FontTag
   },
   props: {

@@ -12,14 +12,15 @@ div(class="category-list-rows")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
+import { ICategoryItem } from '@/interfaces/api'
 import CategoryListRow from './CategoryListRow.vue'
 
 export default defineComponent({
   emits: ['action'],
   props: {
     list: {
-      type: Array,
+      type: Array as PropType<ICategoryItem[]>,
       required: true
     },
     title: {

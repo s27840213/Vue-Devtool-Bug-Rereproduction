@@ -70,6 +70,7 @@ import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
 import i18n from '@/i18n'
 import editorUtils from '@/utils/editorUtils'
 import unitUtils from '@/utils/unitUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
   name: 'DesktopEditor',
@@ -240,6 +241,10 @@ export default defineComponent({
     },
     confirmLeave() {
       return window.confirm('Do you really want to leave? you have unsaved changes!')
+    },
+    copyText(text: string) {
+      generalUtils.copyText(text)
+      notify({ group: 'copy', text: `${text} 已複製` })
     },
     networkError(): void {
       notify({ group: 'error', text: `${i18n.global.t('NN0351')}` })

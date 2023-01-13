@@ -18,7 +18,7 @@ div(class="component-log"
         iconColor="gray-1"
         iconWidth="16px"
         :style="{transform: showContent ? '' : 'rotate(180deg)'}"
-        @click="toggleContent(!showContent)")
+        @click="toggleContent()")
   div(v-show="showContent && logs.length > 0" class="component-log__content" ref="content")
     component-log-item(
       v-for="(log,index) in logs"
@@ -37,12 +37,13 @@ div(class="component-log"
 </template>
 
 <script lang="ts">
+import { defineComponent, PropType } from 'vue'
+import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
+import ComponentLogItem from '@/components/componentLog/ComponentLogItem.vue'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import { debounce } from 'lodash'
-import { defineComponent } from 'vue'
-import ComponentLogItem from '@/components/componentLog/ComponentLogItem.vue'
 
 export default defineComponent({
   emits: [],
@@ -52,7 +53,7 @@ export default defineComponent({
   },
   props: {
     logs: {
-      type: Array,
+      type: Array as PropType<IComponentUpdatedLog[]>,
       default: () => []
     }
   },
