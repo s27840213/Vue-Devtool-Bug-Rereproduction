@@ -69,6 +69,7 @@ div(class="popup-window")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import vClickOutside from 'click-outside-vue3'
@@ -321,7 +322,7 @@ export default defineComponent({
       this.cancelApi(this.cancelReason).then(
         this.closePopup
       ).catch(msg => {
-        this.$notify({ group: 'error', text: msg })
+        notify({ group: 'error', text: msg })
       })
     },
     closePopup() {

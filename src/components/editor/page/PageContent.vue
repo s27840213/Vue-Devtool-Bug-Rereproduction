@@ -44,6 +44,7 @@ div(class="overflow-container"
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import i18n from '@/i18n'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -310,7 +311,7 @@ export default defineComponent({
         editorUtils.setCurrActivePanel('crop')
       }
       if ((srcObj?.assetId ?? '') !== '' && locked) {
-        this.$notify({ group: 'copy', text: i18n.global.tc('NN0804') })
+        notify({ group: 'copy', text: i18n.global.tc('NN0804') })
       }
     },
     async handleFontLoading() {

@@ -87,6 +87,7 @@ import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
 
 import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -571,7 +572,7 @@ export default defineComponent({
       }
     },
     handleLockedNotify() {
-      this.$notify({ group: 'copy', text: i18n.global.tc('NN0804') })
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     },
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActiveSubPanel === panelType) {

@@ -41,7 +41,8 @@ div(:style="[isImgCtrl || inFrame ? {} : {transform: `translateZ(${this.config.s
       square-loading
 </template>
 <script lang="ts">
-import Vue, { PropType, defineComponent } from 'vue'
+import { PropType, defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
@@ -783,7 +784,7 @@ export default defineComponent({
         if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
           this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
         } else {
-          this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+          notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           body.removeEventListener('dragleave', this.layerDragLeave)
           body.removeEventListener('drop', this.layerOnDrop)
         }

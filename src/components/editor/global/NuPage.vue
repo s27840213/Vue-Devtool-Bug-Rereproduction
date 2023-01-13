@@ -154,6 +154,7 @@ div(class="nu-page"
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapMutations, mapGetters, mapState } from 'vuex'
 import { IShape, IText, IImage, IGroup, ILayer, ITmp, IFrame, IImageStyle } from '@/interfaces/layer'
 import PageContent from '@/components/editor/page/PageContent.vue'
@@ -588,7 +589,7 @@ export default defineComponent({
     },
     duplicatePage() {
       if (this.isProcessingShadow) {
-        this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+        notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
         return
       }
       GroupUtils.deselect()

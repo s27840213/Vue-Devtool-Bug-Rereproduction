@@ -55,6 +55,7 @@ div(class="editor-view"
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -437,7 +438,7 @@ export default defineComponent({
         if (!this.isHandleShadow) {
           GroupUtils.deselect()
         } else {
-          this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+          notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           imageUtils.setImgControlDefault(false)
         }
       }

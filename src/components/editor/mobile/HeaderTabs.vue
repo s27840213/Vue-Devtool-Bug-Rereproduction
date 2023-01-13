@@ -32,6 +32,7 @@ div(class="header-bar" @pointerdown.stop)
 import layerUtils from '@/utils/layerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
+import { notify } from '@kyvg/vue3-notification'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import mappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -196,7 +197,7 @@ export default defineComponent({
           if (!this.isHandleShadow) {
             this.$emit('switchTab', icon)
           } else {
-            this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           }
           break
         }

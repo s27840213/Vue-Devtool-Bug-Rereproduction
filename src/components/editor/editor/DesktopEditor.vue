@@ -45,6 +45,7 @@ div(class="desktop-editor")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import Sidebar from '@/components/editor/Sidebar.vue'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
 import SidebarPanel from '@/components/editor/SidebarPanel.vue'
@@ -241,7 +242,7 @@ export default defineComponent({
       return window.confirm('Do you really want to leave? you have unsaved changes!')
     },
     networkError(): void {
-      this.$notify({ group: 'error', text: `${i18n.global.t('NN0351')}` })
+      notify({ group: 'error', text: `${i18n.global.t('NN0351')}` })
       this.$emit('setIsLoading', false)
     }
   }

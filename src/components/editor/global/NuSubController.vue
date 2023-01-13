@@ -36,6 +36,7 @@ div(class="nu-sub-controller")
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import CssConveter from '@/utils/cssConverter'
@@ -557,7 +558,7 @@ export default defineComponent({
               this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
             } else {
-              this.$notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
               body.removeEventListener('drop', this.onDrop)
             }
           }

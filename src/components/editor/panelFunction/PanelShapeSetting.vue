@@ -630,7 +630,7 @@ export default defineComponent({
       }
       GeneralUtils.copyText(text)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${text} 已複製` })
+          notify({ group: 'copy', text: `${text} 已複製` })
         })
     },
     async getDataClicked() {
@@ -638,7 +638,7 @@ export default defineComponent({
 
       const data = {}
       if (this.focusDesignId.length === 0) {
-        this.$notify({ group: 'copy', text: '無元素id' })
+        notify({ group: 'copy', text: '無元素id' })
       }
 
       if (this.focusDesignId.length > 0) {

@@ -54,6 +54,7 @@ div(class="panel-bg" :class="{'panel-flash': panelFlash}" @animationend="panelFl
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
@@ -225,7 +226,7 @@ export default defineComponent({
     }),
     setBgColor(color: string) {
       if (this.currentPageBackgroundLocked) {
-        return this.$notify({ group: 'copy', text: i18n.global.tc('NN0804') })
+        return notify({ group: 'copy', text: i18n.global.tc('NN0804') })
       }
       if (pageUtils.currFocusPageIndex !== pageUtils.addAssetTargetPageIndex) {
         groupUtils.deselect()
