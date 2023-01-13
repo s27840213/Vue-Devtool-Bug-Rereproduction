@@ -18,7 +18,7 @@ div(class="mobile-slider")
       v-ratio-change
       type="range"
       @pointerdown="!borderTouchArea ? $emit('pointerdown', $event) : null"
-      @pointerup="!borderTouchArea ? handlePointerup() : null")
+      @pointerup="!borderTouchArea ? handlePointerup : null")
     input(v-if="borderTouchArea"
       class="mobile-slider__range-input mobile-slider__range-input-top input-top__slider--range"
       v-model.number="propsVal"
@@ -48,7 +48,6 @@ export default defineComponent({
     },
     name: {
       type: String,
-      required: true
     },
     borderTouchArea: {
       type: Boolean,

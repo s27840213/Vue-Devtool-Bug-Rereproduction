@@ -3,7 +3,7 @@ div(class="panel-order bg-white")
   div(v-for="(data,index) in orderDatas()"
       :key="`popup-${index}`"
       class="panel-order__item"
-      @click="data.action()")
+      @click="data.action && data.action()")
     svg-icon(
       class="pointer"
       :iconName="data.icon"
