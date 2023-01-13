@@ -46,11 +46,11 @@ div(class="text-setting" ref='body'
     div(class="action-bar action-bar--small flex-evenly")
       svg-icon(class="pointer record-selection btn-lh feature-button p-5"
         :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click="openLineHeightSliderPopup('.btn-lh')"
+        @click="openLineHeightSliderPopup()"
         v-hint="$t('NN0110')")
       svg-icon(class="pointer record-selection btn-ls feature-button p-5"
         :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click="openSpacingSliderPopup('.btn-ls')"
+        @click="openSpacingSliderPopup()"
         v-hint="$t('NN0109')")
   div(class="action-bar flex-evenly")
     svg-icon(v-for="(icon,index) in mappingIcons('font')"
@@ -131,7 +131,7 @@ export default defineComponent({
         'text-align-center': `${this.$t('NN0106')}`,
         'text-align-right': `${this.$t('NN0107')}`,
         'text-align-justify': `${this.$t('NN0108')}`
-      },
+      } as Record<string, string>,
       fontPrevUrl: ''
     }
   },

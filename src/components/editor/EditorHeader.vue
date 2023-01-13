@@ -103,9 +103,6 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapMutations({
-      _setPages: 'SET_pages'
-    }),
     setPagesName(event: Event) {
       const { value } = event.target as HTMLInputElement
       pageUtils.setPagesName(value)

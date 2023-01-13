@@ -35,7 +35,7 @@ div(class="shape-setting")
       marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
         :styleFormat="markerContentMap[startMarker].styleArray[0]"
         :svg="markerContentMap[startMarker].svg"
-        :trimWidth="markerContentMap[startMarker].trimWidth"
+        :trimWidth="!!markerContentMap[startMarker].trimWidth"
         :markerWidth="markerContentMap[startMarker].vSize[0]"
         :trimOffset="markerContentMap[startMarker].trimOffset")
       general-value-selector(v-if="openValueSelector === 'start-marker' && markerListReady"
@@ -50,7 +50,7 @@ div(class="shape-setting")
           marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
             :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
             :svg="markerContentMap[markerslot.marker].svg"
-            :trimWidth="markerContentMap[markerslot.marker].trimWidth"
+            :trimWidth="!!markerContentMap[markerslot.marker].trimWidth"
             :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
             :trimOffset="markerContentMap[markerslot.marker].trimOffset")
       general-value-selector(v-if="openValueSelector === 'start-marker' && !markerListReady"
@@ -67,7 +67,7 @@ div(class="shape-setting")
       marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
         :styleFormat="markerContentMap[endMarker].styleArray[0]"
         :svg="markerContentMap[endMarker].svg"
-        :trimWidth="markerContentMap[endMarker].trimWidth"
+        :trimWidth="!!markerContentMap[endMarker].trimWidth"
         :markerWidth="markerContentMap[endMarker].vSize[0]"
         :trimOffset="markerContentMap[endMarker].trimOffset"
         style="transform: rotate(180deg)")
@@ -83,7 +83,7 @@ div(class="shape-setting")
           marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
             :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
             :svg="markerContentMap[markerslot.marker].svg"
-            :trimWidth="markerContentMap[markerslot.marker].trimWidth"
+            :trimWidth="!!markerContentMap[markerslot.marker].trimWidth"
             :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
             :trimOffset="markerContentMap[markerslot.marker].trimOffset"
             style="transform: rotate(180deg)")
