@@ -339,7 +339,7 @@ export default defineComponent({
         this.$emit(this.isSelected ? 'deselect' : 'select')
         return
       }
-      if (this.unenterable && this.isTempDesign) return
+      if (this.unenterable || this.isTempDesign) return
       designUtils.setDesign(this.config as IDesign)
     },
     handleCarouselIdx(idx: number) {
