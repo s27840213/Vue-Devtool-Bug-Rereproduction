@@ -48,7 +48,7 @@ div(v-if="allFolders.length > 0 || isFoldersLoading" class="folder-gallery")
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import { IFolder, IQueueItem } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
+import designUtils, { FOLDER_MENU_EVENTS, IFolderMenuEvents } from '@/utils/designUtils'
 import FolderItem from '@/components/mydesign/FolderItem.vue'
 
 export default defineComponent({
@@ -118,7 +118,7 @@ export default defineComponent({
     handleFolderMenuAction(icon: string, folder: IFolder) {
       if (this.useDelete && icon === 'trash') icon = 'delete'
       designUtils.dispatchFolderMenuAction(icon, folder, (extraEvent) => {
-        if (extraEvent) {
+        if (extraEvent && FOLDER_MENU_EVENTS.includes(extraEvent.event as IFolderMenuEvents)) {
           this.$emit('menuAction', extraEvent)
         }
       })

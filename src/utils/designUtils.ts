@@ -10,7 +10,7 @@ import pageUtils from './pageUtils'
 import themeUtils from './themeUtils'
 import uploadUtils from './uploadUtils'
 import resizeUtils from './resizeUtils'
-import Vue, { nextTick } from 'vue'
+import { nextTick } from 'vue'
 import i18n from '@/i18n'
 import stepsUtils from './stepsUtils'
 import _ from 'lodash'
@@ -21,6 +21,18 @@ interface Item {
   name: string,
   lastUpdatedTime: string
 }
+
+export const DESIGN_MENU_EVENTS = [
+  'deleteItem', 'deleteForever',
+  'recoverItem', 'moveDesignToFolder', 'downloadDesign',
+  'favorDesign', 'unfavorDesign', 'rootDesign'
+] as const
+
+export type IDesignMenuEvents = typeof DESIGN_MENU_EVENTS[number]
+
+export const FOLDER_MENU_EVENTS = ['deleteFolderForever', 'recoverItem'] as const
+
+export type IFolderMenuEvents = typeof FOLDER_MENU_EVENTS[number]
 
 class DesignUtils {
   ROOT = '$ROOT$'

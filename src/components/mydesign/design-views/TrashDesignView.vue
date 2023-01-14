@@ -37,11 +37,12 @@ import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import vClickOutside from 'click-outside-vue3'
 import { IQueueItem } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
+import designUtils, { DESIGN_MENU_EVENTS, FOLDER_MENU_EVENTS, IDesignMenuEvents, IFolderMenuEvents } from '@/utils/designUtils'
 import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 
 export default defineComponent({
+  emits: ['clearSelection', 'moveItem', ...DESIGN_MENU_EVENTS, ...FOLDER_MENU_EVENTS],
   components: {
     FolderGallery,
     DesignGallery
@@ -87,7 +88,7 @@ export default defineComponent({
       fetchTrashFolders: 'fetchTrashFolders',
       fetchMoreTrashDesigns: 'fetchMoreTrashDesigns'
     }),
-    handleMenuAction(extraEvent: {event: string, payload: any}) {
+    handleMenuAction(extraEvent: {event: IDesignMenuEvents | IFolderMenuEvents, payload: any}) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
     },

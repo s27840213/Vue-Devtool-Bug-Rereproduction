@@ -129,7 +129,7 @@ div(class="folder-design-view")
 import { defineComponent } from 'vue'
 import vClickOutside from 'click-outside-vue3'
 import { IFolder, IQueueItem } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
+import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@/utils/designUtils'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
@@ -137,6 +137,7 @@ import hintUtils from '@/utils/hintUtils'
 import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
 export default defineComponent({
+  emits: ['clearSelection', 'moveItem', 'deleteFolder', ...DESIGN_MENU_EVENTS],
   mounted() {
     hintUtils.bind(this.$refs.more as HTMLElement, `${this.$t('NN0225')}`, 500)
     hintUtils.bind(this.$refs.newFolder as HTMLElement, `${this.$t('NN0190')}`, 500)
@@ -293,7 +294,7 @@ export default defineComponent({
       this.checkNameLength()
       designUtils.setFolderName(this.folder, this.editableFolderName, this.parents)
     },
-    handleMenuAction(extraEvent: { event: string, payload: any }) {
+    handleMenuAction(extraEvent: { event: IDesignMenuEvents, payload: any }) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
     },

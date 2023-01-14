@@ -14,7 +14,7 @@ div(class="all-design-view")
 </template>
 
 <script lang="ts">
-import designUtils from '@/utils/designUtils'
+import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@/utils/designUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
@@ -22,6 +22,7 @@ import DiskWarning from '@/components/payment/DiskWarning.vue'
 import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
 export default defineComponent({
+  emits: ['clearSelection', ...DESIGN_MENU_EVENTS],
   components: {
     DesignGallery,
     DiskWarning,
@@ -55,7 +56,7 @@ export default defineComponent({
       fetchAllDesigns: 'fetchAllDesigns',
       fetchMoreAllDesigns: 'fetchMoreAllDesigns'
     }),
-    handleDesignMenuAction(extraEvent: { event: string, payload: any }) {
+    handleDesignMenuAction(extraEvent: { event: IDesignMenuEvents, payload: any }) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
     },
