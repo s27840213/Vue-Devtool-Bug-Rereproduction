@@ -1215,12 +1215,10 @@ const mutations: MutationTree<IDesignState> = {
       }
       state.selectedDesigns = {}
       if (nearestSelectedIndex === -1) { // should not happen, but in case that selectedDesigns contain only designs not in updateInfo.designs
-        // Vue.set(state.selectedDesigns, designs[index].asset_index.toString(), designs[index])
         state.selectedDesigns[designs[index].asset_index.toString()] = designs[index]
       } else {
         const [indexFrom, indexTo] = [nearestSelectedIndex, index].sort((a, b) => a - b)
         for (let i = indexFrom; i <= indexTo; i++) {
-          // Vue.set(state.selectedDesigns, designs[i].asset_index.toString(), designs[i])
           state.selectedDesigns[designs[i].asset_index.toString()] = designs[i]
         }
       }
@@ -1252,11 +1250,11 @@ const mutations: MutationTree<IDesignState> = {
       }
       state.selectedFolders = {}
       if (nearestSelectedIndex === -1) { // should not happen, but in case that selectedFolders contain only folders not in updateInfo.folders
-        // Vue.set(state.selectedFolders, folders[index].id, folders[index])
+        state.selectedFolders[folders[index].id] = folders[index]
       } else {
         const [indexFrom, indexTo] = [nearestSelectedIndex, index].sort((a, b) => a - b)
         for (let i = indexFrom; i <= indexTo; i++) {
-          // Vue.set(state.selectedFolders, folders[i].id, folders[i])
+          state.selectedFolders[folders[i].id] = folders[i]
         }
       }
     }
