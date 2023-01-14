@@ -24,11 +24,11 @@ interface Item {
 
 class DesignUtils {
   ROOT = '$ROOT$'
-  ROOT_DISPLAY = i18n.global.t('NN0187')
   event = new EventEmitter()
   eventHash: { [key: string]: () => void } = {}
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get teamId(): string { return store.getters['user/getTeamId'] }
+  get ROOT_DISPLAY(): string { return i18n.global.t('NN0187') }
 
   on(type: string, callback: () => void) {
     if (this.eventHash[type]) {

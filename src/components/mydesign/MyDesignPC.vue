@@ -361,12 +361,12 @@ export default defineComponent({
     messageDestName(item: IQueueItem): string {
       return item.dest ?? ''
     },
-    showMessage(queue: IQueueItem[], flag: string, recordTimer: boolean) {
+    showMessage(queue: IQueueItem[], flag: 'isShowMoveMessage' | 'isShowDeleteMessage' | 'isShowRecoverMessage', recordTimer: boolean) {
       const item = queue[0]
       if (item) {
-        // this.$set(this, flag, true)
+        this[flag] = true
         const timer = setTimeout(() => {
-          // this.$set(this, flag, false)
+          this[flag] = false
           setTimeout(() => {
             queue.shift()
             this.showMessage(queue, flag, recordTimer)
