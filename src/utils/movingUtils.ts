@@ -347,6 +347,7 @@ export class MovingUtils {
         }
         if (this.getLayerType === 'text' && this.config.contentEditable) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+          e.preventDefault()
         }
       }
     }
