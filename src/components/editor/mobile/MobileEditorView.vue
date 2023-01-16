@@ -194,9 +194,6 @@ export default Vue.extend({
   },
 
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapState({
       mobileAllPageMode: 'mobileEditor/mobileAllPageMode'
     }),
@@ -260,7 +257,7 @@ export default Vue.extend({
       return {
         width: `${this.cardWidth}px`,
         height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
-        padding: this.isDetailPage ? '0px' : '40px',
+        padding: this.isDetailPage ? '0px' : `${pageUtils.MOBILE_CARD_PADDING}px`,
         flexDirection: this.isDetailPage ? 'column' : 'initial',
         'overflow-y': this.isDetailPage ? 'initial' : 'scroll',
         // overflow: this.isDetailPage ? 'initial' : 'scroll',
@@ -288,7 +285,6 @@ export default Vue.extend({
       addLayer: 'ADD_selectedLayer',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setPageScaleRatio: 'SET_pageScaleRatio',
-      _setAdminMode: 'user/SET_ADMIN_MODE',
       setInBgRemoveMode: 'SET_inBgRemoveMode',
       addPage: 'ADD_page',
       setCurrCardIndex: 'mobileEditor/SET_currCardIndex'
@@ -299,9 +295,6 @@ export default Vue.extend({
         'getRecently'
       ]
     ),
-    setAdminMode() {
-      this._setAdminMode(!this.adminMode)
-    },
     outerClick(e: MouseEvent) {
       if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         editorUtils.setInBgSettingMode(false)

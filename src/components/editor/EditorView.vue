@@ -2,7 +2,7 @@
   div(class="editor-view"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="cursorStyles()"
-      @pointerdown="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
+      @pointerdown="!inBgRemoveMode ? !getInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
       @wheel="handleWheel"
       @scroll.passive="!inBgRemoveMode ? scrollUpdate() : null"
       @mousewheel="handleWheel"
@@ -112,6 +112,8 @@ export default Vue.extend({
       RulerUtils,
       rulerVPos: 0,
       rulerHPos: 0,
+      lastMappedVPos: 0,
+      lastMappedHPos: 0,
       from: -1,
       screenWidth: document.documentElement.clientWidth,
       screenHeight: document.documentElement.clientHeight,
@@ -214,7 +216,8 @@ export default Vue.extend({
           }
 
           this.isShowGuidelineV = true
-          this.rulerVPos = round(unitUtils.convert(round(pagePos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().width), PRECISION)
+          this.lastMappedVPos = pagePos
+          this.rulerVPos = round(unitUtils.convert(Math.round(this.lastMappedVPos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().width), PRECISION)
           this.$nextTick(() => {
             const guidelineV = this.$refs.guidelineV as HTMLElement
             guidelineV.style.transform = `translate(${pos - guidelineAreaRect.left}px,0px)`
@@ -226,7 +229,8 @@ export default Vue.extend({
             this.closeGuidelineH()
           }
           this.isShowGuidelineH = true
-          this.rulerHPos = round(unitUtils.convert(round(pagePos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().height), PRECISION)
+          this.lastMappedHPos = pagePos
+          this.rulerHPos = round(unitUtils.convert(Math.round(this.lastMappedHPos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().height), PRECISION)
 
           this.$nextTick(() => {
             const guidelineH = this.$refs.guidelineH as HTMLElement
@@ -257,9 +261,6 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapState({
       cursor: 'cursor'
     }),
@@ -279,12 +280,13 @@ export default Vue.extend({
       hasCopiedFormat: 'getHasCopiedFormat',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       prevScrollPos: 'bgRemove/getPrevScrollPos',
-      getInInGestureMode: 'getInGestureToolMode',
+      getInGestureMode: 'getInGestureToolMode',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isSettingScaleRatio: 'getIsSettingScaleRatio',
       enableComponentLog: 'getEnalbleComponentLog',
-      pagesLength: 'getPagesLength'
+      pagesLength: 'getPagesLength',
+      isImgCtrl: 'imgControl/isImgCtrl'
     }),
     pages(): Array<IPage> {
       return (this.pagesState as Array<IPageState>).map(p => p.config)
@@ -331,7 +333,6 @@ export default Vue.extend({
       addLayer: 'ADD_selectedLayer',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setPageScaleRatio: 'SET_pageScaleRatio',
-      _setAdminMode: 'user/SET_ADMIN_MODE',
       setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
       setInGestureMode: 'SET_inGestureMode'
@@ -346,9 +347,6 @@ export default Vue.extend({
       const { cursor } = this
       return cursor ? { cursor } : {}
     },
-    setAdminMode() {
-      this._setAdminMode(!this.adminMode)
-    },
     outerClick(e: MouseEvent) {
       if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         !this.isHandleShadow && GroupUtils.deselect()
@@ -361,7 +359,9 @@ export default Vue.extend({
         }
       }
     },
-    selectStart(e: MouseEvent) {
+    selectStart(e: PointerEvent) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      if (this.isImgCtrl || this.getInGestureMode) return
       if (layerUtils.layerIndex !== -1) {
         /**
          * when the user click the control-region outsize the page,
@@ -380,7 +380,6 @@ export default Vue.extend({
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()
       }
-      if (this.getInInGestureMode) return
       if (imageUtils.isImgControl()) {
         ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
@@ -538,17 +537,43 @@ export default Vue.extend({
       eventUtils.addPointerEvent('pointerup', this.dragEndV)
     },
     draggingV(e: PointerEvent) {
-      this.rulerVPos = round(unitUtils.convert(Math.trunc(this.mapGuidelineToPage('v').pos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().width), PRECISION)
+      this.lastMappedVPos = this.mapGuidelineToPage('v').pos
+      this.rulerVPos = round(unitUtils.convert(Math.round(this.lastMappedVPos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().width), PRECISION)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineV(this.currentRelPos)
     },
     dragEndV(e: PointerEvent) {
       RulerUtils.setIsDragging(false)
-      if (this.mapGuidelineToPage('v').outOfPage) {
-        this.isShowGuidelineV = false
-        StepsUtils.record()
+      if (this.from === -1) {
+        const mouseOverPageIndex = RulerUtils.getMouseOverPageIndex(e)
+        if (mouseOverPageIndex === -1) { // if no page contains mouse
+          const mostlyOverlappedPageIndex = RulerUtils.getMostlyOverlappedPageIndex(e)
+          if (mostlyOverlappedPageIndex === -1) {
+            this.isShowGuidelineV = false
+            StepsUtils.record()
+          } else {
+            this.from = mostlyOverlappedPageIndex
+            if (pageUtils.currFocusPageIndex !== mostlyOverlappedPageIndex) {
+              GroupUtils.deselect()
+            }
+            this.setCurrActivePageIndex(mostlyOverlappedPageIndex)
+            this.closeGuidelineV(true)
+          }
+        } else {
+          this.from = mouseOverPageIndex
+          if (pageUtils.currFocusPageIndex !== mouseOverPageIndex) {
+            GroupUtils.deselect()
+          }
+          this.setCurrActivePageIndex(mouseOverPageIndex)
+          this.closeGuidelineV(true)
+        }
       } else {
-        this.closeGuidelineV(true)
+        if (this.mapGuidelineToPage('v').outOfPage) {
+          this.isShowGuidelineV = false
+          StepsUtils.record()
+        } else {
+          this.closeGuidelineV(true)
+        }
       }
       this.$nextTick(() => {
         eventUtils.removePointerEvent('pointermove', this.draggingV)
@@ -562,11 +587,12 @@ export default Vue.extend({
     },
     closeGuidelineV(need2Record = false) {
       if (!this.isDragging) {
+        const pos = this.lastMappedVPos
         this.isShowGuidelineV = false
         if (this.from !== -1) {
-          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v').pos, 'v', this.from)
+          RulerUtils.addGuidelineToPage(pos, 'v', this.from)
         } else {
-          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v').pos, 'v')
+          RulerUtils.addGuidelineToPage(pos, 'v')
         }
         this.from = -1
         if (need2Record) {
@@ -609,19 +635,36 @@ export default Vue.extend({
       window.addEventListener('mouseup', this.dragEndH)
     },
     draggingH(e: MouseEvent) {
-      this.rulerHPos = round(unitUtils.convert(Math.trunc(this.mapGuidelineToPage('h').pos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().height), PRECISION)
+      this.lastMappedHPos = this.mapGuidelineToPage('h').pos
+      this.rulerHPos = round(unitUtils.convert(Math.round(this.lastMappedHPos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().height), PRECISION)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineH(this.currentRelPos)
     },
     dragEndH(e: MouseEvent) {
       RulerUtils.setIsDragging(false)
-      if (this.mapGuidelineToPage('h').outOfPage) {
-        this.isShowGuidelineH = false
-        StepsUtils.record()
+      if (this.from === -1) {
+        const guideline = this.$refs.guidelineH as HTMLElement
+        const overlappedPageIndex = RulerUtils.getOverlappedPageIndex(guideline, 'h')
+        if (overlappedPageIndex === -1) {
+          this.isShowGuidelineH = false
+          StepsUtils.record()
+        } else {
+          this.from = overlappedPageIndex
+          if (pageUtils.currFocusPageIndex !== overlappedPageIndex) {
+            GroupUtils.deselect()
+          }
+          this.setCurrActivePageIndex(overlappedPageIndex)
+          this.closeGuidelineH(true)
+        }
       } else {
-        // close EditorView guideline then put it into page
-        // or the record point will have some trouble
-        this.closeGuidelineH(true)
+        if (this.mapGuidelineToPage('h').outOfPage) {
+          this.isShowGuidelineH = false
+          StepsUtils.record()
+        } else {
+          // close EditorView guideline then put it into page
+          // or the record point will have some trouble
+          this.closeGuidelineH(true)
+        }
       }
       this.$nextTick(() => {
         window.removeEventListener('mousemove', this.draggingH)
@@ -636,16 +679,18 @@ export default Vue.extend({
     mapGuidelineToPage(type: string): { pos: number, outOfPage: boolean } {
       // just has two options: ['v','h']
       const guideline = type === 'v' ? this.$refs.guidelineV as HTMLElement : this.$refs.guidelineH as HTMLElement
-      const result = RulerUtils.mapGuidelineToPage(guideline, type, this.from)
+      const from = type === 'v' ? this.from : RulerUtils.getOverlappedPageIndex(guideline, 'h')
+      const result = RulerUtils.mapGuidelineToPage(guideline, type, from)
       return result
     },
     closeGuidelineH(need2Record = false) {
       if (!this.isDragging) {
         this.isShowGuidelineH = false
+        const pos = this.lastMappedHPos
         if (this.from !== -1) {
-          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h', this.from)
+          RulerUtils.addGuidelineToPage(pos, 'h', this.from)
         } else {
-          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h')
+          RulerUtils.addGuidelineToPage(pos, 'h')
         }
         this.from = -1
         if (need2Record) {
@@ -677,7 +722,7 @@ export default Vue.extend({
     //   if (e.key === ' ') {
     //     e.preventDefault()
     //     if (!e.repeat) {
-    //       this.setInGestureMode(!this.getInInGestureMode)
+    //       this.setInGestureMode(!this.getInGestureMode)
     //     }
     //   }
     // }
@@ -814,8 +859,8 @@ $REULER_SIZE: 20px;
       transform: rotate(180deg);
       border-radius: 50px;
       color: setColor(white);
-      padding: 0.2rem 0.4rem;
-      font-size: 0.325rem;
+      padding: 3.2px 6.4px;
+      font-size: 12px;
       top: 5px;
       left: 0;
     }
@@ -824,8 +869,8 @@ $REULER_SIZE: 20px;
       left: 5px;
       border-radius: 50px;
       color: setColor(white);
-      padding: 0.2rem 0.4rem;
-      font-size: 0.325rem;
+      padding: 3.2px 6.4px;
+      font-size: 12px;
     }
   }
 }

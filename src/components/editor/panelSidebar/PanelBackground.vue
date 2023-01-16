@@ -1,19 +1,21 @@
 <template lang="pug">
-  div(class="panel-bg")
-    tabs(:tabs="[$tc('NN0002', 2),$t('NN0017')]" @switchTab="switchTab")
+  div(class="panel-bg" :class="{'panel-flash': panelFlash}" @animationend="panelFlash = false")
+    tabs(:tabs="[$tc('NN0002', 2),$t('NN0017')]" v-model="tabIndex")
     //- Search bar
     search-bar(v-if="showImageTab" class="mb-15"
-      :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
+      :placeholder="$t('NN0092', {target: $tc('NN0004', 1)})"
       clear
       :defaultKeyword="keywordLabel"
       @search="handleSearch")
     //- BG color tab content
     color-slips(v-show="showColorTab" class="panel-bg__color-sets" mode="PanelBG"
+                :selectedColor="currentPageBackgroundColor"
                 @selectColor="setBgColor"
                 @selectColorEnd="recordChange"
                 @openColorPicker="openColorPicker")
     //- Search result empty msg
-    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+    div(v-if="emptyResultMessage")
+      span {{ emptyResultMessage }}
     //- Search result and main content
     category-list(v-for="item in categoryListArray"
                   v-show="item.show" :ref="item.key" :key="item.key"
@@ -36,11 +38,18 @@
             :key="item.id"
             :item="item"
             :locked="currentPageBackgroundLocked")
-      template(v-if="pending" #after)
-        div(class="text-center")
+      template(#after)
+        //- Loading icon
+        div(v-if="pending" class="text-center")
           svg-icon(iconName="loading"
             iconColor="white"
             iconWidth="20px")
+        //- BG wishing pool
+        div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
+          span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
+          nubtn(size="mid" class="mt-30")
+            url(:url="$t('NN0791')" :newTab="true")
+              span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 
 </template>
 
@@ -54,11 +63,15 @@ import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
 import Tabs from '@/components/Tabs.vue'
+import Url from '@/components/global/Url.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import { IPage } from '@/interfaces/page'
 import stepsUtils from '@/utils/stepsUtils'
 import pageUtils from '@/utils/pageUtils'
 import generalUtils from '@/utils/generalUtils'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import groupUtils from '@/utils/groupUtils'
 
 export default Vue.extend({
   components: {
@@ -67,7 +80,8 @@ export default Vue.extend({
     CategoryListRows,
     CategoryBackgroundItem,
     Tabs,
-    ColorSlips
+    ColorSlips,
+    Url
   },
   data() {
     return {
@@ -75,7 +89,8 @@ export default Vue.extend({
         mainContent: 0,
         searchResult: 0
       },
-      currActiveTabIndex: 0
+      tabIndex: 0,
+      panelFlash: false
     }
   },
   computed: {
@@ -135,9 +150,16 @@ export default Vue.extend({
         key: 'mainContent'
       }]
     },
+    currPage(): IPage {
+      return this.getPage(pageUtils.currFocusPageIndex)
+    },
     currentPageBackgroundLocked(): boolean {
-      const { backgroundImage } = this.getPage(pageUtils.currFocusPageIndex) || {}
+      const { backgroundImage } = this.currPage || {}
       return backgroundImage && backgroundImage.config.locked
+    },
+    currentPageBackgroundColor(): string {
+      if (this.currPage.backgroundImage.config?.srcObj.assetId) return ''
+      return this.currPage.backgroundColor
     },
     emptyResultMessage(): string {
       const { keyword, pending } = this
@@ -147,14 +169,21 @@ export default Vue.extend({
           target: i18n.tc('NN0004', 1)
         })}`
     },
-    showImageTab(): boolean { return this.currActiveTabIndex === 0 },
-    showColorTab(): boolean { return this.currActiveTabIndex === 1 }
+    showImageTab(): boolean { return this.tabIndex === 0 },
+    showColorTab(): boolean { return this.tabIndex === 1 }
   },
   mounted() {
     generalUtils.panelInit('bg',
       this.handleSearch,
       this.handleCategorySearch,
       this.getRecAndCate)
+    eventUtils.on(PanelEvent.switchPanelBgInnerTab, (tabIndex: number) => {
+      this.switchTab(tabIndex)
+      this.panelFlash = true
+    })
+  },
+  beforeDestroy() {
+    eventUtils.off(PanelEvent.switchPanelBgInnerTab)
   },
   activated() {
     this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
@@ -186,14 +215,19 @@ export default Vue.extend({
     ]),
     ...mapMutations({
       _setBgColor: 'SET_backgroundColor',
+      setCurrActivePageIndex: 'SET_currActivePageIndex',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag'
     }),
     setBgColor(color: string) {
       if (this.currentPageBackgroundLocked) {
-        return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+        return this.$notify({ group: 'copy', text: i18n.tc('NN0804') })
+      }
+      if (pageUtils.currFocusPageIndex !== pageUtils.addAssetTargetPageIndex) {
+        groupUtils.deselect()
+        this.setCurrActivePageIndex(pageUtils.addAssetTargetPageIndex)
       }
       this._setBgColor({
-        pageIndex: pageUtils.currFocusPageIndex,
+        pageIndex: pageUtils.addAssetTargetPageIndex,
         color: color
       })
 
@@ -223,7 +257,7 @@ export default Vue.extend({
       this.$nextTick(() => stepsUtils.record())
     },
     switchTab(tabIndex: number) {
-      this.currActiveTabIndex = tabIndex
+      this.tabIndex = tabIndex
     },
     openColorPicker() { // @openColorPicker will only be trigger in mobile.
       this.$emit('openExtraColorModal', ColorEventType.background, MobileColorPanelType.picker)
@@ -256,10 +290,12 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  color: white;
+  text-align: left;
   &__color-sets {
     filter: none;
-    height: calc(100% - 53px);
-    &::v-deep .color-panel__scroll {
+    height: calc(100% - 54px);
+    .panel &::v-deep .color-panel__scroll { // push scroll only in desktop
       @include push-scrollbar10;
     }
   }
@@ -285,5 +321,18 @@ export default Vue.extend({
   &::v-deep .vue-recycle-scroller__item-view:first-child {
     z-index: 1;
   }
+}
+
+@keyframes flash {
+  0%, 50%, 100% {
+    background: setColor(gray-1-5);
+  }
+  25%, 75% {
+    background: #353951;
+  }
+}
+.panel-flash {
+  animation-name: flash;
+  animation-duration: 1s;
 }
 </style>

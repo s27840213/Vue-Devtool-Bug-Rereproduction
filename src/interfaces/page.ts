@@ -1,4 +1,4 @@
-import { IShape, IText, IImage, IGroup, IFrame } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, IFrame, ITmp } from '@/interfaces/layer'
 import SnapUtils from '@/utils/snapUtils'
 
 export interface IBackgroundImage {
@@ -27,7 +27,7 @@ export interface IPage {
   backgroundColor: string,
   backgroundImage: IBackgroundImage,
   name: string,
-  layers: Array<IShape | IText | IImage | IGroup | IFrame>,
+  layers: Array<IShape | IText | IImage | IGroup | IFrame | ITmp>,
   // snapUtils: SnapUtils,
   documentColors: Array<string>,
   designId: string,

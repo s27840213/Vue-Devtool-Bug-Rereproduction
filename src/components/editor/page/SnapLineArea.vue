@@ -16,7 +16,8 @@
       div(v-for="(line,index) in guidelines.h"
         class="snap-area__line snap-area__line--hr"
         :style="snapLineStyles('h', line,true)"
-        @mouseover="lockGuideline ? null : showGuideline(line,'h',index)")
+        @mouseover="lockGuideline ? null : showGuideline(line,'h',index)"
+        @mouseout="closeGuidelineTimer")
 </template>
 
 <script lang="ts">
@@ -142,6 +143,8 @@ export default Vue.extend({
     top: 0;
     left: 0;
     background-color: setColor("blue-1");
+  }
+  &__line--vr {
     &::before {
       content: "";
       position: absolute;
@@ -157,6 +160,24 @@ export default Vue.extend({
       left: 0;
       width: 5px;
       height: 100%;
+    }
+  }
+  &__line--hr {
+    &::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+    }
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
     }
   }
 }

@@ -1,6 +1,5 @@
 <template lang="pug">
   div(class="shape-setting")
-    //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
     //- Line shape setting
     div(class="action-bar flex-around line-actions" style="padding: 8px 0"
               v-if="isLine")
@@ -101,12 +100,12 @@
     div(class="shape-setting__basic-shape-action" v-if="isBasicShape")
       div(class="action-bar flex-around basic-shape-actions" style="padding: 8px 0")
         div(class="shape-setting__line-action-wrapper")
-          svg-icon(class="pointer feature-button"
+          svg-icon(class="pointer feature-button" v-hint="$t('NN0681')"
                   iconName="line-width" iconWidth="24px" iconColor="gray-2"
                   @click.native="openBasicShapeSliderPopup")
         div(class="shape-setting__line-action-wrapper")
-          svg-icon(class="pointer feature-button"
-                  v-if="filled"
+          svg-icon(v-if="filled" v-hint="$t('NN0797')"
+                  class="pointer feature-button"
                   iconName="filled" iconWidth="24px" iconColor="gray-2"
                   @click.native="handleValueModal('isFilled')")
           svg-icon(class="pointer feature-button"
@@ -136,18 +135,19 @@
             svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
             div(:style="`font-size: ${$i18n.locale === 'us' ? '12px': ''}`") {{$t('NN0086')}}
     //- Shape color setting
-    div(class="shape-setting__colors")
-      div(v-if="hasMultiColors"
-        class="shape-setting__color"
-        :style="groupColorStyles()"
-        @click="selectColor(0)")
-      div(v-else v-for="(color, index) in getDocumentColors"
-        class="shape-setting__color"
-        :style="colorStyles(color, index)"
-        @click="selectColor(index)")
+    div(class="shape-setting__shape-colors")
+      span {{$t('NN0798')}}
+      div(class="shape-setting__colors")
+        color-btn(v-if="hasMultiColors"
+                  :color="groupColor()"
+                  :active="showColorSlips"
+                  @click="selectColor(0)")
+        color-btn(v-else v-for="(color, index) in getDocumentColors" :color="color"
+                  :active="showColorSlips && index === currSelectedColorIndex"
+                  @click="selectColor(index)")
     //- 管理介面
     div(class="shape-setting__info")
-      div(v-if="inAdminMode && isObjectElement")
+      div(v-if="showAdminTool && isObjectElement")
         div(class="shape-setting__info__divider pb-10")
         btn(:type="'primary-sm'"
           class="shape-setting__info__button rounded my-5"
@@ -201,7 +201,6 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
-import markers from '@/store/module/markers'
 import vClickOutside from 'v-click-outside'
 import SearchBar from '@/components/SearchBar.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
@@ -214,9 +213,10 @@ import AssetUtils from '@/utils/assetUtils'
 import { IMarker } from '@/interfaces/shape'
 import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import LabelWithRange from '@/components/LabelWithRange.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import controlUtils from '@/utils/controlUtils'
-import { ColorEventType, LayerType, PopupSliderEventType } from '@/store/types'
-import colorUtils, { getDocumentColor } from '@/utils/colorUtils'
+import { ColorEventType, PopupSliderEventType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -224,6 +224,8 @@ import GeneralUtils from '@/utils/generalUtils'
 import designApis from '@/apis/design-info'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
+import editorUtils from '@/utils/editorUtils'
+import { cloneDeep } from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -231,7 +233,8 @@ export default Vue.extend({
     ColorPicker,
     GeneralValueSelector,
     MarkerIcon,
-    LabelWithRange
+    LabelWithRange,
+    ColorBtn
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -310,20 +313,12 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
-      token: 'user/getToken'
+      token: 'user/getToken',
+      showAdminTool: 'user/showAdminTool'
     }),
-    ...mapState('user', [
-      'role',
-      'adminMode']),
-    ...mapState(
-      'markers',
-      [
-        'categories'
-      ]
-    ),
-    inAdminMode(): boolean {
-      return this.role === 0 && this.adminMode === true
-    },
+    ...mapState('markers', [
+      'categories'
+    ]),
     lineWidth(): number {
       const { currLayer } = this
       return (currLayer as IShape).size?.[0] ?? 0
@@ -344,11 +339,14 @@ export default Vue.extend({
     currLayer(): ILayer {
       return this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex) as ILayer
     },
+    showColorSlips(): boolean {
+      return editorUtils.showColorSlips
+    },
     hasMultiColors(): boolean {
       return shapeUtils.hasMultiColors
     },
     getDocumentColors(): string[] {
-      return shapeUtils.getDocumentColors
+      return colorUtils.globalSelectedColor.colors
     },
     isLine(): boolean {
       return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
@@ -366,7 +364,7 @@ export default Vue.extend({
       return this.currSelectedInfo.layers[0].designId ?? ''
     },
     isObjectElement(): boolean {
-      return !(this.currSelectedInfo.layers[0].db === 'text')
+      return this.currSelectedInfo.layers[0].db !== 'text'
     }
   },
   watch: {
@@ -406,18 +404,12 @@ export default Vue.extend({
         'getCategories'
       ]
     ),
-    colorStyles(color: string, index: number) {
-      return {
-        backgroundColor: color,
-        boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #808080, inset 0 0 0 1.5px #fff' : ''
-      }
-    },
     boundValue(value: number, min: number, max: number): string {
       if (value < min) return min.toString()
       else if (value > max) return max.toString()
       return value.toString()
     },
-    groupColorStyles() {
+    groupColor() {
       const currLayer = this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex)
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
         const origin = currLayer.layers
@@ -430,15 +422,7 @@ export default Vue.extend({
           }
           return true
         })()
-        return isGroupSameColor ? {
-          backgroundColor: origin,
-          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
-        } : {
-          backgroundImage: `url(${require('@/assets/img/jpg/multi-color.jpg')})`,
-          backgroundPosition: 'center center',
-          backgroundSize: 'cover',
-          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1px #fff'
-        }
+        return isGroupSameColor ? origin : 'multi'
       }
     },
     handleColorModalOn(e: MouseEvent) {
@@ -453,7 +437,7 @@ export default Vue.extend({
     selectColor(index: number) {
       this.currSelectedColorIndex = index
       colorUtils.setCurrColor(this.getDocumentColors[index])
-      this.$emit('toggleColorPanel', true)
+      editorUtils.toggleColorSlips(true)
     },
     openLineSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineWidth)
@@ -474,20 +458,32 @@ export default Vue.extend({
     },
     setColor(newColor: string) {
       const currLayer = LayerUtils.getCurrLayer
+      const newDocumentColors = cloneDeep(this.getDocumentColors)
+      newDocumentColors[this.currSelectedColorIndex] = newColor
+
       switch (currLayer.type) {
-        case 'shape': {
-          const color = [...this.getDocumentColors]
-          color[this.currSelectedColorIndex] = newColor
-          LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color })
+        case 'shape':
+          LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color: newDocumentColors })
           break
-        }
         case 'tmp':
         case 'group': {
           const { subLayerIdx } = LayerUtils
           if (subLayerIdx === -1) {
-            for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
-              if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
-                LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: [newColor] })
+            const singleColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length === 1) as IShape[]
+            const multiColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length !== 1) as IShape[]
+            // For one multiple-color shape
+            if (singleColorShapes.length === 0 && multiColorShapes.length === 1) {
+              for (const [i, layer] of currLayer.layers.entries()) {
+                if (layer.type === 'shape' && layer.color.length !== 1) {
+                  LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: newDocumentColors })
+                }
+              }
+            // For one or more single-color shape
+            } else if (singleColorShapes.length !== 0) {
+              for (const [i, layer] of currLayer.layers.entries()) {
+                if (layer.type === 'shape' && layer.color.length === 1) {
+                  LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: [newColor] })
+                }
               }
             }
           } else {
@@ -496,9 +492,7 @@ export default Vue.extend({
               this.handleFrameColorUpdate(newColor)
             }
             if (subLayerType === 'shape') {
-              const color = [...this.getDocumentColors]
-              color[this.currSelectedColorIndex] = newColor
-              LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { color })
+              LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { color: newDocumentColors })
             }
           }
           break
@@ -534,6 +528,9 @@ export default Vue.extend({
     },
     setLineWidth(value: number) {
       shapeUtils.setLineWidth(value)
+      this.$nextTick(() => {
+        popupUtils.setSliderConfig({ value: this.lineWidth })
+      })
     },
     handleLineDashEdgeUpdate(index: number, value: number) {
       if (index === 0) {
@@ -711,26 +708,20 @@ export default Vue.extend({
   > div {
     margin-top: 10px;
   }
+  &__shape-colors {
+    @include text-H6;
+    color: setColor(blue-1);
+    text-align: left;
+  }
   &__colors {
     width: 100%;
-    margin-top: 10px;
+    margin-top: 15px;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 12px;
     @media (max-width: 1260px) {
       gap: 10px;
     }
-  }
-  &__color {
-    width: 100%;
-    padding-top: calc(100% - 3px);
-    border: 1.5px solid setColor(gray-4);
-    border-radius: 4px;
-    box-sizing: border-box;
-    &:hover {
-      box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff;
-    }
-    transition: box-shadow 0.2s ease-in-out;
   }
   &__value-selector {
     position: absolute;
@@ -756,7 +747,7 @@ export default Vue.extend({
 
     &-filled {
       @extend .shape-setting__value-selector;
-      left: 0;
+      left: -70%;
     }
   }
   &__color-picker {

@@ -140,7 +140,7 @@ const layerMapping = function (primaryLayer: IGroup | IFrame | IImage, image: II
   image.styles.adjust.blur = 0
   switch (primaryLayer.type) {
     case LayerType.frame: {
-      if (frameUtils.isImageFrame(primaryLayer as IFrame)) {
+      if (frameUtils.isImageFrame(primaryLayer)) {
         image.styles.x = primaryLayer.styles.x
         image.styles.y = primaryLayer.styles.y
         image.styles.scale = primaryLayer.styles.scale
@@ -168,7 +168,7 @@ const layerMapping = function (primaryLayer: IGroup | IFrame | IImage, image: II
           image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
           image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
         }
-        const mappedImage = groupUtils.mapLayersToPage([image], primaryLayer as IGroup)[0] as IImage
+        const mappedImage = groupUtils.mapLayersToPage([image], primaryLayer)[0] as IImage
         return mappedImage
       }
     }
@@ -178,7 +178,7 @@ const layerMapping = function (primaryLayer: IGroup | IFrame | IImage, image: II
       image.styles.x *= primaryLayer.styles.scale
       image.styles.y *= primaryLayer.styles.scale
       const mappedLayer = groupUtils
-        .mapLayersToPage([image], primaryLayer as IGroup)[0] as IImage
+        .mapLayersToPage([image], primaryLayer)[0] as IImage
       mappedLayer.styles.scale = scale
       return mappedLayer
     }

@@ -11,6 +11,7 @@ import rulerUtils from './rulerUtils'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import store from '@/store'
 import { round, isEqual } from 'lodash'
+import generalUtils from './generalUtils'
 
 class ResizeUtils {
   scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number) {
@@ -74,7 +75,11 @@ class ResizeUtils {
         if (layer.category === 'D') {
           const quadrant = shapeUtils.getLineQuadrant(layer.point ?? [])
           const { width: lineWidth, height: lineHeight } = shapeUtils.lineDimension(layer.point ?? [])
-          const { point, realWidth, realHeight } = shapeUtils.computePointForDimensions(quadrant, layer.size?.[0] ?? 1, lineWidth * targetScale, lineHeight * targetScale)
+          const { size } = layer
+          if (!size) break
+          const strokeWidth = size[0]
+          const newStrokeWidth = round(strokeWidth * targetScale, 2)
+          const { point, realWidth, realHeight } = shapeUtils.computePointForDimensions(quadrant, newStrokeWidth, lineWidth * targetScale, lineHeight * targetScale)
           controlUtils.updateShapeLinePoint(pageIndex, layerIndex, point)
           width = realWidth
           height = realHeight
@@ -83,38 +88,22 @@ class ResizeUtils {
             initHeight: height
           })
           scale = layer.styles.scale
+          layerUtils.updateLayerProps(pageIndex, layerIndex, {
+            size: [newStrokeWidth]
+          })
         }
         if (layer.category === 'E') {
+          const { size } = layer
+          if (!size) break
+          const strokeWidth = size[0]
+          const newStrokeWidth = round(strokeWidth * targetScale, 2)
           scale = 1
-          const corRad = controlUtils.getCorRadValue([width, height], controlUtils.getCorRadPercentage(layer.vSize, layer.size ?? [], layer.shapeType ?? ''), layer.shapeType ?? '')
+          const corRad = controlUtils.getCorRadValue([width, height], controlUtils.getCorRadPercentage(layer.vSize, size, layer.shapeType ?? ''), layer.shapeType ?? '')
           controlUtils.updateShapeVSize(pageIndex, layerIndex, [width, height])
-          controlUtils.updateShapeCorRad(pageIndex, layerIndex, layer.size ?? [], corRad)
+          layerUtils.updateLayerProps(pageIndex, layerIndex, {
+            size: [newStrokeWidth, corRad]
+          })
         }
-        break
-      case 'group':
-        layer = targetLayer as IGroup
-        layer.layers.forEach((subLayer, index) => {
-          if (subLayer.type === 'shape') {
-            subLayer = subLayer as IShape
-            if (subLayer.category === 'D') {
-              const [lineWidth] = subLayer.size ?? [1]
-              layerUtils.updateSubLayerProps(pageIndex, layerIndex, index, {
-                size: [lineWidth / targetScale]
-              })
-              const trans = shapeUtils.getTranslateCompensationForLineWidth(subLayer.point ?? [], subLayer.styles, lineWidth, lineWidth / targetScale)
-              layerUtils.updateSubLayerStyles(pageIndex, layerIndex, index, {
-                x: trans.x,
-                y: trans.y
-              })
-            }
-            if (subLayer.category === 'E') {
-              const [lineWidth, corRad] = subLayer.size ?? [1, 0]
-              layerUtils.updateSubLayerProps(pageIndex, layerIndex, index, {
-                size: [lineWidth / targetScale, corRad]
-              })
-            }
-          }
-        })
         break
       case 'tmp':
         throw new Error('Unexpected tmp layer encountered')
@@ -159,8 +148,10 @@ class ResizeUtils {
 
   centerBackground(pageIndex: number, page: IPage, format: { width: number, height: number }) {
     const { width, height, posX, posY } = imageUtils.adaptToSize({
-      width: page.backgroundImage.config.styles.initWidth || page.backgroundImage.config.styles.width,
-      height: page.backgroundImage.config.styles.initHeight || page.backgroundImage.config.styles.height
+      width: page.backgroundImage.config.styles.imgWidth || page.backgroundImage.config.styles.width || page.width,
+      height: page.backgroundImage.config.styles.imgHeight || page.backgroundImage.config.styles.height || page.height
+      // width: page.backgroundImage.config.styles.initWidth || page.backgroundImage.config.styles.width || page.width,
+      // height: page.backgroundImage.config.styles.initHeight || page.backgroundImage.config.styles.height || page.height
     }, format)
     pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
     pageUtils.updateBackgroundImageStyles(

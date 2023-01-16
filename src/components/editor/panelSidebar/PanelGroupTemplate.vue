@@ -7,10 +7,9 @@
         @click.native="$emit('close')")
       button(class="panel-group-template__apply lead-2"
         @click="handleApplyGroupTemplate") {{ $t('NN0392', { num: count })}}
-      svg-icon(v-if="isAdmin"
-        class="my-5 panel-group-template__delete pointer"
+      svg-icon(v-if="showAdminTool"
+        class="panel-group-template__delete pointer"
         iconName="trash"
-        iconWidth="30px"
         iconColor="white"
         @click.native="handleDeleteGroupTemplate")
     div(class="panel-group-template__list" :style="listStyle")
@@ -41,7 +40,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       token: 'user/getToken',
-      isAdmin: 'user/isAdmin'
+      showAdminTool: 'user/showAdminTool'
     }),
     count(): number {
       return this.groupItem.content_ids.length
@@ -77,7 +76,6 @@ export default Vue.extend({
         })
     },
     handleDeleteGroupTemplate() {
-      if (!this.isAdmin) return
       modalUtils.setModalInfo(
         this.isDetailPage ? '確認刪除詳情頁模板？' : '確認刪除群組模板？',
         [],
@@ -110,11 +108,13 @@ export default Vue.extend({
   z-index: 5;
   background-color: #2c2f43;
   &__apply {
+    display: block;
     color: setColor(gray-6);
     padding: 7px 25px;
     border: 1px solid setColor(gray-6);
     border-radius: 7px;
     background: rgba(255, 255, 255, 0.15);
+    margin: 0 auto;
   }
   &__list {
     @include push-scrollbar10;
@@ -130,6 +130,7 @@ export default Vue.extend({
   }
   &__delete {
     position: absolute;
+    top: 0;
     right: 0;
   }
 }

@@ -16,8 +16,6 @@ import assetUtils from './assetUtils'
 import layerFactary from './layerFactary'
 import textUtils from './textUtils'
 import workerUtils from './workerUtils'
-import { clone } from 'lodash'
-import layerUtils from './layerUtils'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -422,6 +420,10 @@ class StepsUtils {
   clearSteps() {
     this.steps = []
     this.currStep = -1
+  }
+
+  clearCurrStep() {
+    this.steps.splice(this.currStep--, 1)
   }
 }
 

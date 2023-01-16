@@ -1,5 +1,5 @@
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
 import Vue from 'vue'
@@ -30,7 +30,6 @@ export class MovingUtils {
   private isHandleMovingHandler = false
   private snapUtils = null as any
   private body = undefined as unknown as HTMLElement
-  private isPointerDownFromSubController = false
   private _moving = null as unknown
   private _moveEnd = null as unknown
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as ILayerInfo
@@ -150,7 +149,7 @@ export class MovingUtils {
     this.eventTarget = (event.target as HTMLElement)
     this.eventTarget.releasePointerCapture((event as PointerEvent).pointerId)
 
-    if (this.isTouchDevice) {
+    if (this.isTouchDevice && !this.config.locked) {
       this.isClickOnController = controlUtils.isClickOnController(event as MouseEvent)
       event.stopPropagation()
       if (!this.dblTabsFlag && this.isActive) {
@@ -317,9 +316,9 @@ export class MovingUtils {
         }
     }
 
-    const updateConifgData = {} as Partial<ILayer>
+    const updateConfigData = {} as Partial<IText | IImage | IShape>
     if (!this.isDragging) {
-      updateConifgData.dragging = true
+      updateConfigData.dragging = true
       this.component && this.component.$emit('isDragging', this.layerIndex)
     }
     if (this.isActive) {
@@ -338,10 +337,10 @@ export class MovingUtils {
         x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
         y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
       }
-      const hasActualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
+      const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
       if (hasActualMove) {
         if (!this.config.moving || !store.state.isMoving) {
-          updateConifgData.moving = true
+          updateConfigData.moving = true
           this.setMoving(true)
         }
         if (this.getLayerType === 'text' && this.config.contentEditable) {
@@ -379,7 +378,7 @@ export class MovingUtils {
         }
       }
     }
-    layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, updateConifgData)
+    layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, updateConfigData)
   }
 
   movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
@@ -474,7 +473,7 @@ export class MovingUtils {
       x: Math.abs(pageUtils.getCurrPage.x - this.initPageTranslate.x),
       y: Math.abs(pageUtils.getCurrPage.y - this.initPageTranslate.y)
     }
-    const hasActualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
+    const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
     if (this.isActive) {
       if (hasActualMove) {
@@ -511,6 +510,11 @@ export class MovingUtils {
           }
           if (this.config.contentEditable) {
             tiptapUtils.focus({ scrollIntoView: false })
+            if (!this.config.isEdited) {
+              setTimeout(() => {
+                tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
+              }, 100) // wait for default behavior to set cursor position, then select (otherwise selection will be overwritten)
+            }
           }
         }
         if (this.inMultiSelectionMode) {
@@ -536,7 +540,6 @@ export class MovingUtils {
           }
         }
       }
-      this.isPointerDownFromSubController = false
       this.isControlling = false
       this.setCursorStyle(e, '')
     }
@@ -544,7 +547,7 @@ export class MovingUtils {
     if (!this.isActive) {
       if (hasActualPageMove) {
         return
-      } else if (!this.isDoingGestureAction && !hasActualMove) {
+      } else if (!this.isDoingGestureAction && !this.isActive && !hasActualMove) {
         this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
         if (!this.inMultiSelectionMode) {
           groupUtils.deselect()

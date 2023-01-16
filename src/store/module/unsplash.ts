@@ -39,6 +39,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       const { data: { data } } = await photos.getUnsplash({ locale, pageIndex, keyword })
       commit('SET_CONTENT', { data, isSearch: !!keyword })
     } catch (error) {
+      console.error(error)
       captureException(error)
     }
   },
@@ -50,6 +51,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       const { data: { data } } = await photos.getUnsplash({ locale, pageIndex, keyword })
       commit('SET_CONTENT', { data, isSearch: !!keyword })
     } catch (error) {
+      console.error(error)
       captureException(error)
     }
   },
@@ -68,7 +70,7 @@ const mutations: MutationTree<IPhotoState> = {
     keys
       .forEach(key => {
         if (key in state) {
-          (state[key] as any) = newState[key]
+          (state[key] as unknown) = newState[key]
         }
       })
   },

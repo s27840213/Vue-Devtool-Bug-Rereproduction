@@ -10,6 +10,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import store from '@/store'
 import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
@@ -38,7 +39,7 @@ export default Vue.extend({
     },
     addBackground() {
       if (this.locked) {
-        return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+        return this.$notify({ group: 'copy', text: i18n.tc('NN0804') })
       }
       const img = this.$refs.img as HTMLImageElement
       if (!img) {

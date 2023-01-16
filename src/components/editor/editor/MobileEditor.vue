@@ -17,7 +17,6 @@
                 @after-leave="afterLeave")
         mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
-          :currColorEvent="currColorEvent"
           @switchTab="switchTab"
           @panelHeight="setPanelHeight")
       //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
@@ -77,6 +76,9 @@ export default Vue.extend({
   },
   created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
+  },
+  beforeDestroy() {
+    eventUtils.off(PanelEvent.switchTab)
   },
   mounted() {
     const { pageRect, editorRect } = pageUtils.getEditorRenderSize
@@ -138,9 +140,8 @@ export default Vue.extend({
       mobilePanel: 'currActivePanel'
     }),
     ...mapState('user', [
-      'role',
-      'adminMode',
-      'viewGuide']),
+      'viewGuide'
+    ]),
     ...mapGetters({
       groupId: 'getGroupId',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -170,15 +171,12 @@ export default Vue.extend({
     isLogin(): boolean {
       return store.getters['user/isLogin']
     },
-    isAdmin(): boolean {
-      return this.role === 0
-    },
     isLocked(): boolean {
       return layerUtils.getTmpLayer().locked
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup) => {
+      const types = groupLayer.layers.map((layer) => {
         return layer.type
       })
       return new Set(types)
@@ -217,25 +215,25 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
-      _setAdminMode: 'user/SET_ADMIN_MODE',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
-      setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
     }),
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'
     }),
     switchTab(panelType: string, props?: IFooterTabProps) {
-      if (this.currActivePanel === panelType || panelType === 'none') {
+      // Switch between color and text-color panel without close panel
+      if (this.currActivePanel === panelType && panelType === 'color' &&
+        props?.currColorEvent && this.currColorEvent !== props.currColorEvent) {
+        this.currColorEvent = props.currColorEvent
+      // Close panel if re-click
+      } else if (this.currActivePanel === panelType || panelType === 'none') {
         editorUtils.setShowMobilePanel(false)
         editorUtils.setInMultiSelectionMode(false)
       } else {
-        editorUtils.setShowMobilePanel(true)
-        this.setCurrActivePanel(panelType)
-        if (props) {
-          if (panelType === 'color' && props.currColorEvent) {
-            this.currColorEvent = props.currColorEvent
-          }
+        editorUtils.setCurrActivePanel(panelType)
+        if (panelType === 'color' && props?.currColorEvent) {
+          this.currColorEvent = props.currColorEvent
         }
       }
 
@@ -259,7 +257,7 @@ export default Vue.extend({
       this.showMobilePanelAfterTransitoin = true
     },
     afterLeave() {
-      this.setCurrActivePanel('none')
+      editorUtils.setCurrActivePanel('none')
       setTimeout(() => {
         this.showMobilePanelAfterTransitoin = false
       }, 300)

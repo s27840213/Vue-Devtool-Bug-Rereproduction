@@ -106,10 +106,10 @@ export default Vue.extend({
       setIsLoading: 'payment/SET_isLoading'
     }),
     canDownloadInvoice(his: type.IBillingHistory): boolean {
-      return Boolean((his.payType === 'tappay' && his.url) || his.payType === 'stripe')
+      return (['tappay', 'tcloud'].includes(his.payType) && his.url !== '') || his.payType === 'stripe'
     },
     async pdf(index: number, his: type.IBillingHistory) {
-      if (his.payType === 'tappay') {
+      if (['tappay', 'tcloud'].includes(his.payType)) {
         location.href = his.url
         return
       }

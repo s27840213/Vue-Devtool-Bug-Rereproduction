@@ -106,6 +106,7 @@ const actions: ActionTree<IFileState, unknown> = {
       const rawData = await apiUtils.requestWithRetry(() => file.getFiles({ pageIndex }))
       addMyfile(rawData.data.data.image.content, rawData.data.next_page)
     } catch (error) {
+      console.error(error)
       captureException(error)
     }
   },
@@ -208,7 +209,7 @@ const mutations: MutationTree<IFileState> = {
     keys
       .forEach(key => {
         if (key in state) {
-          (state[key] as any) = newState[key]
+          (state[key] as unknown) = newState[key]
         }
       })
   },

@@ -41,9 +41,11 @@ div(class="popup-file")
     //- div(class="popup-file__item" @click="testTrail()")
     //-   span 測試試用
   hr(class="popup-file__hr")
-  div(class="popup-file__item"
-      @click="onLogoutClicked()")
-      span {{$tc('NN0167',2)}}
+  div(class="popup-file__item")
+    url(:url="$t('NN0791')" :newTab="true")
+      span {{$t('NN0790', {type: $tc('NN0793', 1)})}}
+  div(class="popup-file__item" @click="onLogoutClicked()")
+    span {{$tc('NN0167',2)}}
   div(class="popup-file__item" @click="gotoMobile()")
     span(class="text-gray-3") Version: {{buildNumber}}
   template(v-if="isAdmin")
@@ -70,6 +72,7 @@ import { mapGetters, mapMutations, mapState } from 'vuex'
 import shortcutHandler from '@/utils/shortcutUtils'
 import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
+import Url from '@/components/global/Url.vue'
 import stepsUtils from '@/utils/stepsUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import resizeUtils from '@/utils/resizeUtils'
@@ -77,7 +80,8 @@ import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
   components: {
-    Avatar
+    Avatar,
+    Url
   },
   data() {
     return {
@@ -86,7 +90,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('user', [
-      'uname'
+      'uname',
+      'enableAdminView'
     ]),
     ...mapGetters({
       isLogin: 'user/isLogin',
@@ -94,8 +99,7 @@ export default Vue.extend({
       account: 'user/getAccount',
       isFontLoading: 'text/getIsFontLoading',
       pagesLength: 'getPagesLength',
-      groupType: 'getGroupType',
-      enableAdminView: 'user/getEnableAdminView'
+      groupType: 'getGroupType'
     }),
     pageSize(): { w: number, h: number } {
       return {
@@ -200,9 +204,7 @@ export default Vue.extend({
       // designUtils.newDesign()
     },
     toogleAdminView() {
-      this.setUserState({
-        enableAdminView: !this.enableAdminView
-      })
+      this.setUserState({ enableAdminView: !this.enableAdminView })
     },
     testSubscribe() {
       // fbPixelUtils.subscribe(false)
@@ -230,9 +232,6 @@ export default Vue.extend({
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'
-    },
-    gotoMobile() { // TO-DELETE
-      window.location.href = this.$router.currentRoute.fullPath.replace('editor', 'mobile-editor')
     }
   }
 })
@@ -289,7 +288,7 @@ export default Vue.extend({
     &.disabled {
       color: setColor(gray-4);
     }
-    > span {
+    span {
       font-size: 0.75rem;
     }
     &:not(:last-child):not(.disabled) {

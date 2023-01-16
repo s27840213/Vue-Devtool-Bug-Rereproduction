@@ -26,7 +26,6 @@
           :pageIndex="index"
           :contentScaleRatio="scaleRatio()"
           :handleSequentially="true"
-          :isPagePreview="true"
           :lazyLoadTarget="lazyLoadTarget")
         div(class="page-preview-page__highlighter"
           :class="{'focused': currFocusPageIndex === index}"
@@ -304,7 +303,6 @@ export default Vue.extend({
   justify-content: center;
   position: relative;
   max-width: 100%;
-  content-visibility: auto;
   &-content {
     position: relative;
     box-sizing: border-box;
