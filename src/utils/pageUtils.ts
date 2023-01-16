@@ -15,6 +15,7 @@ import groupUtils from './groupUtils'
 import { LayerType } from '@/store/types'
 import unitUtils, { PRECISION } from './unitUtils'
 import SnapUtils from './snapUtils'
+import layerUtils from './layerUtils'
 
 class PageUtils {
   get MAX_AREA() { return 6000 * 6000 }
@@ -42,6 +43,7 @@ class PageUtils {
   get inBgRemoveMode(): boolean { return store.getters['bgRemove/getInBgRemoveMode'] }
   get autoRemoveResult(): IBgRemoveInfo { return store.getters['bgRemove/getAutoRemoveResult'] }
   get getPage(): (pageIndex: number) => IPage { return store.getters.getPage }
+  get getCurrPage(): IPage { return this.getPage(layerUtils.pageIndex) }
   get getPageState(): (pageIndex: number) => IPageState { return store.getters.getPageState }
   get getPages(): Array<IPage> { return store.getters.getPages }
   get pageNum(): number { return this.getPages.length }
@@ -108,16 +110,30 @@ class PageUtils {
     }
   }
 
+  get getEditorRenderSize(): { pageRect: DOMRect, editorRect: DOMRect } {
+    const page = document.getElementById(`nu-page_${layerUtils.pageIndex}`) as HTMLElement
+    const editor = document.getElementById('mobile-editor__content') as HTMLElement
+    return {
+      pageRect: page.getBoundingClientRect(),
+      editorRect: editor.getBoundingClientRect()
+    }
+  }
+
   topBound: number
   bottomBound: number
   mobileMinScaleRatio: number
   isSwitchingToEditor: boolean
+  editorSize: { width: number, height: number }
+  pageSize: { width: number, height: number }
+  originPageSize = { width: -1, height: -1 }
 
   constructor() {
     this.topBound = -1
     this.bottomBound = Number.MAX_SAFE_INTEGER
     this.mobileMinScaleRatio = 0
     this.isSwitchingToEditor = false
+    this.editorSize = { width: 0, height: 0 }
+    this.pageSize = { width: 0, height: 0 }
   }
 
   newPage(pageData: Partial<IPage>) {
@@ -143,6 +159,8 @@ class PageUtils {
     const defaultPage: IPage = {
       width: 1080,
       height: 1080,
+      x: 0,
+      y: 0,
       physicalWidth: 1080,
       physicalHeight: 1080,
       unit: 'px',
@@ -768,6 +786,17 @@ class PageUtils {
       right: round(unitUtils.convert(defaultBleed, 'mm', unit, dpi.width), precision)
     } as IBleed
     return res
+  }
+
+  updatePagePos(pageIndex: number, pos: { x?: number, y?: number }) {
+    const { x, y } = pos
+    store.commit('UPDATE_pagePos', {
+      pageIndex,
+      styles: {
+        ...((typeof x !== 'undefined') && { x }),
+        ...((typeof y !== 'undefined') && { y })
+      }
+    })
   }
 }
 
