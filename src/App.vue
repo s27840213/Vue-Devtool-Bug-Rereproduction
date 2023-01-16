@@ -1,7 +1,7 @@
 <template lang="pug">
 div(id="app" :style="appStyles()")
   link(rel="preconnect" href="https://fonts.googleapis.com")
-  link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+  link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="")
   link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
   link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
   //- div(class="coordinate" ref="coordinate")
@@ -96,7 +96,7 @@ export default defineComponent({
       setDropdown: 'popup/SET_STATE',
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
     }),
-    appStyles() {
+    appStyles(): Record<string, string> {
       if (this.$route.name === 'Preview') {
         return {
           display: 'flex',

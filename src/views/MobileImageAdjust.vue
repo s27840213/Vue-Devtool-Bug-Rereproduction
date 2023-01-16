@@ -367,7 +367,7 @@ export default defineComponent({
         })
       }
     },
-    handleScaling(e: InputEvent) {
+    handleScaling(e: Event) {
       const targetScale = parseInt((e.target as HTMLInputElement).value) / 50 * 0.3583197167755996
       const targetWidth = this.config.styles.initWidth * targetScale
       const targetHeight = this.config.styles.initHeight * targetScale
