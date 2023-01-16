@@ -78,7 +78,7 @@ import { defineComponent } from 'vue'
 import { mapActions, mapState, mapMutations, mapGetters } from 'vuex'
 import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import SearchBar from '@/components/SearchBar.vue'
-import CategoryList from '@/components/category/CategoryList.vue'
+import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
 import PopupTheme from '@/components/popup/PopupTheme.vue'
@@ -93,6 +93,7 @@ import listService from '@/apis/list'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  name: 'PanelTemplate',
   emits: [],
   components: {
     SearchBar,
@@ -226,16 +227,16 @@ export default defineComponent({
     }
   },
   activated() {
-    const mainContent = (this.$refs.mainContent as any)[0]
-    const searchResult = (this.$refs.searchResult as any)[0]
+    const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
+    const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
     mainContent.$el.scrollTop = this.scrollTop.mainContent
     searchResult.$el.scrollTop = this.scrollTop.searchResult
     mainContent.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
     searchResult.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   deactivated() {
-    const mainContent = (this.$refs.mainContent as any)[0]
-    const searchResult = (this.$refs.searchResult as any)[0]
+    const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
+    const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
     mainContent.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
     searchResult.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
@@ -254,7 +255,7 @@ export default defineComponent({
       if (!newVal) {
         this.$nextTick(() => {
           // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          const mainContent = (this.$refs.mainContent as any)[0]
+          const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
           mainContent.$el.scrollTop = this.scrollTop.mainContent
         })
       }

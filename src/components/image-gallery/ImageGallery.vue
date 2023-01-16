@@ -26,7 +26,7 @@ import { mapState } from 'vuex'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import { GalleryImage } from '@/interfaces/gallery'
 
-export default defineComponent({
+const component = defineComponent({
   props: {
     vendor: {
       type: String as PropType<'unsplash' | 'myfile'>,
@@ -116,6 +116,8 @@ export default defineComponent({
     }
   }
 })
+export default component
+export type CImageGallery = typeof component
 </script>
 
 <style lang="scss" scoped>
