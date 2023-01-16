@@ -315,9 +315,9 @@ class GeneralUtils {
       normalInit({ reset: true })
     }
 
-    const query = _.omit(router.currentRoute.value.query,
-      ['panel', 'category', 'category_locale', 'search'])
-    router.replace({ query })
+    // const query = _.omit(router.currentRoute.value.query,
+    //   ['panel', 'category', 'category_locale', 'search'])
+    // router.replace({ query })
   }
 
   downloadTextFile(filename: string, content: string) {
