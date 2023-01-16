@@ -704,8 +704,9 @@ export default defineComponent({
     > span {
       transition: background-color 0.2s, color 0.2s;
       transform: scale(calc(10 / 12));
-      user-select: none;
       -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
   }
 }
