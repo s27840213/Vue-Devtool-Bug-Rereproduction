@@ -1,6 +1,5 @@
 <template lang="pug">
-  div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false")
-    div(v-if="isColorBackground" class="nu-background-image__color" :style="mainStyles" @pointerdown="setInBgSettingMode")
+  div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles")
     div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
       div(v-if="isAdjustImage" :style="frameStyles")
         nu-adjust-image(:src="finalSrc"
@@ -31,7 +30,6 @@ import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
-import { IPage } from '@/interfaces/page'
 import unitUtils from '@/utils/unitUtils'
 
 export default Vue.extend({
@@ -181,26 +179,10 @@ export default Vue.extend({
       }
     },
     mainStyles(): any {
-      const { image, color, pageIndex } = this
-      const page = pageUtils.getPage(pageIndex)
-      const { width, height, bleeds } = pageUtils.getPageSizeWithBleeds(page)
-      const res = {
-        width: width + 'px',
-        height: height + 'px',
-        opacity: image.config.styles.opacity / 100,
-        backgroundColor: color
+      return {
+        opacity: this.image.config.styles.opacity / 100,
+        backgroundColor: this.color
       }
-      if (page.isEnableBleed && bleeds) {
-        return {
-          ...res,
-          transform: `translate(${-bleeds.left * this.contentScaleRatio}px, ${-bleeds.top * this.contentScaleRatio}px) rotate(0deg)`
-          // top: -bleeds.top * this.contentScaleRatio + 'px',
-          // bottom: -bleeds.bottom * this.contentScaleRatio + 'px',
-          // left: -bleeds.left * this.contentScaleRatio + 'px',
-          // right: -bleeds.right * this.contentScaleRatio + 'px'
-        }
-      }
-      return res
     },
     isAdjustImage(): boolean {
       const { styles } = this.image.config
@@ -223,17 +205,6 @@ export default Vue.extend({
         imgX: this.image.posX,
         imgY: this.image.posY
       })
-    },
-    bgStyles(): { [key: string]: string | number } {
-      const { image } = this
-      return {
-        backgroundImage: `url(${this.src})`,
-        width: `${this.imageSize.width}px`,
-        height: `${this.imageSize.height}px`,
-        backgroundSize: `${this.imageSize.width}px ${this.imageSize.height}px`,
-        backgroundPosition: this.imageSize.x === -1 ? 'center center' : `${this.imageSize.x}px ${this.imageSize.y}px`,
-        ...this.flipStyles
-      }
     },
     cssFilterElms(): any[] {
       const { adjust } = this.image.config.styles
@@ -408,6 +379,7 @@ export default Vue.extend({
   right: 0;
   bottom: 0;
   left: 0;
+  padding: inherit;
   &__picture {
     object-fit: cover;
     width: 100%;

@@ -15,7 +15,8 @@ div(class="overflow-container"
         @tap="tapPageContent")
       //- @dblclick will not be trigger in mobile, use @tap + doubleTapUtils instead.
       div(class="content" :style="contentStyles")
-        nu-bg-image(:image="this.config.backgroundImage"
+        nu-bg-image(
+          :image="this.config.backgroundImage"
           :pageIndex="pageIndex"
           :color="this.config.backgroundColor"
           :key="this.config.backgroundImage.id"
@@ -174,31 +175,15 @@ export default Vue.extend({
       return {
         width: (this.config.width - this.config.bleeds.left - this.config.bleeds.right) * this.contentScaleRatio + 'px',
         height: (this.config.height - this.config.bleeds.top - this.config.bleeds.bottom) * this.contentScaleRatio + 'px',
-        marginTop: this.config.bleeds.top * this.contentScaleRatio + 'px',
-        marginBottom: this.config.bleeds.bottom * this.contentScaleRatio + 'px',
-        marginLeft: this.config.bleeds.left * this.contentScaleRatio + 'px',
-        marginRight: this.config.bleeds.right * this.contentScaleRatio + 'px'
+        padding: [
+          this.config.bleeds.top * this.contentScaleRatio + 'px',
+          this.config.bleeds.right * this.contentScaleRatio + 'px',
+          this.config.bleeds.bottom * this.contentScaleRatio + 'px',
+          this.config.bleeds.left * this.contentScaleRatio + 'px'
+        ].join(' ')
       }
     },
     bleedLineStyles() {
-      // let boxShadow = '0 0 3px 1px rgba(0, 0, 0, 0.15)'
-      // const borderSize = { top: 1, bottom: 1 }
-      // if (this.isDetailPage && this.pages.length > 1) {
-      //   const maskTop = '0 -6px 0px 0px white, '
-      //   const maskBottom = '0 6px 0px 0px white, '
-      //   if (this.pageIndex === 0) {
-      //     boxShadow = maskBottom + boxShadow
-      //     borderSize.bottom = 0
-      //   } else if (this.pageIndex === this.pagesLength - 1) {
-      //     boxShadow = maskTop + boxShadow
-      //     borderSize.top = 0
-      //   } else {
-      //     boxShadow = maskBottom + maskTop + boxShadow
-      //     borderSize.bottom = 0
-      //     borderSize.top = 0
-      //   }
-      // }
-
       return {
         top: (this.config.bleeds.top - 1) * this.contentScaleRatio + 'px',
         bottom: (this.config.bleeds.bottom - 1) * this.contentScaleRatio + 'px',
@@ -206,8 +191,6 @@ export default Vue.extend({
         right: (this.config.bleeds.right - 1) * this.contentScaleRatio + 'px',
         border: this.userId === 'backendRendering' ? `${this.contentScaleRatio}px solid white` : `${this.config.isEnableBleed ? this.contentScaleRatio : 0}px dashed white`,
         boxShadow: this.userId === 'backendRendering' ? 'none' : '0 0 3px 1px rgba(0, 0, 0, 0.15)'
-      // borderTop: borderSize.top + 'px solid white',
-      // borderBottom: borderSize.bottom + 'px solid white'
       }
     },
     trimStyles() {
@@ -396,7 +379,6 @@ export default Vue.extend({
   position: absolute;
   left: 0px;
   top: 0px;
-  box-sizing: border-box;
 }
 
 .bleed-line {
