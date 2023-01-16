@@ -22,7 +22,7 @@ import DiskWarning from '@/components/payment/DiskWarning.vue'
 import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
 export default defineComponent({
-  emits: ['clearSelection', ...DESIGN_MENU_EVENTS],
+  emits: ['clearSelection', ...DESIGN_MENU_EVENTS()],
   components: {
     DesignGallery,
     DiskWarning,

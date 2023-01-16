@@ -42,7 +42,7 @@ import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 
 export default defineComponent({
-  emits: ['clearSelection', 'moveItem', ...DESIGN_MENU_EVENTS, ...FOLDER_MENU_EVENTS],
+  emits: ['clearSelection', 'moveItem', ...DESIGN_MENU_EVENTS(), ...FOLDER_MENU_EVENTS()],
   components: {
     FolderGallery,
     DesignGallery

@@ -137,7 +137,7 @@ import hintUtils from '@/utils/hintUtils'
 import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
 export default defineComponent({
-  emits: ['clearSelection', 'moveItem', 'deleteFolder', ...DESIGN_MENU_EVENTS],
+  emits: ['clearSelection', 'moveItem', 'deleteFolder', ...DESIGN_MENU_EVENTS()],
   mounted() {
     hintUtils.bind(this.$refs.more as HTMLElement, `${this.$t('NN0225')}`, 500)
     hintUtils.bind(this.$refs.newFolder as HTMLElement, `${this.$t('NN0190')}`, 500)

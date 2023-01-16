@@ -22,17 +22,25 @@ interface Item {
   lastUpdatedTime: string
 }
 
-export const DESIGN_MENU_EVENTS = [
+const _DESIGN_MENU_EVENTS = [
   'deleteItem', 'deleteForever',
   'recoverItem', 'moveDesignToFolder', 'downloadDesign',
   'favorDesign', 'unfavorDesign', 'rootDesign'
 ] as const
 
-export type IDesignMenuEvents = typeof DESIGN_MENU_EVENTS[number]
+export type IDesignMenuEvents = typeof _DESIGN_MENU_EVENTS[number]
 
-export const FOLDER_MENU_EVENTS = ['deleteFolderForever', 'recoverItem'] as const
+export function DESIGN_MENU_EVENTS(): typeof _DESIGN_MENU_EVENTS {
+  return _DESIGN_MENU_EVENTS
+}
 
-export type IFolderMenuEvents = typeof FOLDER_MENU_EVENTS[number]
+const _FOLDER_MENU_EVENTS = ['deleteFolderForever', 'recoverItem'] as const
+
+export type IFolderMenuEvents = typeof _FOLDER_MENU_EVENTS[number]
+
+export function FOLDER_MENU_EVENTS(): typeof _FOLDER_MENU_EVENTS {
+  return _FOLDER_MENU_EVENTS
+}
 
 class DesignUtils {
   ROOT = '$ROOT$'

@@ -118,7 +118,7 @@ export default defineComponent({
     handleFolderMenuAction(icon: string, folder: IFolder) {
       if (this.useDelete && icon === 'trash') icon = 'delete'
       designUtils.dispatchFolderMenuAction(icon, folder, (extraEvent) => {
-        if (extraEvent && FOLDER_MENU_EVENTS.includes(extraEvent.event as IFolderMenuEvents)) {
+        if (extraEvent && FOLDER_MENU_EVENTS().includes(extraEvent.event as IFolderMenuEvents)) {
           this.$emit('menuAction', extraEvent)
         }
       })

@@ -17,7 +17,7 @@ import { mapActions, mapGetters } from 'vuex'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 
 export default defineComponent({
-  emits: ['clearSelection', ...DESIGN_MENU_EVENTS],
+  emits: ['clearSelection', ...DESIGN_MENU_EVENTS()],
   components: {
     DesignGallery
   },

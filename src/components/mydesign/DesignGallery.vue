@@ -129,7 +129,7 @@ export default defineComponent({
     handleDesignMenuAction(icon: string, design: IDesign) {
       if (this.useDelete && icon === 'trash') icon = 'delete'
       designUtils.dispatchDesignMenuAction(icon, design, (extraEvent) => {
-        if (extraEvent && DESIGN_MENU_EVENTS.includes(extraEvent.event as IDesignMenuEvents)) {
+        if (extraEvent && DESIGN_MENU_EVENTS().includes(extraEvent.event as IDesignMenuEvents)) {
           this.$emit('menuAction', extraEvent)
         }
       })
