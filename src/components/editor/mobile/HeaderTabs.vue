@@ -266,6 +266,9 @@ export default defineComponent({
   padding: 8px 16px;
   box-sizing: border-box;
   z-index: setZindex("header");
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 
   &__feature-icon {
     width: 22px;

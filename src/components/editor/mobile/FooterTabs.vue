@@ -681,6 +681,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 .footer-tabs {
   overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
   &__container {
     overflow: scroll;
     display: grid;
@@ -704,9 +707,6 @@ export default defineComponent({
     > span {
       transition: background-color 0.2s, color 0.2s;
       transform: scale(calc(10 / 12));
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      user-select: none;
     }
   }
 }
