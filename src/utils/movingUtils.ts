@@ -415,7 +415,7 @@ export class MovingUtils {
     }
     const base = {
       x: -(newPageSize.w - originPageSize.width) * 0.5,
-      y: -(newPageSize.h - originPageSize.height) * 0.5
+      y: 0
     }
     const limitRange = {
       x: (newPageSize.w - originPageSize.width) * 0.5,
@@ -427,35 +427,32 @@ export class MovingUtils {
     }
     const isReachRightEdge = currPage.x < 0 && offsetPos.x < 0 && diff.x > limitRange.x
     const isReachLeftEdge = currPage.x >= 0 && offsetPos.x > 0 && diff.x > limitRange.x
-    // const isReachTopEdge = currPage.y > 0 && offsetPos.y > 0 && diff.y > limitRange.y
-    // const isReachBottomEdge = currPage.y <= 0 && offsetPos.y < 0 && diff.y > limitRange.y
+    const isReachTopEdge = currPage.y > 0 && offsetPos.y > 0 && diff.y > limitRange.y
+    const isReachBottomEdge = currPage.y <= 0 && offsetPos.y < 0 && diff.y > limitRange.y
 
     console.log(diff.y, limitRange.y)
 
     if (isReachRightEdge || isReachLeftEdge) {
       pageUtils.updatePagePos(this.pageIndex, {
-        x: isReachRightEdge ? originPageSize.width - newPageSize.w : 0,
-        y: offsetPos.y + currPage.y
+        x: isReachRightEdge ? originPageSize.width - newPageSize.w : 0
       })
     } else {
       pageUtils.updatePagePos(this.pageIndex, {
-        x: offsetPos.x + currPage.x,
-        y: offsetPos.y + currPage.y
+        x: offsetPos.x + currPage.x
       })
     }
 
-    // if (isReachTopEdge || isReachBottomEdge) {
-    //   pageUtils.updatePagePos(this.pageIndex, {
-    //     y: isReachTopEdge ? originPageSize.height - newPageSize.h : 0
-    //   })
-    // } else {
-    //   pageUtils.updatePagePos(this.pageIndex, {
-    //     y: offsetPos.y + currPage.y
-    //   })
-    // }
-    // this.initialPos.y += isReachTopEdge || isReachBottomEdge ? 0 : offsetPos.y
+    if (isReachTopEdge || isReachBottomEdge) {
+      pageUtils.updatePagePos(this.pageIndex, {
+        y: isReachTopEdge ? -(originPageSize.height - newPageSize.h) * 0.5 : (originPageSize.height - newPageSize.h) * 0.5
+      })
+    } else {
+      pageUtils.updatePagePos(this.pageIndex, {
+        y: offsetPos.y + currPage.y
+      })
+    }
+    this.initialPos.y += isReachTopEdge || isReachBottomEdge ? 0 : offsetPos.y
     this.initialPos.x += isReachRightEdge || isReachLeftEdge ? 0 : offsetPos.x
-    this.initialPos.y += offsetPos.y
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
