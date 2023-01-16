@@ -1,9 +1,10 @@
 <template lang="pug">
 div(class="panel")
-  component(v-show="isSidebarPanelOpen && !isShowPagePreview && !bgRemoveMode"
-    class="p-10 border-box"
-    :style="panelStyles()"
-    :is="showPagePanel ? 'panel-page' : panelComponents[currPanel]")
+  keep-alive(:include="['PanelTemplate', 'PanelPhoto', 'PanelObject', 'PanelBackground', 'PanelText', 'PanelFile', 'PanelBrand']")
+    component(v-show="isSidebarPanelOpen && !isShowPagePreview && !bgRemoveMode"
+      class="p-10 border-box"
+      :style="panelStyles()"
+      :is="showPagePanel ? 'panel-page' : panelComponents[currPanel]")
 </template>
 
 <script lang="ts">
@@ -15,7 +16,6 @@ import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vu
 import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
 import PanelBrand from '@/components/editor/panelSidebar/PanelBrand.vue'
-import PanelPexels from '@/components/editor/panelSidebar/PanelPexels.vue'
 import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import { mapGetters, mapState } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
@@ -31,7 +31,6 @@ export default defineComponent({
     PanelText,
     PanelFile,
     PanelBrand,
-    PanelPexels, // for testing purposes
     PanelPage
   },
   props: {

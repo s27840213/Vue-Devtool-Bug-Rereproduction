@@ -23,10 +23,11 @@ div(class="panel-photo")
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
-import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
+import ImageGallery, { CImageGallery } from '@/components/image-gallery/ImageGallery.vue'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
+  name: 'PanelPhoto',
   emits: [],
   components: {
     SearchBar,
@@ -67,16 +68,16 @@ export default defineComponent({
     )
   },
   activated() {
-    const mainContent = (this.$refs.mainContent as any)[0]
-    const searchResult = (this.$refs.searchResult as any)[0]
+    const mainContent = (this.$refs.mainContent as CImageGallery[])[0]
+    const searchResult = (this.$refs.searchResult as CImageGallery[])[0]
     mainContent.$el.scrollTop = this.scrollTop.mainContent
     searchResult.$el.scrollTop = this.scrollTop.searchResult
     mainContent.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
     searchResult.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   deactivated() {
-    const mainContent = (this.$refs.mainContent as any)[0]
-    const searchResult = (this.$refs.searchResult as any)[0]
+    const mainContent = (this.$refs.mainContent as CImageGallery[])[0]
+    const searchResult = (this.$refs.searchResult as CImageGallery[])[0]
     mainContent.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
     searchResult.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
@@ -85,7 +86,7 @@ export default defineComponent({
       if (!newVal) {
         this.$nextTick(() => {
           // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          const mainContent = (this.$refs.mainContent as any)[0]
+          const mainContent = (this.$refs.mainContent as CImageGallery[])[0]
           mainContent.$el.scrollTop = this.scrollTop.mainContent
         })
       }

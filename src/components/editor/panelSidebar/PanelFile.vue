@@ -40,9 +40,10 @@ import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
-import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
+import ImageGallery, { CImageGallery } from '@/components/image-gallery/ImageGallery.vue'
 
 export default defineComponent({
+  name: 'PanelFile',
   emits: [],
   components: {
     SearchBar,
@@ -70,14 +71,14 @@ export default defineComponent({
     }
   },
   mounted() {
-    (this.$refs.mainContent as any).myfileUpdate()
+    (this.$refs.mainContent as CImageGallery).myfileUpdate()
   },
   activated() {
-    (this.$refs.mainContent as any).$el.children[0].scrollTop = this.scrollTop.mainContent;
-    (this.$refs.mainContent as any).$el.children[0].addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    (this.$refs.mainContent as CImageGallery).$el.children[0].scrollTop = this.scrollTop.mainContent;
+    (this.$refs.mainContent as CImageGallery).$el.children[0].addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
   },
   deactivated() {
-    (this.$refs.mainContent as any).$el.children[0].removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    (this.$refs.mainContent as CImageGallery).$el.children[0].removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
   },
   methods: {
     ...mapActions({
