@@ -167,17 +167,17 @@ export default Vue.extend({
     contentStyles() {
       if (!this.config.isEnableBleed) {
         return {
-          top: '0px',
-          bottom: '0px',
-          left: '0px',
-          right: '0px'
+          width: this.config.width * this.contentScaleRatio + 'px',
+          height: this.config.height * this.contentScaleRatio + 'px'
         }
       }
       return {
-        top: this.config.bleeds.top * this.contentScaleRatio + 'px',
-        bottom: this.config.bleeds.bottom * this.contentScaleRatio + 'px',
-        left: this.config.bleeds.left * this.contentScaleRatio + 'px',
-        right: this.config.bleeds.right * this.contentScaleRatio + 'px'
+        width: (this.config.width - this.config.bleeds.left - this.config.bleeds.right) * this.contentScaleRatio + 'px',
+        height: (this.config.height - this.config.bleeds.top - this.config.bleeds.bottom) * this.contentScaleRatio + 'px',
+        marginTop: this.config.bleeds.top * this.contentScaleRatio + 'px',
+        marginBottom: this.config.bleeds.bottom * this.contentScaleRatio + 'px',
+        marginLeft: this.config.bleeds.left * this.contentScaleRatio + 'px',
+        marginRight: this.config.bleeds.right * this.contentScaleRatio + 'px'
       }
     },
     bleedLineStyles() {

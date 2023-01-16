@@ -184,18 +184,21 @@ export default Vue.extend({
     mainStyles(): any {
       const { image, color, pageIndex } = this
       const page = pageUtils.getPage(pageIndex)
-      const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
+      const { width, height, bleeds } = pageUtils.getPageSizeWithBleeds(page)
       const res = {
+        width: width + 'px',
+        height: height + 'px',
         opacity: image.config.styles.opacity / 100,
         backgroundColor: color
       }
       if (page.isEnableBleed && bleeds) {
         return {
           ...res,
-          top: -bleeds.top * this.contentScaleRatio + 'px',
-          bottom: -bleeds.bottom * this.contentScaleRatio + 'px',
-          left: -bleeds.left * this.contentScaleRatio + 'px',
-          right: -bleeds.right * this.contentScaleRatio + 'px'
+          transform: `translate(${-bleeds.left * this.contentScaleRatio}px, ${-bleeds.top * this.contentScaleRatio}px) rotate(0deg)`
+          // top: -bleeds.top * this.contentScaleRatio + 'px',
+          // bottom: -bleeds.bottom * this.contentScaleRatio + 'px',
+          // left: -bleeds.left * this.contentScaleRatio + 'px',
+          // right: -bleeds.right * this.contentScaleRatio + 'px'
         }
       }
       return res
@@ -403,9 +406,9 @@ export default Vue.extend({
   // will-change: opacity, transform;
   position: absolute;
   top: 0;
-  left: 0;
   right: 0;
   bottom: 0;
+  left: 0;
   &__picture {
     object-fit: cover;
     width: 100%;
@@ -414,19 +417,17 @@ export default Vue.extend({
   text-align: left;
 
   &__color {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: relative;
+    width: 100%;
+    height: 100%;
   }
 
   &__image{
     position: absolute;
-    top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
   }
 }
 
