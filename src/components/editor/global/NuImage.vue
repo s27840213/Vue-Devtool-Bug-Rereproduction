@@ -170,7 +170,7 @@ export default defineComponent({
       }
     })
 
-    this.canvas = this.$refs.canvas as HTMLCanvasElement | undefined
+    // this.canvas = this.$refs.canvas as HTMLCanvasElement | undefined
   },
   beforeUnmount() {
     if (!this.isBgImgControl) {
@@ -195,8 +195,8 @@ export default defineComponent({
         drawCanvasW: 0,
         drawCanvasH: 0,
         MAXSIZE: 0
-      },
-      canvas: undefined as HTMLCanvasElement | undefined
+      }
+      // canvas: undefined as HTMLCanvasElement | undefined
     }
   },
   watch: {
@@ -234,13 +234,24 @@ export default defineComponent({
         this.handleNewShadowEffect()
       } else {
         /** until the canvas is mounted */
-        this.$nextTick(() => this.handleNewShadowEffect())
+        // this.$nextTick(() => this.handleNewShadowEffect())
+        // eventUtils.on(`canvas-onload_${this.layerIndex}_${this.subLayerIndex || -1}`, () => {
+        //   console.log('emit on', `canvas-onload_${this.layerIndex}_${this.subLayerIndex || -1}`)
+        //   eventUtils.off(`canvas-onload_${this.layerIndex}_${this.subLayerIndex || -1}`)
+        //   console.log(this.$refs.canvas)
+        //   this.handleNewShadowEffect()
+        // })
+        setTimeout(() => this.handleNewShadowEffect(), 0)
       }
     },
     showCanvas(val) {
-      if (val && (this.config as IImage).styles.shadow.srcObj.type) {
+      // if (val && (this.config as IImage).styles.shadow.srcObj.type) {
+      if (val) {
         setTimeout(() => {
           this.handleNewShadowEffect(false)
+          // console.log(`emit to canvas-onload_${this.layerIndex}_${this.subLayerIndex || -1}`)
+          // eventUtils.emit(`canvas-onload_${this.layerIndex}_${this.subLayerIndex || -1}`)
+          // console.log(this.$refs.canvas)
         })
       }
     },
@@ -347,6 +358,7 @@ export default defineComponent({
           return layerUtils.getLayer(pageIndex, layerIndex).id === handleId.layerId
         }
       })()
+      console.log(isCurrShadowEffectApplied, isHandling)
       return isCurrShadowEffectApplied && isHandling
     },
     getImgDimension(): number | string {
@@ -663,7 +675,9 @@ export default defineComponent({
       }
     },
     async handleNewShadowEffect(clearShadowSrc = true) {
-      const { canvas, layerInfo, shadowBuff } = this
+      const { layerInfo, shadowBuff } = this
+      const canvas = this.$refs.canvas as HTMLCanvasElement
+
       if (!canvas || this.isUploadingShadowImg) {
         if (!canvas) {
           imageShadowUtils.setIsProcess(this.layerInfo(), false)
@@ -823,7 +837,8 @@ export default defineComponent({
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
-      const { canvas, shadowBuff } = this
+      const { shadowBuff } = this
+      const canvas = this.$refs.canvas as HTMLCanvasElement
       const layerInfo = this.layerInfo()
       const { drawCanvasW, drawCanvasH } = shadowBuff
       if (!canvas || this.isUploadingShadowImg) {

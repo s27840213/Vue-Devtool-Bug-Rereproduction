@@ -54,23 +54,34 @@ const marks = {
     'finish whole uploading process'
   ]
 }
+
+const markLogs = [] as any
 export const setMark = function (type: 'shadow' | 'imageMatched' | 'floating' | 'upload', i: number) {
-  performance.mark(marks[type][i])
+  markLogs.push({
+    time: Date.now(),
+    log: marks[type][i]
+  })
 }
-export const logMark = function (type: 'shadow' | 'imageMatched' | 'floating' | 'upload', ...logs: string[]) {
-  logs.forEach(log => {
+export const logMark = function (type: 'shadow' | 'imageMatched' | 'floating' | 'upload', ..._logs: string[]) {
+  _logs.forEach(log => {
     logUtils.setLog(log)
   })
+  const logs = [] as any
   for (let i = 0; i < marks[type].length - 1; i++) {
-    performance.measure('FROM: ' + marks[type][i] + '\nTO:   ' + marks[type][i + 1], marks[type][i], marks[type][i + 1])
+    logs.push({
+      log: 'FROM: ' + marks[type][i] + '\nTO:   ' + marks[type][i + 1],
+      duration: markLogs[i + 1].time - markLogs[i].time
+    })
   }
-  performance.measure('FROM: ' + marks[type][0] + '\nTO:   ' + marks[type][marks[type].length - 1], marks[type][0], marks[type][marks[type].length - 1])
-  const measures = performance.getEntriesByType('measure')
-  measures.forEach(measureItem => {
-    const log = `${measureItem.name}\n-> ${measureItem.duration.toFixed(2)} ms`
+  logs.push({
+    log: 'FROM: ' + marks[type][0] + '\nTO:   ' + marks[type][marks[type].length - 1],
+    duration: markLogs[markLogs.length - 1].time - markLogs[0].time
+  })
+  logs.forEach((l: any) => {
+    const log = `${l.log}\n-> ${l.duration.toFixed(2)} ms`
     logUtils.setLog(log)
   })
-  performance.clearMeasures()
+  markLogs.length = 0
 }
 export interface DrawParams {
   drawCanvasW: number,
@@ -414,6 +425,7 @@ class ImageShadowUtils {
   }
 
   drawShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+    console.log('start drawing')
     const canvas = canvas_s[0] || undefined
     const { timeout = DRAWING_TIMEOUT, cb } = params
     const { shadow } = config.styles
@@ -445,6 +457,7 @@ class ImageShadowUtils {
     } else {
       this.shadowHandler(canvas_s, img, config, params)
     }
+    console.log('end drawing')
   }
 
   shadowHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
@@ -479,6 +492,7 @@ class ImageShadowUtils {
       this.setIsProcess(layerInfo, true)
     }
 
+    console.log(1)
     setMark('shadow', 1)
     const isStaticShadow = !shadow.isTransparent
     const spreadF = isStaticShadow ? fieldRange.frame.spread.weighting : Math.min(layerWidth / _imgWidth, layerHeight / _imgHeight)
@@ -501,6 +515,7 @@ class ImageShadowUtils {
     ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
 
     setMark('shadow', 3)
+    console.log(2)
 
     ctxT.globalCompositeOperation = 'source-in'
     ctxT.globalAlpha = opacity * 0.01
@@ -508,6 +523,7 @@ class ImageShadowUtils {
     ctxT.fillRect(0, 0, canvasT.width, canvasT.height)
     ctxT.globalAlpha = 1
     ctxT.globalCompositeOperation = 'source-over'
+    console.log(3)
 
     canvas_s.forEach(c => {
       const ctx = c.getContext('2d') as CanvasRenderingContext2D
@@ -518,9 +534,12 @@ class ImageShadowUtils {
       timeout && this.setIsProcess(layerInfo, false)
     }
     this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
+    console.log(4)
+    const stime = Date.now()
     cb && cb()
     setMark('shadow', 4)
     logMark('shadow')
+    console.log('end drawing in handling', Date.now() - stime)
   }
 
   clearHandler() {
