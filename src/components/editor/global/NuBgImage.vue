@@ -1,7 +1,7 @@
 <template lang="pug">
   div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false")
-    div(class="nu-background-image__color" :style="mainStyles" @pointerdown="setInBgSettingMode")
-    div(class="nu-background-image__image" v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)")
+    div(v-if="isColorBackground" class="nu-background-image__color" :style="mainStyles" @pointerdown="setInBgSettingMode")
+    div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
       div(v-if="isAdjustImage" :style="frameStyles")
         nu-adjust-image(:src="finalSrc"
           @error="onError"
@@ -9,7 +9,6 @@
           :contentScaleRatio="contentScaleRatio")
       img(v-else-if="src" :src="finalSrc"
         draggable="false"
-        :style="imgStyles()"
         class="body"
         @error="onError"
         ref="body")
@@ -423,11 +422,12 @@ export default Vue.extend({
   }
 
   &__image{
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
+    position: relative;
+    >img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
   }
 }
 
