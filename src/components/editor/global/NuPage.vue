@@ -121,7 +121,7 @@
             div(class="scale-container relative"
                 :style="scaleContainerStyles")
               page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
-              div(v-if="isAdmin && enableAdminView" class="layer-num") Layer數量: {{config.layers.length}}
+              div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
               div(v-if="currSelectedIndex !== -1" class="page-control" :style="styles('control')")
                 nu-controller(v-if="currFocusPageIndex === pageIndex" data-identifier="controller"
                   :key="`controller-${currLayer.id}`"
@@ -364,14 +364,19 @@ export default Vue.extend({
     },
     pageRootStyles(): { [index: string]: string | number } {
       let transform = ''
+      let margin = ''
+      let position = 'relative'
       if (generalUtils.isTouchDevice()) {
         transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
+        position = 'absolute'
+      } else {
+        margin = this.isDetailPage ? '0px auto' : '25px auto'
       }
       return {
-        ...this.sizeStyles,
+        position,
         transform,
+        margin,
         ...this.sizeStyles
-        // margin: this.isDetailPage ? '0px auto' : '25px auto'
       }
     },
     isOutOfBound(): boolean {
@@ -887,9 +892,6 @@ export default Vue.extend({
 }
 
 .page-wrapper {
-  position: absolute;
-  // top: 0;
-  // left: 0;
 }
 
 .layer-num {
