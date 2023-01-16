@@ -795,11 +795,7 @@ class DesignUtils {
       path,
       folderName
     }
-    const route = router.resolve({
-      name: 'Editor',
-      query
-    })
-    router.push(route.href)
+    router.push({ name: 'Editor', query })
   }
 
   // Below function is used to update the page
@@ -840,7 +836,7 @@ class DesignUtils {
       query.unit = unit
       if (path) query.path = path
       if (folderName) query.folderName = folderName
-      router.replace({
+      router.push({
         query,
         path: to?.path ?? router.currentRoute.value.path
       })
