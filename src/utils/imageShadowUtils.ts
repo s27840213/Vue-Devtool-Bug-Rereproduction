@@ -54,23 +54,34 @@ const marks = {
     'finish whole uploading process'
   ]
 }
+
+const markLogs = [] as any
 export const setMark = function (type: 'shadow' | 'imageMatched' | 'floating' | 'upload', i: number) {
-  performance.mark(marks[type][i])
+  markLogs.push({
+    time: Date.now(),
+    log: marks[type][i]
+  })
 }
-export const logMark = function (type: 'shadow' | 'imageMatched' | 'floating' | 'upload', ...logs: string[]) {
-  logs.forEach(log => {
+export const logMark = function (type: 'shadow' | 'imageMatched' | 'floating' | 'upload', ..._logs: string[]) {
+  _logs.forEach(log => {
     logUtils.setLog(log)
   })
+  const logs = [] as any
   for (let i = 0; i < marks[type].length - 1; i++) {
-    performance.measure('FROM: ' + marks[type][i] + '\nTO:   ' + marks[type][i + 1], marks[type][i], marks[type][i + 1])
+    logs.push({
+      log: 'FROM: ' + marks[type][i] + '\nTO:   ' + marks[type][i + 1],
+      duration: markLogs[i + 1].time - markLogs[i].time
+    })
   }
-  performance.measure('FROM: ' + marks[type][0] + '\nTO:   ' + marks[type][marks[type].length - 1], marks[type][0], marks[type][marks[type].length - 1])
-  const measures = performance.getEntriesByType('measure')
-  measures.forEach(measureItem => {
-    const log = `${measureItem.name}\n-> ${measureItem.duration.toFixed(2)} ms`
+  logs.push({
+    log: 'FROM: ' + marks[type][0] + '\nTO:   ' + marks[type][marks[type].length - 1],
+    duration: markLogs[markLogs.length - 1].time - markLogs[0].time
+  })
+  logs.forEach((l: any) => {
+    const log = `${l.log}\n-> ${l.duration.toFixed(2)} ms`
     logUtils.setLog(log)
   })
-  performance.clearMeasures()
+  markLogs.length = 0
 }
 export interface DrawParams {
   drawCanvasW: number,
@@ -526,8 +537,8 @@ class ImageShadowUtils {
     console.log(4)
     const stime = Date.now()
     cb && cb()
-    // setMark('shadow', 4)
-    // logMark('shadow')
+    setMark('shadow', 4)
+    logMark('shadow')
     console.log('end drawing in handling', Date.now() - stime)
   }
 
