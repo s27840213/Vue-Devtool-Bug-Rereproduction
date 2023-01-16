@@ -199,12 +199,14 @@ export default defineComponent({
     allDesigns() {
       this.$emit('clearSelection')
     },
-    currLocation() {
+    currLocation(newVal) {
       this.isFolderNameMouseOver = false
       this.isFolderNameEditing = false
       this.isFolderMenuOpen = false
-      this.refreshItems()
-      this.refreshItemCount()
+      if (newVal.startsWith('f:')) {
+        this.refreshItems()
+        this.refreshItemCount()
+      }
     }
   },
   computed: {

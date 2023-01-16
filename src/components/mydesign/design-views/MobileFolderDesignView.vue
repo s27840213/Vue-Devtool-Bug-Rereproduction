@@ -44,8 +44,10 @@ export default defineComponent({
     allFolders() {
       this.$emit('clearSelection')
     },
-    currLocation() {
-      this.refreshItems()
+    currLocation(newVal) {
+      if (newVal.startsWith('f:')) {
+        this.refreshItems()
+      }
     }
   },
   computed: {
