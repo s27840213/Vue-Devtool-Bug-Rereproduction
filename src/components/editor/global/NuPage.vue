@@ -413,7 +413,7 @@ export default defineComponent({
       // For those using keyCode in their codebase, we recommend converting them to their kebab-cased named equivalents.
       // The keys for some punctuation marks can just be included literally. e.g. For the , key:
       // Limitations of the syntax prevent certain characters from being matched, such as ", ', /, =, >, and .. For those characters you should check event.key inside the listener instead.
-      if (e.key === '=' && e.ctrlKey) {
+      if (e.key === '=' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
         e.stopPropagation()
         ShortcutUtils.zoomIn()
