@@ -260,6 +260,7 @@ export default defineComponent({
       this.pageState.modules.snapUtils.pageIndex = val
     },
     isOutOfBound(val) {
+      console.log('is out of bound')
       if (val && this.currFunctionPanelType === FunctionPanelType.photoShadow && layerUtils.pageIndex === this.pageIndex) {
         GroupUtils.deselect()
         const { pageId, layerId, subLayerId } = this.handleId
@@ -298,7 +299,11 @@ export default defineComponent({
       isProcessingShadow: 'shadow/isProcessing',
       contentScaleRatio: 'getContentScaleRatio',
       pagesLength: 'getPagesLength',
-      showAllAdminTool: 'user/showAllAdminTool'
+      showAllAdminTool: 'user/showAllAdminTool',
+      useMobileEditor: 'getUseMobileEditor',
+      currCardIndex: 'mobileEditor/getCurrCardIndex',
+      topBound: 'page/getTopBound',
+      bottomBound: 'page/getBottomBound'
     }),
     config(): IPage {
       return this.pageState.config
@@ -356,7 +361,8 @@ export default defineComponent({
       }
     },
     isOutOfBound(): boolean {
-      return pageUtils.isOutOfBound(this.pageIndex)
+      return this.isMobile && !this.isDetailPage ? (this.pageIndex <= this.currCardIndex - 2 || this.pageIndex >= this.currCardIndex + 2)
+        : this.pageIndex <= (this.topBound - 4) || this.pageIndex >= (this.bottomBound + 4)
     },
     hasEditingText(): boolean {
       const page = this.config as IPage

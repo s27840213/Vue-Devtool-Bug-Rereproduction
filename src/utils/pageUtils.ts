@@ -108,14 +108,18 @@ class PageUtils {
     }
   }
 
-  topBound: number
-  bottomBound: number
+  get topBound() {
+    return store.getters['page/getTopBound']
+  }
+
+  get bottomBound() {
+    return store.getters['page/getBottomBound']
+  }
+
   mobileMinScaleRatio: number
   isSwitchingToEditor: boolean
 
   constructor() {
-    this.topBound = -1
-    this.bottomBound = Number.MAX_SAFE_INTEGER
     this.mobileMinScaleRatio = 0
     this.isSwitchingToEditor = false
   }
@@ -414,8 +418,11 @@ class PageUtils {
     }
 
     if (!preventFocus) this.activeMiddlemostPage()
-    this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
-    this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
+
+    store.commit('page/SET_STATE', {
+      topBound: this.findBoundary(pages, containerRect, targetIndex - 1, true),
+      bottomBound: this.findBoundary(pages, containerRect, targetIndex + 1, false)
+    })
   }
 
   findBoundary(posArr: Array<{ top: number, bottom: number }>, containerRect: DOMRect, currIndex: number, toTop: boolean): number {
