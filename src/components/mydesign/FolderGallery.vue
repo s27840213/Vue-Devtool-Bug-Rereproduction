@@ -48,7 +48,7 @@ div(v-if="allFolders.length > 0 || isFoldersLoading" class="folder-gallery")
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import { IFolder, IQueueItem } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
+import designUtils, { FOLDER_MENU_EVENTS, IFolderMenuEvents } from '@/utils/designUtils'
 import FolderItem from '@/components/mydesign/FolderItem.vue'
 
 export default defineComponent({
@@ -118,7 +118,7 @@ export default defineComponent({
     handleFolderMenuAction(icon: string, folder: IFolder) {
       if (this.useDelete && icon === 'trash') icon = 'delete'
       designUtils.dispatchFolderMenuAction(icon, folder, (extraEvent) => {
-        if (extraEvent) {
+        if (extraEvent && FOLDER_MENU_EVENTS.includes(extraEvent.event as IFolderMenuEvents)) {
           this.$emit('menuAction', extraEvent)
         }
       })
@@ -200,6 +200,52 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     width: 100%;
+  }
+}
+
+.folder-menu-item {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 5px;
+  padding: 6px 0;
+  cursor: pointer;
+  &:hover {
+    background-color: setColor(gray-5);
+  }
+  &__icon {
+    margin-left: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 10px;
+    height: 10px;
+  }
+  &__text {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    height: 12px;
+    transform: scale(0.8);
+    transform-origin: left;
+    > span {
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 12px;
+      color: setColor(gray-2);
+      white-space: nowrap;
+    }
+  }
+  &__right {
+    position: absolute;
+    right: 3px;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-50%);
   }
 }
 </style>

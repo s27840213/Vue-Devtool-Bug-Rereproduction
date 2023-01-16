@@ -153,7 +153,6 @@ export default defineComponent({
           this.$router.push({ name: pageName })
         }
       } else {
-        // this.$router.push({ path: pageName })
         this.$router.push({ name: 'Home' })
       }
       // ----------------------

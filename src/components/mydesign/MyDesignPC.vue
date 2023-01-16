@@ -128,7 +128,7 @@ div(class="my-design-pc")
     div(v-if="confirmMessage === 'delete-all'" class="dim-background" @click="closeConfirmMessage")
       div(class="delete-all-message" @click.stop)
         div(class="delete-all-message__img")
-          img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55px" height="57px")
+          img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55" height="57")
         div(class="delete-all-message__text")
           span {{$t('NN0244')}}
         div(class="delete-all-message__buttons")
@@ -139,7 +139,7 @@ div(class="my-design-pc")
     div(v-else-if="confirmMessage === 'delete-folder'" class="dim-background" @click="closeConfirmMessage")
       div(class="delete-folder-message" @click.stop)
         div(class="delete-folder-message__img")
-          img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="76px" height="79px")
+          img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="76" height="79")
         div
           div(class="delete-folder-message__text")
             span(class="first-line") {{$t('NN0245')}}
@@ -152,7 +152,7 @@ div(class="my-design-pc")
     div(v-else-if="confirmMessage === 'delete-forever'" class="dim-background" @click="closeConfirmMessage")
       div(class="delete-forever-message" @click.stop)
         div(class="delete-forever-message__img")
-          img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55px" height="57px")
+          img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55" height="57")
         div(class="delete-forever-message__text")
           span {{$tc('NN0202', isMultiSelected ? 2 : 1)}}
         div(class="delete-forever-message__description")
@@ -361,12 +361,12 @@ export default defineComponent({
     messageDestName(item: IQueueItem): string {
       return item.dest ?? ''
     },
-    showMessage(queue: IQueueItem[], flag: string, recordTimer: boolean) {
+    showMessage(queue: IQueueItem[], flag: 'isShowMoveMessage' | 'isShowDeleteMessage' | 'isShowRecoverMessage', recordTimer: boolean) {
       const item = queue[0]
       if (item) {
-        // this.$set(this, flag, true)
+        this[flag] = true
         const timer = setTimeout(() => {
-          // this.$set(this, flag, false)
+          this[flag] = false
           setTimeout(() => {
             queue.shift()
             this.showMessage(queue, flag, recordTimer)

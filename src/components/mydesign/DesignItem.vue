@@ -29,8 +29,8 @@ div(class="design-item")
           class="design-item__checkbox-checked"
           @click.stop="emitDeselect")
           svg-icon(iconName="done"
-                  iconWidth="10px"
-                  iconHeight="8px"
+                  iconWidth="20px"
+                  iconHeight="20px"
                   iconColor="white")
         div(v-if="!isSelected && (isMouseOver || isAnySelected)"
           class="design-item__checkbox"
@@ -339,7 +339,7 @@ export default defineComponent({
         this.$emit(this.isSelected ? 'deselect' : 'select')
         return
       }
-      if (this.unenterable && this.isTempDesign) return
+      if (this.unenterable || this.isTempDesign) return
       designUtils.setDesign(this.config as IDesign)
     },
     handleCarouselIdx(idx: number) {

@@ -10,7 +10,7 @@ import pageUtils from './pageUtils'
 import themeUtils from './themeUtils'
 import uploadUtils from './uploadUtils'
 import resizeUtils from './resizeUtils'
-import Vue, { nextTick } from 'vue'
+import { nextTick } from 'vue'
 import i18n from '@/i18n'
 import stepsUtils from './stepsUtils'
 import _ from 'lodash'
@@ -22,13 +22,25 @@ interface Item {
   lastUpdatedTime: string
 }
 
+export const DESIGN_MENU_EVENTS = [
+  'deleteItem', 'deleteForever',
+  'recoverItem', 'moveDesignToFolder', 'downloadDesign',
+  'favorDesign', 'unfavorDesign', 'rootDesign'
+] as const
+
+export type IDesignMenuEvents = typeof DESIGN_MENU_EVENTS[number]
+
+export const FOLDER_MENU_EVENTS = ['deleteFolderForever', 'recoverItem'] as const
+
+export type IFolderMenuEvents = typeof FOLDER_MENU_EVENTS[number]
+
 class DesignUtils {
   ROOT = '$ROOT$'
-  ROOT_DISPLAY = i18n.global.t('NN0187')
   event = new EventEmitter()
   eventHash: { [key: string]: () => void } = {}
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get teamId(): string { return store.getters['user/getTeamId'] }
+  get ROOT_DISPLAY(): string { return i18n.global.t('NN0187') }
 
   on(type: string, callback: () => void) {
     if (this.eventHash[type]) {

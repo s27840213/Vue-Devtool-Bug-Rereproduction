@@ -43,7 +43,7 @@
     "click-outside-vue3": "^4.0.1",
     "core-js": "^3.8.3",
     "dotenv": "^8.2.0",
-    "floating-vue": "^1.0.0-beta.5",
+    "floating-vue": "^2.0.0-beta.20",
     "fontfaceobserver": "^2.1.0",
     "html2pdf.js": "^0.10.1",
     "lottie-vuejs": "^0.4.0",

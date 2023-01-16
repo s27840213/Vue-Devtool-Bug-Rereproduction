@@ -11,12 +11,13 @@ div(class="favorite-design-view")
 </template>
 
 <script lang="ts">
-import designUtils from '@/utils/designUtils'
+import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@/utils/designUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 
 export default defineComponent({
+  emits: ['clearSelection', ...DESIGN_MENU_EVENTS],
   components: {
     DesignGallery
   },
@@ -47,7 +48,7 @@ export default defineComponent({
       fetchFavoriteDesigns: 'fetchFavoriteDesigns',
       fetchMoreFavoriteDesigns: 'fetchMoreFavoriteDesigns'
     }),
-    handleDesignMenuAction(extraEvent: { event: string, payload: any }) {
+    handleDesignMenuAction(extraEvent: { event: IDesignMenuEvents, payload: any }) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
     },

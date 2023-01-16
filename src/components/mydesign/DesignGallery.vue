@@ -49,7 +49,7 @@ div(v-if="allDesigns.length > 0 || isDesignsLoading" class="design-gallery")
 
 <script lang="ts">
 import { IDesign } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
+import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@/utils/designUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import DesignItem from '@/components/mydesign/DesignItem.vue'
@@ -129,7 +129,7 @@ export default defineComponent({
     handleDesignMenuAction(icon: string, design: IDesign) {
       if (this.useDelete && icon === 'trash') icon = 'delete'
       designUtils.dispatchDesignMenuAction(icon, design, (extraEvent) => {
-        if (extraEvent) {
+        if (extraEvent && DESIGN_MENU_EVENTS.includes(extraEvent.event as IDesignMenuEvents)) {
           this.$emit('menuAction', extraEvent)
         }
       })
