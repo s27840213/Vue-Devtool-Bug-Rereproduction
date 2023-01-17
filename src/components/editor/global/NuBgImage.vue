@@ -11,7 +11,7 @@
         class="body"
         @error="onError"
         ref="body")
-    div(:style="filterContainerStyles()" class="filter-container")
+    div(v-show="!(isBgImgCtrl && imgControlPageIdx === pageIndex)" :style="filterContainerStyles()" class="filter-container")
       component(v-for="(elm, idx) in cssFilterElms"
         :key="`cssFilter${idx}`"
         :is="elm.tag"
@@ -274,7 +274,12 @@ export default Vue.extend({
       return this.stylesConverter()
     },
     filterContainerStyles() {
-      return { margin: this.padding }
+      const { width, height } = pageUtils.getPage(this.pageIndex)
+      return {
+        width: `${width * this.contentScaleRatio}px`,
+        height: `${height * this.contentScaleRatio}px`,
+        transform: `translate(0px, -${this.imageSize.height}px)`
+      }
     },
     async previewAsLoading() {
       let isPrimaryImgLoaded = false
@@ -410,7 +415,7 @@ export default Vue.extend({
 }
 
 .filter-container {
-  position: absolute;
+  position: relative;
   top: 0;
   right: 0;
   bottom: 0;
