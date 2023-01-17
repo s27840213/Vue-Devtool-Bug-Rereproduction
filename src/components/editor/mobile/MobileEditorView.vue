@@ -6,7 +6,6 @@
       @scroll="!inBgRemoveMode ? scrollUpdate() : null"
       @pointerdown="selectStart"
       @mousewheel="handleWheel"
-      @pinch="pinchHandler"
       ref="editorView")
     div(class="editor-view__abs-container"
         :style="absContainerStyle")
@@ -19,6 +18,7 @@
             :key="`page-${index}`"
             class="editor-view__card"
             :style="cardStyle"
+            @pinch="pinchHandler"
             @pointerdown.self.prevent="outerClick($event)"
             ref="card")
           nu-page(
@@ -151,9 +151,28 @@ export default Vue.extend({
 
     if (generalUtils.isTouchDevice()) {
       pageUtils.mobileMinScaleRatio = this.isDetailPage ? 20 : this.tmpScaleRatio
-      console.log(pageUtils.getPages[0].width * this.pageUtils.mobileMinScaleRatio * 0.01)
       pageUtils.originPageSize.width = pageUtils.getPages[0].width * this.pageUtils.mobileMinScaleRatio * 0.01
       pageUtils.originPageSize.height = pageUtils.getPages[0].height * this.pageUtils.mobileMinScaleRatio * 0.01
+
+      const editorView = this.$refs.editorView as HTMLElement
+      const rect = editorView.getBoundingClientRect()
+      pageUtils.originEditorSize.width = rect.width
+      pageUtils.originEditorSize.height = rect.height
+
+      let card = this.$refs.card as HTMLElement | HTMLElement[]
+      if (Array.isArray(card)) card = card[0]
+      const cardRect = card.getBoundingClientRect()
+      const padding = +card.style.padding.slice(0, -2)
+      pageUtils.pageEventPosOffset.x = cardRect.x + padding
+      pageUtils.pageEventPosOffset.y = cardRect.y + padding
+
+      pageUtils.originPageY = (pageUtils.originEditorSize.height - (pageUtils.getCurrPage.width * (pageUtils.scaleRatio * 0.01))) * 0.5 - padding
+      pageUtils.getPages.forEach((_, i) => {
+        pageUtils.updatePagePos(i, {
+          x: 0,
+          y: pageUtils.originPageY
+        })
+      })
     }
 
     this.$nextTick(() => {
@@ -364,6 +383,7 @@ export default Vue.extend({
       }
     },
     handleWheel(e: WheelEvent) {
+      console.log(e.clientX, e.clientY)
       if ((e.metaKey || e.ctrlKey) && !this.handleWheelTransition) {
         if (!store.state.isPageScaling) {
           store.commit('SET_isPageScaling', true)
@@ -371,7 +391,6 @@ export default Vue.extend({
         clearTimeout(this.hanleWheelTimer)
         this.hanleWheelTimer = setTimeout(() => {
           store.commit('SET_isPageScaling', false)
-          console.log('reach limit', pageUtils.mobileMinScaleRatio)
           if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
             const page = document.getElementById(`nu-page_${layerUtils.pageIndex}`) as HTMLElement
             page.style.transition = '0.3s linear'
@@ -381,7 +400,7 @@ export default Vue.extend({
               page.style.transition = ''
               this.handleWheelTransition = false
             }, 500)
-            pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
+            pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: pageUtils.originPageY })
           }
         }, 500)
         const ratio = this.pageScaleRatio * (1 - e.deltaY * 0.005)
@@ -393,6 +412,7 @@ export default Vue.extend({
       }
     },
     pinchHandler(event: AnyTouchEvent) {
+      console.log(event.x, event.y, pageUtils.getCurrPage.x, pageUtils.getCurrPage.y)
       switch (event.phase) {
         /**
          * @Note the very first event won't fire start phase, it's very strange and need to pay attention
@@ -410,6 +430,7 @@ export default Vue.extend({
             this.isScaling = true
             store.commit('SET_isPageScaling', true)
           }
+          console.log(event.scale)
           window.requestAnimationFrame(() => {
             const limitMultiplier = 4
             if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
@@ -431,7 +452,7 @@ export default Vue.extend({
                 const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
                 page.style.transition = '0.2s linear'
                 this.handleWheelTransition = true
-                pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
+                pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: pageUtils.originPageY })
                 this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
                 setTimeout(() => {
                   page.style.transition = ''
@@ -554,8 +575,8 @@ $REULER_SIZE: 20px;
     width: 100%;
     touch-action: none;
     box-sizing: border-box;
-    display: flex;
-    align-items: center;
+    // display: flex;
+    // align-items: center;
     // justify-content: center;
     @include no-scrollbar;
     // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container

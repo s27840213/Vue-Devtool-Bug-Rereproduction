@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="header-bar" @pointerdown.stop)
+  div(class="header-bar" ref="header-bar" @pointerdown.stop)
     div(class="header-bar__left")
       div(class="header-bar__feature-icon mr-25"
           @pointerdown="backBtnAction()")
