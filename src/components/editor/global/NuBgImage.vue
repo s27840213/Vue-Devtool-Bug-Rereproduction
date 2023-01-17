@@ -1,22 +1,22 @@
 <template lang="pug">
   div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles")
     div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
-      //- nu-adjust-image(v-if="isAdjustImage"
-      //-   :src="finalSrc"
-      //-   :styles="adjustImgStyles"
-      //-   :contentScaleRatio="contentScaleRatio"
-      //-   @error="onError")
-      img(
+      nu-adjust-image(v-if="isAdjustImage"
+        :src="finalSrc"
+        :styles="adjustImgStyles"
+        :contentScaleRatio="contentScaleRatio"
+        @error="onError")
+      img(v-else-if="src"
         :src="finalSrc"
         draggable="false"
         class="body"
         ref="body"
         @error="onError")
-    div(:style="filterContainerStyles()" class="filter-container")
-      component(v-for="(elm, idx) in cssFilterElms"
-        :key="`cssFilter${idx}`"
-        :is="elm.tag"
-        v-bind="elm.attrs")
+    //- div(:style="filterContainerStyles()" class="filter-container")
+    //-   component(v-for="(elm, idx) in cssFilterElms"
+    //-     :key="`cssFilter${idx}`"
+    //-     :is="elm.tag"
+    //-     v-bind="elm.attrs")
 </template>
 
 <script lang="ts">
