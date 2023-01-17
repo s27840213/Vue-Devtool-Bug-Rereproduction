@@ -1,7 +1,7 @@
 <template lang="pug">
   div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles")
     div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
-      div(v-if="isAdjustImage" :style="frameStyles")
+      div(v-if="isAdjustImage")
         nu-adjust-image(:src="finalSrc"
           @error="onError"
           :styles="adjustImgStyles"
@@ -190,20 +190,14 @@ export default Vue.extend({
         .values(styles.adjust || {})
         .some(val => typeof val === 'number' && val !== 0)
     },
-    frameStyles(): { [key: string]: string | number } {
-      const { flipStyles } = this
-      return {
-        width: `${this.imageSize.width}px`,
-        height: `${this.imageSize.height}px`,
-        transform: `translate(${this.imageSize.x}px, ${this.imageSize.y}px) ${flipStyles.transform}`
-      }
-    },
     adjustImgStyles(): { [key: string]: string | number } {
       return Object.assign(generalUtils.deepCopy(this.image.config.styles), {
         width: this.getPageSize(this.pageIndex).width,
         height: this.getPageSize(this.pageIndex).height,
-        imgX: this.image.posX,
-        imgY: this.image.posY
+        imgX: this.imageSize.x,
+        imgY: this.imageSize.y,
+        imgWidth: this.imageSize.width,
+        imgHeight: this.imageSize.height
       })
     },
     cssFilterElms(): any[] {
