@@ -11,11 +11,11 @@
         class="body"
         @error="onError"
         ref="body")
-    div(v-show="!(isBgImgCtrl && imgControlPageIdx === pageIndex)" :style="filterContainerStyles()" class="filter-container")
-      component(v-for="(elm, idx) in cssFilterElms"
-        :key="`cssFilter${idx}`"
-        :is="elm.tag"
-        v-bind="elm.attrs")
+      div(v-show="!(isBgImgCtrl && imgControlPageIdx === pageIndex)" :style="filterContainerStyles()" class="filter-container")
+        component(v-for="(elm, idx) in cssFilterElms"
+          :key="`cssFilter${idx}`"
+          :is="elm.tag"
+          v-bind="elm.attrs")
 </template>
 
 <script lang="ts">
@@ -278,7 +278,7 @@ export default Vue.extend({
       return {
         width: `${width * this.contentScaleRatio}px`,
         height: `${height * this.contentScaleRatio}px`,
-        transform: `translate(0px, -${this.imageSize.height}px)`
+        transform: `translate(${-this.imageSize.x}px, ${-this.imageSize.y}px)`
       }
     },
     async previewAsLoading() {
