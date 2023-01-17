@@ -94,7 +94,7 @@ export default defineComponent({
           layerId: this.primaryLayer ? this.primaryLayer.id : this.config.id,
           subLayerId: this.primaryLayer ? this.config.id : undefined
         })
-        const hasPrimaryLayer = typeof this.primaryLayerIndex !== 'undefined' && this.primaryLayerIndex !== -1
+        const hasPrimaryLayer = this.primaryLayerIndex !== -1
         imageShadowUtils.updateShadowSrc({
           pageIndex: this.pageIndex,
           layerIndex: hasPrimaryLayer ? this.primaryLayerIndex : this.layerIndex,
@@ -177,14 +177,14 @@ export default defineComponent({
     angleInRad(): number {
       const { type, styles: primaryStyles } = LayerUtils.getCurrLayer
       const { rotate } = this.config.styles
-      if (typeof this.primaryLayerIndex !== 'undefined') {
+      if (this.primaryLayerIndex !== -1) {
         return (primaryStyles.rotate + (type === 'group' ? rotate : 0)) * Math.PI / 180
       } else {
         return this.getLayerRotate * Math.PI / 180
       }
     },
     primaryType(): string {
-      if (typeof this.primaryLayerIndex !== 'undefined') {
+      if (this.primaryLayerIndex !== -1) {
         return LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).type
       } else {
         return ''
@@ -192,7 +192,7 @@ export default defineComponent({
     },
     primaryScale(): number {
       const currLayer = LayerUtils.getCurrLayer
-      if (typeof this.primaryLayerIndex !== 'undefined' && ['group', 'frame'].includes(currLayer.type)) {
+      if (this.primaryLayerIndex !== -1 && ['group', 'frame'].includes(currLayer.type)) {
         return LayerUtils.getCurrLayer.styles.scale
       } else {
         return 1
@@ -262,7 +262,7 @@ export default defineComponent({
       return imgControllerPos
     },
     updateLayerProps(prop: { [key: string]: string | boolean | number }) {
-      if (typeof this.primaryLayerIndex !== 'undefined') {
+      if (this.primaryLayerIndex !== -1) {
         switch (LayerUtils.getCurrLayer.type) {
           case 'frame':
             FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, prop)
@@ -275,7 +275,7 @@ export default defineComponent({
       }
     },
     updateLayerStyles(prop: { [key: string]: number }) {
-      if (typeof this.primaryLayerIndex !== 'undefined') {
+      if (this.primaryLayerIndex !== -1) {
         switch (LayerUtils.getCurrLayer.type) {
           case 'frame':
             FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, prop)
@@ -316,7 +316,7 @@ export default defineComponent({
       offsetPos.y = (offsetPos.y * _layerScale) * (100 / this.scaleRatio)
 
       const currLayer = LayerUtils.getCurrLayer
-      if (typeof this.primaryLayerIndex !== 'undefined' && currLayer.type === 'group') {
+      if (this.primaryLayerIndex !== -1 && currLayer.type === 'group') {
         const primaryScale = LayerUtils.getCurrLayer.styles.scale
         offsetPos.x /= primaryScale
         offsetPos.y /= primaryScale
@@ -377,7 +377,7 @@ export default defineComponent({
       const angleInRad = this.angleInRad
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
-      if (typeof this.primaryLayerIndex !== 'undefined' && currLayer.type === 'group') {
+      if (this.primaryLayerIndex !== -1 && currLayer.type === 'group') {
         const primaryScale = currLayer.styles.scale
         diff.offsetX /= primaryScale
         diff.offsetY /= primaryScale

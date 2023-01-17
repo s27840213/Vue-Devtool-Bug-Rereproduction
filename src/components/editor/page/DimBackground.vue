@@ -22,6 +22,7 @@ div(v-if="isImgCtrl")
     nu-img-controller(:layerIndex="layerIndex"
                       :pageIndex="pageIndex"
                       :contentScaleRatio="contentScaleRatio"
+                      :primaryLayerIndex="-1"
                       :primaryLayer="primaryLayer"
                       :config="image")
 div(v-else-if="isBgImgCtrl")

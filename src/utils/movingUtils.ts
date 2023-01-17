@@ -321,7 +321,7 @@ export class MovingUtils {
     const updateConifgData = {} as Partial<IShape | IText | IImage | IGroup>
     if (!this.isDragging) {
       updateConifgData.dragging = true
-      this.component && this.component.$emit('isDragging', this.layerIndex)
+      // this.component && this.component.$emit('isDragging', this.layerIndex)
     }
     if (this.isActive) {
       if (generalUtils.getEventType(e) !== 'touch') {
@@ -499,7 +499,7 @@ export class MovingUtils {
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false
       })
-      this.component && this.component.$emit('isDragging', -1)
+      // this.component && this.component.$emit('isDragging', -1)
     }
 
     this.isDoingGestureAction = false
