@@ -1107,7 +1107,7 @@ export default defineComponent({
   transition: 0.3s ease;
 }
 
-.slide-fade-enter,
+.slide-fade-enter-from,
 .slide-fade-leave-to {
   transform: translateY(-10px);
   opacity: 0;

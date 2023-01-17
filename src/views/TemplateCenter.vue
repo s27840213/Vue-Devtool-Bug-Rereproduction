@@ -1123,7 +1123,7 @@ body {
     transition: 0.3s ease;
   }
 
-  &-enter,
+  &-enter-from,
   &-leave-to {
     transform: scale(0.8);
     opacity: 0;
@@ -1136,7 +1136,7 @@ body {
     transition: 0.3s ease;
   }
 
-  &-enter,
+  &-enter-from,
   &-leave-to {
     transform: translate(-50%, -50%) scale(0.8);
     opacity: 0;
@@ -1149,7 +1149,7 @@ body {
     transition: 0.3s ease;
   }
 
-  &-enter,
+  &-enter-from,
   &-leave-to {
     left: 100%;
   }
@@ -1161,7 +1161,7 @@ body {
     transition: 0.3s ease;
   }
 
-  &-enter,
+  &-enter-from,
   &-leave-to {
     opacity: 0;
     transform: translateY(-100px);

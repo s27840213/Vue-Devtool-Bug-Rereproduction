@@ -354,7 +354,7 @@ export default defineComponent({
   &-leave-active {
     transition: 0.2s;
   }
-  &-enter,
+  &-enter-from,
   &-leave-to {
     opacity: 0;
   }

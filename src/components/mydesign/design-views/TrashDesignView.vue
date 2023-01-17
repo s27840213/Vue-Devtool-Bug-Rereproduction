@@ -177,16 +177,16 @@ export default defineComponent({
   &-enter-active, &-leave-active {
     transition: .2s;
   }
-  &-enter, &-leave-to {
+  &-enter-from, &-leave-to {
     opacity: 0;
   }
 }
 
-.slide-fade-img-enter, .slide-fade-img-leave-to {
+.slide-fade-img-enter-from, .slide-fade-img-leave-to {
   left: 100%
 }
 
-.slide-fade-text-enter, .slide-fade-text-leave-to {
+.slide-fade-text-enter-from, .slide-fade-text-leave-to {
   left: calc(100% + 9px);
 }
 </style>

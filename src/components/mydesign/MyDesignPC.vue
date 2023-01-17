@@ -1033,7 +1033,7 @@ $messageTypes: delete-all, delete-folder, delete-forever;
   transition: 0.5s ease;
 }
 
-.slide-fade-enter,
+.slide-fade-enter-from,
 .slide-fade-leave-to {
   transform: translateY(-5px);
   opacity: 0;
@@ -1044,7 +1044,7 @@ $messageTypes: delete-all, delete-folder, delete-forever;
   transition: 0.2s;
 }
 
-.slide-down-fade-enter,
+.slide-down-fade-enter-from,
 .slide-down-fade-leave-to {
   top: -55px;
   opacity: 0;
@@ -1055,7 +1055,7 @@ $messageTypes: delete-all, delete-folder, delete-forever;
   transition: 0.05s;
 }
 
-.scale-fade-enter,
+.scale-fade-enter-from,
 .scale-fade-leave-to {
   opacity: 0;
   transform: scale(0.8);
@@ -1067,18 +1067,18 @@ $messageTypes: delete-all, delete-folder, delete-forever;
   &-leave-active {
     transition: 0.2s;
   }
-  &-enter,
+  &-enter-from,
   &-leave-to {
     opacity: 0;
   }
 }
 
-.slide-fade-img-enter,
+.slide-fade-img-enter-from,
 .slide-fade-img-leave-to {
   left: 100%;
 }
 
-.slide-fade-text-enter,
+.slide-fade-text-enter-from,
 .slide-fade-text-leave-to {
   left: calc(100% + 9px);
 }

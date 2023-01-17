@@ -301,7 +301,7 @@ export default defineComponent({
     padding-top: calc(100% - 2px);
   }
 
-  &-enter,
+  &-enter-from,
   &-leave-to {
     transform: translateY(-20px);
     opacity: 0;

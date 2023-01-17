@@ -310,11 +310,11 @@ export default defineComponent({
   &-enter-active,
   &-leave-active {
     &:not(.no-trans) {
-      transition: 0.1s ease;
+      transition: 0.3s ease;
     }
   }
 
-  &-enter,
+  &-enter-from,
   &-leave-to {
     &:not(.no-trans) {
       transform: translateY(-30%);

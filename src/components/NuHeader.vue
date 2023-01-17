@@ -400,7 +400,7 @@ export default defineComponent({
   &-leave-active {
     transition: 0.1s;
   }
-  &-enter,
+  &-enter-from,
   &-leave-to {
     opacity: 0;
   }
@@ -410,7 +410,7 @@ export default defineComponent({
   &-leave-active {
     transition: 0.5s;
   }
-  &-enter,
+  &-enter-from,
   &-leave-to {
     opacity: 0;
   }

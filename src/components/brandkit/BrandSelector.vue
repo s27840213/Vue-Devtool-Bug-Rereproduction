@@ -443,7 +443,7 @@ export default defineComponent({
   transition: 0.1s;
 }
 
-.fade-slide-enter,
+.fade-slide-enter-from,
 .fade-slide-leave-to {
   opacity: 0;
   transform: translate(0, -5px);

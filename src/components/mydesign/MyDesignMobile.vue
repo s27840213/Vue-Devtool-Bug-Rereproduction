@@ -810,7 +810,7 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
   transition: 0.2s;
 }
 
-.slide-full-enter,
+.slide-full-enter-from,
 .slide-full-leave-to {
   transform: translateY(100%);
 }
@@ -823,7 +823,7 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
   transition: 0.5s ease;
 }
 
-.slide-fade-enter,
+.slide-fade-enter-from,
 .slide-fade-leave-to {
   top: -25%;
   opacity: 0;

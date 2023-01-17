@@ -394,7 +394,7 @@ $maxLevels: 5;
   &-enter-active, &-leave-active {
     transition: .2s;
   }
-  &-enter, &-leave-to {
+  &-enter-from, &-leave-to {
     opacity: 0;
   }
 }

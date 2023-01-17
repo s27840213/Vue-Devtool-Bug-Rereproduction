@@ -292,7 +292,7 @@ export default defineComponent({
     }
   }
 
-  &-enter,
+  &-enter-from,
   &-leave-to {
     &:not(.no-trans) {
       transform: translateX(-30%);
