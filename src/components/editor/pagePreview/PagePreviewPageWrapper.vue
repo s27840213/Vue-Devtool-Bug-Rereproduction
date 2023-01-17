@@ -305,7 +305,6 @@ export default Vue.extend({
   justify-content: center;
   position: relative;
   max-width: 100%;
-  content-visibility: auto;
   &-content {
     position: relative;
     box-sizing: border-box;

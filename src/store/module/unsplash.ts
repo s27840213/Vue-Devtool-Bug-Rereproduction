@@ -45,6 +45,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
   },
   async getMorePhotos({ commit, getters }) {
     const { locale, pageIndex, keyword } = getters.getNextParams
+    if (pageIndex === undefined || pageIndex < 0) return
 
     commit(SET_STATE, { pending: true })
     try {
