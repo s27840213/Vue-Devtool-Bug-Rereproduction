@@ -237,8 +237,8 @@ export default defineComponent({
   deactivated() {
     const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
     const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
-    mainContent.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    searchResult.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    mainContent && mainContent.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    searchResult && searchResult.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   watch: {
     currPageThemeIds(curr: number[] = []) {
