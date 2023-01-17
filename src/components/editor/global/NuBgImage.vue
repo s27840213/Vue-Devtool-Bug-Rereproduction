@@ -12,8 +12,8 @@
       //-   class="body"
       //-   ref="body"
       //-   @error="onError")
-      div(style="position: relative;")
-        img(
+      div()
+        img(style="width: 100%; height: 100%;"
           :src="finalSrc"
           draggable="false"
           class="body"
