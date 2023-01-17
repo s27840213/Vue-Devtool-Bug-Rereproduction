@@ -308,10 +308,15 @@ export default defineComponent({
 
 .logo-list {
   &-enter-active,
-  &-leave-active {
+  &-leave-active,
+  &-move {
     &:not(.no-trans) {
       transition: 0.1s ease;
     }
+  }
+
+  &-leave-active {
+    position: absolute;
   }
 
   &-enter-from,

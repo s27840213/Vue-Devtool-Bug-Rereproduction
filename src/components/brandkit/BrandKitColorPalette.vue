@@ -295,7 +295,8 @@ export default defineComponent({
 
 .color-list {
   &-enter-active,
-  &-leave-active {
+  &-leave-active,
+  &-move {
     transition: 0.3s ease;
     z-index: 10;
     padding-top: calc(100% - 2px);

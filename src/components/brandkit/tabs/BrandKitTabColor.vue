@@ -104,12 +104,17 @@ export default defineComponent({
 
 .list {
   &-enter-active,
-  &-leave-active {
+  &-leave-active,
+  &-move {
     &:not(.no-trans) {
       transition: 0.3s ease;
       z-index: 10;
     }
   }
+
+&-leave-active {
+  position: absolute;
+}
 
   &-enter-from,
   &-leave-to {

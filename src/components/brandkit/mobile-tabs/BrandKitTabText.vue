@@ -286,7 +286,8 @@ export default defineComponent({
 
 .font-list {
   &-enter-active,
-  &-leave-active {
+  &-leave-active,
+  &-move {
     &:not(.no-trans) {
       transition: 0.3s ease;
     }
