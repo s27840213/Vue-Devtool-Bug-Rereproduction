@@ -21,7 +21,8 @@ div(class="overflow-container"
           :color="this.config.backgroundColor"
           :key="this.config.backgroundImage.id"
           @mousedown.native.left="pageClickHandler()"
-          :contentScaleRatio="contentScaleRatio")
+          :contentScaleRatio="contentScaleRatio"
+          :padding="contentStyles.padding")
         nu-layer(
           v-for="(layer,index) in config.layers"
           :key="layer.id"

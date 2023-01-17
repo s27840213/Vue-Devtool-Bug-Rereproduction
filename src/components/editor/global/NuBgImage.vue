@@ -11,10 +11,11 @@
         class="body"
         @error="onError"
         ref="body")
-    component(v-for="(elm, idx) in cssFilterElms"
-      :key="`cssFilter${idx}`"
-      :is="elm.tag"
-      v-bind="elm.attrs")
+    div(:style="filterContainerStyles()" class="filter-container")
+      component(v-for="(elm, idx) in cssFilterElms"
+        :key="`cssFilter${idx}`"
+        :is="elm.tag"
+        v-bind="elm.attrs")
 </template>
 
 <script lang="ts">
@@ -40,6 +41,10 @@ export default Vue.extend({
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    padding: {
+      type: String,
+      default: '0'
     }
   },
   data() {
@@ -180,6 +185,7 @@ export default Vue.extend({
     },
     mainStyles(): any {
       return {
+        padding: this.padding,
         opacity: this.image.config.styles.opacity / 100,
         backgroundColor: this.color
       }
@@ -266,6 +272,9 @@ export default Vue.extend({
     },
     imgStyles(): Partial<IImage> {
       return this.stylesConverter()
+    },
+    filterContainerStyles() {
+      return { margin: this.padding }
     },
     async previewAsLoading() {
       let isPrimaryImgLoaded = false
@@ -373,7 +382,6 @@ export default Vue.extend({
   right: 0;
   bottom: 0;
   left: 0;
-  padding: inherit;
   &__picture {
     object-fit: cover;
     width: 100%;
@@ -399,5 +407,13 @@ export default Vue.extend({
 
 .body {
   transition: opacity 1s;
+}
+
+.filter-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 </style>
