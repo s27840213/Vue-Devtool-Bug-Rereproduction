@@ -103,8 +103,8 @@ export default Vue.extend({
       uploadUtils: uploadUtils,
       hanleWheelTimer: -1,
       handleWheelTransition: false,
-      oriX: 0,
-      oriPageSize: 0
+      initPos: { x: 0, y: 0 },
+      initPageSize: { width: 0, height: 0 }
     }
   },
   created() {
@@ -158,6 +158,11 @@ export default Vue.extend({
       const rect = editorView.getBoundingClientRect()
       pageUtils.originEditorSize.width = rect.width
       pageUtils.originEditorSize.height = rect.height
+
+      pageUtils.pageCenterPos = {
+        x: rect.width * 0.5,
+        y: rect.height * 0.5
+      }
 
       let card = this.$refs.card as HTMLElement | HTMLElement[]
       if (Array.isArray(card)) card = card[0]
@@ -412,14 +417,15 @@ export default Vue.extend({
       }
     },
     pinchHandler(event: AnyTouchEvent) {
-      console.log(event.x, event.y, pageUtils.getCurrPage.x, pageUtils.getCurrPage.y)
       switch (event.phase) {
         /**
          * @Note the very first event won't fire start phase, it's very strange and need to pay attention
          */
         case 'start': {
-          this.oriX = pageUtils.getCurrPage.x
-          this.oriPageSize = (pageUtils.getCurrPage.width * (pageUtils.scaleRatio / 100))
+          this.initPos.x = pageUtils.getCurrPage.x
+          this.initPos.y = pageUtils.getCurrPage.y
+          this.initPageSize.width = pageUtils.getCurrPage.width * (pageUtils.scaleRatio * 0.01)
+          this.initPageSize.height = pageUtils.getCurrPage.height * (pageUtils.scaleRatio * 0.01)
           this.tmpScaleRatio = pageUtils.scaleRatio
           this.isScaling = true
           store.commit('SET_isPageScaling', true)
@@ -430,7 +436,6 @@ export default Vue.extend({
             this.isScaling = true
             store.commit('SET_isPageScaling', true)
           }
-          console.log(event.scale)
           window.requestAnimationFrame(() => {
             const limitMultiplier = 4
             if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
@@ -440,12 +445,27 @@ export default Vue.extend({
             const newScaleRatio = Math.min(this.tmpScaleRatio * event.scale, pageUtils.mobileMinScaleRatio * limitMultiplier)
             if (newScaleRatio >= pageUtils.mobileMinScaleRatio * 0.8) {
               pageUtils.setScaleRatio(newScaleRatio)
+              const pinchPos = { x: event.x - pageUtils.pageEventPosOffset.x, y: event.y - pageUtils.pageEventPosOffset.x }
+              const widthDiff = pageUtils.getCurrPage.width * (newScaleRatio * 0.01) - this.initPageSize.width
+              const heightDiff = pageUtils.getCurrPage.height * (newScaleRatio * 0.01) - this.initPageSize.height
+              const xTranslateRatio = (pinchPos.x - pageUtils.pageCenterPos.x) / pageUtils.originPageSize.width + 0.5
+              const yTranslateRatio = (pinchPos.y - pageUtils.pageCenterPos.y) / pageUtils.originPageSize.height + 0.5
+              console.log('pinchPos', pinchPos.x, pinchPos.y)
+              console.log('pageCenterPos', pageUtils.pageCenterPos.x, pageUtils.pageCenterPos.y)
+              console.log('xTranslateRatio', xTranslateRatio)
 
-              const baseX = (pageUtils.getCurrPage.width * (newScaleRatio / 100) - this.oriPageSize) * 0.5
               pageUtils.updatePagePos(0, {
-                x: this.oriX - baseX
+                x: this.initPos.x - widthDiff * xTranslateRatio,
+                y: this.initPos.y - heightDiff * yTranslateRatio
               })
+
+              /** origin not scale with pinch center logic */
+              // const baseX = (pageUtils.getCurrPage.width * (newScaleRatio * 0.01) - this.initPageSize) * 0.5
+              // pageUtils.updatePagePos(0, {
+              //   x: this.initPos.x - baseX
+              // })
             }
+
             clearTimeout(this.hanleWheelTimer)
             this.hanleWheelTimer = setTimeout(() => {
               if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {

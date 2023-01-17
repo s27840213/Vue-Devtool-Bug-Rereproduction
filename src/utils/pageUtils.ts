@@ -129,6 +129,7 @@ class PageUtils {
   originEditorSize = { width: -1, height: -1 }
   originPageY = 0
   pageEventPosOffset = { x: 0, y: 0 }
+  pageCenterPos = { x: 0, y: 0 }
 
   constructor() {
     this.topBound = -1
