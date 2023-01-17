@@ -639,7 +639,11 @@ class PageUtils {
    ** unit: Unit for physical size and physical bleeds
    */
   getPageSizeWithBleeds(page: IPage = this.currFocusPage): { width: number, height: number, physicalWidth: number, physicalHeight: number, bleeds: IBleed, physicalBleeds: IBleed, unit: string } {
-    const { width, height, physicalWidth, physicalHeight, unit, bleeds, physicalBleeds } = page
+    const noBleed = { top: 0, bottom: 0, left: 0, right: 0 } as IBleed
+    const { width, height, physicalWidth, physicalHeight, unit } = page
+    let { bleeds, physicalBleeds } = page
+    bleeds ??= noBleed
+    physicalBleeds ??= bleeds
     return {
       width: width + bleeds.left + bleeds.right,
       height: height + bleeds.top + bleeds.bottom,
