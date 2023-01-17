@@ -653,12 +653,12 @@ const mutations: MutationTree<IBrandKitState> = {
   },
   UPDATE_addBrand(state: IBrandKitState, brand: IBrand) {
     const index = brandkitUtils.findInsertIndex(state.brands, brand, true)
-    state.brands.splice(index, 0, brand)
+    state.brands = [...state.brands.slice(0, index), brand, ...state.brands.slice(index)]
   },
   UPDATE_deleteBrand(state: IBrandKitState, brand: IBrand) {
     const index = state.brands.findIndex(brand_ => brand_.id === brand.id)
     if (index < 0) return
-    state.brands.splice(index, 1)
+    state.brands = [...state.brands.slice(0, index), ...state.brands.slice(index + 1)]
     if (state.currentBrandId === brand.id && state.brands.length > 0) {
       state.currentBrandId = state.brands[0].id
     }
@@ -666,7 +666,7 @@ const mutations: MutationTree<IBrandKitState> = {
   UPDATE_replaceBrand(state: IBrandKitState, updateInfo: { id: string, brand: IBrand }) {
     const index = state.brands.findIndex(brand_ => brand_.id === updateInfo.id)
     if (index < 0) return
-    state.brands.splice(index, 1, updateInfo.brand)
+    state.brands = [...state.brands.slice(0, index), updateInfo.brand, ...state.brands.slice(index + 1)]
   },
   UPDATE_replaceBrandTime(state: IBrandKitState, updateInfo: { brand: IBrand, createTime: string }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
@@ -677,34 +677,34 @@ const mutations: MutationTree<IBrandKitState> = {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
     if (!brand) return
     const index = brandkitUtils.findInsertIndex(brand.logos, updateInfo.logo)
-    brand.logos.splice(index, 0, updateInfo.logo)
+    brand.logos = [...brand.logos.slice(0, index), updateInfo.logo, ...brand.logos.slice(index)]
   },
   UPDATE_deleteLogo(state: IBrandKitState, updateInfo: { brand: { id: string }, logo: { id: string } }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
     if (!brand) return
     const index = brand.logos.findIndex(logo_ => logo_.id === updateInfo.logo.id)
     if (index < 0) return
-    brand.logos.splice(index, 1)
+    brand.logos = [...brand.logos.slice(0, index), ...brand.logos.slice(index + 1)]
   },
   UPDATE_replaceLogo(state: IBrandKitState, updateInfo: { id: string, logo: IBrandLogo, brandId: string }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brandId)
     if (!brand) return
     const index = brand.logos.findIndex(logo_ => logo_.id === updateInfo.id)
     if (index < 0) return
-    brand.logos.splice(index, 1, updateInfo.logo)
+    brand.logos = [...brand.logos.slice(0, index), updateInfo.logo, ...brand.logos.slice(index + 1)]
   },
   UPDATE_addPalette(state: IBrandKitState, updateInfo: { brand: IBrand, palette: IBrandColorPalette }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
     if (!brand) return
     const index = brandkitUtils.findInsertIndex(brand.colorPalettes, updateInfo.palette)
-    brand.colorPalettes.splice(index, 0, updateInfo.palette)
+    brand.colorPalettes = [...brand.colorPalettes.slice(0, index), updateInfo.palette, ...brand.colorPalettes.slice(index)]
   },
   UPDATE_deletePalette(state: IBrandKitState, updateInfo: { brand: IBrand, palette: IBrandColorPalette }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
     if (!brand) return
     const index = brand.colorPalettes.findIndex(palette_ => palette_.id === updateInfo.palette.id)
     if (index < 0) return
-    brand.colorPalettes.splice(index, 1)
+    brand.colorPalettes = [...brand.colorPalettes.slice(0, index), ...brand.colorPalettes.slice(index + 1)]
   },
   UPDATE_replacePaletteTime(state: IBrandKitState, updateInfo: { brand: IBrand, palette: IBrandColorPalette, createTime: string }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
@@ -719,7 +719,7 @@ const mutations: MutationTree<IBrandKitState> = {
     const colorPalette = brand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
     if (!colorPalette) return
     const index = brandkitUtils.findInsertIndex(colorPalette.colors, updateInfo.color, true)
-    colorPalette.colors.splice(index, 0, updateInfo.color)
+    colorPalette.colors = [...colorPalette.colors.slice(0, index), updateInfo.color, ...colorPalette.colors.slice(index)]
   },
   UPDATE_deleteColor(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, color: IBrandColor }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
@@ -728,7 +728,7 @@ const mutations: MutationTree<IBrandKitState> = {
     if (!colorPalette) return
     const index = colorPalette.colors.findIndex(color => color.id === updateInfo.color.id)
     if (index < 0) return
-    colorPalette.colors.splice(index, 1)
+    colorPalette.colors = [...colorPalette.colors.slice(0, index), ...colorPalette.colors.slice(index + 1)]
   },
   UPDATE_setColor(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, id: string, color: string }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
@@ -738,7 +738,7 @@ const mutations: MutationTree<IBrandKitState> = {
     const index = colorPalette.colors.findIndex(color => color.id === updateInfo.id)
     if (index < 0) return
     const oldColor = colorPalette.colors[index]
-    colorPalette.colors.splice(index, 1, { ...oldColor, color: updateInfo.color })
+    colorPalette.colors = [...colorPalette.colors.slice(0, index), { ...oldColor, color: updateInfo.color }, ...colorPalette.colors.slice(index + 1)]
   },
   UPDATE_replaceColorTime(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, color: IBrandColor, createTime: string }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
@@ -753,16 +753,16 @@ const mutations: MutationTree<IBrandKitState> = {
   UPDATE_deleteFont(state: IBrandKitState, font: IBrandFont) {
     const index = state.fonts.findIndex(font_ => font_.id === font.id)
     if (index < 0) return
-    state.fonts.splice(index, 1)
+    state.fonts = [...state.fonts.slice(0, index), ...state.fonts.slice(index + 1)]
   },
   UPDATE_addFont(state: IBrandKitState, font: IBrandFont) {
     const index = brandkitUtils.findInsertIndex(state.fonts, font)
-    state.fonts.splice(index, 0, font)
+    state.fonts = [...state.fonts.slice(0, index), font, ...state.fonts.slice(index)]
   },
   UPDATE_replaceFont(state: IBrandKitState, updateInfo: { id: string, font: IBrandFont }) {
     const index = state.fonts.findIndex(font_ => font_.id === updateInfo.id)
     if (index < 0) return
-    state.fonts.splice(index, 1, updateInfo.font)
+    state.fonts = [...state.fonts.slice(0, index), updateInfo.font, ...state.fonts.slice(index + 1)]
   },
   UPDATE_replaceFontUrl(state: IBrandKitState, updateInfo: { font: IBrandFont, urlMap: { [key: string]: string } }) {
     const font = state.fonts.find(font_ => font_.id === updateInfo.font.id)
