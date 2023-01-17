@@ -217,7 +217,8 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations('design', {
-      setDraggingDesign: 'SET_draggingDesign'
+      setDraggingDesign: 'SET_draggingDesign',
+      setDesignThumbnail: 'UPDATE_setDesignThumbnail'
     }),
     blockStyles() {
       return (this.isMouseOver || this.isSelected) ? { 'background-color': '#474a5780' } : {}
@@ -378,7 +379,7 @@ export default defineComponent({
       if (this.config.polling) {
         this.pageImages = Array(this.config.pageNum).fill(this.previewPlaceholder)
         this.previewCheckReady = true
-        this.config.thumbnail = this.previewPlaceholder
+        this.setDesignThumbnail({ id: this.config.id, thumbnail: this.previewPlaceholder })
         this.pollingStep()
       } else {
         if (this.isTempDesign) return
@@ -388,7 +389,7 @@ export default defineComponent({
           this.imgWidth = width
           this.imgHeight = height
           this.previewCheckReady = true
-          this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
+          this.setDesignThumbnail({ id: this.config.id, thumbnail: exists ? this.configPreview : this.previewPlaceholder })
         })
       }
     },
@@ -407,7 +408,7 @@ export default defineComponent({
         this.imgWidth = width
         this.imgHeight = height
         if (exists) {
-          this.config.thumbnail = this.configPreview
+          this.setDesignThumbnail({ id: this.config.id, thumbnail: this.configPreview })
         } else if (step < 35) {
           setTimeout(() => {
             this.pollingStep(step + 1)

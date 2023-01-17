@@ -160,7 +160,8 @@ export default defineComponent({
     ...mapMutations('design', {
       clearSelection: 'UPDATE_clearSelection',
       setBottomMenu: 'SET_bottomMenu',
-      setMobileDesignBuffer: 'SET_mobileDesignBuffer'
+      setMobileDesignBuffer: 'SET_mobileDesignBuffer',
+      setDesignThumbnail: 'UPDATE_setDesignThumbnail'
     }),
     imageStyles() {
       return { width: `${this.renderedWidth}px`, height: `${this.renderedHeight}px` }
@@ -192,8 +193,7 @@ export default defineComponent({
       if (this.config.polling) {
         this.pageImages = Array(this.config.pageNum).fill(this.previewPlaceholder)
         this.previewCheckReady = true
-        // eslint-disable-next-line vue/no-mutating-props
-        this.config.thumbnail = this.previewPlaceholder
+        this.setDesignThumbnail({ id: this.config.id, thumbnail: this.previewPlaceholder })
         this.pollingStep(0, callback)
       } else {
         if (this.isTempDesign) return
@@ -203,8 +203,7 @@ export default defineComponent({
           this.imgWidth = width
           this.imgHeight = height
           this.previewCheckReady = true
-          // eslint-disable-next-line vue/no-mutating-props
-          this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
+          this.setDesignThumbnail({ id: this.config.id, thumbnail: exists ? this.configPreview : this.previewPlaceholder })
           this.$nextTick(() => {
             callback()
           })
@@ -226,8 +225,7 @@ export default defineComponent({
         this.imgWidth = width
         this.imgHeight = height
         if (exists) {
-          // eslint-disable-next-line vue/no-mutating-props
-          this.config.thumbnail = this.configPreview
+          this.setDesignThumbnail({ id: this.config.id, thumbnail: this.configPreview })
           this.$nextTick(() => {
             callback()
           })
