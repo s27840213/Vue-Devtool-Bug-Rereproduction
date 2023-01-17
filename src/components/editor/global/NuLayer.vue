@@ -287,7 +287,7 @@ export default defineComponent({
       }
     },
     layerWrapperStyles(): any {
-      if (this.isImgCtrl || this.inFrame || this.isTouchDevice()) {
+      if (this.isImgCtrl || this.inFrame || this.isTouchDevice() || !this.isActive) {
         return {}
       }
       return { transform: `translateZ(${this.config.styles.zindex}px)`, ...this.transformStyle }

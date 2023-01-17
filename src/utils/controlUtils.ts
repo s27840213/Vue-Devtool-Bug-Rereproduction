@@ -61,7 +61,7 @@ class Controller {
           height: `${scalerSize}px`,
           left: '0',
           top: '0',
-          transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(-50%,-50%) scale(${100 / scaleRatio * contentScaleRatio})`,
           borderRadius: '50%'
           // background: 'red'
         },
@@ -72,7 +72,7 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(50%,-50%) scale(${100 / scaleRatio * contentScaleRatio})`,
           right: '0',
           top: '0',
           borderRadius: '50%'
@@ -85,7 +85,7 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(50%,50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(50%,50%) scale(${100 / scaleRatio * contentScaleRatio})`,
           right: '0',
           bottom: '0',
           borderRadius: '50%'
@@ -98,7 +98,7 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(-50%,50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(-50%,50%) scale(${100 / scaleRatio * contentScaleRatio})`,
           left: '0',
           bottom: '0',
           borderRadius: '50%'
@@ -120,7 +120,7 @@ class Controller {
           height: `${scalerSize}px`,
           left: '0',
           top: '0',
-          transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(-50%,-50%) scale(${100 / scaleRatio * contentScaleRatio})`,
           borderRadius: '50%',
           opacity: isTouchArea ? '0' : '1'
         },
@@ -131,7 +131,7 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(50%,-50%) scale(${100 / scaleRatio * contentScaleRatio})`,
           right: '0',
           top: '0',
           borderRadius: '50%',
@@ -144,7 +144,7 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(50%,50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(50%,50%) scale(${100 / scaleRatio * contentScaleRatio})`,
           right: '0',
           bottom: '0',
           borderRadius: '50%',
@@ -157,7 +157,7 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(-50%,50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(-50%,50%) scale(${100 / scaleRatio * contentScaleRatio})`,
           left: '0',
           bottom: '0',
           borderRadius: '50%',
@@ -241,13 +241,13 @@ class Controller {
           height: `${scalerSize}px`,
           left: '0',
           top: '50%',
-          transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(-50%,-50%) scale(${100 / scaleRatio * contentScaleRatio})`,
           borderRadius: '50%'
         },
         {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(50%,-50%) scale(${100 / scaleRatio * contentScaleRatio})`,
           right: '0',
           top: '50%',
           borderRadius: '50%'

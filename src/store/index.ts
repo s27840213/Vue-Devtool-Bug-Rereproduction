@@ -301,7 +301,7 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.defaultContentScaleRatio
   },
   get3dEnabledPageIndex(state: IEditorState) {
-    return state._3dEnabledPageIndex
+    return state.useMobileEditor ? -1 : state._3dEnabledPageIndex
   },
   getEnalbleComponentLog(state: IEditorState) {
     return state.enalbleComponentLog
@@ -987,7 +987,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_3dEnabledPageIndex(state: IEditorState, index: number) {
     if (index !== state._3dEnabledPageIndex) {
-      state._3dEnabledPageIndex = index
+      state._3dEnabledPageIndex = this.useMobileEditor ? -1 : index
     }
   },
   SET_enalbleComponentLog(state: IEditorState, bool: boolean) {
