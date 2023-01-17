@@ -1,5 +1,5 @@
 <template lang="pug">
-div(:style="[isImgCtrl || inFrame ? {} : {transform: `translateZ(${config.styles.zindex}px)`,...transformStyle}]")
+div(class="nu-layer__wrapper" :style="layerWrapperStyles")
   div(v-for="div in layerDivs"
       class="nu-layer"
       :class="!config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : ''"
@@ -285,6 +285,12 @@ export default defineComponent({
         pageIndex: this.pageIndex,
         layerIndex: this.layerIndex
       }
+    },
+    layerWrapperStyles(): any {
+      if (this.isImgCtrl || this.inFrame || this.isTouchDevice()) {
+        return {}
+      }
+      return { transform: `translateZ(${this.config.styles.zindex}px)`, ...this.transformStyle }
     },
     isDragging(): boolean {
       return (this.config as ILayer).dragging

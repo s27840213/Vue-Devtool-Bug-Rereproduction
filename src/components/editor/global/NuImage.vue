@@ -358,7 +358,6 @@ export default defineComponent({
           return layerUtils.getLayer(pageIndex, layerIndex).id === handleId.layerId
         }
       })()
-      console.log(isCurrShadowEffectApplied, isHandling)
       return isCurrShadowEffectApplied && isHandling
     },
     getImgDimension(): number | string {
