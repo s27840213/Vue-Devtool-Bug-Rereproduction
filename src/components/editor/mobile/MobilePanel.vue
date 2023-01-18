@@ -42,7 +42,7 @@ div(class="mobile-panel"
       :tabs="innerTabs.label" v-model="innerTabIndex")
     keep-alive(:include="['PanelTemplate', 'PanelPhoto', 'PanelObject', 'PanelBackground', 'PanelText', 'PanelFile']")
       //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-      component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
+      component(v-if="dynamicBindIs && !isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
         class="border-box p-2"
         :is="dynamicBindIs"
         :key="dynamicBindIs"
