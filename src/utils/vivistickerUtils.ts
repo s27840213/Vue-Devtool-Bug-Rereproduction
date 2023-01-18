@@ -33,10 +33,15 @@ const STANDALONE_USER_INFO: IUserInfo = {
   osVer: '100.0'
 }
 
-const USER_SETTINGS_CONFIG: {[key: string]: {default: any, description: string}} = {
+const USER_SETTINGS_CONFIG: {[key: string]: {default: any, description: string, val?: any}} = {
   autoSave: {
     default: false,
     description: 'STK0012'
+  },
+  mydesignShowMissingPhotoAsk: {
+    default: true,
+    description: 'STK0036',
+    val: true
   }
 }
 
@@ -207,7 +212,10 @@ class ViviStickerUtils {
           })
           modalUtils.clearModalInfo()
         }
-      }, undefined, undefined, true, true)
+      }, undefined, {
+        noClose: true,
+        noCloseIcon: true
+      })
     }
     try {
       const webkit = (window as any).webkit
@@ -968,7 +976,7 @@ class ViviStickerUtils {
     }
   }
 
-  handleFrameClipError(page: IPage) {
+  handleFrameClipError(page: IPage, showCheckContent = false) {
     const { layers } = page
     const frames = (layers
       .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
@@ -1010,11 +1018,25 @@ class ViviStickerUtils {
         }, frame.clips[subLayerIdx])
       }
 
-      const modalBtn = {
-        msg: i18n.t('STK0023') as string,
-        action
+      if (USER_SETTINGS_CONFIG.mydesignShowMissingPhotoAsk.val) {
+        let options
+        if (showCheckContent) {
+          options = {
+            checkboxText: USER_SETTINGS_CONFIG.mydesignShowMissingPhotoAsk.description as string,
+            checked: false,
+            onCheckedChange: (val: boolean) => {
+              USER_SETTINGS_CONFIG.mydesignShowMissingPhotoAsk.val = !val
+            }
+          }
+        }
+        const modalBtn = {
+          msg: i18n.t('STK0023') as string,
+          action
+        }
+        modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn, undefined, options)
+      } else {
+        action && action()
       }
-      modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn)
     }
   }
 

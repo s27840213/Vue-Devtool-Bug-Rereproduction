@@ -70,7 +70,7 @@ export default Vue.extend({
                   l.initFromMydesign = true
                 })
                 vivistickerUtils.initLoadingFlags(page, () => {
-                  vivistickerUtils.handleFrameClipError(page)
+                  vivistickerUtils.handleFrameClipError(page, true)
                 })
               },
               tab: ''
