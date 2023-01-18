@@ -180,7 +180,7 @@ export default Vue.extend({
         padding: [
           this.config.bleeds.top * this.contentScaleRatio + 'px',
           this.config.bleeds.right * this.contentScaleRatio + 'px',
-          this.config.bleeds.bottom * this.contentScaleRatio + 'px',
+          this.config.bleeds.bottom * this.contentScaleRatio + (this.userId === 'backendRendering' ? 8 : 0) + 'px',
           this.config.bleeds.left * this.contentScaleRatio + 'px'
         ].join(' ')
       }
