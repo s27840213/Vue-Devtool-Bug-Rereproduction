@@ -811,14 +811,7 @@ class DesignUtils {
   async newDesign(width = 1080, height = 1080, unit = 'px', newDesignType?: number, path?: string, folderName?: string, to?: VueRouter.RouteLocationNormalized) {
     store.commit('file/SET_setLayersDone')
     const pxSize = unitUtils.convertSize(width, height, unit, 'px')
-    const inSize = unitUtils.convertSize(width, height, unit, 'in')
-
-    // get default bleeds with page dpi
-    const dpi = {
-      width: pxSize.width / inSize.width,
-      height: pxSize.height / inSize.height
-    }
-    const bleeds = pageUtils.getDefaultBleeds('px', dpi)
+    const bleeds = pageUtils.getPageDefaultBleeds({ physicalWidth: width, physicalHeight: height, unit }, 'px')
 
     pageUtils.setPages([pageUtils.newPage({
       width: pxSize.width,
@@ -826,7 +819,7 @@ class DesignUtils {
       physicalWidth: width,
       physicalHeight: height,
       bleeds,
-      physicalBleeds: unit === 'px' ? bleeds : pageUtils.getDefaultBleeds(unit, dpi),
+      physicalBleeds: unit === 'px' ? bleeds : pageUtils.getPageDefaultBleeds({ physicalWidth: width, physicalHeight: height, unit }),
       unit
     })])
     pageUtils.clearPagesInfo()

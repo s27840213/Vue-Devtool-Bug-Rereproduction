@@ -10,6 +10,8 @@ export class Page implements IPage {
   snapUtils: SnapUtils
   width: number
   height: number
+  x: number
+  y: number
   physicalWidth: number
   physicalHeight: number
   unit: string
@@ -47,6 +49,8 @@ export class Page implements IPage {
     this.snapUtils = new SnapUtils(-1)
     this.width = 1080
     this.height = 1080
+    this.x = 0
+    this.y = 0
     this.physicalWidth = 1080
     this.physicalHeight = 1080
     this.unit = 'px'

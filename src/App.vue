@@ -147,6 +147,8 @@ export default defineComponent({
   @include size(100%, 100%);
   position: relative;
   max-height: 100%;
+  user-select: none;
+  -webkit-user-select: none;
   -webkit-font-smoothing: subpixel-antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

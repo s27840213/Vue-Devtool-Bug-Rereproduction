@@ -19,6 +19,8 @@ export interface IPage {
   id: string,
   width: number,
   height: number,
+  x: number,
+  y: number,
   physicalWidth: number,
   physicalHeight: number,
   unit: string,

@@ -43,6 +43,9 @@ export default defineComponent({
       return pageUtils.currFocusPage
     },
     currFocusPageSize() {
+      return pageUtils.currFocusPageSize
+    },
+    currFocusPageSizeWithBleeds() {
       return pageUtils.currFocusPageSizeWithBleeds
     },
     rulerRootStyles(): { [index: string]: string } {
@@ -81,7 +84,7 @@ export default defineComponent({
       this.calcRulerBodyOffset()
       this.scale = rulerUtils.adjRulerScale()
     },
-    currFocusPageSize() {
+    currFocusPageSizeWithBleeds() {
       this.calcRulerBodyOffset()
       this.scale = rulerUtils.adjRulerScale(this.scale)
     },

@@ -243,7 +243,11 @@ export default defineComponent({
             width: photoWidth,
             height: photoHeight
           }
-        } as unknown as IImage, path, config.styles).styles
+        } as unknown as IImage, path, config.styles).styles,
+        ...{
+          initWidth: config.styles.initWidth,
+          initHeight: config.styles.initHeight
+        }
       }
       if (isPrimaryLayerFrame) {
         frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, Math.max(subLayerIdx, 0), styles)

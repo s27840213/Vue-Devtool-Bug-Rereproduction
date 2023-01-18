@@ -4,7 +4,18 @@ class TooltipUtils {
   themes: {
     hint: {
       $extend: string,
-      $resetCss: boolean
+      $resetCss: boolean,
+    },
+    'hint-menu': {
+      $extend: string,
+      $resetCss: boolean,
+      placement: string,
+      popperTriggers: string[],
+      distance: number,
+      delay: {
+        show: number,
+        hide: number
+      }
     }
   }
 
@@ -13,6 +24,17 @@ class TooltipUtils {
       hint: {
         $extend: 'tooltip',
         $resetCss: true
+      },
+      'hint-menu': {
+        $extend: 'tooltip',
+        $resetCss: true,
+        placement: 'bottom',
+        popperTriggers: ['hover', 'focus'],
+        distance: 7,
+        delay: {
+          show: 200,
+          hide: 200
+        }
       }
     }
   }

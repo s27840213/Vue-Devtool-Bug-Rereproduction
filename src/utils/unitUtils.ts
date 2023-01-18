@@ -27,7 +27,7 @@ function mulConvUnit(dpi = 96): number[][] {
 }
 
 class UnitUtils {
-  get dimensionMap() { return store.getters['user/getDimensionMap'] }
+  get dimensionMap() { return store?.getters['user/getDimensionMap'] ?? {} }
 
   /**
    * Convert value in source unit into target unit.
@@ -106,6 +106,19 @@ class UnitUtils {
 
   convertAllSize(width: number, height: number, sourceUnit: string): IMapSize {
     return Object.fromEntries(STR_UNITS.map((targetUnit) => [targetUnit, this.convertSize(width, height, sourceUnit, targetUnit)]))
+  }
+
+  /**
+   * Get DPI for conversion between px and physical units
+   */
+  getConvertDpi(pageSize: { physicalWidth: number, physicalHeight: number, unit: string }) {
+    const { physicalWidth: width, physicalHeight: height, unit } = pageSize
+    const pxSize = this.convertSize(width, height, unit, 'px')
+    const inSize = this.convertSize(width, height, unit, 'in')
+    return {
+      width: pxSize.width / inSize.width,
+      height: pxSize.height / inSize.height
+    }
   }
 }
 
