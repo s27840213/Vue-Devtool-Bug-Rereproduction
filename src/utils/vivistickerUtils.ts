@@ -33,14 +33,19 @@ const STANDALONE_USER_INFO: IUserInfo = {
   osVer: '100.0'
 }
 
-const USER_SETTINGS_CONFIG: {[key: string]: {default: any, description: string, val?: any}} = {
+/**
+ * shown prop indicates if the user-setting-config is shown in the setting page
+ */
+const USER_SETTINGS_CONFIG: {[key: string]: {default: any, description: string, shown: boolean, val?: any}} = {
   autoSave: {
     default: false,
-    description: 'STK0012'
+    description: 'STK0012',
+    shown: true
   },
   mydesignShowMissingPhotoAsk: {
     default: true,
     description: 'STK0036',
+    shown: false,
     val: true
   }
 }
@@ -149,7 +154,9 @@ class ViviStickerUtils {
   getDefaultUserSettings(): IUserSettings {
     const res = {} as {[key: string]: any}
     for (const [key, value] of Object.entries(USER_SETTINGS_CONFIG)) {
-      res[key] = value.default
+      if (value.shown) {
+        res[key] = value.default
+      }
     }
     return res as IUserSettings
   }

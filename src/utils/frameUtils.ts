@@ -163,7 +163,6 @@ class FrameUtils {
   }
 
   iosPhotoSelect(layerInfo: ILayerInfo, config: IImage) {
-    console.log(generalUtils.deepCopy(config))
     const { pageIndex, layerIndex, subLayerIdx = 0 } = layerInfo
     vivistickerUtils.getIosImg()
       .then(async (images: Array<string>) => {

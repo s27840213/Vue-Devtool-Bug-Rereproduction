@@ -1,4 +1,4 @@
-import { IFrame, IGroup, ILayer, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
 import colorUtils from './colorUtils'
@@ -20,6 +20,7 @@ export default class SubControllerUtils {
   private posDiff = { x: 0, y: 0 }
   private _onMouseup = null as unknown
   private primaryActive = false
+  private initTranslate = { x: 0, y: 0 }
 
   private get config(): ILayer { return this._config.config }
   private get pageIndex(): number { return this.layerInfo.pageIndex }
@@ -34,6 +35,10 @@ export default class SubControllerUtils {
   }
 
   onPointerdown(e: PointerEvent) {
+    this.initTranslate = {
+      x: this.primaryLayer.styles?.x || 0,
+      y: this.primaryLayer.styles?.y || 0
+    }
     if (this.primaryLayer.type === 'tmp') {
       if (generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || store.getters['mobileEditor/getInMultiSelectionMode']) {
         groupUtils.deselectTargetLayer(this.subLayerIdx)
@@ -106,11 +111,16 @@ export default class SubControllerUtils {
   }
 
   onMouseup(e: PointerEvent) {
+    eventUtils.removePointerEvent('pointerup', this._onMouseup)
     e.stopPropagation()
+    if (!this.primaryLayer.styles) return
+    const posDiff = {
+      x: this.primaryLayer.styles.x - this.initTranslate.x,
+      y: this.primaryLayer.styles.y - this.initTranslate.y
+    }
+    const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
     if (this.config.type === 'text') {
-      this.posDiff.x = this.primaryLayer.styles.x - this.posDiff.x
-      this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
-      if (this.posDiff.x !== 0 || this.posDiff.y !== 0) {
+      if (hasActualMove) {
         layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { contentEditable: false })
       } else {
         if (this.config.contentEditable) {
@@ -123,10 +133,22 @@ export default class SubControllerUtils {
         }
       }
     }
-    eventUtils.removePointerEvent('pointerup', this._onMouseup)
-    // this.isControlling = false
+    const isEmptClipInFrame = this.primaryLayer.type === LayerType.frame && (this.config as IImage).srcObj.type === 'frame' &&
+      !hasActualMove && !store.getters['vivisticker/getControllerHidden']
+    const isEmptClipInGroup = this.primaryLayer.type === LayerType.group && this.config.type === LayerType.frame &&
+      this.primaryLayer.active && (this.config as IFrame).clips.length === 1 && (this.config as IFrame).clips[0].srcObj.type === 'frame'
+    if (!hasActualMove && (isEmptClipInFrame || isEmptClipInGroup)) {
+      let image
+      if (isEmptClipInGroup) {
+        image = (this.config as IFrame).clips[0]
+      } else if (isEmptClipInFrame) {
+        image = (this.primaryLayer as IFrame).clips[this.layerIndex]
+      }
+      frameUtils.iosPhotoSelect(this.layerInfo, image as IImage)
+    }
     this.onClickEvent(e)
     this.primaryActive = false
+    this.posDiff = { x: 0, y: 0 }
   }
 
   onClickEvent(e: MouseEvent) {
