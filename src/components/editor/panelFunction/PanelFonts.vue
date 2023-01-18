@@ -349,7 +349,7 @@ export default defineComponent({
     }
   }
 }
-.category-list::v-deep::-webkit-scrollbar-thumb {
+.category-list::-webkit-scrollbar-thumb {
   border: 3px solid #ffffff;
 }
 .cover-background {

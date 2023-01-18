@@ -177,9 +177,6 @@ export default defineComponent({
   &:focus {
     outline: none;
   }
-  &__picker::v-deep {
-    box-shadow: none;
-  }
   &__hex {
     height: 40px;
     display: flex;

@@ -295,7 +295,7 @@ export default defineComponent({
   &__color-sets {
     filter: none;
     height: calc(100% - 54px);
-    .panel &::v-deep .color-panel__scroll { // push scroll only in desktop
+    .panel &:deep(.color-panel__scroll) { // push scroll only in desktop
       @include push-scrollbar10;
     }
   }
@@ -317,9 +317,6 @@ export default defineComponent({
     color: #ffffff;
     padding: 10px 0;
     text-align: left;
-  }
-  &::v-deep .vue-recycle-scroller__item-view:first-child {
-    z-index: 1;
   }
 }
 
