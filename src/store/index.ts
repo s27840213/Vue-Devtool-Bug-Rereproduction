@@ -914,6 +914,12 @@ const mutations: MutationTree<IEditorState> = {
     pages[currFocusPageIndex].config.guidelines.v = []
     pages[currFocusPageIndex].config.guidelines.h = []
   },
+  SET_isEnableBleed(state: IEditorState, payload: { value: boolean, pageIndex?: number }) {
+    const { pages } = state
+    const { value, pageIndex } = payload
+    if (pageIndex) pages[pageIndex].config.isEnableBleed = value
+    else pages.forEach(page => { page.config.isEnableBleed = value })
+  },
   SET_bleeds(state: IEditorState, payload: { pageIndex: number, bleeds: IBleed, physicalBleeds: IBleed }) {
     const { pages } = state
     const { pageIndex, bleeds, physicalBleeds } = payload

@@ -133,11 +133,12 @@
                   @setFocus="setFocus()"
                   @isDragging="handleDraggingController")
               dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
-        div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
+        div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex)"
           class="page-highlighter"
           :style="wrapperStyles()")
-        div(v-if="config.isEnableBleed && hasBleed" :class="`bleed-line nu-page-bleed-${pageIndex}`" :style="bleedLineStyles()")
-        div(v-if="(currActivePageIndex === pageIndex && isDetailPage)"
+        //- for ruler to get rectangle of page content (without bleeds)
+        div(v-if="config.isEnableBleed" :class="`nu-page-bleed-${pageIndex}`" :style="bleedLineAreaStyles()")
+        div(v-if="(currActivePageIndex === pageIndex && isDetailPage && !isImgCtrl && !isBgImgCtrl)"
             class="page-resizer"
             ref="pageResizer"
             @pointerdown.left.stop="pageResizeStart($event)"
@@ -192,7 +193,6 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
 import { floor, round } from 'lodash'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
-import resizeUtils from '@/utils/resizeUtils'
 
 export default Vue.extend({
   inheritAttrs: false,
@@ -234,8 +234,7 @@ export default Vue.extend({
       },
       generalUtils,
       pageUtils,
-      currDraggingIndex: -1,
-      displayDPI: 96
+      currDraggingIndex: -1
     }
   },
   props: {
@@ -304,11 +303,16 @@ export default Vue.extend({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
       contentScaleRatio: 'getContentScaleRatio',
-      pagesLength: 'getPagesLength',
-      showAllAdminTool: 'user/showAllAdminTool'
+      showAllAdminTool: 'user/showAllAdminTool',
+      isImgCtrl: 'imgControl/isImgCtrl',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
     config(): IPage {
-      return this.pageState.config
+      if (!this.pageState.config.isEnableBleed) return this.pageState.config
+      return {
+        ...this.pageState.config,
+        ...pageUtils.getPageSizeWithBleeds(this.pageState.config)
+      }
     },
     scaleContainerStyles(): { [index: string]: string } {
       const transform = `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`
@@ -416,10 +420,7 @@ export default Vue.extend({
       return this.currSelectedInfo.layers.length
     },
     resizerHint(): string {
-      return !this.isResizingPage ? '拖曳調整畫布高度' : `${round(this.config.physicalHeight, PRECISION)}${this.config.unit}`
-    },
-    hasBleed(): boolean {
-      return !!this.config.bleeds.top || !!this.config.bleeds.bottom || !!this.config.bleeds.left || !!this.config.bleeds.right
+      return !this.isResizingPage ? '拖曳調整畫布高度' : `${round(this.pageState.config.physicalHeight, PRECISION)}${this.config.unit}`
     },
     sizeStyles(): any {
       return {
@@ -433,8 +434,6 @@ export default Vue.extend({
       ADD_newLayers: 'ADD_newLayers',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setDropdown: 'popup/SET_STATE',
-      _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page',
       setPanelType: 'SET_currFunctionPanelType',
       setSidebarType: 'SET_currSidebarPanelType',
       setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
@@ -476,34 +475,21 @@ export default Vue.extend({
           'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
         }
     },
-    bleedLineStyles() {
-      const scaleRatio = this.scaleRatio / 100
-      let boxShadow = '0 0 3px 1px rgba(0, 0, 0, 0.15)'
-      const borderSize = { top: 1, bottom: 1 }
-      if (this.isDetailPage && this.pages.length > 1) {
-        const maskTop = '0 -6px 0px 0px white, '
-        const maskBottom = '0 6px 0px 0px white, '
-        if (this.pageIndex === 0) {
-          boxShadow = maskBottom + boxShadow
-          borderSize.bottom = 0
-        } else if (this.pageIndex === this.pagesLength - 1) {
-          boxShadow = maskTop + boxShadow
-          borderSize.top = 0
-        } else {
-          boxShadow = maskBottom + maskTop + boxShadow
-          borderSize.bottom = 0
-          borderSize.top = 0
+    bleedLineAreaStyles() {
+      if (!this.config.isEnableBleed) {
+        return {
+          top: '0px',
+          bottom: '0px',
+          left: '0px',
+          right: '0px'
         }
       }
-
+      const scaleRatio = this.scaleRatio / 100
       return {
         top: this.config.bleeds.top * scaleRatio + 'px',
         bottom: this.config.bleeds.bottom * scaleRatio + 'px',
         left: this.config.bleeds.left * scaleRatio + 'px',
-        right: this.config.bleeds.right * scaleRatio + 'px',
-        borderTop: borderSize.top + 'px dashed white',
-        borderBottom: borderSize.bottom + 'px dashed white',
-        boxShadow
+        right: this.config.bleeds.right * scaleRatio + 'px'
       }
     },
     addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup): void {
@@ -559,22 +545,15 @@ export default Vue.extend({
       GroupUtils.reset()
 
       pageUtils.addPageToPos(pageUtils.newPage({
-        width: this.config.width,
-        height: this.config.height,
-        physicalWidth: this.config.physicalWidth,
-        physicalHeight: this.config.physicalHeight,
-        isEnableBleed: this.config.isEnableBleed,
-        bleeds: this.config.bleeds,
-        physicalBleeds: this.config.physicalBleeds,
-        unit: this.config.unit
+        width: this.pageState.config.width,
+        height: this.pageState.config.height,
+        physicalWidth: this.pageState.config.physicalWidth,
+        physicalHeight: this.pageState.config.physicalHeight,
+        isEnableBleed: this.pageState.config.isEnableBleed,
+        bleeds: this.pageState.config.bleeds,
+        physicalBleeds: this.pageState.config.physicalBleeds,
+        unit: this.pageState.config.unit
       }), this.pageIndex + 1)
-
-      // remove top and bottom bleeds for email marketing design
-      if (this.isDetailPage) {
-        resizeUtils.resizeBleeds(this.pageIndex + 1, { ...this.config.physicalBleeds, top: 0 })
-        resizeUtils.resizeBleeds(this.pageIndex, { ...this.config.physicalBleeds, bottom: 0 })
-      }
-
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })
       StepsUtils.record()
@@ -586,20 +565,7 @@ export default Vue.extend({
       } else {
         this.setCurrActivePageIndex(this.pageIndex)
       }
-      this._deletePage(this.pageIndex)
-
-      // add top and bottom bleeds for email marketing design
-      if (this.isDetailPage) {
-        if (this.pages.length === 1) {
-          resizeUtils.resizeBleeds(0, {
-            ...this.config.physicalBleeds,
-            top: this.pageIndex === 0 ? this.config.physicalBleeds.top : this.getPage(0).physicalBleeds.top,
-            bottom: this.pageIndex === 1 ? this.config.physicalBleeds.bottom : this.getPage(0).physicalBleeds.bottom
-          })
-        } else if (this.pageIndex === 0) resizeUtils.resizeBleeds(0, this.config.physicalBleeds)
-        else if (this.pageIndex === this.pages.length) resizeUtils.resizeBleeds(this.pages.length - 1, this.config.physicalBleeds)
-      }
-
+      pageUtils.deletePage(this.pageIndex)
       StepsUtils.record()
     },
     duplicatePage() {
@@ -620,14 +586,6 @@ export default Vue.extend({
       page.designId = ''
       page.id = generalUtils.generateRandomString(8)
       pageUtils.addPageToPos(page, this.pageIndex + 1)
-
-      // remove top and bottom bleeds for email marketing design
-      // TODO: resize bleeds before copy
-      if (this.isDetailPage) {
-        resizeUtils.resizeBleeds(this.pageIndex + 1, { ...page.physicalBleeds, top: 0 })
-        resizeUtils.resizeBleeds(this.pageIndex, { ...this.config.physicalBleeds, bottom: 0 })
-      }
-
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })
       StepsUtils.record()
@@ -666,11 +624,10 @@ export default Vue.extend({
       window.dispatchEvent(event)
     },
     pageResizeStart(e: PointerEvent) {
-      this.initialPageHeight = (this.config as IPage).height
+      this.initialPageHeight = this.pageState.config.height
       this.isResizingPage = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-      this.displayDPI = this.config.height / unitUtils.convert(this.config.physicalHeight, this.config.unit, 'in')
       eventUtils.addPointerEvent('pointermove', this.pageResizing)
       this.overflowContainer.addEventListener('scroll', this.scrollUpdate, { capture: true })
       eventUtils.addPointerEvent('pointerup', this.pageResizeEnd)
@@ -686,7 +643,8 @@ export default Vue.extend({
         const minHeight = Math.max(pageUtils.MIN_SIZE, this.config.bleeds?.top ?? 0 + this.config.bleeds?.bottom ?? 0)
         const maxHeight = floor(pageUtils.MAX_AREA / this.config.width)
         const newHeight = Math.min(Math.max(Math.trunc(this.initialPageHeight + yDiff), minHeight), maxHeight)
-        const newPhysicalHeight = unitUtils.convert(newHeight / this.displayDPI, 'in', this.config.unit)
+        const dpi = pageUtils.getPageDPI(this.pageState.config)
+        const newPhysicalHeight = unitUtils.convert(newHeight / dpi.height, 'in', this.config.unit)
         pageUtils.updatePageProps({
           height: newHeight,
           physicalHeight: newPhysicalHeight
@@ -694,15 +652,16 @@ export default Vue.extend({
       } else {
         this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
         this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-        this.initialPageHeight = (this.config as IPage).height
+        this.initialPageHeight = this.pageState.config.height
       }
       this.isShownScrollBar = isShownScrollbar
     },
     pageResizeEnd(e: PointerEvent) {
-      this.initialPageHeight = (this.config as IPage).height
+      this.initialPageHeight = this.pageState.config.height
       this.isResizingPage = false
-      const newHeight = Math.round(this.config.height)
-      const newPhysicalHeight = unitUtils.convert(newHeight / this.displayDPI, 'in', this.config.unit)
+      const newHeight = Math.round(this.pageState.config.height)
+      const dpi = pageUtils.getPageDPI(this.pageState.config)
+      const newPhysicalHeight = unitUtils.convert(newHeight / dpi.height, 'in', this.config.unit)
       pageUtils.updatePageProps({
         height: newHeight,
         physicalHeight: newPhysicalHeight
@@ -820,10 +779,9 @@ export default Vue.extend({
 
 .page-highlighter {
   position: absolute;
-  top: 0px;
-  left: 0px;
+  top: -2px;
+  left: -2px;
   border: 2px solid setColor(blue-2);
-  box-sizing: border-box;
   z-index: setZindex("page-highlighter");
   pointer-events: none;
 }
@@ -869,24 +827,6 @@ export default Vue.extend({
   pointer-events: none;
 }
 
-.dim-background {
-  position: absolute;
-  transform: translateZ(1000px);
-  top: 0px;
-  left: 0px;
-  background: rgba(0, 0, 0, 0.4);
-  pointer-events: none;
-  transform-style: preserve-3d;
-}
-
-.background-control {
-  position: absolute;
-  // transform: translateZ(1000px);
-  z-index: 1000;
-  background-color: rgba(0, 0, 0, 0.6);
-  color: white;
-}
-
 .skeleton {
   background-color: setColor(white);
 }
@@ -900,13 +840,10 @@ export default Vue.extend({
   left: 50%;
 }
 
-.bleed-line {
+div[class*="nu-page-bleed"] {
   pointer-events: none;
   position: absolute;
   left: 0px;
   top: 0px;
-  box-sizing: border-box;
-  border: 1px dashed white;
-  box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.15);
 }
 </style>

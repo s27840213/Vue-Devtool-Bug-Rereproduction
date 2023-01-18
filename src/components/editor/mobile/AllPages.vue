@@ -75,14 +75,21 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _addPage: 'ADD_page',
       _setPagesPerRow: 'page/SET_PagesPerRow',
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
     addPage() {
-      const { width, height } = pageUtils.getPageSize(pageUtils.pageNum - 1)
-      pageUtils.addPage(pageUtils.newPage({ width, height }))
-
+      const lastPage = pageUtils.pageNum > 0 ? pageUtils.getPages[pageUtils.pageNum - 1] : undefined
+      pageUtils.addPageToPos(pageUtils.newPage(lastPage ? {
+        width: lastPage.width,
+        height: lastPage.height,
+        physicalWidth: lastPage.physicalWidth,
+        physicalHeight: lastPage.physicalHeight,
+        isEnableBleed: lastPage.isEnableBleed,
+        bleeds: lastPage.bleeds,
+        physicalBleeds: lastPage.physicalBleeds,
+        unit: lastPage.unit
+      } : {}), pageUtils.pageNum)
       this._setCurrActivePageIndex(pageUtils.pageNum - 1)
       editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
       stepsUtils.record()

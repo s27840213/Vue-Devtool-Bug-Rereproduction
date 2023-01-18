@@ -4,34 +4,36 @@ import { IDownloadTypeAttrs, IDownloadServiceParams } from '@/interfaces/downloa
 import GeneralUtils from './generalUtils'
 
 class DownloadUtil {
-  private fileAttrs = {
-    jpg: {
-      scale: 1,
-      quality: 90
-      // bleed: 0
-    },
-    png: {
-      scale: 1,
-      omitBackground: 0
-      // bleed: 0
-    },
-    pdf_standard: {
-      outline: 1,
-      cmyk: 0
-    },
-    pdf_print: {
-      // trim: 0,
-      // bleed: 1,
-      outline: 1,
-      cmyk: 0
-    },
-    svg: {
-      omitBackground: 0
-    },
-    mp4: {},
-    gif: {}
-  } as { [key: string]: IDownloadTypeAttrs }
+  get fileAttrs() {
+    return {
+      jpg: {
+        scale: 1,
+        quality: 90,
+        ...(this.isAdmin && { bleed: 0 })
+      },
+      png: {
+        scale: 1,
+        omitBackground: 0,
+        ...(this.isAdmin && { bleed: 0 })
+      },
+      pdf_standard: {
+        outline: 0,
+        cmyk: 0
+      },
+      pdf_print: {
+        ...(this.isAdmin && { bleed: 1 }),
+        outline: 1,
+        cmyk: 0
+      },
+      svg: {
+        omitBackground: 0
+      },
+      mp4: {},
+      gif: {}
+    } as { [key: string]: IDownloadTypeAttrs }
+  }
 
+  get isAdmin(): boolean { return store.getters['user/isAdmin'] }
   get userId(): string { return store.getters['user/getUserId'] }
 
   getTypeAttrs (type: string): IDownloadTypeAttrs {

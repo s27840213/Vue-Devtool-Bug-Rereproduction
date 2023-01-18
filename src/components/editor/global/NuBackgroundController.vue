@@ -1,6 +1,5 @@
 <template lang="pug">
   div(class="nu-background-controller")
-    div(class="dim-background" :style="dimBgStyles")
     div(class="nu-controller__body"
         ref="body"
         :style="styles"
@@ -368,15 +367,5 @@ export default Vue.extend({
       height: max-content;
     }
   }
-}
-
-.dim-background {
-  // @include size(100%, 100%);
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  background: rgba(0, 0, 0, 0.4);
-  pointer-events: none;
-  // transform-style: preserve-3d;
 }
 </style>

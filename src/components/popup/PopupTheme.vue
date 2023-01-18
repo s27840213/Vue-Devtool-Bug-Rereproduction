@@ -91,7 +91,7 @@ export default Vue.extend({
       this.$emit('close')
     },
     handleRecommend() {
-      const currFocusPageSize = pageUtils.currFocusPageSizeWithBleeds
+      const currFocusPageSize = pageUtils.currFocusPageSize
       const themes = themeUtils.getThemesBySize(currFocusPageSize.width, currFocusPageSize.height)
       this.initSelected(themes.map(theme => `${theme.id}`))
     }

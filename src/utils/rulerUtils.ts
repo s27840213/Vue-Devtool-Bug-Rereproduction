@@ -127,7 +127,6 @@ class RulerUtils {
     const guidelineRect = guideline.getBoundingClientRect()
     const targetPageIndex = from === -1 ? pageUtils.currFocusPageIndex : from
     const targetPage: IPage = from === -1 ? this.currFocusPage : pageUtils.getPage(targetPageIndex)
-    const { width, height } = pageUtils.getPageSizeWithBleeds(targetPage)
 
     switch (type) {
       case 'v': {
@@ -135,7 +134,7 @@ class RulerUtils {
         const mapResult = (guidelineRect.left - pageRect.left) / (this.scaleRatio / 100)
         return {
           pos: mapResult,
-          outOfPage: mapResult < 0 || mapResult > width
+          outOfPage: mapResult < 0 || mapResult > targetPage.width
         }
       }
       case 'h': {
@@ -143,7 +142,7 @@ class RulerUtils {
         const mapResult = (guidelineRect.top - pageRect.top) / (this.scaleRatio / 100)
         return {
           pos: mapResult,
-          outOfPage: mapResult < 0 || mapResult > height
+          outOfPage: mapResult < 0 || mapResult > targetPage.height
         }
       }
     }

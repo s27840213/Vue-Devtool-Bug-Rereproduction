@@ -54,8 +54,8 @@ class SnapUtils {
     /**
      * Push page edge and center snapline first
      */
-    const v = [0, page.width / 2, page.width, ...this.guidelinePos.v]
-    const h = [0, page.height / 2, page.height, ...this.guidelinePos.h]
+    const v = [-1, page.width / 2, page.width + 1, ...this.guidelinePos.v]
+    const h = [-1, page.height / 2, page.height + 1, ...this.guidelinePos.h]
 
     /**
      * Then push all bounding edges and center line of layers

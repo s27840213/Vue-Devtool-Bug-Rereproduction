@@ -21,7 +21,6 @@ class DownloadService {
       cmyk: params.cmyk,
       outline: params.outline,
       bleed: params.bleed,
-      trim: params.trim,
       merge: params.merge,
       split_size: params.splitSize,
       new_test: useDev,

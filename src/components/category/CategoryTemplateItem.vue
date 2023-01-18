@@ -94,7 +94,7 @@ export default Vue.extend({
         .map(theme => theme.id).join(',')
       const isSameTheme = themeUtils.compareThemesWithPage(theme)
       */
-      const pageSize = pageUtils.currFocusPageSizeWithBleeds
+      const pageSize = pageUtils.currFocusPageSize
       const isSameSize = pageSize.physicalWidth === width && pageSize.physicalHeight === height && pageSize.unit === 'px'
       const cb = this.groupItem
         ? (resize?: any) => {
