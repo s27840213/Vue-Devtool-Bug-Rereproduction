@@ -180,7 +180,7 @@ export default defineComponent({
     getAd(name: IPaymentWarningView): string[] {
       switch (name) {
         case 'export-pdf-print':
-          return [i18n.tc('NN0806'), 'export-pdf-print.jpg']
+          return [this.$tc('NN0806'), 'export-pdf-print.jpg']
         case 'page-resize':
           return [this.$tc('NN0768'), 'page-resize.jpg']
         case 'brandkit':
