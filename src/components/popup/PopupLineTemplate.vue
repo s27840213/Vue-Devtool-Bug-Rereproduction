@@ -163,7 +163,7 @@ export default defineComponent({
     justify-content: center;
     aspect-ratio: 1/1;
   }
-  &__icon::v-deep {
+  &__icon {
     stroke: #969bab;
     transition: stroke 0.1s ease-in, stroke-width 0.1s ease-in;
     &:hover {

@@ -10,7 +10,8 @@ div(class="panel-file"
     :myfile="myfileImages"
     vendor="myfile"
     :inFilePanel="true"
-    @loadMore="handleLoadMore")
+    @loadMore="handleLoadMore"
+    @scroll.passive="handleScrollTop($event, 'mainContent')")
     template(#pending)
       div(v-if="pending" class="text-center")
         svg-icon(iconName="loading"
@@ -74,12 +75,7 @@ export default defineComponent({
     (this.$refs.mainContent as CImageGallery).myfileUpdate()
   },
   activated() {
-    (this.$refs.mainContent as CImageGallery).$el.children[0].scrollTop = this.scrollTop.mainContent;
-    (this.$refs.mainContent as CImageGallery).$el.children[0].addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-  },
-  deactivated() {
-    const mainContent = this.$refs.mainContent as CImageGallery
-    mainContent && mainContent.$el.children[0].removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    (this.$refs.mainContent as CImageGallery).$el.children[0].scrollTop = this.scrollTop.mainContent
   },
   methods: {
     ...mapActions({

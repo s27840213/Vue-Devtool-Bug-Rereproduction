@@ -97,7 +97,10 @@ export default defineComponent({
       this.previewCheckReady = false
       if (this.config.polling) {
         this.previewCheckReady = true
-        this.setDesignThumbnail({ id: this.config.id, thumbnail: this.previewPlaceholder })
+        this.setDesignThumbnail({
+          asset_index: this.config.asset_index,
+          thumbnail: this.previewPlaceholder
+        })
         this.pollingStep()
       } else {
         imageUtils.getImageSize(this.configPreview, 150, 150, false).then((size) => {
@@ -105,7 +108,10 @@ export default defineComponent({
           this.imgWidth = width
           this.imgHeight = height
           this.previewCheckReady = true
-          this.setDesignThumbnail({ id: this.config.id, thumbnail: exists ? this.configPreview : this.previewPlaceholder })
+          this.setDesignThumbnail({
+            asset_index: this.config.asset_index,
+            thumbnail: exists ? this.configPreview : this.previewPlaceholder
+          })
         })
       }
     },
@@ -123,7 +129,10 @@ export default defineComponent({
         this.imgWidth = width
         this.imgHeight = height
         if (exists) {
-          this.setDesignThumbnail({ id: this.config.id, thumbnail: this.configPreview })
+          this.setDesignThumbnail({
+            asset_index: this.config.asset_index,
+            thumbnail: this.configPreview
+          })
         } else if (step < 35) {
           setTimeout(() => {
             this.pollingStep(step + 1)

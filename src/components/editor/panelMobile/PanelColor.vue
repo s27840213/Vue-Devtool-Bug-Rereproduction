@@ -311,7 +311,7 @@ export default defineComponent({
     height: 1px;
     background-color: setColor(gray-4);
   }
-  & .show-document-colors::v-deep .color-panel__scroll {
+  & .show-document-colors:deep(.color-panel__scroll) {
     padding-top: 16px;
   }
 }

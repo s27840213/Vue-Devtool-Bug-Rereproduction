@@ -11,7 +11,8 @@ div(class="panel-photo")
   //- Search result and main content
   image-gallery(v-for="item in categoryListArray"
                 v-show="item.show" :ref="item.key" :key="item.key"
-                :images="item.content" @loadMore="handleLoadMore" vendor="unsplash")
+                :images="item.content" @loadMore="handleLoadMore" vendor="unsplash"
+                @scroll.passive="handleScrollTop($event, item.key)")
     template(#pending)
       div(v-if="pending" class="text-center")
         svg-icon(iconName="loading"
@@ -72,14 +73,6 @@ export default defineComponent({
     const searchResult = (this.$refs.searchResult as CImageGallery[])[0]
     mainContent.$el.scrollTop = this.scrollTop.mainContent
     searchResult.$el.scrollTop = this.scrollTop.searchResult
-    mainContent.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    searchResult.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
-  },
-  deactivated() {
-    const mainContent = (this.$refs.mainContent as CImageGallery[])[0]
-    const searchResult = (this.$refs.searchResult as CImageGallery[])[0]
-    mainContent && mainContent.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    searchResult && searchResult.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   watch: {
     keyword(newVal: string) {
