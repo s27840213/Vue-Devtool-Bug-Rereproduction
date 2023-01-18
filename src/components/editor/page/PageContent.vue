@@ -188,7 +188,7 @@ export default Vue.extend({
     bleedLineStyles() {
       return {
         top: (this.config.bleeds.top - 1) * this.contentScaleRatio + 'px',
-        bottom: (this.config.bleeds.bottom - 1) * this.contentScaleRatio + 'px',
+        bottom: (this.config.bleeds.bottom + (this.userId === 'backendRendering' ? 8 : 0) - 1) * this.contentScaleRatio - this.config.bleeds.bottom + 'px',
         left: (this.config.bleeds.left - 1) * this.contentScaleRatio + 'px',
         right: (this.config.bleeds.right - 1) * this.contentScaleRatio + 'px',
         border: this.userId === 'backendRendering' ? `${this.contentScaleRatio}px solid white` : `${this.config.isEnableBleed ? this.contentScaleRatio : 0}px dashed white`,
