@@ -379,7 +379,7 @@ export default defineComponent({
       if (this.config.polling) {
         this.pageImages = Array(this.config.pageNum).fill(this.previewPlaceholder)
         this.previewCheckReady = true
-        this.setDesignThumbnail({ id: this.config.id, thumbnail: this.previewPlaceholder })
+        this.setDesignThumbnail({ asset_index: this.config.asset_index, thumbnail: this.previewPlaceholder })
         this.pollingStep()
       } else {
         if (this.isTempDesign) return
@@ -389,7 +389,10 @@ export default defineComponent({
           this.imgWidth = width
           this.imgHeight = height
           this.previewCheckReady = true
-          this.setDesignThumbnail({ id: this.config.id, thumbnail: exists ? this.configPreview : this.previewPlaceholder })
+          this.setDesignThumbnail({
+            asset_index: this.config.asset_index,
+            thumbnail: exists ? this.configPreview : this.previewPlaceholder
+          })
         })
       }
     },
@@ -408,7 +411,7 @@ export default defineComponent({
         this.imgWidth = width
         this.imgHeight = height
         if (exists) {
-          this.setDesignThumbnail({ id: this.config.id, thumbnail: this.configPreview })
+          this.setDesignThumbnail({ asset_index: this.config.asset_index, thumbnail: this.configPreview })
         } else if (step < 35) {
           setTimeout(() => {
             this.pollingStep(step + 1)

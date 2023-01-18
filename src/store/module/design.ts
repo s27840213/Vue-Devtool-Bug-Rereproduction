@@ -5,6 +5,7 @@ import designApis from '@/apis/design'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 import router from '@/router'
 import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
+import { isEqual, update } from 'lodash'
 
 interface IDesignState {
   currLocation: string,
@@ -1034,8 +1035,8 @@ const mutations: MutationTree<IDesignState> = {
   SET_mobilePathBuffer(state: IDesignState, mobilePathBuffer: string[]) {
     state.mobilePathBuffer = mobilePathBuffer
   },
-  UPDATE_setDesignThumbnail(state: IDesignState, updateInfo: { id: string, thumbnail: string }) {
-    const design = state.allDesigns.find((design) => design.id === updateInfo.id)
+  UPDATE_setDesignThumbnail(state: IDesignState, updateInfo: { asset_index: number, thumbnail: string }) {
+    const design = state.allDesigns.find((design) => design.asset_index === updateInfo.asset_index)
     if (design) {
       design.thumbnail = updateInfo.thumbnail
     }
