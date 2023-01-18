@@ -19,7 +19,8 @@ div(class="panel-bg" :class="{'panel-flash': panelFlash}" @animationend="panelFl
   //- Search result and main content
   category-list(v-for="item in categoryListArray"
                 v-show="item.show" :ref="item.key" :key="item.key"
-                :list="item.content" @loadMore="handleLoadMore")
+                :list="item.content" @loadMore="handleLoadMore"
+                @scroll.passive="handleScrollTop($event, item.key)")
     template(v-slot:category-list-rows="{ list, title }")
       category-list-rows(
         :list="list"
@@ -192,14 +193,6 @@ export default defineComponent({
     const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
     mainContent.$el.scrollTop = this.scrollTop.mainContent
     searchResult.$el.scrollTop = this.scrollTop.searchResult
-    mainContent.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    searchResult.$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
-  },
-  deactivated() {
-    const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
-    const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
-    mainContent && mainContent.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    searchResult && searchResult.$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   watch: {
     keyword(newVal: string) {
