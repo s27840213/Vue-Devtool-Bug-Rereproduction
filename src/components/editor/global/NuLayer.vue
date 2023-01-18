@@ -32,7 +32,7 @@
               :isTransparent="div.isTransparent"
               :noShadow="div.noShadow"
               v-bind="$attrs")
-          svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
+          svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !controllerHidden && !forRender"
             :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
             g(v-html="frameClipFormatter(config.clipPath)"
               :style="frameClipStyles")
@@ -234,6 +234,7 @@ export default Vue.extend({
       isProcessImgShadow: 'shadow/isProcessing',
       currSelectedInfo: 'getCurrSelectedInfo',
       scaleRatio: 'getPageScaleRatio',
+      controllerHidden: 'vivisticker/getControllerHidden',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isUploadingShadowImg: 'shadow/isUploading',
       isHandling: 'shadow/isHandling',
