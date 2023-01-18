@@ -1,4 +1,3 @@
-import VueRouter from 'vue-router'
 import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
 import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
 import designApis from '@/apis/design'
@@ -807,8 +806,7 @@ class DesignUtils {
   }
 
   // Below function is used to update the page
-  // async newDesign(width?: number, height?: number, newDesignType?: number, path?: string, folderName?: string, to?: VueRouter.RouteLocationNormalized) {
-  async newDesign(width = 1080, height = 1080, unit = 'px', newDesignType?: number, path?: string, folderName?: string, to?: VueRouter.RouteLocationNormalized) {
+  async newDesign(width = 1080, height = 1080, unit = 'px', newDesignType?: number) {
     store.commit('file/SET_setLayersDone')
     const pxSize = unitUtils.convertSize(width, height, unit, 'px')
     const inSize = unitUtils.convertSize(width, height, unit, 'in')
@@ -831,24 +829,7 @@ class DesignUtils {
     })])
     pageUtils.clearPagesInfo()
     await themeUtils.refreshTemplateState(undefined, newDesignType)
-
-    // if (this.isLogin) {
-    //   router.replace({
-    //     query: { width: width?.toString(), height: height?.toString(), ...(path && { path }), ...(folderName && { folderName }) },
-    //     path: to?.path ?? router.currentRoute.value.path
-    //   })
-    if (this.isLogin) {
-      const query = router.currentRoute.value.query
-      query.width = width.toString()
-      query.height = height.toString()
-      query.unit = unit
-      if (path) query.path = path
-      if (folderName) query.folderName = folderName
-      router.push({
-        query,
-        path: to?.path ?? router.currentRoute.value.path
-      })
-    }
+    // Set default url query 'unit' in Editor.vue
   }
 
   newDesignWithTemplae(width: number, height: number, json: any, templateId: string, groupId: string) {

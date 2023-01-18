@@ -189,7 +189,6 @@ export default defineComponent({
       stepsUtils.record()
     },
     newDesign() {
-      // designUtils.newDesign()
       const path = `${window.location.origin}${window.location.pathname}`
       window.open(path)
       this.closePopup()
@@ -202,7 +201,6 @@ export default defineComponent({
     },
     exportJSON() {
       fileUtils.export()
-      // designUtils.newDesign()
     },
     toogleAdminView() {
       this.setUserState({ enableAdminView: !this.enableAdminView })
