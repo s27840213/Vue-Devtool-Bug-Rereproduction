@@ -7,7 +7,6 @@
         :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : null"
         :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
         :data-p-index="pageIndex"
-        v-press="isTouchDevice() && div.main ? onPress : -1"
         @pointerdown="div.main ? onPointerDown($event) : null"
         @pointerup="div.main ? onPointerUp($event) : null"
         @contextmenu.prevent
