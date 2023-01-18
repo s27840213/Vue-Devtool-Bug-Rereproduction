@@ -8,7 +8,7 @@ import store from './store'
 import i18n from './i18n'
 import VueMeta from 'vue-meta'
 // import 'floating-vue/dist/style.css'
-// import FloatingVue from 'floating-vue'
+import FloatingVue from 'floating-vue'
 import TooltipUtils from './utils/tooltipUtils'
 import VueGtm from '@gtm-support/vue2-gtm'
 import svgIconUtils from './utils/svgIconUtils'
@@ -88,9 +88,9 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(VueRecyclerviewNew)
 app.use(Notifications)
 // app.use(VueMeta)
-// app.use(FloatingVue, {
-//   themes: tooltipUtils.themes
-// })
+app.use(FloatingVue, {
+  themes: tooltipUtils.themes
+})
 
 // app.use(VueGtm, {
 //   id: 'GTM-T7LDWBP',
