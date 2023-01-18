@@ -107,12 +107,13 @@ const routes: Array<RouteConfig> = [
         const dpi = +(urlParams.get('dpi') ?? -1)
         const bleed = !!+(urlParams.get('bleed') ?? 0)
         const trim = !!+(urlParams.get('trim') ?? 0)
+        const margin = +(urlParams.get('margin') ?? 0)
         const renderForPDF = urlParams.get('renderForPDF')
 
         if (token && teamId && url) {
           // for new version
           // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET
-          store.commit('user/SET_STATE', { token, teamId, dpi, bleed, trim })
+          store.commit('user/SET_STATE', { token, teamId, dpi, backendRenderParams: { isBleed: bleed, isTrim: trim, margin } })
           store.commit('user/SET_STATE', { userId: 'backendRendering' })
           const response = await (await fetch(`https://${url}`)).json()
           await assetUtils.addTemplate(response, { pageIndex: 0 })
@@ -137,7 +138,8 @@ const routes: Array<RouteConfig> = [
             const dpi = +(querys.dpi ?? -1)
             const bleed = !!+querys.bleed
             const trim = !!+querys.trim
-            store.commit('user/SET_STATE', { token, teamId, dpi, bleed, trim })
+            const margin = +(querys.margin ?? 0)
+            store.commit('user/SET_STATE', { token, teamId, dpi, backendRenderParams: { isBleed: bleed, isTrim: trim, margin } })
           }
           store.commit('user/SET_STATE', { userId: 'backendRendering' })
           const response = await (await fetch(`https://${src}`)).json()

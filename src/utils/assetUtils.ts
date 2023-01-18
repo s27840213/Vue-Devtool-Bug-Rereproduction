@@ -171,10 +171,10 @@ class AssetUtils {
     if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newLayer, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 
     if (store.getters['user/getUserId'] === 'backendRendering') {
-      if (store.getters['user/getBleed'] || store.getters['user/getTrim']) {
-        // use bleeds of page if it has
+      const { isBleed, isTrim } = store.getters['user/getBackendRenderParams']
+      if (isBleed || isTrim) {
         pageUtils.setIsEnableBleed(true, targetPageIndex)
-        if (json.bleeds && json.physicalBleeds) pageUtils.setBleeds(targetPageIndex, json.physicalBleeds, json.bleeds)
+        if (json.bleeds && json.physicalBleeds) pageUtils.setBleeds(targetPageIndex, json.physicalBleeds, json.bleeds) // use bleeds of page if it has
       } else pageUtils.setIsEnableBleed(false, targetPageIndex)
     } else {
       if (targetPage.isEnableBleed && targetPage.bleeds && targetPage.physicalBleeds) {

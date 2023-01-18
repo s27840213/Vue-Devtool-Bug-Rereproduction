@@ -55,8 +55,11 @@ export interface IUserModule {
     }
   },
   dpi?: number,
-  bleed?: boolean,
-  trim?: boolean
+  backendRenderParams: {
+    isBleed: boolean,
+    isTrim: boolean,
+    margin: number
+  }
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -108,9 +111,12 @@ const getDefaultState = (): IUserModule => ({
   updateDesignType: '',
   dimensionMap: {},
   dpi: -1,
-  bleed: false,
-  trim: false,
-  renderForPDF: false
+  renderForPDF: false,
+  backendRenderParams: {
+    isBleed: false,
+    isTrim: false,
+    margin: 0
+  }
 })
 
 const state = getDefaultState()
@@ -203,11 +209,8 @@ const getters: GetterTree<IUserModule, any> = {
   getDimensionMap() {
     return state.dimensionMap
   },
-  getBleed() {
-    return state.bleed
-  },
-  getTrim() {
-    return state.trim
+  getBackendRenderParams(state) {
+    return state.backendRenderParams
   },
   getRenderForPDF() {
     return state.renderForPDF

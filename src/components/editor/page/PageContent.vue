@@ -49,7 +49,7 @@ div(class="overflow-container"
           :lazyLoadTarget="lazyLoadTarget"
           v-on="$listeners")
       div(v-if="isShowBleed" class="bleed-line" :style="bleedLineStyles")
-      div(v-if="this.userId === 'backendRendering' && this.trim" class="trim")
+      div(v-if="this.userId === 'backendRendering' && backendRenderParams.isTrim" class="trim")
         div(class="trim__tl" :style="trimStyles.tl")
         div(class="trim__tr" :style="trimStyles.tr")
         div(class="trim__bl" :style="trimStyles.bl")
@@ -129,7 +129,7 @@ export default Vue.extend({
       isShowPagePanel: 'page/getShowPagePanel',
       currSelectedPageIndex: 'getCurrSelectedPageIndex'
     }),
-    ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'bleed', 'trim']),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'backendRenderParams']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     isHandleShadow(): boolean {
       return this.isProcessImgShadow || this.isUploadImgShadow
@@ -138,7 +138,8 @@ export default Vue.extend({
       return {
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial',
+        ...(this.userId === 'backendRendering' && { marginBottom: this.backendRenderParams.margin + 'px' })
       }
     },
     stylesWith3DPreserve(): { [index: string]: string } {
@@ -162,7 +163,7 @@ export default Vue.extend({
     },
     isShowBleed() {
       if (this.userId === 'backendRendering') {
-        if (this.bleed || this.trim) return true
+        if (this.backendRenderParams.isBleed || this.backendRenderParams.isTrim) return true
       } else if (this.config.isEnableBleed) return true
       return false
     },
