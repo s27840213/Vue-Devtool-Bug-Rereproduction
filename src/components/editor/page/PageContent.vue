@@ -139,7 +139,7 @@ export default Vue.extend({
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial',
-        ...(this.userId === 'backendRendering' && { marginBottom: this.backendRenderParams.margin + 'px' })
+        ...(this.userId === 'backendRendering' && { marginBottom: 8 + 'px' })
       }
     },
     stylesWith3DPreserve(): { [index: string]: string } {
