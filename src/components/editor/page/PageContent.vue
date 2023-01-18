@@ -137,9 +137,9 @@ export default Vue.extend({
     pageStyles(): { [index: string]: string } {
       return {
         width: `${this.config.width * this.contentScaleRatio}px`,
-        height: `${this.config.height * this.contentScaleRatio}px`,
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial',
-        ...(this.userId === 'backendRendering' && { marginBottom: 8 + 'px' })
+        height: `${this.config.height * this.contentScaleRatio + (this.userId === 'backendRendering' ? 8 : 0)}px`,
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
+        // ...(this.userId === 'backendRendering' && { paddingBottom: 8 + 'px' })
       }
     },
     stylesWith3DPreserve(): { [index: string]: string } {
