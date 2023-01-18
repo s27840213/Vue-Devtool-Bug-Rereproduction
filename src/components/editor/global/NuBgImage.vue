@@ -1,24 +1,22 @@
 <template lang="pug">
-  div(v-if="!image.config.imgContorl" class="nu-background-image"
-    :style="mainStyles"
-    @pointerdown="setInBgSettingMode"
-    draggable="false")
-    div(v-show="!isColorBackground")
-      div(v-if="isAdjustImage" :style="frameStyles")
-        nu-adjust-image(:src="finalSrc"
-          @error="onError"
-          :styles="adjustImgStyles"
-          :contentScaleRatio="contentScaleRatio")
-      img(v-else-if="src" :src="finalSrc"
+  div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles")
+    div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
+      nu-adjust-image(v-if="isAdjustImage"
+        :src="finalSrc"
+        :styles="adjustImgStyles"
+        :contentScaleRatio="contentScaleRatio"
+        @error="onError")
+      img(v-else-if="src"
+        :src="finalSrc"
         draggable="false"
-        :style="imgStyles()"
         class="body"
-        @error="onError"
-        ref="body")
-    component(v-for="(elm, idx) in cssFilterElms"
-      :key="`cssFilter${idx}`"
-      :is="elm.tag"
-      v-bind="elm.attrs")
+        ref="body"
+        @error="onError")
+    div(:style="filterContainerStyles()" class="filter-container")
+      component(v-for="(elm, idx) in cssFilterElms"
+        :key="`cssFilter${idx}`"
+        :is="elm.tag"
+        v-bind="elm.attrs")
 </template>
 
 <script lang="ts">
@@ -34,7 +32,6 @@ import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
-import { IPage } from '@/interfaces/page'
 import unitUtils from '@/utils/unitUtils'
 
 export default Vue.extend({
@@ -45,6 +42,10 @@ export default Vue.extend({
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    padding: {
+      type: String,
+      default: '0'
     }
   },
   data() {
@@ -122,7 +123,9 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize',
-      getEditorViewImages: 'file/getEditorViewImages'
+      getEditorViewImages: 'file/getEditorViewImages',
+      imgControlPageIdx: 'imgControl/imgControlPageIdx',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'dpi']),
     configStyles(): IImageStyle {
@@ -157,13 +160,7 @@ export default Vue.extend({
       return ImageUtils.getSrcSize(srcObj, Math.max(renderW, renderH) * (this.scaleRatio / 100))
     },
     pageSizeData(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return {
-        width: pageUtils.getPage(this.pageIndex).width,
-        height: pageUtils.getPage(this.pageIndex).height,
-        physicalWidth: pageUtils.getPage(this.pageIndex).physicalWidth,
-        physicalHeight: pageUtils.getPage(this.pageIndex).physicalHeight,
-        unit: pageUtils.getPage(this.pageIndex).unit
-      }
+      return this.getPageSize(this.pageIndex)
     },
     srcObj(): SrcObj {
       return this.image.config.srcObj
@@ -174,18 +171,24 @@ export default Vue.extend({
     },
     imageSize(): { width: number, height: number, x: number, y: number } {
       const { image } = this
+      const offset = 1
+      const aspectRatio = image.config.styles.imgWidth / image.config.styles.imgHeight
+      const width = image.config.styles.imgWidth + (aspectRatio < 1 ? offset * 2 : offset * 2 * aspectRatio)
+      const height = image.config.styles.imgHeight + (aspectRatio > 1 ? offset * 2 : offset * 2 / aspectRatio)
+      const x = image.posX - (aspectRatio < 1 ? offset : offset * aspectRatio)
+      const y = image.posY - (aspectRatio > 1 ? offset : offset / aspectRatio)
       return {
-        width: image.config.styles.imgWidth * this.contentScaleRatio,
-        height: image.config.styles.imgHeight * this.contentScaleRatio,
-        x: image.posX * this.contentScaleRatio,
-        y: image.posY * this.contentScaleRatio
+        width: width * this.contentScaleRatio,
+        height: height * this.contentScaleRatio,
+        x: x * this.contentScaleRatio,
+        y: y * this.contentScaleRatio
       }
     },
     mainStyles(): any {
-      const { image, color } = this
       return {
-        opacity: image.config.styles.opacity / 100,
-        backgroundColor: color
+        padding: this.padding,
+        opacity: this.image.config.styles.opacity / 100,
+        backgroundColor: this.color
       }
     },
     isAdjustImage(): boolean {
@@ -194,32 +197,15 @@ export default Vue.extend({
         .values(styles.adjust || {})
         .some(val => typeof val === 'number' && val !== 0)
     },
-    frameStyles(): { [key: string]: string | number } {
-      const { flipStyles } = this
-      return {
-        width: `${this.imageSize.width}px`,
-        height: `${this.imageSize.height}px`,
-        transform: `translate(${this.imageSize.x}px, ${this.imageSize.y}px) ${flipStyles.transform}`
-      }
-    },
     adjustImgStyles(): { [key: string]: string | number } {
       return Object.assign(generalUtils.deepCopy(this.image.config.styles), {
         width: this.getPageSize(this.pageIndex).width,
         height: this.getPageSize(this.pageIndex).height,
-        imgX: this.image.posX,
-        imgY: this.image.posY
+        imgX: this.imageSize.x,
+        imgY: this.imageSize.y,
+        imgWidth: this.imageSize.width,
+        imgHeight: this.imageSize.height
       })
-    },
-    bgStyles(): { [key: string]: string | number } {
-      const { image } = this
-      return {
-        backgroundImage: `url(${this.src})`,
-        width: `${this.imageSize.width}px`,
-        height: `${this.imageSize.height}px`,
-        backgroundSize: `${this.imageSize.width}px ${this.imageSize.height}px`,
-        backgroundPosition: this.imageSize.x === -1 ? 'center center' : `${this.imageSize.x}px ${this.imageSize.y}px`,
-        ...this.flipStyles
-      }
     },
     cssFilterElms(): any[] {
       const { adjust } = this.image.config.styles
@@ -287,6 +273,9 @@ export default Vue.extend({
     },
     imgStyles(): Partial<IImage> {
       return this.stylesConverter()
+    },
+    filterContainerStyles() {
+      return { margin: this.padding }
     },
     async previewAsLoading() {
       let isPrimaryImgLoaded = false
@@ -391,17 +380,41 @@ export default Vue.extend({
   // will-change: opacity, transform;
   position: absolute;
   top: 0;
-  left: 0;
   right: 0;
   bottom: 0;
+  left: 0;
   &__picture {
     object-fit: cover;
     width: 100%;
     height: 100%;
   }
+  text-align: left;
+
+  &__color {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  &__image{
+    position: relative;
+    >img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+  }
 }
 
 .body {
   transition: opacity 1s;
+}
+
+.filter-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 </style>

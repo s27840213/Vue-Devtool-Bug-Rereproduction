@@ -142,7 +142,6 @@ export default Vue.extend({
       pageSizes: {} as IMapSize,
       aspectRatio: NaN,
       isLocked: true,
-      unitOptions: STR_UNITS,
       selectedUnit: '',
       showUnitOptions: false,
       copyBeforeApply: true,
@@ -173,6 +172,9 @@ export default Vue.extend({
     }),
     isTouchDevice() {
       return generalUtils.isTouchDevice()
+    },
+    unitOptions(): string[] {
+      return STR_UNITS
     },
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
@@ -277,7 +279,8 @@ export default Vue.extend({
         unit: item.unit ?? 'px'
       })).filter((layout: ILayout) => {
         const pxSize = unitUtils.convertSize(layout.width, layout.height, layout.unit, 'px')
-        return !(pxSize.width * pxSize.height > pageUtils.MAX_AREA)
+        if (pxSize.width * pxSize.height > pageUtils.MAX_AREA) return false
+        return true
       }) : []
     },
     isLayoutReady(): boolean {
@@ -334,7 +337,7 @@ export default Vue.extend({
       return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description} ${format.unit ?? 'px'}`
     },
     handleCurrFocusPageIndexChange() {
-      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSizeWithBleeds
+      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSize
       this.selectedUnit = unit ?? 'px'
       this.pageWidth = physicalWidth ?? width ?? 0
       this.pageHeight = physicalHeight ?? height ?? 0
@@ -430,26 +433,25 @@ export default Vue.extend({
         const { pagesLength, getPageSize } = this
         const resizingPage = pageUtils.getPage(this.currFocusPageIndex)
         for (let pageIndex = 0; pageIndex < pagesLength; pageIndex++) {
-          if (pageIndex === this.currFocusPageIndex) {
+          const isNewUnitPx = format.unit === 'px'
+          if (pageIndex === this.currFocusPageIndex) { // resize current page
             this.resizePage({
-              width: format.unit === 'px' ? format.width : resizingPage.width,
-              height: format.unit === 'px' ? format.height : Math.round(resizingPage.width / format.width * format.height),
+              width: isNewUnitPx ? format.width : resizingPage.width,
+              height: isNewUnitPx ? format.height : round(resizingPage.width / format.width * format.height),
               physicalWidth: format.width,
               physicalHeight: format.height,
               unit: format.unit
             })
-            continue
-          }
-          const { physicalWidth, physicalHeight, unit } = getPageSize(pageIndex)
-          if (format.unit === 'px') {
+          } else { // resize other pages to same px width and unit
+            const { width, height, physicalWidth, physicalHeight } = getPageSize(pageIndex)
             const newWidth = format.width
-            const newHeight = Math.round(newWidth / physicalWidth * physicalHeight)
+            const newHeight = round(newWidth / physicalWidth * physicalHeight, isNewUnitPx ? 0 : PRECISION)
             resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), {
-              width: newWidth,
-              height: newHeight,
-              physicalWidth: unit === 'px' ? newWidth : physicalWidth,
-              physicalHeight: unit === 'px' ? newHeight : physicalHeight,
-              unit
+              width: isNewUnitPx ? newWidth : width,
+              height: isNewUnitPx ? newHeight : height,
+              physicalWidth: newWidth,
+              physicalHeight: newHeight,
+              unit: format.unit
             })
           }
         }

@@ -60,7 +60,7 @@
               div(v-if="!isNameEditing" class="menu__editable-name__icon"
                   @click.stop="handleNameClick")
                 svg-icon(iconName="pen" iconWidth="18px" iconColor="gray-2")
-            div(v-if="!isNameEditing" class="menu__description" @click.stop.prevent) {{ `${designBuffer.width} x ${designBuffer.height}` }}
+            div(v-if="!isNameEditing" class="menu__description" @click.stop.prevent) {{ `${designBuffer.width} x ${designBuffer.height} ${designBuffer.unit}` }}
             div(v-if="isNameEditing" style="width: 100%; height: 8px;")
             div(v-else class="menu__hr")
           div(v-else style="margin-top: 20px;")

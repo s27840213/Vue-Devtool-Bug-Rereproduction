@@ -27,6 +27,7 @@ import vivistickerUtils from './vivistickerUtils'
 import mathUtils from './mathUtils'
 import tiptapUtils from './tiptapUtils'
 import unitUtils from './unitUtils'
+import backgroundUtils from './backgroundUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -170,28 +171,28 @@ class AssetUtils {
     if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newLayer, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 
     if (store.getters['user/getUserId'] === 'backendRendering') {
-      if (store.getters['user/getUserId'] === 'backendRendering' && !store.getters['user/getBleed'] && !store.getters['user/getTrim']) {
-        // remove bleeds if disabled
-        // console.log('noBleed')
-        resizeUtils.disableBleeds(targetPageIndex)
-      } else if (json.isEnableBleed && json.bleeds && json.physicalBleeds) {
-        // use bleeds of template if it has
-        resizeUtils.resizeBleeds(targetPageIndex, json.physicalBleeds, json.bleeds)
-      } else {
-        // use default bleeds if it has no bleeds
-        // console.log('defaultBleed')
-        const page = this.getPage(targetPageIndex)
-        resizeUtils.resizeBleeds(targetPageIndex, pageUtils.getDefaultBleeds(page.unit, pageUtils.getPageDPI(page)))
-      }
-    } else if (targetPage.isEnableBleed && targetPage.bleeds && targetPage.physicalBleeds) {
-      // convert bleeds to template unit
-      const dpi = pageUtils.getPageDPI(targetPage)
-      const physicalBleeds = targetPage.unit === 'px' ? targetPage.bleeds
-        : targetPage.unit === attrs?.unit ? targetPage.physicalBleeds
-          : Object.fromEntries(Object.entries(targetPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, targetPage.unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+      if (store.getters['user/getBleed'] || store.getters['user/getTrim']) {
+        // use bleeds of page if it has
+        pageUtils.setIsEnableBleed(true, targetPageIndex)
+        if (json.bleeds && json.physicalBleeds) pageUtils.setBleeds(targetPageIndex, json.physicalBleeds, json.bleeds)
+      } else pageUtils.setIsEnableBleed(false, targetPageIndex)
+    } else {
+      if (targetPage.isEnableBleed && targetPage.bleeds && targetPage.physicalBleeds) {
+        const resizedPage = this.getPage(targetPageIndex)
 
-      // apply bleeds of targetPage
-      resizeUtils.resizeBleeds(targetPageIndex, physicalBleeds)
+        // convert bleeds to template unit
+        const dpi = pageUtils.getPageDPI(resizedPage)
+        const physicalBleeds = resizedPage.unit === 'px' ? targetPage.bleeds
+          : targetPage.unit === attrs?.unit ? targetPage.physicalBleeds
+            : Object.fromEntries(Object.entries(targetPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, targetPage.unit, resizedPage.unit, k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+
+        // apply bleeds of targetPage
+        pageUtils.setIsEnableBleed(true, targetPageIndex)
+        pageUtils.setBleeds(targetPageIndex, physicalBleeds)
+      }
+
+      // fit page background if the template has background image
+      if (json.backgroundImage.config.srcObj.assetId) backgroundUtils.fitPageBackground(targetPageIndex)
     }
     GroupUtils.deselect()
     store.commit('SET_currActivePageIndex', targetPageIndex)
@@ -382,7 +383,7 @@ class AssetUtils {
     const { width: assetWidth = 0, height: assetHeight = 0 } = styles
     const { width: srcWidth = 0, height: srcHeight = 0 } = imgSrcSize || { width: 0, height: 0 }
     const page = store.getters.getPage(targetPageIndex)
-    const { width, height, posX, posY } = ImageUtils.adaptToSize({
+    const { width, height, posX, posY } = ImageUtils.adaptToPage({
       width: srcWidth,
       height: srcHeight
     }, page)
@@ -432,7 +433,7 @@ class AssetUtils {
   async updateBackground(json: any): Promise<any> {
     if ((json.backgroundImage.config.srcObj?.assetId ?? '') !== '' && !json.backgroundImage.newDisplayMode) {
       const { width: srcWidth, height: srcHeight } = await ImageUtils.getImageSize(ImageUtils.getSrc(json.backgroundImage.config), json.backgroundImage.config.styles.width, json.backgroundImage.config.styles.height)
-      const { width, height, posX, posY } = ImageUtils.adaptToSize({
+      const { width, height, posX, posY } = ImageUtils.adaptToPage({
         width: srcWidth,
         height: srcHeight
       }, json)
@@ -656,6 +657,7 @@ class AssetUtils {
           // @TODO: resize page/layer before adding to the store.
           if (resize) {
             resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
+            backgroundUtils.fitPageBackground(targetIndex)
           }
           if ((groupType === 1 || currGroupType === 1) && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
@@ -672,13 +674,14 @@ class AssetUtils {
           if (currFocusPage.isEnableBleed && currFocusPage.bleeds && currFocusPage.physicalBleeds) {
             // convert bleeds to template unit
             const dpi = pageUtils.getPageDPI(currFocusPage)
-            const physicalBleeds = currFocusPage.unit === 'px' ? currFocusPage.bleeds
-              : currFocusPage.unit === resize?.unit ? currFocusPage.physicalBleeds
-                : Object.fromEntries(Object.entries(currFocusPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, currFocusPage.unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+            const unit = resize?.unit ?? jsonDataList[0]?.unit ?? 'px'
+            const physicalBleeds = currFocusPage.unit === unit ? currFocusPage.physicalBleeds
+              : Object.fromEntries(Object.entries(currFocusPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, currFocusPage.unit, unit, k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
 
             for (const idx in jsonDataList) {
               const pageIndex = +idx + targetIndex
-              resizeUtils.resizeBleeds(pageIndex, physicalBleeds)
+              pageUtils.setIsEnableBleed(true, pageIndex)
+              pageUtils.setBleeds(pageIndex, physicalBleeds)
             }
           }
           store.commit('SET_currActivePageIndex', targetIndex)

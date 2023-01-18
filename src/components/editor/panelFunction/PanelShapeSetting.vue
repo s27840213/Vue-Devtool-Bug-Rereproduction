@@ -528,6 +528,9 @@ export default Vue.extend({
     },
     setLineWidth(value: number) {
       shapeUtils.setLineWidth(value)
+      this.$nextTick(() => {
+        popupUtils.setSliderConfig({ value: this.lineWidth })
+      })
     },
     handleLineDashEdgeUpdate(index: number, value: number) {
       if (index === 0) {

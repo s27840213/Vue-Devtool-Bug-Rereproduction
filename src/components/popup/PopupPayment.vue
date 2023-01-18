@@ -179,6 +179,8 @@ export default Vue.extend({
     }),
     getAd(name: IPaymentWarningView): string[] {
       switch (name) {
+        case 'export-pdf-print':
+          return [i18n.tc('NN0806'), 'export-pdf-print.jpg']
         case 'page-resize':
           return [i18n.tc('NN0768'), 'page-resize.jpg']
         case 'brandkit':
@@ -195,6 +197,7 @@ export default Vue.extend({
     async changeView(name: IPaymentView) {
       this.view = name
       switch (name) {
+        case 'export-pdf-print':
         case 'page-resize':
         case 'brandkit':
         case 'bgrm':

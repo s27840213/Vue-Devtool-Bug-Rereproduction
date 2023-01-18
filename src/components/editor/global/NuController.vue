@@ -329,7 +329,9 @@ export default Vue.extend({
     },
     sizeStyles(): any {
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
-      let transform = `translate(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px)`
+      const page = pageUtils.getPage(this.pageIndex)
+      const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
+      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * this.contentScaleRatio}px, ${(page.isEnableBleed ? y + bleeds.top : y) * this.contentScaleRatio}px)`
       if (rotate) {
         transform += ` rotate(${rotate}deg)`
       }

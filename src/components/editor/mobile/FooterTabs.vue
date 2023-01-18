@@ -464,9 +464,6 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _addPage: 'ADD_page',
-      _addPageToPos: 'ADD_pageToPos',
-      _deletePage: 'DELETE_page',
       _setmiddlemostPageIndex: 'SET_middlemostPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex',
       _setIsDragged: 'page/SET_IsDragged',
@@ -532,8 +529,14 @@ export default Vue.extend({
           break
         }
         case 'add-page': {
-          const { width, height } = pageUtils.getPageSize(pageUtils.currFocusPageIndex)
-          pageUtils.addPageToPos(pageUtils.newPage({ width, height }), pageUtils.currActivePageIndex + 1)
+          const pageSize = pageUtils.getPageSize(pageUtils.currFocusPageIndex)
+          const currPage = pageUtils.currFocusPage
+          pageUtils.addPageToPos(pageUtils.newPage({
+            ...pageSize,
+            bleeds: currPage.bleeds,
+            physicalBleeds: currPage.physicalBleeds,
+            isEnableBleed: currPage.isEnableBleed
+          }), pageUtils.currActivePageIndex + 1)
           this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
           stepsUtils.record()
           break
@@ -560,7 +563,7 @@ export default Vue.extend({
           const tmpIndex = pageUtils.currActivePageIndex
           this._setCurrActivePageIndex(pageUtils.isLastPage ? tmpIndex - 1 : tmpIndex)
           editorUtils.setCurrCardIndex(pageUtils.currActivePageIndex)
-          this._deletePage(tmpIndex)
+          pageUtils.deletePage(tmpIndex)
           stepsUtils.record()
           break
         }

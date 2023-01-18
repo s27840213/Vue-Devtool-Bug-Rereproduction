@@ -11,7 +11,18 @@
       :iconName="checked ? 'radio-checked' : 'radio'"
       :iconWidth="iconSize")
     slot
-      span(class="download-check-button__label") {{ label }}
+      div(class="download-check-button__label")
+          span(v-if="label.split(' ').length === 1") {{ label }}
+          span(v-else) {{ label.split(' ').slice(0, -1).join(' ') }}
+          nobr
+            span(v-if="label.split(' ').length > 1") {{ ' ' + label.split(' ').at(-1) }}
+            v-tooltip(v-if="info" class="download-check-button__label__icon-info" theme="hint-menu")
+              svg-icon(iconName="info"
+                :iconWidth="'16px'"
+                :iconColor="'gray-2'")
+              template(v-slot:popper)
+                span {{info}}
+                  a(v-if="infoUrl" class="text-white" :href="infoUrl" target="_blank") {{`${$t('NN0801')}`}}
     input(class="download-check-button__input"
       :type="type"
       :value="value"
@@ -32,6 +43,14 @@ export default Vue.extend({
     iconSize: {
       type: String,
       default: '16px'
+    },
+    info: {
+      type: String,
+      default: ''
+    },
+    infoUrl: {
+      type: String,
+      default: ''
     },
     groupName: String,
     type: String,
@@ -70,6 +89,16 @@ export default Vue.extend({
     cursor: pointer;
     height: 0;
     width: 0;
+  }
+  &__label {
+    &__icon-info {
+      display: inline-block;
+      margin-left: 8px;
+      >svg {
+        position: relative;
+        top: 4px;
+      }
+    }
   }
 }
 </style>

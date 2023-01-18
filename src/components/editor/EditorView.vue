@@ -1,6 +1,5 @@
 <template lang="pug">
-  div(class="editor-view"
-      :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
+  div(class="editor-view bg-gray-5"
       :style="cursorStyles()"
       @pointerdown="!inBgRemoveMode ? !getInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
       @wheel="handleWheel"
@@ -525,7 +524,11 @@ export default Vue.extend({
         /**
          * @Note if the page was focused, make it bring the highest z-index to prevent from being blocking by other page's layer
          */
-        return pageUtils.currFocusPageIndex === index ? this.pageNum + 1 : this.pageNum - index
+        if (pageUtils.currFocusPageIndex === index) return this.pageNum + 2
+
+        // if the page was hovered, make it bring the 2nd highest z-index to prevent highlighter from being blocking by other pages
+        if (pageUtils.currHoveredPageIndex === index) return this.pageNum + 1
+        return this.pageNum - index
       }
     },
     dragStartV(e: PointerEvent) {
@@ -883,9 +886,5 @@ $REULER_SIZE: 20px;
   width: $REULER_SIZE;
   height: $REULER_SIZE;
   background: #dfe1e7;
-}
-
-.dim-background {
-  background-color: rgba(0, 0, 0, 0.4);
 }
 </style>

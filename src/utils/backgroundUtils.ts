@@ -187,7 +187,7 @@ class BackgroundUtils {
       //   pageIndex: pageIndex,
       //   config: image
       // })
-      const { width, height, posX, posY } = imageUtils.adaptToSize(image.styles, pageUtils.getPage(pageIndex))
+      const { width, height, posX, posY } = imageUtils.adaptToPage(image.styles, pageUtils.getPage(pageIndex))
       const { adjust, horizontalFlip, verticalFlip } = image.styles
       pageUtils.updateBackgroundImageStyles(pageIndex, {
         width,
@@ -207,6 +207,22 @@ class BackgroundUtils {
     if (generalUtils.isTouchDevice()) {
       editorUtils.setInBgSettingMode(true)
     }
+  }
+
+  fitPageBackground(pageIndex: number) {
+    const page = pageUtils.getPage(pageIndex)
+    const { width, height, posX, posY } = imageUtils.adaptToPage({
+      width: page.backgroundImage.config.styles.initWidth || page.backgroundImage.config.styles.width,
+      height: page.backgroundImage.config.styles.initHeight || page.backgroundImage.config.styles.height
+    }, page)
+    pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
+    pageUtils.updateBackgroundImageStyles(
+      pageIndex, {
+        width,
+        height,
+        imgWidth: width,
+        imgHeight: height
+      })
   }
 }
 

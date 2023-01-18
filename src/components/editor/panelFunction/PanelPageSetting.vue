@@ -253,9 +253,8 @@ import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 import { IBleed, IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import resizeUtils from '@/utils/resizeUtils'
-import { STR_UNITS, PRECISION } from '@/utils/unitUtils'
-import { round } from 'lodash'
+import unitUtils, { PRECISION } from '@/utils/unitUtils'
+import { floor, round } from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -306,8 +305,7 @@ export default Vue.extend({
       groupErrorMsg: '',
       unsetThemeTemplate: [] as string[],
       showBleedSettings: true,
-      unitOptions: STR_UNITS,
-      bleeds: pageUtils.getDefaultBleeds('px'),
+      bleeds: pageUtils.getPageDefaultBleeds(),
       bleedsToShow: {
         top: {
           key: 'top',
@@ -407,7 +405,7 @@ export default Vue.extend({
     }),
     currentPageBleeds(): IBleed {
       const currPage = pageUtils.currFocusPage
-      let bleeds = currPage?.physicalBleeds ?? currPage?.bleeds ?? pageUtils.getDefaultBleeds(currPage.unit)
+      let bleeds = currPage?.physicalBleeds ?? currPage?.bleeds
       bleeds = {
         top: this.groupType === 1 ? this.getPage(0).physicalBleeds?.top ?? this.getPage(0).bleeds?.top ?? 0 : bleeds.top,
         bottom: this.groupType === 1 ? this.getPage(this.pagesLength - 1).physicalBleeds?.bottom ?? this.getPage(this.pagesLength - 1).bleeds?.bottom ?? 0 : bleeds.bottom,
@@ -417,7 +415,7 @@ export default Vue.extend({
       return bleeds
     },
     sizeToShow(): {width: number, height: number, unit: string} {
-      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSizeWithBleeds
+      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSize
       return {
         width: round(physicalWidth ?? width ?? 0, PRECISION),
         height: round(physicalHeight ?? height ?? 0, PRECISION),
@@ -711,46 +709,50 @@ export default Vue.extend({
     expandIconStyles() {
       return this.showBleedSettings ? {} : { transform: 'scaleY(-1)' }
     },
+    maxBleed(key: string) {
+      const dpi = unitUtils.getConvertDpi(pageUtils.currFocusPageSize)
+      return floor(unitUtils.convert(20, 'mm', this.sizeToShow.unit, (key === 'left' || key === 'right') ? dpi.width : dpi.height), this.sizeToShow.unit === 'px' ? 0 : PRECISION)
+    },
     setBleed(evt: Event, key: string, all = false) {
       const value = (evt.target as HTMLInputElement).value
       this.bleedsToShow[key].value = value
-      const numValue = typeof value === 'string' ? parseFloat(value) : value
+      const numValue = parseFloat(value)
       const striped = numValue.toString() !== value
       const roundedValue = round(numValue, this.sizeToShow.unit === 'px' ? 0 : PRECISION)
       const rounded = this.bleeds[key] !== roundedValue
-      const strValue = !striped || rounded ? roundedValue.toString() : this.bleedsToShow[key].value
-      this.bleeds[key] = roundedValue
-      this.bleedsToShow[key].value = strValue
-
-      console.log('set bleed', { ...this.currentPageBleeds }, value)
+      const numBleed = Math.min(roundedValue, this.maxBleed(key))
+      const strBleed = !striped || rounded ? numBleed.toString() : this.bleedsToShow[key].value
+      this.bleeds[key] = numBleed
+      this.bleedsToShow[key].value = strBleed
       if (all) {
         Object.keys(this.bleeds).forEach((key) => {
-          this.bleeds[key] = roundedValue
-          this.bleedsToShow[key].value = strValue
+          this.bleeds[key] = numBleed
+          this.bleedsToShow[key].value = strBleed
         })
       }
       this.applyBleeds(key, all)
     },
     addBleed(key: string, value: number, all = false) {
-      console.log('add bleed', { ...this.currentPageBleeds }, value)
+      const numBleed = Math.min(Math.max(this.bleeds[key] + value, 0), this.maxBleed(key))
+      const strBleed = this.bleeds[key].toString()
       if (all) {
         Object.keys(this.bleeds).forEach((key) => {
-          this.bleeds[key] = Math.max(this.bleeds[key] + value, 0)
-          this.bleedsToShow[key].value = this.bleeds[key].toString()
+          this.bleeds[key] = numBleed
+          this.bleedsToShow[key].value = strBleed
         })
       } else {
-        this.bleeds[key] = Math.max(this.bleeds[key] + value, 0)
-        this.bleedsToShow[key].value = this.bleeds[key].toString()
+        this.bleeds[key] = numBleed
+        this.bleedsToShow[key].value = strBleed
       }
       this.applyBleeds(key, all)
       stepsUtils.record()
     },
     applyBleeds(key: string, all: boolean) {
       // resize all bleeds of all pages if is email marketing design
-      if (this.groupType === 1) {
+      if (this.groupType === 1 && pageUtils.pageNum > 1) {
         if (!all && (key === 'top' || key === 'bottom')) {
           const pageIndex = key === 'top' ? 0 : this.pagesLength - 1
-          resizeUtils.resizeBleeds(pageIndex, {
+          pageUtils.setBleeds(pageIndex, {
             top: key === 'top' ? this.bleeds.top : 0,
             bottom: key === 'bottom' ? this.bleeds.bottom : 0,
             left: this.bleeds.left,
@@ -758,7 +760,7 @@ export default Vue.extend({
           })
         } else {
           for (let pageIndex = 0; pageIndex < this.pagesLength; pageIndex++) {
-            resizeUtils.resizeBleeds(pageIndex, {
+            pageUtils.setBleeds(pageIndex, {
               top: pageIndex === 0 ? this.bleeds.top : 0,
               bottom: pageIndex === this.pagesLength - 1 ? this.bleeds.bottom : 0,
               left: this.bleeds.left,
@@ -766,7 +768,7 @@ export default Vue.extend({
             })
           }
         }
-      } else resizeUtils.resizeBleeds(pageUtils.currFocusPageIndex, this.bleeds)
+      } else pageUtils.setBleeds(pageUtils.currFocusPageIndex, this.bleeds)
     },
     handleBleedSubmit(evt?: KeyboardEvent) {
       if (!evt || evt.key === 'Enter') {

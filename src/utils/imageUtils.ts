@@ -2,7 +2,6 @@ import store from '@/store'
 import { ICoordinate } from '@/interfaces/frame'
 import { IFrame, IGroup, IImage } from '@/interfaces/layer'
 import { IBounding, ISize } from '@/interfaces/math'
-import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
 import { IImageSize, IUserImageContentData } from '@/interfaces/api'
@@ -11,9 +10,9 @@ import imageApi from '@/apis/image-api'
 import { AxiosPromise } from 'axios'
 import { IShadowAsset } from '@/store/module/shadow'
 import generalUtils from './generalUtils'
-import editorUtils from './editorUtils'
 import mouseUtils from './mouseUtils'
-import { reject } from 'lodash'
+import { IPage } from '@/interfaces/page'
+import pageUtils from './pageUtils'
 
 class ImageUtils {
   async imgLoadHandler<T>(src: string, cb: (img: HTMLImageElement) => T, options?: { error?: () => void, crossOrigin?: boolean }) {
@@ -521,6 +520,21 @@ class ImageUtils {
     }
     const posX = (targetSize.width - width) / 2
     const posY = (targetSize.height - height) / 2
+    return { width, height, posX, posY }
+  }
+
+  /**
+   * Adapt to size without bleeds if page is in pixel unit, or size with bleeds if page is in physical unit.
+   * @param srcSize Source size
+   * @param page Target page
+   * @returns Adapted size and position
+   */
+  adaptToPage(srcSize: { width: number, height: number }, page: IPage): { width: number, height: number, posX: number, posY: number } {
+    let { width, height, posX, posY } = this.adaptToSize(srcSize, page.unit === 'px' ? page : pageUtils.getPageSizeWithBleeds(page))
+    if (page.unit !== 'px') {
+      posX -= page.bleeds.left
+      posY -= page.bleeds.top
+    }
     return { width, height, posX, posY }
   }
 
