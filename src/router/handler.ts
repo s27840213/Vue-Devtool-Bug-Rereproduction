@@ -29,8 +29,6 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
     const unit = urlParams.get('unit')
     const themeId = urlParams.get('themeId')
     const groupId = urlParams.get('group_id')
-    const path = urlParams.get('path')
-    const folderName = urlParams.get('folderName')
 
     if (type && designId) {
       switch (type) {
@@ -55,9 +53,6 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
         parseInt(height === '0' ? width : height),
         unit || 'px',
         parseInt(themeId as string),
-        path === null ? undefined : path,
-        folderName === null ? undefined : folderName,
-        _to
       )
       if (themeId === '7') {
         store.commit('SET_groupType', 1)

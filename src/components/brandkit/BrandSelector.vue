@@ -371,6 +371,7 @@ export default defineComponent({
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        color: setColor(gray-1);
       }
       &:not(.disabled):hover {
         & > .brand-selector__brand-list__item-menu-icon {
