@@ -482,20 +482,20 @@ export default Vue.extend({
           this.initPinchPos = null
           this.isScaling = false
           const newScaleRatio = Math.min(this.tmpScaleRatio * event.scale, MAX_SCALE_RATIO)
+          const needResizeToDefault = newScaleRatio <= pageUtils.mobileMinScaleRatio
           this.setPinchScaleRatio(100)
           this.setPageScaleRatio(newScaleRatio)
           store.commit('SET_isPageScaling', false)
 
           const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
           setTimeout(() => {
-            page.style.transition = '.2s'
-            // page.style.transition = 'transform .2s, webkit-transform .2s'
+            page.style.transition = 'transform .2s, webkit-transform .2s'
             page.style.transformOrigin = 'center'
           }, 0)
 
           clearTimeout(this.hanleWheelTimer)
           this.hanleWheelTimer = setTimeout(() => {
-            if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
+            if (needResizeToDefault) {
               this.handleWheelTransition = true
               pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: pageUtils.originPageY })
               this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
