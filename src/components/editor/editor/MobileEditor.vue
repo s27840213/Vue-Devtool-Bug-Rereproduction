@@ -124,16 +124,6 @@ export default defineComponent({
 
     brandkitUtils.fetchBrands(this.fetchBrands)
 
-    // load size from query for new design
-    const newDesignWidth = parseInt(this.$route.query.width as string)
-    const newDesignHeight = parseInt(this.$route.query.height as string)
-    const newDesignUnit = (this.$route.query.unit || 'px') as string
-    if (newDesignWidth && newDesignHeight) {
-      const pxSize = unitUtils.convertSize(newDesignWidth, newDesignHeight, newDesignUnit, 'px')
-      pageUtils.setPageSize(0, pxSize.width, pxSize.height, newDesignWidth, newDesignHeight, newDesignUnit)
-      pageUtils.fitPage()
-    }
-
     this.setUserState({ enableAdminView: false })
   },
   computed: {
