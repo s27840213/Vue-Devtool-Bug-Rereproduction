@@ -383,15 +383,16 @@ class ViviStickerUtils {
     }
   }
 
-  makeFlagKey(layerIndex: number, subLayerIndex = -1, clipIndex = -1) {
-    return subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}_c${clipIndex}`)
+  makeFlagKey(layerIndex: number, subLayerIndex = -1, clipIndex?: number) {
+    return subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}` + (typeof clipIndex !== 'undefined' ? `_c${clipIndex}` : ''))
   }
 
-  initLoadingFlagsForLayer(layer: ILayer, layerIndex: number, subLayerIndex = -1, clipIndex = -1) {
+  initLoadingFlagsForLayer(layer: ILayer, layerIndex: number, subLayerIndex = -1, clipIndex?: number) {
     switch (layer.type) {
       case LayerType.group:
         for (const [subIndex, subLayer] of (layer as IGroup).layers.entries()) {
-          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex, clipIndex)
+          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
+          // this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex, clipIndex)
         }
         break
       case LayerType.frame: {
@@ -406,7 +407,7 @@ class ViviStickerUtils {
         }
         if (subLayerIndex === -1) {
           for (const [_clipIndex, subLayer] of layers.entries()) {
-            this.initLoadingFlagsForLayer(subLayer, layerIndex, _clipIndex, -1)
+            this.initLoadingFlagsForLayer(subLayer, layerIndex, _clipIndex)
           }
         } else {
           for (const [_clipIndex, subLayer] of layers.entries()) {
@@ -426,7 +427,7 @@ class ViviStickerUtils {
     this.loadingFlags[this.makeFlagKey(0, -1)] = false
   }
 
-  setLoadingFlag(layerIndex: number, subLayerIndex = -1, clipIndex = -1) {
+  setLoadingFlag(layerIndex: number, subLayerIndex = -1, clipIndex?: number) {
     const key = this.makeFlagKey(layerIndex, subLayerIndex, clipIndex)
     if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
       this.loadingFlags[key] = true

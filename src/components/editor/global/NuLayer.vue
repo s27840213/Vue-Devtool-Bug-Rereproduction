@@ -29,6 +29,7 @@
               :scaleRatio="scaleRatio"
               :forRender="forRender"
               :isTransparent="div.isTransparent"
+              :primaryLayer="primaryLayer"
               :noShadow="div.noShadow"
               v-bind="$attrs")
           svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !controllerHidden && !forRender"
