@@ -126,8 +126,8 @@ export default defineComponent({
     },
     pageStyles(): { [index: string]: string } {
       return {
-        width: `${this.config.width * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin.right : 0)}px`,
-        height: `${this.config.height * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin.bottom : 0)}px`,
+        width: `${this.config.width * this.contentScaleRatio + this.margin.right}px`,
+        height: `${this.config.height * this.contentScaleRatio + this.margin.bottom}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
         // ...(this.userId === 'backendRendering' && { paddingBottom: 8 + 'px' })
       }
@@ -164,8 +164,8 @@ export default defineComponent({
           height: this.config.height * this.contentScaleRatio + 'px',
           padding: [
             '0px',
-            (this.userId === 'backendRendering' ? this.backendRenderParams.margin.right : 0) + 'px',
-            (this.userId === 'backendRendering' ? this.backendRenderParams.margin.bottom : 0) + 'px',
+            this.margin.right + 'px',
+            this.margin.bottom + 'px',
             '0px'
           ].join(' ')
         }
@@ -175,8 +175,8 @@ export default defineComponent({
         height: (this.config.height - this.config.bleeds.top - this.config.bleeds.bottom) * this.contentScaleRatio + 'px',
         padding: [
           this.config.bleeds.top * this.contentScaleRatio + 'px',
-          this.config.bleeds.right * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin.right : 0) + 'px',
-          this.config.bleeds.bottom * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin.bottom : 0) + 'px',
+          this.config.bleeds.right * this.contentScaleRatio + this.margin.right + 'px',
+          this.config.bleeds.bottom * this.contentScaleRatio + this.margin.bottom + 'px',
           this.config.bleeds.left * this.contentScaleRatio + 'px'
         ].join(' ')
       }
@@ -184,9 +184,9 @@ export default defineComponent({
     bleedLineStyles() {
       return {
         top: (this.config.bleeds.top - 1) * this.contentScaleRatio + 'px',
-        bottom: (this.config.bleeds.bottom - 1) * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin.bottom : 0) + 'px',
+        bottom: (this.config.bleeds.bottom - 1) * this.contentScaleRatio + this.margin.bottom + 'px',
         left: (this.config.bleeds.left - 1) * this.contentScaleRatio + 'px',
-        right: (this.config.bleeds.right - 1) * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin.right : 0) + 'px',
+        right: (this.config.bleeds.right - 1) * this.contentScaleRatio + this.margin.right + 'px',
         border: this.userId === 'backendRendering' ? `${this.contentScaleRatio}px solid white` : `${this.config.isEnableBleed ? this.contentScaleRatio : 0}px dashed white`,
         boxShadow: this.userId === 'backendRendering' ? 'none' : '0 0 3px 1px rgba(0, 0, 0, 0.15)'
       }
@@ -195,14 +195,14 @@ export default defineComponent({
       return {
         tl: {
           top: '-2px',
-          bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio}px`,
+          bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio + this.margin.bottom}px`,
           left: '-2px',
-          right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio}px`,
+          right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio + this.margin.right}px`,
           borderWidth: `${this.contentScaleRatio}px`
         },
         tr: {
           top: '-2px',
-          bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio}px`,
+          bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio + this.margin.bottom}px`,
           left: `${(this.config.width - this.config.bleeds.right) * this.contentScaleRatio}px`,
           right: '-2px',
           borderWidth: `${this.contentScaleRatio}px`
@@ -211,7 +211,7 @@ export default defineComponent({
           top: `${(this.config.height - this.config.bleeds.bottom) * this.contentScaleRatio}px`,
           bottom: '-2px',
           left: '-2px',
-          right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio}px`,
+          right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio + this.margin.right}px`,
           borderWidth: `${this.contentScaleRatio}px`
         },
         br: {
@@ -222,6 +222,10 @@ export default defineComponent({
           borderWidth: `${this.contentScaleRatio}px`
         }
       }
+    },
+    margin() {
+      // additional margin for backend render
+      return (this.userId === 'backendRendering' ? this.backendRenderParams.margin : { bottom: 0, right: 0 })
     }
   },
   mounted() {
