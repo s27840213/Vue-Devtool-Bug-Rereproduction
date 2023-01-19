@@ -15,7 +15,7 @@
               :contentScaleRatio="contentScaleRatio"
               @getClosestSnaplines="getClosestSnaplines"
               @clearSnap="clearSnap")
-        dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
+        dim-background(v-if="isImgCtrl" :config="config" :contentScaleRatio="contentScaleRatio")
 </template>
 
 <script lang="ts">
