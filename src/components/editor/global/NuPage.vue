@@ -285,6 +285,7 @@ export default Vue.extend({
   computed: {
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapState('shadow', ['handleId']),
+    ...mapState({ pinchScaleRatio: 'pinchScaleRatio' }),
     ...mapGetters({
       imgControlPageIdx: 'imgControl/imgControlPageIdx'
     }),
@@ -367,7 +368,7 @@ export default Vue.extend({
       let margin = ''
       let position = 'relative'
       if (generalUtils.isTouchDevice()) {
-        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
+        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px) scale(${this.$store.state.pinchScaleRatio * 0.01})`
         position = 'absolute'
       } else {
         margin = this.isDetailPage ? '0px auto' : '25px auto'
@@ -892,6 +893,7 @@ export default Vue.extend({
 }
 
 .page-wrapper {
+  transform-origin: top left;
 }
 
 .layer-num {

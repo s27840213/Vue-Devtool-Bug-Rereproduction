@@ -69,6 +69,7 @@ const getDefaultState = (): IEditorState => ({
   showColorSlips: false,
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
+  pinchScaleRatio: 100,
   isSettingScaleRatio: false,
   middlemostPageIndex: 0,
   currActivePageIndex: -1,
@@ -457,6 +458,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_pageScaleRatio(state: IEditorState, ratio: number) {
     state.pageScaleRatio = ratio
+  },
+  SET_pinchScaleRatio(state: IEditorState, ratio: number) {
+    state.pinchScaleRatio = ratio
   },
   SET_isSettingScaleRatio(state: IEditorState, isSettingScaleRatio: boolean) {
     state.isSettingScaleRatio = isSettingScaleRatio

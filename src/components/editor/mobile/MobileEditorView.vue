@@ -54,6 +54,9 @@ import modalUtils from '@/utils/modalUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import store from '@/store'
+import { ICoordinate } from '@/interfaces/frame'
+
+const MAX_SCALE_RATIO = 400
 
 export default Vue.extend({
   components: {
@@ -104,7 +107,9 @@ export default Vue.extend({
       hanleWheelTimer: -1,
       handleWheelTransition: false,
       initPos: { x: 0, y: 0 },
-      initPageSize: { width: 0, height: 0 }
+      initPageSize: { width: 0, height: 0 },
+      initPinchPos: null as ICoordinate | null,
+      tmpPinchScaleRatio: 100
     }
   },
   created() {
@@ -311,7 +316,8 @@ export default Vue.extend({
       setPageScaleRatio: 'SET_pageScaleRatio',
       setInBgRemoveMode: 'SET_inBgRemoveMode',
       addPage: 'ADD_page',
-      setCurrCardIndex: 'mobileEditor/SET_currCardIndex'
+      setCurrCardIndex: 'mobileEditor/SET_currCardIndex',
+      setPinchScaleRatio: 'SET_pinchScaleRatio'
     }),
     ...mapActions('layouts',
       [
@@ -437,56 +443,71 @@ export default Vue.extend({
             store.commit('SET_isPageScaling', true)
           }
           window.requestAnimationFrame(() => {
-            const limitMultiplier = 4
-            if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
-              pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
-              return
+            if (!this.initPinchPos) {
+              this.initPinchPos = { x: event.x - pageUtils.pageEventPosOffset.x, y: event.y - pageUtils.pageEventPosOffset.x }
             }
-            const newScaleRatio = Math.min(this.tmpScaleRatio * event.scale, pageUtils.mobileMinScaleRatio * limitMultiplier)
-            if (newScaleRatio >= pageUtils.mobileMinScaleRatio * 0.8) {
-              pageUtils.setScaleRatio(newScaleRatio)
-              const pinchPos = { x: event.x - pageUtils.pageEventPosOffset.x, y: event.y - pageUtils.pageEventPosOffset.x }
-              const widthDiff = pageUtils.getCurrPage.width * (newScaleRatio * 0.01) - this.initPageSize.width
-              const heightDiff = pageUtils.getCurrPage.height * (newScaleRatio * 0.01) - this.initPageSize.height
-              const xTranslateRatio = (pinchPos.x - pageUtils.pageCenterPos.x) / pageUtils.originPageSize.width + 0.5
-              const yTranslateRatio = (pinchPos.y - pageUtils.pageCenterPos.y) / pageUtils.originPageSize.height + 0.5
-              console.log('pinchPos', pinchPos.x, pinchPos.y)
-              console.log('pageCenterPos', pageUtils.pageCenterPos.x, pageUtils.pageCenterPos.y)
-              console.log('xTranslateRatio', xTranslateRatio)
+            const limitMultiplier = 4
+            // if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
+            //   // pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
+            //   this.setPinchScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
+            //   return
+            // }
+            console.log(event.scale)
+            const pinchScaleRatio = Math.min(event.scale * 100, MAX_SCALE_RATIO)
+            if (pinchScaleRatio) {
+              this.setPinchScaleRatio(pinchScaleRatio)
+
+              const sizeDiff = {
+                // width: pageUtils.getCurrPage.width * (newScaleRatio * 0.01) - this.initPageSize.width,
+                // height: pageUtils.getCurrPage.height * (newScaleRatio * 0.01) - this.initPageSize.height
+                width: (pinchScaleRatio * 0.01 - 1) * this.initPageSize.width,
+                height: (pinchScaleRatio * 0.01 - 1) * this.initPageSize.height
+              }
+
+              const translationRatio = {
+                x: (this.initPinchPos.x - pageUtils.pageCenterPos.x) / pageUtils.originPageSize.width + 0.5,
+                y: (this.initPinchPos.y - pageUtils.pageCenterPos.y) / pageUtils.originPageSize.height + 0.5
+              }
 
               pageUtils.updatePagePos(0, {
-                x: this.initPos.x - widthDiff * xTranslateRatio,
-                y: this.initPos.y - heightDiff * yTranslateRatio
+                x: this.initPos.x - sizeDiff.width * translationRatio.x,
+                y: this.initPos.y - sizeDiff.height * translationRatio.y
               })
-
-              /** origin not scale with pinch center logic */
-              // const baseX = (pageUtils.getCurrPage.width * (newScaleRatio * 0.01) - this.initPageSize) * 0.5
-              // pageUtils.updatePagePos(0, {
-              //   x: this.initPos.x - baseX
-              // })
             }
-
-            clearTimeout(this.hanleWheelTimer)
-            this.hanleWheelTimer = setTimeout(() => {
-              if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
-                const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-                page.style.transition = '0.2s linear'
-                this.handleWheelTransition = true
-                pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: pageUtils.originPageY })
-                this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
-                setTimeout(() => {
-                  page.style.transition = ''
-                  this.handleWheelTransition = false
-                }, 500)
-              }
-            }, 500)
           })
           break
         }
 
         case 'end': {
+          this.initPinchPos = null
           this.isScaling = false
+          const newScaleRatio = Math.min(this.tmpScaleRatio * event.scale, MAX_SCALE_RATIO)
+          this.setPinchScaleRatio(100)
+          this.setPageScaleRatio(newScaleRatio)
           store.commit('SET_isPageScaling', false)
+
+          const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
+          setTimeout(() => {
+            page.style.transition = '.2s'
+            // page.style.transition = 'transform .2s, webkit-transform .2s'
+            page.style.transformOrigin = 'center'
+          }, 0)
+
+          clearTimeout(this.hanleWheelTimer)
+          this.hanleWheelTimer = setTimeout(() => {
+            if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
+              this.handleWheelTransition = true
+              pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: pageUtils.originPageY })
+              this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
+              setTimeout(() => {
+                page.style.transition = ''
+                this.handleWheelTransition = false
+              }, 500)
+            } else {
+              page.style.transition = ''
+            }
+            page.style.transformOrigin = 'top left'
+          }, 500)
           break
         }
       }
