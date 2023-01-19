@@ -223,7 +223,6 @@ export default defineComponent({
       return unitUtils.convertSize(floor(res.width), floor(res.height), 'px', this.selectedUnit)
     },
     errMsg(): string {
-      // if (!this.pageWidth || !this.pageHeight || this.pageWidth <= 0 || this.pageHeight <= 0) return this.$t('NN0767', { num: 0 }).toString()
       const pxSize = {
         width: unitUtils.convert(this.pageWidth, this.selectedUnit, 'px'),
         height: unitUtils.convert(this.pageHeight, this.selectedUnit, 'px')

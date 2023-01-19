@@ -108,7 +108,7 @@ import { ILayout } from '@/interfaces/layout'
 import { IListServiceContentData } from '@/interfaces/api'
 import unitUtils, { IMapSize, PRECISION, STR_UNITS } from '@/utils/unitUtils'
 import pageUtils from '@/utils/pageUtils'
-import { floor, round } from 'lodash'
+import { ceil, floor, round } from 'lodash'
 
 export default defineComponent({
   props: {
@@ -234,9 +234,13 @@ export default defineComponent({
       return unitUtils.convertSize(floor(res.width), floor(res.height), 'px', this.selectedUnit)
     },
     errMsg(): string {
-      // if (!this.pageWidth || !this.pageHeight || this.pageWidth <= 0 || this.pageHeight <= 0) return this.$t('NN0767', { num: 0 }).toString()
-      if (this.isOverSize(this.pageSizes.px.width) || this.isUnderSize(this.pageSizes.px.width) || this.isOverSize(this.pageSizes.px.height) || this.isUnderSize(this.pageSizes.px.height)) {
-        if (this.selectedUnit === 'px') return 'Size must between 40px and 8000px.'
+      if (
+        this.isOverSize(this.pageSizes.px.width) ||
+        this.isUnderSize(this.pageSizes.px.width) ||
+        this.isOverSize(this.pageSizes.px.height) ||
+        this.isUnderSize(this.pageSizes.px.height)
+      ) {
+        if (this.selectedUnit === 'px') return this.$t('NN0785', { size1: '40px', size2: '8000px' }).toString()
         const dpi = {
           width: this.pageSizes.px.width / unitUtils.convert(this.pageWidth, this.selectedUnit, 'in'),
           height: this.pageSizes.px.height / unitUtils.convert(this.pageHeight, this.selectedUnit, 'in')
@@ -249,9 +253,14 @@ export default defineComponent({
           width: unitUtils.convert(8000, 'px', this.selectedUnit, dpi.width),
           height: unitUtils.convert(8000, 'px', this.selectedUnit, dpi.height)
         }
-        return `Size must between ${round(minSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit} and ${round(maxSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit}.`
+        return this.$t('NN0785', { size1: `${ceil(minSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit}`, size2: `${floor(maxSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit}` }).toString()
       }
-      if (this.isOverArea()) return `Must be less than ${this.isLocked ? `${floor(this.fixedSize.width, PRECISION)} x ${floor(this.fixedSize.height, PRECISION)}` : floor(this.fixedSize[this.lastFocusedInput], PRECISION)} ${this.selectedUnit} to stay within our maximum allowed area. `
+      if (this.isOverArea()) {
+        return this.$t('NN0786', {
+          size: `${this.isLocked ? `${floor(this.fixedSize.width, PRECISION)} x ${floor(this.fixedSize.height, PRECISION)}`
+                : floor(this.fixedSize[this.lastFocusedInput], PRECISION)} ${this.selectedUnit}`
+        }).toString() + ' '
+      }
       return ''
     },
     selectedFormat(): ILayout | undefined {
