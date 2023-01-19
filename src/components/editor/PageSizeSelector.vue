@@ -233,8 +233,7 @@ export default defineComponent({
         this.isOverSize(pxSize.height) ||
         this.isUnderSize(pxSize.height)
       ) {
-        if (this.selectedUnit === 'px') return this.$t('NN0785', { size1: '40px', size2: '8000px' }).toString()
-
+        if (this.selectedUnit === 'px') return this.$t('NN0785', { size1: pageUtils.MIN_SIZE + 'px', size2: pageUtils.MAX_SIZE + 'px' }).toString()
         const minSize: {[index: string]: number} = {
           width: unitUtils.convert(pageUtils.MIN_SIZE, 'px', this.selectedUnit),
           height: unitUtils.convert(pageUtils.MIN_SIZE, 'px', this.selectedUnit)

@@ -205,14 +205,16 @@ export default defineComponent({
     widthValid(): boolean {
       if (!this.pageWidth) return false
       if (this.pageWidth < 0) return false
-      if (this.isOverSize(this.pageSizes.px.width) || this.isUnderSize(this.pageSizes.px.width)) return false
+      const pxWidth = unitUtils.convert(this.pageWidth, this.selectedUnit, 'px')
+      if (this.isOverSize(pxWidth) || this.isUnderSize(pxWidth)) return false
       if ((this.isOverArea() && (this.isLocked || this.lastFocusedInput === 'width'))) return false
       return true
     },
     heightValid(): boolean {
       if (!this.pageHeight) return false
       if (this.pageHeight < 0) return false
-      if (this.isOverSize(this.pageSizes.px.height) || this.isUnderSize(this.pageSizes.px.height)) return false
+      const pxHeight = unitUtils.convert(this.pageHeight, this.selectedUnit, 'px')
+      if (this.isOverSize(pxHeight) || this.isUnderSize(pxHeight)) return false
       if ((this.isOverArea() && (this.isLocked || this.lastFocusedInput === 'height'))) return false
       return true
     },
@@ -234,24 +236,24 @@ export default defineComponent({
       return unitUtils.convertSize(floor(res.width), floor(res.height), 'px', this.selectedUnit)
     },
     errMsg(): string {
+      const pxSize = {
+        width: unitUtils.convert(this.pageWidth, this.selectedUnit, 'px'),
+        height: unitUtils.convert(this.pageHeight, this.selectedUnit, 'px')
+      }
       if (
-        this.isOverSize(this.pageSizes.px.width) ||
-        this.isUnderSize(this.pageSizes.px.width) ||
-        this.isOverSize(this.pageSizes.px.height) ||
-        this.isUnderSize(this.pageSizes.px.height)
+        this.isOverSize(pxSize.width) ||
+        this.isUnderSize(pxSize.width) ||
+        this.isOverSize(pxSize.height) ||
+        this.isUnderSize(pxSize.height)
       ) {
-        if (this.selectedUnit === 'px') return this.$t('NN0785', { size1: '40px', size2: '8000px' }).toString()
-        const dpi = {
-          width: this.pageSizes.px.width / unitUtils.convert(this.pageWidth, this.selectedUnit, 'in'),
-          height: this.pageSizes.px.height / unitUtils.convert(this.pageHeight, this.selectedUnit, 'in')
-        }
+        if (this.selectedUnit === 'px') return this.$t('NN0785', { size1: pageUtils.MIN_SIZE + 'px', size2: pageUtils.MAX_SIZE + 'px' }).toString()
         const minSize: {[index: string]: number} = {
-          width: unitUtils.convert(40, 'px', this.selectedUnit, dpi.width),
-          height: unitUtils.convert(40, 'px', this.selectedUnit, dpi.height)
+          width: unitUtils.convert(pageUtils.MIN_SIZE, 'px', this.selectedUnit),
+          height: unitUtils.convert(pageUtils.MIN_SIZE, 'px', this.selectedUnit)
         }
         const maxSize: {[index: string]: number} = {
-          width: unitUtils.convert(8000, 'px', this.selectedUnit, dpi.width),
-          height: unitUtils.convert(8000, 'px', this.selectedUnit, dpi.height)
+          width: unitUtils.convert(pageUtils.MAX_SIZE, 'px', this.selectedUnit),
+          height: unitUtils.convert(pageUtils.MAX_SIZE, 'px', this.selectedUnit)
         }
         return this.$t('NN0785', { size1: `${ceil(minSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit}`, size2: `${floor(maxSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit}` }).toString()
       }
