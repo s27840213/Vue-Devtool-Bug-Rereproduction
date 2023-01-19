@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import store from '@/store'
 import text, { ITextState } from '@/store/text/index'
 import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
@@ -11,7 +11,7 @@ import TextEffectUtils from './textEffectUtils'
 import i18n from '@/i18n'
 import tiptapUtils from './tiptapUtils'
 
-const fontPropsMap: {[key: string]: string} = {
+const fontPropsMap: { [key: string]: string } = {
   fontSize: 'size',
   fontFamily: 'font',
   bold: 'weight',
@@ -103,7 +103,7 @@ class TextPropUtils {
           const newConfig = this.spanPropertyHandler(propName, prop, selStart, selEnd, config as IText)
           LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
           if (TextUtils.isSel(selEnd)) {
-            Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
+            nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
           } else {
             setTimeout(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end), 0)
           }
@@ -274,7 +274,7 @@ class TextPropUtils {
       const prop = this.propIndicator(start, end, propName, value ?? '', config)
       const newConfig = this.spanPropertyHandler(propName, prop, start, end, config)
       LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: newConfig.paragraphs })
-      // Vue.nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end, subLayerIndex))
+      // nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end, subLayerIndex))
       TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end, subLayerIndex)
     }
   }
@@ -579,7 +579,7 @@ class TextPropUtils {
         styles: { ...styles }
       })
       paragraphs[pIndex].spans[sIndex].text = paragraphs[pIndex].spans[sIndex].text.substring(0, offset)
-      Object.assign(config?.paragraphs, paragraphs)
+      Object.assign(config?.paragraphs as IParagraph[], paragraphs)
       TextUtils.updateSelection({ pIndex, sIndex: sIndex + 1, offset: 1 }, TextUtils.getNullSel())
     }
   }
@@ -1031,7 +1031,7 @@ class TextPropUtils {
             }
           }
           editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
-          Vue.nextTick(() => {
+          nextTick(() => {
             tiptapUtils.forceUpdate()
             this.updateTextPropsState()
           })
@@ -1144,7 +1144,6 @@ class TextPropUtils {
             flag = true
             break
           }
-          default: { }
         }
         if (flag) break
       }
@@ -1216,7 +1215,7 @@ class TextPropUtils {
         case 'font': {
           const font = this.propReader('fontFamily')
           // const font = this.getTextState.fontStore.find(font => font.face === this.propReader('fontFamily'))?.name
-          value = typeof font === 'string' ? font : `_${i18n.t('NN0341')}`
+          value = typeof font === 'string' ? font : `_${i18n.global.t('NN0341')}`
           break
         }
         case 'type': {

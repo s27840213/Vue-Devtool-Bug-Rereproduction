@@ -1,47 +1,48 @@
 <template lang="pug">
-  div(:style="[isImgCtrl || inFrame ? {} : {transform: `translateZ(${this.config.styles.zindex}px)`,...transformStyle}]")
-    div(v-for="div in layerDivs"
-        class="nu-layer" :class="!config.locked && subLayerIndex === -1 ? `nu-layer--p${pageIndex}` : ''"
-        :style="layerStyles(div.noShadow, div.isTransparent)"
-        :ref="div.main ? 'body' : null"
-        :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : null"
-        :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
-        :data-p-index="pageIndex"
-        v-press="isTouchDevice() && div.main ? onPress : -1"
-        @pointerdown="div.main ? onPointerDown($event) : null"
-        @pointerup="div.main ? onPointerUp($event) : null"
-        @contextmenu.prevent
-        @click.right.stop="div.main ? onRightClick($event) : null"
-        @dragenter="div.main ? dragEnter($event) : null"
-        @dblclick="div.main ? dblClick($event) : null")
-      div(class="layer-translate posAbs"
-          :style="translateStyles()")
-        div(class="layer-scale posAbs" :ref="div.main ? 'scale' : null"
-            :style="scaleStyles()")
-          nu-clipper(:config="config"
-              :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-              :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
-            component(:is="`nu-${config.type}`"
-              class="transition-none"
-              :config="config"
-              :imgControl="imgControl"
-              :contentScaleRatio="contentScaleRatio"
-              :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-              :scaleRatio="scaleRatio"
-              :forRender="forRender"
-              :isTransparent="div.isTransparent"
-              :noShadow="div.noShadow"
-              v-bind="$attrs")
-          svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
-            :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
-            g(v-html="frameClipFormatter(config.clipPath)"
-              :style="frameClipStyles")
-      div(v-if="showSpinner()" class="nu-layer__inProcess")
-        square-loading
+div(class="nu-layer__wrapper" :style="layerWrapperStyles")
+  div(v-for="div in layerDivs"
+      class="nu-layer"
+      :class="!config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : ''"
+      :style="layerStyles(div.noShadow, div.isTransparent)"
+      :ref="div.main ? 'body' : ''"
+      :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : ''"
+      :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
+      :data-p-index="pageIndex"
+      v-press="isTouchDevice() && div.main ? onPress : -1"
+      @pointerdown="div.main ? onPointerDown($event) : null"
+      @pointerup="div.main ? onPointerUp($event) : null"
+      @contextmenu.prevent
+      @click.right.stop="div.main ? onRightClick($event) : null"
+      @dragenter="div.main ? dragEnter($event) : null"
+      @dblclick="div.main ? dblClick($event) : null")
+    div(class="layer-translate posAbs"
+        :style="translateStyles()")
+      div(class="layer-scale posAbs" :ref="div.main ? 'scale' : ''"
+          :style="scaleStyles()")
+        nu-clipper(:config="config"
+            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+            :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
+          component(:is="`nu-${config.type}`"
+            class="transition-none"
+            :config="config"
+            :imgControl="imgControl"
+            :contentScaleRatio="contentScaleRatio"
+            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+            :scaleRatio="scaleRatio"
+            :forRender="forRender"
+            :isTransparent="div.isTransparent"
+            :noShadow="div.noShadow"
+            v-bind="$attrs")
+        svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
+          :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
+          g(v-html="frameClipFormatter(config.clipPath)"
+            :style="frameClipStyles")
+    div(v-if="showSpinner()" class="nu-layer__inProcess")
+      square-loading
 </template>
-
 <script lang="ts">
-import Vue from 'vue'
+import { PropType, defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
@@ -52,7 +53,7 @@ import SquareLoading from '@/components/global/SqureLoading.vue'
 import frameUtils from '@/utils/frameUtils'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
-import { IFrame, IGroup, IImage, ILayer } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IText, ITmp } from '@/interfaces/layer'
 import LazyLoad from '@/components/LazyLoad.vue'
 import SubControllerUtils from '@/utils/subControllerUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -72,25 +73,35 @@ import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import Svgpath from 'svgpath'
 
-export default Vue.extend({
-  inheritAttrs: false,
+export default defineComponent({
+  emits: ['onSubDrop'],
   components: {
     SquareLoading,
     LazyLoad
   },
   props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
-    imgControl: Boolean,
-    snapUtils: Object,
-    primaryLayer: {
+    config: {
       type: Object,
-      default: undefined
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
     },
     subLayerIndex: {
       type: Number,
       default: -1
+    },
+    imgControl: {
+      type: Boolean
+    },
+    snapUtils: Object,
+    primaryLayer: {
+      type: Object as PropType<IGroup | IFrame | ITmp>
     },
     isSubLayer: {
       type: Boolean,
@@ -104,9 +115,21 @@ export default Vue.extend({
       default: 1,
       type: Number
     },
-    'data-index': {
+    dataIndex: {
       default: '-1',
       type: String
+    },
+    dataPindex: {
+      default: '-1',
+      type: String
+    },
+    inTmp: {
+      type: Boolean,
+      default: false
+    },
+    primaryScale: {
+      type: Number,
+      default: 1
     },
     lazyLoadTarget: {
       default: '.editor-view',
@@ -201,11 +224,11 @@ export default Vue.extend({
     }
 
     if (this.subLayerIndex === -1) {
-      this.movingUtils = new MovingUtils(data)
+      this.movingUtils = new MovingUtils(data as any)
       const moveStart = this.movingUtils.moveStart.bind(this.movingUtils)
       body.addEventListener('pointerdown', moveStart)
     } else {
-      const subCtrlUtils = new SubControllerUtils(data)
+      const subCtrlUtils = new SubControllerUtils(data as any)
       const pointerdown = subCtrlUtils.onPointerdown.bind(subCtrlUtils)
       body.addEventListener('pointerdown', pointerdown)
     }
@@ -214,7 +237,7 @@ export default Vue.extend({
       body.addEventListener(generalUtils.isTouchDevice() ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
     }
   },
-  destroyed() {
+  unmounted() {
     this.movingUtils && this.movingUtils.removeListener()
   },
   computed: {
@@ -263,6 +286,12 @@ export default Vue.extend({
         layerIndex: this.layerIndex
       }
     },
+    layerWrapperStyles(): any {
+      if (this.isImgCtrl || this.inFrame || this.isTouchDevice() || !this.isActive) {
+        return {}
+      }
+      return { transform: `translateZ(${this.config.styles.zindex}px)`, ...this.transformStyle }
+    },
     isDragging(): boolean {
       return (this.config as ILayer).dragging
     },
@@ -290,7 +319,7 @@ export default Vue.extend({
       return {
         fill: '#00000000',
         stroke: this.config?.active ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
-        strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / this.primaryLayer.styles.scale * (100 / this.scaleRatio)}px`
+        strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / (this.primaryLayer as IFrame).styles.scale * (100 / this.scaleRatio)}px`
       }
     },
     getPointerEvents(): string {
@@ -307,7 +336,7 @@ export default Vue.extend({
       return ''
     },
     layerDivs() {
-      if (this.$router.currentRoute.name === 'Preview' && this.renderForPDF && this.config.type === 'text') {
+      if (this.$router.currentRoute.value.name === 'Preview' && this.renderForPDF && this.config.type === 'text') {
         return [
           { noShadow: false, isTransparent: true },
           { noShadow: true, isTransparent: false, main: true }
@@ -317,7 +346,7 @@ export default Vue.extend({
       }
     },
     isOk2HandleFrameMouseEnter(): boolean {
-      if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
+      if (this.config.type !== LayerType.image || this.primaryLayer?.type !== LayerType.frame) {
         return false
       }
       if (layerUtils.getLayer(this.pageIndex, this.layerIndex).locked) {
@@ -363,7 +392,7 @@ export default Vue.extend({
       )
       switch (this.config.type) {
         case LayerType.text: {
-          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
+          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
           const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
           Object.assign(
             styles,
@@ -412,6 +441,9 @@ export default Vue.extend({
         y: this.config.styles.y
       }
     },
+    subLayerInTmpStyles(layer: ILayer) {
+      return (layer.type === 'shape' && layer.category === 'D') ? {} : { outline: this.inTmp ? `${2 / this.primaryScale}px solid #7190CC` : {} }
+    },
     pageScaleRatio(): number {
       return pageUtils.scaleRatio / 100
     },
@@ -432,7 +464,7 @@ export default Vue.extend({
     translateStyles(): { [index: string]: string } {
       const { zindex } = this.config.styles
       const { type } = this.config
-      const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
+      const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config as IFrame))
       const transform = isImgType ? `scale(${1 / (this.compensationRatio())})` : `scale(${1 / (this.compensationRatio())})`
       /**
       * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
@@ -447,7 +479,7 @@ export default Vue.extend({
       const { zindex } = this.config.styles
       const { scale, scaleX, scaleY } = this.config.styles
       const { type } = this.config
-      const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
+      const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config as IFrame))
 
       const styles = {
         transform: isImgType ? `scale(${this.compensationRatio()})` : `scale(${scale * (this.contentScaleRatio)}) scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`,
@@ -548,7 +580,6 @@ export default Vue.extend({
               return
             }
             break
-          case LayerType.image:
           default:
             return
         }
@@ -588,7 +619,7 @@ export default Vue.extend({
       const currLayer = layerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
         const { srcObj, panelPreviewSrc } = this.config
-        const clips = generalUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
+        const clips = generalUtils.deepCopy(this.primaryLayer?.clips) as Array<IImage>
         const clip = clips[this.subLayerIndex]
 
         Object.assign(this.imgBuff, {
@@ -630,7 +661,7 @@ export default Vue.extend({
     onFrameMouseLeave(e: MouseEvent | PointerEvent) {
       this.hasHandledFrameMouseEnter = false
       if (this.currDraggedPhoto.srcObj.type !== '') return
-      if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
+      if (this.config.type !== LayerType.image || this.primaryLayer?.type !== LayerType.frame) {
         return
       }
       e.stopPropagation()
@@ -657,7 +688,7 @@ export default Vue.extend({
       if (currLayer && currLayer.type === LayerType.image) {
         layerUtils.deleteLayer(layerUtils.pageIndex, layerUtils.layerIndex)
         const newIndex = this.layerIndex > layerUtils.layerIndex ? this.layerIndex - 1 : this.layerIndex
-        groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer])
+        groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer as IFrame])
         frameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.subLayerIndex, { active: true })
         stepsUtils.record()
       }
@@ -673,7 +704,7 @@ export default Vue.extend({
     },
     onFrameDragEnter(e: DragEvent) {
       if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
-      if (this.config.type !== LayerType.image || this.primaryLayer.type !== LayerType.frame) {
+      if (this.config.type !== LayerType.image || this.primaryLayer?.type !== LayerType.frame) {
         return
       }
       const { primaryLayer } = this
@@ -741,7 +772,7 @@ export default Vue.extend({
           userId: ''
         }
       })
-      if (this.primaryLayer.locked) {
+      if (this.primaryLayer?.locked) {
         this.$emit('onSubDrop', { e })
       }
     },
@@ -759,7 +790,7 @@ export default Vue.extend({
         if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
           this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
         } else {
-          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           body.removeEventListener('dragleave', this.layerDragLeave)
           body.removeEventListener('drop', this.layerOnDrop)
         }

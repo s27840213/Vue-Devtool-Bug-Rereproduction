@@ -1,32 +1,33 @@
 <template lang="pug">
-  div(class="panel-page")
-    btn(:hasIcon="true"
-        :iconName="'new-page'"
-        :iconWidth="'15px'"
-        :type="'gray-sm'"
-        class="rounded my-20 mx-25"
-        style="padding: 5px 0;"
-        @click.native="addPage(middlemostPageIndex+1)") {{$t('NN0139')}}
-    div(class="panel-page-items")
-      template(v-for="(page, idx) in getPages")
-        div(class="panel-page__plus")
-          panel-page-plus(:index="idx" last=false
-            :class="{'pt-10': idx === 0}")
-        page-preview-page-wrapper(:index="idx" :pagename="page.name" type="panel" :config="wrappedPage(page)" :lazyLoadTarget="'.panel-page'")
-        div(v-if="idx+1 === getPageCount"
-          class="panel-page__plus")
-          panel-page-plus(:index="idx+1" last=false)
+div(class="panel-page")
+  btn(:hasIcon="true"
+      :iconName="'new-page'"
+      :iconWidth="'15px'"
+      :type="'gray-sm'"
+      class="rounded my-20 mx-25"
+      style="padding: 5px 0;"
+      @click="addPage(middlemostPageIndex+1)") {{$t('NN0139')}}
+  div(class="panel-page-items")
+    template(v-for="(page, idx) in getPages")
+      div(class="panel-page__plus")
+        panel-page-plus(:index="idx" :last="false"
+          :class="{'pt-10': idx === 0}")
+      page-preview-page-wrapper(:index="idx" :pagename="page.name" type="panel" :config="wrappedPage(page)" :lazyLoadTarget="'.panel-page'")
+      div(v-if="idx+1 === getPageCount"
+        class="panel-page__plus")
+        panel-page-plus(:index="idx+1" :last="false")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PanelPagePlus from '@/components/editor/pagePreview/PanelPagePlus.vue'
 import pageUtils from '@/utils/pageUtils'
 import { IPage } from '@/interfaces/page'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     PagePreviewPageWrapper,
     PanelPagePlus

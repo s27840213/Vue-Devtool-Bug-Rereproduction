@@ -25,7 +25,7 @@ class ThemeUtils {
   checkAllThemes() { // Must be excute after get editorThemes
     const themes = store.getters.getEditThemes
       .map((it: Record<string, string>) => it.id)
-      .sort((a: number, b:number) => a - b)
+      .sort((a: number, b: number) => a - b)
       .join(',')
     store.commit('templates/SET_STATE', { theme: themes })
   }
@@ -54,7 +54,7 @@ class ThemeUtils {
   async checkThemeState() {
     const { themes } = this
     if (!themes.length) {
-      await listService.getTheme({ locale: i18n.locale })
+      await listService.getTheme({ locale: i18n.global.locale })
         .then(response => {
           const { data } = response.data
           store.commit('SET_themes', data.content)

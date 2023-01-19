@@ -1,80 +1,83 @@
 <template lang="pug">
-  div(class="res-info")
-    strong(v-if="info.userName || info.vendor"
-      class="res-info__desc")
-      i18n(v-if="this.info.type === 'photo'"
-        path="NN0364" tag="span")
-          template(#author)
-            a(v-if="info.userLink"
-              class="res-info__link pointer"
-              :href="userLink"
-              target="_blank"
-              rel="nofollow noopener noreferrer"
-              @mousedown.prevent)
-              span {{ info.userName }}
-          template(#site)
-            a(v-if="info.vendor && vendorLink"
-              class="res-info__link pointer"
-              :href="vendorLink"
-              target="_blank"
-              rel="nofollow noopener noreferrer"
-              @mousedown.prevent) {{ info.vendor }}
-            span(v-else
-              class="pl-5") {{ info.vendor }}
-      i18n(v-else
-        path="NN0365" tag="span")
-          template(#author)
-            a(v-if="info.userLink"
-              class="res-info__link pointer"
-              :href="userLink"
-              target="_blank"
-              rel="nofollow noopener noreferrer"
-              @mousedown.prevent)
-              span {{ info.userName }}
-              span {{info.authorCompany ? ', ' + info.authorCompany : ''}}
-            template(v-else
-              class="px-5")
-              span {{ ' ' + info.userName }}
-              span {{info.authorCompany ? ', ' + info.authorCompany : ''}}
-    div(v-if="info.tags && info.tags.length"
-      class="res-info__tags")
-      span(class="pr-5") {{$t('NN0366')}}:
-      template(v-for="tag, idx in info.tags")
-        span(v-if="idx !== 0") {{' '}}
-        span(class="res-info__link __tag"
-          @click="onTagClicked(tag)") {{ tag }}
-    strong(v-if="info.licenseName"
-      class="res-info__desc")
-      span(class="pr-5") {{$t('NN0367')}}:
-      a(v-if="info.licenseLink"
-        class="res-info__link __license pointer"
-        :href="info.licenseLink"
-        target="_blank"
-        rel="nofollow noopener noreferrer"
-        @mousedown.prevent) {{ info.licenseName }}
-      span(v-else) {{ info.licenseName }}
-    //- div(class="res-info__action")
-    //-   svg-icon(:iconName="'folder'",
-    //-     :iconColor="'gray-2'",
-    //-     :iconWidth="'20px'")
-    //-   span Add to My file
-    //- div(class="res-info__action")
-    //-   svg-icon(:iconName="'search'",
-    //-     :iconColor="'gray-2'",
-    //-     :iconWidth="'20px'")
-    //-   span More ...
+div(class="res-info")
+  strong(v-if="info.userName || info.vendor"
+    class="res-info__desc")
+    i18n-t(v-if="info.type === 'photo'"
+      keypath="NN0364" tag="span")
+        template(#author)
+          a(v-if="info.userLink"
+            class="res-info__link pointer"
+            :href="userLink"
+            target="_blank"
+            rel="nofollow noopener noreferrer"
+            @mousedown.prevent)
+            span {{ info.userName }}
+        template(#site)
+          a(v-if="info.vendor && vendorLink"
+            class="res-info__link pointer"
+            :href="vendorLink"
+            target="_blank"
+            rel="nofollow noopener noreferrer"
+            @mousedown.prevent) {{ info.vendor }}
+          span(v-else
+            class="pl-5") {{ info.vendor }}
+    i18n-t(v-else
+      keypath="NN0365" tag="span")
+        template(#author)
+          a(v-if="info.userLink"
+            class="res-info__link pointer"
+            :href="userLink"
+            target="_blank"
+            rel="nofollow noopener noreferrer"
+            @mousedown.prevent)
+            span {{ info.userName }}
+            span {{info.authorCompany ? ', ' + info.authorCompany : ''}}
+          template(v-else
+            class="px-5")
+            span {{ ' ' + info.userName }}
+            span {{info.authorCompany ? ', ' + info.authorCompany : ''}}
+  div(v-if="info.tags && info.tags.length"
+    class="res-info__tags")
+    span(class="pr-5") {{$t('NN0366')}}:
+    template(v-for="tag, idx in info.tags")
+      span(v-if="idx !== 0") {{' '}}
+      span(class="res-info__link __tag"
+        @click="onTagClicked(tag)") {{ tag }}
+  strong(v-if="info.licenseName"
+    class="res-info__desc")
+    span(class="pr-5") {{$t('NN0367')}}:
+    a(v-if="info.licenseLink"
+      class="res-info__link __license pointer"
+      :href="info.licenseLink"
+      target="_blank"
+      rel="nofollow noopener noreferrer"
+      @mousedown.prevent) {{ info.licenseName }}
+    span(v-else) {{ info.licenseName }}
+  //- div(class="res-info__action")
+  //-   svg-icon(:iconName="'folder'",
+  //-     :iconColor="'gray-2'",
+  //-     :iconWidth="'20px'")
+  //-   span Add to My file
+  //- div(class="res-info__action")
+  //-   svg-icon(:iconName="'search'",
+  //-     :iconColor="'gray-2'",
+  //-     :iconWidth="'20px'")
+  //-   span More ...
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import i18n from '@/i18n'
+import { defineComponent } from 'vue'
 import { mapMutations, mapActions } from 'vuex'
 
 const moduleName = 'unsplash'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    info: Object
+    info: {
+      type: Object,
+      required: true
+    }
   },
   computed: {
     vendorLink (): string {

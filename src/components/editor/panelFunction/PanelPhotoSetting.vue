@@ -1,31 +1,32 @@
 <template lang="pug">
-  div(class="photo-setting")
-    span(class="photo-setting__title text-blue-1 text-H6") {{$t('NN0039')}}
-    div(class="photo-setting__grid mb-10")
-      template(v-for="btn in btns")
-        btn(v-if="!btn.condition || btn.condition()"
-          class="full-width"
-          :class="[activeBtn(btn) ? 'active' : '']"
-          type="gray-mid"
-          ref="btn"
-          :disabled="disableBtn(btn)"
-          :key="btn.name"
-          v-hint="disableBtn(btn) ? btn.hint : ''"
-          @click.native="handleShow(btn.show)") {{ btn.label }}
-      btn(v-if="isImage && !isFrame"
+div(class="photo-setting")
+  span(class="photo-setting__title text-blue-1 text-H6") {{$t('NN0039')}}
+  div(class="photo-setting__grid mb-10")
+    template(v-for="btn in btns")
+      btn(v-if="!btn.condition || btn.condition()"
         class="full-width"
+        :class="[activeBtn(btn) ? 'active' : '']"
         type="gray-mid"
         ref="btn"
-        :disabled="isHandleShadow || show === 'panel-photo-shadow'"
-        @click.native="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
-    component(:is="show || 'div'"
-      ref="popup"
-      :imageAdjust="currLayerAdjust"
-      @update="handleAdjust")
+        :disabled="disableBtn(btn)"
+        :key="btn.name"
+        v-hint="disableBtn(btn) ? btn.hint : ''"
+        @click="handleShow(btn.show)") {{ btn.label }}
+    btn(v-if="isImage && !isFrame"
+      class="full-width"
+      type="gray-mid"
+      ref="btn"
+      :disabled="isHandleShadow || show === 'panel-photo-shadow'"
+      @click="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
+  component(:is="show || 'div'"
+    ref="popup"
+    :imageAdjust="currLayerAdjust"
+    @update="handleAdjust")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import layerUtils from '@/utils/layerUtils'
@@ -42,10 +43,18 @@ import { FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import store from '@/store'
-import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+interface IBtn {
+  name: string
+  label: string
+  show: string
+  condition?: () => boolean
+  hint?: string
+}
+
+export default defineComponent({
   name: 'PanelPhotoSetting',
+  emits: ['toggleColorPanel'],
   data() {
     return {
       show: '',
@@ -79,7 +88,7 @@ export default Vue.extend({
             return currLayer.type === LayerType.image
           }
         }
-      ],
+      ] as IBtn[],
       bgRemoveBtn: { label: `${this.$t('NN0043')}`, show: 'remove-bg' }
     }
   },
@@ -94,7 +103,7 @@ export default Vue.extend({
     })
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoSetting)
   },
-  destroyed() {
+  unmounted() {
     eventUtils.off(PanelEvent.showPhotoShadow)
     document.removeEventListener('mouseup', this.handleClick)
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.none)
@@ -182,7 +191,7 @@ export default Vue.extend({
     ...mapActions({
       removeBg: 'user/removeBg'
     }),
-    disableBtn(btn: { [key: string]: string }): boolean {
+    disableBtn(btn: IBtn): boolean {
       const currLayer = layerUtils.getCurrConfig as IImage
       const { shadow } = currLayer.styles
       if (shadow) {
@@ -201,7 +210,7 @@ export default Vue.extend({
       }
       return false
     },
-    activeBtn(btn: { [key: string]: string }): boolean {
+    activeBtn(btn: IBtn): boolean {
       if (this.show === btn.show) return true
       if (btn.name === 'crop' && this.isCropping) return true
       if (btn.name === 'remove-bg' && this.inBgRemoveMode) return true
@@ -277,10 +286,14 @@ export default Vue.extend({
           const aspect = imgWidth >= imgHeight ? 0 : 1
           const isThirdPartyImage = type === 'unsplash' || type === 'pexels'
           const initSrc = imageUtils.getSrc((this.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage, 'larg', undefined, true)
+          console.log('remove bg')
           this.removeBg({ srcObj: targetLayer.srcObj, ...(isThirdPartyImage && { aspect }) }).then((data) => {
+            console.log(data)
             if (data.flag === 0) {
               uploadUtils.polling(data.url, (json: any) => {
+                console.log(json)
                 if (json.flag === 0 && json.data) {
+                  console.log('polling success')
                   this.recudeBgrmRemain()
                   const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
                   const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
@@ -299,6 +312,7 @@ export default Vue.extend({
 
                     this.setAutoRemoveResult(imageUtils.getBgRemoveInfo(json.data, initSrc))
                     this.setInBgRemoveMode(true)
+                    console.log(this.inBgRemoveMode, this.isProcessing)
                   }
                   return true
                 }
@@ -311,7 +325,7 @@ export default Vue.extend({
                       inProcess: LayerProcessType.none
                     })
 
-                    this.$notify({ group: 'error', text: `${this.$t('NN0349')}` })
+                    notify({ group: 'error', text: `${this.$t('NN0349')}` })
                   }
 
                   return true
@@ -348,7 +362,7 @@ export default Vue.extend({
       if (colorPanel && colorPanel.contains(e.target as Node)) {
         return
       }
-      if (!(this.$refs.popup as Vue).$el.contains(e.target as Node)) {
+      if (!(this.$refs.popup as any).$el.contains(e.target as Node)) {
         if (!this.isHandleShadow) {
           this.handleOutside()
         }

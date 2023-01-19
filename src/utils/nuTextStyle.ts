@@ -1,7 +1,7 @@
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import { IGroup, IText } from '@/interfaces/layer'
 import { Extension } from '@tiptap/core'
-import { Editor } from '@tiptap/vue-2'
+import { Editor } from '@tiptap/vue-3'
 import tiptapUtils from './tiptapUtils'
 import layerUtils from './layerUtils'
 import stepsUtils from './stepsUtils'
@@ -363,7 +363,7 @@ export default Extension.create({
     return {
       'Mod-z': ({ editor }) => {
         stepsUtils.undo().then(() => {
-          Vue.nextTick(() => {
+          nextTick(() => {
             const currLayer = layerUtils.getCurrLayer as IText
             if (!currLayer.active) return
             editor.commands.sync()
@@ -375,7 +375,7 @@ export default Extension.create({
       },
       'Shift-Mod-z': ({ editor }) => {
         stepsUtils.redo().then(() => {
-          Vue.nextTick(() => {
+          nextTick(() => {
             const currLayer = layerUtils.getCurrLayer as IText
             if (!currLayer.active) return
             editor.commands.sync()

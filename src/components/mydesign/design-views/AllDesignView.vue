@@ -1,27 +1,28 @@
 <template lang="pug">
-  div(class="all-design-view")
-    disk-warning(class="warning" size="small")
-    div(class="all-design-view__toolbar")
-      div(class="all-design-view__folder-name") {{$t('NN0187')}}
-      btn-new-design
-    div(class="horizontal-rule")
-    design-gallery(:noHeader="true"
-                  :menuItems="menuItems"
-                  :allDesigns="allDesigns"
-                  :selectedNum="selectedNum"
-                  @menuAction="handleDesignMenuAction"
-                  @loadMore="handleLoadMore")
+div(class="all-design-view")
+  disk-warning(class="warning" size="small")
+  div(class="all-design-view__toolbar")
+    div(class="all-design-view__folder-name") {{$t('NN0187')}}
+    btn-new-design
+  div(class="horizontal-rule")
+  design-gallery(:noHeader="true"
+                :menuItems="menuItems"
+                :allDesigns="allDesigns"
+                :selectedNum="selectedNum"
+                @menuAction="handleDesignMenuAction"
+                @loadMore="handleLoadMore")
 </template>
 
 <script lang="ts">
-import designUtils from '@/utils/designUtils'
-import Vue from 'vue'
+import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@/utils/designUtils'
+import { defineComponent } from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
 import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: ['clearSelection', ...DESIGN_MENU_EVENTS()],
   components: {
     DesignGallery,
     DiskWarning,
@@ -55,7 +56,7 @@ export default Vue.extend({
       fetchAllDesigns: 'fetchAllDesigns',
       fetchMoreAllDesigns: 'fetchMoreAllDesigns'
     }),
-    handleDesignMenuAction(extraEvent: { event: string, payload: any }) {
+    handleDesignMenuAction(extraEvent: { event: IDesignMenuEvents, payload: any }) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
     },

@@ -1,29 +1,30 @@
 <template lang="pug">
-  div(class="download-btn"
-    v-hint="isHandlingShadow ? $t('NN0500') : ''")
-    btn(:hasIcon="true"
-      :iconName="'download'"
-      :iconWidth="'18px'"
-      :type="'primary-sm'"
-      :disabled="inprogress || inBgRemoveMode || uploadingImgs.length !== 0 || isHandlingShadow || isFontLoading"
-      class="btn-download rounded full-height full-width"
-      @click.native="() => handleShowPopup(true)")
-      span(v-if="!inprogress") {{$t('NN0010')}}
-    popup-download(v-if="show"
-      class="download-btn__modal"
-      :page-index="currFocusPageIndex"
-      @close="handleShowPopup"
-      @inprogress="handleInprogress")
+div(class="download-btn"
+  v-hint="isHandlingShadow ? $t('NN0500') : ''")
+  btn(:hasIcon="true"
+    :iconName="'download'"
+    :iconWidth="'18px'"
+    :type="'primary-sm'"
+    :disabled="inprogress || inBgRemoveMode || uploadingImgs.length !== 0 || isHandlingShadow || isFontLoading"
+    class="btn-download rounded full-height full-width"
+    @click="() => handleShowPopup(true)")
+    span(v-if="!inprogress") {{$t('NN0010')}}
+  popup-download(v-if="show"
+    class="download-btn__modal"
+    :page-index="currFocusPageIndex"
+    @close="handleShowPopup"
+    @inprogress="handleInprogress")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import modalUtils from '@/utils/modalUtils'
 import { FunctionPanelType } from '@/store/types'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     PopupDownload
   },

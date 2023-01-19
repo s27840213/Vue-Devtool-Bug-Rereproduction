@@ -1,39 +1,40 @@
 <template lang="pug">
-  div(class="editor-view" v-touch
-      :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
-      :style="editorViewStyle"
-      @wheel="handleWheel"
-      @scroll="!inBgRemoveMode ? scrollUpdate() : null"
-      @pointerdown="selectStart"
-      @mousewheel="handleWheel"
-      @pinch="pinchHandler"
-      ref="editorView")
-    div(class="editor-view__abs-container"
-        :style="absContainerStyle")
-      div(class="editor-view__canvas"
-          ref="canvas"
-          @swipeup="swipeUpHandler"
-          @swipedown="swipeDownHandler"
-          :style="canvasStyle")
-        div(v-for="(page,index) in pagesState"
-            :key="`page-${index}`"
-            class="editor-view__card"
-            :style="cardStyle"
-            @pointerdown.self.prevent="outerClick($event)"
-            ref="card")
-          nu-page(
-            :ref="`page-${index}`"
-            :pageIndex="index"
-            :overflowContainer="editorView"
-            :style="pageStyle(index)"
-            :pageState="page"
-            :index="index"
-            :inScaling="isScaling"
-            :isAnyBackgroundImageControl="isBackgroundImageControl")
+div(class="editor-view" v-touch
+    :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
+    :style="editorViewStyle"
+    @wheel="handleWheel"
+    @scroll="!inBgRemoveMode ? scrollUpdate() : null"
+    @pointerdown="selectStart"
+    @mousewheel="handleWheel"
+    @pinch="pinchHandler"
+    ref="editorView")
+  div(class="editor-view__abs-container"
+      :style="absContainerStyle")
+    div(class="editor-view__canvas"
+        ref="canvas"
+        @swipeup="swipeUpHandler"
+        @swipedown="swipeDownHandler"
+        :style="canvasStyle")
+      div(v-for="(page,index) in pagesState"
+          :key="`page-${index}`"
+          class="editor-view__card"
+          :style="cardStyle"
+          @pointerdown="selectStart"
+          @pointerdown.self.prevent="outerClick($event)"
+          ref="card")
+        nu-page(
+          :ref="`page-${index}`"
+          :pageIndex="index"
+          :overflowContainer="editorView"
+          :style="pageStyle(index)"
+          :pageState="page"
+          :index="index"
+          :inScaling="isScaling"
+          :isAnyBackgroundImageControl="isBackgroundImageControl")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -55,13 +56,17 @@ import uploadUtils from '@/utils/uploadUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import store from '@/store'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     EditorHeader,
     BgRemoveArea
   },
   props: {
-    isConfigPanelOpen: Boolean,
+    isConfigPanelOpen: {
+      type: Boolean,
+      required: true
+    },
     inAllPagesMode: {
       type: Boolean,
       required: true
@@ -168,7 +173,7 @@ export default Vue.extend({
 
     this.editorViewResizeObserver.observe(this.editorView as HTMLElement)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.editorViewResizeObserver.disconnect()
   },
   watch: {

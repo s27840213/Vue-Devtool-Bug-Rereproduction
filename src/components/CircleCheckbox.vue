@@ -1,24 +1,31 @@
 <template lang="pug">
-  div(class="circle-checkbox")
-    input(:id="value" type="checkbox" name="cb" :value="value" v-model="myVm" :disabled="disabled")
-    label(:for="value")
-      svg(fill="none", viewBox="0 0 12 12")
-        circle(class="box" cx="6", cy="6", r="5.5", fill="#4EABE6", stroke="#fff")
-        path(class="check" stroke="#fff", stroke-linecap="round", d="M4 5.333l1.087 1.933a.5.5 0 00.86.02L8 4")
+div(class="circle-checkbox")
+  input(:id="`${value}`" type="checkbox" name="cb" :value="value" v-model="myVm" :disabled="disabled")
+  label(:for="`${value}`")
+    svg(fill="none", viewBox="0 0 12 12")
+      circle(class="box" cx="6", cy="6", r="5.5", fill="#4EABE6", stroke="#fff")
+      path(class="check" stroke="#fff", stroke-linecap="round", d="M4 5.333l1.087 1.933a.5.5 0 00.86.02L8 4")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
-    value: [Number, String],
-    checkedValues: Array,
+    value: {
+      type: [Number, String],
+      required: true
+    },
+    checkedValues: {
+      type: Array,
+      required: true
+    },
     disabled: {
       type: Boolean,
       default: false
     }
   },
+  emits: ['update'],
   data() {
     return {
       checked: false
@@ -30,8 +37,7 @@ export default Vue.extend({
         return this.checkedValues !== undefined ? this.checkedValues : this.checked
       },
       set(value: Array<any> | boolean): void {
-        if (!this.checkedValues) {
-        } else {
+        if (this.checkedValues) {
           if (!this.disabled) {
             this.$emit('update', value)
           }

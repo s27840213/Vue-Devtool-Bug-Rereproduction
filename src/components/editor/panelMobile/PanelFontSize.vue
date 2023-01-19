@@ -1,18 +1,18 @@
 <template lang="pug">
-  div(class="panel-font-size")
-    font-size-selector
-    input(class="panel-font-size__range-input input__slider--range"
-      v-model.number="fontSize"
-      :max="fieldRange.fontSize.max"
-      :min="fieldRange.fontSize.min"
-      step="1"
-      type="range"
-      :disabled="fontSize === '--'"
-      @pointerup="handleChangeStop")
+div(class="panel-font-size")
+  font-size-selector
+  input(class="panel-font-size__range-input input__slider--range"
+    v-model.number="fontSize"
+    :max="fieldRange.fontSize.max"
+    :min="fieldRange.fontSize.min"
+    step="1"
+    type="range"
+    :disabled="fontSize === '--'"
+    @pointerup="handleChangeStop")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
 import layerUtils from '@/utils/layerUtils'
@@ -23,7 +23,8 @@ import pageUtils from '@/utils/pageUtils'
 import { mapGetters, mapState } from 'vuex'
 import { IGroup, ILayer } from '@/interfaces/layer'
 import stepsUtils from '@/utils/stepsUtils'
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     MobileSlider,
     FontSizeSelector
@@ -78,6 +79,7 @@ export default Vue.extend({
         tiptapUtils.agent(editor => {
           layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
         })
+        tiptapUtils.forceUpdate(true)
         textPropUtils.updateTextPropsState({ fontSize: value.toString() })
         textEffectUtils.refreshSize()
       }

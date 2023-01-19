@@ -1,20 +1,20 @@
 <template lang="pug">
-  div(ref="box"
-      class="scrollable-template-preview"
-      @mousemove="changeMouseX")
-    div(ref="container"
-        class="scrollable-template-preview__images"
-        :style="scrollStyles()")
-      img(v-for="imageUrl in imageUrls"
-          :src="imageUrl")
-    div(class="scrollable-template-preview__bar"
-        :style="barStyles()")
-      div(class="scrollable-template-preview__bar-progress"
-          :style="progressStyles()")
+div(ref="box"
+    class="scrollable-template-preview"
+    @mousemove="changeMouseX")
+  div(ref="container"
+      class="scrollable-template-preview__images"
+      :style="scrollStyles()")
+    img(v-for="imageUrl in imageUrls"
+        :src="imageUrl")
+  div(class="scrollable-template-preview__bar"
+      :style="barStyles()")
+    div(class="scrollable-template-preview__bar-progress"
+        :style="progressStyles()")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import { IContentTemplate } from '@/interfaces/template'
 import mouseUtils from '@/utils/mouseUtils'
@@ -22,10 +22,13 @@ import mouseUtils from '@/utils/mouseUtils'
 const SCROLL_MARGIN_HALF = 5
 const SCROLL_MARGIN = SCROLL_MARGIN_HALF * 2
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    isMobile: Boolean,
-    contentIds: Array
+    contentIds: {
+      type: Array,
+      required: true
+    }
   },
   computed: {
     typedContentIds(): IContentTemplate[] {

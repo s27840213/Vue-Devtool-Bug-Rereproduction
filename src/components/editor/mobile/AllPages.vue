@@ -19,7 +19,7 @@ div(class="all-pages")
           :iconWidth="'25px'")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
 import pageUtils from '@/utils/pageUtils'
@@ -31,7 +31,8 @@ import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import { globalQueue } from '@/utils/queueUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
       screenWidth: 0,

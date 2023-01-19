@@ -1,7 +1,5 @@
 import store from '@/store'
-import { VNode } from 'vue'
-import { DirectiveBinding } from 'vue/types/options'
-import layerUtils from './layerUtils'
+import { VNode, DirectiveBinding } from 'vue'
 
 let pressTimer = -1
 
@@ -34,7 +32,7 @@ const preventDefault = (e: MouseEvent) => {
 }
 
 const longpress = {
-  bind: function (el: HTMLElement, binding: DirectiveBinding, vNode: VNode) {
+  mounted: function (el: HTMLElement, binding: DirectiveBinding, vNode: VNode) {
     if (typeof binding.value !== 'function') {
       return
     }
@@ -51,10 +49,10 @@ const longpress = {
     el.addEventListener('pointerup', cancel)
     el.addEventListener('pointercancel', cancel)
   },
-  componentUpdated(el: HTMLElement, binding: DirectiveBinding) {
+  updated(el: HTMLElement, binding: DirectiveBinding) {
     (el as any).$value = binding.value
   },
-  unbind(el: HTMLElement) {
+  unmounted(el: HTMLElement) {
     clearTimeout(pressTimer)
     el.removeEventListener('pointerdown', (el as any).handler)
     el.removeEventListener('contextmenu', preventDefault)

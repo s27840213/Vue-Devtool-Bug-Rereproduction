@@ -1,168 +1,162 @@
 <template lang="pug">
-  div(class="page-wrapper" ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${this.pageIndex}`")
-    div(class="nu-page" :id="`nu-page_${this.pageIndex}`"
-        :style="pageStyles"
-        ref="page")
-      div(v-if="!isDetailPage && !isMobile"
-        class="page-title text-left pb-10"
-        :style="{'width': `${config.width * (scaleRatio/100)}px`, 'transform': `translate3d(0, -100%, ${isAnyLayerActive ? 0 : 1}px)`}")
-        //- span(class="pr-10") 第 {{pageIndex+1}} 頁
-        span(class="pr-10") {{$t('NN0134', {num:`${pageIndex+1}`})}}
-        input(
-          type="text"
-          v-model="pageName"
-          :placeholder="`${$t('NN0081')}`"
-          @focus="pageNameFocused()"
-          @blur="stepRecord()")
-        div(class="nu-page__icons"
-          v-if="!isBackgroundImageControl")
-          svg-icon(class="pointer btn-line-template mr-15"
-            :pageIndex="pageIndex"
-            :iconName="'line-template'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-            @click.native="openLineTemplatePopup()"
-            v-hint="$t('NN0138')"
-          )
-          //- svg-icon(class="pointer mr-5"
-          //-   :iconName="'caret-up'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
-          //-   @click.native="")
-          //- svg-icon(class="pointer mr-15"
-          //-   :iconName="'caret-down'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
-          //-   @click.native="")
-          svg-icon(class="pointer mr-10"
-            :iconName="'add-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-            @click.native="addPage()"
-            v-hint="$t('NN0139')"
-          )
-          svg-icon(class="pointer"
-            :class="[{'mr-10': getPageCount > 1}]"
-            :iconName="'duplicate-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-            @click.native="duplicatePage()"
-            v-hint="$t('NN0140')"
-          )
-          svg-icon(class="pointer"
-            v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
-            @click.native="deletePage()"
-            v-hint="$t('NN0141')"
-          )
-      div(v-if="isDetailPage && !isMobile" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
-        div(class="page-bar__icons" v-if="!isBackgroundImageControl")
-          div(class="body-2")
-            span {{pageIndex + 1}}
-          //- svg-icon(class="pointer mt-10"
-          //-   :iconName="'caret-up'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
-          //-   @click.native="")
-          //- svg-icon(class="pointer mt-10"
-          //-   :iconName="'caret-down'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
-          //-   @click.native="")
-          svg-icon(class="pointer mt-15"
-            :iconName="'add-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
-            @click.native="addPage()")
-          svg-icon(class="pointer mt-10"
-            :iconName="'duplicate-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
-            @click.native="duplicatePage()")
-          svg-icon(class="pointer mt-10"
-            v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
-            @click.native="deletePage()")
-      template(v-if="!isOutOfBound || hasEditingText")
-        div(class='pages-wrapper'
-            :class="`nu-page-${pageIndex}`"
-            :style="wrapperStyles()"
-            @keydown.delete.exact.self.prevent.stop="ShortcutUtils.del()"
-            @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.copy()"
-            @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.copy()"
-            @keydown.ctrl.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
-            @keydown.meta.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
-            @keydown.ctrl.88.exact.stop.prevent.self="ShortcutUtils.cut()"
-            @keydown.meta.88.exact.stop.prevent.self="ShortcutUtils.cut()"
-            @keydown.ctrl.83.exact.stop.prevent.self="ShortcutUtils.save()"
-            @keydown.meta.83.exact.stop.prevent.self="ShortcutUtils.save()"
-            @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
-            @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
-            @keydown.ctrl.71.exact.stop.prevent.self="ShortcutUtils.group()"
-            @keydown.meta.71.exact.stop.prevent.self="ShortcutUtils.group()"
-            @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
-            @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
-            @keydown.ctrl.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
-            @keydown.meta.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
-            @keydown.ctrl.90.exact.stop.prevent.self="undo()"
-            @keydown.meta.90.exact.stop.prevent.self="undo()"
-            @keydown.ctrl.shift.90.exact.stop.prevent.self="redo()"
-            @keydown.meta.shift.90.exact.stop.prevent.self="redo()"
-            @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-            @keydown.meta.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-            @keydown.ctrl.61.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-            @keydown.meta.61.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-            @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-            @keydown.meta.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-            @keydown.ctrl.107.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-            @keydown.meta.107.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-            @keydown.ctrl.109.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-            @keydown.meta.109.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-            @keydown.ctrl.173.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-            @keydown.meta.173.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-            @keydown.37.exact.stop.prevent.self="ShortcutUtils.left()"
-            @keydown.38.exact.stop.prevent.self="ShortcutUtils.up()"
-            @keydown.39.exact.stop.prevent.self="ShortcutUtils.right()"
-            @keydown.40.exact.stop.prevent.self="ShortcutUtils.down()"
-            @keydown.shift.37.exact.self.prevent.stop="ShortcutUtils.left(true)"
-            @keydown.shift.38.exact.self.prevent.stop="ShortcutUtils.up(true)"
-            @keydown.shift.39.exact.self.prevent.stop="ShortcutUtils.right(true)"
-            @keydown.shift.40.exact.self.prevent.stop="ShortcutUtils.down(true)"
-            @mouseover="togglePageHighlighter(true)"
-            @mouseleave="togglePageHighlighter(false)"
-            tabindex="0")
-          //- command/ctrl + 61/173 for Firefox keycode, http://www.javascripter.net/faq/keycodes.htm
-          lazy-load(
-              target=".editor-view"
-              :rootMargin="'1500px 0px 1500px 0px'"
-              :minHeight="config.height * (scaleRatio / 100)"
-              :maxHeight="config.height * (scaleRatio / 100)"
-              :threshold="[0,1]")
-            div(class="scale-container relative"
-                :style="scaleContainerStyles")
-              page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
-              div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
-              div(v-if="currSelectedIndex !== -1" class="page-control" :style="styles('control')")
-                nu-controller(v-if="currFocusPageIndex === pageIndex" data-identifier="controller"
-                  :key="`controller-${currLayer.id}`"
-                  :layerIndex="currSelectedIndex"
-                  :pageIndex="pageIndex"
-                  :config="currLayer"
-                  :snapUtils="snapUtils"
-                  :contentScaleRatio="contentScaleRatio"
-                  @setFocus="setFocus()"
-                  @isDragging="handleDraggingController")
-              dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
-        div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex)"
-          class="page-highlighter"
-          :style="wrapperStyles()")
-        //- for ruler to get rectangle of page content (without bleeds)
-        div(v-if="config.isEnableBleed" :class="`nu-page-bleed-${pageIndex}`" :style="bleedLineAreaStyles()")
-        div(v-if="(currActivePageIndex === pageIndex && isDetailPage && !isImgCtrl && !isBgImgCtrl)"
-            class="page-resizer"
-            ref="pageResizer"
-            @pointerdown.left.stop="pageResizeStart($event)"
-            @touchstart="disableTouchEvent"
-            @mouseenter="toggleResizerHint(true)"
-            @mouseleave="toggleResizerHint(false)")
-          svg-icon(class="page-resizer__resizer-bar"
-            :iconName="'move-vertical'" :iconWidth="`${15}px`" :iconColor="'white'")
-          div(class="page-resizer__resizer-bar")
-          div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{resizerHint}}
-        snap-line-area(
-          :config="config"
+div(class="page-wrapper" ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${this.pageIndex}`")
+  div(class="nu-page"
+      :id="`nu-page_${pageIndex}`"
+      :style="pageStyles"
+      ref="page")
+    div(v-if="!isDetailPage && !isMobile"
+      class="page-title text-left pb-10"
+      :style="{'width': `${config.width * (scaleRatio/100)}px`, 'transform': `translate3d(0, -100%, ${isAnyLayerActive ? 0 : 1}px)`}")
+      //- span(class="pr-10") 第 {{pageIndex+1}} 頁
+      span(class="pr-10") {{$t('NN0134', {num:`${pageIndex+1}`})}}
+      input(
+        type="text"
+        v-model="pageName"
+        :placeholder="`${$t('NN0081')}`"
+        @focus="pageNameFocused()"
+        @blur="stepRecord()")
+      div(class="nu-page__icons"
+        v-if="!isBackgroundImageControl")
+        svg-icon(class="pointer btn-line-template mr-15"
           :pageIndex="pageIndex"
-          :pageScaleRatio="pageScaleRatio"
-          :snapUtils="snapUtils"
+          :iconName="'line-template'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
+          @click.native="openLineTemplatePopup()"
+          v-hint="$t('NN0138')"
         )
-      template(v-else)
-        div(class='pages-wrapper'
+        //- svg-icon(class="pointer mr-5"
+        //-   :iconName="'caret-up'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
+        //-   @click.native="")
+        //- svg-icon(class="pointer mr-15"
+        //-   :iconName="'caret-down'" :iconWidth="`${8}px`" :iconColor="'gray-3'"
+        //-   @click.native="")
+        svg-icon(class="pointer mr-10"
+          :iconName="'add-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
+          @click.native="addPage()"
+          v-hint="$t('NN0139')"
+        )
+        svg-icon(class="pointer"
+          :class="[{'mr-10': getPageCount > 1}]"
+          :iconName="'duplicate-page'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
+          @click.native="duplicatePage()"
+          v-hint="$t('NN0140')"
+        )
+        svg-icon(class="pointer"
+          v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${18}px`" :iconColor="'gray-3'"
+          @click.native="deletePage()"
+          v-hint="$t('NN0141')"
+        )
+    div(v-if="isDetailPage && !isMobile" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
+      div(class="page-bar__icons" v-if="!isBackgroundImageControl")
+        div(class="body-2")
+          span {{pageIndex + 1}}
+        //- svg-icon(class="pointer mt-10"
+        //-   :iconName="'caret-up'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
+        //-   @click.native="")
+        //- svg-icon(class="pointer mt-10"
+        //-   :iconName="'caret-down'" :iconWidth="`${10}px`" :iconColor="'gray-2'"
+        //-   @click.native="")
+        svg-icon(class="pointer mt-15"
+          :iconName="'add-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
+          @click.native="addPage()")
+        svg-icon(class="pointer mt-10"
+          :iconName="'duplicate-page'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
+          @click.native="duplicatePage()")
+        svg-icon(class="pointer mt-10"
+          v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
+          @click.native="deletePage()")
+    template(v-if="!isOutOfBound || hasEditingText")
+      div(class='pages-wrapper'
           :class="`nu-page-${pageIndex}`"
-          :style="wrapperStyles()")
+          :style="wrapperStyles()"
+          @keydown.self="handleSpecialCharacter"
+          @keydown.delete.exact.self.prevent.stop="ShortcutUtils.del()"
+          @keydown.ctrl.c.exact.self.prevent.stop="ShortcutUtils.copy()"
+          @keydown.meta.c.exact.self.prevent.stop="ShortcutUtils.copy()"
+          @keydown.ctrl.d.exact.self.prevent.stop="ShortcutUtils.deselect()"
+          @keydown.meta.d.exact.self.prevent.stop="ShortcutUtils.deselect()"
+          @keydown.ctrl.x.exact.self.prevent.stop="ShortcutUtils.cut()"
+          @keydown.meta.x.exact.self.prevent.stop="ShortcutUtils.cut()"
+          @keydown.ctrl.s.exact.self.prevent.stop="ShortcutUtils.save()"
+          @keydown.meta.s.exact.self.prevent.stop="ShortcutUtils.save()"
+          @keydown.ctrl.v.exact.self.prevent.stop="ShortcutUtils.paste($event)"
+          @keydown.meta.v.exact.self.prevent.stop="ShortcutUtils.paste($event)"
+          @keydown.ctrl.g.exact.self.prevent.stop="ShortcutUtils.group()"
+          @keydown.meta.g.exact.self.prevent.stop="ShortcutUtils.group()"
+          @keydown.ctrl.a.exact.self.prevent.stop="ShortcutUtils.selectAll()"
+          @keydown.meta.a.exact.self.prevent.stop="ShortcutUtils.selectAll()"
+          @keydown.ctrl.shift.g.exact.self.prevent.stop="ShortcutUtils.ungroup()"
+          @keydown.meta.shift.g.exact.self.prevent.stop="ShortcutUtils.ungroup()"
+          @keydown.ctrl.z.exact.self.prevent.stop="undo()"
+          @keydown.meta.z.exact.self.prevent.stop="undo()"
+          @keydown.ctrl.shift.z.exact.self.prevent.stop="redo()"
+          @keydown.meta.shift.z.exact.self.prevent.stop="redo()"
+          @keydown.ctrl.-.exact.self.prevent.stop="ShortcutUtils.zoomOut()"
+          @keydown.meta.-.exact.self.prevent.stop="ShortcutUtils.zoomOut()"
+          @keydown.ctrl.+.exact.self.prevent.stop="ShortcutUtils.zoomIn()"
+          @keydown.meta.+.exact.self.prevent.stop="ShortcutUtils.zoomIn()"
+          @keydown.left.exact.self.prevent.stop="ShortcutUtils.left()"
+          @keydown.up.exact.self.prevent.stop="ShortcutUtils.up()"
+          @keydown.right.exact.self.prevent.stop="ShortcutUtils.right()"
+          @keydown.down.exact.self.prevent.stop="ShortcutUtils.down()"
+          @keydown.shift.left.exact.self.prevent.stop="ShortcutUtils.left(true)"
+          @keydown.shift.up.exact.self.prevent.stop="ShortcutUtils.up(true)"
+          @keydown.shift.right.exact.self.prevent.stop="ShortcutUtils.right(true)"
+          @keydown.shift.down.exact.self.prevent.stop="ShortcutUtils.down(true)"
+          @mouseover="togglePageHighlighter(true)"
+          @mouseleave="togglePageHighlighter(false)"
+          tabindex="0")
+        //- command/ctrl + 61/173 for Firefox keycode, http://www.javascripter.net/faq/keycodes.htm
+        lazy-load(
+            target=".editor-view"
+            :rootMargin="'1500px 0px 1500px 0px'"
+            :minHeight="config.height * (scaleRatio / 100)"
+            :maxHeight="config.height * (scaleRatio / 100)"
+            :threshold="[0,1]")
+          div(class="scale-container relative"
+              :style="scaleContainerStyles")
+            page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+            div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
+            div(v-if="currSelectedIndex !== -1" class="page-control" :style="styles('control')")
+              nu-controller(v-if="currFocusPageIndex === pageIndex" data-identifier="controller"
+                :key="`controller-${currLayer.id}`"
+                :layerIndex="currSelectedIndex"
+                :pageIndex="pageIndex"
+                :config="currLayer"
+                :snapUtils="snapUtils"
+                :contentScaleRatio="contentScaleRatio"
+                @setFocus="setFocus()"
+                @isDragging="handleDraggingController")
+            dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
+      div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex)"
+        class="page-highlighter"
+        :style="wrapperStyles()")
+      //- for ruler to get rectangle of page content (without bleeds)
+      div(v-if="config.isEnableBleed" :class="`nu-page-bleed-${pageIndex}`" :style="bleedLineAreaStyles()")
+      div(v-if="(currActivePageIndex === pageIndex && isDetailPage && !isImgCtrl && !isBgImgCtrl)"
+          class="page-resizer"
+          ref="pageResizer"
+          @pointerdown.left.stop="pageResizeStart($event)"
+          @touchstart="disableTouchEvent"
+          @mouseenter="toggleResizerHint(true)"
+          @mouseleave="toggleResizerHint(false)")
+        svg-icon(class="page-resizer__resizer-bar"
+          :iconName="'move-vertical'" :iconWidth="`${15}px`" :iconColor="'white'")
+        div(class="page-resizer__resizer-bar")
+        div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{resizerHint}}
+      snap-line-area(
+        :config="config"
+        :pageIndex="pageIndex"
+        :snapUtils="snapUtils"
+      )
+    template(v-else)
+      div(class='pages-wrapper'
+        :class="`nu-page-${pageIndex}`"
+        :style="wrapperStyles()")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapMutations, mapGetters, mapState } from 'vuex'
 import { IShape, IText, IImage, IGroup, ILayer, ITmp, IFrame, IImageStyle } from '@/interfaces/layer'
 import PageContent from '@/components/editor/page/PageContent.vue'
@@ -176,7 +170,6 @@ import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
 import layerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import NuImage from '@/components/editor/global/NuImage.vue'
 import DimBackground from '@/components/editor/page/DimBackground.vue'
 import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
@@ -187,17 +180,15 @@ import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
 import cssConverter from '@/utils/cssConverter'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
-import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
+import i18n from '@/i18n'
 import { floor, round } from 'lodash'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
 
-export default Vue.extend({
-  inheritAttrs: false,
+export default defineComponent({
   components: {
-    NuImage,
     NuBackgroundController,
     PageContent,
     DimBackground,
@@ -238,13 +229,27 @@ export default Vue.extend({
     }
   },
   props: {
-    pageState: Object as () => IPageState,
-    pageIndex: Number,
-    pageScaleRatio: Number,
-    isAnyBackgroundImageControl: Boolean,
-    overflowContainer: HTMLElement,
-    isScaling: Boolean
+    pageState: {
+      type: Object as PropType<IPageState>,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    isAnyBackgroundImageControl: {
+      type: Boolean,
+      required: true
+    },
+    overflowContainer: {
+      type: HTMLElement
+    },
+    isScaling: {
+      type: Boolean,
+      default: false
+    }
   },
+  emits: ['stepChange'],
   mounted() {
     this.initialPageHeight = (this.config as IPage).height
     this.$nextTick(() => {
@@ -303,7 +308,12 @@ export default Vue.extend({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
       contentScaleRatio: 'getContentScaleRatio',
+      pagesLength: 'getPagesLength',
       showAllAdminTool: 'user/showAllAdminTool',
+      useMobileEditor: 'getUseMobileEditor',
+      currCardIndex: 'mobileEditor/getCurrCardIndex',
+      topBound: 'page/getTopBound',
+      bottomBound: 'page/getBottomBound',
       isImgCtrl: 'imgControl/isImgCtrl',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
@@ -384,7 +394,8 @@ export default Vue.extend({
       }
     },
     isOutOfBound(): boolean {
-      return pageUtils.isOutOfBound(this.pageIndex)
+      return this.isMobile && !this.isDetailPage ? (this.pageIndex <= this.currCardIndex - 2 || this.pageIndex >= this.currCardIndex + 2)
+        : this.pageIndex <= (this.topBound - 4) || this.pageIndex >= (this.bottomBound + 4)
     },
     hasEditingText(): boolean {
       const page = this.config as IPage
@@ -438,7 +449,17 @@ export default Vue.extend({
       setSidebarType: 'SET_currSidebarPanelType',
       setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
     }),
-    styles(type: string) {
+    handleSpecialCharacter(e: KeyboardEvent) {
+      // For those using keyCode in their codebase, we recommend converting them to their kebab-cased named equivalents.
+      // The keys for some punctuation marks can just be included literally. e.g. For the , key:
+      // Limitations of the syntax prevent certain characters from being matched, such as ", ', /, =, >, and .. For those characters you should check event.key inside the listener instead.
+      if (e.key === '=' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault()
+        e.stopPropagation()
+        ShortcutUtils.zoomIn()
+      }
+    },
+    styles(type: string): Record<string, string> {
       return type === 'content' ? {
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
@@ -454,7 +475,7 @@ export default Vue.extend({
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
-    wrapperStyles() {
+    wrapperStyles(): Record<string, string> {
       return {
         ...this.sizeStyles,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
@@ -570,7 +591,7 @@ export default Vue.extend({
     },
     duplicatePage() {
       if (this.isProcessingShadow) {
-        Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+        notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
         return
       }
       GroupUtils.deselect()
@@ -629,13 +650,15 @@ export default Vue.extend({
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       eventUtils.addPointerEvent('pointermove', this.pageResizing)
-      this.overflowContainer.addEventListener('scroll', this.scrollUpdate, { capture: true })
+      if (this.overflowContainer) {
+        this.overflowContainer.addEventListener('scroll', this.scrollUpdate, { capture: true })
+      }
       eventUtils.addPointerEvent('pointerup', this.pageResizeEnd)
     },
     pageResizing(e: PointerEvent) {
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
-      const isShownScrollbar = (this.overflowContainer.scrollHeight === this.overflowContainer.clientHeight)
+      const isShownScrollbar = (this.overflowContainer?.scrollHeight === this.overflowContainer?.clientHeight)
 
       if (isShownScrollbar === this.isShownScrollBar) {
         const multiplier = isShownScrollbar ? 2 : 1
@@ -669,7 +692,9 @@ export default Vue.extend({
       StepsUtils.record()
       this.$nextTick(() => {
         eventUtils.removePointerEvent('pointermove', this.pageResizing)
-        this.overflowContainer.removeEventListener('scroll', this.scrollUpdate, { capture: true })
+        if (this.overflowContainer) {
+          this.overflowContainer.removeEventListener('scroll', this.scrollUpdate, { capture: true })
+        }
         eventUtils.removePointerEvent('pointerup', this.pageResizeEnd)
       })
       pageUtils.findCentralPageIndexInfo()

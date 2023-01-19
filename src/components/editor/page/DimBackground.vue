@@ -1,50 +1,51 @@
 <template lang="pug">
-  div(v-if="isImgCtrl" class="dim-background")
-    div(class="dim-background__backdrop")
-    div(class="dim-background__content-area" :style="contentAreaStyles")
-      div
-        nu-layer(:style="'opacity: 0.45'"
-          :layerIndex="layerIndex"
-          :pageIndex="pageIndex"
-          :primaryLayer="primaryLayer"
-          :imgControl="true"
-          :forRender="true"
-          :contentScaleRatio="contentScaleRatio"
-          :config="image")
-      div
-        nu-layer(:layerIndex="layerIndex"
-          :pageIndex="pageIndex"
-          :primaryLayer="primaryLayer"
-          :forRender="true"
-          :contentScaleRatio="contentScaleRatio"
-          :config="image")
-      div(class="page-control")
-        nu-img-controller(:layerIndex="layerIndex"
-                          :pageIndex="pageIndex"
-                          :contentScaleRatio="contentScaleRatio"
-                          :primaryLayer="primaryLayer"
-                          :config="image")
-  div(v-else-if="isBgImgCtrl" class="dim-background")
-    div(class="background-control"
-        :style="backgroundControlStyles")
-      nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio" :forRender="true" :pageIndex="pageIndex" :layerIndex="layerIndex")
-      div(class="dim-background__content-area hollow" :style="contentAreaStyles")
-        component(v-for="(elm, idx) in getHalation"
-          :key="idx"
-          :is="elm.tag"
-          v-bind="elm.attrs")
-      nu-background-controller(:config="image"
+div(v-if="isImgCtrl" class="dim-background")
+  div(class="dim-background__backdrop")
+  div(class="dim-background__content-area" :style="contentAreaStyles")
+    div
+      nu-layer(:style="'opacity: 0.45'"
+        :layerIndex="layerIndex"
         :pageIndex="pageIndex"
-        :contentScaleRatio="contentScaleRatio")
-    //- div(:style="backgroundContorlClipStyles")
-    //-   nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
-    //- div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
-    //-     class="dim-background"
-    //-     :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
+        :primaryLayer="primaryLayer"
+        :imgControl="true"
+        :forRender="true"
+        :contentScaleRatio="contentScaleRatio"
+        :config="image")
+    div
+      nu-layer(:layerIndex="layerIndex"
+        :pageIndex="pageIndex"
+        :primaryLayer="primaryLayer"
+        :forRender="true"
+        :contentScaleRatio="contentScaleRatio"
+        :config="image")
+    div(class="page-control")
+      nu-img-controller(:layerIndex="layerIndex"
+                        :pageIndex="pageIndex"
+                        :contentScaleRatio="contentScaleRatio"
+                        :primaryLayer="primaryLayer"
+                        :primaryLayerIndex="-1"
+                        :config="image")
+div(v-else-if="isBgImgCtrl" class="dim-background")
+  div(class="background-control"
+      :style="backgroundControlStyles")
+    nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio" :forRender="true" :pageIndex="pageIndex" :layerIndex="layerIndex")
+    div(class="dim-background__content-area hollow" :style="contentAreaStyles")
+      component(v-for="(elm, idx) in getHalation"
+        :key="idx"
+        :is="elm.tag"
+        v-bind="elm.attrs")
+    nu-background-controller(:config="image"
+      :pageIndex="pageIndex"
+      :contentScaleRatio="contentScaleRatio")
+  //- div(:style="backgroundContorlClipStyles")
+  //-   nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
+  //- div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
+  //-     class="dim-background"
+  //-     :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
 
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import { IPage } from '@/interfaces/page'
@@ -53,7 +54,8 @@ import pageUtils from '@/utils/pageUtils'
 import { IImage } from '@/interfaces/layer'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     NuBackgroundController
   },
@@ -61,9 +63,13 @@ export default Vue.extend({
     return {}
   },
   props: {
-    config: Object,
-    pageScaleRatio: Number,
-    isAnyBackgroundImageControl: Boolean,
+    config: {
+      type: Object,
+      required: true
+    },
+    isAnyBackgroundImageControl: {
+      type: Boolean,
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -122,7 +128,7 @@ export default Vue.extend({
         'pointer-events': 'none'
       }
     },
-    getHalation(): unknown[] {
+    getHalation(): ReturnType<typeof imageAdjustUtil.getHalation> {
       const { styles: { adjust } } = this.config.backgroundImage.config as IImage
       const { width, height } = pageUtils.getPage(this.imgControlPageIdx)
       const position = {

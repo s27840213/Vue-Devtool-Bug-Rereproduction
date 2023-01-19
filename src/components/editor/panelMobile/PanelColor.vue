@@ -1,33 +1,33 @@
 <template lang="pug">
-  div(class="panel-color px-5")
-    div(v-if="showDocumentColors")
-      div(class="text-left") {{$t('NN0798')}}
-      div(class="panel-color__shape-colors" :style="colorsStyle"
-          @scroll.passive="updateColorsOverflow" ref="colors")
-        color-btn(v-for="(color, index) in getDocumentColors"
-                  :color="color" :focus="index === currSelectedColorIndex"
-                  @click="selectColor(index)")
-      div(class="panel-color__hr")
-    //- There is no row-gap in MobilePanel while active PanelColor.
-    //- Instead, control gap by PanelColor itself.
-    div(v-else class="mt-10")
-    color-picker(
-      v-if="showColorPicker"
-      :isMobile="true" :aspectRatio="40"
-      :currentColor="colorUtils.currColor"
-      @update="handleDragUpdate"
-      @final="handleChangeStop")
-    color-slips(v-if="showPalette"
-      :class="{'show-document-colors': showDocumentColors}"
-      mode="PanelColor"
-      :allRecentlyControl="showAllRecently"
-      :selectedColor="selectedColor"
-      @openColorPicker="openColorPicker"
-      @openColorMore="openColorMore")
+div(class="panel-color px-5")
+  div(v-if="showDocumentColors")
+    div(class="text-left") {{$t('NN0798')}}
+    div(class="panel-color__shape-colors" :style="colorsStyle"
+        @scroll.passive="updateColorsOverflow" ref="colors")
+      color-btn(v-for="(color, index) in getDocumentColors"
+                :color="color" :focus="index === currSelectedColorIndex"
+                @click="selectColor(index)")
+    div(class="panel-color__hr")
+  //- There is no row-gap in MobilePanel while active PanelColor.
+  //- Instead, control gap by PanelColor itself.
+  div(v-else class="mt-10")
+  color-picker(
+    v-if="showColorPicker"
+    :isMobile="true" :aspectRatio="40"
+    :currentColor="colorUtils.currColor"
+    @update="handleDragUpdate"
+    @final="handleChangeStop")
+  color-slips(v-if="showPalette"
+    :class="{'show-document-colors': showDocumentColors}"
+    mode="PanelColor"
+    :allRecentlyControl="showAllRecently"
+    :selectedColor="selectedColor"
+    @openColorPicker="openColorPicker"
+    @openColorMore="openColorMore")
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import Vue, { PropType, defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
@@ -48,7 +48,7 @@ import textBgUtils from '@/utils/textBgUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import { cloneDeep } from 'lodash'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       currColor: '#fff',
@@ -64,6 +64,7 @@ export default Vue.extend({
       default: () => []
     }
   },
+  emits: ['pushHistory'],
   components: {
     MobileSlider,
     ColorPicker,
@@ -74,10 +75,7 @@ export default Vue.extend({
     colorUtils.on(this.currEvent, this.handleColorUpdate)
     colorUtils.onStop(this.currEvent, this.recordChange)
   },
-  mounted() {
-    this.updateColorsOverflow()
-  },
-  beforeDestroy() {
+  beforeUnmount() {
     colorUtils.event.off(this.currEvent, this.handleColorUpdate)
     colorUtils.offStop(this.currEvent, this.recordChange)
   },
@@ -313,7 +311,7 @@ export default Vue.extend({
     height: 1px;
     background-color: setColor(gray-4);
   }
-  & .show-document-colors::v-deep .color-panel__scroll {
+  & .show-document-colors:deep(.color-panel__scroll) {
     padding-top: 16px;
   }
 }

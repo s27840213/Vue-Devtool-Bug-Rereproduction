@@ -3,7 +3,7 @@ import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import store from '@/store'
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import designUtils from './designUtils'
 import editorUtils from './editorUtils'
 import FocusUtils from './focusUtils'
@@ -110,6 +110,14 @@ class PageUtils {
     }
   }
 
+  get topBound() {
+    return store.getters['page/getTopBound']
+  }
+
+  get bottomBound() {
+    return store.getters['page/getBottomBound']
+  }
+
   get getEditorRenderSize(): { pageRect: DOMRect, editorRect: DOMRect } {
     const page = document.getElementById(`nu-page_${layerUtils.pageIndex}`) as HTMLElement
     const editor = document.getElementById('mobile-editor__content') as HTMLElement
@@ -119,8 +127,6 @@ class PageUtils {
     }
   }
 
-  topBound: number
-  bottomBound: number
   mobileMinScaleRatio: number
   isSwitchingToEditor: boolean
   editorSize: { width: number, height: number }
@@ -128,8 +134,6 @@ class PageUtils {
   originPageSize = { width: -1, height: -1 }
 
   constructor() {
-    this.topBound = -1
-    this.bottomBound = Number.MAX_SAFE_INTEGER
     this.mobileMinScaleRatio = 0
     this.isSwitchingToEditor = false
     this.editorSize = { width: 0, height: 0 }
@@ -451,8 +455,11 @@ class PageUtils {
     }
 
     if (!preventFocus) this.activeMiddlemostPage()
-    this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
-    this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
+
+    store.commit('page/SET_STATE', {
+      topBound: this.findBoundary(pages, containerRect, targetIndex - 1, true),
+      bottomBound: this.findBoundary(pages, containerRect, targetIndex + 1, false)
+    })
   }
 
   findBoundary(posArr: Array<{ top: number, bottom: number }>, containerRect: DOMRect, currIndex: number, toTop: boolean): number {
@@ -556,7 +563,7 @@ class PageUtils {
       this.findCentralPageIndexInfo()
     }
     if (scrollToTop) {
-      Vue.nextTick(() => {
+      nextTick(() => {
         editorViewBox.scrollTo((editorViewBox.scrollWidth - editorWidth) / 2, 0)
       })
     }
@@ -564,7 +571,7 @@ class PageUtils {
       pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
     } else {
       this.isSwitchingToEditor = true
-      Vue.nextTick(() => {
+      nextTick(() => {
         setTimeout(() => {
           this.scrollIntoPage(this.currFocusPageIndex, 'auto')
           this.isSwitchingToEditor = false

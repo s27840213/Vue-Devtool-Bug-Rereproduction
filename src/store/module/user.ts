@@ -11,6 +11,7 @@ import i18n from '@/i18n'
 // import apiUtils from '@/utils/apiUtils'
 import generalUtils from '@/utils/generalUtils'
 import logUtils from '@/utils/logUtils'
+import { notify } from '@kyvg/vue3-notification'
 
 const SET_TOKEN = 'SET_TOKEN' as const
 const SET_STATE = 'SET_STATE' as const
@@ -123,7 +124,7 @@ const state = getDefaultState()
 
 const getters: GetterTree<IUserModule, any> = {
   isLogin: state => {
-    return state.isAuthenticated
+    return state.token.length > 0
   },
   getUserId: state => {
     return state.userId
@@ -188,7 +189,7 @@ const getters: GetterTree<IUserModule, any> = {
   getAvatar(state) {
     return state.avatar
   },
-  hasAvatar(): boolean {
+  hasAvatar(state): boolean {
     return state.avatar.prev_2x !== undefined
   },
   getViewGuide(state): number {
@@ -197,35 +198,34 @@ const getters: GetterTree<IUserModule, any> = {
   getImgSizeMap(state): Array<{ [key: string]: string | number }> {
     return state.imgSizeMap
   },
-  getIsUpdateDesignOpen() {
+  getIsUpdateDesignOpen(state) {
     return state.isUpdateDesignOpen
   },
-  getUpdateDesignId() {
+  getUpdateDesignId(state) {
     return state.updateDesignId
   },
-  getUpdateDesignType() {
+  getUpdateDesignType(state) {
     return state.updateDesignType
   },
-  getDimensionMap() {
+  getDimensionMap(state) {
     return state.dimensionMap
   },
   getBackendRenderParams(state) {
     return state.backendRenderParams
   },
-  getRenderForPDF() {
+  getRenderForPDF(state) {
     return state.renderForPDF
   },
-  showAdminTool() { // Partial admin tool
+  showAdminTool(state) { // Partial admin tool
     return state.role === 0 && state.adminMode && state.enableAdminView
   },
-  showAllAdminTool() {
+  showAllAdminTool(state) {
     return state.role === 0 && state.enableAdminView
   }
 }
 
 const mutations: MutationTree<IUserModule> = {
   [SET_TOKEN](state: IUserModule, token: string) {
-    state.isAuthenticated = token.length > 0
     state.token = token
     localStorage.setItem('token', token)
   },
@@ -268,7 +268,6 @@ const actions: ActionTree<IUserModule, unknown> = {
     try {
       const { data } = await userApis.groupDesign(params)
       const { flag, group_id: groupId, msg } = data
-      console.log(data)
       const isDelete = params.list?.length === 0 && params.update === 1
       if (flag === 0) {
         commit('SET_groupId', groupId, { root: true })
@@ -281,7 +280,6 @@ const actions: ActionTree<IUserModule, unknown> = {
           commit('SET_groupType', 0, { root: true })
         }
         themeUtils.fetchTemplateContent()
-        console.log(`Success: ${groupId}}`)
       } else if (flag === 1) {
         modalUtils.setModalInfo('上傳失敗', [`Error msg: ${msg}`])
         commit('SET_groupId', '', { root: true })
@@ -311,10 +309,10 @@ const actions: ActionTree<IUserModule, unknown> = {
       }
       if (flag === 1) {
         logUtils.setLog(`Put asset failed: ${msg}`)
-        Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+        notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
       } else if (flag === 2) {
         logUtils.setLog(`Token invalid!: ${msg}`)
-        Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+        notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
       }
       return data
     } catch (error) {
@@ -324,7 +322,6 @@ const actions: ActionTree<IUserModule, unknown> = {
   async login({ commit, dispatch }, { token, account, password }) {
     try {
       const { data } = await userApis.login(token, account, password)
-      state.isAuthenticated = token.length > 0
       await dispatch('loginSetup', { data: data })
       return Promise.resolve(data)
     } catch (error) {
@@ -375,10 +372,9 @@ const actions: ActionTree<IUserModule, unknown> = {
       })
 
       // locale settings
-      process.env.NODE_ENV === 'development' && console.log(data.data)
       const locale = localStorage.getItem('locale') as string
       if (locale !== data.data.locale) {
-        i18n.locale = data.data.locale
+        i18n.global.locale = data.data.locale
         localStorage.setItem('locale', data.data.locale)
       }
       uploadUtils.setLoginOutput(data.data)
@@ -436,4 +432,4 @@ export default {
   getters,
   mutations,
   actions
-} as ModuleTree<IUserModule>
+}

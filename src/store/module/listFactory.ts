@@ -128,7 +128,7 @@ export default function (this: any) {
       const { keyword } = params
       const locale = params.locale || localeUtils.currLocale()
       commit('SET_STATE', { pending: true, locale })
-      if (keyword)commit('SET_STATE', { keyword })
+      if (keyword) commit('SET_STATE', { keyword })
       if (keyword && this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
       try {
         const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
@@ -234,7 +234,7 @@ export default function (this: any) {
     },
 
     // Clear search keyword and result.
-    resetSearch: async({ commit }) => {
+    resetSearch: async ({ commit }) => {
       commit('SET_STATE', {
         searchResult: {},
         nextSearch: 0,
@@ -292,14 +292,14 @@ export default function (this: any) {
     },
     UPDATE_RECENTLY_PAGE(state: IListModuleState, { index, format }) {
       const targetCategory = state.categories.find((category: any) => {
-        return category.title === `${i18n.t('NN0024')}`
+        return category.title === `${i18n.global.t('NN0024')}`
       })?.list
       if (targetCategory) {
         targetCategory.splice(index, 1)
         targetCategory.unshift(format)
       }
     },
-    SET_CONTENT(state: IListModuleState, { objects, isSearch = false }: {objects: IListServiceData, isSearch: boolean}) {
+    SET_CONTENT(state: IListModuleState, { objects, isSearch = false }: { objects: IListServiceData, isSearch: boolean }) {
       const {
         content = [],
         // host = '',
@@ -382,5 +382,5 @@ export default function (this: any) {
     getters,
     mutations,
     actions
-  } as ModuleTree<IListModuleState>
+  }
 }

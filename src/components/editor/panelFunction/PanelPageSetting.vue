@@ -1,247 +1,248 @@
 <template lang="pug">
-  div(class="page-setting")
-    div(class="page-setting-row page-setting__title")
-      span(class="text-gray-2 label-mid") {{$t('NN0021')}}
-    div(class="page-setting-row page-setting__size bg-gray-6 pointer" @click="toggleSuggestionPanel()")
-      div(class="page-setting__size__box")
-        span(class="body-XS text-gray-2") {{ `${sizeToShow.width} ${sizeToShow.unit}` }}
-      span(class="body-XS text-gray-3") W
-      span(class="body-XS text-gray-2 text-center") x
-      div(class="page-setting__size__box")
-        span(class="body-XS text-gray-2") {{ `${sizeToShow.height} ${sizeToShow.unit}` }}
-      span(class="body-XS text-gray-3") H
-    div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
-        @click="toggleSuggestionPanel()")
-      svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm" class="mr-10")
-      span(class="page-setting__apply__text") {{$t('NN0022')}}
-    transition(name="slide-fade")
-      div(v-if="isPanelOpen"
-        class="page-setting__suggestion-panel")
-        img(class="page-setting__suggestion-panel__arrow" :src="require('@/assets/img/svg/up-arrow.svg')")
-        div(class="page-setting__suggestion-panel__body")
-          div(class="page-setting__suggestion-panel__body__close pointer"
-              @click="setSuggestionPanel(false)")
-            svg-icon(class="page-setting__suggestion-panel__body__close"
-                    iconName="close" iconWidth="19px" iconColor="white")
-          keep-alive
-            page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)" ref="pageSizeSelector")
-    div(v-if="hasBleed" class="page-setting__bleed")
-      div(class="page-setting-row page-setting__bleed__title pointer" @click="() => showBleedSettings = !showBleedSettings")
-        span(class="text-gray-2 label-mid") {{$t('NN0780')}}
-        svg-icon(class='page-setting__bleed__expand-icon'
-                iconName="chevron-up"
-                iconWidth="14px"
-                iconColor="gray-2"
-                :style="expandIconStyles()")
-      div(v-if="showBleedSettings" class="page-setting-row page-setting__bleed__content")
-        div(v-for="bleed in bleedsToShow" class='page-setting__bleed__content__item')
-          div(class='page-setting__bleed__content__item__label')
-            span(class="body-XS text-gray-2") {{bleed.label}}
-          div(class='page-setting__bleed__content__item__input')
-            div(class='page-setting__bleed__content__item__input__icon pointer'
-                @click="addBleed(bleed.key, 1, isLocked)")
-              svg-icon(iconName="chevron-up"
-                iconWidth="14px"
-                iconColor="gray-2")
-            div(class='page-setting__bleed__content__item__input__icon pointer'
-                @click="addBleed(bleed.key, -1, isLocked)")
-              svg-icon(iconName="chevron-up"
-                iconWidth="14px"
-                iconColor="gray-2"
-                :style="{transform: 'scaleY(-1)'}")
-            div(class='page-setting__bleed__content__item__input__value body-XS')
-              input(type="number" min="0"
-                    :value="bleed.value"
-                    @input="setBleed($event, bleed.key, isLocked)"
-                    @blur="handleBleedSubmit()"
-                    @keyup="handleBleedSubmit")
-              span(class='text-gray-3') {{sizeToShow.unit}}
-        div(class="page-setting__bleed__content__lock-icon")
-          div(class="page-setting__bleed__content__lock-icon__box"
-              :style="isLocked ? {background: '#E7EFFF'} : {}")
-            svg-icon(class="pointer"
-                    :iconName="isLocked ? 'lock' : 'unlock'"
-                    iconWidth="15px"
-                    iconColor="gray-2"
-                    @click.native="toggleLock()")
-    div(class="page-setting__footer")
-    div(v-if="showAdminTool"
-      class="template-information")
-      div(class="template-information__divider pb-10")
-      btn(:type="'primary-sm'" class="rounded my-5"
-          style="padding: 8px 0; margin-left: 6%; width: 88%;"
-          @click.native="getDataClicked()") 取 得 群 組 / 模 板 資 料
-      div(v-if="groupId.length > 0"
-        class="pt-10")
-        span(class="text-gray-1 label-lg") 群 組 資 訊
+div(class="page-setting")
+  div(class="page-setting-row page-setting__title")
+    span(class="text-gray-2 label-mid") {{$t('NN0021')}}
+  div(class="page-setting-row page-setting__size bg-gray-6 pointer" @click="toggleSuggestionPanel()")
+    div(class="page-setting__size__box")
+      span(class="body-XS text-gray-2") {{ `${sizeToShow.width} ${sizeToShow.unit}` }}
+    span(class="body-XS text-gray-3") W
+    span(class="body-XS text-gray-2 text-center") x
+    div(class="page-setting__size__box")
+      span(class="body-XS text-gray-2") {{ `${sizeToShow.height} ${sizeToShow.unit}` }}
+    span(class="body-XS text-gray-3") H
+  div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
+      @click="toggleSuggestionPanel()")
+    svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm" class="mr-10")
+    span(class="page-setting__apply__text") {{$t('NN0022')}}
+  transition(name="slide-fade")
+    div(v-if="isPanelOpen"
+      class="page-setting__suggestion-panel")
+      img(class="page-setting__suggestion-panel__arrow" :src="require('@/assets/img/svg/up-arrow.svg')")
+      div(class="page-setting__suggestion-panel__body")
+        div(class="page-setting__suggestion-panel__body__close pointer"
+            @click="setSuggestionPanel(false)")
+          svg-icon(class="page-setting__suggestion-panel__body__close"
+                  iconName="close" iconWidth="19px" iconColor="white")
+        keep-alive
+          page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)" ref="pageSizeSelector")
+  div(v-if="hasBleed" class="page-setting__bleed")
+    div(class="page-setting-row page-setting__bleed__title pointer" @click="() => showBleedSettings = !showBleedSettings")
+      span(class="text-gray-2 label-mid") {{$t('NN0780')}}
+      svg-icon(class='page-setting__bleed__expand-icon'
+              iconName="chevron-up"
+              iconWidth="14px"
+              iconColor="gray-2"
+              :style="expandIconStyles()")
+    div(v-if="showBleedSettings" class="page-setting-row page-setting__bleed__content")
+      div(v-for="bleed in bleedsToShow" class='page-setting__bleed__content__item')
+        div(class='page-setting__bleed__content__item__label')
+          span(class="body-XS text-gray-2") {{bleed.label}}
+        div(class='page-setting__bleed__content__item__input')
+          div(class='page-setting__bleed__content__item__input__icon pointer'
+              @click="addBleed(bleed.key, 1, isLocked)")
+            svg-icon(iconName="chevron-up"
+              iconWidth="14px"
+              iconColor="gray-2")
+          div(class='page-setting__bleed__content__item__input__icon pointer'
+              @click="addBleed(bleed.key, -1, isLocked)")
+            svg-icon(iconName="chevron-up"
+              iconWidth="14px"
+              iconColor="gray-2"
+              :style="{transform: 'scaleY(-1)'}")
+          div(class='page-setting__bleed__content__item__input__value body-XS')
+            input(type="number" min="0"
+                  :value="bleed.value"
+                  @input="setBleed($event, bleed.key, isLocked)"
+                  @blur="handleBleedSubmit()"
+                  @keyup="handleBleedSubmit")
+            span(class='text-gray-3') {{sizeToShow.unit}}
+      div(class="page-setting__bleed__content__lock-icon")
+        div(class="page-setting__bleed__content__lock-icon__box"
+            :style="isLocked ? {background: '#E7EFFF'} : {}")
+          svg-icon(class="pointer"
+                  :iconName="isLocked ? 'lock' : 'unlock'"
+                  iconWidth="15px"
+                  iconColor="gray-2"
+                  @click="toggleLock()")
+  div(class="page-setting__footer")
+  div(v-if="showAdminTool"
+    class="template-information")
+    div(class="template-information__divider pb-10")
+    btn(:type="'primary-sm'" class="rounded my-5"
+        style="padding: 8px 0; margin-left: 6%; width: 88%;"
+        @click="getDataClicked()") 取 得 群 組 / 模 板 資 料
+    div(v-if="groupId.length > 0"
+      class="pt-10")
+      span(class="text-gray-1 label-lg") 群 組 資 訊
+      div(class="template-information__line")
+        span(class="body-1") groupId
+        span(class="pl-15 body-2"
+          @click="copyText(groupId)") {{groupId}}
+      div(class="pt-5 text-red body-2") {{groupErrorMsg}}
+      div(v-for="id in unsetThemeTemplate"
+        class="pt-5 text-red body-2"
+        @click="copyText(id)") {{id}}
+      div(v-if="isGetGroup")
+        div(v-if="showDbGroup"
+          class="py-5 text-red body-2") 提醒：原有的設定不合法，已自動修正。請在下方修正版確認內容後按下更新按鈕
+        div(v-if="showDbGroup"
+          class="template-information__line")
+          span(class="body-1 text-red-1") 原設定內容
+        div(v-if="showDbGroup"
+          class="mb-10 square-wrapper wrong text-center")
+          div(v-if="dbGroupThemes.length === 0"
+            class="body-1") 尚未設定
+          div(v-else
+            class="pr-10 cover-option body-4")
+            span theme
+            span 封面頁碼
+          div(v-for="(item, idx) in dbGroupThemes"
+            class="pt-5 pr-10 cover-option")
+            span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
+            span 第{{item.coverIndex+1}}頁
+        div(v-if="showDbGroup"
+          class="template-information__line")
+          span(class="body-1 ") 修正版
+        div(class="square-wrapper text-center")
+          div(class="pr-10 cover-option body-4")
+            span theme
+            span 封面頁碼
+          div(v-for="(item, idx) in groupInfo.groupThemes"
+            class="pt-5 pr-10 cover-option")
+            span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
+            select(class="template-information__cover-select text-center"
+              v-model="item.coverIndex")
+              option(v-for="option in item.options" :value="option.index") 第{{option.index+1}}頁
+        div(class="pt-10")
+          btn(:type="'primary-sm'" class="rounded my-5"
+            style="padding: 8px 0; margin: 0 auto; width: 70%;"
+            @click.native="updateGroupClicked()") 更新
+    div(class="template-information__divider2")
+    span(class="text-gray-1 label-lg") 模 板 資 訊
+    div(class="template-information__content")
+      div(class="template-information__line" style="background: #eee;")
+        span(class="body-1") focus
+        span(class="pl-15 body-2" @click="copyText(key_id)") {{key_id}}
+      img(v-if="key_id.length > 0" style="margin: 0 auto;"
+        :src="`https://template.vivipic.com/template/${key_id}/prev?ver=${imgRandQuery}`")
+      div(v-if="isGetTemplate")
+        div(v-if="groupId.length > 0 && !isGroupMember"
+          class="text-red") 此模板不是上列群組的成員
         div(class="template-information__line")
-          span(class="body-1") groupId
-          span(class="pl-15 body-2"
-            @click="copyText(groupId)") {{groupId}}
-        div(class="pt-5 text-red body-2") {{groupErrorMsg}}
-        div(v-for="id in unsetThemeTemplate"
-          class="pt-5 text-red body-2"
-          @click="copyText(id)") {{id}}
-        div(v-if="isGetGroup")
-          div(v-if="showDbGroup"
-            class="py-5 text-red body-2") 提醒：原有的設定不合法，已自動修正。請在下方修正版確認內容後按下更新按鈕
-          div(v-if="showDbGroup"
-            class="template-information__line")
-            span(class="body-1 text-red-1") 原設定內容
-          div(v-if="showDbGroup"
-            class="mb-10 square-wrapper wrong text-center")
-            div(v-if="dbGroupThemes.length === 0"
-              class="body-1") 尚未設定
-            div(v-else
-              class="pr-10 cover-option body-4")
-              span theme
-              span 封面頁碼
-            div(v-for="(item, idx) in dbGroupThemes"
-              class="pt-5 pr-10 cover-option")
-              span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
-              span 第{{item.coverIndex+1}}頁
-          div(v-if="showDbGroup"
-            class="template-information__line")
-            span(class="body-1 ") 修正版
-          div(class="square-wrapper text-center")
-            div(class="pr-10 cover-option body-4")
-              span theme
-              span 封面頁碼
-            div(v-for="(item, idx) in groupInfo.groupThemes"
-              class="pt-5 pr-10 cover-option")
-              span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
-              select(class="template-information__cover-select text-center"
-                v-model="item.coverIndex")
-                option(v-for="option in item.options" :value="option.index") 第{{option.index+1}}頁
-          div(class="pt-10")
-            btn(:type="'primary-sm'" class="rounded my-5"
-              style="padding: 8px 0; margin: 0 auto; width: 70%;"
-              @click.native="updateGroupClicked()") 更新
-      div(class="template-information__divider2")
-      span(class="text-gray-1 label-lg") 模 板 資 訊
-      div(class="template-information__content")
-        div(class="template-information__line" style="background: #eee;")
-          span(class="body-1") focus
-          span(class="pl-15 body-2" @click="copyText(key_id)") {{key_id}}
-        img(v-if="key_id.length > 0" style="margin: 0 auto;"
-          :src="`https://template.vivipic.com/template/${key_id}/prev?ver=${imgRandQuery}`")
-        div(v-if="isGetTemplate")
-          div(v-if="groupId.length > 0 && !isGroupMember"
-            class="text-red") 此模板不是上列群組的成員
+          span(class="body-1") key_id
+          span(class="pl-15 body-2" @click="copyText(templateInfo.key_id)") {{templateInfo.key_id}}
+        div(class="template-information__line")
+          span(class="body-1") 創建者
+          span(class="pl-15 body-2" @click="copyText(templateInfo.creator)") {{templateInfo.creator}}
+        div(class="template-information__line")
+          span(class="body-1") 修改者
+          span(class="pl-15 body-2" @click="copyText(templateInfo.author)") {{templateInfo.author}}
+        div(class="template-information__line")
+          span(class="body-1") 上次更新
+          span(class="pl-15 body-2") {{templateInfo.edit_time}}
+        div(class="template-information__line")
+          span(class="body-1") 模板尺寸
+          span(class="pl-15 body-2") {{templateInfo.width}} x {{templateInfo.height}}
+        div(class="pt-10") plan(0：預設一般 / 1：Pro)
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="templateInfo.plan")
+        div(class="template-information__line")
+          span(class="body-1") Theme_ids
+        template(v-if="showDbTemplate")
+          div(class="py-5 text-red body-2") 提醒：主題設定有誤。請在下方修正版確認內容後按下更新按鈕
           div(class="template-information__line")
-            span(class="body-1") key_id
-            span(class="pl-15 body-2" @click="copyText(templateInfo.key_id)") {{templateInfo.key_id}}
-          div(class="template-information__line")
-            span(class="body-1") 創建者
-            span(class="pl-15 body-2" @click="copyText(templateInfo.creator)") {{templateInfo.creator}}
-          div(class="template-information__line")
-            span(class="body-1") 修改者
-            span(class="pl-15 body-2" @click="copyText(templateInfo.author)") {{templateInfo.author}}
-          div(class="template-information__line")
-            span(class="body-1") 上次更新
-            span(class="pl-15 body-2") {{templateInfo.edit_time}}
-          div(class="template-information__line")
-            span(class="body-1") 模板尺寸
-            span(class="pl-15 body-2") {{templateInfo.width}} x {{templateInfo.height}}
-          div(class="pt-10") plan(0：預設一般 / 1：Pro)
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="templateInfo.plan")
-          div(class="template-information__line")
-            span(class="body-1") Theme_ids
-          template(v-if="showDbTemplate")
-            div(class="py-5 text-red body-2") 提醒：主題設定有誤。請在下方修正版確認內容後按下更新按鈕
-            div(class="template-information__line")
-              span(class="body-1 text-red-1") 原設定內容 (x表示設定錯誤)
-          div(v-if="showDbTemplate"
-            class="square-wrapper wrong")
-            template(v-for="(item, idx) in themeList")
-              div(v-if="dbTemplateThemes[item.id]"
-                class="pt-5 theme-option")
-                span(class="text-red-1 text-center") {{isDisabled(item.id, item.width, item.height) ? 'x' : ''}}
-                span(class="body-1") {{item.title}}
-                span(class="body-2 text-gray-2") {{item.description}}
-          div(v-if="showDbTemplate"
-            class="pt-10 template-information__line")
-            span(class="body-1 ") 修正版
-          div(class="square-wrapper")
-            div(v-for="(item, idx) in themeList"
+            span(class="body-1 text-red-1") 原設定內容 (x表示設定錯誤)
+        div(v-if="showDbTemplate"
+          class="square-wrapper wrong")
+          template(v-for="(item, idx) in themeList")
+            div(v-if="dbTemplateThemes[item.id]"
               class="pt-5 theme-option")
-              input(type="checkbox"
-                class="theme-option__check"
-                :disabled="isDisabled(item.id, item.width, item.height)"
-                v-model="templateThemes[item.id]")
+              span(class="text-red-1 text-center") {{isDisabled(item.id, item.width, item.height) ? 'x' : ''}}
               span(class="body-1") {{item.title}}
               span(class="body-2 text-gray-2") {{item.description}}
-          div(class="template-information__line pt-10")
-            span(class="body-1") 語系
-            select(class="template-information__select" v-model="templateInfo.locale")
-              option(v-for="locale in localeOptions" :value="locale") {{locale}}
-          div(class="pt-10") tags_tw
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="templateInfo.tags_tw")
-          div(class="pt-10") tags_us
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="templateInfo.tags_us")
-          div(class="pt-10") tags_jp
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="templateInfo.tags_jp")
-          div(class="pt-10")
-            btn(:type="'primary-sm'" class="rounded my-5"
-              style="padding: 8px 0; margin: 0 auto; width: 70%;"
-              @click.native="updateDataClicked()") 更新
-          div(class="template-information__divider")
-          div(class="template-information__line bg-blue")
-            span(class="body-1") 父
-            span(class="pl-15 body-2"
-              @click="copyText(templateInfo.parent_id)") {{templateInfo.parent_id || '無'}}
-            span(class="text-blue-1") {{templateInfo.parent_locale}}
-          div(class="template-information__line bg-blue border-bottom pb-5")
-            span(class="body-1") 爺
-            span(class="pl-15 body-2"
-              @click="copyText(templateInfo.grandparent_id)") {{templateInfo.grandparent_id || '無'}}
-            span(class="text-blue-1") {{templateInfo.grandparent_locale}}
-          div(class="bg-blue")
-            div(v-for="(item) in templateInfo.grandchildren_id"
-              class="border-bottom py-5")
-              div(class="child-item")
-                span(class="body-1") 子
-                span(class="body-2"
-                  @click="copyText(item.childrenId)") {{item.childrenId}}
-                span {{item.childrenLocale}}
-              div(v-for="(item2) in item.grandchildren"
-                class="child-item")
-                span 孫
-                span(class="body-2"
-                  @click="copyText(item2.key_id)") {{item2.key_id}}
-                span {{item2.locale}}
-          div(class="template-information__line")
-            span(class="body-1 pt-10") parent_id (父模板)
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="userParentId")
-            div(class="pt-5 text-red body-3") 注意: parent_id的修改會更新模板的json，請修改時注意模板內容有無更動，避免複寫
-          div(class="template-information__line pt-10")
-            div(style="width: 50%;")
-              input(type="checkbox"
-                class="template-information__check"
-                v-model="updateParentIdChecked")
-              label 確定修改
-            btn(:type="'primary-sm'" class="rounded my-5"
-              style="padding: 5px 40px;"
-              @click.native="updateParentIdClicked()") 修改
+        div(v-if="showDbTemplate"
+          class="pt-10 template-information__line")
+          span(class="body-1 ") 修正版
+        div(class="square-wrapper")
+          div(v-for="(item, idx) in themeList"
+            class="pt-5 theme-option")
+            input(type="checkbox"
+              class="theme-option__check"
+              :disabled="isDisabled(item.id, item.width, item.height)"
+              v-model="templateThemes[item.id]")
+            span(class="body-1") {{item.title}}
+            span(class="body-2 text-gray-2") {{item.description}}
+        div(class="template-information__line pt-10")
+          span(class="body-1") 語系
+          select(class="template-information__select" v-model="templateInfo.locale")
+            option(v-for="locale in localeOptions" :value="locale") {{locale}}
+        div(class="pt-10") tags_tw
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="templateInfo.tags_tw")
+        div(class="pt-10") tags_us
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="templateInfo.tags_us")
+        div(class="pt-10") tags_jp
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="templateInfo.tags_jp")
+        div(class="pt-10")
+          btn(:type="'primary-sm'" class="rounded my-5"
+            style="padding: 8px 0; margin: 0 auto; width: 70%;"
+            @click="updateDataClicked()") 更新
+        div(class="template-information__divider")
+        div(class="template-information__line bg-blue")
+          span(class="body-1") 父
+          span(class="pl-15 body-2"
+            @click="copyText(templateInfo.parent_id)") {{templateInfo.parent_id || '無'}}
+          span(class="text-blue-1") {{templateInfo.parent_locale}}
+        div(class="template-information__line bg-blue border-bottom pb-5")
+          span(class="body-1") 爺
+          span(class="pl-15 body-2"
+            @click="copyText(templateInfo.grandparent_id)") {{templateInfo.grandparent_id || '無'}}
+          span(class="text-blue-1") {{templateInfo.grandparent_locale}}
+        div(class="bg-blue")
+          div(v-for="(item) in templateInfo.grandchildren_id"
+            class="border-bottom py-5")
+            div(class="child-item")
+              span(class="body-1") 子
+              span(class="body-2"
+                @click="copyText(item.childrenId)") {{item.childrenId}}
+              span {{item.childrenLocale}}
+            div(v-for="(item2) in item.grandchildren"
+              class="child-item")
+              span 孫
+              span(class="body-2"
+                @click="copyText(item2.key_id)") {{item2.key_id}}
+              span {{item2.locale}}
+        div(class="template-information__line")
+          span(class="body-1 pt-10") parent_id (父模板)
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="userParentId")
+          div(class="pt-5 text-red body-3") 注意: parent_id的修改會更新模板的json，請修改時注意模板內容有無更動，避免複寫
+        div(class="template-information__line pt-10")
+          div(style="width: 50%;")
+            input(type="checkbox"
+              class="template-information__check"
+              v-model="updateParentIdChecked")
+            label 確定修改
+          btn(:type="'primary-sm'" class="rounded my-5"
+            style="padding: 5px 40px;"
+            @click="updateParentIdClicked()") 修改
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import SearchBar from '@/components/SearchBar.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
@@ -256,7 +257,8 @@ import stepsUtils from '@/utils/stepsUtils'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import { floor, round } from 'lodash'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     SearchBar,
     RadioBtn,
@@ -288,7 +290,14 @@ export default Vue.extend({
         parent_locale: '' as string,
         grandparent_id: '' as string,
         grandparent_locale: '' as string,
-        grandchildren_id: []
+        grandchildren_id: [] as {
+          childrenId: string
+          childrenLocale: string
+          grandchildren: {
+            key_id: string
+            locale: string
+          }[]
+        }[]
       },
       themeList: [] as Itheme[],
       userParentId: '',
@@ -461,7 +470,7 @@ export default Vue.extend({
       this.resetStatus()
       const data = {}
       if (this.groupId.length === 0 && this.key_id.length === 0) {
-        this.$notify({ group: 'copy', text: '無群組及模板id' })
+        notify({ group: 'copy', text: '無群組及模板id' })
       }
       if (this.groupId.length > 0) {
         const groupRes = await designApis.getDesignInfo(this.token, 'group', this.groupId, 'select', JSON.stringify(data))
@@ -469,7 +478,7 @@ export default Vue.extend({
           this.isGetGroup = true
           this.setGroupInfo(groupRes.data)
         } else {
-          this.$notify({ group: 'copy', text: '找不到群組資料' })
+          notify({ group: 'copy', text: '找不到群組資料' })
         }
       }
 
@@ -483,7 +492,7 @@ export default Vue.extend({
           }
           this.userParentId = this.templateInfo.parent_id
         } else {
-          this.$notify({ group: 'copy', text: '找不到模板資料' })
+          notify({ group: 'copy', text: '找不到模板資料' })
         }
       }
 
@@ -501,10 +510,10 @@ export default Vue.extend({
 
       const res = await designApis.updateDesignInfo(this.token, 'group', this.groupId, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
-        this.$notify({ group: 'copy', text: '群組資料更新成功' })
+        notify({ group: 'copy', text: '群組資料更新成功' })
         this.setGroupInfo(res.data)
       } else {
-        this.$notify({ group: 'copy', text: '更新時發生錯誤' })
+        notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.resetStatus()
       this.setIsloading(false)
@@ -520,11 +529,11 @@ export default Vue.extend({
       const themeIds = arr.join()
 
       if (!this.templateInfo.key_id) {
-        this.$notify({ group: 'copy', text: '請先取得模板資料' })
+        notify({ group: 'copy', text: '請先取得模板資料' })
         return
       }
       if (themeIds === '' || themeIds.length === 0) {
-        this.$notify({ group: 'copy', text: 'theme_ids不得為空' })
+        notify({ group: 'copy', text: 'theme_ids不得為空' })
         return
       }
 
@@ -539,10 +548,10 @@ export default Vue.extend({
       }
       const res = await designApis.updateDesignInfo(this.token, 'template', this.templateInfo.key_id, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
-        this.$notify({ group: 'copy', text: '模板資料更新成功' })
+        notify({ group: 'copy', text: '模板資料更新成功' })
         this.setTemplateInfo(res.data)
       } else {
-        this.$notify({ group: 'copy', text: '更新時發生錯誤' })
+        notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.resetStatus()
       this.isGetGroup = false
@@ -552,7 +561,7 @@ export default Vue.extend({
     },
     updateParentIdClicked() {
       if (!this.updateParentIdChecked) {
-        this.$notify({ group: 'copy', text: '請先勾選確定修改' })
+        notify({ group: 'copy', text: '請先勾選確定修改' })
         return
       }
       this.updatePageProps({
@@ -585,7 +594,7 @@ export default Vue.extend({
       this.groupInfo.contents.forEach((content, idx) => {
         const themes = content.theme_ids.split(',')
         if (themes.length === 0 || themes[0] === '0') {
-          // this.$notify({ group: 'copy', text: '有模板尚未設定theme，請設定完後再更新群組資訊' })
+          notify({ group: 'copy', text: '有模板尚未設定theme，請設定完後再更新群組資訊' })
           this.groupErrorMsg = '以下模板尚未設定theme，請設定完後再更新群組資訊：'
           this.unsetThemeTemplate.push(content.key_id)
           this.isGetGroup = false
@@ -617,7 +626,7 @@ export default Vue.extend({
 
       // fill in cover_ids
       const coverList = this.groupInfo.cover_ids.split(',')
-      coverList.map((cover) => {
+      coverList.forEach((cover) => {
         const id = parseInt(cover.split(':')[0])
         if (id === 0) {
           return
@@ -670,7 +679,7 @@ export default Vue.extend({
       this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
       if (this.templateInfo.theme_ids === '0' ||
         this.templateInfo.theme_ids.length === 0) {
-        this.$notify({ group: 'copy', text: '尚未設定主題' })
+        notify({ group: 'copy', text: '尚未設定主題' })
       }
       const themes = this.templateInfo.theme_ids.split(',')
       themes.forEach((item) => {
@@ -684,19 +693,18 @@ export default Vue.extend({
       }
       GeneralUtils.copyText(text)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${text} 已複製` })
+          notify({ group: 'copy', text: `${text} 已複製` })
         })
     },
-    isDisabled(idx: number, themeWidth: string, themeHeight: string) {
-      const themeAspectRatio = parseInt(themeWidth) / parseInt(themeHeight)
+    isDisabled(idx: number, themeWidth: number, themeHeight: number) {
+      const themeAspectRatio = themeWidth / themeHeight
       const templateAspectRatio = parseInt(this.templateInfo.width) / parseInt(this.templateInfo.height)
-
-      if (parseInt(themeHeight) === 0) { // 詳情頁模板
+      if (themeHeight === 0) { // 詳情頁模板
         return false
       } else if (themeAspectRatio === templateAspectRatio) {
         return false
-      } else if ((themeWidth === this.templateInfo.width || parseInt(themeWidth) === 0) &&
-        (themeHeight === this.templateInfo.height || parseInt(themeHeight) === 0)) {
+      } else if ((String(themeWidth) === this.templateInfo.width || themeWidth === 0) &&
+        (String(themeHeight) === this.templateInfo.height || themeHeight === 0)) {
         return false
       } else { // Disabled
         if (this.templateThemes[idx]) {
@@ -1101,7 +1109,7 @@ export default Vue.extend({
   transition: 0.3s ease;
 }
 
-.slide-fade-enter,
+.slide-fade-enter-from,
 .slide-fade-leave-to {
   transform: translateY(-10px);
   opacity: 0;

@@ -1,14 +1,7 @@
 import store from '@/store'
+import { IMobileEditorState } from '@/store/module/mobileEditor'
 import generalUtils from './generalUtils'
 
-interface IMobileEditorState {
-  closeMobilePanelFlag: boolean,
-  mobileAllPageMode: boolean
-  inMultiSelectionMode: boolean,
-  currCardIndex: number,
-  currActivePanel: string,
-  inBgSettingMode: boolean
-}
 class EditorUtils {
   get mobileAllPageMode() {
     return store.getters['mobileEditor/getMobileAllPageMode']

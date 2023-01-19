@@ -1,26 +1,27 @@
 <template lang="pug">
-  div(class="footer-tabs" ref="tabs" :style="rootStyles")
-    div(class="footer-tabs__container" :style="containerStyles"
-        @scroll.passive="updateContainerOverflow" ref="container")
-      template(v-for="(tab, index) in tabs")
-        div(v-if="!tab.hidden" :key="tab.icon"
-            class="footer-tabs__item"
-            :class="{'click-disabled': (tab.disabled || isLocked)}"
-            @click="handleTabAction(tab)")
-          color-btn(v-if="tab.icon === 'color'" size="22px"
-                    class="mb-5 click-disabled"
-                    :color="globalSelectedColor")
-          svg-icon(v-else class="mb-5 click-disabled"
-            :iconName="tab.icon"
-            :iconColor="(tab.disabled || isLocked) ? 'gray-2' : tabActive(tab) ? 'blue-1' :'white'"
-            :iconWidth="'22px'"
-            :style="textIconStyle")
-          span(class="body-3 no-wrap click-disabled"
-          :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-blue-1' : 'text-white'") {{tab.text}}
+div(class="footer-tabs" ref="tabs" :style="rootStyles")
+  div(class="footer-tabs__container" :style="containerStyles"
+      @scroll.passive="updateContainerOverflow" ref="container")
+    template(v-for="(tab, index) in tabs")
+      div(v-if="!tab.hidden" :key="tab.icon"
+          class="footer-tabs__item"
+          :class="{'click-disabled': (tab.disabled || isLocked)}"
+          @click="handleTabAction(tab)")
+        color-btn(v-if="tab.icon === 'color'" size="22px"
+                  class="mb-5 click-disabled"
+                  :color="globalSelectedColor")
+        svg-icon(v-else class="mb-5 click-disabled"
+          :iconName="tab.icon"
+          :iconColor="(tab.disabled || isLocked) ? 'gray-2' : tabActive(tab) ? 'blue-1' :'white'"
+          :iconWidth="'22px'"
+          :style="textIconStyle")
+        span(class="body-3 no-wrap click-disabled"
+        :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -36,12 +37,12 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import editorUtils from '@/utils/editorUtils'
-import i18n from '@/i18n'
 import brandkitUtils from '@/utils/brandkitUtils'
+import i18n from '@/i18n'
 import colorUtils from '@/utils/colorUtils'
 import { isEqual } from 'lodash'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ColorBtn
   },
@@ -55,6 +56,7 @@ export default Vue.extend({
       default: false
     }
   },
+  emits: ['switchTab', 'showAllPages'],
   data() {
     const mainMenu = { icon: 'main-menu', text: `${this.$t('NN0489')}` }
 
@@ -615,7 +617,7 @@ export default Vue.extend({
         }
         case 'effect': {
           if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
-            Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
             return
           }
           break
@@ -673,7 +675,7 @@ export default Vue.extend({
       } else return this.currTab === tab.panelType
     },
     handleLockedNotify() {
-      this.$notify({ group: 'copy', text: i18n.tc('NN0804') })
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     }
   }
 })
@@ -682,6 +684,9 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .footer-tabs {
   overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
   &__container {
     overflow: scroll;
     display: grid;

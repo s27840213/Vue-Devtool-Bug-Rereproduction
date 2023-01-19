@@ -1,6 +1,7 @@
 <template lang="pug">
-  div(class="popup bg-white")
-    component(:is="component"
+div(class="popup bg-white")
+  component(v-if="component"
+    :is="component"
     v-click-outside="vcoConfig"
     :updateOptions="sharedUpdateOptions"
     v-bind="props"
@@ -8,15 +9,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import vClickOutside from 'v-click-outside'
+import { defineComponent } from 'vue'
+import vClickOutside from 'click-outside-vue3'
 import PopupOrder from '@/components/popup/PopupOrder.vue'
 import PopupAlign from '@/components/popup/PopupAlign.vue'
 import PopupLayer from '@/components/popup/PopupLayer.vue'
 import PopupPage from '@/components/popup/PopupPage.vue'
 import PopupFlip from '@/components/popup/PopupFlip.vue'
 import PopupFile from '@/components/popup/PopupFile.vue'
-import PopupDownload from '@/components/popup/PopupDownload.vue'
 import PopupLineTemplate from '@/components/popup/PopupLineTemplate.vue'
 import PopupGuideline from '@/components/popup/PopupGuideline.vue'
 import PopupSlider from '@/components/popup/PopupSlider.vue'
@@ -30,7 +30,8 @@ import uploadUtils from '@/utils/uploadUtils'
 import pageUtils from '@/utils/pageUtils'
 import modalUtils from '@/utils/modalUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     PopupOrder,
     PopupLayer,
@@ -41,7 +42,6 @@ export default Vue.extend({
     PopupFile,
     PopupLineTemplate,
     PopupGuideline,
-    PopupDownload,
     PopupPageScale,
     PopupSubmit,
     PopupPayment

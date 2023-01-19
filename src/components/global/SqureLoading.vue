@@ -1,22 +1,23 @@
 <template lang="pug">
-  div(class="flip-to-square-random"
-      :style="styles")
-    div
-    div
-    div
-    div
-    div
-    div
-    div
-    div
-    div
+div(class="flip-to-square-random"
+    :style="styles")
+  div
+  div
+  div
+  div
+  div
+  div
+  div
+  div
+  div
 </template>
 
 <script lang="ts">
 
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
     size: {
       type: Number,

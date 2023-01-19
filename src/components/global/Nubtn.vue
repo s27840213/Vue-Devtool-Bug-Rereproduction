@@ -9,9 +9,9 @@ div(:class="`nubtn ${theme} ${sizeClass} ${status}`"
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import Vue, { defineComponent, PropType } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'Nubtn',
   // Let status prop and @status will be the target of v-model, https://bit.ly/3ukz2Yq
   model: {
@@ -68,11 +68,10 @@ export default Vue.extend({
           : 'default'
       this.$emit('status', newStatus)
     },
-    click(event: Event) {
+    click() {
       if (this.status === 'disabled') return
       this.active = !this.active
       this.updateStatus()
-      this.$emit('click', event)
     }
   }
 })

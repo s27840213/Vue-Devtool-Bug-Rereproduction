@@ -1,74 +1,75 @@
 <template lang="pug">
-  div(class="bg-setting" v-click-outside="handleOutSide")
-    span(class="bg-setting__title text-blue-1 text-H6") {{$t('NN0142')}}
-    div(class="action-bar flex-evenly my-10")
-      svg-icon(class="btn-opacity pointer p-5 feature-button"
-        iconName="transparency" :iconWidth="'20px'"
-        :class="{ 'disabled': backgroundLocked }"
-        :iconColor="'gray-2'"
-        @click.native="openSliderPopup()"
-        v-hint="$t('NN0030')"
-      )
-      svg-icon(class="pointer p-5 feature-button"
-        :class="{ 'active': backgroundLocked }"
-        :iconName="backgroundLocked ? 'unlock' : 'lock'"
-        :iconWidth="'20px'"
-        :iconColor="'gray-2'"
-        @click.native="handleLockBackground"
-        v-hint="backgroundLocked ? $t('NN0382'): $t('NN0143')"
-      )
-      svg-icon(class="pointer p-5 feature-button"
-        :class="{ 'disabled': backgroundLocked }"
-        :iconColor="'gray-2'"
-        iconName="trash" :iconWidth="'20px'"
-        @click.native="handleDeleteBackground"
-        v-hint="$t('NN0034')"
-      )
-    div(class="mb-10")
-      btn(class="full-width"
-        :class="backgroundImgControl ? 'active' : ''"
-        type="gray-mid"
-        :disabled="!isShowImage || backgroundLocked"
-        @click.native="() => handleControlBgImage()") {{$t('NN0040')}}
-    div(class="bg-setting__grid mb-10")
-      btn(class="full-width"
-        :class="show === 'popup-flip' ? 'active' : ''"
-        type="gray-mid"
-        :disabled="!isShowImage || backgroundLocked"
-        @click.native="() => handleShow('popup-flip')") {{$t('NN0038')}}
-      btn(class="full-width"
-        :class="show === 'popup-adjust' ? 'active' : ''"
-        type="gray-mid"
-        :disabled="!isShowImage || backgroundLocked"
-        @click.native="handleShow('popup-adjust')") {{$t('NN0042')}}
-    div(class="mb-10 text-left")
-      div(v-if="show === 'popup-flip'"
-        class="popup-flip"
-        v-click-outside="handleOutSide")
-        div(v-for="data in popupDatas"
-            :key="`popup-${data.icon}`"
-            class="popup-flip__item"
-            @click="() => handleImageFlip(data.icon)")
-          svg-icon(
-            class="pointer"
-            :iconName="data.icon"
-            :iconWidth="'12px'"
-            :iconColor="'gray-1'")
-          span(class="ml-5 body-2") {{data.text}}
-      popup-adjust(v-if="show === 'popup-adjust'"
-        :imageAdjust="backgroundAdjust"
-        @update="handleChangeBgAdjust"
-        v-click-outside="handleOutSide")
-    div(class="bg-setting__current-colors" :class="{lock: backgroundLocked}")
-      color-btn(:color="colorSlipsIcon"
-                :active="bgColorSelected"
-                @click="handleColorPicker()")
+div(class="bg-setting" v-click-outside="handleOutSide")
+  span(class="bg-setting__title text-blue-1 text-H6") {{$t('NN0142')}}
+  div(class="action-bar flex-evenly my-10")
+    svg-icon(class="btn-opacity pointer p-5 feature-button"
+      iconName="transparency" :iconWidth="'20px'"
+      :class="{ 'disabled': backgroundLocked }"
+      :iconColor="'gray-2'"
+      @click="openSliderPopup()"
+      v-hint="$t('NN0030')"
+    )
+    svg-icon(class="pointer p-5 feature-button"
+      :class="{ 'active': backgroundLocked }"
+      :iconName="backgroundLocked ? 'unlock' : 'lock'"
+      :iconWidth="'20px'"
+      :iconColor="'gray-2'"
+      @click="handleLockBackground"
+      v-hint="backgroundLocked ? $t('NN0382'): $t('NN0143')"
+    )
+    svg-icon(class="pointer p-5 feature-button"
+      :class="{ 'disabled': backgroundLocked }"
+      :iconColor="'gray-2'"
+      iconName="trash" :iconWidth="'20px'"
+      @click="handleDeleteBackground"
+      v-hint="$t('NN0034')"
+    )
+  div(class="mb-10")
+    btn(class="full-width"
+      :class="backgroundImgControl ? 'active' : ''"
+      type="gray-mid"
+      :disabled="!isShowImage || backgroundLocked"
+      @click="() => handleControlBgImage()") {{$t('NN0040')}}
+  div(class="bg-setting__grid mb-10")
+    btn(class="full-width"
+      :class="show === 'popup-flip' ? 'active' : ''"
+      type="gray-mid"
+      :disabled="!isShowImage || backgroundLocked"
+      @click="() => handleShow('popup-flip')") {{$t('NN0038')}}
+    btn(class="full-width"
+      :class="show === 'popup-adjust' ? 'active' : ''"
+      type="gray-mid"
+      :disabled="!isShowImage || backgroundLocked"
+      @click="handleShow('popup-adjust')") {{$t('NN0042')}}
+  div(class="mb-10 text-left")
+    div(v-if="show === 'popup-flip'"
+      class="popup-flip"
+      v-click-outside="handleOutSide")
+      div(v-for="data in popupDatas"
+          :key="`popup-${data.icon}`"
+          class="popup-flip__item"
+          @click="() => handleImageFlip(data.icon)")
+        svg-icon(
+          class="pointer"
+          :iconName="data.icon"
+          :iconWidth="'12px'"
+          :iconColor="'gray-1'")
+        span(class="ml-5 body-2") {{data.text}}
+    popup-adjust(v-if="show === 'popup-adjust'"
+      :imageAdjust="backgroundAdjust"
+      @update="handleChangeBgAdjust"
+      v-click-outside="handleOutSide")
+  div(class="bg-setting__current-colors" :class="{lock: backgroundLocked}")
+    color-btn(:color="colorSlipsIcon"
+              :active="bgColorSelected"
+              @click="handleColorPicker()")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import i18n from '@/i18n'
-import vClickOutside from 'v-click-outside'
+import { defineComponent } from 'vue'
+import vClickOutside from 'click-outside-vue3'
+import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations } from 'vuex'
 import { IPage } from '@/interfaces/page'
 import { PopupSliderEventType } from '@/store/types'
@@ -80,7 +81,7 @@ import ColorBtn from '@/components/global/ColorBtn.vue'
 import pageUtils from '@/utils/pageUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     PopupAdjust,
     ColorBtn
@@ -88,6 +89,7 @@ export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  emits: ['toggleColorPanel'],
   data() {
     return {
       show: '',
@@ -141,7 +143,7 @@ export default Vue.extend({
   mounted() {
     popupUtils.on(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     popupUtils.event.off(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
   },
   methods: {
@@ -217,7 +219,7 @@ export default Vue.extend({
       stepsUtils.record()
     },
     handleLockedNotify() {
-      this.$notify({ group: 'copy', text: i18n.tc('NN0804') })
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     },
     handleOutSide(e: Event) {
       const target = e.target as HTMLElement

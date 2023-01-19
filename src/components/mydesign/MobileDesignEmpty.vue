@@ -1,18 +1,19 @@
 <template lang="pug">
-  div(class="mobile-design-empty")
-      img(class="mobile-design-empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
-      span
-        slot {{$t('NN0766')}}
-      btn-new-design(v-slot="slotProps")
-        button(class="btn-primary-sm pointer" @click="slotProps.openPopup")
-          span(class="header-sort") {{$tc('NN0072')}}
+div(class="mobile-design-empty")
+    img(class="mobile-design-empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
+    span
+      slot {{$t('NN0766')}}
+    btn-new-design(v-slot="slotProps")
+      button(class="btn-primary-sm pointer" @click="slotProps.openPopup")
+        span(class="header-sort") {{$tc('NN0072')}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     BtnNewDesign
   }

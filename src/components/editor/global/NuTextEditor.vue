@@ -1,26 +1,39 @@
 <template lang="pug">
-  editor-content(:editor="editor")
+editor-content(:editor="(editor as Editor)")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { Editor, EditorContent } from '@tiptap/vue-2'
+import { defineComponent } from 'vue'
+import { Editor, EditorContent } from '@tiptap/vue-3'
 import tiptapUtils from '@/utils/tiptapUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { IGroup, IText, ITmp } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     EditorContent
   },
   props: {
-    initText: Object,
-    pageIndex: Number,
-    layerIndex: Number,
-    subLayerIndex: Number
+    initText: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    subLayerIndex: {
+      type: Number,
+      required: true
+    }
   },
+  emits: ['update', 'compositionend'],
   data() {
     return {
       editor: undefined as Editor | undefined,
@@ -55,7 +68,11 @@ export default Vue.extend({
     const contentEditable = this.subLayerIndex === -1 ? (this.layerInfo.currLayer as IText).contentEditable : ((this.layerInfo.currLayer as IGroup).layers[this.subLayerIndex] as IText).contentEditable
 
     tiptapUtils.init(this.initText, contentEditable)
-    this.editor = tiptapUtils.editor
+    /**
+     * @Note why I use as any is bcz when I update the tiptap from vue2 ver to vue 3 ver, it throw some weird error
+     * If TingAn is avalible, maybe we could discuss and fix the error.
+     */
+    this.editor = tiptapUtils.editor as any
     tiptapUtils.on('update', ({ editor }) => {
       let toRecord = false
       const newText = tiptapUtils.getText(editor)
@@ -113,7 +130,7 @@ export default Vue.extend({
       }
     })
   },
-  destroyed() {
+  unmounted() {
     if (this.editor) {
       this.editor.destroy()
     }

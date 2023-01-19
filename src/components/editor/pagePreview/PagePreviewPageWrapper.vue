@@ -1,83 +1,92 @@
 <template lang="pug">
-  lazy-load(
-      class="transition"
-      :target="lazyLoadTarget"
-      :threshold="[0,1]"
-      :minHeight="itemSize ? pageHeight * scaleRatio : contentWidth"
-      @loaded="handleLoaded")
-    div(class="page-preview-page"
-      :style="styles2()"
-      :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
-      ref="pagePreview")
-      div(class="page-preview-page-content pointer"
-          :style="styles()"
-          @click="clickPage"
-          @dblclick="dbclickPage()"
-          draggable="true",
-          @dragstart="handleDragStart"
-          @dragend="handleDragEnd"
-          @mouseenter="handleMouseEnter",
-          @mouseleave="handleMouseLeave"
-          ref="content")
-        page-content(
-          class="click-disabled"
-          :style="contentScaleStyles()"
-          :config="this.configWithBleed()"
-          :pageIndex="index"
-          :contentScaleRatio="scaleRatio()"
-          :handleSequentially="true"
-          :lazyLoadTarget="lazyLoadTarget")
-        div(class="page-preview-page__highlighter"
-          :class="{'focused': currFocusPageIndex === index}"
-          :style="hightlighterStyles()")
-        div(v-if="isMouseOver && showMoreBtn"
-          class="page-preview-page-content-more"
-          @click="toggleMenu()")
-          svg-icon(class="pb-5"
-            :iconName="'more_vertical'"
-            :iconWidth="'25px'")
-        div(v-if="isMenuOpen && currFocusPageIndex === index"
-          class="menu"
-          v-click-outside="closeMenu")
-          template(v-for="menuItem in menuItems")
-            div(class="menu-item"
-              @click="handleMenuAction(menuItem.icon)")
-              div(class="menu-item-icon")
-                svg-icon(:iconName="menuItem.icon"
-                  iconWidth="15px"
-                  iconColor="gray-2")
-              div(class="menu-item-text")
-                span {{ menuItem.text }}
-        div(v-if="type === 'panel'"
-          class="page-preview-page-icon")
-          span {{index+1}}
-      div(class="page-preview-page__background"
-        :style="styles")
-      div(v-if="type === 'full'"
-        class="page-preview-page-title")
-        span(:style="{'color': currFocusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
-    template(#placeholder)
-      div(v-if="itemSize" :style="loadingStyle()"
-        :key="'placeholder'")
+lazy-load(
+    class="transition"
+    :target="lazyLoadTarget"
+    :threshold="[0,1]"
+    :minHeight="itemSize ? pageHeight() * scaleRatio() : contentWidth"
+    @loaded="handleLoaded")
+  div(class="page-preview-page"
+    :style="styles2()"
+    :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
+    ref="pagePreview")
+    div(class="page-preview-page-content pointer"
+        :style="styles()"
+        @click="clickPage"
+        @dblclick="dbclickPage()"
+        draggable="true",
+        @dragstart="handleDragStart"
+        @dragend="handleDragEnd"
+        @mouseenter="handleMouseEnter",
+        @mouseleave="handleMouseLeave"
+        ref="content")
+      page-content(
+        class="click-disabled"
+        :style="contentScaleStyles()"
+        :config="configWithBleed()"
+        :pageIndex="index"
+        :contentScaleRatio="scaleRatio()"
+        :handleSequentially="true"
+        :lazyLoadTarget="lazyLoadTarget")
+      div(class="page-preview-page__highlighter"
+        :class="{'focused': currFocusPageIndex === index}"
+        :style="hightlighterStyles()")
+      div(v-if="isMouseOver && showMoreBtn"
+        class="page-preview-page-content-more"
+        @click="toggleMenu()")
+        svg-icon(class="pb-5"
+          :iconName="'more_vertical'"
+          :iconWidth="'25px'")
+      div(v-if="isMenuOpen && currFocusPageIndex === index"
+        class="menu"
+        v-click-outside="closeMenu")
+        template(v-for="menuItem in menuItems")
+          div(class="menu-item"
+            @click="handleMenuAction(menuItem.icon)")
+            div(class="menu-item-icon")
+              svg-icon(:iconName="menuItem.icon"
+                iconWidth="15px"
+                iconColor="gray-2")
+            div(class="menu-item-text")
+              span {{ menuItem.text }}
+      div(v-if="type === 'panel'"
+        class="page-preview-page-icon")
+        span {{index+1}}
+    div(class="page-preview-page__background"
+      :style="styles")
+    div(v-if="type === 'full'"
+      class="page-preview-page-title")
+      span(:style="{'color': currFocusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
+  template(#placeholder)
+    div(v-if="itemSize" :style="loadingStyle()"
+      :key="'placeholder'")
 </template>
+
 <script lang="ts">
-import Vue from 'vue'
-import i18n from '@/i18n'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
+import { IPage } from '@/interfaces/page'
 import GroupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import editorUtils from '@/utils/editorUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
 import generalUtils from '@/utils/generalUtils'
+import i18n from '@/i18n'
+import PageContent from '@/components/editor/page/PageContent.vue'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
-    type: String,
-    index: Number,
+    type: {
+      type: String,
+      required: true
+    },
+    index: {
+      type: Number,
+      required: true
+    },
     config: {
-      type: Object,
+      type: Object as PropType<IPage>,
       required: true
     },
     showMoreBtn: {
@@ -92,8 +101,9 @@ export default Vue.extend({
       default: '.mobile-editor__page-preview'
     }
   },
+  emits: ['loaded'],
   components: {
-    PageContent: () => import('@/components/editor/page/PageContent.vue'),
+    PageContent,
     LazyLoad
   },
   data() {
@@ -101,11 +111,11 @@ export default Vue.extend({
       menuItems: [
         {
           icon: 'copy',
-          text: i18n.t('NN0251')
+          text: i18n.global.t('NN0251')
         },
         {
           icon: 'trash',
-          text: i18n.t('NN0034')
+          text: i18n.global.t('NN0034')
         }
       ],
       isMouseOver: false,

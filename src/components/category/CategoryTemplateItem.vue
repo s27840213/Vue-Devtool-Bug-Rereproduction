@@ -1,21 +1,22 @@
 <template lang="pug">
-  div(class="category-template-item" :style="itemStyle")
-    div(class="relative pointer"
-        @click="addTemplate"
-        @dragstart="dragStart($event)")
-      img(class="category-template-item__img"
-        draggable="true"
-        :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
-        :style="previewStyle"
-        @error="handleNotFound")
-      pro-item(v-if="item.plan")
-    div(v-if="showId"
-      class="category-template-item__id"
-      @click="copyId") {{ item.id }}
+div(class="category-template-item" :style="itemStyle")
+  div(class="relative pointer"
+      @click="addTemplate"
+      @dragstart="dragStart($event)")
+    img(class="category-template-item__img"
+      draggable="true"
+      :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
+      :style="previewStyle"
+      @error="handleNotFound")
+    pro-item(v-if="item.plan")
+  div(v-if="showId"
+    class="category-template-item__id"
+    @click="copyId") {{ item.id }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import AssetUtils from '@/utils/assetUtils'
@@ -26,16 +27,31 @@ import paymentUtils from '@/utils/paymentUtils'
 import { PRECISION } from '@/utils/unitUtils'
 import { round } from 'lodash'
 
-export default Vue.extend({
+/**
+ * @Todo - fix the any type problems -> TingAn
+ */
+
+export default defineComponent({
+  emits: [],
   components: {
     ImageCarousel,
     ProItem
   },
   props: {
-    src: String,
-    item: Object,
-    showId: Boolean,
-    groupItem: Object
+    src: {
+      type: String
+    },
+    item: {
+      type: Object,
+      required: true
+    },
+    showId: {
+      type: Boolean,
+      required: true
+    },
+    groupItem: {
+      type: Object
+    }
   },
   data() {
     return {
@@ -67,8 +83,8 @@ export default Vue.extend({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     dragStart(event: DragEvent) {
-      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem, this.item)) return
-      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item)) return
+      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem as any, this.item as any)) return
+      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item as any)) return
       const dataTransfer = event.dataTransfer as DataTransfer
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
@@ -78,8 +94,8 @@ export default Vue.extend({
         : this.item))
     },
     addTemplate() {
-      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem, this.item)) return
-      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item)) return
+      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem as any, this.item as any)) return
+      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item as any)) return
       const { match_cover: matchCover = {} } = this.item
       let { height, width } = this.item
 
@@ -98,10 +114,10 @@ export default Vue.extend({
       const isSameSize = pageSize.physicalWidth === width && pageSize.physicalHeight === height && pageSize.unit === 'px'
       const cb = this.groupItem
         ? (resize?: any) => {
-          AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
+          AssetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize)
         }
         : (resize?: any) => {
-          AssetUtils.addAsset(this.item, resize)
+          AssetUtils.addAsset(this.item as any, resize)
           GeneralUtils.fbq('track', 'AddToWishlist', {
             content_ids: [this.item.id]
           })
@@ -151,7 +167,7 @@ export default Vue.extend({
     copyId() {
       GeneralUtils.copyText(this.item.id)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${this.item.id} 已複製` })
+          notify({ group: 'copy', text: `${this.item.id} 已複製` })
         })
     }
   }

@@ -1,23 +1,23 @@
 <template lang="pug">
-  div(class="toggle" :style="outsideStyle")
-    div(v-for="op, idx in options" class="toggle-text"
-        :style="textStyle(idx)" @click="setValue(idx)") {{op.label}}
-    div(class="toggle-inside" :style="insideStyle")
+div(class="toggle" :style="outsideStyle")
+  div(v-for="op, idx in options" class="toggle-text"
+      :style="textStyle(idx)" @click="setValue(idx)") {{op.label}}
+  div(class="toggle-inside" :style="insideStyle")
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import Vue, { PropType, defineComponent } from 'vue'
 import _ from 'lodash'
 /**
  * Usage1: Text slide toggle
  * options: [{
-      label: i18n.t('NN0514'),
+      label: i18n.global.t('NN0514'),
       value: 'monthly'
     }, {
-      label: i18n.t('NN0515'),
+      label: i18n.global.t('NN0515'),
       value: 'yearly'
     }, {
-      label: i18n.t('?'),
+      label: i18n.global.t('?'),
       value: '?'
     }]
  * slide-toggle(:options="options" v-model="test" bgColor="#F4F5F7")
@@ -33,7 +33,7 @@ import _ from 'lodash'
  * slide-toggle(:options="options" v-model="test" optionWidth="32px")
  */
 
-export default Vue.extend({
+export default defineComponent({
   name: 'SlideToggle',
   props: {
     // Only accept {label, value}[]
@@ -41,9 +41,9 @@ export default Vue.extend({
       type: Array as PropType<{label: string, value: string}[]>,
       required: true
     },
-    // Use v-model to two way bindings this props, don't use :value.
+    // Use v-model to two way bindings this props, don't use :modelValue.
     // If value cannot found in options, will be set to first option automatically.
-    value: {
+    modelValue: {
       type: String,
       required: true
     },
@@ -68,9 +68,10 @@ export default Vue.extend({
       default: '#fff'
     }
   },
+  emits: ['update:modelValue'],
   computed: {
     insideIndex():number {
-      return _.findIndex(this.options, ['value', this.value])
+      return _.findIndex(this.options, ['value', this.modelValue])
     },
     outsideStyle():Record<string, string> {
       return {
@@ -94,7 +95,7 @@ export default Vue.extend({
   },
   methods: {
     setValue(index: number) {
-      this.$emit('input', this.options[index].value)
+      this.$emit('update:modelValue', this.options[index].value)
     },
     textStyle(idx: number):Record<string, string> {
       return {

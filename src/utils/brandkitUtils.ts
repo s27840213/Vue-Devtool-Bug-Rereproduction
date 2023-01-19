@@ -22,7 +22,7 @@ const FONT_DEFAULTS = {
   tw: '思源黑體-標準',
   us: 'Roboto-Regular',
   jp: '裝甲明朝'
-} as {[key: string]: string}
+} as { [key: string]: string }
 
 interface Item {
   createTime: string
@@ -432,7 +432,7 @@ class BrandKitUtils {
     return (store.getters['brandkit/getFonts'] as IBrandFont[]).find(font => font.id === assetId)
   }
 
-  getFontUrlMap(assetId: string): {[key: string]: string} | undefined {
+  getFontUrlMap(assetId: string): { [key: string]: string } | undefined {
     return store.getters['brandkit/getFontUrlMap'](assetId)
   }
 
@@ -447,7 +447,7 @@ class BrandKitUtils {
       case 'admin':
         return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/${postfix}?ver=${generalUtils.generateRandomString(6)}`
       case 'private': {
-        const urlMap = this.getFontUrlMap(assetId) as {[key: string]: string} | undefined
+        const urlMap = this.getFontUrlMap(assetId) as { [key: string]: string } | undefined
         const url = urlMap?.[postfix]
         return url ? `${url}&ver=${generalUtils.generateRandomString(6)}` : ''
       }
@@ -469,10 +469,10 @@ class BrandKitUtils {
     }
   }
 
-  getCurrentValues(brand: any, info: { type: string, style: Partial<IBrandTextStyle> }): {[key: string]: any} {
+  getCurrentValues(brand: any, info: { type: string, style: Partial<IBrandTextStyle> }): { [key: string]: any } {
     const textStyle = (brand.textStyleSetting)[`${info.type}Style`] as any
     if (!textStyle) return {}
-    const res = {} as {[key: string]: any}
+    const res = {} as { [key: string]: any }
     for (const k of Object.keys(info.style)) {
       res[k] = textStyle[k]
     }
@@ -484,8 +484,8 @@ class BrandKitUtils {
     const textStyle = (brand.textStyleSetting)[`${info.type}Style`] as IBrandTextStyle
     if (!textStyle) return
     if (textStyle.fontId === '' && !info.style.fontId) { // if current font is not set and updateInfo doesn't set font as well
-      info.style.fontId = STANDARD_TEXT_FONT[i18n.locale]
-      info.style.fontName = FONT_DEFAULTS[i18n.locale]
+      info.style.fontId = STANDARD_TEXT_FONT[`${i18n.global.locale}`]
+      info.style.fontName = FONT_DEFAULTS[`${i18n.global.locale}`]
       info.style.fontType = 'public'
     }
   }
@@ -538,11 +538,11 @@ class BrandKitUtils {
   }
 
   getDisplayedBrandName(brand: IBrand): string {
-    return (!this.checkIsNullBrand(brand) && brand.name === '') ? `${i18n.t('NN0397')}` : brand.name
+    return (!this.checkIsNullBrand(brand) && brand.name === '') ? `${i18n.global.t('NN0397')}` : brand.name
   }
 
   getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {
-    return colorPalette.name === '' ? `${i18n.t('NN0405')}` : colorPalette.name
+    return colorPalette.name === '' ? `${i18n.global.t('NN0405')}` : colorPalette.name
   }
 
   getDisplayedName(type: string, content: any) {

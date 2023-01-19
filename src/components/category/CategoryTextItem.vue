@@ -1,27 +1,34 @@
 <template lang="pug">
-  img(class="pointer"
-    :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
-    draggable="true"
-    :style="itemStyle"
-    @dragstart="dragStart($event)"
-    @click="addText"
-    @click.right.prevent="openUpdateDesignPopup()"
-    @error="handleNotFound")
+img(class="pointer"
+  :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
+  draggable="true"
+  :style="itemStyle"
+  @dragstart="dragStart($event)"
+  @click="addText"
+  @click.right.prevent="openUpdateDesignPopup()"
+  @error="handleNotFound")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import store from '@/store'
 import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import DragUtils from '@/utils/dragUtils'
 import generalUtils from '@/utils/generalUtils'
+import { IListServiceContentDataItem } from '@/interfaces/api'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    src: String,
-    item: Object
+    src: {
+      type: String
+    },
+    item: {
+      type: Object as PropType<any>,
+      required: true
+    }
   },
   data() {
     return {

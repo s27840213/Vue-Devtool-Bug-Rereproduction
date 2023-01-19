@@ -1,18 +1,18 @@
 <template lang="pug">
-  div(class="nu-shape" :style="styles()")
-    svg(:view-box.camel="viewBoxFormatter" :style="styles()")
-      defs(v-if="config.category === 'E'" v-html="svgFormatter")
-      defs
-        filter(v-if="config.category === 'C'" :id="className()" v-html="filterFormatter")
-        clipPath(v-if="config.category === 'E'" :id="clipPathId()")
-          use(:xlink:href="svgId()")
-      g(v-if="config.category === 'E'")
-        use(:xlink:href="svgId()" :clip-path="'url(#' + clipPathId() + ')'" :style="styleTextContent[0]")
-      g(v-else :filter="config.category === 'C' ? filterId() : 'none'" v-html="svgFormatter")
+div(class="nu-shape" :style="styles()")
+  svg(:view-box.camel="viewBoxFormatter" :style="styles()")
+    defs(v-if="config.category === 'E'" v-html="svgFormatter")
+    defs
+      filter(v-if="config.category === 'C'" :id="className()" v-html="filterFormatter")
+      clipPath(v-if="config.category === 'E'" :id="clipPathId()")
+        use(:xlink:href="svgId()")
+    g(v-if="config.category === 'E'")
+      use(:xlink:href="svgId()" :clip-path="'url(#' + clipPathId() + ')'" :style="styleTextContent[0]")
+    g(v-else :filter="config.category === 'C' ? filterId() : 'none'" v-html="svgFormatter")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
 import { IShape } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
@@ -51,7 +51,29 @@ const VIEWBOX_HEIGHT_REG = new RegExp(`\\${VIEWBOX_HEIGHT}`, 'g')
 const CROP_X_REG = new RegExp(`\\${CROP_X}`, 'g')
 const CROP_Y_REG = new RegExp(`\\${CROP_Y}`, 'g')
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
+  props: {
+    config: {
+      type: Object as PropType<any>,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    subLayerIndex: {
+      type: Number
+    },
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
+  },
   data() {
     return {
       filterTemplate: '',
@@ -248,16 +270,6 @@ export default Vue.extend({
         }
       }
       return ''
-    }
-  },
-  props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
-    subLayerIndex: Number,
-    contentScaleRatio: {
-      default: 1,
-      type: Number
     }
   },
   methods: {

@@ -1,48 +1,47 @@
 <template lang="pug">
-  //- :style="transformStyle")
-  div(class="nu-sub-controller")
-    div(class="nu-sub-controller__wrapper" :style="positionStyles()")
-      div(class="nu-sub-controller__wrapper" :style="wrapperStyles")
-        div(class="nu-sub-controller__content"
-            ref="body"
-            :layer-index="`${layerIndex}`"
-            :style="styles")
-            div(v-if="config.type === 'text' && config.active"
-              class="text text__wrapper" :style="textWrapperStyle()" draggable="false"
-              @pointerdown="onPointerdown")
-              nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
-                :style="textBodyStyle()"
-                :pageIndex="pageIndex"
-                :layerIndex="primaryLayerIndex"
-                :subLayerIndex="layerIndex"
-                @keydown.native.37.stop
-                @keydown.native.38.stop
-                @keydown.native.39.stop
-                @keydown.native.40.stop
-                @keydown.native.ctrl.67.exact.stop.self
-                @keydown.native.meta.67.exact.stop.self
-                @keydown.native.ctrl.86.exact.stop.self
-                @keydown.native.meta.86.exact.stop.self
-                @keydown.native.ctrl.88.exact.stop.self
-                @keydown.native.meta.88.exact.stop.self
-                @keydown.native.ctrl.65.exact.stop.self
-                @keydown.native.meta.65.exact.stop.self
-                @keydown.native.ctrl.90.exact.stop.self
-                @keydown.native.meta.90.exact.stop.self
-                @keydown.native.ctrl.shift.90.exact.stop.self
-                @keydown.native.meta.shift.90.exact.stop.self
-                @update="handleTextChange"
-                @compositionend="handleTextCompositionEnd")
+//- :style="transformStyle")
+div(class="nu-sub-controller")
+  div(class="nu-sub-controller__wrapper" :style="positionStyles()")
+    div(class="nu-sub-controller__wrapper" :style="wrapperStyles")
+      div(class="nu-sub-controller__content"
+          ref="body"
+          :layer-index="`${layerIndex}`"
+          :style="styles")
+          div(v-if="config.type === 'text' && config.active"
+            class="text text__wrapper" :style="textWrapperStyle()" draggable="false"
+            @pointerdown="onPointerdown")
+            nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
+              :style="textBodyStyle()"
+              :pageIndex="pageIndex"
+              :layerIndex="primaryLayerIndex"
+              :subLayerIndex="layerIndex"
+              @keydown.37.stop
+              @keydown.38.stop
+              @keydown.39.stop
+              @keydown.40.stop
+              @keydown.ctrl.67.exact.stop.self
+              @keydown.meta.67.exact.stop.self
+              @keydown.ctrl.86.exact.stop.self
+              @keydown.meta.86.exact.stop.self
+              @keydown.ctrl.88.exact.stop.self
+              @keydown.meta.88.exact.stop.self
+              @keydown.ctrl.65.exact.stop.self
+              @keydown.meta.65.exact.stop.self
+              @keydown.ctrl.90.exact.stop.self
+              @keydown.meta.90.exact.stop.self
+              @keydown.ctrl.shift.90.exact.stop.self
+              @keydown.meta.shift.90.exact.stop.self
+              @update="handleTextChange"
+              @compositionend="handleTextCompositionEnd")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
-import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
-import { IControlPoints } from '@/interfaces/controller'
+import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
@@ -52,7 +51,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
-import { FunctionPanelType, ILayerInfo, LayerType, PopupSliderEventType } from '@/store/types'
+import { ILayerInfo, LayerType } from '@/store/types'
 import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import DragUtils from '@/utils/dragUtils'
@@ -61,23 +60,43 @@ import imageUtils from '@/utils/imageUtils'
 import SubCtrlUtils from '@/utils/subControllerUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import colorUtils from '@/utils/colorUtils'
-import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
+import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import i18n from '@/i18n'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import pageUtils from '@/utils/pageUtils'
 import SvgPath from 'svgpath'
+import i18n from '@/i18n'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
-    config: Object,
-    layerIndex: Number,
-    pageIndex: Number,
-    primaryLayerIndex: Number,
-    primaryLayer: Object,
-    snapUtils: Object,
-    type: String,
-    isMoved: Boolean,
+    config: {
+      type: Object,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    primaryLayerIndex: {
+      type: Number,
+      required: true
+    },
+    primaryLayer: {
+      type: Object,
+      required: true
+    },
+    type: {
+      type: String,
+      required: true
+    },
+    isMoved: {
+      type: Boolean,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -90,6 +109,7 @@ export default Vue.extend({
   components: {
     NuTextEditor
   },
+  emits: ['pointerDownSubController', 'clickSubController', 'dblSubController', 'onSubDrop'],
   data() {
     return {
       MappingUtils,
@@ -174,7 +194,7 @@ export default Vue.extend({
       const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
       return {
         transformOrigin: '0px 0px',
-        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
+        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer as IFrame) ? scale : 1})`,
         ...this.transformStyle,
         outline: this.outlineStyles(),
         ...this.sizeStyle(),
@@ -191,7 +211,7 @@ export default Vue.extend({
     styles(): any {
       const { isFrameImg } = this.config
       const zindex = this.type === 'group' ? this.config?.active ? this.getPrimaryLayerSubLayerNum : this.primaryLayerZindex : this.config.styles.zindex
-      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
+      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
 
       return {
         ...this.sizeStyle(),
@@ -201,7 +221,7 @@ export default Vue.extend({
       }
     },
     isCurveText(): boolean {
-      return this.checkIfCurve(this.config)
+      return this.checkIfCurve(this.config as IText)
     },
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
@@ -283,7 +303,7 @@ export default Vue.extend({
       !GeneralUtils.isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal }, this.layerIndex)
     }
   },
-  destroyed() {
+  unmounted() {
     // the condition indicates the primaryLayer transform from group-layer to tmp-layer
     if (this.config.type === 'text' && this.primaryLayer && this.primaryLayer.id === this.parentId) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false })
@@ -397,7 +417,7 @@ export default Vue.extend({
       this.isControlling = false
       this.onClickEvent(e)
     },
-    positionStyles() {
+    positionStyles(): Record<string, string> {
       const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
       let { x, y } = this.config.styles
 
@@ -476,7 +496,7 @@ export default Vue.extend({
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      this.calcSize(this.config)
+      this.calcSize(this.config as IText)
       if (payload.toRecord) {
         this.waitFontLoadingAndRecord()
       } else {
@@ -537,7 +557,7 @@ export default Vue.extend({
               this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
             } else {
-              Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
               body.removeEventListener('drop', this.onDrop)
             }
           }
@@ -755,7 +775,7 @@ export default Vue.extend({
       if (currLayer && currLayer.type === LayerType.image) {
         LayerUtils.deleteLayer(LayerUtils.pageIndex, LayerUtils.layerIndex)
         const newIndex = this.primaryLayerIndex > LayerUtils.layerIndex ? this.primaryLayerIndex - 1 : this.primaryLayerIndex
-        groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer])
+        groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer as IFrame])
         FrameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.layerIndex, { active: true })
         StepsUtils.record()
       }

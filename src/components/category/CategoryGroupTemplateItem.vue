@@ -1,40 +1,50 @@
 <template lang="pug">
-  div(class="category-template-item" :style="itemStyle" @click="handleClickGroup")
-    div(class="relative pointer"
-      @mouseover="() => handleCarouse()"
-      @mouseleave="stopCarouse()")
-      image-carousel(v-if="showCarousel"
-        :imgs="groupImages"
-        @change="handleCarouselIdx")
-        template(v-slot="{ url }")
-          img(:src="url" :style="previewStyle" class="category-template-item__img")
-      img(v-else
-        class="category-template-item__img pointer"
-        :src="fallbackSrc || previewImage"
-        :style="previewStyle"
-        @error="handleNotFound")
-      span(class="category-template-item__index") {{ carouselIdx + 1 }}/{{ item.content_ids.length }}
-      pro-item(v-if="item.plan")
-    div(v-if="showId"
-      class="category-template-item__id"
-      @click.self.stop="copyId") {{ item.id }}
+div(class="category-template-item" :style="itemStyle" @click="handleClickGroup")
+  div(class="relative pointer"
+    @mouseover="() => handleCarouse()"
+    @mouseleave="stopCarouse()")
+    image-carousel(v-if="showCarousel"
+      :imgs="groupImages"
+      @change="handleCarouselIdx")
+      template(v-slot="{ url }")
+        img(:src="url" :style="previewStyle" class="category-template-item__img")
+    img(v-else
+      class="category-template-item__img pointer"
+      :src="fallbackSrc || previewImage"
+      :style="previewStyle"
+      @error="handleNotFound")
+    span(class="category-template-item__index") {{ carouselIdx + 1 }}/{{ item.content_ids.length }}
+    pro-item(v-if="item.plan")
+  div(v-if="showId"
+    class="category-template-item__id"
+    @click.self.stop="copyId") {{ item.id }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import GeneralUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: ['clickGroupItem'],
   components: {
     ImageCarousel,
     ProItem
   },
   props: {
-    src: String,
-    item: Object,
-    showId: Boolean
+    src: {
+      type: String
+    },
+    item: {
+      type: Object,
+      required: true
+    },
+    showId: {
+      type: Boolean,
+      required: true
+    }
   },
   data () {
     return {
@@ -73,14 +83,14 @@ export default Vue.extend({
     copyId() {
       GeneralUtils.copyText(this.item.id)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${this.item.id} 已複製` })
+          notify({ group: 'copy', text: `${this.item.id} 已複製` })
         })
     },
     handleCarouselIdx (idx: number) {
       this.carouselIdx = idx
     },
     handleClickGroup () {
-      this.$emit('click', this.item)
+      this.$emit('clickGroupItem', this.item)
     },
     handleCarouse () {
       this.isHover = true

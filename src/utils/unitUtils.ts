@@ -1,11 +1,11 @@
 import store from '@/store'
 import { round } from 'lodash'
 
-interface IMapUnit {
+export interface IMapUnit {
   [key: string]: number
 }
 
-interface IMapSize {
+export interface IMapSize {
   [key: string]: {
     width: number,
     height: number
@@ -125,7 +125,5 @@ class UnitUtils {
 export default new UnitUtils()
 export {
   STR_UNITS,
-  PRECISION,
-  IMapUnit,
-  IMapSize
+  PRECISION
 }

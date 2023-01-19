@@ -18,7 +18,8 @@ import tiptapUtils from './tiptapUtils'
 
 export class MovingUtils {
   isControlling = false
-  private component = undefined as Vue | undefined
+  private component = undefined as any | undefined
+  // private component = undefined as Vue | undefined
   private eventTarget = null as unknown as HTMLElement
   private dblTabsFlag = false
   private _config = { config: null as unknown as ILayer }
@@ -71,7 +72,7 @@ export class MovingUtils {
     return false
   }
 
-  constructor({ _config, snapUtils, component, body, layerInfo }: { _config: { config: ILayer }, snapUtils: unknown, component?: Vue, body: HTMLElement, layerInfo?: ILayerInfo }) {
+  constructor({ _config, snapUtils, component, body, layerInfo }: { _config: { config: ILayer }, snapUtils: unknown, component?: any, body: HTMLElement, layerInfo?: ILayerInfo }) {
     this._config = _config
     this.snapUtils = snapUtils
     this.body = body
@@ -319,7 +320,7 @@ export class MovingUtils {
     const updateConfigData = {} as Partial<IText | IImage | IShape>
     if (!this.isDragging) {
       updateConfigData.dragging = true
-      this.component && this.component.$emit('isDragging', this.layerIndex)
+      // this.component && this.component.$emit('isDragging', this.layerIndex)
     }
     if (this.isActive) {
       if (generalUtils.getEventType(e) !== 'touch') {
@@ -345,6 +346,7 @@ export class MovingUtils {
         }
         if (this.getLayerType === 'text' && this.config.contentEditable) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+          e.preventDefault()
         }
       }
     }
@@ -566,7 +568,7 @@ export class MovingUtils {
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false
       })
-      this.component && this.component.$emit('isDragging', -1)
+      // this.component && this.component.$emit('isDragging', -1)
     }
 
     this.isDoingGestureAction = false

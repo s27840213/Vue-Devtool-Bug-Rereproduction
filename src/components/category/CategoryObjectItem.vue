@@ -1,22 +1,22 @@
 <template lang="pug">
-  div(class="category-object-item"
-      @click="addSvg"
-      @click.right.prevent="openUpdateDesignPopup()"
-      @dragstart="dragStart($event)")
-    img(class="category-object-item__img"
-      draggable="true"
-      :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
-    svg-icon(v-if="!isTouchDevice && (item.info || (item.tags && item.tags.length > 0))"
-      class="category-object-item__more"
-      @click.native="showSvgInfo"
-      :iconName="'more_vertical'"
-      :iconColor="'gray-2'"
-      :iconWidth="'20px'")
-    pro-item(v-if="item.plan")
+div(class="category-object-item"
+    @click="addSvg"
+    @click.right.prevent="openUpdateDesignPopup()"
+    @dragstart="dragStart($event)")
+  img(class="category-object-item__img"
+    draggable="true"
+    :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
+  svg-icon(v-if="!isTouchDevice && (item.info || (item.tags && item.tags.length > 0))"
+    class="category-object-item__more"
+    @click="showSvgInfo"
+    :iconName="'more_vertical'"
+    :iconColor="'gray-2'"
+    :iconWidth="'20px'")
+  pro-item(v-if="item.plan")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import store from '@/store'
 import DragUtils from '@/utils/dragUtils'
 import assetUtils, { RESIZE_RATIO_SVG } from '@/utils/assetUtils'
@@ -25,13 +25,19 @@ import ProItem from '@/components/payment/ProItem.vue'
 import paymentUtils from '@/utils/paymentUtils'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     ProItem
   },
   props: {
-    src: String,
-    item: Object
+    src: {
+      type: String
+    },
+    item: {
+      type: Object,
+      required: true
+    }
   },
   computed: {
     ...mapGetters('user', {
@@ -46,7 +52,7 @@ export default Vue.extend({
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
     }),
     dragStart(e: DragEvent) {
-      if (!paymentUtils.checkPro(this.item, 'pro-object')) return
+      if (!paymentUtils.checkPro(this.item as any, 'pro-object')) return
       const type = assetUtils.getLayerType(this.item.type)
       new DragUtils().itemDragStart(e, type || '', {
         ...this.item
@@ -55,8 +61,8 @@ export default Vue.extend({
       })
     },
     addSvg() {
-      if (!paymentUtils.checkPro(this.item, 'pro-object')) return
-      assetUtils.addAsset(this.item, { db: 'svg' })
+      if (!paymentUtils.checkPro(this.item as any, 'pro-object')) return
+      assetUtils.addAsset(this.item as any, { db: 'svg' })
     },
     showSvgInfo(evt: Event) {
       const { info = {}, tags } = this.item

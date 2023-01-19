@@ -38,22 +38,22 @@ div(:layer-index="`${layerIndex}`"
             :pageIndex="pageIndex"
             :layerIndex="layerIndex"
             :subLayerIndex="-1"
-            @keydown.native.37.stop
-            @keydown.native.38.stop
-            @keydown.native.39.stop
-            @keydown.native.40.stop
-            @keydown.native.ctrl.67.exact.stop.self
-            @keydown.native.meta.67.exact.stop.self
-            @keydown.native.ctrl.86.exact.stop.self
-            @keydown.native.meta.86.exact.stop.self
-            @keydown.native.ctrl.88.exact.stop.self
-            @keydown.native.meta.88.exact.stop.self
-            @keydown.native.ctrl.65.exact.stop.self
-            @keydown.native.meta.65.exact.stop.self
-            @keydown.native.ctrl.90.exact.stop.self
-            @keydown.native.meta.90.exact.stop.self
-            @keydown.native.ctrl.shift.90.exact.stop.self
-            @keydown.native.meta.shift.90.exact.stop.self
+            @keydown.37.stop
+            @keydown.38.stop
+            @keydown.39.stop
+            @keydown.40.stop
+            @keydown.ctrl.67.exact.stop.self
+            @keydown.meta.67.exact.stop.self
+            @keydown.ctrl.86.exact.stop.self
+            @keydown.meta.86.exact.stop.self
+            @keydown.ctrl.88.exact.stop.self
+            @keydown.meta.88.exact.stop.self
+            @keydown.ctrl.65.exact.stop.self
+            @keydown.meta.65.exact.stop.self
+            @keydown.ctrl.90.exact.stop.self
+            @keydown.meta.90.exact.stop.self
+            @keydown.ctrl.shift.90.exact.stop.self
+            @keydown.meta.shift.90.exact.stop.self
             @update="handleTextChange"
             @compositionend="handleTextCompositionEnd")
         div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
@@ -70,7 +70,7 @@ div(:layer-index="`${layerIndex}`"
             :style="ctrlPointerStyles(end, {'cursor': 'pointer'})"
             @pointerdown.stop="lineEndMoveStart"
             @touchstart="disableTouchEvent")
-        div(v-for="(resizer, index) in resizer(controlPoints)"
+        div(v-for="(resizer, index) in getResizer(controlPoints)"
             class="control-point__resize-bar-wrapper")
           div(class="control-point resizer"
               :key="`resizer-${index}`"
@@ -81,7 +81,7 @@ div(:layer-index="`${layerIndex}`"
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="!isTouchDevice() ? resizeStart($event) : null"
               @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
-        div(v-if="isTouchDevice()" v-for="(resizer, index) in resizer(controlPoints, false, true)"
+        div(v-if="isTouchDevice()" v-for="(resizer, index) in getResizer(controlPoints, false, true)"
             class="control-point__resize-bar-wrapper")
           div(class="control-point resizer"
               :key="`resizer-touch-${index}`"
@@ -94,18 +94,18 @@ div(:layer-index="`${layerIndex}`"
               @touchstart="disableTouchEvent")
         div(v-if="config.type === 'text' && contentEditable && !isTouchDevice()"
             class="control-point__resize-bar-wrapper")
-          div(v-for="(resizer, index) in resizer(controlPoints, true)"
+          div(v-for="(resizer, index) in getResizer(controlPoints, true)"
               class="control-point resizer control-point__move-bar"
               :key="`resizer-text-${index}`"
               :style="resizerBarStyles(resizer.styles)"
               @pointerdown="moveStart")
-        div(v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalers) : []"
+        div(v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="`scaler-${index}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
             @pointerdown.prevent.stop="!isTouchDevice() ? scaleStart($event) : null"
             @touchstart="!isTouchDevice() ? disableTouchEvent($event) : null")
-        div(v-if="isTouchDevice()" v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalerTouchAreas) : []"
+        div(v-if="isTouchDevice()" v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalerTouchAreas) : []"
             class="control-point scaler"
             :key="`scaler-touch-${index}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
@@ -118,8 +118,8 @@ div(:layer-index="`${layerIndex}`"
             :iconName="'rotate'" :iconWidth="`${20}px`"
             :src="require('@/assets/img/svg/rotate.svg')"
             :style='lineControlPointStyles()'
-            @pointerdown.native.stop="lineRotateStart"
-            @touchstart.native="lineRotateStart")
+            @pointerdown.stop="lineRotateStart"
+            @touchstart="lineRotateStart")
           img(class="control-point__mover"
             :src="require('@/assets/img/svg/move.svg')"
             :style='lineControlPointStyles()'
@@ -133,8 +133,8 @@ div(:layer-index="`${layerIndex}`"
               :iconName="'rotate'" :iconWidth="`${20}px`"
               :src="require('@/assets/img/svg/rotate.svg')"
               :style='controlPointStyles()'
-              @pointerdown.native.stop="rotateStart"
-              @touchstart.native="disableTouchEvent")
+              @pointerdown.stop="rotateStart"
+              @touchstart="disableTouchEvent")
             img(class="control-point__mover"
               :src="require('@/assets/img/svg/move.svg')"
               :style='controlPointStyles()'
@@ -147,10 +147,11 @@ div(:layer-index="`${layerIndex}`"
       svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IStyle, IText } from '@/interfaces/layer'
 import { IResizer } from '@/interfaces/controller'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -179,26 +180,41 @@ import mathUtils from '@/utils/mathUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
-import i18n from '@/i18n'
 import editorUtils from '@/utils/editorUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
+import i18n from '@/i18n'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
 const RESIZER_SHOWN_MIN = 4000
 
-export default Vue.extend({
+type ICP = ReturnType<typeof ControlUtils.getControlPoints>
+
+export default defineComponent({
   props: {
-    config: Object,
-    layerIndex: Number,
-    pageIndex: Number,
-    snapUtils: Object,
+    config: {
+      type: Object,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    snapUtils: {
+      type: Object,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
     }
   },
+  emits: ['isDragging', 'setFocus'],
   components: {
     NuTextEditor,
     LazyLoad
@@ -214,7 +230,9 @@ export default Vue.extend({
       FrameUtils,
       ShortcutUtils,
       dragUtils: new DragUtils(this.config.id),
-      controlPoints: generalUtils.isTouchDevice() ? ControlUtils.getControlPoints(6, 25) : ControlUtils.getControlPoints(4, 25),
+      controlPoints: (generalUtils.isTouchDevice()
+        ? ControlUtils.getControlPoints(6, 25)
+        : ControlUtils.getControlPoints(4, 25)) as ICP,
       isControlling: false,
       isLineEndMoving: false,
       isRotating: false,
@@ -263,7 +281,7 @@ export default Vue.extend({
     //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
     // }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     eventUtils.removePointerEvent('pointerup', this.moveEnd)
     eventUtils.removePointerEvent('pointermove', this.moving)
     if (this.eventTarget) {
@@ -342,7 +360,7 @@ export default Vue.extend({
     },
     contentStyles(): any {
       const { width, height } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
-      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
+      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
       const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
       const pointerEvents = this.getPointerEvents
       return {
@@ -382,7 +400,7 @@ export default Vue.extend({
       return false
     },
     isCurveText(): boolean {
-      return this.checkIfCurve(this.config)
+      return this.checkIfCurve(this.config as IText)
     },
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
@@ -447,7 +465,7 @@ export default Vue.extend({
       !generalUtils.isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
   },
-  destroyed() {
+  unmounted() {
     /**
      * While image is setted to frame, these event-listener should be removed
      */
@@ -518,8 +536,8 @@ export default Vue.extend({
       }
       return Object.assign(resizerStyle, HW)
     },
-    resizer(controlPoints: any, textMoveBar = false, isTouchArea = false) {
-      let resizers = (isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers) as Array<{ [key: string]: string | number }>
+    getResizer(controlPoints: ICP, textMoveBar = false, isTouchArea = false) {
+      let resizers = isTouchArea ? controlPoints.resizerTouchAreas : controlPoints.resizers
       const tooShort = this.getLayerHeight() * this.scaleRatio < RESIZER_SHOWN_MIN
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < RESIZER_SHOWN_MIN
       switch (this.getLayerType) {
@@ -548,7 +566,7 @@ export default Vue.extend({
           resizers = []
           break
         case 'frame':
-          if (!FrameUtils.isImageFrame(this.config)) {
+          if (!FrameUtils.isImageFrame(this.config as IFrame)) {
             resizers = []
           } else {
             const shadow = this.config.styles.shadow
@@ -570,7 +588,7 @@ export default Vue.extend({
       }
       return resizers
     },
-    scaler(scalers: any) {
+    getScaler(scalers: any) {
       const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
       const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
@@ -801,7 +819,7 @@ export default Vue.extend({
       this.initTranslate = this.getLayerPos()
 
       if (inCopyMode) {
-        ShortcutUtils.altDuplicate(this.pageIndex, this.layerIndex, this.config)
+        ShortcutUtils.altDuplicate(this.pageIndex, this.layerIndex, this.config as ILayer<IStyle>)
       }
 
       switch (this.getLayerType) {
@@ -1242,7 +1260,7 @@ export default Vue.extend({
           }
           break
         case 'frame': {
-          if (FrameUtils.isImageFrame(this.config)) {
+          if (FrameUtils.isImageFrame(this.config as IFrame)) {
             let { imgWidth, imgHeight, imgX, imgY } = (this.config as IFrame).clips[0].styles
             const _scale = scale / this.config.styles.scale
             imgWidth *= _scale
@@ -1507,7 +1525,7 @@ export default Vue.extend({
           scale = 1
           break
         case 'shape': {
-          [width, height] = ControlUtils.resizeShapeHandler(this.config, this.scale, this.initSize, width, height)
+          [width, height] = ControlUtils.resizeShapeHandler(this.config as IShape, this.scale, this.initSize, width, height)
           if (this.config.category === 'E') {
             width === MIN_THINKNESS && (width = MIN_THINKNESS * 4)
             height === MIN_THINKNESS && (height = MIN_THINKNESS * 4)
@@ -1524,10 +1542,10 @@ export default Vue.extend({
            */
           if (this.config.styles.writingMode.includes('vertical')) {
             ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: height })
-            width = TextUtils.getTextHW(this.config, height).width
+            width = TextUtils.getTextHW(this.config as IText, height).width
           } else {
             ControlUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { widthLimit: width })
-            height = TextUtils.getTextHW(this.config, width).height
+            height = TextUtils.getTextHW(this.config as IText, width).height
           }
           /**
            * below make the anchor-point always pinned at the top-left or top-right
@@ -1745,7 +1763,7 @@ export default Vue.extend({
       eventUtils.removePointerEvent('pointerup', this.lineRotateEnd)
       this.$emit('setFocus')
     },
-    ctrlPointerStyles(ctrlPointerStyles: { [key: string]: string | number }, attrs?: { [key: string]: string | number }) {
+    ctrlPointerStyles(ctrlPointerStyles: { [key: string]: string | number | undefined }, attrs?: { [key: string]: string | number }) {
       return {
         ...ctrlPointerStyles,
         ...attrs
@@ -1815,7 +1833,7 @@ export default Vue.extend({
         if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
           this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
         } else {
-          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           body.removeEventListener('dragleave', this.dragLeave)
           body.removeEventListener('drop', this.onDrop)
         }
@@ -1900,7 +1918,7 @@ export default Vue.extend({
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
       const config = generalUtils.deepCopy(this.config)
       config.paragraphs = payload.paragraphs
-      this.calcSize(config, !!tiptapUtils.editor?.view?.composing)
+      this.calcSize(config as IText, !!tiptapUtils.editor?.view?.composing)
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       if (payload.toRecord) {
         this.waitFontLoadingAndRecord()
@@ -1922,7 +1940,7 @@ export default Vue.extend({
       if (this.widthLimitSetDuringComposition) {
         this.widthLimitSetDuringComposition = false
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
-        this.textSizeRefresh(this.config, false)
+        this.textSizeRefresh(this.config as IText, false)
       }
       if (toRecord) {
         this.waitFontLoadingAndRecord()
@@ -1938,7 +1956,7 @@ export default Vue.extend({
       let layerY = this.getLayerPos().y
 
       if (widthLimit === -1) {
-        const pageSize = (this.$parent.$el as HTMLElement)
+        const pageSize = (this.$parent?.$el as HTMLElement)
           .getBoundingClientRect()[isVertical ? 'height' : 'width'] / (this.scaleRatio * 0.01)
         const currTextSize = textHW[isVertical ? 'height' : 'width']
 

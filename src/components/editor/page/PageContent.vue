@@ -16,40 +16,27 @@ div(class="overflow-container"
       //- @dblclick will not be trigger in mobile, use @tap + doubleTapUtils instead.
       div(class="content" :style="contentStyles")
         nu-bg-image(
-          :image="this.config.backgroundImage"
-          :pageIndex="pageIndex"
-          :color="this.config.backgroundColor"
-          :key="this.config.backgroundImage.id"
-          @mousedown.native.left="pageClickHandler()"
-          :contentScaleRatio="contentScaleRatio"
-          :padding="contentStyles.padding")
+            :image="config.backgroundImage"
+            :pageIndex="pageIndex"
+            :color="config.backgroundColor"
+            :key="config.backgroundImage.id"
+            @mousedown.native.left="pageClickHandler()"
+            :contentScaleRatio="contentScaleRatio"
+            :padding="contentStyles.padding")
         nu-layer(
           v-for="(layer,index) in config.layers"
           :key="layer.id"
-          :data-index="`${index}`"
-          :data-pindex="`${pageIndex}`"
+          :dataIndex="`${index}`"
+          :dataPindex="`${pageIndex}`"
           :snapUtils="snapUtils"
           :layerIndex="index"
           :pageIndex="pageIndex"
           :config="layer"
-          :currSelectedInfo="currSelectedInfo"
           :contentScaleRatio="contentScaleRatio"
-          :scaleRatio="scaleRatio"
-          :getCurrFunctionPanelType="getCurrFunctionPanelType"
-          :isUploadingShadowImg="isUploadingShadowImg"
-          :isHandling="isHandling"
-          :isShowPagePanel="isShowPagePanel"
-          :imgSizeMap="imgSizeMap"
-          :userId="userId"
-          :verUni="verUni"
-          :uploadId="uploadId"
-          :handleId="handleId"
-          :uploadShadowImgs="uploadShadowImgs"
-            :forceRender="forceRender"
-          :lazyLoadTarget="lazyLoadTarget"
-          v-on="$listeners")
+          :forceRender="forceRender"
+          :lazyLoadTarget="lazyLoadTarget")
       div(v-if="isShowBleed" class="bleed-line" :style="bleedLineStyles")
-      div(v-if="this.userId === 'backendRendering' && backendRenderParams.isTrim" class="trim")
+      div(v-if="userId === 'backendRendering' && backendRenderParams.isTrim" class="trim")
         div(class="trim__tl" :style="trimStyles.tl")
         div(class="trim__tr" :style="trimStyles.tr")
         div(class="trim__bl" :style="trimStyles.bl")
@@ -59,7 +46,8 @@ div(class="overflow-container"
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import i18n from '@/i18n'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -76,9 +64,11 @@ import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
 import { ILayer } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     NuBgImage,
     LazyLoad
@@ -86,7 +76,7 @@ export default Vue.extend({
   props: {
     snapUtils: Object,
     config: {
-      type: Object,
+      type: Object as PropType<IPage>,
       required: true
     },
     pageIndex: {
@@ -299,7 +289,7 @@ export default Vue.extend({
         }
       }
     },
-    pageClickHandler(e: PointerEvent): void {
+    pageClickHandler(): void {
       groupUtils.deselect()
       // imageUtils.setImgControlDefault(false)
       editorUtils.setInMultiSelectionMode(false)
@@ -339,7 +329,7 @@ export default Vue.extend({
         editorUtils.setCurrActivePanel('crop')
       }
       if ((srcObj?.assetId ?? '') !== '' && locked) {
-        this.$notify({ group: 'copy', text: i18n.tc('NN0804') })
+        notify({ group: 'copy', text: i18n.global.tc('NN0804') })
       }
     },
     async handleFontLoading() {

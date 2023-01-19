@@ -1,16 +1,18 @@
 <template lang="pug">
-  div(class="nu-tmp"
-      :style="styles()")
-    nu-layer(v-for="(layer,index) in config.layers"
-      :key="`layer-${index}`"
-      :pageIndex="pageIndex"
-      :layerIndex="layerIndex"
-      :subLayerIndex="index"
-      :primaryLayer="config"
-      :contentScaleRatio="contentScaleRatio"
-      :config="layer"
-      :style="subLayerStyles(layer)"
-      :isSubLayer="true")
+div(class="nu-tmp"
+    :style="styles()")
+  nu-layer(v-for="(layer,index) in config.layers"
+    :key="`layer-${index}`"
+    :pageIndex="pageIndex"
+    :layerIndex="layerIndex"
+    :subLayerIndex="index"
+    :contentScaleRatio="contentScaleRatio"
+    :config="layer"
+    :style="subLayerStyles(layer)"
+    :isSubLayer="true"
+    :inTmp="true"
+    :primaryScale="config.styles.scale"
+    :primaryLayer="config")
 </template>
 
 <script lang="ts">
@@ -19,14 +21,24 @@ import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import textPropUtils from '@/utils/textPropUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
+    config: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number

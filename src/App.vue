@@ -1,63 +1,62 @@
 <template lang="pug">
-  div(id="app" :style="appStyles()")
-    link(rel="preconnect" href="https://fonts.googleapis.com")
-    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
-    link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
-    link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
-    //- div(class="coordinate" ref="coordinate")
-    //-   div(class="coordinate__val coordinate__width")
-    //-     span {{coordinateWidth}}px
-    //-   div(class="coordinate__val coordinate__height")
-    //-     span {{coordinateHeight}}px
-    router-view
-    div(class="popup-area")
-      popup
-      res-info(v-show="currSelectedResInfo.type"
-        :info="currSelectedResInfo"
-        @blur.native="setCurrSelectedResInfo()"
-        tabindex="0")
-    fps(v-if="!inScreenshotPreview && showAllAdminTool")
-    div(class="modal-container"
-        v-if="isModalOpen")
-      modal-card
-    notifications(group="copy"
-      position="top center"
-      width="300px"
-      :max="2"
-      :duration="2000")
-      template(v-slot:body="{ item }")
-        div(class="notification copy"
-          v-html="item.text")
-    notifications(group="error"
-      position="top center"
-      width="300px"
-      :max="1"
-      :duration="5000")
-      template(v-slot:body="{ item }")
-        div(class="notification error"
-          v-html="item.text")
+div(id="app" :style="appStyles()")
+  link(rel="preconnect" href="https://fonts.googleapis.com")
+  link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="")
+  link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
+  link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
+  //- div(class="coordinate" ref="coordinate")
+  //-   div(class="coordinate__val coordinate__width")
+  //-     span {{coordinateWidth}}px
+  //-   div(class="coordinate__val coordinate__height")
+  //-     span {{coordinateHeight}}px
+  router-view
+  div(class="popup-area")
+    popup
+    res-info(v-show="currSelectedResInfo.type"
+      :info="currSelectedResInfo"
+      @blur="setCurrSelectedResInfo()"
+      tabindex="0")
+  debug-tool(v-if="!inScreenshotPreview && showAllAdminTool")
+  div(class="modal-container"
+      v-if="isModalOpen")
+    modal-card
+  notifications(group="copy"
+    position="top center"
+    width="300px"
+    :max="2"
+    :duration="2000")
+    template(v-slot:body="{ item }")
+      div(class="notification copy"
+        v-html="item.text")
+  notifications(group="error"
+    position="top center"
+    width="300px"
+    :max="1"
+    :duration="5000")
+    template(v-slot:body="{ item }")
+      div(class="notification error"
+        v-html="item.text")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import Popup from '@/components/popup/Popup.vue'
-import { Chrome } from 'vue-color'
 import ResInfo from '@/components/modal/ResInfo.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
-import Fps from '@/components/componentLog/Fps.vue'
+import DebugTool from '@/components/componentLog/DebugTool.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     Popup,
-    'chrome-picker': Chrome,
     ResInfo,
     ModalCard,
-    Fps
+    DebugTool
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -75,7 +74,7 @@ export default Vue.extend({
   beforeMount() {
     networkUtils.registerNetworkListener()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     networkUtils.unregisterNetworkListener()
   },
   computed: {
@@ -97,7 +96,7 @@ export default Vue.extend({
       setDropdown: 'popup/SET_STATE',
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
     }),
-    appStyles() {
+    appStyles(): Record<string, string> {
       if (this.$route.name === 'Preview') {
         return {
           display: 'flex',
@@ -142,7 +141,7 @@ export default Vue.extend({
 })
 </script>
 <style lang="scss">
-@use "~@/assets/scss/main.scss";
+@use "@/assets/scss/main.scss";
 
 #app {
   @include size(100%, 100%);

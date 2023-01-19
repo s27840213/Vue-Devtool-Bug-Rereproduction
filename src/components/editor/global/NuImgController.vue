@@ -1,28 +1,28 @@
 <template lang="pug">
-  div(class="nu-img-controller")
-    div(class="nu-controller"
-      :style="controllerStyles()")
-    div(class="nu-controller__body"
-        ref="body"
-        :style="styles"
-        @pointerdown.stop="moveStart"
+div(class="nu-img-controller")
+  div(class="nu-controller"
+    :style="controllerStyles()")
+  div(class="nu-controller__body"
+      ref="body"
+      :style="styles"
+      @pointerdown.stop="moveStart"
+      @touchstart="disableTouchEvent")
+    div(v-for="(scaler, index) in controlPoints.scalers"
+        class="controller-point"
+        :key="`scaler-${index}`"
+        :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
+        @pointerdown.prevent.stop="isMobile ? null : scaleStart($event)"
+        @touchstart="isMobile ? null : disableTouchEvent($event)")
+    div(v-if="isMobile" v-for="(scaler, index) in controlPoints.scalerTouchAreas"
+        class="controller-point"
+        :key="`scaler-touch-${index}`"
+        :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
+        @pointerdown.prevent.stop="scaleStart"
         @touchstart="disableTouchEvent")
-      div(v-for="(scaler, index) in controlPoints.scalers"
-          class="controller-point"
-          :key="`scaler-${index}`"
-          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' })"
-          @pointerdown.prevent.stop="isMobile ? null : scaleStart($event)"
-          @touchstart="isMobile ? null : disableTouchEvent($event)")
-      div(v-if="isMobile" v-for="(scaler, index) in controlPoints.scalerTouchAreas"
-          class="controller-point"
-          :key="`scaler-touch-${index}`"
-          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' })"
-          @pointerdown.prevent.stop="scaleStart"
-          @touchstart="disableTouchEvent")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import ControlUtils from '@/utils/controlUtils'
@@ -37,13 +37,29 @@ import pageUtils from '@/utils/pageUtils'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    config: Object,
-    layerIndex: Number,
-    pageIndex: Number,
-    primaryLayerIndex: Number,
-    primaryLayer: Object,
+    config: {
+      type: Object,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    primaryLayerIndex: {
+      type: Number,
+      required: true
+    },
+    primaryLayer: {
+      type: Object,
+      required: true
+    },
     forRender: {
       type: Boolean,
       default: false
@@ -78,7 +94,7 @@ export default Vue.extend({
           layerId: this.primaryLayer ? this.primaryLayer.id : this.config.id,
           subLayerId: this.primaryLayer ? this.config.id : undefined
         })
-        const hasPrimaryLayer = typeof this.primaryLayerIndex !== 'undefined' && this.primaryLayerIndex !== -1
+        const hasPrimaryLayer = this.primaryLayerIndex !== -1
         imageShadowUtils.updateShadowSrc({
           pageIndex: this.pageIndex,
           layerIndex: hasPrimaryLayer ? this.primaryLayerIndex : this.layerIndex,
@@ -87,7 +103,7 @@ export default Vue.extend({
       }
     }
   },
-  destroyed() {
+  unmounted() {
     for (let i = 0; i < this.getPage(this.pageIndex).layers.length; i++) {
       if (LayerUtils.getLayer(this.pageIndex, i).type === 'image') {
         ControlUtils.updateLayerProps(this.pageIndex, i, { imgControl: false })
@@ -161,14 +177,14 @@ export default Vue.extend({
     angleInRad(): number {
       const { type, styles: primaryStyles } = LayerUtils.getCurrLayer
       const { rotate } = this.config.styles
-      if (typeof this.primaryLayerIndex !== 'undefined') {
+      if (this.primaryLayerIndex !== -1) {
         return (primaryStyles.rotate + (type === 'group' ? rotate : 0)) * Math.PI / 180
       } else {
         return this.getLayerRotate * Math.PI / 180
       }
     },
     primaryType(): string {
-      if (typeof this.primaryLayerIndex !== 'undefined') {
+      if (this.primaryLayerIndex !== -1) {
         return LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).type
       } else {
         return ''
@@ -176,7 +192,7 @@ export default Vue.extend({
     },
     primaryScale(): number {
       const currLayer = LayerUtils.getCurrLayer
-      if (typeof this.primaryLayerIndex !== 'undefined' && ['group', 'frame'].includes(currLayer.type)) {
+      if (this.primaryLayerIndex !== -1 && ['group', 'frame'].includes(currLayer.type)) {
         return LayerUtils.getCurrLayer.styles.scale
       } else {
         return 1
@@ -246,7 +262,7 @@ export default Vue.extend({
       return imgControllerPos
     },
     updateLayerProps(prop: { [key: string]: string | boolean | number }) {
-      if (typeof this.primaryLayerIndex !== 'undefined') {
+      if (this.primaryLayerIndex !== -1) {
         switch (LayerUtils.getCurrLayer.type) {
           case 'frame':
             FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, prop)
@@ -259,7 +275,7 @@ export default Vue.extend({
       }
     },
     updateLayerStyles(prop: { [key: string]: number }) {
-      if (typeof this.primaryLayerIndex !== 'undefined') {
+      if (this.primaryLayerIndex !== -1) {
         switch (LayerUtils.getCurrLayer.type) {
           case 'frame':
             FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, prop)
@@ -300,7 +316,7 @@ export default Vue.extend({
       offsetPos.y = (offsetPos.y * _layerScale) * (100 / this.scaleRatio)
 
       const currLayer = LayerUtils.getCurrLayer
-      if (typeof this.primaryLayerIndex !== 'undefined' && currLayer.type === 'group') {
+      if (this.primaryLayerIndex !== -1 && currLayer.type === 'group') {
         const primaryScale = LayerUtils.getCurrLayer.styles.scale
         offsetPos.x /= primaryScale
         offsetPos.y /= primaryScale
@@ -361,7 +377,7 @@ export default Vue.extend({
       const angleInRad = this.angleInRad
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
-      if (typeof this.primaryLayerIndex !== 'undefined' && currLayer.type === 'group') {
+      if (this.primaryLayerIndex !== -1 && currLayer.type === 'group') {
         const primaryScale = currLayer.styles.scale
         diff.offsetX /= primaryScale
         diff.offsetY /= primaryScale

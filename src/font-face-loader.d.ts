@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 // Type definitions for CSS Font Loading Module Level 3
 // Project: https://drafts.csswg.org/css-font-loading/
 // Definitions by: slikts <https://github.com/slikts>
@@ -9,12 +10,6 @@ export type BinaryData = ArrayBuffer | ArrayBufferView;
 
 export interface FontFaceSetLoadEventInit extends EventInit {
     fontfaces?: FontFace[] | undefined;
-}
-
-export interface FontFaceSetEventMap {
-    "loading": (this: FontFaceSet, event: FontFaceSetLoadEvent) => any;
-    "loadingdone": (this: FontFaceSet, event: FontFaceSetLoadEvent) => any;
-    "loadingerror": (this: FontFaceSet, event: FontFaceSetLoadEvent) => any;
 }
 
 export interface FontFaceSet extends Set<FontFace>, EventTarget {
@@ -41,8 +36,14 @@ export interface FontFaceSet extends Set<FontFace>, EventTarget {
     // async notification that font loading and layout operations are done
     readonly ready: Promise<FontFaceSet>;
 
-    // loading state, "loading" while one or more fonts loading, "loaded" otherwise
+    // loading state, 'loading' while one or more fonts loading, 'loaded' otherwise
     readonly status: FontFaceSetLoadStatus;
+}
+
+export interface FontFaceSetEventMap {
+    'loading': (this: FontFaceSet, event: FontFaceSetLoadEvent) => any;
+    'loadingdone': (this: FontFaceSet, event: FontFaceSetLoadEvent) => any;
+    'loadingerror': (this: FontFaceSet, event: FontFaceSetLoadEvent) => any;
 }
 
 declare global {
@@ -72,19 +73,19 @@ declare global {
         readonly loaded: Promise<FontFace>;
     }
 
-    var FontFace: {
+    let FontFace: {
         prototype: FontFace;
         new(family: string, source: string | BinaryData, descriptors?: FontFaceDescriptors): FontFace;
-    };
+    }
 
     interface FontFaceSetLoadEvent extends Event {
         readonly fontfaces: ReadonlyArray<FontFace>;
     }
 
-    var FontFaceSetLoadEvent: {
+    let FontFaceSetLoadEvent: {
         prototype: FontFaceSetLoadEvent;
         new(type: string, eventInitDict?: FontFaceSetLoadEventInit): FontFaceSetLoadEvent;
-    };
+    }
 
     interface Document {
         fonts: FontFaceSet;

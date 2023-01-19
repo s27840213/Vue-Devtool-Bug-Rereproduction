@@ -1,34 +1,32 @@
 <template lang="pug">
-  div(class="nu-text" :style="textWrapperStyle()" draggable="false")
-    //- Svg BG for text effex gooey.
-    svg(v-if="svgBG && !noShadow" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
-      component(v-for="(elm, idx) in svgBG.content"
-                :key="`textSvgBg${idx}`"
-                :is="elm.tag"
-                v-bind="elm.attrs")
-    div(v-for="text, idx in duplicatedText" class="nu-text__body" ref="body"
-        :style="Object.assign(bodyStyles(), text.extraBody)")
-      nu-curve-text(v-if="isCurveText"
-        :config="config"
-        :layerIndex="layerIndex"
-        :pageIndex="pageIndex"
-        :subLayerIndex="subLayerIndex"
-        :isDuplicated="idx !== duplicatedText.length-1"
-        :isTransparent="isTransparent")
-      p(v-else
-        v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
-        :key="p.id"
-        :style="pStyle(p.styles)")
-        span(v-for="(span, sIndex) in p.spans"
-          class="nu-text__span"
-          :data-sindex="sIndex"
-          :key="span.id"
-          :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan, transParentStyles)") {{ span.text }}
-          br(v-if="!span.text && p.spans.length === 1")
+div(class="nu-text" :style="textWrapperStyle()" draggable="false")
+  //- Svg BG for text effex gooey.
+  svg(v-if="svgBG && !noShadow" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
+    component(v-for="(elm, idx) in svgBG.content"
+              :key="`textSvgBg${idx}`"
+              :is="elm.tag"
+              v-bind="elm.attrs")
+  div(v-for="text, idx in duplicatedText" class="nu-text__body" ref="body"
+      :style="Object.assign(bodyStyles(), text.extraBody)")
+    nu-curve-text(v-if="isCurveText"
+      :config="config"
+      :layerIndex="layerIndex"
+      :pageIndex="pageIndex"
+      :subLayerIndex="subLayerIndex"
+      :isDuplicated="idx !== duplicatedText.length-1"
+      :isTransparent="isTransparent")
+    p(v-else
+      v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+      :style="pStyle(p.styles)")
+      span(v-for="(span, sIndex) in p.spans"
+        class="nu-text__span"
+        :data-sindex="sIndex"
+        :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan, transParentStyles)") {{ span.text }}
+        br(v-if="!span.text && p.spans.length === 1")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { IGroup, IParagraph, ISpan, IText } from '@/interfaces/layer'
 import { mapGetters, mapState } from 'vuex'
 import textUtils from '@/utils/textUtils'
@@ -45,12 +43,24 @@ import _ from 'lodash'
 import controlUtils from '@/utils/controlUtils'
 import pageUtils from '@/utils/pageUtils'
 
-export default Vue.extend({
-  components: { NuCurveText, NuTextEditor },
+export default defineComponent({
+  components: {
+    NuCurveText,
+    NuTextEditor
+  },
   props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
+    config: {
+      type: Object as PropType<IText>,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
     subLayerIndex: {
       type: Number,
       default: -1
@@ -74,14 +84,14 @@ export default Vue.extend({
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
       isLoading: true,
-      svgBG: {} as Record<string, unknown> | null,
+      svgBG: {} as ReturnType<typeof textBgUtils.drawSvgBg>,
       widthLimitSetDuringComposition: false
     }
   },
   created() {
     textUtils.loadAllFonts(this.config)
   },
-  destroyed() {
+  unmounted() {
     this.isDestroyed = true
   },
   mounted() {
@@ -125,7 +135,7 @@ export default Vue.extend({
       return this.config.locked
     },
     // Use duplicated of text to do some text effect, define their difference css here.
-    duplicatedText() {
+    duplicatedText(): (Record<string, Record<string, string> | never>)[] {
       const duplicatedBodyBasicCss = {
         position: 'absolute',
         top: '0px',
@@ -134,10 +144,10 @@ export default Vue.extend({
         opacity: 1
       }
       const textShadow = textEffectUtils.convertTextEffect(this.config)
-      const duplicatedTextShadow = textShadow.duplicatedBody || textShadow.duplicatedSpan
+      const duplicatedTextShadow = (textShadow.duplicatedBody || textShadow.duplicatedSpan) as Record<string, string>
       const textShadowCss = {
-        extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody),
-        extraSpan: textShadow.duplicatedSpan
+        extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody as Record<string, string>),
+        extraSpan: textShadow.duplicatedSpan as Record<string, string>
       }
       // const textBgSpan = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
       // const duplicatedTextBgSpan = textBgSpan.duplicatedBody || textBgSpan.duplicatedSpan
@@ -335,7 +345,7 @@ export default Vue.extend({
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
-    textWrapperStyle() {
+    textWrapperStyle(): Record<string, string> {
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
@@ -371,7 +381,7 @@ export default Vue.extend({
         return 1
       }
     },
-    bodyStyles() {
+    bodyStyles(): Record<string, string|number> {
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
@@ -386,7 +396,7 @@ export default Vue.extend({
         writingMode: this.config.styles.writingMode
       }
     },
-    spanStyle(spans: any, sIndex: number) {
+    spanStyle(spans: any, sIndex: number): Record<string, string> {
       const span = spans[sIndex]
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
         sIndex === spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {}

@@ -1,42 +1,42 @@
 <template lang="pug">
-  div(class="popup-line-template bg-white")
-    div(class="popup-line-template__group")
-      div(class="body-3")
-        span {{$t('NN0501')}}
+div(class="popup-line-template bg-white")
+  div(class="popup-line-template__group")
+    div(class="body-3")
+      span {{$t('NN0501')}}
+    div(class="popup-line-template__options")
+      span(class="popup-line-template__subtitle text-gray-3 mb-5") {{$t('NN0152', {media: 'Line'})}}
+      div(class="popup-line-template__grid-4")
+        svg-icon(v-for="(template,index) in lineTemplate1"
+            :key="`line-template-1-${index}`"
+            class="popup-line-template__icon pointer"
+            :iconName="template"
+            :iconWidth="'80px'"
+            :iconColor="'gray-1'"
+            @click="addLineTemplate(index,LineTemplatesType.type1)")
+    hr(class="popup-line-template__hr")
+    div(class="popup-line-template__row2" :style="row2Styles")
+      div(v-if="isFbCover" class="popup-line-template__fb-cover")
+        span(class="popup-line-template__subtitle text-gray-3 mb-5") {{$tc('NN0151', 2,{ media: 'FB' })}}
+        div
+          svg-icon(class="popup-line-template__icon pointer"
+            :iconName="'line-template-fb-cover'"
+            :iconWidth="'80px'"
+            :iconColor="'gray-1'"
+            @click="addLineToSpecPos(fbCover)")
       div(class="popup-line-template__options")
-        span(class="popup-line-template__subtitle text-gray-3 mb-5") {{$t('NN0152', {media: 'Line'})}}
-        div(class="popup-line-template__grid-4")
-          svg-icon(v-for="(template,index) in lineTemplate1"
-              :key="`line-template-1-${index}`"
+        span(class="popup-line-template__subtitle text-gray-3 mb-5") {{$t('NN0452')}}
+        div(class="popup-line-template__grid-3")
+          svg-icon(v-for="(template,index) in lineTemplate2"
+              :key="`line-template-2-${index}`"
               class="popup-line-template__icon pointer"
               :iconName="template"
               :iconWidth="'80px'"
               :iconColor="'gray-1'"
-              @click.native="addLineTemplate(index,LineTemplatesType.type1)")
-      hr(class="popup-line-template__hr")
-      div(class="popup-line-template__row2" :style="row2Styles")
-        div(v-if="isFbCover" class="popup-line-template__fb-cover")
-          span(class="popup-line-template__subtitle text-gray-3 mb-5") {{$tc('NN0151', 2,{ media: 'FB' })}}
-          div
-            svg-icon(class="popup-line-template__icon pointer"
-              :iconName="'line-template-fb-cover'"
-              :iconWidth="'80px'"
-              :iconColor="'gray-1'"
-              @click.native="addLineToSpecPos(fbCover)")
-        div(class="popup-line-template__options")
-          span(class="popup-line-template__subtitle text-gray-3 mb-5") {{$t('NN0452')}}
-          div(class="popup-line-template__grid-3")
-            svg-icon(v-for="(template,index) in lineTemplate2"
-                :key="`line-template-2-${index}`"
-                class="popup-line-template__icon pointer"
-                :iconName="template"
-                :iconWidth="'80px'"
-                :iconColor="'gray-1'"
-                @click.native="addLineTemplate(index,LineTemplatesType.type2)")
+              @click="addLineTemplate(index,LineTemplatesType.type2)")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters } from 'vuex'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
@@ -45,7 +45,8 @@ import popupUtils from '@/utils/popupUtils'
 import { LineTemplatesType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     const tmp = MappingUtils.mappingIconSet('lineTemplate')
     const lineTemplate1 = tmp.slice(0, 8)
@@ -70,7 +71,7 @@ export default Vue.extend({
       const pageSize = pageUtils.getPageSize(pageUtils.currFocusPageIndex)
       return pageSize.width === 1230 && pageSize.height === 693
     },
-    row2Styles() {
+    row2Styles(): {[index: string]: string} {
       return {
         'grid-template-columns': this.isFbCover ? '0.25fr 0.75fr' : '0.75fr 0.25fr'
       }
@@ -162,7 +163,7 @@ export default Vue.extend({
     justify-content: center;
     aspect-ratio: 1/1;
   }
-  &__icon::v-deep {
+  &__icon {
     stroke: #969bab;
     transition: stroke 0.1s ease-in, stroke-width 0.1s ease-in;
     &:hover {

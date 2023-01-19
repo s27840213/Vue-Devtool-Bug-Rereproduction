@@ -1,30 +1,42 @@
 <template lang="pug">
-  p(class="nu-curve-text__p" :style="pStyle()")
-    span(v-if="focus()"  class="nu-curve-text__circle" :style="circleStyle()")
-      svg-icon(iconName="curve-center" :style="curveIconStyle")
-    span(v-for="(span, sIndex) in spans()"
-      class="nu-curve-text__span"
-      :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
-      :key="sIndex",
-      :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan, transParentStyles)") {{ span.text }}
+p(class="nu-curve-text__p" :style="pStyle()")
+  span(v-if="focus()"  class="nu-curve-text__circle" :style="circleStyle()")
+    svg-icon(iconName="curve-center" :style="curveIconStyle")
+  span(v-for="(span, sIndex) in spans()"
+    class="nu-curve-text__span"
+    :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
+    :key="sIndex",
+    :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan, transParentStyles)") {{ span.text }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import TextShapeUtils from '@/utils/textShapeUtils'
-import { IGroup, ISpan } from '@/interfaces/layer'
+import { IGroup, ISpan, IText } from '@/interfaces/layer'
 import tiptapUtils from '@/utils/tiptapUtils'
 import LayerUtils from '@/utils/layerUtils'
 import textUtils from '@/utils/textUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    config: Object,
-    layerIndex: Number,
-    pageIndex: Number,
-    subLayerIndex: Number,
+    config: {
+      type: Object as PropType<IText>,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    subLayerIndex: {
+      type: Number
+    },
     isDuplicated: {
       type: Boolean,
       default: false
@@ -47,7 +59,7 @@ export default Vue.extend({
     // textUtils.loadAllFonts(this.config, 1)
     textUtils.loadAllFonts(this.config)
   },
-  destroyed() {
+  unmounted() {
     this.isDestroyed = true
   },
   mounted() {

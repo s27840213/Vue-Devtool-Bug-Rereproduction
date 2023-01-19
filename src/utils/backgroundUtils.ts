@@ -1,8 +1,9 @@
+import { nextTick } from 'vue'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import { IBackgroundImage, IPage } from '@/interfaces/page'
 import { SidebarPanelType } from '@/store/types'
 import store from '@/store'
-import Vue from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import i18n from '@/i18n'
 import assetUtils from './assetUtils'
 import editorUtils from './editorUtils'
@@ -66,7 +67,7 @@ class BackgroundUtils {
 
   switchPanelBgTab(index: number) {
     store.commit('SET_currSidebarPanelType', SidebarPanelType.bg)
-    Vue.nextTick(() => { eventUtils.emit(PanelEvent.switchPanelBgInnerTab, index) })
+    nextTick(() => { eventUtils.emit(PanelEvent.switchPanelBgInnerTab, index) })
   }
 
   handleImageFlip(flipIcon: string) {
@@ -111,7 +112,7 @@ class BackgroundUtils {
   }
 
   handleLockedNotify() {
-    Vue.notify({ group: 'copy', text: i18n.tc('NN0804') })
+    notify({ group: 'copy', text: i18n.global.tc('NN0804') })
   }
 
   setBgImage(props: { pageIndex: number, config: Partial<IImage> }) {

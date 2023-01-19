@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import { captureException } from '@sentry/browser'
 import store from '@/store'
 import { IListServiceContentDataItem, IListServiceContentData } from '@/interfaces/api'
@@ -24,6 +24,7 @@ import errorHandleUtils from './errorHandleUtils'
 import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import mathUtils from './mathUtils'
+import { notify } from '@kyvg/vue3-notification'
 import unitUtils from './unitUtils'
 import tiptapUtils from './tiptapUtils'
 import backgroundUtils from './backgroundUtils'
@@ -150,7 +151,7 @@ class AssetUtils {
           if (asset.type === 5 && error.message === '404') {
             errorHandleUtils.addMissingDesign('svg', asset.id)
           } else {
-            Vue.notify({
+            notify({
               group: 'error',
               text: `網路異常，請確認網路正常後再嘗試。(ErrorCode: ${error.message === 'Failed to fetch' ? 19 : error.message})`
             })
@@ -161,7 +162,7 @@ class AssetUtils {
     }
   }
 
-  async addTemplate(json: any, attrs?: {pageIndex?: number, width?: number, height?: number, physicalWidth?: number, physicalHeight?: number, unit?: string}, recordStep = true) {
+  async addTemplate(json: any, attrs?: { pageIndex?: number, width?: number, height?: number, physicalWidth?: number, physicalHeight?: number, unit?: string }, recordStep = true) {
     const targetPageIndex = attrs?.pageIndex ?? pageUtils.addAssetTargetPageIndex
     const targetPage: IPage = this.getPage(targetPageIndex)
     json = await this.updateBackground(generalUtils.deepCopy(json))
@@ -645,7 +646,7 @@ class AssetUtils {
         }
         pageUtils.setAutoResizeNeededForPages(jsonDataList, true)
         pageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
-        Vue.nextTick(() => {
+        nextTick(() => {
           pageUtils.scrollIntoPage(targetIndex)
           // @TODO: resize page/layer before adding to the store.
           if (resize) {

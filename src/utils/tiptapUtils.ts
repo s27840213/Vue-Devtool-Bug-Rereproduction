@@ -1,4 +1,4 @@
-import { Editor, EditorEvents, FocusPosition } from '@tiptap/vue-2'
+import { Editor, EditorEvents, FocusPosition } from '@tiptap/vue-3'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
@@ -26,7 +26,7 @@ class TiptapUtils {
     this.eventHandler = undefined
   }
 
-  init(content: string, editable: boolean) {
+  init(content: any, editable: boolean) {
     this.editor = new Editor({
       content: content ?? '',
       extensions: [
@@ -99,7 +99,7 @@ class TiptapUtils {
     this.event.emit('update', toRecord)
   }
 
-  textStylesRaw(styles: any): {[key: string]: any} {
+  textStylesRaw(styles: any): { [key: string]: any } {
     const textStyles = cssConveter.convertFontStyle(styles)
     return Object.assign(textStyles, {
       '-webkit-text-decoration-line': textStyles['text-decoration-line']
@@ -117,7 +117,7 @@ class TiptapUtils {
       content: paragraphs.map(p => {
         const pObj = {
           type: 'paragraph'
-        } as {[key: string]: any}
+        } as { [key: string]: any }
         const attrs = this.makeParagraphStyle(p.styles) as any
         if (p.spanStyle) {
           attrs.spanStyle = true
@@ -341,7 +341,7 @@ class TiptapUtils {
     return lines.join('\n')
   }
 
-  applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined, otherUpdates: {[key: string]: any} = {}) {
+  applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined, otherUpdates: { [key: string]: any } = {}) {
     const item = { [key]: value }
     Object.assign(item, otherUpdates)
     const { subLayerIdx, getCurrLayer } = layerUtils
@@ -396,7 +396,7 @@ class TiptapUtils {
   }
 
   applyParagraphStyle(key: string, value: any, setFocus = true) {
-    const item: {[string: string]: any} = {}
+    const item: { [string: string]: any } = {}
     item[key] = value
     this.agent(editor => {
       if (layerUtils.getCurrLayer.contentEditable) {

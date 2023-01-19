@@ -4,7 +4,7 @@ div(class="popup-file")
     class="popup-file__profile")
     router-link(to="/settings/account"
         class="popup-file__option__link"
-        @click.native="closePopup")
+        @click="closePopup")
       avatar(class="mr-10"
         :textSize="14"
         :avatarSize="35")
@@ -64,7 +64,7 @@ div(class="popup-file")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import popupUtils from '@/utils/popupUtils'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
@@ -77,7 +77,8 @@ import stepsUtils from '@/utils/stepsUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import { IPage } from '@/interfaces/page'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     Avatar,
     Url
@@ -163,7 +164,6 @@ export default Vue.extend({
       stepsUtils.record()
     },
     newDesign() {
-      // designUtils.newDesign()
       const path = `${window.location.origin}${window.location.pathname}`
       window.open(path)
       this.closePopup()
@@ -176,7 +176,6 @@ export default Vue.extend({
     },
     exportJSON() {
       fileUtils.export()
-      // designUtils.newDesign()
     },
     toogleAdminView() {
       this.setUserState({ enableAdminView: !this.enableAdminView })
@@ -207,6 +206,9 @@ export default Vue.extend({
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'
+    },
+    gotoMobile() { // TO-DELETE
+      window.location.href = this.$router.currentRoute.value.fullPath.replace('editor', 'mobile-editor')
     }
   }
 })
