@@ -59,7 +59,10 @@ export interface IUserModule {
   backendRenderParams: {
     isBleed: boolean,
     isTrim: boolean,
-    margin: number
+    margin: {
+      bottom: number,
+      right: number
+    }
   }
 }
 
@@ -116,7 +119,10 @@ const getDefaultState = (): IUserModule => ({
   backendRenderParams: {
     isBleed: false,
     isTrim: false,
-    margin: 0
+    margin: {
+      bottom: 0,
+      right: 0
+    }
   }
 })
 

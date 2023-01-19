@@ -126,8 +126,8 @@ export default defineComponent({
     },
     pageStyles(): { [index: string]: string } {
       return {
-        width: `${this.config.width * this.contentScaleRatio}px`,
-        height: `${this.config.height * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin : 0)}px`,
+        width: `${this.config.width * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin.right : 0)}px`,
+        height: `${this.config.height * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin.bottom : 0)}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
         // ...(this.userId === 'backendRendering' && { paddingBottom: 8 + 'px' })
       }
@@ -161,7 +161,13 @@ export default defineComponent({
       if (!this.config.isEnableBleed) {
         return {
           width: this.config.width * this.contentScaleRatio + 'px',
-          height: this.config.height * this.contentScaleRatio + 'px'
+          height: this.config.height * this.contentScaleRatio + 'px',
+          padding: [
+            '0px',
+            (this.userId === 'backendRendering' ? this.backendRenderParams.margin.right : 0) + 'px',
+            (this.userId === 'backendRendering' ? this.backendRenderParams.margin.bottom : 0) + 'px',
+            '0px'
+          ].join(' ')
         }
       }
       return {
@@ -169,8 +175,8 @@ export default defineComponent({
         height: (this.config.height - this.config.bleeds.top - this.config.bleeds.bottom) * this.contentScaleRatio + 'px',
         padding: [
           this.config.bleeds.top * this.contentScaleRatio + 'px',
-          this.config.bleeds.right * this.contentScaleRatio + 'px',
-          this.config.bleeds.bottom * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin : 0) + 'px',
+          this.config.bleeds.right * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin.right : 0) + 'px',
+          this.config.bleeds.bottom * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin.bottom : 0) + 'px',
           this.config.bleeds.left * this.contentScaleRatio + 'px'
         ].join(' ')
       }
@@ -178,9 +184,9 @@ export default defineComponent({
     bleedLineStyles() {
       return {
         top: (this.config.bleeds.top - 1) * this.contentScaleRatio + 'px',
-        bottom: (this.config.bleeds.bottom - 1) * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin : 0) + 'px',
+        bottom: (this.config.bleeds.bottom - 1) * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin.bottom : 0) + 'px',
         left: (this.config.bleeds.left - 1) * this.contentScaleRatio + 'px',
-        right: (this.config.bleeds.right - 1) * this.contentScaleRatio + 'px',
+        right: (this.config.bleeds.right - 1) * this.contentScaleRatio + (this.userId === 'backendRendering' ? this.backendRenderParams.margin.right : 0) + 'px',
         border: this.userId === 'backendRendering' ? `${this.contentScaleRatio}px solid white` : `${this.config.isEnableBleed ? this.contentScaleRatio : 0}px dashed white`,
         boxShadow: this.userId === 'backendRendering' ? 'none' : '0 0 3px 1px rgba(0, 0, 0, 0.15)'
       }
