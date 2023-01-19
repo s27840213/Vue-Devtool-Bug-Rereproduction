@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 // ***********************************************
 // This example commands.ts shows you how to
 // create various custom commands and overwrite
@@ -43,3 +42,6 @@ Cypress.Commands.add('login', () => {
       window.localStorage.setItem('token', response.body.data.token)
     })
 })
+
+// Plz check doc to add correct type define for custom command:
+// https://docs.cypress.io/guides/tooling/typescript-support#Types-for-Custom-Commands
