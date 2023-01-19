@@ -3,6 +3,7 @@ import { SrcObj } from '@/interfaces/gallery'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle, IShape } from '@/interfaces/layer'
 import store from '@/store'
+import { round } from 'lodash'
 import assetUtils from './assetUtils'
 import generalUtils from './generalUtils'
 import imageShadowUtils from './imageShadowUtils'
@@ -10,6 +11,7 @@ import layerUtils from './layerUtils'
 import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
+import { PRECISION } from './unitUtils'
 
 class DragUtils {
   /**
@@ -128,11 +130,12 @@ class DragUtils {
           const pageSize = data.groupChildId ? pageUtils.currFocusPageSize : pageUtils.getPageSize(pageIndex)
           const newPageIndex = data.groupChildId ? data.content_ids.findIndex((content: any) => content.id === data.groupChildId) : 0
           const aspectRatio = data.content_ids[newPageIndex].height / data.content_ids[newPageIndex].width
+          const precision = pageSize.unit === 'px' ? 0 : PRECISION
           const resize = {
             width: pageSize.width,
-            height: pageSize.width * aspectRatio,
+            height: round(pageSize.width * aspectRatio, precision),
             physicalWidth: pageSize.physicalWidth,
-            physicalHeight: pageSize.physicalWidth * aspectRatio,
+            physicalHeight: round(pageSize.physicalWidth * aspectRatio, precision),
             unit: pageSize.unit
           }
 
