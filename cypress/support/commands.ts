@@ -35,3 +35,11 @@
 //     }
 //   }
 // }
+import loginData from '../fixtures/loginData.json'
+
+Cypress.Commands.add('login', () => {
+  cy.request('POST', 'https://apiv2.vivipic.com/login', loginData.email)
+    .then((response) => {
+      window.localStorage.setItem('token', response.body.data.token)
+    })
+})
