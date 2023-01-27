@@ -1,10 +1,11 @@
 <template lang="pug">
 div(class="popup bg-white")
-  component(:is="component"
-  v-click-outside="vcoConfig"
-  :updateOptions="sharedUpdateOptions"
-  v-bind="props"
-  @close="close")
+  component(v-if="component"
+    :is="component"
+    v-click-outside="vcoConfig"
+    :updateOptions="sharedUpdateOptions"
+    v-bind="props"
+    @close="close")
 </template>
 
 <script lang="ts">

@@ -54,11 +54,20 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      _addPage: 'ADD_page',
       _setPagesPerRow: 'page/SET_PagesPerRow'
     }),
     addPage() {
-      this._addPage(pageUtils.newPage({}))
+      const lastPage = pageUtils.pageNum > 0 ? pageUtils.getPages[pageUtils.pageNum - 1] : undefined
+      pageUtils.addPageToPos(pageUtils.newPage(lastPage ? {
+        width: lastPage.width,
+        height: lastPage.height,
+        physicalWidth: lastPage.physicalWidth,
+        physicalHeight: lastPage.physicalHeight,
+        isEnableBleed: lastPage.isEnableBleed,
+        bleeds: lastPage.bleeds,
+        physicalBleeds: lastPage.physicalBleeds,
+        unit: lastPage.unit
+      } : {}), pageUtils.pageNum)
       stepsUtils.record()
     },
     wrappedPage(page: IPage) {

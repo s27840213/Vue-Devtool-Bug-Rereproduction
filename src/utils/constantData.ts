@@ -570,7 +570,8 @@ class ConstantData {
       i18n.global.t('NN0571'),
       i18n.global.t('NN0572'),
       i18n.global.t('NN0573'),
-      i18n.global.t('NN0769')
+      i18n.global.t('NN0769'),
+      i18n.global.t('NN0805')
     ]
   }
 

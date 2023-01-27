@@ -86,7 +86,7 @@ const routes: Array<RouteRecordRaw> = [
           const response = await (await fetch(`https://${url}`)).json()
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           store.commit('file/SET_setLayersDone')
-          store.commit('user/SET_STATE', { userId: 'backendRendering', dpi, renderForPDF: renderForPDF === 'true' })
+          store.commit('user/SET_STATE', { renderForPDF: renderForPDF === 'true' })
         } else if (url) {
           // for old version
           // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET
@@ -112,7 +112,7 @@ const routes: Array<RouteRecordRaw> = [
           const response = await (await fetch(`https://${src}`)).json()
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           store.commit('file/SET_setLayersDone')
-          store.commit('user/SET_STATE', { userId: 'backendRendering', renderForPDF: renderForPDF === 'true' })
+          store.commit('user/SET_STATE', { renderForPDF: renderForPDF === 'true' })
         }
         next()
       } catch (error) {

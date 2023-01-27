@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="preview" :style="containStyles")
-  page-content(v-if="pages.length > 0" :config="pages[0]" :pageIndex="0" :contentScaleRatio="contentScaleRatio" :forceRender="true")
+  page-content(v-if="config" :config="config" :pageIndex="0" :contentScaleRatio="contentScaleRatio" :forceRender="true")
   span(v-if="host" class="preview__host") {{host}}
 </template>
 
@@ -9,6 +9,8 @@ import { defineComponent } from 'vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
 import { mapGetters, mapState, mapMutations } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
+import { IPage } from '@/interfaces/page'
+import pageUtils from '@/utils/pageUtils'
 
 export default defineComponent({
   emits: [],
@@ -35,6 +37,14 @@ export default defineComponent({
       else if (host === 'localhost:8080') return 'local'
       else if (subdomain) return subdomain[1]
       else return host
+    },
+    config(): IPage | undefined {
+      if (this.pages.length === 0) return undefined
+      if (!this.pages[0].isEnableBleed) return this.pages[0]
+      return {
+        ...this.pages[0],
+        ...pageUtils.getPageSizeWithBleeds(this.pages[0])
+      }
     },
     containStyles(): any {
       return {

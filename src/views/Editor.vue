@@ -12,11 +12,9 @@ import logUtils from '@/utils/logUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import editorUtils from '@/utils/editorUtils'
-import { editorRouteHandler } from '@/router/handler'
-
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import generalUtils from '@/utils/generalUtils'
+import { omit } from 'lodash'
 
 export default defineComponent({
   emits: [],
@@ -65,6 +63,14 @@ export default defineComponent({
      * So if we clear the state, some component watcher and computed will update and then throw lots of errors
      */
     this.clearState()
+  },
+  mounted() {
+    let query = this.$router.currentRoute.value.query
+    query = omit(query, ['panel', 'category', 'category_locale', 'search'])
+    if (query.type === 'new-design-size') {
+      query.unit = query.unit ?? 'px'
+    }
+    this.$router.replace({ query })
   },
   methods: {
     ...mapMutations({

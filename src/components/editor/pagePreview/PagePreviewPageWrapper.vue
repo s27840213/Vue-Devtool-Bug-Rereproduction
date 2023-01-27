@@ -22,7 +22,7 @@ lazy-load(
       page-content(
         class="click-disabled"
         :style="contentScaleStyles()"
-        :config="config"
+        :config="configWithBleed()"
         :pageIndex="index"
         :contentScaleRatio="scaleRatio()"
         :handleSequentially="true"
@@ -144,13 +144,18 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      _addPageToPos: 'ADD_pageToPos',
-      _deletePage: 'DELETE_page',
       _setmiddlemostPageIndex: 'SET_middlemostPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex',
       _setIsDragged: 'page/SET_IsDragged',
       _setIsShowPagePreview: 'page/SET_isShowPagePreview'
     }),
+    configWithBleed() {
+      if (!this.config.isEnableBleed) return this.config
+      return {
+        ...this.config,
+        ...pageUtils.getPageSizeWithBleeds(this.config)
+      }
+    },
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen
     },
@@ -228,10 +233,7 @@ export default defineComponent({
         case 'copy':
           page = generalUtils.deepCopy(this.getPage(this.index))
           page.designId = ''
-          this._addPageToPos({
-            newPage: page,
-            pos: this.index + 1
-          })
+          pageUtils.addPageToPos(page, this.index + 1)
           GroupUtils.deselect()
           this._setmiddlemostPageIndex(this.index + 1)
           this._setCurrActivePageIndex(this.index + 1)
@@ -239,7 +241,7 @@ export default defineComponent({
           break
         case 'trash':
           GroupUtils.deselect()
-          this._deletePage(this.index)
+          pageUtils.deletePage(this.index)
           this._setmiddlemostPageIndex(this.index - 1)
           this._setCurrActivePageIndex(this.index - 1)
           StepsUtils.record()
@@ -257,10 +259,10 @@ export default defineComponent({
     },
     // computed -> methods
     pageWidth(): number {
-      return this.config.width
+      return this.configWithBleed().width
     },
     pageHeight(): number {
-      return this.config.height
+      return this.configWithBleed().height
     },
     scaleRatio(): number {
       return this.itemSize ? this.itemSize / this.pageWidth() : this.contentWidth / this.pageWidth()

@@ -123,7 +123,8 @@ const getDefaultState = (): IEditorState => ({
   _3dEnabledPageIndex: -1,
   enalbleComponentLog: false,
   inScreenshotPreviewRoute: false,
-  cursor: ''
+  cursor: '',
+  isPageScaling: false
 })
 
 const state = getDefaultState()
@@ -427,7 +428,6 @@ const mutations: MutationTree<IEditorState> = {
     state.exportIds = exportIds.join(',')
   },
   SET_groupType(state: IEditorState, groupType: number) {
-    console.log('SET_groupType')
     state.groupType = groupType
   },
   SET_folderInfo(state: IEditorState, folderInfo: { isRoot: boolean, parentFolder: string, path: string }) {
@@ -919,6 +919,12 @@ const mutations: MutationTree<IEditorState> = {
     pages[currFocusPageIndex].config.guidelines.v = []
     pages[currFocusPageIndex].config.guidelines.h = []
   },
+  SET_isEnableBleed(state: IEditorState, payload: { value: boolean, pageIndex?: number }) {
+    const { pages } = state
+    const { value, pageIndex } = payload
+    if (pageIndex) pages[pageIndex].config.isEnableBleed = value
+    else pages.forEach(page => { page.config.isEnableBleed = value })
+  },
   SET_bleeds(state: IEditorState, payload: { pageIndex: number, bleeds: IBleed, physicalBleeds: IBleed }) {
     const { pages } = state
     const { pageIndex, bleeds, physicalBleeds } = payload
@@ -998,6 +1004,19 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_cursor(state: IEditorState, cursor: string) {
     state.cursor = cursor
+  },
+  SET_isPageScaling(state: IEditorState, bool: boolean) {
+    state.isPageScaling = bool
+  },
+  UPDATE_pagePos(state: IEditorState, data: { pageIndex: number, styles: { [key: string]: number } }) {
+    const { pageIndex, styles } = data
+    const page = state.pages[pageIndex]
+    Object.entries(styles)
+      .forEach(([k, v]) => {
+        if (Object.prototype.hasOwnProperty.call(page.config, k)) {
+          page.config[k] = v
+        }
+      })
   },
   ...imgShadowMutations,
   ADD_subLayer

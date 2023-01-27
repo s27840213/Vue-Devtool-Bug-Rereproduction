@@ -1,5 +1,4 @@
 import { IPage } from '@/interfaces/page'
-import router from '@/router'
 import store from '@/store'
 import { nextTick } from 'vue'
 import modalUtils from './modalUtils'
@@ -315,9 +314,7 @@ class GeneralUtils {
       normalInit({ reset: true })
     }
 
-    // const query = _.omit(router.currentRoute.value.query,
-    //   ['panel', 'category', 'category_locale', 'search'])
-    // router.replace({ query })
+    // Omit url query 'panel', 'category', 'category_locale', 'search' in Editor.vue
   }
 
   downloadTextFile(filename: string, content: string) {

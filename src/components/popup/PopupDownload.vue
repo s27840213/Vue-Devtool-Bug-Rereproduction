@@ -10,7 +10,7 @@ div(class="popup-download text-left"
         iconName="close"
         iconWidth="16px"
         iconColor="gray-2"
-        @click="$emit('close')")
+        @click.native="$emit('close')")
     div(class="popup-download__progress mt-5")
       div(class="popup-download__progress-value" :style="{ width: `${progress}%`}")
   div(v-else class="popup-download__form")
@@ -51,24 +51,34 @@ div(class="popup-download text-left"
           min="1"
           v-ratio-change
           type="range")
-      div(v-if="'trim' in selected")
+      div(v-if="selectedTypeVal === 'pdf_print' && 'bleed' in selected")
         download-check-button(type="checkbox"
           class="mb-10"
           :label="`${$t('NN0774')}`"
-          :default-checked="!!selected.trim"
-          @change="({ checked }) => {handleUpdate('trim', checked ? 1 : 0); if('bleed' in selected && checked && selected.bleed === 0) handleUpdate('bleed', 1)}")
+          :default-checked="selected.bleed === 2"
+          @change="({ checked }) => handleUpdate('bleed', checked ? 2 : 1)")
       div(v-if="'bleed' in selected")
         download-check-button(type="checkbox"
           class="mb-10"
           :label="`${$t('NN0775')}`"
-          :default-checked="!!selected.bleed"
-          @change="({ checked }) => {handleUpdate('bleed', checked ? 1 : 0); if('trim' in selected && !checked && selected.trim === 1) handleUpdate('trim', 0)}")
-      div(v-if="'outline' in selected")
+          :default-checked="selected.bleed! > 0"
+          @change="({ checked }) => handleUpdate('bleed', checked ? 1 : 0)")
+      div(v-if="selectedTypeVal === 'pdf_print' && 'outline' in selected")
         download-check-button(type="checkbox"
           class="mb-10"
           :label="`${$t('NN0794')}`"
-          :default-checked="!!selected.outline"
+          :default-checked="selected.outline===1"
+          :info="`${$t('NN0799')}`"
+          :infoUrl="`${$t('NN0802')}`"
           @change="({ checked }) => handleUpdate('outline', checked ? 1 : 0)")
+      div(v-if="'outline' in selected")
+        download-check-button(type="checkbox"
+          class="mb-10"
+          :label="`${$t('NN0776')}`"
+          :default-checked="selected.outline===2"
+          :info="`${$t('NN0800')}`"
+          :infoUrl="`${$t('NN0803')}`"
+          @change="({ checked }) => handleUpdate('outline', checked ? 2 : 0)")
       div(v-if="selectedTypeVal !== 'jpg' && selectedTypeVal !== 'png'"
         class="flex items-center mb-10")
         span {{$t('NN0777')}}
@@ -140,7 +150,7 @@ div(class="popup-download text-left"
         div
           btn(class="full-width body-3 rounded"
             :disabled="isButtonDisabled"
-            @click="handleSubmit(true)")
+            @click.native="handleSubmit(true)")
             svg-icon(v-if="polling"
               class="align-middle"
               iconName="loading"
@@ -156,13 +166,15 @@ div(class="popup-download text-left"
     div
       btn(class="full-width body-3 rounded"
         :disabled="isButtonDisabled"
-        @click="handleSubmit()")
+        @click.native="handleSubmit()")
         svg-icon(v-if="polling"
           class="align-middle"
           iconName="loading"
           iconColor="white"
           iconWidth="20px")
-        span(v-else) {{$t('NN0010')}}
+        span(v-else class="popup-download__btn")
+          svg-icon(v-if="selectedTypeVal === 'pdf_print'" iconName="pro" iconWidth="22px" iconColor="alarm")
+          span {{$t('NN0010')}}
 </template>
 
 <script lang="ts">
@@ -179,6 +191,8 @@ import GeneralUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import pageUtils from '@/utils/pageUtils'
 import gtmUtils from '@/utils/gtmUtils'
+import { Tooltip } from 'floating-vue'
+import paymentUtils from '@/utils/paymentUtils'
 
 const submission = `${process.env.VUE_APP_VERSION}::download_submission`
 
@@ -186,7 +200,8 @@ export default defineComponent({
   components: {
     DownloadCheckButton,
     DownloadTypeOption,
-    DownloadPageSelection
+    DownloadPageSelection,
+    VTooltip: Tooltip
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -216,11 +231,33 @@ export default defineComponent({
       ...prevSubmission
     } = JSON.parse(localStorage.getItem(submission) || '{}')
 
+    const typeOptions = [
+      { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
+      { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` },
+      { value: 'pdf_standard', name: `${this.$t('NN0770')}`, desc: `${this.$t('NN0772')}` },
+      { value: 'pdf_print', name: `${this.$t('NN0771')}`, desc: `${this.$t('NN0773')}`, tag: 'pro' }
+      // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
+      // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
+      // { id: 'gif', name: 'GIF', desc: '短片' }
+    ] as ITypeOption[]
+
+    let defaultSelectedTypeVal = 'jpg'
+    let defaultOptions = DownloadUtil.getTypeAttrs(defaultSelectedTypeVal)
+
+    // apply saved options if exist
+    if (typeOptions.map(v => v.value).includes(selectedTypeVal)) {
+      defaultSelectedTypeVal = selectedTypeVal
+      defaultOptions = DownloadUtil.getTypeAttrs(selectedTypeVal)
+      Object.keys(defaultOptions).forEach(key => {
+        defaultOptions[key] = (key in prevSubmission ? prevSubmission : defaultOptions)[key]
+      })
+    }
+
     const prevInfo = {
       saveSubmission: true,
       // saveSubmission: !!selectedTypeVal,
-      selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('jpg'),
-      selectedTypeVal: (selectedTypeVal || 'jpg') as IOutputType,
+      selected: defaultOptions,
+      selectedTypeVal: defaultSelectedTypeVal,
       rangeType,
       pageRange: rangeType === 'spec' ? pageRange : [],
       selectedDev
@@ -248,12 +285,7 @@ export default defineComponent({
         noLimit: false,
         height: 1500
       },
-      typeOptions: [
-        { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
-        { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` },
-        { value: 'pdf_standard', name: `${this.$t('NN0770')}`, desc: `${this.$t('NN0772')}` },
-        { value: 'pdf_print', name: `${this.$t('NN0771')}`, desc: `${this.$t('NN0773')}` }
-      ] as ITypeOption[],
+      typeOptions,
       devs: [
         { value: 1, label: 'dev0' },
         { value: 2, label: 'dev1' },
@@ -393,6 +425,7 @@ export default defineComponent({
       this.saveSubmission = checked
     },
     handleSubmit(useDev = false) {
+      if (this.selectedTypeVal === 'pdf_print' && !paymentUtils.checkPro({ plan: 1 }, 'export-pdf-print')) return
       this.polling = true
       this.exportId ? this.handleDownload(useDev) : (this.functionQueue = [() => this.handleDownload(useDev)])
     },
@@ -567,6 +600,11 @@ export default defineComponent({
     transition: 0.3s;
     border-radius: 4px;
     background-color: setColor(blue-1);
+  }
+  &__btn{
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
   .property-bar,
   .btn {
