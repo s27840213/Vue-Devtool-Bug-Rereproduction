@@ -13,7 +13,7 @@
       :inImageFrame="inImageFrame()"
       :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
       :contentScaleRatio="contentScaleRatio"
-      :primaryLayerIndex="subLayerIndex !== -1 ? layerIndex : undefined"
+      :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
       :primaryLayer="config"
       :config="layer"
       :isSubLayer="true")
