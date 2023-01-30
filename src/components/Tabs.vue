@@ -67,25 +67,23 @@ export default defineComponent({
       const isActive = tabIndex === this.tabIndex
       const activeMode = isActive ? 'active' : 'inactive'
       const type = this.theme.split('-')[1]
-      return type === 'rect'
-        ? {
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          margin: '0 8px 0 8px',
-          width: `calc(100% / ${this.tabs.length} - 16px)`,
-          height: '36px',
-          borderRadius: '10px',
-          color: this.colors[activeMode],
-          backgroundColor: this.colors[`${activeMode}BG` as 'activeBG'|'inactiveBG']
-        }
-        : {
-          paddingBottom: '4px',
-          minWidth: 'fit-content',
-          color: this.colors[activeMode],
-          borderBottom: isActive ? `2px solid ${this.colors[activeMode]}` : '2px solid transparent',
-          width: `${100 / this.tabs.length / 2}%`
-        }
+      return type === 'rect' ? {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: '0 8px 0 8px',
+        width: `calc(100% / ${this.tabs.length} - 16px)`,
+        height: '36px',
+        borderRadius: '10px',
+        color: this.colors[activeMode],
+        backgroundColor: this.colors[`${activeMode}BG` as 'activeBG'|'inactiveBG']
+      } : {
+        paddingBottom: '4px',
+        minWidth: 'fit-content',
+        color: this.colors[activeMode],
+        borderBottom: isActive ? `2px solid ${this.colors[activeMode]}` : '2px solid transparent',
+        width: `${100 / this.tabs.length / 2}%`
+      }
     },
     switchTab(tabIndex: number) {
       this.$emit('update:modelValue', tabIndex)

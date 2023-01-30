@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 // ***********************************************
 // This example commands.ts shows you how to
 // create various custom commands and overwrite
@@ -35,3 +34,14 @@
 //     }
 //   }
 // }
+import loginData from '../fixtures/loginData.json'
+
+Cypress.Commands.add('login', () => {
+  cy.request('POST', 'https://apiv2.vivipic.com/login', loginData.email)
+    .then((response) => {
+      window.localStorage.setItem('token', response.body.data.token)
+    })
+})
+
+// Plz check doc to add correct type define for custom command:
+// https://docs.cypress.io/guides/tooling/typescript-support#Types-for-Custom-Commands

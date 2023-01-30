@@ -646,35 +646,26 @@ export default defineComponent({
       this.renderGuidelineH(this.currentRelPos)
     },
     dragEndH(e: MouseEvent) {
-      console.log('drag end')
       RulerUtils.setIsDragging(false)
       if (this.from === -1) {
-          console.log('1')
         const guideline = this.$refs.guidelineH as HTMLElement
         const overlappedPageIndex = RulerUtils.getOverlappedPageIndex(guideline, 'h')
         if (overlappedPageIndex === -1) {
-          console.log('2')
           this.isShowGuidelineH = false
           StepsUtils.record()
         } else {
-          console.log('3')
           this.from = overlappedPageIndex
           if (pageUtils.currFocusPageIndex !== overlappedPageIndex) {
-          console.log('4')
             GroupUtils.deselect()
           }
-          console.log('5')
           this.setCurrActivePageIndex(overlappedPageIndex)
           this.closeGuidelineH(true)
         }
       } else {
-          console.log('6')
         if (this.mapGuidelineToPage('h').outOfPage) {
-          console.log('7')
           this.isShowGuidelineH = false
           StepsUtils.record()
         } else {
-          console.log('8')
           // close EditorView guideline then put it into page
           // or the record point will have some trouble
           this.closeGuidelineH(true)

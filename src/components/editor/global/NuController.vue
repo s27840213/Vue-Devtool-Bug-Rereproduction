@@ -630,15 +630,14 @@ export default defineComponent({
         userSelect: this.contentEditable ? 'text' : 'none',
         opacity: 1
       }
-      return !(this.isCurveText || this.isFlipped) ? textstyles
-        : {
-          width: 'auto',
-          height: 'auto',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          opacity: this.contentEditable ? 1 : 0
-        }
+      return !(this.isCurveText || this.isFlipped) ? textstyles : {
+        width: 'auto',
+        height: 'auto',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        opacity: this.contentEditable ? 1 : 0
+      }
     },
     groupControllerStyle() {
       return {
