@@ -68,7 +68,7 @@ div(class="panel-text")
           iconColor="white"
           iconWidth="20px")
       //- Text wishing pool
-      div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
+      div(v-if="keyword && !pending && rawSearchResult.list?.length<=10")
         span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
         nubtn(size="mid" class="mt-30")
           url(:url="$t('NN0791')" :newTab="true")
