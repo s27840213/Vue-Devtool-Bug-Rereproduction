@@ -330,7 +330,7 @@ export default defineComponent({
       }
       return false
     },
-    sizeStyles(): any {
+    sizeStyles(): { transform: string, width: string, height: string } {
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
       const page = pageUtils.getPage(this.pageIndex)
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
@@ -359,17 +359,12 @@ export default defineComponent({
       }
     },
     contentStyles(): any {
-      const params = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
-      if (!params) return
-      const { width, height } = params
       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
       const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
         willChange: this.isDragging() ? 'transform' : '',
-        width: `${width * this.contentScaleRatio}px`,
-        height: `${height * this.contentScaleRatio}px`,
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         pointerEvents,
