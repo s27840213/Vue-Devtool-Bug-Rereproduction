@@ -649,10 +649,7 @@ class AssetUtils {
         nextTick(() => {
           pageUtils.scrollIntoPage(targetIndex)
           // @TODO: resize page/layer before adding to the store.
-          if (resize) {
-            resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
-            backgroundUtils.fitPageBackground(targetIndex)
-          }
+          if (resize) resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
           if ((groupType === 1 || currGroupType === 1) && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
             const { width: pageWidth = 1000 } = pageUtils.getPageWidth()
@@ -678,6 +675,7 @@ class AssetUtils {
               pageUtils.setBleeds(pageIndex, physicalBleeds)
             }
           }
+          if (resize) backgroundUtils.fitPageBackground(targetIndex)
           store.commit('SET_currActivePageIndex', targetIndex)
           stepsUtils.record()
 
