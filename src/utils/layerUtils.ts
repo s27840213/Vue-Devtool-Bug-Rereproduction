@@ -40,19 +40,23 @@ class LayerUtils {
 
   get getCurrOpacity(): number {
     const currLayer = this.getCurrLayer
+
     const { subLayerIdx } = this
 
     if (this.currSelectedInfo.pageIndex === -1) return 1
-
-    switch (currLayer.type) {
-      case 'tmp':
-        return Math.max(...(this.getCurrLayer as IGroup | ITmp).layers.map((layer: ILayer) => layer.styles.opacity))
-      case 'group':
-        return subLayerIdx !== -1 ? (currLayer as IGroup).layers[subLayerIdx].styles.opacity : currLayer.styles.opacity
-      case 'frame':
-        return subLayerIdx !== -1 ? (currLayer as IFrame).clips[subLayerIdx].styles.opacity : currLayer.styles.opacity
-      default:
-        return this.currSelectedInfo.layers[0].styles.opacity
+    if (currLayer.type) {
+      switch (currLayer.type) {
+        case 'tmp':
+          return Math.max(...(this.getCurrLayer as IGroup | ITmp).layers.map((layer: ILayer) => layer.styles.opacity))
+        case 'group':
+          return subLayerIdx !== -1 ? (currLayer as IGroup).layers[subLayerIdx].styles.opacity : currLayer.styles.opacity
+        case 'frame':
+          return subLayerIdx !== -1 ? (currLayer as IFrame).clips[subLayerIdx].styles.opacity : currLayer.styles.opacity
+        default:
+          return this.currSelectedInfo.layers[0].styles.opacity
+      }
+    } else {
+      return 0
     }
   }
 
@@ -205,7 +209,7 @@ class LayerUtils {
     })
   }
 
-  getTmpLayer(): IShape | IText | IImage | IGroup | ITmp {
+  getTmpLayer(): IShape | IText | IImage | IGroup | IFrame |ITmp {
     return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)
   }
 
@@ -296,9 +300,9 @@ class LayerUtils {
     })
   }
 
-  isOutOfBoundary(): boolean {
-    const pageInfo = store.getters.getPage(this.currSelectedInfo.pageIndex) as IPage
-    const targetLayer = this.getTmpLayer()
+  isOutOfBoundary(pageIndex?: number, layer?: IShape | IText | IImage | IGroup | IFrame |ITmp): boolean {
+    const pageInfo = store.getters.getPage(pageIndex ?? this.currSelectedInfo.pageIndex) as IPage
+    const targetLayer = layer ?? this.getTmpLayer()
 
     if (targetLayer.styles.x > pageInfo.width || targetLayer.styles.y > pageInfo.height ||
       (targetLayer.styles.x + targetLayer.styles.width) < 0 || (targetLayer.styles.y + targetLayer.styles.height) < 0) {

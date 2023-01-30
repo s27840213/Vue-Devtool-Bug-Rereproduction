@@ -359,7 +359,9 @@ export default defineComponent({
       }
     },
     contentStyles(): any {
-      const { width, height } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
+      const params = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
+      if (!params) return
+      const { width, height } = params
       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
       const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
       const pointerEvents = this.getPointerEvents
