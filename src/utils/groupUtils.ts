@@ -252,6 +252,7 @@ class GroupUtils {
     this.deselect()
     const indices = [...Array(store.getters.getLayersNum(pageUtils.currFocusPageIndex)).keys()]
       .filter(i => !pageUtils.currFocusPage.layers[i].locked)
+    if (indices.length === 0) return
     this.select(pageUtils.currFocusPageIndex, indices)
   }
 

@@ -359,6 +359,7 @@ class ShortcutUtils {
   cut() {
     this.copy()
     this.del()
+    StepsUtils.record()
   }
 
   async save() {
@@ -368,7 +369,6 @@ class ShortcutUtils {
   }
 
   selectAll() {
-    console.log('select all')
     GroupUtils.selectAll()
   }
 
@@ -425,6 +425,8 @@ class ShortcutUtils {
         })
       })
     }
+
+    console.log(this.currSelectedInfo)
   }
 
   async redo() {
@@ -449,6 +451,7 @@ class ShortcutUtils {
         })
       })
     }
+    console.log(this.currSelectedInfo)
   }
 
   zoomIn() {
