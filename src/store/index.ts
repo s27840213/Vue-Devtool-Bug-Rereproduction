@@ -1018,10 +1018,12 @@ const mutations: MutationTree<IEditorState> = {
         }
       })
   },
+  UPDATE_snapUtilsIndex(state: IEditorState, index: number) {
+    state.pages[index].modules.snapUtils.pageIndex = index
+  },
   ...imgShadowMutations,
   ADD_subLayer
 }
-
 const handleResize = throttle(() => {
   state.isMobile = generalUtils.getWidth() <= 768
   state.isLargeDesktop = generalUtils.getWidth() >= 1440
