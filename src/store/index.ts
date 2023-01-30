@@ -395,7 +395,7 @@ const mutations: MutationTree<IEditorState> = {
     /**
      * @Note the reason why I replace the splice method is bcz its low performance
      */
-    //  state.pages.splice(pageIndex, 1)
+    // state.pages.splice(pageIndex, 1)
   },
   SET_pagesName(state: IEditorState, name: string) {
     state.name = name
