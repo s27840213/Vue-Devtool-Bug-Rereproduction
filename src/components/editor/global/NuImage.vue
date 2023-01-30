@@ -1094,7 +1094,7 @@ export default defineComponent({
       return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
     },
     hasHalation(): boolean {
-      return this.config.styles.adjust.halation
+      return this.config.styles.adjust?.halation
     },
     srcObj(): any {
       return (this.config as IImage).srcObj
