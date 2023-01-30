@@ -964,18 +964,12 @@ pipelines:
               script:
                 - yarn install
                 - yarn build:prerender
-              artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
-                - dist/**
-      - parallel:
-          - step:
-              name: 'Run E2E Tests'
-              caches:
-                - node
-              image: cypress/browsers:node14.17.0-chrome88-ff89
-              script:
                 - npx cypress install
                 - yarn serve --mode production & npx wait-on http://localhost:8080
                 - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+              artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+                - dist/**
+      - parallel:
           - step:
               name: "dev5 Alan"
               deployment: dev5
