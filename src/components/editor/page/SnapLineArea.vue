@@ -107,13 +107,12 @@ export default defineComponent({
         width: '1px',
         transform: `translate(${pos}px,0)`,
         'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
+      } : {
+        width: '100%',
+        height: '1px',
+        transform: `translate(0,${pos}px)`,
+        'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
       }
-        : {
-          width: '100%',
-          height: '1px',
-          transform: `translate(0,${pos}px)`,
-          'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
-        }
     },
     getClosestSnaplines() {
       this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v.map((snapline: ISnapline) => snapline.pos)]

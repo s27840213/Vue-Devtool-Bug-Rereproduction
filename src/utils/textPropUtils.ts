@@ -48,7 +48,7 @@ class TextPropUtils {
     const { type } = this.getCurrLayer
     const subLayerIndex = (type === 'group')
       ? (this.getCurrLayer as IGroup).layers
-        .findIndex(l => l.type === 'text' && l.active) : -1
+          .findIndex(l => l.type === 'text' && l.active) : -1
     return {
       type,
       layerIndex: this.layerIndex,

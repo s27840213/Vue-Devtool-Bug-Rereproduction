@@ -200,10 +200,10 @@ export default defineComponent({
     }
   },
   watch: {
-  getImgDimension(newVal, oldVal) {
-    this.handleDimensionUpdate(newVal, oldVal)
-  },
-  'config.srcObj': {
+    getImgDimension(newVal, oldVal) {
+      this.handleDimensionUpdate(newVal, oldVal)
+    },
+    'config.srcObj': {
       handler: function () {
         this.shadowBuff.canvasShadowImg = undefined
         if (this.forRender) {

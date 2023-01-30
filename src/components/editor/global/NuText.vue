@@ -331,16 +331,15 @@ export default defineComponent({
         userSelect: this.config.contentEditable ? 'text' : 'none'
         // opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
       }
-      return !this.isCurveText ? textstyles
-        : {
-          width: 'auto',
-          height: 'auto',
-          position: 'absolute',
-          outline: 'none',
-          top: 0,
-          left: 0
-          // opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
-        }
+      return !this.isCurveText ? textstyles : {
+        width: 'auto',
+        height: 'auto',
+        position: 'absolute',
+        outline: 'none',
+        top: 0,
+        left: 0
+        // opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
+      }
     },
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)

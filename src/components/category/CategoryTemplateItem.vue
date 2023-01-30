@@ -112,16 +112,14 @@ export default defineComponent({
       */
       const pageSize = pageUtils.currFocusPageSize
       const isSameSize = pageSize.physicalWidth === width && pageSize.physicalHeight === height && pageSize.unit === 'px'
-      const cb = this.groupItem
-        ? (resize?: any) => {
-          AssetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize)
-        }
-        : (resize?: any) => {
-          AssetUtils.addAsset(this.item as any, resize)
-          GeneralUtils.fbq('track', 'AddToWishlist', {
-            content_ids: [this.item.id]
-          })
-        }
+      const cb = this.groupItem ? (resize?: any) => {
+        AssetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize)
+      } : (resize?: any) => {
+        AssetUtils.addAsset(this.item as any, resize)
+        GeneralUtils.fbq('track', 'AddToWishlist', {
+          content_ids: [this.item.id]
+        })
+      }
 
       /**
        * @todo show the modal if the width,height are not the same in detailed page mode

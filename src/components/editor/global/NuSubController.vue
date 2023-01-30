@@ -359,15 +359,14 @@ export default defineComponent({
         userSelect: this.config.contentEditable ? 'text' : 'none',
         opacity: 1
       }
-      return !(this.isCurveText || this.isFlipped) ? textstyles
-        : {
-          width: `${this.config.styles.width / this.config.styles.scale}px`,
-          height: `${this.config.styles.height / this.config.styles.scale}px`,
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          opacity: this.config.contentEditable ? 1 : 0
-        }
+      return !(this.isCurveText || this.isFlipped) ? textstyles : {
+        width: `${this.config.styles.width / this.config.styles.scale}px`,
+        height: `${this.config.styles.height / this.config.styles.scale}px`,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        opacity: this.config.contentEditable ? 1 : 0
+      }
     },
     textStyles(styles: any) {
       const textStyles = CssConveter.convertFontStyle(styles)

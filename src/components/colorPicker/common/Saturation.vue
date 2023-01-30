@@ -39,11 +39,10 @@ export default defineComponent({
   methods: {
     throttle: throttle((fn, data) => {
       fn(data)
-    }, 20,
-      {
-        leading: true,
-        trailing: false
-      }),
+    }, 20, {
+      leading: true,
+      trailing: false
+    }),
     handleChange (e, skip) {
       !skip && e.preventDefault()
       const container = this.$refs.container
