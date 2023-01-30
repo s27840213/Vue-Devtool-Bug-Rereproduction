@@ -223,8 +223,9 @@ export default defineComponent({
     },
     handleOutSide(e: Event) {
       const target = e.target as HTMLElement
-      if (!target.matches('.panel-bg, .panel-bg *') &&
-        !target.matches('.bg-setting, .bg-setting *')) {
+      if (target.matches &&
+        (target.matches('.panel-bg, .panel-bg *') ||
+        target.matches('.bg-setting, .bg-setting *'))) {
         this.bgColorSelected = false
       }
       this.show = ''
