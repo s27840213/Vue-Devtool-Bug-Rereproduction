@@ -130,6 +130,7 @@ export default defineComponent({
     },
     getHalation(): ReturnType<typeof imageAdjustUtil.getHalation> {
       const { styles: { adjust } } = this.config.backgroundImage.config as IImage
+      if (!adjust) return []
       const { width, height } = pageUtils.getPage(this.imgControlPageIdx)
       const position = {
         width: width / 2 * this.contentScaleRatio,
