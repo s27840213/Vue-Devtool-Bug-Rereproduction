@@ -262,7 +262,8 @@ export default defineComponent({
       isHandling: 'shadow/isHandling',
       isShowPagePanel: 'page/getShowPagePanel',
       isHandleShadow: 'shadow/isHandling',
-      renderForPDF: 'user/getRenderForPDF'
+      renderForPDF: 'user/getRenderForPDF',
+      useMobileEditor: 'getUseMobileEditor'
     }),
     lazyloadSize(): { height: number, width: number } {
       const { config, contentScaleRatio } = this
@@ -287,7 +288,7 @@ export default defineComponent({
       }
     },
     layerWrapperStyles(): any {
-      if (this.isImgCtrl || this.inFrame || this.isTouchDevice() || !this.isActive) {
+      if (this.isImgCtrl || this.inFrame || this.isTouchDevice() || this.useMobileEditor) {
         return {}
       }
       return { transform: `translateZ(${this.config.styles.zindex}px)`, ...this.transformStyle }
