@@ -497,13 +497,21 @@ class Controller {
   }
 
   isClickOnController(e: MouseEvent, layerIndex = layerUtils.layerIndex, subLayerIdx = layerUtils.subLayerIdx): boolean {
-    const layer = document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement
+    let layer = document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement
+    const layerConfig = layerUtils.getCurrLayer
+    let rotate = layerConfig.styles.rotate
+    if (layerConfig.type === 'shape' && layerConfig.category === 'D') {
+      layer = document.getElementById(`nu-layer__line-mover_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement
+      const ratio = layerConfig.styles.width / layerConfig.styles.initWidth
+      const { xDiff, yDiff } = shapeUtils.lineDimension(layerConfig.point ?? [])
+      rotate = Math.atan2(yDiff, xDiff) / Math.PI * 180
+    }
     if (layer) {
       const rect = layer.getBoundingClientRect()
       const c = { x: e.clientX, y: e.clientY }
       const { x: x0, y: y0, width: W, height: H } = rect
-      const sinT = mathUtils.sin((layerUtils.getCurrLayer.styles.rotate + 360) % 90)
-      const cosT = mathUtils.cos((layerUtils.getCurrLayer.styles.rotate + 360) % 90)
+      const sinT = mathUtils.sin((rotate + 360) % 90)
+      const cosT = mathUtils.cos((rotate + 360) % 90)
       const w = (H * sinT - W * cosT) / (sinT * sinT - cosT * cosT)
       const h = (H * cosT - W * sinT) / (cosT * cosT - sinT * sinT)
       const yt = y0
