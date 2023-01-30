@@ -1,11 +1,11 @@
 <template lang="pug">
 svg(v-if="iconName === 'loading'"
     class="svg-icon"
-    :class="`text-${iconColor}`"
+    :class="`text-${iconColor} svg-${iconName}`"
     viewBox="0 0 120 30"
     :style="iconStyles()"
     v-html="loadingSvg")
-svg(v-else class="svg-icon" :class="`text-${iconColor}`"
+svg(v-else class="svg-icon" :class="`text-${iconColor} svg-${iconName}`"
     :style="iconStyles()")
   use(:xlink:href="`#${iconName}`")
 </template>

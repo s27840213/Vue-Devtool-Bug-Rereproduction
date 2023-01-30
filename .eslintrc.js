@@ -29,6 +29,7 @@ module.exports = {
     'multiline-ternary': 'off',
     'vue/multi-word-component-names': 'off',
     'comma-dangle': ['error', 'only-multiline'],
+    'cypress/no-unnecessary-waiting': 'off',
     // semi: 'off',
     // 'import/no-dynamic-require': 'off',
     // 'global-require': 0,

@@ -39,6 +39,10 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
             :style="frameClipStyles")
     div(v-if="showSpinner()" class="nu-layer__inProcess")
       square-loading
+  div(class="nu-layer__line-mover"
+    :style="lineMoverStyles()"
+    ref="lineMover"
+    :id="`nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`")
 </template>
 <script lang="ts">
 import { PropType, defineComponent } from 'vue'
@@ -191,6 +195,7 @@ export default defineComponent({
      * thus, we are unnecessary to watching these props and update them manually
      */
     const body = (this.$refs.body as HTMLElement[])[0]
+    const lineMover = this.$refs.lineMover as HTMLElement
     const props = this.$props
     const layerInfo = {} as ILayerInfo
     Object.defineProperty(layerInfo, 'pageIndex', {
@@ -226,11 +231,19 @@ export default defineComponent({
     if (this.subLayerIndex === -1) {
       this.movingUtils = new MovingUtils(data as any)
       const moveStart = this.movingUtils.moveStart.bind(this.movingUtils)
-      body.addEventListener('pointerdown', moveStart)
+      if (this.isLine) {
+        lineMover.addEventListener('pointerdown', moveStart)
+      } else {
+        body.addEventListener('pointerdown', moveStart)
+      }
     } else {
       const subCtrlUtils = new SubControllerUtils(data as any)
       const pointerdown = subCtrlUtils.onPointerdown.bind(subCtrlUtils)
-      body.addEventListener('pointerdown', pointerdown)
+      if (this.isLine) {
+        lineMover.addEventListener('pointerdown', pointerdown)
+      } else {
+        body.addEventListener('pointerdown', pointerdown)
+      }
     }
     if (this.primaryLayer && this.primaryLayer.type === LayerType.frame && this.config.type === LayerType.image) {
       body.addEventListener(generalUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
@@ -420,6 +433,21 @@ export default defineComponent({
         }
       }
       return styles
+    },
+    lineMoverStyles(): {[key: string]: string} {
+      if (!this.isLine) return {}
+      const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
+      const page = pageUtils.getPage(this.pageIndex)
+      const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
+      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * this.contentScaleRatio}px, ${(page.isEnableBleed ? y + bleeds.top : y) * this.contentScaleRatio}px)`
+      if (rotate) {
+        transform += ` rotate(${rotate}deg)`
+      }
+      return {
+        transform,
+        width: `${width * this.contentScaleRatio}px`,
+        height: `${height * this.contentScaleRatio}px`
+      }
     },
     outlineStyles() {
       if (this.primaryLayer && this.primaryLayer.type === 'tmp') {
@@ -863,6 +891,17 @@ export default defineComponent({
   height: 100px;
   &:focus {
     background-color: rgba(168, 218, 220, 1);
+  }
+  &__line-mover {
+    touch-action: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 0;
+    height: 0;
   }
   &__BG {
     position: absolute;

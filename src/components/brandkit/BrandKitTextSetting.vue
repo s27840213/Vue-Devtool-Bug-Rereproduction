@@ -36,6 +36,7 @@ div(class="brand-kit-text-setting relative")
         :iconName="icon" iconWidth="24px" iconColor="gray-2" @mousedown="onPropertyClick(icon)")
     div(v-if="isFontsPanelOpen"
       class="brand-kit-text-setting__panel-fonts"
+      :class="{'dim-background': showMore}"
       v-click-outside="() => { isFontsPanelOpen = false }")
       panel-fonts(:noTitle="true" :textStyleType="type")
 </template>
@@ -48,7 +49,7 @@ import { IBrandTextStyle } from '@/interfaces/brandkit'
 import { fontSelectValue } from '@/utils/textPropUtils'
 import vClickOutside from 'click-outside-vue3'
 import brandkitUtils from '@/utils/brandkitUtils'
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import tiptapUtils from '@/utils/tiptapUtils'
 
 export default defineComponent({
@@ -95,6 +96,7 @@ export default defineComponent({
     this.getFontPrev()
   },
   computed: {
+    ...mapState('fontTag', ['showMore']),
     textStyle(): IBrandTextStyle {
       return this.textStyleSetting[this.type + 'Style']
     },
@@ -348,12 +350,16 @@ export default defineComponent({
     position: absolute;
     left: 0;
     top: 120px;
-    height: 45vh;
+    height: 100vh;
     width: 280px;
     background-color: white;
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     z-index: 2;
     padding: 10px;
   }
+}
+
+.dim-background {
+  background: #a3a4aa;
 }
 </style>

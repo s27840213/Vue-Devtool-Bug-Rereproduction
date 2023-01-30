@@ -39,7 +39,7 @@ div(class="panel-objects")
           iconColor="white"
           iconWidth="20px")
       //- Object wishing pool
-      div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
+      div(v-if="keyword && !pending && rawSearchResult.list?.length<=10")
         span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
         nubtn(size="mid" class="mt-30")
           url(:url="$t('NN0791')" :newTab="true")
@@ -61,7 +61,6 @@ import i18n from '@/i18n'
 
 export default defineComponent({
   name: 'PanelObject',
-  emits: [],
   components: {
     SearchBar,
     CategoryList,
@@ -148,12 +147,6 @@ export default defineComponent({
       this.handleCategorySearch,
       this.getRecAndCate
     )
-  },
-  activated() {
-    const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
-    const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
-    mainContent.$el.scrollTop = this.scrollTop.mainContent
-    searchResult.$el.scrollTop = this.scrollTop.searchResult
   },
   watch: {
     keyword(newVal: string) {

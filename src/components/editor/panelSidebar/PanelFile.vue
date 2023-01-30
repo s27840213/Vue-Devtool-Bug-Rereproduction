@@ -74,9 +74,6 @@ export default defineComponent({
   mounted() {
     (this.$refs.mainContent as CImageGallery).myfileUpdate()
   },
-  activated() {
-    (this.$refs.mainContent as CImageGallery).$el.children[0].scrollTop = this.scrollTop.mainContent
-  },
   methods: {
     ...mapActions({
       deleteAssets: 'file/deleteAssets',

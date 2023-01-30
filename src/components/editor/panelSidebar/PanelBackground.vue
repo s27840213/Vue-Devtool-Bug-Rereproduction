@@ -49,8 +49,8 @@ div(class="panel-bg" :class="{'panel-flash': panelFlash}" @animationend="panelFl
       div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
         span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
         nubtn(size="mid" class="mt-30")
-        url(:url="$t('NN0791')" :newTab="true")
-            span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
+          url(:url="$t('NN0791')" :newTab="true")
+              span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 </template>
 
 <script lang="ts">
@@ -187,12 +187,6 @@ export default defineComponent({
   },
   beforeUnmount() {
     eventUtils.off(PanelEvent.switchPanelBgInnerTab)
-  },
-  activated() {
-    const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
-    const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
-    mainContent.$el.scrollTop = this.scrollTop.mainContent
-    searchResult.$el.scrollTop = this.scrollTop.searchResult
   },
   watch: {
     keyword(newVal: string) {
