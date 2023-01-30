@@ -22,7 +22,7 @@ div(class="overflow-container"
             :key="config.backgroundImage.id"
             @mousedown.native.left="pageClickHandler()"
             :contentScaleRatio="contentScaleRatio"
-            :padding="contentStyles.padding")
+            :padding="contentStyles.margin")
         nu-layer(
           v-for="(layer,index) in config.layers"
           :key="layer.id"
@@ -173,7 +173,7 @@ export default defineComponent({
       return {
         width: (this.config.width - this.config.bleeds.left - this.config.bleeds.right) * this.contentScaleRatio + 'px',
         height: (this.config.height - this.config.bleeds.top - this.config.bleeds.bottom) * this.contentScaleRatio + 'px',
-        padding: [
+        margin: [
           this.config.bleeds.top * this.contentScaleRatio + 'px',
           this.config.bleeds.right * this.contentScaleRatio + this.margin.right + 'px',
           this.config.bleeds.bottom * this.contentScaleRatio + this.margin.bottom + 'px',

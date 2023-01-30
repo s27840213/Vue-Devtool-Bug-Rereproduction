@@ -878,10 +878,6 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
   }
-
-  &__wrapper {
-    position: relative;
-  }
 }
 
 .img-shadow-effect {
