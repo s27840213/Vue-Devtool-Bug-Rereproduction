@@ -381,6 +381,7 @@ export default defineComponent({
   position: absolute;
   left: 0px;
   top: 0px;
+  transform-style: preserve-3d;
 }
 
 .bleed-line {

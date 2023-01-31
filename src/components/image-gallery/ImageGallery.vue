@@ -1,23 +1,22 @@
 <template lang="pug">
-div(class="image-gallery")
-  recycle-scroller(class="image-gallery__content" id="recycle"
-    :items="rows")
-    template(v-slot="{ item }")
-      observer-sentinel(v-if="item.sentinel"
-        @callback="handleLoadMore(item)")
-      div(class="flex flex-between")
-        gallery-photo(v-for="photo in item.list"
-          :style="imageStyle(photo.preview)"
-          :photo="photo"
-          :vendor="vendor"
-          :inFilePanel="inFilePanel"
-          :key="photo.id")
-    template(#after)
-      slot(name="pending")
+recycle-scroller(class="image-gallery" id="recycle"
+  :items="rows")
+  template(v-slot="{ item }")
+    observer-sentinel(v-if="item.sentinel"
+      @callback="handleLoadMore(item)")
+    div(class="flex flex-between")
+      gallery-photo(v-for="photo in item.list"
+        :style="imageStyle(photo.preview)"
+        :photo="photo"
+        :vendor="vendor"
+        :inFilePanel="inFilePanel"
+        :key="photo.id")
+  template(#after)
+    slot(name="pending")
 </template>
 
 <script lang="ts">
-import Vue, { PropType, defineComponent } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import GalleryUtils from '@/utils/galleryUtils'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IPhotoItem } from '@/interfaces/api'
@@ -122,14 +121,11 @@ export type CImageGallery = typeof component
 
 <style lang="scss" scoped>
 .image-gallery {
-  overflow-x: visible;
-  &__content {
-    @include push-scrollbar10;
-    @include hover-scrollbar(dark);
-    height: 100%;
-    line-height: 0;
-    text-align: left;
-    box-sizing: border-box;
-  }
+  @include push-scrollbar10;
+  @include hover-scrollbar(dark);
+  height: 100%;
+  line-height: 0;
+  text-align: left;
+  box-sizing: border-box;
 }
 </style>

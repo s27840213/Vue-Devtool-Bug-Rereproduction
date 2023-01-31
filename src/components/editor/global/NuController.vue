@@ -330,7 +330,7 @@ export default defineComponent({
       }
       return false
     },
-    sizeStyles(): any {
+    sizeStyles(): { transform: string, width: string, height: string } {
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
       const page = pageUtils.getPage(this.pageIndex)
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
@@ -359,15 +359,12 @@ export default defineComponent({
       }
     },
     contentStyles(): any {
-      const { width, height } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
       const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
         willChange: this.isDragging() ? 'transform' : '',
-        width: `${width * this.contentScaleRatio}px`,
-        height: `${height * this.contentScaleRatio}px`,
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         pointerEvents,
@@ -476,7 +473,14 @@ export default defineComponent({
     eventUtils.removePointerEvent('pointermove', this.moving)
     this.isControlling = false
     this.setCursorStyle('')
-    LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
+    /**
+     * the unmounted function may be triggered after the page is destroy
+     * this would lead to the wrong pageIndex
+     */
+    const pageIndex = pageUtils.getPages.findIndex(p => p.layers.some(l => l.id === this.config.id))
+    if (pageIndex !== -1) {
+      LayerUtils.updateLayerProps(pageIndex, this.layerIndex, { moving: false })
+    }
     this.setMoving(false)
   },
   methods: {

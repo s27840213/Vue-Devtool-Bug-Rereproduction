@@ -212,12 +212,6 @@ export default defineComponent({
         textUtils.loadDefaultFonts(this.extractFonts)
       })
   },
-  activated() {
-    const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
-    const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
-    mainContent.$el.scrollTop = this.scrollTop.mainContent
-    searchResult.$el.scrollTop = this.scrollTop.searchResult
-  },
   watch: {
     currentBrand() {
       textUtils.loadDefaultFonts(this.extractFonts)
