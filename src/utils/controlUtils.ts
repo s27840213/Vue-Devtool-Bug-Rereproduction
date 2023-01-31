@@ -498,15 +498,15 @@ class Controller {
 
   isClickOnController(e: MouseEvent, layerIndex = layerUtils.layerIndex, subLayerIdx = layerUtils.subLayerIdx): boolean {
     let layer = document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement
-    const layerConfig = layerUtils.getCurrLayer
-    let rotate = layerConfig.styles.rotate
-    if (layerConfig.type === 'shape' && layerConfig.category === 'D') {
-      layer = document.getElementById(`nu-layer__line-mover_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement
-      const ratio = layerConfig.styles.width / layerConfig.styles.initWidth
-      const { xDiff, yDiff } = shapeUtils.lineDimension(layerConfig.point ?? [])
-      rotate = Math.atan2(yDiff, xDiff) / Math.PI * 180
-    }
     if (layer) {
+      // need to check layerIndex !== -1 i.e. layer !== undefined before accessing styles on layerConfig
+      const layerConfig = layerUtils.getCurrLayer
+      let rotate = layerConfig.styles.rotate
+      if (layerConfig.type === 'shape' && layerConfig.category === 'D') {
+        layer = document.getElementById(`nu-layer__line-mover_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement
+        const { xDiff, yDiff } = shapeUtils.lineDimension(layerConfig.point ?? [])
+        rotate = Math.atan2(yDiff, xDiff) / Math.PI * 180
+      }
       const rect = layer.getBoundingClientRect()
       const c = { x: e.clientX, y: e.clientY }
       const { x: x0, y: y0, width: W, height: H } = rect
