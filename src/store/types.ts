@@ -152,6 +152,10 @@ export interface ILayerInfo {
   subLayerIdx?: number
 }
 
+export interface IExtendLayerInfo extends ILayerInfo {
+  priPrimaryLayerIndex?: number
+}
+
 export enum LineTemplatesType {
   type1 = 'type1',
   type2 = 'type2'

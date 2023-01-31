@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree } from 'vuex'
-import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame, IImageStyle } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame, IImageStyle, ILayer } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData, LayerType } from './types'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import zindexUtils from '@/utils/zindexUtils'
@@ -994,6 +994,20 @@ const mutations: MutationTree<IEditorState> = {
           page.config[k] = v
         }
       })
+  },
+  UPDATE_frameInGroup(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, layerIndex: number, clipIndex: number, props?: Partial<IImage>, styles?: { [key: string]: string | number | boolean } }) {
+    const { pageIndex, primaryLayerIndex, layerIndex, clipIndex, props = {}, styles = {} } = data
+    const frame = (state.pages[pageIndex].config.layers[primaryLayerIndex] as IGroup).layers[layerIndex] as IFrame
+    if (frame.type === LayerType.frame) {
+      Object.entries(props)
+        .forEach(([k, v]) => {
+          frame.clips[clipIndex][k] = v
+        })
+      Object.entries(styles)
+        .forEach(([k, v]) => {
+          frame.clips[clipIndex].styles[k] = v
+        })
+    }
   },
   ...imgShadowMutations,
   ADD_subLayer

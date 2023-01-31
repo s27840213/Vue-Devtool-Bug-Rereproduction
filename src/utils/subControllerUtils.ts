@@ -1,6 +1,6 @@
 import { IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
 import store from '@/store'
-import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
+import { FunctionPanelType, IExtendLayerInfo, ILayerInfo, LayerType } from '@/store/types'
 import colorUtils from './colorUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
 import formatUtils from './formatUtils'
@@ -11,9 +11,6 @@ import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import tiptapUtils from './tiptapUtils'
 
-interface IExtendLayerInfo extends ILayerInfo {
-  priPrimaryLayerIndex?: number
-}
 export default class SubControllerUtils {
   private component = undefined as Vue | undefined
   private body = undefined as unknown as HTMLElement
@@ -95,7 +92,6 @@ export default class SubControllerUtils {
           this.dblTapFlag = false
         }, interval)
       }
-      this.component && this.component.$emit('pointerDownSubController')
     }
 
     if (store.getters.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
@@ -126,7 +122,6 @@ export default class SubControllerUtils {
 
   onMouseup(e: PointerEvent) {
     eventUtils.removePointerEvent('pointerup', this._onMouseup)
-    console.log(this.primaryLayer)
     e.stopPropagation()
     if (!this.primaryLayer.styles) return
     const posDiff = {
@@ -150,15 +145,28 @@ export default class SubControllerUtils {
     }
     const isEmptClipInFrame = this.primaryLayer.type === LayerType.frame && (this.config as IImage).srcObj.type === 'frame' &&
       !hasActualMove && !store.getters['vivisticker/getControllerHidden']
-    const isEmptClipInGroup = this.primaryLayer.type === LayerType.group && this.config.type === LayerType.image &&
+    const isEmptClipInGroup = this.primaryLayer.type === LayerType.group && this.config.type === LayerType.image && this.primaryLayer.layers[this.layerIndex].type === 'frame' &&
       this.primaryLayer.active && (this.primaryLayer.layers[this.layerIndex] as IFrame).clips.length === 1 && (this.config as IImage).srcObj.type === 'frame'
     // const isEmptClipInGroup = this.primaryLayer.type === LayerType.group && this.config.type === LayerType.frame &&
     //   this.primaryLayer.active && (this.config as IFrame).clips.length === 1 && (this.config as IFrame).clips[0].srcObj.type === 'frame'
     if (!hasActualMove && (isEmptClipInFrame || isEmptClipInGroup)) {
       let image
       if (isEmptClipInGroup) {
-        // image = (this.config as IFrame).clips[0]
         image = this.config
+        const primaryLayer = this.primaryLayer as IGroup
+        primaryLayer.layers.forEach((l, i) => {
+          if (l.active) {
+            layerUtils.updateLayerProps(this.pageIndex, this.priPrimaryLayerIndex, { active: false }, i)
+          }
+        })
+        layerUtils.updateLayerProps(this.pageIndex, this.priPrimaryLayerIndex, { active: true }, this.layerIndex)
+        layerUtils.updateInGroupFrame(
+          this.pageIndex,
+          this.priPrimaryLayerIndex,
+          this.layerIndex,
+          this.subLayerIdx,
+          { active: true }
+        )
       } else if (isEmptClipInFrame) {
         image = (this.primaryLayer as IFrame).clips[this.layerIndex]
       }
@@ -171,9 +179,9 @@ export default class SubControllerUtils {
 
   onClickEvent(e: MouseEvent) {
     colorUtils.event.emit('closeColorPanel', false)
-    if (!this.primaryLayer.active) {
-      return
-    }
+    // if (!this.primaryLayer.active) {
+    //   return
+    // }
     let updateSubLayerProps = null as any
     let layers = null as any
     switch (this.primaryLayer.type) {
@@ -186,7 +194,8 @@ export default class SubControllerUtils {
         layers = (layerUtils.getCurrLayer as IFrame).clips
     }
 
-    if (!store.getters['shadow/isHandling'] && this.primaryActive && !store.state.isMoving) {
+    // if (!store.getters['shadow/isHandling'] && this.primaryActive && !store.state.isMoving) {
+    if (!store.getters['shadow/isHandling'] && !store.state.isMoving) {
       if (layerUtils.layerIndex !== -1) {
         for (let idx = 0; idx < layers.length; idx++) {
           if (idx !== this.subLayerIdx) {

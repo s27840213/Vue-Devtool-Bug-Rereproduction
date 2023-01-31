@@ -517,6 +517,12 @@ class LayerUtils {
       }
     }
   }
+
+  updateInGroupFrame(pageIndex: number, primaryLayerIndex: number, layerIndex: number, clipIndex: number, props?: Partial<IImage>, styles?: { [key: string]: string | boolean | number }) {
+    store.commit('UPDATE_frameInGroup', {
+      pageIndex, primaryLayerIndex, layerIndex, clipIndex, props, styles
+    })
+  }
 }
 
 const layerUtils = new LayerUtils()

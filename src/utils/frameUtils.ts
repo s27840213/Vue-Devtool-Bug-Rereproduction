@@ -7,7 +7,7 @@ import layerFactary from './layerFactary'
 import generalUtils from './generalUtils'
 import { IAdjustJsonProps } from '@/interfaces/adjust'
 import zindexUtils from './zindexUtils'
-import { ILayerInfo } from '@/store/types'
+import { IExtendLayerInfo, ILayerInfo } from '@/store/types'
 import stepsUtils from './stepsUtils'
 import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import Vue from 'vue'
@@ -162,8 +162,8 @@ class FrameUtils {
     }
   }
 
-  iosPhotoSelect(layerInfo: ILayerInfo, config: IImage) {
-    const { pageIndex, layerIndex, subLayerIdx = 0 } = layerInfo
+  iosPhotoSelect(layerInfo: IExtendLayerInfo, config: IImage) {
+    const { pageIndex, layerIndex, subLayerIdx = 0, priPrimaryLayerIndex = -1 } = layerInfo
     vivistickerUtils.getIosImg()
       .then(async (images: Array<string>) => {
         if (images.length) {
@@ -172,17 +172,32 @@ class FrameUtils {
             assetId: images[0],
             userId: ''
           }))
-          this.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
-            imgWidth,
-            imgHeight,
-            imgX,
-            imgY
-          })
-          this.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, {
-            type: 'ios',
-            assetId: images[0],
-            userId: ''
-          })
+          if (priPrimaryLayerIndex === -1) {
+            this.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx, {
+              imgWidth,
+              imgHeight,
+              imgX,
+              imgY
+            })
+            this.updateFrameClipSrc(pageIndex, layerIndex, subLayerIdx, {
+              type: 'ios',
+              assetId: images[0],
+              userId: ''
+            })
+          } else {
+            LayerUtils.updateInGroupFrame(pageIndex, priPrimaryLayerIndex, layerIndex, subLayerIdx, {
+              srcObj: {
+                type: 'ios',
+                assetId: images[0],
+                userId: ''
+              }
+            }, {
+              imgWidth,
+              imgHeight,
+              imgX,
+              imgY
+            })
+          }
           stepsUtils.record()
         }
       })
