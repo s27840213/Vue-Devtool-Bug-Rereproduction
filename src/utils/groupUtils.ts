@@ -19,6 +19,7 @@ import backgroundUtils from './backgroundUtils'
 import vivistickerUtils from './vivistickerUtils'
 import { IPage } from '@/interfaces/page'
 import _ from 'lodash'
+import frameUtils from './frameUtils'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup | IFrame>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -260,19 +261,24 @@ class GroupUtils {
 
   deselect() {
     const tmpPageIndex = this.currSelectedInfo.pageIndex
-
     if (this.currSelectedInfo.index !== -1) {
       const currSelectedLayers = store.getters.getCurrSelectedLayers
       if (currSelectedLayers.length === 1) {
-        const { pageIndex, index: layerIndex } = this.currSelectedInfo
+        // const { pageIndex, index: layerIndex } = this.currSelectedInfo
+        const { pageIndex, layerIndex, subLayerIdx } = LayerUtils
         if (currSelectedLayers[0].type === 'text' && textUtils.isEmptyText(currSelectedLayers[0])) {
           store.commit('DELETE_selectedLayer')
           store.commit('SET_lastSelectedLayerIndex', -1)
         } else {
-          LayerUtils.updateLayerProps(pageIndex, layerIndex, {
-            active: false
-          })
+          LayerUtils.updateLayerProps(pageIndex, layerIndex, { active: false })
           ImageUtils.setImgControlDefault()
+          switch (LayerUtils.getLayer(pageIndex, layerIndex).type) {
+            case LayerType.frame:
+              frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { active: false })
+              break
+            case LayerType.group:
+              LayerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIdx, { active: false })
+          }
         }
       } else {
         const tmpLayer = this.tmpLayer as ITmp

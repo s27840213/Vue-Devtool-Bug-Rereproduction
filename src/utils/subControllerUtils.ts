@@ -25,6 +25,7 @@ export default class SubControllerUtils {
   private primaryActive = false
   private initTranslate = { x: 0, y: 0 }
 
+  private get isControllerShown(): boolean { return this.primaryLayer.active && !store.getters['vivisticker/getControllerHidden'] }
   private get config(): ILayer { return this._config.config }
   private get pageIndex(): number { return this.layerInfo.pageIndex }
   private get layerIndex(): number { return this.layerInfo.layerIndex }
@@ -169,8 +170,6 @@ export default class SubControllerUtils {
   }
 
   onClickEvent(e: MouseEvent) {
-    if (!this.primaryLayer.active) return
-
     colorUtils.event.emit('closeColorPanel', false)
     if (!this.primaryLayer.active) {
       return
@@ -195,9 +194,15 @@ export default class SubControllerUtils {
           }
         }
       }
-      if ((this.primaryLayer.type === LayerType.frame && !(this.primaryLayer as IFrame).clips[this.subLayerIdx].active) ||
-        (this.primaryLayer.type === LayerType.group && !(this.primaryLayer as IGroup).layers[this.subLayerIdx].active)) {
-        updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { active: true })
+      const isFrameSub = this.primaryLayer.type === LayerType.frame && !(this.primaryLayer as IFrame).clips[this.subLayerIdx].active
+      const isGroupSub = this.primaryLayer.type === LayerType.group && !(this.primaryLayer as IGroup).layers[this.subLayerIdx].active
+      if (isFrameSub || isGroupSub) {
+        if (this.isControllerShown) {
+          updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { active: true })
+        } else {
+          groupUtils.deselect()
+          groupUtils.select(this.pageIndex, [this.layerIndex])
+        }
       }
       layerUtils.setCurrSubSelectedInfo(this.subLayerIdx, this.config.type)
     }

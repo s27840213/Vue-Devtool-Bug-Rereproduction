@@ -462,13 +462,25 @@ class ViviStickerUtils {
       }
     } else {
       const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
-      if (currLayer.type === 'text') {
-        layerUtils.updateLayerProps(pageIndex, layerIndex, { contentEditable: false })
-      } else if (['group', 'tmp'].includes(currLayer.type) && subLayerIdx !== -1) {
-        const subLayer = (currLayer as IGroup).layers[subLayerIdx]
-        if (subLayer.type === 'text') {
-          layerUtils.updateLayerProps(pageIndex, layerIndex, { contentEditable: false }, subLayerIdx)
-        }
+      switch (currLayer.type) {
+        case 'text':
+          layerUtils.updateLayerProps(pageIndex, layerIndex, { contentEditable: false })
+          break
+        case 'group':
+        case 'tmp':
+          if (subLayerIdx !== -1) {
+            const subLayer = (currLayer as IGroup).layers[subLayerIdx]
+            const updateData = { active: false } as { [key: string]: string | boolean }
+            if (subLayer.type === 'text') {
+              updateData.contentEditable = false
+            }
+            layerUtils.updateLayerProps(pageIndex, layerIndex, updateData, subLayerIdx)
+          }
+          break
+        case 'frame':
+          if (subLayerIdx !== -1) {
+            frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { active: false })
+          }
       }
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault(false)
