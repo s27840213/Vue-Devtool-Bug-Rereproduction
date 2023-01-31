@@ -977,7 +977,7 @@ pipelines:
               script:
                 - yarn install
                 - npx cypress install
-                - npx serve -s dist -p 8080 &
+                - npx serve -s dist -p 8080 & npx wait-on http://localhost:8080
                 - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
           - step:
               name: "dev5 Alan"
