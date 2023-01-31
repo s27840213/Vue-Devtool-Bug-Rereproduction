@@ -137,7 +137,13 @@ export default defineComponent({
       })
     }
 
-    // panelInit for PanelTemplate at themeUtils.fetchTemplateContent
+    themeUtils.refreshTemplateState().then(() => {
+      generalUtils.panelInit('template',
+        this.handleSearch,
+        this.handleCategorySearch,
+        this.getRecAndCate
+      )
+    })
   },
   computed: {
     ...mapState('templates', {

@@ -65,8 +65,7 @@ export default defineComponent({
     this.clearState()
   },
   mounted() {
-    let query = this.$router.currentRoute.value.query
-    query = omit(query, ['panel', 'category', 'category_locale', 'search'])
+    const query = this.$router.currentRoute.value.query
     if (query.type === 'new-design-size') {
       query.unit = query.unit ?? 'px'
     }
