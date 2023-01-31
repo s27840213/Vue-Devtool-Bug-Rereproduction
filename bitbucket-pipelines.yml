@@ -972,17 +972,15 @@ pipelines:
       - parallel:
           - step:
               name: 'Run E2E Tests'
+              size: 2x
               caches:
                 - node
               image: cypress/browsers:node14.17.0-chrome88-ff89
               script:
+                - yarn install
                 - npx cypress install
                 - yarn serve --mode production & npx wait-on http://localhost:8080
-                - ls -a
-                - pwd
                 - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
-                - ls -a
-                - pwd
           - step:
               name: "dev5 Alan"
               deployment: dev5
