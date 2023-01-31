@@ -11,11 +11,14 @@ import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import tiptapUtils from './tiptapUtils'
 
+interface IExtendLayerInfo extends ILayerInfo {
+  priPrimaryLayerIndex?: number
+}
 export default class SubControllerUtils {
   private component = undefined as Vue | undefined
   private body = undefined as unknown as HTMLElement
   private _config = { config: null as unknown as ILayer }
-  private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as ILayerInfo
+  private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as IExtendLayerInfo
   private dblTapFlag = false
   private posDiff = { x: 0, y: 0 }
   private _onMouseup = null as unknown
@@ -26,7 +29,16 @@ export default class SubControllerUtils {
   private get pageIndex(): number { return this.layerInfo.pageIndex }
   private get layerIndex(): number { return this.layerInfo.layerIndex }
   private get subLayerIdx(): number { return this.layerInfo.subLayerIdx ?? -1 }
-  private get primaryLayer(): IGroup | IFrame | ITmp { return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp }
+  private get priPrimaryLayerIndex(): number { return this.layerInfo.priPrimaryLayerIndex ?? -1 }
+  private get primaryLayer(): IGroup | IFrame | ITmp {
+    /**
+     * Only the frame inside a group would have the prop of priPrimaryLayerIndex
+     */
+    if (this.priPrimaryLayerIndex !== -1) {
+      return layerUtils.getLayer(this.pageIndex, this.priPrimaryLayerIndex) as IGroup
+    }
+    return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp
+  }
 
   constructor({ _config, body, layerInfo }: { _config: { config: ILayer }, body: HTMLElement, layerInfo?: ILayerInfo, component?: Vue }) {
     this._config = _config
@@ -35,6 +47,7 @@ export default class SubControllerUtils {
   }
 
   onPointerdown(e: PointerEvent) {
+    e.stopPropagation()
     this.initTranslate = {
       x: this.primaryLayer.styles?.x || 0,
       y: this.primaryLayer.styles?.y || 0
@@ -112,6 +125,7 @@ export default class SubControllerUtils {
 
   onMouseup(e: PointerEvent) {
     eventUtils.removePointerEvent('pointerup', this._onMouseup)
+    console.log(this.primaryLayer)
     e.stopPropagation()
     if (!this.primaryLayer.styles) return
     const posDiff = {
@@ -135,12 +149,15 @@ export default class SubControllerUtils {
     }
     const isEmptClipInFrame = this.primaryLayer.type === LayerType.frame && (this.config as IImage).srcObj.type === 'frame' &&
       !hasActualMove && !store.getters['vivisticker/getControllerHidden']
-    const isEmptClipInGroup = this.primaryLayer.type === LayerType.group && this.config.type === LayerType.frame &&
-      this.primaryLayer.active && (this.config as IFrame).clips.length === 1 && (this.config as IFrame).clips[0].srcObj.type === 'frame'
+    const isEmptClipInGroup = this.primaryLayer.type === LayerType.group && this.config.type === LayerType.image &&
+      this.primaryLayer.active && (this.primaryLayer.layers[this.layerIndex] as IFrame).clips.length === 1 && (this.config as IImage).srcObj.type === 'frame'
+    // const isEmptClipInGroup = this.primaryLayer.type === LayerType.group && this.config.type === LayerType.frame &&
+    //   this.primaryLayer.active && (this.config as IFrame).clips.length === 1 && (this.config as IFrame).clips[0].srcObj.type === 'frame'
     if (!hasActualMove && (isEmptClipInFrame || isEmptClipInGroup)) {
       let image
       if (isEmptClipInGroup) {
-        image = (this.config as IFrame).clips[0]
+        // image = (this.config as IFrame).clips[0]
+        image = this.config
       } else if (isEmptClipInFrame) {
         image = (this.primaryLayer as IFrame).clips[this.layerIndex]
       }

@@ -29,6 +29,7 @@
               :scaleRatio="scaleRatio"
               :forRender="forRender"
               :isTransparent="div.isTransparent"
+              :primaryLayer="primaryLayer"
               :noShadow="div.noShadow"
               v-bind="$attrs")
           svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !controllerHidden && !forRender"
@@ -122,6 +123,10 @@ export default Vue.extend({
     handleUnrender: {
       default: false,
       type: Boolean
+    },
+    priPrimaryLayerIndex: {
+      default: -1,
+      type: Number
     }
     /**
      * @Note Vuex Props
@@ -182,6 +187,11 @@ export default Vue.extend({
     Object.defineProperty(layerInfo, 'subLayerIdx', {
       get() {
         return props.subLayerIndex
+      }
+    })
+    Object.defineProperty(layerInfo, 'priPrimaryLayerIndex', {
+      get() {
+        return props.priPrimaryLayerIndex
       }
     })
     const _config = { config: this.config }
