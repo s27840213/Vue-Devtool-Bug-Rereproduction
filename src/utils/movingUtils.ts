@@ -349,7 +349,7 @@ export class MovingUtils {
         }
       }
     }
-    if (!this.isActive) {
+    if (!this.isControllerShown) {
       const posDiff = {
         x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
         y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
@@ -473,7 +473,7 @@ export class MovingUtils {
     }
     const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
-    if (this.isActive) {
+    if (this.isControllerShown) {
       if (hasActualMove) {
         // dragging to another page
         if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
@@ -542,10 +542,10 @@ export class MovingUtils {
       this.setCursorStyle(e, '')
     }
 
-    if (!this.isActive) {
+    if (!this.isControllerShown) {
       if (hasActualPageMove) {
         return
-      } else if (!this.isDoingGestureAction && !this.isActive && !hasActualMove) {
+      } else if (!this.isDoingGestureAction && !this.isControllerShown && !hasActualMove) {
         this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
         if (!this.inMultiSelectionMode) {
           groupUtils.deselect()
