@@ -20,7 +20,7 @@ describe('Testing SidebarPanel', () => {
 
     for (const panel of sidebarData) {
       cy.get(panel.icon).click()
-      cy.get('.vue-recycle-scroller:visible').scrollTo(0, 300).wait(150)
+      cy.get('.vue-recycle-scroller:visible').scrollTo(0, 300)
     }
 
     for (const panel of sidebarData) {
@@ -36,9 +36,9 @@ describe('Testing SidebarPanel', () => {
 
     for (const panel of sidebarData) {
       cy.get(panel.icon).click()
-      cy.get('.vue-recycle-scroller:visible').scrollTo(0, 300).wait(150)
+      cy.get('.vue-recycle-scroller:visible').scrollTo(0, 300)
       cy.get('.search-bar__input').type('紙').type('{enter}')
-      cy.get('.vue-recycle-scroller:visible').scrollTo(0, 300).wait(150)
+      cy.get('.vue-recycle-scroller:visible').scrollTo(0, 300)
     }
 
     for (const panel of sidebarData) {

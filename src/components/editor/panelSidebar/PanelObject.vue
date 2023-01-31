@@ -148,6 +148,14 @@ export default defineComponent({
       this.getRecAndCate
     )
   },
+  activated() {
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
+      const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
+      mainContent.$el.scrollTop = this.scrollTop.mainContent
+      searchResult.$el.scrollTop = this.scrollTop.searchResult
+    })
+  },
   watch: {
     keyword(newVal: string) {
       if (!newVal) {

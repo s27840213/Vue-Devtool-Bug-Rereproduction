@@ -227,6 +227,14 @@ export default defineComponent({
       return editorThemesString === this.theme
     }
   },
+  activated() {
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
+      const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
+      mainContent.$el.scrollTop = this.scrollTop.mainContent
+      searchResult.$el.scrollTop = this.scrollTop.searchResult
+    })
+  },
   watch: {
     currPageThemeIds(curr: number[] = []) {
       const { theme, userId } = this
