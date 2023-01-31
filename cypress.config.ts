@@ -9,7 +9,7 @@ export default defineConfig({
     experimentalRunAllSpecs: true,
     experimentalWebKitSupport: true,
     setupNodeEvents(on, config) {
-      // implement node event listeners here
+      require('cypress-terminal-report/src/installLogsPrinter')(on)
     },
   },
 })
