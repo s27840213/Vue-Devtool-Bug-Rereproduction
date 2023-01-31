@@ -258,7 +258,6 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      _setBackgroundImage: 'SET_backgroundImage',
       set_popupComponent: 'SET_popupComponent',
       _setBgImgSrc: 'SET_backgroundImageSrc'
     }),

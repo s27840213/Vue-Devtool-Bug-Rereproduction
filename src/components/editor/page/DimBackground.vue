@@ -1,5 +1,5 @@
 <template lang="pug">
-div(v-if="isImgCtrl" class="dim-background")
+div(v-if="isImgCtrl" class="dim-background" @pointerdown="onBgClick")
   div(class="dim-background__backdrop")
   div(class="dim-background__content-area" :style="contentAreaStyles")
     div
@@ -53,6 +53,7 @@ import cssConverter from '@/utils/cssConverter'
 import pageUtils from '@/utils/pageUtils'
 import { IImage } from '@/interfaces/layer'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import imageUtils from '@/utils/imageUtils'
 
 export default defineComponent({
   emits: [],
@@ -147,6 +148,11 @@ export default defineComponent({
         left: this.config.bleeds.left * this.contentScaleRatio + 'px',
         right: this.config.bleeds.right * this.contentScaleRatio + 'px'
       }
+    }
+  },
+  methods: {
+    onBgClick(e: PointerEvent) {
+      imageUtils.setImgControlDefault()
     }
   }
 })
