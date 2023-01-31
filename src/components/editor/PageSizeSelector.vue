@@ -538,8 +538,12 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .page-size-selector {
-  height: 100%;
   display: grid;
+  // Set height to scroll container
+  height: calc(100% - 19px);
+  &.isTouchDevice {
+    height: 100%;
+  }
   &__arrow {
     margin-left: auto;
     margin-right: 30%;
@@ -723,10 +727,6 @@ export default defineComponent({
     gap: 4px;
     overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
-    :not(.isTouchDevice) > & {
-      // Set maxHeight 500px to scroll container in PC
-      max-height: 500px;
-    }
     @include firefoxOnly {
       scrollbar-width: thin;
       scrollbar-color: setColor(gray-3) transparent;
