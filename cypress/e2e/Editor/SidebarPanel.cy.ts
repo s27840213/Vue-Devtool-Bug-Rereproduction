@@ -39,8 +39,8 @@ const _sidebarData = [{
   icon: '.svg-upload',
   panelName: 'file',
   componentName: 'file',
-  apiUrl: '/*',
-  apiType: 'text',
+  apiUrl: '',
+  apiType: '',
   testCategory: ''
 }]
 
