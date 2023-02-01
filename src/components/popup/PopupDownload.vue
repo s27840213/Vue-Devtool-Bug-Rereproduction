@@ -83,8 +83,10 @@ div(class="popup-download text-left"
         class="flex items-center mb-10")
         span {{$t('NN0777')}}
         dropdown(v-if="colorFormats[selectedTypeVal].length > 1" class="mx-5 popup-download__color-format"
+          :current="colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0].label"
+          :placeholder="colorFormats[selectedTypeVal][0].label"
           :options="colorFormats[selectedTypeVal]"
-          @select="(option:string) => handleUpdate('cmyk', option === 'CMYK' ? 1 : 0)") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
+          @select="handleColorModeSelect")
         div(v-if="colorFormats[selectedTypeVal].length === 1" class="popup-download__color-format fixed")
           span(class="body-XS") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
       div(v-if="isDetailPage" class="mb-10 pt-5") {{ $t('NN0344') }}
@@ -273,9 +275,12 @@ export default defineComponent({
       functionQueue: [] as Array<() => void>,
       scaleOptions: [0.5, 0.75, 1, 1.5, 2, 2.5, 3],
       colorFormats: {
-        pdf_standard: ['RGB'],
-        pdf_print: ['RGB', 'CMYK']
-      } as {[key: string]: string[]},
+        pdf_standard: [{ value: 0, label: 'RGB' }],
+        pdf_print: [
+          { value: 0, label: 'RGB' },
+          { value: 1, label: 'CMYK' }
+        ]
+      } as {[key: string]: { value: number, label: string }[]},
       detailPageDownloadOptions: [
         { value: 'whole', label: this.$t('NN0347') as string },
         { value: 'splice', label: this.$t('NN0348') as string }
@@ -402,6 +407,9 @@ export default defineComponent({
     },
     handleDevSelect(data: { value: number }) {
       this.selectedDev = data.value
+    },
+    handleColorModeSelect(data: { value: number }) {
+      Object.assign(this.selected, { cmyk: data.value })
     },
     handleMaxHeight(e: Event) {
       const value = +(e.target as HTMLInputElement).value
