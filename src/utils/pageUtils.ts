@@ -22,20 +22,6 @@ class PageUtils {
   get MAX_SIZE() { return 8000 }
   get MIN_SIZE() { return 40 }
   get MOBILE_CARD_PADDING() { return 16 }
-  get defaultBleedMap() {
-    const toBleed = (val: number) => ({
-      top: val,
-      bottom: val,
-      left: val,
-      right: val
-    } as IBleed)
-    return {
-      px: toBleed(11),
-      cm: toBleed(0.3),
-      mm: toBleed(3),
-      in: toBleed(0.118)
-    } as { [index: string]: IBleed }
-  }
 
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get isDetailPage(): boolean { return store.getters.getGroupType === 1 }
@@ -837,6 +823,26 @@ class PageUtils {
       left: round(unitUtils.convert(defaultBleed, 'mm', unit, dpi.width), precision),
       right: round(unitUtils.convert(defaultBleed, 'mm', unit, dpi.width), precision)
     } as IBleed
+  }
+
+  getDefaultBleedMap(pageIndex: number) {
+    const toBleed = (val: number) => ({
+      top: this.isDetailPage && pageIndex !== 0 ? 0 : val,
+      bottom: this.isDetailPage && pageIndex !== store.getters.getPagesLength - 1 ? 0 : val,
+      left: val,
+      right: val
+    } as IBleed)
+    const defaultPxBleed = this.getPageDefaultBleeds(this.getPageSize(pageIndex), 'px')
+    if (this.isDetailPage) {
+      if (pageIndex !== 0) defaultPxBleed.top = 0
+      if (pageIndex !== store.getters.getPagesLength - 1)defaultPxBleed.bottom = 0
+    }
+    return {
+      px: defaultPxBleed,
+      cm: toBleed(0.3),
+      mm: toBleed(3),
+      in: toBleed(0.118)
+    } as { [index: string]: IBleed }
   }
 
   updatePagePos(pageIndex: number, pos: { x?: number, y?: number }) {
