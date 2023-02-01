@@ -108,6 +108,7 @@ class BackgroundUtils {
   handleDeleteBackground() {
     if (this.backgroundLocked) return this.handleLockedNotify()
     store.commit('REMOVE_background', { pageIndex: pageUtils.currFocusPageIndex })
+    pageUtils.updateBackgroundImageStyles(pageUtils.currFocusPageIndex, { adjust: {} })
     stepsUtils.record()
   }
 

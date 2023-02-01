@@ -85,6 +85,7 @@ import pageUtils from '@/utils/pageUtils'
 import unitUtils from '@/utils/unitUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import NuAdjustImage from './NuAdjustImage.vue'
+import { IPage } from '@/interfaces/page'
 
 export default defineComponent({
   emits: [],
@@ -195,7 +196,8 @@ export default defineComponent({
         drawCanvasW: 0,
         drawCanvasH: 0,
         MAXSIZE: 0
-      }
+      },
+      page: pageUtils.getPage(this.pageIndex) as IPage
       // canvas: undefined as HTMLCanvasElement | undefined
     }
   },
@@ -234,24 +236,13 @@ export default defineComponent({
         this.handleNewShadowEffect()
       } else {
         /** until the canvas is mounted */
-        // this.$nextTick(() => this.handleNewShadowEffect())
-        // eventUtils.on(`canvas-onload_${this.layerIndex}_${this.subLayerIndex || -1}`, () => {
-        //   console.log('emit on', `canvas-onload_${this.layerIndex}_${this.subLayerIndex || -1}`)
-        //   eventUtils.off(`canvas-onload_${this.layerIndex}_${this.subLayerIndex || -1}`)
-        //   console.log(this.$refs.canvas)
-        //   this.handleNewShadowEffect()
-        // })
         setTimeout(() => this.handleNewShadowEffect(), 0)
       }
     },
     showCanvas(val) {
-      // if (val && (this.config as IImage).styles.shadow.srcObj.type) {
       if (val) {
         setTimeout(() => {
           this.handleNewShadowEffect(false)
-          // console.log(`emit to canvas-onload_${this.layerIndex}_${this.subLayerIndex || -1}`)
-          // eventUtils.emit(`canvas-onload_${this.layerIndex}_${this.subLayerIndex || -1}`)
-          // console.log(this.$refs.canvas)
         })
       }
     },
@@ -349,10 +340,11 @@ export default defineComponent({
       if (pageIndex === undefined || pageUtils.getPage(pageIndex) === undefined) {
         return false
       }
-      const isCurrShadowEffectApplied = this.currentShadowEffect() !== ShadowEffectType.none
-      const isHandling = handleId?.pageId === pageUtils.getPage(pageIndex)?.id && (() => {
+      const currentShadowEffect = (this.config as IImage).styles.shadow.currentEffect
+      const isCurrShadowEffectApplied = currentShadowEffect !== ShadowEffectType.none
+      const isHandling = handleId?.pageId === this.page.id && (() => {
         if (subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined') {
-          const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
+          const { primaryLayer = {} } = this
           return primaryLayer.id === handleId.layerId && primaryLayer.layers[subLayerIndex].id === handleId.subLayerId
         } else {
           return layerUtils.getLayer(pageIndex, layerIndex).id === handleId.layerId

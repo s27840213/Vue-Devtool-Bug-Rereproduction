@@ -288,7 +288,19 @@ class TiptapUtils {
         }
       } else {
         if (pStyles.size !== largestSize) {
+          // keep size of <p> the same as the largest size of <span>s
           pStyles.size = largestSize
+          isSetContentRequired = true
+        }
+        if (pStyles.font === 'undefined') {
+          // <p>s of pasted text may have 'undefined' font
+          // If so, use the font of the first <span>
+          const sStyles = spans[0].styles
+          pStyles.font = sStyles.font
+          pStyles.type = sStyles.type
+          pStyles.userId = sStyles.userId
+          pStyles.assetId = sStyles.assetId
+          pStyles.fontUrl = sStyles.fontUrl
           isSetContentRequired = true
         }
         if (paragraph.attrs.spanStyle) {

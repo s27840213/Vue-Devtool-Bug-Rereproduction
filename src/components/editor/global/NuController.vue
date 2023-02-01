@@ -473,7 +473,14 @@ export default defineComponent({
     eventUtils.removePointerEvent('pointermove', this.moving)
     this.isControlling = false
     this.setCursorStyle('')
-    LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
+    /**
+     * the unmounted function may be triggered after the page is destroy
+     * this would lead to the wrong pageIndex
+     */
+    const pageIndex = pageUtils.getPages.findIndex(p => p.layers.some(l => l.id === this.config.id))
+    if (pageIndex !== -1) {
+      LayerUtils.updateLayerProps(pageIndex, this.layerIndex, { moving: false })
+    }
     this.setMoving(false)
   },
   methods: {

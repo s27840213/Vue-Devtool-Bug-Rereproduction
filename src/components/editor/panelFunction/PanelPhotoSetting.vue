@@ -287,14 +287,10 @@ export default defineComponent({
           const aspect = imgWidth >= imgHeight ? 0 : 1
           const isThirdPartyImage = type === 'unsplash' || type === 'pexels'
           const initSrc = imageUtils.getSrc((this.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage, 'larg', undefined, true)
-          console.log('remove bg')
           this.removeBg({ srcObj: targetLayer.srcObj, ...(isThirdPartyImage && { aspect }) }).then((data) => {
-            console.log(data)
             if (data.flag === 0) {
               uploadUtils.polling(data.url, (json: any) => {
-                console.log(json)
                 if (json.flag === 0 && json.data) {
-                  console.log('polling success')
                   this.recudeBgrmRemain()
                   const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
                   const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
@@ -313,7 +309,6 @@ export default defineComponent({
 
                     this.setAutoRemoveResult(imageUtils.getBgRemoveInfo(json.data, initSrc))
                     this.setInBgRemoveMode(true)
-                    console.log(this.inBgRemoveMode, this.isProcessing)
                   }
                   return true
                 }
