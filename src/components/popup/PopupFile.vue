@@ -156,11 +156,7 @@ export default defineComponent({
       rulerUtils.setLockGuideline(!rulerUtils.lockGuideline)
     },
     toggleBleed() {
-      const isEnableBleed = !this.hasBleed
-      for (let idx = 0; idx < this.pagesLength; idx++) {
-        pageUtils.setIsEnableBleed(isEnableBleed, idx)
-        if (!isEnableBleed) pageUtils.resetBleeds(idx)
-      }
+      for (let idx = 0; idx < this.pagesLength; idx++) pageUtils.setIsEnableBleed(!this.hasBleed, idx)
       stepsUtils.record()
     },
     newDesign() {
