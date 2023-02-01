@@ -152,10 +152,8 @@ export default defineComponent({
       return this.currSelectedInfo.layers.length > 0
     },
     isShowBleed() {
-      if (this.userId === 'backendRendering') {
-        if (this.backendRenderParams.isBleed || this.backendRenderParams.isTrim) return true
-      } else if (this.config.isEnableBleed) return true
-      return false
+      if (this.userId === 'backendRendering') return false
+      return this.config.isEnableBleed
     },
     contentStyles() {
       if (!this.config.isEnableBleed) {
