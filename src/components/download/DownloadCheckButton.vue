@@ -14,7 +14,7 @@ label(class="download-check-button")
     div(class="download-check-button__label")
         span(v-if="label.split(' ').length === 1") {{ label }}
         span(v-else) {{ label.split(' ').slice(0, -1).join(' ') }}
-        nobr
+        span(class='no-wrap')
           span(v-if="label.split(' ').length > 1") {{ ' ' + label.split(' ').at(-1) }}
           v-tooltip(v-if="info" class="download-check-button__label__icon-info" theme="hint-menu")
             svg-icon(iconName="info"
