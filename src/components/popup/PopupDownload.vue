@@ -275,7 +275,7 @@ export default defineComponent({
       colorFormats: {
         pdf_standard: ['RGB'],
         pdf_print: ['RGB', 'CMYK']
-      },
+      } as {[key: string]: string[]},
       detailPageDownloadOptions: [
         { value: 'whole', label: this.$t('NN0347') as string },
         { value: 'splice', label: this.$t('NN0348') as string }

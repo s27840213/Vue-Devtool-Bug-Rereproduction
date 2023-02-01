@@ -55,7 +55,10 @@ export default defineComponent({
     },
     groupName: String,
     type: String,
-    label: String,
+    label: {
+      type: String,
+      required: true
+    },
     value: String
   },
   data () {
