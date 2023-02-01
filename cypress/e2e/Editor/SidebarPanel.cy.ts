@@ -5,31 +5,36 @@ const sidebarData = [{
   panelName: 'template',
   componentName: 'template',
   apiUrl: '/list-design*',
-  apiType: 'template'
+  apiType: 'template',
+  testCategory: '新品上架'
 }, {
   icon: '.svg-photo',
   panelName: 'photo',
   componentName: 'photo',
   apiUrl: '/list-lib-photo*',
-  apiType: 'unsplash'
+  apiType: 'unsplash',
+  testCategory: ''
 }, {
   icon: '.svg-objects',
   panelName: 'object',
   componentName: 'objects',
   apiUrl: '/list-design*',
-  apiType: 'svg'
+  apiType: 'svg',
+  testCategory: '線條與形狀'
 }, {
   icon: '.svg-bg',
   panelName: 'bg',
   componentName: 'bg',
   apiUrl: '/list-design*',
-  apiType: 'background'
+  apiType: 'background',
+  testCategory: '木紋'
 }, {
   icon: '.svg-text',
   panelName: 'text',
   componentName: 'text',
   apiUrl: '/list-design*',
-  apiType: 'text'
+  apiType: 'text',
+  testCategory: '手繪感'
 }]
 
 describe('Testing SidebarPanel', () => {
@@ -95,7 +100,7 @@ describe('Testing SidebarPanel', () => {
     }
   })
 
-  it('Search keyword sidebar panel by url', () => {
+  it('Search keyword in sidebar panel by url', () => {
     for (const panel of sidebarData) {
       const keyword = panel.panelName === 'photo' ? '紙' : 'tag::紙'
       cy.intercept({
@@ -106,7 +111,7 @@ describe('Testing SidebarPanel', () => {
         }
       }).as(`search-${panel.apiType}`)
 
-      cy.visit(`/editor?panel=${panel.panelName}&search=%E7%B4%99`)
+      cy.visit(encodeURI(`/editor?panel=${panel.panelName}&search=紙`))
 
       // Check api
       cy.wait(`@search-${panel.apiType}`).its('response.body')
@@ -122,6 +127,37 @@ describe('Testing SidebarPanel', () => {
       const itemClass = panel.panelName === 'photo'
         ? '.gallery-photo__img'
         : `.panel-${panel.componentName}__item`
+      cy.get(`.panel > .panel-${panel.componentName}
+          > .vue-recycle-scroller:visible ${itemClass}`)
+    }
+  })
+
+  it('Search category in sidebar panel by url', () => {
+    for (const panel of sidebarData) {
+      if (panel.panelName === 'photo') continue
+
+      cy.intercept({
+        url: panel.apiUrl,
+        query: {
+          type: panel.apiType,
+          keyword: `${panel.testCategory}`
+        }
+      }).as(`search-${panel.apiType}`)
+
+      cy.visit(encodeURI(`/editor?panel=${panel.panelName}&category=${panel.testCategory}&category_locale=tw`))
+
+      // Check api
+      cy.wait(`@search-${panel.apiType}`).its('response.body')
+        .then((body) => {
+          expect(body.flag).to.match(/0/)
+          expect(body.data.content[0].list.length).to.greaterThan(0)
+        })
+
+      // Check icon color
+      cy.get(panel.icon).should('have.css', 'color', colors.blue1)
+
+      // Check content type
+      const itemClass = `.panel-${panel.componentName}__item`
       cy.get(`.panel > .panel-${panel.componentName}
           > .vue-recycle-scroller:visible ${itemClass}`)
     }
