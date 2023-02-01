@@ -1,6 +1,6 @@
 import colors from '../../fixtures/colors.json'
 
-const sidebarData = [{
+const _sidebarData = [{
   icon: '.svg-template',
   panelName: 'template',
   componentName: 'template',
@@ -35,7 +35,25 @@ const sidebarData = [{
   apiUrl: '/list-design*',
   apiType: 'text',
   testCategory: '手繪感'
+}, {
+  icon: '.svg-upload',
+  panelName: 'file',
+  componentName: 'file',
+  apiUrl: '/*',
+  apiType: 'text',
+  testCategory: ''
 }]
+
+function sidebarData (condition?: string) {
+  switch (condition) {
+    case 'has.search':
+      return _sidebarData.filter((side) => side.panelName !== 'file')
+    case 'has.category':
+      return _sidebarData.filter((side) => side.testCategory !== '')
+    default:
+      return _sidebarData
+  }
+}
 
 describe('Testing SidebarPanel', () => {
   beforeEach(() => {
@@ -45,12 +63,12 @@ describe('Testing SidebarPanel', () => {
   it('Keep scroll position', () => {
     cy.visit('/editor')
 
-    for (const panel of sidebarData) {
+    for (const panel of sidebarData()) {
       cy.get(panel.icon).click()
       cy.get('.vue-recycle-scroller:visible').scrollTo(0, 300)
     }
 
-    for (const panel of sidebarData) {
+    for (const panel of sidebarData()) {
       cy.get(panel.icon).click()
       cy.get('.vue-recycle-scroller:visible')
         .invoke('prop', 'scrollTop')
@@ -61,21 +79,21 @@ describe('Testing SidebarPanel', () => {
   it('Keep scroll position after search', () => {
     cy.visit('/editor')
 
-    for (const panel of sidebarData) {
+    for (const panel of sidebarData('has.search')) {
       cy.get(panel.icon).click()
       cy.get('.vue-recycle-scroller:visible').scrollTo(0, 300)
       cy.get('.search-bar__input').type('紙').type('{enter}')
       cy.get('.vue-recycle-scroller:visible').scrollTo(0, 300)
     }
 
-    for (const panel of sidebarData) {
+    for (const panel of sidebarData('has.search')) {
       cy.get(panel.icon).click()
       cy.get('.vue-recycle-scroller:visible')
         .invoke('prop', 'scrollTop')
         .should('eq', 300)
     }
 
-    for (const panel of sidebarData) {
+    for (const panel of sidebarData('has.search')) {
       cy.get(panel.icon).click()
       cy.get('.search-bar > .svg-close').click()
       cy.get('.vue-recycle-scroller:visible')
@@ -85,14 +103,14 @@ describe('Testing SidebarPanel', () => {
   })
 
   it('Open sidebar panel by url', () => {
-    for (const panel of sidebarData) {
+    for (const panel of sidebarData()) {
       cy.visit(`/editor?panel=${panel.panelName}`)
 
       // Check icon color
       cy.get(panel.icon).should('have.css', 'color', colors.blue1)
 
       // Check content type
-      const itemClass = panel.panelName === 'photo'
+      const itemClass = ['photo', 'file'].includes(panel.panelName)
         ? '.gallery-photo__img'
         : `.panel-${panel.componentName}__item`
       cy.get(`.panel > .panel-${panel.componentName}
@@ -101,7 +119,7 @@ describe('Testing SidebarPanel', () => {
   })
 
   it('Search keyword in sidebar panel by url', () => {
-    for (const panel of sidebarData) {
+    for (const panel of sidebarData('has.search')) {
       const keyword = panel.panelName === 'photo' ? '紙' : 'tag::紙'
       cy.intercept({
         url: panel.apiUrl,
@@ -133,7 +151,7 @@ describe('Testing SidebarPanel', () => {
   })
 
   it('Search category in sidebar panel by url', () => {
-    for (const panel of sidebarData) {
+    for (const panel of sidebarData('has.category')) {
       if (panel.panelName === 'photo') continue
 
       cy.intercept({
