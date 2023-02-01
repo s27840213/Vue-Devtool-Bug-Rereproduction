@@ -5,10 +5,10 @@ transition(name="fade-in-out")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { defineComponent } from 'vue'
 import popupUtils from '@/utils/popupUtils'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'PopupIcon',
   props: {
     iconName: {

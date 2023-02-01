@@ -1,25 +1,27 @@
 <template lang="pug">
-  div(class="general-value-selector")
-    div(class="general-value-selector__wrapper")
-      ul
-        template(v-for="(subArray, index) in valueArray")
-          li(v-for="(i, index2) in subArray" :key="i"
-            class="feature-button"
-            :class="{ active: values.includes(i) }"
-            :style="{'min-width': `${itemMinWidth}px`}")
-            div(class="general-value-selector__value flex-evenly" @click="setValue(index, i)" :style="{'height': `${buttonHeight}px`}")
-              slot(:name="'g' + index + 'i' + index2") {{ 'g' + index + 'i' + index2 }}
-          div(class="horizontal-rule bg-gray-4" v-if="notLastSubArray(index)" :style="{'width': `${itemMinWidth * 2 / 3}px`}")
-
+div(class="general-value-selector")
+  div(class="general-value-selector__wrapper")
+    ul
+      template(v-for="(subArray, index) in valueArray")
+        li(v-for="(i, index2) in subArray" :key="i"
+          class="feature-button"
+          :class="{ active: values.includes(i) }"
+          :style="{'min-width': `${itemMinWidth}px`}")
+          div(class="general-value-selector__value flex-evenly" @click="setValue(index, i)" :style="{'height': `${buttonHeight}px`}")
+            slot(:name="'g' + index + 'i' + index2") {{ 'g' + index + 'i' + index2 }}
+        div(class="horizontal-rule bg-gray-4" v-if="notLastSubArray(index)" :style="{'width': `${Number(itemMinWidth) * 2 / 3}px`}")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     valueArray: Array,
-    values: Array,
+    values: {
+      type: Array as PropType<(number | string)[]>,
+      required: true
+    },
     itemMinWidth: {
       type: String,
       default: '40'
@@ -29,6 +31,7 @@ export default Vue.extend({
       default: '30'
     }
   },
+  emits: ['update'],
   data() {
     return {
     }

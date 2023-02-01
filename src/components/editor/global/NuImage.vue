@@ -1,72 +1,76 @@
 <template lang="pug">
-  div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
-    :id="`nu-image-${config.id}`"
-    :style="containerStyles()"
-    draggable="false")
-    div(v-if="showCanvas"
-      class="shadow__canvas-wrapper"
-      :style="canvasWrapperStyle()")
-      canvas(ref="canvas" :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
-    div(v-if="shadowSrc() && !config.isFrameImg"
-      :id="`nu-image-${config.id}__shadow`"
-      class="shadow__picture"
-      :style="imgShadowStyles()")
-      img(ref="shadow-img"
-        class="nu-image__picture-shadow"
+div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
+  :id="`nu-image-${config.id}`"
+  :style="containerStyles()"
+  draggable="false")
+  div(v-if="showCanvas"
+    class="shadow__canvas-wrapper"
+    :style="canvasWrapperStyle()")
+    canvas(ref="canvas" :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
+  div(v-if="shadowSrc() && !config.isFrameImg"
+    :id="`nu-image-${config.id}__shadow`"
+    class="shadow__picture"
+    :style="imgShadowStyles()")
+    img(ref="shadow-img"
+      class="nu-image__picture-shadow"
+      draggable="false"
+      :src="shadowSrc()"
+      @error="onError")
+  div(class="img-wrapper"
+    :style="imgWrapperstyle()")
+    div(class='nu-image__picture'
+      :style="imgStyles()")
+      svg(v-if="isAdjustImage()"
+        :style="flipStyles()"
+        class="nu-image__svg"
+        :class="{'layer-flip': flippedAnimation() }"
+        :viewBox="svgViewBox()"
+        :width="svgImageWidth()"
+        :height="svgImageHeight()"
+        preserveAspectRatio="none"
+        role="image")
+        defs
+          filter(:id="filterId"
+            color-interpolation-filters="sRGB")
+            component(v-for="(elm, idx) in svgFilterElms()"
+              :key="`${filterId + idx}`"
+              :is="elm.tag"
+              v-bind="elm.attrs")
+              component(v-for="child in elm.child"
+                :key="child.tag"
+                :is="child.tag"
+                v-bind="child.attrs")
+        g
+          g(:filter="`url(#${filterId})`")
+            image(:xlink:href="finalSrc" ref="img"
+              class="nu-image__picture"
+              draggable="false"
+              @error="onError"
+              @load="onLoad")
+      img(v-else-if="src" ref="img"
+        :style="flipStyles()"
+        :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation() }"
+        :src="finalSrc"
         draggable="false"
-        :src="shadowSrc()"
-        @error="onError")
-    div(class="img-wrapper"
-      :style="imgWrapperstyle()")
-      div(class='nu-image__picture'
-        :style="imgStyles()")
-        svg(v-if="isAdjustImage()"
-          :style="flipStyles()"
-          class="nu-image__svg"
-          :class="{'layer-flip': flippedAnimation() }"
-          :viewBox="svgViewBox()"
-          :width="svgImageWidth()"
-          :height="svgImageHeight()"
-          preserveAspectRatio="none"
-          role="image")
-          defs
-            filter(:id="filterId"
-              color-interpolation-filters="sRGB")
-              component(v-for="(elm, idx) in svgFilterElms()"
-                :key="`${filterId + idx}`"
-                :is="elm.tag"
-                v-bind="elm.attrs")
-                component(v-for="child in elm.child"
-                  :key="child.tag"
-                  :is="child.tag"
-                  v-bind="child.attrs")
-          g
-            g(:filter="`url(#${filterId})`")
-              image(:xlink:href="finalSrc" ref="img"
-                class="nu-image__picture"
-                draggable="false"
-                @error="onError"
-                @load="onLoad")
-        img(v-else-if="src" ref="img"
-          :style="flipStyles()"
-          :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation() }"
-          :src="finalSrc"
-          draggable="false"
-          @error="onError"
-          @load="onLoad")
-    template(v-if="hasHalation()")
-      component(v-for="(elm, idx) in cssFilterElms()"
-        :key="`cssFilter${idx}`"
-        :is="elm.tag"
-        v-bind="elm.attrs")
+        @error="onError"
+        @load="onLoad")
+  template(v-if="hasHalation()")
+    component(v-for="(elm, idx) in cssFilterElms()"
+      :key="`cssFilter${idx}`"
+      :is="elm.tag"
+      v-bind="elm.attrs")
 </template>
 
 <script lang="ts">
 import i18n from '@/i18n'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
 import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
+import { AxiosError } from 'axios'
 import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -80,21 +84,39 @@ import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
 import unitUtils from '@/utils/unitUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { AxiosError } from 'axios'
-import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
+import { IPage } from '@/interfaces/page'
 
-export default Vue.extend({
-  inheritAttrs: false,
+export default defineComponent({
+  emits: [],
   props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
-    subLayerIndex: Number,
-    inheritStyle: Object,
-    isBgImgControl: Boolean,
-    imgControl: Boolean,
+    config: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    subLayerIndex: {
+      type: Number,
+      default: -1
+    },
+    inheritStyle: {
+      type: Object
+    },
+    isBgImgControl: {
+      type: Boolean,
+      default: false
+    },
+    imgControl: {
+      type: Boolean,
+      default: false
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -148,8 +170,10 @@ export default Vue.extend({
         stepsUtils.record()
       }
     })
+
+    // this.canvas = this.$refs.canvas as HTMLCanvasElement | undefined
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (!this.isBgImgControl) {
       if (this.config.inProcess) {
         this.setIsProcessing(LayerProcessType.none)
@@ -157,7 +181,7 @@ export default Vue.extend({
       eventUtils.off(ImageEvent.redrawCanvasShadow + this.config.id)
     }
   },
-  destroyed() {
+  unmounted() {
     this.hasDestroyed = true
   },
   data() {
@@ -172,7 +196,9 @@ export default Vue.extend({
         drawCanvasW: 0,
         drawCanvasH: 0,
         MAXSIZE: 0
-      }
+      },
+      page: pageUtils.getPage(this.pageIndex) as IPage
+      // canvas: undefined as HTMLCanvasElement | undefined
     }
   },
   watch: {
@@ -210,11 +236,11 @@ export default Vue.extend({
         this.handleNewShadowEffect()
       } else {
         /** until the canvas is mounted */
-        this.$nextTick(() => this.handleNewShadowEffect())
+        setTimeout(() => this.handleNewShadowEffect(), 0)
       }
     },
     showCanvas(val) {
-      if (val && (this.config as IImage).styles.shadow.srcObj.type) {
+      if (val) {
         setTimeout(() => {
           this.handleNewShadowEffect(false)
         })
@@ -297,12 +323,6 @@ export default Vue.extend({
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'dpi']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
-    canvas: {
-      get(): HTMLCanvasElement | undefined {
-        return this.$refs.canvas as HTMLCanvasElement | undefined
-      },
-      cache: false
-    },
     finalSrc(): string {
       if (this.$route.name === 'Preview') {
         return ImageUtils.appendCompQueryForVivipic(this.src)
@@ -317,13 +337,15 @@ export default Vue.extend({
     },
     showCanvas(): boolean {
       const { pageIndex, layerIndex, subLayerIndex, handleId } = this
+      // console.warn('showCanvas in computed', pageIndex)
       if (typeof pageIndex === 'undefined') {
         return false
       }
-      const isCurrShadowEffectApplied = this.currentShadowEffect() !== ShadowEffectType.none
-      const isHandling = handleId?.pageId === pageUtils.getPage(pageIndex).id && (() => {
+      const currentShadowEffect = (this.config as IImage).styles.shadow.currentEffect
+      const isCurrShadowEffectApplied = currentShadowEffect !== ShadowEffectType.none
+      const isHandling = handleId?.pageId === this.page.id && (() => {
         if (subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined') {
-          const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
+          const { primaryLayer = {} } = this
           return primaryLayer.id === handleId.layerId && primaryLayer.layers[subLayerIndex].id === handleId.subLayerId
         } else {
           return layerUtils.getLayer(pageIndex, layerIndex).id === handleId.layerId
@@ -645,7 +667,9 @@ export default Vue.extend({
       }
     },
     async handleNewShadowEffect(clearShadowSrc = true) {
-      const { canvas, layerInfo, shadowBuff } = this
+      const { layerInfo, shadowBuff } = this
+      const canvas = this.$refs.canvas as HTMLCanvasElement
+
       if (!canvas || this.isUploadingShadowImg) {
         if (!canvas) {
           imageShadowUtils.setIsProcess(this.layerInfo(), false)
@@ -690,12 +714,12 @@ export default Vue.extend({
             await new Promise<void>((resolve) => {
               img.onerror = () => {
                 console.log('img load error')
-                Vue.notify({ group: 'copy', text: `${i18n.t('NN0351')}` })
+                notify({ group: 'copy', text: `${i18n.global.t('NN0351')}` })
                 resolve()
               }
               img.onload = async () => {
                 this.shadowBuff.canvasShadowImg = img
-                const isSVG = await imageShadowPanelUtils.isSVG(img.src, this.config)
+                const isSVG = await imageShadowPanelUtils.isSVG(img.src, this.config as IImage)
                 if (isSVG) {
                   imageShadowPanelUtils.svgImageSizeFormatter(img, 510, () => {
                     /** svgImageSizeFormatter change the img src, need to use onload to catch the changed img */
@@ -788,24 +812,25 @@ export default Vue.extend({
           this.clearShadowSrc()
         }
       }
-      imageShadowUtils.drawingInit(canvas, img, this.config, params)
+      imageShadowUtils.drawingInit(canvas, img, this.config as IImage, params)
       switch (currentEffect) {
         case ShadowEffectType.shadow:
         case ShadowEffectType.frame:
         case ShadowEffectType.blur:
-          imageShadowUtils.drawShadow(canvasList, img, this.config, params)
+          imageShadowUtils.drawShadow(canvasList, img, this.config as IImage, params)
           break
         case ShadowEffectType.imageMatched:
-          imageShadowUtils.drawImageMatchedShadow(canvasList, img, this.config, params)
+          imageShadowUtils.drawImageMatchedShadow(canvasList, img, this.config as IImage, params)
           break
         case ShadowEffectType.floating: {
-          imageShadowUtils.drawFloatingShadow(canvasList, img, this.config, params)
+          imageShadowUtils.drawFloatingShadow(canvasList, img, this.config as IImage, params)
           break
         }
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
-      const { canvas, shadowBuff } = this
+      const { shadowBuff } = this
+      const canvas = this.$refs.canvas as HTMLCanvasElement
       const layerInfo = this.layerInfo()
       const { drawCanvasW, drawCanvasH } = shadowBuff
       if (!canvas || this.isUploadingShadowImg) {
@@ -834,7 +859,7 @@ export default Vue.extend({
           case ShadowEffectType.blur:
           case ShadowEffectType.frame:
             if (shadowBuff.canvasShadowImg as HTMLImageElement) {
-              imageShadowUtils.drawShadow(canvasList, shadowBuff.canvasShadowImg as HTMLImageElement, this.config, {
+              imageShadowUtils.drawShadow(canvasList, shadowBuff.canvasShadowImg as HTMLImageElement, this.config as IImage, {
                 layerInfo,
                 drawCanvasW,
                 drawCanvasH,
@@ -844,7 +869,7 @@ export default Vue.extend({
             break
           case ShadowEffectType.imageMatched:
             if (shadowBuff.canvasShadowImg as HTMLImageElement) {
-              imageShadowUtils.drawImageMatchedShadow(canvasList, shadowBuff.canvasShadowImg as HTMLImageElement, this.config, {
+              imageShadowUtils.drawImageMatchedShadow(canvasList, shadowBuff.canvasShadowImg as HTMLImageElement, this.config as IImage, {
                 layerInfo,
                 drawCanvasW,
                 drawCanvasH,
@@ -854,7 +879,7 @@ export default Vue.extend({
             break
           case ShadowEffectType.floating:
             if (shadowBuff.canvasShadowImg as HTMLImageElement) {
-              imageShadowUtils.drawFloatingShadow(canvasList, shadowBuff.canvasShadowImg as HTMLImageElement, this.config, {
+              imageShadowUtils.drawFloatingShadow(canvasList, shadowBuff.canvasShadowImg as HTMLImageElement, this.config as IImage, {
                 layerInfo,
                 drawCanvasW,
                 drawCanvasH,
@@ -1062,7 +1087,7 @@ export default Vue.extend({
       return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
     },
     hasHalation(): boolean {
-      return this.config.styles.adjust.halation
+      return this.config.styles.adjust?.halation
     },
     srcObj(): any {
       return (this.config as IImage).srcObj

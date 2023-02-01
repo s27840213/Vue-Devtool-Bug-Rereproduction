@@ -1,16 +1,19 @@
 <template lang="pug">
 div(class="preview" :style="containStyles")
-  page-content(v-if="pages.length > 0" :config="pages[0]" :pageIndex="0" :contentScaleRatio="contentScaleRatio" :forceRender="true")
+  page-content(v-if="config" :config="config" :pageIndex="0" :contentScaleRatio="contentScaleRatio" :forceRender="true")
   span(v-if="host" class="preview__host") {{host}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
 import { mapGetters, mapState, mapMutations } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
+import { IPage } from '@/interfaces/page'
+import pageUtils from '@/utils/pageUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'Preview',
   components: {
     PageContent
@@ -35,6 +38,14 @@ export default Vue.extend({
       else if (subdomain) return subdomain[1]
       else return host
     },
+    config(): IPage | undefined {
+      if (this.pages.length === 0) return undefined
+      if (!this.pages[0].isEnableBleed) return this.pages[0]
+      return {
+        ...this.pages[0],
+        ...pageUtils.getPageSizeWithBleeds(this.pages[0])
+      }
+    },
     containStyles(): any {
       return {
         transform: `scale(${1 / this.contentScaleRatio})`
@@ -47,16 +58,16 @@ export default Vue.extend({
     })
   },
   mounted() {
-    const type = this.$router.currentRoute.query.type
-    const designId = this.$router.currentRoute.query.design_id
-    const teamId = this.$router.currentRoute.query.team_id
+    const type = this.$router.currentRoute.value.query.type
+    const designId = this.$router.currentRoute.value.query.design_id
+    const teamId = this.$router.currentRoute.value.query.team_id
     if (!type || !designId || !teamId) {
       uploadUtils.isGettingDesign = false
     }
 
     this.setInScreenshotPreview(true)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.setInScreenshotPreview(false)
   }
 })

@@ -1,11 +1,11 @@
 import store from '@/store'
 import { round } from 'lodash'
 
-interface IMapUnit {
+export interface IMapUnit {
   [key: string]: number
 }
 
-interface IMapSize {
+export interface IMapSize {
   [key: string]: {
     width: number,
     height: number
@@ -16,18 +16,19 @@ const STR_UNITS = ['px', 'cm', 'mm', 'in']
 const IDX_UNITS = Object.fromEntries(STR_UNITS.map((v, i) => [v, i]))
 const PRECISION = 3
 
+/* eslint-disable no-multi-spaces, comma-spacing */
 function mulConvUnit(dpi = 96): number[][] {
   return [
-    // px cm mm in
-    [1, 1 / dpi * 2.54, 1 / dpi * 25.4, 1 / dpi], // px
-    [dpi / 2.54, 1, 10, 1 / 2.54], // cm
-    [dpi / 25.4, 1 / 10, 1, 1 / 25.4], // mm
-    [dpi, 2.54, 25.4, 1] // in
+    // px        cm          mm          in
+    [1         , 2.54 / dpi, 25.4 / dpi, 1 / dpi], // px
+    [dpi / 2.54, 1         , 10        , 1 / 2.54], // cm
+    [dpi / 25.4, 1 / 10    , 1         , 1 / 25.4], // mm
+    [dpi       , 2.54      , 25.4      , 1] // in
   ]
 }
 
 class UnitUtils {
-  get dimensionMap() { return store.getters['user/getDimensionMap'] }
+  get dimensionMap() { return store?.getters['user/getDimensionMap'] ?? {} }
 
   /**
    * Convert value in source unit into target unit.
@@ -107,12 +108,23 @@ class UnitUtils {
   convertAllSize(width: number, height: number, sourceUnit: string): IMapSize {
     return Object.fromEntries(STR_UNITS.map((targetUnit) => [targetUnit, this.convertSize(width, height, sourceUnit, targetUnit)]))
   }
+
+  /**
+   * Get DPI for conversion between px and physical units
+   */
+  getConvertDpi(pageSize: { physicalWidth: number, physicalHeight: number, unit: string }) {
+    const { physicalWidth: width, physicalHeight: height, unit } = pageSize
+    const pxSize = this.convertSize(width, height, unit, 'px')
+    const inSize = this.convertSize(width, height, unit, 'in')
+    return {
+      width: pxSize.width / inSize.width,
+      height: pxSize.height / inSize.height
+    }
+  }
 }
 
 export default new UnitUtils()
 export {
   STR_UNITS,
-  PRECISION,
-  IMapUnit,
-  IMapSize
+  PRECISION
 }

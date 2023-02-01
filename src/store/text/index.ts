@@ -242,7 +242,7 @@ const actions: ActionTree<ITextState, unknown> = {
 const getFontUrl = async (type: string, url: string, face: string, userId: string, assetId: string, ver = 0): Promise<string> => {
   let cssUrl
   let response
-  const isInPrevew = router.currentRoute.name === 'Preview'
+  const isInPrevew = router.currentRoute.value.name === 'Preview'
   switch (type) {
     case 'public':
       cssUrl = addPlatform(`https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`)
@@ -308,7 +308,7 @@ const randomizeVer = (url: string): string => {
   return url.replace(/ver=[0-9a-zA-Z]+/g, `ver=${generalUtils.generateRandomString(6)}`)
 }
 
-const getCssUrl = (urlMap: {[key:string]: string}, ver: number) => {
+const getCssUrl = (urlMap: { [key: string]: string }, ver: number) => {
   const cssUrl = urlMap.css
   return cssUrl ? addPlatform(`${cssUrl}&ver=${ver}&origin=true`) : ''
 }
@@ -327,4 +327,4 @@ export default {
   getters,
   mutations,
   actions
-} as ModuleTree<ITextState>
+}

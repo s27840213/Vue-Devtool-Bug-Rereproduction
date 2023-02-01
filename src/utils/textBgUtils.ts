@@ -24,7 +24,7 @@ export class Point {
     )
   }
 
-  add(p: {x: number, y: number}): Point {
+  add(p: { x: number, y: number }): Point {
     return new Point(
       this.x + p.x,
       this.y + p.y
@@ -39,7 +39,7 @@ export class Point {
     return `${this.x} ${this.y}`
   }
 }
-function obj2Point(p: {x: number, y: number}) {
+function obj2Point(p: { x: number, y: number }) {
   return new Point(p.x, p.y)
 }
 
@@ -112,7 +112,7 @@ export class Path {
 }
 
 class Gooey {
-  controlPoints = [[], []] as {top: Point, bottom: Point, oldHeight: number}[][]
+  controlPoints = [[], []] as { top: Point, bottom: Point, oldHeight: number }[][]
   bRadius: number
   constructor(textBg: ITextGooey, rects: DOMRect[]) {
     this.bRadius = textBg.bRadius
@@ -177,7 +177,8 @@ class Gooey {
       for (let i = 1; i < side.length - 1;) {
         const cps = side[i]
         if (side.length > 3 && cps.bottom.y - cps.top.y < cps.oldHeight * 0.1) {
-          Vue.delete(side, i)
+          // Vue.delete(side, i)
+          delete side[i]
           count++
         } else i++
       }
@@ -472,19 +473,20 @@ class TextBg {
         if (((nextTop <= currTop && currTop <= nextBottom &&
           nextTop <= currBottom && currBottom <= nextBottom) ||
           (currTop <= nextTop && nextTop <= currBottom &&
-          currTop <= nextBottom && nextBottom <= currBottom))) {
+            currTop <= nextBottom && nextBottom <= currBottom))) {
           rect.y = Math.min(rect.y, next.y)
           rect.width += next.width
           rect.height = Math.max(rect.height, next.height)
         } else break
-        Vue.delete(rects, nextIndex)
+        // Vue.delete(rects, nextIndex)
+        delete rects[nextIndex]
       }
     })
     // Deal with empty line
     rects.forEach((rect: DOMRect, index: number) => {
       if (rect.width < 1) {
         let nextIndex = index + 1
-        while (nextIndex < rects.length && rects[nextIndex].width < 1)nextIndex++
+        while (nextIndex < rects.length && rects[nextIndex].width < 1) nextIndex++
         const next = rects[nextIndex] ?? { x: bodyRect.x, width: bodyRect.width }
         const prev = rects[index - 1] ?? { x: bodyRect.x, width: bodyRect.width }
         const target = (prev.width < next.width) ? prev : next
@@ -643,7 +645,7 @@ class TextBg {
     } else if (isITextGooey(effect) || isITextUnderline(effect)) {
       return ['color', effect.color]
     } else {
-      return ['color', (effect as unknown as {color:string}).color || '']
+      return ['color', (effect as unknown as { color: string }).color || '']
     }
   }
 
@@ -655,7 +657,7 @@ class TextBg {
     const newShareAttrs = { opacity: textBg.opacity }
     const newEffect = { opacity: shareAttrs.opacity }
     if (isITextBox(textBg) &&
-        ['square-hollow', 'rounded-hollow', 'square-both', 'rounded-both'].includes(textBg.name)) {
+      ['square-hollow', 'rounded-hollow', 'square-both', 'rounded-both'].includes(textBg.name)) {
       Object.assign(newShareAttrs, { bStroke: textBg.bStroke })
       Object.assign(newEffect, { bStroke: shareAttrs.bStroke })
     }

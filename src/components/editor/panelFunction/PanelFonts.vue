@@ -1,64 +1,61 @@
 <template lang="pug">
-  div(class="panel-fonts")
-    div(v-if="!noTitle && !isMobile" class="panel-fonts__title")
-      span(v-if="!isMobile" class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
-      svg-icon(
-        v-if="!isMobile"
-        class="panel-fonts__close pointer"
-        :iconName="'close'"
-        :iconWidth="'30px'"
-        :iconColor="'gray-2'"
-        @click.native="closeFontsPanel")
-    search-bar(placeholder="Search font"
-      clear
-      :defaultKeyword="keywordLabel"
-      @search="handleSearch")
-    div(v-if="emptyResultMessage" class="text-gray-3") {{ emptyResultMessage }}
-    font-tag(v-if="!keyword" :tags="tags"
-            @search="handleSearch" @showMore="setShowMore")
-    //- Search result and main content
-    category-list(v-for="item in categoryListArray"
-                  v-show="item.show" :ref="item.key" :key="item.key"
-                  :list="item.content" @loadMore="handleLoadMore")
-      template(v-if="pending" #after)
-        div(class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="gray-1"
-            iconWidth="20px")
-      template(v-slot:title="{ title }")
-        div(class="panel-fonts__category-title") {{ title }}
-      template(v-slot:category-font-item="{ list }")
-        category-font-item(v-for="item in list"
-          :key="item.id"
-          :item="item"
-          :textStyleType="textStyleType")
-    div(v-if="showMore" class="cover-background")
+div(class="panel-fonts")
+  div(v-if="!noTitle && !isMobile" class="panel-fonts__title")
+    span(v-if="!isMobile" class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
+    svg-icon(
+      v-if="!isMobile"
+      class="panel-fonts__close pointer"
+      :iconName="'close'"
+      :iconWidth="'30px'"
+      :iconColor="'gray-2'"
+      @click="closeFontsPanel")
+  search-bar(placeholder="Search font"
+    clear
+    :defaultKeyword="keywordLabel"
+    @search="handleSearch")
+  div(v-if="emptyResultMessage" class="text-gray-3") {{ emptyResultMessage }}
+  font-tag(v-if="!keyword" :tags="tags"
+          @search="handleSearch" @showMore="setShowMore")
+  //- Search result and main content
+  category-list(v-for="item in categoryListArray"
+                v-show="item.show" :ref="item.key" :key="item.key"
+                :list="item.content" @loadMore="handleLoadMore")
+    template(v-if="pending" #after)
+      div(class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="gray-1"
+          iconWidth="20px")
+    template(v-slot:title="{ title }")
+      div(class="panel-fonts__category-title") {{ title }}
+    template(v-slot:category-font-item="{ list }")
+      category-font-item(v-for="item in list"
+        :key="item.id"
+        :item="item"
+        :textStyleType="textStyleType || ''")
+  div(v-if="showMore" class="cover-background")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 import FileUtils from '@/utils/fileUtils'
 import TextUtils from '@/utils/textUtils'
 import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
-import CategoryListFont from '@/components/category/CategoryListFont.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import { IListServiceContentData, IListServiceContentDataItem, ICategoryItem, ICategoryList } from '@/interfaces/api'
 import uploadUtils from '@/utils/uploadUtils'
 import { IBrandFont } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
-import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import FontTag from '@/components/global/Tags.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     CategoryList,
     CategoryFontItem,
-    CategoryListFont,
     FontTag
   },
   props: {
@@ -66,8 +63,11 @@ export default Vue.extend({
       type: Boolean,
       default: false
     },
-    textStyleType: String
+    textStyleType: {
+      type: String,
+    }
   },
+  emits: ['closeFontsPanel'],
   data() {
     return {
       FileUtils
@@ -82,7 +82,7 @@ export default Vue.extend({
       this.addFontTags()
     }
   },
-  destroyed() {
+  unmounted() {
     this.setShowMore(false)
     TextUtils.setCurrTextInfo({ layerIndex: -1 })
   },
@@ -221,9 +221,9 @@ export default Vue.extend({
     emptyResultMessage(): string {
       const { keyword, pending } = this
       if (pending || !keyword || this.searchResult.length > 0) return ''
-      return `${i18n.t('NN0393', {
+      return `${this.$t('NN0393', {
         keyword: this.keywordLabel,
-        target: i18n.tc('NN0353', 1)
+        target: this.$tc('NN0353', 1)
       })}`
     }
   },
@@ -349,7 +349,7 @@ export default Vue.extend({
     }
   }
 }
-.category-list::v-deep::-webkit-scrollbar-thumb {
+.category-list::-webkit-scrollbar-thumb {
   border: 3px solid #ffffff;
 }
 .cover-background {

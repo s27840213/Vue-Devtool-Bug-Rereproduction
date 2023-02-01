@@ -1,31 +1,32 @@
 <template lang="pug">
-  div(class="panel-spacing")
-    mobile-slider(:title="`${$t('NN0109')}`"
-      :borderTouchArea="true"
-      :value="fontSpacing"
-      :min="fieldRange.fontSpacing.min"
-      :max="fieldRange.fontSpacing.max"
-      :step="1"
-      :propKey="'fs'"
-      @update:fs="updateFontSpacing")
-    mobile-slider(:title="`${$t('NN0110')}`"
-      :borderTouchArea="true"
-      :value="lineHeight"
-      :min="fieldRange.lineHeight.min"
-      :max="fieldRange.lineHeight.max"
-      :step="0.01"
-      :propKey="'lh'"
-      @update:lh="updateLineHeight")
+div(class="panel-spacing")
+  mobile-slider(:title="`${$t('NN0109')}`"
+    :borderTouchArea="true"
+    :value="fontSpacing"
+    :min="fieldRange.fontSpacing.min"
+    :max="fieldRange.fontSpacing.max"
+    :step="1"
+    :propKey="'fs'"
+    @update:fs="updateFontSpacing")
+  mobile-slider(:title="`${$t('NN0110')}`"
+    :borderTouchArea="true"
+    :value="lineHeight"
+    :min="fieldRange.lineHeight.min"
+    :max="fieldRange.lineHeight.max"
+    :step="0.01"
+    :propKey="'lh'"
+    @update:lh="updateLineHeight")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import layerUtils from '@/utils/layerUtils'
 import { mapState } from 'vuex'
 import textUtils from '@/utils/textUtils'
-import generalUtils from '@/utils/generalUtils'
-export default Vue.extend({
+
+export default defineComponent({
+  emits: [],
   components: {
     MobileSlider
   },

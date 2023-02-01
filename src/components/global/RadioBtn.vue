@@ -1,21 +1,31 @@
 <template lang="pug">
-  div(class="radio-btn relative pointer"
-    @click="select"
-    @mouseenter="setHovered(true)"
-    @mouseleave="setHovered(false)")
-    svg-icon(v-if="isSelected" class="radio-btn__svg" iconName="radio-checked" iconWidth="12px" iconColor="blue-1")
-    svg-icon(v-else class="radio-btn__svg" iconName="radio" iconWidth="12px" :iconColor="circleColor || 'white'")
-    div(v-if="isHovered" class="radio-btn__hover-effect")
+div(class="radio-btn relative pointer"
+  @click="select"
+  @mouseenter="setHovered(true)"
+  @mouseleave="setHovered(false)")
+  svg-icon(v-if="isSelected" class="radio-btn__svg" iconName="radio-checked" iconWidth="12px" iconColor="blue-1")
+  svg-icon(v-else class="radio-btn__svg" iconName="radio" iconWidth="12px" :iconColor="circleColor || 'white'")
+  div(v-if="isHovered" class="radio-btn__hover-effect")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
-    isSelected: Boolean,
-    formatKey: String,
-    circleColor: String
+    isSelected: {
+      type: Boolean,
+      required: true
+    },
+    formatKey: {
+      type: String,
+      required: true
+    },
+    circleColor: {
+      type: String,
+      required: true
+    }
   },
+  emits: ['select'],
   data() {
     return {
       isHovered: false

@@ -1,49 +1,49 @@
 <template lang="pug">
-  div(class="function-panel"
-    :style="functionPanelStyles")
-    //- span {{pageUtils._3dEnabledPageIndex}},
-    //- span {{pageUtils.currFocusPageIndex}},
-    //- span {{pageUtils._3dEnabledPageIndex === pageUtils.currFocusPageIndex}}
-    div(class="function-panel__topbar")
-      svg-icon(:class="{'pointer': !isInFirstStep}"
-        :iconName="'undo'"
-        :iconWidth="'20px'"
-        :iconColor="(!inBgRemoveMode && !isInFirstStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveFirstStep) ? 'gray-2' : 'gray-4'"
-        @click.native="undo"
-        v-hint="$t('NN0119')"
-      )
-      svg-icon(:class="{'pointer': !isInLastStep}"
-        :iconName="'redo'"
-        :iconWidth="'20px'"
-        :iconColor="(!inBgRemoveMode && !isInLastStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveLastStep) ? 'gray-2' : 'gray-4'"
-        @click.native="redo"
-        v-hint="$t('NN0120')")
-      download-btn
-      btn(:hasIcon="true"
-        :iconName="'menu'"
-        :iconWidth="'25px'"
-        :type="!inBgRemoveMode  ? 'primary-sm' : 'inactive-sm'"
-        :disabled="inBgRemoveMode"
-        :squared="true"
-        class="btn-file rounded full-height"
-        @click.native="openFilePopup")
-    div(v-if="!isShowPagePreview"
-        class="function-panel__content"
-        :class="{'dim-background': showMore}")
-      panel-bg-remove(v-if="showBgRemove")
-      panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
-      panel-general(v-if="showGeneral")
-      panel-page-setting(v-if="showPageSetting")
-      panel-background-setting(v-if="showPageSetting")
-      panel-shape-setting(v-if="showShapeSetting")
-      panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel")
-      panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
-      panel-photo-setting(v-if="showPhotoSetting")
-      panel-img-ctrl(v-if="isImgCtrl")
+div(class="function-panel"
+  :style="functionPanelStyles")
+  //- span {{pageUtils._3dEnabledPageIndex}},
+  //- span {{pageUtils.currFocusPageIndex}},
+  //- span {{pageUtils._3dEnabledPageIndex === pageUtils.currFocusPageIndex}}
+  div(class="function-panel__topbar")
+    svg-icon(:class="{'pointer': !isInFirstStep}"
+      :iconName="'undo'"
+      :iconWidth="'20px'"
+      :iconColor="(!inBgRemoveMode && !isInFirstStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveFirstStep) ? 'gray-2' : 'gray-4'"
+      @click="undo"
+      v-hint="$t('NN0119')"
+    )
+    svg-icon(:class="{'pointer': !isInLastStep}"
+      :iconName="'redo'"
+      :iconWidth="'20px'"
+      :iconColor="(!inBgRemoveMode && !isInLastStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveLastStep) ? 'gray-2' : 'gray-4'"
+      @click="redo"
+      v-hint="$t('NN0120')")
+    download-btn
+    btn(:hasIcon="true"
+      :iconName="'menu'"
+      :iconWidth="'25px'"
+      :type="!inBgRemoveMode  ? 'primary-sm' : 'inactive-sm'"
+      :disabled="inBgRemoveMode"
+      :squared="true"
+      class="btn-file rounded full-height"
+      @click="openFilePopup")
+  div(v-if="!isShowPagePreview"
+      class="function-panel__content"
+      :class="{'dim-background': showMore}")
+    panel-bg-remove(v-if="showBgRemove")
+    panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
+    panel-general(v-if="showGeneral")
+    panel-page-setting(v-if="showPageSetting")
+    panel-background-setting(v-if="showPageSetting")
+    panel-shape-setting(v-if="showShapeSetting")
+    panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel")
+    panel-text-effect-setting(v-if="showTextSetting")
+    panel-photo-setting(v-if="showPhotoSetting")
+    panel-img-ctrl(v-if="isImgCtrl")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import PanelGeneral from '@/components/editor/panelFunction/PanelGeneral.vue'
 import PanelTextSetting from '@/components/editor/panelFunction/PanelTextSetting.vue'
 import PanelColorPicker from '@/components/editor/panelFunction/PanelColorPicker.vue'
@@ -68,7 +68,7 @@ import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
 import colorUtils from '@/utils/colorUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     PanelGeneral,
     PanelTextSetting,
@@ -84,6 +84,7 @@ export default Vue.extend({
     PanelPhotoShadow,
     PanelImgCtrl
   },
+  emits: ['toggleColorPanel'],
   data() {
     return {
       isFontsPanelOpened: false,

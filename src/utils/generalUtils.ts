@@ -1,7 +1,6 @@
 import { IPage } from '@/interfaces/page'
-import router from '@/router'
 import store from '@/store'
-import Vue from 'vue'
+import { nextTick } from 'vue'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import _ from 'lodash'
@@ -39,7 +38,7 @@ class GeneralUtils {
     const oldScrollWidth = el.scrollWidth
     const oldScrollHeight = el.scrollHeight
 
-    Vue.nextTick(() => {
+    nextTick(() => {
       el.scrollLeft = Math.round((scrollCenterX * el.scrollWidth / oldScrollWidth - el.clientWidth) / 2)
       el.scrollTop = Math.round((scrollCenterY * el.scrollHeight / oldScrollHeight - el.clientHeight) / 2)
     })
@@ -47,7 +46,7 @@ class GeneralUtils {
 
   scrollToCenter(el?: HTMLElement, vertical = true, horizontal = true) {
     const target = el !== undefined ? el : document.querySelector('.editor-view')
-    Vue.nextTick(() => {
+    nextTick(() => {
       if (!target) return
       if (vertical) {
         target.scrollTop = (target.scrollHeight - target.clientHeight) / 2
@@ -315,9 +314,7 @@ class GeneralUtils {
       normalInit({ reset: true })
     }
 
-    const query = _.omit(router.currentRoute.query,
-      ['panel', 'category', 'category_locale', 'search'])
-    router.replace({ query })
+    // Omit url query 'panel', 'category', 'category_locale', 'search' in Editor.vue
   }
 
   downloadTextFile(filename: string, content: string) {

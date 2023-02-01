@@ -1,30 +1,35 @@
 <template lang="pug">
-  div(class="design-item")
-    div(class="design-item__block pointer")
-      div(class="design-item__img-container"
-        :style="containerStyles()")
-        img(v-if="previewCheckReady"
-            class="design-item__thumbnail"
-            :style="imageStyles()"
-            :src="appliedUrl")
-      div(class="design-item__controller")
-        div(class="design-item__controller-content"
-          @click.self="handleClick")
-    div(class="design-item__name")
-      div(class="design-item__name__container")
-        span(:title="config.name") {{ config.name }}
+div(class="design-item")
+  div(class="design-item__block pointer")
+    div(class="design-item__img-container"
+      :style="containerStyles()")
+      img(v-if="previewCheckReady"
+          class="design-item__thumbnail"
+          :style="imageStyles()"
+          :src="appliedUrl")
+    div(class="design-item__controller")
+      div(class="design-item__controller-content"
+        @click.self="handleClick")
+  div(class="design-item__name")
+    div(class="design-item__name__container")
+      span(:title="config.name") {{ config.name }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import imageUtils from '@/utils/imageUtils'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import designUtils from '@/utils/designUtils'
+import { IDesign } from '@/interfaces/design'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    config: Object
+    config: {
+      type: Object as PropType<IDesign>,
+      required: true
+    }
   },
   data() {
     return {
@@ -64,6 +69,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      setDesignThumbnail: 'design/UPDATE_setDesignThumbnail'
+    }),
     containerStyles() {
       return (this.aspectRatio < 1.2 && this.aspectRatio > 0.83) ? { padding: '26px' } : { padding: '17px' }
     },
@@ -89,7 +97,10 @@ export default Vue.extend({
       this.previewCheckReady = false
       if (this.config.polling) {
         this.previewCheckReady = true
-        this.config.thumbnail = this.previewPlaceholder
+        this.setDesignThumbnail({
+          asset_index: this.config.asset_index,
+          thumbnail: this.previewPlaceholder
+        })
         this.pollingStep()
       } else {
         imageUtils.getImageSize(this.configPreview, 150, 150, false).then((size) => {
@@ -97,7 +108,10 @@ export default Vue.extend({
           this.imgWidth = width
           this.imgHeight = height
           this.previewCheckReady = true
-          this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
+          this.setDesignThumbnail({
+            asset_index: this.config.asset_index,
+            thumbnail: exists ? this.configPreview : this.previewPlaceholder
+          })
         })
       }
     },
@@ -115,7 +129,10 @@ export default Vue.extend({
         this.imgWidth = width
         this.imgHeight = height
         if (exists) {
-          this.config.thumbnail = this.configPreview
+          this.setDesignThumbnail({
+            asset_index: this.config.asset_index,
+            thumbnail: this.configPreview
+          })
         } else if (step < 35) {
           setTimeout(() => {
             this.pollingStep(step + 1)

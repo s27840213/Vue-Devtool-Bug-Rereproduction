@@ -1,6 +1,6 @@
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 
-interface IMobileEditorState {
+export interface IMobileEditorState {
   closeMobilePanelFlag: boolean,
   mobileAllPageMode: boolean
   inMultiSelectionMode: boolean,

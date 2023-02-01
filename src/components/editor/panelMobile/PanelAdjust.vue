@@ -1,19 +1,19 @@
 <template lang="pug">
-  div(class="panel-adjust")
-    div(v-for="field in fields" :key="field.name")
-      mobile-slider(:title="`${field.label}`"
-        :borderTouchArea="true"
-        :name="field.name"
-        :value="adjustVal[field.name] || 0"
-        :min="field.min"
-        :max="field.max"
-        @update="handleField")
-    div(class="panel-adjust__reset")
-      button(@click="reset") {{ 'Reset' }}
+div(class="panel-adjust")
+  div(v-for="field in fields" :key="field.name")
+    mobile-slider(:title="`${field.label}`"
+      :borderTouchArea="true"
+      :name="field.name"
+      :value="adjustVal[field.name] || 0"
+      :min="field.min"
+      :max="field.max"
+      @update="handleField")
+  div(class="panel-adjust__reset")
+    button(@click="reset") {{ 'Reset' }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import { mapGetters, mapState } from 'vuex'
@@ -22,7 +22,8 @@ import pageUtils from '@/utils/pageUtils'
 import { IFrame } from '@/interfaces/layer'
 import backgroundUtils from '@/utils/backgroundUtils'
 import generalUtils from '@/utils/generalUtils'
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     MobileSlider
   },

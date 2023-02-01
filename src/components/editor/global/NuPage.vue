@@ -1,6 +1,8 @@
 <template lang="pug">
+div(class="page-wrapper" ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex}`")
   div(class="nu-page"
-      :style="pageRootStyles"
+      :id="`nu-page_${pageIndex}`"
+      :style="pageStyles"
       ref="page")
     div(v-if="!isDetailPage && !isMobile"
       class="page-title text-left pb-10"
@@ -66,47 +68,40 @@
       div(class='pages-wrapper'
           :class="`nu-page-${pageIndex}`"
           :style="wrapperStyles()"
+          @keydown.self="handleSpecialCharacter"
           @keydown.delete.exact.self.prevent.stop="ShortcutUtils.del()"
-          @keydown.ctrl.67.exact.stop.prevent.self="ShortcutUtils.copy()"
-          @keydown.meta.67.exact.stop.prevent.self="ShortcutUtils.copy()"
-          @keydown.ctrl.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
-          @keydown.meta.68.exact.stop.prevent.self="ShortcutUtils.deselect()"
-          @keydown.ctrl.88.exact.stop.prevent.self="ShortcutUtils.cut()"
-          @keydown.meta.88.exact.stop.prevent.self="ShortcutUtils.cut()"
-          @keydown.ctrl.83.exact.stop.prevent.self="ShortcutUtils.save()"
-          @keydown.meta.83.exact.stop.prevent.self="ShortcutUtils.save()"
-          @keydown.ctrl.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
-          @keydown.meta.86.exact.stop.prevent.self="ShortcutUtils.paste($event)"
-          @keydown.ctrl.71.exact.stop.prevent.self="ShortcutUtils.group()"
-          @keydown.meta.71.exact.stop.prevent.self="ShortcutUtils.group()"
-          @keydown.ctrl.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
-          @keydown.meta.65.exact.stop.prevent.self="ShortcutUtils.selectAll()"
-          @keydown.ctrl.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
-          @keydown.meta.shift.71.exact.stop.prevent.self="ShortcutUtils.ungroup()"
-          @keydown.ctrl.90.exact.stop.prevent.self="undo()"
-          @keydown.meta.90.exact.stop.prevent.self="undo()"
-          @keydown.ctrl.shift.90.exact.stop.prevent.self="redo()"
-          @keydown.meta.shift.90.exact.stop.prevent.self="redo()"
-          @keydown.ctrl.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-          @keydown.meta.187.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-          @keydown.ctrl.61.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-          @keydown.meta.61.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-          @keydown.ctrl.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-          @keydown.meta.189.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-          @keydown.ctrl.107.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-          @keydown.meta.107.exact.stop.prevent.self="ShortcutUtils.zoomIn()"
-          @keydown.ctrl.109.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-          @keydown.meta.109.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-          @keydown.ctrl.173.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-          @keydown.meta.173.exact.stop.prevent.self="ShortcutUtils.zoomOut()"
-          @keydown.37.exact.stop.prevent.self="ShortcutUtils.left()"
-          @keydown.38.exact.stop.prevent.self="ShortcutUtils.up()"
-          @keydown.39.exact.stop.prevent.self="ShortcutUtils.right()"
-          @keydown.40.exact.stop.prevent.self="ShortcutUtils.down()"
-          @keydown.shift.37.exact.self.prevent.stop="ShortcutUtils.left(true)"
-          @keydown.shift.38.exact.self.prevent.stop="ShortcutUtils.up(true)"
-          @keydown.shift.39.exact.self.prevent.stop="ShortcutUtils.right(true)"
-          @keydown.shift.40.exact.self.prevent.stop="ShortcutUtils.down(true)"
+          @keydown.ctrl.c.exact.self.prevent.stop="ShortcutUtils.copy()"
+          @keydown.meta.c.exact.self.prevent.stop="ShortcutUtils.copy()"
+          @keydown.ctrl.d.exact.self.prevent.stop="ShortcutUtils.deselect()"
+          @keydown.meta.d.exact.self.prevent.stop="ShortcutUtils.deselect()"
+          @keydown.ctrl.x.exact.self.prevent.stop="ShortcutUtils.cut()"
+          @keydown.meta.x.exact.self.prevent.stop="ShortcutUtils.cut()"
+          @keydown.ctrl.s.exact.self.prevent.stop="ShortcutUtils.save()"
+          @keydown.meta.s.exact.self.prevent.stop="ShortcutUtils.save()"
+          @keydown.ctrl.v.exact.self.prevent.stop="ShortcutUtils.paste($event)"
+          @keydown.meta.v.exact.self.prevent.stop="ShortcutUtils.paste($event)"
+          @keydown.ctrl.g.exact.self.prevent.stop="ShortcutUtils.group()"
+          @keydown.meta.g.exact.self.prevent.stop="ShortcutUtils.group()"
+          @keydown.ctrl.a.exact.self.prevent.stop="ShortcutUtils.selectAll()"
+          @keydown.meta.a.exact.self.prevent.stop="ShortcutUtils.selectAll()"
+          @keydown.ctrl.shift.g.exact.self.prevent.stop="ShortcutUtils.ungroup()"
+          @keydown.meta.shift.g.exact.self.prevent.stop="ShortcutUtils.ungroup()"
+          @keydown.ctrl.z.exact.self.prevent.stop="undo()"
+          @keydown.meta.z.exact.self.prevent.stop="undo()"
+          @keydown.ctrl.shift.z.exact.self.prevent.stop="redo()"
+          @keydown.meta.shift.z.exact.self.prevent.stop="redo()"
+          @keydown.ctrl.-.exact.self.prevent.stop="ShortcutUtils.zoomOut()"
+          @keydown.meta.-.exact.self.prevent.stop="ShortcutUtils.zoomOut()"
+          @keydown.ctrl.+.exact.self.prevent.stop="ShortcutUtils.zoomIn()"
+          @keydown.meta.+.exact.self.prevent.stop="ShortcutUtils.zoomIn()"
+          @keydown.left.exact.self.prevent.stop="ShortcutUtils.left()"
+          @keydown.up.exact.self.prevent.stop="ShortcutUtils.up()"
+          @keydown.right.exact.self.prevent.stop="ShortcutUtils.right()"
+          @keydown.down.exact.self.prevent.stop="ShortcutUtils.down()"
+          @keydown.shift.left.exact.self.prevent.stop="ShortcutUtils.left(true)"
+          @keydown.shift.up.exact.self.prevent.stop="ShortcutUtils.up(true)"
+          @keydown.shift.right.exact.self.prevent.stop="ShortcutUtils.right(true)"
+          @keydown.shift.down.exact.self.prevent.stop="ShortcutUtils.down(true)"
           @mouseover="togglePageHighlighter(true)"
           @mouseleave="togglePageHighlighter(false)"
           tabindex="0")
@@ -122,7 +117,7 @@
             page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
             div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
             div(v-if="currSelectedIndex !== -1" class="page-control" :style="styles('control')")
-              nu-controller(v-if="currFocusPageIndex === pageIndex" data-identifier="controller"
+              nu-controller(v-if="currFocusPageIndex === pageIndex && currLayer.type" data-identifier="controller"
                 :key="`controller-${currLayer.id}`"
                 :layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
@@ -131,12 +126,13 @@
                 :contentScaleRatio="contentScaleRatio"
                 @setFocus="setFocus()"
                 @isDragging="handleDraggingController")
-            dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
-      div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
+            dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
+      div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex)"
         class="page-highlighter"
         :style="wrapperStyles()")
-      div(v-if="config.isEnableBleed && hasBleed" :class="`bleed-line nu-page-bleed-${pageIndex}`" :style="bleedLineStyles()")
-      div(v-if="(currActivePageIndex === pageIndex && isDetailPage)"
+      //- for ruler to get rectangle of page content (without bleeds)
+      div(v-if="config.isEnableBleed" :class="`nu-page-bleed-${pageIndex}`" :style="bleedLineAreaStyles()")
+      div(v-if="(currActivePageIndex === pageIndex && isDetailPage && !isImgCtrl && !isBgImgCtrl)"
           class="page-resizer"
           ref="pageResizer"
           @pointerdown.left.stop="pageResizeStart($event)"
@@ -150,7 +146,6 @@
       snap-line-area(
         :config="config"
         :pageIndex="pageIndex"
-        :pageScaleRatio="pageScaleRatio"
         :snapUtils="snapUtils"
       )
     template(v-else)
@@ -160,7 +155,8 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapMutations, mapGetters, mapState } from 'vuex'
 import { IShape, IText, IImage, IGroup, ILayer, ITmp, IFrame, IImageStyle } from '@/interfaces/layer'
 import PageContent from '@/components/editor/page/PageContent.vue'
@@ -174,7 +170,6 @@ import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
 import layerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import NuImage from '@/components/editor/global/NuImage.vue'
 import DimBackground from '@/components/editor/page/DimBackground.vue'
 import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
@@ -185,18 +180,15 @@ import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
 import cssConverter from '@/utils/cssConverter'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
-import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
+import i18n from '@/i18n'
 import { floor, round } from 'lodash'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
-import resizeUtils from '@/utils/resizeUtils'
 
-export default Vue.extend({
-  inheritAttrs: false,
+export default defineComponent({
   components: {
-    NuImage,
     NuBackgroundController,
     PageContent,
     DimBackground,
@@ -204,7 +196,7 @@ export default Vue.extend({
     LazyLoad
   },
   created() {
-    this.pageState.modules.snapUtils.pageIndex = this.pageIndex
+    this.updateSnapUtilsIndex(this.pageIndex)
   },
   data() {
     return {
@@ -233,27 +225,50 @@ export default Vue.extend({
       },
       generalUtils,
       pageUtils,
-      currDraggingIndex: -1,
-      displayDPI: 96
+      currDraggingIndex: -1
     }
   },
   props: {
-    pageState: Object as () => IPageState,
-    pageIndex: Number,
-    pageScaleRatio: Number,
-    isAnyBackgroundImageControl: Boolean,
-    overflowContainer: HTMLElement,
-    isScaling: Boolean
+    pageState: {
+      type: Object as PropType<IPageState>,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    isAnyBackgroundImageControl: {
+      type: Boolean,
+      required: true
+    },
+    overflowContainer: {
+      type: HTMLElement
+    },
+    isScaling: {
+      type: Boolean,
+      default: false
+    }
   },
+  emits: ['stepChange'],
   mounted() {
     this.initialPageHeight = (this.config as IPage).height
     this.$nextTick(() => {
       this.isShownScrollBar = !(this.overflowContainer?.scrollHeight === this.overflowContainer?.clientHeight)
+      // const el = this.$refs.page as HTMLElement
+      // const pz = new PinchZoom(el, {
+      //   minZoom: (pageUtils.mobileMinScaleRatio * 0.01),
+      //   onZoomStart: (pz, e) => {
+      //     console.log('zoom start', pz)
+      //   },
+      //   onDoubleTap: (pz, e) => {
+      //     console.log('onDoubleTap', pz, e)
+      //   }
+      // })
     })
   },
   watch: {
     pageIndex(val) {
-      this.pageState.modules.snapUtils.pageIndex = val
+      this.updateSnapUtilsIndex(val)
     },
     isOutOfBound(val) {
       if (val && this.currFunctionPanelType === FunctionPanelType.photoShadow && layerUtils.pageIndex === this.pageIndex) {
@@ -294,17 +309,27 @@ export default Vue.extend({
       isProcessingShadow: 'shadow/isProcessing',
       contentScaleRatio: 'getContentScaleRatio',
       pagesLength: 'getPagesLength',
-      showAllAdminTool: 'user/showAllAdminTool'
+      showAllAdminTool: 'user/showAllAdminTool',
+      useMobileEditor: 'getUseMobileEditor',
+      currCardIndex: 'mobileEditor/getCurrCardIndex',
+      topBound: 'page/getTopBound',
+      bottomBound: 'page/getBottomBound',
+      isImgCtrl: 'imgControl/isImgCtrl',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
     config(): IPage {
-      return this.pageState.config
+      if (!this.pageState.config.isEnableBleed) return this.pageState.config
+      return {
+        ...this.pageState.config,
+        ...pageUtils.getPageSizeWithBleeds(this.pageState.config)
+      }
     },
     scaleContainerStyles(): { [index: string]: string } {
+      const transform = `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`
       return {
-        // transform: `scale(${1})`
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
-        transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`,
+        transform,
         willChange: this.isScaling ? 'transform' : ''
       }
     },
@@ -345,14 +370,32 @@ export default Vue.extend({
     isDetailPage(): boolean {
       return this.groupType === 1
     },
-    pageRootStyles(): { [index: string]: string } {
+    pageStyles(): any {
       return {
-        margin: this.isDetailPage ? '0px auto' : '25px auto',
+        // margin: this.isDetailPage ? '0px auto' : '25px auto',
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
+    pageRootStyles(): { [index: string]: string | number } {
+      let transform = ''
+      let margin = ''
+      let position = 'relative'
+      if (generalUtils.isTouchDevice()) {
+        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
+        position = 'absolute'
+      } else {
+        margin = this.isDetailPage ? '0px auto' : '25px auto'
+      }
+      return {
+        position,
+        transform,
+        margin,
+        ...this.sizeStyles
+      }
+    },
     isOutOfBound(): boolean {
-      return pageUtils.isOutOfBound(this.pageIndex)
+      return this.isMobile && !this.isDetailPage ? (this.pageIndex <= this.currCardIndex - 2 || this.pageIndex >= this.currCardIndex + 2)
+        : this.pageIndex <= (this.topBound - 4) || this.pageIndex >= (this.bottomBound + 4)
     },
     hasEditingText(): boolean {
       const page = this.config as IPage
@@ -388,10 +431,13 @@ export default Vue.extend({
       return this.currSelectedInfo.layers.length
     },
     resizerHint(): string {
-      return !this.isResizingPage ? '拖曳調整畫布高度' : `${round(this.config.physicalHeight, PRECISION)}${this.config.unit}`
+      return !this.isResizingPage ? '拖曳調整畫布高度' : `${round(this.pageState.config.physicalHeight, PRECISION)}${this.config.unit}`
     },
-    hasBleed(): boolean {
-      return !!this.config.bleeds.top || !!this.config.bleeds.bottom || !!this.config.bleeds.left || !!this.config.bleeds.right
+    sizeStyles(): any {
+      return {
+        width: `${this.config.width * (this.scaleRatio / 100)}px`,
+        height: `${this.config.height * (this.scaleRatio / 100)}px`
+      }
     }
   },
   methods: {
@@ -399,13 +445,22 @@ export default Vue.extend({
       ADD_newLayers: 'ADD_newLayers',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setDropdown: 'popup/SET_STATE',
-      _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page',
       setPanelType: 'SET_currFunctionPanelType',
       setSidebarType: 'SET_currSidebarPanelType',
-      setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
+      setCurrHoveredPageIndex: 'SET_currHoveredPageIndex',
+      updateSnapUtilsIndex: 'UPDATE_snapUtilsIndex'
     }),
-    styles(type: string) {
+    handleSpecialCharacter(e: KeyboardEvent) {
+      // For those using keyCode in their codebase, we recommend converting them to their kebab-cased named equivalents.
+      // The keys for some punctuation marks can just be included literally. e.g. For the , key:
+      // Limitations of the syntax prevent certain characters from being matched, such as ", ', /, =, >, and .. For those characters you should check event.key inside the listener instead.
+      if (e.key === '=' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault()
+        e.stopPropagation()
+        ShortcutUtils.zoomIn()
+      }
+    },
+    styles(type: string): Record<string, string> {
       return type === 'content' ? {
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
@@ -421,10 +476,9 @@ export default Vue.extend({
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
-    wrapperStyles() {
+    wrapperStyles(): Record<string, string> {
       return {
-        width: `${this.config.width * (this.scaleRatio / 100)}px`,
-        height: `${this.config.height * (this.scaleRatio / 100)}px`,
+        ...this.sizeStyles,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
@@ -435,42 +489,28 @@ export default Vue.extend({
         width: '1px',
         transform: `translate(${pos}px,0)`,
         'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
+      } : {
+        width: '100%',
+        height: '1px',
+        transform: `translate(0,${pos}px)`,
+        'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
       }
-        : {
-          width: '100%',
-          height: '1px',
-          transform: `translate(0,${pos}px)`,
-          'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
-        }
     },
-    bleedLineStyles() {
-      const scaleRatio = this.scaleRatio / 100
-      let boxShadow = '0 0 3px 1px rgba(0, 0, 0, 0.15)'
-      const borderSize = { top: 1, bottom: 1 }
-      if (this.isDetailPage && this.pages.length > 1) {
-        const maskTop = '0 -6px 0px 0px white, '
-        const maskBottom = '0 6px 0px 0px white, '
-        if (this.pageIndex === 0) {
-          boxShadow = maskBottom + boxShadow
-          borderSize.bottom = 0
-        } else if (this.pageIndex === this.pagesLength - 1) {
-          boxShadow = maskTop + boxShadow
-          borderSize.top = 0
-        } else {
-          boxShadow = maskBottom + maskTop + boxShadow
-          borderSize.bottom = 0
-          borderSize.top = 0
+    bleedLineAreaStyles() {
+      if (!this.config.isEnableBleed) {
+        return {
+          top: '0px',
+          bottom: '0px',
+          left: '0px',
+          right: '0px'
         }
       }
-
+      const scaleRatio = this.scaleRatio / 100
       return {
         top: this.config.bleeds.top * scaleRatio + 'px',
         bottom: this.config.bleeds.bottom * scaleRatio + 'px',
         left: this.config.bleeds.left * scaleRatio + 'px',
-        right: this.config.bleeds.right * scaleRatio + 'px',
-        borderTop: borderSize.top + 'px dashed white',
-        borderBottom: borderSize.bottom + 'px dashed white',
-        boxShadow
+        right: this.config.bleeds.right * scaleRatio + 'px'
       }
     },
     addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup): void {
@@ -526,22 +566,15 @@ export default Vue.extend({
       GroupUtils.reset()
 
       pageUtils.addPageToPos(pageUtils.newPage({
-        width: this.config.width,
-        height: this.config.height,
-        physicalWidth: this.config.physicalWidth,
-        physicalHeight: this.config.physicalHeight,
-        isEnableBleed: this.config.isEnableBleed,
-        bleeds: this.config.bleeds,
-        physicalBleeds: this.config.physicalBleeds,
-        unit: this.config.unit
+        width: this.pageState.config.width,
+        height: this.pageState.config.height,
+        physicalWidth: this.pageState.config.physicalWidth,
+        physicalHeight: this.pageState.config.physicalHeight,
+        isEnableBleed: this.pageState.config.isEnableBleed,
+        bleeds: this.pageState.config.bleeds,
+        physicalBleeds: this.pageState.config.physicalBleeds,
+        unit: this.pageState.config.unit
       }), this.pageIndex + 1)
-
-      // remove top and bottom bleeds for email marketing design
-      if (this.isDetailPage) {
-        resizeUtils.resizeBleeds(this.pageIndex + 1, { ...this.config.physicalBleeds, top: 0 })
-        resizeUtils.resizeBleeds(this.pageIndex, { ...this.config.physicalBleeds, bottom: 0 })
-      }
-
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })
       StepsUtils.record()
@@ -553,25 +586,12 @@ export default Vue.extend({
       } else {
         this.setCurrActivePageIndex(this.pageIndex)
       }
-      this._deletePage(this.pageIndex)
-
-      // add top and bottom bleeds for email marketing design
-      if (this.isDetailPage) {
-        if (this.pages.length === 1) {
-          resizeUtils.resizeBleeds(0, {
-            ...this.config.physicalBleeds,
-            top: this.pageIndex === 0 ? this.config.physicalBleeds.top : this.getPage(0).physicalBleeds.top,
-            bottom: this.pageIndex === 1 ? this.config.physicalBleeds.bottom : this.getPage(0).physicalBleeds.bottom
-          })
-        } else if (this.pageIndex === 0) resizeUtils.resizeBleeds(0, this.config.physicalBleeds)
-        else if (this.pageIndex === this.pages.length) resizeUtils.resizeBleeds(this.pages.length - 1, this.config.physicalBleeds)
-      }
-
+      pageUtils.deletePage(this.pageIndex)
       StepsUtils.record()
     },
     duplicatePage() {
       if (this.isProcessingShadow) {
-        Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+        notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
         return
       }
       GroupUtils.deselect()
@@ -587,14 +607,6 @@ export default Vue.extend({
       page.designId = ''
       page.id = generalUtils.generateRandomString(8)
       pageUtils.addPageToPos(page, this.pageIndex + 1)
-
-      // remove top and bottom bleeds for email marketing design
-      // TODO: resize bleeds before copy
-      if (this.isDetailPage) {
-        resizeUtils.resizeBleeds(this.pageIndex + 1, { ...page.physicalBleeds, top: 0 })
-        resizeUtils.resizeBleeds(this.pageIndex, { ...this.config.physicalBleeds, bottom: 0 })
-      }
-
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })
       StepsUtils.record()
@@ -633,19 +645,20 @@ export default Vue.extend({
       window.dispatchEvent(event)
     },
     pageResizeStart(e: PointerEvent) {
-      this.initialPageHeight = (this.config as IPage).height
+      this.initialPageHeight = this.pageState.config.height
       this.isResizingPage = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-      this.displayDPI = this.config.height / unitUtils.convert(this.config.physicalHeight, this.config.unit, 'in')
       eventUtils.addPointerEvent('pointermove', this.pageResizing)
-      this.overflowContainer.addEventListener('scroll', this.scrollUpdate, { capture: true })
+      if (this.overflowContainer) {
+        this.overflowContainer.addEventListener('scroll', this.scrollUpdate, { capture: true })
+      }
       eventUtils.addPointerEvent('pointerup', this.pageResizeEnd)
     },
     pageResizing(e: PointerEvent) {
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
-      const isShownScrollbar = (this.overflowContainer.scrollHeight === this.overflowContainer.clientHeight)
+      const isShownScrollbar = (this.overflowContainer?.scrollHeight === this.overflowContainer?.clientHeight)
 
       if (isShownScrollbar === this.isShownScrollBar) {
         const multiplier = isShownScrollbar ? 2 : 1
@@ -653,7 +666,8 @@ export default Vue.extend({
         const minHeight = Math.max(pageUtils.MIN_SIZE, this.config.bleeds?.top ?? 0 + this.config.bleeds?.bottom ?? 0)
         const maxHeight = floor(pageUtils.MAX_AREA / this.config.width)
         const newHeight = Math.min(Math.max(Math.trunc(this.initialPageHeight + yDiff), minHeight), maxHeight)
-        const newPhysicalHeight = unitUtils.convert(newHeight / this.displayDPI, 'in', this.config.unit)
+        const dpi = pageUtils.getPageDPI(this.pageState.config)
+        const newPhysicalHeight = unitUtils.convert(newHeight / dpi.height, 'in', this.config.unit)
         pageUtils.updatePageProps({
           height: newHeight,
           physicalHeight: newPhysicalHeight
@@ -661,15 +675,16 @@ export default Vue.extend({
       } else {
         this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
         this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-        this.initialPageHeight = (this.config as IPage).height
+        this.initialPageHeight = this.pageState.config.height
       }
       this.isShownScrollBar = isShownScrollbar
     },
     pageResizeEnd(e: PointerEvent) {
-      this.initialPageHeight = (this.config as IPage).height
+      this.initialPageHeight = this.pageState.config.height
       this.isResizingPage = false
-      const newHeight = Math.round(this.config.height)
-      const newPhysicalHeight = unitUtils.convert(newHeight / this.displayDPI, 'in', this.config.unit)
+      const newHeight = Math.round(this.pageState.config.height)
+      const dpi = pageUtils.getPageDPI(this.pageState.config)
+      const newPhysicalHeight = unitUtils.convert(newHeight / dpi.height, 'in', this.config.unit)
       pageUtils.updatePageProps({
         height: newHeight,
         physicalHeight: newPhysicalHeight
@@ -677,7 +692,9 @@ export default Vue.extend({
       StepsUtils.record()
       this.$nextTick(() => {
         eventUtils.removePointerEvent('pointermove', this.pageResizing)
-        this.overflowContainer.removeEventListener('scroll', this.scrollUpdate, { capture: true })
+        if (this.overflowContainer) {
+          this.overflowContainer.removeEventListener('scroll', this.scrollUpdate, { capture: true })
+        }
         eventUtils.removePointerEvent('pointerup', this.pageResizeEnd)
       })
       pageUtils.findCentralPageIndexInfo()
@@ -787,10 +804,9 @@ export default Vue.extend({
 
 .page-highlighter {
   position: absolute;
-  top: 0px;
-  left: 0px;
+  top: -2px;
+  left: -2px;
   border: 2px solid setColor(blue-2);
-  box-sizing: border-box;
   z-index: setZindex("page-highlighter");
   pointer-events: none;
 }
@@ -836,26 +852,11 @@ export default Vue.extend({
   pointer-events: none;
 }
 
-.dim-background {
-  position: absolute;
-  transform: translateZ(1000px);
-  top: 0px;
-  left: 0px;
-  background: rgba(0, 0, 0, 0.4);
-  pointer-events: none;
-  transform-style: preserve-3d;
-}
-
-.background-control {
-  position: absolute;
-  // transform: translateZ(1000px);
-  z-index: 1000;
-  background-color: rgba(0, 0, 0, 0.6);
-  color: white;
-}
-
 .skeleton {
   background-color: setColor(white);
+}
+
+.page-wrapper {
 }
 
 .layer-num {
@@ -864,13 +865,10 @@ export default Vue.extend({
   left: 50%;
 }
 
-.bleed-line {
+div[class*="nu-page-bleed"] {
   pointer-events: none;
   position: absolute;
   left: 0px;
   top: 0px;
-  box-sizing: border-box;
-  border: 1px dashed white;
-  box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.15);
 }
 </style>

@@ -1,31 +1,31 @@
 <template lang="pug">
-  div(class="mobile-image-adjust")
-    div(class="page relative")
-      nu-layer(class="nu-layer--p0"
-        :data-index="0"
-        :data-pindex="0"
-        :layerIndex="0"
-        :pageIndex="0"
-        :config="config")
-    div(class="photo-setting")
-      span(class="photo-setting__title text-blue-1 subtitle-1") {{$t('NN0039')}}
-      popup-adjust(
-        :imageAdjust="currLayerAdjust"
-        @update="handleAdjust")
-      div(class="label") 縮放
-        input(class="range-input input__slider--range"
-          :value="currentScale"
-          :max="100"
-          :min="1"
-          name="scale"
-          @input="handleScaling"
-          type="range")
+div(class="mobile-image-adjust")
+  div(class="page relative")
+    nu-layer(class="nu-layer--p0"
+      :data-lindex="0"
+      :data-pindex="0"
+      :layerIndex="0"
+      :pageIndex="0"
+      :config="config")
+  div(class="photo-setting")
+    span(class="photo-setting__title text-blue-1 subtitle-1") {{$t('NN0039')}}
+    popup-adjust(
+      :imageAdjust="currLayerAdjust"
+      @update="handleAdjust")
+    div(class="label") 縮放
+      input(class="range-input input__slider--range"
+        :value="currentScale"
+        :max="100"
+        :min="1"
+        name="scale"
+        @input="handleScaling"
+        type="range")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -39,7 +39,8 @@ import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow
 import groupUtils from '@/utils/groupUtils'
 import controlUtils from '@/utils/controlUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'MobileImageAdjust',
   directives: {
     clickOutside: vClickOutside.directive
@@ -366,7 +367,7 @@ export default Vue.extend({
         })
       }
     },
-    handleScaling(e: InputEvent) {
+    handleScaling(e: Event) {
       const targetScale = parseInt((e.target as HTMLInputElement).value) / 50 * 0.3583197167755996
       const targetWidth = this.config.styles.initWidth * targetScale
       const targetHeight = this.config.styles.initHeight * targetScale

@@ -12,7 +12,8 @@ import layerUtils from './layerUtils'
 import tiptapUtils from './tiptapUtils'
 
 export default class SubControllerUtils {
-  private component = undefined as Vue | undefined
+  // private component = undefined as Vue | undefined
+  private component = undefined as any | undefined
   private body = undefined as unknown as HTMLElement
   private _config = { config: null as unknown as ILayer }
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as ILayerInfo
@@ -27,7 +28,7 @@ export default class SubControllerUtils {
   private get subLayerIdx(): number { return this.layerInfo.subLayerIdx ?? -1 }
   private get primaryLayer(): IGroup | IFrame | ITmp { return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp }
 
-  constructor({ _config, body, layerInfo }: { _config: { config: ILayer }, body: HTMLElement, layerInfo?: ILayerInfo, component?: Vue }) {
+  constructor({ _config, body, layerInfo }: { _config: { config: ILayer }, body: HTMLElement, layerInfo?: ILayerInfo, component?: any }) {
     this._config = _config
     this.body = body
     layerInfo && (this.layerInfo = layerInfo)

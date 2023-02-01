@@ -12,21 +12,21 @@ div(style="position:relative;")
         div {{$t('NN0301')}}
         div {{$t('NN0302')}}
       div
-        btn(@click.native="onFacebookClicked()"
+        btn(@click="onFacebookClicked()"
           :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/facebook.png')")
         span(class="body-2") {{$t('NN0303', {media:'Facebook'})}}
       div
-        btn(@click.native="onGoogleClicked()" :type="'icon-mid-body'")
+        btn(@click="onGoogleClicked()" :type="'icon-mid-body'")
         img(:src="require('@/assets/img/png/google.png')")
         span(class="body-2") {{$t('NN0303', {media:'Google'})}}
       div
-        btn(@click.native="onEmailClicked()" :type="'icon-mid-body text-white'") {{$t('NN0303', {media: $tc('NN0173', 2)})}}
+        btn(@click="onEmailClicked()" :type="'icon-mid-body text-white'") {{$t('NN0303', {media: $tc('NN0173', 2)})}}
       div
         span {{$t('NN0304')}}
         btn(:type="'icon'"
           class="h-link"
-          @click.native="onLoginClicked()") {{$t('NN0305')}}
+          @click="onLoginClicked()") {{$t('NN0305')}}
       div
         button(@click="onCloseClicked")
               svg-icon(class="pointer"
@@ -65,7 +65,7 @@ div(style="position:relative;")
           property-bar(class="mt-5"
             :class="{'input-invalid': !passwordValid}")
             input(class="body-2 text-gray-2"
-              v-model="password" type="number"
+              v-model="password"
               :placeholder="$t('NN0163', {term: $tc('NN0180', 2)})"
               :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
@@ -98,9 +98,9 @@ div(style="position:relative;")
       div
         btn(:type="'primary-mid'"
           class="bg-gray-2 text-white btn-shadow"
-          @click.native="onSignUpClicked()") {{$tc('NN0169',2)}}
+          @click="onSignUpClicked()") {{$tc('NN0169',2)}}
       div
-        i18n(path="NN0307" tag="span")
+        this($path="NN0307" tag="span")
           template(#use)
             a(class="h-link" :href="termsPage") {{$t('NN0162')}}
           template(#privacy)
@@ -109,7 +109,7 @@ div(style="position:relative;")
         span {{$t('NN0304')}}
         btn(:type="'icon'"
           class="h-link"
-          @click.native="onLoginClicked()") {{$t('NN0305')}}
+          @click="onLoginClicked()") {{$t('NN0305')}}
     div(v-if="currentPageIndex === 2"
       class="signup")
       div(class="text-center")
@@ -127,7 +127,7 @@ div(style="position:relative;")
       div(style="margin-bottom: 15px;")
         btn(:type="'primary-mid'"
           class="btn-shadow full-width"
-          @click.native="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
+          @click="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
       div(class="page-close")
         button(@click="onCloseClicked")
           svg-icon(class="pointer"
@@ -138,7 +138,7 @@ div(style="position:relative;")
         span {{$t('NN0288')}}
         btn(:type="'icon'"
           class="text-blue-1 body-1"
-          @click.native="onResendClicked()") {{$t('NN0290')}}
+          @click="onResendClicked()") {{$t('NN0290')}}
       div(v-else
         class="flex align-center text-gray-3"
         style="height:30px; margin-bottom: 0;")
@@ -147,8 +147,7 @@ div(style="position:relative;")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import i18n from '@/i18n'
+import { defineComponent } from 'vue'
 import store from '@/store'
 import userApis from '@/apis/user'
 import localeUtils from '@/utils/localeUtils'
@@ -157,7 +156,8 @@ import loginUtils from '@/utils/loginUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import fbPixelUtils from '@/utils/fbPixelUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'SignUp',
   props: {
     redirect: {
@@ -177,8 +177,8 @@ export default Vue.extend({
       resendAvailable: true as boolean,
       isSignUpClicked: false as boolean,
       emailResponseError: false as boolean,
-      passwordHint: i18n.t('NN0308') as string,
-      vcodeErrorMessage: i18n.t('NN0298') as string,
+      passwordHint: this.$t('NN0308') as string,
+      vcodeErrorMessage: this.$t('NN0298') as string,
       isVcodeClicked: false as boolean,
       isPeerPassword: false as boolean,
       isRollbackByGoogleSignIn: window.location.href.indexOf('googleapi') > -1 as boolean,
@@ -252,9 +252,9 @@ export default Vue.extend({
     },
     mailErrorMessage(): string {
       if (this.email.length === 0) {
-        return i18n.t('NN0163', { term: i18n.tc('NN0173', 2) }) as string
+        return this.$t('NN0163', { term: this.$tc('NN0173', 2) }) as string
       } else {
-        return i18n.t('NN0297') as string
+        return this.$t('NN0297') as string
       }
     },
     passwordLengthValid(): boolean {
@@ -372,7 +372,7 @@ export default Vue.extend({
       this.isLoading = true
       if (!this.nameValid || !this.mailValid || !this.passwordValid) {
         this.isLoading = false
-        this.passwordHint = i18n.t('NN0308') as string
+        this.passwordHint = this.$t('NN0308') as string
         return
       }
       const parameter = {
@@ -387,7 +387,7 @@ export default Vue.extend({
         this.isVcodeClicked = false
       } else {
         this.emailResponseError = true
-        this.passwordHint = response.msg || i18n.t('NN0242')
+        this.passwordHint = response.msg || this.$t('NN0242')
       }
       this.isLoading = false
     },
@@ -399,7 +399,7 @@ export default Vue.extend({
         return
       }
       this.resendAvailable = false
-      this.leftTimeText = i18n.t('NN0289', { time: this.leftTime }) as string
+      this.leftTimeText = this.$t('NN0289', { time: this.leftTime }) as string
       const parameter = {
         account: this.email,
         register: '1',
@@ -412,7 +412,7 @@ export default Vue.extend({
         this.isLoading = false
         const clock = window.setInterval(() => {
           this.leftTime--
-          this.leftTimeText = i18n.t('NN0289', { time: this.leftTime }) as string
+          this.leftTimeText = this.$t('NN0289', { time: this.leftTime }) as string
           if (this.leftTime === 0) {
             window.clearInterval(clock)
             this.resendAvailable = true
@@ -435,7 +435,7 @@ export default Vue.extend({
         return
       }
       if (!this.vcodeValid) {
-        this.vcodeErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0286') }) as string
+        this.vcodeErrorMessage = this.$t('NN0163', { term: this.$t('NN0286') }) as string
         this.isLoading = false
         return
       }
@@ -453,7 +453,7 @@ export default Vue.extend({
         this.currentPageIndex = 0
       } else {
         this.vcode = ''
-        this.vcodeErrorMessage = data.msg || i18n.t('NN0242')
+        this.vcodeErrorMessage = data.msg || this.$t('NN0242')
       }
       this.isLoading = false
     },

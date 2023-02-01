@@ -15,11 +15,12 @@ div(class="ruler-hr"
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
+import { defineComponent } from 'vue'
 import unitUtils from '@/utils/unitUtils'
-import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
     canvasRect: DOMRect,
     editorView: HTMLElement
@@ -42,6 +43,9 @@ export default Vue.extend({
       return pageUtils.currFocusPage
     },
     currFocusPageSize() {
+      return pageUtils.currFocusPageSize
+    },
+    currFocusPageSizeWithBleeds() {
       return pageUtils.currFocusPageSizeWithBleeds
     },
     rulerRootStyles(): { [index: string]: string } {
@@ -80,7 +84,7 @@ export default Vue.extend({
       this.calcRulerBodyOffset()
       this.scale = rulerUtils.adjRulerScale()
     },
-    currFocusPageSize() {
+    currFocusPageSizeWithBleeds() {
       this.calcRulerBodyOffset()
       this.scale = rulerUtils.adjRulerScale(this.scale)
     },
@@ -91,7 +95,7 @@ export default Vue.extend({
   methods: {
     calcRulerBodyOffset(): void {
       this.$nextTick(() => {
-        this.rulerBodyOffset = pageUtils.pageRect.left - this.canvasRect.left + this.editorView.scrollLeft
+        this.rulerBodyOffset = pageUtils.pageRect.left - this.canvasRect!.left + this.editorView!.scrollLeft
       })
     }
   }

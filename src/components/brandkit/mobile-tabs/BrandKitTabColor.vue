@@ -1,32 +1,33 @@
 <template lang="pug">
-  div(class="brand-kit-tab-color")
-    brand-kit-add-btn(:text="`${$t('NN0404')}`"
-                      @click.native="handleCreatePalette")
-    transition-group(class="brand-kit-tab-color__palettes" name="list" tag="div")
-      template(v-for="colorPalette in renderedColorPalettes")
-        div(v-if="colorPalette === 'loading'"
-            class="no-trans"
-            key="loading")
-          svg-icon(iconName="loading"
-                  iconWidth="50px"
-                  iconColor="gray-3")
-        brand-kit-color-palette(v-else
-                                :key="colorPalette.id"
-                                :colorPalette="colorPalette"
-                                :selectedColor="selectedColor"
-                                @selectColor="handleSelectColor"
-                                @deleteItem="handleDeleteItem")
+div(class="brand-kit-tab-color")
+  brand-kit-add-btn(:text="`${$t('NN0404')}`"
+                    @click="handleCreatePalette")
+  transition-group(class="brand-kit-tab-color__palettes" name="list" tag="div")
+    template(v-for="colorPalette in renderedColorPalettes")
+      div(v-if="colorPalette === 'loading'"
+          class="no-trans"
+          key="loading")
+        svg-icon(iconName="loading"
+                iconWidth="50px"
+                iconColor="gray-3")
+      brand-kit-color-palette(v-else
+                              :key="colorPalette.id"
+                              :colorPalette="colorPalette"
+                              :selectedColor="selectedColor"
+                              @selectColor="handleSelectColor"
+                              @deleteItem="handleDeleteItem")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import brandkitUtils from '@/utils/brandkitUtils'
 import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import BrandKitColorPalette from '@/components/brandkit/BrandKitColorPalette.vue'
 import { IBrand, IBrandColorPalette, IDeletingItem } from '@/interfaces/brandkit'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: ['deleteItem'],
   data() {
     return {
       selectedColor: {
@@ -55,8 +56,8 @@ export default Vue.extend({
     colorPalettes(): IBrandColorPalette[] {
       return (this.currentBrand as IBrand).colorPalettes
     },
-    renderedColorPalettes(): (IBrandColorPalette | string)[] {
-      const res = [...this.colorPalettes] as (IBrandColorPalette | string)[]
+    renderedColorPalettes(): (IBrandColorPalette | 'loading')[] {
+      const res = [...this.colorPalettes] as (IBrandColorPalette | 'loading')[]
       if (this.isPalettesLoading) {
         res.push('loading')
       }
@@ -103,14 +104,19 @@ export default Vue.extend({
 
 .list {
   &-enter-active,
-  &-leave-active {
+  &-leave-active,
+  &-move {
     &:not(.no-trans) {
       transition: 0.3s ease;
       z-index: 10;
     }
   }
 
-  &-enter,
+  &-leave-active {
+    position: absolute;
+  }
+
+  &-enter-from,
   &-leave-to {
     &:not(.no-trans) {
       transform: translateX(-30%);

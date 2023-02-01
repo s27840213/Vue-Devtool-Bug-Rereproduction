@@ -9,7 +9,7 @@ import TextUtils from './textUtils'
 import mouseUtils from './mouseUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import stepsUtils from './stepsUtils'
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import { SrcObj } from '@/interfaces/gallery'
 import { ITiptapSelection } from '@/interfaces/text'
 import mathUtils from './mathUtils'
@@ -40,16 +40,23 @@ class LayerUtils {
 
   get getCurrOpacity(): number {
     const currLayer = this.getCurrLayer
+
     const { subLayerIdx } = this
-    switch (currLayer.type) {
-      case 'tmp':
-        return Math.max(...(this.getCurrLayer as IGroup | ITmp).layers.map((layer: ILayer) => layer.styles.opacity))
-      case 'group':
-        return subLayerIdx !== -1 ? (currLayer as IGroup).layers[subLayerIdx].styles.opacity : currLayer.styles.opacity
-      case 'frame':
-        return subLayerIdx !== -1 ? (currLayer as IFrame).clips[subLayerIdx].styles.opacity : currLayer.styles.opacity
-      default:
-        return this.currSelectedInfo.layers[0].styles.opacity
+
+    if (this.currSelectedInfo.pageIndex === -1) return 1
+    if (currLayer.type) {
+      switch (currLayer.type) {
+        case 'tmp':
+          return Math.max(...(this.getCurrLayer as IGroup | ITmp).layers.map((layer: ILayer) => layer.styles.opacity))
+        case 'group':
+          return subLayerIdx !== -1 ? (currLayer as IGroup).layers[subLayerIdx].styles.opacity : currLayer.styles.opacity
+        case 'frame':
+          return subLayerIdx !== -1 ? (currLayer as IFrame).clips[subLayerIdx].styles.opacity : currLayer.styles.opacity
+        default:
+          return this.currSelectedInfo.layers[0].styles.opacity
+      }
+    } else {
+      return 0
     }
   }
 
@@ -124,7 +131,7 @@ class LayerUtils {
      * e.g. text-layer: the editing props need to be set to false after deactive
      * Hence, this kind of initilization should be done before conducting a step-record.
      */
-    Vue.nextTick(() => {
+    nextTick(() => {
       stepsUtils.record()
     })
   }
@@ -202,7 +209,7 @@ class LayerUtils {
     })
   }
 
-  getTmpLayer(): IShape | IText | IImage | IGroup | ITmp {
+  getTmpLayer(): IShape | IText | IImage | IGroup | IFrame |ITmp {
     return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)
   }
 
@@ -293,9 +300,9 @@ class LayerUtils {
     })
   }
 
-  isOutOfBoundary(): boolean {
-    const pageInfo = store.getters.getPage(this.currSelectedInfo.pageIndex) as IPage
-    const targetLayer = this.getTmpLayer()
+  isOutOfBoundary(pageIndex?: number, layer?: IShape | IText | IImage | IGroup | IFrame |ITmp): boolean {
+    const pageInfo = store.getters.getPage(pageIndex ?? this.currSelectedInfo.pageIndex) as IPage
+    const targetLayer = layer ?? this.getTmpLayer()
 
     if (targetLayer.styles.x > pageInfo.width || targetLayer.styles.y > pageInfo.height ||
       (targetLayer.styles.x + targetLayer.styles.width) < 0 || (targetLayer.styles.y + targetLayer.styles.height) < 0) {

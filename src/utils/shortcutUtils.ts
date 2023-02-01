@@ -1,9 +1,9 @@
 import store from '@/store'
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import GroupUtils from '@/utils/groupUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import ZindexUtils from '@/utils/zindexUtils'
-import LayerUtils from '@/utils/layerUtils'
+import layerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
 import TextUtils from './textUtils'
@@ -32,7 +32,7 @@ class ShortcutUtils {
   }
 
   get currSelectedLayerStyles() {
-    return LayerUtils.getTmpLayer().styles
+    return layerUtils.getTmpLayer().styles
   }
   // target: HTMLElement
   // constructor(target: HTMLElement) {
@@ -106,11 +106,11 @@ class ShortcutUtils {
             return 'image'
           } else if (blob.type.includes('text')) {
             return 'text'
-          } else {
-            return ''
           }
         }
       }
+
+      return ''
     } catch (err) {
       console.error(err)
     }
@@ -124,7 +124,7 @@ class ShortcutUtils {
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
 
   copy() {
-    if (store.getters.getCurrSelectedIndex >= 0 && !LayerUtils.getTmpLayer().locked) {
+    if (store.getters.getCurrSelectedIndex >= 0 && !layerUtils.getTmpLayer().locked) {
       navigator.clipboard.writeText(JSON.stringify(GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex))))
       this.copySourcePageIndex = store.getters.getCurrSelectedPageIndex
       // store.commit('SET_clipboard', GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)))
@@ -149,7 +149,7 @@ class ShortcutUtils {
     const targetPageIndex = currHoveredPageIndex >= 0 ? currHoveredPageIndex : currFocusPageIndex
 
     const clipboardInfo = [JSON.parse(text)].map((layer: IText | IShape | IImage | IGroup | ITmp) => {
-      return this.regenerateLayerInfo(layer, { toCenter: targetPageIndex !== this.copySourcePageIndex, targetPageIndex })
+      return this.regenerateLayerInfo(layer, { toCenter: layerUtils.isOutOfBoundary(targetPageIndex, layer), targetPageIndex })
     })
 
     const isTmp: boolean = clipboardInfo[0].type === 'tmp'
@@ -182,13 +182,13 @@ class ShortcutUtils {
     if (targetPageIndex === this.copySourcePageIndex) {
       navigator.clipboard.writeText(JSON.stringify(GeneralUtils.deepCopy(store.getters.getLayer(this.copySourcePageIndex, store.getters.getCurrSelectedIndex))))
     }
-    Vue.nextTick(() => {
+    nextTick(() => {
       StepsUtils.record()
     })
   }
 
   duplicate() {
-    const { getCurrLayer: currLayer } = LayerUtils
+    const { getCurrLayer: currLayer } = layerUtils
     const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(currLayer) as IShape | IText | IImage | IGroup | IFrame | ITmp, {})
 
     const currActivePageIndex = pageUtils.currActivePageIndex
@@ -229,7 +229,7 @@ class ShortcutUtils {
     newLayer.active = false
 
     const isTmp: boolean = newLayer.type === 'tmp'
-    const { index, layers } = LayerUtils.currSelectedInfo
+    const { index, layers } = layerUtils.currSelectedInfo
     const currFocusPageIndex = pageUtils.currFocusPageIndex
 
     const tmpIndex = index
@@ -260,7 +260,7 @@ class ShortcutUtils {
       navigator.clipboard.writeText(sel.toString().replace(/\n\n/g, '\n'))
       tiptapUtils.agent(editor => {
         editor.commands.deleteSelection()
-        LayerUtils.updatecCurrTypeLayerProp({ isEdited: true })
+        layerUtils.updatecCurrTypeLayerProp({ isEdited: true })
       })
     }
   }
@@ -271,15 +271,19 @@ class ShortcutUtils {
       const spans = text.split('\n')
       let chainedCommands = editor.chain().deleteSelection()
       spans.forEach((line, index) => {
-        const spanText = `<span>${line === ''
+        const spanText = `<p><span>${line === ''
           ? '<br/>'
           : line.replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;')
-          }</span>`
-        chainedCommands = chainedCommands.insertContent(spanText)
+        }</span></p>`
+        chainedCommands = chainedCommands.insertContent(spanText, {
+          parseOptions: {
+            preserveWhitespace: true
+          }
+        })
         if (index !== spans.length - 1) {
           chainedCommands = chainedCommands.enter()
         }
@@ -287,10 +291,10 @@ class ShortcutUtils {
       editor.storage.nuTextStyle.pasting = true
       chainedCommands.run()
       editor.storage.nuTextStyle.pasting = false
-      Vue.nextTick(() => {
+      nextTick(() => {
         editor.commands.scrollIntoView()
       })
-      LayerUtils.updatecCurrTypeLayerProp({ isEdited: true })
+      layerUtils.updatecCurrTypeLayerProp({ isEdited: true })
     })
   }
 
@@ -301,14 +305,14 @@ class ShortcutUtils {
   }
 
   textSelectAll(layerIndex?: number) {
-    const text = document.getElementById(`text-${layerIndex ?? LayerUtils.layerIndex}`) as HTMLElement
+    const text = document.getElementById(`text-${layerIndex ?? layerUtils.layerIndex}`) as HTMLElement
     const sel = window.getSelection()
     const range = new Range()
     if (sel) {
       range.selectNodeContents(text)
       sel.removeAllRanges()
       sel.addRange(range)
-      const config = LayerUtils.getCurrLayer as IText
+      const config = layerUtils.getCurrLayer as IText
 
       const pIndex = config.paragraphs.length - 1
       const sIndex = config.paragraphs[pIndex].spans.length - 1
@@ -320,20 +324,20 @@ class ShortcutUtils {
   }
 
   del() {
-    let currLayer = LayerUtils.getCurrLayer
+    let currLayer = layerUtils.getCurrLayer
     switch (currLayer.type) {
       case 'frame':
         currLayer = currLayer as IFrame
         if (currLayer.clips.some(img => img.active)) {
           const idx = currLayer.clips.findIndex(img => img.active)
           if (currLayer.clips[idx].srcObj.type === 'frame') {
-            LayerUtils.deleteSelectedLayer()
+            layerUtils.deleteSelectedLayer()
             GroupUtils.reset()
             return
           }
           const clips = GeneralUtils.deepCopy(currLayer.clips) as Array<IImage>
           if (clips[idx].imgControl) {
-            frameUtils.updateFrameLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, idx, { imgControl: false })
+            frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, idx, { imgControl: false })
             return
           }
           clips[idx].srcObj = {
@@ -341,20 +345,21 @@ class ShortcutUtils {
             assetId: '',
             userId: ''
           }
-          LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { clips })
+          layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { clips })
           StepsUtils.record()
           return
         }
         break
     }
 
-    LayerUtils.deleteSelectedLayer()
+    layerUtils.deleteSelectedLayer()
     GroupUtils.reset()
   }
 
   cut() {
     this.copy()
     this.del()
+    StepsUtils.record()
   }
 
   async save() {
@@ -381,7 +386,7 @@ class ShortcutUtils {
 
   async undo() {
     if (!StepsUtils.isInFirstStep) {
-      const currLayer = LayerUtils.getCurrLayer
+      const currLayer = layerUtils.getCurrLayer
       if (currLayer) {
         switch (currLayer.type) {
           case 'frame':
@@ -401,13 +406,13 @@ class ShortcutUtils {
         }
       }
       await StepsUtils.undo()
-      Vue.nextTick(() => {
+      nextTick(() => {
         tiptapUtils.agent(editor => {
-          const currLayer = LayerUtils.getCurrLayer
+          const currLayer = layerUtils.getCurrLayer
           let textLayer = currLayer
           if (!currLayer.active) return
           if (currLayer.type === 'group') {
-            const subLayerIndex = LayerUtils.subLayerIdx
+            const subLayerIndex = layerUtils.subLayerIdx
             if (subLayerIndex === -1) return
             const subLayer = (currLayer as IGroup).layers[subLayerIndex]
             if (!subLayer.active || subLayer.type !== 'text') return
@@ -420,18 +425,20 @@ class ShortcutUtils {
         })
       })
     }
+
+    console.log(this.currSelectedInfo)
   }
 
   async redo() {
     if (!StepsUtils.isInLastStep) {
       await StepsUtils.redo()
-      Vue.nextTick(() => {
+      nextTick(() => {
         tiptapUtils.agent(editor => {
-          const currLayer = LayerUtils.getCurrLayer
+          const currLayer = layerUtils.getCurrLayer
           let textLayer = currLayer
           if (!currLayer.active) return
           if (currLayer.type === 'group') {
-            const subLayerIndex = LayerUtils.subLayerIdx
+            const subLayerIndex = layerUtils.subLayerIdx
             if (subLayerIndex === -1) return
             const subLayer = (currLayer as IGroup).layers[subLayerIndex]
             if (!subLayer.active || subLayer.type !== 'text') return
@@ -444,6 +451,7 @@ class ShortcutUtils {
         })
       })
     }
+    console.log(this.currSelectedInfo)
   }
 
   zoomIn() {
@@ -456,7 +464,7 @@ class ShortcutUtils {
 
   up(pressShift = false) {
     const moveOffset = pressShift ? 10 : 1
-    LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
+    layerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       y: this.currSelectedLayerStyles.y - (moveOffset * (100 / this.scaleRatio))
     })
     StepsUtils.record()
@@ -464,7 +472,7 @@ class ShortcutUtils {
 
   down(pressShift = false) {
     const moveOffset = pressShift ? 10 : 1
-    LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
+    layerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       y: this.currSelectedLayerStyles.y + (moveOffset * (100 / this.scaleRatio))
     })
     StepsUtils.record()
@@ -472,7 +480,7 @@ class ShortcutUtils {
 
   left(pressShift = false) {
     const moveOffset = pressShift ? 10 : 1
-    LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
+    layerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       x: this.currSelectedLayerStyles.x - (moveOffset * (100 / this.scaleRatio))
     })
     StepsUtils.record()
@@ -480,7 +488,7 @@ class ShortcutUtils {
 
   right(pressShift = false) {
     const moveOffset = pressShift ? 10 : 1
-    LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
+    layerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       x: this.currSelectedLayerStyles.x + (moveOffset * (100 / this.scaleRatio))
     })
     StepsUtils.record()

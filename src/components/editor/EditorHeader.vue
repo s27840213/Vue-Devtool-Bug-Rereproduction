@@ -1,38 +1,39 @@
 <template lang="pug">
-  div(class="editor-header" ref="header"
-      :style="headerPosStyle")
-    template(v-if="!isLogin")
-      i18n(path="NN0352" tag="span")
-        template(#signUp)
-          a(:href="`/signup?redirect=${path}`") {{$tc('NN0169',1)}}
-        template(#logIn)
-          a(:href="`/login?redirect=${path}`") {{$tc('NN0168',1)}}
-    template(v-else)
-      router-link(to="/mydesign" class="body-3 pointer hover-effect a-reset") {{$t('NN0080')}}
-      span(class="body-3 pointer") {{`${!isRoot ? '/...': ''}`}}
-      router-link(v-if="parentFolder.name && parentFolder.path"
-        :to="`/mydesign/${parentFolder.path}`"
-        class="body-3 pointer hover-effect a-reset") {{`/${parentFolder.name}`}}
-      span(class="body-3 ml-10 mr-5") /
-      input(class="body-3 text-gray-2" type="text"
-        :placeholder="`${$t('NN0079')}`"
-        maxlength="64"
-        :value="pagesName"
-        @change="setPagesName"
-        ref="pagesName")
-      svg-icon(:iconName="'upload-cloud'"
-        :iconWidth="'20px'"
-        :iconColor="statusColor"
-        class="upload-cloud ml-10"
-        v-hint="statusHint"
-        )
+div(class="editor-header" ref="header"
+    :style="headerPosStyle")
+  template(v-if="!isLogin")
+    i18n-t(keypath="NN0352" tag="span")
+      template(#signUp)
+        a(:href="`/signup?redirect=${path}`") {{$tc('NN0169',1)}}
+      template(#logIn)
+        a(:href="`/login?redirect=${path}`") {{$tc('NN0168',1)}}
+  template(v-else)
+    router-link(to="/mydesign" class="body-3 pointer hover-effect a-reset") {{$t('NN0080')}}
+    span(class="body-3 pointer") {{`${!isRoot ? '/...': ''}`}}
+    router-link(v-if="parentFolder.name && parentFolder.path"
+      :to="`/mydesign/${parentFolder.path}`"
+      class="body-3 pointer hover-effect a-reset") {{`/${parentFolder.name}`}}
+    span(class="body-3 ml-10 mr-5") /
+    input(class="body-3 text-gray-2" type="text"
+      :placeholder="`${$t('NN0079')}`"
+      maxlength="64"
+      :value="pagesName"
+      @change="setPagesName"
+      ref="pagesName")
+    svg-icon(:iconName="'upload-cloud'"
+      :iconWidth="'20px'"
+      :iconColor="statusColor"
+      class="upload-cloud ml-10"
+      v-hint="statusHint"
+      )
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
+import { mapMutations, mapGetters } from 'vuex'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import { mapState, mapMutations, mapGetters } from 'vuex'
 import store from '@/store'
 import pageUtils from '@/utils/pageUtils'
 import GeneralUtils from '@/utils/generalUtils'
@@ -40,7 +41,8 @@ import rulerUtils from '@/utils/rulerUtils'
 import networkUtils from '@/utils/networkUtils'
 import uploadUtils from '@/utils/uploadUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
       ShortcutUtils,
@@ -53,7 +55,7 @@ export default Vue.extend({
       this.designUploadStatus = status
     })
   },
-  beforeDestroy() {
+  beforeUnmount() {
     uploadUtils.offDesignUploadStatus()
   },
   computed: {
@@ -101,9 +103,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapMutations({
-      _setPages: 'SET_pages'
-    }),
     setPagesName(event: Event) {
       const { value } = event.target as HTMLInputElement
       pageUtils.setPagesName(value)
@@ -114,7 +113,7 @@ export default Vue.extend({
       }
       GeneralUtils.copyText(text)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${text} 已複製` })
+          notify({ group: 'copy', text: `${text} 已複製` })
         })
     }
   }

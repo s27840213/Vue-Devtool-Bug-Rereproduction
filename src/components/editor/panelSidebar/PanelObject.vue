@@ -1,63 +1,66 @@
 <template lang="pug">
-  div(class="panel-objects")
-    //- Search bar
-    search-bar(class="mb-15"
-      :placeholder="$t('NN0092', {target: $tc('NN0003',1)})"
-      clear
-      :defaultKeyword="keywordLabel"
-      @search="handleSearch")
-    //- Admin tool
-    div(v-if="showAdminTool" class="panel-objects-2html")
-      input(type="text" placeholder="項目網址" v-model="panelParams")
-      btn(@click.native="downloadAll") Download all
-    //- Search result empty msg
-    div(v-if="emptyResultMessage")
-      span {{ emptyResultMessage }}
-    //- Search result and main content
-    category-list(v-for="item in categoryListArray"
-                  v-show="item.show" :ref="item.key" :key="item.key"
-                  :list="item.content" @loadMore="handleLoadMore")
-      template(v-slot:category-list-rows="{ list, title }")
-        category-list-rows(
-          :list="list"
-          :title="title"
-          @action="handleCategorySearch")
-          template(v-slot:preview="{ item }")
-            category-object-item(class="panel-objects__item"
-              :item="item")
-      template(v-slot:category-object-item="{ list }")
-        div(class="panel-objects__items")
-          category-object-item(v-for="item in list"
-            class="panel-objects__item"
-            :key="item.id"
+div(class="panel-objects")
+  //- Search bar
+  search-bar(class="mb-15"
+    :placeholder="$t('NN0092', {target: $tc('NN0003',1)})"
+    clear
+    :defaultKeyword="keywordLabel"
+    @search="handleSearch")
+  //- Admin tool
+  div(v-if="showAdminTool" class="panel-objects-2html")
+    input(type="text" placeholder="項目網址" v-model="panelParams")
+    btn(@click="downloadAll") Download all
+  //- Search result empty msg
+  div(v-if="emptyResultMessage")
+    span {{ emptyResultMessage }}
+  //- Search result and main content
+  category-list(v-for="item in categoryListArray"
+                v-show="item.show" :ref="item.key" :key="item.key"
+                :list="item.content" @loadMore="handleLoadMore"
+                @scroll.passive="handleScrollTop($event, item.key)")
+    template(v-slot:category-list-rows="{ list, title }")
+      category-list-rows(
+        :list="list"
+        :title="title"
+        @action="handleCategorySearch")
+        template(v-slot:preview="{ item }")
+          category-object-item(class="panel-objects__item"
             :item="item")
-      template(#after)
-        //- Loading icon
-        div(v-if="pending" class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
-        //- Object wishing pool
-        div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
-          span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
-          nubtn(size="mid" class="mt-30")
-            url(:url="$t('NN0791')")
-              span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
+    template(v-slot:category-object-item="{ list }")
+      div(class="panel-objects__items")
+        category-object-item(v-for="item in list"
+          class="panel-objects__item"
+          :key="item.id"
+          :item="item")
+    template(#after)
+      //- Loading icon
+      div(v-if="pending" class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
+      //- Object wishing pool
+      div(v-if="keyword && !pending && rawSearchResult.list?.length<=10")
+        span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
+        nubtn(size="mid" class="mt-30")
+          url(:url="$t('NN0791')" :newTab="true")
+            span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
-import CategoryList from '@/components/category/CategoryList.vue'
+import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import Url from '@/components/global/Url.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
+import i18n from '@/i18n'
 
-export default Vue.extend({
+export default defineComponent({
+  name: 'PanelObject',
   components: {
     SearchBar,
     CategoryList,
@@ -132,9 +135,9 @@ export default Vue.extend({
     emptyResultMessage(): string {
       const { keyword, pending } = this
       if (pending || !keyword || this.searchResult.length > 0) return ''
-      return `${i18n.t('NN0393', {
+      return `${this.$t('NN0393', {
           keyword: this.keywordLabel,
-          target: i18n.tc('NN0003', 1)
+          target: this.$tc('NN0003', 1)
         })}`
     }
   },
@@ -145,22 +148,13 @@ export default Vue.extend({
       this.getRecAndCate
     )
   },
-  activated() {
-    this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
-    this.$refs.searchResult[0].$el.scrollTop = this.scrollTop.searchResult
-    this.$refs.mainContent[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
-  },
-  deactivated() {
-    this.$refs.mainContent[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
-  },
   watch: {
     keyword(newVal: string) {
       if (!newVal) {
         this.$nextTick(() => {
           // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+          const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
+          mainContent.$el.scrollTop = this.scrollTop.mainContent
         })
       }
     }
@@ -183,7 +177,7 @@ export default Vue.extend({
     async handleCategorySearch(keyword: string, locale = '') {
       this.resetSearch()
       if (keyword) {
-        this.panelParams = `http://vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
+        this.panelParams = `http://vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.global.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
         await this.getContent({ keyword, locale })
       }
     },
@@ -195,7 +189,7 @@ export default Vue.extend({
     },
     downloadAll() {
       generalUtils.copyText(this.panelParams)
-      this.$notify({ group: 'copy', text: '已複製網址到剪貼簿' })
+      notify({ group: 'copy', text: '已複製網址到剪貼簿' })
       const links = this.mainContent.map((it) => {
         return it.list.map((it) => {
           return `https://template.vivipic.com/svg/${it.id}/prev?ver=${it.ver}`

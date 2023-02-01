@@ -1,40 +1,51 @@
 <template lang="pug">
-  div(class="nu-frame"
-      :style="styles()")
-    div(v-if="shadowSrc()" class="shadow__wrapper" :style="shadowWrapperStyles")
-      img(class="shadow__img"
-        draggable="false"
-        :src="shadowSrc()")
-    nu-layer(v-for="(layer,index) in layers"
-      :key="`layer-${layer.id}`"
-      :pageIndex="pageIndex"
-      :layerIndex="layerIndex"
-      :inFrame="true"
-      :inImageFrame="inImageFrame()"
-      :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
-      :contentScaleRatio="contentScaleRatio"
-      :primaryLayer="config"
-      :config="layer"
-      :isSubLayer="true")
+div(class="nu-frame"
+    :style="styles()")
+  div(v-if="shadowSrc()" class="shadow__wrapper" :style="shadowWrapperStyles")
+    img(class="shadow__img"
+      draggable="false"
+      :src="shadowSrc()")
+  nu-layer(v-for="(layer,index) in layers"
+    :key="`layer-${layer.id}`"
+    :pageIndex="pageIndex"
+    :layerIndex="layerIndex"
+    :inFrame="true"
+    :inImageFrame="inImageFrame()"
+    :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
+    :contentScaleRatio="contentScaleRatio"
+    :primaryLayer="config"
+    :config="layer"
+    :isSubLayer="true")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IImage, IShape } from '@/interfaces/layer'
 import AssetUtils from '@/utils/assetUtils'
 import ImageUtils from '@/utils/imageUtils'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import layerFactary from '@/utils/layerFactary'
 import generalUtils from '@/utils/generalUtils'
 import editorUtils from '@/utils/editorUtils'
+import frameUtils from '@/utils/frameUtils'
+import layerUtils from '@/utils/layerUtils'
 
-export default Vue.extend({
-  inheritAttrs: false,
+export default defineComponent({
+  emits: [],
   props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
+    config: {
+      type: Object as PropType<IFrame>,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -51,28 +62,36 @@ export default Vue.extend({
 
       const json = (await AssetUtils.get(asset)).jsonData as IFrame
 
-      this.config.styles.initWidth = json.width
-      this.config.styles.initHeight = json.height
+      // this.config.styles.initWidth = json.width as number
+      // this.config.styles.initHeight = json.height as number
+      layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+        initWidth: json.width as number,
+        initHeight: json.height as number
+      })
 
       config.clips.forEach((img, idx) => {
         if (json.clips[idx]) {
-          img.clipPath = json.clips[idx].clipPath
+          frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, idx, { clipPath: json.clips[idx].clipPath })
+          // img.clipPath = json.clips[idx].clipPath
         }
       })
       if (config.decoration && json.decoration) {
         json.decoration.color = [...config.decoration.color]
-        Object.assign(config.decoration, json.decoration)
+        // Object.assign(config.decoration, json.decoration)
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: json.decoration })
       }
       if (config.decorationTop && json.decorationTop) {
         json.decorationTop.color = [...config.decorationTop.color]
-        Object.assign(config.decorationTop, json.decorationTop)
+        // Object.assign(config.decorationTop, json.decorationTop)
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: json.decorationTop })
       }
       if (json.blendLayers) {
         if (!this.config.blendLayers) {
-          this.config.blendLayers = []
+          // this.config.blendLayers = []
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { blendLayers: [] })
         }
         json.blendLayers.forEach((l, i) => {
-          if (!this.config.blendLayers[i]) {
+          if (!this.config.blendLayers![i]) {
             const styles = {
               width: this.config.styles.width / this.config.styles.scale,
               height: this.config.styles.height / this.config.styles.scale,
@@ -80,14 +99,33 @@ export default Vue.extend({
               initHeight: this.config.styles.height / this.config.styles.scale,
               vSize: [this.config.styles.width / this.config.styles.scale, this.config.styles.height / this.config.styles.scale]
             }
-            this.config.blendLayers.push(layerFactary.newShape({ styles }))
+            // this.config.blendLayers!.push(layerFactary.newShape({ styles }))
+            this.updateFrameBlendLayer({
+              pageIndex: this.pageIndex,
+              layerIndex: this.layerIndex,
+              subLayerIdx: -1,
+              shape: layerFactary.newShape({ styles })
+            })
           }
-          l.color = this.config.blendLayers[i].color
-          this.config.blendLayers[i].styles.blendMode = (json.blendLayers as IShape[])[i].blendMode
-          Object.assign(this.config.blendLayers[i], (json.blendLayers as IShape[])[i])
+          l.color = this.config.blendLayers![i].color
+          // this.config.blendLayers![i].styles.blendMode = (json.blendLayers as IShape[])[i].blendMode
+          // Object.assign(this.config.blendLayers![i], (json.blendLayers as IShape[])[i])
+          const styles = {
+            ...this.config.blendLayers![i].styles,
+            blendMode: (json.blendLayers as IShape[])[i].blendMode
+          }
+          const blendLayer = (json.blendLayers as IShape[])[i]
+          blendLayer.styles = styles
+          this.updateFrameBlendLayer({
+            pageIndex: this.pageIndex,
+            layerIndex: this.layerIndex,
+            subLayerIdx: i,
+            shape: blendLayer
+          })
         })
       }
-      config.needFetch = false
+      // config.needFetch = false
+      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { needFetch: false })
     }
   },
   watch: {
@@ -100,9 +138,11 @@ export default Vue.extend({
         } as IListServiceContentDataItem
         AssetUtils.get(asset).then((res) => {
           const json = res.jsonData as IFrame
+          // eslint-disable-next-line vue/no-mutating-props
           this.config.clips = generalUtils.deepCopy(this.config.clips)
           if (this.config.decoration && json.decoration) {
             json.decoration.color = [...this.config.decoration.color] as [string]
+            // eslint-disable-next-line vue/no-mutating-props
             this.config.decoration = layerFactary.newShape({
               ...json.decoration,
               vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
@@ -116,6 +156,7 @@ export default Vue.extend({
           }
           if (this.config.decorationTop && json.decorationTop) {
             json.decorationTop.color = [...this.config.decorationTop.color] as [string]
+            // eslint-disable-next-line vue/no-mutating-props
             this.config.decorationTop = layerFactary.newShape({
               ...json.decorationTop,
               vSize: [this.config.styles.initWidth, this.config.styles.initHeight],
@@ -127,6 +168,7 @@ export default Vue.extend({
               }
             })
           }
+          // eslint-disable-next-line vue/no-mutating-props
           this.config.needFetch = false
         })
       }
@@ -180,7 +222,10 @@ export default Vue.extend({
     }
   },
   methods: {
-    styles() {
+    ...mapMutations({
+      updateFrameBlendLayer: 'UPDATE_frameBlendLayer'
+    }),
+    styles(): Record<string, string> {
       const isFrameImg = this.config.clips.length === 1 && this.config.clips[0].isFrameImg
       return {
         width: isFrameImg ? '' : `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio}px`,

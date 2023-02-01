@@ -13,10 +13,11 @@ div(class="tool")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import _ from 'lodash'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
       css: '',

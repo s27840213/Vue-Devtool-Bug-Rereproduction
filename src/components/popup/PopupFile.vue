@@ -4,7 +4,7 @@ div(class="popup-file")
     class="popup-file__profile")
     router-link(to="/settings/account"
         class="popup-file__option__link"
-        @click.native="closePopup")
+        @click="closePopup")
       avatar(class="mr-10"
         :textSize="14"
         :avatarSize="35")
@@ -15,8 +15,8 @@ div(class="popup-file")
   div(class="popup-file__item" @click="newDesign()")
     span {{$tc('NN0072')}}
   hr(class="popup-file__hr")
-  //- div(class="popup-file__item " @click="toggleBleed()")
-  //-   span {{hasBleed ? `${$t('NN0779')}` : `${$t('NN0778')}`}}
+  div(v-if="isAdmin" class="popup-file__item " @click="toggleBleed()")
+    span {{hasBleed ? `${$t('NN0779')}` : `${$t('NN0778')}`}}
   div(class="popup-file__item " @click="togglerRuler()")
     span {{$t('NN0073')}}
     svg-icon(v-if="isShownRuler" class="pointer"
@@ -42,7 +42,7 @@ div(class="popup-file")
     //-   span 測試試用
   hr(class="popup-file__hr")
   div(class="popup-file__item")
-    url(:url="$t('NN0791')")
+    url(:url="$t('NN0791')" :newTab="true")
       span {{$t('NN0790', {type: $tc('NN0793', 1)})}}
   div(class="popup-file__item" @click="onLogoutClicked()")
     span {{$tc('NN0167',2)}}
@@ -64,7 +64,7 @@ div(class="popup-file")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import popupUtils from '@/utils/popupUtils'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
@@ -75,10 +75,10 @@ import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
 import stepsUtils from '@/utils/stepsUtils'
 import gtmUtils from '@/utils/gtmUtils'
-import resizeUtils from '@/utils/resizeUtils'
 import { IPage } from '@/interfaces/page'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     Avatar,
     Url
@@ -156,39 +156,14 @@ export default Vue.extend({
       rulerUtils.setLockGuideline(!rulerUtils.lockGuideline)
     },
     toggleBleed() {
-      if (this.hasBleed) {
-        // disable bleeds for all pages
-        for (let idx = 0; idx < this.pagesLength; idx++) {
-          resizeUtils.disableBleeds(idx)
-        }
-      } else {
-        // apply default bleeds for all pages
-        for (let idx = 0; idx < this.pagesLength; idx++) {
-          const page = pageUtils.getPage(idx)
-          if (page.physicalBleeds && page.bleeds) resizeUtils.resizeBleeds(idx, page.physicalBleeds, page.bleeds)
-          else {
-            const unit = page.unit ?? 'px'
-            const defaultBleeds = pageUtils.getDefaultBleeds('px')
-            defaultBleeds.top = this.groupType === 1 && idx !== 0 ? 0 : defaultBleeds.top
-            defaultBleeds.bottom = this.groupType === 1 && idx !== this.pagesLength - 1 ? 0 : defaultBleeds.bottom
-
-            const defaultPhysicalBleeds = unit === 'px' ? defaultBleeds : pageUtils.getDefaultBleeds(unit, pageUtils.getPageDPI(page))
-            if (unit !== 'px') {
-              defaultPhysicalBleeds.top = this.groupType === 1 && idx !== 0 ? 0 : defaultPhysicalBleeds.top
-              defaultPhysicalBleeds.bottom = this.groupType === 1 && idx !== this.pagesLength - 1 ? 0 : defaultPhysicalBleeds.bottom
-            }
-            resizeUtils.resizeBleeds(idx, defaultPhysicalBleeds, defaultBleeds)
-          }
-          this.$store.commit('UPDATE_pageProps', {
-            pageIndex: idx,
-            props: { isEnableBleed: true }
-          })
-        }
+      const isEnableBleed = !this.hasBleed
+      for (let idx = 0; idx < this.pagesLength; idx++) {
+        pageUtils.setIsEnableBleed(isEnableBleed, idx)
+        if (!isEnableBleed) pageUtils.resetBleeds(idx)
       }
       stepsUtils.record()
     },
     newDesign() {
-      // designUtils.newDesign()
       const path = `${window.location.origin}${window.location.pathname}`
       window.open(path)
       this.closePopup()
@@ -201,7 +176,6 @@ export default Vue.extend({
     },
     exportJSON() {
       fileUtils.export()
-      // designUtils.newDesign()
     },
     toogleAdminView() {
       this.setUserState({ enableAdminView: !this.enableAdminView })
@@ -232,6 +206,9 @@ export default Vue.extend({
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'
+    },
+    gotoMobile() { // TO-DELETE
+      window.location.href = this.$router.currentRoute.value.fullPath.replace('editor', 'mobile-editor')
     }
   }
 })

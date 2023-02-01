@@ -3,7 +3,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import { IStep } from '@/interfaces/steps'
 import TextPropUtils from './textPropUtils'
-import Vue from 'vue'
+import Vue, { nextTick } from 'vue'
 import { FunctionPanelType } from '@/store/types'
 import pageUtils from './pageUtils'
 import popupUtils from './popupUtils'
@@ -254,30 +254,38 @@ class StepsUtils {
     }
   }
 
+  unproxify<T>(val: T): T {
+    const self = this as StepsUtils
+    if (val instanceof Array) {
+      return val.map((i) => this.unproxify(i)) as unknown as T
+    }
+    if (val instanceof Object) {
+      return Object.fromEntries(Object.entries({ ...val }).map(([k, v]) => {
+        return [k, this.unproxify(v)]
+      })) as unknown as T
+    }
+    return val
+  }
+
   async asyncRecord() {
+    const pages = this.unproxify(store.getters.getPages)
+    const selectedInfo = this.unproxify(store.getters.getCurrSelectedInfo)
     const clonedData = await workerUtils.asyncCloneDeep({
-      pages_1: store.getters.getPages,
-      // pages_2: GeneralUtils.deepCopy(store.getters.getPages),
-      selectedInfo: store.getters.getCurrSelectedInfo
+      pages_1: pages,
+      selectedInfo: selectedInfo
     })
-    const pages_2 = await workerUtils.asyncCloneDeep(store.getters.getPages)
+    const pages_2 = await workerUtils.asyncCloneDeep(pages)
 
     if (clonedData) {
       const pages = this.filterDataForLayersInPages(clonedData.pages_1)
       const currSelectedInfo = clonedData.selectedInfo
       const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
-      // console.log(GeneralUtils.deepCopy(clonedData.pages_1))
       /**
        * The following code modify the wrong config state cause by the async
        */
       if (currSelectedInfo.layers.length === 1) {
         currSelectedInfo.layers[0].active = true
       }
-      // pages[currSelectedInfo.pageIndex].layers[lastSelectedLayerIndex].active = true
-      // if (currIndex !== lastSelectedLayerIndex) {
-      //   pages[currSelectedInfo.pageIndex].layers[currIndex].active = false
-      //   clonedData.pages_2[currSelectedInfo.pageIndex].layers[currIndex].active = false
-      // }
 
       // There's not any steps before, create the initial step first
       if (this.currStep < 0) {
@@ -294,7 +302,6 @@ class StepsUtils {
         // Don't upload the design when initialize the steps
         if (uploadUtils.isLogin) {
           uploadUtils.uploadDesign(undefined, { clonedPages: pages_2 })
-          // uploadUtils.uploadDesign(undefined, { clonedPages: clonedData.pages_2 })
         }
       }
     }
@@ -332,7 +339,7 @@ class StepsUtils {
       pageUtils.scrollIntoPage(pageIndex)
     }
     if (this.currStep > 0) {
-      Vue.nextTick(() => {
+      nextTick(() => {
         if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
           TextPropUtils.updateTextPropsState()
         }
@@ -385,7 +392,7 @@ class StepsUtils {
     if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
       pageUtils.scrollIntoPage(pageIndex)
     }
-    Vue.nextTick(() => {
+    nextTick(() => {
       if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
         TextPropUtils.updateTextPropsState()
       }

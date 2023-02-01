@@ -1,22 +1,29 @@
 <template lang="pug">
-  div(class="no-items-hint" :class="{mobile: mobile}")
-    div(v-if="mobile" class="no-items-hint__icon")
-      svg-icon(:iconName="hints[type].icon" iconColor="white" iconWidth="42px")
-    span(class="no-items-hint__title" :class="{mobile: mobile}") {{ $t('NN0659', { items: hints[type].items }) }}
-    p(class="no-items-hint__description" :class="{mobile: mobile}")
-      span {{ $t('NN0662') }}
-      svg-icon(iconName="settings" :iconColor="mobile ? 'gray-3' : 'white'" iconWidth="16px")
-    span(class="no-items-hint__description" :class="{mobile: mobile}")
-      span {{ hints[type].action }}
+div(class="no-items-hint" :class="{mobile: mobile}")
+  div(v-if="mobile" class="no-items-hint__icon")
+    svg-icon(:iconName="hints[type].icon" iconColor="white" iconWidth="42px")
+  span(class="no-items-hint__title" :class="{mobile: mobile}") {{ $t('NN0659', { items: hints[type].items }) }}
+  p(class="no-items-hint__description" :class="{mobile: mobile}")
+    span {{ $t('NN0662') }}
+    svg-icon(iconName="settings" :iconColor="mobile ? 'gray-3' : 'white'" iconWidth="16px")
+  span(class="no-items-hint__description" :class="{mobile: mobile}")
+    span {{ hints[type].action }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    type: String,
-    mobile: Boolean
+    type: {
+      type: String as PropType<'logo' | 'color'>,
+      required: true
+    },
+    mobile: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {

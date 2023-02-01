@@ -1,126 +1,130 @@
 <template lang="pug">
-  div(class="popup-verify"
-    v-click-outside="closePopup")
-    div(v-if="currentPage === 'vcode'")
-      div(class="popup-verify__close")
-        svg-icon(class="pointer" iconName="page-close"
-          :iconWidth="'10px'" iconColor="gray-0"
-          @click.native="closePopup()")
-      div(class="text-blue-1 heading-5 pb-20 text-center") {{$t('NN0284')}}
-      div(class="pb-20")
-        span(class="body-2") {{$t('NN0285', {email: account, time: 10})}}
-      div
-        property-bar(:class="{'input-invalid': !vcodeValid}")
-          input(class="body-2 text-gray-2"
-            v-model="vcode" type="text" name="vcode"
-            :placeholder="$t('NN0163', {term: $t('NN0286')})")
-        div(v-if="!vcodeValid"
-          class="invalid-message")
-          span {{ vcodeErrorMessage }}
-        div(class="my-10")
-          div(class="popup-verify__btn btn-blue full-width"
-            @click="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
-        div(v-if="resendAvailable"
-          class="popup-verify__vcode-bottom")
-          span {{$t('NN0288')}}
-          btn(:type="'icon'"
-            class="text-blue-1"
-            @click.native="onResendClicked()") {{$t('NN0290')}}
-        div(v-else
-          class="popup-verify__vcode-bottom text-gray-3")
-          span {{ leftTimeText }}
-    div(v-if="currentPage === 'oldPass'")
-      div(class="popup-verify__close")
-        svg-icon(class="pointer" iconName="page-close"
-          :iconWidth="'10px'" iconColor="gray-0"
-          @click.native="closePopup()")
-      div(class="label-lg pb-20 text-center") {{$t('NN0335')}}
-      div(class="pb-10 body-2 text-gray-3 text-center") {{$t('NN0337')}}
-      div
-        property-bar(:class="{'input-invalid': !oldPassValid}")
-          input(class="body-2 text-gray-2"
-            v-model="oldPass" type="password" name="oldPass"
-            @input="onUpdate"
-            :placeholder="$t('NN0163', {term: $t('NN0336')})")
-        div(class="popup-verify__forgot-pwd")
-          div(class="invalid-message")
-            span(v-if="!oldPassValid") {{ oldPassErrorMessage }}
-          btn(:type="'icon'"
-            class="pt-5 body-2"
-            @click.native="onForgotClicked()") {{$t('NN0181')}}
-        div(class="popup-verify__btns my-15")
-          div(class="popup-verify__btn btn-gray"
-            @click="closePopup()") {{$t('NN0203')}}
-          div(class="popup-verify__btn btn-blue"
-            @click="onCheckPasswordClicked()") {{$t('NN0338')}}
-    div(v-if="currentPage === 'newPass'")
-      div(class="popup-verify__close")
-        svg-icon(class="pointer" iconName="page-close"
-          :iconWidth="'10px'" iconColor="gray-0"
-          @click.native="closePopup()")
-      div(class="label-lg pb-20 text-center") {{$t('NN0291')}}
-      div
-        property-bar(:class="{'input-invalid': !resetPasswordValid}")
-          input(class="body-2 text-gray-2"
-            v-model="newPass" type="password" name="newPass"
-            :placeholder="$t('NN0163', { term: $t('NN0292') })"
-            @input="onUpdate"
-            :type="togglePeerPasswordInput")
-          button(@click="isPeerPassword = !isPeerPassword")
-            svg-icon(class="pointer"
-            :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
-        div(v-if="emptyPassword || isResponseError"
-          class="body-3 pt-15 pb-40 pl-5"
-          :style="`${resetPasswordValid && !isResponseError ? '' : 'color: #EB5757;'}`")
-            span {{ passwordHint }}
-        div(v-else
-          class="invalid-message mt-10")
-          div(class="flex align-center")
-            svg-icon(class="pointer"
-              :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'20px'"
-              :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
-            span(class="ml-5 body-3"
-              :class="{'text-green-1': passwordLengthValid}") {{$t('NN0293', {len: 8})}}
-          div(class="flex align-center")
-            svg-icon(class="pointer"
-              :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'20px'"
-              :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
-            span(class="ml-5 body-3"
-              :class="{'text-green-1': passwordContainEng}") {{$t('NN0294')}}
-          div(class="flex align-center")
-            svg-icon(class="pointer"
-              :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'20px'"
-              :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
-            span(class="ml-5 body-3"
-              :class="{'text-green-1': passwordContainNum}") {{$t('NN0295')}}
-        div(class="popup-verify__btns my-15")
-          div(class="popup-verify__btn btn-gray"
-            @click="closePopup()") {{$t('NN0203')}}
-          div(class="popup-verify__btn btn-blue"
-            @click="onConfirmPasswordClicked()") {{$tc('NN0164', 2)}}
-    div(v-if="currentPage === 'removeAvatar'")
-      div(class="label-lg pb-20 text-center") {{$t('NN0339')}}
+div(class="popup-verify"
+  v-click-outside="closePopup")
+  div(v-if="currentPage === 'vcode'")
+    div(class="popup-verify__close")
+      svg-icon(class="pointer" iconName="page-close"
+        :iconWidth="'10px'" iconColor="gray-0"
+        @click="closePopup()")
+    div(class="text-blue-1 heading-5 pb-20 text-center") {{$t('NN0284')}}
+    div(class="pb-20")
+      span(class="body-2") {{$t('NN0285', {email: account, time: 10})}}
+    div
+      property-bar(:class="{'input-invalid': !vcodeValid}")
+        input(class="body-2 text-gray-2"
+          v-model="vcode" type="text" name="vcode"
+          :placeholder="$t('NN0163', {term: $t('NN0286')})")
+      div(v-if="!vcodeValid"
+        class="invalid-message")
+        span {{ vcodeErrorMessage }}
+      div(class="my-10")
+        div(class="popup-verify__btn btn-blue full-width"
+          @click="onEnterCodeDoneClicked()") {{$tc('NN0133',2)}}
+      div(v-if="resendAvailable"
+        class="popup-verify__vcode-bottom")
+        span {{$t('NN0288')}}
+        btn(:type="'icon'"
+          class="text-blue-1"
+          @click="onResendClicked()") {{$t('NN0290')}}
+      div(v-else
+        class="popup-verify__vcode-bottom text-gray-3")
+        span {{ leftTimeText }}
+  div(v-if="currentPage === 'oldPass'")
+    div(class="popup-verify__close")
+      svg-icon(class="pointer" iconName="page-close"
+        :iconWidth="'10px'" iconColor="gray-0"
+        @click="closePopup()")
+    div(class="label-lg pb-20 text-center") {{$t('NN0335')}}
+    div(class="pb-10 body-2 text-gray-3 text-center") {{$t('NN0337')}}
+    div
+      property-bar(:class="{'input-invalid': !oldPassValid}")
+        input(class="body-2 text-gray-2"
+          v-model="oldPass" type="password" name="oldPass"
+          @input="onUpdate"
+          :placeholder="$t('NN0163', {term: $t('NN0336')})")
+      div(class="popup-verify__forgot-pwd")
+        div(class="invalid-message")
+          span(v-if="!oldPassValid") {{ oldPassErrorMessage }}
+        btn(:type="'icon'"
+          class="pt-5 body-2"
+          @click="onForgotClicked()") {{$t('NN0181')}}
       div(class="popup-verify__btns my-15")
         div(class="popup-verify__btn btn-gray"
           @click="closePopup()") {{$t('NN0203')}}
-        div(class="popup-verify__btn btn-red"
-          @click="onRemoveAvatarClicked()") {{$t('NN0170')}}
-    spinner(v-if="isLoading")
+        div(class="popup-verify__btn btn-blue"
+          @click="onCheckPasswordClicked()") {{$t('NN0338')}}
+  div(v-if="currentPage === 'newPass'")
+    div(class="popup-verify__close")
+      svg-icon(class="pointer" iconName="page-close"
+        :iconWidth="'10px'" iconColor="gray-0"
+        @click="closePopup()")
+    div(class="label-lg pb-20 text-center") {{$t('NN0291')}}
+    div
+      property-bar(:class="{'input-invalid': !resetPasswordValid}")
+        input(class="body-2 text-gray-2"
+          v-model="newPass" name="newPass"
+          :placeholder="$t('NN0163', { term: $t('NN0292') })"
+          @input="onUpdate"
+          :type="togglePeerPasswordInput")
+        button(@click="isPeerPassword = !isPeerPassword")
+          svg-icon(class="pointer"
+          :iconName="togglePeerPasswordIcon" :iconWidth="'20px'" :iconColor="'gray-2'")
+      div(v-if="emptyPassword || isResponseError"
+        class="body-3 pt-15 pb-40 pl-5"
+        :style="`${resetPasswordValid && !isResponseError ? '' : 'color: #EB5757;'}`")
+          span {{ passwordHint }}
+      div(v-else
+        class="invalid-message mt-10")
+        div(class="flex align-center")
+          svg-icon(class="pointer"
+            :iconName="`${passwordLengthValid ? '' : 'un'}check`" :iconWidth="'20px'"
+            :iconColor="`${passwordLengthValid ? 'green-1' : 'red'}`")
+          span(class="ml-5 body-3"
+            :class="{'text-green-1': passwordLengthValid}") {{$t('NN0293', {len: 8})}}
+        div(class="flex align-center")
+          svg-icon(class="pointer"
+            :iconName="`${passwordContainEng ? '' : 'un'}check`" :iconWidth="'20px'"
+            :iconColor="`${passwordContainEng ? 'green-1' : 'red'}`")
+          span(class="ml-5 body-3"
+            :class="{'text-green-1': passwordContainEng}") {{$t('NN0294')}}
+        div(class="flex align-center")
+          svg-icon(class="pointer"
+            :iconName="`${passwordContainNum ? '' : 'un'}check`" :iconWidth="'20px'"
+            :iconColor="`${passwordContainNum ? 'green-1' : 'red'}`")
+          span(class="ml-5 body-3"
+            :class="{'text-green-1': passwordContainNum}") {{$t('NN0295')}}
+      div(class="popup-verify__btns my-15")
+        div(class="popup-verify__btn btn-gray"
+          @click="closePopup()") {{$t('NN0203')}}
+        div(class="popup-verify__btn btn-blue"
+          @click="onConfirmPasswordClicked()") {{$tc('NN0164', 2)}}
+  div(v-if="currentPage === 'removeAvatar'")
+    div(class="label-lg pb-20 text-center") {{$t('NN0339')}}
+    div(class="popup-verify__btns my-15")
+      div(class="popup-verify__btn btn-gray"
+        @click="closePopup()") {{$t('NN0203')}}
+      div(class="popup-verify__btn btn-red"
+        @click="onRemoveAvatarClicked()") {{$t('NN0170')}}
+  spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import userApis from '@/apis/user'
 import store from '@/store'
-import i18n from '@/i18n'
 import localeUtils from '@/utils/localeUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
-    account: String,
-    type: String
+    account: {
+      type: String,
+    },
+    type: {
+      type: String,
+      required: true
+    }
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -131,9 +135,9 @@ export default Vue.extend({
       vcode: '' as string,
       oldPass: '',
       newPass: '',
-      vcodeErrorMessage: i18n.t('NN0298') as string,
+      vcodeErrorMessage: this.$t('NN0298') as string,
       oldPassErrorMessage: '' as string,
-      passwordHint: i18n.t('NN0308') as string,
+      passwordHint: this.$t('NN0308') as string,
       leftTime: 60 as number,
       leftTimeText: '' as string,
       resendAvailable: true as boolean,
@@ -228,12 +232,12 @@ export default Vue.extend({
     }),
     async onResendClicked() {
       this.isLoading = true
-      if (this.account.length === 0) {
+      if (!this.account || this.account.length === 0) {
         this.isLoading = false
         return
       }
       this.resendAvailable = false
-      this.leftTimeText = i18n.t('NN0289', { time: this.leftTime }) as string
+      this.leftTimeText = this.$t('NN0289', { time: this.leftTime }) as string
       const parameter = {
         token: this.token,
         account: this.account,
@@ -247,7 +251,7 @@ export default Vue.extend({
         this.isLoading = false
         const clock = window.setInterval(() => {
           this.leftTime--
-          this.leftTimeText = i18n.t('NN0289', { time: this.leftTime }) as string
+          this.leftTimeText = this.$t('NN0289', { time: this.leftTime }) as string
           if (this.leftTime === 0) {
             window.clearInterval(clock)
             this.resendAvailable = true
@@ -263,12 +267,12 @@ export default Vue.extend({
     async onEnterCodeDoneClicked() {
       this.isVcodeClicked = true
       this.isLoading = true
-      if (this.account.length === 0) {
+      if (!this.account || this.account.length === 0) {
         this.isLoading = false
         return
       }
       if (!this.vcodeValid) {
-        this.vcodeErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0286') }) as string
+        this.vcodeErrorMessage = this.$t('NN0163', { term: this.$t('NN0286') }) as string
         this.isLoading = false
         return
       }
@@ -291,7 +295,7 @@ export default Vue.extend({
       this.isCheckPasswordClicked = true
       this.isLoading = true
       if (!this.oldPassValid) {
-        this.oldPassErrorMessage = i18n.t('NN0163', { term: i18n.tc('NN0180', 2) }) as string
+        this.oldPassErrorMessage = this.$t('NN0163', { term: this.$tc('NN0180', 2) }) as string
         this.isLoading = false
         return
       }
@@ -306,7 +310,7 @@ export default Vue.extend({
         this.currentPage = 'newPass'
       } else {
         this.oldPass = ''
-        this.oldPassErrorMessage = data.msg || i18n.t('NN0242') as string
+        this.oldPassErrorMessage = data.msg || this.$t('NN0242') as string
         console.log(data.msg)
       }
       this.isLoading = false
@@ -319,7 +323,7 @@ export default Vue.extend({
       this.isConfirmClicked = true
       this.isResponseError = false
       if (!this.resetPasswordValid) {
-        this.passwordHint = i18n.t('NN0308') as string
+        this.passwordHint = this.$t('NN0308') as string
         return
       }
       this.isLoading = true
@@ -335,7 +339,7 @@ export default Vue.extend({
         this.closePopup()
       } else {
         this.isResponseError = true
-        this.passwordHint = data.msg || i18n.t('NN0242') as string
+        this.passwordHint = data.msg || this.$t('NN0242') as string
         console.log(data.msg)
       }
       this.isLoading = false

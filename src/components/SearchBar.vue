@@ -1,36 +1,35 @@
 <template lang="pug">
-  //- Show search button on mobile, https://www.paddingleft.com/2019/09/18/Show-Search-on-mobile-devices-keyboard
-  form(class="search-bar bg-gray-6" action @submit="onSearch")
-    svg-icon(class="pointer"
-      iconName="search"
-      :iconColor="color.search || 'gray-3'"
-      iconWidth="20px")
-    input(class="search-bar__input body-2" ref="searchbar"
-      type="search"
-      v-model="keyword"
-      @input="onUpdate"
-      :placeholder="placeholder"
-      :style="inputStyles()")
-    svg-icon(v-if="clear && keyword"
-      class="pointer"
-      iconName="close"
-      :iconColor="color.close || 'gray-3'"
-      iconWidth="20px"
-      @click.native="onClear")
-    slot
+//- Show search button on mobile, https://www.paddingleft.com/2019/09/18/Show-Search-on-mobile-devices-keyboard
+form(class="search-bar bg-gray-6" action="" @submit="onSearch")
+  svg-icon(class="pointer"
+    iconName="search"
+    :iconColor="color.search || 'gray-3'"
+    iconWidth="20px")
+  input(class="search-bar__input body-2" ref="searchbar"
+    type="search"
+    v-model="keyword"
+    @input="onUpdate"
+    :placeholder="placeholder"
+    :style="inputStyles()")
+  svg-icon(v-if="clear && keyword"
+    class="pointer"
+    iconName="close"
+    :iconColor="color.close || 'gray-3'"
+    iconWidth="20px"
+    @click="onClear")
+  slot
 </template>
 
 <script lang="ts">
-import i18n from '@/i18n'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
   },
   props: {
     placeholder: {
       type: String,
-      default: `${i18n.t('NN0092')}`
+      required: true
     },
     clear: {
       type: Boolean
@@ -53,6 +52,7 @@ export default Vue.extend({
       }
     }
   },
+  emits: ['search', 'update'],
   data() {
     return {
       keyword: this.defaultKeyword

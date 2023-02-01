@@ -1,148 +1,149 @@
 <template lang="pug">
-  div(class="bottom-menu")
-    div(class="bottom-menu__wrapper relative")
-      div(v-if="isPrevButtonNeeded" class="bottom-menu__prev pointer"
-          @click.stop="handlePrevMenu")
-        svg-icon(iconName="chevron-left" iconColor="gray-3" iconWidth="20px")
-      div(class="bottom-menu__close pointer"
-          @click.stop="handleCloseMenu")
-        svg-icon(iconName="close" iconColor="gray-3" iconWidth="20px")
-      template(v-if="isAnySelected && bottomMenu === ''")
-        div(class="multi-menu")
-          div(class="multi-menu__title")
-            i18n(path="NN0254" tag="span")
-              template(#selectedNum) {{selectedNum}}
-          div(class="menu__hr")
-          div(class="multi-menu__actions")
-            div(v-for="multiMenuItem in multiMenuItems"
-                class="multi-menu__action"
-                @click.stop="multiMenuItem.action")
-              svg-icon(:iconName="multiMenuItem.icon" iconWidth="24px" iconColor="gray-2")
-      template(v-else)
-        div(v-if="bottomMenu === 'trash-info'" class="trash-info") {{$t('NN0241')}}
-        div(v-if="bottomMenu === 'new-folder'" class="new-folder")
-          div(class="new-folder__name-editor")
-            input(ref="name"
-                  class="new-folder__input"
-                  :placeholder="$t('NN0691')"
-                  v-model="editableName"
-                  @change="handleNewFolder"
-                  @keyup="checkNameLength")
-            div(v-if="editableName.length" class="new-folder__icon" @click.stop="handleClearNewFolderName")
-              svg-icon(iconName="close" iconColor="gray-3" iconWidth="24px")
-          div(v-if="isShowHint" class="menu__hint in-new-folder") {{ $t('NN0226') }}
-          div(class="new-folder__confirm"
-              :class="{disabled: !editableName.length}"
-              @click.stop="handleNewFolder") {{ $t('NN0190') }}
-        div(v-if="bottomMenu === 'sort-menu'" class="sort-menu menu")
-          div(v-for="sortMenuItem in sortMenuItems"
-              class="menu__item pointer"
-              :class="{selected: checkSortSelected(sortMenuItem.payload)}"
-              @click.stop="handleSortByClick(sortMenuItem.payload)")
+div(class="bottom-menu")
+  div(class="bottom-menu__wrapper relative")
+    div(v-if="isPrevButtonNeeded" class="bottom-menu__prev pointer"
+        @click.stop="handlePrevMenu")
+      svg-icon(iconName="chevron-left" iconColor="gray-3" iconWidth="20px")
+    div(class="bottom-menu__close pointer"
+        @click.stop="handleCloseMenu")
+      svg-icon(iconName="close" iconColor="gray-3" iconWidth="20px")
+    template(v-if="isAnySelected && bottomMenu === ''")
+      div(class="multi-menu")
+        div(class="multi-menu__title")
+          i18n-t(keypath="NN0254" tag="span")
+            template(#selectedNum) {{selectedNum}}
+        div(class="menu__hr")
+        div(class="multi-menu__actions")
+          div(v-for="multiMenuItem in multiMenuItems"
+              class="multi-menu__action"
+              @click.stop="multiMenuItem.action")
+            svg-icon(:iconName="multiMenuItem.icon" iconWidth="24px" iconColor="gray-2")
+    template(v-else)
+      div(v-if="bottomMenu === 'trash-info'" class="trash-info") {{$t('NN0241')}}
+      div(v-if="bottomMenu === 'new-folder'" class="new-folder")
+        div(class="new-folder__name-editor")
+          input(ref="name"
+                class="new-folder__input"
+                :placeholder="$t('NN0691')"
+                v-model="editableName"
+                @change="handleNewFolder"
+                @keyup="checkNameLength")
+          div(v-if="editableName.length" class="new-folder__icon" @click.stop="handleClearNewFolderName")
+            svg-icon(iconName="close" iconColor="gray-3" iconWidth="24px")
+        div(v-if="isShowHint" class="menu__hint in-new-folder") {{ $t('NN0226') }}
+        div(class="new-folder__confirm"
+            :class="{disabled: !editableName.length}"
+            @click.stop="handleNewFolder") {{ $t('NN0190') }}
+      div(v-if="bottomMenu === 'sort-menu'" class="sort-menu menu")
+        div(v-for="sortMenuItem in sortMenuItems"
+            class="menu__item pointer"
+            :class="{selected: checkSortSelected(sortMenuItem.payload)}"
+            @click.stop="handleSortByClick(sortMenuItem.payload)")
+          div(class="menu__item-icon")
+            svg-icon(:iconName="sortMenuItem.icon"
+                    iconWidth="24px"
+                    iconColor="gray-2"
+                    :style="sortMenuItem.style")
+          div(class="menu__item-text")
+            span {{ sortMenuItem.text }}
+      div(v-if="bottomMenu === 'design-menu'" class="design-menu menu")
+        template(v-if="currLocation !== 't'")
+          div(class="menu__editable-name")
+            div(v-if="isNameEditing"
+                class="menu__editable-name__text menu__editable-name__text-editor")
+              input(ref="name"
+                    v-model="editableName"
+                    @change="handleNameEditEnd"
+                    @keyup="checkNameEnter")
+            div(v-else class="menu__editable-name__text")
+              span(:title="designBuffer.name") {{ designBuffer.name }}
+            div(v-if="!isNameEditing" class="menu__editable-name__icon"
+                @click.stop="handleNameClick")
+              svg-icon(iconName="pen" iconWidth="18px" iconColor="gray-2")
+          div(v-if="!isNameEditing" class="menu__description" @click.stop.prevent) {{ `${designBuffer.width} x ${designBuffer.height} ${designBuffer.unit}` }}
+          div(v-if="isNameEditing" style="width: 100%; height: 8px;")
+          div(v-else class="menu__hr")
+        div(v-else style="margin-top: 20px;")
+        template(v-if="!isNameEditing")
+          div(v-for="designMenuItem in designMenuItems"
+              class="menu__item"
+              @click.stop="handleDesignMenuAction(designMenuItem.icon)")
             div(class="menu__item-icon")
-              svg-icon(:iconName="sortMenuItem.icon"
-                      iconWidth="24px"
-                      iconColor="gray-2"
-                      :style="sortMenuItem.style")
+              svg-icon(:iconName="designMenuItem.icon"
+                      :iconWidth="designMenuItem.icon === 'confirm-circle' ? '22px' : '24px'"
+                      :iconColor="designMenuItem.icon === 'favorites-fill' ? 'gray-3' : 'gray-2'")
             div(class="menu__item-text")
-              span {{ sortMenuItem.text }}
-        div(v-if="bottomMenu === 'design-menu'" class="design-menu menu")
-          template(v-if="currLocation !== 't'")
-            div(class="menu__editable-name")
-              div(v-if="isNameEditing"
-                  class="menu__editable-name__text menu__editable-name__text-editor")
-                input(ref="name"
-                      v-model="editableName"
-                      @change="handleNameEditEnd"
-                      @keyup="checkNameEnter")
-              div(v-else class="menu__editable-name__text")
-                span(:title="designBuffer.name") {{ designBuffer.name }}
-              div(v-if="!isNameEditing" class="menu__editable-name__icon"
-                  @click.stop="handleNameClick")
-                svg-icon(iconName="pen" iconWidth="18px" iconColor="gray-2")
-            div(v-if="!isNameEditing" class="menu__description" @click.stop.prevent) {{ `${designBuffer.width} x ${designBuffer.height}` }}
-            div(v-if="isNameEditing" style="width: 100%; height: 8px;")
-            div(v-else class="menu__hr")
-          div(v-else style="margin-top: 20px;")
+              span {{ designMenuItem.text }}
+      div(v-if="bottomMenu === 'folder-menu'" class="folder-menu menu")
+        template(v-if="currLocation !== 't'")
+          div(class="menu__editable-name")
+            div(v-if="isNameEditing"
+                class="menu__editable-name__text menu__editable-name__text-editor")
+              input(ref="name"
+                    v-model="editableName"
+                    @change="handleNameEditEnd"
+                    @keyup="checkNameEnter")
+            div(v-else class="menu__editable-name__text")
+              span(:title="folderBuffer.folder.name") {{ folderBuffer.folder.name }}
+            div(v-if="!isNameEditing" class="menu__editable-name__icon"
+                @click.stop="handleNameClick")
+              svg-icon(iconName="pen" iconWidth="18px" iconColor="gray-2")
           template(v-if="!isNameEditing")
-            div(v-for="designMenuItem in designMenuItems"
-                class="menu__item"
-                @click.stop="handleDesignMenuAction(designMenuItem.icon)")
-              div(class="menu__item-icon")
-                svg-icon(:iconName="designMenuItem.icon"
-                        :iconWidth="designMenuItem.icon === 'confirm-circle' ? '22px' : '24px'"
-                        :iconColor="designMenuItem.icon === 'favorites-fill' ? 'gray-3' : 'gray-2'")
-              div(class="menu__item-text")
-                span {{ designMenuItem.text }}
-        div(v-if="bottomMenu === 'folder-menu'" class="folder-menu menu")
-          template(v-if="currLocation !== 't'")
-            div(class="menu__editable-name")
-              div(v-if="isNameEditing"
-                  class="menu__editable-name__text menu__editable-name__text-editor")
-                input(ref="name"
-                      v-model="editableName"
-                      @change="handleNameEditEnd"
-                      @keyup="checkNameEnter")
-              div(v-else class="menu__editable-name__text")
-                span(:title="folderBuffer.folder.name") {{ folderBuffer.folder.name }}
-              div(v-if="!isNameEditing" class="menu__editable-name__icon"
-                  @click.stop="handleNameClick")
-                svg-icon(iconName="pen" iconWidth="18px" iconColor="gray-2")
-            template(v-if="!isNameEditing")
-              div(v-if="itemCount >= 0" class="menu__description" @click.stop.prevent) {{ $t('NN0197', { num: itemCount }) }}
-              div(v-else class="menu__description" @click.stop.prevent) ...
-            div(v-if="isNameEditing && isShowHint" class="menu__hint in-folder-menu") {{ $t('NN0226') }}
-            div(v-if="isNameEditing" style="width: 100%; height: 8px;")
-            div(v-else class="menu__hr")
-          div(v-else style="margin-top: 20px;")
-          template(v-if="!isNameEditing")
-            div(v-for="folderMenuItem in folderMenuItems"
-                class="menu__item"
-                @click.stop="handleFolderMenuAction(folderMenuItem.icon)")
-              div(class="menu__item-icon")
-                svg-icon(:iconName="folderMenuItem.icon"
-                        :iconWidth="folderMenuItem.icon === 'confirm-circle' ? '22px' : '24px'"
-                        iconColor="gray-2")
-              div(class="menu__item-text")
-                span {{ folderMenuItem.text }}
-        div(v-if="bottomMenu === 'move-folder'" class="move-folder"
+            div(v-if="itemCount >= 0" class="menu__description" @click.stop.prevent) {{ $t('NN0197', { num: itemCount }) }}
+            div(v-else class="menu__description" @click.stop.prevent) ...
+          div(v-if="isNameEditing && isShowHint" class="menu__hint in-folder-menu") {{ $t('NN0226') }}
+          div(v-if="isNameEditing" style="width: 100%; height: 8px;")
+          div(v-else class="menu__hr")
+        div(v-else style="margin-top: 20px;")
+        template(v-if="!isNameEditing")
+          div(v-for="folderMenuItem in folderMenuItems"
+              class="menu__item"
+              @click.stop="handleFolderMenuAction(folderMenuItem.icon)")
+            div(class="menu__item-icon")
+              svg-icon(:iconName="folderMenuItem.icon"
+                      :iconWidth="folderMenuItem.icon === 'confirm-circle' ? '22px' : '24px'"
+                      iconColor="gray-2")
+            div(class="menu__item-text")
+              span {{ folderMenuItem.text }}
+      div(v-if="bottomMenu === 'move-folder'" class="move-folder"
+          @click.stop.prevent="clearMoveToFolderSelectInfo")
+        div(class="move-folder__folders"
             @click.stop.prevent="clearMoveToFolderSelectInfo")
-          div(class="move-folder__folders"
-              @click.stop.prevent="clearMoveToFolderSelectInfo")
-            mobile-structure-folder(v-for="folder in realFolders"
-                            :folder="folder"
-                            :parents="[]"
-                            :level="0")
-          div(class="move-folder__hr"
-              @click.stop.prevent="clearMoveToFolderSelectInfo")
-          div(class="move-folder__footer")
-            div(class="move-folder__new-folder"
-                :class="{disabled: isMaxLevelReached}"
-                @click.stop.prevent="handleCreateFolder")
-              div(class="move-folder__new-folder__icon")
-                svg-icon(iconName="folder_plus"
-                        :iconColor="isMaxLevelReached ? 'gray-4' : 'gray-2'"
-                        iconWidth="24px")
-              div(class="move-folder__new-folder__text" :class="{disabled: isMaxLevelReached}") {{ $t('NN0190') }}
-            div(class="move-folder__confirm"
-                :class="{'disabled': moveToFolderSelectInfo === ''}"
-                @click.stop="handleMoveToFolder") {{ $t('NN0206') }}
+          mobile-structure-folder(v-for="folder in realFolders"
+                          :folder="folder"
+                          :parents="[]"
+                          :level="0")
+        div(class="move-folder__hr"
+            @click.stop.prevent="clearMoveToFolderSelectInfo")
+        div(class="move-folder__footer")
+          div(class="move-folder__new-folder"
+              :class="{disabled: isMaxLevelReached}"
+              @click.stop.prevent="handleCreateFolder")
+            div(class="move-folder__new-folder__icon")
+              svg-icon(iconName="folder_plus"
+                      :iconColor="isMaxLevelReached ? 'gray-4' : 'gray-2'"
+                      iconWidth="24px")
+            div(class="move-folder__new-folder__text" :class="{disabled: isMaxLevelReached}") {{ $t('NN0190') }}
+          div(class="move-folder__confirm"
+              :class="{'disabled': moveToFolderSelectInfo === ''}"
+              @click.stop="handleMoveToFolder") {{ $t('NN0206') }}
 </template>
 
 <script lang="ts">
 import designUtils from '@/utils/designUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import MobileStructureFolder from '@/components/mydesign/MobileStructureFolder.vue'
 import { IDesign, IFolder } from '@/interfaces/design'
 
 const PREV_BUTTON_MENUS = ['new-folder', 'move-folder']
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     MobileStructureFolder
   },
+  emits: ['menuAction', 'back', 'clear', 'close', 'push'],
   data() {
     return {
       sortMenuItems: [
@@ -170,7 +171,7 @@ export default Vue.extend({
           text: `${this.$t('NN0194')}`,
           payload: ['update', true]
         }
-      ],
+      ] as { icon: string, style: string, text: string, payload: [string, boolean] }[],
       isNameEditing: false,
       editableName: '',
       messageTimer: -1,
@@ -181,15 +182,27 @@ export default Vue.extend({
     clickOutside: vClickOutside.directive
   },
   props: {
-    bottomMenu: String,
-    selectedNum: Number,
-    isAnySelected: Boolean,
-    menuStack: Array
+    bottomMenu: {
+      type: String,
+      required: true
+    },
+    selectedNum: {
+      type: Number,
+      required: true
+    },
+    isAnySelected: {
+      type: Boolean,
+      required: true
+    },
+    menuStack: {
+      type: Array,
+      required: true
+    }
   },
   mounted() {
     this.prepareForMenu(this.bottomMenu)
   },
-  destroyed() {
+  unmounted() {
     this.clearBuffers()
   },
   watch: {

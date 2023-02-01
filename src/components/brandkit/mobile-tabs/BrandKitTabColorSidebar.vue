@@ -1,27 +1,28 @@
 <template lang="pug">
-  div(v-if="colorPalettes.length === 0 && !isPalettesLoading" class="hint" :style="minHeightStyles()")
-    no-items-hint(type="color" :mobile="true")
-  div(v-else class="brand-kit-tab-color" :style="minHeightStyles()")
-    div(class="brand-kit-tab-color__palettes")
-      div(v-if="isPalettesLoading" class="loading")
-        svg-icon(iconName="loading"
-                iconWidth="24px"
-                iconColor="gray-3")
-      template(v-else)
-        brand-kit-color-palette-sidebar-mobile(v-for="colorPalette in colorPalettes"
-                                        :colorPalette="colorPalette"
-                                        :settingmode="settingmode")
+div(v-if="colorPalettes.length === 0 && !isPalettesLoading" class="hint" :style="minHeightStyles()")
+  no-items-hint(type="color" :mobile="true")
+div(v-else class="brand-kit-tab-color" :style="minHeightStyles()")
+  div(class="brand-kit-tab-color__palettes")
+    div(v-if="isPalettesLoading" class="loading")
+      svg-icon(iconName="loading"
+              iconWidth="24px"
+              iconColor="gray-3")
+    template(v-else)
+      brand-kit-color-palette-sidebar-mobile(v-for="colorPalette in colorPalettes"
+                                      :colorPalette="colorPalette"
+                                      :settingmode="settingmode")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import BrandKitColorPaletteSidebarMobile from '@/components/brandkit/BrandKitColorPaletteSidebarMobile.vue'
 import NoItemsHint from '@/components/brandkit/NoItemsHint.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
     }

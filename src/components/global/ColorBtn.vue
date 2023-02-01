@@ -1,7 +1,6 @@
 <template lang="pug">
 div(class="color-btn" :style="wrapperStyle")
-  div(class="color-btn__wrapper" :class="{active: active || focus, mobile: isMobileEditor}"
-    @click="$emit('click', $event)")
+  div(class="color-btn__wrapper" :class="{active: active || focus, mobile: isMobileEditor}")
     div(v-if="color === 'add'" class="color-btn__add-color")
     div(v-else-if="color === 'multi'" class="color-btn__multi-color")
     div(v-else class="color-btn__color" :style="{backgroundColor: color}")
@@ -10,9 +9,9 @@ div(class="color-btn" :style="wrapperStyle")
 
 <script lang="ts">
 import generalUtils from '@/utils/generalUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'ColorBtn',
   props: {
     color: {
@@ -39,14 +38,6 @@ export default Vue.extend({
       } : {}
     },
     isMobileEditor() { return generalUtils.isTouchDevice() }
-  },
-  methods: {
-    add(event: Event) {
-      this.$emit('click', event)
-    },
-    selectColor(color: string) {
-      this.$emit('click', color)
-    }
   }
 })
 </script>

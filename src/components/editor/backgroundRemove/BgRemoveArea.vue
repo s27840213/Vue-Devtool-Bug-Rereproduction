@@ -22,12 +22,16 @@ import { IBgRemoveInfo } from '@/interfaces/image'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    editorViewCanvas: HTMLElement
+    editorViewCanvas: {
+      type: HTMLElement,
+      required: true
+    }
   },
   data() {
     return {
@@ -93,7 +97,7 @@ export default Vue.extend({
     this.setPrevPageScaleRatio(this.scaleRatio)
     pageUtils.fitPage()
   },
-  destroyed() {
+  unmounted() {
     window.removeEventListener('mouseup', this.drawEnd)
     window.removeEventListener('mousemove', this.brushMoving)
     this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
@@ -372,10 +376,13 @@ export default Vue.extend({
       this.setCompositeOperationMode('destination-in', this.initImgCtx)
     },
     setCompositeOperationMode(mode: string, ctx?: CanvasRenderingContext2D) {
+      /**
+       * @Note GlobalCompositeOperation type has some problems
+       */
       if (ctx) {
-        ctx.globalCompositeOperation = mode
+        ctx.globalCompositeOperation = mode as any
       } else {
-        this.ctx.globalCompositeOperation = mode
+        this.ctx.globalCompositeOperation = mode as any
       }
     },
     getCanvasBlob(mycanvas: HTMLCanvasElement) {

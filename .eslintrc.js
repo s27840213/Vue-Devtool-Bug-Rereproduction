@@ -1,17 +1,18 @@
 module.exports = {
     root: true,
     plugins: [
-        "cypress"
+        'cypress'
     ],
     env: {
-        "cypress/globals": true,
+        'cypress/globals': true,
         node: true
     },
+
     extends: [
-        "plugin:cypress/recommended",
-        'plugin:vue/essential',
+        'plugin:vue/vue3-essential',
         '@vue/standard',
-        '@vue/typescript/recommended'
+        '@vue/typescript/recommended',
+        'plugin:cypress/recommended',
     ],
     parserOptions: {
         ecmaVersion: 2020
@@ -22,8 +23,12 @@ module.exports = {
         'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
         'space-before-function-paren': 0,
         '@typescript-eslint/no-var-requires': 0,
-        'camelcase': 'off',
-        // 'comma-dangle': ['error', 'never'],
+        camelcase: 'off',
+        '@typescript-eslint/no-non-null-assertion': 0,
+        'multiline-ternary': 'off',
+        'vue/multi-word-component-names': 'off',
+        'comma-dangle': ['error', 'only-multiline'],
+        'cypress/no-unnecessary-waiting': 'off',
         // semi: 'off',
         // 'import/no-dynamic-require': 'off',
         // 'global-require': 0,

@@ -1,57 +1,57 @@
 <template lang="pug">
-  div(v-if="allFolders.length > 0 || isFoldersLoading" class="folder-gallery")
-    div(v-if="allFolders.length > 0" class="folder-gallery__header")
-      div(class="folder-gallery__expand-icon-container"
-          @click="toggleExpansion")
-        svg-icon(:style="expansionIconStyles()"
-                iconName="caret-down"
-                iconWidth="10px"
-                iconHeight="5px"
-                iconColor="gray-2")
-      div(class="folder-gallery__title")
-        span {{$tc('NN0253', 2)}}
-    div(v-if="isExpanded" class="folder-gallery__folders")
-      folder-item(v-for="(folder, index) in allFolders"
-                  :path="path"
-                  :config="folder"
-                  :index="index"
-                  @goto="handleGotoFolder(folder.id)"
-                  :undraggable="limitFunctions"
-                  :undroppable="limitFunctions"
-                  :nameIneditable="limitFunctions"
-                  :isSelected="checkFolderSelected(folder.id)"
-                  :isAnySelected="isAnySelected"
-                  :menuItemNum="menuItemSlots.length"
-                  @moveItem="handleMoveItem"
-                  @select="selectFolder(folder)"
-                  @deselect="deselectFolder(folder)"
-                  @metaSelectFolder="metaSelectFolder(index)")
-        template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
-          div(class="folder-menu-item" @click="handleFolderMenuAction(menuItemSlot.icon, folder)")
-            div(class="folder-menu-item__icon")
-              svg-icon(:iconName="menuItemSlot.icon"
-                      iconWidth="10px"
-                      iconColor="gray-2")
-            div(class="folder-menu-item__text")
-              span {{ menuItemSlot.text }}
-            div(v-if="menuItemSlot.extendable" class="folder-menu-item__right")
-              svg-icon(iconName="chevron-right"
-                      iconWidth="10px"
-                      iconColor="gray-2")
-    div(v-if="isExpanded && isFoldersLoading" class="folder-gallery__loading")
-      svg-icon(iconName="loading"
-                iconWidth="50px"
-                iconColor="gray-3")
+div(v-if="allFolders.length > 0 || isFoldersLoading" class="folder-gallery")
+  div(v-if="allFolders.length > 0" class="folder-gallery__header")
+    div(class="folder-gallery__expand-icon-container"
+        @click="toggleExpansion")
+      svg-icon(:style="expansionIconStyles()"
+              iconName="caret-down"
+              iconWidth="10px"
+              iconHeight="5px"
+              iconColor="gray-2")
+    div(class="folder-gallery__title")
+      span {{$tc('NN0253', 2)}}
+  div(v-if="isExpanded" class="folder-gallery__folders")
+    folder-item(v-for="(folder, index) in allFolders"
+                :path="path"
+                :config="folder"
+                :index="index"
+                @goto="handleGotoFolder(folder.id)"
+                :undraggable="limitFunctions"
+                :undroppable="limitFunctions"
+                :nameIneditable="limitFunctions"
+                :isSelected="checkFolderSelected(folder.id)"
+                :isAnySelected="isAnySelected"
+                :menuItemNum="menuItemSlots.length"
+                @moveItem="handleMoveItem"
+                @select="selectFolder(folder)"
+                @deselect="deselectFolder(folder)"
+                @metaSelectFolder="metaSelectFolder(index)")
+      template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
+        div(class="folder-menu-item" @click="handleFolderMenuAction(menuItemSlot.icon, folder)")
+          div(class="folder-menu-item__icon")
+            svg-icon(:iconName="menuItemSlot.icon"
+                    iconWidth="10px"
+                    iconColor="gray-2")
+          div(class="folder-menu-item__text")
+            span {{ menuItemSlot.text }}
+          div(v-if="menuItemSlot.extendable" class="folder-menu-item__right")
+            svg-icon(iconName="chevron-right"
+                    iconWidth="10px"
+                    iconColor="gray-2")
+  div(v-if="isExpanded && isFoldersLoading" class="folder-gallery__loading")
+    svg-icon(iconName="loading"
+              iconWidth="50px"
+              iconColor="gray-3")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import { IFolder, IQueueItem } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
+import designUtils, { FOLDER_MENU_EVENTS, IFolderMenuEvents } from '@/utils/designUtils'
 import FolderItem from '@/components/mydesign/FolderItem.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     FolderItem
   },
@@ -61,21 +61,43 @@ export default Vue.extend({
     }
   },
   props: {
-    path: Array,
-    menuItems: Array,
-    allFolders: Array,
-    selectedNum: Number,
-    limitFunctions: Boolean,
-    useDelete: Boolean,
-    selectable: Boolean
+    path: {
+      type: Array as PropType<string[]>,
+      default: [] as string[]
+    },
+    menuItems: {
+      type: Array,
+      required: true
+    },
+    allFolders: {
+      type: Array as PropType<IFolder[]>,
+      required: true
+    },
+    selectedNum: {
+      type: Number,
+      required: true
+    },
+    limitFunctions: {
+      type: Boolean,
+      default: false
+    },
+    useDelete: {
+      type: Boolean,
+      default: false
+    },
+    selectable: {
+      type: Boolean,
+      default: false
+    }
   },
+  emits: ['menuAction', 'moveItem'],
   computed: {
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',
       selectedFolders: 'getSelectedFolders',
       isFoldersLoading: 'getIsFoldersLoading'
     }),
-    menuItemSlots(): {name: string, icon: string, text: string}[] {
+    menuItemSlots(): {name: string, icon: string, text: string, extendable?: boolean}[] {
       return (this.menuItems as {icon: string, text: string, extendable?: boolean}[]).map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
     },
     isAnySelected(): boolean {
@@ -96,7 +118,7 @@ export default Vue.extend({
     handleFolderMenuAction(icon: string, folder: IFolder) {
       if (this.useDelete && icon === 'trash') icon = 'delete'
       designUtils.dispatchFolderMenuAction(icon, folder, (extraEvent) => {
-        if (extraEvent) {
+        if (extraEvent && FOLDER_MENU_EVENTS().includes(extraEvent.event as IFolderMenuEvents)) {
           this.$emit('menuAction', extraEvent)
         }
       })
@@ -178,6 +200,52 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     width: 100%;
+  }
+}
+
+.folder-menu-item {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 5px;
+  padding: 6px 0;
+  cursor: pointer;
+  &:hover {
+    background-color: setColor(gray-5);
+  }
+  &__icon {
+    margin-left: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 10px;
+    height: 10px;
+  }
+  &__text {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    height: 12px;
+    transform: scale(0.8);
+    transform-origin: left;
+    > span {
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 12px;
+      color: setColor(gray-2);
+      white-space: nowrap;
+    }
+  }
+  &__right {
+    position: absolute;
+    right: 3px;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-50%);
   }
 }
 </style>
