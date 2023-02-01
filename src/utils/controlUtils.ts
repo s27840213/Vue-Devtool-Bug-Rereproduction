@@ -499,6 +499,7 @@ class Controller {
   isClickOnController(e: MouseEvent, layerIndex = layerUtils.layerIndex, subLayerIdx = layerUtils.subLayerIdx): boolean {
     let layer = document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement
     const layerConfig = layerUtils.getCurrLayer
+    if (!layerConfig || !layer) return false
     let rotate = layerConfig.styles.rotate
     if (layerConfig.type === 'shape' && layerConfig.category === 'D') {
       layer = document.getElementById(`nu-layer__line-mover_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement

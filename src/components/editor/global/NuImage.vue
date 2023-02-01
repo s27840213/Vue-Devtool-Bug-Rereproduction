@@ -346,7 +346,7 @@ export default defineComponent({
     },
     showCanvas(): boolean {
       const { pageIndex, layerIndex, subLayerIndex, handleId } = this
-      if (typeof pageIndex === 'undefined') {
+      if (pageIndex === undefined || pageUtils.getPage(pageIndex) === undefined) {
         return false
       }
       const isCurrShadowEffectApplied = this.currentShadowEffect() !== ShadowEffectType.none

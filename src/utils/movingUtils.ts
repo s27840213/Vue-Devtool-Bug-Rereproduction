@@ -476,8 +476,10 @@ export class MovingUtils {
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
     if (this.isActive) {
       if (hasActualMove) {
-        // dragging to another page
-        if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
+        if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex === -1) {
+          layerUtils.deleteSelectedLayer()
+        } else if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
+          // dragging to another page
           const layerNum = this.currSelectedInfo.layers.length
           if (layerNum > 1) {
             groupUtils.group()

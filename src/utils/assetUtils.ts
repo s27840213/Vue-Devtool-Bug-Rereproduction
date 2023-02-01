@@ -516,7 +516,6 @@ class AssetUtils {
   addImage(url: string | SrcObj, photoAspectRatio: number, attrs: IAssetProps = {}, categoryType = -1) {
     store.commit('SET_mobileSidebarPanelOpen', false)
     const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, panelPreviewSrc } = attrs
-    const resizeRatio = RESIZE_RATIO_IMAGE
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
 
     let newStyles = {
@@ -534,8 +533,8 @@ class AssetUtils {
       const { width: boundingWidth, height: boundingHeight } = mathUtils.getBounding({ styles: styles as IStyle })
       photoAspectRatio = boundingWidth / boundingHeight
 
-      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
-      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
+      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * RESIZE_RATIO_IMAGE : (this.pageSize.height * RESIZE_RATIO_IMAGE) * photoAspectRatio
+      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * RESIZE_RATIO_IMAGE) / photoAspectRatio : this.pageSize.height * RESIZE_RATIO_IMAGE
 
       const { width = photoWidth, height = photoHeight, imgWidth = photoWidth, imgHeight = photoHeight, imgX = 0, imgY = 0 } = styles as IImageStyle
 
@@ -552,8 +551,8 @@ class AssetUtils {
         imgY: imgY * scaleRatio
       }
     } else {
-      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
-      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
+      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * RESIZE_RATIO_IMAGE : (this.pageSize.height * RESIZE_RATIO_IMAGE) * photoAspectRatio
+      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * RESIZE_RATIO_IMAGE) / photoAspectRatio : this.pageSize.height * RESIZE_RATIO_IMAGE
 
       newStyles = {
         width: photoWidth,

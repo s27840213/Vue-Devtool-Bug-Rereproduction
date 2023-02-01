@@ -32,7 +32,7 @@ class ShortcutUtils {
   }
 
   get currSelectedLayerStyles() {
-    return layerUtils.getTmpLayer().styles
+    return layerUtils.getSelectedLayer().styles
   }
   // target: HTMLElement
   // constructor(target: HTMLElement) {
@@ -45,14 +45,9 @@ class ShortcutUtils {
 
   private regenerateLayerInfo(_layer: IText | IShape | IImage | IGroup | ITmp | IFrame, props: { toCenter?: boolean, offset?: number, targetPageIndex?: number }) {
     const { toCenter = false, offset = 10, targetPageIndex } = props
-    const layer = GeneralUtils.deepCopy(_layer)
+    let layer = GeneralUtils.deepCopy(_layer)
     if (toCenter && targetPageIndex !== undefined) {
-      const targetPage = pageUtils.getPage(targetPageIndex)
-      const { x, y, width, height } = layer.styles
-      const posX = (targetPage.width / 2) - (width / 2)
-      const posY = (targetPage.height / 2) - (height / 2)
-      layer.styles.x = posX
-      layer.styles.y = posY
+      layer = layerUtils.resizeLayerConfig(targetPageIndex, GeneralUtils.deepCopy(layer), true)
     } else {
       layer.styles.x += offset
       layer.styles.y += offset
@@ -88,8 +83,9 @@ class ShortcutUtils {
         return layerFactary.newTmp((layer as ITmp).styles as ICalculatedGroupStyle, (layer as ITmp).layers)
       case 'text':
         return layerFactary.newText(layer as IText)
+      case 'frame':
+        return layerFactary.newFrame(layer as IFrame)
     }
-    return layer
   }
 
   async getClipboardContents(): Promise<string | undefined> {
@@ -124,9 +120,12 @@ class ShortcutUtils {
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
 
   copy() {
-    if (store.getters.getCurrSelectedIndex >= 0 && !layerUtils.getTmpLayer().locked) {
-      navigator.clipboard.writeText(JSON.stringify(GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex))))
-      this.copySourcePageIndex = store.getters.getCurrSelectedPageIndex
+    const { index, layers, pageIndex } = layerUtils.currSelectedInfo
+
+    if (index >= 0 && !layerUtils.getSelectedLayer().locked) {
+      const layer = store.getters.getLayer(pageIndex, index)
+      navigator.clipboard.writeText(JSON.stringify(GeneralUtils.deepCopy(layer)))
+      this.copySourcePageIndex = pageIndex
       // store.commit('SET_clipboard', GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)))
     } else {
       console.warn('You did\'t select any unlocked layer')
@@ -149,10 +148,24 @@ class ShortcutUtils {
     const targetPageIndex = currHoveredPageIndex >= 0 ? currHoveredPageIndex : currFocusPageIndex
 
     const clipboardInfo = [JSON.parse(text)].map((layer: IText | IShape | IImage | IGroup | ITmp) => {
-      return this.regenerateLayerInfo(layer, { toCenter: layerUtils.isOutOfBoundary(targetPageIndex, layer), targetPageIndex })
+      let toCenterResizeFlag = false
+
+      if (this.copySourcePageIndex !== targetPageIndex) {
+        const intersectRatio = layerUtils.getLayerPageIntersectRatio(targetPageIndex, layer)
+        const prevIntersectRatio = this.copySourcePageIndex !== -1 ? layerUtils.getLayerPageIntersectRatio(this.copySourcePageIndex, layer) : 1
+
+        if (intersectRatio === 1 || intersectRatio === prevIntersectRatio) {
+          toCenterResizeFlag = false
+        } else {
+          toCenterResizeFlag = true
+        }
+      }
+
+      return this.regenerateLayerInfo(layer, { toCenter: toCenterResizeFlag, targetPageIndex })
     })
 
     const isTmp: boolean = clipboardInfo[0].type === 'tmp'
+
     if (store.getters.getCurrSelectedIndex >= 0 && targetPageIndex === store.getters.getCurrSelectedPageIndex) {
       const tmpIndex = store.getters.getCurrSelectedIndex
       const tmpLayers = store.getters.getCurrSelectedLayers
@@ -180,8 +193,10 @@ class ShortcutUtils {
       ZindexUtils.reassignZindex(targetPageIndex)
     }
     if (targetPageIndex === this.copySourcePageIndex) {
+      // why I need to writeText again? bcz when pasting to same page, we need to add an offset to the pasted layer
       navigator.clipboard.writeText(JSON.stringify(GeneralUtils.deepCopy(store.getters.getLayer(this.copySourcePageIndex, store.getters.getCurrSelectedIndex))))
     }
+
     nextTick(() => {
       StepsUtils.record()
     })
@@ -332,7 +347,6 @@ class ShortcutUtils {
           const idx = currLayer.clips.findIndex(img => img.active)
           if (currLayer.clips[idx].srcObj.type === 'frame') {
             layerUtils.deleteSelectedLayer()
-            GroupUtils.reset()
             return
           }
           const clips = GeneralUtils.deepCopy(currLayer.clips) as Array<IImage>
@@ -353,13 +367,11 @@ class ShortcutUtils {
     }
 
     layerUtils.deleteSelectedLayer()
-    GroupUtils.reset()
   }
 
   cut() {
     this.copy()
     this.del()
-    StepsUtils.record()
   }
 
   async save() {
@@ -425,8 +437,6 @@ class ShortcutUtils {
         })
       })
     }
-
-    console.log(this.currSelectedInfo)
   }
 
   async redo() {
@@ -451,7 +461,6 @@ class ShortcutUtils {
         })
       })
     }
-    console.log(this.currSelectedInfo)
   }
 
   zoomIn() {

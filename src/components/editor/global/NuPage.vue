@@ -585,8 +585,10 @@ export default defineComponent({
       } else {
         this.setCurrActivePageIndex(this.pageIndex)
       }
-      pageUtils.deletePage(this.pageIndex)
-      StepsUtils.record()
+      this.$nextTick(() => {
+        pageUtils.deletePage(this.pageIndex)
+        StepsUtils.record()
+      })
     },
     duplicatePage() {
       if (this.isProcessingShadow) {

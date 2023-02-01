@@ -130,8 +130,8 @@ const getDefaultState = (): IEditorState => ({
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
   getPage(state: IEditorState) {
-    return (pageIndex: number): IPage => {
-      return state.pages[pageIndex].config
+    return (pageIndex: number): IPage | undefined => {
+      return state.pages[pageIndex] ? state.pages[pageIndex].config : undefined
     }
   },
   getPageState(state: IEditorState) {
@@ -603,6 +603,8 @@ const mutations: MutationTree<IEditorState> = {
     /**
      * This Mutation is used to update the layer's properties excluding styles
      */
+    const { pageIndex, layerIndex } = updateInfo
+
     Object.entries(updateInfo.props).forEach(([k, v]) => {
       if (state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex]) {
         state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex][k] = v
