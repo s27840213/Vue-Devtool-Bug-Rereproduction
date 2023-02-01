@@ -27,13 +27,13 @@ div(class="settings-security")
       @close="closePopup()")
 </template>
 <script lang="ts">
-import Vue from 'vue'
-import i18n from '@/i18n'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 import PopupVerify from '@/components/popup/PopupVerify.vue'
 import localeUtils from '@/utils/localeUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     PopupVerify
   },
@@ -51,11 +51,11 @@ export default Vue.extend({
     }),
     lastUpdateText(): string {
       if (this.upassUpdate === '0000-00-00 00:00:00') {
-        return i18n.t('NN0325') as string
+        return this.$t('NN0325') as string
       }
 
       const s = new Date(this.upassUpdate)
-      return i18n.t('NN0312', { year: s.getFullYear(), month: s.getMonth() + 1, date: s.getDate() }) as string
+      return this.$t('NN0312', { year: s.getFullYear(), month: s.getMonth() + 1, date: s.getDate() }) as string
     },
     currLocale(): string {
       return localeUtils.currLocale()

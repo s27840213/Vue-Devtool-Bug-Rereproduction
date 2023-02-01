@@ -1,38 +1,38 @@
 <template lang="pug">
-  div(class="mobile-editor")
-    div(class="mobile-editor__top")
-      header-tabs(@switchTab="switchTab"
-        @showAllPages="showAllPages"
-        :currTab="currActivePanel"
-        :inAllPagesMode="inAllPagesMode")
-      div(class="mobile-editor__content" :style="contentStyle")
-        keep-alive
-          component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
-            :currActivePanel="currActivePanel"
-            :isConfigPanelOpen="isConfigPanelOpen"
-            :inAllPagesMode="inAllPagesMode"
-            :showMobilePanel="showMobilePanelAfterTransitoin")
-      transition(name="panel-up"
-                @before-enter="beforeEnter"
-                @after-leave="afterLeave")
-        mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
-          :currActivePanel="currActivePanel"
-          @switchTab="switchTab"
-          @panelHeight="setPanelHeight")
-      //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
-      //-   :currActivePanel="'color'"
-      //-   :currColorEvent="ColorEventType.background"
-      //-   :isExtraPanel="true"
-      //-   @switchTab="switchTab")
-    footer-tabs(class="mobile-editor__bottom"
-      @switchTab="switchTab"
+div(class="mobile-editor")
+  div(class="mobile-editor__top")
+    header-tabs(@switchTab="switchTab"
+      @showAllPages="showAllPages"
       :currTab="currActivePanel"
-      :inAllPagesMode="inAllPagesMode"
-      @showAllPages="showAllPages")
+      :inAllPagesMode="inAllPagesMode")
+    div(class="mobile-editor__content" :style="contentStyle" id="mobile-editor__content" ref="mobile-editor__content")
+      keep-alive
+        component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
+          :currActivePanel="currActivePanel"
+          :isConfigPanelOpen="isConfigPanelOpen"
+          :inAllPagesMode="inAllPagesMode"
+          :showMobilePanel="showMobilePanelAfterTransitoin")
+    transition(name="panel-up"
+              @before-enter="beforeEnter"
+              @after-leave="afterLeave")
+      mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
+        :currActivePanel="currActivePanel"
+        @switchTab="switchTab"
+        @panelHeight="setPanelHeight")
+    //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
+    //-   :currActivePanel="'color'"
+    //-   :currColorEvent="ColorEventType.background"
+    //-   :isExtraPanel="true"
+    //-   @switchTab="switchTab")
+  footer-tabs(class="mobile-editor__bottom"
+    @switchTab="switchTab"
+    :currTab="currActivePanel"
+    :inAllPagesMode="inAllPagesMode"
+    @showAllPages="showAllPages")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MobileEditorView from '@/components/editor/mobile/MobileEditorView.vue'
 import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
 import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
@@ -53,7 +53,8 @@ import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import unitUtils from '@/utils/unitUtils'
 import testUtils from '@/utils/testUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'MobileEditor',
   components: {
     MobileEditorView,
@@ -77,10 +78,17 @@ export default Vue.extend({
   created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     eventUtils.off(PanelEvent.switchTab)
   },
   mounted() {
+    const { pageRect, editorRect } = pageUtils.getEditorRenderSize
+    pageUtils.pageSize = { width: pageRect.width, height: pageRect.height }
+    pageUtils.editorSize = { width: editorRect.width, height: editorRect.height }
+    // const el = this.$refs['mobile-editor__content'] as HTMLElement
+    // const pz = new PinchZoom(el, {
+    //   minZoom: (pageUtils.mobileMinScaleRatio * 0.01)
+    // })
     /**
      * @Note the codes below is used to prevent the zoom in/out effect of mobile phone, especially for the "IOS"
      * Remember to set passive to "false", or the preventDefault() function won't work.
@@ -125,6 +133,8 @@ export default Vue.extend({
       pageUtils.setPageSize(0, pxSize.width, pxSize.height, newDesignWidth, newDesignHeight, newDesignUnit)
       pageUtils.fitPage()
     }
+
+    this.setUserState({ enableAdminView: false })
   },
   computed: {
     ...mapState('mobileEditor', {
@@ -209,7 +219,8 @@ export default Vue.extend({
     ...mapMutations({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
-      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
+      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
+      setUserState: 'user/SET_STATE'
     }),
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'

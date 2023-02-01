@@ -1,42 +1,42 @@
 <template lang="pug">
-  div(class="field")
-    template(v-if="isChange")
-      svg-icon(iconName="page-close" iconWidth="10px"
-              iconColor="gray-0" class="field__close pointer" @click.native="close()")
-      span(class="text-H6 text-gray-2 mb-40") {{$t('NN0600')}}
-    div(class="field-card")
-      options(v-if="!isChange" class="mb-10"
-              :options="countryData" v-model="userCountryUi")
-      div(:class="{hidden: !useTappay}" class="field-card-tappay")
-        div(id="card-number")
-        div(id="card-date")
-        div(id="card-ccv")
-      div(:class="{hidden: useTappay}" class="field-card-stripe" id="stripe")
-        svg-icon(iconName="loading" iconColor="gray-1")
-      template(v-if="!isChange")
-        div(v-if="PaidDate" class="field-card__info")
-          span {{$t('NN0552', {date: PaidDate})}}
-          span {{`$${plans[planSelected][periodUi].nextPaid - coupon.discount}`}}
-        div(v-if="coupon.discount!==0" class="field-card__info text-green-1")
-          span {{$t('NN0699')}}
-          span {{`-$${coupon.discount}`}}
-        div(class="field-card__info overline-LG")
-          span {{$t('NN0553')}}
-          span {{priceToday}}
-    div(v-if="!isChange" class="field-invoice")
-      div(class="text-H4 mb-25") {{$t('NN0554')}}
-      div(v-for="inv in invoiceInput" class="field-invoice__input")
-        input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
-        span(v-if="biv[inv.key]" class="text-red") {{inv.error}}
-    btn(class="btn-LG mt-30 rounded" type="primary-lg"
-        :disabled="disableSubmit" @click.native="submit()") {{submitText}}
+div(class="field")
+  template(v-if="isChange")
+    svg-icon(iconName="page-close" iconWidth="10px"
+            iconColor="gray-0" class="field__close pointer" @click="close()")
+    span(class="text-H6 text-gray-2 mb-40") {{$t('NN0600')}}
+  div(class="field-card")
+    options(v-if="!isChange" class="mb-10"
+            :options="countryData" v-model="userCountryUi")
+    div(:class="{hidden: !useTappay}" class="field-card-tappay")
+      div(id="card-number")
+      div(id="card-date")
+      div(id="card-ccv")
+    div(:class="{hidden: useTappay}" class="field-card-stripe" id="stripe")
+      svg-icon(iconName="loading" iconColor="gray-1")
+    template(v-if="!isChange")
+      div(v-if="PaidDate" class="field-card__info")
+        span {{$t('NN0552', {date: PaidDate})}}
+        span {{`$${plans[planSelected][periodUi].nextPaid - coupon.discount}`}}
+      div(v-if="coupon.discount!==0" class="field-card__info text-green-1")
+        span {{$t('NN0699')}}
+        span {{`-$${coupon.discount}`}}
+      div(class="field-card__info overline-LG")
+        span {{$t('NN0553')}}
+        span {{priceToday}}
+  div(v-if="!isChange" class="field-invoice")
+    div(class="text-H4 mb-25") {{$t('NN0554')}}
+    div(v-for="inv in invoiceInput" class="field-invoice__input")
+      input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
+      span(v-if="biv[inv.key]" class="text-red") {{inv.error}}
+  btn(class="btn-LG mt-30 rounded" type="primary-lg"
+      :disabled="disableSubmit" @click="submit()") {{submitText}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
-import i18n from '@/i18n'
 import Options from '@/components/global/Options.vue'
 import paymentData from '@/utils/constantData'
 import mappingUtils from '@/utils/mappingUtils'
@@ -48,7 +48,7 @@ const { mapFields } = createHelpers({
   mutationType: 'payment/updateField'
 })
 
-export default Vue.extend({
+export default defineComponent({
   name: 'PaymentField',
   props: {
     isChange: { // Is change credit card
@@ -59,6 +59,7 @@ export default Vue.extend({
   components: {
     Options
   },
+  emits: ['next'],
   data() {
     return {
       countryData: paymentData.countryList(),
@@ -67,8 +68,7 @@ export default Vue.extend({
       stripe: null as unknown as Stripe,
       stripeElement: null as unknown as StripeElements,
       // Tappay
-      tappayPayReady: false,
-      TPDirect: (window as any).TPDirect
+      tappayPayReady: false
     }
   },
   watch: {
@@ -107,12 +107,12 @@ export default Vue.extend({
     },
     submitText(): string {
       return (this.isLoading
-        ? i18n.t('NN0454')
+        ? this.$t('NN0454')
         : this.isChange
-          ? i18n.tc('NN0133', 2)
+          ? this.$tc('NN0133', 2)
           : this.trialStatus === 'not used'
-            ? i18n.t('NN0560')
-            : i18n.t('NN0561')) as string
+            ? this.$t('NN0560')
+            : this.$t('NN0561')) as string
     },
     invoiceReady(): boolean { // Check if input is empty
       for (const item of this.invoiceInput) {
@@ -156,20 +156,21 @@ export default Vue.extend({
       setPrime: 'payment/SET_prime'
     }),
     tappayInit() {
-      this.TPDirect.setupSDK(
+      window.TPDirect.setupSDK(
         122890,
         'app_vCknZsetHXn07bficr2XQdp7o373nyvvxNoBEm6yIcqgQGFQA96WYtUTDu60',
         'production'
       )
-      this.TPDirect.card.setup(paymentData.tappayConfig())
-      this.TPDirect.card.onUpdate((update: any) => {
+      // @ts-expect-error: Type of card.setup is not correct, skip its type check.
+      window.TPDirect.card.setup(paymentData.tappayConfig())
+      window.TPDirect.card.onUpdate((update) => {
         this.tappayPayReady = update.canGetPrime
       })
     },
     async stripeInit() {
       await this.clientSecret // Wait for api promise
       this.stripe = await loadStripe('pk_live_51HPpbIJuHmbesNZIbXTLIiElWHqRqS9xLnCkoJ9LynKfQO2G9JIVpeEdogBdBU7aiqvXrTjjJQPUVVGQBdSxwmoc00bJcj9VG2', {
-        locale: mappingUtils.mappingLocales(i18n.locale) as 'zh-TW'// | 'ja-JP' | 'en-US'
+        locale: mappingUtils.mappingLocales(this.$i18n.locale) as 'zh-TW'// | 'ja-JP' | 'en-US'
       }) as Stripe
       this.stripeElement = this.stripe.elements({
         clientSecret: this.clientSecret,
@@ -196,7 +197,7 @@ export default Vue.extend({
       if (!await this.checkInvoiceInput()) return
       this.isLoading = true
 
-      const callback = (result: any) => {
+      window.TPDirect.card.getPrime((result) => {
         return new Promise<void>((resolve) => {
           if (result.status !== 0) throw Error(result.msg)
           this.setPrime(result.card.prime)
@@ -207,11 +208,10 @@ export default Vue.extend({
           if (data.flag) throw Error(data.msg)
           this.close()
         }).catch(msg => {
-          Vue.notify({ group: 'error', text: msg })
+          notify({ group: 'error', text: msg })
           this.isLoading = false
         })
-      }
-      this.TPDirect.card.getPrime(callback)
+      })
     },
     async stripeSubmit() {
       if (!await this.checkInvoiceInput()) return
@@ -229,7 +229,7 @@ export default Vue.extend({
         if (data.flag) throw Error(data.msg)
         this.close()
       }).catch(msg => {
-        Vue.notify({ group: 'error', text: msg })
+        notify({ group: 'error', text: msg })
         this.isLoading = false
       })
     },

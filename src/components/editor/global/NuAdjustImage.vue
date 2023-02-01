@@ -1,41 +1,47 @@
 <template lang="pug">
-  div(class="nu-adjust-image")
-    svg(:viewBox="svgViewBox"
-      :width="svgImageWidth"
-      :height="svgImageHeight"
-      preserveAspectRatio="none"
-      role="image")
-      defs
-        filter(:id="filterId"
-          color-interpolation-filters="sRGB")
-          component(v-for="(elm, idx) in svgFilterElms"
-            :key="`svgFilter${idx}`"
-            :is="elm.tag"
-            v-bind="elm.attrs")
-            component(v-for="child in elm.child"
-              :key="child.tag"
-              :is="child.tag"
-              v-bind="child.attrs")
-      image(:xlink:href="src"
-        v-bind="style"
-        :filter="imageFilter")
-    //- component(v-for="(elm, idx) in cssFilterElms"
-    //-   :key="`cssFilter${idx}`"
-    //-   :is="elm.tag"
-    //-   v-bind="elm.attrs")
+svg(:viewBox="svgViewBox"
+  :width="svgImageWidth"
+  :height="svgImageHeight"
+  preserveAspectRatio="none"
+  role="image")
+  defs
+    filter(:id="filterId"
+      color-interpolation-filters="sRGB")
+      component(v-for="(elm, idx) in svgFilterElms"
+        :key="`svgFilter${idx}`"
+        :is="elm.tag"
+        v-bind="elm.attrs")
+        component(v-for="child in elm.child"
+          :key="child.tag"
+          :is="child.tag"
+          v-bind="child.attrs")
+  image(:xlink:href="src"
+    v-bind="style"
+    :filter="imageFilter")
+//- component(v-for="(elm, idx) in cssFilterElms"
+//-   :key="`cssFilter${idx}`"
+//-   :is="elm.tag"
+//-   v-bind="elm.attrs")
 </template>
 
 <script lang="ts">
 import { IImage } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
 import ImageAdjustUtil from '@/utils/imageAdjustUtil'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    src: String,
-    styles: Object,
+    src: {
+      type: String,
+      required: true
+    },
+    styles: {
+      type: Object,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -94,9 +100,4 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.nu-adjust-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
 </style>

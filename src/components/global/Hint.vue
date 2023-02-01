@@ -9,9 +9,10 @@ div(class="hint")
 
 <script lang="ts">
 import hintUtils from '@/utils/hintUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'Hint',
   data() {
     return {

@@ -1,22 +1,23 @@
 <template lang="pug">
-  div(class="btn-new-design")
-    slot(:openPopup="openPopup")
-      button(class="btn-primary-sm pointer" @click="openPopup()")
-        span(class="header-sort") {{$tc('NN0072')}}
-    div(v-if="isMobile < 0 && isShowPopup"
-      class="popup-window")
-      popup-size(@close="closePopup()")
-    transition(name="panel-up")
-      panel-size(v-if="isMobile > 0 && isShowPopup" @close="closePopup()")
+div(class="btn-new-design")
+  slot(:openPopup="openPopup")
+    button(class="btn-primary-sm pointer" @click="openPopup()")
+      span(class="header-sort") {{$tc('NN0072')}}
+  div(v-if="isMobile < 0 && isShowPopup"
+    class="popup-window")
+    popup-size(@close="closePopup()")
+  transition(name="panel-up")
+    panel-size(v-if="isMobile > 0 && isShowPopup" @close="closePopup()")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import PopupSize from '@/components/new-design/PopupSize.vue'
 import PanelSize from '@/components/new-design/PanelSize.vue'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     PopupSize,
     PanelSize
@@ -32,7 +33,7 @@ export default Vue.extend({
 
     this.handleResize()
   },
-  destroyed() {
+  unmounted() {
     window.removeEventListener('resize', this.handleResize)
   },
   methods: {

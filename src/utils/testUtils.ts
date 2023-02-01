@@ -1,6 +1,7 @@
 import { IGroup } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
+import { notify } from '@kyvg/vue3-notification'
 import Vue from 'vue'
 
 class TestUtils {
@@ -9,7 +10,7 @@ class TestUtils {
     notify: boolean
   }>
 
-  flags: {[key: string]: boolean}[]
+  flags: { [key: string]: boolean }[]
 
   constructor() {
     this.timer = {}
@@ -30,7 +31,7 @@ class TestUtils {
     const result = `${key}: ${msg}, ${duration}`
     console.log(result)
     if (timer.notify) {
-      Vue.notify({
+      notify({
         group: 'copy',
         text: result
       })
@@ -66,7 +67,7 @@ class TestUtils {
     const layerIndexes = this.getlayerIndexes(pages, layerType)
     this.flags = []
     for (let i = 0; i < pageNum; i++) {
-      const pageArray = {} as {[key: string]: boolean}
+      const pageArray = {} as { [key: string]: boolean }
       for (let j = 0; j < layerIndexes[i].length; j++) {
         pageArray[layerIndexes[i][j]] = false
       }

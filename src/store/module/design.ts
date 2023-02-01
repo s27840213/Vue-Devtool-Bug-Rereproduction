@@ -3,9 +3,9 @@ import designUtils from '@/utils/designUtils'
 import generalUtils from '@/utils/generalUtils'
 import designApis from '@/apis/design'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
-import Vue from 'vue'
 import router from '@/router'
 import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
+import { isEqual, update } from 'lodash'
 
 interface IDesignState {
   currLocation: string,
@@ -954,7 +954,7 @@ const mutations: MutationTree<IDesignState> = {
       default:
         targetPath = `/mydesign/${designUtils.makePath(currLocation).slice(1).join('&')}`
     }
-    if (router.currentRoute.path === targetPath) return
+    if (router.currentRoute.value.path === targetPath) return
     router.replace({ path: targetPath })
   },
   SET_moveToFolderSelectInfo(state: IDesignState, selectInfo: string) {
@@ -1035,6 +1035,12 @@ const mutations: MutationTree<IDesignState> = {
   SET_mobilePathBuffer(state: IDesignState, mobilePathBuffer: string[]) {
     state.mobilePathBuffer = mobilePathBuffer
   },
+  UPDATE_setDesignThumbnail(state: IDesignState, updateInfo: { asset_index: number, thumbnail: string }) {
+    const design = state.allDesigns.find((design) => design.asset_index === updateInfo.asset_index)
+    if (design) {
+      design.thumbnail = updateInfo.thumbnail
+    }
+  },
   UPDATE_folders(state: IDesignState, updateInfo: { path: string, folders: IFolder[] }) {
     let pathNodes
     if (updateInfo.path === 'root') {
@@ -1072,17 +1078,17 @@ const mutations: MutationTree<IDesignState> = {
   },
   UPDATE_addDesign(state: IDesignState, design: IDesign) {
     const index = designUtils.getInsertIndex(state.allDesigns, state.sortByField, state.sortByDescending, design)
-    state.allDesigns.splice(index, 0, design)
+    state.allDesigns = [...state.allDesigns.slice(0, index), design, ...state.allDesigns.slice(index)]
     state.folderDesignCount += 1
   },
   UPDATE_replaceDesign(state: IDesignState, updateInfo: { id: string, design: IDesign }) {
     const index = state.allDesigns.findIndex((design_) => design_.id === updateInfo.id) // placeholder design uses special id, so replace by id
-    state.allDesigns.splice(index, 1, updateInfo.design)
+    state.allDesigns = [...state.allDesigns.slice(0, index), updateInfo.design, ...state.allDesigns.slice(index + 1)]
   },
   UPDATE_deleteDesign(state: IDesignState, design: IDesign) {
     const index = state.allDesigns.findIndex((design_) => design_.asset_index === design.asset_index)
     if (index >= 0) {
-      state.allDesigns.splice(index, 1)
+      state.allDesigns = [...state.allDesigns.slice(0, index), ...state.allDesigns.slice(index + 1)]
       state.folderDesignCount -= 1
     }
   },
@@ -1095,24 +1101,24 @@ const mutations: MutationTree<IDesignState> = {
     const index = state.allFolders.findIndex((folder_) => folder_.id === updateInfo.folder.id)
     if (index >= 0) {
       const newFolder = state.allFolders[index]
-      state.allFolders.splice(index, 1)
+      state.allFolders = [...state.allFolders.slice(0, index), ...state.allFolders.slice(index + 1)]
       newFolder.name = updateInfo.name
       newFolder.lastUpdatedTime = updateInfo.lastUpdatedTime
       const newIndex = designUtils.getInsertIndex(state.allFolders, state.sortByField, state.sortByDescending, newFolder)
-      state.allFolders.splice(newIndex, 0, newFolder)
+      state.allFolders = [...state.allFolders.slice(0, newIndex), newFolder, ...state.allFolders.slice(newIndex)]
     }
   },
   UPDATE_addFolder(state: IDesignState, folder: IFolder) {
     const index = state.allFolders.findIndex(folder_ => folder_.id === folder.id)
     if (index >= 0) return
     const insertIndex = designUtils.getInsertIndex(state.allFolders, state.sortByField, state.sortByDescending, folder)
-    state.allFolders.splice(insertIndex, 0, folder)
+    state.allFolders = [...state.allFolders.slice(0, insertIndex), folder, ...state.allFolders.slice(insertIndex)]
     state.folderFolderCount += 1
   },
   UPDATE_deleteFolder(state: IDesignState, folder: IFolder) {
     const index = state.allFolders.findIndex(folder_ => folder_.id === folder.id)
     if (index >= 0) {
-      state.allFolders.splice(index, 1)
+      state.allFolders = [...state.allFolders.slice(0, index), ...state.allFolders.slice(index + 1)]
       state.folderFolderCount -= 1
     }
   },
@@ -1121,7 +1127,7 @@ const mutations: MutationTree<IDesignState> = {
     if (targetFolder) {
       const index = targetFolder.subFolders.findIndex(folder_ => folder_.id === pathedFolder.folder.id)
       if (index >= 0) {
-        targetFolder.subFolders.splice(index, 1)
+        targetFolder.subFolders = [...targetFolder.subFolders.slice(0, index), ...targetFolder.subFolders.slice(index + 1)]
       }
     }
   },
@@ -1144,40 +1150,40 @@ const mutations: MutationTree<IDesignState> = {
   UPDATE_replaceFolder(state: IDesignState, updateInfo: { parents: string[], id: string, folder: IFolder }) {
     const index = state.allFolders.findIndex((folder_) => folder_.id === updateInfo.id)
     if (index >= 0) {
-      state.allFolders.splice(index, 1, updateInfo.folder)
+      state.allFolders = [...state.allFolders.slice(0, index), updateInfo.folder, ...state.allFolders.slice(index + 1)]
     }
     const targetFolder = designUtils.search(state.folders, updateInfo.parents)
     if (targetFolder) {
       const index = targetFolder.subFolders.findIndex((folder_) => folder_.id === updateInfo.id)
-      targetFolder.subFolders.splice(index, 1, updateInfo.folder)
+      targetFolder.subFolders = [...targetFolder.subFolders.slice(0, index), updateInfo.folder, ...targetFolder.subFolders.slice(index + 1)]
     }
     if (updateInfo.parents.length === 1) {
       const index = state.copiedFolders.findIndex((folder_) => folder_.id === updateInfo.id)
-      state.copiedFolders.splice(index, 1, updateInfo.folder)
+      state.copiedFolders = [...state.copiedFolders.slice(0, index), updateInfo.folder, ...state.copiedFolders.slice(index + 1)]
     } else {
       const targetFolder = designUtils.search(state.copiedFolders, updateInfo.parents.slice(1))
       if (targetFolder) {
         const index = targetFolder.subFolders.findIndex((folder_) => folder_.id === updateInfo.id)
-        targetFolder.subFolders.splice(index, 1, updateInfo.folder)
+        targetFolder.subFolders = [...targetFolder.subFolders.slice(0, index), updateInfo.folder, ...targetFolder.subFolders.slice(index + 1)]
       }
     }
   },
   UPDATE_addToSelection(state: IDesignState, design: IDesign) {
-    Vue.set(state.selectedDesigns, design.asset_index.toString(), design)
+    state.selectedDesigns[design.asset_index.toString()] = design
   },
   UPDATE_removeFromSelection(state: IDesignState, design: IDesign) {
-    Vue.delete(state.selectedDesigns, design.asset_index.toString())
+    delete state.selectedDesigns[design.asset_index.toString()]
   },
   UPDATE_addFolderToSelection(state: IDesignState, folder: IFolder) {
-    Vue.set(state.selectedFolders, folder.id, folder)
+    state.selectedFolders[folder.id] = folder
   },
   UPDATE_removeFolderFromSelection(state: IDesignState, folder: IFolder) {
-    Vue.delete(state.selectedFolders, folder.id)
+    delete state.selectedFolders[folder.id]
   },
-  UPDATE_metaSelect(state: IDesignState, updateInfo: {designs: IDesign[], index: number}) {
+  UPDATE_metaSelect(state: IDesignState, updateInfo: { designs: IDesign[], index: number }) {
     const { designs, index } = updateInfo
     if (Object.keys(state.selectedDesigns).length === 0) {
-      Vue.set(state.selectedDesigns, designs[index].asset_index.toString(), designs[index])
+      state.selectedDesigns[designs[index].asset_index.toString()] = designs[index]
     } else {
       let nearestSelectedIndex = -1
       const indexQueue = [[index, 0]]
@@ -1199,19 +1205,19 @@ const mutations: MutationTree<IDesignState> = {
       }
       state.selectedDesigns = {}
       if (nearestSelectedIndex === -1) { // should not happen, but in case that selectedDesigns contain only designs not in updateInfo.designs
-        Vue.set(state.selectedDesigns, designs[index].asset_index.toString(), designs[index])
+        state.selectedDesigns[designs[index].asset_index.toString()] = designs[index]
       } else {
         const [indexFrom, indexTo] = [nearestSelectedIndex, index].sort((a, b) => a - b)
         for (let i = indexFrom; i <= indexTo; i++) {
-          Vue.set(state.selectedDesigns, designs[i].asset_index.toString(), designs[i])
+          state.selectedDesigns[designs[i].asset_index.toString()] = designs[i]
         }
       }
     }
   },
-  UPDATE_metaSelectFolder(state: IDesignState, updateInfo: {folders: IFolder[], index: number}) {
+  UPDATE_metaSelectFolder(state: IDesignState, updateInfo: { folders: IFolder[], index: number }) {
     const { folders, index } = updateInfo
     if (Object.keys(state.selectedFolders).length === 0) {
-      Vue.set(state.selectedFolders, folders[index].id, folders[index])
+      state.selectedFolders[folders[index].id] = folders[index]
     } else {
       let nearestSelectedIndex = -1
       const indexQueue = [[index, 0]]
@@ -1233,11 +1239,11 @@ const mutations: MutationTree<IDesignState> = {
       }
       state.selectedFolders = {}
       if (nearestSelectedIndex === -1) { // should not happen, but in case that selectedFolders contain only folders not in updateInfo.folders
-        Vue.set(state.selectedFolders, folders[index].id, folders[index])
+        state.selectedFolders[folders[index].id] = folders[index]
       } else {
         const [indexFrom, indexTo] = [nearestSelectedIndex, index].sort((a, b) => a - b)
         for (let i = indexFrom; i <= indexTo; i++) {
-          Vue.set(state.selectedFolders, folders[i].id, folders[i])
+          state.selectedFolders[folders[i].id] = folders[i]
         }
       }
     }

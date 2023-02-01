@@ -1,26 +1,35 @@
 <template lang="pug">
-  div(class="nu-group"
-      :style="styles()")
-    nu-layer(v-for="(layer,index) in config.layers"
-      :key="`layer-${layer.id}`"
-      :pageIndex="pageIndex"
-      :primaryLayer="config"
-      :layerIndex="layerIndex"
-      :subLayerIndex="index"
-      :contentScaleRatio="contentScaleRatio"
-      :config="layer"
-      :isSubLayer="true")
+div(class="nu-group"
+    :style="styles()")
+  nu-layer(v-for="(layer,index) in config.layers"
+    :key="`layer-${layer.id}`"
+    :pageIndex="pageIndex"
+    :primaryLayer="config"
+    :layerIndex="layerIndex"
+    :subLayerIndex="index"
+    :contentScaleRatio="contentScaleRatio"
+    :config="layer"
+    :isSubLayer="true")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
-  inheritAttrs: false,
+export default defineComponent({
+  emits: [],
   props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
+    config: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number

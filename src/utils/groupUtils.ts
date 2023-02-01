@@ -16,6 +16,7 @@ import pageUtils from './pageUtils'
 import { LayerType } from '@/store/types'
 import editorUtils from './editorUtils'
 import backgroundUtils from './backgroundUtils'
+import _ from 'lodash'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup | IFrame>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -177,7 +178,7 @@ class GroupUtils {
       } else {
         // when we select multiple layer
         const layers = MappingUtils.mappingLayers(pageIndex, layerIndexs)
-          .filter(l => !l.locked)
+          .filter(l => !l?.locked)
         const tmpStyles = calcTmpProps(layers)
         const currSelectedLayers = this.mapLayersToTmp(layers, tmpStyles)
         const topIndex = Math.max(...layerIndexs)
@@ -251,6 +252,7 @@ class GroupUtils {
     this.deselect()
     const indices = [...Array(store.getters.getLayersNum(pageUtils.currFocusPageIndex)).keys()]
       .filter(i => !pageUtils.currFocusPage.layers[i].locked)
+    if (indices.length === 0) return
     this.select(pageUtils.currFocusPageIndex, indices)
   }
 
@@ -415,7 +417,7 @@ class GroupUtils {
           const [lineWidth] = (layer as IShape).size ?? [1]
           const point = (layer as IShape).point ?? []
 
-          const newLineWidth = Math.round(lineWidth * tmpLayer.styles.scale)
+          const newLineWidth = _.round(lineWidth * tmpLayer.styles.scale, 2)
           layer.size = [newLineWidth]
 
           const { width, height } = ShapeUtils.lineDimension(point)
@@ -441,7 +443,7 @@ class GroupUtils {
           layer.styles.initHeight = layer.styles.height
           layer.vSize = [layer.styles.width, layer.styles.height]
           const [lineWidth, corRad] = (layer as IShape).size ?? [1, 0]
-          layer.size = [Math.round(lineWidth * tmpLayer.styles.scale), corRad * tmpLayer.styles.scale]
+          layer.size = [_.round(lineWidth * tmpLayer.styles.scale, 2), corRad * tmpLayer.styles.scale]
           layer.styles.scale = 1
 
           // const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
@@ -594,7 +596,7 @@ class GroupUtils {
           const [lineWidth] = (layer as IShape).size ?? [1]
           const point = (layer as IShape).point ?? []
 
-          const newLineWidth = Math.round(lineWidth * groupLayer.styles.scale)
+          const newLineWidth = _.round(lineWidth * groupLayer.styles.scale, 2)
           layer.size = [newLineWidth]
 
           const { width, height } = ShapeUtils.lineDimension(point)
@@ -620,7 +622,7 @@ class GroupUtils {
           layer.styles.initHeight = layer.styles.height
           layer.vSize = [layer.styles.width, layer.styles.height]
           const [lineWidth, corRad] = (layer as IShape).size ?? [1, 0]
-          layer.size = [Math.round(lineWidth * groupLayer.styles.scale), corRad * groupLayer.styles.scale]
+          layer.size = [_.round(lineWidth * groupLayer.styles.scale, 2), corRad * groupLayer.styles.scale]
           layer.styles.scale = 1
 
           // const ratio = groupLayer.styles.width / groupLayer.styles.initWidth

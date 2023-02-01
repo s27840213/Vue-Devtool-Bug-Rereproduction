@@ -1,22 +1,21 @@
 <template lang="pug">
-  div(class="nu-background-controller")
-    div(class="dim-background" :style="dimBgStyles")
-    div(class="nu-controller__body"
-        ref="body"
-        :style="styles"
-        @pointerdown.stop="moveStart"
-        @touchstart="disableTouchEvent")
-      div(v-for="(scaler, index)  in controlPoints.scalers"
-          class="controller-point"
-          :key="index"
-          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getPageRotate))"
-          @pointerdown.stop="scaleStart")
-    //- div(class="nu-controller"
-    //-     :style="controllerStyles()")
+div(class="nu-background-controller")
+  div(class="nu-controller__body"
+      ref="body"
+      :style="styles"
+      @pointerdown.stop="moveStart"
+      @touchstart="disableTouchEvent")
+    div(v-for="(scaler, index)  in controlPoints.scalers"
+        class="controller-point"
+        :key="index"
+        :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getPageRotate))"
+        @pointerdown.stop="scaleStart")
+  //- div(class="nu-controller"
+  //-     :style="controllerStyles()")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import ControlUtils from '@/utils/controlUtils'
@@ -28,10 +27,17 @@ import stepsUtils from '@/utils/stepsUtils'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    config: Object,
-    pageIndex: Number,
+    config: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -49,7 +55,7 @@ export default Vue.extend({
       control: { xSign: 1, ySign: 1, isHorizon: false }
     }
   },
-  destroyed() {
+  unmounted() {
     PageUtils.setBackgroundImageControlDefault()
   },
   computed: {
@@ -89,13 +95,13 @@ export default Vue.extend({
     getImgController(): ICoordinate {
       return this.config.styles.imgController
     },
-    dimBgStyles(): unknown {
+    dimBgStyles(): Record<string, string> {
       return {
         width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`
       }
     },
-    styles(): unknown {
+    styles(): Record<string, string> {
       // preserve in case the background image is needed to be rotatable in the future
       // const zindex = (this.pageIndex + 1) * 100
       // const pos = this.imgControllerPosHandler()
@@ -313,7 +319,7 @@ export default Vue.extend({
       eventUtils.removePointerEvent('pointermove', this.scaling)
       eventUtils.removePointerEvent('pointerup', this.scaleEnd)
     },
-    cursorStyles(index: number, rotateAngle: number) {
+    cursorStyles(index: number, rotateAngle: number): Record<string, string> {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
       return { cursor: this.controlPoints.cursors[cursorIndex] }
@@ -368,15 +374,5 @@ export default Vue.extend({
       height: max-content;
     }
   }
-}
-
-.dim-background {
-  // @include size(100%, 100%);
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  background: rgba(0, 0, 0, 0.4);
-  pointer-events: none;
-  // transform-style: preserve-3d;
 }
 </style>

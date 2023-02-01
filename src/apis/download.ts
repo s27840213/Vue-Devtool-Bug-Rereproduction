@@ -6,7 +6,7 @@ import { AxiosError } from 'axios'
 import designUtils from '@/utils/designUtils'
 import i18n from '@/i18n'
 class DownloadService {
-  createFile (params: IDownloadServiceParams, useDev = 0) {
+  createFile(params: IDownloadServiceParams, useDev = 0) {
     const data = {
       token: authToken().token || '',
       team_id: params.teamId,
@@ -21,11 +21,10 @@ class DownloadService {
       cmyk: params.cmyk,
       outline: params.outline,
       bleed: params.bleed,
-      trim: params.trim,
       merge: params.merge,
       split_size: params.splitSize,
       new_test: useDev,
-      locale: i18n.locale,
+      locale: i18n.global.locale,
       title: designUtils.getDesignName()
     }
     return axios.request<IDownloadServiceResponse>({
@@ -35,7 +34,7 @@ class DownloadService {
     })
   }
 
-  getFileUrl (url: string) {
+  getFileUrl(url: string) {
     axios.interceptors.response.use(undefined, (error: AxiosError) => {
       const { config, response } = error
       const isExportUrl = /export\/(\w+)\/(\w+).json/g.test(config.url || '')

@@ -1,8 +1,8 @@
 <template lang="pug">
-  div(class="editor")
-    desktop-editor(v-if="!useMobileEditor" @setIsLoading="setIsLoading")
-    mobile-editor(v-else)
-    spinner(v-if="isLoading || isSaving || isGlobalLoading" :textContent="isSaving ? $t('NN0455') : $t('NN0454')")
+div(class="editor")
+  desktop-editor(v-if="!useMobileEditor" @setIsLoading="setIsLoading")
+  mobile-editor(v-else)
+  spinner(v-if="isLoading || isSaving || isGlobalLoading" :textContent="isSaving ? $t('NN0455') : $t('NN0454')")
 </template>
 
 <script lang="ts">
@@ -12,11 +12,12 @@ import logUtils from '@/utils/logUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import editorUtils from '@/utils/editorUtils'
-
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
+import { omit } from 'lodash'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     DesktopEditor,
     MobileEditor
@@ -39,23 +40,37 @@ export default Vue.extend({
     //   next(false)
     //   return
     // }
-
     editorUtils.setCloseMobilePanelFlag(true)
     stepsUtils.clearSteps()
-    if (uploadUtils.isLogin && this.$router.currentRoute.query.design_id && this.$router.currentRoute.query.type) {
+    if (uploadUtils.isLogin && this.$router.currentRoute.value.query.design_id && this.$router.currentRoute.value.query.type) {
       this.isSaving = true
       uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
         uploadUtils.isGettingDesign = false
         logUtils.setLog('Leave editor')
         this.isSaving = false
-        this.clearState()
         next()
       })
     } else {
       logUtils.setLog('Leave editor')
-      this.clearState()
       next()
     }
+  },
+  beforeUnmount() {
+    /**
+     * Why clear state is putting here instead of beforeRouteLeave?
+     * The reason is bcz Vue 3 is too much fast than Vue 2,
+     * When beforeRouteLeave triggered, the component in Editor hasn't been unmounted(destroyed) yet
+     * So if we clear the state, some component watcher and computed will update and then throw lots of errors
+     */
+    this.clearState()
+  },
+  mounted() {
+    let query = this.$router.currentRoute.value.query
+    query = omit(query, ['panel', 'category', 'category_locale', 'search'])
+    if (query.type === 'new-design-size') {
+      query.unit = query.unit ?? 'px'
+    }
+    this.$router.replace({ query })
   },
   methods: {
     ...mapMutations({

@@ -1,17 +1,21 @@
 <template lang="pug">
-  div(class="brand-kit-add-btn pointer")
-    svg-icon(iconName="plus-origin"
-            iconWidth="16px"
-            iconColor="gray-1")
-    span(class="brand-kit-add-btn__text") {{ text }}
+div(class="brand-kit-add-btn pointer")
+  svg-icon(iconName="plus-origin"
+          iconWidth="16px"
+          iconColor="gray-1")
+  span(class="brand-kit-add-btn__text") {{ text }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    text: String
+    text: {
+      type: String,
+      required: true
+    }
   }
 })
 </script>

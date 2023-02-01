@@ -1,33 +1,33 @@
 <template lang="pug">
-  div(class="category-fonts pointer feature-button"
-    :class="{ active: props.font === item.id }"
-    draggable="false"
-    @click="setFont()")
-    div(class="category-fonts__item-wrapper")
-      img(class="category-fonts__item"
-        :src="fallbackSrc || `${getPreview}`"
-        @error="handleNotFound")
-    div(class="category-fonts__item-wrapper")
-      img(class="category-fonts__item"
-        :src="fallbackSrc || `${getPreview2}`"
-        @error="handleNotFound")
-    div(class="category-fonts__icon")
-      svg-icon(v-if="props.font === item.id"
-        iconName="done"
-        iconColor="gray-2"
-        iconWidth="25px")
-      svg-icon(v-else-if="pending && pending === item.id"
-        iconName="loading"
-        iconColor="gray-1"
-        iconWidth="20px")
+div(class="category-fonts pointer feature-button"
+  :class="{ active: props.font === item.id }"
+  draggable="false"
+  @click="setFont()")
+  div(class="category-fonts__item-wrapper")
+    img(class="category-fonts__item"
+      :src="fallbackSrc || `${getPreview}`"
+      @error="handleNotFound")
+  div(class="category-fonts__item-wrapper")
+    img(class="category-fonts__item"
+      :src="fallbackSrc || `${getPreview2}`"
+      @error="handleNotFound")
+  div(class="category-fonts__icon")
+    svg-icon(v-if="props.font === item.id"
+      iconName="done"
+      iconColor="gray-2"
+      iconWidth="25px")
+    svg-icon(v-else-if="pending && pending === item.id"
+      iconName="loading"
+      iconColor="gray-1"
+      iconWidth="20px")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
-import StepsUtils from '@/utils/stepsUtils'
 import { ISelection } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -36,15 +36,22 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
     // host: String,
     // preview: String,
     // preview2: String,
-    item: Object,
-    textStyleType: String
+    item: {
+      type: Object,
+      required: true
+    },
+    textStyleType: {
+      type: String,
+      required: true
+    }
   },
-  data() {
+  data () {
     return {
       fallbackSrc: ''
     }
@@ -320,7 +327,7 @@ export default Vue.extend({
       } catch (error: any) {
         const code = error.message === 'timeout' ? 'timeout' : error.code
         console.error(error)
-        this.$notify({
+        notify({
           group: 'error',
           text: `${this.$t('NN0248')} (ErrorCode: ${code})`
         })

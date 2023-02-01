@@ -1,37 +1,43 @@
 <template lang="pug">
-  div(class="relative dropdown")
-    property-bar(class="pointer"
-      @click.native.prevent="handleOpen")
-      div(class="dropdown__label")
-        slot {{ current || placeholder }}
-      slot(name="caret-down")
-        svg-icon(iconName="caret-down"
-          iconWidth="10px"
-          iconColor="gray-2")
-    div(v-if="showDropdown && options.length"
-      v-click-outside="handleClose"
-      class="dropdown__options")
-      div(v-for="option in options"
-        :key="option.value || option"
-        @click.stop="() => handleSelect(option)")
-        slot(name="option" :data="option")
-          div(class="dropdown__option") {{ option.label || option }}
-    div(v-if="showDropdown && isCustomOptions"
-      v-click-outside="handleClose"
-      class="dropdown__options")
-      slot(name="custom")
+div(class="relative dropdown")
+  property-bar(class="pointer"
+    @click.prevent="handleOpen")
+    div(class="dropdown__label")
+      slot {{ current || placeholder }}
+    slot(name="caret-down")
+      svg-icon(iconName="caret-down"
+        iconWidth="10px"
+        iconColor="gray-2")
+  div(v-if="showDropdown && options.length"
+    v-click-outside="handleClose"
+    class="dropdown__options")
+    div(v-for="option in options"
+      :key="typeof option === 'number' ? option : option.value"
+      @click.stop="() => handleSelect(option)")
+      slot(name="option" :data="option")
+        div(class="dropdown__option") {{ typeof option === 'number' ? option : option.label }}
+  div(v-if="showDropdown && isCustomOptions"
+    v-click-outside="handleClose"
+    class="dropdown__options")
+    slot(name="custom")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import vClickOutside from 'v-click-outside'
+import { defineComponent, PropType } from 'vue'
+import vClickOutside from 'click-outside-vue3'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
-    current: String,
-    placeholder: String,
+    current: {
+      type: String,
+      required: true
+    },
+    placeholder: {
+      type: String,
+      required: true
+    },
     options: {
-      type: Array,
+      type: Array as PropType<{value: string, label: string}[] | number[]>,
       default: () => []
     },
     closeAfterSelection: {
@@ -50,6 +56,7 @@ export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  emits: ['open', 'close', 'select'],
   data () {
     return {
       showDropdown: false

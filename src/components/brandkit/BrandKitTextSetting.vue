@@ -1,60 +1,68 @@
 <template lang="pug">
-  div(class="brand-kit-text-setting relative")
-    div(class="brand-kit-text-setting__inner pointer"
-        :class="type"
-        @click="handleToggleConfig")
-      span(:style="getFontStyles()") {{ getDisplayedText() }}
-    div(v-if="isConfigOpen" class="brand-kit-text-setting__config"
-        v-click-outside="() => { isConfigOpen = false }")
-      span(class="brand-kit-text-setting__config__title") {{ $t('NN0062') }}
-      div(class="brand-kit-text-setting__config__family-size")
-        div(class="property-bar pointer" @click="openFontsPanel")
-          img(:src="fontPrevUrl" @error="onError")
-          svg-icon(class="pointer"
-            :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
-        div(class="brand-kit-text-setting__config__size size-bar relative")
-          div(class="pointer"
-            @mousedown="fontSizeStepping(-1)")
-            svg-icon(iconName="minus-small" iconWidth="24px" iconColor="gray-2")
-          button(class="brand-kit-text-setting__config__range-input-button" @click="handleValueModal")
-            input(class="body-2 text-gray-2 center" type="text" ref="input-fontSize"
-                  @change="setSize" :value="fontSizeBuffer")
-          div(class="pointer"
-            @mousedown="fontSizeStepping(1)")
-            svg-icon(iconName="plus-small" iconWidth="24px" iconColor="gray-2")
-          value-selector(v-if="isValueSelectorOpen"
-                      :valueArray="fontSelectValue"
-                      class="brand-kit-text-setting__config__value-selector"
-                      v-click-outside="handleValueModal"
-                      @update="handleValueUpdate")
-      div(class="action-bar flex-evenly brand-kit-text-setting__config__style")
-        svg-icon(v-for="(icon, index) in fontIcons"
-          class="feature-button pointer"
-          :class="{active: styleHit(icon)}"
-          :id="`icon-${icon}`"
-          v-hint="hintMap[icon]"
-          :iconName="icon" iconWidth="24px" iconColor="gray-2" @mousedown.native="onPropertyClick(icon)")
-      div(v-if="isFontsPanelOpen"
-        class="brand-kit-text-setting__panel-fonts"
-        v-click-outside="() => { isFontsPanelOpen = false }")
-        panel-fonts(:noTitle="true" :textStyleType="type")
+div(class="brand-kit-text-setting relative")
+  div(class="brand-kit-text-setting__inner pointer"
+      :class="type"
+      @click="handleToggleConfig")
+    span(:style="getFontStyles()") {{ getDisplayedText() }}
+  div(v-if="isConfigOpen" class="brand-kit-text-setting__config"
+      v-click-outside="() => { isConfigOpen = false }")
+    span(class="brand-kit-text-setting__config__title") {{ $t('NN0062') }}
+    div(class="brand-kit-text-setting__config__family-size")
+      div(class="property-bar pointer" @click="openFontsPanel")
+        img(:src="fontPrevUrl" @error="onError")
+        svg-icon(class="pointer"
+          :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
+      div(class="brand-kit-text-setting__config__size size-bar relative")
+        div(class="pointer"
+          @mousedown="fontSizeStepping(-1)")
+          svg-icon(iconName="minus-small" iconWidth="24px" iconColor="gray-2")
+        button(class="brand-kit-text-setting__config__range-input-button" @click="handleValueModal")
+          input(class="body-2 text-gray-2 center" type="text" ref="input-fontSize"
+                @change="setSize" :value="fontSizeBuffer")
+        div(class="pointer"
+          @mousedown="fontSizeStepping(1)")
+          svg-icon(iconName="plus-small" iconWidth="24px" iconColor="gray-2")
+        value-selector(v-if="isValueSelectorOpen"
+                    :valueArray="fontSelectValue"
+                    class="brand-kit-text-setting__config__value-selector"
+                    v-click-outside="handleValueModal"
+                    @update="handleValueUpdate")
+    div(class="action-bar flex-evenly brand-kit-text-setting__config__style")
+      svg-icon(v-for="(icon, index) in fontIcons"
+        class="feature-button pointer"
+        :class="{active: styleHit(icon)}"
+        :id="`icon-${icon}`"
+        v-hint="hintMap[icon]"
+        :iconName="icon" iconWidth="24px" iconColor="gray-2" @mousedown="onPropertyClick(icon)")
+    div(v-if="isFontsPanelOpen"
+      class="brand-kit-text-setting__panel-fonts"
+      :class="{'dim-background': showMore}"
+      v-click-outside="() => { isFontsPanelOpen = false }")
+      panel-fonts(:noTitle="true" :textStyleType="type")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import ValueSelector from '@/components/ValueSelector.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import { IBrandTextStyle } from '@/interfaces/brandkit'
 import { fontSelectValue } from '@/utils/textPropUtils'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import brandkitUtils from '@/utils/brandkitUtils'
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import tiptapUtils from '@/utils/tiptapUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    type: String,
-    textStyleSetting: Object
+    type: {
+      type: String,
+      required: true
+    },
+    textStyleSetting: {
+      type: Object,
+      required: true
+    }
   },
   components: {
     ValueSelector,
@@ -75,7 +83,7 @@ export default Vue.extend({
       isValueSelectorOpen: false,
       fontSizeBuffer: 0,
       fontSelectValue,
-      fontIcons: ['bold', 'underline', 'italic'],
+      fontIcons: ['bold', 'underline', 'italic'] as ('bold' | 'underline' | 'italic')[],
       hintMap: {
         bold: `${this.$t('NN0101')}`,
         underline: `${this.$t('NN0102')}`,
@@ -88,6 +96,7 @@ export default Vue.extend({
     this.getFontPrev()
   },
   computed: {
+    ...mapState('fontTag', ['showMore']),
     textStyle(): IBrandTextStyle {
       return this.textStyleSetting[this.type + 'Style']
     },
@@ -341,12 +350,16 @@ export default Vue.extend({
     position: absolute;
     left: 0;
     top: 120px;
-    height: 45vh;
+    height: 100vh;
     width: 280px;
     background-color: white;
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     z-index: 2;
     padding: 10px;
   }
+}
+
+.dim-background {
+  background: #a3a4aa;
 }
 </style>

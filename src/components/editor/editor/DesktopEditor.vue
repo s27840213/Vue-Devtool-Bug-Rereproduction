@@ -1,50 +1,51 @@
 <template lang="pug">
-  div(class="desktop-editor")
-    sidebar(:isSidebarPanelOpen="isSidebarPanelOpen"
-      @toggleSidebarPanel="toggleSidebarPanel")
-    section
-      div(class="content")
-        sidebar-panel(:isSidebarPanelOpen="isSidebarPanelOpen")
-        div(class="content__main")
-          div(class="content__editor")
-            div(v-if="!inBgRemoveMode" class="header-container")
-              editor-header
-            div(v-if="showAllAdminTool" class="admin-options")
-              div(class="admin-options__sticky-container"
-                  :style="stickyTopPos")
-                div(class="flex flex-column mr-10")
-                  span(class="ml-10 text-bold text-orange") {{templateText}}
-                  span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
-                svg-icon(
-                  class="mr-10"
-                  :iconName="`user-admin${getAdminModeText}`"
-                  :iconWidth="'20px'"
-                  :iconColor="'gray-2'"
-                  @click.native="setAdminMode()")
-                div(class="flex flex-column")
-                  select(class="locale-select" v-model="inputLocale")
-                    option(v-for="locale in localeOptions" :value="locale") {{locale}}
-                div(class="ml-10" @click="setEnableComponentLog(!enableComponentLog)")
-                  span {{`${enableComponentLog ? '關閉' : '開啟'} Log`}}
-            editor-view
-            scale-ratio-editor(@toggleSidebarPanel="toggleSidebarPanel")
-        div(class="content__panel"
-            :style="contentPanelStyles")
-          function-panel
-          transition(name="panel-up")
-            color-slips(v-if="showColorSlips" mode="FunctionPanel"
-              :selectedColor="currEventColor()"
-              class="content__panel__color-panel")
-        div(v-if="isShowPagePreview" class="content__pages")
-          page-preview
-    tour-guide(v-if="showEditorGuide")
-    popup-brand-settings(v-if="isBrandSettingsOpen")
-    popup-update-design(v-if="isUpdateDesignOpen")
-    component-log(v-if="enableComponentLog" :logs="componentLogs")
+div(class="desktop-editor")
+  sidebar(:isSidebarPanelOpen="isSidebarPanelOpen"
+    @toggleSidebarPanel="toggleSidebarPanel")
+  section
+    div(class="content")
+      sidebar-panel(:isSidebarPanelOpen="isSidebarPanelOpen")
+      div(class="content__main")
+        div(class="content__editor")
+          div(v-if="!inBgRemoveMode" class="header-container")
+            editor-header
+          div(v-if="showAllAdminTool" class="admin-options")
+            div(class="admin-options__sticky-container"
+                :style="stickyTopPos")
+              div(class="flex flex-column mr-10")
+                span(class="ml-10 text-bold text-orange") {{templateText}}
+                span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
+              svg-icon(
+                class="mr-10"
+                :iconName="`user-admin${getAdminModeText}`"
+                :iconWidth="'20px'"
+                :iconColor="'gray-2'"
+                @click="setAdminMode()")
+              div(class="flex flex-column")
+                select(class="locale-select" v-model="inputLocale")
+                  option(v-for="locale in localeOptions" :value="locale") {{locale}}
+              div(class="ml-10" @click="setEnableComponentLog(!enableComponentLog)")
+                span {{`${enableComponentLog ? '關閉' : '開啟'} Log`}}
+          editor-view
+          scale-ratio-editor(@toggleSidebarPanel="toggleSidebarPanel")
+      div(class="content__panel"
+          :style="contentPanelStyles")
+        function-panel
+        transition(name="panel-up")
+          color-slips(v-if="showColorSlips" mode="FunctionPanel"
+            :selectedColor="currEventColor()"
+            class="content__panel__color-panel")
+      div(v-if="isShowPagePreview" class="content__pages")
+        page-preview
+  tour-guide(v-if="showEditorGuide")
+  popup-brand-settings(v-if="isBrandSettingsOpen")
+  popup-update-design(v-if="isUpdateDesignOpen")
+  component-log(v-if="enableComponentLog" :logs="componentLogs")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import Sidebar from '@/components/editor/Sidebar.vue'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
 import SidebarPanel from '@/components/editor/SidebarPanel.vue'
@@ -61,16 +62,17 @@ import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import store from '@/store'
 import rulerUtils from '@/utils/rulerUtils'
 import logUtils from '@/utils/logUtils'
-import i18n from '@/i18n'
 import colorUtils from '@/utils/colorUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import pageUtils from '@/utils/pageUtils'
 import ComponentLog from '@/components/componentLog/ComponentLog.vue'
 import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
+import i18n from '@/i18n'
 import editorUtils from '@/utils/editorUtils'
 import unitUtils from '@/utils/unitUtils'
+import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'DesktopEditor',
   components: {
     Sidebar,
@@ -86,43 +88,45 @@ export default Vue.extend({
     PopupUpdateDesign,
     ComponentLog
   },
+  emits: ['setIsLoading'],
   data() {
     return {
       FunctionPanelType,
       isSidebarPanelOpen: true,
-      inputLocale: i18n.locale,
+      inputLocale: i18n.global.locale,
       componentLogs: [] as Array<IComponentUpdatedLog>
     }
   },
   created() {
-    this.$root.$on('on-re-rendering', (component: IComponentUpdatedLog) => {
-      if (this.componentLogs.length >= 50) {
-        this.componentLogs.shift()
-      }
-      this.componentLogs.push(component)
-    })
+    this.inputLocale = this.$i18n.locale
+    // this.$root.$on('on-re-rendering', (component: IComponentUpdatedLog) => {
+    //   if (this.componentLogs.length >= 50) {
+    //     this.componentLogs.shift()
+    //   }
+    //   this.componentLogs.push(component)
+    // })
   },
   watch: {
     isShowPagePreview() {
       this.toggleSidebarPanel = this.isShowPagePreview
     },
     async inputLocale() {
-      this.$emit('setIsLoading', true)
-      const updateValue: { [key: string]: string } = {}
-      updateValue.token = this.token
-      updateValue.locale = this.inputLocale
+      // this.$emit('setIsLoading', true)
+      // const updateValue: { [key: string]: string } = {}
+      // updateValue.token = this.token
+      // updateValue.locale = this.inputLocale
 
-      await store.dispatch('user/updateUser', updateValue)
-        .then((value) => {
-          if (!value.data.flag) {
-            localStorage.setItem('locale', value.data.locale)
-            this.$router.go(0)
-          } else {
-            this.networkError()
-          }
-        }, () => {
-          this.networkError()
-        })
+      // await store.dispatch('user/updateUser', updateValue)
+      //   .then((value) => {
+      //     if (!value.data.flag) {
+      //       localStorage.setItem('locale', value.data.locale)
+      //       this.$router.go(0)
+      //     } else {
+      //       this.networkError()
+      //     }
+      //   }, () => {
+      //     this.networkError()
+      //   })
     }
   },
   computed: {
@@ -190,7 +194,7 @@ export default Vue.extend({
       return this.viewGuide === 0
     },
     localeOptions(): string[] {
-      return i18n.availableLocales
+      return this.$i18n.availableLocales
     }
   },
   mounted() {
@@ -238,8 +242,12 @@ export default Vue.extend({
     confirmLeave() {
       return window.confirm('Do you really want to leave? you have unsaved changes!')
     },
+    copyText(text: string) {
+      generalUtils.copyText(text)
+      notify({ group: 'copy', text: `${text} 已複製` })
+    },
     networkError(): void {
-      Vue.notify({ group: 'error', text: `${i18n.t('NN0351')}` })
+      notify({ group: 'error', text: `${i18n.global.t('NN0351')}` })
       this.$emit('setIsLoading', false)
     }
   }

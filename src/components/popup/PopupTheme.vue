@@ -1,37 +1,37 @@
 <template lang="pug">
-  div(class="popup-theme text-left"
-    v-click-outside="vcoConfig")
-    div(class="popup-theme__recommend")
-      btn(class="full-width body-3 rounded mb-10"
-        @click.native="handleRecommend")
-        span(v-html="$t('NN0322')")
-    div(class="popup-theme-items")
-      div(class="caption-LG body-2 mb-5") {{ $t('NN0321') }}
-      checkbox(v-model="all"
-              class="popup-theme-items__checkbox body-3 text-gray-2 pl-5") {{$t('NN0324')}}
-      checkbox(v-for="theme in themes" v-model="selected[theme.id]"
-              class="popup-theme-items__checkbox body-3 text-gray-2 pl-5") {{theme.title}}
-    div(class="popup-theme-buttons")
-      btn(class="popup-theme-buttons__btn popup-theme-buttons__btn--cancel rounded"
-        type="primary-sm"
-        @click.native="handleCancel") {{$t('NN0203')}}
-      btn(class="popup-theme-buttons__btn rounded"
-        type="primary-sm"
-        :disabled="isConfirmDisabled"
-        @click.native="handleSubmit") {{$tc('NN0164', 1)}}
+div(class="popup-theme text-left"
+  v-click-outside="vcoConfig")
+  div(class="popup-theme__recommend")
+    btn(class="full-width body-3 rounded mb-10"
+      @click="handleRecommend")
+      span(v-html="$t('NN0322')")
+  div(class="popup-theme-items")
+    div(class="caption-LG body-2 mb-5") {{ $t('NN0321') }}
+    checkbox(v-model="all"
+            class="popup-theme-items__checkbox body-3 text-gray-2 pl-5") {{$t('NN0324')}}
+    checkbox(v-for="theme in themes" v-model="selected[theme.id]"
+            class="popup-theme-items__checkbox body-3 text-gray-2 pl-5") {{theme.title}}
+  div(class="popup-theme-buttons")
+    btn(class="popup-theme-buttons__btn popup-theme-buttons__btn--cancel rounded"
+      type="primary-sm"
+      @click="handleCancel") {{$t('NN0203')}}
+    btn(class="popup-theme-buttons__btn rounded"
+      type="primary-sm"
+      :disabled="isConfirmDisabled"
+      @click="handleSubmit") {{$tc('NN0164', 1)}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import Checkbox from '@/components/global/Checkbox.vue'
 import { Itheme } from '@/interfaces/theme'
 import themeUtils from '@/utils/themeUtils'
 import { mapValues } from 'lodash'
 import pageUtils from '@/utils/pageUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     Checkbox
   },
@@ -91,7 +91,7 @@ export default Vue.extend({
       this.$emit('close')
     },
     handleRecommend() {
-      const currFocusPageSize = pageUtils.currFocusPageSizeWithBleeds
+      const currFocusPageSize = pageUtils.currFocusPageSize
       const themes = themeUtils.getThemesBySize(currFocusPageSize.width, currFocusPageSize.height)
       this.initSelected(themes.map(theme => `${theme.id}`))
     }

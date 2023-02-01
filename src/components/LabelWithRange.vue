@@ -1,37 +1,53 @@
 <template lang="pug">
-  div(class="label-with-range")
-    div(class="label-with-range__label flex-between"
-        :class="{ pointer: !disabled }"
-        @click="openCorRadSliderPopup")
-      div(class="label-with-range__label__description")
-        slot
-          div placeholder
-      div(class="label-with-range__label__value"
-          :class="{ disabled: disabled }")
-        input(:value="Math.round(value)"
-              @input="setValue"
-              :disabled="disabled"
-              @change="handleChangeStop")
+div(class="label-with-range")
+  div(class="label-with-range__label flex-between"
+      :class="{ pointer: !disabled }"
+      @click="openCorRadSliderPopup")
+    div(class="label-with-range__label__description")
+      slot
+        div placeholder
+    div(class="label-with-range__label__value"
+        :class="{ disabled: disabled }")
+      input(:value="Math.round(value)"
+            @input="setValue"
+            :disabled="disabled"
+            @change="handleChangeStop")
 
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import vClickOutside from 'v-click-outside'
+import { defineComponent } from 'vue'
+import vClickOutside from 'click-outside-vue3'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 
-export default Vue.extend({
+export default defineComponent({
   directives: {
     clickOutside: vClickOutside.directive
   },
   props: {
-    value: Number,
-    max: Number,
-    min: Number,
-    event: String,
-    disabled: Boolean
+    value: {
+      type: Number,
+      required: true
+    },
+    max: {
+      type: Number,
+      required: true
+    },
+    min: {
+      type: Number,
+      required: true
+    },
+    event: {
+      type: String,
+      required: true
+    },
+    disabled: {
+      type: Boolean,
+      required: true
+    }
   },
+  emits: ['update'],
   mounted() {
     popupUtils.on(this.event, (value: number) => {
       this.emitValue(value)

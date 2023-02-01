@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 jupyterlab = "*"
 gspread = "*"
+numpy = "*"
 
 [dev-packages]
 

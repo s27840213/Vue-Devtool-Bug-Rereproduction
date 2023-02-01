@@ -1,31 +1,31 @@
 <template lang="pug">
-  div(class="popup-size"
-    v-click-outside="closePopup")
-    div(class="popup-size__close")
-      svg-icon(class="pointer"
-        iconName="page-close"
-        iconWidth="10px"
-        iconColor="gray-2"
-        @click.native="closePopup()")
-    div(class="popup-size__title label-mid mb-20")
-      span {{$tc('NN0072', 2)}}
-    PageSizeSelector(:isValidate="isConfirmClicked" defaultFormat="custom" ref="pageSizeSelector" @select="selectFormat")
-    div(class="popup-size__body__button")
-      button(class="btn-primary-sm rounded my-6 full-width pointer"
-        @click="onConfirmClicked()")
-        span {{$tc('NN0164', 2)}}
+div(class="popup-size"
+  v-click-outside="closePopup")
+  div(class="popup-size__close")
+    svg-icon(class="pointer"
+      iconName="page-close"
+      iconWidth="10px"
+      iconColor="gray-2"
+      @click="closePopup()")
+  div(class="popup-size__title label-mid mb-20")
+    span {{$tc('NN0072', 2)}}
+  PageSizeSelector(:isValidate="isConfirmClicked" defaultFormat="custom" ref="pageSizeSelector" @select="selectFormat")
+  div(class="popup-size__body__button")
+    button(class="btn-primary-sm rounded my-6 full-width pointer"
+      @click="onConfirmClicked()")
+      span {{$tc('NN0164', 2)}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import { ILayout } from '@/interfaces/layout'
 import designUtils from '@/utils/designUtils'
 import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     RadioBtn,
     PageSizeSelector
@@ -33,6 +33,7 @@ export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  emits: ['close'],
   data() {
     return {
       selectedFormat: {} as ILayout,

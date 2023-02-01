@@ -1,20 +1,21 @@
 <template lang="pug">
-  div(class="spinner popup-window")
-    div
-      img(:src="require('@/assets/img/gif/rocket-loading.gif')")
-      span {{textContent}}...
+div(class="spinner popup-window")
+  div
+    img(:src="require('@/assets/img/gif/rocket-loading.gif')")
+    span {{textContent}}...
 </template>
 
 <script lang="ts">
 
 import i18n from '@/i18n'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
     textContent: {
       type: String,
-      default: `${i18n.t('NN0454')}`
+      default: `${i18n.global.t('NN0454')}`
     }
   }
 })

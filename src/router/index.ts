@@ -1,5 +1,4 @@
-import Vue from 'vue'
-import VueRouter, { RawLocation, Route, RouteConfig } from 'vue-router'
+import VueRouter, { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Editor from '@/views/Editor.vue'
 import SignUp from '@/views/Login/SignUp.vue'
 import Login from '@/views/Login/Login.vue'
@@ -23,8 +22,7 @@ import assetUtils from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import appJson from '@/assets/json/app.json'
 import generalUtils from '@/utils/generalUtils'
-
-Vue.use(VueRouter)
+import { h, resolveComponent } from 'vue'
 
 const MOBILE_ROUTES = [
   'Home',
@@ -39,36 +37,7 @@ const MOBILE_ROUTES = [
   'Pricing'
 ]
 
-// Ingore some normal router console error
-const originalPush = VueRouter.prototype.push
-VueRouter.prototype.push = function push(location: RawLocation): Promise<Route> {
-  return (originalPush.call(this, location) as unknown as Promise<Route>)
-    .catch(err => {
-      switch (err.name) {
-        case 'NavigationDuplicated':
-          break
-        default:
-          console.error(err)
-      }
-      return err
-    })
-}
-
-const originalReplace = VueRouter.prototype.replace
-VueRouter.prototype.replace = function repalce(location: RawLocation): Promise<Route> {
-  return (originalReplace.call(this, location) as unknown as Promise<Route>)
-    .catch(err => {
-      switch (err.name) {
-        case 'NavigationDuplicated':
-          break
-        default:
-          console.error(err)
-      }
-      return err
-    })
-}
-
-const routes: Array<RouteConfig> = [
+const routes: Array<RouteRecordRaw> = [
   {
     path: '',
     name: 'Home',
@@ -117,7 +86,7 @@ const routes: Array<RouteConfig> = [
           const response = await (await fetch(`https://${url}`)).json()
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           store.commit('file/SET_setLayersDone')
-          store.commit('user/SET_STATE', { userId: 'backendRendering', dpi, renderForPDF: renderForPDF === 'true' })
+          store.commit('user/SET_STATE', { renderForPDF: renderForPDF === 'true' })
         } else if (url) {
           // for old version
           // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DQT0z7B3D3ZuXVp6R%26team_id%3DPUPPET
@@ -143,7 +112,7 @@ const routes: Array<RouteConfig> = [
           const response = await (await fetch(`https://${src}`)).json()
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           store.commit('file/SET_setLayersDone')
-          store.commit('user/SET_STATE', { userId: 'backendRendering', renderForPDF: renderForPDF === 'true' })
+          store.commit('user/SET_STATE', { renderForPDF: renderForPDF === 'true' })
         }
         next()
       } catch (error) {
@@ -252,15 +221,15 @@ if (window.location.host !== 'vivipic.com') {
   })
 }
 
-const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
+const router = createRouter({
+  history: createWebHistory(process.env.BASE_URL),
+
   routes: [
     {
       // Include the locales you support between ()
       path: `/:locale${localeUtils.getLocaleRegex()}?`,
       component: {
-        render(h) { return h('router-view') }
+        render() { return h(resolveComponent('router-view')) }
       },
       beforeEnter(to, from, next) {
         if (logUtils.getLog()) {
@@ -270,23 +239,23 @@ const router = new VueRouter({
         let locale = localStorage.getItem('locale')
         // if local storage is empty
         if (locale === '' || !locale) {
-          locale = to.params.locale
+          locale = to.params.locale as string
           // without locale param, determine the locale with browser language
           if (locale === '' || !locale) {
-            i18n.locale = localeUtils.getBrowserLang()
+            i18n.global.locale = localeUtils.getBrowserLang()
           } else {
-            i18n.locale = locale
+            i18n.global.locale = locale
           }
-        } else if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.locale) {
+        } else if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.global.locale) {
           // if local storage has been set
-          i18n.locale = locale
+          i18n.global.locale = locale
           localStorage.setItem('locale', locale)
         }
         next()
-        if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.params.locale) {
+        if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
           // Delete locale in url, will be ignore by prerender.
-          delete router.currentRoute.params.locale
-          router.replace({ query: router.currentRoute.query, params: router.currentRoute.params })
+          delete router.currentRoute.value.params.locale
+          router.replace({ query: router.currentRoute.value.query, params: router.currentRoute.value.params })
         }
       },
       children: routes
@@ -295,7 +264,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  document.title = to.meta?.title || i18n.t('SE0001')
+  document.title = to.meta?.title as string || i18n.global.t('SE0001')
 
   if ((window as any).__PRERENDER_INJECTED !== undefined) {
     next()
@@ -363,7 +332,7 @@ router.beforeEach(async (to, from, next) => {
         store.commit('text/UPDATE_DEFAULT_FONT', { font })
       })
   }
-  if (!MOBILE_ROUTES.includes(to.name ?? '') && (to.name === 'Editor' || !localStorage.getItem('not-mobile'))) {
+  if (!MOBILE_ROUTES.includes(String(to.name) ?? '') && (to.name === 'Editor' || !localStorage.getItem('not-mobile'))) {
     let isMobile = false
     const userAgent = navigator.userAgent || navigator.vendor
     logUtils.setLog(`Read device width: ${window.screen.width}`)
@@ -397,5 +366,35 @@ router.beforeEach(async (to, from, next) => {
 
   next()
 })
+
+// // Ingore some normal router console error
+// const originalPush = (router as any).prototype.push
+
+// router.prototype.push = function push(location: VueRouter.RouteLocationRaw): Promise<void | VueRouter.NavigationFailure | undefined> {
+//   return (originalPush.call(this, location) as unknown as Promise<void | VueRouter.NavigationFailure | undefined>)
+//     .catch(err => {
+//       switch (err.name) {
+//         case 'NavigationDuplicated':
+//           break
+//         default:
+//           console.error(err)
+//       }
+//       return err
+//     })
+// }
+
+// const originalReplace = router.prototype.replace
+// router.prototype.replace = function repalce(location: VueRouter.RouteLocationRaw): Promise<void | VueRouter.NavigationFailure | undefined> {
+//   return (originalReplace.call(this, location) as unknown as Promise<void | VueRouter.NavigationFailure | undefined>)
+//     .catch(err => {
+//       switch (err.name) {
+//         case 'NavigationDuplicated':
+//           break
+//         default:
+//           console.error(err)
+//       }
+//       return err
+//     })
+// }
 
 export default router

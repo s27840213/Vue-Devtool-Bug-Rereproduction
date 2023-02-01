@@ -69,6 +69,7 @@ export interface IEditorState {
   showRuler: boolean,
   showGuideline: boolean,
   lockGuideline: boolean,
+  isDraggingGuideline: boolean,
   themes: Itheme[],
   hasCopiedFormat: boolean,
   inGestureToolMode: boolean,
@@ -81,7 +82,8 @@ export interface IEditorState {
   currFocusPageIndex: number,
   enalbleComponentLog: boolean,
   inScreenshotPreviewRoute: boolean,
-  cursor: string
+  cursor: string,
+  isPageScaling: boolean
 }
 
 export enum SidebarPanelType {

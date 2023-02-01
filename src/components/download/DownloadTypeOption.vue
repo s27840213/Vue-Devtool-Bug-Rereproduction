@@ -1,18 +1,25 @@
 <template lang="pug">
-  div(class="download-type-option__name")
-    span {{ name }}
-    span(v-if="tag"
-      class="download-type-option__tag")
-      span(class="download-type-option__label") {{ tag }}
+div(class="download-type-option__name")
+  span {{ name }}
+  span(v-if="tag"
+    class="download-type-option__tag")
+    svg-icon(v-if="tag==='pro'" class="download-type-option__tag__pro" iconName="pro" iconWidth="20px" iconColor="alarm")
+    span(v-else class="download-type-option__label") {{ tag }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    name: String,
-    tag: String
+    name: {
+      type: String,
+      required: true
+    },
+    tag: {
+      type: String,
+    }
   }
 })
 </script>
@@ -35,6 +42,9 @@ export default Vue.extend({
     margin-left: 5px;
     justify-content: center;
     align-items: center;
+    &__pro {
+      padding: 0px 2px;
+    }
   }
   &__label {
     font-size: 15px;

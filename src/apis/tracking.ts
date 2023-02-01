@@ -9,7 +9,7 @@ export default {
     return store.getters['user/getToken']
   },
   getLocale(): string {
-    return i18n.locale
+    return i18n.global.locale
   },
   getTeamId(): string {
     return store.getters['user/getTeamId']

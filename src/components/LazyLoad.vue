@@ -1,19 +1,19 @@
 <template lang="pug">
-  div(class="lazy-load"
-      :style="styles"
-      ref="observer")
-    transition(:name="anamationEnabled && !forceRender ? 'fade-in': ''" mode="out-in")
-      slot(v-if="forceRender || shoudBeRendered")
-      slot(v-else name="placeholder")
+div(class="lazy-load"
+    :style="styles"
+    ref="observer")
+  transition(:name="anamationEnabled && !forceRender ? 'fade-in': ''" mode="out-in")
+    slot(v-if="forceRender || shoudBeRendered")
+    slot(v-else name="placeholder")
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { some } from 'lodash'
 import generalUtils from '@/utils/generalUtils'
 import { globalQueue } from '@/utils/queueUtils'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'LazyLoad',
   props: {
     target: {
@@ -28,8 +28,12 @@ export default Vue.extend({
       default: 0,
       type: Number
     },
-    maxHeight: Number,
-    minWidth: Number,
+    maxHeight: {
+      type: Number
+    },
+    minWidth: {
+      type: Number
+    },
     threshold: {
       type: Array as PropType<number[]>,
       default: () => [0, 1]
@@ -55,6 +59,7 @@ export default Vue.extend({
       default: false
     }
   },
+  emits: ['loaded', 'intersecting'],
   data() {
     return {
       intersectionObserver: null as unknown as IntersectionObserver,
@@ -175,7 +180,7 @@ export default Vue.extend({
       // }
     }
   },
-  destroyed() {
+  unmounted() {
     this.intersectionObserver && this.intersectionObserver.disconnect()
   }
 })

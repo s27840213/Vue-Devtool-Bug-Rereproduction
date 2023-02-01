@@ -1,29 +1,30 @@
 <template lang="pug">
-  div(class="popup-slider"
-      :style="styles")
-    input(class="popup-slider__range-input input__slider--range"
-      v-model.number="value"
-      :max="max"
-      :min="min"
-      :step="step"
-      v-ratio-change
-      type="range"
-      @mouseup="handleChangeStop")
-    input(class="popup-slider__text body-2 text-gray-2"
-      v-if="!noText"
-      type="number"
-      v-model.number="value"
-      @change="handleChangeStop")
+div(class="popup-slider"
+    :style="styles")
+  input(class="popup-slider__range-input input__slider--range"
+    v-model.number="value"
+    :max="max"
+    :min="min"
+    :step="step"
+    v-ratio-change
+    type="range"
+    @mouseup="handleChangeStop")
+  input(class="popup-slider__text body-2 text-gray-2"
+    v-if="!noText"
+    type="number"
+    v-model.number="value"
+    @change="handleChangeStop")
 </template>
 
 <script lang="ts">
 import { PopupSliderEventType } from '@/store/types'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
       popupUtils

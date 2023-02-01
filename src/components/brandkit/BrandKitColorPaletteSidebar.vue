@@ -1,16 +1,16 @@
 <template lang="pug">
-  div(class="brand-kit-color-palette")
-    div(class="brand-kit-color-palette__header")
-      div(class="brand-kit-color-palette__name")
-        span(:title="paletteName") {{ paletteName }}
-    div(class="brand-kit-color-palette__colors")
-      color-btn(v-for="color in colorPalette.colors" :color="color.color"
-                :style="backgroundColorStyles"
-                @click="handleSetColor(color.color)")
+div(class="brand-kit-color-palette")
+  div(class="brand-kit-color-palette__header")
+    div(class="brand-kit-color-palette__name")
+      span(:title="paletteName") {{ paletteName }}
+  div(class="brand-kit-color-palette__colors")
+    color-btn(v-for="color in colorPalette.colors" :color="color.color"
+      :style="backgroundColorStyles"
+      @click="handleSetColor(color.color)")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrandColorPalette } from '@/interfaces/brandkit'
@@ -22,7 +22,8 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import colorUtils from '@/utils/colorUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     ColorBtn
   },
@@ -31,7 +32,10 @@ export default Vue.extend({
     }
   },
   props: {
-    colorPalette: Object
+    colorPalette: {
+      type: Object as PropType<IBrandColorPalette>,
+      required: true
+    }
   },
   computed: {
     paletteName(): string {

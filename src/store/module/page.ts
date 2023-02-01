@@ -3,20 +3,23 @@ import { floor } from 'lodash'
 import pageUtils from '@/utils/pageUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
-import Vue from '*.vue'
 
 interface IPageState {
   isShowPagePreview: boolean,
   pagesPerRow: number,
   showPagePanel: boolean,
-  isDragged: boolean
+  isDragged: boolean,
+  topBound: number
+  bottomBound: number
 }
 
 const getDefaultState = (): IPageState => ({
   isShowPagePreview: false,
   pagesPerRow: floor((document.body.clientWidth - 130) / 180),
   showPagePanel: false,
-  isDragged: false
+  isDragged: false,
+  topBound: -1,
+  bottomBound: Number.MAX_SAFE_INTEGER
 })
 
 const state = getDefaultState()
@@ -32,10 +35,26 @@ const getters: GetterTree<IPageState, unknown> = {
   },
   getIsDragged(state: IPageState) {
     return state.isDragged
+  },
+  getTopBound(state: IPageState) {
+    return state.topBound
+  },
+  getBottomBound(state: IPageState) {
+    return state.bottomBound
   }
 }
 
 const mutations: MutationTree<IPageState> = {
+  SET_STATE(state: IPageState, data: Partial<IPageState>) {
+    const newState = data || getDefaultState()
+    const keys = Object.keys(newState) as Array<keyof IPageState>
+    keys
+      .forEach(key => {
+        if (key in state) {
+          (state[key] as unknown) = newState[key]
+        }
+      })
+  },
   SET_isShowPagePreview(state: IPageState, isShowPagePreview: boolean) {
     state.isShowPagePreview = isShowPagePreview
 

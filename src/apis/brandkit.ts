@@ -11,7 +11,7 @@ export default {
     return store.getters['user/getToken']
   },
   getLocale(): string {
-    return i18n.locale
+    return i18n.global.locale
   },
   getUserId(): string {
     return store.getters['user/getUserId']
@@ -19,7 +19,7 @@ export default {
   getTeamId(): string {
     return store.getters['user/getTeamId']
   },
-  async sendApi(url: string, data: {[key: string]: any}): Promise<any> {
+  async sendApi(url: string, data: { [key: string]: any }): Promise<any> {
     return await apiUtils.requestWithRetry(() => axios(url, {
       method: 'POST',
       data

@@ -1,49 +1,54 @@
 <template lang="pug">
-  div(class="mobile-slider")
-    div
-      span(class="mobile-slider__name text-gray-3 body-2 no-wrap") {{title}}
-      input(class="mobile-slider__text body-2 text-gray-2"
-        type="number"
-        v-model.number="propsVal"
-        :name="name"
-        @change="handleChangeStop")
-    div(class="mobile-slider__range-input-wrapper")
-      input(class="input__slider--range"
-        :style="{ 'pointer-events': borderTouchArea ? 'none' : 'auto' }"
-        v-model.number="propsVal"
-        :name="name"
-        :max="max"
-        :min="min"
-        :step="step"
-        v-ratio-change
-        type="range"
-        @pointerdown="!borderTouchArea ? $emit('pointerdown', $event) : null"
-        @pointerup="!borderTouchArea ? handlePointerup() : null")
-      input(v-if="borderTouchArea"
-        class="mobile-slider__range-input mobile-slider__range-input-top input-top__slider--range"
-        v-model.number="propsVal"
-        :name="name"
-        :max="max"
-        :min="min"
-        :step="step"
-        v-ratio-change
-        type="range"
-        @pointerdown="$emit('pointerdown', $event)"
-        @pointerup="handlePointerup")
+div(class="mobile-slider")
+  div
+    span(class="mobile-slider__name text-gray-3 body-2 no-wrap") {{title}}
+    input(class="mobile-slider__text body-2 text-gray-2"
+      type="number"
+      v-model.number="propsVal"
+      :name="name"
+      @change="handleChangeStop")
+  div(class="mobile-slider__range-input-wrapper")
+    input(class="input__slider--range"
+      :style="{ 'pointer-events': borderTouchArea ? 'none' : 'auto' }"
+      v-model.number="propsVal"
+      :name="name"
+      :max="max"
+      :min="min"
+      :step="step"
+      v-ratio-change
+      type="range"
+      @pointerdown="!borderTouchArea ? $emit('pointerdown', $event) : null"
+      @pointerup="!borderTouchArea ? handlePointerup : null")
+    input(v-if="borderTouchArea"
+      class="mobile-slider__range-input mobile-slider__range-input-top input-top__slider--range"
+      v-model.number="propsVal"
+      :name="name"
+      :max="max"
+      :min="min"
+      :step="step"
+      v-ratio-change
+      type="range"
+      @pointerdown="$emit('pointerdown', $event)"
+      @pointerup="handlePointerup")
 </template>
 
 <script lang="ts">
 import stepsUtils from '@/utils/stepsUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
     }
   },
   props: {
-    title: String,
-    name: String,
+    title: {
+      type: String,
+      required: true
+    },
+    name: {
+      type: String,
+    },
     borderTouchArea: {
       type: Boolean,
       default: false
@@ -83,6 +88,10 @@ export default Vue.extend({
         } else {
           this.$emit('update', val, this.name)
         }
+        // The below line is necessary for value that would be rounded.
+        // If a value is rounded and not changed compared to previous value after rounded,
+        // the value in this component will not be synced with the rounded value (since not change happens).
+        this.$forceUpdate()
       }
     }
   },

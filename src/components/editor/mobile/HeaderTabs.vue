@@ -1,44 +1,45 @@
 <template lang="pug">
-  div(class="header-bar" @pointerdown.stop)
-    div(class="header-bar__left")
-      div(class="header-bar__feature-icon mr-25"
-          @pointerdown="backBtnAction()")
-        svg-icon(
-          :iconName="'chevron-left'"
-          :iconColor="'white'"
-          :iconWidth="'22px'")
-      div(class="header-bar__feature-icon mr-20"
-          :class="{'click-disabled': stepsUtils.isInFirstStep || isCropping}"
-          @pointerdown="undo()")
-        svg-icon(:iconName="'undo'"
-          :iconColor="(!stepsUtils.isInFirstStep && !isCropping) ? 'white' : 'gray-2'"
-          :iconWidth="'22px'")
-      div(class="header-bar__feature-icon"
-          :class="{'click-disabled': stepsUtils.isInLastStep || isCropping}"
-          @pointerdown="redo()")
-        svg-icon(:iconName="'redo'"
-          :iconColor="(!stepsUtils.isInLastStep && !isCropping) ? 'white' : 'gray-2'"
-          :iconWidth="'22px'")
-    div(class="header-bar__right")
-      div(v-for="tab in rightTabs" class="header-bar__feature-icon"
-          :class="{'click-disabled': (isLocked && tab.icon !== 'lock'), 'panel-icon': tab.isPanelIcon }"
-          @pointerdown="handleIconAction(tab.icon)")
-        svg-icon(
-          :iconName="tab.icon"
-          :iconColor="iconColor(tab)"
-          :iconWidth="'22px'")
+div(class="header-bar" @pointerdown.stop)
+  div(class="header-bar__left")
+    div(class="header-bar__feature-icon mr-25"
+        @pointerdown="backBtnAction()")
+      svg-icon(
+        :iconName="'chevron-left'"
+        :iconColor="'white'"
+        :iconWidth="'22px'")
+    div(class="header-bar__feature-icon mr-20"
+        :class="{'click-disabled': stepsUtils.isInFirstStep || isCropping}"
+        @pointerdown="undo()")
+      svg-icon(:iconName="'undo'"
+        :iconColor="(!stepsUtils.isInFirstStep && !isCropping) ? 'white' : 'gray-2'"
+        :iconWidth="'22px'")
+    div(class="header-bar__feature-icon"
+        :class="{'click-disabled': stepsUtils.isInLastStep || isCropping}"
+        @pointerdown="redo()")
+      svg-icon(:iconName="'redo'"
+        :iconColor="(!stepsUtils.isInLastStep && !isCropping) ? 'white' : 'gray-2'"
+        :iconWidth="'22px'")
+  div(class="header-bar__right")
+    div(v-for="tab in rightTabs" class="header-bar__feature-icon"
+        :class="{'click-disabled': (isLocked && tab.icon !== 'lock'), 'panel-icon': tab.isPanelIcon }"
+        @pointerdown="handleIconAction(tab.icon)")
+      svg-icon(
+        :iconName="tab.icon"
+        :iconColor="iconColor(tab)"
+        :iconWidth="'22px'")
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
+import { notify } from '@kyvg/vue3-notification'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import mappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
-import i18n from '@/i18n'
 import backgroundUtils from '@/utils/backgroundUtils'
 import imageUtils from '@/utils/imageUtils'
+import i18n from '@/i18n'
 
 interface IIcon {
   icon: string,
@@ -46,7 +47,7 @@ interface IIcon {
   isPanelIcon?: boolean
 }
 
-export default Vue.extend({
+export default defineComponent({
   components: {
   },
   props: {
@@ -59,6 +60,7 @@ export default Vue.extend({
       required: true
     }
   },
+  emits: ['switchTab', 'showAllPages'],
   data() {
     return {
       homeTabs: [
@@ -195,7 +197,7 @@ export default Vue.extend({
           if (!this.isHandleShadow) {
             this.$emit('switchTab', icon)
           } else {
-            Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           }
           break
         }
@@ -264,6 +266,9 @@ export default Vue.extend({
   padding: 8px 16px;
   box-sizing: border-box;
   z-index: setZindex("header");
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 
   &__feature-icon {
     width: 22px;

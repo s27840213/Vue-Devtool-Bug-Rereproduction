@@ -1,34 +1,41 @@
 <template lang="pug">
-  div(class="page-preview-plus"
-    :style="styles()"
-    @mouseover="pageMoveTo($event, 'mouse')"
-    @mouseout="pageMoveBack($event)"
-    @dragover="pageMoveTo($event, 'drag')"
-    @dragleave="pageMoveBack($event)"
-    @drop="handlePageDrop($event)")
-    div(v-if="!last && actionType === 'mouse'"
-      class="page-preview-plus-wrapper pointer"
-      @click="addPage(index)")
-        svg-icon(class="py-10"
-            :iconColor="'blue-1'"
-            :iconName="'plus-origin'"
-            :iconWidth="'18px'")
-        span {{$t('NN0139')}}
-    div(v-if="actionType === 'drag'"
-      class="page-preview-plus-drag")
+div(class="page-preview-plus"
+  :style="styles()"
+  @mouseover="pageMoveTo($event, 'mouse')"
+  @mouseout="pageMoveBack($event)"
+  @dragover="pageMoveTo($event, 'drag')"
+  @dragleave="pageMoveBack($event)"
+  @drop="handlePageDrop($event)")
+  div(v-if="!last && actionType === 'mouse'"
+    class="page-preview-plus-wrapper pointer"
+    @click="addPage(index)")
+      svg-icon(class="py-10"
+          :iconColor="'blue-1'"
+          :iconName="'plus-origin'"
+          :iconWidth="'18px'")
+      span {{$t('NN0139')}}
+  div(v-if="actionType === 'drag'"
+    class="page-preview-plus-drag")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    index: Number,
-    last: Boolean
+    index: {
+      type: Number,
+      required: true
+    },
+    last: {
+      type: Boolean,
+      required: true
+    }
   },
   data() {
     return {
@@ -46,12 +53,10 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _addPageToPos: 'ADD_pageToPos',
-      _deletePage: 'DELETE_page',
       _setmiddlemostPageIndex: 'SET_middlemostPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
-    styles() {
+    styles(): Record<string, string> {
       if (this.isDragged) {
         return {
           'z-index': '2',
@@ -120,21 +125,31 @@ export default Vue.extend({
       const moveFront = indexFrom < indexTo
       const newPos = moveFront ? indexTo - 1 : indexTo
       const page = GeneralUtils.deepCopy(this.getPage(indexFrom))
-      this._deletePage(indexFrom)
-      this._addPageToPos({
-        newPage: page,
-        pos: newPos
-      })
+      const refPage = pageUtils.getPage(newPos)
+      pageUtils.deletePage(indexFrom)
+      pageUtils.addPageToPos(pageUtils.isDetailPage ? { ...page, bleeds: refPage.bleeds, physicalBleeds: refPage.physicalBleeds } : page, newPos)
       GroupUtils.deselect()
       this._setmiddlemostPageIndex(newPos)
       this._setCurrActivePageIndex(newPos)
       StepsUtils.record()
     },
     addPage(position: number) {
-      this._addPageToPos({
-        newPage: pageUtils.newPage({}),
-        pos: position
-      })
+      const refPage = pageUtils.pageNum === 0 ? undefined // add new page if no pages
+        : pageUtils.pageNum === 1 ? pageUtils.getPage(0) // apply size of the last page if there is only one
+          : pageUtils.getPage(position + (position === 0 ? 1 : -1)) // apply size of the previous page, or next page if dosen't exist
+      pageUtils.addPageToPos(
+        pageUtils.newPage(refPage ? {
+          width: refPage.width,
+          height: refPage.height,
+          physicalWidth: refPage.physicalWidth,
+          physicalHeight: refPage.physicalHeight,
+          isEnableBleed: refPage.isEnableBleed,
+          bleeds: refPage.bleeds,
+          physicalBleeds: refPage.physicalBleeds,
+          unit: refPage.unit
+        } : {}),
+        position
+      )
       this._setmiddlemostPageIndex(position)
       StepsUtils.record()
     }

@@ -1,47 +1,48 @@
 <template lang="pug">
-  div(class="trash-design-view")
-    div(class="trash-design-view__title")
-      div(class="trash-design-view__folder-name")
-        span {{ $t('NN0189') }}
-      div(class="trash-design-view__info"
-          @click="toggleInfo()"
-          v-click-outside="closeInfo")
-        svg-icon(iconName="info"
-                iconWidth="16px"
-                iconColor="bu")
-        transition(name="slide-fade-img")
-          img(v-if="isInfoOpen" class="trash-design-view__info__arrow" :src="require('@/assets/img/svg/left-arrow.svg')")
-        transition(name="slide-fade-text")
-          div(v-if="isInfoOpen" class="trash-design-view__info__text")
-            span {{$t('NN0241')}}
-    div(class="horizontal-rule")
-    folder-gallery(:menuItems="menuItems"
-                  :allFolders="allFolders"
-                  :selectedNum="selectedNum"
-                  :limitFunctions="true"
-                  :useDelete="true"
-                  :selectable="true"
-                  @menuAction="handleMenuAction"
-                  @moveItem="handleMoveItem")
-    design-gallery(:menuItems="menuItems"
-                  :allDesigns="allDesigns"
-                  :selectedNum="selectedNum"
-                  :limitFunctions="true"
-                  :useDelete="true"
-                  @menuAction="handleMenuAction"
-                  @loadMore="handleLoadMore")
+div(class="trash-design-view")
+  div(class="trash-design-view__title")
+    div(class="trash-design-view__folder-name")
+      span {{ $t('NN0189') }}
+    div(class="trash-design-view__info"
+        @click="toggleInfo()"
+        v-click-outside="closeInfo")
+      svg-icon(iconName="info"
+              iconWidth="16px"
+              iconColor="bu")
+      transition(name="slide-fade-img")
+        img(v-if="isInfoOpen" class="trash-design-view__info__arrow" :src="require('@/assets/img/svg/left-arrow.svg')")
+      transition(name="slide-fade-text")
+        div(v-if="isInfoOpen" class="trash-design-view__info__text")
+          span {{$t('NN0241')}}
+  div(class="horizontal-rule")
+  folder-gallery(:menuItems="menuItems"
+                :allFolders="allFolders"
+                :selectedNum="selectedNum"
+                :limitFunctions="true"
+                :useDelete="true"
+                :selectable="true"
+                @menuAction="handleMenuAction"
+                @moveItem="handleMoveItem")
+  design-gallery(:menuItems="menuItems"
+                :allDesigns="allDesigns"
+                :selectedNum="selectedNum"
+                :limitFunctions="true"
+                :useDelete="true"
+                @menuAction="handleMenuAction"
+                @loadMore="handleLoadMore")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import { IQueueItem } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
+import designUtils, { DESIGN_MENU_EVENTS, FOLDER_MENU_EVENTS, IDesignMenuEvents, IFolderMenuEvents } from '@/utils/designUtils'
 import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: ['clearSelection', 'moveItem', ...DESIGN_MENU_EVENTS(), ...FOLDER_MENU_EVENTS()],
   components: {
     FolderGallery,
     DesignGallery
@@ -87,7 +88,7 @@ export default Vue.extend({
       fetchTrashFolders: 'fetchTrashFolders',
       fetchMoreTrashDesigns: 'fetchMoreTrashDesigns'
     }),
-    handleMenuAction(extraEvent: {event: string, payload: any}) {
+    handleMenuAction(extraEvent: {event: IDesignMenuEvents | IFolderMenuEvents, payload: any}) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
     },
@@ -176,16 +177,16 @@ export default Vue.extend({
   &-enter-active, &-leave-active {
     transition: .2s;
   }
-  &-enter, &-leave-to {
+  &-enter-from, &-leave-to {
     opacity: 0;
   }
 }
 
-.slide-fade-img-enter, .slide-fade-img-leave-to {
+.slide-fade-img-enter-from, .slide-fade-img-leave-to {
   left: 100%
 }
 
-.slide-fade-text-enter, .slide-fade-text-leave-to {
+.slide-fade-text-enter-from, .slide-fade-text-leave-to {
   left: calc(100% + 9px);
 }
 </style>

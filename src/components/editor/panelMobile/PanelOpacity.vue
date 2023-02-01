@@ -1,20 +1,21 @@
 <template lang="pug">
-  div(class="panel-opacity")
-    mobile-slider(:title="`${$t('NN0030')}`"
-      :borderTouchArea="true"
-      :value="opacity"
-      :min="0"
-      :max="100"
-      @update="updateLayerOpacity")
+div(class="panel-opacity")
+  mobile-slider(:title="`${$t('NN0030')}`"
+    :borderTouchArea="true"
+    :value="opacity"
+    :min="0"
+    :max="100"
+    @update="updateLayerOpacity")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import { mapGetters, mapMutations } from 'vuex'
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     MobileSlider
   },

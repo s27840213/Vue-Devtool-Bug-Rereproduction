@@ -1,9 +1,18 @@
-import { IPopupComponent } from '@/interfaces/popup'
+import { IPopupComponent, ISliderConfig } from '@/interfaces/popup'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 
 interface IPopupState {
   isPopupOpen: boolean,
-  popupComponent: IPopupComponent
+  popupComponent: IPopupComponent,
+  sliderConfig: ISliderConfig
+}
+
+const DEFAULT_SLIDER_CONFIG = {
+  value: 0,
+  min: 0,
+  max: 0,
+  step: 1,
+  noText: false
 }
 
 const SET_STATE = 'SET_STATE' as const
@@ -17,7 +26,8 @@ const getDefaultState = (): IPopupState => ({
     closeHandler: () => {
       return false
     }
-  }
+  },
+  sliderConfig: DEFAULT_SLIDER_CONFIG
 })
 
 const state = getDefaultState()
@@ -27,6 +37,9 @@ const getters: GetterTree<IPopupState, unknown> = {
   },
   getPopupComponent(state: IPopupState) {
     return state.popupComponent
+  },
+  getSliderConfig(state: IPopupState) {
+    return state.sliderConfig
   }
 }
 
@@ -36,6 +49,12 @@ const mutations: MutationTree<IPopupState> = {
   },
   SET_popupComponent(state, configs) {
     Object.assign(state.popupComponent, configs)
+  },
+  SET_sliderConfig(state, sliderConfig) {
+    Object.assign(state.sliderConfig, sliderConfig)
+  },
+  UPDATE_clearSliderConfig(state) {
+    state.sliderConfig = DEFAULT_SLIDER_CONFIG
   }
 }
 

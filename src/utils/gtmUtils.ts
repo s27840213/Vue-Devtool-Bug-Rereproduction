@@ -13,47 +13,47 @@ class GtmUtils {
   get isLogin(): boolean { return store.getters['user/isLogin'] }
 
   track(eventName: string, params?: { [index: string]: string | boolean | number }) {
-    Vue.gtm.trackEvent({
-      event: eventName,
-      ...params
-    })
+    // Vue.gtm.trackEvent({
+    //   event: eventName,
+    //   ...params
+    // })
   }
 
   trackTemplateDownload(templateId: string) {
-    if (this.isLogin && !this.isAdmin) {
-      this.track('template-download', {
-        templateId
-      })
-    }
+    // if (this.isLogin && !this.isAdmin) {
+    //   this.track('template-download', {
+    //     templateId
+    //   })
+    // }
   }
 
   trackPageDownload(templateId: string) {
-    if (this.isLogin && !this.isAdmin && templateId !== '') {
-      this.track('template-download-2', {
-        templateId
-      })
-    }
+    // if (this.isLogin && !this.isAdmin && templateId !== '') {
+    //   this.track('template-download-2', {
+    //     templateId
+    //   })
+    // }
   }
 
   // below code is used for Google Ads
   subscribe(isYearly: boolean) {
     // month : 8.99 usd (269 TWD), year: 79.99 usd (2388 TWD)
-    const conversionPrice = isYearly ? 79.99 : 8.99
-    const subScribePeriod = isYearly ? 365 : 30
-    if (this.isLogin) {
-      this.track('subscribe', {
-        conversionPrice,
-        subScribePeriod
-      })
-    }
+    // const conversionPrice = isYearly ? 79.99 : 8.99
+    // const subScribePeriod = isYearly ? 365 : 30
+    // if (this.isLogin) {
+    //   this.track('subscribe', {
+    //     conversionPrice,
+    //     subScribePeriod
+    //   })
+    // }
   }
 
   startTrail(subScribePeriod: number) {
-    if (this.isLogin) {
-      this.track('startTrail', {
-        subScribePeriod
-      })
-    }
+    // if (this.isLogin) {
+    //   this.track('startTrail', {
+    //     subScribePeriod
+    //   })
+    // }
   }
 
   /**
@@ -61,9 +61,9 @@ class GtmUtils {
    */
 
   signUp(method: 'Google' | 'Facebook' | 'Vivipic') {
-    this.track('sign_up', {
-      method
-    })
+    // this.track('sign_up', {
+    //   method
+    // })
   }
 }
 

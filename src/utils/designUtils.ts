@@ -9,7 +9,7 @@ import pageUtils from './pageUtils'
 import themeUtils from './themeUtils'
 import uploadUtils from './uploadUtils'
 import resizeUtils from './resizeUtils'
-import Vue from 'vue'
+import { nextTick } from 'vue'
 import i18n from '@/i18n'
 import stepsUtils from './stepsUtils'
 import _ from 'lodash'
@@ -21,13 +21,33 @@ interface Item {
   lastUpdatedTime: string
 }
 
+export function DESIGN_MENU_EVENTS(): typeof eventNames {
+  const eventNames = [
+    'deleteItem', 'deleteForever',
+    'recoverItem', 'moveDesignToFolder', 'downloadDesign',
+    'favorDesign', 'unfavorDesign', 'rootDesign'
+  ] as const
+  return eventNames
+}
+
+export type IDesignMenuEvents = ReturnType<typeof DESIGN_MENU_EVENTS>[number]
+
+export function FOLDER_MENU_EVENTS(): typeof eventNames {
+  const eventNames = [
+    'deleteFolderForever', 'recoverItem'
+  ] as const
+  return eventNames
+}
+
+export type IFolderMenuEvents = ReturnType<typeof FOLDER_MENU_EVENTS>[number]
+
 class DesignUtils {
   ROOT = '$ROOT$'
-  ROOT_DISPLAY = i18n.t('NN0187')
   event = new EventEmitter()
-  eventHash: {[key: string]: () => void} = {}
+  eventHash: { [key: string]: () => void } = {}
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get teamId(): string { return store.getters['user/getTeamId'] }
+  get ROOT_DISPLAY(): string { return i18n.global.t('NN0187') }
 
   on(type: string, callback: () => void) {
     if (this.eventHash[type]) {
@@ -198,16 +218,16 @@ class DesignUtils {
     return [
       {
         icon: 'copy',
-        text: `${i18n.t('NN0251')}`
+        text: `${i18n.global.t('NN0251')}`
       },
       {
         icon: 'folder',
-        text: `${i18n.t('NN0206')}`,
+        text: `${i18n.global.t('NN0206')}`,
         extendable: true
       },
       {
         icon: 'trash',
-        text: `${i18n.t('NN0034')}`
+        text: `${i18n.global.t('NN0034')}`
       }
     ]
     // ,
@@ -225,16 +245,16 @@ class DesignUtils {
     return [
       {
         icon: 'trash',
-        text: `${i18n.t('NN0034')}`
+        text: `${i18n.global.t('NN0034')}`
       }
     ]
     // {
     //   icon: 'share-alt',
-    //   text: `${i18n.t('NN0214')}`
+    //   text: `${useI18n().t('NN0214')}`
     // },
     // {
     //   icon: 'download',
-    //   text: `${i18n.t('NN0010')}`
+    //   text: `${useI18n().t('NN0010')}`
     // },
   }
 
@@ -242,11 +262,11 @@ class DesignUtils {
     return [
       {
         icon: 'reduction',
-        text: `${i18n.t('NN0204')}`
+        text: `${i18n.global.t('NN0204')}`
       },
       {
         icon: 'trash',
-        text: `${i18n.t('NN0200')}`
+        text: `${i18n.global.t('NN0200')}`
       }
     ]
   }
@@ -255,29 +275,29 @@ class DesignUtils {
     const res = [
       {
         icon: 'copy',
-        text: `${i18n.t('NN0251')}`
+        text: `${i18n.global.t('NN0251')}`
       },
       {
         icon: 'folder',
-        text: `${i18n.t('NN0206')}`
+        text: `${i18n.global.t('NN0206')}`
       },
       {
         icon: isInFavorites ? 'favorites-fill' : 'favorites',
-        text: isInFavorites ? `${i18n.t('NN0207')}` : `${i18n.t('NN0205')}`
+        text: isInFavorites ? `${i18n.global.t('NN0207')}` : `${i18n.global.t('NN0205')}`
       },
       {
         icon: 'confirm-circle',
-        text: `${i18n.t('NN0680')}`
+        text: `${i18n.global.t('NN0680')}`
       },
       {
         icon: 'trash',
-        text: `${i18n.t('NN0034')}`
+        text: `${i18n.global.t('NN0034')}`
       }
     ]
     if (isInFolderView) {
       res.splice(2, 0, {
         icon: 'folder_minus',
-        text: `${i18n.t('NN0692')}`
+        text: `${i18n.global.t('NN0692')}`
       })
     }
     return res
@@ -287,15 +307,15 @@ class DesignUtils {
     return [
       {
         icon: 'favorites-fill',
-        text: `${i18n.t('NN0207')}`
+        text: `${i18n.global.t('NN0207')}`
       },
       {
         icon: 'confirm-circle',
-        text: `${i18n.t('NN0680')}`
+        text: `${i18n.global.t('NN0680')}`
       },
       {
         icon: 'trash',
-        text: `${i18n.t('NN0034')}`
+        text: `${i18n.global.t('NN0034')}`
       }
     ]
   }
@@ -304,15 +324,15 @@ class DesignUtils {
     return [
       {
         icon: 'undo',
-        text: `${i18n.t('NN0204')}`
+        text: `${i18n.global.t('NN0204')}`
       },
       {
         icon: 'confirm-circle',
-        text: `${i18n.t('NN0680')}`
+        text: `${i18n.global.t('NN0680')}`
       },
       {
         icon: 'trash',
-        text: `${i18n.t('NN0200')}`
+        text: `${i18n.global.t('NN0200')}`
       }
     ]
   }
@@ -321,17 +341,17 @@ class DesignUtils {
     const res = [
       {
         icon: 'folder',
-        text: `${i18n.t('NN0206')}`
+        text: `${i18n.global.t('NN0206')}`
       },
       {
         icon: 'trash',
-        text: `${i18n.t('NN0034')}`
+        text: `${i18n.global.t('NN0034')}`
       }
     ]
     if (isInFolderView) {
       res.splice(1, 0, {
         icon: 'folder_minus',
-        text: `${i18n.t('NN0692')}`
+        text: `${i18n.global.t('NN0692')}`
       })
     }
     return res
@@ -341,15 +361,15 @@ class DesignUtils {
     return [
       {
         icon: 'undo',
-        text: `${i18n.t('NN0204')}`
+        text: `${i18n.global.t('NN0204')}`
       },
       {
         icon: 'confirm-circle',
-        text: `${i18n.t('NN0690')}`
+        text: `${i18n.global.t('NN0690')}`
       },
       {
         icon: 'trash',
-        text: `${i18n.t('NN0200')}`
+        text: `${i18n.global.t('NN0200')}`
       }
     ]
   }
@@ -610,7 +630,7 @@ class DesignUtils {
   }
 
   addNewFolder(path: string[], fromFolderView = false, name: string | undefined = undefined, insertToCopied = false): string {
-    const folder = this.newFolder(name ?? `${i18n.t('NN0249')}`, 'SYSTEM')
+    const folder = this.newFolder(name ?? `${i18n.global.t('NN0249')}`, 'SYSTEM')
     store.commit('design/UPDATE_insertFolder', {
       parents: path,
       folder
@@ -782,25 +802,14 @@ class DesignUtils {
       path,
       folderName
     }
-    const route = router.resolve({
-      name: 'Editor',
-      query
-    })
-    router.push(route.href)
+    router.push({ name: 'Editor', query })
   }
 
   // Below function is used to update the page
-  async newDesign(width = 1080, height = 1080, unit = 'px', newDesignType?: number, path?: string, folderName?: string) {
+  async newDesign(width = 1080, height = 1080, unit = 'px', newDesignType?: number) {
     store.commit('file/SET_setLayersDone')
     const pxSize = unitUtils.convertSize(width, height, unit, 'px')
-    const inSize = unitUtils.convertSize(width, height, unit, 'in')
-
-    // get default bleeds with page dpi
-    const dpi = {
-      width: pxSize.width / inSize.width,
-      height: pxSize.height / inSize.height
-    }
-    const bleeds = pageUtils.getDefaultBleeds('px', dpi)
+    const bleeds = pageUtils.getPageDefaultBleeds({ physicalWidth: width, physicalHeight: height, unit }, 'px')
 
     pageUtils.setPages([pageUtils.newPage({
       width: pxSize.width,
@@ -808,29 +817,21 @@ class DesignUtils {
       physicalWidth: width,
       physicalHeight: height,
       bleeds,
-      physicalBleeds: unit === 'px' ? bleeds : pageUtils.getDefaultBleeds(unit, dpi),
+      physicalBleeds: unit === 'px' ? bleeds : pageUtils.getPageDefaultBleeds({ physicalWidth: width, physicalHeight: height, unit }),
       unit
     })])
     pageUtils.clearPagesInfo()
     await themeUtils.refreshTemplateState(undefined, newDesignType)
-    if (this.isLogin) {
-      const query = router.currentRoute.query
-      query.width = width.toString()
-      query.height = height.toString()
-      query.unit = unit
-      if (path) query.path = path
-      if (folderName) query.folderName = folderName
-      router.replace({ query })
-    }
+    // Set default url query 'unit' in Editor.vue
   }
 
-  newDesignWithTemplae(width: number, height: number, json: any, templateId:string, groupId: string) {
+  newDesignWithTemplae(width: number, height: number, json: any, templateId: string, groupId: string) {
     console.log(json)
     assetUtils.addTemplateToRecentlyUsedPure(templateId).then(() => {
       assetUtils.addTemplate(json, {}, false).then(() => {
         stepsUtils.reset()
         pageUtils.clearPagesInfo()
-        Vue.nextTick(() => {
+        nextTick(() => {
           resizeUtils.resizePage(0, json, { width, height })
           store.commit('UPDATE_pageProps', {
             pageIndex: 0,
@@ -843,7 +844,7 @@ class DesignUtils {
              */
             store.commit('SET_assetId', generalUtils.generateAssetId())
             // eslint-disable-next-line camelcase
-            const query = _.omit(router.currentRoute.query,
+            const query = _.omit(router.currentRoute.value.query,
               ['width', 'height'])
             query.type = 'design'
             query.design_id = uploadUtils.assetId

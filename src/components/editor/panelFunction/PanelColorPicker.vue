@@ -1,13 +1,14 @@
 <template lang="pug">
-  div(class="color-picker")
-    span(class="color-picker__title text-blue-1 label-lg") Color Picker
+div(class="color-picker")
+  span(class="color-picker__title text-blue-1 label-lg") Color Picker
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     SearchBar
   }

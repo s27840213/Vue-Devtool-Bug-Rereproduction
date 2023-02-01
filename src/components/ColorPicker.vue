@@ -1,49 +1,53 @@
 <template lang="pug">
-  div(class="color-picker" ref="colorPicker"
-      :style="{'box-shadow': isMobile ? 'none' : '0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3)'}")
-    chrome-picker(
-      class="color-picker__picker"
-      :value="convertedHex"
-      @input="updateHex"
-      @paste="onPaste"
-      @mouseup.native="onmouseup"
-      :disableFields="true"
-      :disableAlpha="true"
-      :isMobile="isMobile"
-      :fullWidth="isMobile"
-      :aspectRatio="aspectRatio")
-    div(:class="{'px-10': !isTouchDevice}")
-      div(class="color-picker__hex")
-        svg-icon(v-if="!isTouchDevice"
-          class="pointer"
-          iconName="eye-dropper"
-          :iconWidth="'20px'"
-          :iconColor="'gray-2'"
-          @click.native="eyeDropper"
-          v-hint="$t('NN0407')")
-        span(class="body-1") Hex
-        div(class="color-picker__input")
-          div(:style="{'background-color': convertedHex}")
-          input(
-            ref="input"
-            type="text"
-            spellcheck="false"
-            v-model="color"
-            maxlength="7")
+div(class="color-picker" ref="colorPicker"
+    :style="{'box-shadow': isMobile ? 'none' : '0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3)'}")
+  chrome-picker(
+    class="color-picker__picker"
+    :value="convertedHex"
+    @input="updateHex"
+    @paste="onPaste"
+    @mouseup="onmouseup"
+    :disableFields="true"
+    :disableAlpha="true"
+    :isMobile="isMobile"
+    :fullWidth="isMobile"
+    :aspectRatio="aspectRatio")
+  div(:class="{'px-10': !isTouchDevice}")
+    div(class="color-picker__hex")
+      svg-icon(v-if="!isTouchDevice"
+        class="pointer"
+        iconName="eye-dropper"
+        :iconWidth="'20px'"
+        :iconColor="'gray-2'"
+        @click="eyeDropper"
+        v-hint="$t('NN0407')")
+      span(class="body-1") Hex
+      div(class="color-picker__input")
+        div(:style="{'background-color': convertedHex}")
+        input(
+          ref="input"
+          type="text"
+          spellcheck="false"
+          v-model="color"
+          maxlength="7")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
-import layerUtils from '@/utils/layerUtils'
-import { Chrome } from 'vue-color'
 import i18n from '@/i18n'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
+import { notify } from '@kyvg/vue3-notification'
+import layerUtils from '@/utils/layerUtils'
+import Chrome from '@/components/colorPicker/Chrome.vue'
 import generalUtils from '@/utils/generalUtils'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
-    currentColor: String,
+    currentColor: {
+      type: String,
+      required: true
+    },
     isMobile: {
       type: Boolean,
       default: false
@@ -53,6 +57,7 @@ export default Vue.extend({
       default: 56.25
     }
   },
+  emits: ['update', 'final'],
   components: {
     'chrome-picker': Chrome
   },
@@ -120,7 +125,7 @@ export default Vue.extend({
     },
     eyeDropper() {
       if (!(window as any).EyeDropper) {
-        Vue.notify({ group: 'error', text: `${i18n.t('NN0406')}` })
+        notify({ group: 'error', text: `${i18n.global.t('NN0406')}` })
         return
       }
 
@@ -171,9 +176,6 @@ export default Vue.extend({
   background-color: white;
   &:focus {
     outline: none;
-  }
-  &__picker::v-deep {
-    box-shadow: none;
   }
   &__hex {
     height: 40px;

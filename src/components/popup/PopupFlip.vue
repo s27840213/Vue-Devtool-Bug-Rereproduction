@@ -1,24 +1,25 @@
 <template lang="pug">
-  div(class="popup-flip")
-    div(v-for="(data,index) in popupDatas()"
-        :key="`popup-${index}`"
-        class="popup-flip__item"
-        @click="MappingUtils.mappingIconAction(data.icon)")
-      svg-icon(
-        class="pointer"
-        :iconName="data.icon"
-        :iconWidth="'12px'"
-        :iconColor="'gray-1'")
-      span(class="ml-5 body-2") {{data.text}}
+div(class="popup-flip")
+  div(v-for="(data,index) in popupDatas()"
+      :key="`popup-${index}`"
+      class="popup-flip__item"
+      @click="MappingUtils.mappingIconAction(data.icon)")
+    svg-icon(
+      class="pointer"
+      :iconName="data.icon"
+      :iconWidth="'12px'"
+      :iconColor="'gray-1'")
+    span(class="ml-5 body-2") {{data.text}}
 </template>
 
 <script lang="ts">
 import { LayerType } from '@/store/types'
 import layerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
       MappingUtils,
@@ -37,7 +38,7 @@ export default Vue.extend({
       }
     }
   },
-  destroyed() {
+  unmounted() {
     this.destoryCb && this.destoryCb()
   },
   methods: {

@@ -19,7 +19,7 @@ div(class="all-pages")
           :iconWidth="'25px'")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
 import pageUtils from '@/utils/pageUtils'
@@ -31,7 +31,8 @@ import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import { globalQueue } from '@/utils/queueUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
       screenWidth: 0,
@@ -75,14 +76,21 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _addPage: 'ADD_page',
       _setPagesPerRow: 'page/SET_PagesPerRow',
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
     addPage() {
-      const { width, height } = pageUtils.getPageSize(pageUtils.pageNum - 1)
-      pageUtils.addPage(pageUtils.newPage({ width, height }))
-
+      const lastPage = pageUtils.pageNum > 0 ? pageUtils.getPages[pageUtils.pageNum - 1] : undefined
+      pageUtils.addPageToPos(pageUtils.newPage(lastPage ? {
+        width: lastPage.width,
+        height: lastPage.height,
+        physicalWidth: lastPage.physicalWidth,
+        physicalHeight: lastPage.physicalHeight,
+        isEnableBleed: lastPage.isEnableBleed,
+        bleeds: lastPage.bleeds,
+        physicalBleeds: lastPage.physicalBleeds,
+        unit: lastPage.unit
+      } : {}), pageUtils.pageNum)
       this._setCurrActivePageIndex(pageUtils.pageNum - 1)
       editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
       stepsUtils.record()

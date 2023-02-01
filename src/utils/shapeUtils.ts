@@ -10,6 +10,7 @@ import generalUtils from '@/utils/generalUtils'
 import pageUtils from './pageUtils'
 import zindexUtils from './zindexUtils'
 import layerFactary from './layerFactary'
+import _ from 'lodash'
 
 class ShapeUtils {
   get hasMultiColors() {
@@ -67,17 +68,14 @@ class ShapeUtils {
       }
     }
     if (dashArray) {
-      const reg = new RegExp('\\$dash', 'g')
-      style = style.replace(reg, dashArray.join(' ').replace('1', ((sizeArray?.[0] ?? 1) * 2.5).toString()))
+      style = style.replace(/\$dash/g, dashArray.join(' ').replace('1', ((sizeArray?.[0] ?? 1) * 2.5).toString()))
     }
     if (linecap) {
-      const reg = new RegExp('\\$cap', 'g')
-      style = style.replace(reg, linecap)
+      style = style.replace(/\$cap/g, linecap)
     }
     if (filled !== undefined) {
       const fillcolor = filled ? colorArray[0] : 'none'
-      const reg = new RegExp('\\$fillcolor', 'g')
-      style = style.replace(reg, fillcolor)
+      style = style.replace(/\$fillcolor/g, fillcolor)
     }
     return style.split('!!')
   }
@@ -95,18 +93,12 @@ class ShapeUtils {
     const translateXC = -1 * pSize[0] * (1 - ratioX)
     const translateYC = -1 * pSize[1] * (1 - ratioY)
 
-    const regRatioX = new RegExp('\\$sx', 'g')
-    style = style.replace(regRatioX, ratioX.toString())
-    const regRatioY = new RegExp('\\$sy', 'g')
-    style = style.replace(regRatioY, ratioY.toString())
-    const regTransXP = new RegExp('\\$txp', 'g')
-    style = style.replace(regTransXP, translateXP.toString())
-    const regTransYP = new RegExp('\\$typ', 'g')
-    style = style.replace(regTransYP, translateYP.toString())
-    const regTransXC = new RegExp('\\$txc', 'g')
-    style = style.replace(regTransXC, translateXC.toString())
-    const regTransYC = new RegExp('\\$tyc', 'g')
-    style = style.replace(regTransYC, translateYC.toString())
+    style = style.replace(/\$sx/g, ratioX.toString())
+    style = style.replace(/\$sy/g, ratioY.toString())
+    style = style.replace(/\$txp/g, translateXP.toString())
+    style = style.replace(/\$typ/g, translateYP.toString())
+    style = style.replace(/\$txc/g, translateXC.toString())
+    style = style.replace(/\$tyc/g, translateYC.toString())
 
     return style.split('!!')
   }
@@ -127,8 +119,7 @@ class ShapeUtils {
       const reg = new RegExp('\\$mtrans\\[' + i + '\\]', 'g')
       svgOut = svgOut.replace(reg, `${transTextContent[i]}`)
     }
-    const svgReg = new RegExp('\\$svgId', 'g')
-    svgOut = svgOut.replace(svgReg, `${className}SVG`)
+    svgOut = svgOut.replace(/\$svgId/g, `${className}SVG`)
     if (point?.length !== undefined) {
       for (let i = 0; i < point.length; i++) {
         const reg = new RegExp('\\$point\\[' + i + '\\]', 'g')
@@ -142,12 +133,10 @@ class ShapeUtils {
       }
     }
     if (pDiff !== undefined) {
-      const regX = new RegExp('\\$patchedX\\(([\\.\\d]+)\\)', 'g')
-      svgOut = svgOut.replace(regX, (m, p1) => {
+      svgOut = svgOut.replace(/\$patchedX\(([.\d]+)\)/g, (m, p1) => {
         return Math.max((Number(p1) + pDiff[0]), 0).toString()
       })
-      const regY = new RegExp('\\$patchedY\\(([\\.\\d]+)\\)', 'g')
-      svgOut = svgOut.replace(regY, (m, p1) => {
+      svgOut = svgOut.replace(/\$patchedY\(([.\d]+)\)/g, (m, p1) => {
         return Math.max((Number(p1) + pDiff[1]), 0).toString()
       })
     }
@@ -331,23 +320,15 @@ class ShapeUtils {
       style = style.replace(reg, sizeArray[j].toString())
     }
     const scale = sizeArray[0]
-    const regRoms = new RegExp('\\$roms', 'g')
-    style = style.replace(regRoms, roms.toString())
-    const regRome = new RegExp('\\$rome', 'g')
-    style = style.replace(regRome, rome.toString())
-    const regTransXS = new RegExp('\\$txms', 'g')
-    style = style.replace(regTransXS, txms.toString())
-    const regTransYS = new RegExp('\\$tyms', 'g')
-    style = style.replace(regTransYS, tyms.toString())
-    const regTransXE = new RegExp('\\$txme', 'g')
-    style = style.replace(regTransXE, txme.toString())
-    const regTransYE = new RegExp('\\$tyme', 'g')
-    style = style.replace(regTransYE, tyme.toString())
+    style = style.replace(/\$roms/g, roms.toString())
+    style = style.replace(/\$rome/g, rome.toString())
+    style = style.replace(/\$txms/g, txms.toString())
+    style = style.replace(/\$tyms/g, tyms.toString())
+    style = style.replace(/\$txme/g, txme.toString())
+    style = style.replace(/\$tyme/g, tyme.toString())
     if (markerWidth && markerWidth.length > 1) {
-      const regFineTuneS = new RegExp('\\$finetunes', 'g')
-      style = style.replace(regFineTuneS, `translate(-${markerWidth[0] * scale}px, -${2 * scale}px)`)
-      const regFineTuneE = new RegExp('\\$finetunee', 'g')
-      style = style.replace(regFineTuneE, `translate(-${markerWidth[1] * scale}px, -${2 * scale}px)`)
+      style = style.replace(/\$finetunes/g, `translate(-${markerWidth[0] * scale}px, -${2 * scale}px)`)
+      style = style.replace(/\$finetunee/g, `translate(-${markerWidth[1] * scale}px, -${2 * scale}px)`)
     }
 
     return style.split('!!')
@@ -684,7 +665,7 @@ class ShapeUtils {
 
   setLineWidth(value: number) {
     const { min, max } = mappingUtils.mappingMinMax('lineWidth')
-    const lineWidth = parseInt(generalUtils.boundValue(value, min, max))
+    const lineWidth = _.floor(parseFloat(generalUtils.boundValue(value, min, max)), 2)
     const { getCurrLayer: currLayer } = layerUtils
     const { point, styles, size } = (currLayer as IShape)
 

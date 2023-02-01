@@ -1,70 +1,70 @@
 <template lang="pug">
-  div(class="text-effect-setting mt-25")
-    //- Tabs to choose effect category: shadow, shape and bg.
-    div(class="text-effect-setting-tabs")
-      span(v-for="category in textEffects"
-          :selected="currTab===category.name"
-          @click="switchTab(category.name)") {{category.label}}
-    div(class="action-bar")
-      template(v-for="effects1d in currCategory.effects2d")
-        //- To choose effect, ex: hollow, splice or echo.
-        div(class="text-effect-setting__effects mb-10")
-          svg-icon(v-for="effect in effects1d"
-            :key="`${currCategory.name}-${effect.key}`"
-            :iconName="`text-${currCategory.name}-${effect.key}`"
-            @click.native="onEffectClick(effect.key)"
-            class="text-effect-setting__effect pointer"
-            :class="{'selected': currentStyle[currCategory.name].name === effect.key }"
-            iconWidth="60px"
-            iconColor="white"
-            v-hint="effect.label")
-        //- Effect option UI.
-        div(v-if="getOptions(effects1d) && getOptions(effects1d).length !== 0"
-            class="text-effect-setting-options")
-          div(v-for="option in getOptions(effects1d)"
-              :key="option.key"
-              class="text-effect-setting-options__field")
-            div(class="text-effect-setting-options__field--name") {{option.label}}
-            //- Option type select
-            div(v-if="option.type === 'select'"
-                class="text-effect-setting-options__field--select")
-              svg-icon(v-for="sel in option.select"
-                :iconName="`${option.key}-${sel.key}`"
-                iconWidth="24px"
-                :class="{'selected': currentStyle[currCategory.name].endpoint === sel.key }"
-                @click.native="handleSelectInput(option.key, sel.key)")
-            //- Option type range
-            template(v-if="option.type === 'range'")
-              input(class="text-effect-setting-options__field--number"
-                :value="currentStyle[currCategory.name][option.key]"
-                :name="option.key"
-                :max="option.max"
-                :min="option.min"
-                @change="(e)=>{handleRangeInput(e, option);recordChange()}"
-                type="number")
-              input(class="text-effect-setting-options__field--range input__slider--range"
-                :value="currentStyle[currCategory.name][option.key]"
-                :name="option.key"
-                :max="option.max"
-                :min="option.min"
-                @input="(e)=>handleRangeInput(e, option)"
-                @mousedown="handleRangeMousedown()"
-                @mouseup="handleRangeMouseup()"
-                v-ratio-change
-                type="range")
-            //- Option type color
-            color-btn(v-if="option.type === 'color'" size="25px"
-              :color="colorParser(currentStyle[currCategory.name][option.key])"
-              :active="option.key === colorTarget.key && settingTextEffect"
-              @click="handleColorModal(currCategory.name, option.key)")
-          div(class="text-effect-setting-options__field")
-            span
-            span(class="text-effect-setting-options__field--reset"
-                @click="resetTextEffect()") {{$t('NN0754')}}
+div(class="text-effect-setting mt-25")
+  //- Tabs to choose effect category: shadow, shape and bg.
+  div(class="text-effect-setting-tabs")
+    span(v-for="category in textEffects"
+        :selected="currTab===category.name"
+        @click="switchTab(category.name)") {{category.label}}
+  div(class="action-bar")
+    template(v-for="effects1d in currCategory.effects2d")
+      //- To choose effect, ex: hollow, splice or echo.
+      div(class="text-effect-setting__effects mb-10")
+        svg-icon(v-for="effect in effects1d"
+          :key="`${currCategory.name}-${effect.key}`"
+          :iconName="`text-${currCategory.name}-${effect.key}`"
+          @click="onEffectClick(effect.key)"
+          class="text-effect-setting__effect pointer"
+          :class="{'selected': currentStyle.name === effect.key }"
+          iconWidth="60px"
+          iconColor="white"
+          v-hint="effect.label")
+      //- Effect option UI.
+      div(v-if="getOptions(effects1d) && getOptions(effects1d)?.length !== 0"
+          class="text-effect-setting-options")
+        div(v-for="option in getOptions(effects1d)"
+            :key="option.key"
+            class="text-effect-setting-options__field")
+          div(class="text-effect-setting-options__field--name") {{option.label}}
+          //- Option type select
+          div(v-if="option.type === 'select'"
+              class="text-effect-setting-options__field--select")
+            svg-icon(v-for="sel in option.select"
+              :iconName="`${option.key}-${sel.key}`"
+              iconWidth="24px"
+              :class="{'selected': currentStyle.endpoint === sel.key }"
+              @click="handleSelectInput(option.key, sel.key)")
+          //- Option type range
+          template(v-if="option.type === 'range'")
+            input(class="text-effect-setting-options__field--number"
+              :value="currentStyle[option.key]"
+              :name="option.key"
+              :max="option.max"
+              :min="option.min"
+              @change="(e)=>{handleRangeInput(e, option);recordChange()}"
+              type="number")
+            input(class="text-effect-setting-options__field--range input__slider--range"
+              :value="currentStyle[option.key]"
+              :name="option.key"
+              :max="option.max"
+              :min="option.min"
+              @input="(e)=>handleRangeInput(e, option)"
+              @mousedown="handleRangeMousedown()"
+              @mouseup="handleRangeMouseup()"
+              v-ratio-change
+              type="range")
+          //- Option type color
+          color-btn(v-if="option.type === 'color'" size="25px"
+            :color="colorParser(currentStyle[option.key])"
+            :active="option.key === colorTarget.key && settingTextEffect"
+            @click="handleColorModal(currCategory.name, option.key)")
+        div(class="text-effect-setting-options__field")
+          span
+          span(class="text-effect-setting-options__field--reset"
+              @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textBgUtils from '@/utils/textBgUtils'
@@ -80,11 +80,12 @@ import localStorageUtils from '@/utils/localStorageUtils'
 import editorUtils from '@/utils/editorUtils'
 import _ from 'lodash'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ColorPicker,
     ColorBtn
   },
+  emits: ['toggleColorPanel'],
   data() {
     return {
       openColorPicker: false,
@@ -100,13 +101,13 @@ export default Vue.extend({
     currCategory():IEffectCategory {
       return _.find(this.textEffects, ['name', this.currTab]) as IEffectCategory
     },
-    currentStyle(): { shadow: ITextEffect, bg: ITextBgEffect, shape: ITextShape } {
+    currentStyle(): Record<string, string> {
       const { styles } = textEffectUtils.getCurrentLayer()
       return {
         shadow: Object.assign({ name: 'none' }, styles.textEffect as ITextEffect),
         bg: styles.textBg as ITextBgEffect,
         shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
-      }
+      }[this.currTab] as Record<string, string>
     },
     settingTextEffect(): boolean {
       return colorUtils.currEvent === 'setTextEffectColor' &&
@@ -117,15 +118,13 @@ export default Vue.extend({
     colorUtils.on(ColorEventType.textEffect, (color: string) => this.handleColorUpdate(color))
     colorUtils.onStop(ColorEventType.textEffect, this.recordChange)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     colorUtils.event.off(ColorEventType.textEffect, (color: string) => this.handleColorUpdate(color))
     colorUtils.offStop(ColorEventType.textEffect, this.recordChange)
   },
   methods: {
-    handleColorModal(category: 'shadow'|'bg', key: string) {
-      const currColor = this.colorParser(
-        (this.currentStyle[category] as Record<string, string>)[key]
-      )
+    handleColorModal(category: 'shadow'|'bg'|'shape', key: string) {
+      const currColor = this.colorParser(this.currentStyle[key])
 
       this.colorTarget = { category, key }
       editorUtils.toggleColorSlips(true)
@@ -138,15 +137,16 @@ export default Vue.extend({
     },
     getOptions(effects1d: IEffect[]) {
       return _.find(effects1d, ['key',
-        this.currentStyle[this.currTab].name])?.options
+        this.currentStyle.name])?.options
     },
     setEffect(options:{
       effectName?: string,
       effect?: Record<string, string|number|boolean>
     }) {
       let { effectName, effect } = options
+      const { textShape } = textEffectUtils.getCurrentLayer().styles
       if (!effectName) {
-        effectName = this.currentStyle[this.currTab].name || 'none'
+        effectName = this.currentStyle.name || 'none'
       }
 
       switch (this.currTab) {
@@ -156,7 +156,7 @@ export default Vue.extend({
           break
         case 'bg':
           textBgUtils.setTextBg(effectName, Object.assign({}, effect))
-          if (this.currentStyle.shape.name !== 'none') {
+          if (textShape.name !== 'none') {
             textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
             textPropUtils.updateTextPropsState()
           }
@@ -229,7 +229,7 @@ export default Vue.extend({
       justify-content: center;
       align-items: center;
       height: 100%;
-      &[selected] {
+      &[selected=true] {
         background-color: setColor(gray-6);
       }
     }

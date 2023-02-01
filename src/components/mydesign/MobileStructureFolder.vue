@@ -1,39 +1,48 @@
 <template lang="pug">
-  section
-    div(:class="[`nav-folder-${level}`, {'bg-blue-4': folder.isCurrLocation}]"
-        :title="folder.name"
-        @click.stop="handleSelection")
-      svg-icon(iconName="folder"
+section
+  div(:class="[`nav-folder-${level}`, {'bg-blue-4': folder.isCurrLocation}]"
+      :title="folder.name"
+      @click.stop="handleSelection")
+    svg-icon(iconName="folder"
+        :iconColor="isDisabled ? 'gray-4' : 'gray-2'"
+        iconWidth="24px"
+        style="pointer-events: none")
+    div(:class="[`nav-folder-${level}__text`, {disabled: isDisabled}]"
+        style="pointer-events: none")
+        span {{ folder.name }}
+    div(class="nav-folder__expand-icon-container"
+        @click.stop="toggleExpansion")
+      svg-icon(class="nav-folder__expand-icon"
+          iconName="chevron-left"
           :iconColor="isDisabled ? 'gray-4' : 'gray-2'"
           iconWidth="24px"
-          style="pointer-events: none")
-      div(:class="[`nav-folder-${level}__text`, {disabled: isDisabled}]"
-          style="pointer-events: none")
-          span {{ folder.name }}
-      div(class="nav-folder__expand-icon-container"
-          @click.stop="toggleExpansion")
-        svg-icon(class="nav-folder__expand-icon"
-            iconName="chevron-left"
-            :iconColor="isDisabled ? 'gray-4' : 'gray-2'"
-            iconWidth="24px"
-            :style="expandIconStyles()")
-    mobile-structure-folder(v-for="subFolder in checkExpand(realFolders)"
-                    :folder="subFolder" :level="level+1"
-                    :parents="[...parents, folder.id]")
+          :style="expandIconStyles()")
+  mobile-structure-folder(v-for="subFolder in checkExpand(realFolders)"
+                  :folder="subFolder" :level="level+1"
+                  :parents="[...parents, folder.id]")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'mobile-structure-folder',
   props: {
-    folder: Object,
-    parents: Array,
-    level: Number,
-    isPopup: Boolean
+    folder: {
+      type: Object,
+      required: true
+    },
+    parents: {
+      type: Array,
+      required: true
+    },
+    level: {
+      type: Number,
+      required: true
+    }
   },
   computed: {
     ...mapGetters('design', {
@@ -47,7 +56,7 @@ export default Vue.extend({
         this.folderBuffer &&
         (
           designUtils.isMaxLevelReached(this.parents.length) ||
-          designUtils.isParentOrEqual(this.folderBuffer, { parents: [designUtils.ROOT, ...this.parents as string[]], folder: this.folder })
+          designUtils.isParentOrEqual(this.folderBuffer, { parents: [designUtils.ROOT, ...this.parents as string[]], folder: this.folder as IFolder })
         )
       )
     },

@@ -1,40 +1,48 @@
 <template lang="pug">
-  div(class="panel-more")
-    div(class="panel-more__page-name")
-      input(class="body-1 text-gray-2" type="text"
-        :placeholder="`${$t('NN0079')}`"
-        maxlength="30"
-        :value="pagesName"
-        @change="setPagesName"
-        ref="pagesName")
-    hr(class="panel-more__hr")
-    div(class="panel-more__item" @click="save()")
-      span(class="body-2 pointer") {{$t('NN0009')}}
-    div(class="panel-more__item" @click="newDesign()")
-      span(class="body-2 pointer") {{$tc('NN0072')}}
-    hr(class="panel-more__hr")
-    div(class="panel-more__item" @click="goToPage('MyDesign')")
-      span(class="body-2 pointer") {{$t('NN0080')}}
-    hr(class="panel-more__hr")
-    div(class="panel-more__item"
-        @click="onLogoutClicked()")
-        span(class="body-2 pointer") {{$tc('NN0167',2)}}
-    div(class="body-2 panel-more__item" @click="gotoDesktop")
-      span(class="text-gray-3") Version: {{buildNumber}}
+div(class="panel-more")
+  div(class="panel-more__page-name")
+    input(class="body-1 text-gray-2" type="text"
+      :placeholder="`${$t('NN0079')}`"
+      maxlength="30"
+      :value="pagesName"
+      @change="setPagesName"
+      ref="pagesName")
+  hr(class="panel-more__hr")
+  div(class="panel-more__item" @click="save()")
+    span(class="body-2 pointer") {{$t('NN0009')}}
+  div(class="panel-more__item" @click="newDesign()")
+    span(class="body-2 pointer") {{$tc('NN0072')}}
+  hr(class="panel-more__hr")
+  div(class="panel-more__item" @click="goToPage('MyDesign')")
+    span(class="body-2 pointer") {{$t('NN0080')}}
+  hr(class="panel-more__hr")
+  div(class="panel-more__item"
+      @click="onLogoutClicked()")
+      span(class="body-2 pointer") {{$tc('NN0167',2)}}
+  div(class="panel-more__item"
+      @click="toggleDebugTool")
+    span Toggle admin tool
+  div(class="body-2 panel-more__item" @click="gotoDesktop")
+    span(class="text-gray-3") Version: {{buildNumber}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import layerUtils from '@/utils/layerUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
 import pageUtils from '@/utils/pageUtils'
+import { mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     MobileSlider
   },
+  emits: ['close'],
   computed: {
+    ...mapState('user', [
+      'enableAdminView'
+    ]),
     opacity(): number {
       return layerUtils.getCurrOpacity
     },
@@ -47,11 +55,13 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      setUserState: 'user/SET_STATE'
+    }),
     updateLayerOpacity(val: number) {
       layerUtils.updateLayerOpacity(val)
     },
     newDesign() {
-      // designUtils.newDesign()
       const path = `${window.location.origin}${window.location.pathname}`
       window.open(path)
     },
@@ -75,7 +85,10 @@ export default Vue.extend({
       pageUtils.setPagesName(value)
     },
     gotoDesktop() { // TO-DELETE
-      this.$router.push(this.$router.currentRoute.fullPath.replace('mobile-editor', 'editor'))
+      this.$router.push(this.$router.currentRoute.value.fullPath.replace('mobile-editor', 'editor'))
+    },
+    toggleDebugTool() {
+      this.setUserState({ enableAdminView: !this.enableAdminView })
     }
   }
 })
