@@ -1,24 +1,24 @@
-import { IShape, IText, IImage, IGroup, ITmp, ILayer, IFrame, IParagraph, IImageStyle, IStyle } from '@/interfaces/layer'
-import store from '@/store'
-import ZindexUtils from '@/utils/zindexUtils'
-import { IEditorState, ILayerInfo, ISpecLayerData, LayerType } from '@/store/types'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { SrcObj } from '@/interfaces/gallery'
+import { IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import { ITiptapSelection } from '@/interfaces/text'
+import store from '@/store'
+import { IEditorState, ILayerInfo, ISpecLayerData, LayerType } from '@/store/types'
+import groupUtils from '@/utils/groupUtils'
+import ZindexUtils from '@/utils/zindexUtils'
+import { round } from 'lodash'
+import { nextTick } from 'vue'
+import controlUtils from './controlUtils'
+import frameUtils from './frameUtils'
+import mathUtils from './mathUtils'
+import mouseUtils from './mouseUtils'
+import pageUtils from './pageUtils'
+import shapeUtils from './shapeUtils'
+import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
 import TextUtils from './textUtils'
-import mouseUtils from './mouseUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import stepsUtils from './stepsUtils'
-import { nextTick } from 'vue'
-import { SrcObj } from '@/interfaces/gallery'
-import { ITiptapSelection } from '@/interfaces/text'
-import mathUtils from './mathUtils'
-import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
-import frameUtils from './frameUtils'
-import groupUtils from '@/utils/groupUtils'
-import shapeUtils from './shapeUtils'
-import { round } from 'lodash'
-import controlUtils from './controlUtils'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -437,6 +437,15 @@ class LayerUtils {
       }
       default : {
         Object.assign(layer.styles, defaultStyles)
+      }
+    }
+
+    if (toPageCenter) {
+      const { x, y } = mathUtils.getCenter(layer.styles)
+
+      if (x !== pageSize.width / 2 && y !== pageSize.height / 2) {
+        layer.styles.x += pageSize.width / 2 - x
+        layer.styles.y += pageSize.height / 2 - y
       }
     }
 

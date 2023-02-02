@@ -1,22 +1,22 @@
+import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { ICalculatedGroupStyle } from '@/interfaces/group'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
-import { nextTick } from 'vue'
-import GroupUtils from '@/utils/groupUtils'
 import GeneralUtils from '@/utils/generalUtils'
-import ZindexUtils from '@/utils/zindexUtils'
+import GroupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
-import TextUtils from './textUtils'
-import TextPropUtils from './textPropUtils'
-import ShapeUtils from './shapeUtils'
+import ZindexUtils from '@/utils/zindexUtils'
+import { nextTick } from 'vue'
 import frameUtils from './frameUtils'
-import uploadUtils from './uploadUtils'
-import logUtils from './logUtils'
-import tiptapUtils from './tiptapUtils'
-import pageUtils from './pageUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
 import layerFactary from './layerFactary'
-import { ICalculatedGroupStyle } from '@/interfaces/group'
+import logUtils from './logUtils'
+import pageUtils from './pageUtils'
+import ShapeUtils from './shapeUtils'
+import TextPropUtils from './textPropUtils'
+import TextUtils from './textUtils'
+import tiptapUtils from './tiptapUtils'
+import uploadUtils from './uploadUtils'
 
 class ShortcutUtils {
   copySourcePageIndex: number
@@ -49,8 +49,10 @@ class ShortcutUtils {
     if (toCenter && targetPageIndex !== undefined) {
       layer = layerUtils.resizeLayerConfig(targetPageIndex, GeneralUtils.deepCopy(layer), true)
     } else {
-      layer.styles.x += offset
-      layer.styles.y += offset
+      if (this.copySourcePageIndex === targetPageIndex) {
+        layer.styles.x += offset
+        layer.styles.y += offset
+      }
     }
 
     layer.id = GeneralUtils.generateRandomString(8)
