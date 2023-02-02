@@ -72,18 +72,37 @@ export default defineComponent({
       config.clips.forEach((img, idx) => {
         if (json.clips[idx]) {
           frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, idx, { clipPath: json.clips[idx].clipPath })
-          // img.clipPath = json.clips[idx].clipPath
         }
       })
       if (config.decoration && json.decoration) {
         json.decoration.color = [...config.decoration.color]
-        // Object.assign(config.decoration, json.decoration)
-        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: json.decoration })
+        const newDecor = {} as IShape
+        Object.entries(config.decoration)
+          .forEach(([k, v]) => {
+            if (v instanceof Object || v instanceof Array) {
+              newDecor[k] = generalUtils.unproxify(v)
+            } else {
+              newDecor[k] = v
+            }
+          })
+        Object.assign(newDecor, json.decoration)
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: newDecor })
+        // layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decoration: json.decoration })
       }
       if (config.decorationTop && json.decorationTop) {
         json.decorationTop.color = [...config.decorationTop.color]
-        // Object.assign(config.decorationTop, json.decorationTop)
-        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: json.decorationTop })
+        const newDecorTop = {} as IShape
+        Object.entries(config.decorationTop)
+          .forEach(([k, v]) => {
+            if (v instanceof Object || v instanceof Array) {
+              newDecorTop[k] = generalUtils.unproxify(v)
+            } else {
+              newDecorTop[k] = v
+            }
+          })
+        Object.assign(newDecorTop, json.decorationTop)
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: newDecorTop })
+        // layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { decorationTop: json.decorationTop })
       }
       if (json.blendLayers) {
         if (!this.config.blendLayers) {

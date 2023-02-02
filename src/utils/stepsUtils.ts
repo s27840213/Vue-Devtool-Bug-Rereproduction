@@ -1,20 +1,20 @@
+import { IListServiceContentDataItem } from '@/interfaces/api'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import { IStep } from '@/interfaces/steps'
 import store from '@/store'
+import { FunctionPanelType } from '@/store/types'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
-import { IStep } from '@/interfaces/steps'
-import TextPropUtils from './textPropUtils'
 import { nextTick } from 'vue'
-import { FunctionPanelType } from '@/store/types'
-import pageUtils from './pageUtils'
-import popupUtils from './popupUtils'
-import uploadUtils from './uploadUtils'
-import { IPage } from '@/interfaces/page'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
-import shapeUtils from './shapeUtils'
-import { IListServiceContentDataItem } from '@/interfaces/api'
 import assetUtils from './assetUtils'
 import layerFactary from './layerFactary'
+import pageUtils from './pageUtils'
+import popupUtils from './popupUtils'
+import shapeUtils from './shapeUtils'
+import TextPropUtils from './textPropUtils'
 import textUtils from './textUtils'
+import uploadUtils from './uploadUtils'
 import workerUtils from './workerUtils'
 
 class StepsUtils {
@@ -254,22 +254,9 @@ class StepsUtils {
     }
   }
 
-  unproxify<T>(val: T): T {
-    const self = this as StepsUtils
-    if (val instanceof Array) {
-      return val.map((i) => this.unproxify(i)) as unknown as T
-    }
-    if (val instanceof Object) {
-      return Object.fromEntries(Object.entries({ ...val }).map(([k, v]) => {
-        return [k, this.unproxify(v)]
-      })) as unknown as T
-    }
-    return val
-  }
-
   async asyncRecord() {
-    const pages = this.unproxify(store.getters.getPages)
-    const selectedInfo = this.unproxify(store.getters.getCurrSelectedInfo)
+    const pages = GeneralUtils.unproxify(store.getters.getPages)
+    const selectedInfo = GeneralUtils.unproxify(store.getters.getCurrSelectedInfo)
     const clonedData = await workerUtils.asyncCloneDeep({
       pages_1: pages,
       selectedInfo: selectedInfo
