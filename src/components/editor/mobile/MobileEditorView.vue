@@ -560,7 +560,7 @@ $REULER_SIZE: 20px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
-    // justify-content: center;
+    justify-content: center;
     @include no-scrollbar;
     // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container
     // justify-content: center;
