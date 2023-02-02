@@ -150,7 +150,8 @@ export default defineComponent({
   data() {
     return {
       panelHistory: [] as Array<string>,
-      panelHeight: 0,
+      // If fixSize is true, panelDragHeight take no effect.
+      panelDragHeight: 0,
       lastPointerY: 0,
       showExtraColorPanel: false,
       extraColorEvent: ColorEventType.text,
@@ -255,7 +256,7 @@ export default defineComponent({
           'row-gap': this.noRowGap ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
-            ? 'initial' : this.panelHeight + 'px'
+            ? 'initial' : this.panelDragHeight + 'px'
         }
       )
     },
@@ -350,7 +351,7 @@ export default defineComponent({
         }
         case 'brand': {
           return {
-            maxheight: this.maxHeightPx()
+            maxheight: this.panelParentHeight()
           }
         }
         default: {
@@ -482,7 +483,7 @@ export default defineComponent({
       this.innerTabIndex = 0
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
-      this.panelHeight = newVal === 'none' ? 0 : this.initHeightPx()
+      this.panelDragHeight = newVal === 'none' ? 0 : this.initPanelHeight()
     },
     showMobilePanel(newVal) {
       if (!newVal) {
@@ -491,10 +492,10 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.panelHeight = 0
+    this.panelDragHeight = 0
     this.resizeObserver = new ResizeObserver(() => {
-      this.$emit('panelHeight', (this.$refs.panel as HTMLElement).clientHeight)
-      this.fitPage()
+      this.$emit('panelHeight', this.currPanelHeight())
+      if (this.currPanelHeight() < this.panelParentHeight()) this.fitPage()
     })
     this.resizeObserver.observe(this.$refs.panel as Element)
   },
@@ -532,10 +533,13 @@ export default defineComponent({
       this.panelHistory = []
       editorUtils.setCurrActivePanel('none')
     },
-    initHeightPx() {
+    initPanelHeight() {
       return ((this.$el.parentElement as HTMLElement).clientHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
     },
-    maxHeightPx() {
+    currPanelHeight() {
+      return (this.$refs.panel as HTMLElement).clientHeight
+    },
+    panelParentHeight() {
       return (this.$el.parentElement as HTMLElement).clientHeight
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
@@ -544,23 +548,23 @@ export default defineComponent({
       }
       this.isDraggingPanel = true
       this.lastPointerY = event.clientY
-      this.panelHeight = (this.$refs.panel as HTMLElement).clientHeight
+      this.panelDragHeight = this.currPanelHeight()
       eventUtils.addPointerEvent('pointermove', this.dragingPanel)
       eventUtils.addPointerEvent('pointerup', this.dragPanelEnd)
     },
     dragingPanel(event: MouseEvent | PointerEvent) {
-      this.panelHeight -= event.clientY - this.lastPointerY
+      this.panelDragHeight -= event.clientY - this.lastPointerY
       this.lastPointerY = event.clientY
     },
     dragPanelEnd() {
       this.isDraggingPanel = false
-      const maxHeightPx = this.maxHeightPx()
-      if (this.panelHeight < maxHeightPx * 0.25) {
+      const panelParentHeight = this.panelParentHeight()
+      if (this.panelDragHeight < panelParentHeight * 0.25) {
         this.closeMobilePanel()
-      } else if (this.panelHeight >= maxHeightPx * 0.75) {
-        this.panelHeight = maxHeightPx
+      } else if (this.panelDragHeight >= panelParentHeight * 0.75) {
+        this.panelDragHeight = panelParentHeight
       } else {
-        this.panelHeight = maxHeightPx * 0.5
+        this.panelDragHeight = panelParentHeight * 0.5
       }
 
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)
