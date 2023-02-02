@@ -91,9 +91,11 @@ export default defineComponent({
     style(): { [key: string]: string } {
       const { svgImageWidth, svgImageHeight } = this
       if (svgImageWidth >= svgImageHeight) {
-        return { width: `${svgImageWidth * this.contentScaleRatio}px` }
+        // return { width: `${svgImageWidth * this.contentScaleRatio}px` }
+        return { width: `${svgImageWidth}px` }
       }
-      return { height: `${svgImageHeight * this.contentScaleRatio}px` }
+      // return { height: `${svgImageHeight * this.contentScaleRatio}px` }
+      return { height: `${svgImageHeight}px` }
     }
   }
 })
