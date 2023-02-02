@@ -515,11 +515,9 @@ export class MovingUtils {
             }
           }
           if (this.config.contentEditable) {
-            console.log('contentEditable')
             tiptapUtils.focus({ scrollIntoView: false }, this.isTouchDevice ? 'end' : null)
             if (!this.config.isEdited) {
               setTimeout(() => {
-                console.log('selectAll')
                 tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
               }, 100) // wait for default behavior to set cursor position, then select (otherwise selection will be overwritten)
             }

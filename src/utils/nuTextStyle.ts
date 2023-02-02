@@ -54,7 +54,7 @@ export default Extension.create({
       layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, {
         selection: { from, to }
       })
-      if (tiptapUtils.getText(this.editor as Editor) === tiptapUtils.prevText && !this.editor.view.composing) {
+      if (tiptapUtils.getText((this.editor as Editor).getJSON()) === tiptapUtils.prevText && !this.editor.view.composing) {
         stepsUtils.updateHead(layerUtils.pageIndex, layerUtils.layerIndex, {
           selection: { from, to }
         })
@@ -367,7 +367,7 @@ export default Extension.create({
             const currLayer = layerUtils.getCurrLayer as IText
             if (!currLayer.active) return
             editor.commands.sync()
-            tiptapUtils.prevText = tiptapUtils.getText(editor as Editor)
+            tiptapUtils.updatePrevData(editor as Editor)
             textPropUtils.updateTextPropsState()
           })
         })
@@ -379,7 +379,7 @@ export default Extension.create({
             const currLayer = layerUtils.getCurrLayer as IText
             if (!currLayer.active) return
             editor.commands.sync()
-            tiptapUtils.prevText = tiptapUtils.getText(editor as Editor)
+            tiptapUtils.updatePrevData(editor as Editor)
             textPropUtils.updateTextPropsState()
           })
         })

@@ -1,5 +1,6 @@
 import store from '@/store'
 import Vue, { nextTick } from 'vue'
+import { Editor } from '@tiptap/vue-3'
 import GroupUtils from '@/utils/groupUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import ZindexUtils from '@/utils/zindexUtils'
@@ -432,7 +433,7 @@ class ShortcutUtils {
           } else if (currLayer.type !== 'text') return
           editor.commands.sync()
           textLayer.contentEditable && editor.commands.focus(null, { scrollIntoView: false })
-          tiptapUtils.prevText = tiptapUtils.getText(editor)
+          tiptapUtils.updatePrevData(editor as Editor)
           TextPropUtils.updateTextPropsState()
         })
       })
@@ -456,7 +457,7 @@ class ShortcutUtils {
           } else if (currLayer.type !== 'text') return
           editor.commands.sync()
           textLayer.contentEditable && editor.commands.focus(null, { scrollIntoView: false })
-          tiptapUtils.prevText = tiptapUtils.getText(editor)
+          tiptapUtils.updatePrevData(editor as Editor)
           TextPropUtils.updateTextPropsState()
         })
       })
