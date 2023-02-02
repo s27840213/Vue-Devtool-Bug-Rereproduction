@@ -1,0 +1,25 @@
+{
+  "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
+  "javascript.format.insertSpaceAfterConstructor": true,
+  "javascript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": true,
+  "javascript.format.insertSpaceAfterSemicolonInForStatements": true,
+  "javascript.format.semicolons": "remove",
+  "editor.tabSize": 2,
+
+  // Format file when save file
+  "editor.formatOnSave": true,
+  // When save file, do
+  "editor.codeActionsOnSave": {
+    // auto fix eslint error/warn
+    "source.fixAll.eslint": true,
+    // auto sort import
+    "source.organizeImports": true
+  },
+  
+  "files.insertFinalNewline": true,
+  "i18n-ally.localesPaths": [
+    "src/locales"
+  ],
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.sourceLanguage": "tw",
+}
