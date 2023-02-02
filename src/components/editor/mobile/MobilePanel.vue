@@ -58,50 +58,50 @@ div(class="mobile-panel"
       @close="closeMobilePanel")
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue'
-import i18n from '@/i18n'
-import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
-import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
-import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
-import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
-import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
-import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
+import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
+import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
 import PanelBrand from '@/components/editor/panelMobile/PanelBrand.vue'
-import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
-import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
+import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
+import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import PanelFlip from '@/components/editor/panelMobile/PanelFlip.vue'
+import PanelFontFormat from '@/components/editor/panelMobile/PanelFontFormat.vue'
+import PanelFontSize from '@/components/editor/panelMobile/PanelFontSize.vue'
+import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.vue'
+import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
+import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust.vue'
 import PanelOpacity from '@/components/editor/panelMobile/PanelOpacity.vue'
 import PanelOrder from '@/components/editor/panelMobile/PanelOrder.vue'
-import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
-import PanelFontSize from '@/components/editor/panelMobile/PanelFontSize.vue'
-import PanelFontFormat from '@/components/editor/panelMobile/PanelFontFormat.vue'
-import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.vue'
-import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
-import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
-import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
-import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
-import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
-import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust.vue'
 import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.vue'
-import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
+import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
+import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
+import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
+import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
+import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
+import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
+import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
+import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
+import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
+import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
+import i18n from '@/i18n'
+import { defineComponent } from 'vue'
 
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import { notify } from '@kyvg/vue3-notification'
-import vClickOutside from 'click-outside-vue3'
-import layerUtils from '@/utils/layerUtils'
-import imageUtils from '@/utils/imageUtils'
+import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IFrame } from '@/interfaces/layer'
-import frameUtils from '@/utils/frameUtils'
-import eventUtils from '@/utils/eventUtils'
-import generalUtils from '@/utils/generalUtils'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
-import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import editorUtils from '@/utils/editorUtils'
+import eventUtils from '@/utils/eventUtils'
+import frameUtils from '@/utils/frameUtils'
+import generalUtils from '@/utils/generalUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
+import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
 import _ from 'lodash'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   name: 'mobile-panel',
@@ -158,11 +158,11 @@ export default defineComponent({
       isDraggingPanel: false,
       currSubColorEvent: '',
       innerTabIndex: 0,
-      fitPage: _.debounce(() => {
+      fitPage: _.throttle(() => {
         this.$nextTick(() => {
           pageUtils.fitPage()
         })
-      }, 100),
+      }, 100, { trailing: false }),
       resizeObserver: null as unknown as ResizeObserver
     }
   },
@@ -495,7 +495,10 @@ export default defineComponent({
     this.panelDragHeight = 0
     this.resizeObserver = new ResizeObserver(() => {
       this.$emit('panelHeight', this.currPanelHeight())
-      if (this.currPanelHeight() < this.panelParentHeight()) this.fitPage()
+      // Prevent fitPage when full size panel open, ex: SidebarPanel
+      if (this.fixSize || this.panelDragHeight !== this.panelParentHeight()) {
+        this.fitPage()
+      }
     })
     this.resizeObserver.observe(this.$refs.panel as Element)
   },
