@@ -27,7 +27,7 @@ div(class="sidebar")
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import Avatar from '@/components/Avatar.vue'

@@ -29,7 +29,7 @@ import { IImage } from '@/interfaces/layer'
 import GeneralUtils from '@/utils/generalUtils'
 import ImageAdjustUtil from '@/utils/imageAdjustUtil'
 import { defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],

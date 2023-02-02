@@ -98,7 +98,6 @@ import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
 import { IPopupOptions } from '@/interfaces/popup'
 import tiptapUtils from '@/utils/tiptapUtils'
-import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({

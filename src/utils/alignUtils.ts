@@ -3,11 +3,9 @@ import store from '@/store'
 import { IShape, IText, IImage, IGroup, ITmp, IStyle, ILayer, IFrame } from '@/interfaces/layer'
 import GroupUtils from '@/utils/groupUtils'
 import mathUtils from './mathUtils'
-import { IBounding } from '@/interfaces/math'
 import LayerUtils from '@/utils/layerUtils'
 import { IPage } from '@/interfaces/page'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import themeUtils from './themeUtils'
 
 class AlignUtils {
   get currSelectedInfo(): ICurrSelectedInfo {

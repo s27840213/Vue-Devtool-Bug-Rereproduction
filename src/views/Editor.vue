@@ -14,7 +14,6 @@ import uploadUtils from '@/utils/uploadUtils'
 import editorUtils from '@/utils/editorUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { omit } from 'lodash'
 
 export default defineComponent({
   emits: [],
