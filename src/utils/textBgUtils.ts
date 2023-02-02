@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import store from '@/store'
 import { IStyle, IText } from '@/interfaces/layer'
 import { isITextBox, isITextGooey, isITextUnderline, ITextBgEffect, ITextGooey } from '@/interfaces/format'

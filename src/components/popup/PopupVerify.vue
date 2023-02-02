@@ -390,7 +390,7 @@ export default defineComponent({
   &__body {
     &-row {
       display: flex;
-      justify-content: start;
+      justify-content: flex-start;
       width: 87%;
       margin-left: auto;
       margin-top: 15px;

@@ -1,5 +1,4 @@
-import Vue from 'vue'
-import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
+import { ActionTree, MutationTree, GetterTree } from 'vuex'
 import { getField, updateField } from 'vuex-map-fields'
 import store from '..'
 import i18n from '@/i18n'

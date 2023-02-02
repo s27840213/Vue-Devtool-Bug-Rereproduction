@@ -1,5 +1,4 @@
 /* eslint-disable indent */
-import Vue from 'vue'
 import store from '@/store'
 import i18n from '@/i18n'
 import { IPaymentView, IPaymentWarningView } from '@/interfaces/payment'

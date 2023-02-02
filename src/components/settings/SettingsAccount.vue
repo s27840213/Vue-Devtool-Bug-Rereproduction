@@ -379,7 +379,7 @@ export default defineComponent({
   }
   &__buttons {
     display: flex;
-    justify-content: end;
+    justify-content: flex-end;
     @include layout-mobile {
       padding-bottom: 30px;
     }

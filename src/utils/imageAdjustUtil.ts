@@ -6,7 +6,6 @@ import {
 } from '@/interfaces/adjust'
 import i18n from '@/i18n'
 import { IImage } from '@/interfaces/layer'
-import imageShadowUtils from './imageShadowUtils'
 
 class ImageAdjustUtil {
   getFields() {
