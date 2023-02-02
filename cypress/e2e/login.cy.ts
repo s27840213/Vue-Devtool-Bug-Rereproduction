@@ -8,10 +8,10 @@ describe('Testing login', () => {
   })
 
   it('Login from email', () => {
-    cy.visit('/login')
+    cy.visit('/us/login')
     cy.get('input[type="email"]').type(loginData.email.account)
     cy.get('input[type="password"]').type(loginData.email.password)
-    cy.get('button').contains('登 入').click()
+    cy.get('button').contains('Log in').click()
     cy.get('.avatar').should('exist')
   })
 })

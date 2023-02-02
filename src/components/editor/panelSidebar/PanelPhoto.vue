@@ -68,6 +68,14 @@ export default defineComponent({
       () => this.getPhotos({ keyword: '' })
     )
   },
+  activated() {
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CImageGallery[])[0]
+      const searchResult = (this.$refs.searchResult as CImageGallery[])[0]
+      mainContent.$el.scrollTop = this.scrollTop.mainContent
+      searchResult.$el.scrollTop = this.scrollTop.searchResult
+    })
+  },
   watch: {
     keyword(newVal: string) {
       if (!newVal) {

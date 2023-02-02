@@ -52,7 +52,6 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
         parseInt(width),
         parseInt(height === '0' ? width : height),
         unit || 'px',
-        parseInt(themeId as string),
       )
       if (themeId === '7') {
         store.commit('SET_groupType', 1)
@@ -63,7 +62,6 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
     } else if (!url && (!from.name || ['Login'].includes(String(from.name)))) {
       // refresh /editor page
       store.commit('file/SET_setLayersDone')
-      themeUtils.refreshTemplateState()
     }
 
     if (panel && panel in SidebarPanelType) {

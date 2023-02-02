@@ -948,7 +948,7 @@ pipelines:
               trigger: manual
               script:
                 - ./bash/create_pull_request.sh
-    fix/nathan: # Copy from Default
+    feature/cypress: # Copy from Default
       - parallel:
           - step:
               name: "Verify build environment"
@@ -964,19 +964,21 @@ pipelines:
               script:
                 - yarn install
                 - yarn build:prerender
+                # - npx cypress install
+                # - yarn serve --mode production & npx wait-on http://localhost:8080
+                # - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
-        # - step:
-        #     name: 'Run E2E Tests'
-        #     caches:
-        #       - node
-        #     image: cypress/browsers:node14.17.0-chrome88-ff89
-        #     script:
-        #       - npx cypress install
-        #       - yarn install
-        #       - yarn serve & npx wait-on http://localhost:8080
-        #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+                - node_modules/**
       - parallel:
+          - step:
+              name: 'Run E2E Tests'
+              size: 2x
+              image: cypress/browsers:node14.17.0-chrome88-ff89
+              script:
+                - npx cypress install
+                - python3 server4spa.py & npx wait-on http://localhost:8080
+                - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
           - step:
               name: "dev5 Alan"
               deployment: dev5
@@ -1100,7 +1102,7 @@ pipelines:
           - step:
               name: "dev1 Nathan"
               deployment: dev1
-              # Auto deploy on text-effect branch.
+              trigger: manual
               script:
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
