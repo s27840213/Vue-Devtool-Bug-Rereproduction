@@ -49,8 +49,8 @@ div(class="page-setting")
               iconWidth="14px"
               iconColor="gray-2"
               :style="{transform: 'scaleY(-1)'}")
-          div(class='page-setting__bleed__content__item__input__value body-XS')
-            input(type="number" min="0"
+          div(class='page-setting__bleed__content__item__input__value body-XS' @click="handleBleedInputClick(bleed.key)")
+            input(type="number" min="0" :ref="'bleed-' + bleed.key"
                   :value="bleed.value"
                   @input="setBleed($event, bleed.key, isLocked)"
                   @blur="handleBleedSubmit()"
@@ -788,6 +788,9 @@ export default defineComponent({
         })
         stepsUtils.record()
       }
+    },
+    handleBleedInputClick(key: string) {
+      (this.$refs['bleed-' + key] as HTMLElement[])[0].focus()
     }
   }
 })
