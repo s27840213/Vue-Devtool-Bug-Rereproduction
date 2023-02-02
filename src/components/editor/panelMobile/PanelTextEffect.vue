@@ -59,7 +59,7 @@ div(class="panel-text-effect")
 </template>
 
 <script lang="ts">
-import Vue, { PropType, defineComponent } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import textEffectUtils from '@/utils/textEffectUtils'

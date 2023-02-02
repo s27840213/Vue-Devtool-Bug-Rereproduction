@@ -1,4 +1,4 @@
-import Vue, { nextTick } from 'vue'
+import { nextTick } from 'vue'
 import { captureException } from '@sentry/browser'
 import store from '@/store'
 import { IListServiceContentDataItem, IListServiceContentData } from '@/interfaces/api'

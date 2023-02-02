@@ -1,5 +1,5 @@
 import store from '@/store'
-import Vue, { nextTick } from 'vue'
+import { nextTick } from 'vue'
 import GroupUtils from '@/utils/groupUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import ZindexUtils from '@/utils/zindexUtils'

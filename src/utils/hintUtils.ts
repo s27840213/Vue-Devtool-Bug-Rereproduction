@@ -1,4 +1,4 @@
-import Vue, { nextTick } from 'vue'
+import { nextTick } from 'vue'
 
 class HintUtils {
   showHint: boolean

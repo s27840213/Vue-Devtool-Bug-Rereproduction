@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import Vue, { createApp, h, nextTick } from 'vue';
+import { createApp, h, nextTick } from 'vue';
 import VueRecyclerviewNew from 'vue-recyclerview'
 import App from '@/App.vue'
 import router from './router'

@@ -78,7 +78,7 @@ export default defineComponent({
       clearState: 'CLEAR_state',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
     }),
-    setIsLoading(bool: boolean) {
+    setIsLoading() {
       this.isLoading = true
     }
   }

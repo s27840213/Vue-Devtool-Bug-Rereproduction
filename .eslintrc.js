@@ -1,7 +1,8 @@
 module.exports = {
   root: true,
   plugins: [
-    'cypress'
+    'cypress',
+    'unused-imports'
   ],
   env: {
     'cypress/globals': true,
@@ -29,6 +30,7 @@ module.exports = {
     'vue/multi-word-component-names': 'off',
     'comma-dangle': ['error', 'only-multiline'],
     'cypress/no-unnecessary-waiting': 'off',
+    'unused-imports/no-unused-imports': 'warn',
     // semi: 'off',
     // 'import/no-dynamic-require': 'off',
     // 'global-require': 0,
