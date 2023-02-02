@@ -81,7 +81,7 @@ export default defineComponent({
       }
       this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord })
       tiptapUtils.prevText = newText
-      //TODO: detect if content is changed, or just contentEditable is changed, and set isEdited only for the former case.
+      // TODO: detect if content is changed, or just contentEditable is changed, and set isEdited only for the former case.
       this.updateLayerProps({ isEdited: true })
       if (Object.prototype.hasOwnProperty.call(this.config, 'loadFontEdited')) {
         this.updateLayerProps({ loadFontEdited: true })
