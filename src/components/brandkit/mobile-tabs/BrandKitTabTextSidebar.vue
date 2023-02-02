@@ -18,7 +18,6 @@ import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/br
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import assetUtils from '@/utils/assetUtils'
-import DragUtils from '@/utils/dragUtils'
 
 export default defineComponent({
   emits: [],

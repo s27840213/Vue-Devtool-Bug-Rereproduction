@@ -1,4 +1,4 @@
-import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
+import { ActionTree, MutationTree, GetterTree } from 'vuex'
 import { IListServiceData } from '@/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'

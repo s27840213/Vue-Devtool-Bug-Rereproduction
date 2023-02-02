@@ -27,7 +27,6 @@ import ImageUtils from '@/utils/imageUtils'
 import { mapGetters, mapMutations } from 'vuex'
 import layerFactary from '@/utils/layerFactary'
 import generalUtils from '@/utils/generalUtils'
-import editorUtils from '@/utils/editorUtils'
 import frameUtils from '@/utils/frameUtils'
 import layerUtils from '@/utils/layerUtils'
 

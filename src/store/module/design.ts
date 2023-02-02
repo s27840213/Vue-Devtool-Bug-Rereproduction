@@ -5,7 +5,6 @@ import designApis from '@/apis/design'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 import router from '@/router'
 import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
-import { isEqual, update } from 'lodash'
 
 interface IDesignState {
   currLocation: string,

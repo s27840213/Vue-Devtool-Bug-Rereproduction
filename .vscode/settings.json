@@ -15,11 +15,13 @@
     // auto sort import
     "source.organizeImports": true
   },
-  
+  "[vue]": {
+    // Prevent volar or prettier format vue file
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+
   "files.insertFinalNewline": true,
-  "i18n-ally.localesPaths": [
-    "src/locales"
-  ],
+  "i18n-ally.localesPaths": ["src/locales"],
   "i18n-ally.keystyle": "nested",
-  "i18n-ally.sourceLanguage": "tw",
+  "i18n-ally.sourceLanguage": "tw"
 }

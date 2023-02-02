@@ -1,7 +1,7 @@
 /**
  */
 import store from '@/store'
-import { IFrame, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
+import { IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { SidebarPanelType } from '@/store/types'
 import LayerFactary from '@/utils/layerFactary'
 import { ICoordinate } from '@/interfaces/frame'

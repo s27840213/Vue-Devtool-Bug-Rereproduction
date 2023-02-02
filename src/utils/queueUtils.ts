@@ -1,5 +1,3 @@
-import { EventEmitter } from 'events'
-
 class EventQueue {
   eventIds: Array<string>
   eventMap: Map<string, () => Promise<void | number>>

@@ -1,10 +1,8 @@
-import { IPage, IPageState } from '@/interfaces/page'
-import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
+import { IPageState } from '@/interfaces/page'
+import { ITmp } from '@/interfaces/layer'
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
-import { ITextState } from './text'
 import { IAsset } from '@/interfaces/module'
 import { SrcObj } from '@/interfaces/gallery'
-import { IUserModule } from './module/user'
 import { Itheme } from '@/interfaces/theme'
 
 /**

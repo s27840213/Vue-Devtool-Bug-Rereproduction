@@ -255,7 +255,7 @@ export class MovingUtils {
 
         if (isMover || isMoveBar) {
           this.movingByControlPoint = true
-        } else {
+        } else if (!this.isTouchDevice) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
         }
 
@@ -345,7 +345,6 @@ export class MovingUtils {
         }
         if (this.getLayerType === 'text' && this.config.contentEditable) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
-          e.preventDefault()
         }
       }
     }
@@ -505,11 +504,17 @@ export class MovingUtils {
       } else {
         if (this.getLayerType === 'text') {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
-          if (this.movingByControlPoint) {
-            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+          if (this.isTouchDevice) {
+            if (!this.movingByControlPoint) {
+              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
+            }
+          } else {
+            if (this.movingByControlPoint) {
+              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+            }
           }
           if (this.config.contentEditable) {
-            tiptapUtils.focus({ scrollIntoView: false })
+            tiptapUtils.focus({ scrollIntoView: false }, this.isTouchDevice ? 'end' : null)
             if (!this.config.isEdited) {
               setTimeout(() => {
                 tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())

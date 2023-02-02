@@ -10,6 +10,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import { IGroup, IText, ITmp } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
+import { isEqual } from 'lodash'
 
 export default defineComponent({
   components: {
@@ -75,16 +76,20 @@ export default defineComponent({
     this.editor = tiptapUtils.editor as any
     tiptapUtils.on('update', ({ editor }) => {
       let toRecord = false
-      const newText = tiptapUtils.getText(editor)
+      const newJSON = editor.getJSON()
+      const newText = tiptapUtils.getText(newJSON)
       if (!editor.view.composing && (tiptapUtils.prevText !== newText)) {
         toRecord = true
       }
-      this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord })
-      tiptapUtils.prevText = newText
-      this.updateLayerProps({ isEdited: true })
-      if (Object.prototype.hasOwnProperty.call(this.config, 'loadFontEdited')) {
-        this.updateLayerProps({ loadFontEdited: true })
+      this.$emit('update', { ...tiptapUtils.toIParagraph(newJSON), toRecord })
+      if (!isEqual(newJSON, tiptapUtils.prevJSON)) {
+        this.updateLayerProps({ isEdited: true })
+        if (Object.prototype.hasOwnProperty.call(this.config, 'loadFontEdited')) {
+          this.updateLayerProps({ loadFontEdited: true })
+        }
       }
+      tiptapUtils.prevText = newText
+      tiptapUtils.prevJSON = newJSON
     })
     tiptapUtils.onForceUpdate((editor, toRecord) => {
       this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord })

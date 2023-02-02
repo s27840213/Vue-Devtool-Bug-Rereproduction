@@ -42,7 +42,7 @@ import { FunctionPanelType, SidebarPanelType, ColorEventType } from '@/store/typ
 import store from '@/store'
 import stepsUtils from '@/utils/stepsUtils'
 import layerUtils from '@/utils/layerUtils'
-import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import { IGroup } from '@/interfaces/layer'
 import { IFooterTabProps } from '@/interfaces/editor'
 import AllPages from '@/components/editor/mobile/AllPages.vue'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
@@ -51,7 +51,6 @@ import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import unitUtils from '@/utils/unitUtils'
-import testUtils from '@/utils/testUtils'
 
 export default defineComponent({
   emits: [],
