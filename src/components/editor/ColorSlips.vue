@@ -64,8 +64,8 @@ div(class="color-panel"
                     :active="color === selectedColor"
                     @click="handleColorEvent(color)")
           img(v-if="mode==='PanelBG'"
+            class="full-width full-height"
             src="@/assets/img/svg/transparent.svg"
-            width="100%" height="100%"
             @click="handleColorEvent('#ffffff00')")
   color-picker(v-if="openColorPicker"
     class="color-panel__color-picker"
@@ -77,21 +77,21 @@ div(class="color-panel"
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import vClickOutside from 'click-outside-vue3'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
-import colorUtils from '@/utils/colorUtils'
-import layerUtils from '@/utils/layerUtils'
-import mouseUtils from '@/utils/mouseUtils'
+import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
 import { SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
-import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
-import generalUtils from '@/utils/generalUtils'
-import pageUtils from '@/utils/pageUtils'
+import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
+import layerUtils from '@/utils/layerUtils'
+import mouseUtils from '@/utils/mouseUtils'
+import pageUtils from '@/utils/pageUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   name: 'ColorSlips',
