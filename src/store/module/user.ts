@@ -1,15 +1,13 @@
 /* eslint-disable camelcase */
-import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
+import { ActionTree, MutationTree, GetterTree } from 'vuex'
 import * as Sentry from '@sentry/browser'
 import userApis from '@/apis/user'
 import uploadUtils from '@/utils/uploadUtils'
-import { IAssetPhoto, IGroupDesignInputParams, IUserAssetsData, IUserFontContentData, IUserImageContentData } from '@/interfaces/api'
+import { IGroupDesignInputParams, IUserAssetsData, IUserFontContentData } from '@/interfaces/api'
 import modalUtils from '@/utils/modalUtils'
-import Vue from 'vue'
 import themeUtils from '@/utils/themeUtils'
 import i18n from '@/i18n'
 // import apiUtils from '@/utils/apiUtils'
-import generalUtils from '@/utils/generalUtils'
 import logUtils from '@/utils/logUtils'
 import { notify } from '@kyvg/vue3-notification'
 

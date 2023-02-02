@@ -193,6 +193,7 @@ export default defineComponent({
     }),
     disableBtn(btn: IBtn): boolean {
       const currLayer = layerUtils.getCurrConfig as IImage
+      if (!currLayer.styles) return false
       const { shadow } = currLayer.styles
       if (shadow) {
         const isCurrLayerHanlingShadow = [this.handleId.layerId, this.handleId.subLayerId].includes(currLayer.id)

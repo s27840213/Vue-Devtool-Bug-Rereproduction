@@ -122,7 +122,7 @@ export default defineComponent({
   &__info {
     display: flex;
     flex-direction: column;
-    align-items: start;
+    align-items: flex-start;
   }
   &__block {
     width: 60px;

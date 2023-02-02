@@ -48,7 +48,6 @@ div(v-else-if="isBgImgCtrl" class="dim-background")
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
-import { IPage } from '@/interfaces/page'
 import cssConverter from '@/utils/cssConverter'
 import pageUtils from '@/utils/pageUtils'
 import { IImage } from '@/interfaces/layer'

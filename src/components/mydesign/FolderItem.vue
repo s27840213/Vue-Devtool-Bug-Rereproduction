@@ -454,7 +454,7 @@ export default defineComponent({
     width: 120px;
     height: 40px;
     display: flex;
-    align-items: start;
+    align-items: flex-start;
     justify-content: center;
     > span {
       text-align: center;

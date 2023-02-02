@@ -1,7 +1,6 @@
 import i18n from '@/i18n'
 import { notify } from '@kyvg/vue3-notification'
 import { EventEmitter } from 'events'
-import Vue from 'vue'
 
 class NetworkUtils {
   event: any

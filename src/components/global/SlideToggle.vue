@@ -6,7 +6,7 @@ div(class="toggle" :style="outsideStyle")
 </template>
 
 <script lang="ts">
-import Vue, { PropType, defineComponent } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import _ from 'lodash'
 /**
  * Usage1: Text slide toggle

@@ -306,7 +306,7 @@ class GroupUtils {
      *  4. Update Layer order
      */
     const { index, pageIndex, layers } = this.currSelectedInfo
-    const tmpLayer = LayerUtils.getTmpLayer() as ITmp
+    const tmpLayer = LayerUtils.getSelectedLayer() as ITmp
 
     /**
      * @param targetLayer - the layer we want to remove from tmp

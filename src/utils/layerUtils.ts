@@ -1,22 +1,24 @@
-import { IShape, IText, IImage, IGroup, ITmp, ILayer, IFrame, IParagraph, IImageStyle } from '@/interfaces/layer'
-import store from '@/store'
-import ZindexUtils from '@/utils/zindexUtils'
-import GroupUtils from '@/utils/groupUtils'
-import { IEditorState, ILayerInfo, ISpecLayerData, LayerType } from '@/store/types'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { SrcObj } from '@/interfaces/gallery'
+import { IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import { ITiptapSelection } from '@/interfaces/text'
+import store from '@/store'
+import { IEditorState, ILayerInfo, ISpecLayerData, LayerType } from '@/store/types'
+import groupUtils from '@/utils/groupUtils'
+import ZindexUtils from '@/utils/zindexUtils'
+import { round } from 'lodash'
+import { nextTick } from 'vue'
+import controlUtils from './controlUtils'
+import frameUtils from './frameUtils'
+import mathUtils from './mathUtils'
+import mouseUtils from './mouseUtils'
+import pageUtils from './pageUtils'
+import shapeUtils from './shapeUtils'
+import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
 import TextUtils from './textUtils'
-import mouseUtils from './mouseUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import stepsUtils from './stepsUtils'
-import Vue, { nextTick } from 'vue'
-import { SrcObj } from '@/interfaces/gallery'
-import { ITiptapSelection } from '@/interfaces/text'
-import mathUtils from './mathUtils'
-import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
-import frameUtils from './frameUtils'
-import generalUtils from './generalUtils'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -122,9 +124,9 @@ class LayerUtils {
       layers: [...layers]
     })
     ZindexUtils.reassignZindex(pageIndex)
-    GroupUtils.deselect()
+    groupUtils.deselect()
     store.commit('SET_currActivePageIndex', pageIndex)
-    GroupUtils.select(pageIndex, [store.getters.getLayers(pageIndex).length - 1])
+    groupUtils.select(pageIndex, [store.getters.getLayers(pageIndex).length - 1])
 
     /**
      * For some existing layers, those active layers might have some props need to be initialized after deactive
@@ -159,6 +161,7 @@ class LayerUtils {
      * The action of adding layer will trigger record function; so if we also record delete step, we will record two steps at once.
      */
     if (record) {
+      groupUtils.reset()
       stepsUtils.record()
     }
   }
@@ -209,7 +212,7 @@ class LayerUtils {
     })
   }
 
-  getTmpLayer(): IShape | IText | IImage | IGroup | IFrame |ITmp {
+  getSelectedLayer(): IShape | IText | IImage | IGroup | IFrame |ITmp {
     return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)
   }
 
@@ -300,9 +303,158 @@ class LayerUtils {
     })
   }
 
+  getLayerPageIntersectRatio(pageIndex: number, layer: IShape | IText | IImage | IGroup | IFrame |ITmp) {
+    const pageInfo = store.getters.getPage(pageIndex) as IPage
+
+    const pageRectInfo = { x: 0, y: 0, width: pageInfo.width, height: pageInfo.height, scale: 0, rotate: 0 }
+
+    const polygon1 = mathUtils.generatePolygon(pageRectInfo)
+    const polygon2 = mathUtils.generatePolygon(layer.styles)
+
+    const intersectArea = mathUtils.getIntersectArea(polygon1, polygon2)
+    return intersectArea / polygon2.area()
+  }
+
+  resizeLayerConfig(pageIndex: number, layer: IShape | IText | IImage | IGroup | IFrame |ITmp, toPageCenter = false, resizeRatio = 0.8) : (IText | IShape | IImage | IGroup | ITmp | IFrame) {
+    const { width: initBoundingWidth, height: initBoundingHeight } = mathUtils.getBounding({ styles: layer.styles as IStyle })
+    const boundingboxAspectRatio = initBoundingWidth / initBoundingHeight
+    const pageSize = store.getters.getPageSize(pageIndex)
+    const pageAspectRatio = pageSize.width / pageSize.height
+
+    const boundingWidth = boundingboxAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * boundingboxAspectRatio
+    const boundingHeight = boundingboxAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / boundingboxAspectRatio : pageSize.height * resizeRatio
+
+    const scaleRatio = boundingWidth / initBoundingWidth
+
+    const _width = layer.styles.width * scaleRatio
+    const _height = layer.styles.height * scaleRatio
+    const _scale = layer.styles.scale * scaleRatio
+
+    const defaultStyles = {
+      width: _width,
+      height: _height,
+      scale: _scale
+    }
+
+    if (toPageCenter) {
+      const posX = (pageSize.width / 2) - (boundingWidth / 2)
+      const posY = (pageSize.height / 2) - (boundingHeight / 2)
+
+      Object.assign(defaultStyles, mathUtils.getRotatedPoint(-layer.styles.rotate, {
+        x: pageSize.width / 2,
+        y: pageSize.height / 2
+      }, {
+        x: posX,
+        y: posY
+      }))
+    }
+
+    switch (layer.type) {
+      case 'image': {
+        const { width, height, imgWidth, imgHeight, imgX, imgY } = layer.styles as IImageStyle
+        Object.assign(layer.styles, defaultStyles, {
+          initWidth: width * scaleRatio,
+          initHeight: height * scaleRatio,
+          imgWidth: imgWidth * scaleRatio,
+          imgHeight: imgHeight * scaleRatio,
+          imgX: imgX * scaleRatio,
+          imgY: imgY * scaleRatio
+        })
+
+        break
+      }
+      case 'text': {
+        if ((layer as IText).widthLimit !== -1) {
+          layer.widthLimit = layer.styles.writingMode.includes('vertical') ? _height : _width
+        }
+        Object.assign(layer.styles, defaultStyles)
+        break
+      }
+      case 'frame': {
+        if (frameUtils.isImageFrame(layer)) {
+          let { imgWidth, imgHeight, imgX, imgY } = layer.clips[0].styles
+          const width = layer.styles.width * scaleRatio
+          const height = layer.styles.height * scaleRatio
+          imgWidth *= scaleRatio
+          imgHeight *= scaleRatio
+          imgY *= scaleRatio
+          imgX *= scaleRatio
+
+          Object.assign(layer.styles, defaultStyles, {
+            initWidth: width,
+            initHeight: height
+          })
+
+          Object.assign(layer.clips[0].styles, {
+            width: width,
+            height: height,
+            imgWidth,
+            imgHeight,
+            imgX,
+            imgY
+          })
+        } else {
+          Object.assign(layer.styles, defaultStyles)
+        }
+
+        break
+      }
+      case undefined:
+      case 'shape': {
+        if (layer.category === 'D') {
+          const quadrant = shapeUtils.getLineQuadrant(layer.point ?? [])
+          const { width: lineWidth, height: lineHeight } = shapeUtils.lineDimension(layer.point ?? [])
+          const { size } = layer
+          if (!size) break
+          const strokeWidth = size[0]
+          const newStrokeWidth = round(strokeWidth * scaleRatio, 2)
+          const { point, realWidth, realHeight } = shapeUtils.computePointForDimensions(quadrant, newStrokeWidth, lineWidth * scaleRatio, lineHeight * scaleRatio)
+          layer.point = point
+          // controlUtils.updateShapeLinePoint(pageIndex, layerIndex, point)
+          defaultStyles.width = realWidth
+          defaultStyles.height = realHeight
+          defaultStyles.scale = layer.styles.scale
+          Object.assign(layer.styles, {
+            initWidth: defaultStyles.width,
+            initHeight: defaultStyles.height
+          })
+
+          layer.size = [newStrokeWidth]
+        }
+        if (layer.category === 'E') {
+          const { size } = layer
+          if (!size) break
+          const strokeWidth = size[0]
+          const newStrokeWidth = round(strokeWidth * scaleRatio, 2)
+          defaultStyles.scale = layer.styles.scale
+          const corRad = controlUtils.getCorRadValue([_width, _height], controlUtils.getCorRadPercentage(layer.vSize, size, layer.shapeType ?? ''), layer.shapeType ?? '')
+
+          layer.vSize = [_width, _height]
+          layer.size = [newStrokeWidth, corRad]
+        }
+        Object.assign(layer.styles, defaultStyles)
+        break
+      }
+      default : {
+        Object.assign(layer.styles, defaultStyles)
+      }
+    }
+
+    if (toPageCenter) {
+      const { x, y } = mathUtils.getCenter(layer.styles)
+
+      if (x !== pageSize.width / 2 && y !== pageSize.height / 2) {
+        layer.styles.x += pageSize.width / 2 - x
+        layer.styles.y += pageSize.height / 2 - y
+      }
+    }
+
+    return layer
+  }
+
   isOutOfBoundary(pageIndex?: number, layer?: IShape | IText | IImage | IGroup | IFrame |ITmp): boolean {
     const pageInfo = store.getters.getPage(pageIndex ?? this.currSelectedInfo.pageIndex) as IPage
-    const targetLayer = layer ?? this.getTmpLayer()
+    const targetLayer = layer ?? this.getSelectedLayer()
 
     if (targetLayer.styles.x > pageInfo.width || targetLayer.styles.y > pageInfo.height ||
       (targetLayer.styles.x + targetLayer.styles.width) < 0 || (targetLayer.styles.y + targetLayer.styles.height) < 0) {
@@ -350,7 +502,7 @@ class LayerUtils {
           break
         default:
           if (isMultipleLayer) {
-            const [newLayer] = GroupUtils.mapLayersToPage([applyLayers[idx] as IText], layer as ITmp)
+            const [newLayer] = groupUtils.mapLayersToPage([applyLayers[idx] as IText], layer as ITmp)
             Object.assign(styles, newLayer.styles)
             Object.assign(
               props,
@@ -393,7 +545,7 @@ class LayerUtils {
     if (layers.length !== 1 || !types.has('group')) {
       return new Set<string>()
     } else {
-      return GroupUtils.calcType((layers[0] as IGroup).layers)
+      return groupUtils.calcType((layers[0] as IGroup).layers)
     }
   }
 

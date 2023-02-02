@@ -67,7 +67,6 @@ import paymentUtils from '@/utils/paymentUtils'
 import { IAssetTemplate } from '@/interfaces/api'
 import { Itheme } from '@/interfaces/theme'
 import templateCenterUtils from '@/utils/templateCenterUtils'
-import generalUtils from '@/utils/generalUtils'
 import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
 export default defineComponent({

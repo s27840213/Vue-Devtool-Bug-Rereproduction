@@ -1,6 +1,5 @@
 import { IGroup, IStyle, ITextStyle, ITmp, ILayer } from '@/interfaces/layer'
 import { IBounding } from '@/interfaces/math'
-import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import Flatten from '@flatten-js/core'
 

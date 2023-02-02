@@ -29,6 +29,7 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
             :contentScaleRatio="contentScaleRatio"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
             :scaleRatio="scaleRatio"
+            :primaryLayer="primaryLayer"
             :forRender="forRender"
             :isTransparent="div.isTransparent"
             :noShadow="div.noShadow"
@@ -105,7 +106,8 @@ export default defineComponent({
     },
     snapUtils: Object,
     primaryLayer: {
-      type: Object as PropType<IGroup | IFrame | ITmp>
+      type: Object as PropType<IGroup | IFrame | ITmp>,
+      default: undefined
     },
     isSubLayer: {
       type: Boolean,
@@ -398,7 +400,7 @@ export default defineComponent({
         CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
         {
           outline,
-          willChange: !this.isSubLayer && this.isDragging ? 'transform' : '',
+          willChange: !this.isSubLayer && this.isDragging && !this.useMobileEditor ? 'transform' : '',
           pointerEvents,
           clipPath,
           ...this.transformStyle
@@ -413,7 +415,7 @@ export default defineComponent({
             textEffectStyles,
             textBgStyles,
             {
-              willChange: 'text-shadow' + (this.isDragging ? ', transform' : ''),
+              willChange: this.useMobileEditor ? '' : ('text-shadow' + (this.isDragging ? ', transform' : '')),
               '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
             }
           )
@@ -434,7 +436,7 @@ export default defineComponent({
       }
       return styles
     },
-    lineMoverStyles(): {[key: string]: string} {
+    lineMoverStyles(): { [key: string]: string } {
       if (!this.isLine) return {}
       const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       const page = pageUtils.getPage(this.pageIndex)
