@@ -41,13 +41,12 @@ class ThemeUtils {
       })
   }
 
-  refreshTemplateState(pageIndex?: number, newDesignType?: number) {
+  refreshTemplateState() {
     // Refresh template in sidebar panel. If pageIndex give, use its width and height to sort template.
     // If newDesignType give, it should be the first priority template result.
     this.setTemplateThemes([])
     return this.checkThemeState().then(() => {
-      this.setPageThemes(pageIndex, undefined, newDesignType)
-      this.fetchTemplateContent()
+      this.setPageThemes()
     })
   }
 
@@ -63,17 +62,10 @@ class ThemeUtils {
     return Promise.resolve()
   }
 
-  setPageThemes(pageIndex?: number, themes?: Itheme[], newDesignType?: number) {
-    const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get('themeId')) {
-      store.commit('templates/SET_STATE', {
-        theme: urlParams.get('themeId')
-      })
-    } else {
-      const pageSize = this.getFocusPageSize(pageIndex)
-      const pageThemes = (themes || this.getThemesBySize(pageSize.width, pageSize.height, newDesignType))
-      this.setTemplateThemes(pageThemes)
-    }
+  setPageThemes() {
+    const pageSize = this.getFocusPageSize()
+    const pageThemes = this.getThemesBySize(pageSize.width, pageSize.height)
+    this.setTemplateThemes(pageThemes)
   }
 
   sortedThemes(width: number, height: number) {
@@ -87,7 +79,7 @@ class ThemeUtils {
     ]).reverse()
   }
 
-  getThemesBySize(width: number, height: number, newDesignType?: number) {
+  getThemesBySize(width: number, height: number) {
     const { themes, groupType } = this
 
     if (groupType === 1) return themes.filter(theme => theme.id === 7)
@@ -98,10 +90,13 @@ class ThemeUtils {
       theme => this.themeRatioDifference(theme, currPageRatio) < 0.2
     )
 
+    const urlParams = new URLSearchParams(window.location.search)
+    const themeId = urlParams.get('themeId')
+    const newDesignType = themeId ? parseInt(themeId) : null
     // Pick new design type to the top.
     if (newDesignType) {
-      recommendation = recommendation.filter((item) => item.id === newDesignType).concat(
-        recommendation.filter((item) => item.id !== newDesignType))
+      recommendation = recommendation.filter((item) => item.id !== newDesignType)
+        .concat(recommendation.filter((item) => item.id === newDesignType))
     }
     return recommendation.length ? recommendation : themes
   }

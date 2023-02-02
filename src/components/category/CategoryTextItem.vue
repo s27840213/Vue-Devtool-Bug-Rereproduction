@@ -17,7 +17,6 @@ import AssetUtils from '@/utils/assetUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import DragUtils from '@/utils/dragUtils'
 import generalUtils from '@/utils/generalUtils'
-import { IListServiceContentDataItem } from '@/interfaces/api'
 
 export default defineComponent({
   emits: [],

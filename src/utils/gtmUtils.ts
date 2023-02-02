@@ -3,7 +3,6 @@
  */
 
 import store from '@/store'
-import Vue from 'vue'
 
 class GtmUtils {
   get userId(): string { return store.getters['user/getUserId'] }

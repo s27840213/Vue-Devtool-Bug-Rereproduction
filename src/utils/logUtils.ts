@@ -1,6 +1,3 @@
-import { IGroup, IImage, ILayer, IShape, ITmp } from '@/interfaces/layer'
-import store from '@/store'
-import LayerUtils from '@/utils/layerUtils'
 import generalUtils from './generalUtils'
 import uploadUtils from './uploadUtils'
 

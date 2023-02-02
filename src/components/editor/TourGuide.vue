@@ -183,7 +183,7 @@ export default defineComponent({
     }
     &__actions {
       display: flex;
-      justify-content: end;
+      justify-content: flex-end;
     }
     &__arrow {
       position: absolute;

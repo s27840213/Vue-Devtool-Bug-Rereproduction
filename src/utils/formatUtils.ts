@@ -5,12 +5,10 @@ import generalUtils from './generalUtils'
 import tiptapUtils from './tiptapUtils'
 import layerUtils from './layerUtils'
 import textUtils from './textUtils'
-import controlUtils from './controlUtils'
 import stepsUtils from './stepsUtils'
 import imageAdjustUtil from './imageAdjustUtil'
 import frameUtils from './frameUtils'
 import textShapeUtils from './textShapeUtils'
-import mathUtils from './mathUtils'
 
 class FormatUtils {
   copiedFormat: IFormat | undefined

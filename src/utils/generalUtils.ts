@@ -4,6 +4,7 @@ import { nextTick } from 'vue'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import _ from 'lodash'
+import router from '@/router'
 
 class GeneralUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
@@ -314,7 +315,9 @@ class GeneralUtils {
       normalInit({ reset: true })
     }
 
-    // Omit url query 'panel', 'category', 'category_locale', 'search' in Editor.vue
+    const query = _.omit(router.currentRoute.value.query,
+      ['panel', 'category', 'category_locale', 'search'])
+    router.replace({ query })
   }
 
   downloadTextFile(filename: string, content: string) {

@@ -9,7 +9,7 @@ div(class="panel-file"
     ref="mainContent"
     :myfile="myfileImages"
     vendor="myfile"
-    :inFilePanel="true"
+    :inFilePanel="canDeletePhoto"
     @loadMore="handleLoadMore"
     @scroll.passive="handleScrollTop($event, 'mainContent')")
     template(#pending)
@@ -42,6 +42,8 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import ImageGallery, { CImageGallery } from '@/components/image-gallery/ImageGallery.vue'
+import generalUtils from '@/utils/generalUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default defineComponent({
   name: 'PanelFile',
@@ -67,12 +69,23 @@ export default defineComponent({
     ...mapGetters({
       checkedAssets: 'file/getCheckedAssets'
     }),
+    canDeletePhoto() {
+      // currPanel can be 'file' or 'replace' in mobile
+      if (generalUtils.isTouchDevice()) return editorUtils.currActivePanel === 'file'
+      else return true
+    },
     hasCheckedAssets(): boolean {
       return this.checkedAssets.length !== 0
     }
   },
   mounted() {
     (this.$refs.mainContent as CImageGallery).myfileUpdate()
+  },
+  activated() {
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CImageGallery)
+      mainContent.$el.scrollTop = this.scrollTop.mainContent
+    })
   },
   methods: {
     ...mapActions({
