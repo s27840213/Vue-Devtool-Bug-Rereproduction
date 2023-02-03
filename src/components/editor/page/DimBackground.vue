@@ -53,6 +53,7 @@ import pageUtils from '@/utils/pageUtils'
 import { IImage } from '@/interfaces/layer'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageUtils from '@/utils/imageUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default defineComponent({
   emits: [],
@@ -151,7 +152,14 @@ export default defineComponent({
   },
   methods: {
     onBgClick(e: PointerEvent) {
-      imageUtils.setImgControlDefault()
+      /**
+       *  Use setTimeout bcz the page click would set the layer to non-active,
+       *  setTimeout can make the click order ideally
+       */
+      setTimeout(() => {
+        imageUtils.setImgControlDefault()
+        editorUtils.setCurrActivePanel('none')
+      }, 0)
     }
   }
 })

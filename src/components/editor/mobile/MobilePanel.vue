@@ -167,6 +167,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapGetters('imgControl', {
+      isImgCtrl: 'isImgCtrl'
+    }),
     ...mapGetters({
       isShowPagePreview: 'page/getIsShowPagePreview',
       showPagePanel: 'page/getShowPagePanel',
@@ -517,7 +520,11 @@ export default defineComponent({
     }),
     vcoConfig() {
       return {
-        handler: this.closeMobilePanel,
+        handler: (e: Event) => {
+          if (!this.isImgCtrl) {
+            this.closeMobilePanel()
+          }
+        },
         middleware: this.middleware,
         events: ['touchstart', 'pointerdown',
           ...window.location.host === 'localhost:8080' ? [] : ['contextmenu']]
