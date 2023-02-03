@@ -731,7 +731,7 @@ export default defineComponent({
       this.onLayerDragEnter(e)
     },
     onFrameDragEnter(e: DragEvent) {
-      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
+      if (!e.target || !['IMG', 'image'].includes((e.target as HTMLElement).tagName)) return
       if (this.config.type !== LayerType.image || this.primaryLayer?.type !== LayerType.frame) {
         return
       }
@@ -775,7 +775,7 @@ export default defineComponent({
       }
     },
     onFrameDragLeave(e: DragEvent) {
-      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
+      if (!e.target || !['IMG', 'image'].includes((e.target as HTMLElement).tagName)) return
       e.stopPropagation()
       const body = (this.$refs.body as HTMLElement[])[0]
       body.removeEventListener('dragleave', this.onFrameDragLeave)
@@ -805,7 +805,7 @@ export default defineComponent({
       }
     },
     onLayerDragEnter(e: DragEvent) {
-      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
+      if (!e.target || !['IMG', 'image'].includes((e.target as HTMLElement).tagName)) return
       const body = (this.$refs.body as HTMLElement[])[0]
       const dragSrcObj = this.$store.state.currDraggedPhoto.srcObj
       if (this.getLayerType === 'image' && dragSrcObj.assetId !== this.config.srcObj.assetId) {
@@ -825,7 +825,7 @@ export default defineComponent({
       }
     },
     layerDragLeave(e: DragEvent) {
-      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
+      if (!e.target || !['IMG', 'image'].includes((e.target as HTMLElement).tagName)) return
       const body = (this.$refs.body as HTMLElement[])[0]
       body.removeEventListener('dragleave', this.layerDragLeave)
       body.removeEventListener('drop', this.layerOnDrop)
