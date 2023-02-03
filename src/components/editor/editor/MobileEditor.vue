@@ -81,9 +81,6 @@ export default defineComponent({
     eventUtils.off(PanelEvent.switchTab)
   },
   mounted() {
-    const { pageRect, editorRect } = pageUtils.getEditorRenderSize
-    pageUtils.pageSize = { width: pageRect.width, height: pageRect.height }
-    pageUtils.editorSize = { width: editorRect.width, height: editorRect.height }
     // const el = this.$refs['mobile-editor__content'] as HTMLElement
     // const pz = new PinchZoom(el, {
     //   minZoom: (pageUtils.mobileMinScaleRatio * 0.01)

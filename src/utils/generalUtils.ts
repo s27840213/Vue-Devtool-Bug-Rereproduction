@@ -1,10 +1,10 @@
 import { IPage } from '@/interfaces/page'
+import router from '@/router'
 import store from '@/store'
+import _ from 'lodash'
 import { nextTick } from 'vue'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
-import _ from 'lodash'
-import router from '@/router'
 
 class GeneralUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
@@ -364,6 +364,18 @@ class GeneralUtils {
       document.documentElement.offsetHeight,
       document.documentElement.clientHeight
     )
+  }
+
+  unproxify<T>(val: T): T {
+    if (val instanceof Array) {
+      return val.map((i) => this.unproxify(i)) as unknown as T
+    }
+    if (val instanceof Object) {
+      return Object.fromEntries(Object.entries({ ...val }).map(([k, v]) => {
+        return [k, this.unproxify(v)]
+      })) as unknown as T
+    }
+    return val
   }
 }
 
