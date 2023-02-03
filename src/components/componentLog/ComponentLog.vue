@@ -37,13 +37,12 @@ div(class="component-log"
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
 import ComponentLogItem from '@/components/componentLog/ComponentLogItem.vue'
+import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
 import eventUtils from '@/utils/eventUtils'
-import generalUtils from '@/utils/generalUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import { debounce } from 'lodash'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   emits: [],
@@ -112,7 +111,7 @@ export default defineComponent({
       this.showContent = !this.showContent
     },
     disableTouchEvent(e: TouchEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         e.preventDefault()
         e.stopPropagation()
       }

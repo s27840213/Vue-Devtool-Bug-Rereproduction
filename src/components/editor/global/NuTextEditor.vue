@@ -3,14 +3,13 @@ editor-content(:editor="(editor as Editor)")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { Editor, EditorContent } from '@tiptap/vue-3'
-import tiptapUtils from '@/utils/tiptapUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import { IGroup, IText, ITmp } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
-import generalUtils from '@/utils/generalUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import { Editor, EditorContent } from '@tiptap/vue-3'
 import { isEqual } from 'lodash'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   components: {
@@ -95,7 +94,7 @@ export default defineComponent({
       this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord })
     })
     tiptapUtils.on('create', ({ editor }) => {
-      // if (!this.config?.isEdited && !generalUtils.isTouchDevice()) {
+      // if (!this.config?.isEdited && !this.$isTouchDevice) {
       //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
       //   editor.commands.focus()
       // }
@@ -130,7 +129,7 @@ export default defineComponent({
     })
     tiptapUtils.on('blur', () => {
       this.updateLayerProps({ isTyping: false })
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         this.updateLayerProps({ contentEditable: false })
       }
     })

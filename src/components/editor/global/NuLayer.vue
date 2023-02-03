@@ -8,7 +8,7 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
       :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : ''"
       :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
       :data-p-index="pageIndex"
-      v-press="isTouchDevice() && div.main ? onPress : -1"
+      v-press="$isTouchDevice && div.main ? onPress : -1"
       @pointerdown="div.main ? onPointerDown($event) : null"
       @pointerup="div.main ? onPointerUp($event) : null"
       @contextmenu.prevent
@@ -46,37 +46,37 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
     :id="`nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`")
 </template>
 <script lang="ts">
-import { PropType, defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
-import CssConveter from '@/utils/cssConverter'
-import MouseUtils from '@/utils/mouseUtils'
-import TextEffectUtils from '@/utils/textEffectUtils'
-import textBgUtils from '@/utils/textBgUtils'
-import layerUtils from '@/utils/layerUtils'
 import SquareLoading from '@/components/global/SqureLoading.vue'
-import frameUtils from '@/utils/frameUtils'
-import { mapGetters, mapMutations, mapState } from 'vuex'
-import pageUtils from '@/utils/pageUtils'
-import { IFrame, IGroup, IImage, ILayer, IText, ITmp } from '@/interfaces/layer'
 import LazyLoad from '@/components/LazyLoad.vue'
-import SubControllerUtils from '@/utils/subControllerUtils'
-import generalUtils from '@/utils/generalUtils'
-import { MovingUtils } from '@/utils/movingUtils'
-import DragUtils from '@/utils/dragUtils'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
 import i18n from '@/i18n'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IFrame, IGroup, IImage, ILayer, IText, ITmp } from '@/interfaces/layer'
+import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
+import controlUtils from '@/utils/controlUtils'
+import CssConveter from '@/utils/cssConverter'
+import DragUtils from '@/utils/dragUtils'
+import editorUtils from '@/utils/editorUtils'
+import eventUtils, { ImageEvent } from '@/utils/eventUtils'
+import frameUtils from '@/utils/frameUtils'
+import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
-import eventUtils, { ImageEvent } from '@/utils/eventUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import groupUtils from '@/utils/groupUtils'
-import controlUtils from '@/utils/controlUtils'
-import { AnyTouchEvent } from '@any-touch/shared'
-import editorUtils from '@/utils/editorUtils'
+import layerUtils from '@/utils/layerUtils'
+import MouseUtils from '@/utils/mouseUtils'
+import { MovingUtils } from '@/utils/movingUtils'
+import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import SubControllerUtils from '@/utils/subControllerUtils'
+import textBgUtils from '@/utils/textBgUtils'
+import TextEffectUtils from '@/utils/textEffectUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { AnyTouchEvent } from '@any-touch/shared'
+import { notify } from '@kyvg/vue3-notification'
 import Svgpath from 'svgpath'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   emits: ['onSubDrop'],
@@ -248,8 +248,8 @@ export default defineComponent({
       }
     }
     if (this.primaryLayer && this.primaryLayer.type === LayerType.frame && this.config.type === LayerType.image) {
-      body.addEventListener(generalUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
-      body.addEventListener(generalUtils.isTouchDevice() ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
+      body.addEventListener(this.$isTouchDevice ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+      body.addEventListener(this.$isTouchDevice ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
     }
   },
   unmounted() {
@@ -303,7 +303,7 @@ export default defineComponent({
       }
     },
     layerWrapperStyles(): any {
-      if (this.isImgCtrl || this.inFrame || this.isTouchDevice() || this.useMobileEditor) {
+      if (this.isImgCtrl || this.inFrame || this.$isTouchDevice || this.useMobileEditor) {
         return {}
       }
       return { transform: `translateZ(${this.config.styles.zindex}px)`, ...this.transformStyle }
@@ -489,9 +489,6 @@ export default defineComponent({
       const isHandleBgRemove = config.inProcess === 'bgRemove'
       return isHandleBgRemove || isHandleShadow
     },
-    isTouchDevice(): boolean {
-      return generalUtils.isTouchDevice()
-    },
     translateStyles(): { [index: string]: string } {
       const { zindex } = this.config.styles
       const { type } = this.config
@@ -522,7 +519,7 @@ export default defineComponent({
       return this.config.locked
     },
     onRightClick(event: MouseEvent) {
-      if (this.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         // in touch device, right click will be triggered by long click
         event.preventDefault()
         return
@@ -584,7 +581,7 @@ export default defineComponent({
       this.initPos.y = this.config.styles.y
     },
     disableTouchEvent(e: TouchEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         e.preventDefault()
         e.stopPropagation()
       }
@@ -685,8 +682,8 @@ export default defineComponent({
           imgY
         })
         const body = (this.$refs.body as HTMLElement[])[0]
-        body.addEventListener(generalUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
-        body.addEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+        body.addEventListener(this.$isTouchDevice ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+        body.addEventListener(this.$isTouchDevice ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
       }
     },
     onFrameMouseLeave(e: MouseEvent | PointerEvent) {
@@ -709,8 +706,8 @@ export default defineComponent({
         })
       }
       const body = (this.$refs.body as HTMLElement[])[0]
-      body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
-      body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+      body.removeEventListener(this.$isTouchDevice ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+      body.removeEventListener(this.$isTouchDevice ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
     },
     onFrameMouseUp(e: MouseEvent) {
       this.hasHandledFrameMouseEnter = false
@@ -724,8 +721,8 @@ export default defineComponent({
         stepsUtils.record()
       }
       const body = (this.$refs.body as HTMLElement[])[0]
-      body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
-      body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+      body.removeEventListener(this.$isTouchDevice ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+      body.removeEventListener(this.$isTouchDevice ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
     },
     dragEnter(e: DragEvent) {
       if (this.primaryLayer && this.primaryLayer.type) {

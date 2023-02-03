@@ -22,7 +22,6 @@ import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IPhotoItem } from '@/interfaces/api'
 import { GalleryImage } from '@/interfaces/gallery'
 import GalleryUtils from '@/utils/galleryUtils'
-import generalUtils from '@/utils/generalUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapState } from 'vuex'
 
@@ -64,7 +63,7 @@ const component = defineComponent({
     return {
       nextIndex: 0,
       rows: [] as any[],
-      galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 34 : 300, 95, 5)
+      galleryUtils: new GalleryUtils(this.$isTouchDevice ? window.innerWidth - 34 : 300, 95, 5)
     }
   },
   watch: {

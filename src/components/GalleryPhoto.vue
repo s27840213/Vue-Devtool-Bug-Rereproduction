@@ -39,7 +39,6 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import DragUtils from '@/utils/dragUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
-import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
@@ -125,7 +124,7 @@ export default defineComponent({
       return imageUtils.getSrc(data, photo.width)
     },
     showMoreBtn(): boolean {
-      return !this.inFilePanel && !this.inLogoPanel && !generalUtils.isTouchDevice()
+      return !this.inFilePanel && !this.inLogoPanel && !this.$isTouchDevice
     },
     panelPreviewSrc(): string {
       const img = this.$refs.img as HTMLImageElement
@@ -208,7 +207,7 @@ export default defineComponent({
       })
     },
     onClick(e: MouseEvent, photo: IAssetPhoto) {
-      if (generalUtils.isTouchDevice() && this.mobilePanel === 'replace') {
+      if (this.$isTouchDevice && this.mobilePanel === 'replace') {
         this.replaceImg(photo)
       } else if (this.multiSelectMode === 'on' || this.hasCheckedAssets) {
         this.modifyCheckedAssets(photo.assetIndex as number)
@@ -288,7 +287,7 @@ export default defineComponent({
           ...(this.isUploading && { isPreview: true, assetId: photo.id })
         }
       )
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         this.setCloseMobilePanelFlag(true)
       }
     },

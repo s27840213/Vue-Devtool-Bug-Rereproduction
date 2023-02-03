@@ -4,7 +4,7 @@ div(class="page-wrapper" ref="page-wrapper" :style="pageRootStyles" :id="`nu-pag
       :id="`nu-page_${pageIndex}`"
       :style="pageStyles"
       ref="page")
-    div(v-if="!isDetailPage && !isMobile"
+    div(v-if="!isDetailPage && !$isTouchDevice"
       class="page-title text-left pb-10"
       :style="{'width': `${config.width * (scaleRatio/100)}px`, 'transform': `translate3d(0, -100%, ${isAnyLayerActive ? 0 : 1}px)`}")
       //- span(class="pr-10") 第 {{pageIndex+1}} 頁
@@ -45,7 +45,7 @@ div(class="page-wrapper" ref="page-wrapper" :style="pageRootStyles" :id="`nu-pag
           @click.native="deletePage()"
           v-hint="$t('NN0141')"
         )
-    div(v-if="isDetailPage && !isMobile" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
+    div(v-if="isDetailPage && !$isTouchDevice" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
       div(class="page-bar__icons" v-if="!isBackgroundImageControl")
         div(class="body-2")
           span {{pageIndex + 1}}
@@ -155,35 +155,35 @@ div(class="page-wrapper" ref="page-wrapper" :style="pageRootStyles" :id="`nu-pag
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapMutations, mapGetters, mapState } from 'vuex'
-import { IShape, IText, IImage, IGroup, ILayer, IFrame } from '@/interfaces/layer'
-import PageContent from '@/components/editor/page/PageContent.vue'
-import LazyLoad from '@/components/LazyLoad.vue'
-import MouseUtils from '@/utils/mouseUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
-import GroupUtils from '@/utils/groupUtils'
-import SnapUtils from '@/utils/snapUtils'
-import ImageUtils from '@/utils/imageUtils'
-import popupUtils from '@/utils/popupUtils'
-import layerUtils from '@/utils/layerUtils'
-import StepsUtils from '@/utils/stepsUtils'
-import DimBackground from '@/components/editor/page/DimBackground.vue'
-import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
+import DimBackground from '@/components/editor/page/DimBackground.vue'
+import PageContent from '@/components/editor/page/PageContent.vue'
+import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
+import LazyLoad from '@/components/LazyLoad.vue'
+import i18n from '@/i18n'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IPage, IPageState } from '@/interfaces/page'
 import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
-import frameUtils from '@/utils/frameUtils'
-import pageUtils from '@/utils/pageUtils'
 import cssConverter from '@/utils/cssConverter'
-import imageAdjustUtil from '@/utils/imageAdjustUtil'
-import generalUtils from '@/utils/generalUtils'
-import imageShadowUtils from '@/utils/imageShadowUtils'
 import eventUtils from '@/utils/eventUtils'
-import i18n from '@/i18n'
-import { floor, round } from 'lodash'
+import frameUtils from '@/utils/frameUtils'
+import generalUtils from '@/utils/generalUtils'
+import GroupUtils from '@/utils/groupUtils'
+import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import imageShadowUtils from '@/utils/imageShadowUtils'
+import ImageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import MouseUtils from '@/utils/mouseUtils'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import ShortcutUtils from '@/utils/shortcutUtils'
+import SnapUtils from '@/utils/snapUtils'
+import StepsUtils from '@/utils/stepsUtils'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { floor, round } from 'lodash'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -378,7 +378,7 @@ export default defineComponent({
       let transform = ''
       let margin = ''
       let position = 'relative'
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
         position = 'absolute'
       } else {
@@ -392,7 +392,7 @@ export default defineComponent({
       }
     },
     isOutOfBound(): boolean {
-      return this.isMobile && !this.isDetailPage ? (this.pageIndex <= this.currCardIndex - 2 || this.pageIndex >= this.currCardIndex + 2)
+      return this.$isTouchDevice && !this.isDetailPage ? (this.pageIndex <= this.currCardIndex - 2 || this.pageIndex >= this.currCardIndex + 2)
         : this.pageIndex <= (this.topBound - 4) || this.pageIndex >= (this.bottomBound + 4)
     },
     hasEditingText(): boolean {
@@ -421,9 +421,6 @@ export default defineComponent({
         y: (-posY + height / 2) * this.contentScaleRatio
       }
       return imageAdjustUtil.getHalation(adjust.halation, position)
-    },
-    isMobile(): boolean {
-      return generalUtils.isTouchDevice()
     },
     selectedLayerCount(): number {
       return this.currSelectedInfo.layers.length
@@ -718,7 +715,7 @@ export default defineComponent({
       }
     },
     disableTouchEvent(e: TouchEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         e.preventDefault()
         e.stopPropagation()
       }

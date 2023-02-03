@@ -27,10 +27,10 @@ div(class="color-panel"
       template(v-if="isBrandkitAvailable")
         //- Brandkit select
         div(class="relative")
-          brand-selector(:theme="isTouchDevice ? 'mobile-panel' : 'panel'")
+          brand-selector(:theme="$isTouchDevice ? 'mobile-panel' : 'panel'")
           div(class="color-panel__brand-settings pointer"
               @click="handleOpenSettings")
-            svg-icon(iconName="settings" :iconColor="isTouchDevice ? 'gray-2' : 'white'" iconWidth="24px")
+            svg-icon(iconName="settings" :iconColor="$isTouchDevice ? 'gray-2' : 'white'" iconWidth="24px")
         //- Brandkit palettes
         div(v-if="isPalettesLoading" class="color-panel__colors")
           svg-icon(iconName="loading"
@@ -85,7 +85,6 @@ import { SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
-import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -215,9 +214,6 @@ export default defineComponent({
     defaultColors(): unknown {
       return this.mode === 'PanelBG' ? this.defaultBgColor : this._defaultColors
     },
-    isTouchDevice(): boolean {
-      return generalUtils.isTouchDevice()
-    }
   },
   methods: {
     ...mapMutations({
@@ -287,7 +283,7 @@ export default defineComponent({
       editorUtils.toggleColorSlips(false)
     },
     openColorPanel(event: MouseEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         this.$emit('openColorPicker')
         return
       }
