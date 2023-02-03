@@ -48,31 +48,31 @@ div(class="panel-bg" :class="{'panel-flash': panelFlash}" @animationend="panelFl
       //- BG wishing pool
       div(v-if="keyword && !pending && rawSearchResult.list?.length<=10")
         span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
-        nubtn(size="mid" class="mt-30")
+        nubtn(size="mid-center" class="mt-30")
           url(:url="$t('NN0791')" :newTab="true")
               span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
-import SearchBar from '@/components/SearchBar.vue'
+import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
-import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
-import Tabs from '@/components/Tabs.vue'
 import Url from '@/components/global/Url.vue'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import { ColorEventType, MobileColorPanelType } from '@/store/types'
-import { IPage } from '@/interfaces/page'
-import stepsUtils from '@/utils/stepsUtils'
-import pageUtils from '@/utils/pageUtils'
-import generalUtils from '@/utils/generalUtils'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import groupUtils from '@/utils/groupUtils'
+import SearchBar from '@/components/SearchBar.vue'
+import Tabs from '@/components/Tabs.vue'
 import i18n from '@/i18n'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { IPage } from '@/interfaces/page'
+import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'PanelBackground',

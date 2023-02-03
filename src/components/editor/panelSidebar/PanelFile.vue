@@ -3,13 +3,18 @@ div(class="panel-file"
     @drop.stop.prevent="onDrop($event)"
     @dragover.prevent,
     @dragenter.prevent)
-  btn(class="full-width mb-20" :type="'primary-mid'"
-      @click="uploadImage()") {{$t('NN0014')}}
+  div(class="panel-file__topbtn")
+    btn(class="full-width" :type="'primary-mid'"
+        @click="uploadImage()") {{$t('NN0014')}}
+    nubtn(v-if="$isTouchDevice" theme="icon" icon="trash" size="mid"
+          :status="inMultiSelectMode === 'on' ? 'active': 'default'"
+          @click="toggleMultiSelect()")
   image-gallery(
     ref="mainContent"
     :myfile="myfileImages"
     vendor="myfile"
-    :inFilePanel="canDeletePhoto"
+    :inFilePanel="true"
+    :multiSelectMode="inMultiSelectMode"
     @loadMore="handleLoadMore"
     @scroll.passive="handleScrollTop($event, 'mainContent')")
     template(#pending)
@@ -21,10 +26,6 @@ div(class="panel-file"
     div(v-if="hasCheckedAssets"
         class="panel-file__menu")
       div
-        //- svg-icon(class="pointer"
-        //-   :iconName="'folder'"
-        //-   :iconColor="'white'"
-        //-   :iconWidth="'24px'")
         svg-icon(class="pointer"
           :iconName="'trash'"
           :iconColor="'white'"
@@ -34,23 +35,17 @@ div(class="panel-file"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import SearchBar from '@/components/SearchBar.vue'
-import uploadUtils from '@/utils/uploadUtils'
-import GalleryPhoto from '@/components/GalleryPhoto.vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import ImageGallery, { CImageGallery } from '@/components/image-gallery/ImageGallery.vue'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
-import ImageGallery, { CImageGallery } from '@/components/image-gallery/ImageGallery.vue'
-import generalUtils from '@/utils/generalUtils'
-import editorUtils from '@/utils/editorUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'PanelFile',
   emits: [],
   components: {
-    SearchBar,
-    GalleryPhoto,
     ImageGallery
   },
   data() {
@@ -58,7 +53,8 @@ export default defineComponent({
       scrollTop: {
         mainContent: 0
         // searchResult: 0
-      }
+      },
+      inMultiSelectMode: this.$isTouchDevice ? 'off' : 'hover' as 'hover' | 'on' | 'off'
     }
   },
   computed: {
@@ -69,11 +65,6 @@ export default defineComponent({
     ...mapGetters({
       checkedAssets: 'file/getCheckedAssets'
     }),
-    canDeletePhoto() {
-      // currPanel can be 'file' or 'replace' in mobile
-      if (generalUtils.isTouchDevice()) return editorUtils.currActivePanel === 'file'
-      else return true
-    },
     hasCheckedAssets(): boolean {
       return this.checkedAssets.length !== 0
     }
@@ -95,6 +86,10 @@ export default defineComponent({
     ...mapMutations({
       clearCheckedAssets: 'file/CLEAR_CHECKED_ASSETS'
     }),
+    toggleMultiSelect() {
+      this.inMultiSelectMode = this.inMultiSelectMode === 'on' ? 'off' : 'on'
+      if (this.inMultiSelectMode === 'off') this.clearCheckedAssets()
+    },
     handleLoadMore() {
       !this.pending && this.getMoreMyfiles()
     },
@@ -140,6 +135,15 @@ export default defineComponent({
   text-align: center;
   &__title {
     margin-bottom: 20px;
+  }
+  &__topbtn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    * + * {
+      margin-left: 10px;
+    }
   }
   &__menu {
     display: flex;
