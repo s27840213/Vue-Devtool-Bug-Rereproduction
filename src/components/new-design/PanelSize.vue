@@ -37,15 +37,14 @@ div(class="mobile-panel p-15"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import designUtils from '@/utils/designUtils'
 import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
+import designUtils from '@/utils/designUtils'
+import { defineComponent } from 'vue'
 
-import { mapState } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
-import eventUtils from '@/utils/eventUtils'
-import generalUtils from '@/utils/generalUtils'
 import { ILayout } from '@/interfaces/layout'
+import eventUtils from '@/utils/eventUtils'
+import vClickOutside from 'click-outside-vue3'
+import { mapState } from 'vuex'
 
 export default defineComponent({
   name: 'panel-size',
@@ -152,7 +151,7 @@ export default defineComponent({
       eventUtils.removePointerEvent('pointerup', this.dragPanelEnd)
     },
     disableTouchEvent(e: TouchEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         e.preventDefault()
         e.stopPropagation()
       }

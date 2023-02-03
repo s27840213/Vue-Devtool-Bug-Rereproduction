@@ -12,9 +12,9 @@ div(class="color-picker" ref="colorPicker"
     :isMobile="isMobile"
     :fullWidth="isMobile"
     :aspectRatio="aspectRatio")
-  div(:class="{'px-10': !isTouchDevice}")
+  div(:class="{'px-10': !$isTouchDevice}")
     div(class="color-picker__hex")
-      svg-icon(v-if="!isTouchDevice"
+      svg-icon(v-if="!$isTouchDevice"
         class="pointer"
         iconName="eye-dropper"
         :iconWidth="'20px'"
@@ -33,14 +33,13 @@ div(class="color-picker" ref="colorPicker"
 </template>
 
 <script lang="ts">
+import Chrome from '@/components/colorPicker/Chrome.vue'
 import i18n from '@/i18n'
+import { checkAndConvertToHex } from '@/utils/colorUtils'
+import layerUtils from '@/utils/layerUtils'
+import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { notify } from '@kyvg/vue3-notification'
-import layerUtils from '@/utils/layerUtils'
-import Chrome from '@/components/colorPicker/Chrome.vue'
-import generalUtils from '@/utils/generalUtils'
-import { checkAndConvertToHex } from '@/utils/colorUtils'
 
 export default defineComponent({
   props: {
@@ -70,7 +69,7 @@ export default defineComponent({
   mounted() {
     const root = this.$refs.colorPicker as HTMLElement
     const input = this.$refs.input as HTMLInputElement
-    if (!generalUtils.isTouchDevice()) {
+    if (!this.$isTouchDevice) {
       root.focus()
       input.select()
     }
@@ -85,9 +84,6 @@ export default defineComponent({
       this.$emit('update', formatedColor)
       return formatedColor
     },
-    isTouchDevice() {
-      return generalUtils.isTouchDevice()
-    }
   },
   watch: {
     color(): void {

@@ -6,7 +6,7 @@ div(class="category-object-item"
   img(class="category-object-item__img"
     draggable="true"
     :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
-  svg-icon(v-if="!isTouchDevice && (item.info || (item.tags && item.tags.length > 0))"
+  svg-icon(v-if="!$isTouchDevice && (item.info || (item.tags && item.tags.length > 0))"
     class="category-object-item__more"
     @click="showSvgInfo"
     :iconName="'more_vertical'"
@@ -16,14 +16,13 @@ div(class="category-object-item"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import store from '@/store'
-import DragUtils from '@/utils/dragUtils'
-import assetUtils, { RESIZE_RATIO_SVG } from '@/utils/assetUtils'
-import { mapMutations, mapGetters } from 'vuex'
 import ProItem from '@/components/payment/ProItem.vue'
+import store from '@/store'
+import assetUtils, { RESIZE_RATIO_SVG } from '@/utils/assetUtils'
+import DragUtils from '@/utils/dragUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import generalUtils from '@/utils/generalUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -43,9 +42,6 @@ export default defineComponent({
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
     }),
-    isTouchDevice(): boolean {
-      return generalUtils.isTouchDevice()
-    }
   },
   methods: {
     ...mapMutations({

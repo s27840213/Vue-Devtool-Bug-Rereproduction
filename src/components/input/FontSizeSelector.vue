@@ -17,6 +17,7 @@ div(class="font-size-selector size-bar relative")
 </template>
 
 <script lang="ts">
+import ValueSelector from '@/components/ValueSelector.vue'
 import { IGroup, ILayer } from '@/interfaces/layer'
 import eventUtils from '@/utils/eventUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -25,11 +26,9 @@ import stepsUtils from '@/utils/stepsUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
-import ValueSelector from '@/components/ValueSelector.vue'
-import vClickOutside from 'click-outside-vue3'
-import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
   emits: [],
@@ -110,7 +109,7 @@ export default defineComponent({
       return value.toString()
     },
     handleValueModal() {
-      if (generalUtils.isTouchDevice()) return
+      if (this.$isTouchDevice) return
       this.openValueSelector = !this.openValueSelector
       if (this.openValueSelector) {
         const input = this.$refs['input-fontSize'] as HTMLInputElement

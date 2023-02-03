@@ -62,18 +62,18 @@ lazy-load(
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
+import PageContent from '@/components/editor/page/PageContent.vue'
+import LazyLoad from '@/components/LazyLoad.vue'
+import i18n from '@/i18n'
 import { IPage } from '@/interfaces/page'
+import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import editorUtils from '@/utils/editorUtils'
-import LazyLoad from '@/components/LazyLoad.vue'
-import generalUtils from '@/utils/generalUtils'
-import i18n from '@/i18n'
-import PageContent from '@/components/editor/page/PageContent.vue'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   props: {
@@ -181,7 +181,7 @@ export default defineComponent({
         pageUtils.scrollIntoPage(this.index)
       }
 
-      if (generalUtils.isTouchDevice() && clickFocusedPreview) {
+      if (this.$isTouchDevice && clickFocusedPreview) {
         this.$nextTick(() => {
           if (pageUtils.isDetailPage) {
             pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 'auto')

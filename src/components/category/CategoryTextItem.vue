@@ -10,13 +10,12 @@ img(class="pointer"
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
 import store from '@/store'
-import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
-import textPropUtils from '@/utils/textPropUtils'
 import DragUtils from '@/utils/dragUtils'
-import generalUtils from '@/utils/generalUtils'
+import textPropUtils from '@/utils/textPropUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -41,7 +40,7 @@ export default defineComponent({
     }),
     itemStyle(): any {
       const { width } = this.item.preview || {
-        width: generalUtils.isTouchDevice()
+        width: this.$isTouchDevice
           ? (window.innerWidth - 54) / 3 - 10 // ([window width] - [padding and gap]) / 3 - [item margin]
           : 135
       }

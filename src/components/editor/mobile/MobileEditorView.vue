@@ -34,27 +34,27 @@ div(class="editor-view" v-touch
 </template>
 
 <script lang="ts">
+import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
+import EditorHeader from '@/components/editor/EditorHeader.vue'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IPage, IPageState } from '@/interfaces/page'
+import store from '@/store'
+import backgroundUtils from '@/utils/backgroundUtils'
+import ControlUtils from '@/utils/controlUtils'
+import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
+import GroupUtils from '@/utils/groupUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import modalUtils from '@/utils/modalUtils'
+import { MovingUtils } from '@/utils/movingUtils'
+import pageUtils from '@/utils/pageUtils'
+import StepsUtils from '@/utils/stepsUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import GroupUtils from '@/utils/groupUtils'
-import StepsUtils from '@/utils/stepsUtils'
-import ControlUtils from '@/utils/controlUtils'
-import pageUtils from '@/utils/pageUtils'
-import { IPage, IPageState } from '@/interfaces/page'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
-import imageUtils from '@/utils/imageUtils'
-import EditorHeader from '@/components/editor/EditorHeader.vue'
-import tiptapUtils from '@/utils/tiptapUtils'
-import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
-import generalUtils from '@/utils/generalUtils'
-import { AnyTouchEvent } from 'any-touch'
-import layerUtils from '@/utils/layerUtils'
-import editorUtils from '@/utils/editorUtils'
-import backgroundUtils from '@/utils/backgroundUtils'
-import modalUtils from '@/utils/modalUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import { MovingUtils } from '@/utils/movingUtils'
-import store from '@/store'
 
 export default defineComponent({
   emits: [],
@@ -153,7 +153,7 @@ export default defineComponent({
     pageUtils.fitPage(false, true)
     this.tmpScaleRatio = pageUtils.scaleRatio
 
-    if (generalUtils.isTouchDevice()) {
+    if (this.$isTouchDevice) {
       pageUtils.mobileMinScaleRatio = this.isDetailPage ? 20 : this.tmpScaleRatio
       pageUtils.originPageSize.width = pageUtils.getPages[0].width * this.pageUtils.mobileMinScaleRatio * 0.01
       pageUtils.originPageSize.height = pageUtils.getPages[0].height * this.pageUtils.mobileMinScaleRatio * 0.01

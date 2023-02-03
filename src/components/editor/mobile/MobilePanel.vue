@@ -94,7 +94,6 @@ import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
-import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -581,7 +580,7 @@ export default defineComponent({
       eventUtils.removePointerEvent('pointerup', this.dragPanelEnd)
     },
     disableTouchEvent(e: TouchEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         e.preventDefault()
         e.stopPropagation()
       }
