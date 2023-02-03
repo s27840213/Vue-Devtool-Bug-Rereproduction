@@ -1,4 +1,4 @@
-import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
+import { ActionTree, MutationTree, GetterTree } from 'vuex'
 import { captureException } from '@sentry/browser'
 import i18n from '@/i18n'
 import photos from '@/apis/photos'

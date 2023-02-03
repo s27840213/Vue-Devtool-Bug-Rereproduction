@@ -1,8 +1,7 @@
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
-import Vue from 'vue'
 import controlUtils from './controlUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
 import formatUtils from './formatUtils'
@@ -256,7 +255,7 @@ export class MovingUtils {
 
         if (isMover || isMoveBar) {
           this.movingByControlPoint = true
-        } else {
+        } else if (!this.isTouchDevice) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
         }
 
@@ -346,7 +345,6 @@ export class MovingUtils {
         }
         if (this.getLayerType === 'text' && this.config.contentEditable) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
-          e.preventDefault()
         }
       }
     }
@@ -476,8 +474,10 @@ export class MovingUtils {
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
     if (this.isActive) {
       if (hasActualMove) {
-        // dragging to another page
-        if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
+        if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex === -1) {
+          layerUtils.deleteSelectedLayer()
+        } else if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
+          // dragging to another page
           const layerNum = this.currSelectedInfo.layers.length
           if (layerNum > 1) {
             groupUtils.group()
@@ -504,11 +504,17 @@ export class MovingUtils {
       } else {
         if (this.getLayerType === 'text') {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
-          if (this.movingByControlPoint) {
-            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+          if (this.isTouchDevice) {
+            if (!this.movingByControlPoint) {
+              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
+            }
+          } else {
+            if (this.movingByControlPoint) {
+              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+            }
           }
           if (this.config.contentEditable) {
-            tiptapUtils.focus({ scrollIntoView: false })
+            tiptapUtils.focus({ scrollIntoView: false }, this.isTouchDevice ? 'end' : null)
             if (!this.config.isEdited) {
               setTimeout(() => {
                 tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())

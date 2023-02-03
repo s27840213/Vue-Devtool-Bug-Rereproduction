@@ -1,11 +1,10 @@
-import { IBrandFont } from '@/interfaces/brandkit'
-import { IGroup, IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
+import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import { ISelection, IFont } from '@/interfaces/text'
 import router from '@/router'
 import brandkitUtils from '@/utils/brandkitUtils'
 import errorHandleUtils from '@/utils/errorHandleUtils'
 import generalUtils from '@/utils/generalUtils'
-import { ModuleTree, MutationTree, GetterTree, ActionTree } from 'vuex'
+import { MutationTree, GetterTree, ActionTree } from 'vuex'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
 const UPDATE_FONTFACE = 'UPDATE_FONTFACE' as const

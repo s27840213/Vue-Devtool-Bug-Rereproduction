@@ -137,7 +137,13 @@ export default defineComponent({
       })
     }
 
-    // panelInit for PanelTemplate at themeUtils.fetchTemplateContent
+    themeUtils.refreshTemplateState().then(() => {
+      generalUtils.panelInit('template',
+        this.handleSearch,
+        this.handleCategorySearch,
+        this.getRecAndCate
+      )
+    })
   },
   computed: {
     ...mapState('templates', {
@@ -226,6 +232,14 @@ export default defineComponent({
       const editorThemesString = _.sortBy((this.editorThemes as Itheme[]).map(theme => theme.id)).join(',')
       return editorThemesString === this.theme
     }
+  },
+  activated() {
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
+      const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
+      mainContent.$el.scrollTop = this.scrollTop.mainContent
+      searchResult.$el.scrollTop = this.scrollTop.searchResult
+    })
   },
   watch: {
     currPageThemeIds(curr: number[] = []) {

@@ -119,6 +119,9 @@ export default defineComponent({
       isShowPagePanel: 'page/getShowPagePanel',
       currSelectedPageIndex: 'getCurrSelectedPageIndex'
     }),
+    ...mapGetters('imgControl', {
+      isImgCtrl: 'isImgCtrl'
+    }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'backendRenderParams']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     isHandleShadow(): boolean {
@@ -298,17 +301,19 @@ export default defineComponent({
       }
     },
     pageClickHandler(): void {
-      groupUtils.deselect()
-      // imageUtils.setImgControlDefault(false)
-      editorUtils.setInMultiSelectionMode(false)
-      if (this.currSelectedPageIndex !== this.pageIndex) {
-        pageUtils.setBackgroundImageControlDefault()
-        this.setCurrActivePageIndex(this.pageIndex)
-      }
-      const sel = window.getSelection()
-      if (sel) {
-        sel.empty()
-        sel.removeAllRanges()
+      if (!this.isImgCtrl) {
+        groupUtils.deselect()
+        // imageUtils.setImgControlDefault(false)
+        editorUtils.setInMultiSelectionMode(false)
+        if (this.currSelectedPageIndex !== this.pageIndex) {
+          pageUtils.setBackgroundImageControlDefault()
+          this.setCurrActivePageIndex(this.pageIndex)
+        }
+        const sel = window.getSelection()
+        if (sel) {
+          sel.empty()
+          sel.removeAllRanges()
+        }
       }
     },
     onRightClick(event: MouseEvent) {

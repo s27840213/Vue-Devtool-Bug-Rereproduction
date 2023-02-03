@@ -16,7 +16,6 @@ import { defineComponent, PropType } from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
 import { IShape } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
-import generalUtils from '@/utils/generalUtils'
 import stepsUtils from '@/utils/stepsUtils'
 
 const FILTER_X = '$fx'

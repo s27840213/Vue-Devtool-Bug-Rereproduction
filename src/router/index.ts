@@ -1,4 +1,4 @@
-import VueRouter, { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
+import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Editor from '@/views/Editor.vue'
 import SignUp from '@/views/Login/SignUp.vue'
 import Login from '@/views/Login/Login.vue'
@@ -20,7 +20,6 @@ import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import assetUtils from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
-import appJson from '@/assets/json/app.json'
 import generalUtils from '@/utils/generalUtils'
 import { h, resolveComponent } from 'vue'
 

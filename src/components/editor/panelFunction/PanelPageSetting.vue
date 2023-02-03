@@ -949,6 +949,9 @@ export default defineComponent({
   }
 
   &__suggestion-panel {
+    height: calc(100vh - 248px); // fill the rest of function panel
+    min-height: 287px;
+    max-height: 742px;
     color: white;
     &__arrow {
       margin-left: auto;
@@ -958,6 +961,7 @@ export default defineComponent({
       display: block;
     }
     &__body {
+      height: calc(100% - 35px);
       background-color: setColor(gray-1-5);
       box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.25);
       border-radius: 4px;

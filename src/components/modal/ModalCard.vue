@@ -30,7 +30,7 @@ div(class="modal-card")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { IModalInfo } from '@/interfaces/modal'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters } from 'vuex'
 import modalUtils from '@/utils/modalUtils'
 
 export default defineComponent({

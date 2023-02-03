@@ -15,7 +15,7 @@ div(class="panel-position bg-white")
 <script lang="ts">
 import { defineComponent } from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters } from 'vuex'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 
 export default defineComponent({

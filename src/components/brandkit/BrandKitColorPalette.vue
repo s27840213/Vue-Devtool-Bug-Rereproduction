@@ -43,7 +43,7 @@ div(class="brand-kit-color-palette")
 </template>
 
 <script lang="ts">
-import { defineComponent, Prop, PropType } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import vClickOutside from 'click-outside-vue3'
@@ -187,7 +187,7 @@ export default defineComponent({
     margin-left: 8px;
     display: flex;
     align-items: center;
-    justify-content: start;
+    justify-content: flex-start;
     color: setColor(gray-1);
     width: 300px;
     & > span {

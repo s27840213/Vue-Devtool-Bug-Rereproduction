@@ -17,7 +17,6 @@ div(class="nu-tmp"
 
 <script lang="ts">
 import { ILayer, ITmp } from '@/interfaces/layer'
-import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import textPropUtils from '@/utils/textPropUtils'

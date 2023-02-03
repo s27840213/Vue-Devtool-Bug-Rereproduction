@@ -304,7 +304,8 @@ export default defineComponent({
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
-      currFunctionPanelType: 'getCurrFunctionPanelType'
+      currFunctionPanelType: 'getCurrFunctionPanelType',
+      useMobileEditor: 'getUseMobileEditor'
     }),
     subLayer(): any {
       if ([LayerType.group, LayerType.frame].includes(this.config.type)) {
@@ -364,7 +365,7 @@ export default defineComponent({
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
-        willChange: this.isDragging() ? 'transform' : '',
+        willChange: this.isDragging() && !this.useMobileEditor ? 'transform' : '',
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         pointerEvents,

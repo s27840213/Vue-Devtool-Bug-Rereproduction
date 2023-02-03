@@ -1,5 +1,5 @@
 /* eslint-disable indent */
-import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IFrame, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IBleed, IPage } from '@/interfaces/page'
 import frameUtils from '@/utils/frameUtils'
 import shapeUtils from '@/utils/shapeUtils'

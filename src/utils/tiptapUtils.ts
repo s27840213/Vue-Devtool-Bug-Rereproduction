@@ -20,6 +20,7 @@ class TiptapUtils {
   eventHandler: undefined | ((toRecord: boolean) => void)
   editor: Editor | undefined = undefined
   prevText: string | undefined = undefined
+  prevJSON: any | undefined = undefined
 
   constructor() {
     this.event = new EventEmitter()
@@ -61,7 +62,7 @@ class TiptapUtils {
       },
       editable,
       onCreate: ({ editor }) => {
-        this.prevText = this.getText(editor as Editor)
+        this.updatePrevData(editor as Editor)
         editor.commands.selectAll()
       }
     })
@@ -316,9 +317,8 @@ class TiptapUtils {
     return { paragraphs: result, isSetContentRequired }
   }
 
-  getText(editor: Editor): string {
+  getText(json: any): string {
     const lines: string[] = []
-    const json = editor.getJSON()
     const paragraphs = json.content ?? []
     for (const paragraph of paragraphs) {
       const spans = paragraph.content ?? []
@@ -333,6 +333,12 @@ class TiptapUtils {
       }
     }
     return lines.join('\n')
+  }
+
+  updatePrevData(editor: Editor) {
+    const json = editor.getJSON()
+    this.prevJSON = json
+    this.prevText = this.getText(json)
   }
 
   toText(textLayer: IText): string {

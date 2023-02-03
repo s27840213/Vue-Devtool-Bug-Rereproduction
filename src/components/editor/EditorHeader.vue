@@ -31,7 +31,7 @@ div(class="editor-header" ref="header"
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { notify } from '@kyvg/vue3-notification'
-import { mapMutations, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import store from '@/store'

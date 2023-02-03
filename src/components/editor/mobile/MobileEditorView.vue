@@ -47,7 +47,7 @@ import EditorHeader from '@/components/editor/EditorHeader.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import generalUtils from '@/utils/generalUtils'
-import AnyTouch, { AnyTouchEvent } from 'any-touch'
+import { AnyTouchEvent } from 'any-touch'
 import layerUtils from '@/utils/layerUtils'
 import editorUtils from '@/utils/editorUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
@@ -560,7 +560,7 @@ $REULER_SIZE: 20px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
-    // justify-content: center;
+    justify-content: center;
     @include no-scrollbar;
     // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container
     // justify-content: center;

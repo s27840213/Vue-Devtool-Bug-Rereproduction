@@ -14,7 +14,6 @@ import uploadUtils from '@/utils/uploadUtils'
 import editorUtils from '@/utils/editorUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { omit } from 'lodash'
 
 export default defineComponent({
   emits: [],
@@ -65,8 +64,7 @@ export default defineComponent({
     this.clearState()
   },
   mounted() {
-    let query = this.$router.currentRoute.value.query
-    query = omit(query, ['panel', 'category', 'category_locale', 'search'])
+    const query = this.$router.currentRoute.value.query
     if (query.type === 'new-design-size') {
       query.unit = query.unit ?? 'px'
     }
@@ -78,7 +76,7 @@ export default defineComponent({
       clearState: 'CLEAR_state',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
     }),
-    setIsLoading(bool: boolean) {
+    setIsLoading() {
       this.isLoading = true
     }
   }
