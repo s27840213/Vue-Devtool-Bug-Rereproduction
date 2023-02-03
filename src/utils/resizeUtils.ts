@@ -186,7 +186,7 @@ class ResizeUtils {
         })
         const precision = unit === 'px' ? 0 : PRECISION
         const bleedDPI = (key: string): number => (key === 'left' || key === 'right') ? dpi.width : dpi.height
-        const maxBleed = (key: string): number => floor(unitUtils.convert(20, 'mm', unit, bleedDPI(key)), precision)
+        const maxBleed = (key: string): number => floor(unitUtils.convert(pageUtils.MAX_BLEED, 'px', unit, bleedDPI(key)), precision)
         const defaultBleedMap = pageUtils.getDefaultBleedMap(pageIndex)
         physicalBleeds = isEqual(defaultBleedMap[page.unit], physicalBleeds) ? defaultBleedMap[unit]
                           : Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, Math.min(round(unitUtils.convert(v, page.unit, unit, bleedDPI(k)), precision), maxBleed(k))])) as IBleed

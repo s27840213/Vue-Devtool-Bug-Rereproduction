@@ -719,7 +719,7 @@ export default defineComponent({
     },
     maxBleed(key: string) {
       const dpi = unitUtils.getConvertDpi(pageUtils.currFocusPageSize)
-      return floor(unitUtils.convert(20, 'mm', this.sizeToShow.unit, (key === 'left' || key === 'right') ? dpi.width : dpi.height), this.sizeToShow.unit === 'px' ? 0 : PRECISION)
+      return floor(unitUtils.convert(pageUtils.MAX_BLEED, 'px', this.sizeToShow.unit, (key === 'left' || key === 'right') ? dpi.width : dpi.height), this.sizeToShow.unit === 'px' ? 0 : PRECISION)
     },
     setBleed(evt: Event, key: string, all = false) {
       const value = (evt.target as HTMLInputElement).value
