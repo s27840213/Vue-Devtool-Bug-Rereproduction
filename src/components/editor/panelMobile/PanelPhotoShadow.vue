@@ -32,17 +32,16 @@ div(class="panel-shadow")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
-import { mapGetters } from 'vuex'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle } from '@/interfaces/layer'
-import layerUtils from '@/utils/layerUtils'
-import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
-import colorUtils from '@/utils/colorUtils'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
-import generalUtils from '@/utils/generalUtils'
+import colorUtils from '@/utils/colorUtils'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
+import layerUtils from '@/utils/layerUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 export default defineComponent({
   components: {
     MobileSlider
@@ -114,7 +113,7 @@ export default defineComponent({
       imageShadowPanelUtils.handleEffectUpdate(name, value)
     },
     handleColorModal() {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         colorUtils.setCurrEvent(ColorEventType.photoShadow)
         this.handleColor = true
         this.$emit('openExtraColorModal', ColorEventType.photoShadow, MobileColorPanelType.palette)

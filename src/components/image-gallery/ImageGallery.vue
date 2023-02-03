@@ -10,20 +10,20 @@ recycle-scroller(class="image-gallery" id="recycle"
         :photo="photo"
         :vendor="vendor"
         :inFilePanel="inFilePanel"
+        :multiSelectMode="multiSelectMode"
         :key="photo.id")
   template(#after)
     slot(name="pending")
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from 'vue'
-import GalleryUtils from '@/utils/galleryUtils'
+import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IPhotoItem } from '@/interfaces/api'
-import generalUtils from '@/utils/generalUtils'
-import { mapState } from 'vuex'
-import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import { GalleryImage } from '@/interfaces/gallery'
+import GalleryUtils from '@/utils/galleryUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapState } from 'vuex'
 
 const component = defineComponent({
   props: {
@@ -42,6 +42,10 @@ const component = defineComponent({
     inFilePanel: {
       type: Boolean,
       default: false
+    },
+    multiSelectMode: {
+      type: String as PropType<'hover' | 'on' | 'off'>,
+      default: 'off'
     }
   },
   components: {
@@ -59,7 +63,7 @@ const component = defineComponent({
     return {
       nextIndex: 0,
       rows: [] as any[],
-      galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 34 : 300, 95, 5)
+      galleryUtils: new GalleryUtils(this.$isTouchDevice ? window.innerWidth - 34 : 300, 95, 5)
     }
   },
   watch: {

@@ -55,7 +55,6 @@ import { SidebarPanelType } from '@/store/types'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import DragUtils from '@/utils/dragUtils'
 import editorUtils from '@/utils/editorUtils'
-import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
@@ -308,7 +307,7 @@ export default defineComponent({
       }
     },
     onRightClick(event: MouseEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         return
       }
 

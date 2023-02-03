@@ -4,9 +4,9 @@ div(class="gallery-photo" :class="{border: deletable}")
       class="gallery-photo__delete"
       @click.stop.prevent="handleDeletePhoto")
     svg-icon(iconName="close" iconColor="gray-2" iconWidth="24px")
-  circle-checkbox(v-if="inFilePanel"
+  circle-checkbox(v-if="multiSelectMode !== 'off'"
     class="gallery-photo__checkbox"
-    :class="{show: hasCheckedAssets}"
+    :class="{show: hasCheckedAssets || multiSelectMode === 'on'}"
     :value="photo.assetIndex"
     :checkedValues="checkedAssets"
     :disabled="isUploading"
@@ -30,24 +30,23 @@ div(class="gallery-photo" :class="{border: deletable}")
 </template>
 
 <script lang="ts">
+import CircleCheckbox from '@/components/CircleCheckbox.vue'
+import { IAssetPhoto } from '@/interfaces/api'
+import { IFrame, IImage } from '@/interfaces/layer'
+import { FunctionPanelType, LayerType } from '@/store/types'
+import AssetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
+import brandkitUtils from '@/utils/brandkitUtils'
+import DragUtils from '@/utils/dragUtils'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import frameUtils from '@/utils/frameUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import mouseUtils from '@/utils/mouseUtils'
+import networkUtils from '@/utils/networkUtils'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-import { IFrame, IImage } from '@/interfaces/layer'
-import CircleCheckbox from '@/components/CircleCheckbox.vue'
-import AssetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
-import imageUtils from '@/utils/imageUtils'
-import pageUtils from '@/utils/pageUtils'
-import { IAssetPhoto } from '@/interfaces/api'
-import networkUtils from '@/utils/networkUtils'
-import layerUtils from '@/utils/layerUtils'
-import DragUtils from '@/utils/dragUtils'
-import generalUtils from '@/utils/generalUtils'
-import { FunctionPanelType, LayerType } from '@/store/types'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import mouseUtils from '@/utils/mouseUtils'
-import brandkitUtils from '@/utils/brandkitUtils'
-import frameUtils from '@/utils/frameUtils'
-import stepsUtils from '@/utils/stepsUtils'
 
 export default defineComponent({
   emits: [],
@@ -72,6 +71,10 @@ export default defineComponent({
     deletable: {
       type: Boolean,
       default: false
+    },
+    multiSelectMode: {
+      type: String as PropType<'hover' | 'on' | 'off'>,
+      default: 'off'
     }
   },
   components: {
@@ -121,7 +124,7 @@ export default defineComponent({
       return imageUtils.getSrc(data, photo.width)
     },
     showMoreBtn(): boolean {
-      return !this.inFilePanel && !this.inLogoPanel && !generalUtils.isTouchDevice()
+      return !this.inFilePanel && !this.inLogoPanel && !this.$isTouchDevice
     },
     panelPreviewSrc(): string {
       const img = this.$refs.img as HTMLImageElement
@@ -204,9 +207,9 @@ export default defineComponent({
       })
     },
     onClick(e: MouseEvent, photo: IAssetPhoto) {
-      if (generalUtils.isTouchDevice() && this.mobilePanel === 'replace') {
+      if (this.$isTouchDevice && this.mobilePanel === 'replace') {
         this.replaceImg(photo)
-      } else if (this.hasCheckedAssets && this.inFilePanel) {
+      } else if (this.multiSelectMode === 'on' || this.hasCheckedAssets) {
         this.modifyCheckedAssets(photo.assetIndex as number)
       } else {
         this.addImage(photo)
@@ -284,7 +287,7 @@ export default defineComponent({
           ...(this.isUploading && { isPreview: true, assetId: photo.id })
         }
       )
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         this.setCloseMobilePanelFlag(true)
       }
     },

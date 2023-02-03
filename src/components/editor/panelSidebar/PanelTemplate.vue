@@ -69,29 +69,29 @@ div(class="panel-template" ref="panel")
       //- Template wishing pool
       div(v-if="keyword && theme && !pending && resultGroupCounter<=10")
         span {{$t('NN0796', {type: $tc('NN0001', 3)})}}
-        nubtn(size="mid" class="mt-30")
+        nubtn(size="mid-center" class="mt-30")
           url(:url="$t('NN0791')" :newTab="true")
             span {{$t('NN0790', {type: $tc('NN0001', 3)})}}
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapActions, mapState, mapMutations, mapGetters } from 'vuex'
-import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import SearchBar from '@/components/SearchBar.vue'
+import listService from '@/apis/list'
+import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
-import PopupTheme from '@/components/popup/PopupTheme.vue'
 import PanelGroupTemplate from '@/components/editor/panelSidebar/PanelGroupTemplate.vue'
-import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
 import Url from '@/components/global/Url.vue'
-import themeUtils from '@/utils/themeUtils'
-import GalleryUtils from '@/utils/galleryUtils'
+import PopupTheme from '@/components/popup/PopupTheme.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { Itheme } from '@/interfaces/theme'
-import _ from 'lodash'
-import listService from '@/apis/list'
+import GalleryUtils from '@/utils/galleryUtils'
 import generalUtils from '@/utils/generalUtils'
+import themeUtils from '@/utils/themeUtils'
+import _ from 'lodash'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'PanelTemplate',
@@ -330,7 +330,7 @@ export default defineComponent({
       return new Set([...set, ...subset]).size === set.length
     },
     themeStyle(): Record<string, string> {
-      const gapTop = generalUtils.isTouchDevice() ? 60 : 80
+      const gapTop = this.$isTouchDevice ? 60 : 80
       return {
         maxHeight: `${(this.$refs.panel as HTMLElement).clientHeight - gapTop}px`
       }
@@ -340,9 +340,9 @@ export default defineComponent({
       let galleryUtils = null
       if (this.isSubsetOf(['3', '7', '13'], theme.split(','))) {
         // 判斷如果版型為IG限時動態(3) or 電商詳情頁(7), 最小高度則為200px
-        galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 30 : 300, 200, 10)
+        galleryUtils = new GalleryUtils(this.$isTouchDevice ? window.innerWidth - 30 : 300, 200, 10)
       } else {
-        galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 30 : 300, 140, 10)
+        galleryUtils = new GalleryUtils(this.$isTouchDevice ? window.innerWidth - 30 : 300, 140, 10)
       }
       const idContainerHeight = this.showAdminTool ? 24 : 0
       const result = galleryUtils

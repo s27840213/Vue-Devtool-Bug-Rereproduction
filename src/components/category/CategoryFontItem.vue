@@ -23,18 +23,17 @@ div(class="category-fonts pointer feature-button"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import TextUtils from '@/utils/textUtils'
-import TextPropUtils from '@/utils/textPropUtils'
+import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import { ISelection } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
-import layerUtils from '@/utils/layerUtils'
-import { IGroup, IParagraph, IText } from '@/interfaces/layer'
-import tiptapUtils from '@/utils/tiptapUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
-import generalUtils from '@/utils/generalUtils'
+import layerUtils from '@/utils/layerUtils'
+import TextPropUtils from '@/utils/textPropUtils'
+import TextUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -293,7 +292,7 @@ export default defineComponent({
           const newConfig = TextPropUtils.spanParagraphPropertyHandler('fontFamily', updateItem, start, end, config as IText)
           this.updateLayerProps(layerUtils.layerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
           tiptapUtils.updateHtml(newConfig.paragraphs)
-          !generalUtils.isTouchDevice() && tiptapUtils.focus()
+          !this.$isTouchDevice && tiptapUtils.focus()
         }
 
         AssetUtils.addAssetToRecentlyUsed({

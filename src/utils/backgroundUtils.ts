@@ -1,13 +1,10 @@
-import { nextTick } from 'vue'
+import i18n from '@/i18n'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import { IBackgroundImage, IPage } from '@/interfaces/page'
-import { SidebarPanelType } from '@/store/types'
 import store from '@/store'
 import { notify } from '@kyvg/vue3-notification'
-import i18n from '@/i18n'
 import assetUtils from './assetUtils'
 import editorUtils from './editorUtils'
-import eventUtils, { PanelEvent } from './eventUtils'
 import generalUtils from './generalUtils'
 import imageUtils from './imageUtils'
 import layerFactary from './layerFactary'
@@ -63,11 +60,6 @@ class BackgroundUtils {
   get backgroundImgFlip(): boolean[] {
     const { horizontalFlip = false, verticalFlip = false } = this.currPage.backgroundImage.config?.styles || {}
     return [horizontalFlip, verticalFlip]
-  }
-
-  switchPanelBgTab(index: number) {
-    store.commit('SET_currSidebarPanelType', SidebarPanelType.bg)
-    nextTick(() => { eventUtils.emit(PanelEvent.switchPanelBgInnerTab, index) })
   }
 
   handleImageFlip(flipIcon: string) {

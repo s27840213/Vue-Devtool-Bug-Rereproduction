@@ -7,7 +7,7 @@ div(class="brand-selector relative"
     span {{ $t('NN0089') }}
   div(v-else
     class="brand-selector__brand-name"
-    :class="[`${theme}-theme`, {hover: !isMobile}]")
+    :class="[`${theme}-theme`, {hover: !$isTouchDevice}]")
     input(v-if="isNameEditing"
       ref="brandName"
       v-model="editableName"
@@ -18,7 +18,7 @@ div(class="brand-selector relative"
       :title="brandName"
       @click="handleNameClick") {{ brandName }}
   div(class="brand-selector__dropdown pointer"
-    :class="[`${theme}-theme`, {mobile: isMobile}]"
+    :class="[`${theme}-theme`, {mobile: $isTouchDevice}]"
     @click="handleOpenMenu")
     svg-icon(:class="`${theme}-theme`"
       :style="dropdownStyles()"
@@ -57,13 +57,12 @@ div(class="brand-selector relative"
 </template>
 
 <script lang="ts">
+import { IBrand } from '@/interfaces/brandkit'
+import brandkitUtils from '@/utils/brandkitUtils'
+import editorUtils from '@/utils/editorUtils'
+import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
-import brandkitUtils from '@/utils/brandkitUtils'
-import { IBrand } from '@/interfaces/brandkit'
-import generalUtils from '@/utils/generalUtils'
-import editorUtils from '@/utils/editorUtils'
 
 export default defineComponent({
   props: {
@@ -98,9 +97,6 @@ export default defineComponent({
     brandName(): string {
       return brandkitUtils.getDisplayedBrandName(this.currentBrand)
     },
-    isMobile(): boolean {
-      return generalUtils.isTouchDevice()
-    }
   },
   watch: {
     currentHoverBrandId(newVal) {
@@ -126,7 +122,7 @@ export default defineComponent({
       } : {}
     },
     handleNameClick() {
-      if (this.isMobile) return
+      if (this.$isTouchDevice) return
       this.editableName = this.brandName
       this.isNameEditing = true
       this.$nextTick(() => {
@@ -170,7 +166,7 @@ export default defineComponent({
       })
     },
     handleOpenMenu() {
-      if (this.isMobile) {
+      if (this.$isTouchDevice) {
         editorUtils.setCurrActiveSubPanel('brand-list')
       } else {
         this.isBrandListOpen = true

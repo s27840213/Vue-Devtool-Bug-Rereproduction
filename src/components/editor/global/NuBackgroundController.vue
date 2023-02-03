@@ -15,17 +15,16 @@ div(class="nu-background-controller")
 </template>
 
 <script lang="ts">
+import { ICoordinate } from '@/interfaces/frame'
+import { IPage } from '@/interfaces/page'
+import ControlUtils from '@/utils/controlUtils'
+import eventUtils from '@/utils/eventUtils'
+import MathUtils from '@/utils/mathUtils'
+import MouseUtils from '@/utils/mouseUtils'
+import PageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import MouseUtils from '@/utils/mouseUtils'
-import ControlUtils from '@/utils/controlUtils'
-import { ICoordinate } from '@/interfaces/frame'
-import MathUtils from '@/utils/mathUtils'
-import PageUtils from '@/utils/pageUtils'
-import { IPage } from '@/interfaces/page'
-import stepsUtils from '@/utils/stepsUtils'
-import eventUtils from '@/utils/eventUtils'
-import generalUtils from '@/utils/generalUtils'
 
 export default defineComponent({
   emits: [],
@@ -334,7 +333,7 @@ export default defineComponent({
       this.setCursorStyle(el.style.cursor)
     },
     disableTouchEvent(e: TouchEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         e.preventDefault()
         e.stopPropagation()
       }
