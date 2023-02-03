@@ -19,7 +19,7 @@ div(class="overflow-container"
             :image="config.backgroundImage"
             :pageIndex="pageIndex"
             :color="config.backgroundColor"
-            :key="config.backgroundImage.id"
+            :key="config.backgroundImage.config.id"
             @mousedown.native.left="pageClickHandler()"
             :contentScaleRatio="contentScaleRatio"
             :padding="contentStyles.padding")
@@ -46,26 +46,25 @@ div(class="overflow-container"
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import i18n from '@/i18n'
-import groupUtils from '@/utils/groupUtils'
-import pageUtils from '@/utils/pageUtils'
-import popupUtils from '@/utils/popupUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import { SidebarPanelType } from '@/store/types'
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
-import modalUtils from '@/utils/modalUtils'
-import networkUtils from '@/utils/networkUtils'
-import DragUtils from '@/utils/dragUtils'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import textUtils from '@/utils/textUtils'
-import editorUtils from '@/utils/editorUtils'
-import generalUtils from '@/utils/generalUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
+import i18n from '@/i18n'
 import { ILayer } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import { SidebarPanelType } from '@/store/types'
 import doubleTapUtils from '@/utils/doubleTapUtils'
+import DragUtils from '@/utils/dragUtils'
+import editorUtils from '@/utils/editorUtils'
+import groupUtils from '@/utils/groupUtils'
+import modalUtils from '@/utils/modalUtils'
+import networkUtils from '@/utils/networkUtils'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import textUtils from '@/utils/textUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -308,7 +307,7 @@ export default defineComponent({
       }
     },
     onRightClick(event: MouseEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         return
       }
 

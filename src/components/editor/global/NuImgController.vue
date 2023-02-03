@@ -11,9 +11,9 @@ div(class="nu-img-controller")
         class="controller-point"
         :key="`scaler-${index}`"
         :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
-        @pointerdown.prevent.stop="isMobile ? null : scaleStart($event)"
-        @touchstart="isMobile ? null : disableTouchEvent($event)")
-    div(v-if="isMobile" v-for="(scaler, index) in controlPoints.scalerTouchAreas"
+        @pointerdown.prevent.stop="$isTouchDevice ? null : scaleStart($event)"
+        @touchstart="$isTouchDevice ? null : disableTouchEvent($event)")
+    div(v-if="$isTouchDevice" v-for="(scaler, index) in controlPoints.scalerTouchAreas"
         class="controller-point"
         :key="`scaler-touch-${index}`"
         :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
@@ -22,20 +22,19 @@ div(class="nu-img-controller")
 </template>
 
 <script lang="ts">
+import { ICoordinate } from '@/interfaces/frame'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IImage, IImageStyle } from '@/interfaces/layer'
+import ControlUtils from '@/utils/controlUtils'
+import eventUtils from '@/utils/eventUtils'
+import FrameUtils from '@/utils/frameUtils'
+import imageShadowUtils from '@/utils/imageShadowUtils'
+import LayerUtils from '@/utils/layerUtils'
+import MathUtils from '@/utils/mathUtils'
+import MouseUtils from '@/utils/mouseUtils'
+import pageUtils from '@/utils/pageUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import MouseUtils from '@/utils/mouseUtils'
-import ControlUtils from '@/utils/controlUtils'
-import { ICoordinate } from '@/interfaces/frame'
-import MathUtils from '@/utils/mathUtils'
-import LayerUtils from '@/utils/layerUtils'
-import FrameUtils from '@/utils/frameUtils'
-import generalUtils from '@/utils/generalUtils'
-import eventUtils from '@/utils/eventUtils'
-import imageShadowUtils from '@/utils/imageShadowUtils'
-import pageUtils from '@/utils/pageUtils'
-import { IImage, IImageStyle } from '@/interfaces/layer'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default defineComponent({
   emits: [],
@@ -125,9 +124,6 @@ export default defineComponent({
         outline: `${2 * (100 / this.scaleRatio * this.contentScaleRatio)}px solid #7190CC`,
         'pointer-events': this.pointerEvents ?? 'initial'
       }
-    },
-    isMobile(): boolean {
-      return generalUtils.isTouchDevice()
     },
     pointerEvents(): string {
       return this.forRender ? 'none' : 'initial'
@@ -492,7 +488,7 @@ export default defineComponent({
       this.setCursorStyle(el.style.cursor)
     },
     disableTouchEvent(e: TouchEvent) {
-      if (this.isMobile) {
+      if (this.$isTouchDevice) {
         e.preventDefault()
         e.stopPropagation()
       }

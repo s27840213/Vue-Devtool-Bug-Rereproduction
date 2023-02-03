@@ -22,14 +22,13 @@ div(class="panel-group-template py-20 px-10 flex flex-column" :style="panelStyle
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
 import assetUtils from '@/utils/assetUtils'
+import editorUtils from '@/utils/editorUtils'
 import modalUtils from '@/utils/modalUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import generalUtils from '@/utils/generalUtils'
-import editorUtils from '@/utils/editorUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   components: { CategoryTemplateItem },
@@ -64,12 +63,12 @@ export default defineComponent({
       return this.groupItem.group_type === 1
     },
     panelStyle(): Record<string, string> {
-      return generalUtils.isTouchDevice() ? {
+      return this.$isTouchDevice ? {
         padding: '20px 15px'
       } : {}
     },
     listStyle(): Record<string, string> {
-      return generalUtils.isTouchDevice() ? {
+      return this.$isTouchDevice ? {
         gridTemplateColumns: `repeat(${window.innerWidth >= 600 ? 3 : 2}, 1fr)`
       } : {}
     }
