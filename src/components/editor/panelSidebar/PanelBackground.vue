@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="panel-bg" :class="{'panel-flash': panelFlash}" @animationend="panelFlash = false")
+div(class="panel-bg")
   tabs(:tabs="[$tc('NN0002', 2),$t('NN0017')]" v-model="tabIndex")
   //- Search bar
   search-bar(v-if="showImageTab" class="mb-15"
@@ -65,7 +65,6 @@ import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -93,7 +92,6 @@ export default defineComponent({
         searchResult: 0
       },
       tabIndex: 0,
-      panelFlash: false
     }
   },
   computed: {
@@ -180,13 +178,6 @@ export default defineComponent({
       this.handleSearch,
       this.handleCategorySearch,
       this.getRecAndCate)
-    eventUtils.on(PanelEvent.switchPanelBgInnerTab, (tabIndex: number) => {
-      this.switchTab(tabIndex)
-      this.panelFlash = true
-    })
-  },
-  beforeUnmount() {
-    eventUtils.off(PanelEvent.switchPanelBgInnerTab)
   },
   activated() {
     this.$nextTick(() => {
@@ -320,18 +311,5 @@ export default defineComponent({
     padding: 10px 0;
     text-align: left;
   }
-}
-
-@keyframes flash {
-  0%, 50%, 100% {
-    background: setColor(gray-1-5);
-  }
-  25%, 75% {
-    background: #353951;
-  }
-}
-.panel-flash {
-  animation-name: flash;
-  animation-duration: 1s;
 }
 </style>
