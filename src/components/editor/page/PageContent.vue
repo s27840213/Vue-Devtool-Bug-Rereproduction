@@ -62,6 +62,7 @@ import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import textUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import imageUtils from '@/utils/imageUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -304,6 +305,9 @@ export default defineComponent({
           sel.empty()
           sel.removeAllRanges()
         }
+      } else {
+        imageUtils.setImgControlDefault()
+        editorUtils.setShowMobilePanel(false)
       }
     },
     onRightClick(event: MouseEvent) {
