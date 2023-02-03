@@ -346,7 +346,7 @@ export default defineComponent({
       height: 30px;
       display: flex;
       align-items: center;
-      justify-content: start;
+      justify-content: flex-start;
       gap: 10px;
       cursor: pointer;
       &:hover {
@@ -361,7 +361,7 @@ export default defineComponent({
       &-text {
         display: flex;
         align-items: center;
-        justify-content: start;
+        justify-content: flex-start;
         > span {
           font-weight: 400;
           font-size: 12px;

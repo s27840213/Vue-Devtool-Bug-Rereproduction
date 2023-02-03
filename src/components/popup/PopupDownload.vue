@@ -182,7 +182,7 @@ import { defineComponent } from 'vue'
 import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'click-outside-vue3'
-import { IDownloadServiceParams, ITypeOption, IOutputType } from '@/interfaces/download'
+import { IDownloadServiceParams, IOutputType, ITypeOption } from '@/interfaces/download'
 import DownloadUtil from '@/utils/downloadUtil'
 import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
 import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
@@ -257,7 +257,7 @@ export default defineComponent({
       saveSubmission: true,
       // saveSubmission: !!selectedTypeVal,
       selected: defaultOptions,
-      selectedTypeVal: defaultSelectedTypeVal,
+      selectedTypeVal: defaultSelectedTypeVal as IOutputType,
       rangeType,
       pageRange: rangeType === 'spec' ? pageRange : [],
       selectedDev

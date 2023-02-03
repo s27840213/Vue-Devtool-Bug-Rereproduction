@@ -3,11 +3,9 @@ import store from '@/store'
 import { IShape, IText, IImage, IGroup, ITmp, IStyle, ILayer, IFrame } from '@/interfaces/layer'
 import GroupUtils from '@/utils/groupUtils'
 import mathUtils from './mathUtils'
-import { IBounding } from '@/interfaces/math'
 import LayerUtils from '@/utils/layerUtils'
 import { IPage } from '@/interfaces/page'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import themeUtils from './themeUtils'
 
 class AlignUtils {
   get currSelectedInfo(): ICurrSelectedInfo {
@@ -117,12 +115,12 @@ class AlignUtils {
       const pageAlignPos = this.getPageAlignPos(type)
       LayerUtils.updateLayerStyles(pageIndex, index, pageAlignPos)
     } else {
-      let tmpStyles = LayerUtils.getTmpLayer().styles
+      let tmpStyles = LayerUtils.getSelectedLayer().styles
       const rotateDeg = tmpStyles.rotate
       if (rotateDeg !== 0) {
         // Step 3 -> reselect layer to make align calculation much easier
         GroupUtils.reselect()
-        tmpStyles = LayerUtils.getTmpLayer().styles
+        tmpStyles = LayerUtils.getSelectedLayer().styles
       }
       // Step 4 -> align layers to target position, and then reselect to get the correct bounding rect.
 
@@ -133,10 +131,10 @@ class AlignUtils {
       if (rotateDeg !== 0) {
         // Step 5 -> rotated tmp layer with -N deg
         LayerUtils.updateLayerStyles(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, { rotate: -rotateDeg })
-        const center1 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
+        const center1 = mathUtils.getCenter(LayerUtils.getSelectedLayer().styles)
         GroupUtils.reselect()
         // The center point of Step 6 and Step 7
-        const center2 = mathUtils.getCenter(LayerUtils.getTmpLayer().styles)
+        const center2 = mathUtils.getCenter(LayerUtils.getSelectedLayer().styles)
         // rotate the center 2 point around center1
         const center3 = mathUtils.getRotatedPoint(rotateDeg, center1, center2)
         console.log(center1, center2, center3)
@@ -145,7 +143,7 @@ class AlignUtils {
           x: center3.x - center2.x,
           y: center3.y - center2.y
         }
-        tmpStyles = LayerUtils.getTmpLayer().styles
+        tmpStyles = LayerUtils.getSelectedLayer().styles
         LayerUtils.updateLayerStyles(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, {
           x: tmpStyles.x + centerOffset.x,
           y: tmpStyles.y + centerOffset.y,
@@ -156,11 +154,11 @@ class AlignUtils {
   }
 
   distribueHr(): void {
-    let tmpStyles = LayerUtils.getTmpLayer().styles
+    let tmpStyles = LayerUtils.getSelectedLayer().styles
     const rotateDeg = tmpStyles.rotate
     if (rotateDeg !== 0) {
       GroupUtils.reselect()
-      tmpStyles = LayerUtils.getTmpLayer().styles
+      tmpStyles = LayerUtils.getSelectedLayer().styles
     }
     const totalWidth = tmpStyles.width
     const totalLayersWidth = this.currSelectedInfo.layers.reduce((acc: number, layer) => {
@@ -178,11 +176,11 @@ class AlignUtils {
   }
 
   distribueVr(): void {
-    let tmpStyles = LayerUtils.getTmpLayer().styles
+    let tmpStyles = LayerUtils.getSelectedLayer().styles
     const rotateDeg = tmpStyles.rotate
     if (rotateDeg !== 0) {
       GroupUtils.reselect()
-      tmpStyles = LayerUtils.getTmpLayer().styles
+      tmpStyles = LayerUtils.getSelectedLayer().styles
     }
     const totalHeight = tmpStyles.height
     const totalLayersHeight = this.currSelectedInfo.layers.reduce((acc: number, layer) => {

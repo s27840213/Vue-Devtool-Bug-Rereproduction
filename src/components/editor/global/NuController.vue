@@ -304,7 +304,8 @@ export default defineComponent({
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
-      currFunctionPanelType: 'getCurrFunctionPanelType'
+      currFunctionPanelType: 'getCurrFunctionPanelType',
+      useMobileEditor: 'getUseMobileEditor'
     }),
     subLayer(): any {
       if ([LayerType.group, LayerType.frame].includes(this.config.type)) {
@@ -364,7 +365,7 @@ export default defineComponent({
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
-        willChange: this.isDragging() ? 'transform' : '',
+        willChange: this.isDragging() && !this.useMobileEditor ? 'transform' : '',
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         pointerEvents,
@@ -473,7 +474,14 @@ export default defineComponent({
     eventUtils.removePointerEvent('pointermove', this.moving)
     this.isControlling = false
     this.setCursorStyle('')
-    LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
+    /**
+     * the unmounted function may be triggered after the page is destroy
+     * this would lead to the wrong pageIndex
+     */
+    const pageIndex = pageUtils.getPages.findIndex(p => p.layers.some(l => l.id === this.config.id))
+    if (pageIndex !== -1) {
+      LayerUtils.updateLayerProps(pageIndex, this.layerIndex, { moving: false })
+    }
     this.setMoving(false)
   },
   methods: {

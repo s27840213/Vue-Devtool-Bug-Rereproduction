@@ -17,7 +17,7 @@ div(class="design-item")
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapMutations } from 'vuex'
 import imageUtils from '@/utils/imageUtils'
 import vClickOutside from 'click-outside-vue3'
 import designUtils from '@/utils/designUtils'

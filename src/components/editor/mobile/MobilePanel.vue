@@ -58,50 +58,50 @@ div(class="mobile-panel"
       @close="closeMobilePanel")
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue'
-import i18n from '@/i18n'
-import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
-import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
-import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
-import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
-import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
-import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
+import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
+import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
 import PanelBrand from '@/components/editor/panelMobile/PanelBrand.vue'
-import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
-import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
+import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
+import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import PanelFlip from '@/components/editor/panelMobile/PanelFlip.vue'
+import PanelFontFormat from '@/components/editor/panelMobile/PanelFontFormat.vue'
+import PanelFontSize from '@/components/editor/panelMobile/PanelFontSize.vue'
+import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.vue'
+import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
+import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust.vue'
 import PanelOpacity from '@/components/editor/panelMobile/PanelOpacity.vue'
 import PanelOrder from '@/components/editor/panelMobile/PanelOrder.vue'
-import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
-import PanelFontSize from '@/components/editor/panelMobile/PanelFontSize.vue'
-import PanelFontFormat from '@/components/editor/panelMobile/PanelFontFormat.vue'
-import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.vue'
-import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
-import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
-import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
-import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
-import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
-import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust.vue'
 import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.vue'
-import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
+import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
+import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
+import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
+import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
+import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
+import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
+import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
+import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
+import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
+import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
+import i18n from '@/i18n'
+import { defineComponent } from 'vue'
 
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import { notify } from '@kyvg/vue3-notification'
-import vClickOutside from 'click-outside-vue3'
-import layerUtils from '@/utils/layerUtils'
-import imageUtils from '@/utils/imageUtils'
+import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IFrame } from '@/interfaces/layer'
-import frameUtils from '@/utils/frameUtils'
-import eventUtils from '@/utils/eventUtils'
-import generalUtils from '@/utils/generalUtils'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
-import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import editorUtils from '@/utils/editorUtils'
+import eventUtils from '@/utils/eventUtils'
+import frameUtils from '@/utils/frameUtils'
+import generalUtils from '@/utils/generalUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
+import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
 import _ from 'lodash'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   name: 'mobile-panel',
@@ -150,18 +150,19 @@ export default defineComponent({
   data() {
     return {
       panelHistory: [] as Array<string>,
-      panelHeight: 0,
+      // If fixSize is true, panelDragHeight take no effect.
+      panelDragHeight: 0,
       lastPointerY: 0,
       showExtraColorPanel: false,
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
       currSubColorEvent: '',
       innerTabIndex: 0,
-      fitPage: _.debounce(() => {
+      fitPage: _.throttle(() => {
         this.$nextTick(() => {
           pageUtils.fitPage()
         })
-      }, 100),
+      }, 100, { trailing: false }),
       resizeObserver: null as unknown as ResizeObserver
     }
   },
@@ -255,7 +256,7 @@ export default defineComponent({
           'row-gap': this.noRowGap ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
-            ? 'initial' : this.panelHeight + 'px'
+            ? 'initial' : this.panelDragHeight + 'px'
         }
       )
     },
@@ -350,7 +351,7 @@ export default defineComponent({
         }
         case 'brand': {
           return {
-            maxheight: this.maxHeightPx()
+            maxheight: this.panelParentHeight()
           }
         }
         default: {
@@ -482,7 +483,7 @@ export default defineComponent({
       this.innerTabIndex = 0
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
-      this.panelHeight = newVal === 'none' ? 0 : this.initHeightPx()
+      this.panelDragHeight = newVal === 'none' ? 0 : this.initPanelHeight()
     },
     showMobilePanel(newVal) {
       if (!newVal) {
@@ -491,10 +492,13 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.panelHeight = 0
+    this.panelDragHeight = 0
     this.resizeObserver = new ResizeObserver(() => {
-      this.$emit('panelHeight', (this.$refs.panel as HTMLElement).clientHeight)
-      this.fitPage()
+      this.$emit('panelHeight', this.currPanelHeight())
+      // Prevent fitPage when full size panel open, ex: SidebarPanel
+      if (this.fixSize || this.panelDragHeight !== this.panelParentHeight()) {
+        this.fitPage()
+      }
     })
     this.resizeObserver.observe(this.$refs.panel as Element)
   },
@@ -532,10 +536,13 @@ export default defineComponent({
       this.panelHistory = []
       editorUtils.setCurrActivePanel('none')
     },
-    initHeightPx() {
+    initPanelHeight() {
       return ((this.$el.parentElement as HTMLElement).clientHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
     },
-    maxHeightPx() {
+    currPanelHeight() {
+      return (this.$refs.panel as HTMLElement).clientHeight
+    },
+    panelParentHeight() {
       return (this.$el.parentElement as HTMLElement).clientHeight
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
@@ -544,23 +551,23 @@ export default defineComponent({
       }
       this.isDraggingPanel = true
       this.lastPointerY = event.clientY
-      this.panelHeight = (this.$refs.panel as HTMLElement).clientHeight
+      this.panelDragHeight = this.currPanelHeight()
       eventUtils.addPointerEvent('pointermove', this.dragingPanel)
       eventUtils.addPointerEvent('pointerup', this.dragPanelEnd)
     },
     dragingPanel(event: MouseEvent | PointerEvent) {
-      this.panelHeight -= event.clientY - this.lastPointerY
+      this.panelDragHeight -= event.clientY - this.lastPointerY
       this.lastPointerY = event.clientY
     },
     dragPanelEnd() {
       this.isDraggingPanel = false
-      const maxHeightPx = this.maxHeightPx()
-      if (this.panelHeight < maxHeightPx * 0.25) {
+      const panelParentHeight = this.panelParentHeight()
+      if (this.panelDragHeight < panelParentHeight * 0.25) {
         this.closeMobilePanel()
-      } else if (this.panelHeight >= maxHeightPx * 0.75) {
-        this.panelHeight = maxHeightPx
+      } else if (this.panelDragHeight >= panelParentHeight * 0.75) {
+        this.panelDragHeight = panelParentHeight
       } else {
-        this.panelHeight = maxHeightPx * 0.5
+        this.panelDragHeight = panelParentHeight * 0.5
       }
 
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)

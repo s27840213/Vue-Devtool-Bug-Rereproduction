@@ -6,14 +6,12 @@ div(class="nu-clipper layer-flip" ref="body"
 </template>
 
 <script lang="ts">
-import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup } from '@/interfaces/layer'
 import { LayerType } from '@/store/types'
 import cssConverter from '@/utils/cssConverter'
 import frameUtils from '@/utils/frameUtils'
 import layerUtils from '@/utils/layerUtils'
 import { defineComponent } from 'vue'
-import Svgpath from 'svgpath'
 import pageUtils from '@/utils/pageUtils'
 import { mapGetters, mapState } from 'vuex'
 

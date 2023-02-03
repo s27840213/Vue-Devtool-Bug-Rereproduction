@@ -1,6 +1,9 @@
 import ControlUtils from '@/utils/controlUtils'
 import store from '@/store'
-import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp, IGroup, IImage, IShape } from '@/interfaces/layer'
+import {
+  ILayer, IParagraph, IParagraphStyle, ISpan,
+  ISpanStyle, IText, ITmp, IGroup
+} from '@/interfaces/layer'
 import { IFont, ISelection } from '@/interfaces/text'
 import GeneralUtils from './generalUtils'
 import LayerUtils from './layerUtils'
@@ -1279,7 +1282,7 @@ class TextUtils {
       isError = true
     } finally {
       if (isError === true) {
-        // console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (toSetFlag && this.toSetFlagId === setFlagId) {
         this.setIsFontLoading(false)

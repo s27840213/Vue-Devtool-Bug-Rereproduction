@@ -317,7 +317,7 @@ export default defineComponent({
       return this.currSelectedInfo.layers.length
     },
     isLocked(): boolean {
-      return layerUtils.getTmpLayer().locked
+      return layerUtils.getSelectedLayer().locked
     },
     isGroup(): boolean {
       return layerUtils.getCurrLayer.type === LayerType.group

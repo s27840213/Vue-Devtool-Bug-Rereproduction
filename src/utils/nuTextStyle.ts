@@ -1,4 +1,4 @@
-import Vue, { nextTick } from 'vue'
+import { nextTick } from 'vue'
 import { IGroup, IText } from '@/interfaces/layer'
 import { Extension } from '@tiptap/core'
 import { Editor } from '@tiptap/vue-3'

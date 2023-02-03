@@ -158,14 +158,13 @@ div(class="page-wrapper" ref="page-wrapper" :style="pageRootStyles" :id="`nu-pag
 import { defineComponent, PropType } from 'vue'
 import { notify } from '@kyvg/vue3-notification'
 import { mapMutations, mapGetters, mapState } from 'vuex'
-import { IShape, IText, IImage, IGroup, ILayer, ITmp, IFrame, IImageStyle } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ILayer, IFrame } from '@/interfaces/layer'
 import PageContent from '@/components/editor/page/PageContent.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
 import SnapUtils from '@/utils/snapUtils'
-import { ISnapline } from '@/interfaces/snap'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -173,7 +172,6 @@ import StepsUtils from '@/utils/stepsUtils'
 import DimBackground from '@/components/editor/page/DimBackground.vue'
 import SnapLineArea from '@/components/editor/page/SnapLineArea.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
-import rulerUtils from '@/utils/rulerUtils'
 import { IPage, IPageState } from '@/interfaces/page'
 import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
 import frameUtils from '@/utils/frameUtils'
@@ -196,7 +194,7 @@ export default defineComponent({
     LazyLoad
   },
   created() {
-    this.pageState.modules.snapUtils.pageIndex = this.pageIndex
+    this.updateSnapUtilsIndex(this.pageIndex)
   },
   data() {
     return {
@@ -268,7 +266,7 @@ export default defineComponent({
   },
   watch: {
     pageIndex(val) {
-      this.pageState.modules.snapUtils.pageIndex = val
+      this.updateSnapUtilsIndex(val)
     },
     isOutOfBound(val) {
       if (val && this.currFunctionPanelType === FunctionPanelType.photoShadow && layerUtils.pageIndex === this.pageIndex) {
@@ -447,7 +445,8 @@ export default defineComponent({
       setDropdown: 'popup/SET_STATE',
       setPanelType: 'SET_currFunctionPanelType',
       setSidebarType: 'SET_currSidebarPanelType',
-      setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
+      setCurrHoveredPageIndex: 'SET_currHoveredPageIndex',
+      updateSnapUtilsIndex: 'UPDATE_snapUtilsIndex'
     }),
     handleSpecialCharacter(e: KeyboardEvent) {
       // For those using keyCode in their codebase, we recommend converting them to their kebab-cased named equivalents.
@@ -585,8 +584,10 @@ export default defineComponent({
       } else {
         this.setCurrActivePageIndex(this.pageIndex)
       }
-      pageUtils.deletePage(this.pageIndex)
-      StepsUtils.record()
+      this.$nextTick(() => {
+        pageUtils.deletePage(this.pageIndex)
+        StepsUtils.record()
+      })
     },
     duplicatePage() {
       if (this.isProcessingShadow) {

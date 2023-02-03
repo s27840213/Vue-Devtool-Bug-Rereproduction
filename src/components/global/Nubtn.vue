@@ -9,7 +9,7 @@ div(:class="`nubtn ${theme} ${sizeClass} ${status}`"
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent, PropType } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   name: 'Nubtn',

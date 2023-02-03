@@ -2,7 +2,6 @@ import { IGroup } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { notify } from '@kyvg/vue3-notification'
-import Vue from 'vue'
 
 class TestUtils {
   timer: Record<string, {

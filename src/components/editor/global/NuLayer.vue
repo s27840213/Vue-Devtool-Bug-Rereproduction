@@ -275,7 +275,8 @@ export default defineComponent({
       isHandling: 'shadow/isHandling',
       isShowPagePanel: 'page/getShowPagePanel',
       isHandleShadow: 'shadow/isHandling',
-      renderForPDF: 'user/getRenderForPDF'
+      renderForPDF: 'user/getRenderForPDF',
+      useMobileEditor: 'getUseMobileEditor'
     }),
     lazyloadSize(): { height: number, width: number } {
       const { config, contentScaleRatio } = this
@@ -300,7 +301,7 @@ export default defineComponent({
       }
     },
     layerWrapperStyles(): any {
-      if (this.isImgCtrl || this.inFrame || this.isTouchDevice() || !this.isActive) {
+      if (this.isImgCtrl || this.inFrame || this.isTouchDevice() || this.useMobileEditor) {
         return {}
       }
       return { transform: `translateZ(${this.config.styles.zindex}px)`, ...this.transformStyle }
@@ -397,7 +398,7 @@ export default defineComponent({
         CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
         {
           outline,
-          willChange: !this.isSubLayer && this.isDragging ? 'transform' : '',
+          willChange: !this.isSubLayer && this.isDragging && !this.useMobileEditor ? 'transform' : '',
           pointerEvents,
           clipPath,
           ...this.transformStyle
@@ -412,7 +413,7 @@ export default defineComponent({
             textEffectStyles,
             textBgStyles,
             {
-              willChange: 'text-shadow' + (this.isDragging ? ', transform' : ''),
+              willChange: this.useMobileEditor ? '' : ('text-shadow' + (this.isDragging ? ', transform' : '')),
               '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
             }
           )
@@ -433,7 +434,7 @@ export default defineComponent({
       }
       return styles
     },
-    lineMoverStyles(): {[key: string]: string} {
+    lineMoverStyles(): { [key: string]: string } {
       if (!this.isLine) return {}
       const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       const page = pageUtils.getPage(this.pageIndex)
@@ -958,6 +959,7 @@ export default defineComponent({
 }
 
 .clip-contour {
+  pointer-events: none;
   position: absolute;
   top: 0;
   left: 0;

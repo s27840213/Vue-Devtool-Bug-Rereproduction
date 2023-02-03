@@ -33,7 +33,7 @@ import layerUtils from '@/utils/layerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 import { notify } from '@kyvg/vue3-notification'
-import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup } from '@/interfaces/layer'
 import mappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
@@ -113,7 +113,7 @@ export default defineComponent({
       return this.currSelectedInfo.layers.length
     },
     isLocked(): boolean {
-      return this.inBgSettingMode ? backgroundUtils.backgroundLocked : layerUtils.getTmpLayer().locked
+      return this.inBgSettingMode ? backgroundUtils.backgroundLocked : layerUtils.getSelectedLayer().locked
     },
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1

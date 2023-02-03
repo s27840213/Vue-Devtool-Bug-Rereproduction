@@ -208,7 +208,7 @@ export default defineComponent({
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: start;
+  justify-content: flex-start;
   gap: 5px;
   padding: 6px 0;
   cursor: pointer;
@@ -226,7 +226,7 @@ export default defineComponent({
   &__text {
     display: flex;
     align-items: center;
-    justify-content: start;
+    justify-content: flex-start;
     height: 12px;
     transform: scale(0.8);
     transform-origin: left;

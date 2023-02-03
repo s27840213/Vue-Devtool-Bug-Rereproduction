@@ -14,7 +14,6 @@ import uploadUtils from '@/utils/uploadUtils'
 import editorUtils from '@/utils/editorUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { omit } from 'lodash'
 
 export default defineComponent({
   emits: [],
@@ -77,7 +76,7 @@ export default defineComponent({
       clearState: 'CLEAR_state',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
     }),
-    setIsLoading(bool: boolean) {
+    setIsLoading() {
       this.isLoading = true
     }
   }
