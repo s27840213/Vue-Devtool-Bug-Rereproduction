@@ -80,7 +80,6 @@ class UploadUtils {
 
   event: any
   eventHash: { [index: string]: (param: any) => void }
-  isGettingDesign: boolean
   designStatusTimer: number
   DEFAULT_POLLING_RETRY_LIMIT = 15
 
@@ -102,7 +101,6 @@ class UploadUtils {
       id: '',
       teamId: ''
     }
-    this.isGettingDesign = false
     this.event = new EventEmitter()
     this.eventHash = {}
     this.designStatusTimer = -1
@@ -575,7 +573,7 @@ class UploadUtils {
     // const exportIds = router.currentRoute.value.query.export_ids
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
 
-    if (this.isGettingDesign) {
+    if (store.state.isGettingDesign) {
       return
     }
     logUtils.setLog(`Query Info:
@@ -1128,7 +1126,7 @@ class UploadUtils {
     let fetchTarget = ''
     const designId = designParams.designId ?? ''
     const teamId = designParams.teamId ?? this.teamId
-    this.isGettingDesign = true
+    store.commit('SET_isGettingDesign', true)
     logUtils.setLog(`Get Design
       Type: ${type}
       DesignId: ${designId}
@@ -1189,7 +1187,7 @@ class UploadUtils {
             })
             themeUtils.refreshTemplateState()
             stepsUtils.reset()
-            this.isGettingDesign = false
+            store.commit('SET_isGettingDesign', false)
           })
       }
       case GetDesignType.NEW_DESIGN_TEMPLATE: {
@@ -1207,7 +1205,7 @@ class UploadUtils {
           logUtils.setLog('Fail to get design')
           themeUtils.refreshTemplateState()
           router.replace({ query: Object.assign({}) })
-          this.isGettingDesign = false
+          store.commit('SET_isGettingDesign', false)
         } else {
           response.json().then(async (json) => {
             switch (type) {
@@ -1254,7 +1252,7 @@ class UploadUtils {
               }
             }
           }).then(() => {
-            this.isGettingDesign = false
+            store.commit('SET_isGettingDesign', false)
             const editorView = document.querySelector('.editor-view') as HTMLElement
             if (editorUtils) {
               pageUtils.fitPage()
@@ -1265,7 +1263,7 @@ class UploadUtils {
       })
       .catch((err) => {
         router.replace({ query: Object.assign({}) })
-        this.isGettingDesign = false
+        store.commit('SET_isGettingDesign', false)
         type === GetDesignType.ASSET_DESIGN && themeUtils.refreshTemplateState()
         logUtils.setLog(`Fetch error: ${err}`)
         console.error('fetch failed', err)

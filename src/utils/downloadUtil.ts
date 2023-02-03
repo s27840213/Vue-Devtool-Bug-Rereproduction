@@ -9,19 +9,19 @@ class DownloadUtil {
       jpg: {
         scale: 1,
         quality: 90,
-        ...(this.isAdmin && { bleed: 0 })
+        bleed: 0
       },
       png: {
         scale: 1,
         omitBackground: 0,
-        ...(this.isAdmin && { bleed: 0 })
+        bleed: 0
       },
       pdf_standard: {
         outline: 0,
         cmyk: 0
       },
       pdf_print: {
-        ...(this.isAdmin && { bleed: 1 }),
+        bleed: 1,
         outline: 1,
         cmyk: 0
       },
@@ -33,7 +33,6 @@ class DownloadUtil {
     } as { [key: string]: IDownloadTypeAttrs }
   }
 
-  get isAdmin(): boolean { return store.getters['user/isAdmin'] }
   get userId(): string { return store.getters['user/getUserId'] }
 
   getTypeAttrs (type: string): IDownloadTypeAttrs {
