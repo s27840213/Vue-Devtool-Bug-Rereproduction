@@ -48,8 +48,8 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
       }
     } else if (type === 'new-design-size' && width && height) {
       designUtils.newDesign(
-        parseInt(width),
-        parseInt(height === '0' ? width : height),
+        parseFloat(width),
+        parseFloat(height === '0' ? width : height),
         unit || 'px',
       )
       if (themeId === '7') {

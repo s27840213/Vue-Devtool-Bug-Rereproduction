@@ -63,7 +63,7 @@ div(class="color-panel"
           color-btn(v-for="color in defaultColors" :color="color" :key="color"
                     :active="color === selectedColor"
                     @click="handleColorEvent(color)")
-          img(v-if="mode==='PanelBG'"
+          img(v-if="selectingBg"
             class="full-width full-height"
             src="@/assets/img/svg/transparent.svg"
             @click="handleColorEvent('#ffffff00')")
@@ -81,7 +81,7 @@ import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
-import { SidebarPanelType } from '@/store/types'
+import { ColorEventType, SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -211,8 +211,11 @@ export default defineComponent({
         ? this._recentlyColors
         : this._recentlyColors.slice(0, 20)
     },
+    selectingBg(): boolean {
+      return this.mode === 'PanelBG' || colorUtils.currEvent === ColorEventType.background
+    },
     defaultColors(): unknown {
-      return this.mode === 'PanelBG' ? this.defaultBgColor : this._defaultColors
+      return this.selectingBg ? this.defaultBgColor : this._defaultColors
     },
   },
   methods: {

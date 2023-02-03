@@ -105,7 +105,6 @@ export default defineComponent({
       editorViewResizeObserver: null as unknown as ResizeObserver,
       isSwiping: false,
       isScaling: false,
-      uploadUtils: uploadUtils,
       hanleWheelTimer: -1,
       handleWheelTransition: false,
       oriX: 0,
@@ -121,7 +120,7 @@ export default defineComponent({
           uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
           modalUtils.setModalInfo(
             `${this.$t('NN0788')}`,
-            [`${this.$t('NN0789', { size: '6000 x 6000' })}`],
+            [`${this.$t('NN0789', { size: `${pageUtils.MAX_WIDTH} x ${pageUtils.MAX_HEIGHT}` })}`],
             {
               msg: `${this.$t('NN0358')}`,
               class: 'btn-blue-mid',
@@ -199,7 +198,8 @@ export default defineComponent({
 
   computed: {
     ...mapState({
-      mobileAllPageMode: 'mobileEditor/mobileAllPageMode'
+      mobileAllPageMode: 'mobileEditor/mobileAllPageMode',
+      isGettingDesign: 'isGettingDesign'
     }),
     ...mapGetters({
       groupId: 'getGroupId',
@@ -279,9 +279,6 @@ export default defineComponent({
         transform: this.isDetailPage ? 'initail' : `translate3d(0, -${this.currCardIndex * this.cardHeight}px,0)`,
         transition: `transform ${transformDuration}s`
       }
-    },
-    isGettingDesign(): boolean {
-      return this.uploadUtils.isGettingDesign
     }
   },
   methods: {

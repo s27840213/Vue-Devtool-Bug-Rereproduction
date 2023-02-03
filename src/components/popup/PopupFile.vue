@@ -15,7 +15,7 @@ div(class="popup-file")
   div(class="popup-file__item" @click="newDesign()")
     span {{$tc('NN0072')}}
   hr(class="popup-file__hr")
-  div(v-if="isAdmin" class="popup-file__item " @click="toggleBleed()")
+  div(class="popup-file__item " @click="toggleBleed()")
     span {{hasBleed ? `${$t('NN0779')}` : `${$t('NN0778')}`}}
   div(class="popup-file__item " @click="togglerRuler()")
     span {{$t('NN0073')}}
@@ -157,10 +157,7 @@ export default defineComponent({
     },
     toggleBleed() {
       const isEnableBleed = !this.hasBleed
-      for (let idx = 0; idx < this.pagesLength; idx++) {
-        pageUtils.setIsEnableBleed(isEnableBleed, idx)
-        if (!isEnableBleed) pageUtils.resetBleeds(idx)
-      }
+      for (let idx = 0; idx < this.pagesLength; idx++) pageUtils.setIsEnableBleed(isEnableBleed, idx)
       stepsUtils.record()
     },
     newDesign() {
