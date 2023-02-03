@@ -22,7 +22,7 @@ class PageUtils {
   get MAX_AREA() { return this.MAX_WIDTH * this.MAX_HEIGHT }
   get MAX_SIZE() { return 8000 }
   get MIN_SIZE() { return 40 }
-  get MAX_BLEED() { return { px: 216, mm: 20 } }
+  get MAX_BLEED() { return { px: 216, mm: 18.288 } }
   get MOBILE_CARD_PADDING() { return 16 }
 
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
