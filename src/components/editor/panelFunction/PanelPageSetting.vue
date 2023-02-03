@@ -241,21 +241,21 @@ div(class="page-setting")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import SearchBar from '@/components/SearchBar.vue'
-import RadioBtn from '@/components/global/RadioBtn.vue'
-import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import designApis from '@/apis/design-info'
-import GeneralUtils from '@/utils/generalUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
+import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
+import RadioBtn from '@/components/global/RadioBtn.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import { IBleed, IPage } from '@/interfaces/page'
+import { ICoverTheme, Itheme, IThemeTemplate } from '@/interfaces/theme'
+import GeneralUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { notify } from '@kyvg/vue3-notification'
 import { floor, round } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -719,7 +719,7 @@ export default defineComponent({
     },
     maxBleed(key: string) {
       const dpi = unitUtils.getConvertDpi(pageUtils.currFocusPageSize)
-      return floor(unitUtils.convert(pageUtils.MAX_BLEED, 'px', this.sizeToShow.unit, (key === 'left' || key === 'right') ? dpi.width : dpi.height), this.sizeToShow.unit === 'px' ? 0 : PRECISION)
+      return this.sizeToShow.unit === 'px' ? pageUtils.MAX_BLEED.px : floor(unitUtils.convert(pageUtils.MAX_BLEED.mm, 'mm', this.sizeToShow.unit, (key === 'left' || key === 'right') ? dpi.width : dpi.height), this.sizeToShow.unit === 'px' ? 0 : PRECISION)
     },
     setBleed(evt: Event, key: string, all = false) {
       const value = (evt.target as HTMLInputElement).value
