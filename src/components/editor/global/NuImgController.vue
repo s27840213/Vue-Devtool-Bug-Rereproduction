@@ -119,7 +119,7 @@ export default defineComponent({
       const zindex = (this.layerIndex + 1) * 1000
       const pos = this.imgControllerPosHandler()
       return {
-        transform: `translate3d(${pos.x * this.contentScaleRatio}px, ${pos.y * this.contentScaleRatio}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
+        transform: `translate(${pos.x * this.contentScaleRatio}px, ${pos.y * this.contentScaleRatio}px) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`,
         outline: `${2 * (100 / this.scaleRatio * this.contentScaleRatio)}px solid #7190CC`,
@@ -209,7 +209,8 @@ export default defineComponent({
     controllerStyles() {
       const zindex = 0
       return {
-        transform: `translate3d(${this.config.styles.x * this.contentScaleRatio}px, ${this.config.styles.y * this.contentScaleRatio}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
+        transform: `translate(${this.config.styles.x * this.contentScaleRatio}px, ${this.config.styles.y * this.contentScaleRatio}px) rotate(${this.config.styles.rotate}deg)`,
+        // transform: `translate3d(${this.config.styles.x * this.contentScaleRatio}px, ${this.config.styles.y * this.contentScaleRatio}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width * this.contentScaleRatio}px`,
         height: `${this.config.styles.height * this.contentScaleRatio}px`,
         outline: `${2 * (100 / this.scaleRatio * this.contentScaleRatio)}px solid #7190CC`
