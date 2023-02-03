@@ -75,22 +75,22 @@ div(:layer-index="`${layerIndex}`"
           div(class="control-point resizer"
               :key="`resizer-${index}`"
               :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="!$isTouchDevice ? resizeStart($event) : null"
+              @pointerdown.prevent.stop="!$isTouchDevice ? resizeStart($event, resizer.type) : null"
               @touchstart="!$isTouchDevice ? disableTouchEvent($event) : null")
           div(class="control-point resizer"
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="!$isTouchDevice ? resizeStart($event) : null"
+              @pointerdown.prevent.stop="!$isTouchDevice ? resizeStart($event, resizer.type) : null"
               @touchstart="!$isTouchDevice ? disableTouchEvent($event) : null")
         div(v-if="$isTouchDevice" v-for="(resizer, index) in getResizer(controlPoints, false, true)"
             class="control-point__resize-bar-wrapper")
           div(class="control-point resizer"
               :key="`resizer-touch-${index}`"
               :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="resizeStart"
+              @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
               @touchstart="disableTouchEvent")
           div(class="control-point resizer"
               :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="resizeStart"
+              @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
               @touchstart="disableTouchEvent")
         div(v-if="config.type === 'text' && contentEditable && !$isTouchDevice"
             class="control-point__resize-bar-wrapper")
@@ -1413,7 +1413,7 @@ export default defineComponent({
       this.$emit('setFocus')
       this.snapUtils.event.emit('clearSnapLines')
     },
-    resizeStart(event: MouseEvent) {
+    resizeStart(event: MouseEvent, type: string) {
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
@@ -1439,7 +1439,8 @@ export default defineComponent({
       this.control.xSign = (clientP.x - center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - center.y > 0) ? 1 : -1
 
-      this.control.isHorizon = ControlUtils.dirHandler(clientP, rect)
+      this.control.isHorizon = type === 'H'
+      // this.control.isHorizon = ControlUtils.dirHandler(clientP, rect)
 
       eventUtils.addPointerEvent('pointermove', this.resizing)
       eventUtils.addPointerEvent('pointerup', this.resizeEnd)
@@ -1466,7 +1467,7 @@ export default defineComponent({
           ImageUtils.initLayerSize = this.initSize
           ImageUtils.xSign = (clientP.x - center.x > 0) ? 1 : -1
           ImageUtils.ySign = (clientP.y - center.y > 0) ? 1 : -1
-          ImageUtils.isHorizon = ControlUtils.dirHandler(clientP, rect)
+          ImageUtils.isHorizon = this.control.isHorizon
           break
         case 'frame':
           /**
@@ -1484,7 +1485,7 @@ export default defineComponent({
           ImageUtils.initLayerSize = this.initSize
           ImageUtils.xSign = (clientP.x - center.x > 0) ? 1 : -1
           ImageUtils.ySign = (clientP.y - center.y > 0) ? 1 : -1
-          ImageUtils.isHorizon = ControlUtils.dirHandler(clientP, rect)
+          ImageUtils.isHorizon = this.control.isHorizon
       }
     },
     resizing(event: MouseEvent | TouchEvent) {
@@ -1510,10 +1511,8 @@ export default defineComponent({
       let offsetHeight = this.control.isHorizon ? 0 : this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad)) * offsetMultiplier
       if (offsetWidth === 0 && offsetHeight === 0) return
 
-      width = offsetWidth + initWidth
-      height = offsetHeight + initHeight
-      width = width < MIN_THINKNESS ? MIN_THINKNESS : width
-      height = height < MIN_THINKNESS ? MIN_THINKNESS : height
+      width = Math.max(MIN_THINKNESS, offsetWidth + initWidth)
+      height = Math.max(MIN_THINKNESS, offsetHeight + initHeight)
 
       const offsetSize = {
         width: width - initWidth,
@@ -1538,7 +1537,6 @@ export default defineComponent({
           break
         }
         case 'text':
-          // [width, height] = TextUtils.textResizeHandler(this.pageIndex, this.layerIndex, width, height)
           /**
            * When the size is very close to the text-wrapping boundary, the getBoundingClientRect() result in textResizeHandler may be
            * wrong. That maybe results from the tiny delay between the size-update by setting layerSize and the function call. Thus,

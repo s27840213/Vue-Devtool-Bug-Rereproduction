@@ -1,12 +1,12 @@
-import store from '@/store'
+import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
 import { IShape } from '@/interfaces/layer'
-import { IResizer } from '@/interfaces/controller'
-import shapeUtils from '@/utils/shapeUtils'
+import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
-import layerUtils from './layerUtils'
-import editorUtils from './editorUtils'
+import shapeUtils from '@/utils/shapeUtils'
 import { svg1, svg2, svg3, svg4, svg5, svg6, svg7, svg8 } from './cornerRotate'
+import editorUtils from './editorUtils'
+import layerUtils from './layerUtils'
 import mathUtils from './mathUtils'
 
 const blob1 = new Blob([svg1], { type: 'image/svg+xml' })
@@ -266,23 +266,6 @@ class Controller {
         'ew-resize'
       ]
     }
-  }
-
-  dirHandler(clientP: ICoordinate, rect: DOMRect): boolean {
-    const center: ICoordinate = this.getRectCenter(rect)
-    const H = {
-      left: center.x - rect.width / 2,
-      right: center.x + rect.width / 2
-    }
-    const V = {
-      top: center.y - rect.height / 2,
-      bottom: center.y + rect.height / 2
-    }
-    const xmin = Math.min(Math.abs(clientP.x - H.left), Math.abs(clientP.x - H.right))
-    const ymin = Math.min(Math.abs(clientP.y - V.top), Math.abs(clientP.y - V.bottom))
-    /**  If it's in horizontal direction, return true
-     *  */
-    return xmin < ymin
   }
 
   getTranslateCompensation(initData: { xSign: number, ySign: number, x: number, y: number, angle: number },
