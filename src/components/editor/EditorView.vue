@@ -116,8 +116,7 @@ export default defineComponent({
       from: -1,
       screenWidth: document.documentElement.clientWidth,
       screenHeight: document.documentElement.clientHeight,
-      scrollHeight: 0,
-      uploadUtils: uploadUtils
+      scrollHeight: 0
     }
   },
   created() {
@@ -171,7 +170,7 @@ export default defineComponent({
           uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
           modalUtils.setModalInfo(
             `${this.$t('NN0788')}`,
-            [`${this.$t('NN0789', { size: '6000 x 6000' })}`],
+            [`${this.$t('NN0789', { size: `${pageUtils.MAX_WIDTH} x ${pageUtils.MAX_HEIGHT}` })}`],
             {
               msg: `${this.$t('NN0358')}`,
               class: 'btn-blue-mid',
@@ -261,7 +260,8 @@ export default defineComponent({
   },
   computed: {
     ...mapState({
-      cursor: 'cursor'
+      cursor: 'cursor',
+      isGettingDesign: 'isGettingDesign'
     }),
     ...mapGetters({
       groupId: 'getGroupId',
@@ -285,7 +285,7 @@ export default defineComponent({
       isSettingScaleRatio: 'getIsSettingScaleRatio',
       enableComponentLog: 'getEnalbleComponentLog',
       pagesLength: 'getPagesLength',
-      isImgCtrl: 'imgControl/isImgCtrl'
+      isImgCtrl: 'imgControl/isImgCtrl',
     }),
     pages(): Array<IPage> {
       return (this.pagesState as Array<IPageState>).map(p => p.config)
@@ -322,9 +322,6 @@ export default defineComponent({
     },
     showRuler(): boolean {
       return this._showRuler && !this.inBgRemoveMode
-    },
-    isGettingDesign(): boolean {
-      return this.uploadUtils.isGettingDesign
     }
   },
   methods: {

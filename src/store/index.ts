@@ -124,7 +124,8 @@ const getDefaultState = (): IEditorState => ({
   enalbleComponentLog: false,
   inScreenshotPreviewRoute: false,
   cursor: '',
-  isPageScaling: false
+  isPageScaling: false,
+  isGettingDesign: false
 })
 
 const state = getDefaultState()
@@ -1009,6 +1010,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isPageScaling(state: IEditorState, bool: boolean) {
     state.isPageScaling = bool
+  },
+  SET_isGettingDesign(state: IEditorState, bool: boolean) {
+    state.isGettingDesign = bool
   },
   UPDATE_pagePos(state: IEditorState, data: { pageIndex: number, styles: { [key: string]: number } }) {
     const { pageIndex, styles } = data

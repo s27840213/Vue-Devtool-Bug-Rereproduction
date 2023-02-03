@@ -17,7 +17,9 @@ import unitUtils, { PRECISION } from './unitUtils'
 import layerUtils from './layerUtils'
 
 class PageUtils {
-  get MAX_AREA() { return 6000 * 6000 }
+  get MAX_WIDTH() { return 6000 }
+  get MAX_HEIGHT() { return 6000 }
+  get MAX_AREA() { return this.MAX_WIDTH * this.MAX_HEIGHT }
   get MAX_SIZE() { return 8000 }
   get MIN_SIZE() { return 40 }
   get MOBILE_CARD_PADDING() { return 16 }

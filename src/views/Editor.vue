@@ -44,7 +44,7 @@ export default defineComponent({
     if (uploadUtils.isLogin && this.$router.currentRoute.value.query.design_id && this.$router.currentRoute.value.query.type) {
       this.isSaving = true
       uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
-        uploadUtils.isGettingDesign = false
+        this.setIsGettingDesign(false)
         logUtils.setLog('Leave editor')
         this.isSaving = false
         next()
@@ -74,7 +74,8 @@ export default defineComponent({
     ...mapMutations({
       setCurrFunctionPanel: 'SET_currFunctionPanelType',
       clearState: 'CLEAR_state',
-      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
+      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
+      setIsGettingDesign: 'SET_isGettingDesign'
     }),
     setIsLoading() {
       this.isLoading = true
