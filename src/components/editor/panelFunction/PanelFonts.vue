@@ -1,9 +1,9 @@
 <template lang="pug">
 div(class="panel-fonts")
-  div(v-if="!noTitle && !isMobile" class="panel-fonts__title")
-    span(v-if="!isMobile" class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
+  div(v-if="!noTitle && !$isTouchDevice" class="panel-fonts__title")
+    span(v-if="!$isTouchDevice" class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
     svg-icon(
-      v-if="!isMobile"
+      v-if="!$isTouchDevice"
       class="panel-fonts__close pointer"
       :iconName="'close'"
       :iconWidth="'30px'"
@@ -36,20 +36,20 @@ div(class="panel-fonts")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import SearchBar from '@/components/SearchBar.vue'
-import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
-import FileUtils from '@/utils/fileUtils'
-import TextUtils from '@/utils/textUtils'
 import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
-import { IListServiceContentData, IListServiceContentDataItem, ICategoryItem, ICategoryList } from '@/interfaces/api'
-import uploadUtils from '@/utils/uploadUtils'
+import FontTag from '@/components/global/Tags.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IBrandFont } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
+import FileUtils from '@/utils/fileUtils'
 import generalUtils from '@/utils/generalUtils'
-import FontTag from '@/components/global/Tags.vue'
+import MappingUtils from '@/utils/mappingUtils'
+import TextUtils from '@/utils/textUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -112,9 +112,6 @@ export default defineComponent({
     }),
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
-    },
-    isMobile(): boolean {
-      return generalUtils.isTouchDevice()
     },
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable

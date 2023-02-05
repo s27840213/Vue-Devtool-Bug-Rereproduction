@@ -247,8 +247,8 @@ export default defineComponent({
       }
     }
     if (this.primaryLayer && this.primaryLayer.type === LayerType.frame && this.config.type === LayerType.image) {
-      body.addEventListener(generalUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
-      body.addEventListener(generalUtils.isTouchDevice() ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
+      body.addEventListener(this.$isTouchDevice ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+      body.addEventListener(this.$isTouchDevice ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
     }
   },
   unmounted() {
@@ -302,7 +302,7 @@ export default defineComponent({
       }
     },
     layerWrapperStyles(): any {
-      if (this.isImgCtrl || this.inFrame || this.isTouchDevice() || this.useMobileEditor) {
+      if (this.isImgCtrl || this.inFrame || this.$isTouchDevice || this.useMobileEditor) {
         return {}
       }
       return { transform: `translateZ(${this.config.styles.zindex}px)`, ...this.transformStyle }
@@ -488,9 +488,6 @@ export default defineComponent({
       const isHandleBgRemove = config.inProcess === 'bgRemove'
       return isHandleBgRemove || isHandleShadow
     },
-    isTouchDevice(): boolean {
-      return generalUtils.isTouchDevice()
-    },
     translateStyles(): { [index: string]: string } {
       const { zindex } = this.config.styles
       const { type } = this.config
@@ -521,7 +518,7 @@ export default defineComponent({
       return this.config.locked
     },
     onRightClick(event: MouseEvent) {
-      if (this.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         // in touch device, right click will be triggered by long click
         event.preventDefault()
         return
@@ -583,7 +580,7 @@ export default defineComponent({
       this.initPos.y = this.config.styles.y
     },
     disableTouchEvent(e: TouchEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         e.preventDefault()
         e.stopPropagation()
       }
@@ -684,8 +681,8 @@ export default defineComponent({
           imgY
         })
         const body = (this.$refs.body as HTMLElement[])[0]
-        body.addEventListener(generalUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
-        body.addEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+        body.addEventListener(this.$isTouchDevice ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+        body.addEventListener(this.$isTouchDevice ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
       }
     },
     onFrameMouseLeave(e: MouseEvent | PointerEvent) {
@@ -708,8 +705,8 @@ export default defineComponent({
         })
       }
       const body = (this.$refs.body as HTMLElement[])[0]
-      body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
-      body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+      body.removeEventListener(this.$isTouchDevice ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+      body.removeEventListener(this.$isTouchDevice ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
     },
     onFrameMouseUp(e: MouseEvent) {
       this.hasHandledFrameMouseEnter = false
@@ -723,8 +720,8 @@ export default defineComponent({
         stepsUtils.record()
       }
       const body = (this.$refs.body as HTMLElement[])[0]
-      body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
-      body.removeEventListener(generalUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+      body.removeEventListener(this.$isTouchDevice ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+      body.removeEventListener(this.$isTouchDevice ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
     },
     dragEnter(e: DragEvent) {
       if (this.primaryLayer && this.primaryLayer.type) {
@@ -733,7 +730,7 @@ export default defineComponent({
       this.onLayerDragEnter(e)
     },
     onFrameDragEnter(e: DragEvent) {
-      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
+      if (!e.target || !['IMG', 'image'].includes((e.target as HTMLElement).tagName)) return
       if (this.config.type !== LayerType.image || this.primaryLayer?.type !== LayerType.frame) {
         return
       }
@@ -777,7 +774,7 @@ export default defineComponent({
       }
     },
     onFrameDragLeave(e: DragEvent) {
-      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
+      if (!e.target || !['IMG', 'image'].includes((e.target as HTMLElement).tagName)) return
       e.stopPropagation()
       const body = (this.$refs.body as HTMLElement[])[0]
       body.removeEventListener('dragleave', this.onFrameDragLeave)
@@ -807,7 +804,7 @@ export default defineComponent({
       }
     },
     onLayerDragEnter(e: DragEvent) {
-      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
+      if (!e.target || !['IMG', 'image'].includes((e.target as HTMLElement).tagName)) return
       const body = (this.$refs.body as HTMLElement[])[0]
       const dragSrcObj = this.$store.state.currDraggedPhoto.srcObj
       if (this.getLayerType === 'image' && dragSrcObj.assetId !== this.config.srcObj.assetId) {
@@ -827,7 +824,7 @@ export default defineComponent({
       }
     },
     layerDragLeave(e: DragEvent) {
-      if (!e.target || (e.target as HTMLElement).tagName !== 'IMG') return
+      if (!e.target || !['IMG', 'image'].includes((e.target as HTMLElement).tagName)) return
       const body = (this.$refs.body as HTMLElement[])[0]
       body.removeEventListener('dragleave', this.layerDragLeave)
       body.removeEventListener('drop', this.layerOnDrop)

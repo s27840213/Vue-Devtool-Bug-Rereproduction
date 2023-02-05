@@ -3,38 +3,27 @@ import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import store from '@/store'
+import { LayerType } from '@/store/types'
+import { floor, round, throttle } from 'lodash'
 import { nextTick } from 'vue'
 import designUtils from './designUtils'
 import editorUtils from './editorUtils'
 import FocusUtils from './focusUtils'
 import generalUtils from './generalUtils'
-import layerFactary from './layerFactary'
-import resizeUtils from './resizeUtils'
-import { floor, round, throttle } from 'lodash'
 import groupUtils from './groupUtils'
-import { LayerType } from '@/store/types'
-import unitUtils, { PRECISION } from './unitUtils'
+import layerFactary from './layerFactary'
 import layerUtils from './layerUtils'
+import resizeUtils from './resizeUtils'
+import unitUtils, { PRECISION } from './unitUtils'
 
 class PageUtils {
-  get MAX_AREA() { return 6000 * 6000 }
+  get MAX_WIDTH() { return 5200 }
+  get MAX_HEIGHT() { return 5200 }
+  get MAX_AREA() { return this.MAX_WIDTH * this.MAX_HEIGHT }
   get MAX_SIZE() { return 8000 }
   get MIN_SIZE() { return 40 }
+  get MAX_BLEED() { return { px: 216, mm: 18.288 } }
   get MOBILE_CARD_PADDING() { return 16 }
-  get defaultBleedMap() {
-    const toBleed = (val: number) => ({
-      top: val,
-      bottom: val,
-      left: val,
-      right: val
-    } as IBleed)
-    return {
-      px: toBleed(11),
-      cm: toBleed(0.3),
-      mm: toBleed(3),
-      in: toBleed(0.118)
-    } as { [index: string]: IBleed }
-  }
 
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get isDetailPage(): boolean { return store.getters.getGroupType === 1 }
@@ -647,7 +636,7 @@ class PageUtils {
    * @param page Target page, use current focused page if undefined
    * @returns DPI of target page if target page is in physical size, otherwise 96 (default DPI)
    */
-  getPageDPI(pageSize: {width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string} = this.currFocusPageSize): { width: number, height: number } {
+  getPageDPI(pageSize: { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } = this.currFocusPageSize): { width: number, height: number } {
     return {
       width: pageSize.width / unitUtils.convert(pageSize.physicalWidth, pageSize.unit, 'in'),
       height: pageSize.height / unitUtils.convert(pageSize.physicalHeight, pageSize.unit, 'in')
@@ -836,6 +825,26 @@ class PageUtils {
       left: round(unitUtils.convert(defaultBleed, 'mm', unit, dpi.width), precision),
       right: round(unitUtils.convert(defaultBleed, 'mm', unit, dpi.width), precision)
     } as IBleed
+  }
+
+  getDefaultBleedMap(pageIndex: number) {
+    const toBleed = (val: number) => ({
+      top: this.isDetailPage && pageIndex !== 0 ? 0 : val,
+      bottom: this.isDetailPage && pageIndex !== store.getters.getPagesLength - 1 ? 0 : val,
+      left: val,
+      right: val
+    } as IBleed)
+    const defaultPxBleed = this.getPageDefaultBleeds(this.getPageSize(pageIndex), 'px')
+    if (this.isDetailPage) {
+      if (pageIndex !== 0) defaultPxBleed.top = 0
+      if (pageIndex !== store.getters.getPagesLength - 1) defaultPxBleed.bottom = 0
+    }
+    return {
+      px: defaultPxBleed,
+      cm: toBleed(0.3),
+      mm: toBleed(3),
+      in: toBleed(0.118)
+    } as { [index: string]: IBleed }
   }
 
   updatePagePos(pageIndex: number, pos: { x?: number, y?: number }) {

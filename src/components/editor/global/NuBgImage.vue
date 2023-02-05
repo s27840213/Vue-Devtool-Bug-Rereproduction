@@ -196,6 +196,7 @@ export default defineComponent({
     },
     mainStyles(): any {
       return {
+        margin: this.padding.split(' ').map(val => '-' + val).join(' '),
         padding: this.padding,
         opacity: this.image.config.styles.opacity / 100,
         backgroundColor: this.color

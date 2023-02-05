@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="font-tag" v-click-outside="clickOutsideHandler")
-  template(v-if="!isTouchDevice")
+  template(v-if="!$isTouchDevice")
     div(class="font-tag__flex-container"
         :style="containerStyle")
       div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
@@ -19,9 +19,8 @@ div(class="font-tag" v-click-outside="clickOutsideHandler")
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
 import vClickOutside from 'click-outside-vue3'
-import generalUtils from '@/utils/generalUtils'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   directives: {
@@ -40,9 +39,6 @@ export default defineComponent({
   },
   emits: ['search', 'showMore'],
   computed: {
-    isTouchDevice(): boolean {
-      return generalUtils.isTouchDevice()
-    },
     containerStyle(): Record<string, string|number> {
       return this.showMore ? {
         position: 'absolute',

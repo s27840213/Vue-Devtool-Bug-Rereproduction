@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="color-btn" :style="wrapperStyle")
-  div(class="color-btn__wrapper" :class="{active: active || focus, mobile: isMobileEditor}")
+  div(class="color-btn__wrapper" :class="{active: active || focus, mobile: $isTouchDevice}")
     div(v-if="color === 'add'" class="color-btn__add-color")
     div(v-else-if="color === 'multi'" class="color-btn__multi-color")
     div(v-else class="color-btn__color" :style="{backgroundColor: color}")
@@ -8,7 +8,6 @@ div(class="color-btn" :style="wrapperStyle")
 </template>
 
 <script lang="ts">
-import generalUtils from '@/utils/generalUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -37,7 +36,6 @@ export default defineComponent({
         paddingTop: 0
       } : {}
     },
-    isMobileEditor() { return generalUtils.isTouchDevice() }
   }
 })
 </script>
