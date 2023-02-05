@@ -8,7 +8,6 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
       :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : ''"
       :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
       :data-p-index="pageIndex"
-      v-press="isTouchDevice() && div.main ? onPress : -1"
       @pointerdown="div.main ? onPointerDown($event) : null"
       @pointerup="div.main ? onPointerUp($event) : null"
       @contextmenu.prevent
@@ -46,37 +45,37 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
     :id="`nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`")
 </template>
 <script lang="ts">
-import { PropType, defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
-import CssConveter from '@/utils/cssConverter'
-import MouseUtils from '@/utils/mouseUtils'
-import TextEffectUtils from '@/utils/textEffectUtils'
-import textBgUtils from '@/utils/textBgUtils'
-import layerUtils from '@/utils/layerUtils'
 import SquareLoading from '@/components/global/SqureLoading.vue'
-import frameUtils from '@/utils/frameUtils'
-import { mapGetters, mapMutations, mapState } from 'vuex'
-import pageUtils from '@/utils/pageUtils'
-import { IFrame, IGroup, IImage, ILayer, IText, ITmp } from '@/interfaces/layer'
 import LazyLoad from '@/components/LazyLoad.vue'
-import SubControllerUtils from '@/utils/subControllerUtils'
-import generalUtils from '@/utils/generalUtils'
-import { MovingUtils } from '@/utils/movingUtils'
-import DragUtils from '@/utils/dragUtils'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
 import i18n from '@/i18n'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IFrame, IGroup, IImage, ILayer, IText, ITmp } from '@/interfaces/layer'
+import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
+import controlUtils from '@/utils/controlUtils'
+import CssConveter from '@/utils/cssConverter'
+import DragUtils from '@/utils/dragUtils'
+import editorUtils from '@/utils/editorUtils'
+import eventUtils, { ImageEvent } from '@/utils/eventUtils'
+import frameUtils from '@/utils/frameUtils'
+import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
-import eventUtils, { ImageEvent } from '@/utils/eventUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import groupUtils from '@/utils/groupUtils'
-import controlUtils from '@/utils/controlUtils'
-import { AnyTouchEvent } from '@any-touch/shared'
-import editorUtils from '@/utils/editorUtils'
+import layerUtils from '@/utils/layerUtils'
+import MouseUtils from '@/utils/mouseUtils'
+import { MovingUtils } from '@/utils/movingUtils'
+import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import SubControllerUtils from '@/utils/subControllerUtils'
+import textBgUtils from '@/utils/textBgUtils'
+import TextEffectUtils from '@/utils/textEffectUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { AnyTouchEvent } from '@any-touch/shared'
+import { notify } from '@kyvg/vue3-notification'
 import Svgpath from 'svgpath'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   emits: ['onSubDrop'],
