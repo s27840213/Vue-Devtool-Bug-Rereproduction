@@ -63,6 +63,7 @@ import popupUtils from '@/utils/popupUtils'
 import textUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -303,9 +304,10 @@ export default defineComponent({
     pageClickHandler(): void {
       if (!this.isImgCtrl) {
         groupUtils.deselect()
-        // imageUtils.setImgControlDefault(false)
         editorUtils.setInMultiSelectionMode(false)
-        if (this.currSelectedPageIndex !== this.pageIndex) {
+        // if (this.currSelectedPageIndex !== this.pageIndex) {
+        if (layerUtils.pageIndex !== this.pageIndex) {
+          console.log(layerUtils.pageIndex, this.pageIndex)
           pageUtils.setBackgroundImageControlDefault()
           this.setCurrActivePageIndex(this.pageIndex)
         }

@@ -289,10 +289,7 @@ class ShortcutUtils {
       const spans = text.split('\n')
       let chainedCommands = editor.chain().deleteSelection()
       spans.forEach((line, index) => {
-        chainedCommands = chainedCommands.command(({ tr }) => {
-          tr.insertText(line)
-          return true
-        })
+        chainedCommands = chainedCommands.insertPlainText(line)
         if (index !== spans.length - 1) {
           chainedCommands = chainedCommands.enter()
         }
