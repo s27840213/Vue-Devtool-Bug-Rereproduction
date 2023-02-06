@@ -46,7 +46,7 @@ div(v-else-if="isBgImgCtrl" class="dim-background")
         v-bind="elm.attrs")
     nu-background-controller(:config="image"
       :pageIndex="pageIndex"
-      :page="(config as IPage)"
+      :page="config"
       :contentScaleRatio="contentScaleRatio")
   //- div(:style="backgroundContorlClipStyles")
   //-   nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
@@ -75,7 +75,7 @@ export default defineComponent({
   },
   props: {
     config: {
-      type: Object,
+      type: Object as PropType<IPage>,
       required: true
     },
     isAnyBackgroundImageControl: {
