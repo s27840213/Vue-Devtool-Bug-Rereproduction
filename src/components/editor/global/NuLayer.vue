@@ -27,6 +27,7 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
             :imgControl="imgControl"
             :contentScaleRatio="contentScaleRatio"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+            :page="page"
             :scaleRatio="scaleRatio"
             :primaryLayer="primaryLayer"
             :forRender="forRender"
@@ -50,6 +51,7 @@ import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, ILayer, IText, ITmp } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
 import CssConveter from '@/utils/cssConverter'
@@ -90,6 +92,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     layerIndex: {
@@ -438,7 +444,7 @@ export default defineComponent({
     lineMoverStyles(): { [key: string]: string } {
       if (!this.isLine) return {}
       const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
-      const page = pageUtils.getPage(this.pageIndex)
+      const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
       let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * this.contentScaleRatio}px, ${(page.isEnableBleed ? y + bleeds.top : y) * this.contentScaleRatio}px)`
       if (rotate) {

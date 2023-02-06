@@ -13,7 +13,9 @@ div(class="nu-sub-controller")
             nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
               :style="textBodyStyle()"
               :pageIndex="pageIndex"
+              :page="page"
               :layerIndex="primaryLayerIndex"
+              :layer="config"
               :subLayerIndex="layerIndex"
               @keydown.37.stop
               @keydown.38.stop
@@ -39,6 +41,7 @@ import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import i18n from '@/i18n'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import ControlUtils from '@/utils/controlUtils'
@@ -64,7 +67,7 @@ import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { notify } from '@kyvg/vue3-notification'
 import SvgPath from 'svgpath'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -79,6 +82,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     primaryLayerIndex: {
@@ -465,7 +472,7 @@ export default defineComponent({
       }
     },
     waitFontLoadingAndRecord() {
-      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const pageId = this.page.id
       const layerId = this.primaryLayer.id
       const subLayerId = this.config.id
       TextUtils.waitFontLoadingAndRecord(this.config.paragraphs, () => {
@@ -475,7 +482,7 @@ export default defineComponent({
       })
     },
     waitFontLoadingAndResize() {
-      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const pageId = this.page.id
       const layerId = this.primaryLayer.id
       const subLayerId = this.config.id
       TextUtils.untilFontLoaded(this.config.paragraphs).then(() => {

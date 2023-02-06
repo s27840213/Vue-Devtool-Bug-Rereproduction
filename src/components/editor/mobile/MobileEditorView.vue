@@ -209,7 +209,6 @@ export default defineComponent({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
-      getPageSize: 'getPageSize',
       pageScaleRatio: 'getPageScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview',
       hasCopiedFormat: 'getHasCopiedFormat',
@@ -242,9 +241,6 @@ export default defineComponent({
     },
     currFocusPage(): IPage {
       return this.pageUtils.currFocusPage
-    },
-    pageSize(): { width: number, height: number } {
-      return this.getPageSize(0)
     },
     minScaleRatio(): number {
       return pageUtils.mobileMinScaleRatio

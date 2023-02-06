@@ -4,12 +4,13 @@ editor-content(:editor="(editor as Editor)")
 
 <script lang="ts">
 import { IGroup, IText, ITmp } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import layerUtils from '@/utils/layerUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import { isEqual } from 'lodash'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   components: {
@@ -24,8 +25,16 @@ export default defineComponent({
       type: Number,
       required: true
     },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
     layerIndex: {
       type: Number,
+      required: true
+    },
+    layer: {
+      type: Object,
       required: true
     },
     subLayerIndex: {
@@ -46,16 +55,7 @@ export default defineComponent({
   },
   computed: {
     config(): IText | undefined {
-      const currLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
-      switch (currLayer.type) {
-        case 'text':
-          return currLayer as IText
-        case 'group':
-          return (currLayer as IGroup).layers.find(l => l.active) as IText ?? undefined
-        default:
-          console.error('cannt access acitve text config')
-          return undefined
-      }
+      return this.layer.type === 'text' ? this.layer as IText : undefined
     }
   },
   mounted() {

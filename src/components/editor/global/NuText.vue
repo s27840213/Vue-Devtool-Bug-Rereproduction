@@ -12,6 +12,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       :config="config"
       :layerIndex="layerIndex"
       :pageIndex="pageIndex"
+      :page="page"
       :subLayerIndex="subLayerIndex"
       :isDuplicated="idx !== duplicatedText.length-1"
       :isTransparent="isTransparent")
@@ -26,22 +27,22 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { IGroup, IParagraph, ISpan, IText } from '@/interfaces/layer'
-import { mapGetters, mapState } from 'vuex'
-import textUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
-import LayerUtils from '@/utils/layerUtils'
-import { calcTmpProps } from '@/utils/groupUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
-import textShapeUtils from '@/utils/textShapeUtils'
+import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
+import { IGroup, IParagraph, ISpan, IText } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import controlUtils from '@/utils/controlUtils'
 import generalUtils from '@/utils/generalUtils'
+import { calcTmpProps } from '@/utils/groupUtils'
+import LayerUtils from '@/utils/layerUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
+import textShapeUtils from '@/utils/textShapeUtils'
+import textUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 import _ from 'lodash'
-import controlUtils from '@/utils/controlUtils'
-import pageUtils from '@/utils/pageUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -55,6 +56,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     layerIndex: {
@@ -198,7 +203,7 @@ export default defineComponent({
       }
     },
     waitFontLoadingAndRecord() {
-      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const pageId = this.page.id
       const layerId = this.config.id
       textUtils.waitFontLoadingAndRecord(this.config.paragraphs, () => {
         const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
@@ -207,7 +212,7 @@ export default defineComponent({
       })
     },
     waitFontLoadingAndResize() {
-      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const pageId = this.page.id
       const layerId = this.primaryLayer ? this.primaryLayer.id : this.config.id
       const subLayerId = this.primaryLayer ? this.config.id : ''
       textUtils.untilFontLoaded(this.config.paragraphs).then(() => {
@@ -250,7 +255,7 @@ export default defineComponent({
       if (widthLimit === -1) {
         // const pageSize = (this.$parent.$el as HTMLElement)
         //   .getBoundingClientRect()[isVertical ? 'height' : 'width'] / (this.scaleRatio * 0.01)
-        const pageSize = pageUtils.getPage(this.pageIndex)[isVertical ? 'height' : 'width']
+        const pageSize = this.page[isVertical ? 'height' : 'width']
         const currTextSize = textHW[isVertical ? 'height' : 'width']
 
         let layerPos = this.config.styles[isVertical ? 'y' : 'x'] - (currTextSize - getSize()) / 2
@@ -363,7 +368,7 @@ export default defineComponent({
       return textShapeUtils.flattenSpans(this.config)
     },
     isAutoResizeNeeded(): boolean {
-      return LayerUtils.getPage(this.pageIndex).isAutoResizeNeeded
+      return this.page.isAutoResizeNeeded
     },
     styles(styles: any) {
       return tiptapUtils.textStylesRaw(styles)

@@ -271,7 +271,6 @@ export default defineComponent({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
-      getPageSize: 'getPageSize',
       pageScaleRatio: 'getPageScaleRatio',
       _showRuler: 'getShowRuler',
       lockGuideline: 'getLockGuideline',
@@ -313,9 +312,6 @@ export default defineComponent({
     },
     isDragging(): boolean {
       return RulerUtils.isDragging
-    },
-    pageSize(): { width: number, height: number } {
-      return this.getPageSize(0)
     },
     isHandleShadow(): boolean {
       return this.isProcessImgShadow || this.isUploadImgShadow

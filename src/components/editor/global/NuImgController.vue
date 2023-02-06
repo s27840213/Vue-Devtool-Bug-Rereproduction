@@ -25,6 +25,7 @@ div(class="nu-img-controller")
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import ControlUtils from '@/utils/controlUtils'
 import eventUtils from '@/utils/eventUtils'
 import FrameUtils from '@/utils/frameUtils'
@@ -33,7 +34,7 @@ import LayerUtils from '@/utils/layerUtils'
 import MathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -49,6 +50,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     primaryLayerIndex: {
@@ -103,7 +108,7 @@ export default defineComponent({
     }
   },
   unmounted() {
-    for (let i = 0; i < this.getPage(this.pageIndex).layers.length; i++) {
+    for (let i = 0; i < this.page.layers.length; i++) {
       if (LayerUtils.getLayer(this.pageIndex, i).type === 'image') {
         ControlUtils.updateLayerProps(this.pageIndex, i, { imgControl: false })
       }

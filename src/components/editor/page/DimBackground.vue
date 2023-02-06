@@ -6,6 +6,7 @@ div(v-if="isImgCtrl" class="dim-background" @pointerdown="onBgClick")
       nu-layer(:style="'opacity: 0.45'"
         :layerIndex="layerIndex"
         :pageIndex="pageIndex"
+        :page="config"
         :primaryLayer="primaryLayer"
         :imgControl="true"
         :forRender="true"
@@ -14,6 +15,7 @@ div(v-if="isImgCtrl" class="dim-background" @pointerdown="onBgClick")
     div
       nu-layer(:layerIndex="layerIndex"
         :pageIndex="pageIndex"
+        :page="config"
         :primaryLayer="primaryLayer"
         :forRender="true"
         :contentScaleRatio="contentScaleRatio"
@@ -21,6 +23,7 @@ div(v-if="isImgCtrl" class="dim-background" @pointerdown="onBgClick")
     div(class="page-control")
       nu-img-controller(:layerIndex="layerIndex"
                         :pageIndex="pageIndex"
+                        :page="config"
                         :contentScaleRatio="contentScaleRatio"
                         :primaryLayer="primaryLayer"
                         :primaryLayerIndex="-1"
@@ -28,7 +31,14 @@ div(v-if="isImgCtrl" class="dim-background" @pointerdown="onBgClick")
 div(v-else-if="isBgImgCtrl" class="dim-background")
   div(class="background-control"
       :style="backgroundControlStyles")
-    nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio" :forRender="true" :pageIndex="pageIndex" :layerIndex="layerIndex")
+    nu-image(:config="image"
+      :inheritStyle="backgroundFlipStyles"
+      :isBgImgControl="true"
+      :contentScaleRatio="contentScaleRatio"
+      :forRender="true"
+      :pageIndex="pageIndex"
+      :page="config"
+      :layerIndex="layerIndex")
     div(class="dim-background__content-area hollow" :style="contentAreaStyles")
       component(v-for="(elm, idx) in getHalation"
         :key="idx"
@@ -36,6 +46,7 @@ div(v-else-if="isBgImgCtrl" class="dim-background")
         v-bind="elm.attrs")
     nu-background-controller(:config="image"
       :pageIndex="pageIndex"
+      :page="(config as IPage)"
       :contentScaleRatio="contentScaleRatio")
   //- div(:style="backgroundContorlClipStyles")
   //-   nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
@@ -45,15 +56,14 @@ div(v-else-if="isBgImgCtrl" class="dim-background")
 
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
-import cssConverter from '@/utils/cssConverter'
-import pageUtils from '@/utils/pageUtils'
 import { IImage } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import cssConverter from '@/utils/cssConverter'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
-import imageUtils from '@/utils/imageUtils'
-import editorUtils from '@/utils/editorUtils'
+import pageUtils from '@/utils/pageUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],

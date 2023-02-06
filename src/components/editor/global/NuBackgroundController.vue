@@ -23,7 +23,7 @@ import MathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import PageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -35,6 +35,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     contentScaleRatio: {
@@ -59,17 +63,13 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      scaleRatio: 'getPageScaleRatio',
-      getPage: 'getPage'
+      scaleRatio: 'getPageScaleRatio'
     }),
     isActive(): boolean {
       return this.config.active
     },
     isShown(): boolean {
       return this.config.shown
-    },
-    page(): IPage {
-      return this.getPage(this.pageIndex)
     },
     getImgX(): number {
       // return this.page.backgroundImage.posX
