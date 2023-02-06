@@ -361,12 +361,13 @@ export default defineComponent({
   box-sizing: border-box;
   &__body {
     position: absolute;
+    pointer-events: initial;
     display: flex;
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
     &:hover {
-      cursor: pointer;
+      cursor: move;
     }
     &__wrapper {
       width: max-content;

@@ -59,6 +59,7 @@ import DragUtils from '@/utils/dragUtils'
 import editorUtils from '@/utils/editorUtils'
 import groupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -305,9 +306,10 @@ export default defineComponent({
     pageClickHandler(): void {
       if (!this.isImgCtrl) {
         groupUtils.deselect()
-        // imageUtils.setImgControlDefault(false)
         editorUtils.setInMultiSelectionMode(false)
-        if (this.currSelectedPageIndex !== this.pageIndex) {
+        // if (this.currSelectedPageIndex !== this.pageIndex) {
+        if (layerUtils.pageIndex !== this.pageIndex) {
+          console.log(layerUtils.pageIndex, this.pageIndex)
           pageUtils.setBackgroundImageControlDefault()
           this.setCurrActivePageIndex(this.pageIndex)
         }

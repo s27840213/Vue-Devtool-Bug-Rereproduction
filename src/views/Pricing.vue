@@ -44,7 +44,7 @@ div(class="pricing")
       details(v-for="item in faqs")
         summary {{item.Q}}
           svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
-        i18n(v-if="item.isPath" :path="item.A" tag="p" class="body-MD text-gray-2 mt-20")
+        i18n-t(v-if="item.isPath" :keypath="item.A" tag="p" class="body-MD text-gray-2 mt-20")
           template(#history)
             router-link(to="/settings/billing") {{$t('NN0614')}}
         p(v-else class="body-MD text-gray-2 mt-20" v-html="item.A")
@@ -52,14 +52,14 @@ div(class="pricing")
 </template>
 
 <script lang="ts">
+import SlideToggle from '@/components/global/SlideToggle.vue'
+import NuFooter from '@/components/NuFooter.vue'
+import NuHeader from '@/components/NuHeader.vue'
+import paymentData from '@/utils/constantData'
+import paymentUtils from '@/utils/paymentUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
-import NuHeader from '@/components/NuHeader.vue'
-import NuFooter from '@/components/NuFooter.vue'
-import SlideToggle from '@/components/global/SlideToggle.vue'
-import paymentData from '@/utils/constantData'
-import paymentUtils from '@/utils/paymentUtils'
 
 // Pricing testing doc: https://www.notion.so/vivipic/Pricing
 
