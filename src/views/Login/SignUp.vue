@@ -100,7 +100,7 @@ div(style="position:relative;")
           class="bg-gray-2 text-white btn-shadow"
           @click="onSignUpClicked()") {{$tc('NN0169',2)}}
       div
-        this($path="NN0307" tag="span")
+        i18n-t(keypath="NN0307" tag="span")
           template(#use)
             a(class="h-link" :href="termsPage") {{$t('NN0162')}}
           template(#privacy)
@@ -147,13 +147,13 @@ div(style="position:relative;")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import store from '@/store'
 import userApis from '@/apis/user'
+import store from '@/store'
+import fbPixelUtils from '@/utils/fbPixelUtils'
+import gtmUtils from '@/utils/gtmUtils'
 import localeUtils from '@/utils/localeUtils'
 import loginUtils from '@/utils/loginUtils'
-import gtmUtils from '@/utils/gtmUtils'
-import fbPixelUtils from '@/utils/fbPixelUtils'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   emits: [],
