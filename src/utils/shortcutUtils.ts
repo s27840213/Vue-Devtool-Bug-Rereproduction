@@ -2,12 +2,12 @@ import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
-import { Editor } from '@tiptap/vue-3'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import ZindexUtils from '@/utils/zindexUtils'
+import { Editor } from '@tiptap/vue-3'
 import { nextTick } from 'vue'
 import frameUtils from './frameUtils'
 import layerFactary from './layerFactary'
@@ -289,18 +289,9 @@ class ShortcutUtils {
       const spans = text.split('\n')
       let chainedCommands = editor.chain().deleteSelection()
       spans.forEach((line, index) => {
-        const spanText = `<p><span>${line === ''
-          ? '<br/>'
-          : line.replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;')
-          }</span></p>`
-        chainedCommands = chainedCommands.insertContent(spanText, {
-          parseOptions: {
-            preserveWhitespace: true
-          }
+        chainedCommands = chainedCommands.command(({ tr }) => {
+          tr.insertText(line)
+          return true
         })
         if (index !== spans.length - 1) {
           chainedCommands = chainedCommands.enter()
