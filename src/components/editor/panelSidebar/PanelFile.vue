@@ -4,9 +4,8 @@ div(class="panel-file"
     @dragover.prevent,
     @dragenter.prevent)
   div(class="panel-file__topbtn")
-    btn(class="full-width" :type="'primary-mid'"
-        @click="uploadImage()") {{$t('NN0014')}}
-    nubtn(v-if="$isTouchDevice" theme="icon" icon="trash" size="mid"
+    nubtn(size="mid-full" @click="uploadImage()") {{$t('NN0014')}}
+    nubtn(v-if="$isTouchDevice" theme="icon2" icon="trash" size="mid"
           :status="inMultiSelectMode === 'on' ? 'active': 'default'"
           @click="toggleMultiSelect()")
   image-gallery(
