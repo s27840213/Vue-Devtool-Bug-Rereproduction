@@ -340,8 +340,8 @@ export default defineComponent({
       return `filter__${id}`
     },
     showCanvas(): boolean {
-      const { pageIndex, layerIndex, subLayerIndex, handleId } = this
-      if (pageIndex === undefined || this.page === undefined) {
+      const { subLayerIndex, handleId } = this
+      if (this.page === undefined) {
         return false
       }
       const currentShadowEffect = (this.config as IImage).styles.shadow.currentEffect
