@@ -27,19 +27,19 @@ div(class="btnList" :style="BGstyle")
     div(class="flex-center")
       span 邏輯測試按鈕的主題：
       options(:options="themes" v-model="testBtnTheme")
-    nubtn(:theme="testBtnTheme" v-model="testBtnStatus"
+    nubtn(:theme="testBtnTheme" size="sm-center" v-model="testBtnStatus"
           icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，下拉選單可改變/觀察此按鈕狀態(此按鈕會切換active)
-    nubtn(:theme="testBtnTheme" :status="testBtnStatus"
+    nubtn(:theme="testBtnTheme" size="sm-center" :status="testBtnStatus"
           icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，下拉選單可改變/觀察此按鈕狀態(此按鈕不會active)
-    nubtn(:theme="testBtnTheme"
+    nubtn(:theme="testBtnTheme" size="sm-center"
           icon="download" :hint="'邏輯測試按鈕'" @click="click") 邏輯測試按鈕，此按鈕狀態沒有連動，僅hover
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
 import Checkbox from '@/components/global/Checkbox.vue'
 import Options from '@/components/global/Options.vue'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'NubtnList',
@@ -51,43 +51,46 @@ export default defineComponent({
     return {
       btns: [{
         theme: 'primary',
-        size: 'sm'
+        size: 'sm-center'
       }, {
         theme: 'primary',
-        size: 'mid'
+        size: 'mid-center'
       }, {
         theme: 'icon_text',
-        size: 'sm'
+        size: 'sm-center'
       }, {
         theme: 'icon_text',
-        size: 'mid'
+        size: 'mid-center'
       }, {
         theme: 'outline',
-        size: 'sm'
+        size: 'sm-center'
       }, {
         theme: 'outline',
-        size: 'mid'
+        size: 'mid-center'
       }, {
         theme: 'text',
-        size: 'sm'
+        size: 'sm-center'
       }, {
         theme: 'ghost',
-        size: 'sm'
+        size: 'sm-center'
       }, {
         theme: 'ghost_outline',
-        size: 'sm'
+        size: 'sm-center'
       }, {
         theme: 'icon',
-        size: 'sm'
+        size: 'sm-center'
+      }, {
+        theme: 'icon2',
+        size: 'mid-center'
       }, {
         theme: 'danger',
-        size: 'sm'
+        size: 'sm-center'
       }, {
         theme: 'secondary',
-        size: 'sm'
+        size: 'sm-center'
       }],
       statuses: ['default', 'hover', 'disabled', 'active'],
-      themes: ['primary', 'outline', 'text', 'icon_text', 'icon',
+      themes: ['primary', 'outline', 'text', 'icon_text', 'icon', 'icon2',
         'ghost', 'ghost_outline', 'danger', 'secondary'],
       full: false,
       darkBG: true,
@@ -106,6 +109,9 @@ export default defineComponent({
         backgroundColor: 'white',
         color: 'black'
       }
+    },
+    tableRowsAmount(): number {
+      return this.btns.length + 1
     }
   },
   methods: {
@@ -132,7 +138,7 @@ export default defineComponent({
     display: grid;
     align-items: center;
     grid-auto-flow: column;
-    grid-template-rows: repeat(13, auto);
+    grid-template-rows: repeat(v-bind(tableRowsAmount), auto);
     gap: 10px;
     width: fit-content;
   }
