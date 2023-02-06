@@ -156,10 +156,12 @@ export default defineComponent({
        *  Use setTimeout bcz the page click would set the layer to non-active,
        *  setTimeout can make the click order ideally
        */
-      setTimeout(() => {
-        imageUtils.setImgControlDefault()
-        editorUtils.setCurrActivePanel('none')
-      }, 0)
+      // e.stopPropagation()
+      // setTimeout(() => {
+      //   imageUtils.setImgControlDefault()
+      //   editorUtils.setShowMobilePanel(false)
+      //   // editorUtils.setCurrActivePanel('none')
+      // }, 0)
     }
   }
 })
@@ -196,6 +198,7 @@ export default defineComponent({
 }
 
 .dim-background {
+  pointer-events: none;
   position: absolute;
   top: 0px;
   bottom: 0px;

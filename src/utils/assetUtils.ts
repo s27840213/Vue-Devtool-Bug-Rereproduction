@@ -172,10 +172,10 @@ class AssetUtils {
     if (attrs?.width && attrs?.height) resizeUtils.resizePage(targetPageIndex, newLayer, { width: attrs.width, height: attrs.height, physicalWidth: attrs.physicalWidth, physicalHeight: attrs.physicalHeight, unit: attrs.unit })
 
     if (store.getters['user/getUserId'] === 'backendRendering') {
-      if (store.getters['user/getBleed'] || store.getters['user/getTrim']) {
-        // use bleeds of page if it has
+      const { isBleed, isTrim } = store.getters['user/getBackendRenderParams']
+      if (isBleed || isTrim) {
         pageUtils.setIsEnableBleed(true, targetPageIndex)
-        if (json.bleeds && json.physicalBleeds) pageUtils.setBleeds(targetPageIndex, json.physicalBleeds, json.bleeds)
+        if (json.bleeds && json.physicalBleeds) pageUtils.setBleeds(targetPageIndex, json.physicalBleeds, json.bleeds) // use bleeds of page if it has
       } else pageUtils.setIsEnableBleed(false, targetPageIndex)
     } else {
       if (targetPage.isEnableBleed && targetPage.bleeds && targetPage.physicalBleeds) {
@@ -648,10 +648,7 @@ class AssetUtils {
         nextTick(() => {
           pageUtils.scrollIntoPage(targetIndex)
           // @TODO: resize page/layer before adding to the store.
-          if (resize) {
-            resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
-            backgroundUtils.fitPageBackground(targetIndex)
-          }
+          if (resize) resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
           if ((groupType === 1 || currGroupType === 1) && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
             const { width: pageWidth = 1000 } = pageUtils.getPageWidth()
@@ -677,6 +674,7 @@ class AssetUtils {
               pageUtils.setBleeds(pageIndex, physicalBleeds)
             }
           }
+          if (resize) backgroundUtils.fitPageBackground(targetIndex)
           store.commit('SET_currActivePageIndex', targetIndex)
           stepsUtils.record()
 

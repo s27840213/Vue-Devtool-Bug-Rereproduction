@@ -56,6 +56,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         @load="onLoad")
   template(v-if="hasHalation()")
     component(v-for="(elm, idx) in cssFilterElms()"
+      class="nu-image__adjust"
       :key="`cssFilter${idx}`"
       :is="elm.tag"
       v-bind="elm.attrs")
@@ -1189,6 +1190,10 @@ export default defineComponent({
 
   &__svg {
     display: block;
+  }
+
+  &__adjust {
+    pointer-events: none;
   }
 
   .img-wrapper {
