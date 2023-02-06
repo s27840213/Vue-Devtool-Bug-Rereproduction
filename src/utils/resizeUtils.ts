@@ -1,16 +1,16 @@
 /* eslint-disable indent */
 import { IFrame, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IBleed, IPage } from '@/interfaces/page'
-import frameUtils from '@/utils/frameUtils'
-import shapeUtils from '@/utils/shapeUtils'
+import store from '@/store'
 import controlUtils from '@/utils/controlUtils'
+import frameUtils from '@/utils/frameUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
-import rulerUtils from './rulerUtils'
+import shapeUtils from '@/utils/shapeUtils'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
-import store from '@/store'
-import { round, isEqual, floor } from 'lodash'
+import { floor, isEqual, round } from 'lodash'
+import rulerUtils from './rulerUtils'
 
 class ResizeUtils {
   scaleAndMoveLayer(pageIndex: number, layerIndex: number, targetLayer: ILayer, targetScale: number, xOffset: number, yOffset: number) {
@@ -186,8 +186,9 @@ class ResizeUtils {
         })
         const precision = unit === 'px' ? 0 : PRECISION
         const bleedDPI = (key: string): number => (key === 'left' || key === 'right') ? dpi.width : dpi.height
-        const maxBleed = (key: string): number => floor(unitUtils.convert(20, 'mm', unit, bleedDPI(key)), precision)
-        physicalBleeds = page.unit !== 'px' && unit !== 'px' && isEqual(pageUtils.defaultBleedMap[page.unit], physicalBleeds) ? pageUtils.defaultBleedMap[unit]
+        const maxBleed = (key: string): number => unit === 'px' ? pageUtils.MAX_BLEED.px : floor(unitUtils.convert(pageUtils.MAX_BLEED.mm, 'mm', unit, bleedDPI(key)), precision)
+        const defaultBleedMap = pageUtils.getDefaultBleedMap(pageIndex)
+        physicalBleeds = isEqual(defaultBleedMap[page.unit], physicalBleeds) ? defaultBleedMap[unit]
                           : Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, Math.min(round(unitUtils.convert(v, page.unit, unit, bleedDPI(k)), precision), maxBleed(k))])) as IBleed
         bleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, unit, 'px', bleedDPI(k)))])) as IBleed
         store.commit('SET_bleeds', { pageIndex, bleeds, physicalBleeds })

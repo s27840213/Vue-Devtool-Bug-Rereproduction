@@ -54,7 +54,8 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      setInScreenshotPreview: 'SET_inScreenshotPreview'
+      setInScreenshotPreview: 'SET_inScreenshotPreview',
+      setIsGettingDesign: 'SET_isGettingDesign'
     })
   },
   mounted() {
@@ -62,7 +63,7 @@ export default defineComponent({
     const designId = this.$router.currentRoute.value.query.design_id
     const teamId = this.$router.currentRoute.value.query.team_id
     if (!type || !designId || !teamId) {
-      uploadUtils.isGettingDesign = false
+      this.setIsGettingDesign(false)
     }
 
     this.setInScreenshotPreview(true)
