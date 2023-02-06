@@ -127,8 +127,7 @@ div(:layer-index="`${layerIndex}`"
             @touchstart="disableTouchEvent")
         template(v-else)
           div(class="control-point__controller-wrapper"
-              ref="rotater"
-              :style="`transform: scale(${100/scaleRatio  * contentScaleRatio})`")
+              ref="rotater")
             svg-icon(class="control-point__rotater"
               :iconName="'rotate'" :iconWidth="`${20}px`"
               :src="require('@/assets/img/svg/rotate.svg')"
@@ -335,14 +334,15 @@ export default defineComponent({
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
       const page = pageUtils.getPage(this.pageIndex)
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
-      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * this.contentScaleRatio}px, ${(page.isEnableBleed ? y + bleeds.top : y) * this.contentScaleRatio}px)`
+      const _f = this.contentScaleRatio * this.scaleRatio * 0.01
+      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * _f}px, ${(page.isEnableBleed ? y + bleeds.top : y) * _f}px)`
       if (rotate) {
         transform += ` rotate(${rotate}deg)`
       }
       return {
         transform,
-        width: `${width * this.contentScaleRatio}px`,
-        height: `${height * this.contentScaleRatio}px`
+        width: `${width * _f}px`,
+        height: `${height * _f}px`
       }
     },
     subContentStyles(): any {
@@ -499,15 +499,17 @@ export default defineComponent({
       const height = parseFloat(resizerStyle.height.replace('px', ''))
       const isHorizon = width > height
       if (isHorizon) {
-        resizerStyle.transform += ` scaleY(${100 / this.scaleRatio})`
+        // resizerStyle.transform += ` scaleY(${100 / this.scaleRatio})`
       } else {
-        resizerStyle.transform += ` scaleX(${100 / this.scaleRatio})`
+        // resizerStyle.transform += ` scaleX(${100 / this.scaleRatio})`
       }
       const scalerOffset = this.$isTouchDevice ? 36 : 20
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: isHorizon ? `${this.getLayerWidth() - scalerOffset * 100 / this.scaleRatio}px` : `${width * this.contentScaleRatio}px`,
-        height: !isHorizon ? `${this.getLayerHeight() - scalerOffset * 100 / this.scaleRatio}px` : `${height * this.contentScaleRatio}px`,
+        // width: isHorizon ? `${this.getLayerWidth() - scalerOffset * 100 / this.scaleRatio}px` : `${width * this.contentScaleRatio}px`,
+        // height: !isHorizon ? `${this.getLayerHeight() - scalerOffset * 100 / this.scaleRatio}px` : `${height * this.contentScaleRatio}px`,
+        width: isHorizon ? `${(this.getLayerWidth() - scalerOffset) * this.scaleRatio * 0.01}px` : `${width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
+        height: !isHorizon ? `${(this.getLayerHeight() - scalerOffset) * this.scaleRatio * 0.01}px` : `${height * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
         opacity: 0
       }
       return Object.assign(resizerStyle, HW)
@@ -520,7 +522,7 @@ export default defineComponent({
         ? (this.config.styles.writingMode.includes('vertical') ? tooNarrow : tooShort)
         : false
       if (!tooSmall) {
-        resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
+        // resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
       }
       // resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
       const width = parseFloat(resizerStyle.width.replace('px', ''))
@@ -723,9 +725,9 @@ export default defineComponent({
         return 'none'
       } else if (this.isShown() || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
         } else {
-          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
         }
       } else {
         return 'none'
@@ -2203,8 +2205,8 @@ export default defineComponent({
     lockIconStyles(): { [index: string]: string } {
       const zindex = (this.layerIndex + 1) * 100
       return {
-        transform: this.enalble3dTransform ? `translate3d(0px, 0px, ${zindex}px) scale(${100 / this.scaleRatio * this.contentScaleRatio})`
-          : `translate(0px, 0px) scale(${100 / this.scaleRatio * this.contentScaleRatio})`
+        transform: this.enalble3dTransform ? `translate3d(0px, 0px, ${zindex}px) scale(${this.contentScaleRatio})`
+          : `translate(0px, 0px) scale(${this.contentScaleRatio})`
       }
     },
     textHtml(): any {
