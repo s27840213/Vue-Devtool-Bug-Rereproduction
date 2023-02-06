@@ -2,8 +2,6 @@ import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
 import { ILayer, IParagraph, IText } from '@/interfaces/layer'
 import LayerUtils from './layerUtils'
-import layerFactary from './layerFactary'
-import imageUtils from './imageUtils'
 
 class TemplateUtils {
   public readonly fields = ['heading', 'subheading', 'body']

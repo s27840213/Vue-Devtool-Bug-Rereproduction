@@ -68,31 +68,31 @@ div(class="panel-text")
           iconColor="white"
           iconWidth="20px")
       //- Text wishing pool
-      div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
+      div(v-if="keyword && !pending && rawSearchResult.list?.length<=10")
         span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
-        nubtn(size="mid" class="mt-30")
+        nubtn(size="mid-center" class="mt-30")
           url(:url="$t('NN0791')" :newTab="true")
             span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
-import SearchBar from '@/components/SearchBar.vue'
+import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
-import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import Url from '@/components/global/Url.vue'
-import AssetUtils from '@/utils/assetUtils'
+import SearchBar from '@/components/SearchBar.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import DragUtils from '@/utils/dragUtils'
-import textUtils from '@/utils/textUtils'
 import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
+import AssetUtils from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
-import VueI18n from 'vue-i18n'
-import tiptapUtils from '@/utils/tiptapUtils'
+import DragUtils from '@/utils/dragUtils'
 import generalUtils from '@/utils/generalUtils'
+import textUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import { defineComponent } from 'vue'
+import VueI18n from 'vue-i18n'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'PanelText',
@@ -163,7 +163,7 @@ export default defineComponent({
         }))
     },
     amountInRow():number {
-      return generalUtils.isTouchDevice() ? 3 : 2
+      return this.$isTouchDevice ? 3 : 2
     },
     listResult(): ICategoryItem[] {
       return this.processListResult(this.rawContent.list, false)
@@ -211,6 +211,14 @@ export default defineComponent({
         this.getContent()
         textUtils.loadDefaultFonts(this.extractFonts)
       })
+  },
+  activated() {
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
+      const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
+      mainContent.$el.scrollTop = this.scrollTop.mainContent
+      searchResult.$el.scrollTop = this.scrollTop.searchResult
+    })
   },
   watch: {
     currentBrand() {

@@ -79,7 +79,7 @@ export default defineComponent({
       return this.currSelectedInfo.layers.length
     },
     isLocked(): boolean {
-      return layerUtils.getTmpLayer().locked
+      return layerUtils.getSelectedLayer().locked
     },
     isCopyFormatDisabled(): boolean {
       if (this.layerNum === 1) { // not tmp

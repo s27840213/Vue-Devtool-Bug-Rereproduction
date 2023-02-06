@@ -26,14 +26,15 @@ div(v-else class="brand-kit-tab-logo")
 </template>
 
 <script lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue'
-import { mapActions, mapGetters } from 'vuex'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import NoItemsHint from '@/components/brandkit/NoItemsHint.vue'
-import brandkitUtils from '@/utils/brandkitUtils'
-import vClickOutside from 'click-outside-vue3'
+import GalleryPhoto from '@/components/GalleryPhoto.vue'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
+import brandkitUtils from '@/utils/brandkitUtils'
 import GalleryUtils from '@/utils/galleryUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -52,7 +53,7 @@ export default defineComponent({
   },
   components: {
     ObserverSentinel,
-    GalleryPhoto: defineAsyncComponent(() => import('@/components/GalleryPhoto.vue')),
+    GalleryPhoto,
     NoItemsHint
   },
   watch: {

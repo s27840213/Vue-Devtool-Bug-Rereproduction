@@ -1,46 +1,37 @@
-/* eslint-disable */
-
-import Vue, { createApp, h, nextTick } from 'vue';
-import VueRecyclerviewNew from 'vue-recyclerview'
 import App from '@/App.vue'
-import router from './router'
-import store from './store'
-import i18n from './i18n'
-import VueMeta from 'vue-meta'
-// import 'floating-vue/dist/style.css'
-import FloatingVue from 'floating-vue'
-import TooltipUtils from './utils/tooltipUtils'
-import VueGtm from '@gtm-support/vue2-gtm'
-import svgIconUtils from './utils/svgIconUtils'
-import logUtils from './utils/logUtils'
-import longpress from './utils/longpress'
-import generalUtils from './utils/generalUtils'
-import imageShadowUtils from './utils/imageShadowUtils'
-import Notifications from '@kyvg/vue3-notification'
-
-// global component section
-import SvgIcon from '@/components/global/SvgIcon.vue'
-import PropertyBar from '@/components/global/PropertyBar.vue'
-import Btn from '@/components/global/Btn.vue'
-import NuPage from '@/components/editor/global/NuPage.vue'
-import NuLayer from '@/components/editor/global/NuLayer.vue'
-import NuImage from '@/components/editor/global/NuImage.vue'
-import NuText from '@/components/editor/global/NuText.vue'
-import NuTmp from '@/components/editor/global/NuTmp.vue'
-import NuGroup from '@/components/editor/global/NuGroup.vue'
 import NuClipper from '@/components/editor/global/NuClipper.vue'
 import NuController from '@/components/editor/global/NuController.vue'
-import NuSubController from '@/components/editor/global/NuSubController.vue'
-import NuShape from '@/components/editor/global/NuShape.vue'
-import NuImgController from '@/components/editor/global/NuImgController.vue'
 import NuFrame from '@/components/editor/global/NuFrame.vue'
-import Nubtn from '@/components/global/Nubtn.vue'
-import Spinner from '@/components/global/Spinner.vue'
-import Hint from '@/components/global/Hint.vue'
+import NuGroup from '@/components/editor/global/NuGroup.vue'
+import NuImage from '@/components/editor/global/NuImage.vue'
+import NuImgController from '@/components/editor/global/NuImgController.vue'
+import NuLayer from '@/components/editor/global/NuLayer.vue'
+import NuPage from '@/components/editor/global/NuPage.vue'
+import NuShape from '@/components/editor/global/NuShape.vue'
+import NuSubController from '@/components/editor/global/NuSubController.vue'
+import NuText from '@/components/editor/global/NuText.vue'
+import NuTmp from '@/components/editor/global/NuTmp.vue'
+import Btn from '@/components/global/Btn.vue'
 import Dropdown from '@/components/global/Dropdown.vue'
-import { RecycleScroller } from 'vue-virtual-scroller'
-// global component section
+import Hint from '@/components/global/Hint.vue'
+import Nubtn from '@/components/global/Nubtn.vue'
+import PropertyBar from '@/components/global/PropertyBar.vue'
+import Spinner from '@/components/global/Spinner.vue'
+import SvgIcon from '@/components/global/SvgIcon.vue'
+import Notifications from '@kyvg/vue3-notification'
 import AnyTouch from 'any-touch'
+import FloatingVue from 'floating-vue'
+import { createApp, nextTick } from 'vue'
+import VueRecyclerviewNew from 'vue-recyclerview'
+import { RecycleScroller } from 'vue-virtual-scroller'
+import i18n from './i18n'
+import router from './router'
+import store from './store'
+import generalUtils from './utils/generalUtils'
+import logUtils from './utils/logUtils'
+import longpress from './utils/longpress'
+import svgIconUtils from './utils/svgIconUtils'
+import TooltipUtils from './utils/tooltipUtils'
 
 window.onerror = function (msg, url, line) {
   const message = [
@@ -77,8 +68,17 @@ window.onerror = function (msg, url, line) {
 //   }
 // }
 
-
 const app = createApp(App).use(i18n).use(router).use(store)
+
+// Add variable that bind in vue this and its type define
+// Ex: div(v-if="$isTouchDevice" ...) in pug
+// Ex: if (this.$isTouchDevice) in .vue ts
+declare module '@vue/runtime-core' {
+  interface ComponentCustomProperties {
+    $isTouchDevice: boolean
+  }
+}
+app.config.globalProperties.$isTouchDevice = generalUtils.isTouchDevice()
 
 const tooltipUtils = new TooltipUtils()
 
@@ -120,7 +120,6 @@ app.component('nu-frame', NuFrame)
 app.component('nubtn', Nubtn)
 app.component('spinner', Spinner)
 app.component('hint', Hint)
-
 
 app.directive('hint', {
   // When the bound element is inserted into the DOM...
@@ -253,6 +252,5 @@ if (urlParams.has('token')) {
 //   })
 //   // app.config.devtools = false
 // }
-
 
 app.mount('#app')

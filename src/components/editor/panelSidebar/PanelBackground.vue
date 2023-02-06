@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="panel-bg" :class="{'panel-flash': panelFlash}" @animationend="panelFlash = false")
+div(class="panel-bg")
   tabs(:tabs="[$tc('NN0002', 2),$t('NN0017')]" v-model="tabIndex")
   //- Search bar
   search-bar(v-if="showImageTab" class="mb-15"
@@ -46,33 +46,32 @@ div(class="panel-bg" :class="{'panel-flash': panelFlash}" @animationend="panelFl
           iconColor="white"
           iconWidth="20px")
       //- BG wishing pool
-      div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
+      div(v-if="keyword && !pending && rawSearchResult.list?.length<=10")
         span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
-        nubtn(size="mid" class="mt-30")
+        nubtn(size="mid-center" class="mt-30")
           url(:url="$t('NN0791')" :newTab="true")
               span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
-import SearchBar from '@/components/SearchBar.vue'
+import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
-import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
-import Tabs from '@/components/Tabs.vue'
 import Url from '@/components/global/Url.vue'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import { ColorEventType, MobileColorPanelType } from '@/store/types'
-import { IPage } from '@/interfaces/page'
-import stepsUtils from '@/utils/stepsUtils'
-import pageUtils from '@/utils/pageUtils'
-import generalUtils from '@/utils/generalUtils'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import groupUtils from '@/utils/groupUtils'
+import SearchBar from '@/components/SearchBar.vue'
+import Tabs from '@/components/Tabs.vue'
 import i18n from '@/i18n'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { IPage } from '@/interfaces/page'
+import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'PanelBackground',
@@ -93,7 +92,6 @@ export default defineComponent({
         searchResult: 0
       },
       tabIndex: 0,
-      panelFlash: false
     }
   },
   computed: {
@@ -166,7 +164,7 @@ export default defineComponent({
     },
     emptyResultMessage(): string {
       const { keyword, pending } = this
-      if (pending || !keyword || this.rawSearchResult.list.length > 0) return ''
+      if (pending || !keyword || this.searchResult.length > 0) return ''
       return `${this.$t('NN0393', {
           keyword: this.keywordLabel,
           target: this.$tc('NN0004', 1)
@@ -180,13 +178,14 @@ export default defineComponent({
       this.handleSearch,
       this.handleCategorySearch,
       this.getRecAndCate)
-    eventUtils.on(PanelEvent.switchPanelBgInnerTab, (tabIndex: number) => {
-      this.switchTab(tabIndex)
-      this.panelFlash = true
-    })
   },
-  beforeUnmount() {
-    eventUtils.off(PanelEvent.switchPanelBgInnerTab)
+  activated() {
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
+      const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
+      mainContent.$el.scrollTop = this.scrollTop.mainContent
+      searchResult.$el.scrollTop = this.scrollTop.searchResult
+    })
   },
   watch: {
     keyword(newVal: string) {
@@ -225,7 +224,7 @@ export default defineComponent({
         color: color
       })
 
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         this.setCloseMobilePanelFlag(true)
       }
     },
@@ -312,18 +311,5 @@ export default defineComponent({
     padding: 10px 0;
     text-align: left;
   }
-}
-
-@keyframes flash {
-  0%, 50%, 100% {
-    background: setColor(gray-1-5);
-  }
-  25%, 75% {
-    background: #353951;
-  }
-}
-.panel-flash {
-  animation-name: flash;
-  animation-duration: 1s;
 }
 </style>

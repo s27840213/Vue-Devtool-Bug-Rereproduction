@@ -337,8 +337,7 @@ export default defineComponent({
     },
     showCanvas(): boolean {
       const { pageIndex, layerIndex, subLayerIndex, handleId } = this
-      // console.warn('showCanvas in computed', pageIndex)
-      if (typeof pageIndex === 'undefined') {
+      if (pageIndex === undefined || pageUtils.getPage(pageIndex) === undefined) {
         return false
       }
       const currentShadowEffect = (this.config as IImage).styles.shadow.currentEffect

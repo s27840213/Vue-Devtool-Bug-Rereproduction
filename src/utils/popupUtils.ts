@@ -1,7 +1,7 @@
 import { IPopupComponent, IPopupProps, ISliderConfig } from '@/interfaces/popup'
 import store from '@/store'
 import { EventEmitter } from 'events'
-import Vue, { nextTick } from 'vue'
+import { nextTick } from 'vue'
 import MouseUtils from './mouseUtils'
 
 class PopupUtils {

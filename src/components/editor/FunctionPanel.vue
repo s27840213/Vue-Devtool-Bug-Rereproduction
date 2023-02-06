@@ -122,7 +122,7 @@ export default defineComponent({
       return this.currSelectedInfo.layers.length
     },
     isLocked(): boolean {
-      return LayerUtils.getTmpLayer().locked
+      return LayerUtils.getSelectedLayer().locked
     },
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1

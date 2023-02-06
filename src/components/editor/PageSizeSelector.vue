@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="page-size-selector" :class="{isTouchDevice}")
+div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice}")
   div(class="page-size-selector__body-row first-row")
     span(class="page-size-selector__body__title subtitle-2"
       :class="defaultTextColor") {{$t('NN0023')}}
@@ -96,24 +96,24 @@ div(class="page-size-selector" :class="{isTouchDevice}")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import vClickOutside from 'click-outside-vue3'
-import SearchBar from '@/components/SearchBar.vue'
-import RadioBtn from '@/components/global/RadioBtn.vue'
-import Checkbox from '@/components/global/Checkbox.vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import { ILayout } from '@/interfaces/layout'
-import pageUtils from '@/utils/pageUtils'
-import { IListServiceContentData } from '@/interfaces/api'
-import groupUtils from '@/utils/groupUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import listApi from '@/apis/list'
-import generalUtils from '@/utils/generalUtils'
-import resizeUtils from '@/utils/resizeUtils'
-import paymentUtils from '@/utils/paymentUtils'
+import Checkbox from '@/components/global/Checkbox.vue'
+import RadioBtn from '@/components/global/RadioBtn.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import { IListServiceContentData } from '@/interfaces/api'
+import { ILayout } from '@/interfaces/layout'
 import editorUtils from '@/utils/editorUtils'
-import unitUtils, { STR_UNITS, IMapSize, PRECISION } from '@/utils/unitUtils'
-import { throttle, round, floor, ceil } from 'lodash'
+import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
+import pageUtils from '@/utils/pageUtils'
+import paymentUtils from '@/utils/paymentUtils'
+import resizeUtils from '@/utils/resizeUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import unitUtils, { IMapSize, PRECISION, STR_UNITS } from '@/utils/unitUtils'
+import vClickOutside from 'click-outside-vue3'
+import { ceil, floor, round, throttle } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   props: {
@@ -171,9 +171,6 @@ export default defineComponent({
       pagesLength: 'getPagesLength',
       getPageSize: 'getPageSize'
     }),
-    isTouchDevice() {
-      return generalUtils.isTouchDevice()
-    },
     unitOptions(): string[] {
       return STR_UNITS
     },
@@ -472,7 +469,7 @@ export default defineComponent({
         format
       })
 
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         pageUtils.fitPage()
       }
       if (record) {

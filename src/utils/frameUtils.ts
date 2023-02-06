@@ -10,10 +10,9 @@ import zindexUtils from './zindexUtils'
 import { ILayerInfo } from '@/store/types'
 import stepsUtils from './stepsUtils'
 import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
-import Vue from 'vue'
 import i18n from '@/i18n'
-import mathUtils from './mathUtils'
 import { notify } from '@kyvg/vue3-notification'
+
 class FrameUtils {
   isImageFrame(config: IFrame): boolean {
     return config.clips.length === 1 && (config.clips[0].isFrameImg as boolean)

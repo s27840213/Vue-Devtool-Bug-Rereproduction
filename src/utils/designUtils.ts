@@ -6,7 +6,6 @@ import store from '@/store'
 import assetUtils from './assetUtils'
 import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
-import themeUtils from './themeUtils'
 import uploadUtils from './uploadUtils'
 import resizeUtils from './resizeUtils'
 import { nextTick } from 'vue'
@@ -806,7 +805,7 @@ class DesignUtils {
   }
 
   // Below function is used to update the page
-  async newDesign(width = 1080, height = 1080, unit = 'px', newDesignType?: number) {
+  async newDesign(width = 1080, height = 1080, unit = 'px') {
     store.commit('file/SET_setLayersDone')
     const pxSize = unitUtils.convertSize(width, height, unit, 'px')
     const bleeds = pageUtils.getPageDefaultBleeds({ physicalWidth: width, physicalHeight: height, unit }, 'px')
@@ -821,7 +820,6 @@ class DesignUtils {
       unit
     })])
     pageUtils.clearPagesInfo()
-    await themeUtils.refreshTemplateState(undefined, newDesignType)
     // Set default url query 'unit' in Editor.vue
   }
 
@@ -837,7 +835,6 @@ class DesignUtils {
             pageIndex: 0,
             props: { width, height }
           })
-          themeUtils.refreshTemplateState()
           if (this.isLogin) {
             /**
              * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry

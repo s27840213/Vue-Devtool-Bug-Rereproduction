@@ -42,7 +42,7 @@ import { FunctionPanelType, SidebarPanelType, ColorEventType } from '@/store/typ
 import store from '@/store'
 import stepsUtils from '@/utils/stepsUtils'
 import layerUtils from '@/utils/layerUtils'
-import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import { IGroup } from '@/interfaces/layer'
 import { IFooterTabProps } from '@/interfaces/editor'
 import AllPages from '@/components/editor/mobile/AllPages.vue'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
@@ -51,7 +51,6 @@ import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import unitUtils from '@/utils/unitUtils'
-import testUtils from '@/utils/testUtils'
 
 export default defineComponent({
   emits: [],
@@ -82,9 +81,6 @@ export default defineComponent({
     eventUtils.off(PanelEvent.switchTab)
   },
   mounted() {
-    const { pageRect, editorRect } = pageUtils.getEditorRenderSize
-    pageUtils.pageSize = { width: pageRect.width, height: pageRect.height }
-    pageUtils.editorSize = { width: editorRect.width, height: editorRect.height }
     // const el = this.$refs['mobile-editor__content'] as HTMLElement
     // const pz = new PinchZoom(el, {
     //   minZoom: (pageUtils.mobileMinScaleRatio * 0.01)
@@ -175,7 +171,7 @@ export default defineComponent({
       return store.getters['user/isLogin']
     },
     isLocked(): boolean {
-      return layerUtils.getTmpLayer().locked
+      return layerUtils.getSelectedLayer().locked
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup

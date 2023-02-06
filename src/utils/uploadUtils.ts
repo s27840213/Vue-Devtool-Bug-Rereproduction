@@ -1,6 +1,5 @@
 /* eslint-disable indent */
-import Vue from 'vue'
-import { IAssetPhoto, IGroupDesignInputParams, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { IAssetPhoto, IGroupDesignInputParams, IListServiceContentData } from '@/interfaces/api'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import generalUtils from './generalUtils'

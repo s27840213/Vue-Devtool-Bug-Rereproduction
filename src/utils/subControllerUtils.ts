@@ -1,4 +1,4 @@
-import { IFrame, IGroup, ILayer, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
 import colorUtils from './colorUtils'
@@ -63,7 +63,9 @@ export default class SubControllerUtils {
                   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true }, this.subLayerIdx)
                   break
                 case LayerType.frame:
-                  frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { imgControl: true })
+                  if ((this.config as IImage).srcObj.type !== 'frame') {
+                    frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { imgControl: true })
+                  }
                   break
               }
               eventUtils.emit(PanelEvent.switchTab, 'crop')

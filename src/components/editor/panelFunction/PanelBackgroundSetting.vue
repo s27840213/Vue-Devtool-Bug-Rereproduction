@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="bg-setting" v-click-outside="handleOutSide")
+div(class="bg-setting")
   span(class="bg-setting__title text-blue-1 text-H6") {{$t('NN0142')}}
   div(class="action-bar flex-evenly my-10")
     svg-icon(class="btn-opacity pointer p-5 feature-button"
@@ -61,25 +61,27 @@ div(class="bg-setting" v-click-outside="handleOutSide")
       v-click-outside="handleOutSide")
   div(class="bg-setting__current-colors" :class="{lock: backgroundLocked}")
     color-btn(:color="colorSlipsIcon"
-              :active="bgColorSelected"
+              :active="colorSlipsIcon !== 'multi' && showColorSlips"
               @click="handleColorPicker()")
 </template>
 
 <script lang="ts">
+import ColorBtn from '@/components/global/ColorBtn.vue'
+import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import i18n from '@/i18n'
-import { defineComponent } from 'vue'
-import vClickOutside from 'click-outside-vue3'
-import { notify } from '@kyvg/vue3-notification'
-import { mapGetters, mapMutations } from 'vuex'
 import { IPage } from '@/interfaces/page'
-import { PopupSliderEventType } from '@/store/types'
+import { ColorEventType, PopupSliderEventType } from '@/store/types'
+import backgroundUtils from '@/utils/backgroundUtils'
+import colorUtils from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
 import MappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import PopupAdjust from '@/components/popup/PopupAdjust.vue'
-import ColorBtn from '@/components/global/ColorBtn.vue'
-import pageUtils from '@/utils/pageUtils'
-import backgroundUtils from '@/utils/backgroundUtils'
+import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -97,7 +99,6 @@ export default defineComponent({
         { icon: 'flip-h', text: `${this.$t('NN0053')}` },
         { icon: 'flip-v', text: `${this.$t('NN0054')}` }
       ],
-      bgColorSelected: false
     }
   },
   computed: {
@@ -135,6 +136,9 @@ export default defineComponent({
     isShowImage(): boolean {
       return this.backgroundImage.assetId
     },
+    showColorSlips(): boolean {
+      return editorUtils.showColorSlips
+    },
     colorSlipsIcon(): string {
       if (this.backgroundImage.assetId) return 'multi'
       else return this.backgroundColor
@@ -142,13 +146,18 @@ export default defineComponent({
   },
   mounted() {
     popupUtils.on(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
+    colorUtils.on(ColorEventType.background, this.handleChangeBgColor)
+    colorUtils.onStop(ColorEventType.background, this.recordChange)
   },
   beforeUnmount() {
     popupUtils.event.off(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
+    colorUtils.event.off(ColorEventType.background, this.handleChangeBgColor)
+    colorUtils.offStop(ColorEventType.background, this.recordChange)
   },
   methods: {
     ...mapMutations({
       updateLayerStyles: 'UPDATE_layerStyles',
+      setBgColor: 'SET_backgroundColor',
       removeBg: 'REMOVE_background',
       setBgOpacity: 'SET_backgroundOpacity',
       setBgImageControl: 'SET_backgroundImageControl',
@@ -159,6 +168,12 @@ export default defineComponent({
     },
     handleLockBackground() {
       backgroundUtils.handleLockBackground()
+    },
+    handleChangeBgColor(color: string) {
+      this.setBgColor({
+        pageIndex: pageUtils.currFocusPageIndex,
+        color
+      })
     },
     handleChangeBgOpacity(opacity: number) {
       this.setBgOpacity({
@@ -201,11 +216,9 @@ export default defineComponent({
     },
     handleColorPicker() {
       if (this.backgroundLocked) return this.handleLockedNotify()
-      this.bgColorSelected = true
-      // Switch to PanelBg and switch PanelBG inner tab.
-      this.colorSlipsIcon === 'multi'
-        ? backgroundUtils.switchPanelBgTab(0)
-        : backgroundUtils.switchPanelBgTab(1)
+      colorUtils.setCurrEvent(ColorEventType.background)
+      colorUtils.setCurrColor(this.backgroundColor)
+      editorUtils.toggleColorSlips(true)
     },
     handleImageFlip(flipIcon: string) {
       const [h, v] = this.backgroundImgFlip
@@ -221,14 +234,11 @@ export default defineComponent({
     handleLockedNotify() {
       notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     },
-    handleOutSide(e: Event) {
-      const target = e.target as HTMLElement
-      if (target.matches &&
-        (target.matches('.panel-bg, .panel-bg *') ||
-        target.matches('.bg-setting, .bg-setting *'))) {
-        this.bgColorSelected = false
-      }
+    handleOutSide() {
       this.show = ''
+    },
+    recordChange() {
+      stepsUtils.record()
     }
   }
 })

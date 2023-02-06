@@ -27,10 +27,10 @@ div(class="color-panel"
       template(v-if="isBrandkitAvailable")
         //- Brandkit select
         div(class="relative")
-          brand-selector(:theme="isTouchDevice ? 'mobile-panel' : 'panel'")
+          brand-selector(:theme="$isTouchDevice ? 'mobile-panel' : 'panel'")
           div(class="color-panel__brand-settings pointer"
               @click="handleOpenSettings")
-            svg-icon(iconName="settings" :iconColor="isTouchDevice ? 'gray-2' : 'white'" iconWidth="24px")
+            svg-icon(iconName="settings" :iconColor="$isTouchDevice ? 'gray-2' : 'white'" iconWidth="24px")
         //- Brandkit palettes
         div(v-if="isPalettesLoading" class="color-panel__colors")
           svg-icon(iconName="loading"
@@ -63,9 +63,9 @@ div(class="color-panel"
           color-btn(v-for="color in defaultColors" :color="color" :key="color"
                     :active="color === selectedColor"
                     @click="handleColorEvent(color)")
-          img(v-if="mode==='PanelBG'"
+          img(v-if="selectingBg"
+            class="full-width full-height"
             src="@/assets/img/svg/transparent.svg"
-            width="100%" height="100%"
             @click="handleColorEvent('#ffffff00')")
   color-picker(v-if="openColorPicker"
     class="color-panel__color-picker"
@@ -77,21 +77,20 @@ div(class="color-panel"
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import vClickOutside from 'click-outside-vue3'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
+import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
+import { ColorEventType, SidebarPanelType } from '@/store/types'
+import brandkitUtils from '@/utils/brandkitUtils'
 import colorUtils from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
 import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
-import { SidebarPanelType } from '@/store/types'
-import brandkitUtils from '@/utils/brandkitUtils'
-import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
-import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
-import editorUtils from '@/utils/editorUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   name: 'ColorSlips',
@@ -212,12 +211,12 @@ export default defineComponent({
         ? this._recentlyColors
         : this._recentlyColors.slice(0, 20)
     },
-    defaultColors(): unknown {
-      return this.mode === 'PanelBG' ? this.defaultBgColor : this._defaultColors
+    selectingBg(): boolean {
+      return this.mode === 'PanelBG' || colorUtils.currEvent === ColorEventType.background
     },
-    isTouchDevice(): boolean {
-      return generalUtils.isTouchDevice()
-    }
+    defaultColors(): unknown {
+      return this.selectingBg ? this.defaultBgColor : this._defaultColors
+    },
   },
   methods: {
     ...mapMutations({
@@ -287,7 +286,7 @@ export default defineComponent({
       editorUtils.toggleColorSlips(false)
     },
     openColorPanel(event: MouseEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         this.$emit('openColorPicker')
         return
       }

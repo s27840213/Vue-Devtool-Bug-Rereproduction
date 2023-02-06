@@ -16,7 +16,6 @@ const mobileHash = {
 export enum PanelEvent {
   showPhotoShadow = 'showPhotoShadow',
   switchTab = 'switchTab',
-  switchPanelBgInnerTab = 'switchPanelBgInnerTab',
 }
 
 export enum ImageEvent {

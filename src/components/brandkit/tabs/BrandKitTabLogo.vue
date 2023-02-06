@@ -273,7 +273,7 @@ export default defineComponent({
         padding: 0px 8px;
         display: flex;
         align-items: center;
-        justify-content: start;
+        justify-content: flex-start;
         & > span {
           @include caption-LG;
           text-align: left;

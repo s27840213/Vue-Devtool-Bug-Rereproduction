@@ -55,7 +55,7 @@ export default defineComponent({
   &__name {
     display: flex;
     align-items: center;
-    justify-content: start;
+    justify-content: flex-start;
     color: white;
     & > span {
       @include body-SM;

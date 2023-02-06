@@ -1,4 +1,4 @@
-import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, ShadowEffectType } from '@/interfaces/imgShadow'
 import { ColorEventType, FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import colorUtils from './colorUtils'
 import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SPACE, fieldRange, logMark, setMark } from './imageShadowUtils'

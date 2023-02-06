@@ -1,5 +1,5 @@
 <template lang="pug">
-div(:class="`nubtn ${theme} ${sizeClass} ${status}`"
+div(:class="`nubtn ${theme} ${sizeClass} ${status} ${$isTouchDevice?'mobile':'desktop'}`"
     v-hint="hint"
     @click="click")
   svg-icon(v-if="theme.includes('icon')"
@@ -9,7 +9,7 @@ div(:class="`nubtn ${theme} ${sizeClass} ${status}`"
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent, PropType } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   name: 'Nubtn',
@@ -24,8 +24,9 @@ export default defineComponent({
       default: 'primary'
     },
     // *-full mean button will occupy all width.
+    // *-center mean button have ml/mr: auto
     size: {
-      type: String as PropType<'sm'|'sm-full'|'mid'|'mid-full'>,
+      type: String as PropType<'sm'|'sm-full'|'sm-center'|'mid'|'mid-full'|'mid-center'>,
       default: 'sm'
     },
     // Use v-model if you want Nubtn switch between active/default.
@@ -87,9 +88,11 @@ export default defineComponent({
   cursor: pointer;
   user-select: none;
   &:not(.full) {
+    width: fit-content;
+  }
+  &.center {
     margin-left: auto;
     margin-right: auto;
-    width: fit-content;
   }
 }
 
@@ -115,7 +118,7 @@ export default defineComponent({
 .active {
   --blue: #{setColor(blue-active)};
 }
-:hover, .hover { // In this way, :hover can overwrite default and active but not disabled.
+.desktop:hover, .hover { // In this way, .desktop:hover can overwrite default and active but not disabled.
   --blue: #{setColor(blue-hover)};
 }
 .disabled {
@@ -164,7 +167,7 @@ export default defineComponent({
   &.active {
     background-color: setColor(blue-3);
   }
-  &:hover, &.hover {
+  &.desktop:hover, &.hover {
     background-color: setColor(blue-3, 0.5);
   }
   &.disabled {
@@ -179,7 +182,7 @@ export default defineComponent({
     color: setColor(blue-1);
     background-color: setColor(blue-4);
   }
-  &:hover, &.hover {
+  &.desktop:hover, &.hover {
     color: setColor(blue-1);
     background-color: setColor(white);
   }
@@ -196,7 +199,7 @@ export default defineComponent({
     color: setColor(blue-3);
     border: 1px solid setColor(blue-3);
   }
-  &:hover, &.hover {
+  &.desktop:hover, &.hover {
     color: setColor(white);
     border: 1px solid setColor(white);
   }
@@ -214,7 +217,7 @@ export default defineComponent({
   &.active {
     background-color: #D9624E;
   }
-  &:hover, &.hover {
+  &.desktop:hover, &.hover {
     background-color: #FC5757;
   }
   &.disabled {
@@ -231,7 +234,7 @@ export default defineComponent({
     color: setColor(gray-2);
     border: 1px solid setColor(gray-2);
   }
-  &:hover, &.hover {
+  &.desktop:hover, &.hover {
     color: setColor(gray-2);
     background-color: setColor(gray-4);
     border: 1px solid setColor(gray-3);

@@ -5,7 +5,7 @@ transition(name="fade-in-out")
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent } from 'vue'
+import { defineComponent } from 'vue'
 import popupUtils from '@/utils/popupUtils'
 
 export default defineComponent({

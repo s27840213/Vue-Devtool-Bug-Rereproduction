@@ -41,23 +41,23 @@ div(class="panel-objects")
       //- Object wishing pool
       div(v-if="keyword && !pending && rawSearchResult.list?.length<=10")
         span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
-        nubtn(size="mid" class="mt-30")
+        nubtn(size="mid-center" class="mt-30")
           url(:url="$t('NN0791')" :newTab="true")
             span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapActions, mapGetters, mapState } from 'vuex'
-import SearchBar from '@/components/SearchBar.vue'
 import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import Url from '@/components/global/Url.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import generalUtils from '@/utils/generalUtils'
-import i18n from '@/i18n'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'PanelObject',
@@ -147,6 +147,14 @@ export default defineComponent({
       this.handleCategorySearch,
       this.getRecAndCate
     )
+  },
+  activated() {
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
+      const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
+      mainContent.$el.scrollTop = this.scrollTop.mainContent
+      searchResult.$el.scrollTop = this.scrollTop.searchResult
+    })
   },
   watch: {
     keyword(newVal: string) {
