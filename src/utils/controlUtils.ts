@@ -225,36 +225,35 @@ class Controller {
     }[]
   }
 
-  getControlPoints = (resizerShort: number, resizerLong: number) => {
-    const contentScaleRatio = editorUtils.contentScaleRatio
-    const scaleRatio = store.getters.getPageScaleRatio
+  getControlPoints = (resizerShort: number, resizerLong: number, scaleRatio = 1) => {
+    const scale = editorUtils.contentScaleRatio * scaleRatio
     const isMobile = generalUtils.isTouchDevice()
     const scalerSize = isMobile ? 12 : 8
 
     return {
-      scalers: this.getScalers(scalerSize),
-      scalerTouchAreas: this.getScalers(scalerSize * 3, true),
-      cornerRotaters: this.getCornerRatater(scalerSize * 4),
+      scalers: this.getScalers(scalerSize * scaleRatio),
+      scalerTouchAreas: this.getScalers(scalerSize * 3 * scaleRatio, true),
+      cornerRotaters: this.getCornerRatater(scalerSize * 4 * scaleRatio),
       lineEnds: [
         {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
           left: '0',
           top: '50%',
-          transform: `translate(-50%,-50%) scale(${contentScaleRatio})`,
+          transform: `translate(-50%,-50%) scale(${scale})`,
           borderRadius: '50%'
         },
         {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate(50%,-50%) scale(${contentScaleRatio})`,
+          transform: `translate(50%,-50%) scale(${scale})`,
           right: '0',
           top: '50%',
           borderRadius: '50%'
         }
       ],
-      resizers: this.getResizers(resizerShort, resizerLong, contentScaleRatio),
-      resizerTouchAreas: this.getResizers(resizerShort * 3, resizerLong * 3, contentScaleRatio, true),
+      resizers: this.getResizers(resizerShort, resizerLong, scale),
+      resizerTouchAreas: this.getResizers(resizerShort * 3, resizerLong * 3, scale, true),
       cursors: [
         'nwse-resize',
         'ns-resize',

@@ -117,7 +117,8 @@ div(class="page-wrapper" ref="page-wrapper" :style="pageRootStyles" :id="`nu-pag
                 :style="scaleContainerStyles")
               page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
               div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
-            div(class="page-control" :style="styles('control')")
+              dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
+            div(v-if="imgControlPageIdx !== pageIndex" class="page-control" :style="styles('control')")
               nu-controller(v-if="currFocusPageIndex === pageIndex && currLayer.type" data-identifier="controller"
                 :key="`controller-${currLayer.id}`"
                 :layerIndex="currSelectedIndex"
@@ -127,7 +128,6 @@ div(class="page-wrapper" ref="page-wrapper" :style="pageRootStyles" :id="`nu-pag
                 :contentScaleRatio="contentScaleRatio"
                 @setFocus="setFocus()"
                 @isDragging="handleDraggingController")
-            dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
       div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex)"
         class="page-highlighter"
         :style="wrapperStyles()")
