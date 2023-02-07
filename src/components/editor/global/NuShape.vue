@@ -17,6 +17,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import { IShape } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import { IPage } from '@/interfaces/page'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'
@@ -59,6 +60,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     layerIndex: {

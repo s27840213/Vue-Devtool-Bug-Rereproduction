@@ -114,19 +114,23 @@ div(class="page-wrapper" ref="page-wrapper" :style="pageRootStyles" :id="`nu-pag
             :threshold="[0,1]")
           div(class="scale-container relative"
               :style="scaleContainerStyles")
-            page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+            page-content(:config="config" :pageIndex="pageIndex" :page="config" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
             div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
             div(v-if="currSelectedIndex !== -1" class="page-control" :style="styles('control')")
               nu-controller(v-if="currFocusPageIndex === pageIndex && currLayer.type" data-identifier="controller"
                 :key="`controller-${currLayer.id}`"
                 :layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
+                :page="config"
                 :config="currLayer"
                 :snapUtils="snapUtils"
                 :contentScaleRatio="contentScaleRatio"
                 @setFocus="setFocus()"
                 @isDragging="handleDraggingController")
-            dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
+            dim-background(v-if="imgControlPageIdx === pageIndex"
+              :pageIndex="pageIndex"
+              :config="config"
+              :contentScaleRatio="contentScaleRatio")
       div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex)"
         class="page-highlighter"
         :style="wrapperStyles()")
@@ -592,7 +596,7 @@ export default defineComponent({
         return
       }
       GroupUtils.deselect()
-      const page = generalUtils.deepCopy(this.getPage(this.pageIndex)) as IPage
+      const page = generalUtils.deepCopy(this.config) as IPage
       page.layers.forEach(l => {
         l.id = generalUtils.generateRandomString(8)
         if (l.type === LayerType.frame) {

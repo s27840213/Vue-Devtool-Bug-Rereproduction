@@ -18,6 +18,7 @@ div(class="overflow-container"
         nu-bg-image(
             :image="config.backgroundImage"
             :pageIndex="pageIndex"
+            :page="config"
             :color="config.backgroundColor"
             :key="config.backgroundImage.config.id"
             @mousedown.native.left="pageClickHandler()"
@@ -31,6 +32,7 @@ div(class="overflow-container"
           :snapUtils="snapUtils"
           :layerIndex="index"
           :pageIndex="pageIndex"
+          :page="config"
           :config="layer"
           :contentScaleRatio="contentScaleRatio"
           :forceRender="forceRender"
@@ -56,14 +58,14 @@ import doubleTapUtils from '@/utils/doubleTapUtils'
 import DragUtils from '@/utils/dragUtils'
 import editorUtils from '@/utils/editorUtils'
 import groupUtils from '@/utils/groupUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import textUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import imageUtils from '@/utils/imageUtils'
-import layerUtils from '@/utils/layerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'

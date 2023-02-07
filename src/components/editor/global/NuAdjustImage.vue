@@ -26,9 +26,10 @@ svg(:viewBox="svgViewBox"
 
 <script lang="ts">
 import { IImage } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import GeneralUtils from '@/utils/generalUtils'
 import ImageAdjustUtil from '@/utils/imageAdjustUtil'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
@@ -45,7 +46,11 @@ export default defineComponent({
     contentScaleRatio: {
       default: 1,
       type: Number
-    }
+    },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
   },
   computed: {
     ...mapGetters({

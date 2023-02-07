@@ -18,6 +18,7 @@ div(:layer-index="`${layerIndex}`"
       data-identifier="controller"
       :key="`group-controller-${subLayer.config.id}`"
       :pageIndex="pageIndex"
+      :page="page"
       :layerIndex="subLayer.subLayerIdx"
       :primaryLayerIndex="layerIndex"
       :primaryLayer="config"
@@ -32,11 +33,13 @@ div(:layer-index="`${layerIndex}`"
         ref="body"
         @contextmenu.prevent
         @click.right.stop="onRightClick")
-        div(v-if="showTextEditor" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
+        div(v-if="config.type === 'text' && config.active" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
             :style="textBodyStyle()"
             :pageIndex="pageIndex"
+            :page="page"
             :layerIndex="layerIndex"
+            :config="(config as IText)"
             :subLayerIndex="-1"
             @keydown.37.stop
             @keydown.38.stop
@@ -154,6 +157,7 @@ import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IStyle, IText } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
 import DragUtils from '@/utils/dragUtils'
@@ -182,7 +186,7 @@ import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -203,6 +207,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     snapUtils: {
@@ -325,15 +333,9 @@ export default defineComponent({
       }
       return undefined
     },
-    showTextEditor(): boolean {
-      if (this.config.type === 'text' && this.isActive) {
-        return true
-      }
-      return false
-    },
     sizeStyles(): { transform: string, width: string, height: string } {
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
-      const page = pageUtils.getPage(this.pageIndex)
+      const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
       let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * this.contentScaleRatio}px, ${(page.isEnableBleed ? y + bleeds.top : y) * this.contentScaleRatio}px)`
       if (rotate) {
@@ -1891,7 +1893,7 @@ export default defineComponent({
       e && this.onDrop(e)
     },
     waitFontLoadingAndRecord() {
-      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const pageId = this.page.id
       const layerId = this.config.id
       TextUtils.waitFontLoadingAndRecord(this.config.paragraphs, () => {
         const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
@@ -1900,7 +1902,7 @@ export default defineComponent({
       })
     },
     waitFontLoadingAndResize() {
-      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const pageId = this.page.id
       const layerId = this.config.id
       TextUtils.untilFontLoaded(this.config.paragraphs).then(() => {
         setTimeout(() => {
