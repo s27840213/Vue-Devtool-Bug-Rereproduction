@@ -573,7 +573,7 @@ export default defineComponent({
       /**
        * Prevent double clicking of img will propagate and set the img-ctrl to default immediately.
        */
-      if (this.isImgCtrl && !['IMG', 'path'].includes(target.tagName)) {
+      if (this.isImgCtrl && !['IMG', 'path', 'image'].includes(target.tagName)) {
         imageUtils.setImgControlDefault()
       }
       this.initPos.x = this.config.styles.x
