@@ -272,7 +272,7 @@ export default defineComponent({
     absContainerStyle(): { [index: string]: string | number } {
       const transformDuration = !this.showMobilePanel ? 0.3 : 0
       return {
-        transform: this.isDetailPage ? 'initail' : `translate3d(0, -${this.currCardIndex * this.cardHeight}px,0)`,
+        transform: this.isDetailPage ? 'initail' : `translate(0, -${this.currCardIndex * this.cardHeight}px)`,
         transition: `transform ${transformDuration}s`
       }
     }
@@ -542,7 +542,7 @@ $REULER_SIZE: 20px;
     max-height: 100%;
     display: flex;
     flex-direction: column;
-    transform-style: preserve-3d;
+    // transform-style: preserve-3d;
     transform: scale(1);
     box-sizing: border-box;
   }
