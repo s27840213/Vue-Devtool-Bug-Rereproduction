@@ -19,28 +19,28 @@ div(class="footer-tabs" ref="tabs" :style="rootStyles")
         :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
 <script lang="ts">
-import layerUtils from '@/utils/layerUtils'
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import ColorBtn from '@/components/global/ColorBtn.vue'
+import i18n from '@/i18n'
+import { IFooterTab } from '@/interfaces/editor'
 import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
-import ColorBtn from '@/components/global/ColorBtn.vue'
-import stepsUtils from '@/utils/stepsUtils'
-import generalUtils from '@/utils/generalUtils'
-import imageUtils from '@/utils/imageUtils'
-import frameUtils from '@/utils/frameUtils'
-import { IFooterTab } from '@/interfaces/editor'
-import groupUtils from '@/utils/groupUtils'
-import pageUtils from '@/utils/pageUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
-import mappingUtils from '@/utils/mappingUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
-import editorUtils from '@/utils/editorUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
-import i18n from '@/i18n'
 import colorUtils from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
+import frameUtils from '@/utils/frameUtils'
+import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import mappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import { notify } from '@kyvg/vue3-notification'
 import { isEqual } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -88,7 +88,8 @@ export default defineComponent({
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
-      isHandleShadow: 'shadow/isHandling'
+      isHandleShadow: 'shadow/isHandling',
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
     }),
     backgroundImgControl(): boolean {
       return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
@@ -98,7 +99,9 @@ export default defineComponent({
       return locked
     },
     groupTab(): IFooterTab {
-      return { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1 }
+      return {
+        icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1
+      }
     },
     photoInGroupTabs(): Array<IFooterTab> {
       return [
@@ -115,6 +118,7 @@ export default defineComponent({
       return [
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         ...(this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
@@ -134,6 +138,7 @@ export default defineComponent({
       return [
         this.mainMenu,
         ...replace,
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -161,7 +166,8 @@ export default defineComponent({
         },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
-        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
+        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
     },
@@ -224,7 +230,8 @@ export default defineComponent({
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust }
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` }
       ]
     },
     pageTabs(): Array<IFooterTab> {
@@ -241,7 +248,7 @@ export default defineComponent({
       return [
         { icon: 'layers-alt', text: `${this.$t('NN0757')}`, panelType: 'order' },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
-        { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1 },
+        this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' }
         // { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true }
@@ -253,7 +260,9 @@ export default defineComponent({
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         this.groupTab,
-        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' }
+        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` }
+
       ]
     },
     tabs(): Array<IFooterTab> {
@@ -605,6 +614,10 @@ export default defineComponent({
         case 'ungroup': {
           this.disableTabScroll = true
           mappingUtils.mappingIconAction(tab.icon)
+          break
+        }
+        case 'multiple-select': {
+          editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
           break
         }
         case 'bg-separate': {

@@ -41,7 +41,7 @@ const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const { argv } = require('yargs')
 const { defineConfig } = require('@vue/cli-service')
 
-function resolve(dir) {
+function resolve (dir) {
     return path.join(__dirname, dir)
 }
 
@@ -199,8 +199,7 @@ module.exports = defineConfig({
                     // Tell the Pre-SPA plugin not to use index.html as its template file.
                     indexPath: path.join(__dirname, 'dist', 'app.html'),
                     staticDir: path.join(__dirname, 'dist'),
-                    // routes: ['/', '/tw', '/us', '/jp', '/templates', '/tw/templates', '/us/templates', '/jp/templates', '/editor', '/pricing', '/brandkit'],
-                    routes: ['/'],
+                    routes: ['/', '/tw', '/us', '/jp', '/templates', '/tw/templates', '/us/templates', '/jp/templates', '/editor', '/pricing', '/brandkit'],
                     minify: {
                         minifyCSS: true,
                         removeComments: true
