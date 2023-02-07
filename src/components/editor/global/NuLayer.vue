@@ -20,6 +20,7 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
           :style="scaleStyles()")
         nu-clipper(:config="config"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+            :primaryLayer="primaryLayer"
             :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
           component(:is="`nu-${config.type}`"
             class="transition-none"
@@ -370,7 +371,7 @@ export default defineComponent({
       if (this.config.type !== LayerType.image || this.primaryLayer?.type !== LayerType.frame) {
         return false
       }
-      if (layerUtils.getLayer(this.pageIndex, this.layerIndex).locked) {
+      if ((this.primaryLayer ? this.primaryLayer : this.config).locked) {
         return false
       }
       if (layerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {

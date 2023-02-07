@@ -92,7 +92,6 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize',
-      getLayers: 'getLayers',
       checkedAssets: 'file/getCheckedAssets',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isAdmin: 'user/isAdmin'

@@ -109,7 +109,7 @@ export default defineComponent({
   },
   unmounted() {
     for (let i = 0; i < this.page.layers.length; i++) {
-      if (LayerUtils.getLayer(this.pageIndex, i).type === 'image') {
+      if (this.page.layers[i].type === 'image') {
         ControlUtils.updateLayerProps(this.pageIndex, i, { imgControl: false })
       }
     }
@@ -182,13 +182,6 @@ export default defineComponent({
         return (primaryStyles.rotate + (type === 'group' ? rotate : 0)) * Math.PI / 180
       } else {
         return this.getLayerRotate * Math.PI / 180
-      }
-    },
-    primaryType(): string {
-      if (this.primaryLayerIndex !== -1) {
-        return LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).type
-      } else {
-        return ''
       }
     },
     primaryScale(): number {

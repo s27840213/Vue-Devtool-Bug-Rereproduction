@@ -252,9 +252,9 @@ export default defineComponent({
     },
     'config.imgControl'(val) {
       if (val) {
-        const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
+        const { subLayerIdx } = this.layerInfo()
         const isSubLayer = typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1
-        const currLayer = layerUtils.getLayer(pageIndex, layerIndex)
+        const currLayer = this.primaryLayer ? this.primaryLayer : this.config
         const isInFrame = isSubLayer && currLayer.type === LayerType.frame && (currLayer as IFrame).clips[subLayerIdx || 0].type === LayerType.image
         const isInGroup = isSubLayer && currLayer.type === LayerType.group && (currLayer as IGroup).layers[subLayerIdx || 0].type === LayerType.image
         if ((!isSubLayer && currLayer.type === LayerType.image) || isInFrame || isInGroup) {
@@ -361,7 +361,7 @@ export default defineComponent({
       const { imgWidth, imgHeight } = this.config.styles
       let renderW = imgWidth
       let renderH = imgHeight
-      const primaryLayer = this.primaryLayer || [layerUtils.getLayer(this.pageIndex, this.layerIndex)].filter(i => [LayerType.group, LayerType.frame].includes(i.type as LayerType))[0]
+      const primaryLayer = this.primaryLayer
       const isPrimaryFrameImg = primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.clips[0].isFrameImg
       if (!this.forRender && (this.config.parentLayerStyles || primaryLayer) && !isPrimaryFrameImg) {
         const { scale } = this.config.parentLayerStyles || primaryLayer?.styles
@@ -1006,7 +1006,7 @@ export default defineComponent({
       let scaleY = verticalFlip ? -1 : 1
 
       if (typeof this.subLayerIndex !== 'undefined' && this.subLayerIndex !== -1) {
-        const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
+        const primaryLayer = this.primaryLayer ? this.primaryLayer : this.config
         if (primaryLayer.type === 'frame' && this.config.srcObj.type === 'frame') {
           scaleX = primaryLayer.styles.horizontalFlip ? -1 : 1
           scaleY = primaryLayer.styles.verticalFlip ? -1 : 1

@@ -15,7 +15,8 @@ div(class="nu-sub-controller")
               :pageIndex="pageIndex"
               :page="page"
               :layerIndex="primaryLayerIndex"
-              :layer="config"
+              :config="(config as IText)"
+              :primaryLayer="primaryLayer"
               :subLayerIndex="layerIndex"
               @keydown.37.stop
               @keydown.38.stop
@@ -198,7 +199,7 @@ export default defineComponent({
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
     }),
     wrapperStyles(): any {
-      const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      const scale = this.primaryLayer.styles.scale
       return {
         transformOrigin: '0px 0px',
         transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer as IFrame) ? scale : 1})`,
@@ -265,7 +266,7 @@ export default defineComponent({
 
           if (this.currTextInfo.subLayerIndex === this.layerIndex) {
             TextUtils.setCurrTextInfo({
-              config: LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IGroup,
+              config: this.primaryLayer as IGroup,
               subLayerIndex: undefined
             })
           }
@@ -702,7 +703,7 @@ export default defineComponent({
       if (LayerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
         return
       }
-      if (LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked && !this.isDraggedPanelPhoto()) {
+      if (this.primaryLayer.locked && !this.isDraggedPanelPhoto()) {
         return
       }
       if ((LayerUtils.getCurrLayer as IImage).id === this.uploadId.layerId) {

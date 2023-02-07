@@ -33,13 +33,13 @@ div(:layer-index="`${layerIndex}`"
         ref="body"
         @contextmenu.prevent
         @click.right.stop="onRightClick")
-        div(v-if="showTextEditor" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
+        div(v-if="config.type === 'text' && config.active" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
             :style="textBodyStyle()"
             :pageIndex="pageIndex"
             :page="page"
             :layerIndex="layerIndex"
-            :layer="config"
+            :config="(config as IText)"
             :subLayerIndex="-1"
             @keydown.37.stop
             @keydown.38.stop
@@ -332,12 +332,6 @@ export default defineComponent({
         }
       }
       return undefined
-    },
-    showTextEditor(): boolean {
-      if (this.config.type === 'text' && this.isActive) {
-        return true
-      }
-      return false
     },
     sizeStyles(): { transform: string, width: string, height: string } {
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])

@@ -270,7 +270,6 @@ export default defineComponent({
       geCurrActivePageIndex: 'getCurrActivePageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer',
       pageScaleRatio: 'getPageScaleRatio',
       _showRuler: 'getShowRuler',
       lockGuideline: 'getLockGuideline',

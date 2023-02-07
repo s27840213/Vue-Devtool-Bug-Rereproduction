@@ -42,6 +42,10 @@ export default defineComponent({
     subLayerIndex: {
       type: Number
     },
+    primaryLayer: {
+      type: Object,
+      default: () => { return undefined }
+    },
     isDuplicated: {
       type: Boolean,
       default: false
@@ -183,7 +187,7 @@ export default defineComponent({
       if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
       } else {
-        const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
+        const group = this.primaryLayer as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
         textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)

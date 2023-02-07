@@ -14,6 +14,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       :pageIndex="pageIndex"
       :page="page"
       :subLayerIndex="subLayerIndex"
+      :primaryLayer="primaryLayer"
       :isDuplicated="idx !== duplicatedText.length-1"
       :isTransparent="isTransparent")
     p(v-else
@@ -70,6 +71,10 @@ export default defineComponent({
       type: Number,
       default: -1
     },
+    primaryLayer: {
+      type: Object,
+      default: () => { return undefined }
+    },
     isTransparent: {
       default: false,
       type: Boolean
@@ -119,13 +124,6 @@ export default defineComponent({
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer'
     }),
-    primaryLayer(): IGroup | undefined {
-      if (this.subLayerIndex === -1) {
-        return undefined
-      } else {
-        return LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
-      }
-    },
     spanEffect(): Record<string, unknown> {
       return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
     },
@@ -439,7 +437,7 @@ export default defineComponent({
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
       } else {
         // console.log(this.layerIndex, this.subLayerIndex, textHW.width, textHW.height, widthLimit)
-        const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
+        const group = this.primaryLayer as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
         LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })

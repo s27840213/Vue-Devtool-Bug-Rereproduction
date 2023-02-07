@@ -33,9 +33,12 @@ export default defineComponent({
       type: Number,
       required: true
     },
-    layer: {
-      type: Object,
+    config: {
+      type: Object as PropType<IText>,
       required: true
+    },
+    primaryLayer: {
+      type: Object
     },
     subLayerIndex: {
       type: Number,
@@ -53,19 +56,14 @@ export default defineComponent({
       } | undefined
     }
   },
-  computed: {
-    config(): IText | undefined {
-      return this.layer.type === 'text' ? this.layer as IText : undefined
-    }
-  },
   mounted() {
     this.layerInfo = {
-      currLayer: layerUtils.getLayer(this.pageIndex, this.layerIndex) as IText | IGroup | ITmp,
+      currLayer: (this.primaryLayer ? this.primaryLayer : this.config) as IText | IGroup | ITmp,
       layerIndex: this.layerIndex,
       subLayerIdx: this.subLayerIndex
     }
 
-    const contentEditable = this.subLayerIndex === -1 ? (this.layerInfo.currLayer as IText).contentEditable : ((this.layerInfo.currLayer as IGroup).layers[this.subLayerIndex] as IText).contentEditable
+    const contentEditable = this.config.contentEditable
 
     tiptapUtils.init(this.initText, contentEditable)
     /**
