@@ -190,8 +190,7 @@ export default defineComponent({
       getAsset: 'getAsset',
       groupId: 'getGroupId',
       groupType: 'getGroupType',
-      pagesLength: 'getPagesLength',
-      getPageSize: 'getPageSize'
+      pagesLength: 'getPagesLength'
     }),
     isCustomValid(): boolean {
       return this.widthValid && this.heightValid && !this.isOverArea()

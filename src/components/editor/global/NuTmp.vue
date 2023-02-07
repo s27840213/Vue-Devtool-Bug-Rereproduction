@@ -4,6 +4,7 @@ div(class="nu-tmp"
   nu-layer(v-for="(layer,index) in config.layers"
     :key="`layer-${index}`"
     :pageIndex="pageIndex"
+    :page="page"
     :layerIndex="layerIndex"
     :subLayerIndex="index"
     :contentScaleRatio="contentScaleRatio"
@@ -17,10 +18,11 @@ div(class="nu-tmp"
 
 <script lang="ts">
 import { ILayer, ITmp } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import textPropUtils from '@/utils/textPropUtils'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
@@ -32,6 +34,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     layerIndex: {

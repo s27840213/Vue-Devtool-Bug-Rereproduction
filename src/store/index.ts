@@ -37,7 +37,6 @@ import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import zindexUtils from '@/utils/zindexUtils'
 import { throttle } from 'lodash'
-import { } from 'vue'
 import { createStore, GetterTree, MutationTree } from 'vuex'
 import brandkit from './module/brandkit'
 import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
@@ -114,8 +113,8 @@ const getDefaultState = (): IEditorState => ({
   themes: [],
   hasCopiedFormat: false,
   inGestureToolMode: false,
-  isMobile: false,
-  isLargeDesktop: false,
+  isMobile: generalUtils.getWidth() <= 768,
+  isLargeDesktop: generalUtils.getWidth() >= 1440,
   isGlobalLoading: false,
   useMobileEditor: false,
   defaultContentScaleRatio: generalUtils.isTouchDevice() ? 1 : 1,
@@ -171,13 +170,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getPageSize(state: IEditorState) {
     return (pageIndex: number): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } => {
-      return {
-        width: state.pages[pageIndex].config.width,
-        height: state.pages[pageIndex].config.height,
-        physicalWidth: state.pages[pageIndex].config.physicalWidth,
-        physicalHeight: state.pages[pageIndex].config.physicalHeight,
-        unit: state.pages[pageIndex].config.unit
-      }
+      return pageUtils.extractPageSize(state.pages[pageIndex].config)
     }
   },
   getCurrSidebarPanelType(state: IEditorState): number {

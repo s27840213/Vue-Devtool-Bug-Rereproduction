@@ -4,6 +4,7 @@ div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false
     nu-adjust-image(v-if="isAdjustImage"
           :src="finalSrc"
           :styles="adjustImgStyles"
+          :page="page"
           :contentScaleRatio="contentScaleRatio"
           @error="onError")
     img(v-else-if="src"
@@ -20,7 +21,7 @@ div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -33,6 +34,7 @@ import pageUtils from '@/utils/pageUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import unitUtils from '@/utils/unitUtils'
+import { IPage } from '@/interfaces/page'
 
 export default defineComponent({
   emits: [],
@@ -47,6 +49,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     contentScaleRatio: {
@@ -132,7 +138,6 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      getPageSize: 'getPageSize',
       getEditorViewImages: 'file/getEditorViewImages',
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
@@ -170,7 +175,7 @@ export default defineComponent({
       return ImageUtils.getSrcSize(srcObj, Math.max(renderW, renderH) * (this.scaleRatio / 100))
     },
     pageSizeData(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return this.getPageSize(this.pageIndex)
+      return pageUtils.extractPageSize(this.page)
     },
     srcObj(): SrcObj {
       return this.image.config.srcObj
@@ -210,8 +215,8 @@ export default defineComponent({
     },
     adjustImgStyles(): { [key: string]: string | number } {
       return Object.assign(generalUtils.deepCopy(this.image.config.styles), {
-        width: this.getPageSize(this.pageIndex).width,
-        height: this.getPageSize(this.pageIndex).height,
+        width: this.pageSizeData.width,
+        height: this.pageSizeData.height,
         imgX: this.imageSize.x,
         imgY: this.imageSize.y,
         imgWidth: this.imageSize.width,
@@ -220,7 +225,7 @@ export default defineComponent({
     },
     cssFilterElms(): any[] {
       const { adjust } = this.image.config.styles
-      const { width, height } = pageUtils.getPage(this.pageIndex)
+      const { width, height } = this.page
       if (!adjust) return []
 
       const elms = []

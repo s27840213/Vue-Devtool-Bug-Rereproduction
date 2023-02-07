@@ -5,12 +5,11 @@ div(class="preview" :style="containStyles")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
-import { mapGetters, mapState, mapMutations } from 'vuex'
-import uploadUtils from '@/utils/uploadUtils'
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -40,10 +39,11 @@ export default defineComponent({
     },
     config(): IPage | undefined {
       if (this.pages.length === 0) return undefined
-      if (!this.pages[0].isEnableBleed) return this.pages[0]
+      const page = this.pages[0]
+      if (!page.isEnableBleed) return page
       return {
-        ...this.pages[0],
-        ...pageUtils.getPageSizeWithBleeds(this.pages[0])
+        ...page,
+        ...pageUtils.getPageSizeWithBleeds(page)
       }
     },
     containStyles(): any {

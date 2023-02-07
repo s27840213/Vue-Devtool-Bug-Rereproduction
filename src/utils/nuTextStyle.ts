@@ -1,19 +1,20 @@
-import { nextTick } from 'vue'
 import { IGroup, IText } from '@/interfaces/layer'
+import { checkAndConvertToHex } from '@/utils/colorUtils'
 import { Extension } from '@tiptap/core'
 import { Editor } from '@tiptap/vue-3'
-import tiptapUtils from './tiptapUtils'
+import { nextTick } from 'vue'
 import layerUtils from './layerUtils'
+import shortcutUtils from './shortcutUtils'
 import stepsUtils from './stepsUtils'
 import textPropUtils from './textPropUtils'
-import shortcutUtils from './shortcutUtils'
-import { checkAndConvertToHex } from '@/utils/colorUtils'
+import tiptapUtils from './tiptapUtils'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     nuTextStyle: {
       selectPrevious: () => ReturnType,
-      sync: () => ReturnType
+      sync: () => ReturnType,
+      insertPlainText: (text: string) => ReturnType
     }
   }
 }
@@ -439,6 +440,12 @@ export default Extension.create({
         const paragraphs = targetLayer.paragraphs
         const selection = targetLayer.selection
         return chain().setContent(tiptapUtils.toJSON(paragraphs)).setTextSelection(selection).run()
+      },
+      insertPlainText: (text: string) => ({ commands }) => {
+        return commands.command(({ tr }) => {
+          tr.insertText(text)
+          return true
+        })
       }
     }
   }

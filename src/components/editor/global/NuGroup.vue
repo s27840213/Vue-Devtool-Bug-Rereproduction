@@ -4,6 +4,7 @@ div(class="nu-group"
   nu-layer(v-for="(layer,index) in config.layers"
     :key="`layer-${layer.id}`"
     :pageIndex="pageIndex"
+    :page="page"
     :primaryLayer="config"
     :layerIndex="layerIndex"
     :subLayerIndex="index"
@@ -13,7 +14,8 @@ div(class="nu-group"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { IPage } from '@/interfaces/page'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   emits: [],
@@ -24,6 +26,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     layerIndex: {

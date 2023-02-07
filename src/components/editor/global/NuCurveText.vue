@@ -10,14 +10,15 @@ p(class="nu-curve-text__p" :style="pStyle()")
 </template>
 
 <script lang="ts">
+import { IGroup, ISpan, IText } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import LayerUtils from '@/utils/layerUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import TextShapeUtils from '@/utils/textShapeUtils'
+import textUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
-import TextShapeUtils from '@/utils/textShapeUtils'
-import { IGroup, ISpan, IText } from '@/interfaces/layer'
-import tiptapUtils from '@/utils/tiptapUtils'
-import LayerUtils from '@/utils/layerUtils'
-import textUtils from '@/utils/textUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
 
 export default defineComponent({
   emits: [],
@@ -34,8 +35,16 @@ export default defineComponent({
       type: Number,
       required: true
     },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
     subLayerIndex: {
       type: Number
+    },
+    primaryLayer: {
+      type: Object,
+      default: () => { return undefined }
     },
     isDuplicated: {
       type: Boolean,
@@ -178,7 +187,7 @@ export default defineComponent({
       if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
       } else {
-        const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
+        const group = this.primaryLayer as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
         textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)

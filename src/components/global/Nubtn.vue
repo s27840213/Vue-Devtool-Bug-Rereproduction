@@ -4,7 +4,7 @@ div(:class="`nubtn ${theme} ${sizeClass} ${status} ${$isTouchDevice?'mobile':'de
     @click="click")
   svg-icon(v-if="theme.includes('icon')"
           :iconName="icon" :iconWidth="iconSize" :iconColor="iconColor")
-  span(v-if="theme !== 'icon'")
+  span(v-if="!theme.includes('icon') || theme === 'icon_text'")
     slot
 </template>
 
@@ -20,7 +20,10 @@ export default defineComponent({
   },
   props: {
     theme: {
-      type: String as PropType<'primary'|'outline'|'text'|'icon_text'|'icon'|'ghost'|'ghost_outline'|'danger'|'secondary'>,
+      type: String as PropType<
+        'primary'|'outline'|'text'|'icon_text'|'icon'|'icon2'|
+        'ghost'|'ghost_outline'|'danger'|'secondary'
+      >,
       default: 'primary'
     },
     // *-full mean button will occupy all width.
@@ -87,6 +90,9 @@ export default defineComponent({
   box-sizing: border-box;
   cursor: pointer;
   user-select: none;
+  &.full {
+    width: 100%;
+  }
   &:not(.full) {
     width: fit-content;
   }
@@ -121,7 +127,7 @@ export default defineComponent({
 .desktop:hover, .hover { // In this way, .desktop:hover can overwrite default and active but not disabled.
   --blue: #{setColor(blue-hover)};
 }
-.disabled {
+.desktop.disabled, .mobile.disabled { // Add .desktop can make .disabled css weight > .desktop:hover
   --blue: #{setColor(gray-4)};
 }
 
@@ -170,8 +176,29 @@ export default defineComponent({
   &.desktop:hover, &.hover {
     background-color: setColor(blue-3, 0.5);
   }
-  &.disabled {
-    opacity: 0.5;
+  &.desktop.disabled, &.mobile.disabled {
+    background-color: transparent;
+  }
+}
+.nubtn.icon2 {
+  // &.sm {
+  //   width: 24px;
+  //   height: 24px;
+  // }
+  &.mid {
+    width: 44px;
+    height: 44px;
+  }
+  border: 1px solid setColor(gray-3);
+  background-color: white;
+  &.active {
+    background-color: setColor(blue-3);
+  }
+  &.desktop:hover, &.hover {
+    background-color: setColor(blue-4);
+  }
+  &.desktop.disabled, &.mobile.disabled {
+    background-color: white;
   }
 }
 .nubtn.ghost {
@@ -186,7 +213,7 @@ export default defineComponent({
     color: setColor(blue-1);
     background-color: setColor(white);
   }
-  &.disabled {
+  &.desktop.disabled, &.mobile.disabled {
     color: setColor(gray-4);
     background-color: setColor(white);
   }
@@ -203,7 +230,7 @@ export default defineComponent({
     color: setColor(white);
     border: 1px solid setColor(white);
   }
-  &.disabled {
+  &.desktop.disabled, &.mobile.disabled {
     color: setColor(gray-4);
     border: 1px solid setColor(gray-4);
   }
@@ -220,7 +247,7 @@ export default defineComponent({
   &.desktop:hover, &.hover {
     background-color: #FC5757;
   }
-  &.disabled {
+  &.desktop.disabled, &.mobile.disabled {
     background-color: setColor(gray-4);
   }
 }
@@ -239,7 +266,7 @@ export default defineComponent({
     background-color: setColor(gray-4);
     border: 1px solid setColor(gray-3);
   }
-  &.disabled {
+  &.desktop.disabled, &.mobile.disabled {
     color: setColor(white);
     background-color: setColor(gray-4);
     border: none;
