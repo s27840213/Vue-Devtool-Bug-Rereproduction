@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="nu-shape" :style="styles()")
-  svg(:view-box.camel="viewBoxFormatter" :style="styles()")
+  svg(:view-box.camel="viewBoxFormatter")
     defs(v-if="config.category === 'E'" v-html="svgFormatter")
     defs
       filter(v-if="config.category === 'C'" :id="className()" v-html="filterFormatter")
@@ -18,6 +18,7 @@ import { IShape } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { IPage } from '@/interfaces/page'
+import { useRoute } from 'vue-router'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'
@@ -296,7 +297,8 @@ export default defineComponent({
       if (this.paramsReady) {
         return {
           width: `${(this.config.category === 'D') ? this.config.styles.initWidth : (this.config.vSize[0] + this.config.pDiff[0])}px`,
-          height: `${(this.config.category === 'D') ? this.config.styles.initHeight : (this.config.vSize[1] + this.config.pDiff[1])}px`
+          height: `${(this.config.category === 'D') ? this.config.styles.initHeight : (this.config.vSize[1] + this.config.pDiff[1])}px`,
+          ...(this.config.wkf && useRoute().path === '/preview' && { '-webkit-filter': 'opacity(1)' })
         }
       } else {
         return {
