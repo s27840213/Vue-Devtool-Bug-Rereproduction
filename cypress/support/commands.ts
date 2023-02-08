@@ -48,6 +48,14 @@ Cypress.Commands.add('deleteAllLayers', () => {
   cy.get('body').type('{ctrl+A}').type('{del}')
 })
 
+Cypress.Commands.add('importDesign', (designName: string) => {
+  // TODO: Use @/ instead of ../
+  const designJson = require(`../fixtures/design/${designName}`)
+  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$store').then((vuex) => {
+    vuex.commit('SET_pages', designJson)
+  })
+})
+
 Cypress.Commands.add('getAllCategoryName', (panel: ISidebarData, categoryName = [], last = false) => {
   cy.get(panel.icon).click()
   cy.get(`.panel > .panel-${panel.componentName}
@@ -107,9 +115,6 @@ function addAsset(panel: ISidebarData, category: string | number, itemIndex: num
     cy.get(panel.icon).click()
 
     // Find target item we want to add
-    const itemClass = ['photo', 'file'].includes(panel.panelName)
-      ? '.gallery-photo__img'
-      : `.panel-${panel.componentName}__item > img`
     if (itemIndex < 3) {
       cy.get(`.panel > .panel-${panel.componentName}
             > .vue-recycle-scroller:visible
