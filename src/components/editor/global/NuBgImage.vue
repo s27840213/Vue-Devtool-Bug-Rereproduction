@@ -21,20 +21,20 @@ div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import NuAdjustImage from './NuAdjustImage.vue'
-import ImageUtils from '@/utils/imageUtils'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import cssConverter from '@/utils/cssConverter'
-import generalUtils from '@/utils/generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImage, IImageStyle } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import cssConverter from '@/utils/cssConverter'
 import editorUtils from '@/utils/editorUtils'
-import pageUtils from '@/utils/pageUtils'
+import generalUtils from '@/utils/generalUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
+import ImageUtils from '@/utils/imageUtils'
+import pageUtils from '@/utils/pageUtils'
 import unitUtils from '@/utils/unitUtils'
-import { IPage } from '@/interfaces/page'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import NuAdjustImage from './NuAdjustImage.vue'
 
 export default defineComponent({
   emits: [],
@@ -162,7 +162,7 @@ export default defineComponent({
       let renderW = imgWidth
       let renderH = imgHeight
       if (dpi !== -1) {
-        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.pageSizeData
+        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.pageSize
         if (unit !== 'px' && physicalHeight && physicalWidth) {
           const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
           renderW *= dpi / physicaldpi
@@ -174,8 +174,8 @@ export default defineComponent({
       }
       return ImageUtils.getSrcSize(srcObj, Math.max(renderW, renderH) * (this.scaleRatio / 100))
     },
-    pageSizeData(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return pageUtils.extractPageSize(this.page)
+    pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
+      return pageUtils.removeBleedsFromPageSize(this.page)
     },
     srcObj(): SrcObj {
       return this.image.config.srcObj
@@ -215,8 +215,8 @@ export default defineComponent({
     },
     adjustImgStyles(): { [key: string]: string | number } {
       return Object.assign(generalUtils.deepCopy(this.image.config.styles), {
-        width: this.pageSizeData.width,
-        height: this.pageSizeData.height,
+        width: this.pageSize.width,
+        height: this.pageSize.height,
         imgX: this.imageSize.x,
         imgY: this.imageSize.y,
         imgWidth: this.imageSize.width,
@@ -225,7 +225,7 @@ export default defineComponent({
     },
     cssFilterElms(): any[] {
       const { adjust } = this.image.config.styles
-      const { width, height } = this.page
+      const { width, height } = this.pageSize
       if (!adjust) return []
 
       const elms = []
