@@ -75,7 +75,7 @@ export default defineComponent({
   },
   data() {
     return {
-      controlPoints: ControlUtils.getControlPoints(4, 25),
+      controlPoints: ControlUtils.getControlPoints(4, 25, (100 / this.$store.getters.getPageScaleRatio)),
       isControlling: false,
       initialPos: { x: 0, y: 0 },
       initImgPos: { imgX: 0, imgY: 0 },

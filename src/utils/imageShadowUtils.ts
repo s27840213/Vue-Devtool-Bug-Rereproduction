@@ -425,7 +425,7 @@ class ImageShadowUtils {
   }
 
   drawShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
-    console.log('start drawing')
+    console.log('start drawing', params.drawCanvasH, params.drawCanvasW)
     const canvas = canvas_s[0] || undefined
     const { timeout = DRAWING_TIMEOUT, cb } = params
     const { shadow } = config.styles

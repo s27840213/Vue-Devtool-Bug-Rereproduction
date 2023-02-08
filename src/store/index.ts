@@ -117,7 +117,7 @@ const getDefaultState = (): IEditorState => ({
   isLargeDesktop: generalUtils.getWidth() >= 1440,
   isGlobalLoading: false,
   useMobileEditor: false,
-  defaultContentScaleRatio: 1,
+  defaultContentScaleRatio: generalUtils.isTouchDevice() ? 1 : 1,
   _3dEnabledPageIndex: -1,
   enalbleComponentLog: false,
   inScreenshotPreviewRoute: false,
