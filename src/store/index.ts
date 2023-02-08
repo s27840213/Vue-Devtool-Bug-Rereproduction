@@ -385,6 +385,7 @@ const mutations: MutationTree<IEditorState> = {
     })]
   },
   ADD_pageToPos(state: IEditorState, updateInfo: { newPage: IPage, pos: number }) {
+    console.log(updateInfo.pos)
     state.pages = state.pages.slice(0, updateInfo.pos).concat(
       {
         config: updateInfo.newPage,

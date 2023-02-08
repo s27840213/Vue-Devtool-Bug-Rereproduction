@@ -73,6 +73,7 @@ export default defineComponent({
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
+        { icon: 'add-page', text: `${this.$t('NN0139')}` },
         ...brandkitUtils.isBrandkitAvailable ? [{ icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }] : []
       ] as Array<IFooterTab>
     }
@@ -546,7 +547,7 @@ export default defineComponent({
             bleeds: currPage.bleeds,
             physicalBleeds: currPage.physicalBleeds,
             isEnableBleed: currPage.isEnableBleed
-          }), pageUtils.currActivePageIndex + 1)
+          }), pageUtils.currFocusPageIndex + 1)
           this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
           stepsUtils.record()
           break

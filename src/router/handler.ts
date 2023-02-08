@@ -1,13 +1,13 @@
-import { nextTick } from 'vue'
-import VueRouter from 'vue-router'
-import uploadUtils from '@/utils/uploadUtils'
-import assetUtils from '@/utils/assetUtils'
-import { SidebarPanelType } from '@/store/types'
 import store from '@/store'
+import { SidebarPanelType } from '@/store/types'
+import assetUtils from '@/utils/assetUtils'
 import designUtils from '@/utils/designUtils'
+import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
-import editorUtils from '@/utils/editorUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { nextTick } from 'vue'
+import VueRouter from 'vue-router'
 
 export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized, from: VueRouter.RouteLocationNormalized, next: VueRouter.NavigationGuardNext) {
   try {
