@@ -20,6 +20,7 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
           :style="scaleStyles()")
         nu-clipper(:config="config"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+            :primaryLayer="primaryLayer"
             :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
           component(:is="`nu-${config.type}`"
             class="transition-none"
@@ -27,6 +28,7 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
             :imgControl="imgControl"
             :contentScaleRatio="contentScaleRatio"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+            :page="page"
             :scaleRatio="scaleRatio"
             :primaryLayer="primaryLayer"
             :forRender="forRender"
@@ -50,6 +52,7 @@ import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, ILayer, IText, ITmp } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
 import CssConveter from '@/utils/cssConverter'
@@ -90,6 +93,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     layerIndex: {
@@ -364,7 +371,7 @@ export default defineComponent({
       if (this.config.type !== LayerType.image || this.primaryLayer?.type !== LayerType.frame) {
         return false
       }
-      if (layerUtils.getLayer(this.pageIndex, this.layerIndex).locked) {
+      if ((this.primaryLayer ? this.primaryLayer : this.config).locked) {
         return false
       }
       if (layerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
@@ -438,7 +445,7 @@ export default defineComponent({
     lineMoverStyles(): { [key: string]: string } {
       if (!this.isLine) return {}
       const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
-      const page = pageUtils.getPage(this.pageIndex)
+      const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
       let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * this.contentScaleRatio}px, ${(page.isEnableBleed ? y + bleeds.top : y) * this.contentScaleRatio}px)`
       if (rotate) {
@@ -573,7 +580,7 @@ export default defineComponent({
       /**
        * Prevent double clicking of img will propagate and set the img-ctrl to default immediately.
        */
-      if (this.isImgCtrl && !['IMG', 'path'].includes(target.tagName)) {
+      if (this.isImgCtrl && !['IMG', 'path', 'image'].includes(target.tagName)) {
         imageUtils.setImgControlDefault()
       }
       this.initPos.x = this.config.styles.x
@@ -779,7 +786,7 @@ export default defineComponent({
       const body = (this.$refs.body as HTMLElement[])[0]
       body.removeEventListener('dragleave', this.onFrameDragLeave)
       body.removeEventListener('drop', this.onFrameDrop)
-      const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex) as IFrame
+      const primaryLayer = this.primaryLayer as IFrame
       if (this.currDraggedPhoto.srcObj.type !== '' && !primaryLayer.locked) {
         frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex, this.imgBuff.srcObj)
         frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, this.imgBuff.styles)

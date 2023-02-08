@@ -73,6 +73,7 @@ export default defineComponent({
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
+        { icon: 'add-page', text: `${this.$t('NN0139')}` },
         ...brandkitUtils.isBrandkitAvailable ? [{ icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }] : []
       ] as Array<IFooterTab>
     }
@@ -118,6 +119,7 @@ export default defineComponent({
       return [
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         ...(this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
@@ -137,6 +139,7 @@ export default defineComponent({
       return [
         this.mainMenu,
         ...replace,
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -164,7 +167,8 @@ export default defineComponent({
         },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
-        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
+        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
     },
@@ -227,7 +231,8 @@ export default defineComponent({
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust }
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` }
       ]
     },
     pageTabs(): Array<IFooterTab> {
@@ -246,8 +251,7 @@ export default defineComponent({
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
-        { icon: 'multiple-file', text: `${this.$t('NN0807')}` }
+        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' }
         // { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true }
       ]
     },
@@ -258,7 +262,7 @@ export default defineComponent({
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'multiple-file', text: `${this.$t('NN0807')}` }
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` }
 
       ]
     },
@@ -543,7 +547,7 @@ export default defineComponent({
             bleeds: currPage.bleeds,
             physicalBleeds: currPage.physicalBleeds,
             isEnableBleed: currPage.isEnableBleed
-          }), pageUtils.currActivePageIndex + 1)
+          }), pageUtils.currFocusPageIndex + 1)
           this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
           stepsUtils.record()
           break
@@ -613,7 +617,7 @@ export default defineComponent({
           mappingUtils.mappingIconAction(tab.icon)
           break
         }
-        case 'multiple-file': {
+        case 'multiple-select': {
           editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
           break
         }

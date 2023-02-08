@@ -40,7 +40,7 @@ export default defineComponent({
       openValueSelector: false,
       fontSelectValue,
       fieldRange: {
-        fontSize: { min: 1, max: 144 },
+        fontSize: { min: 1, max: 9999 },
         lineHeight: { min: 0.5, max: 2.5 },
         fontSpacing: { min: -200, max: 800 },
         // fontSpacing: { min: -2, max: 8 },
@@ -56,8 +56,7 @@ export default defineComponent({
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
-      layerIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer'
+      layerIndex: 'getCurrSelectedIndex'
     }),
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
     scale(): number {
@@ -119,7 +118,7 @@ export default defineComponent({
     },
     handleValueUpdate(value: number) {
       // layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-      value = Math.round(value / this.scale * 10) / 10
+      value = value / this.scale
       tiptapUtils.spanStyleHandler('size', value)
       tiptapUtils.forceUpdate(true)
       textPropUtils.updateTextPropsState({ fontSize: value.toString() })
@@ -129,7 +128,7 @@ export default defineComponent({
       let { value } = e.target as HTMLInputElement
       if (this.isValidFloat(value)) {
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
-        const finalValue = Math.round(parseFloat(value) / this.scale * 10) / 10
+        const finalValue = parseFloat(value) / this.scale
         window.requestAnimationFrame(() => {
           tiptapUtils.applySpanStyle('size', finalValue)
           tiptapUtils.agent(editor => {

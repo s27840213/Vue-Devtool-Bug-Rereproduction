@@ -1,9 +1,9 @@
-import { SrcObj } from './gallery'
-import { ITiptapSelection } from './text'
 import { IAdjustJsonProps } from '@/interfaces/adjust'
-import { IShadowProps, IShadowStyles } from './imgShadow'
 import { LayerProcessType } from '@/store/types'
 import { ITextBgEffect, ITextEffect, ITextShape } from './format'
+import { SrcObj } from './gallery'
+import { IShadowProps, IShadowStyles } from './imgShadow'
+import { ITiptapSelection } from './text'
 
 export const jsonVer = '1.0.7'
 
@@ -177,4 +177,4 @@ export interface ITmp extends ILayer<IStyle> {
   layers: Array<IShape | IText | IImage | IGroup | IFrame>
 }
 
-export type LayerType = IShape | IText | IImage | IGroup | IFrame
+export type AllLayerTypes = IShape | IText | IImage | IGroup | IFrame | ITmp

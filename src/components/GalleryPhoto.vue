@@ -92,7 +92,6 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize',
-      getLayers: 'getLayers',
       checkedAssets: 'file/getCheckedAssets',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isAdmin: 'user/isAdmin'
@@ -102,9 +101,6 @@ export default defineComponent({
     },
     hasCheckedAssets(): boolean {
       return this.checkedAssets.length !== 0
-    },
-    pageSize(): { width: number, height: number } {
-      return this.getPageSize(pageUtils.currFocusPageIndex)
     },
     previewSrc(): string {
       const { inFilePanel, inLogoPanel, photo, vendor } = this
@@ -144,6 +140,9 @@ export default defineComponent({
       setCurrDraggedPhoto: 'SET_currDraggedPhoto',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag'
     }),
+    pageSize(): { width: number, height: number } {
+      return this.getPageSize(pageUtils.currFocusPageIndex)
+    },
     dragStart(e: DragEvent, photo: any) {
       if (!networkUtils.check()) {
         networkUtils.notifyNetworkError()
@@ -155,7 +154,7 @@ export default defineComponent({
       if (this.isUploading) {
         e.preventDefault()
       } else {
-        const pageSize = this.$store.getters.getPageSize(layerUtils.pageIndex)
+        const pageSize = this.getPageSize(layerUtils.pageIndex)
         const resizeRatio = RESIZE_RATIO_IMAGE
         const pageAspectRatio = pageSize.width / pageSize.height
         const photoAspectRatio = photo.width / photo.height
@@ -230,10 +229,11 @@ export default defineComponent({
       }
 
       const resizeRatio = RESIZE_RATIO_IMAGE
-      const pageAspectRatio = this.pageSize.width / this.pageSize.height
+      const pageSize = this.pageSize()
+      const pageAspectRatio = pageSize.width / pageSize.height
       const photoAspectRatio = photo.width / photo.height
-      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
-      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
+      const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
+      const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
 
       const isPrimaryLayerFrame = layer.type === LayerType.frame
       const config = isPrimaryLayerFrame ? ((layer as IFrame).clips.find(c => c.active) ?? (layer as IFrame).clips[0]) : _config as IImage

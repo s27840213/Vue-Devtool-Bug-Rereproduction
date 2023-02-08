@@ -1,47 +1,45 @@
-import { } from 'vue'
-import { GetterTree, MutationTree, createStore } from 'vuex'
-import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame, IImageStyle } from '@/interfaces/layer'
-import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData, LayerType } from './types'
+import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
+import { SrcObj } from '@/interfaces/gallery'
+import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IShape, IText, ITmp } from '@/interfaces/layer'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
-import zindexUtils from '@/utils/zindexUtils'
-
-import photos from '@/store/photos'
-import user from '@/store/module/user'
-import color from '@/store/module/color'
-import bgRemove from '@/store/module/bgRemove'
-import text from '@/store/text'
-import objects from '@/store/module/objects'
-import templates from '@/store/module/templates'
-import textStock from '@/store/module/text'
-import shadow from '@/store/module/shadow'
-import font from '@/store/module/font'
+import { Itheme } from '@/interfaces/theme'
 import background from '@/store/module/background'
-import modal from '@/store/module/modal'
-import popup from '@/store/module/popup'
-import page from '@/store/module/page'
-import homeTemplate from '@/store/module/homeTemplate'
+import bgRemove from '@/store/module/bgRemove'
+import color from '@/store/module/color'
 import design from '@/store/module/design'
+import file from '@/store/module/file'
+import font from '@/store/module/font'
+import fontTag from '@/store/module/fontTag'
+import homeTemplate from '@/store/module/homeTemplate'
+import imgControl from '@/store/module/imgControl'
 import layouts from '@/store/module/layouts'
 import markers from '@/store/module/markers'
 import mobileEditor from '@/store/module/mobileEditor'
-import brandkit from './module/brandkit'
-import groupUtils from '@/utils/groupUtils'
-import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
-import { SrcObj } from '@/interfaces/gallery'
-import pageUtils from '@/utils/pageUtils'
+import modal from '@/store/module/modal'
+import objects from '@/store/module/objects'
+import page from '@/store/module/page'
+import payment from '@/store/module/payment'
+import popup from '@/store/module/popup'
+import shadow from '@/store/module/shadow'
+import templates from '@/store/module/templates'
+import textStock from '@/store/module/text'
+import unsplash from '@/store/module/unsplash'
+import user from '@/store/module/user'
+import photos from '@/store/photos'
+import text from '@/store/text'
+import imgShadowMutations from '@/store/utils/imgShadow'
 import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
-import { Itheme } from '@/interfaces/theme'
-import unsplash from '@/store/module/unsplash'
-import uploadUtils from '@/utils/uploadUtils'
-import imgShadowMutations from '@/store/utils/imgShadow'
-import file from '@/store/module/file'
-import payment from '@/store/module/payment'
-import fontTag from '@/store/module/fontTag'
-import imgControl from '@/store/module/imgControl'
+import groupUtils from '@/utils/groupUtils'
 import { ADD_subLayer } from '@/utils/layerUtils'
-import { throttle } from 'lodash'
+import pageUtils from '@/utils/pageUtils'
 import SnapUtils from '@/utils/snapUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import zindexUtils from '@/utils/zindexUtils'
+import { throttle } from 'lodash'
+import { createStore, GetterTree, MutationTree } from 'vuex'
+import brandkit from './module/brandkit'
+import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
 const getDefaultState = (): IEditorState => ({
   pages: [{
@@ -115,11 +113,11 @@ const getDefaultState = (): IEditorState => ({
   themes: [],
   hasCopiedFormat: false,
   inGestureToolMode: false,
-  isMobile: false,
-  isLargeDesktop: false,
+  isMobile: generalUtils.getWidth() <= 768,
+  isLargeDesktop: generalUtils.getWidth() >= 1440,
   isGlobalLoading: false,
   useMobileEditor: false,
-  defaultContentScaleRatio: 1,
+  defaultContentScaleRatio: generalUtils.isTouchDevice() ? 1 : 1,
   _3dEnabledPageIndex: -1,
   enalbleComponentLog: false,
   inScreenshotPreviewRoute: false,
@@ -172,12 +170,13 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getPageSize(state: IEditorState) {
     return (pageIndex: number): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } => {
+      const { width, height, physicalWidth, physicalHeight, unit } = state.pages[pageIndex].config
       return {
-        width: state.pages[pageIndex].config.width,
-        height: state.pages[pageIndex].config.height,
-        physicalWidth: state.pages[pageIndex].config.physicalWidth,
-        physicalHeight: state.pages[pageIndex].config.physicalHeight,
-        unit: state.pages[pageIndex].config.unit
+        width,
+        height,
+        physicalWidth,
+        physicalHeight,
+        unit
       }
     }
   },
@@ -310,6 +309,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getInScreenshotPreview(state: IEditorState) {
     return state.inScreenshotPreviewRoute
+  },
+  getHasBleed(state: IEditorState) {
+    return state.pages.some((page: IPageState) => page.config.isEnableBleed)
   }
 }
 
@@ -383,6 +385,7 @@ const mutations: MutationTree<IEditorState> = {
     })]
   },
   ADD_pageToPos(state: IEditorState, updateInfo: { newPage: IPage, pos: number }) {
+    console.log(updateInfo.pos)
     state.pages = state.pages.slice(0, updateInfo.pos).concat(
       {
         config: updateInfo.newPage,

@@ -120,7 +120,6 @@ export default defineComponent({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedLayers: 'getCurrSelectedLayers',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
@@ -185,7 +184,7 @@ export default defineComponent({
       setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
       setIsProcessing: 'bgRemove/SET_isProcessing',
       setIdInfo: 'bgRemove/SET_idInfo',
-      recudeBgrmRemain: 'payment/REDUCE_bgrmRemain',
+      reduceBgrmRemain: 'payment/REDUCE_bgrmRemain',
       updateImgCtrlConfig: 'imgControl/UPDATE_CONFIG'
     }),
     ...mapActions({
@@ -291,7 +290,7 @@ export default defineComponent({
             if (data.flag === 0) {
               uploadUtils.polling(data.url, (json: any) => {
                 if (json.flag === 0 && json.data) {
-                  this.recudeBgrmRemain()
+                  this.reduceBgrmRemain()
                   const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
                   const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
 

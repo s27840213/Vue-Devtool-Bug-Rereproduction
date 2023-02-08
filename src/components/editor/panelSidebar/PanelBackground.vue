@@ -10,6 +10,7 @@ div(class="panel-bg")
   //- BG color tab content
   color-slips(v-show="showColorTab" class="panel-bg__color-sets" mode="PanelBG"
               :selectedColor="currentPageBackgroundColor"
+              :currPage="currPage"
               @selectColor="setBgColor"
               @selectColorEnd="recordChange"
               @openColorPicker="openColorPicker")
@@ -70,8 +71,8 @@ import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'PanelBackground',
@@ -94,6 +95,12 @@ export default defineComponent({
       tabIndex: 0,
     }
   },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
+  },
   computed: {
     ...mapState('background', {
       categories: 'categories',
@@ -101,9 +108,6 @@ export default defineComponent({
       rawSearchResult: 'searchResult',
       pending: 'pending',
       keyword: 'keyword'
-    }),
-    ...mapGetters({
-      getPage: 'getPage'
     }),
     itemWidth(): number {
       const basicWidth = (window.innerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
@@ -151,11 +155,8 @@ export default defineComponent({
         key: 'mainContent'
       }]
     },
-    currPage(): IPage {
-      return this.getPage(pageUtils.currFocusPageIndex)
-    },
     currentPageBackgroundLocked(): boolean {
-      const { backgroundImage } = this.currPage || {}
+      const { backgroundImage } = this.currPage
       return backgroundImage && backgroundImage.config.locked
     },
     currentPageBackgroundColor(): string {

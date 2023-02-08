@@ -4,31 +4,33 @@ div(class="popup bg-white")
     :is="component"
     v-click-outside="vcoConfig"
     :updateOptions="sharedUpdateOptions"
+    :currPage="currPage"
     v-bind="props"
     @close="close")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import vClickOutside from 'click-outside-vue3'
-import PopupOrder from '@/components/popup/PopupOrder.vue'
 import PopupAlign from '@/components/popup/PopupAlign.vue'
-import PopupLayer from '@/components/popup/PopupLayer.vue'
-import PopupPage from '@/components/popup/PopupPage.vue'
-import PopupFlip from '@/components/popup/PopupFlip.vue'
 import PopupFile from '@/components/popup/PopupFile.vue'
-import PopupLineTemplate from '@/components/popup/PopupLineTemplate.vue'
+import PopupFlip from '@/components/popup/PopupFlip.vue'
 import PopupGuideline from '@/components/popup/PopupGuideline.vue'
-import PopupSlider from '@/components/popup/PopupSlider.vue'
+import PopupLayer from '@/components/popup/PopupLayer.vue'
+import PopupLineTemplate from '@/components/popup/PopupLineTemplate.vue'
+import PopupOrder from '@/components/popup/PopupOrder.vue'
+import PopupPage from '@/components/popup/PopupPage.vue'
 import PopupPageScale from '@/components/popup/PopupPageScale.vue'
-import PopupSubmit from '@/components/popup/PopupSubmit.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import PopupSlider from '@/components/popup/PopupSlider.vue'
+import PopupSubmit from '@/components/popup/PopupSubmit.vue'
+import { IPage } from '@/interfaces/page'
 import { IPopupComponent, IPopupOptions } from '@/interfaces/popup'
+import modalUtils from '@/utils/modalUtils'
+import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import pageUtils from '@/utils/pageUtils'
-import modalUtils from '@/utils/modalUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -82,7 +84,7 @@ export default defineComponent({
       return (this.popupComponent as IPopupComponent).props
     },
     hasDesignId(): boolean {
-      return this.getPage(pageUtils.currFocusPageIndex)?.designId !== ''
+      return this.currPage.designId !== ''
     },
     sharedUpdateOptions(): Array<IPopupOptions> {
       return [
@@ -195,6 +197,9 @@ export default defineComponent({
         //   }
         // }
       ]
+    },
+    currPage(): IPage {
+      return this.getPage(pageUtils.currFocusPageIndex)
     }
   },
   mounted() {

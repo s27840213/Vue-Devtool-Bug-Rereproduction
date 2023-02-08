@@ -46,6 +46,7 @@ div(class="mobile-panel"
         class="border-box p-2"
         :is="dynamicBindIs"
         :key="dynamicBindIs"
+        :currPage="currPage"
         v-bind="dynamicBindProps"
         v-on="dynamicBindMethod"
         @close="closeMobilePanel")
@@ -54,12 +55,14 @@ div(class="mobile-panel"
       :currActivePanel="currActiveSubPanel"
       :currColorEvent="currSubColorEvent"
       :isSubPanel="true"
+      :currPage="currPage"
       @switchTab="switchTab"
       @close="closeMobilePanel")
 </template>
 <script lang="ts">
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
+import PanelBleed from '@/components/editor/panelMobile/PanelBleed.vue'
 import PanelBrand from '@/components/editor/panelMobile/PanelBrand.vue'
 import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
@@ -85,10 +88,11 @@ import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
 import i18n from '@/i18n'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IFrame } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -112,6 +116,10 @@ export default defineComponent({
     isSubPanel: {
       default: false,
       type: Boolean
+    },
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
   emits: ['panelHeight', 'switchTab'],
@@ -144,6 +152,7 @@ export default defineComponent({
     PanelPhotoShadow,
     PanelObjectAdjust,
     PanelBrandList,
+    PanelBleed,
     Tabs
   },
   data() {
@@ -194,7 +203,7 @@ export default defineComponent({
     },
     whiteTheme(): boolean {
       const whiteThemePanel = [
-        'replace', 'crop', 'bgRemove', 'position', 'flip',
+        'bleed', 'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list']
@@ -206,7 +215,7 @@ export default defineComponent({
     },
     fixSize(): boolean {
       return this.inSelectionState || [
-        'crop', 'bgRemove', 'position', 'flip', 'opacity',
+        'bleed', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust', 'brand-list'].includes(this.currActivePanel)
     },

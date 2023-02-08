@@ -116,7 +116,6 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      getLayersNum: 'getLayersNum',
       isDefaultSelected: 'brandkit/getIsDefaultSelected',
       currentBrand: 'brandkit/getCurrentBrand'
     }),

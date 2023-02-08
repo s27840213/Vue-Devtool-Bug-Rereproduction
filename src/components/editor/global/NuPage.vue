@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="page-wrapper" ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex}`")
+div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex}`")
   div(class="nu-page"
       :id="`nu-page_${pageIndex}`"
       :style="pageStyles"
@@ -112,21 +112,23 @@ div(class="page-wrapper" ref="page-wrapper" :style="pageRootStyles" :id="`nu-pag
             :minHeight="config.height * (scaleRatio / 100)"
             :maxHeight="config.height * (scaleRatio / 100)"
             :threshold="[0,1]")
-          div(class="scale-container relative"
-              :style="scaleContainerStyles")
-            page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
-            div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
-            div(v-if="currSelectedIndex !== -1" class="page-control" :style="styles('control')")
+          div(:style="sizeStyles")
+            div(class="scale-container relative"
+                :style="scaleContainerStyles")
+              page-content(:config="config" :pageIndex="pageIndex" :page="config" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+              div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
+              dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
+            div(v-if="imgControlPageIdx !== pageIndex" class="page-control" :style="styles('control')")
               nu-controller(v-if="currFocusPageIndex === pageIndex && currLayer.type" data-identifier="controller"
                 :key="`controller-${currLayer.id}`"
                 :layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
+                :page="config"
                 :config="currLayer"
                 :snapUtils="snapUtils"
                 :contentScaleRatio="contentScaleRatio"
                 @setFocus="setFocus()"
                 @isDragging="handleDraggingController")
-            dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
       div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex)"
         class="page-highlighter"
         :style="wrapperStyles()")
@@ -299,7 +301,6 @@ export default defineComponent({
       currSelectedIndex: 'getCurrSelectedIndex',
       pages: 'getPages',
       getPage: 'getPage',
-      getLayer: 'getLayer',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       lockGuideline: 'getLockGuideline',
@@ -375,11 +376,10 @@ export default defineComponent({
       }
     },
     pageRootStyles(): { [index: string]: string | number } {
-      let transform = ''
+      const transform = ''
       let margin = ''
       let position = 'relative'
       if (this.$isTouchDevice) {
-        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
         position = 'absolute'
       } else {
         margin = this.isDetailPage ? '0px auto' : '25px auto'
@@ -430,8 +430,8 @@ export default defineComponent({
     },
     sizeStyles(): any {
       return {
-        width: `${this.config.width * (this.scaleRatio / 100)}px`,
-        height: `${this.config.height * (this.scaleRatio / 100)}px`
+        width: `${this.config.width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
+        height: `${this.config.height * this.contentScaleRatio * this.scaleRatio * 0.01}px`
       }
     }
   },
@@ -465,8 +465,7 @@ export default defineComponent({
           : `${this.config.backgroundImage.posX}px ${this.config.backgroundImage.posY}px`,
         backgroundSize: `${this.config.backgroundImage.config.styles.imgWidth}px ${this.config.backgroundImage.config.styles.imgHeight}px`
       } : {
-        width: `${this.config.width * this.contentScaleRatio}px`,
-        height: `${this.config.height * this.contentScaleRatio}px`,
+        ...this.sizeStyles,
         overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden',
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
@@ -592,7 +591,7 @@ export default defineComponent({
         return
       }
       GroupUtils.deselect()
-      const page = generalUtils.deepCopy(this.getPage(this.pageIndex)) as IPage
+      const page = generalUtils.deepCopy(this.config) as IPage
       page.layers.forEach(l => {
         l.id = generalUtils.generateRandomString(8)
         if (l.type === LayerType.frame) {
@@ -851,9 +850,6 @@ export default defineComponent({
 
 .skeleton {
   background-color: setColor(white);
-}
-
-.page-wrapper {
 }
 
 .layer-num {
