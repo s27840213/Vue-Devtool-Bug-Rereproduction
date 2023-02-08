@@ -36,14 +36,15 @@ div(class="popup-line-template bg-white")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters } from 'vuex'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import rulerUtils from '@/utils/rulerUtils'
-import popupUtils from '@/utils/popupUtils'
+import { IPage } from '@/interfaces/page'
 import { LineTemplatesType } from '@/store/types'
+import MappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import rulerUtils from '@/utils/rulerUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -60,6 +61,12 @@ export default defineComponent({
       fbCover
     }
   },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
+  },
   computed: {
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo'
@@ -68,7 +75,7 @@ export default defineComponent({
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
     },
     isFbCover(): boolean {
-      const pageSize = pageUtils.getPageSize(pageUtils.currFocusPageIndex)
+      const pageSize = pageUtils.extractPageSize(this.currPage)
       return pageSize.width === 1230 && pageSize.height === 693
     },
     row2Styles(): {[index: string]: string} {
