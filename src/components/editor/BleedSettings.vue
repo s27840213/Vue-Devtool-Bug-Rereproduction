@@ -3,7 +3,7 @@ div(class="bleed-settings")
   div(v-for="bleed in bleedsToShow" class='bleed-settings__item')
     div(class='bleed-settings__item__label')
       span(class="body-XS text-gray-2") {{bleed.label}}
-    div(class='bleed-settings__item__input')
+    div(v-if="!$isTouchDevice" class='bleed-settings__item__input')
       div(class='bleed-settings__item__input__icon pointer'
           @click="addBleed(bleed.key, 1, isLocked)")
         svg-icon(iconName="chevron-up"
@@ -22,6 +22,25 @@ div(class="bleed-settings")
               @blur="handleBleedSubmit()"
               @keyup="handleBleedSubmit")
         span(class='text-gray-3') {{pageUnit}}
+    div(v-else class='bleed-settings__item__input mobile')
+      div(class='bleed-settings__item__input__icon pointer mobile'
+          @touchstart="addBleed(bleed.key, -1, isLocked)")
+          svg-icon(iconName="minus-small"
+            iconWidth="14px"
+            iconColor="gray-2"
+            :style="{transform: 'scaleY(-1)'}")
+      div(class='bleed-settings__item__input__value body-XS mobile' @click="handleBleedInputClick(bleed.key)")
+        input(type="number" min="0" :ref="'bleed-' + bleed.key"
+              :value="bleed.value"
+              @input="setBleed($event, bleed.key, isLocked)"
+              @blur="handleBleedSubmit()"
+              @keyup="handleBleedSubmit")
+        span(class='text-gray-3') {{pageUnit}}
+      div(class='bleed-settings__item__input__icon pointer mobile'
+          @touchstart="addBleed(bleed.key, 1, isLocked)")
+        svg-icon(iconName="plus-small"
+          iconWidth="14px"
+          iconColor="gray-2")
   div(class="bleed-settings__lock-icon")
     div(class="bleed-settings__lock-icon__box"
         :style="isLocked ? {background: '#E7EFFF'} : {}")
@@ -223,6 +242,10 @@ export default defineComponent({
         &:active {
           background: setColor(blue-4);
         }
+        &.mobile {
+          height: 100%;
+          border: none;
+        }
       }
       &__value {
         padding: 6px;
@@ -231,6 +254,15 @@ export default defineComponent({
         display: flex;
         align-items: center;
         justify-content: space-between;
+        &.mobile {
+          grid-row: 1;
+          grid-column: 2;
+          border-left: 1px solid setColor(gray-4);
+          border-right: 1px solid setColor(gray-4);
+        }
+      }
+      &.mobile {
+        grid-template-columns: 30px auto 30px;
       }
     }
   }

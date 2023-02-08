@@ -310,6 +310,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getInScreenshotPreview(state: IEditorState) {
     return state.inScreenshotPreviewRoute
+  },
+  getHasBleed(state: IEditorState) {
+    return state.pages.some((page: IPageState) => page.config.isEnableBleed)
   }
 }
 

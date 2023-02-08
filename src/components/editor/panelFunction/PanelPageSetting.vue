@@ -213,10 +213,10 @@ div(class="page-setting")
 
 <script lang="ts">
 import designApis from '@/apis/design-info'
+import BleedSettings from '@/components/editor/BleedSettings.vue'
 import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import SearchBar from '@/components/SearchBar.vue'
-import { IPage } from '@/interfaces/page'
 import { ICoverTheme, Itheme, IThemeTemplate } from '@/interfaces/theme'
 import GeneralUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -226,7 +226,6 @@ import { notify } from '@kyvg/vue3-notification'
 import { round } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import BleedSettings from '../BleedSettings.vue'
 
 export default defineComponent({
   emits: [],
@@ -335,7 +334,7 @@ export default defineComponent({
     ]),
     ...mapGetters({
       getPage: 'getPage',
-      getPages: 'getPages',
+      hasBleed: 'getHasBleed',
       token: 'user/getToken',
       groupId: 'getGroupId',
       showAdminTool: 'user/showAdminTool'
@@ -359,10 +358,7 @@ export default defineComponent({
       } else {
         return false
       }
-    },
-    hasBleed(): boolean {
-      return this.getPages.some((page: IPage) => page.isEnableBleed)
-    },
+    }
   },
   methods: {
     ...mapMutations({

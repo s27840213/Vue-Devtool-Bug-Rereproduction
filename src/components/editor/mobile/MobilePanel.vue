@@ -60,6 +60,7 @@ div(class="mobile-panel"
 <script lang="ts">
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
+import PanelBleed from '@/components/editor/panelMobile/PanelBleed.vue'
 import PanelBrand from '@/components/editor/panelMobile/PanelBrand.vue'
 import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
@@ -144,6 +145,7 @@ export default defineComponent({
     PanelPhotoShadow,
     PanelObjectAdjust,
     PanelBrandList,
+    PanelBleed,
     Tabs
   },
   data() {
@@ -194,7 +196,7 @@ export default defineComponent({
     },
     whiteTheme(): boolean {
       const whiteThemePanel = [
-        'replace', 'crop', 'bgRemove', 'position', 'flip',
+        'bleed', 'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list']
@@ -206,7 +208,7 @@ export default defineComponent({
     },
     fixSize(): boolean {
       return this.inSelectionState || [
-        'crop', 'bgRemove', 'position', 'flip', 'opacity',
+        'bleed', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust', 'brand-list'].includes(this.currActivePanel)
     },

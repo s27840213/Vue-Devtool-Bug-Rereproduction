@@ -20,31 +20,32 @@ div(class="header-bar" @pointerdown.stop)
         :iconColor="(!stepsUtils.isInLastStep && !isCropping) ? 'white' : 'gray-2'"
         :iconWidth="'22px'")
   div(class="header-bar__right")
-    div(v-for="tab in rightTabs" class="header-bar__feature-icon"
-        :class="{'click-disabled': (isLocked && tab.icon !== 'lock'), 'panel-icon': tab.isPanelIcon }"
+    div(v-for="tab in rightTabs")
+      div(v-if="!tab.isHidden" class="header-bar__feature-icon" :class="{'click-disabled': (isLocked && tab.icon !== 'lock'), 'panel-icon': tab.isPanelIcon }"
         @pointerdown="handleIconAction(tab.icon)")
-      svg-icon(
-        :iconName="tab.icon"
-        :iconColor="iconColor(tab)"
-        :iconWidth="'22px'")
+        svg-icon(
+          :iconName="tab.icon"
+          :iconColor="iconColor(tab)"
+          :iconWidth="'22px'")
 </template>
 <script lang="ts">
-import layerUtils from '@/utils/layerUtils'
-import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
-import { notify } from '@kyvg/vue3-notification'
+import i18n from '@/i18n'
 import { IFrame, IGroup } from '@/interfaces/layer'
-import mappingUtils from '@/utils/mappingUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import shotcutUtils from '@/utils/shortcutUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import imageUtils from '@/utils/imageUtils'
-import i18n from '@/i18n'
+import layerUtils from '@/utils/layerUtils'
+import mappingUtils from '@/utils/mappingUtils'
+import shotcutUtils from '@/utils/shortcutUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 interface IIcon {
   icon: string,
   // If isPanelIcon is true, MobilePanel v-out will not be triggered by this icon.
-  isPanelIcon?: boolean
+  isPanelIcon?: boolean,
+  isHidden?: boolean
 }
 
 export default defineComponent({
@@ -64,6 +65,7 @@ export default defineComponent({
   data() {
     return {
       homeTabs: [
+        { icon: 'bleed', isPanelIcon: true },
         { icon: 'resize', isPanelIcon: true },
         { icon: 'all-pages' },
         { icon: 'download', isPanelIcon: true },
@@ -82,7 +84,8 @@ export default defineComponent({
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
       isHandleShadow: 'shadow/isHandling',
-      inBgSettingMode: 'mobileEditor/getInBgSettingMode'
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode',
+      hasBleed: 'getHasBleed'
     }),
     isCropping(): boolean {
       return imageUtils.isImgControl()
@@ -106,7 +109,10 @@ export default defineComponent({
       } else if (this.inBgSettingMode) {
         return this.bgSettingTabs
       } else {
-        return this.homeTabs
+        return this.homeTabs.map(tab => {
+          if (tab.icon === 'bleed') tab.isHidden = !this.hasBleed
+          return tab
+        })
       }
     },
     selectedLayerNum(): number {
@@ -215,6 +221,10 @@ export default defineComponent({
         }
         case 'copy': {
           shotcutUtils.duplicate()
+          break
+        }
+        case 'bleed': {
+          this.$emit('switchTab', icon)
           break
         }
         default: {
