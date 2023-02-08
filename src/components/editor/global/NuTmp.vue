@@ -58,9 +58,6 @@ export default defineComponent({
     textPropUtils.updateTextPropsState()
   },
   computed: {
-    ...mapGetters({
-      getLayer: 'getLayer'
-    }),
     transformStyle(): { [index: string]: string } {
       return {
         transformStyle: this.enalble3dTransform ? 'preserve-3d' : 'initial'

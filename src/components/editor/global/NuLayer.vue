@@ -786,7 +786,7 @@ export default defineComponent({
       const body = (this.$refs.body as HTMLElement[])[0]
       body.removeEventListener('dragleave', this.onFrameDragLeave)
       body.removeEventListener('drop', this.onFrameDrop)
-      const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex) as IFrame
+      const primaryLayer = this.primaryLayer as IFrame
       if (this.currDraggedPhoto.srcObj.type !== '' && !primaryLayer.locked) {
         frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex, this.imgBuff.srcObj)
         frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, this.imgBuff.styles)

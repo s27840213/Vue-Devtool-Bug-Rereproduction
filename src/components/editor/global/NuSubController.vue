@@ -670,7 +670,7 @@ export default defineComponent({
     },
     onFrameDragLeave(e: DragEvent) {
       e.stopPropagation()
-      const primaryLayer = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IFrame
+      const primaryLayer = this.primaryLayer as IFrame
       if (this.isDraggedPanelPhoto() && !primaryLayer.locked) {
         FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.srcObj)
         FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.styles)

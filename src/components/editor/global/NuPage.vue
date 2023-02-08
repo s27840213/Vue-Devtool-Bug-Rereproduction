@@ -301,7 +301,6 @@ export default defineComponent({
       currSelectedIndex: 'getCurrSelectedIndex',
       pages: 'getPages',
       getPage: 'getPage',
-      getLayer: 'getLayer',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       lockGuideline: 'getLockGuideline',

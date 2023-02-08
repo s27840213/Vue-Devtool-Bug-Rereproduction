@@ -199,9 +199,6 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters({
-      getLayer: 'getLayer'
-    }),
     ...mapGetters('user', ['getVerUni']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',

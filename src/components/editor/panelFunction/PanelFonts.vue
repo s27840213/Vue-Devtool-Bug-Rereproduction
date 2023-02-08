@@ -107,7 +107,6 @@ export default defineComponent({
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer',
       assetFonts: 'user/getAssetFonts'
     }),
     keywordLabel(): string {

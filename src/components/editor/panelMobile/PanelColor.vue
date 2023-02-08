@@ -100,7 +100,6 @@ export default defineComponent({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       layerIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer'
     }),
     historySize(): number {
       return this.panelHistory.length

@@ -35,7 +35,6 @@ export default defineComponent({
     ...mapGetters({
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer',
       pageScaleRatio: 'getPageScaleRatio'
     }),
     currFocusPage(): IPage {

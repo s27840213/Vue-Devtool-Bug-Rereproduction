@@ -208,7 +208,6 @@ export default defineComponent({
       geCurrActivePageIndex: 'getCurrActivePageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer',
       pageScaleRatio: 'getPageScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview',
       hasCopiedFormat: 'getHasCopiedFormat',

@@ -121,8 +121,7 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       getDefaultFontsList: 'text/getDefaultFontsList',
-      currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer'
+      currSelectedInfo: 'getCurrSelectedInfo'
     }),
     spanEffect(): Record<string, unknown> {
       return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
