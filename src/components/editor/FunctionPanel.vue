@@ -30,43 +30,44 @@ div(class="function-panel"
   div(v-if="!isShowPagePreview"
       class="function-panel__content"
       :class="{'dim-background': showMore}")
-    panel-bg-remove(v-if="showBgRemove")
-    panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
-    panel-general(v-if="showGeneral")
-    panel-page-setting(v-if="showPageSetting")
-    panel-background-setting(v-if="showPageSetting")
-    panel-shape-setting(v-if="showShapeSetting")
-    panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel")
-    panel-text-effect-setting(v-if="showTextSetting")
-    panel-photo-setting(v-if="showPhotoSetting")
-    panel-img-ctrl(v-if="isImgCtrl")
+    panel-bg-remove(v-if="showBgRemove" :currPage="currPage")
+    panel-fonts(v-if="showFont" :currPage="currPage" @closeFontsPanel="closeFontsPanel")
+    panel-general(v-if="showGeneral" :currPage="currPage")
+    panel-page-setting(v-if="showPageSetting" :currPage="currPage")
+    panel-background-setting(v-if="showPageSetting" :currPage="currPage")
+    panel-shape-setting(v-if="showShapeSetting" :currPage="currPage")
+    panel-text-setting(v-if="showTextSetting" :currPage="currPage" @openFontsPanel="openFontsPanel")
+    panel-text-effect-setting(v-if="showTextSetting" :currPage="currPage")
+    panel-photo-setting(v-if="showPhotoSetting" :currPage="currPage")
+    panel-img-ctrl(v-if="isImgCtrl" :currPage="currPage")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import PanelGeneral from '@/components/editor/panelFunction/PanelGeneral.vue'
-import PanelTextSetting from '@/components/editor/panelFunction/PanelTextSetting.vue'
-import PanelColorPicker from '@/components/editor/panelFunction/PanelColorPicker.vue'
+import DownloadBtn from '@/components/download/DownloadBtn.vue'
 import PanelBackgroundSetting from '@/components/editor/panelFunction/PanelBackgroundSetting.vue'
-import PanelPhotoSetting from '@/components/editor/panelFunction/PanelPhotoSetting.vue'
-import PanelPageSetting from '@/components/editor/panelFunction/PanelPageSetting.vue'
+import PanelBgRemove from '@/components/editor/panelFunction/PanelBgRemove.vue'
+import PanelColorPicker from '@/components/editor/panelFunction/PanelColorPicker.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
+import PanelGeneral from '@/components/editor/panelFunction/PanelGeneral.vue'
+import PanelImgCtrl from '@/components/editor/panelFunction/panelImgCtrl.vue'
+import PanelPageSetting from '@/components/editor/panelFunction/PanelPageSetting.vue'
+import PanelPhotoSetting from '@/components/editor/panelFunction/PanelPhotoSetting.vue'
+import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetting.vue'
 import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
-import PanelBgRemove from '@/components/editor/panelFunction/PanelBgRemove.vue'
-import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
-import PanelImgCtrl from '@/components/editor/panelFunction/panelImgCtrl.vue'
-import DownloadBtn from '@/components/download/DownloadBtn.vue'
-import { mapGetters, mapState } from 'vuex'
-import LayerUtils from '@/utils/layerUtils'
+import PanelTextSetting from '@/components/editor/panelFunction/PanelTextSetting.vue'
 import { IFrame, IGroup } from '@/interfaces/layer'
-import popupUtils from '@/utils/popupUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import shotcutUtils from '@/utils/shortcutUtils'
+import { IPage } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
-import generalUtils from '@/utils/generalUtils'
-import pageUtils from '@/utils/pageUtils'
 import colorUtils from '@/utils/colorUtils'
+import generalUtils from '@/utils/generalUtils'
+import LayerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import shotcutUtils from '@/utils/shortcutUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -89,6 +90,12 @@ export default defineComponent({
     return {
       isFontsPanelOpened: false,
       pageUtils
+    }
+  },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
   computed: {

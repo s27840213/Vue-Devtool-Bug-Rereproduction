@@ -53,35 +53,35 @@ div(class="editor-view bg-gray-5"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import MouseUtils from '@/utils/mouseUtils'
-import GroupUtils from '@/utils/groupUtils'
-import StepsUtils from '@/utils/stepsUtils'
-import ControlUtils from '@/utils/controlUtils'
-import pageUtils from '@/utils/pageUtils'
-import RulerUtils from '@/utils/rulerUtils'
-import { IPage, IPageState } from '@/interfaces/page'
-import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
+import EditorHeader from '@/components/editor/EditorHeader.vue'
 import RulerHr from '@/components/editor/ruler/RulerHr.vue'
 import RulerVr from '@/components/editor/ruler/RulerVr.vue'
-import popupUtils from '@/utils/popupUtils'
-import imageUtils from '@/utils/imageUtils'
-import EditorHeader from '@/components/editor/EditorHeader.vue'
-import tiptapUtils from '@/utils/tiptapUtils'
-import formatUtils from '@/utils/formatUtils'
-import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
-import eventUtils from '@/utils/eventUtils'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
-import generalUtils from '@/utils/generalUtils'
-import layerUtils from '@/utils/layerUtils'
-import { MovingUtils } from '@/utils/movingUtils'
 import i18n from '@/i18n'
-import unitUtils, { PRECISION } from '@/utils/unitUtils'
-import { round } from 'lodash'
+import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import { IPage, IPageState } from '@/interfaces/page'
+import ControlUtils from '@/utils/controlUtils'
+import eventUtils from '@/utils/eventUtils'
+import formatUtils from '@/utils/formatUtils'
+import generalUtils from '@/utils/generalUtils'
+import GroupUtils from '@/utils/groupUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import modalUtils from '@/utils/modalUtils'
+import MouseUtils from '@/utils/mouseUtils'
+import { MovingUtils } from '@/utils/movingUtils'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import RulerUtils from '@/utils/rulerUtils'
+import StepsUtils from '@/utils/stepsUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { round } from 'lodash'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -215,7 +215,7 @@ export default defineComponent({
 
           this.isShowGuidelineV = true
           this.lastMappedVPos = pagePos
-          this.rulerVPos = round(unitUtils.convert(Math.round(this.lastMappedVPos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().width), PRECISION)
+          this.rulerVPos = round(unitUtils.convert(Math.round(this.lastMappedVPos), 'px', this.currPage.unit, pageUtils.getPageDPI().width), PRECISION)
           this.$nextTick(() => {
             const guidelineV = this.$refs.guidelineV as HTMLElement
             guidelineV.style.transform = `translate(${pos - guidelineAreaRect.left}px,0px)`
@@ -228,7 +228,7 @@ export default defineComponent({
           }
           this.isShowGuidelineH = true
           this.lastMappedHPos = pagePos
-          this.rulerHPos = round(unitUtils.convert(Math.round(this.lastMappedHPos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().height), PRECISION)
+          this.rulerHPos = round(unitUtils.convert(Math.round(this.lastMappedHPos), 'px', this.currPage.unit, pageUtils.getPageDPI().height), PRECISION)
 
           this.$nextTick(() => {
             const guidelineH = this.$refs.guidelineH as HTMLElement
@@ -256,6 +256,12 @@ export default defineComponent({
     },
     screenHeight() {
       pageUtils.findCentralPageIndexInfo()
+    }
+  },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
   computed: {
@@ -305,9 +311,6 @@ export default defineComponent({
     isTyping(): boolean {
       return (this.currSelectedInfo.layers as Array<IGroup | IShape | IText | IFrame | IImage>)
         .some(l => l.type === 'text' && l.isTyping)
-    },
-    currFocusPage(): IPage {
-      return this.pageUtils.currFocusPage
     },
     isDragging(): boolean {
       return RulerUtils.isDragging
@@ -467,7 +470,6 @@ export default defineComponent({
     },
     mapSelectionRectToPage(selectionData: DOMRect): { x: number, y: number, width: number, height: number } {
       const targetPageIndex = pageUtils.currFocusPageIndex
-      const targetPage: IPage = this.currFocusPage
 
       const pageRect = document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
 
@@ -533,7 +535,7 @@ export default defineComponent({
     },
     draggingV(e: PointerEvent) {
       this.lastMappedVPos = this.mapGuidelineToPage('v').pos
-      this.rulerVPos = round(unitUtils.convert(Math.round(this.lastMappedVPos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().width), PRECISION)
+      this.rulerVPos = round(unitUtils.convert(Math.round(this.lastMappedVPos), 'px', this.currPage.unit, pageUtils.getPageDPI().width), PRECISION)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineV(this.currentRelPos)
     },
@@ -631,7 +633,7 @@ export default defineComponent({
     },
     draggingH(e: MouseEvent) {
       this.lastMappedHPos = this.mapGuidelineToPage('h').pos
-      this.rulerHPos = round(unitUtils.convert(Math.round(this.lastMappedHPos), 'px', this.currFocusPage.unit, pageUtils.getPageDPI().height), PRECISION)
+      this.rulerHPos = round(unitUtils.convert(Math.round(this.lastMappedHPos), 'px', this.currPage.unit, pageUtils.getPageDPI().height), PRECISION)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineH(this.currentRelPos)
     },

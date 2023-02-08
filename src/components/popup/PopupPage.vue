@@ -37,18 +37,19 @@ div(class="popup-page bg-gray-6"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import MappingUtils from '@/utils/mappingUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
-import GeneralUtils from '@/utils/generalUtils'
-import { mapGetters, mapMutations } from 'vuex'
-import layerUtils from '@/utils/layerUtils'
-import popupUtils from '@/utils/popupUtils'
+import { IPage } from '@/interfaces/page'
 import { IPopupOptions } from '@/interfaces/popup'
-import pageUtils from '@/utils/pageUtils'
 import assetUtils from '@/utils/assetUtils'
+import GeneralUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
+import layerUtils from '@/utils/layerUtils'
+import MappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import ShortcutUtils from '@/utils/shortcutUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -81,9 +82,6 @@ export default defineComponent({
       groupId: 'getGroupId',
       isFontLoading: 'text/getIsFontLoading'
     }),
-    hasDesignId(): boolean {
-      return this.getPage(pageUtils.currFocusPageIndex).designId !== ''
-    },
     currFocusPageIndex(): number {
       return pageUtils.currFocusPageIndex
     }
