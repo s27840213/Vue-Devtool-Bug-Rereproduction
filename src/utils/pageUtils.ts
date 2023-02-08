@@ -669,23 +669,6 @@ class PageUtils {
   }
 
   /**
-   * returns page size
-   * @param page Target page, use current focused page if undefined
-   * @returns
-   ** width, height, physicalWidth, physicalHeight: page size with bleeds
-   ** unit: Unit for physical size and physical bleeds
-   */
-  extractPageSize(page: IPage = this.currFocusPage): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-    return {
-      width: page.width,
-      height: page.height,
-      physicalWidth: page.physicalWidth,
-      physicalHeight: page.physicalHeight,
-      unit: page.unit
-    }
-  }
-
-  /**
    * Set isEnableBleed for one or all pages
    * @param value New value of isEnableBleed
    * @param pageIndex Index of target page, apply to all pages if unspecified

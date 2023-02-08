@@ -170,7 +170,14 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getPageSize(state: IEditorState) {
     return (pageIndex: number): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } => {
-      return pageUtils.extractPageSize(state.pages[pageIndex].config)
+      const { width, height, physicalWidth, physicalHeight, unit } = state.pages[pageIndex].config
+      return {
+        width,
+        height,
+        physicalWidth,
+        physicalHeight,
+        unit
+      }
     }
   },
   getCurrSidebarPanelType(state: IEditorState): number {

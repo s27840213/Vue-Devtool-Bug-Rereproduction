@@ -370,7 +370,7 @@ export default defineComponent({
       }
       const { dpi } = this
       if (dpi !== -1) {
-        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.pageSizeData
+        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.page
         if (unit !== 'px' && physicalHeight && physicalWidth) {
           const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
           renderW *= dpi / physicaldpi
@@ -381,9 +381,6 @@ export default defineComponent({
         }
       }
       return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
-    },
-    pageSizeData() {
-      return pageUtils.extractPageSize(this.page)
     },
     parentLayerDimension(): number | string {
       const { width, height } = this.config.parentLayerStyles || {}
