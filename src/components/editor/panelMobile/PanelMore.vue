@@ -13,6 +13,9 @@ div(class="panel-more")
   div(class="panel-more__item" @click="newDesign()")
     span(class="body-2 pointer") {{$tc('NN0072')}}
   hr(class="panel-more__hr")
+  div(class="panel-more__item " @click="toggleBleed()")
+    span(class="body-2 pointer") {{hasBleed ? `${$t('NN0779')}` : `${$t('NN0778')}`}}
+  hr(class="panel-more__hr")
   div(class="panel-more__item" @click="goToPage('MyDesign')")
     span(class="body-2 pointer") {{$t('NN0080')}}
   hr(class="panel-more__hr")
@@ -27,12 +30,13 @@ div(class="panel-more")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import layerUtils from '@/utils/layerUtils'
-import shortcutHandler from '@/utils/shortcutUtils'
 import pageUtils from '@/utils/pageUtils'
-import { mapMutations, mapState } from 'vuex'
+import shortcutHandler from '@/utils/shortcutUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -43,6 +47,10 @@ export default defineComponent({
     ...mapState('user', [
       'enableAdminView'
     ]),
+    ...mapGetters({
+      pagesLength: 'getPagesLength',
+      hasBleed: 'getHasBleed'
+    }),
     opacity(): number {
       return layerUtils.getCurrOpacity
     },
@@ -89,7 +97,12 @@ export default defineComponent({
     },
     toggleDebugTool() {
       this.setUserState({ enableAdminView: !this.enableAdminView })
-    }
+    },
+    toggleBleed() {
+      const isEnableBleed = !this.hasBleed
+      for (let idx = 0; idx < this.pagesLength; idx++) pageUtils.setIsEnableBleed(isEnableBleed, idx)
+      stepsUtils.record()
+    },
   }
 })
 </script>
