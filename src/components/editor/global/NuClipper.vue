@@ -6,13 +6,12 @@ div(class="nu-clipper layer-flip" ref="body"
 </template>
 
 <script lang="ts">
-import { IFrame, IGroup } from '@/interfaces/layer'
+import { IFrame, IGroup, ITmp } from '@/interfaces/layer'
 import { LayerType } from '@/store/types'
 import cssConverter from '@/utils/cssConverter'
 import frameUtils from '@/utils/frameUtils'
-import layerUtils from '@/utils/layerUtils'
-import { defineComponent } from 'vue'
 import pageUtils from '@/utils/pageUtils'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -32,6 +31,10 @@ export default defineComponent({
     },
     subLayerIndex: {
       type: Number
+    },
+    primaryLayer: {
+      type: Object as PropType<IGroup | IFrame | ITmp>,
+      default: undefined
     },
     imgControl: {
       type: Boolean,
@@ -53,13 +56,6 @@ export default defineComponent({
       isShowPagePanel: 'page/getShowPagePanel',
       isHandleShadow: 'shadow/isHandling'
     }),
-    primaryLayer(): IGroup | IFrame | undefined {
-      if (this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined') {
-        return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame
-      } else {
-        return undefined
-      }
-    },
     shapeWidth(): number {
       return (this.config.vSize?.[0] ?? 0) + (this.config.pDiff?.[0])
     },

@@ -25,6 +25,7 @@ div(class="nu-img-controller")
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import ControlUtils from '@/utils/controlUtils'
 import eventUtils from '@/utils/eventUtils'
 import FrameUtils from '@/utils/frameUtils'
@@ -33,7 +34,7 @@ import LayerUtils from '@/utils/layerUtils'
 import MathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -49,6 +50,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     primaryLayerIndex: {
@@ -70,7 +75,7 @@ export default defineComponent({
   },
   data() {
     return {
-      controlPoints: ControlUtils.getControlPoints(4, 25),
+      controlPoints: ControlUtils.getControlPoints(4, 25, (100 / this.$store.getters.getPageScaleRatio)),
       isControlling: false,
       initialPos: { x: 0, y: 0 },
       initImgPos: { imgX: 0, imgY: 0 },
@@ -103,8 +108,8 @@ export default defineComponent({
     }
   },
   unmounted() {
-    for (let i = 0; i < this.getPage(this.pageIndex).layers.length; i++) {
-      if (LayerUtils.getLayer(this.pageIndex, i).type === 'image') {
+    for (let i = 0; i < this.page.layers.length; i++) {
+      if (this.page.layers[i].type === 'image') {
         ControlUtils.updateLayerProps(this.pageIndex, i, { imgControl: false })
       }
     }
@@ -177,13 +182,6 @@ export default defineComponent({
         return (primaryStyles.rotate + (type === 'group' ? rotate : 0)) * Math.PI / 180
       } else {
         return this.getLayerRotate * Math.PI / 180
-      }
-    },
-    primaryType(): string {
-      if (this.primaryLayerIndex !== -1) {
-        return LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).type
-      } else {
-        return ''
       }
     },
     primaryScale(): number {

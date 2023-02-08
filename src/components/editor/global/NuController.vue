@@ -18,6 +18,7 @@ div(:layer-index="`${layerIndex}`"
       data-identifier="controller"
       :key="`group-controller-${subLayer.config.id}`"
       :pageIndex="pageIndex"
+      :page="page"
       :layerIndex="subLayer.subLayerIdx"
       :primaryLayerIndex="layerIndex"
       :primaryLayer="config"
@@ -32,11 +33,13 @@ div(:layer-index="`${layerIndex}`"
         ref="body"
         @contextmenu.prevent
         @click.right.stop="onRightClick")
-        div(v-if="showTextEditor" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
+        div(v-if="config.type === 'text' && config.active" class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
             :style="textBodyStyle()"
             :pageIndex="pageIndex"
+            :page="page"
             :layerIndex="layerIndex"
+            :config="(config as IText)"
             :subLayerIndex="-1"
             @keydown.37.stop
             @keydown.38.stop
@@ -127,8 +130,7 @@ div(:layer-index="`${layerIndex}`"
             @touchstart="disableTouchEvent")
         template(v-else)
           div(class="control-point__controller-wrapper"
-              ref="rotater"
-              :style="`transform: scale(${100/scaleRatio  * contentScaleRatio})`")
+              ref="rotater")
             svg-icon(class="control-point__rotater"
               :iconName="'rotate'" :iconWidth="`${20}px`"
               :src="require('@/assets/img/svg/rotate.svg')"
@@ -154,6 +156,7 @@ import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IStyle, IText } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
 import DragUtils from '@/utils/dragUtils'
@@ -182,7 +185,7 @@ import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const LAYER_SIZE_MIN = 10
@@ -203,6 +206,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     snapUtils: {
@@ -325,24 +332,19 @@ export default defineComponent({
       }
       return undefined
     },
-    showTextEditor(): boolean {
-      if (this.config.type === 'text' && this.isActive) {
-        return true
-      }
-      return false
-    },
     sizeStyles(): { transform: string, width: string, height: string } {
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
-      const page = pageUtils.getPage(this.pageIndex)
+      const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
-      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * this.contentScaleRatio}px, ${(page.isEnableBleed ? y + bleeds.top : y) * this.contentScaleRatio}px)`
+      const _f = this.contentScaleRatio * this.scaleRatio * 0.01
+      let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * _f}px, ${(page.isEnableBleed ? y + bleeds.top : y) * _f}px)`
       if (rotate) {
         transform += ` rotate(${rotate}deg)`
       }
       return {
         transform,
-        width: `${width * this.contentScaleRatio}px`,
-        height: `${height * this.contentScaleRatio}px`
+        width: `${width * _f}px`,
+        height: `${height * _f}px`
       }
     },
     subContentStyles(): any {
@@ -499,15 +501,17 @@ export default defineComponent({
       const height = parseFloat(resizerStyle.height.replace('px', ''))
       const isHorizon = width > height
       if (isHorizon) {
-        resizerStyle.transform += ` scaleY(${100 / this.scaleRatio})`
+        // resizerStyle.transform += ` scaleY(${100 / this.scaleRatio})`
       } else {
-        resizerStyle.transform += ` scaleX(${100 / this.scaleRatio})`
+        // resizerStyle.transform += ` scaleX(${100 / this.scaleRatio})`
       }
       const scalerOffset = this.$isTouchDevice ? 36 : 20
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: isHorizon ? `${this.getLayerWidth() - scalerOffset * 100 / this.scaleRatio}px` : `${width * this.contentScaleRatio}px`,
-        height: !isHorizon ? `${this.getLayerHeight() - scalerOffset * 100 / this.scaleRatio}px` : `${height * this.contentScaleRatio}px`,
+        // width: isHorizon ? `${this.getLayerWidth() - scalerOffset * 100 / this.scaleRatio}px` : `${width * this.contentScaleRatio}px`,
+        // height: !isHorizon ? `${this.getLayerHeight() - scalerOffset * 100 / this.scaleRatio}px` : `${height * this.contentScaleRatio}px`,
+        width: isHorizon ? `${(this.getLayerWidth() - scalerOffset) * this.scaleRatio * 0.01}px` : `${width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
+        height: !isHorizon ? `${(this.getLayerHeight() - scalerOffset) * this.scaleRatio * 0.01}px` : `${height * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
         opacity: 0
       }
       return Object.assign(resizerStyle, HW)
@@ -520,7 +524,7 @@ export default defineComponent({
         ? (this.config.styles.writingMode.includes('vertical') ? tooNarrow : tooShort)
         : false
       if (!tooSmall) {
-        resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
+        // resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
       }
       // resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
       const width = parseFloat(resizerStyle.width.replace('px', ''))
@@ -723,16 +727,16 @@ export default defineComponent({
         return 'none'
       } else if (this.isShown() || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
         } else {
-          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
         }
       } else {
         return 'none'
       }
     },
     hintStyles() {
-      return `transform: translate(calc(${this.hintTranslation.x * this.contentScaleRatio}px - 100%), ${this.hintTranslation.y * this.contentScaleRatio}px) scale(${100 / this.scaleRatio * this.contentScaleRatio})`
+      return `transform: translate(calc(${this.hintTranslation.x * this.contentScaleRatio}px - 100%), ${this.hintTranslation.y * this.contentScaleRatio}px) scale(${this.contentScaleRatio})`
     },
     moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
       const currLayerIndex = LayerUtils.layerIndex
@@ -1363,7 +1367,7 @@ export default defineComponent({
       const { angle, yDiff, xDiff } = shapeUtils.lineDimension(this.config.point)
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintTranslation = { x: mouseActualPos.offsetX - 35, y: mouseActualPos.offsetY }
       this.hintAngle = ((angle / Math.PI * 180 + (1 - markerIndex) * 180) + 360) % 360
       this.hintLength = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2))
 
@@ -1392,7 +1396,7 @@ export default defineComponent({
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintTranslation = { x: mouseActualPos.offsetX - 35, y: mouseActualPos.offsetY + 35 }
       this.hintLength = lineLength
       this.hintAngle = lineAngle
 
@@ -1635,7 +1639,7 @@ export default defineComponent({
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintTranslation = { x: mouseActualPos.offsetX - 35, y: mouseActualPos.offsetY + 35 }
       this.hintAngle = (this.initialRotate + 360) % 360
 
       eventUtils.addPointerEvent('pointermove', this.rotating)
@@ -1673,7 +1677,7 @@ export default defineComponent({
 
         const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
         const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-        this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+        this.hintTranslation = { x: mouseActualPos.offsetX - 35, y: mouseActualPos.offsetY + 35 }
         this.hintAngle = rotateAngle
         ControlUtils.updateLayerRotate(this.pageIndex, this.layerIndex, angle)
 
@@ -1714,7 +1718,7 @@ export default defineComponent({
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintTranslation = { x: mouseActualPos.offsetX - 35, y: mouseActualPos.offsetY + 35 }
       this.hintAngle = (this.initialRotate + 360) % 360
 
       eventUtils.addPointerEvent('pointermove', this.lineRotating)
@@ -1748,7 +1752,7 @@ export default defineComponent({
 
         const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
         const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-        this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+        this.hintTranslation = { x: mouseActualPos.offsetX - 35, y: mouseActualPos.offsetY + 35 }
         this.hintAngle = angle
 
         ControlUtils.updateShapeLinePoint(this.pageIndex, this.layerIndex, point)
@@ -1891,7 +1895,7 @@ export default defineComponent({
       e && this.onDrop(e)
     },
     waitFontLoadingAndRecord() {
-      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const pageId = this.page.id
       const layerId = this.config.id
       TextUtils.waitFontLoadingAndRecord(this.config.paragraphs, () => {
         const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
@@ -1900,7 +1904,7 @@ export default defineComponent({
       })
     },
     waitFontLoadingAndResize() {
-      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const pageId = this.page.id
       const layerId = this.config.id
       TextUtils.untilFontLoaded(this.config.paragraphs).then(() => {
         setTimeout(() => {
@@ -2203,8 +2207,8 @@ export default defineComponent({
     lockIconStyles(): { [index: string]: string } {
       const zindex = (this.layerIndex + 1) * 100
       return {
-        transform: this.enalble3dTransform ? `translate3d(0px, 0px, ${zindex}px) scale(${100 / this.scaleRatio * this.contentScaleRatio})`
-          : `translate(0px, 0px) scale(${100 / this.scaleRatio * this.contentScaleRatio})`
+        transform: this.enalble3dTransform ? `translate3d(0px, 0px, ${zindex}px) scale(${this.contentScaleRatio})`
+          : `translate(0px, 0px) scale(${this.contentScaleRatio})`
       }
     },
     textHtml(): any {

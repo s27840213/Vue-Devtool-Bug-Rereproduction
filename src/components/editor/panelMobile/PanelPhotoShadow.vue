@@ -24,7 +24,7 @@ div(class="panel-shadow")
       div(class="photo-shadow__row")
         div(class="photo-shadow__color-name text-gray-3 body-2 no-wrap") {{$t('NN0017')}}
         div(class="photo-shadow__color"
-          :style="{ backgroundColor: currentStyle.shadow.effects.color || '#000000' }"
+          :style="{ backgroundColor: currentEffect === 'frame' ? currentStyle.shadow.effects.frameColor : currentStyle.shadow.effects.color || '#000000' }"
           @click="handleColorModal")
     div(v-if="currentEffect !== 'none'" class="photo-shadow__row-wrapper")
       div(class="photo-shadow__reset")
@@ -105,9 +105,22 @@ export default defineComponent({
     },
     onEffectClick(effectName: ShadowEffectType): void {
       const alreadySetEffect = effectName === ShadowEffectType.none || Object.keys((this.currentStyle.shadow as any).effects[effectName]).length
-      imageShadowUtils.setEffect(effectName, {
-        ...(!alreadySetEffect && imageShadowUtils.getDefaultEffect(effectName))
-      })
+      if (!alreadySetEffect) {
+        const data = imageShadowUtils.getLocalEffectAttrs(effectName) || (imageShadowUtils.getDefaultEffect(effectName) as any)[effectName]
+        const color = imageShadowUtils.getLocalEffectColor(effectName) || '#000000'
+        if (effectName === ShadowEffectType.frame) {
+          imageShadowUtils.setEffect(effectName, { [effectName]: data, frameColor: color })
+        } else {
+          imageShadowUtils.setEffect(effectName, { [effectName]: data, color })
+        }
+      } else {
+        if (effectName === ShadowEffectType.frame) {
+          const color = this.currentStyle.shadow.effects.frameColor || this.currentStyle.shadow.effects.color || '#000000'
+          imageShadowUtils.setEffect(effectName, { frameColor: color })
+        } else {
+          imageShadowUtils.setEffect(effectName, {})
+        }
+      }
     },
     handleEffectUpdate(value: string, name: string): void {
       imageShadowPanelUtils.handleEffectUpdate(name, value)

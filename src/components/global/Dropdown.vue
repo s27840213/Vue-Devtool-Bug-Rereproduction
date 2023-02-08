@@ -23,18 +23,16 @@ div(class="relative dropdown")
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
 import vClickOutside from 'click-outside-vue3'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   props: {
     current: {
-      type: String,
-      required: true
+      type: String
     },
     placeholder: {
-      type: String,
-      required: true
+      type: String
     },
     options: {
       type: Array as PropType<{value: string, label: string}[] | number[]>,

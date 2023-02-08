@@ -209,7 +209,6 @@ export default defineComponent({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
-      getPageSize: 'getPageSize',
       pageScaleRatio: 'getPageScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview',
       hasCopiedFormat: 'getHasCopiedFormat',
@@ -243,9 +242,6 @@ export default defineComponent({
     currFocusPage(): IPage {
       return this.pageUtils.currFocusPage
     },
-    pageSize(): { width: number, height: number } {
-      return this.getPageSize(0)
-    },
     minScaleRatio(): number {
       return pageUtils.mobileMinScaleRatio
     },
@@ -276,7 +272,7 @@ export default defineComponent({
     absContainerStyle(): { [index: string]: string | number } {
       const transformDuration = !this.showMobilePanel ? 0.3 : 0
       return {
-        transform: this.isDetailPage ? 'initail' : `translate(0, -${this.currCardIndex * this.cardHeight}px)`,
+        transform: this.isDetailPage ? 'initial' : `translate(0, -${this.currCardIndex * this.cardHeight}px)`,
         transition: `transform ${transformDuration}s`
       }
     }
