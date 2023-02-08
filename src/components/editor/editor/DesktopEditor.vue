@@ -27,7 +27,7 @@ div(class="desktop-editor")
               div(class="ml-10" @click="setEnableComponentLog(!enableComponentLog)")
                 span {{`${enableComponentLog ? '關閉' : '開啟'} Log`}}
           editor-view
-          scale-ratio-editor(@toggleSidebarPanel="toggleSidebarPanel")
+          scale-ratio-editor(v-if="!isShowPagePreview" @toggleSidebarPanel="toggleSidebarPanel")
       div(class="content__panel"
           :style="contentPanelStyles")
         function-panel
@@ -44,33 +44,31 @@ div(class="desktop-editor")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import Sidebar from '@/components/editor/Sidebar.vue'
-import EditorHeader from '@/components/editor/EditorHeader.vue'
-import SidebarPanel from '@/components/editor/SidebarPanel.vue'
-import FunctionPanel from '@/components/editor/FunctionPanel.vue'
+import ComponentLog from '@/components/componentLog/ComponentLog.vue'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
+import EditorHeader from '@/components/editor/EditorHeader.vue'
 import EditorView from '@/components/editor/EditorView.vue'
-import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
+import FunctionPanel from '@/components/editor/FunctionPanel.vue'
 import PagePreview from '@/components/editor/PagePreview.vue'
+import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
+import Sidebar from '@/components/editor/Sidebar.vue'
+import SidebarPanel from '@/components/editor/SidebarPanel.vue'
 import TourGuide from '@/components/editor/TourGuide.vue'
 import PopupBrandSettings from '@/components/popup/PopupBrandSettings.vue'
 import PopupUpdateDesign from '@/components/popup/PopupUpdateDesign.vue'
-import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
-import { FunctionPanelType, SidebarPanelType } from '@/store/types'
-import store from '@/store'
-import rulerUtils from '@/utils/rulerUtils'
-import logUtils from '@/utils/logUtils'
-import colorUtils from '@/utils/colorUtils'
-import brandkitUtils from '@/utils/brandkitUtils'
-import pageUtils from '@/utils/pageUtils'
-import ComponentLog from '@/components/componentLog/ComponentLog.vue'
-import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
 import i18n from '@/i18n'
+import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
+import store from '@/store'
+import { FunctionPanelType, SidebarPanelType } from '@/store/types'
+import brandkitUtils from '@/utils/brandkitUtils'
+import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
-import unitUtils from '@/utils/unitUtils'
 import generalUtils from '@/utils/generalUtils'
+import logUtils from '@/utils/logUtils'
+import rulerUtils from '@/utils/rulerUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'DesktopEditor',
