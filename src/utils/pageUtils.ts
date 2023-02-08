@@ -1,7 +1,7 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
-import { IBleed, IPage, IPageState } from '@/interfaces/page'
+import { IBleed, IPage, IPageSizeWithBleeds, IPageState } from '@/interfaces/page'
 import store from '@/store'
 import { LayerType } from '@/store/types'
 import { floor, round, throttle } from 'lodash'
@@ -644,17 +644,17 @@ class PageUtils {
   }
 
   /**
-   * returns page size with bleeds and bleed sizes
-   * @param page Target page, use current focused page if undefined
+   * Returns page size with bleeds and size of bleeds
+   * @param pageSize Target page size, use size of current focused page if undefined
    * @returns
    ** width, height, physicalWidth, physicalHeight: page size with bleeds
-   ** bleeds, physicalBleeds: page bleed sizes
-   ** unit: Unit for physical size and physical bleeds
+   ** bleeds, physicalBleeds: size of bleeds
+   ** unit: unit of physical size for page and bleeds
    */
-  getPageSizeWithBleeds(page: IPage = this.currFocusPage): { width: number, height: number, physicalWidth: number, physicalHeight: number, bleeds: IBleed, physicalBleeds: IBleed, unit: string } {
+  getPageSizeWithBleeds(pageSize: IPageSizeWithBleeds = this.currFocusPage): IPageSizeWithBleeds {
     const noBleed = { top: 0, bottom: 0, left: 0, right: 0 } as IBleed
-    const { width, height, physicalWidth, physicalHeight, unit } = page
-    let { bleeds, physicalBleeds } = page
+    const { width, height, physicalWidth, physicalHeight, unit } = pageSize
+    let { bleeds, physicalBleeds } = pageSize
     bleeds ??= noBleed
     physicalBleeds ??= bleeds
     return {
@@ -662,6 +662,28 @@ class PageUtils {
       height: height + bleeds.top + bleeds.bottom,
       physicalWidth: physicalWidth + physicalBleeds.left + physicalBleeds.right,
       physicalHeight: physicalHeight + physicalBleeds.top + physicalBleeds.bottom,
+      bleeds,
+      physicalBleeds,
+      unit
+    }
+  }
+
+  /**
+   * Returns page size without bleeds and size of bleeds
+   * @param pageSize Target page size
+   * @returns
+   ** width, height, physicalWidth, physicalHeight: page size without bleeds
+   ** bleeds, physicalBleeds: size of bleeds
+   ** unit: unit of physical size for page and bleeds
+   */
+  removeBleedsFromPageSize(pageSize: IPageSizeWithBleeds): IPageSizeWithBleeds {
+    const { width, height, physicalWidth, physicalHeight, bleeds, physicalBleeds, unit } = pageSize
+    if (!(bleeds && physicalBleeds)) return pageSize
+    return {
+      width: width - bleeds.left - bleeds.right,
+      height: height - bleeds.top - bleeds.bottom,
+      physicalWidth: physicalWidth - physicalBleeds.left - physicalBleeds.right,
+      physicalHeight: physicalHeight - physicalBleeds.top - physicalBleeds.bottom,
       bleeds,
       physicalBleeds,
       unit
