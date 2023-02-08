@@ -1,17 +1,19 @@
 <template lang="pug">
 div(class="editor")
-  desktop-editor(v-if="!useMobileEditor" @setIsLoading="setIsLoading")
-  mobile-editor(v-else)
+  desktop-editor(v-if="!useMobileEditor" :currPage="currPage" @setIsLoading="setIsLoading")
+  mobile-editor(v-else :currPage="currPage")
   spinner(v-if="isLoading || isSaving || isGlobalLoading" :textContent="isSaving ? $t('NN0455') : $t('NN0454')")
 </template>
 
 <script lang="ts">
 import DesktopEditor from '@/components/editor/editor/DesktopEditor.vue'
 import MobileEditor from '@/components/editor/editor/MobileEditor.vue'
+import { IPage } from '@/interfaces/page'
+import editorUtils from '@/utils/editorUtils'
 import logUtils from '@/utils/logUtils'
+import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import editorUtils from '@/utils/editorUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -30,8 +32,12 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       useMobileEditor: 'getUseMobileEditor',
-      isGlobalLoading: 'getIsGlobalLoading'
-    })
+      isGlobalLoading: 'getIsGlobalLoading',
+      getPage: 'getPage'
+    }),
+    currPage(): IPage {
+      return this.getPage(pageUtils.currFocusPageIndex)
+    }
   },
   beforeRouteLeave(to, from, next) {
     // const answer = this.confirmLeave()

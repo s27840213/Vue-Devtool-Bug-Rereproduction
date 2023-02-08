@@ -217,6 +217,7 @@ import BleedSettings from '@/components/editor/BleedSettings.vue'
 import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import SearchBar from '@/components/SearchBar.vue'
+import { IPage } from '@/interfaces/page'
 import { ICoverTheme, Itheme, IThemeTemplate } from '@/interfaces/theme'
 import GeneralUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -224,7 +225,7 @@ import { PRECISION } from '@/utils/unitUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { round } from 'lodash'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -285,6 +286,12 @@ export default defineComponent({
       groupErrorMsg: '',
       unsetThemeTemplate: [] as string[],
       showBleedSettings: true,
+    }
+  },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
   watch: {
@@ -348,7 +355,7 @@ export default defineComponent({
       }
     },
     key_id(): string {
-      return this.getPage(pageUtils.currFocusPageIndex).designId
+      return this.currPage.designId
     },
     isGroupMember(): boolean {
       if (this.groupId.length === 0) {
