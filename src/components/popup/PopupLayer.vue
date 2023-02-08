@@ -84,21 +84,21 @@ div(class=" popup-layer bg-gray-6"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import MappingUtils from '@/utils/mappingUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
-import { mapGetters, mapMutations, mapState } from 'vuex'
 import { IImage } from '@/interfaces/layer'
-import uploadUtils from '@/utils/uploadUtils'
-import groupUtils from '@/utils/groupUtils'
-import layerUtils from '@/utils/layerUtils'
-import popupUtils from '@/utils/popupUtils'
-import imageUtils from '@/utils/imageUtils'
-import pageUtils from '@/utils/pageUtils'
-import frameUtils from '@/utils/frameUtils'
 import { IPopupOptions } from '@/interfaces/popup'
-import tiptapUtils from '@/utils/tiptapUtils'
+import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import MappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import ShortcutUtils from '@/utils/shortcutUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -168,9 +168,6 @@ export default defineComponent({
     },
     isFrame(): boolean {
       return this.currSelectedInfo.layers.length === 1 && this.getType.includes('frame')
-    },
-    hasPageDesignId(): boolean {
-      return this.getPage(pageUtils.currFocusPageIndex).designId !== ''
     },
     hasLayerDesignId(): boolean {
       return this.currSelectedInfo.layers[0] ? this.currSelectedInfo.layers[0].designId !== '' : false

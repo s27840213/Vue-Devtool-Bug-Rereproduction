@@ -87,8 +87,8 @@ div(class="popup-download text-left"
           :placeholder="colorFormats[selectedTypeVal][0].label"
           :options="colorFormats[selectedTypeVal]"
           @select="handleColorModeSelect")
-        div(v-if="colorFormats[selectedTypeVal].length === 1" class="popup-download__color-format fixed")
-          span(class="body-XS") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
+        div(v-else-if="colorFormats[selectedTypeVal].length === 1" class="popup-download__color-format fixed")
+          span(class="body-XS") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0].label }}
       div(v-if="isDetailPage" class="mb-10 pt-5") {{ $t('NN0344') }}
         dropdown(class="mt-5"
           :options="detailPageDownloadOptions"

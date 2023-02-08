@@ -1,8 +1,8 @@
+import listService from '@/apis/list'
+import i18n from '@/i18n'
 import { Itheme } from '@/interfaces/theme'
 import store from '@/store'
 import PageUtils from '@/utils/pageUtils'
-import listService from '@/apis/list'
-import i18n from '@/i18n'
 import _ from 'lodash'
 import generalUtils from './generalUtils'
 
@@ -63,9 +63,15 @@ class ThemeUtils {
   }
 
   setPageThemes() {
-    const pageSize = this.getFocusPageSize()
-    const pageThemes = this.getThemesBySize(pageSize.width, pageSize.height)
-    this.setTemplateThemes(pageThemes)
+    const urlParams = new URLSearchParams(window.location.search)
+    const themeId = urlParams.get('themeId')
+    if (themeId) {
+      store.commit('templates/SET_STATE', { theme: themeId })
+    } else {
+      const pageSize = this.getFocusPageSize()
+      const pageThemes = this.getThemesBySize(pageSize.width, pageSize.height)
+      this.setTemplateThemes(pageThemes)
+    }
   }
 
   sortedThemes(width: number, height: number) {

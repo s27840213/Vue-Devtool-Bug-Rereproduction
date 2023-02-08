@@ -80,8 +80,8 @@ import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
-import { defineComponent } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { defineComponent, PropType } from 'vue'
+import { mapMutations } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -101,13 +101,13 @@ export default defineComponent({
       ],
     }
   },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
+  },
   computed: {
-    ...mapGetters({
-      getPage: 'getPage'
-    }),
-    currPage(): IPage {
-      return this.getPage(pageUtils.currFocusPageIndex)
-    },
     backgroundColor(): string {
       return this.currPage.backgroundColor
     },

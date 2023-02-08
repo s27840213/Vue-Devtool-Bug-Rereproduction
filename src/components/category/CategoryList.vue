@@ -5,7 +5,7 @@ recycle-scroller(class="category-list" id="recycle" :items="list")
       :key="item.id"
       :target="`.category-list_${item.type}`"
       @callback="onLoadMore(item.moreType)")
-    slot(:name="item.type"
+    slot(:name="item.type" :key="item.id"
       :list="item.list"
       :title="item.title")
   template(#before)
@@ -15,8 +15,8 @@ recycle-scroller(class="category-list" id="recycle" :items="list")
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from 'vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import { defineComponent, PropType } from 'vue'
 
 const component = defineComponent({
   emits: ['loadMore'],

@@ -1,12 +1,7 @@
-import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IShape, IText, ITmp } from '@/interfaces/layer'
-import { IBleed, IPage, IPageState } from '@/interfaces/page'
-import zindexUtils from '@/utils/zindexUtils'
-import { } from 'vue'
-import { createStore, GetterTree, MutationTree } from 'vuex'
-import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
-
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
+import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import { Itheme } from '@/interfaces/theme'
 import background from '@/store/module/background'
 import bgRemove from '@/store/module/bgRemove'
@@ -40,8 +35,11 @@ import { ADD_subLayer } from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import SnapUtils from '@/utils/snapUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import zindexUtils from '@/utils/zindexUtils'
 import { throttle } from 'lodash'
+import { createStore, GetterTree, MutationTree } from 'vuex'
 import brandkit from './module/brandkit'
+import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
 const getDefaultState = (): IEditorState => ({
   pages: [{
@@ -115,11 +113,11 @@ const getDefaultState = (): IEditorState => ({
   themes: [],
   hasCopiedFormat: false,
   inGestureToolMode: false,
-  isMobile: false,
-  isLargeDesktop: false,
+  isMobile: generalUtils.getWidth() <= 768,
+  isLargeDesktop: generalUtils.getWidth() >= 1440,
   isGlobalLoading: false,
   useMobileEditor: false,
-  defaultContentScaleRatio: 1,
+  defaultContentScaleRatio: generalUtils.isTouchDevice() ? 1 : 1,
   _3dEnabledPageIndex: -1,
   enalbleComponentLog: false,
   inScreenshotPreviewRoute: false,
@@ -172,12 +170,13 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getPageSize(state: IEditorState) {
     return (pageIndex: number): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } => {
+      const { width, height, physicalWidth, physicalHeight, unit } = state.pages[pageIndex].config
       return {
-        width: state.pages[pageIndex].config.width,
-        height: state.pages[pageIndex].config.height,
-        physicalWidth: state.pages[pageIndex].config.physicalWidth,
-        physicalHeight: state.pages[pageIndex].config.physicalHeight,
-        unit: state.pages[pageIndex].config.unit
+        width,
+        height,
+        physicalWidth,
+        physicalHeight,
+        unit
       }
     }
   },
@@ -310,6 +309,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getInScreenshotPreview(state: IEditorState) {
     return state.inScreenshotPreviewRoute
+  },
+  getHasBleed(state: IEditorState) {
+    return state.pages.some((page: IPageState) => page.config.isEnableBleed)
   }
 }
 

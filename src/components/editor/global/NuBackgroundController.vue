@@ -23,7 +23,7 @@ import MathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import PageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -35,6 +35,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     contentScaleRatio: {
@@ -59,17 +63,13 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      scaleRatio: 'getPageScaleRatio',
-      getPage: 'getPage'
+      scaleRatio: 'getPageScaleRatio'
     }),
     isActive(): boolean {
       return this.config.active
     },
     isShown(): boolean {
       return this.config.shown
-    },
-    page(): IPage {
-      return this.getPage(this.pageIndex)
     },
     getImgX(): number {
       // return this.page.backgroundImage.posX
@@ -110,18 +110,20 @@ export default defineComponent({
         height: `${this.config.styles.imgHeight * this.getPageScale * this.contentScaleRatio}px`,
         outline: `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`
       }
-    }
+    },
+    pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
+      return PageUtils.removeBleedsFromPageSize(this.page)
+    },
   },
   methods: {
     ...mapMutations({
       updateConfig: 'imgControl/UPDATE_CONFIG'
     }),
     imgControllerPosHandler(): ICoordinate {
-      const page = this.page
       const angleInRad = this.getPageRotate * Math.PI / 180
       const rectCenter = {
-        x: page.width / 2,
-        y: page.height / 2
+        x: this.pageSize.width / 2,
+        y: this.pageSize.height / 2
       }
       const pageVect = {
         x: -rectCenter.x,
@@ -151,8 +153,8 @@ export default defineComponent({
     controllerStyles() {
       return {
         transform: `translate(${-this.page.backgroundImage.posX * this.contentScaleRatio}px, ${-this.page.backgroundImage.posY * this.contentScaleRatio}px)`,
-        width: `${this.page.width * this.contentScaleRatio}px`,
-        height: `${this.page.height * this.contentScaleRatio}px`,
+        width: `${this.pageSize.width * this.contentScaleRatio}px`,
+        height: `${this.pageSize.height * this.contentScaleRatio}px`,
         outline: `${3 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`,
         'pointer-events': 'none'
       }
@@ -172,12 +174,12 @@ export default defineComponent({
       this.setCursorStyle('move')
       event.preventDefault()
       const baseLine = {
-        x: -this.getImgWidth / 2 + (this.page.width / this.getPageScale) / 2,
-        y: -this.getImgHeight / 2 + (this.page.height / this.getPageScale) / 2
+        x: -this.getImgWidth / 2 + (this.pageSize.width / this.getPageScale) / 2,
+        y: -this.getImgHeight / 2 + (this.pageSize.height / this.getPageScale) / 2
       }
       const translateLimit = {
-        width: (this.getImgWidth - this.page.width / this.getPageScale) / 2,
-        height: (this.getImgHeight - this.page.height / this.getPageScale) / 2
+        width: (this.getImgWidth - this.pageSize.width / this.getPageScale) / 2,
+        height: (this.getImgHeight - this.pageSize.height / this.getPageScale) / 2
       }
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
@@ -186,10 +188,10 @@ export default defineComponent({
       offsetPos.y = (offsetPos.y / this.getPageScale) * (100 / this.scaleRatio)
       const imgPos = this.imgPosMapper(offsetPos)
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
-        imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.page.width / this.getPageScale - this.getImgWidth
+        imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.pageSize.width / this.getPageScale - this.getImgWidth
       }
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
-        imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.page.height / this.getPageScale - this.getImgHeight
+        imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.pageSize.height / this.getPageScale - this.getImgHeight
       }
       // PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
       this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y })
@@ -267,12 +269,12 @@ export default defineComponent({
         y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
       }
       const baseLine = {
-        x: -width / 2 + (this.page.width / this.getPageScale) / 2,
-        y: -height / 2 + (this.page.height / this.getPageScale) / 2
+        x: -width / 2 + (this.pageSize.width / this.getPageScale) / 2,
+        y: -height / 2 + (this.pageSize.height / this.getPageScale) / 2
       }
       const translateLimit = {
-        width: (width - this.page.width / this.getPageScale) / 2,
-        height: (height - this.page.height / this.getPageScale) / 2
+        width: (width - this.pageSize.width / this.getPageScale) / 2,
+        height: (height - this.pageSize.height / this.getPageScale) / 2
       }
 
       const ratio = width / height
@@ -281,24 +283,24 @@ export default defineComponent({
           imgPos.x = 0
           offsetSize.width = this.initImgPos.imgX
         } else {
-          offsetSize.width = this.page.width - this.initImgPos.imgX - initWidth
+          offsetSize.width = this.pageSize.width - this.initImgPos.imgX - initWidth
         }
         offsetSize.height = offsetSize.width / ratio
         imgPos.y = this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
 
-        baseLine.x = -width / 2 + (this.page.width / this.getPageScale) / 2
-        baseLine.y = -height / 2 + (this.page.height / this.getPageScale) / 2
-        translateLimit.width = (width - this.page.width / this.getPageScale) / 2
-        translateLimit.height = (height - this.page.height / this.getPageScale) / 2
+        baseLine.x = -width / 2 + (this.pageSize.width / this.getPageScale) / 2
+        baseLine.y = -height / 2 + (this.pageSize.height / this.getPageScale) / 2
+        translateLimit.width = (width - this.pageSize.width / this.getPageScale) / 2
+        translateLimit.height = (height - this.pageSize.height / this.getPageScale) / 2
       }
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         if (this.control.ySign < 0) {
           imgPos.y = 0
           offsetSize.height = this.initImgPos.imgY
         } else {
-          offsetSize.height = this.page.height - this.initImgPos.imgY - initHeight
+          offsetSize.height = this.pageSize.height - this.initImgPos.imgY - initHeight
         }
         offsetSize.width = offsetSize.height * ratio
         imgPos.x = this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX

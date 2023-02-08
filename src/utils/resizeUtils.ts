@@ -167,30 +167,55 @@ class ResizeUtils {
     const noBleed = { top: 0, bottom: 0, left: 0, right: 0 } as IBleed
     let bleeds = noBleed
     let physicalBleeds = noBleed
+    const newDPI = pageUtils.getPageDPI({
+      width: format.width,
+      height: format.height,
+      physicalWidth: format.physicalWidth,
+      physicalHeight: format.physicalHeight,
+      unit: format.unit
+    })
+    const newUnit = format.unit || 'px'
     if (page.isEnableBleed && page.bleeds && page.physicalBleeds) {
       bleeds = page.bleeds
       physicalBleeds = page.physicalBleeds
-      // convert bleeds if unit changes
-      if (format.unit !== page.unit) {
-        const unit = format.unit || 'px'
-        const dpi = unit === 'px' ? unitUtils.getConvertDpi({
+
+      // convert bleeds
+      if (!(page.unit === 'px' && newUnit === 'px')) { // resize between px size is DPI indepandent
+        const dpi = newUnit === 'px' ? unitUtils.getConvertDpi({
           physicalWidth: format.physicalWidth,
           physicalHeight: format.physicalHeight,
           unit: format.unit
-        }) : pageUtils.getPageDPI({
-          width: format.width,
-          height: format.height,
-          physicalWidth: format.physicalWidth,
-          physicalHeight: format.physicalHeight,
-          unit: format.unit
-        })
-        const precision = unit === 'px' ? 0 : PRECISION
+        }) : newDPI
+        const precision = newUnit === 'px' ? 0 : PRECISION
         const bleedDPI = (key: string): number => (key === 'left' || key === 'right') ? dpi.width : dpi.height
-        const maxBleed = (key: string): number => unit === 'px' ? pageUtils.MAX_BLEED.px : floor(unitUtils.convert(pageUtils.MAX_BLEED.mm, 'mm', unit, bleedDPI(key)), precision)
+        const maxBleed = newUnit === 'px' ? pageUtils.MAX_BLEED.px : floor(unitUtils.convert(pageUtils.MAX_BLEED.mm, 'mm', newUnit), precision)
         const defaultBleedMap = pageUtils.getDefaultBleedMap(pageIndex)
-        physicalBleeds = isEqual(defaultBleedMap[page.unit], physicalBleeds) ? defaultBleedMap[unit]
-                          : Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, Math.min(round(unitUtils.convert(v, page.unit, unit, bleedDPI(k)), precision), maxBleed(k))])) as IBleed
-        bleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, unit, 'px', bleedDPI(k)))])) as IBleed
+        const isDefaultBleed = isEqual(defaultBleedMap[page.unit], physicalBleeds)
+        const isFixPxSize = pageUtils.isDetailPage && newUnit !== 'px'
+
+        // table search for default bleeds to prevent mismatch of default bleeds in different unit during conversion due to roundings
+        if (isDefaultBleed) physicalBleeds = defaultBleedMap[newUnit]
+        else {
+          Object.keys(physicalBleeds).forEach(key => {
+            physicalBleeds[key] = unitUtils.convert(physicalBleeds[key], page.unit, newUnit, bleedDPI(key))
+            physicalBleeds[key] = round(physicalBleeds[key], precision)
+            physicalBleeds[key] = Math.min(physicalBleeds[key], maxBleed)
+          })
+        }
+
+        // prevent unnessary conversion, or px bleed may change due to roundings during conversion
+        if (!isFixPxSize) {
+          Object.keys(physicalBleeds).forEach(key => {
+            bleeds[key] = unitUtils.convert(physicalBleeds[key], newUnit, 'px', bleedDPI(key))
+            bleeds[key] = round(bleeds[key])
+          })
+        }
+
+        // cap converted bleeds
+        Object.keys(bleeds).forEach(key => {
+          const pxMaxBleed = floor(unitUtils.convert(maxBleed, newUnit, 'px', bleedDPI(key)))
+          bleeds[key] = Math.min(bleeds[key], pxMaxBleed)
+        })
         store.commit('SET_bleeds', { pageIndex, bleeds, physicalBleeds })
       }
     }

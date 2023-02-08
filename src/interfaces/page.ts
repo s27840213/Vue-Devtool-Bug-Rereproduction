@@ -1,4 +1,4 @@
-import { IShape, IText, IImage, IGroup, IFrame, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import SnapUtils from '@/utils/snapUtils'
 
 export interface IBackgroundImage {
@@ -14,16 +14,22 @@ export interface IBleed {
   left: number,
   right: number
 }
-export interface IPage {
-  [index: string]: unknown,
-  id: string,
+export interface IPageSize {
   width: number,
   height: number,
-  x: number,
-  y: number,
   physicalWidth: number,
   physicalHeight: number,
-  unit: string,
+  unit: string
+}
+export interface IPageSizeWithBleeds extends IPageSize {
+  bleeds: IBleed,
+  physicalBleeds: IBleed,
+}
+export interface IPage extends IPageSizeWithBleeds {
+  [index: string]: unknown,
+  id: string,
+  x: number,
+  y: number,
   backgroundColor: string,
   backgroundImage: IBackgroundImage,
   name: string,
@@ -38,8 +44,6 @@ export interface IPage {
     h: Array<number>
   },
   isEnableBleed: boolean,
-  bleeds: IBleed,
-  physicalBleeds: IBleed
   isAutoResizeNeeded: boolean
 }
 

@@ -4,11 +4,12 @@ div(class="panel")
     component(v-show="isSidebarPanelOpen && !isShowPagePreview && !bgRemoveMode"
       class="p-10 border-box"
       :style="panelStyles()"
-      :is="showPagePanel ? 'panel-page' : panelComponents[currPanel]")
+      :is="showPagePanel ? 'panel-page' : panelComponents[currPanel]"
+      :currPage="currPage")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
@@ -19,6 +20,7 @@ import PanelBrand from '@/components/editor/panelSidebar/PanelBrand.vue'
 import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import { mapGetters, mapState } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
+import { IPage } from '@/interfaces/page'
 // import { CartType } from '@/store/types'
 
 export default defineComponent({
@@ -36,6 +38,10 @@ export default defineComponent({
   props: {
     isSidebarPanelOpen: {
       type: Boolean,
+      required: true
+    },
+    currPage: {
+      type: Object as PropType<IPage>,
       required: true
     }
   },

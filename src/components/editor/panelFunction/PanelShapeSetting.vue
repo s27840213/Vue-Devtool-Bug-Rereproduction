@@ -199,34 +199,35 @@ div(class="shape-setting")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
-import SearchBar from '@/components/SearchBar.vue'
+import designApis from '@/apis/design-info'
 import ColorPicker from '@/components/ColorPicker.vue'
 import GeneralValueSelector from '@/components/GeneralValueSelector.vue'
-import LayerUtils from '@/utils/layerUtils'
-import { IFrame, ILayer, IShape } from '@/interfaces/layer'
-import shapeUtils from '@/utils/shapeUtils'
-import { IListServiceContentData } from '@/interfaces/api'
-import AssetUtils from '@/utils/assetUtils'
-import { IMarker } from '@/interfaces/shape'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import LabelWithRange from '@/components/LabelWithRange.vue'
-import ColorBtn from '@/components/global/ColorBtn.vue'
-import controlUtils from '@/utils/controlUtils'
+import SearchBar from '@/components/SearchBar.vue'
+import { IListServiceContentData } from '@/interfaces/api'
+import { AllLayerTypes, IFrame, IShape } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import { IMarker } from '@/interfaces/shape'
 import { ColorEventType, PopupSliderEventType } from '@/store/types'
+import AssetUtils from '@/utils/assetUtils'
 import colorUtils from '@/utils/colorUtils'
-import popupUtils from '@/utils/popupUtils'
-import MappingUtils from '@/utils/mappingUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import GeneralUtils from '@/utils/generalUtils'
-import designApis from '@/apis/design-info'
-import pageUtils from '@/utils/pageUtils'
-import frameUtils from '@/utils/frameUtils'
+import controlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
+import frameUtils from '@/utils/frameUtils'
+import GeneralUtils from '@/utils/generalUtils'
+import LayerUtils from '@/utils/layerUtils'
+import MappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import shapeUtils from '@/utils/shapeUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
 import { cloneDeep } from 'lodash'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -241,6 +242,12 @@ export default defineComponent({
     clickOutside: vClickOutside.directive
   },
   emits: ['toggleColorPanel'],
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
+  },
   data() {
     return {
       fieldRange: {
@@ -314,7 +321,6 @@ export default defineComponent({
     ...mapGetters({
       currSelectedIndex: 'getCurrSelectedIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer',
       token: 'user/getToken',
       showAdminTool: 'user/showAdminTool'
     }),
@@ -338,8 +344,8 @@ export default defineComponent({
       const { currLayer } = this
       return (currLayer as IShape).shapeType === 'e'
     },
-    currLayer(): ILayer {
-      return this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex) as ILayer
+    currLayer(): AllLayerTypes {
+      return this.currPage.layers[this.currSelectedIndex]
     },
     showColorSlips(): boolean {
       return editorUtils.showColorSlips
@@ -402,14 +408,14 @@ export default defineComponent({
       else if (value > max) return max.toString()
       return value.toString()
     },
-    groupColor() {
-      const currLayer = this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex)
+    groupColor(): string {
+      const currLayer = this.currLayer
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        const origin = currLayer.layers
-          .find((l: ILayer) => l.type === 'shape' && (l as IShape).color.length === 1).color[0]
+        const oneColorShape = currLayer.layers.find((l) => l.type === 'shape' && l.color.length === 1) as IShape
+        const origin = oneColorShape.color[0]
         const isGroupSameColor = (() => {
           for (const layer of currLayer.layers) {
-            if (layer.type === 'shape' && (layer as IShape).color.length === 1 && (layer as IShape).color[0] !== origin) {
+            if (layer.type === 'shape' && layer.color.length === 1 && layer.color[0] !== origin) {
               return false
             }
           }
@@ -417,6 +423,7 @@ export default defineComponent({
         })()
         return isGroupSameColor ? origin : 'multi'
       }
+      return ''
     },
     handleColorModalOn(e: MouseEvent) {
       this.openColorPicker = true

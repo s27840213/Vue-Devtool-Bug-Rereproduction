@@ -109,20 +109,21 @@ div(class="panel-object-adjust")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import { ILayer, IShape } from '@/interfaces/layer'
-import controlUtils from '@/utils/controlUtils'
-import pageUtils from '@/utils/pageUtils'
+import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import { IListServiceContentData } from '@/interfaces/api'
+import { AllLayerTypes, IShape } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import { IMarker } from '@/interfaces/shape'
 import assetUtils from '@/utils/assetUtils'
-import MarkerIcon from '@/components/global/MarkerIcon.vue'
-import shapeUtils from '@/utils/shapeUtils'
-import mappingUtils from '@/utils/mappingUtils'
-import stepsUtils from '@/utils/stepsUtils'
+import controlUtils from '@/utils/controlUtils'
 import layerUtils from '@/utils/layerUtils'
+import mappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
+import shapeUtils from '@/utils/shapeUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -151,6 +152,12 @@ export default defineComponent({
       lineWidthMax
     }
   },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
+  },
   mounted() {
     const currLayer = this.currLayer as IShape
     this.fetchMarkers().then(async () => {
@@ -176,7 +183,6 @@ export default defineComponent({
     ...mapGetters({
       currSelectedIndex: 'getCurrSelectedIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer',
       token: 'user/getToken'
     }),
     ...mapState(
@@ -202,8 +208,8 @@ export default defineComponent({
       const { currLayer } = this
       return (currLayer as IShape).shapeType === 'e'
     },
-    currLayer(): ILayer {
-      return this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex) as ILayer
+    currLayer(): AllLayerTypes {
+      return this.currPage.layers[this.currSelectedIndex]
     },
     isLine(): boolean {
       return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
