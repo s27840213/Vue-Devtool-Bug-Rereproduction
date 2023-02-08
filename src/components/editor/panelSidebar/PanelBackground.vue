@@ -10,6 +10,7 @@ div(class="panel-bg")
   //- BG color tab content
   color-slips(v-show="showColorTab" class="panel-bg__color-sets" mode="PanelBG"
               :selectedColor="currentPageBackgroundColor"
+              :currPage="currPage"
               @selectColor="setBgColor"
               @selectColorEnd="recordChange"
               @openColorPicker="openColorPicker")

@@ -34,6 +34,7 @@ div(class="desktop-editor")
         transition(name="panel-up")
           color-slips(v-if="showColorSlips" mode="FunctionPanel"
             :selectedColor="currEventColor()"
+            :currPage="currPage"
             class="content__panel__color-panel")
       div(v-if="isShowPagePreview" class="content__pages")
         page-preview

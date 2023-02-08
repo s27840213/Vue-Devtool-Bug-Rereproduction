@@ -627,7 +627,7 @@ export default defineComponent({
         width: `${this.getLayerWidth() / this.getLayerScale()}px`,
         height: `${this.getLayerHeight() / this.getLayerScale()}px`,
         opacity: `${this.config.styles.opacity / 100}`,
-        transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio}) scaleY(${this.getLayerScale() * this.contentScaleRatio})`,
+        transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode
       }
