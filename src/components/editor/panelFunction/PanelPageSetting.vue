@@ -34,7 +34,7 @@ div(class="page-setting")
               iconColor="gray-2"
               :style="expandIconStyles()")
     div(v-if="showBleedSettings" class="page-setting-row page-setting__bleed__content")
-      bleed-settings
+      bleed-settings(:page="currPage")
   div(class="page-setting__footer")
   div(v-if="showAdminTool"
     class="template-information")

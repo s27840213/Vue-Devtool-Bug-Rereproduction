@@ -52,16 +52,22 @@ div(class="bleed-settings")
 </template>
 
 <script lang="ts">
-import { IBleed } from '@/interfaces/page'
+import { IBleed, IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import { floor, round } from 'lodash'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],
+  props: {
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
+  },
   data() {
     return {
       isLocked: true,
@@ -93,7 +99,7 @@ export default defineComponent({
   mounted: function () {
     Object.keys(this.currentPageBleeds).forEach(key => {
       this.bleeds[key] = this.currentPageBleeds[key]
-      this.bleedsToShow[key].value = round(this.currentPageBleeds[key], this.pageUnit === 'px' ? 0 : PRECISION).toString()
+      this.bleedsToShow[key].value = round(this.currentPageBleeds[key], this.page.unit === 'px' ? 0 : PRECISION).toString()
     })
   },
   watch: {
@@ -105,7 +111,7 @@ export default defineComponent({
     bleeds: {
       handler: function(newVal) {
         Object.keys(newVal).forEach(key => {
-          this.bleedsToShow[key].value = round(newVal[key], this.pageUnit === 'px' ? 0 : PRECISION).toString()
+          this.bleedsToShow[key].value = round(newVal[key], this.page.unit === 'px' ? 0 : PRECISION).toString()
         })
       },
       deep: true
@@ -114,13 +120,12 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       getPage: 'getPage',
-      getPages: 'getPages',
       groupType: 'getGroupType',
       pagesLength: 'getPagesLength',
     }),
     currentPageBleeds(): IBleed {
-      const currPage = pageUtils.currFocusPage
-      let bleeds = currPage?.physicalBleeds ?? currPage?.bleeds
+      const { page } = this
+      let bleeds = page?.physicalBleeds ?? page?.bleeds
       bleeds = {
         top: this.groupType === 1 ? this.getPage(0).physicalBleeds?.top ?? this.getPage(0).bleeds?.top ?? 0 : bleeds.top,
         bottom: this.groupType === 1 ? this.getPage(this.pagesLength - 1).physicalBleeds?.bottom ?? this.getPage(this.pagesLength - 1).bleeds?.bottom ?? 0 : bleeds.bottom,
@@ -139,14 +144,15 @@ export default defineComponent({
     },
     maxBleed(key: string) {
       const dpi = unitUtils.getConvertDpi(pageUtils.currFocusPageSize)
-      return this.pageUnit === 'px' ? pageUtils.MAX_BLEED.px : floor(unitUtils.convert(pageUtils.MAX_BLEED.mm, 'mm', this.pageUnit, (key === 'left' || key === 'right') ? dpi.width : dpi.height), this.pageUnit === 'px' ? 0 : PRECISION)
+      const unit = this.page.unit
+      return unit === 'px' ? pageUtils.MAX_BLEED.px : floor(unitUtils.convert(pageUtils.MAX_BLEED.mm, 'mm', unit, (key === 'left' || key === 'right') ? dpi.width : dpi.height), unit === 'px' ? 0 : PRECISION)
     },
     setBleed(evt: Event, key: string, all = false) {
       const value = (evt.target as HTMLInputElement).value
       this.bleedsToShow[key].value = value
       const numValue = parseFloat(value)
       const striped = numValue.toString() !== value
-      const roundedValue = round(numValue, this.pageUnit === 'px' ? 0 : PRECISION)
+      const roundedValue = round(numValue, this.page.unit === 'px' ? 0 : PRECISION)
       const rounded = this.bleeds[key] !== roundedValue
       const numBleed = Math.min(roundedValue, this.maxBleed(key))
       const strBleed = !striped || rounded ? numBleed.toString() : this.bleedsToShow[key].value
