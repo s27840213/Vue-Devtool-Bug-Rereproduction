@@ -1,11 +1,11 @@
-import { ActionTree, MutationTree, GetterTree } from 'vuex'
+import i18n from '@/i18n'
 import { IListServiceData } from '@/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
-import { captureException } from '@sentry/browser'
+import store from '@/store'
 import localeUtils from '@/utils/localeUtils'
 import themeUtils from '@/utils/themeUtils'
-import store from '@/store'
-import i18n from '@/i18n'
+import { captureException } from '@sentry/browser'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 export default function (this: any) {
   const getDefaultState = (): IListModuleState => ({
@@ -125,11 +125,14 @@ export default function (this: any) {
     // For all item or single category search result.
     getContent: async ({ commit, state }, params = {}) => {
       let { theme } = state
-      const { keyword } = params
+      const { keyword }: {keyword: string} = params
       const locale = params.locale || localeUtils.currLocale()
       commit('SET_STATE', { pending: true, locale })
       if (keyword) commit('SET_STATE', { keyword })
-      if (keyword && this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
+      if (keyword && keyword.startsWith('tag::') &&
+        this.namespace === 'templates') {
+        theme = themeUtils.sortSelectedTheme(theme)
+      }
       try {
         const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
@@ -358,7 +361,10 @@ export default function (this: any) {
     nextParams: (state) => {
       let { nextPage, nextSearch, keyword, theme, locale } = state
       const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
-      if (keyword && this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
+      if (keyword && keyword.startsWith('tag::') &&
+        this.namespace === 'templates') {
+        theme = themeUtils.sortSelectedTheme(theme)
+      }
       return {
         token: needCache ? '1' : store.getters['user/getToken'],
         locale,
