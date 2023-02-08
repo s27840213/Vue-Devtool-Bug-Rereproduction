@@ -27,7 +27,7 @@ div(class="desktop-editor")
               div(class="ml-10" @click="setEnableComponentLog(!enableComponentLog)")
                 span {{`${enableComponentLog ? '關閉' : '開啟'} Log`}}
           editor-view(:currPage="currPage")
-          scale-ratio-editor(@toggleSidebarPanel="toggleSidebarPanel")
+          scale-ratio-editor(v-if="!isShowPagePreview" @toggleSidebarPanel="toggleSidebarPanel")
       div(class="content__panel"
           :style="contentPanelStyles")
         function-panel(:currPage="currPage")

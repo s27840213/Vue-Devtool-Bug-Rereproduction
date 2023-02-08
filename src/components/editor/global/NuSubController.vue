@@ -426,6 +426,7 @@ export default defineComponent({
     },
     positionStyles(): Record<string, string> {
       const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
+      const _f = this.contentScaleRatio * this.scaleRatio * 0.01
       let { x, y } = this.config.styles
 
       if (this.type === 'frame' && horizontalFlip) {
@@ -440,23 +441,24 @@ export default defineComponent({
       }
 
       return {
-        transform: `translate(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px)` + `rotate(${this.config.styles.rotate}deg)` +
+        transform: `translate(${x * _f}px, ${y * _f}px)` + `rotate(${this.config.styles.rotate}deg)` +
           `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})`,
-        width: `${this.config.styles.width * this.contentScaleRatio}px`,
-        height: `${this.config.styles.height * this.contentScaleRatio}px`,
+        width: `${this.config.styles.width * _f}px`,
+        height: `${this.config.styles.height * _f}px`,
         'pointer-events': 'none',
         ...this.transformStyle
       }
     },
     sizeStyle() {
       const { isFrameImg } = this.config
+      const _f = this.contentScaleRatio * this.scaleRatio * 0.01
       let width, height
       if (this.type === 'frame' && !isFrameImg) {
-        width = `${this.config.styles.initWidth * this.contentScaleRatio}px`
-        height = `${this.config.styles.initHeight * this.contentScaleRatio}px`
+        width = `${this.config.styles.initWidth * _f}px`
+        height = `${this.config.styles.initHeight * _f}px`
       } else {
-        width = `${this.config.styles.width * this.contentScaleRatio}px`
-        height = `${this.config.styles.height * this.contentScaleRatio}px`
+        width = `${this.config.styles.width * _f}px`
+        height = `${this.config.styles.height * _f}px`
       }
       return { width, height }
     },
@@ -464,9 +466,9 @@ export default defineComponent({
       const outlineColor = this.config.locked ? '#EB5757' : '#7190CC'
       if (this.config?.active && LayerUtils.getCurrLayer.type !== 'frame') {
         if (this.isControlling) {
-          return `${2 * (100 / this.scaleRatio) / this.primaryLayer.styles.scale * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2 / this.primaryLayer.styles.scale * this.contentScaleRatio}px solid ${outlineColor}`
         } else {
-          return `${2 * (100 / this.scaleRatio) / this.primaryLayer.styles.scale * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2 / this.primaryLayer.styles.scale * this.contentScaleRatio}px solid ${outlineColor}`
         }
       } else {
         return 'none'
