@@ -17,6 +17,7 @@ div(class="mobile-editor")
               @after-leave="afterLeave")
       mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
         :currActivePanel="currActivePanel"
+        :currPage="currPage"
         @switchTab="switchTab"
         @panelHeight="setPanelHeight")
     //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
@@ -32,25 +33,25 @@ div(class="mobile-editor")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import AllPages from '@/components/editor/mobile/AllPages.vue'
+import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
+import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import MobileEditorView from '@/components/editor/mobile/MobileEditorView.vue'
 import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
-import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
-import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import { FunctionPanelType, SidebarPanelType, ColorEventType } from '@/store/types'
-import store from '@/store'
-import stepsUtils from '@/utils/stepsUtils'
-import layerUtils from '@/utils/layerUtils'
-import { IGroup } from '@/interfaces/layer'
 import { IFooterTabProps } from '@/interfaces/editor'
-import AllPages from '@/components/editor/mobile/AllPages.vue'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import editorUtils from '@/utils/editorUtils'
-import pageUtils from '@/utils/pageUtils'
+import { IGroup } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import store from '@/store'
+import { ColorEventType, FunctionPanelType, SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
+import editorUtils from '@/utils/editorUtils'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
-import unitUtils from '@/utils/unitUtils'
+import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -72,6 +73,12 @@ export default defineComponent({
       ColorEventType,
       showMobilePanelAfterTransitoin: false,
       panelHeight: 0
+    }
+  },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
   created() {

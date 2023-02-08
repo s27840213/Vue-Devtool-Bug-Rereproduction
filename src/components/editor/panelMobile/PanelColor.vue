@@ -22,6 +22,7 @@ div(class="panel-color px-5")
     mode="PanelColor"
     :allRecentlyControl="showAllRecently"
     :selectedColor="selectedColor"
+    :currPage="currPage"
     @openColorPicker="openColorPicker"
     @openColorMore="openColorMore")
 </template>
@@ -47,6 +48,7 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import { cloneDeep } from 'lodash'
+import { IPage } from '@/interfaces/page'
 
 export default defineComponent({
   data() {
@@ -62,6 +64,10 @@ export default defineComponent({
     panelHistory: {
       type: Array as PropType<string[]>,
       default: () => []
+    },
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
   emits: ['pushHistory'],

@@ -81,13 +81,13 @@ import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
+import { IPage } from '@/interfaces/page'
 import { ColorEventType, SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
-import pageUtils from '@/utils/pageUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
@@ -110,6 +110,10 @@ export default defineComponent({
     selectedColor: {
       type: String,
       default: ''
+    },
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
   components: {
@@ -200,7 +204,7 @@ export default defineComponent({
     },
     currentColor(): string {
       return this.mode === 'PanelBG'
-        ? this.getBackgroundColor(pageUtils.currFocusPageIndex)
+        ? this.currPage.backgroundColor
         : colorUtils.currColor
     },
     showAllRecentlyColor(): boolean {

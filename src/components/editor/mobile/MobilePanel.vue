@@ -46,6 +46,7 @@ div(class="mobile-panel"
         class="border-box p-2"
         :is="dynamicBindIs"
         :key="dynamicBindIs"
+        :currPage="currPage"
         v-bind="dynamicBindProps"
         v-on="dynamicBindMethod"
         @close="closeMobilePanel")
@@ -54,6 +55,7 @@ div(class="mobile-panel"
       :currActivePanel="currActiveSubPanel"
       :currColorEvent="currSubColorEvent"
       :isSubPanel="true"
+      :currPage="currPage"
       @switchTab="switchTab"
       @close="closeMobilePanel")
 </template>
@@ -85,10 +87,11 @@ import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
 import i18n from '@/i18n'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IFrame } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -112,6 +115,10 @@ export default defineComponent({
     isSubPanel: {
       default: false,
       type: Boolean
+    },
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
   emits: ['panelHeight', 'switchTab'],
