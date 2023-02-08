@@ -170,7 +170,14 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getPageSize(state: IEditorState) {
     return (pageIndex: number): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } => {
-      return pageUtils.extractPageSize(state.pages[pageIndex].config)
+      const { width, height, physicalWidth, physicalHeight, unit } = state.pages[pageIndex].config
+      return {
+        width,
+        height,
+        physicalWidth,
+        physicalHeight,
+        unit
+      }
     }
   },
   getCurrSidebarPanelType(state: IEditorState): number {
@@ -302,6 +309,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getInScreenshotPreview(state: IEditorState) {
     return state.inScreenshotPreviewRoute
+  },
+  getHasBleed(state: IEditorState) {
+    return state.pages.some((page: IPageState) => page.config.isEnableBleed)
   }
 }
 
@@ -375,6 +385,7 @@ const mutations: MutationTree<IEditorState> = {
     })]
   },
   ADD_pageToPos(state: IEditorState, updateInfo: { newPage: IPage, pos: number }) {
+    console.log(updateInfo.pos)
     state.pages = state.pages.slice(0, updateInfo.pos).concat(
       {
         config: updateInfo.newPage,

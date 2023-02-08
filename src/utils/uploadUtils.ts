@@ -1,35 +1,35 @@
 /* eslint-disable indent */
-import { IAssetPhoto, IGroupDesignInputParams, IListServiceContentData } from '@/interfaces/api'
-import { IPage } from '@/interfaces/page'
-import store from '@/store'
-import generalUtils from './generalUtils'
-import LayerUtils from './layerUtils'
-import ShapeUtils from './shapeUtils'
-import ImageUtils from '@/utils/imageUtils'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp, jsonVer } from '@/interfaces/layer'
-import groupUtils from './groupUtils'
-import modalUtils from './modalUtils'
-import assetUtils from './assetUtils'
-import stepsUtils from './stepsUtils'
-import { IUploadAssetFontResponse, IUploadAssetLogoResponse, IUploadAssetResponse } from '@/interfaces/upload'
-import pageUtils from './pageUtils'
-import router from '@/router'
-import { EventEmitter } from 'events'
-import themeUtils from './themeUtils'
-import designUtils from './designUtils'
-import { SidebarPanelType } from '@/store/types'
-import i18n from '@/i18n'
-import logUtils from './logUtils'
-import listService from '@/apis/list'
-import designInfoApis from '@/apis/design-info'
-import brandkitUtils from './brandkitUtils'
-import paymentUtils from '@/utils/paymentUtils'
-import networkUtils from './networkUtils'
-import _ from 'lodash'
-import editorUtils from './editorUtils'
 import designApis from '@/apis/design'
-import { notify } from '@kyvg/vue3-notification'
+import designInfoApis from '@/apis/design-info'
+import listService from '@/apis/list'
+import i18n from '@/i18n'
+import { IAssetPhoto, IGroupDesignInputParams, IListServiceContentData } from '@/interfaces/api'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp, jsonVer } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import { IUploadAssetFontResponse, IUploadAssetLogoResponse, IUploadAssetResponse } from '@/interfaces/upload'
+import router from '@/router'
+import store from '@/store'
+import { SidebarPanelType } from '@/store/types'
+import ImageUtils from '@/utils/imageUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import { PRECISION } from '@/utils/unitUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { EventEmitter } from 'events'
+import _ from 'lodash'
+import assetUtils from './assetUtils'
+import brandkitUtils from './brandkitUtils'
+import designUtils from './designUtils'
+import editorUtils from './editorUtils'
+import generalUtils from './generalUtils'
+import groupUtils from './groupUtils'
+import LayerUtils from './layerUtils'
+import logUtils from './logUtils'
+import modalUtils from './modalUtils'
+import networkUtils from './networkUtils'
+import pageUtils from './pageUtils'
+import ShapeUtils from './shapeUtils'
+import stepsUtils from './stepsUtils'
+import themeUtils from './themeUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -1225,18 +1225,19 @@ class UploadUtils {
                  * @Todo add computableInfo if we need
                  */
                 // await ShapeUtils.addComputableInfo(json.layers[0])
-                if (router.currentRoute.value.query.team_id === this.teamId) {
+                const currentQuery = generalUtils.deepCopy(router.currentRoute.value.query)
+                if (currentQuery.team_id === this.teamId) {
                   store.commit('SET_assetId', designId)
                 } else {
                   const id = generalUtils.generateAssetId()
                   store.commit('SET_assetId', id)
-                  router.replace({ query: Object.assign({}, router.currentRoute.value.query, { design_id: id, team_id: this.teamId }) })
+                  router.replace({ query: Object.assign(currentQuery, { design_id: id, team_id: this.teamId }) })
                 }
                 /**
                  * @todo fix the filter function below
                  */
                 // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
-                router.replace({ query: Object.assign({}, router.currentRoute.value.query, { export_ids: json.exportIds }) })
+                router.replace({ query: Object.assign(currentQuery, { export_ids: json.exportIds }) })
                 pageUtils.setAutoResizeNeededForPages(json.pages, true)
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
                 stepsUtils.reset() // make sure to record and upload json right away after json fetched, so that no temp state is uploaded.
