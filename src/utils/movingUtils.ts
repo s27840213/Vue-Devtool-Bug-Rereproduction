@@ -349,6 +349,7 @@ export class MovingUtils {
       }
     }
     if (!this.isActive) {
+      // this condition will only happen in Mobile
       const posDiff = {
         x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
         y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
@@ -472,6 +473,7 @@ export class MovingUtils {
     }
     const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
+
     if (this.isActive) {
       if (hasActualMove) {
         if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex === -1) {
