@@ -33,7 +33,7 @@ export default defineComponent({
     return {
       openValueSelector: false,
       fieldRange: {
-        fontSize: { min: 1, max: 144 },
+        fontSize: { min: 1, max: 9999 },
         lineHeight: { min: 0.5, max: 2.5 },
         fontSpacing: { min: -200, max: 800 },
         // fontSpacing: { min: -2, max: 8 },
