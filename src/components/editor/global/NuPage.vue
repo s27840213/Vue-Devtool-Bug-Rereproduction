@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="page-wrapper" ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex}`")
+div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex}`")
   div(class="nu-page"
       :id="`nu-page_${pageIndex}`"
       :style="pageStyles"
@@ -112,7 +112,7 @@ div(class="page-wrapper" ref="page-wrapper" :style="pageRootStyles" :id="`nu-pag
             :minHeight="config.height * (scaleRatio / 100)"
             :maxHeight="config.height * (scaleRatio / 100)"
             :threshold="[0,1]")
-          div
+          div(:style="sizeStyles")
             div(class="scale-container relative"
                 :style="scaleContainerStyles")
               page-content(:config="config" :pageIndex="pageIndex" :page="config" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
@@ -431,8 +431,8 @@ export default defineComponent({
     },
     sizeStyles(): any {
       return {
-        width: `${this.config.width * (this.scaleRatio / 100)}px`,
-        height: `${this.config.height * (this.scaleRatio / 100)}px`
+        width: `${this.config.width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
+        height: `${this.config.height * this.contentScaleRatio * this.scaleRatio * 0.01}px`
       }
     }
   },
@@ -466,8 +466,7 @@ export default defineComponent({
           : `${this.config.backgroundImage.posX}px ${this.config.backgroundImage.posY}px`,
         backgroundSize: `${this.config.backgroundImage.config.styles.imgWidth}px ${this.config.backgroundImage.config.styles.imgHeight}px`
       } : {
-        width: `${this.config.width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
-        height: `${this.config.height * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
+        ...this.sizeStyles,
         overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden',
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
@@ -852,9 +851,6 @@ export default defineComponent({
 
 .skeleton {
   background-color: setColor(white);
-}
-
-.page-wrapper {
 }
 
 .layer-num {

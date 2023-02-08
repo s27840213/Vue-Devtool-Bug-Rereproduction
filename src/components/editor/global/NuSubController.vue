@@ -348,7 +348,7 @@ export default defineComponent({
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
         opacity: `${this.config.styles.opacity / 100}`,
-        transform: `scaleX(${this.config.styles.scale * this.contentScaleRatio}) scaleY(${this.config.styles.scale * this.contentScaleRatio})`,
+        transform: `scaleX(${this.config.styles.scale * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.config.styles.scale * this.contentScaleRatio * this.scaleRatio * 0.01})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode
       }
