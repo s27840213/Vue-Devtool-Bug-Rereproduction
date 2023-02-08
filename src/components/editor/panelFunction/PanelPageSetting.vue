@@ -254,7 +254,7 @@ import unitUtils, { PRECISION } from '@/utils/unitUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { floor, round } from 'lodash'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
@@ -339,6 +339,12 @@ export default defineComponent({
       } as {[index: string]: {key: string, label: string, value: string}}
     }
   },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
+  },
   mounted: function () {
     Object.keys(this.currentPageBleeds).forEach(key => {
       this.bleeds[key] = this.currentPageBleeds[key]
@@ -413,7 +419,7 @@ export default defineComponent({
       showAdminTool: 'user/showAdminTool'
     }),
     currentPageBleeds(): IBleed {
-      const currPage = pageUtils.currFocusPage
+      const currPage = this.currPage
       let bleeds = currPage?.physicalBleeds ?? currPage?.bleeds
       bleeds = {
         top: this.groupType === 1 ? this.getPage(0).physicalBleeds?.top ?? this.getPage(0).bleeds?.top ?? 0 : bleeds.top,
@@ -435,7 +441,7 @@ export default defineComponent({
       return this.getPages.some((page: IPage) => page.isEnableBleed)
     },
     key_id(): string {
-      return this.getPage(pageUtils.currFocusPageIndex).designId
+      return this.currPage.designId
     },
     isGroupMember(): boolean {
       if (this.groupId.length === 0) {

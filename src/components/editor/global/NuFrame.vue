@@ -8,6 +8,7 @@ div(class="nu-frame"
   nu-layer(v-for="(layer,index) in layers"
     :key="`layer-${layer.id}`"
     :pageIndex="pageIndex"
+    :page="page"
     :layerIndex="layerIndex"
     :inFrame="true"
     :inImageFrame="inImageFrame()"
@@ -29,6 +30,7 @@ import layerFactary from '@/utils/layerFactary'
 import generalUtils from '@/utils/generalUtils'
 import frameUtils from '@/utils/frameUtils'
 import layerUtils from '@/utils/layerUtils'
+import { IPage } from '@/interfaces/page'
 
 export default defineComponent({
   emits: [],
@@ -39,6 +41,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     layerIndex: {
@@ -193,9 +199,6 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters({
-      getLayer: 'getLayer'
-    }),
     ...mapGetters('user', ['getVerUni']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',

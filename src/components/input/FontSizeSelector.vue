@@ -56,8 +56,7 @@ export default defineComponent({
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
-      layerIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer'
+      layerIndex: 'getCurrSelectedIndex'
     }),
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
     scale(): number {

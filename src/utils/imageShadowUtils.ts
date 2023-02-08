@@ -59,22 +59,22 @@ const markLogs = [] as any
 export const setMark = function (type: 'shadow' | 'imageMatched' | 'floating' | 'upload', i: number) {
   markLogs.push({
     time: Date.now(),
-    log: marks[type][i]
+    log: `${type}: ` + marks[type][i]
   })
 }
-export const logMark = function (type: 'shadow' | 'imageMatched' | 'floating' | 'upload', ..._logs: string[]) {
+export const logMark = function (..._logs: string[]) {
   _logs.forEach(log => {
     logUtils.setLog(log)
   })
   const logs = [] as any
-  for (let i = 0; i < marks[type].length - 1; i++) {
+  for (let i = 0; i < markLogs.length - 1; i++) {
     logs.push({
-      log: 'FROM: ' + marks[type][i] + '\nTO:   ' + marks[type][i + 1],
+      log: 'FROM: ' + markLogs[i].log + '\nTO:   ' + markLogs[i + 1].log,
       duration: markLogs[i + 1].time - markLogs[i].time
     })
   }
   logs.push({
-    log: 'FROM: ' + marks[type][0] + '\nTO:   ' + marks[type][marks[type].length - 1],
+    log: 'FROM: ' + markLogs[0].log + '\nTO:   ' + markLogs[markLogs.length - 1].log,
     duration: markLogs[markLogs.length - 1].time - markLogs[0].time
   })
   logs.forEach((l: any) => {
@@ -425,7 +425,7 @@ class ImageShadowUtils {
   }
 
   drawShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
-    console.log('start drawing')
+    console.log('start drawing', params.drawCanvasH, params.drawCanvasW)
     const canvas = canvas_s[0] || undefined
     const { timeout = DRAWING_TIMEOUT, cb } = params
     const { shadow } = config.styles

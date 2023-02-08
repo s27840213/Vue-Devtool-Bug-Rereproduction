@@ -64,14 +64,11 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
 
 <script lang="ts">
 import i18n from '@/i18n'
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
 import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
-import { AxiosError } from 'axios'
 import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -83,10 +80,13 @@ import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
-import unitUtils from '@/utils/unitUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import unitUtils from '@/utils/unitUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { AxiosError } from 'axios'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
-import { IPage } from '@/interfaces/page'
 
 export default defineComponent({
   emits: [],
@@ -97,6 +97,10 @@ export default defineComponent({
     },
     pageIndex: {
       type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
       required: true
     },
     layerIndex: {
@@ -197,8 +201,7 @@ export default defineComponent({
         drawCanvasW: 0,
         drawCanvasH: 0,
         MAXSIZE: 0
-      },
-      page: pageUtils.getPage(this.pageIndex) as IPage
+      }
       // canvas: undefined as HTMLCanvasElement | undefined
     }
   },
@@ -249,9 +252,9 @@ export default defineComponent({
     },
     'config.imgControl'(val) {
       if (val) {
-        const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
+        const { subLayerIdx } = this.layerInfo()
         const isSubLayer = typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1
-        const currLayer = layerUtils.getLayer(pageIndex, layerIndex)
+        const currLayer = this.primaryLayer ? this.primaryLayer : this.config
         const isInFrame = isSubLayer && currLayer.type === LayerType.frame && (currLayer as IFrame).clips[subLayerIdx || 0].type === LayerType.image
         const isInGroup = isSubLayer && currLayer.type === LayerType.group && (currLayer as IGroup).layers[subLayerIdx || 0].type === LayerType.image
         if ((!isSubLayer && currLayer.type === LayerType.image) || isInFrame || isInGroup) {
@@ -337,8 +340,8 @@ export default defineComponent({
       return `filter__${id}`
     },
     showCanvas(): boolean {
-      const { pageIndex, layerIndex, subLayerIndex, handleId } = this
-      if (pageIndex === undefined || pageUtils.getPage(pageIndex) === undefined) {
+      const { subLayerIndex, handleId } = this
+      if (this.page === undefined) {
         return false
       }
       const currentShadowEffect = (this.config as IImage).styles.shadow.currentEffect
@@ -348,7 +351,7 @@ export default defineComponent({
           const { primaryLayer = {} } = this
           return primaryLayer.id === handleId.layerId && primaryLayer.layers[subLayerIndex].id === handleId.subLayerId
         } else {
-          return layerUtils.getLayer(pageIndex, layerIndex).id === handleId.layerId
+          return this.config.id === handleId.layerId
         }
       })()
       return isCurrShadowEffectApplied && isHandling
@@ -358,7 +361,7 @@ export default defineComponent({
       const { imgWidth, imgHeight } = this.config.styles
       let renderW = imgWidth
       let renderH = imgHeight
-      const primaryLayer = this.primaryLayer || [layerUtils.getLayer(this.pageIndex, this.layerIndex)].filter(i => [LayerType.group, LayerType.frame].includes(i.type as LayerType))[0]
+      const primaryLayer = this.primaryLayer
       const isPrimaryFrameImg = primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.clips[0].isFrameImg
       if (!this.forRender && (this.config.parentLayerStyles || primaryLayer) && !isPrimaryFrameImg) {
         const { scale } = this.config.parentLayerStyles || primaryLayer?.styles
@@ -380,13 +383,7 @@ export default defineComponent({
       return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
     },
     pageSizeData() {
-      return {
-        width: pageUtils.getPage(this.pageIndex).width,
-        height: pageUtils.getPage(this.pageIndex).height,
-        physicalWidth: pageUtils.getPage(this.pageIndex).physicalWidth,
-        physicalHeight: pageUtils.getPage(this.pageIndex).physicalHeight,
-        unit: pageUtils.getPage(this.pageIndex).unit
-      }
+      return pageUtils.extractPageSize(this.page)
     },
     parentLayerDimension(): number | string {
       const { width, height } = this.config.parentLayerStyles || {}
@@ -804,7 +801,7 @@ export default defineComponent({
       }
 
       const params = {
-        pageId: pageUtils.getPage(this.pageIndex).id,
+        pageId: this.page.id,
         drawCanvasW: _drawCanvasW,
         drawCanvasH: _drawCanvasH,
         layerInfo: layerInfo(),
@@ -901,7 +898,7 @@ export default defineComponent({
     },
     redrawShadow() {
       const id = {
-        pageId: pageUtils.getPage(this.pageIndex).id,
+        pageId: this.page.id,
         layerId: typeof this.layerIndex !== 'undefined' && this.layerIndex !== -1
           ? layerUtils.getLayer(this.pageIndex, this.layerIndex).id : this.config.id,
         subLayerId: this.config.id
@@ -1009,7 +1006,7 @@ export default defineComponent({
       let scaleY = verticalFlip ? -1 : 1
 
       if (typeof this.subLayerIndex !== 'undefined' && this.subLayerIndex !== -1) {
-        const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
+        const primaryLayer = this.primaryLayer ? this.primaryLayer : this.config
         if (primaryLayer.type === 'frame' && this.config.srcObj.type === 'frame') {
           scaleX = primaryLayer.styles.horizontalFlip ? -1 : 1
           scaleY = primaryLayer.styles.verticalFlip ? -1 : 1
@@ -1144,7 +1141,7 @@ export default defineComponent({
     },
     id(): ILayerIdentifier {
       return {
-        pageId: pageUtils.getPage(this.pageIndex).id,
+        pageId: this.page.id,
         layerId: typeof this.layerIndex !== 'undefined' && this.layerIndex !== -1
           ? layerUtils.getLayer(this.pageIndex, this.layerIndex).id : this.config.id,
         subLayerId: this.config.id
