@@ -376,11 +376,10 @@ export default defineComponent({
       }
     },
     pageRootStyles(): { [index: string]: string | number } {
-      let transform = ''
+      const transform = ''
       let margin = ''
       let position = 'relative'
       if (this.$isTouchDevice) {
-        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
         position = 'absolute'
       } else {
         margin = this.isDetailPage ? '0px auto' : '25px auto'
