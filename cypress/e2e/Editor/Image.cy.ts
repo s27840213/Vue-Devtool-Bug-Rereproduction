@@ -5,15 +5,13 @@ describe('Testing nu-image edit', () => {
     cy.login()
   })
 
-  it('Test', () => {
+  it('Test for unsplash image', function () {
     cy.visit('/editor')
     cy.importDesign('flower.json')
-    cy.get('.nu-layer .nu-image img').snapshotTest('success')
-    cy.get('.nu-layer .nu-image img').snapshotTest('fail')
+    cy.get('.nu-layer .nu-image img').snapshotTest('init')
+    cy.get('.nu-image')
+      .imageAdjust()
   })
-  // it('Test for unsplash image', function () {
-  //   //
-  // })
   // it('Test for auto BG remove', function () {
   //   //
   // })

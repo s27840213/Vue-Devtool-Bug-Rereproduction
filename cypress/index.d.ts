@@ -11,6 +11,7 @@ interface ISidebarData {
 
 declare namespace Cypress {
   interface Chainable {
+    // commands.ts
     login(): Chainable<void>
     deleteAllLayers(): Chainable<void>
     importDesign(designName: string): Chainable<void>
@@ -18,6 +19,9 @@ declare namespace Cypress {
     getAllCategoryName(panel: ISidebarData, categoryName?: string[], last?: boolean): Chainable<string[]>
     addAsset(panel: ISidebarData, categoryIndex: number, itemIndex: number): Chainable<void>
     // addAsset(panel: ISidebarData, categoryName: string, itemIndex: number): Chainable<void>
+
+    // imageEdit.ts
+    imageAdjust(): Chainable<unknown>
 
     // npm package type define
     compareSnapshot(
