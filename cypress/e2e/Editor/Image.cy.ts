@@ -8,6 +8,8 @@ describe('Testing nu-image edit', () => {
   it('Test', () => {
     cy.visit('/editor')
     cy.importDesign('flower.json')
+    cy.get('.nu-layer .nu-image img').snapshotTest('success')
+    cy.get('.nu-layer .nu-image img').snapshotTest('fail')
   })
   // it('Test for unsplash image', function () {
   //   //

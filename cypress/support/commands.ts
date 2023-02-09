@@ -37,6 +37,31 @@
 import { uniq } from 'lodash'
 import loginData from '../fixtures/loginData.json'
 
+const snapshotStyles = `
+  /* Hide carets */
+  * { caret-color: transparent !important; }
+
+  /* Hide scrollbars */
+  ::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Generic hide */
+  [cy-visual-test="transparent"] {
+    color: transparent !important;
+    font-family: monospace !important;
+    opacity: 0 !important;
+  }
+
+  [cy-visual-test="removed"] {
+    display: none !important;
+  }
+
+  [cy-test-no-radius] {
+    border-radius: 0 !important;
+  }
+`
+
 Cypress.Commands.add('login', () => {
   cy.request('POST', 'https://apiv2.vivipic.com/login', loginData.email)
     .then((response) => {
@@ -54,6 +79,18 @@ Cypress.Commands.add('importDesign', (designName: string) => {
   cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$store').then((vuex) => {
     vuex.commit('SET_pages', designJson)
   })
+})
+
+Cypress.Commands.add('snapshotTest', (testName: string) => {
+  cy.document().then((document) => {
+    // Add special css that hide/remove some element during snapshot.
+    const css = document.createElement('style')
+    css.setAttribute('class', 'cy-visual-test-style')
+    css.textContent = snapshotStyles
+    document.body.appendChild(css)
+  }).get('.nu-page').compareSnapshot(testName)
+    // Remove special css
+    .get('style.cy-visual-test-style').invoke('remove')
 })
 
 Cypress.Commands.add('getAllCategoryName', (panel: ISidebarData, categoryName = [], last = false) => {

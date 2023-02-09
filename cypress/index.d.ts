@@ -14,8 +14,16 @@ declare namespace Cypress {
     login(): Chainable<void>
     deleteAllLayers(): Chainable<void>
     importDesign(designName: string): Chainable<void>
+    snapshotTest(testName: string): Chainable<void>
     getAllCategoryName(panel: ISidebarData, categoryName?: string[], last?: boolean): Chainable<string[]>
     addAsset(panel: ISidebarData, categoryIndex: number, itemIndex: number): Chainable<void>
     // addAsset(panel: ISidebarData, categoryName: string, itemIndex: number): Chainable<void>
+
+    // npm package type define
+    compareSnapshot(
+      name: string,
+      testThreshold?: number,
+      retryOptions?: Record<string, unknown>
+    ): Chainable<Element>
   }
 }

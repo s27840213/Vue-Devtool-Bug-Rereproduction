@@ -16,6 +16,12 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 require('cypress-terminal-report/src/installLogsCollector')()
+require('cypress-image-diff-js/dist/command')()
+
+after(() => {
+  // Generate cypress-image-diff report after testing
+  cy.task('generateReport')
+})
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
