@@ -31,10 +31,9 @@ div(class="editor-view" v-touch
           :index="index"
           :inScaling="isScaling"
           :isAnyBackgroundImageControl="isBackgroundImageControl")
-    page-number(
-      :pageNum="pageNum"
-      :currCardIndex="currCardIndex"
-    )
+  page-number(
+    :pageNum="pageNum"
+    :currCardIndex="currCardIndex")
 </template>
 
 <script lang="ts">

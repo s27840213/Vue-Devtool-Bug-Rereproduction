@@ -309,7 +309,6 @@ export default defineComponent({
         editorUtils.setInMultiSelectionMode(false)
         // if (this.currSelectedPageIndex !== this.pageIndex) {
         if (layerUtils.pageIndex !== this.pageIndex) {
-          console.log(layerUtils.pageIndex, this.pageIndex)
           pageUtils.setBackgroundImageControlDefault()
           this.setCurrActivePageIndex(this.pageIndex)
         }

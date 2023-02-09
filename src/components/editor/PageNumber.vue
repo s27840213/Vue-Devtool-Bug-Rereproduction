@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="page-number"
     @click="showAllPages")
-  span(class="page-number__text overline-SM text-white") {{ `${currCardIndex}/${pageNum}` }}
+  span(class="page-number__text overline-SM text-white") {{ `${currCardIndex + 1}/${pageNum}` }}
 </template>
 
 <script lang="ts">
@@ -11,8 +11,14 @@ import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 export default defineComponent({
   props: {
-    pageNum: Number,
-    currCardIndex: Number
+    pageNum: {
+      type: Number,
+      required: true
+    },
+    currCardIndex: {
+      type: Number,
+      required: true
+    }
   },
   computed: {
     ...mapState('mobileEditor', {
