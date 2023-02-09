@@ -96,6 +96,7 @@
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/css-font-loading-module": "0.0.6",
     "@types/events": "^3.0.0",
+    "@types/fs-extra": "^11.0.1",
     "@types/lodash": "^4.14.170",
     "@types/node": "^18.11.17",
     "@types/resize-observer-browser": "^0.1.7",
