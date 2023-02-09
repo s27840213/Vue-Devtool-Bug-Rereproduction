@@ -31,11 +31,15 @@ div(class="editor-view" v-touch
           :index="index"
           :inScaling="isScaling"
           :isAnyBackgroundImageControl="isBackgroundImageControl")
+  page-number(
+    :pageNum="pageNum"
+    :currCardIndex="currCardIndex")
 </template>
 
 <script lang="ts">
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
+import PageNumber from '@/components/editor/PageNumber.vue'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IPage, IPageState } from '@/interfaces/page'
 import store from '@/store'
@@ -60,7 +64,8 @@ export default defineComponent({
   emits: [],
   components: {
     EditorHeader,
-    BgRemoveArea
+    BgRemoveArea,
+    PageNumber
   },
   props: {
     isConfigPanelOpen: {
@@ -219,6 +224,9 @@ export default defineComponent({
     }),
     pages(): Array<IPage> {
       return this.pagesState.map((p: IPageState) => p.config)
+    },
+    hasSelectedLayer(): boolean {
+      return this.currSelectedInfo.layers.length > 0
     },
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -454,7 +462,7 @@ export default defineComponent({
       })
     },
     swipeUpHandler(e: AnyTouchEvent) {
-      if (!this.isDetailPage) {
+      if (!this.isDetailPage && !this.hasSelectedLayer) {
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }
@@ -485,7 +493,7 @@ export default defineComponent({
       }
     },
     swipeDownHandler(e: AnyTouchEvent) {
-      if (!this.isDetailPage) {
+      if (!this.isDetailPage && !this.hasSelectedLayer) {
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }
