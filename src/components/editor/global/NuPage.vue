@@ -324,11 +324,12 @@ export default defineComponent({
       }
     },
     scaleContainerStyles(): { [index: string]: string } {
-      const transform = `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`
+      // console.log(this.scaleRatio, this.scaleRatio / 100 / this.contentScaleRatio)
+      // const transform = `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`
       return {
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
-        transform,
+        // transform,
         willChange: this.isScaling ? 'transform' : ''
       }
     },

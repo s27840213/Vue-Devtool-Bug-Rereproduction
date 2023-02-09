@@ -1,3 +1,4 @@
+import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { IMobileEditorState } from '@/store/module/mobileEditor'
 import generalUtils from './generalUtils'
@@ -29,6 +30,16 @@ class EditorUtils {
 
   get showColorSlips(): boolean {
     return store.state.showColorSlips
+  }
+
+  handleContentScaleCalc(page: IPage) {
+    const { width, height } = page
+    const PAGE_SIZE = 324
+    if (width > PAGE_SIZE || height > PAGE_SIZE) {
+      return PAGE_SIZE / Math.max(width, height)
+    } else {
+      return 1
+    }
   }
 
   toggleColorSlips(bool: boolean) {
@@ -89,6 +100,12 @@ class EditorUtils {
   setShowMobilePanel(bool: boolean): void {
     if (generalUtils.isTouchDevice()) {
       store.commit('mobileEditor/SET_showMobilePanel', bool)
+    }
+  }
+
+  setContentScaleRatio(ratio: number): void {
+    if (generalUtils.isTouchDevice()) {
+      store.commit('SET_contentScaleRatio', ratio)
     }
   }
 }

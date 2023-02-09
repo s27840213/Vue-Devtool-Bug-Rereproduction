@@ -150,6 +150,8 @@ export default defineComponent({
     this.cardHeight = this.editorView ? this.editorView.clientHeight : 0
     this.cardWidth = this.editorView ? this.editorView.clientWidth : 0
 
+    this.setContentScaleRatio(layerUtils.pageIndex)
+
     pageUtils.fitPage(false, true)
     this.tmpScaleRatio = pageUtils.scaleRatio
 
@@ -193,6 +195,9 @@ export default defineComponent({
       this.$nextTick(() => {
         this.cardHeight = this.editorView?.clientHeight
       })
+    },
+    currCardIndex(newVal) {
+      this.setContentScaleRatio(newVal)
     }
   },
 
@@ -509,6 +514,11 @@ export default defineComponent({
         // 'z-index': `${this.getPageZIndex(index)}`,
         // margin: 'auto'
       }
+    },
+    setContentScaleRatio(pageIndex: number) {
+      const page = pageUtils.getPage(pageIndex)
+      const contentScaleRatio = editorUtils.handleContentScaleCalc(page)
+      editorUtils.setContentScaleRatio(contentScaleRatio)
     }
   }
 })

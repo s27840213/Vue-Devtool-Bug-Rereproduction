@@ -727,9 +727,11 @@ export default defineComponent({
         return 'none'
       } else if (this.isShown() || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
+          // return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2}px solid ${outlineColor}`
         } else {
-          return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
+          // return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2}px solid ${outlineColor}`
         }
       } else {
         return 'none'

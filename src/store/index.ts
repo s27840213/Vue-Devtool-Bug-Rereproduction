@@ -117,7 +117,7 @@ const getDefaultState = (): IEditorState => ({
   isLargeDesktop: generalUtils.getWidth() >= 1440,
   isGlobalLoading: false,
   useMobileEditor: false,
-  defaultContentScaleRatio: generalUtils.isTouchDevice() ? 1 : 1,
+  contentScaleRatio: 1,
   _3dEnabledPageIndex: -1,
   enalbleComponentLog: false,
   inScreenshotPreviewRoute: false,
@@ -292,7 +292,7 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.useMobileEditor
   },
   getContentScaleRatio(state: IEditorState) {
-    return state.defaultContentScaleRatio
+    return state.contentScaleRatio
   },
   get3dEnabledPageIndex(state: IEditorState) {
     return state.useMobileEditor ? -1 : state._3dEnabledPageIndex
@@ -1005,6 +1005,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isGettingDesign(state: IEditorState, bool: boolean) {
     state.isGettingDesign = bool
+  },
+  SET_contentScaleRatio(state: IEditorState, ratio: number) {
+    state.contentScaleRatio = ratio
   },
   UPDATE_pagePos(state: IEditorState, data: { pageIndex: number, styles: { [key: string]: number } }) {
     const { pageIndex, styles } = data
