@@ -1203,7 +1203,7 @@ export default defineComponent({
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(event)
 
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y)
+      const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y, 1 / this.contentScaleRatio)
       const [dx, dy] = [diff.offsetX, diff.offsetY]
 
       /**
@@ -1510,7 +1510,8 @@ export default defineComponent({
       const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(event)
 
-      const [dx, dy] = [diff.x / (this.scaleRatio * 0.01), diff.y / (this.scaleRatio * 0.01)]
+      const [dx, dy] = [diff.x * 1 / this.contentScaleRatio, diff.y * 1 / this.contentScaleRatio]
+      // const [dx, dy] = [diff.x / (this.scaleRatio * 0.01), diff.y / (this.scaleRatio * 0.01)]
 
       const offsetMultiplier = altPressed ? 2 : 1
       let offsetWidth = this.control.isHorizon ? this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * offsetMultiplier : 0

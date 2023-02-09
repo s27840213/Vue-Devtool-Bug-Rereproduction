@@ -126,7 +126,7 @@ export default defineComponent({
         transform: `translate(${pos.x * this.contentScaleRatio}px, ${pos.y * this.contentScaleRatio}px) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`,
-        outline: `${2 * (100 / this.scaleRatio * this.contentScaleRatio)}px solid #7190CC`,
+        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`,
         'pointer-events': this.pointerEvents ?? 'initial'
       }
     },
@@ -306,9 +306,11 @@ export default defineComponent({
         height: (this.getImgHeight - this.config.styles.height * _layerScale) * 0.5
       }
 
+      const _f = 1 / this.contentScaleRatio * this.scaleRatio * 0.01
+
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      offsetPos.x = (offsetPos.x * _layerScale) * (100 / this.scaleRatio)
-      offsetPos.y = (offsetPos.y * _layerScale) * (100 / this.scaleRatio)
+      offsetPos.x = (offsetPos.x * _layerScale) * _f
+      offsetPos.y = (offsetPos.y * _layerScale) * _f
 
       const currLayer = LayerUtils.getCurrLayer
       if (this.primaryLayerIndex !== -1 && currLayer.type === 'group') {
@@ -371,7 +373,7 @@ export default defineComponent({
 
       const angleInRad = this.angleInRad
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
+      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y, 1 / this.contentScaleRatio * this.scaleRatio * 0.01)
       if (this.primaryLayerIndex !== -1 && currLayer.type === 'group') {
         const primaryScale = currLayer.styles.scale
         diff.offsetX /= primaryScale
