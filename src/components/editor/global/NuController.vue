@@ -284,9 +284,9 @@ export default defineComponent({
   },
   mounted() {
     this.setLastSelectedLayerIndex(this.layerIndex)
-    // if (this.config.active) {
-    //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
-    // }
+    if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
+      TextPropUtils.updateTextPropsState()
+    }
   },
   beforeUnmount() {
     eventUtils.removePointerEvent('pointerup', this.moveEnd)
@@ -430,28 +430,6 @@ export default defineComponent({
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
-    isActive(val) {
-      if (!val) {
-        this.isControlling = false
-        this.setLastSelectedLayerIndex(this.layerIndex)
-        if (this.getLayerType === 'text') {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { shown: false, contentEditable: false, isTyping: false })
-        }
-        popupUtils.closePopup()
-      } else {
-        // this.getLayerType === 'text' && LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
-        if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
-          TextPropUtils.updateTextPropsState()
-        }
-      }
-    },
-    // isTextEditing(editing) {
-    //   if (this.getLayerType === 'text') {
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-    //       editing
-    //     })
-    //   }
-    // },
     contentEditable(newVal) {
       if (this.config.type !== 'text') return
       if (this.config.active) {
@@ -485,6 +463,8 @@ export default defineComponent({
       LayerUtils.updateLayerProps(pageIndex, this.layerIndex, { moving: false })
     }
     this.setMoving(false)
+
+    popupUtils.closePopup()
   },
   methods: {
     ...mapMutations({
