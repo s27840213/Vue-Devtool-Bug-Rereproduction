@@ -100,7 +100,7 @@ export default Vue.extend({
       /**
        * @param nearHrEdge - is used to prevnt the IOS navagation gesture, this is just a workaround
        */
-      const nearHrEdge = (event as TouchEvent).touches[0].clientX <= 5 || (event as TouchEvent).touches[0].clientX > window.innerWidth - 5
+      const nearHrEdge = (event as TouchEvent).touches[0].clientX <= 5 || (event as TouchEvent).touches[0].clientX > window.outerWidth - 5
 
       if (event.touches.length > 1 || nearHrEdge) {
         event.preventDefault()

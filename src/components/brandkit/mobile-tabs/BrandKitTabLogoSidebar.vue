@@ -43,12 +43,12 @@ export default Vue.extend({
   data() {
     return {
       rows: [] as any[],
-      galleryUtils: new GalleryUtils(window.innerWidth - 34, 95, 16)
+      galleryUtils: new GalleryUtils(window.outerWidth - 34, 95, 16)
     }
   },
   props: {
     maxheight: {
-      default: window.innerHeight * 0.9,
+      default: window.outerHeight * 0.9,
       type: Number
     },
     settingmode: {

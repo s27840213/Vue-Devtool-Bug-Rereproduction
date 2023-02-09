@@ -194,9 +194,9 @@ class GeneralUtils {
 
   getListRowItemSize(): number {
     return !this.isTouchDevice() ? 145
-      : window.innerWidth >= 600
-        ? (window.innerWidth - 50) / 3
-        : (window.innerWidth - 40) / 2
+      : window.outerWidth >= 600
+        ? (window.outerWidth - 50) / 3
+        : (window.outerWidth - 40) / 2
   }
 
   getEventType(e: MouseEvent | TouchEvent) {

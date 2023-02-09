@@ -92,7 +92,7 @@ class PageUtils {
     // Skip in view ratio check if no nu-page found in vvstk.
     if (!focusPage) return 1
     const rect = focusPage.getBoundingClientRect()
-    const windowHeight = window.innerHeight
+    const windowHeight = window.outerHeight
     const topInView = Math.max(rect.top, 0)
     const bottomInView = Math.min(rect.bottom, windowHeight)
     return (bottomInView - topInView) / windowHeight

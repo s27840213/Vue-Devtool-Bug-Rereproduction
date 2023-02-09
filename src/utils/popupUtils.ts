@@ -63,7 +63,7 @@ class PopupUtils {
   private openPopupNearTarget(target: string, pos: { x: 'left' | 'right', y: 'top' | 'bottom' }) {
     Vue.nextTick(() => {
       const [width, height] = [this.popupEl.offsetWidth, this.popupEl.offsetHeight]
-      const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
+      const [vw, vh] = [window.outerWidth || document.documentElement.clientWidth, window.outerHeight || document.documentElement.clientHeight]
       const { left, bottom, right, top } = document.querySelector(target)?.getBoundingClientRect() as DOMRect
       let xDiff = 0
       let yDiff = 0
@@ -89,7 +89,7 @@ class PopupUtils {
   private openPopupOnMousePos(event: MouseEvent) {
     Vue.nextTick(() => {
       const [width, height] = [this.popupEl.offsetWidth, this.popupEl.offsetHeight]
-      const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
+      const [vw, vh] = [window.outerWidth || document.documentElement.clientWidth, window.outerHeight || document.documentElement.clientHeight]
       const mousePos = MouseUtils.getMouseAbsPoint(event)
       let xDiff = 0
       let yDiff = 0

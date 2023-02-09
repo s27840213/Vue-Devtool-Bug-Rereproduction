@@ -56,7 +56,7 @@ export default Vue.extend({
   },
   props: {
     maxheight: {
-      default: window.innerHeight * 0.9,
+      default: window.outerHeight * 0.9,
       type: Number
     }
   },

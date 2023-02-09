@@ -86,7 +86,7 @@
             p(class="panel-bg__color-controller__hint-text") {{ $t('STK0002') }}
             p(class="panel-bg__color-controller__hint-text") {{ $t('STK0003') }}
     div(v-if="isInBgShare" class="panel-bg__share")
-      div(class="panel-bg__share__screen" :style="shareBgSizeStyles()")
+      div(class="panel-bg__share__screen" :style="bgSizeStyles")
         div(class="panel-bg__share__screen-inner" :style="shareBgStyles()")
       div(class="panel-bg__share__buttons")
         div(class="panel-bg__share__button")
@@ -140,7 +140,8 @@ export default Vue.extend({
       tabIndex: 0,
       opacity: 100,
       showAllRecentlyBgColors: false,
-      colorAreaHeight: window.innerHeight - 176
+      colorAreaHeight: 0,
+      bgSizeStyles: {}
     }
   },
   computed: {
@@ -165,7 +166,7 @@ export default Vue.extend({
       newBgColor: 'vivisticker/getNewBgColor'
     }),
     itemWidth(): number {
-      // const basicWidth = (window.innerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
+      // const basicWidth = (window.outerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
       // return basicWidth < 145 ? basicWidth : 145 // 145px is the default width
       return 142
     },
@@ -264,16 +265,20 @@ export default Vue.extend({
         await this.getRecAndCate({ reset, key: 'background' })
         await vivistickerUtils.listAsset('backgroundColor')
       })
+
+    this.recalculateSize()
   },
   activated() {
     this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
     this.$refs.searchResult[0].$el.scrollTop = this.scrollTop.searchResult
     this.$refs.mainContent[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
     this.$refs.searchResult[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    window.addEventListener('resize', this.recalculateSize)
   },
   deactivated() {
     this.$refs.mainContent[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
     this.$refs.searchResult[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    window.removeEventListener('resize', this.recalculateSize)
   },
   beforeDestroy() {
     colorUtils.event.off(ColorEventType.background, this.handleNewBgColor)
@@ -349,14 +354,14 @@ export default Vue.extend({
         height: `${this.colorAreaHeight}px`
       }
     },
-    shareBgSizeStyles() {
-      const screenWidth = window.innerWidth
-      const screenHeight = window.innerHeight
+    recalculateSize() {
+      const screenHeight = window.outerHeight
       const height = (screenHeight - 44) * 0.73
-      return {
-        width: `${height * screenWidth / screenHeight}px`,
+      this.bgSizeStyles = {
+        width: `${height / 16 * 9}px`,
         height: `${height}px`
       }
+      this.colorAreaHeight = window.outerHeight - 176
     },
     shareBgStyles() {
       return this.shareItem ? {

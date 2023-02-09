@@ -105,7 +105,7 @@ export default Vue.extend({
       getPage: 'getPage'
     }),
     itemWidth(): number {
-      const basicWidth = (window.innerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
+      const basicWidth = (window.outerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
       return basicWidth < 145 ? basicWidth : 145 // 145px is the default width
     },
     keywordLabel(): string {

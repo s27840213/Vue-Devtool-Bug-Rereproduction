@@ -348,7 +348,7 @@ class ViviStickerUtils {
   }
 
   startEditing(editorType: string, assetInfo: {[key: string]: any}, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
-    const pageWidth = window.innerWidth - 32
+    const pageWidth = window.outerWidth - 32
     pageUtils.setPages([pageUtils.newPage({
       width: pageWidth,
       height: Math.round(pageWidth * 420 / 358),

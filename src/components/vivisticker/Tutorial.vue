@@ -65,7 +65,7 @@ export default Vue.extend({
           video: `https://template.vivipic.com/static/video/${i18n.locale}-04-background.mp4`
         }
       ],
-      basicWidth: window.innerWidth
+      basicWidth: window.outerWidth
     }
   },
   computed: {

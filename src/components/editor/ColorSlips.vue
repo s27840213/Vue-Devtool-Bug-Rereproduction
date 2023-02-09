@@ -252,7 +252,7 @@ export default Vue.extend({
         const colorPanel = this.$refs.colorPanel as HTMLElement
         const colorPicker = (this.$refs.colorPicker as Vue).$el as HTMLElement
         const [width, height] = [colorPicker.offsetWidth, colorPicker.offsetHeight]
-        const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
+        const [vw, vh] = [window.outerWidth || document.documentElement.clientWidth, window.outerHeight || document.documentElement.clientHeight]
         const mousePos = mouseUtils.getMouseAbsPoint(event)
         const { top, left, right } = (event.target as HTMLElement).getBoundingClientRect()
 
