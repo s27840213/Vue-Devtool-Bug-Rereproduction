@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
@@ -40,6 +41,7 @@ class PageUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get currFocusPageSize() { return store.getters.getPageSize(this.currFocusPageIndex) }
   get currFocusPageSizeWithBleeds() { return this.getPageSizeWithBleeds(this.currFocusPage) }
+  get defaultBleed() { return i18n.global.locale === 'us' ? 3 : 2 } // mm
   get isLastPage(): boolean {
     return this.pageNum - 1 === this.currFocusPageIndex
   }
@@ -838,7 +840,7 @@ class PageUtils {
   }
 
   getPageDefaultBleeds(pageSize = { physicalWidth: 1080, physicalHeight: 1080, unit: 'px' }, unit = pageSize.unit): IBleed {
-    const defaultBleed = 3 // mm
+    const defaultBleed = this.defaultBleed
     const precision = unit === 'px' ? 0 : PRECISION
     const dpi = unitUtils.getConvertDpi(pageSize)
     return {
@@ -850,6 +852,7 @@ class PageUtils {
   }
 
   getDefaultBleedMap(pageIndex: number) {
+    const defaultBleed = this.defaultBleed
     const toBleed = (val: number) => ({
       top: this.isDetailPage && pageIndex !== 0 ? 0 : val,
       bottom: this.isDetailPage && pageIndex !== store.getters.getPagesLength - 1 ? 0 : val,
@@ -863,9 +866,9 @@ class PageUtils {
     }
     return {
       px: defaultPxBleed,
-      cm: toBleed(0.3),
-      mm: toBleed(3),
-      in: toBleed(0.118)
+      cm: toBleed(round(unitUtils.convert(defaultBleed, 'mm', 'cm'), PRECISION)),
+      mm: toBleed(defaultBleed),
+      in: toBleed(round(unitUtils.convert(defaultBleed, 'mm', 'in'), PRECISION))
     } as { [index: string]: IBleed }
   }
 
