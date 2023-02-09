@@ -88,9 +88,9 @@ Cypress.Commands.add('snapshotTest', (testName: string) => {
     css.setAttribute('class', 'cy-visual-test-style')
     css.textContent = snapshotStyles
     document.body.appendChild(css)
+  }).get('.nu-page').compareSnapshot(`${Cypress.currentTest.title}-${testName}`, 0.01)
     // Remove special css
     .get('style.cy-visual-test-style').invoke('remove')
-  }).get('.nu-page').compareSnapshot(`${Cypress.currentTest.title}-${testName}`, 0.01)
 })
 
 Cypress.Commands.add('getAllCategoryName', (panel: ISidebarData, categoryName = [], last = false) => {
