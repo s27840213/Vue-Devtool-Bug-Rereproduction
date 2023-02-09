@@ -19,7 +19,6 @@ div(class="editor-view" v-touch
           :key="`page-${index}`"
           class="editor-view__card"
           :style="cardStyle"
-          @pointerdown="selectStart"
           @pointerdown.self.prevent="outerClick($event)"
           ref="card")
         nu-page(
@@ -310,6 +309,7 @@ export default defineComponent({
       }
     },
     selectStart(e: PointerEvent) {
+      e.stopPropagation()
       if (ControlUtils.isClickOnController(e)) {
         const movingUtils = new MovingUtils({
           _config: { config: layerUtils.getCurrLayer },
@@ -518,6 +518,7 @@ export default defineComponent({
     setContentScaleRatio(pageIndex: number) {
       const page = pageUtils.getPage(pageIndex)
       const contentScaleRatio = editorUtils.handleContentScaleCalc(page)
+      console.log('set contentScaleRatio', contentScaleRatio)
       editorUtils.setContentScaleRatio(contentScaleRatio)
     }
   }

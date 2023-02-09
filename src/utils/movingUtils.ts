@@ -386,7 +386,7 @@ export class MovingUtils {
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
     }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
-    const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y, 1 / store.state.contentScaleRatio)
+    const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y, generalUtils.isTouchDevice() ? 1 / store.state.contentScaleRatio : undefined)
     groupUtils.movingTmp(
       this.pageIndex,
       {

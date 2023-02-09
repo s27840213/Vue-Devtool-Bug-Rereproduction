@@ -306,7 +306,7 @@ export default defineComponent({
         height: (this.getImgHeight - this.config.styles.height * _layerScale) * 0.5
       }
 
-      const _f = 1 / this.contentScaleRatio * this.scaleRatio * 0.01
+      const _f = this.$isTouchDevice ? (this.scaleRatio * 0.01 * 1 / this.contentScaleRatio) : (100 / this.scaleRatio)
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
       offsetPos.x = (offsetPos.x * _layerScale) * _f
@@ -373,7 +373,7 @@ export default defineComponent({
 
       const angleInRad = this.angleInRad
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y, 1 / this.contentScaleRatio * this.scaleRatio * 0.01)
+      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y, this.$isTouchDevice ? 1 / this.contentScaleRatio * this.scaleRatio * 0.01 : undefined)
       if (this.primaryLayerIndex !== -1 && currLayer.type === 'group') {
         const primaryScale = currLayer.styles.scale
         diff.offsetX /= primaryScale

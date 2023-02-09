@@ -61,7 +61,7 @@ class MathUtils {
     }
   }
 
-  getActualMoveOffset(x: number, y: number, scale = store.getters.getPageScaleRatio) {
+  getActualMoveOffset(x: number, y: number, scale = 100 / store.getters.getPageScaleRatio) {
     return {
       offsetX: x * scale,
       offsetY: y * scale
