@@ -435,8 +435,11 @@ export default defineComponent({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
       } else {
-        // console.log(this.layerIndex, this.subLayerIndex, textHW.width, textHW.height, widthLimit)
-        const group = this.primaryLayer as IGroup
+        /**
+         * use LayerUtils.getLayer and not use this.primaryLayer is bcz the tmp layer may contain the group layer,
+         * the group layer in the tmp layer would have a wrong updating to the primary tmp layer
+         */
+        const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
         LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
