@@ -548,7 +548,8 @@ export default defineComponent({
             backgroundColor: page.backgroundColor,
             bleeds: currPage.bleeds,
             physicalBleeds: currPage.physicalBleeds,
-            isEnableBleed: currPage.isEnableBleed
+            isEnableBleed: currPage.isEnableBleed,
+            unit: currPage.unit
           }), pageUtils.currFocusPageIndex + 1)
           this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
           stepsUtils.record()
