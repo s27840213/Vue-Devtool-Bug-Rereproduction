@@ -540,13 +540,16 @@ export default defineComponent({
           break
         }
         case 'add-page': {
-          const pageSize = pageUtils.getPageSize(pageUtils.currFocusPageIndex)
+          const page = pageUtils.getPage(pageUtils.currFocusPageIndex)
           const currPage = pageUtils.currFocusPage
           pageUtils.addPageToPos(pageUtils.newPage({
-            ...pageSize,
+            width: page.width,
+            height: page.height,
+            backgroundColor: page.backgroundColor,
             bleeds: currPage.bleeds,
             physicalBleeds: currPage.physicalBleeds,
-            isEnableBleed: currPage.isEnableBleed
+            isEnableBleed: currPage.isEnableBleed,
+            unit: currPage.unit
           }), pageUtils.currFocusPageIndex + 1)
           this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
           stepsUtils.record()

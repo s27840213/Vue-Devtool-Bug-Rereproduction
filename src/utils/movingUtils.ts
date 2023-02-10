@@ -106,7 +106,7 @@ export class MovingUtils {
   }
 
   pageMoving(e: PointerEvent) {
-    this.pageMovingHandler(e)
+    // this.pageMovingHandler(e)
   }
 
   pageMoveEnd(e: PointerEvent) {
