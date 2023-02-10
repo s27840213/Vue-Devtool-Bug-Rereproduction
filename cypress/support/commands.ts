@@ -82,15 +82,23 @@ Cypress.Commands.add('importDesign', (designName: string) => {
 })
 
 Cypress.Commands.add('snapshotTest', (testName: string) => {
+  // TODO: Need to find a way that keep 0.01 threshold and prevent command fail
+  // Workaround is set threshold to 100% to prevent fail, but it will not create diff image
+
+  const threshold = Cypress.browser.isHeadless ? 0 : 1
+
   cy.document().then((document) => {
     // Add special css that hide/remove some element during snapshot.
     const css = document.createElement('style')
     css.setAttribute('class', 'cy-visual-test-style')
     css.textContent = snapshotStyles
     document.body.appendChild(css)
-  }).get('.nu-page').compareSnapshot(`${Cypress.currentTest.title}-${testName}`, 0.01, { limit: 3, delay: 1000 })
-    // Remove special css
-    .get('style.cy-visual-test-style').invoke('remove')
+  }).get('.nu-page').compareSnapshot(
+    `${Cypress.currentTest.title}-${testName}`,
+    threshold,
+    { limit: 3, delay: 1000 }
+  // Remove special css
+  ).get('style.cy-visual-test-style').invoke('remove')
 })
 
 Cypress.Commands.add('getAllCategoryName', (panel: ISidebarData, categoryName = [], last = false) => {

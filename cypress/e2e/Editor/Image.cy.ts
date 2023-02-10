@@ -1,5 +1,3 @@
-// import { layerOrder, duplicate, lock, del, copyFormat } from '../common/LayerEdit'
-
 describe('Testing nu-image edit', () => {
   beforeEach(() => {
     cy.login()
@@ -10,7 +8,9 @@ describe('Testing nu-image edit', () => {
     cy.importDesign('flower.json')
     cy.get('.nu-layer .nu-image img').snapshotTest('init')
     cy.get('.nu-image')
-      .imageAdjust()
+      .imageAdjust().layerFlip().then((prev) => {
+        console.log('end prev', prev)
+      })
   })
   // it('Test for auto BG remove', function () {
   //   //

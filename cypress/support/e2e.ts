@@ -16,6 +16,7 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 import './imageEdit'
+import './layerEdit'
 require('cypress-terminal-report/src/installLogsCollector')()
 require('cypress-image-diff-js/dist/command')()
 

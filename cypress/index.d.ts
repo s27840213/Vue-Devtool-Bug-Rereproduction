@@ -20,12 +20,14 @@ declare namespace Cypress {
     addAsset(panel: ISidebarData, categoryIndex: number, itemIndex: number): Chainable<void>
     // addAsset(panel: ISidebarData, categoryName: string, itemIndex: number): Chainable<void>
 
+    // layerEdit.ts
+    layerFlip(): Chainable<JQuery<HTMLElement>>
+    layerAlign(): Chainable<JQuery<HTMLElement>>
+
     // imageEdit.ts
     imageAdjust(): Chainable<JQuery<HTMLElement>>
-    imageFlip(): Chainable<JQuery<HTMLElement>>
     imageCrop(): Chainable<JQuery<HTMLElement>>
     imageShadow(): Chainable<JQuery<HTMLElement>>
-    imageAlign(): Chainable<JQuery<HTMLElement>>
     imageSetBg(): Chainable<JQuery<HTMLElement>>
 
     // npm package type define

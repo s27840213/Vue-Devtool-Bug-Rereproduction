@@ -21,8 +21,9 @@ export default defineConfig({
       require('cypress-terminal-report/src/installLogsPrinter')(on)
       require('cypress-image-diff-js/dist/plugin')(on, config)
 
-      // Because set on before:browser:launch will overwrite plugin before:browser:launch event.
+      // Because set on event will overwrite plugin event.
       // So I copy it from 'cypress-image-diff-js/dist/plugin' and add something.
+      // Detail plz see: https://github.com/cypress-io/cypress/issues/5240
       on('before:browser:launch', function (browser, launchOptions) {
         const width = String(config.viewportWidth) || '1280'
         const height = String(config.viewportHeight) || '720'

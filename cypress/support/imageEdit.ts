@@ -3,24 +3,23 @@
 Cypress.Commands.add('imageAdjust', { prevSubject: 'element' }, (subject) => {
   function getOptions() {
     const options = [
-      'brightness/50/0',
-      'brightness/-50/0',
-      'contrast/50/0',
-      'contrast/-50/0',
-      'saturate/50/0',
-      'saturate/-50/0',
-      'hue/50/0',
-      'hue/-50/0',
-      'blur/50/0',
-      'blur/-50/0',
-      'halation/75/0',
-      'halation/25/0',
-      'warm/50/0',
-      'warm/-50/0'
+      ['brightness', '50', '0'],
+      ['brightness', '-50', '0'],
+      ['contrast', '50', '0'],
+      ['contrast', '-50', '0'],
+      ['saturate', '50', '0'],
+      ['saturate', '-50', '0'],
+      ['hue', '50', '0'],
+      ['hue', '-50', '0'],
+      ['blur', '50', '0'],
+      ['blur', '-50', '0'],
+      ['halation', '75', '0'],
+      ['halation', '25', '0'],
+      ['warm', '50', '0'],
+      ['warm', '-50', '0']
     ]
     return options.map(option => {
-      const match = option.match(/(\w+)\/([-\d]+)\/([-\d]+)/)
-      return { name: match[1], val: match[2], init: match[3] }
+      return { name: option[0], val: option[1], init: option[2] }
     })
   }
 
@@ -37,16 +36,10 @@ Cypress.Commands.add('imageAdjust', { prevSubject: 'element' }, (subject) => {
   return cy.wrap(subject)
 })
 
-Cypress.Commands.add('imageFlip', { prevSubject: 'element' }, (subject) => {
-  return cy.wrap(subject)
-})
 Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject) => {
   return cy.wrap(subject)
 })
 Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
-  return cy.wrap(subject)
-})
-Cypress.Commands.add('imageAlign', { prevSubject: 'element' }, (subject) => {
   return cy.wrap(subject)
 })
 Cypress.Commands.add('imageSetBg', { prevSubject: 'element' }, (subject) => {
