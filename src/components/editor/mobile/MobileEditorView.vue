@@ -10,27 +10,21 @@ div(class="editor-view" v-touch
     ref="editorView")
   div(class="editor-view__abs-container"
       :style="absContainerStyle")
-    div(class="editor-view__canvas"
+    div(v-if="editorView" class="editor-view__canvas"
         ref="canvas"
         @swipeup="swipeUpHandler"
         @swipedown="swipeDownHandler"
         :style="canvasStyle")
-      div(v-for="(page,index) in pagesState"
+      page-card(v-for="(page,index) in pagesState"
           :key="`page-${index}`"
-          class="editor-view__card"
-          :style="cardStyle"
-          @pointerdown="selectStart"
-          @pointerdown.self.prevent="outerClick($event)"
-          ref="card")
-        nu-page(
-          :ref="`page-${index}`"
+          :config="page"
+          :cardWidth="cardWidth"
+          :cardHeight="cardHeight"
           :pageIndex="index"
-          :overflowContainer="editorView"
-          :style="pageStyle(index)"
-          :pageState="page"
-          :index="index"
-          :inScaling="isScaling"
-          :isAnyBackgroundImageControl="isBackgroundImageControl")
+          :editorView="editorView"
+          :isAnyBackgroundImageControl="isBackgroundImageControl"
+          @pointerdown="selectStart"
+          @pointerdown.self.prevent="outerClick($event)")
   page-number(
     :pageNum="pageNum"
     :currCardIndex="currCardIndex")
@@ -39,6 +33,7 @@ div(class="editor-view" v-touch
 <script lang="ts">
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
+import PageCard from '@/components/editor/mobile/PageCard.vue'
 import PageNumber from '@/components/editor/PageNumber.vue'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IPage, IPageState } from '@/interfaces/page'
@@ -46,7 +41,6 @@ import store from '@/store'
 import backgroundUtils from '@/utils/backgroundUtils'
 import ControlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
-import generalUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -65,7 +59,8 @@ export default defineComponent({
   components: {
     EditorHeader,
     BgRemoveArea,
-    PageNumber
+    PageNumber,
+    PageCard
   },
   props: {
     isConfigPanelOpen: {
@@ -180,14 +175,6 @@ export default defineComponent({
     this.editorViewResizeObserver.disconnect()
   },
   watch: {
-    pageScaleRatio() {
-      if (this.isDetailPage) {
-        generalUtils.scaleFromCenter(this.editorView)
-      } else {
-        const card = (this.$refs.card as HTMLElement[])[this.currCardIndex]
-        generalUtils.scaleFromCenter(card)
-      }
-    },
     currFocusPageIndex(newVal) {
       this.setCurrCardIndex(newVal)
       if (backgroundUtils.inBgSettingMode) {
@@ -336,12 +323,6 @@ export default defineComponent({
        */
       pageUtils.findCentralPageIndexInfo(tiptapUtils.editor?.view?.hasFocus?.())
     },
-    addSelectedLayer(layerIndexs: Array<number>) {
-      this.addLayer({
-        pageIndex: this.pageIndex,
-        layerIndexs: [...layerIndexs]
-      })
-    },
     detectBlur(event: Event) {
       // The reason why I used setTimeout event here is to make the callback function being executed after the activeElement has been changed
       // or we just put the function in this callback function, the activeElement will always get 'BODY'
@@ -356,16 +337,6 @@ export default defineComponent({
           }
         })
       }, 0)
-    },
-    getPageZIndex(index: number) {
-      if (this.isBackgroundImageControl) {
-        return this.backgroundControllingPageIndex === index ? 1 : 0
-      } else {
-        /**
-         * @Note if the page was focused, make it bring the highest z-index to prevent from being blocking by other page's layer
-         */
-        return pageUtils.currFocusPageIndex === index ? this.pageNum + 1 : this.pageNum - index
-      }
     },
     handleWheel(e: WheelEvent) {
       if ((e.metaKey || e.ctrlKey) && !this.handleWheelTransition) {
@@ -511,12 +482,6 @@ export default defineComponent({
         }
         this.isSwiping = false
       }
-    },
-    pageStyle(index: number) {
-      return {
-        // 'z-index': `${this.getPageZIndex(index)}`,
-        // margin: 'auto'
-      }
     }
   }
 })
@@ -547,23 +512,12 @@ $REULER_SIZE: 20px;
     max-width: 100%;
     min-height: 100%;
     max-height: 100%;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
     // transform-style: preserve-3d;
     transform: scale(1);
     box-sizing: border-box;
-  }
-
-  &__card {
-    width: 100%;
-    touch-action: none;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    @include no-scrollbar;
-    // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container
-    // justify-content: center;
   }
 }
 

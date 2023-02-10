@@ -18,12 +18,12 @@ div(class="page-preview-plus"
     class="page-preview-plus-drag")
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
-import pageUtils from '@/utils/pageUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
+import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -141,6 +141,7 @@ export default defineComponent({
         pageUtils.newPage(refPage ? {
           width: refPage.width,
           height: refPage.height,
+          backgroundColor: refPage.backgroundColor,
           physicalWidth: refPage.physicalWidth,
           physicalHeight: refPage.physicalHeight,
           isEnableBleed: refPage.isEnableBleed,

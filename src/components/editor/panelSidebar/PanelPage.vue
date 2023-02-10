@@ -6,7 +6,7 @@ div(class="panel-page")
       :type="'gray-sm'"
       class="rounded my-20 mx-25"
       style="padding: 5px 0;"
-      @click="addPage(middlemostPageIndex+1)") {{$t('NN0139')}}
+      @click="addPage(currFocusPageIndex+1)") {{$t('NN0139')}}
   div(class="panel-page-items")
     template(v-for="(page, idx) in getPages")
       div(class="panel-page__plus")
@@ -19,12 +19,12 @@ div(class="panel-page")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PanelPagePlus from '@/components/editor/pagePreview/PanelPagePlus.vue'
-import pageUtils from '@/utils/pageUtils'
 import { IPage } from '@/interfaces/page'
+import pageUtils from '@/utils/pageUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -35,7 +35,7 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       getPages: 'getPages',
-      middlemostPageIndex: 'getMiddlemostPageIndex'
+      currFocusPageIndex: 'getCurrFocusPageIndex'
     }),
     getPageCount(): number {
       return this.getPages.length
@@ -43,15 +43,18 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      _addPageToPos: 'ADD_pageToPos',
-      _setmiddlemostPageIndex: 'SET_middlemostPageIndex'
+      _addPageToPos: 'ADD_pageToPos'
     }),
     addPage(position: number) {
+      const currPage = pageUtils.getCurrPage
       this._addPageToPos({
-        newPage: pageUtils.newPage({}),
+        newPage: pageUtils.newPage({
+          widht: currPage.width,
+          height: currPage.height,
+          backgorundColor: currPage.backgroundColor
+        }),
         pos: position
       })
-      this._setmiddlemostPageIndex(position)
     },
     wrappedPage(page: IPage) {
       return { ...page, isAutoResizeNeeded: false }

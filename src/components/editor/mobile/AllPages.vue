@@ -19,17 +19,17 @@ div(class="all-pages")
           :iconWidth="'25px'")
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
-import pageUtils from '@/utils/pageUtils'
-import { floor } from 'lodash'
-import stepsUtils from '@/utils/stepsUtils'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IPage } from '@/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
+import pageUtils from '@/utils/pageUtils'
 import { globalQueue } from '@/utils/queueUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { floor } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -84,6 +84,7 @@ export default defineComponent({
       pageUtils.addPageToPos(pageUtils.newPage(lastPage ? {
         width: lastPage.width,
         height: lastPage.height,
+        backgroundColor: lastPage.backgroundColor,
         physicalWidth: lastPage.physicalWidth,
         physicalHeight: lastPage.physicalHeight,
         isEnableBleed: lastPage.isEnableBleed,
