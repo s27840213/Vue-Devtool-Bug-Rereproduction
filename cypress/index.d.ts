@@ -21,7 +21,12 @@ declare namespace Cypress {
     // addAsset(panel: ISidebarData, categoryName: string, itemIndex: number): Chainable<void>
 
     // imageEdit.ts
-    imageAdjust(): Chainable<unknown>
+    imageAdjust(): Chainable<JQuery<HTMLElement>>
+    imageFlip(): Chainable<JQuery<HTMLElement>>
+    imageCrop(): Chainable<JQuery<HTMLElement>>
+    imageShadow(): Chainable<JQuery<HTMLElement>>
+    imageAlign(): Chainable<JQuery<HTMLElement>>
+    imageSetBg(): Chainable<JQuery<HTMLElement>>
 
     // npm package type define
     compareSnapshot(

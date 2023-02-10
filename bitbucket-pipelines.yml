@@ -964,9 +964,6 @@ pipelines:
               script:
                 - yarn install
                 - yarn build:prerender
-                # - npx cypress install
-                # - yarn serve --mode production & npx wait-on http://localhost:8080
-                # - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
                 - node_modules/**

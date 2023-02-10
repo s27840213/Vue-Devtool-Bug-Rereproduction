@@ -20,6 +20,35 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       require('cypress-terminal-report/src/installLogsPrinter')(on)
       require('cypress-image-diff-js/dist/plugin')(on, config)
+
+      // Because set on before:browser:launch will overwrite plugin before:browser:launch event.
+      // So I copy it from 'cypress-image-diff-js/dist/plugin' and add something.
+      on('before:browser:launch', function (browser, launchOptions) {
+        const width = String(config.viewportWidth) || '1280'
+        const height = String(config.viewportHeight) || '720'
+
+        if (browser.name === 'chrome') {
+          // launchOptions.preferences = { default: {}, defaultSecure: {}, localState: {} }
+          launchOptions.args.push('--window-size='.concat(width, ',').concat(height))
+          launchOptions.args.push('--force-device-scale-factor=1')
+          launchOptions.args.push('--force-color-profile=srgb')
+        }
+
+        if (browser.name === 'electron') {
+          // eslint-disable-next-line no-param-reassign
+          launchOptions.preferences.width = Number.parseInt(width, 10) // eslint-disable-next-line no-param-reassign
+
+          launchOptions.preferences.height = Number.parseInt(height, 10)
+        }
+
+        if (browser.name === 'firefox') {
+          launchOptions.args.push('--width='.concat(width))
+          launchOptions.args.push('--height='.concat(height))
+        }
+
+        console.log('launchOptions', launchOptions)
+        return launchOptions
+      })
     },
   },
 })

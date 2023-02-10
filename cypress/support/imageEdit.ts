@@ -37,13 +37,18 @@ Cypress.Commands.add('imageAdjust', { prevSubject: 'element' }, (subject) => {
   return cy.wrap(subject)
 })
 
-// export function flip() {
-// }
-// export function crop() {
-// }
-// export function shadow() {
-// }
-// export function align() {
-// }
-// export function setBg() {
-// }
+Cypress.Commands.add('imageFlip', { prevSubject: 'element' }, (subject) => {
+  return cy.wrap(subject)
+})
+Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject) => {
+  return cy.wrap(subject)
+})
+Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
+  return cy.wrap(subject)
+})
+Cypress.Commands.add('imageAlign', { prevSubject: 'element' }, (subject) => {
+  return cy.wrap(subject)
+})
+Cypress.Commands.add('imageSetBg', { prevSubject: 'element' }, (subject) => {
+  return cy.wrap(subject)
+})

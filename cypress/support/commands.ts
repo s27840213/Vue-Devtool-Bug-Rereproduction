@@ -88,7 +88,7 @@ Cypress.Commands.add('snapshotTest', (testName: string) => {
     css.setAttribute('class', 'cy-visual-test-style')
     css.textContent = snapshotStyles
     document.body.appendChild(css)
-  }).get('.nu-page').compareSnapshot(`${Cypress.currentTest.title}-${testName}`, 0.01)
+  }).get('.nu-page').compareSnapshot(`${Cypress.currentTest.title}-${testName}`, 0.01, { limit: 3, delay: 1000 })
     // Remove special css
     .get('style.cy-visual-test-style').invoke('remove')
 })
@@ -277,3 +277,11 @@ Cypress.Commands.add('addAsset', addAsset)
 
 // Plz check doc to add correct type define for custom command:
 // https://docs.cypress.io/guides/tooling/typescript-support#Types-for-Custom-Commands
+
+// If you want to define a command that use prevSubject
+// Define type in infex.d.ts like this:
+//   commandName(): Chainable<JQuery<HTMLElement>>
+// Implement like this:
+//   Cypress.Commands.add('commandName', { prevSubject: 'element' }, (subject) => {
+//     return cy.wrap(subject)
+//   })
