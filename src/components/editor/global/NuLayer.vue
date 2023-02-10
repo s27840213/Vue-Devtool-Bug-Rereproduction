@@ -33,8 +33,8 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
             :primaryLayer="primaryLayer"
             :forRender="forRender"
             :isTransparent="div.isTransparent"
-            :noShadow="div.noShadow"
-            v-bind="$attrs")
+            :noShadow="div.noShadow")
+            //- v-bind="$attrs")
         svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
           :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
           g(v-html="frameClipFormatter(config.clipPath)"
@@ -869,9 +869,6 @@ export default defineComponent({
             eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
           }
         }
-        // GroupUtils.deselect()
-        // this.setLastSelectedLayerIndex(this.layerIndex)
-        // GroupUtils.select(this.pageIndex, [this.layerIndex])
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
