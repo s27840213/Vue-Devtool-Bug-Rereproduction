@@ -738,11 +738,14 @@ export default defineComponent({
     },
     onFrameDragEnter(e: DragEvent) {
       if (!e.target || !['IMG', 'image'].includes((e.target as HTMLElement).tagName)) return
-      if (this.config.type !== LayerType.image || this.primaryLayer?.type !== LayerType.frame) {
+      /**
+       * use layerUtils.getLayer is bcz the frame may be included in the group
+       */
+      if (this.config.type !== LayerType.image || layerUtils.getLayer(this.pageIndex, this.layerIndex)?.type !== LayerType.frame) {
         return
       }
       const { primaryLayer } = this
-      if (!primaryLayer.locked) {
+      if (primaryLayer && !primaryLayer.locked) {
         const body = (this.$refs.body as HTMLElement[])[0]
         body.addEventListener('dragleave', this.onFrameDragLeave)
         body.addEventListener('drop', this.onFrameDrop)
