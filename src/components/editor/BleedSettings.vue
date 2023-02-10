@@ -5,12 +5,12 @@ div(class="bleed-settings")
       span(class="body-XS text-gray-2") {{bleed.label}}
     div(v-if="!$isTouchDevice" class='bleed-settings__item__input')
       div(class='bleed-settings__item__input__icon pointer'
-          @click="addBleed(bleed.key, 1, isLocked)")
+          @click="addBleed(bleed.key, bleedStep, isLocked)")
         svg-icon(iconName="chevron-up"
           iconWidth="14px"
           iconColor="gray-2")
       div(class='bleed-settings__item__input__icon pointer'
-          @click="addBleed(bleed.key, -1, isLocked)")
+          @click="addBleed(bleed.key, -bleedStep, isLocked)")
         svg-icon(iconName="chevron-up"
           iconWidth="14px"
           iconColor="gray-2"
@@ -24,7 +24,7 @@ div(class="bleed-settings")
         span(class='text-gray-3') {{pageUnit}}
     div(v-else class='bleed-settings__item__input mobile')
       div(class='bleed-settings__item__input__icon pointer mobile'
-          @touchstart="addBleed(bleed.key, -1, isLocked)")
+          @touchstart="addBleed(bleed.key, -bleedStep, isLocked)")
           svg-icon(iconName="minus-small"
             iconWidth="14px"
             iconColor="gray-2"
@@ -37,7 +37,7 @@ div(class="bleed-settings")
               @keyup="handleBleedSubmit")
         span(class='text-gray-3') {{pageUnit}}
       div(class='bleed-settings__item__input__icon pointer mobile'
-          @touchstart="addBleed(bleed.key, 1, isLocked)")
+          @touchstart="addBleed(bleed.key, bleedStep, isLocked)")
         svg-icon(iconName="plus-small"
           iconWidth="14px"
           iconColor="gray-2")
@@ -93,13 +93,13 @@ export default defineComponent({
           label: `${this.$t('NN0784')}`,
           value: ''
         }
-      } as {[index: string]: {key: string, label: string, value: string}},
+      } as {[index: string]: {key: string, label: string, value: string}}
     }
   },
   mounted: function () {
     Object.keys(this.currentPageBleeds).forEach(key => {
       this.bleeds[key] = this.currentPageBleeds[key]
-      this.bleedsToShow[key].value = round(this.currentPageBleeds[key], this.page.unit === 'px' ? 0 : PRECISION).toString()
+      this.bleedsToShow[key].value = round(this.currentPageBleeds[key], this.precision).toString()
     })
   },
   watch: {
@@ -109,7 +109,7 @@ export default defineComponent({
         if (parseFloat(this.bleedsToShow[key].value) === newVal[key]) return // prevent decimal point from remove for float without decimal numbers during input
         if (this.bleedsToShow[key].value === '' && newVal[key] === 0) return // prevent input from set to zero when delete last digit
         this.bleeds[key] = newVal[key]
-        this.bleedsToShow[key].value = round(newVal[key], this.page.unit === 'px' ? 0 : PRECISION).toString()
+        this.bleedsToShow[key].value = round(newVal[key], this.precision).toString()
       })
     }
   },
@@ -132,6 +132,23 @@ export default defineComponent({
     },
     pageUnit(): string {
       return pageUtils.currFocusPage.unit
+    },
+    bleedStep(): number {
+      switch (this.page.unit) {
+        case 'px':
+          return 1
+        case 'cm':
+          return 0.1
+        case 'mm':
+          return 1
+        case 'in':
+          return 0.04
+        default:
+          return 1
+      }
+    },
+    precision(): number {
+      return this.page.unit === 'px' ? 0 : PRECISION
     }
   },
   methods: {
@@ -141,7 +158,7 @@ export default defineComponent({
     maxBleed(key: string) {
       const dpi = unitUtils.getConvertDpi(pageUtils.currFocusPageSize)
       const unit = this.page.unit
-      return unit === 'px' ? pageUtils.MAX_BLEED.px : floor(unitUtils.convert(pageUtils.MAX_BLEED.mm, 'mm', unit, (key === 'left' || key === 'right') ? dpi.width : dpi.height), unit === 'px' ? 0 : PRECISION)
+      return unit === 'px' ? pageUtils.MAX_BLEED.px : floor(unitUtils.convert(pageUtils.MAX_BLEED.mm, 'mm', unit, (key === 'left' || key === 'right') ? dpi.width : dpi.height), this.precision)
     },
     setBleed(evt: Event, key: string, all = false) {
       const value = (evt.target as HTMLInputElement).value.replace(/^0+(\d)/, '$1') // remove leading zeros
@@ -153,7 +170,7 @@ export default defineComponent({
 
       // round and cap input value
       const numValue = parseFloat(value)
-      const numBleed = Math.min(round(numValue, this.page.unit === 'px' ? 0 : PRECISION), this.maxBleed(key))
+      const numBleed = Math.min(round(numValue, this.precision), this.maxBleed(key))
       const isFixed = numValue !== numBleed
       const strBleed = isFixed && !isNaN(numBleed) ? numBleed.toString() : value
 
@@ -170,7 +187,7 @@ export default defineComponent({
       this.applyBleeds(key, all)
     },
     addBleed(key: string, value: number, all = false) {
-      const numBleed = Math.min(Math.max(this.bleeds[key] + value, 0), this.maxBleed(key))
+      const numBleed = Math.min(Math.max(round(this.bleeds[key] + value, this.precision), 0), this.maxBleed(key))
       const strBleed = this.bleeds[key].toString()
       if (all) {
         Object.keys(this.bleeds).forEach((key) => {
