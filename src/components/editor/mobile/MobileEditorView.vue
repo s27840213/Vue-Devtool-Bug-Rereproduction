@@ -25,7 +25,7 @@ div(class="editor-view" v-touch
           :isAnyBackgroundImageControl="isBackgroundImageControl"
           @pointerdown="selectStart"
           @pointerdown.self.prevent="outerClick($event)")
-  page-number(
+  page-number(v-if="!hasSelectedLayer"
     :pageNum="pageNum"
     :currCardIndex="currCardIndex")
 </template>
