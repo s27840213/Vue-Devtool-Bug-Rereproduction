@@ -40,7 +40,6 @@ import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
 import { LineTemplatesType } from '@/store/types'
 import MappingUtils from '@/utils/mappingUtils'
-import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import rulerUtils from '@/utils/rulerUtils'
 import { defineComponent, PropType } from 'vue'
@@ -75,8 +74,8 @@ export default defineComponent({
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
     },
     isFbCover(): boolean {
-      const pageSize = pageUtils.extractPageSize(this.currPage)
-      return pageSize.width === 1230 && pageSize.height === 693
+      const { width, height } = this.currPage
+      return width === 1230 && height === 693
     },
     row2Styles(): {[index: string]: string} {
       return {

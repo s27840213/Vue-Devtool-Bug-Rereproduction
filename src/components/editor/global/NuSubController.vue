@@ -183,6 +183,16 @@ export default defineComponent({
       if (this.type === LayerType.frame && this.config.type === LayerType.image) {
         body.addEventListener(this.$isTouchDevice ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
       }
+
+      if (this.config.type === LayerType.text) {
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+          editing: true
+        })
+        TextUtils.setCurrTextInfo({
+          config: this.config as IText,
+          subLayerIndex: this.layerIndex
+        })
+      }
     }
   },
   computed: {
@@ -253,38 +263,6 @@ export default defineComponent({
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
-    'config.active'(val) {
-      if (!val) {
-        this.setLastSelectedLayerIndex(this.primaryLayerIndex)
-        if (this.config.type === 'text') {
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-            editing: false,
-            isTyping: false,
-            contentEditable: false
-          })
-          this.isControlling = false
-
-          if (this.currTextInfo.subLayerIndex === this.layerIndex) {
-            TextUtils.setCurrTextInfo({
-              config: this.primaryLayer as IGroup,
-              subLayerIndex: undefined
-            })
-          }
-        }
-        popupUtils.closePopup()
-      } else {
-        if (this.config.type === 'text') {
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-            editing: true
-          })
-        }
-        TextUtils.setCurrTextInfo({
-          config: this.config as IText,
-          subLayerIndex: this.layerIndex
-        })
-      }
-      TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
-    },
     isTextEditing(editing) {
       if (this.config.type === 'text') {
         LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })
@@ -313,10 +291,23 @@ export default defineComponent({
   },
   unmounted() {
     // the condition indicates the primaryLayer transform from group-layer to tmp-layer
-    if (this.config.type === 'text' && this.primaryLayer && this.primaryLayer.id === this.parentId) {
-      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false })
-      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
+    if (this.config.type === 'text') {
+      if (this.primaryLayer && this.primaryLayer.id === this.parentId) {
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false, isTyping: false })
+      }
+      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+        contentEditable: false
+      })
+      this.isControlling = false
+
+      if (this.currTextInfo.subLayerIndex === this.layerIndex) {
+        TextUtils.setCurrTextInfo({
+          config: this.primaryLayer as IGroup,
+          subLayerIndex: undefined
+        })
+      }
     }
+    popupUtils.closePopup()
   },
   methods: {
     ...mapMutations({

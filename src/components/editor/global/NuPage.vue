@@ -389,11 +389,10 @@ export default defineComponent({
       }
     },
     pageRootStyles(): { [index: string]: string | number } {
-      let transform = ''
+      const transform = ''
       let margin = ''
       let position = 'relative'
       if (this.$isTouchDevice) {
-        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px)`
         position = 'absolute'
       } else {
         margin = this.isDetailPage ? '0px auto' : '25px auto'
@@ -576,6 +575,7 @@ export default defineComponent({
       pageUtils.addPageToPos(pageUtils.newPage({
         width: this.pageState.config.width,
         height: this.pageState.config.height,
+        backgroundColor: this.pageState.config.backgroundColor,
         physicalWidth: this.pageState.config.physicalWidth,
         physicalHeight: this.pageState.config.physicalHeight,
         isEnableBleed: this.pageState.config.isEnableBleed,

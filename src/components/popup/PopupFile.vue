@@ -64,18 +64,17 @@ div(class="popup-file")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import popupUtils from '@/utils/popupUtils'
-import pageUtils from '@/utils/pageUtils'
-import rulerUtils from '@/utils/rulerUtils'
-import { mapGetters, mapMutations, mapState } from 'vuex'
-import shortcutHandler from '@/utils/shortcutUtils'
-import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
-import stepsUtils from '@/utils/stepsUtils'
+import fileUtils from '@/utils/fileUtils'
 import gtmUtils from '@/utils/gtmUtils'
-import { IPage } from '@/interfaces/page'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import rulerUtils from '@/utils/rulerUtils'
+import shortcutHandler from '@/utils/shortcutUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -99,7 +98,8 @@ export default defineComponent({
       account: 'user/getAccount',
       isFontLoading: 'text/getIsFontLoading',
       pagesLength: 'getPagesLength',
-      groupType: 'getGroupType'
+      groupType: 'getGroupType',
+      hasBleed: 'getHasBleed'
     }),
     pageSize(): { w: number, h: number } {
       return {
@@ -126,9 +126,6 @@ export default defineComponent({
       } else {
         return this.uname
       }
-    },
-    hasBleed(): boolean {
-      return pageUtils.getPages.some((page: IPage) => page.isEnableBleed)
     }
   },
   methods: {

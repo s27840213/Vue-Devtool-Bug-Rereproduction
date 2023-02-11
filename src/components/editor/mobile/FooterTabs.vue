@@ -73,6 +73,7 @@ export default defineComponent({
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
+        { icon: 'add-page', text: `${this.$t('NN0139')}` },
         ...brandkitUtils.isBrandkitAvailable ? [{ icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }] : []
       ] as Array<IFooterTab>
     }
@@ -539,14 +540,17 @@ export default defineComponent({
           break
         }
         case 'add-page': {
-          const pageSize = pageUtils.getPageSize(pageUtils.currFocusPageIndex)
+          const page = pageUtils.getPage(pageUtils.currFocusPageIndex)
           const currPage = pageUtils.currFocusPage
           pageUtils.addPageToPos(pageUtils.newPage({
-            ...pageSize,
+            width: page.width,
+            height: page.height,
+            backgroundColor: page.backgroundColor,
             bleeds: currPage.bleeds,
             physicalBleeds: currPage.physicalBleeds,
-            isEnableBleed: currPage.isEnableBleed
-          }), pageUtils.currActivePageIndex + 1)
+            isEnableBleed: currPage.isEnableBleed,
+            unit: currPage.unit
+          }), pageUtils.currFocusPageIndex + 1)
           this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
           stepsUtils.record()
           break

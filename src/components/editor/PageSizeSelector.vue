@@ -44,12 +44,11 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice}")
           iconName="chevron-down"
           iconWidth="16px"
           :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'gray-2'")
-        div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option" :class="`bg-${isDarkTheme ? 'white' : 'gray-1-5'}`")
-          div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-gray-2" @click="selectUnit($event, unit)")
-            span(class="body-XS"
-                :class="`text-${isDarkTheme ? 'gray-1' : 'white'}`") {{unit}}
+        div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option bg-white")
+          div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-gray-2" :style="unitOptionStyles" @click="selectUnit($event, unit)")
+            span(class="body-XS text-gray-1") {{unit}}
       div(v-if="selectedFormat === 'custom' && isValidate && !isCustomValid"
-        class="page-size-selector__body__custom__err body-XS text-red") {{errMsg}}
+        class="page-size-selector__body__custom__err body-XS text-red text-left") {{errMsg}}
         span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{$t('NN0787')}}
   div(class="page-size-selector__body__hr first bg-gray-4")
   div(class="page-size-selector__container")
@@ -281,6 +280,9 @@ export default defineComponent({
     },
     isLayoutReady(): boolean {
       return this.formatList.length !== 0
+    },
+    unitOptionStyles(): {[key: string]: string} {
+      return { '--color-hover': this.isDarkTheme ? '#C9DBFF' : '#E7EFFF' }
     }
   },
   methods: {
@@ -631,7 +633,7 @@ export default defineComponent({
             box-sizing: border-box;
             border-radius: 4px;
             &:hover {
-              background-color: setColor(blue-3);
+              background-color: var(--color-hover);
             }
             > span {
               display: block;

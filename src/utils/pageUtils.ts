@@ -1,7 +1,8 @@
+import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
-import { IBleed, IPage, IPageState } from '@/interfaces/page'
+import { IBleed, IPage, IPageSizeWithBleeds, IPageState } from '@/interfaces/page'
 import store from '@/store'
 import { LayerType } from '@/store/types'
 import { floor, round, throttle } from 'lodash'
@@ -40,6 +41,7 @@ class PageUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get currFocusPageSize() { return store.getters.getPageSize(this.currFocusPageIndex) }
   get currFocusPageSizeWithBleeds() { return this.getPageSizeWithBleeds(this.currFocusPage) }
+  get defaultBleed() { return i18n.global.locale === 'us' ? 3 : 2 } // mm
   get isLastPage(): boolean {
     return this.pageNum - 1 === this.currFocusPageIndex
   }
@@ -649,17 +651,17 @@ class PageUtils {
   }
 
   /**
-   * returns page size with bleeds and bleed sizes
-   * @param page Target page, use current focused page if undefined
+   * Returns page size with bleeds and size of bleeds
+   * @param pageSize Target page size, use size of current focused page if undefined
    * @returns
    ** width, height, physicalWidth, physicalHeight: page size with bleeds
-   ** bleeds, physicalBleeds: page bleed sizes
-   ** unit: Unit for physical size and physical bleeds
+   ** bleeds, physicalBleeds: size of bleeds
+   ** unit: unit of physical size for page and bleeds
    */
-  getPageSizeWithBleeds(page: IPage = this.currFocusPage): { width: number, height: number, physicalWidth: number, physicalHeight: number, bleeds: IBleed, physicalBleeds: IBleed, unit: string } {
+  getPageSizeWithBleeds(pageSize: IPageSizeWithBleeds = this.currFocusPage): IPageSizeWithBleeds {
     const noBleed = { top: 0, bottom: 0, left: 0, right: 0 } as IBleed
-    const { width, height, physicalWidth, physicalHeight, unit } = page
-    let { bleeds, physicalBleeds } = page
+    const { width, height, physicalWidth, physicalHeight, unit } = pageSize
+    let { bleeds, physicalBleeds } = pageSize
     bleeds ??= noBleed
     physicalBleeds ??= bleeds
     return {
@@ -674,19 +676,24 @@ class PageUtils {
   }
 
   /**
-   * returns page size
-   * @param page Target page, use current focused page if undefined
+   * Returns page size without bleeds and size of bleeds
+   * @param pageSize Target page size
    * @returns
-   ** width, height, physicalWidth, physicalHeight: page size with bleeds
-   ** unit: Unit for physical size and physical bleeds
+   ** width, height, physicalWidth, physicalHeight: page size without bleeds
+   ** bleeds, physicalBleeds: size of bleeds
+   ** unit: unit of physical size for page and bleeds
    */
-  extractPageSize(page: IPage = this.currFocusPage): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
+  removeBleedsFromPageSize(pageSize: IPageSizeWithBleeds): IPageSizeWithBleeds {
+    const { width, height, physicalWidth, physicalHeight, bleeds, physicalBleeds, unit } = pageSize
+    if (!(bleeds && physicalBleeds)) return pageSize
     return {
-      width: page.width,
-      height: page.height,
-      physicalWidth: page.physicalWidth,
-      physicalHeight: page.physicalHeight,
-      unit: page.unit
+      width: width - bleeds.left - bleeds.right,
+      height: height - bleeds.top - bleeds.bottom,
+      physicalWidth: physicalWidth - physicalBleeds.left - physicalBleeds.right,
+      physicalHeight: physicalHeight - physicalBleeds.top - physicalBleeds.bottom,
+      bleeds,
+      physicalBleeds,
+      unit
     }
   }
 
@@ -838,7 +845,7 @@ class PageUtils {
   }
 
   getPageDefaultBleeds(pageSize = { physicalWidth: 1080, physicalHeight: 1080, unit: 'px' }, unit = pageSize.unit): IBleed {
-    const defaultBleed = 3 // mm
+    const defaultBleed = this.defaultBleed
     const precision = unit === 'px' ? 0 : PRECISION
     const dpi = unitUtils.getConvertDpi(pageSize)
     return {
@@ -850,6 +857,7 @@ class PageUtils {
   }
 
   getDefaultBleedMap(pageIndex: number) {
+    const defaultBleed = this.defaultBleed
     const toBleed = (val: number) => ({
       top: this.isDetailPage && pageIndex !== 0 ? 0 : val,
       bottom: this.isDetailPage && pageIndex !== store.getters.getPagesLength - 1 ? 0 : val,
@@ -863,9 +871,9 @@ class PageUtils {
     }
     return {
       px: defaultPxBleed,
-      cm: toBleed(0.3),
-      mm: toBleed(3),
-      in: toBleed(0.118)
+      cm: toBleed(round(unitUtils.convert(defaultBleed, 'mm', 'cm'), PRECISION)),
+      mm: toBleed(defaultBleed),
+      in: toBleed(round(unitUtils.convert(defaultBleed, 'mm', 'in'), PRECISION))
     } as { [index: string]: IBleed }
   }
 
