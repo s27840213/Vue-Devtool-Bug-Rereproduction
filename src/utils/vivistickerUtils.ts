@@ -808,6 +808,13 @@ class ViviStickerUtils {
     }, id ?? '')
   }
 
+  async fetchMyDesign(myDesign: IMyDesign) {
+    const { id, type } = myDesign
+    const data = await this.getAsset(`mydesign-${this.mapEditorType2MyDesignKey(type)}`, id, 'config')
+    data.pages = pageUtils.newPages(data.pages)
+    return data
+  }
+
   initWithMyDesign(myDesign: IMyDesign, option?: { callback?: (pages: Array<IPage>) => void, tab?: string }) {
     const { callback, tab = 'opacity' } = option || {}
     const {
@@ -815,10 +822,9 @@ class ViviStickerUtils {
       type,
       assetInfo
     } = myDesign
-    const myDesignKey = this.mapEditorType2MyDesignKey(type)
-    this.getAsset(`mydesign-${myDesignKey}`, id, 'config').then((data) => {
+    this.fetchMyDesign(myDesign).then((data) => {
+      const pages = data.pages
       this.startEditing(type, assetInfo ?? {}, this.getFetchDesignInitiator(() => {
-        const pages = pageUtils.newPages(generalUtils.deepCopy(data.pages))
         if (callback) {
           callback(pages)
         }
@@ -826,7 +832,7 @@ class ViviStickerUtils {
       }), () => {
         if (type === 'object') {
           groupUtils.select(0, [0])
-          const firstObject = (data.pages[0] as IPage).layers[0]
+          const firstObject = (pages[0] as IPage).layers[0]
           if (firstObject.type === 'shape' && ((firstObject as IShape).color?.length ?? 0) > 0) {
             eventUtils.emit(PanelEvent.switchTab, 'color', { currColorEvent: ColorEventType.shape })
           } else {

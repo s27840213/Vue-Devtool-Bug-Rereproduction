@@ -60,7 +60,7 @@ export default Vue.extend({
         return
       }
       if (this.item.assetInfo.isFrame) {
-        vivistickerUtils.getAsset(`mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(this.item.type)}`, this.item.id, 'config').then(data => {
+        vivistickerUtils.fetchMyDesign(this.item).then(data => {
           if (vivistickerUtils.checkForEmptyFrame(data.pages)) {
             // handle Dialog and File-selector
             vivistickerUtils.initWithMyDesign(this.item, {
@@ -81,7 +81,7 @@ export default Vue.extend({
           }
         })
       } else {
-        vivistickerUtils.getAsset(`mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(this.item.type)}`, this.item.id, 'config').then(data => {
+        vivistickerUtils.fetchMyDesign(this.item).then(data => {
           const pages = generalUtils.deepCopy(data.pages)
           vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0]))
         })

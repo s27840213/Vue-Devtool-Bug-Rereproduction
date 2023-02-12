@@ -53,7 +53,7 @@ export default Vue.extend({
         this.handleToggleDesignSelected()
         return
       }
-      vivistickerUtils.getAsset(`mydesign-${vivistickerUtils.mapEditorType2MyDesignKey(this.item.type)}`, this.item.id, 'config').then(data => {
+      vivistickerUtils.fetchMyDesign(this.item).then(data => {
         const pages = generalUtils.deepCopy(data.pages)
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON(pages[0]))
       })
