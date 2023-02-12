@@ -526,8 +526,10 @@ class ViviStickerUtils {
     }
   }
 
-  preCopyEditor() {
-    this.handleTextResize()
+  preCopyEditor(toResize = true) {
+    if (toResize) {
+      this.handleTextResize()
+    }
     this.editorStateBuffer.controllerHidden = this.controllerHidden
     this.hideController()
     store.commit('vivisticker/SET_isDuringCopy', true)
@@ -848,7 +850,7 @@ class ViviStickerUtils {
     return await new Promise<string>((resolve, reject) => {
       try {
         Vue.nextTick(() => {
-          this.preCopyEditor()
+          this.preCopyEditor(false)
           setTimeout(() => {
             const { x, y, width, height } = this.getEditorDimensions()
             const editorType = store.getters['vivisticker/getEditorType']
