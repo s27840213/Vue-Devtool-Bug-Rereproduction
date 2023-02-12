@@ -105,7 +105,8 @@ export default Vue.extend({
       getDefaultFontsList: 'text/getDefaultFontsList',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
-      controllerHidden: 'vivisticker/getControllerHidden'
+      controllerHidden: 'vivisticker/getControllerHidden',
+      isDuringCopy: 'vivisticker/getIsDuringCopy'
     }),
     primaryLayer(): IGroup | undefined {
       if (this.subLayerIndex === -1) {
@@ -363,6 +364,7 @@ export default Vue.extend({
       return tiptapUtils.textStylesRaw(styles)
     },
     getOpacity() {
+      if (this.isDuringCopy) return 1
       const { active, contentEditable } = this.config
       if (active && !this.isLocked) {
         if (this.isCurveText || this.isFlipped) {
