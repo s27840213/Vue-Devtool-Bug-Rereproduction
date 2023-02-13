@@ -66,7 +66,11 @@ const routes: Array<RouteConfig> = [
           vivistickerUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
           const tempDesign = await vivistickerUtils.fetchDesign()
           if (tempDesign) {
-            vivistickerUtils.initWithTempDesign(tempDesign)
+            try {
+              vivistickerUtils.initWithTempDesign(tempDesign)
+            } catch (error) {
+              console.log(error)
+            }
           }
         }
         next()
