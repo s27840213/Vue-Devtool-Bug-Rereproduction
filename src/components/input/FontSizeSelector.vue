@@ -118,24 +118,25 @@ export default defineComponent({
     },
     handleValueUpdate(value: number) {
       // layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-      value = value / this.scale
-      tiptapUtils.spanStyleHandler('size', value)
+      value = value / layerUtils.getCurrLayer.styles.scale
+      const compensation = textPropUtils.getScaleCompensation(value)
+      textPropUtils.applyScaleCompensation(compensation.scale)
+      tiptapUtils.spanStyleHandler('size', compensation.size)
       tiptapUtils.forceUpdate(true)
-      textPropUtils.updateTextPropsState({ fontSize: value.toString() })
+      textPropUtils.updateTextPropsState({ fontSize: compensation.size.toString() })
       textEffectUtils.refreshSize()
     },
     setSize(e: Event) {
       let { value } = e.target as HTMLInputElement
       if (this.isValidFloat(value)) {
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
-        const finalValue = parseFloat(value) / this.scale
+        const finalValue = parseFloat(value) / layerUtils.getCurrLayer.styles.scale
+        const compensation = textPropUtils.getScaleCompensation(finalValue)
         window.requestAnimationFrame(() => {
-          tiptapUtils.applySpanStyle('size', finalValue)
-          tiptapUtils.agent(editor => {
-            layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-          })
+          textPropUtils.applyScaleCompensation(compensation.scale)
+          tiptapUtils.spanStyleHandler('size', compensation.size, false)
           tiptapUtils.forceUpdate(true)
-          textPropUtils.updateTextPropsState({ fontSize: finalValue.toString() })
+          textPropUtils.updateTextPropsState({ fontSize: compensation.size.toString() })
           textEffectUtils.refreshSize()
         })
       }

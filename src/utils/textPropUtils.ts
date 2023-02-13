@@ -1,12 +1,13 @@
-import { nextTick } from 'vue'
-import store from '@/store'
-import text, { ITextState } from '@/store/text/index'
+import i18n from '@/i18n'
 import { IGroup, IParagraph, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import { ISelection } from '@/interfaces/text'
+import store from '@/store'
+import text, { ITextState } from '@/store/text/index'
+import { LayerType } from '@/store/types'
+import { nextTick } from 'vue'
 import GeneralUtils from './generalUtils'
-import LayerUtils from './layerUtils'
-import TextUtils from './textUtils'
-import i18n from '@/i18n'
+import layerUtils from './layerUtils'
+import textUtils from './textUtils'
 import tiptapUtils from './tiptapUtils'
 
 const fontPropsMap: { [key: string]: string } = {
@@ -45,8 +46,7 @@ class TextPropUtils {
   get targetInfo() {
     const { type } = this.getCurrLayer
     const subLayerIndex = (type === 'group')
-      ? (this.getCurrLayer as IGroup).layers
-          .findIndex(l => l.type === 'text' && l.active) : -1
+      ? (this.getCurrLayer as IGroup).layers.findIndex(l => l.type === 'text' && l.active) : -1
     return {
       type,
       layerIndex: this.layerIndex,
@@ -77,12 +77,12 @@ class TextPropUtils {
             for (let i = 0; i < groupLayer.layers.length; i++) {
               if (groupLayer.layers[i].type === 'text') {
                 this.blockPropertyHandler(propName, value, i)
-                TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, layerIndex, i)
+                textUtils.updateGroupLayerSize(layerUtils.pageIndex, layerIndex, i)
               }
             }
           } else {
             this.blockPropertyHandler(propName, value, subLayerIndex)
-            TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, layerIndex, subLayerIndex)
+            textUtils.updateGroupLayerSize(layerUtils.pageIndex, layerIndex, subLayerIndex)
           }
           break
         }
@@ -99,11 +99,11 @@ class TextPropUtils {
         case textPropType.span: {
           const prop = this.propIndicator(selStart, selEnd, propName, value || '')
           const newConfig = this.spanPropertyHandler(propName, prop, selStart, selEnd, config as IText)
-          LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
-          if (TextUtils.isSel(selEnd)) {
-            nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
+          layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { paragraphs: newConfig.paragraphs })
+          if (textUtils.isSel(selEnd)) {
+            nextTick(() => textUtils.focus(this.getCurrSel.start, this.getCurrSel.end))
           } else {
-            setTimeout(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end), 0)
+            setTimeout(() => textUtils.focus(this.getCurrSel.start, this.getCurrSel.end), 0)
           }
         }
       }
@@ -112,10 +112,10 @@ class TextPropUtils {
 
   blockPropertyHandler(propName: string, value?: string | number, tmpLayerIndex?: number) {
     const updateTextStyles = (styles: { [key: string]: string | number | boolean }) => {
-      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, styles)
+      layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, styles)
     }
     const updateTextParagraphs = (paragraphs: IParagraph[]) => {
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs })
+      layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs })
     }
     const updateSelectedLayersStyles = (styles: { [key: string]: string | number | boolean }) => {
       this.updateSelectedLayersStyles(styles, tmpLayerIndex ?? NaN)
@@ -138,7 +138,7 @@ class TextPropUtils {
         }
         handler({ writingMode: targetWritingMode })
         if (typeof tmpLayerIndex === 'undefined' && writingMode !== targetWritingMode) {
-          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextUtils.getTextHW(config, config.widthLimit))
+          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textUtils.getTextHW(config, config.widthLimit))
           // @TODO: need to reallocate position of each layer
         }
         this.updateTextPropsState({ isVertical: targetIsVertical, decoration: 'none', style: 'normal' })
@@ -184,21 +184,21 @@ class TextPropUtils {
     })
   }
 
-  groupHandler(propName: string, value?: string | number, selStart = TextUtils.getNullSel(), selEnd = TextUtils.getNullSel(),
+  groupHandler(propName: string, value?: string | number, selStart = textUtils.getNullSel(), selEnd = textUtils.getNullSel(),
     layerIndex?: number, subLayerIndex?: number) {
     let flag = false
     let propValue: number | string | undefined
     const groupLayer = this.getCurrLayer
-    layerIndex = layerIndex ?? (LayerUtils.layerIndex as number)
+    layerIndex = layerIndex ?? (layerUtils.layerIndex as number)
 
     const selHandler = (config: IText): { start: ISelection, end: ISelection } => {
-      if (TextUtils.isSel(selStart)) {
+      if (textUtils.isSel(selStart)) {
         return {
           start: { ...selStart },
           end: { ...selEnd }
         }
       } else {
-        return TextUtils.selectAll(config)
+        return textUtils.selectAll(config)
       }
     }
 
@@ -260,27 +260,27 @@ class TextPropUtils {
       for (let i = 0; i < groupLayer.layers.length; i++) {
         const config = groupLayer.layers[i]
         if (config.type === 'text') {
-          const { start, end } = TextUtils.selectAll(config)
+          const { start, end } = textUtils.selectAll(config)
           const newConfig = this.spanPropertyHandler(propName, prop, start, end, config)
-          LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, i, { paragraphs: newConfig.paragraphs })
+          layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, i, { paragraphs: newConfig.paragraphs })
         }
       }
     }
     if (typeof subLayerIndex === 'number') {
-      const config = (LayerUtils.getLayer(this.pageIndex, layerIndex) as IGroup).layers[subLayerIndex] as IText
+      const config = (layerUtils.getLayer(this.pageIndex, layerIndex) as IGroup).layers[subLayerIndex] as IText
       const { start, end } = selHandler(config)
       const prop = this.propIndicator(start, end, propName, value ?? '', config)
       const newConfig = this.spanPropertyHandler(propName, prop, start, end, config)
-      LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: newConfig.paragraphs })
-      // nextTick(() => TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end, subLayerIndex))
-      TextUtils.focus(this.getCurrSel.start, this.getCurrSel.end, subLayerIndex)
+      layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: newConfig.paragraphs })
+      // nextTick(() => textUtils.focus(this.getCurrSel.start, this.getCurrSel.end, subLayerIndex))
+      textUtils.focus(this.getCurrSel.start, this.getCurrSel.end, subLayerIndex)
     }
   }
 
   spanPropertyHandler(propName: string, prop: { [key: string]: string | number }, start: ISelection, end: ISelection, _config: IText): IText {
     const config = GeneralUtils.deepCopy(_config) as IText
     let isStartContainerDivided = true
-    if (TextUtils.isSel(end)) {
+    if (textUtils.isSel(end)) {
       isStartContainerDivided = this.rangedSelHandler(start, end, config, prop)
       if (propName === 'fontFamily') {
         for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
@@ -292,7 +292,7 @@ class TextPropUtils {
         }
       }
     }
-    if (!TextUtils.isSel(end)) {
+    if (!textUtils.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
       // this.noRangedHandler(styles, propName, prop[propName], config)
       Object.assign(styles, prop)
@@ -314,7 +314,7 @@ class TextPropUtils {
     }
 
     // @ Obsolete code
-    // if (TextUtils.isSel(end)) {
+    // if (textUtils.isSel(end)) {
     //   if (isStartContainerDivided) {
     //     if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
     //       start.sIndex++
@@ -327,15 +327,15 @@ class TextPropUtils {
     //   }
     // } else {
     //   if (propName === 'fontFamily' || propName === 'fontSize') {
-    //     if (TextUtils.isSel(start))
+    //     if (textUtils.isSel(start))
     //     start.offset = 0
     //     Object.assign(end, start)
     //     end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
     //   } else {
-    //     end = TextUtils.getNullSel()
+    //     end = textUtils.getNullSel()
     //   }
     // }
-    // TextUtils.updateSelection(start, end)
+    // textUtils.updateSelection(start, end)
 
     return config
   }
@@ -361,9 +361,9 @@ class TextPropUtils {
 
   _spanPropertyHandler(propName: string, value?: string | number, selStart?: ISelection, selEnd?: ISelection,
     tmpLayerIndex?: number, primaryLayerIndex?: number): { config: IText, start: ISelection, end: ISelection } {
-    const sel = TextUtils.getSelection()
+    const sel = textUtils.getSelection()
     const isGroupLayer = typeof tmpLayerIndex !== 'undefined'
-    const layer = LayerUtils.getLayer(LayerUtils.pageIndex, primaryLayerIndex ?? LayerUtils.layerIndex)
+    const layer = layerUtils.getLayer(layerUtils.pageIndex, primaryLayerIndex ?? layerUtils.layerIndex)
 
     let config: IText
     if (isGroupLayer) {
@@ -374,7 +374,7 @@ class TextPropUtils {
 
     let start = { pIndex: 0, sIndex: 0, offset: 0 }
     let end = { pIndex: 0, sIndex: 0, offset: 0 }
-    if (TextUtils.isSel(selStart)) {
+    if (textUtils.isSel(selStart)) {
       Object.assign(start, selStart)
       Object.assign(end, selEnd)
     } else {
@@ -393,26 +393,26 @@ class TextPropUtils {
     } else {
       prop = this.propIndicator(start, end, propName, value || '')
     }
-    if (TextUtils.isSel(end)) {
+    if (textUtils.isSel(end)) {
       isStartContainerDivided = this.rangedSelHandler(start, end, config, prop)
       if (propName !== 'fontSize') {
         [start, end] = this.spanMerger(config.paragraphs, start, end)
       }
       if (isGroupLayer) {
-        TextUtils.updateSelectedParagraphs(tmpLayerIndex as number, config.paragraphs)
+        textUtils.updateSelectedParagraphs(tmpLayerIndex as number, config.paragraphs)
       } else {
-        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
+        textUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
       }
-    } else if (!TextUtils.isSel(end)) {
+    } else if (!textUtils.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
       this.noRangedHandler(styles, propName, value, config)
       if (propName !== 'fontSize') {
         [start, end] = this.spanMerger(config.paragraphs, start, end)
       }
       if (isGroupLayer) {
-        TextUtils.updateSelectedParagraphs(tmpLayerIndex as number, config.paragraphs)
+        textUtils.updateSelectedParagraphs(tmpLayerIndex as number, config.paragraphs)
       } else {
-        TextUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
+        textUtils.updateTextParagraphs(this.pageIndex, this.layerIndex, config.paragraphs)
       }
     }
 
@@ -428,7 +428,7 @@ class TextPropUtils {
       }
     }
 
-    if (TextUtils.isSel(end)) {
+    if (textUtils.isSel(end)) {
       if (isStartContainerDivided) {
         if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
           start.sIndex++
@@ -439,7 +439,7 @@ class TextPropUtils {
           start.sIndex++
         }
       }
-      TextUtils.updateSelection(start, end)
+      textUtils.updateSelection(start, end)
     }
 
     if (!sel || isGroupLayer || propName === 'color') return { config, start, end }
@@ -452,9 +452,9 @@ class TextPropUtils {
     const { start, end } = this.getCurrSel
     const config = this.spanPropertyHandler('fontSize', prop, start, end, _config as IText)
     if (typeof subLayerIndex === 'undefined') {
-      LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs: config.paragraphs })
+      layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { paragraphs: config.paragraphs })
     } else {
-      LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: config.paragraphs })
+      layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs: config.paragraphs })
     }
   }
 
@@ -578,7 +578,7 @@ class TextPropUtils {
       })
       paragraphs[pIndex].spans[sIndex].text = paragraphs[pIndex].spans[sIndex].text.substring(0, offset)
       Object.assign(config?.paragraphs as IParagraph[], paragraphs)
-      TextUtils.updateSelection({ pIndex, sIndex: sIndex + 1, offset: 1 }, TextUtils.getNullSel())
+      textUtils.updateSelection({ pIndex, sIndex: sIndex + 1, offset: 1 }, textUtils.getNullSel())
     }
   }
 
@@ -594,7 +594,7 @@ class TextPropUtils {
   }
 
   spanMerger(paragraphs: IParagraph[], start: ISelection, end: ISelection): [ISelection, ISelection] {
-    if (!TextUtils.isSel(end)) return [start, end]
+    if (!textUtils.isSel(end)) return [start, end]
     let isStartMerged = false
     let isEndMerged = false
     if (start.sIndex - 1 >= 0) {
@@ -654,7 +654,7 @@ class TextPropUtils {
   }
 
   paragraphPropsHandler(propName: string, value: string | number = '') {
-    const currLayer = LayerUtils.getCurrLayer
+    const currLayer = layerUtils.getCurrLayer
     const { layerIndex, subLayerIndex } = this.getTextInfo
     const { start, end } = this.getCurrSel
 
@@ -680,7 +680,7 @@ class TextPropUtils {
             for (let i = 0; i < paragraphs.length; i++) {
               Object.assign(paragraphs[i].styles, prop)
             }
-            LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subIdx, { paragraphs })
+            layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subIdx, { paragraphs })
           }
         }
       }
@@ -689,20 +689,20 @@ class TextPropUtils {
         const paragraphs = GeneralUtils.deepCopy(this.getTextInfo.config.paragraphs) as Array<IParagraph>
         let pstart = start.pIndex
         let pend = Number.isNaN(end.pIndex) ? pstart : end.pIndex
-        if (!TextUtils.isSel(start)) {
+        if (!textUtils.isSel(start)) {
           pstart = 0
           pend = paragraphs.length
         }
         for (let pIndex = pstart; pIndex <= pend && pIndex < paragraphs.length; pIndex++) {
           Object.assign(paragraphs[pIndex].styles, prop)
         }
-        LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs })
+        layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs })
       }
     }
 
     if (currLayer.type === 'text') {
       const handler = (prop: { [key: string]: string | number }) => {
-        if (TextUtils.isSel(end)) {
+        if (textUtils.isSel(end)) {
           for (let pIndex = start.pIndex; pIndex <= end.pIndex; pIndex++) {
             this.updateParagraphStyles(this.pageIndex, layerIndex, pIndex, prop)
           }
@@ -720,7 +720,7 @@ class TextPropUtils {
    * @returns The desired props value accord to the current selection range.
    */
   propReader(propName: string): string | number | undefined {
-    const { subLayerIdx, getCurrLayer: currLayer } = LayerUtils
+    const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
     switch (currLayer.type) {
       case 'text': {
         return this.propReadOfLayer(propName)
@@ -937,8 +937,8 @@ class TextPropUtils {
   }
 
   fontSizeStepping(step: number) {
-    const currLayer = LayerUtils.getCurrLayer
-    if (currLayer.type === 'text' || (['tmp', 'group'].includes(currLayer.type) && LayerUtils.subLayerIdx !== -1)) {
+    const currLayer = layerUtils.getCurrLayer
+    if (currLayer.type === 'text' || (['tmp', 'group'].includes(currLayer.type) && layerUtils.subLayerIdx !== -1)) {
       tiptapUtils.agent(editor => {
         const selection = editor.view.state.selection
         const from = selection.$from
@@ -1038,8 +1038,8 @@ class TextPropUtils {
     } else if (['group', 'tmp'].includes(currLayer.type)) {
       (currLayer as IGroup | ITmp).layers
         .forEach((l, idx) => {
-          l.type === 'text' && this.propAppliedAllText(LayerUtils.layerIndex, idx, 'size', step)
-          l.type === 'text' && TextUtils.updateGroupLayerSizeByShape(LayerUtils.pageIndex, this.layerIndex, idx)
+          l.type === 'text' && this.propAppliedAllText(layerUtils.layerIndex, idx, 'size', step)
+          l.type === 'text' && textUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, this.layerIndex, idx)
         })
       this.updateTextPropsState()
     }
@@ -1048,7 +1048,7 @@ class TextPropUtils {
   propAppliedAllText(layerIndex: number, subLayerIndex: number, prop: 'size' | 'fontSpacing' | 'lineHeight', payload: number) {
     if (subLayerIndex === -1) return
 
-    const primaryLayer = (LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex) as IGroup)
+    const primaryLayer = (layerUtils.getLayer(layerUtils.pageIndex, layerIndex) as IGroup)
     if (['group', 'tmp'].includes(primaryLayer.type) && primaryLayer.layers[subLayerIndex].type === 'text') {
       const targetLayer = primaryLayer.layers[subLayerIndex] as IText
       const paragraphs = GeneralUtils.deepCopy(targetLayer.paragraphs) as Array<IParagraph>
@@ -1066,7 +1066,7 @@ class TextPropUtils {
           }
         })
       })
-      LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs })
+      layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs })
     }
   }
 
@@ -1074,7 +1074,7 @@ class TextPropUtils {
     const prop: { [key: string]: string | number } = {}
     const config = GeneralUtils.deepCopy(tmpLayer ?? this.getCurrLayer) as IText
 
-    if (!TextUtils.isSel(end)) {
+    if (!textUtils.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
       switch (propName) {
         case 'bold': {
@@ -1186,7 +1186,7 @@ class TextPropUtils {
       'decoration',
       'isVertical'
     ]
-    const subLayerIdx = LayerUtils.subLayerIdx
+    const subLayerIdx = layerUtils.subLayerIdx
     const currLayer = this.getCurrLayer
     props.forEach(k => {
       let value
@@ -1294,7 +1294,7 @@ class TextPropUtils {
     })
   }
 
-  applyPropsToAll(propType = 'span', prop: { [key: string]: string | boolean | number }, layerIndex = LayerUtils.layerIndex, subLayerIdx = LayerUtils.subLayerIdx) {
+  applyPropsToAll(propType = 'span', prop: { [key: string]: string | boolean | number }, layerIndex = layerUtils.layerIndex, subLayerIdx = layerUtils.subLayerIdx) {
     const handler = (paragraphs: IParagraph[]) => {
       paragraphs
         .forEach(p => {
@@ -1314,12 +1314,12 @@ class TextPropUtils {
         })
     }
 
-    const layer = LayerUtils.getLayer(LayerUtils.pageIndex, layerIndex)
+    const layer = layerUtils.getLayer(layerUtils.pageIndex, layerIndex)
 
     if (subLayerIdx !== -1 && layer.type === 'group') {
       const paragraphs = GeneralUtils.deepCopy((layer as IGroup).layers[subLayerIdx].paragraphs) as IParagraph[]
       handler(paragraphs)
-      LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIdx, { paragraphs })
+      layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIdx, { paragraphs })
       return
     }
     if (['tmp', 'group'].includes(layer.type)) {
@@ -1328,7 +1328,7 @@ class TextPropUtils {
           if (l.type === 'text') {
             const paragraphs = GeneralUtils.deepCopy(l.paragraphs) as IParagraph[]
             handler(paragraphs)
-            LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, idx, { paragraphs })
+            layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, idx, { paragraphs })
           }
         })
       return
@@ -1336,7 +1336,59 @@ class TextPropUtils {
     if (layer.type === 'text') {
       const paragraphs = GeneralUtils.deepCopy(layer.paragraphs) as IParagraph[]
       handler(paragraphs)
-      LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { paragraphs })
+      layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { paragraphs })
+    }
+  }
+
+  getMinimumFontSize(): number {
+    const element = document.createElement('span')
+    element.style.fontSize = '1px'
+    element.style.position = 'fixed'
+    element.style.top = '100%'
+    element.style.left = '100%'
+    document.body.appendChild(element)
+    const res = parseInt(getComputedStyle(element).fontSize.replace('px', ''))
+    document.body.removeChild(element)
+    return res / 1.333333
+  }
+
+  getScaleCompensation(size: number): { scale: number, size: number } {
+    const minimumFontSize = this.getMinimumFontSize()
+    if (size < minimumFontSize) {
+      return {
+        size: minimumFontSize,
+        scale: size / minimumFontSize
+      }
+    } else {
+      return {
+        size,
+        scale: 1
+      }
+    }
+  }
+
+  applyScaleCompensation(compensationScale: number) {
+    const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+    const scale = currLayer.styles.scale
+    if (currLayer.type === LayerType.text) {
+      layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+        scale: compensationScale * scale
+      })
+    } else if (currLayer.type === LayerType.group || currLayer.type === LayerType.tmp) {
+      const layers = []
+      if (subLayerIdx === -1) {
+        for (const [sIdx, subLayer] of currLayer.layers.entries()) {
+          if (subLayer.type !== LayerType.text) continue
+          layers.push(sIdx)
+        }
+      } else {
+        layers.push(subLayerIdx)
+      }
+      for (const sIdx of layers) {
+        layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+          scale: compensationScale * scale
+        }, sIdx)
+      }
     }
   }
 }

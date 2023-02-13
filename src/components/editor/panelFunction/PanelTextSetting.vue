@@ -9,19 +9,6 @@ div(class="text-setting" ref='body'
       svg-icon(class="pointer"
         :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
     font-size-selector
-    //- div(class="size-bar relative")
-    //-   div(class="pointer"
-    //-     @mousedown="fontSizeStepping(-step)") -
-    //-   button(class="text-setting__range-input-button" @click="handleValueModal")
-    //-     input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
-    //-           @change="setSize" :value="fontSize")
-    //-   div(class="pointer"
-    //-     @mousedown="fontSizeStepping(step)") +
-    //-   value-selector(v-if="openValueSelector"
-    //-               :valueArray="fontSelectValue"
-    //-               class="text-setting__value-selector"
-    //-               v-click-outside="handleValueModal"
-    //-               @update="handleValueUpdate")
   div(class="text-setting__row2")
     div(class="text-setting__color"
         v-hint="$t('NN0099')")
@@ -70,31 +57,29 @@ div(class="text-setting" ref='body'
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import SearchBar from '@/components/SearchBar.vue'
-import MappingUtils from '@/utils/mappingUtils'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import TextUtils from '@/utils/textUtils'
-import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
-import vClickOutside from 'click-outside-vue3'
 import ColorPicker from '@/components/ColorPicker.vue'
+import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
-import TextPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
-import { parseInt } from 'lodash'
+import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
+import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
+import brandkitUtils from '@/utils/brandkitUtils'
+import colorUtils, { checkAndConvertToHex, isValidHexColor } from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
-import StepsUtils from '@/utils/stepsUtils'
-import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
-import colorUtils, { checkAndConvertToHex, isValidHexColor } from '@/utils/colorUtils'
+import MappingUtils from '@/utils/mappingUtils'
 import popupUtils from '@/utils/popupUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
+import StepsUtils from '@/utils/stepsUtils'
+import TextPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
-import pageUtils from '@/utils/pageUtils'
-import brandkitUtils from '@/utils/brandkitUtils'
-import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
-import editorUtils from '@/utils/editorUtils'
+import TextUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
+import { parseInt } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -307,13 +292,6 @@ export default defineComponent({
         input.select()
       }
     },
-    handleValueUpdate(value: number) {
-      LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-      tiptapUtils.spanStyleHandler('size', value)
-      tiptapUtils.forceUpdate(true)
-      TextPropUtils.updateTextPropsState({ fontSize: value.toString() })
-      textEffectUtils.refreshSize()
-    },
     handleSliderModal(modalName = '') {
       this.openSliderBar = modalName
       if (modalName === 'lineHeight' || modalName === 'fontSpacing' || modalName === 'opacity') {
@@ -473,38 +451,6 @@ export default defineComponent({
         TextPropUtils.updateTextPropsState({ textAlign: prop })
       }
     },
-    fontSizeStepping(step: number, tickInterval = 100) {
-      const startTime = new Date().getTime()
-      const interval = setInterval(() => {
-        if (new Date().getTime() - startTime > 500) {
-          try {
-            TextPropUtils.fontSizeStepping(step)
-            textEffectUtils.refreshSize()
-          } catch (error) {
-            console.error(error)
-            window.removeEventListener('mouseup', onmouseup)
-            clearInterval(interval)
-          }
-        }
-      }, tickInterval)
-
-      const onmouseup = () => {
-        window.removeEventListener('mouseup', onmouseup)
-        if (new Date().getTime() - startTime < 500) {
-          TextPropUtils.fontSizeStepping(step)
-          textEffectUtils.refreshSize()
-        }
-        clearInterval(interval)
-        tiptapUtils.agent(editor => {
-          if (!editor.state.selection.empty) {
-            LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-            StepsUtils.record()
-          }
-        })
-      }
-
-      window.addEventListener('mouseup', onmouseup)
-    },
     isValidInt(value: string) {
       return value.match(/^-?\d+$/)
     },
@@ -514,30 +460,8 @@ export default defineComponent({
     isValidHexColor(value: string) {
       return isValidHexColor(value)
     },
-    boundValue(value: number, min: number, max: number): string {
-      if (value < min) return min.toString()
-      else if (value > max) return max.toString()
-      return value.toString()
-    },
-    setSize(e: Event) {
-      let { value } = e.target as HTMLInputElement
-      if (this.isValidFloat(value)) {
-        LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-        value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
-        window.requestAnimationFrame(() => {
-          tiptapUtils.spanStyleHandler('size', parseFloat(value))
-          tiptapUtils.forceUpdate(true)
-          TextPropUtils.updateTextPropsState({ fontSize: value })
-          textEffectUtils.refreshSize()
-        })
-      }
-    },
     setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
       TextUtils.setParagraphProp(prop, _value)
-    },
-    onBlur() {
-      TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
-      TextPropUtils.updateTextPropsState()
     },
     openLineHeightSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineHeight)
