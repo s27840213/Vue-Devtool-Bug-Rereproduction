@@ -150,8 +150,6 @@ export default defineComponent({
     this.cardHeight = this.editorView ? this.editorView.clientHeight : 0
     this.cardWidth = this.editorView ? this.editorView.clientWidth : 0
 
-    this.setContentScaleRatio(layerUtils.pageIndex)
-
     pageUtils.fitPage(false, true)
     this.tmpScaleRatio = pageUtils.scaleRatio
 
@@ -189,7 +187,7 @@ export default defineComponent({
       })
     },
     currCardIndex(newVal) {
-      this.setContentScaleRatio(newVal)
+      editorUtils.handleContentScaleRatio(newVal)
     }
   },
 
@@ -488,11 +486,6 @@ export default defineComponent({
         }
         this.isSwiping = false
       }
-    },
-    setContentScaleRatio(pageIndex: number) {
-      const page = pageUtils.getPage(pageIndex)
-      const contentScaleRatio = editorUtils.handleContentScaleCalc(page)
-      editorUtils.setContentScaleRatio(contentScaleRatio)
     }
   }
 })

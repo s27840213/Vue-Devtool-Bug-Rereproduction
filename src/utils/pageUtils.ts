@@ -573,6 +573,8 @@ class PageUtils {
         }, 0)
       })
     }
+
+    editorUtils.handleContentScaleRatio(this.currFocusPageIndex)
   }
 
   fillPage() {
