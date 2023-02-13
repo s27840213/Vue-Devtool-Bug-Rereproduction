@@ -70,31 +70,31 @@ div(class="text-setting" ref='body'
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import SearchBar from '@/components/SearchBar.vue'
-import MappingUtils from '@/utils/mappingUtils'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import TextUtils from '@/utils/textUtils'
-import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
-import vClickOutside from 'click-outside-vue3'
 import ColorPicker from '@/components/ColorPicker.vue'
+import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
-import TextPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
-import { parseInt } from 'lodash'
+import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
+import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
+import brandkitUtils from '@/utils/brandkitUtils'
+import colorUtils, { checkAndConvertToHex, isValidHexColor } from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
-import StepsUtils from '@/utils/stepsUtils'
-import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
-import colorUtils, { checkAndConvertToHex, isValidHexColor } from '@/utils/colorUtils'
-import popupUtils from '@/utils/popupUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
-import textShapeUtils from '@/utils/textShapeUtils'
+import MappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
-import brandkitUtils from '@/utils/brandkitUtils'
-import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
-import editorUtils from '@/utils/editorUtils'
+import popupUtils from '@/utils/popupUtils'
+import StepsUtils from '@/utils/stepsUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import TextPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
+import TextUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
+import { parseInt } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -475,7 +475,7 @@ export default defineComponent({
     },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
-      const interval = setInterval(() => {
+      const interval = window.setTimeout(() => {
         if (new Date().getTime() - startTime > 500) {
           try {
             TextPropUtils.fontSizeStepping(step)

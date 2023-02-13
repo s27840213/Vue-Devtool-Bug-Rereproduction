@@ -344,7 +344,7 @@ export default defineComponent({
           store.commit('SET_isPageScaling', true)
         }
         clearTimeout(this.hanleWheelTimer)
-        this.hanleWheelTimer = setTimeout(() => {
+        this.hanleWheelTimer = window.setTimeout(() => {
           store.commit('SET_isPageScaling', false)
           console.log('reach limit', pageUtils.mobileMinScaleRatio)
           if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
@@ -401,7 +401,7 @@ export default defineComponent({
               })
             }
             clearTimeout(this.hanleWheelTimer)
-            this.hanleWheelTimer = setTimeout(() => {
+            this.hanleWheelTimer = window.setTimeout(() => {
               if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
                 const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
                 page.style.transition = '0.2s linear'

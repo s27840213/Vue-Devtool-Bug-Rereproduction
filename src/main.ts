@@ -22,6 +22,7 @@ import Notifications from '@kyvg/vue3-notification'
 import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
 import { createApp, nextTick } from 'vue'
+import { createMetaManager } from 'vue-meta'
 import VueRecyclerviewNew from 'vue-recyclerview'
 import { RecycleScroller } from 'vue-virtual-scroller'
 import i18n from './i18n'
@@ -87,7 +88,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 app.use(VueRecyclerviewNew)
 app.use(Notifications)
-// app.use(VueMeta)
+app.use(createMetaManager())
 app.use(FloatingVue, {
   themes: tooltipUtils.themes
 })
@@ -252,5 +253,4 @@ if (urlParams.has('token')) {
 //   })
 //   // app.config.devtools = false
 // }
-
 app.mount('#app')

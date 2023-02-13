@@ -228,7 +228,7 @@ class ImageShadowUtils {
     const { timeout = DRAWING_TIMEOUT } = params
     if (timeout) {
       clearTimeout(this._draw)
-      this._draw = setTimeout(() => {
+      this._draw = window.setTimeout(() => {
         this.floatingHandler(canvas_s, img, config, params)
       }, timeout)
     } else {
@@ -341,7 +341,7 @@ class ImageShadowUtils {
     const { timeout = DRAWING_TIMEOUT } = params
     if (timeout) {
       clearTimeout(this._draw)
-      this._draw = setTimeout(() => {
+      this._draw = window.setTimeout(() => {
         this.imageMathcedHandler(canvas_s, img, config, params)
       }, timeout)
     } else {
@@ -451,7 +451,7 @@ class ImageShadowUtils {
 
     if (timeout) {
       clearTimeout(this._draw)
-      this._draw = setTimeout(() => {
+      this._draw = window.setTimeout(() => {
         this.shadowHandler(canvas_s, img, config, params)
       }, timeout)
     } else {

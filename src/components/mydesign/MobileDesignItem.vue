@@ -59,15 +59,15 @@ div(class="mobile-design-item")
 </template>
 
 <script lang="ts">
+import ImageCarousel from '@/components/global/ImageCarousel.vue'
+import { IDesign } from '@/interfaces/design'
+import designUtils from '@/utils/designUtils'
+import imageUtils from '@/utils/imageUtils'
+import { PRECISION } from '@/utils/unitUtils'
+import vClickOutside from 'click-outside-vue3'
+import { round } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import ImageCarousel from '@/components/global/ImageCarousel.vue'
-import vClickOutside from 'click-outside-vue3'
-import imageUtils from '@/utils/imageUtils'
-import designUtils from '@/utils/designUtils'
-import { IDesign } from '@/interfaces/design'
-import { PRECISION } from '@/utils/unitUtils'
-import { round } from 'lodash'
 
 export default defineComponent({
   components: {
@@ -266,7 +266,7 @@ export default defineComponent({
     },
     startCarousel() {
       if (this.config.pageNum === 1) return
-      this.waitTimer = setInterval(() => {
+      this.waitTimer = window.setTimeout(() => {
         const success = this.getThumbnailSize()
         if (success) {
           clearInterval(this.waitTimer)

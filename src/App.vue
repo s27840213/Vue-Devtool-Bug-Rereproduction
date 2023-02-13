@@ -1,4 +1,6 @@
 <template lang="pug">
+metainfo
+  template(v-slot:title ="{ content }") {{ content ? `${content} | SITE_NAME` : `SITE_NAME` }}
 div(id="app" :style="appStyles()")
   link(rel="preconnect" href="https://fonts.googleapis.com")
   link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="")
@@ -39,16 +41,16 @@ div(id="app" :style="appStyles()")
 </template>
 
 <script lang="ts">
+import DebugTool from '@/components/componentLog/DebugTool.vue'
+import ModalCard from '@/components/modal/ModalCard.vue'
+import ResInfo from '@/components/modal/ResInfo.vue'
+import Popup from '@/components/popup/Popup.vue'
+import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
-import Popup from '@/components/popup/Popup.vue'
-import ResInfo from '@/components/modal/ResInfo.vue'
-import ModalCard from '@/components/modal/ModalCard.vue'
-import DebugTool from '@/components/componentLog/DebugTool.vue'
-import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
+import popupUtils from './utils/popupUtils'
 
 export default defineComponent({
   emits: [],
@@ -61,6 +63,44 @@ export default defineComponent({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  metaInfo() {
+    return {
+      title: '123456789',
+      meta: [{
+        name: 'description',
+        content: `${this.$t('SE0002')}`,
+        vmid: 'description'
+      }, {
+        property: 'og:title',
+        content: `${this.$t('OG0001')}`,
+        vmid: 'og:title'
+      }, {
+        property: 'og:image',
+        content: `${this.$t('OG0003')}`,
+        vmid: 'og:image'
+      }, {
+        name: 'description',
+        content: `${this.$t('SE0002')}`,
+        vmid: 'description'
+      }, {
+        property: 'twitter:title',
+        content: `${this.$t('OG0001')}`,
+        vmid: 'twitter:title'
+      }, {
+        property: 'twitter:image',
+        content: `${this.$t('OG0003')}`,
+        vmid: 'twitter:image'
+      }, {
+        property: 'twitter:description',
+        content: `${this.$t('OG0002')}`,
+        vmid: 'twitter:description'
+      }, {
+        property: 'og:url',
+        content: `${this.$t('OG0005')}`,
+        vmid: 'og:url'
+      }]
+    }
+  },
   data() {
     return {
       coordinate: null as unknown as HTMLElement,
@@ -70,6 +110,11 @@ export default defineComponent({
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
+
+    if ((window as any).__PRERENDER_INJECTED !== undefined) {
+      document.dispatchEvent(new Event('render-event'))
+      console.log('dispatch prerender event')
+    }
   },
   beforeMount() {
     networkUtils.registerNetworkListener()

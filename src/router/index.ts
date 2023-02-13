@@ -1,27 +1,27 @@
-import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
-import Editor from '@/views/Editor.vue'
-import SignUp from '@/views/Login/SignUp.vue'
-import Login from '@/views/Login/Login.vue'
-import MyDesign from '@/views/MyDesign.vue'
-import Home from '@/views/Home.vue'
-import Settings from '@/views/Settings.vue'
-import TemplateCenter from '@/views/TemplateCenter.vue'
-import MobileWarning from '@/views/MobileWarning.vue'
-import Preview from '@/views/Preview.vue'
-import SvgIconView from '@/views/SvgIconView.vue'
-import NubtnList from '@/views/NubtnList.vue'
-import BrandKit from '@/views/BrandKit.vue'
-import Pricing from '@/views/Pricing.vue'
-import CopyTool from '@/views/CopyTool.vue'
-import store from '@/store'
-import { editorRouteHandler } from './handler'
 import i18n from '@/i18n'
-import localeUtils from '@/utils/localeUtils'
-import logUtils from '@/utils/logUtils'
+import store from '@/store'
 import assetUtils from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
+import localeUtils from '@/utils/localeUtils'
+import logUtils from '@/utils/logUtils'
+import BrandKit from '@/views/BrandKit.vue'
+import CopyTool from '@/views/CopyTool.vue'
+import Editor from '@/views/Editor.vue'
+import Home from '@/views/Home.vue'
+import Login from '@/views/Login/Login.vue'
+import SignUp from '@/views/Login/SignUp.vue'
+import MobileWarning from '@/views/MobileWarning.vue'
+import MyDesign from '@/views/MyDesign.vue'
+import NubtnList from '@/views/NubtnList.vue'
+import Preview from '@/views/Preview.vue'
+import Pricing from '@/views/Pricing.vue'
+import Settings from '@/views/Settings.vue'
+import SvgIconView from '@/views/SvgIconView.vue'
+import TemplateCenter from '@/views/TemplateCenter.vue'
 import { h, resolveComponent } from 'vue'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { editorRouteHandler } from './handler'
 
 const MOBILE_ROUTES = [
   'Home',
@@ -239,15 +239,15 @@ const router = createRouter({
           logUtils.uploadLog()
         }
         logUtils.setLog('App Start')
-        let locale = localStorage.getItem('locale')
+        let locale = localStorage.getItem('locale') as '' | 'tw' | 'us' | 'jp'
         // if local storage is empty
         if (locale === '' || !locale) {
-          locale = to.params.locale as string
+          locale = to.params.locale as '' | 'tw' | 'us' | 'jp'
           // without locale param, determine the locale with browser language
           if (locale === '' || !locale) {
             i18n.global.locale = localeUtils.getBrowserLang()
           } else {
-            i18n.global.locale = locale
+            i18n.global.locale = locale as 'tw' | 'us' | 'jp'
           }
         } else if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.global.locale) {
           // if local storage has been set

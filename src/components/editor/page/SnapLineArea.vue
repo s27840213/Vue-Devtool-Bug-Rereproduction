@@ -123,7 +123,7 @@ export default defineComponent({
       this.closestSnaplines.h = []
     },
     showGuideline(pos: number, type: string, index: number) {
-      this.guidelineTimer = setTimeout(() => {
+      this.guidelineTimer = window.setTimeout(() => {
         if (!rulerUtils.isDragging) {
           rulerUtils.deleteGuideline(
             index,

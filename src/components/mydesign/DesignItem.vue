@@ -93,15 +93,15 @@ div(class="design-item")
 </template>
 
 <script lang="ts">
+import ImageCarousel from '@/components/global/ImageCarousel.vue'
+import { IDesign } from '@/interfaces/design'
+import designUtils from '@/utils/designUtils'
+import imageUtils from '@/utils/imageUtils'
+import { PRECISION } from '@/utils/unitUtils'
+import vClickOutside from 'click-outside-vue3'
+import { round } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import ImageCarousel from '@/components/global/ImageCarousel.vue'
-import vClickOutside from 'click-outside-vue3'
-import imageUtils from '@/utils/imageUtils'
-import designUtils from '@/utils/designUtils'
-import { IDesign } from '@/interfaces/design'
-import { round } from 'lodash'
-import { PRECISION } from '@/utils/unitUtils'
 
 export default defineComponent({
   components: {
@@ -291,7 +291,7 @@ export default defineComponent({
       if (!thumbnailElement) return
       this.isMouseOver = true
       if (this.config.pageNum === 1) return
-      this.waitTimer = setTimeout(() => {
+      this.waitTimer = window.setTimeout(() => {
         if (this.isMouseOver) {
           this.showCarousel = true
           this.renderedWidth = thumbnailElement.width

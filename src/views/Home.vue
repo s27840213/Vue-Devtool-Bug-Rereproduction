@@ -22,8 +22,8 @@ div(class="home")
       scroll-list(v-if="isLogin"
         type="mydesign")
       template(v-if="isLogin")
-        scroll-list(v-for="theme in themeList"
-          type="template" :theme="theme" :key="theme")
+        //- scroll-list(v-for="theme in themeList"
+        //-   type="template" :theme="theme" :key="theme")
     div(class="home-block")
       ta-block(v-for="item in blocklist"
         :content="item")
@@ -31,15 +31,15 @@ div(class="home")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
-import NuHeader from '@/components/NuHeader.vue'
 import Animation from '@/components/Animation.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
 import TaBlock from '@/components/homepage/TaBlock.vue'
 import NuFooter from '@/components/NuFooter.vue'
+import NuHeader from '@/components/NuHeader.vue'
 import blocklistData, { IHomeBlockData } from '@/utils/homeBlockData'
 import _ from 'lodash'
+import { defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],

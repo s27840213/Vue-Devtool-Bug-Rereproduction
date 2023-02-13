@@ -1,10 +1,10 @@
 import { IGroup, IParagraph, IText } from '@/interfaces/layer'
-import { ISelection, IFont } from '@/interfaces/text'
+import { IFont, ISelection } from '@/interfaces/text'
 import router from '@/router'
 import brandkitUtils from '@/utils/brandkitUtils'
 import errorHandleUtils from '@/utils/errorHandleUtils'
 import generalUtils from '@/utils/generalUtils'
-import { MutationTree, GetterTree, ActionTree } from 'vuex'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
 const UPDATE_FONTFACE = 'UPDATE_FONTFACE' as const
@@ -176,7 +176,7 @@ const actions: ActionTree<ITextState, unknown> = {
           link.rel = 'stylesheet'
           document.head.appendChild(link)
           return new Promise<void>(resolve => {
-            const checkLoaded = setInterval(() => {
+            const checkLoaded = window.setTimeout(() => {
               if (Array.from(document.styleSheets).find(s => s.href === cssUrl)) {
                 clearInterval(checkLoaded)
                 commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
@@ -201,7 +201,7 @@ const actions: ActionTree<ITextState, unknown> = {
         // })
       } else {
         return new Promise<void>(resolve => {
-          const checkLoaded = setInterval(() => {
+          const checkLoaded = window.setTimeout(() => {
             if (font.loaded) {
               clearInterval(checkLoaded)
               resolve()
@@ -221,7 +221,7 @@ const actions: ActionTree<ITextState, unknown> = {
         if (check()) {
           resolve(true)
         } else {
-          const checkLoaded = setInterval(() => {
+          const checkLoaded = window.setTimeout(() => {
             if (check()) {
               clearInterval(checkLoaded)
               resolve(true)

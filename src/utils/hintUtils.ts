@@ -23,7 +23,7 @@ class HintUtils {
 
   bind(el: HTMLElement, hint: string, timeInterval = 300) {
     el.addEventListener('mouseenter', () => {
-      this.timerId = setTimeout(() => {
+      this.timerId = window.setTimeout(() => {
         this.openHint(el, hint)
       }, timeInterval)
     })
@@ -35,7 +35,7 @@ class HintUtils {
 
   unbind(el: HTMLElement, hint: string, timeInterval = 300) {
     el.removeEventListener('mouseenter', () => {
-      this.timerId = setTimeout(() => {
+      this.timerId = window.setTimeout(() => {
         this.openHint(el, hint)
       }, timeInterval)
     })
