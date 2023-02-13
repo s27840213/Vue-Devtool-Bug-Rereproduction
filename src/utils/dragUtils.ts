@@ -1,4 +1,5 @@
 /* eslint-disable indent */
+import i18n from '@/i18n'
 import { SrcObj } from '@/interfaces/gallery'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle, IShape } from '@/interfaces/layer'
@@ -7,6 +8,7 @@ import { round } from 'lodash'
 import assetUtils from './assetUtils'
 import imageShadowUtils from './imageShadowUtils'
 import layerUtils from './layerUtils'
+import modalUtils from './modalUtils'
 import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
@@ -126,26 +128,37 @@ class DragUtils {
         assetUtils.addStandardText(textType, text, locale, pageIndex, { styles }, spanStyles)
       } else {
         if (data.type === 6) {
+          const addTemplate = data.groupChildId ? (resize?: any) => assetUtils.addGroupTemplate(data, data.groupChildId, resize)
+           : (resize?: any) => assetUtils.addAsset(data, { styles, pageIndex, ...resize })
           const pageSize = data.groupChildId ? pageUtils.currFocusPageSize : pageUtils.getPageSize(pageIndex)
           const newPageIndex = data.groupChildId ? data.content_ids.findIndex((content: any) => content.id === data.groupChildId) : 0
-          const aspectRatio = data.content_ids[newPageIndex].height / data.content_ids[newPageIndex].width
-          const precision = pageSize.unit === 'px' ? 0 : PRECISION
-          const resize = {
-            width: pageSize.width,
-            height: round(pageSize.width * aspectRatio, precision),
-            physicalWidth: pageSize.physicalWidth,
-            physicalHeight: round(pageSize.physicalWidth * aspectRatio, precision),
-            unit: pageSize.unit
-          }
+          const { height, width, unit } = data.content_ids[newPageIndex]
+          // const aspectRatio = height / width
+          // const precision = pageSize.unit === 'px' ? 0 : PRECISION
+          // const resize = {
+          //   width: pageSize.width,
+          //   height: round(pageSize.width * aspectRatio, precision),
+          //   physicalWidth: pageSize.physicalWidth,
+          //   physicalHeight: round(pageSize.physicalWidth * aspectRatio, precision),
+          //   unit: pageSize.unit
+          // }
 
-          if (data.groupChildId) { // For group template
-            assetUtils.addGroupTemplate(data, data.groupChildId, resize)
-          } else {
-            assetUtils.addAsset(data, {
-              styles,
-              pageIndex,
-              ...(data.type === 6 && resize) // for template
-            })
+          const isSameSize = pageSize.physicalWidth === width && pageSize.physicalHeight === height && pageSize.unit === unit
+          if (!isSameSize) {
+            modalUtils.setModalInfo(
+              i18n.global.t('NN0695') as string,
+              [`${i18n.global.t('NN0209', { tsize: `${width}x${height} ${unit}`, psize: `${round(pageSize.physicalWidth, PRECISION)}x${round(pageSize.physicalHeight, PRECISION)} ${pageSize.unit}` })}`],
+              {
+                msg: `${i18n.global.t('NN0021')}`,
+                class: 'btn-light-mid',
+                style: { border: '1px solid #4EABE6' },
+                action: () => addTemplate(pageSize)
+              },
+              {
+                msg: `${i18n.global.t('NN0208')}`,
+                action: () => addTemplate()
+              }
+            )
           }
         } else {
           assetUtils.addAsset(data, {
