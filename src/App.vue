@@ -93,7 +93,7 @@ export default defineComponent({
     }),
     currLocale(): string {
       return localeUtils.currLocale()
-    }
+    },
   },
   methods: {
     ...mapMutations('text', {
