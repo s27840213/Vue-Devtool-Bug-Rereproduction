@@ -34,7 +34,7 @@
 const path = require('path')
 const webpack = require('webpack')
 // const SentryWebpackPlugin = require('@sentry/webpack-plugin')
-const PrerenderSPAPlugin = require('@dreysolano/prerender-spa-plugin')
+const PrerenderSPAPlugin = require('prerender-spa-plugin-next')
 const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
@@ -197,22 +197,20 @@ module.exports = defineConfig({
             config.plugin('prerender')
                 .use(PrerenderSPAPlugin, [{
                     // Tell the Pre-SPA plugin not to use index.html as its template file.
-                    indexPath: path.join(__dirname, 'dist', 'app.html'),
-                    staticDir: path.join(__dirname, 'dist'),
-                    routes: ['/', '/tw', '/us', '/jp', '/templates', '/tw/templates', '/us/templates', '/jp/templates', '/editor', '/pricing', '/brandkit'],
+                    routes: ['/', '/tw', '/us', '/jp'],
                     minify: {
                         minifyCSS: true,
                         removeComments: true
                     },
-                    renderer: new Renderer({
-                        // The name of the property
+                    renderer: require('@prerenderer/renderer-puppeteer'),
+                    rendererOptions: {
                         injectProperty: '__PRERENDER_INJECTED',
                         // The values to have access to via `window.injectProperty` (the above property )
                         inject: { PRERENDER: 1 },
-                        // renderAfterDocumentEvent: 'render-event',
+                        renderAfterDocumentEvent: 'render-event',
                         headless: true,
-                        renderAfterTime: 5000
-                    })
+                        timeout: 20000
+                    }
                 }])
         }
 

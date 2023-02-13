@@ -97,6 +97,7 @@ import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import { IDesign } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import imageUtils from '@/utils/imageUtils'
+import modalUtils from '@/utils/modalUtils'
 import { PRECISION } from '@/utils/unitUtils'
 import vClickOutside from 'click-outside-vue3'
 import { round } from 'lodash'
@@ -341,6 +342,18 @@ export default defineComponent({
         return
       }
       if (this.unenterable || this.isTempDesign) return
+      if (this.$isTouchDevice && this.config.group_type === 1) {
+        modalUtils.setModalInfo(
+            `${this.$t('NN0808')}`,
+            [],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+        )
+        return
+      }
       designUtils.setDesign(this.config as IDesign)
     },
     handleCarouselIdx(idx: number) {

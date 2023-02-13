@@ -465,7 +465,10 @@ export class MovingUtils {
     layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
     this.setMoving(false)
 
-    const posDiff = {
+    const posDiff = this.isTouchDevice ? {
+      x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
+      y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
+    } : {
       x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
       y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
     }

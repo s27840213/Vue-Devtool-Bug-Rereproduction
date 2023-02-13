@@ -145,21 +145,22 @@ div(ref="body"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
-import hashtag from '@/store/module/hashtag'
-import vClickOutside from 'click-outside-vue3'
-import SearchBar from '@/components/SearchBar.vue'
-import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
+import NuHeader from '@/components/NuHeader.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import HashtagCategoryRow from '@/components/templates/HashtagCategoryRow.vue'
 import TemplateWaterfall from '@/components/templates/TemplateWaterfall.vue'
 import { IContentTemplate, ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
+import hashtag from '@/store/module/hashtag'
+import generalUtils from '@/utils/generalUtils'
+import modalUtils from '@/utils/modalUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import themeUtils from '@/utils/themeUtils'
-import generalUtils from '@/utils/generalUtils'
-import paymentUtils from '@/utils/paymentUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 const HEADER_HEIGHT = 72
 
@@ -389,6 +390,18 @@ export default defineComponent({
     },
     handleClickWaterfall(template: ITemplate) {
       if (template.group_type === 1) {
+        if (this.$isTouchDevice) {
+          modalUtils.setModalInfo(
+            `${this.$t('NN0808')}`,
+            [],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+          )
+          return
+        }
         if (!paymentUtils.checkProTemplate(template)) return
         const route = this.$router.resolve({
           name: 'Editor',

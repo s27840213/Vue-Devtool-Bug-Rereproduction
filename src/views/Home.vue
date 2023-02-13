@@ -22,8 +22,8 @@ div(class="home")
       scroll-list(v-if="isLogin"
         type="mydesign")
       template(v-if="isLogin")
-        //- scroll-list(v-for="theme in themeList"
-        //-   type="template" :theme="theme" :key="theme")
+        scroll-list(v-for="theme in themeList"
+          type="template" :theme="theme" :key="theme")
     div(class="home-block")
       ta-block(v-for="item in blocklist"
         :content="item")
