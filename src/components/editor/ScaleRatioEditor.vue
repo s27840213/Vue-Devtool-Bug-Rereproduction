@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="scale-ratio-editor")
+div(class="scale-ratio-editor" cy-visual-test="transparent")
   input(class="scale-ratio-editor__input pointer"
     ref="scale-ratio-editor" type="range" min="0.1" max="5" step="0.01"
     v-model="ratioInPercent"
@@ -31,10 +31,10 @@ div(class="scale-ratio-editor")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: ['toggleSidebarPanel'],

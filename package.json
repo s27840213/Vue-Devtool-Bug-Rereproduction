@@ -6,6 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "test:e2e": "cypress run",
+    "cyrun": "npx cypress run --browser chrome",
+    "cyopen": "npx cypress open --e2e",
     "lint": "vue-cli-service lint",
     "build-lib": "vue-cli-service build --target lib --name nueditor src/main.ts",
     "build:prerender": "vue-cli-service build --PRERENDER=1",
@@ -95,6 +97,7 @@
     "@sentry/webpack-plugin": "^1.17.1",
     "@types/css-font-loading-module": "0.0.6",
     "@types/events": "^3.0.0",
+    "@types/fs-extra": "^11.0.1",
     "@types/lodash": "^4.14.170",
     "@types/node": "^18.11.17",
     "@types/resize-observer-browser": "^0.1.7",
@@ -112,6 +115,8 @@
     "@vue/eslint-config-standard": "^6.1.0",
     "@vue/eslint-config-typescript": "^9.1.0",
     "cypress": "^12.3.0",
+    "cypress-image-diff-js": "^1.23.0",
+    "cypress-real-events": "^1.7.6",
     "cypress-terminal-report": "^5.0.1",
     "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.2",
@@ -136,7 +141,8 @@
     "vue-template-compiler": "^2.6.11",
     "vue-tsc": "^1.0.11",
     "webpack-bundle-analyzer": "^4.5.0",
-    "worker-loader": "^3.0.8"
+    "worker-loader": "^3.0.8",
+    "yaml": "^2.2.1"
   },
   "vuePlugins": {
     "service": [

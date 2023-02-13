@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "es2019",
     "lib": ["esnext", "dom"],
-    "types": ["cypress", "node"],
+    "types": ["node", "cypress"],
     "moduleResolution": "Node",
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["**/*.ts"]
 }
