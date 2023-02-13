@@ -107,10 +107,10 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
           tabindex="0")
         //- command/ctrl + 61/173 for Firefox keycode, http://www.javascripter.net/faq/keycodes.htm
         lazy-load(
+            class="lazy-load"
             target=".editor-view"
             :rootMargin="'1500px 0px 1500px 0px'"
-            :minHeight="config.height * (scaleRatio / 100)"
-            :maxHeight="config.height * (scaleRatio / 100)"
+            v-bind="lazyloadSize"
             :threshold="[0,1]")
           div(:style="sizeStyles")
             div(class="scale-container relative"
@@ -323,12 +323,25 @@ export default defineComponent({
         ...pageUtils.getPageSizeWithBleeds(this.pageState.config)
       }
     },
+    lazyloadSize(): unknown {
+      if (generalUtils.isTouchDevice()) {
+        return {
+          minHeight: this.config.height * this.contentScaleRatio,
+          maxHeight: this.config.height * this.contentScaleRatio
+        }
+      } else {
+        return {
+          minHeight: this.config.height * (this.scaleRatio / 100),
+          maxHeight: this.config.height * (this.scaleRatio / 100)
+        }
+      }
+    },
     scaleContainerStyles(): { [index: string]: string } {
-      const transform = `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`
+      // console.log(this.scaleRatio, this.scaleRatio / 100 / this.contentScaleRatio)
       return {
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
-        transform,
+        ...(!generalUtils.isTouchDevice() && { transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})` }),
         willChange: this.isScaling ? 'transform' : ''
       }
     },

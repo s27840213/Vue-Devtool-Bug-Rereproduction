@@ -546,7 +546,12 @@ class PageUtils {
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
       store.commit('SET_pageScaleRatio', 100)
     } else {
-      store.commit('SET_pageScaleRatio', newRatio)
+      // @testing not use scaleRatio in mobile
+      if (!generalUtils.isTouchDevice()) {
+        store.commit('SET_pageScaleRatio', newRatio)
+      } else {
+        store.commit('SET_pageScaleRatio', 100)
+      }
     }
 
     if (!this.inBgRemoveMode) {
@@ -568,6 +573,8 @@ class PageUtils {
         }, 0)
       })
     }
+
+    editorUtils.handleContentScaleRatio(this.currFocusPageIndex)
   }
 
   fillPage() {

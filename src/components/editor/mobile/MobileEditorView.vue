@@ -185,6 +185,9 @@ export default defineComponent({
       this.$nextTick(() => {
         this.cardHeight = this.editorView?.clientHeight
       })
+    },
+    currCardIndex(newVal) {
+      editorUtils.handleContentScaleRatio(newVal)
     }
   },
 
@@ -300,6 +303,7 @@ export default defineComponent({
       }
     },
     selectStart(e: PointerEvent) {
+      e.stopPropagation()
       if (ControlUtils.isClickOnController(e)) {
         const movingUtils = new MovingUtils({
           _config: { config: layerUtils.getCurrLayer },

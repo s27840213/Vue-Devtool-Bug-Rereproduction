@@ -1,22 +1,22 @@
-import store from '@/store'
-import { IShape, IText, IImage, IGroup, ITmp, IFrame, ILayer } from '@/interfaces/layer'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import store from '@/store'
+import { LayerType } from '@/store/types'
+import GeneralUtils from '@/utils/generalUtils'
 import LayerFactary from '@/utils/layerFactary'
+import LayerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import MathUtils from '@/utils/mathUtils'
 import ZindexUtils from '@/utils/zindexUtils'
-import GeneralUtils from '@/utils/generalUtils'
-import LayerUtils from '@/utils/layerUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import ShapeUtils from './shapeUtils'
+import _ from 'lodash'
+import backgroundUtils from './backgroundUtils'
+import editorUtils from './editorUtils'
 import ImageUtils from './imageUtils'
+import pageUtils from './pageUtils'
+import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import textUtils from './textUtils'
-import pageUtils from './pageUtils'
-import { LayerType } from '@/store/types'
-import editorUtils from './editorUtils'
-import backgroundUtils from './backgroundUtils'
-import _ from 'lodash'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup | IFrame>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -281,6 +281,9 @@ class GroupUtils {
                 scale: l.styles.scale * tmpLayer.styles.scale
               }, i)
             }
+            LayerUtils.updateLayerProps(this.pageIndex, LayerUtils.layerIndex, {
+              parentLayerStyles: undefined
+            }, i)
           })
         store.commit('DELETE_selectedLayer')
         store.commit('SET_lastSelectedLayerIndex', -1)

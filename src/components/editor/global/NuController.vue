@@ -707,9 +707,11 @@ export default defineComponent({
         return 'none'
       } else if (this.isShown() || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
+          // return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2}px solid ${outlineColor}`
         } else {
-          return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
+          // return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2}px solid ${outlineColor}`
         }
       } else {
         return 'none'
@@ -1181,7 +1183,7 @@ export default defineComponent({
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(event)
 
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y)
+      const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y, this.$isTouchDevice ? 1 / this.contentScaleRatio : undefined)
       const [dx, dy] = [diff.offsetX, diff.offsetY]
 
       /**
@@ -1488,7 +1490,8 @@ export default defineComponent({
       const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(event)
 
-      const [dx, dy] = [diff.x / (this.scaleRatio * 0.01), diff.y / (this.scaleRatio * 0.01)]
+      const _f = (this.$isTouchDevice ? 1 / this.contentScaleRatio : 1 / (this.scaleRatio * 0.01))
+      const [dx, dy] = [diff.x * _f, diff.y * _f]
 
       const offsetMultiplier = altPressed ? 2 : 1
       let offsetWidth = this.control.isHorizon ? this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * offsetMultiplier : 0

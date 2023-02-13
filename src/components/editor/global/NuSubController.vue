@@ -457,9 +457,9 @@ export default defineComponent({
       const outlineColor = this.config.locked ? '#EB5757' : '#7190CC'
       if (this.config?.active && LayerUtils.getCurrLayer.type !== 'frame') {
         if (this.isControlling) {
-          return `${2 / this.primaryLayer.styles.scale * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
         } else {
-          return `${2 / this.primaryLayer.styles.scale * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
         }
       } else {
         return 'none'
