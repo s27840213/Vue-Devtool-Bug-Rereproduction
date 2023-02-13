@@ -29,6 +29,7 @@ import _ from 'lodash'
 import editorUtils from './editorUtils'
 import designApis from '@/apis/design'
 import { PRECISION } from '@/utils/unitUtils'
+import vivistickerUtils from './vivistickerUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -85,6 +86,7 @@ class UploadUtils {
 
   get token(): string { return store.getters['user/getToken'] }
   get userId(): string { return store.getters['user/getUserId'] }
+  get hostId(): string { return store.getters['vivisticker/getUserInfo'].hostId }
   get teamId(): string { return store.getters['user/getTeamId'] || this.userId }
   get groupId(): string { return store.getters.getGroupId }
   get assetId(): string { return store.getters.getAssetId }
@@ -109,9 +111,9 @@ class UploadUtils {
 
   setLoginOutput(loginOutput: any) {
     this.loginOutput = loginOutput
-    if (this.getDesignInfo.flag) {
-      this.getDesign(this.getDesignInfo.type, { designId: this.getDesignInfo.id, teamId: this.getDesignInfo.teamId })
-    }
+    // if (this.getDesignInfo.flag) {
+    //   this.getDesign(this.getDesignInfo.type, { designId: this.getDesignInfo.id, teamId: this.getDesignInfo.teamId })
+    // }
   }
 
   onFontUploadStatus(callback: (status: 'none' | 'uploading' | 'success' | 'fail') => void) {
@@ -541,16 +543,17 @@ class UploadUtils {
     }
   }
 
-  uploadLog(logContent: string) {
+  async uploadLog(logContent: string) {
+    await this.checkIfUrlExpires()
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_log_map.fields).forEach(key => {
       formData.append(key, this.loginOutput.upload_log_map.fields[key])
     })
 
     const logName = `log-${generalUtils.generateTimeStamp()}.txt`
-    formData.append('key', `${this.loginOutput.upload_log_map.path}${this.userId}/${logName}`)
+    formData.append('key', `${this.loginOutput.upload_log_map.path}${this.hostId}/${logName}`)
     formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(logName)}`)
-    formData.append('x-amz-meta-tn', this.userId)
+    formData.append('x-amz-meta-tn', this.hostId)
     const xhr = new XMLHttpRequest()
 
     const blob = new Blob([logContent], { type: 'text/plain;charset=utf-8' })
@@ -1064,6 +1067,13 @@ class UploadUtils {
         modalUtils.setModalInfo('更新失敗', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, `Status Text: ${xhr.statusText}`, `Response Text: ${xhr.responseText}`, '已複製錯誤訊息至剪貼簿，麻煩將錯誤訊息貼至群組'])
         navigator.clipboard.writeText([`Design ID: ${designId}`, `Status code: ${xhr.status}`, `Status Text: ${xhr.statusText}`, `Response Text: ${xhr.responseText}`].join('\n'))
       }
+    }
+  }
+
+  async checkIfUrlExpires() {
+    const expire = new Date(Date.parse(this.loginOutput.upload_log_map.expire + 'Z'))
+    if (new Date() >= expire) {
+      await vivistickerUtils.getUserInfo()
     }
   }
 

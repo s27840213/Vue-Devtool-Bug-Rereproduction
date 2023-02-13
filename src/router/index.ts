@@ -11,8 +11,8 @@ import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import { IUserInfo } from '@/interfaces/vivisticker'
 import { CustomWindow } from '@/interfaces/customWindow'
+import uploadUtils from '@/utils/uploadUtils'
 
 declare let window: CustomWindow
 
@@ -69,7 +69,7 @@ const routes: Array<RouteConfig> = [
             try {
               vivistickerUtils.initWithTempDesign(tempDesign)
             } catch (error) {
-              console.log(error)
+              logUtils.setLogAndConsoleLog(error)
             }
           }
         }
@@ -135,10 +135,6 @@ const router = new VueRouter({
         render(h) { return h('router-view') }
       },
       async beforeEnter(to, from, next) {
-        if (logUtils.getLog()) {
-          logUtils.uploadLog()
-        }
-        logUtils.setLog('App Start')
         vivistickerUtils.registerCallbacks('router')
         const urlParams = new URLSearchParams(window.location.search)
         const standalone = urlParams.get('standalone')
@@ -147,6 +143,13 @@ const router = new VueRouter({
           vivistickerUtils.setDefaultLocale()
         }
         const userInfo = await vivistickerUtils.getUserInfo()
+        if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
+          logUtils.uploadLog().then(() => {
+            logUtils.setLog('App Start')
+          })
+        } else {
+          logUtils.setLog('App Start')
+        }
         const locale = userInfo.locale
         i18n.locale = locale
         localStorage.setItem('locale', locale)
@@ -216,6 +219,8 @@ router.beforeEach(async (to, from, next) => {
       })
 
     store.commit('vivisticker/SET_modalInfo', json.modal)
+
+    uploadUtils.setLoginOutput({ upload_log_map: json.ul_log_map })
   }
 
   next()

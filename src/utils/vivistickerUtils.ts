@@ -24,8 +24,10 @@ import generalUtils from './generalUtils'
 import modalUtils from './modalUtils'
 import frameUtils from './frameUtils'
 import colorUtils from './colorUtils'
+import logUtils from './logUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
+  hostId: '',
   appVer: '100.0',
   locale: 'us',
   isFirstOpen: false,
@@ -206,7 +208,7 @@ class ViviStickerUtils {
   }
 
   sendToIOS(messageType: string, message: any) {
-    console.log(messageType, message)
+    logUtils.setLogAndConsoleLog(messageType, message)
     if (messageType === 'SCREENSHOT' && !this.hasCopied && this.checkOSVersion('16.0')) {
       this.hasCopied = true
       this.setState('hasCopied', { data: this.hasCopied })
@@ -233,7 +235,7 @@ class ViviStickerUtils {
       }
       messageHandler.postMessage(message)
     } catch (error) {
-      console.log(error)
+      logUtils.setLogAndConsoleLog(error)
     }
   }
 
@@ -242,12 +244,10 @@ class ViviStickerUtils {
   }
 
   sendDoneLoading(width: number, height: number, options: string, needCrop = false) {
-    console.log(width, height, options)
     this.sendToIOS('DONE_LOADING', { width, height, options, needCrop })
   }
 
   sendScreenshotUrl(query: string, action = 'copy') {
-    console.log(query)
     this.sendToIOS('SCREENSHOT', { params: query, action })
     if (this.isStandaloneMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
@@ -263,7 +263,7 @@ class ViviStickerUtils {
   }
 
   createUrl(item: IAsset): string {
-    console.log(item)
+    logUtils.setLogAndConsoleLog(item)
     switch (item.type) {
       case 5:
       case 11:
@@ -616,7 +616,7 @@ class ViviStickerUtils {
   }
 
   loginResult(info: IUserInfo) {
-    console.log(JSON.stringify(info))
+    logUtils.setLogAndConsoleLog(JSON.stringify(info))
     store.commit('vivisticker/SET_userInfo', info)
     vivistickerUtils.handleCallback('login')
   }
@@ -631,7 +631,7 @@ class ViviStickerUtils {
 
   updateInfoDone(data: { flag: string, msg?: string }) {
     if (data.flag !== '0') {
-      console.log(data.msg)
+      logUtils.setLogAndConsoleLog(data.msg)
       this.errorMessageMap.locale = data.msg ?? ''
     }
     vivistickerUtils.handleCallback('update-user-info')

@@ -1,7 +1,12 @@
 import { IPage } from './page'
 
 export interface IUserInfo {
-  [key: string]: any
+  hostId: string,
+  appVer: string,
+  osVer: string,
+  locale: string,
+  isFirstOpen: boolean,
+  editorBg: string
 }
 
 export interface IUserSettings {
