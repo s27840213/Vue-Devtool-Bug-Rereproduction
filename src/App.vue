@@ -75,6 +75,7 @@ export default defineComponent({
 
     if ((window as any).__PRERENDER_INJECTED !== undefined) {
       document.dispatchEvent(new Event('render-event'))
+      window.dispatchEvent(new Event('render-event'))
     }
   },
   beforeMount() {

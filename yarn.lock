@@ -8473,6 +8473,15 @@ prelude-ls@^1.2.1:
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.2.1.tgz#debc6489d7a6e6b0e7611888cec880337d316396"
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
 
+prerender-spa-plugin-next@^4.2.3:
+  version "4.2.3"
+  resolved "https://registry.yarnpkg.com/prerender-spa-plugin-next/-/prerender-spa-plugin-next-4.2.3.tgz#07a10b36a1768b7a58b18be32ea27013f4104f1e"
+  integrity sha512-FKmAFdTS0OQc6W4IpzTPofIpujAnTHawTOHtiLy9+cQOBl+dvxcmYoxk3oTjmTrVZUgKyhjcITFZ9F+Kut8gJA==
+  dependencies:
+    "@prerenderer/prerenderer" "^0.7.2"
+    "@prerenderer/renderer-puppeteer" "^0.2.0"
+    schema-utils "^4.0.0"
+
 "prettier@^1.18.2 || ^2.0.0":
   version "2.8.1"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.8.1.tgz#4e1fd11c34e2421bc1da9aea9bd8127cd0a35efc"
