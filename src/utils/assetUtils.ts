@@ -1,33 +1,33 @@
-import { nextTick } from 'vue'
-import { captureException } from '@sentry/browser'
-import store from '@/store'
-import { IListServiceContentDataItem, IListServiceContentData } from '@/interfaces/api'
-import { IAsset, IAssetProps } from '@/interfaces/module'
-import TemplateUtils from './templateUtils'
-import pageUtils from './pageUtils'
-import ShapeUtils from './shapeUtils'
-import LayerUtils from './layerUtils'
-import LayerFactary from './layerFactary'
-import ImageUtils from './imageUtils'
-import { IGroup, IImage, IImageStyle, IShape, ISpanStyle, IStyle, IText, ITmp } from '@/interfaces/layer'
-import TextUtils from './textUtils'
-import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
-import stepsUtils from './stepsUtils'
-import ZindexUtils from './zindexUtils'
-import GroupUtils from './groupUtils'
-import resizeUtils from './resizeUtils'
+import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { SrcObj } from '@/interfaces/gallery'
+import { IGroup, IImage, IImageStyle, IShape, ISpanStyle, IStyle, IText, ITmp } from '@/interfaces/layer'
+import { IAsset, IAssetProps } from '@/interfaces/module'
 import { IBleed, IPage } from '@/interfaces/page'
-import gtmUtils from './gtmUtils'
+import store from '@/store'
+import { notify } from '@kyvg/vue3-notification'
+import { captureException } from '@sentry/browser'
+import { nextTick } from 'vue'
+import backgroundUtils from './backgroundUtils'
+import ControlUtils from './controlUtils'
 import editorUtils from './editorUtils'
 import errorHandleUtils from './errorHandleUtils'
 import generalUtils from './generalUtils'
-import { SrcObj } from '@/interfaces/gallery'
+import GroupUtils from './groupUtils'
+import gtmUtils from './gtmUtils'
+import ImageUtils from './imageUtils'
+import LayerFactary from './layerFactary'
+import LayerUtils from './layerUtils'
 import mathUtils from './mathUtils'
-import { notify } from '@kyvg/vue3-notification'
-import unitUtils from './unitUtils'
+import pageUtils from './pageUtils'
+import resizeUtils from './resizeUtils'
+import ShapeUtils from './shapeUtils'
+import stepsUtils from './stepsUtils'
+import TemplateUtils from './templateUtils'
+import TextUtils from './textUtils'
 import tiptapUtils from './tiptapUtils'
-import backgroundUtils from './backgroundUtils'
+import unitUtils from './unitUtils'
+import ZindexUtils from './zindexUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -177,20 +177,21 @@ class AssetUtils {
         pageUtils.setIsEnableBleed(true, targetPageIndex)
         if (json.bleeds && json.physicalBleeds) pageUtils.setBleeds(targetPageIndex, json.physicalBleeds, json.bleeds) // use bleeds of page if it has
       } else pageUtils.setIsEnableBleed(false, targetPageIndex)
-    } else {
-      if (targetPage.isEnableBleed && targetPage.bleeds && targetPage.physicalBleeds) {
+    } else if (attrs && Object.keys(attrs).length > 0) { // use page size
+      let physicalBleeds
+      if (targetPage.bleeds && targetPage.physicalBleeds) {
         const resizedPage = this.getPage(targetPageIndex)
 
         // convert bleeds to template unit
         const dpi = pageUtils.getPageDPI(resizedPage)
-        const physicalBleeds = resizedPage.unit === 'px' ? targetPage.bleeds
+        physicalBleeds = resizedPage.unit === 'px' ? targetPage.bleeds
           : targetPage.unit === attrs?.unit ? targetPage.physicalBleeds
             : Object.fromEntries(Object.entries(targetPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, targetPage.unit, resizedPage.unit, k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
-
-        // apply bleeds of targetPage
-        pageUtils.setIsEnableBleed(true, targetPageIndex)
-        pageUtils.setBleeds(targetPageIndex, physicalBleeds)
       }
+
+      // apply bleeds of targetPage
+      pageUtils.setIsEnableBleed(!!targetPage.isEnableBleed, targetPageIndex)
+      if (physicalBleeds) pageUtils.setBleeds(targetPageIndex, physicalBleeds)
 
       // fit page background if the template has background image
       if (json.backgroundImage.config.srcObj.assetId) backgroundUtils.fitPageBackground(targetPageIndex)
@@ -661,20 +662,22 @@ class AssetUtils {
           }
 
           // apply bleeds of currFocusPage
-          if (currFocusPage.isEnableBleed && currFocusPage.bleeds && currFocusPage.physicalBleeds) {
-            // convert bleeds to template unit
-            const dpi = pageUtils.getPageDPI(currFocusPage)
-            const unit = resize?.unit ?? jsonDataList[0]?.unit ?? 'px'
-            const physicalBleeds = currFocusPage.unit === unit ? currFocusPage.physicalBleeds
-              : Object.fromEntries(Object.entries(currFocusPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, currFocusPage.unit, unit, k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
-
+          if (resize && Object.keys(resize).length > 0) {
+            let physicalBleeds
+            if (currFocusPage.bleeds && currFocusPage.physicalBleeds) {
+              // convert bleeds to template unit
+              const dpi = pageUtils.getPageDPI(currFocusPage)
+              const unit = resize?.unit ?? jsonDataList[0]?.unit ?? 'px'
+              physicalBleeds = currFocusPage.unit === unit ? currFocusPage.physicalBleeds
+                : Object.fromEntries(Object.entries(currFocusPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, currFocusPage.unit, unit, k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+            }
             for (const idx in jsonDataList) {
               const pageIndex = +idx + targetIndex
-              pageUtils.setIsEnableBleed(true, pageIndex)
-              pageUtils.setBleeds(pageIndex, physicalBleeds)
+              pageUtils.setIsEnableBleed(!!currFocusPage.isEnableBleed, pageIndex)
+              if (physicalBleeds) pageUtils.setBleeds(pageIndex, physicalBleeds)
             }
+            backgroundUtils.fitPageBackground(targetIndex)
           }
-          if (resize) backgroundUtils.fitPageBackground(targetIndex)
           store.commit('SET_currActivePageIndex', targetIndex)
           stepsUtils.record()
 
