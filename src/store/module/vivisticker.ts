@@ -191,7 +191,7 @@ const getters: GetterTree<IViviStickerState, unknown> = {
 }
 
 const actions: ActionTree<IViviStickerState, unknown> = {
-  async updateUserSettings({ commit, getters }, settings: Partial<IUserInfo>) {
+  async updateUserSettings({ commit, getters }, settings: Partial<IUserSettings>) {
     commit('UPDATE_userSettings', settings)
     await vivistickerUtils.setState('userSettings', getters.getUserSettings)
   }
