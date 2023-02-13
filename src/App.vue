@@ -1,6 +1,6 @@
 <template lang="pug">
-metainfo
-  template(v-slot:title ="{ content }") {{ content ? `${content} | SITE_NAME` : `SITE_NAME` }}
+//- metainfo
+//-   template(v-slot:title ="{ content }") {{ content ? `${content} | SITE_NAME` : `SITE_NAME` }}
 div(id="app" :style="appStyles()")
   link(rel="preconnect" href="https://fonts.googleapis.com")
   link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="")

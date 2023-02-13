@@ -368,69 +368,69 @@ export default defineComponent({
       }
     },
     pinchHandler(event: AnyTouchEvent) {
-      switch (event.phase) {
-        /**
-         * @Note the very first event won't fire start phase, it's very strange and need to pay attention
-         */
-        case 'start': {
-          this.oriX = pageUtils.getCurrPage.x
-          this.oriPageSize = (pageUtils.getCurrPage.width * (pageUtils.scaleRatio / 100))
-          this.tmpScaleRatio = pageUtils.scaleRatio
-          this.isScaling = true
-          store.commit('SET_isPageScaling', true)
-          break
-        }
-        case 'move': {
-          if (!this.isScaling) {
-            this.isScaling = true
-            store.commit('SET_isPageScaling', true)
-          }
-          window.requestAnimationFrame(() => {
-            const limitMultiplier = 4
-            if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
-              pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
-              return
-            }
-            const newScaleRatio = Math.min(this.tmpScaleRatio * event.scale, pageUtils.mobileMinScaleRatio * limitMultiplier)
-            if (newScaleRatio >= pageUtils.mobileMinScaleRatio * 0.8) {
-              pageUtils.setScaleRatio(newScaleRatio)
+      // switch (event.phase) {
+      //   /**
+      //    * @Note the very first event won't fire start phase, it's very strange and need to pay attention
+      //    */
+      //   case 'start': {
+      //     this.oriX = pageUtils.getCurrPage.x
+      //     this.oriPageSize = (pageUtils.getCurrPage.width * (pageUtils.scaleRatio / 100))
+      //     this.tmpScaleRatio = pageUtils.scaleRatio
+      //     this.isScaling = true
+      //     store.commit('SET_isPageScaling', true)
+      //     break
+      //   }
+      //   case 'move': {
+      //     if (!this.isScaling) {
+      //       this.isScaling = true
+      //       store.commit('SET_isPageScaling', true)
+      //     }
+      //     window.requestAnimationFrame(() => {
+      //       const limitMultiplier = 4
+      //       if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
+      //         pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
+      //         return
+      //       }
+      //       const newScaleRatio = Math.min(this.tmpScaleRatio * event.scale, pageUtils.mobileMinScaleRatio * limitMultiplier)
+      //       if (newScaleRatio >= pageUtils.mobileMinScaleRatio * 0.8) {
+      //         pageUtils.setScaleRatio(newScaleRatio)
 
-              const baseX = (pageUtils.getCurrPage.width * (newScaleRatio / 100) - this.oriPageSize) * 0.5
-              pageUtils.updatePagePos(0, {
-                x: this.oriX - baseX
-              })
-            }
-            clearTimeout(this.hanleWheelTimer)
-            this.hanleWheelTimer = window.setTimeout(() => {
-              if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
-                const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-                page.style.transition = '0.2s linear'
-                this.handleWheelTransition = true
-                pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
-                this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
-                setTimeout(() => {
-                  page.style.transition = ''
-                  this.handleWheelTransition = false
-                }, 500)
-              }
-            }, 500)
-          })
-          break
-        }
+      //         const baseX = (pageUtils.getCurrPage.width * (newScaleRatio / 100) - this.oriPageSize) * 0.5
+      //         pageUtils.updatePagePos(0, {
+      //           x: this.oriX - baseX
+      //         })
+      //       }
+      //       clearTimeout(this.hanleWheelTimer)
+      //       this.hanleWheelTimer = setTimeout(() => {
+      //         if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
+      //           const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
+      //           page.style.transition = '0.2s linear'
+      //           this.handleWheelTransition = true
+      //           pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
+      //           this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
+      //           setTimeout(() => {
+      //             page.style.transition = ''
+      //             this.handleWheelTransition = false
+      //           }, 500)
+      //         }
+      //       }, 500)
+      //     })
+      //     break
+      //   }
 
-        case 'end': {
-          this.isScaling = false
-          store.commit('SET_isPageScaling', false)
-          break
-        }
-      }
+      //   case 'end': {
+      //     this.isScaling = false
+      //     store.commit('SET_isPageScaling', false)
+      //     break
+      //   }
+      // }
 
-      this.$nextTick(() => {
-        // here is a workaround to fix the problem of selecting layer after pinching
-        if (layerUtils.currSelectedInfo.layers.length > 0) {
-          GroupUtils.deselect()
-        }
-      })
+      // this.$nextTick(() => {
+      //   // here is a workaround to fix the problem of selecting layer after pinching
+      //   if (layerUtils.currSelectedInfo.layers.length > 0) {
+      //     GroupUtils.deselect()
+      //   }
+      // })
     },
     swipeUpHandler(e: AnyTouchEvent) {
       if (!this.isDetailPage && !this.hasSelectedLayer) {
