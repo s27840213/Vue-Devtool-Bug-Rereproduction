@@ -454,7 +454,18 @@ export default defineComponent({
           })
         } else {
           GroupUtils.deselect()
-          this.addPage(pageUtils.newPage({}))
+          const lastPage = pageUtils.pageNum > 0 ? pageUtils.getPages[pageUtils.pageNum - 1] : undefined
+          this.addPage(pageUtils.newPage({
+            width: lastPage?.width,
+            height: lastPage?.height,
+            backgroundColor: lastPage?.backgroundColor,
+            physicalWidth: lastPage?.physicalWidth,
+            physicalHeight: lastPage?.physicalHeight,
+            isEnableBleed: lastPage?.isEnableBleed,
+            bleeds: lastPage?.bleeds,
+            physicalBleeds: lastPage?.physicalBleeds,
+            unit: lastPage?.unit
+          }))
           this.$nextTick(() => {
             editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
             this.setCurrActivePageIndex(this.currCardIndex)
