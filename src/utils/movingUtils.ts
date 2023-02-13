@@ -387,7 +387,7 @@ export class MovingUtils {
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
     }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
-    const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
+    const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y, generalUtils.isTouchDevice() ? 1 / store.state.contentScaleRatio : undefined)
     groupUtils.movingTmp(
       this.pageIndex,
       {
@@ -398,8 +398,10 @@ export class MovingUtils {
     const offsetSnap = this.snapUtils.calcMoveSnap(this.config, layerUtils.layerIndex)
     this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
     const totalOffset = {
-      x: offsetPos.x + (offsetSnap.x * this.scaleRatio * 0.01),
-      y: offsetPos.y + (offsetSnap.y * this.scaleRatio * 0.01)
+      // x: offsetPos.x + (offsetSnap.x * this.scaleRatio * 0.01),
+      // y: offsetPos.y + (offsetSnap.y * this.scaleRatio * 0.01)
+      x: offsetPos.x,
+      y: offsetPos.y
     }
     this.initialPos.x += totalOffset.x
     this.initialPos.y += totalOffset.y
