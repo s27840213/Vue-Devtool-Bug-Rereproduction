@@ -8,7 +8,11 @@ describe('Testing nu-image edit', () => {
     cy.importDesign('flower.json')
     cy.get('.nu-layer .nu-image img').snapshotTest('init')
     cy.get('.nu-image')
-      .imageAdjust().layerFlip().then((prev) => {
+      .imageAdjust()
+      .layerFlip()
+      .imageCrop('button')
+      .imageCrop('dblclick')
+      .then((prev) => {
         console.log('end prev', prev)
       })
   })

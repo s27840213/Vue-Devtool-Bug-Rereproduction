@@ -26,7 +26,7 @@ declare namespace Cypress {
 
     // imageEdit.ts
     imageAdjust(): Chainable<JQuery<HTMLElement>>
-    imageCrop(): Chainable<JQuery<HTMLElement>>
+    imageCrop(enterCrop: 'button'|'dblclick'): Chainable<JQuery<HTMLElement>>
     imageShadow(): Chainable<JQuery<HTMLElement>>
     imageSetBg(): Chainable<JQuery<HTMLElement>>
 

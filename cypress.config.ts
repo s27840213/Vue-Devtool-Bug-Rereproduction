@@ -29,7 +29,6 @@ export default defineConfig({
         const height = String(config.viewportHeight) || '720'
 
         if (browser.name === 'chrome') {
-          // launchOptions.preferences = { default: {}, defaultSecure: {}, localState: {} }
           launchOptions.args.push('--window-size='.concat(width, ',').concat(height))
           launchOptions.args.push('--force-device-scale-factor=1')
           launchOptions.args.push('--force-color-profile=srgb')

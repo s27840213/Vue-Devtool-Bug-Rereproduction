@@ -84,6 +84,8 @@ Cypress.Commands.add('importDesign', (designName: string) => {
 Cypress.Commands.add('snapshotTest', (testName: string) => {
   // TODO: Need to find a way that keep 0.01 threshold and prevent command fail
   // Workaround is set threshold to 100% to prevent fail, but it will not create diff image
+  // TODO: Investigation why compareSnapshot fail and other image that not take snapshot still appear in report
+  // This will happend if using on('fail') to force image mismatch test pass when 'cy open' mode
 
   const threshold = Cypress.browser.isHeadless ? 0 : 1
 
