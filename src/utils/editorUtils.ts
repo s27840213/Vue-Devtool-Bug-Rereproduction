@@ -45,9 +45,11 @@ class EditorUtils {
   }
 
   handleContentScaleRatio(pageIndex: number) {
-    const page = pageUtils.getPage(pageIndex)
-    const contentScaleRatio = this.handleContentScaleCalc(page)
-    this.setContentScaleRatio(contentScaleRatio)
+    if (generalUtils.isTouchDevice()) {
+      const page = pageUtils.getPage(pageIndex)
+      const contentScaleRatio = this.handleContentScaleCalc(page)
+      this.setContentScaleRatio(contentScaleRatio)
+    }
   }
 
   toggleColorSlips(bool: boolean) {
