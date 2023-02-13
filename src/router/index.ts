@@ -254,6 +254,8 @@ const router = createRouter({
           i18n.global.locale = locale
           localStorage.setItem('locale', locale)
         }
+
+        document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()
         if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
           // Delete locale in url, will be ignore by prerender.
@@ -267,8 +269,6 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  document.title = to.meta?.title as string || i18n.global.t('SE0001')
-
   if ((window as any).__PRERENDER_INJECTED !== undefined) {
     next()
     return

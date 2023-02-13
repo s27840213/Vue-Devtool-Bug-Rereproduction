@@ -63,6 +63,11 @@ export default defineComponent({
       ]
     }
   },
+  // setup() {
+  //   useMeta({
+  //     title: 'Home'
+  //   })
+  // },
   metaInfo() {
     return {
       title: `${this.$t('SE0001')}`,
