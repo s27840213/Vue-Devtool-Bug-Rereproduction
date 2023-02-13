@@ -258,6 +258,7 @@ class LayerUtils {
   }
 
   updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: Partial<IImage | IText | IGroup | IShape | ITmp> | { [index: string]: number | string | boolean | number[] | IParagraph[] | SrcObj }) {
+    if (targetIndex === -1) return
     store.commit('UPDATE_subLayerProps', {
       pageIndex,
       layerIndex,
