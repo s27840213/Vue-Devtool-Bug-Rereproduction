@@ -41,11 +41,6 @@ const snapshotStyles = `
   /* Hide carets */
   * { caret-color: transparent !important; }
 
-  /* Hide scrollbars */
-  ::-webkit-scrollbar {
-    display: none !important;
-  }
-
   /* Generic hide */
   [cy-visual-test="transparent"] {
     color: transparent !important;

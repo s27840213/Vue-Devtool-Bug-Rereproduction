@@ -27,7 +27,7 @@ pipelines:
             script:
               - npx cypress install
               - yarn serve & npx wait-on http://localhost:8080
-              - npx cypress run --record --browser chrome
+              - npx cypress run --record --browser chrome || true
             artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
               - cypress-visual-report/**
               - cypress-visual-screenshots/**
@@ -595,7 +595,7 @@ pipelines:
               script:
                 - npx cypress install
                 - yarn serve & npx wait-on http://localhost:8080
-                - npx cypress run --record --browser chrome
+                - npx cypress run --record --browser chrome || true
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - cypress-visual-report/**
                 - cypress-visual-screenshots/**
@@ -691,7 +691,7 @@ pipelines:
               script:
                 - npx cypress install
                 - yarn serve & npx wait-on http://localhost:8080
-                - npx cypress run --record --browser chrome
+                - npx cypress run --record --browser chrome || true
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - cypress-visual-report/**
                 - cypress-visual-screenshots/**

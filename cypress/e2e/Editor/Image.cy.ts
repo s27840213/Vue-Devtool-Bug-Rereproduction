@@ -3,7 +3,7 @@ describe('Testing nu-image edit', () => {
     cy.login()
   })
 
-  it('Test for unsplash image', function () {
+  it('Unsplash image', function () {
     cy.visit('/editor')
     cy.importDesign('flower.json')
     cy.get('.nu-layer .nu-image img').snapshotTest('init')
@@ -12,6 +12,7 @@ describe('Testing nu-image edit', () => {
       .layerFlip()
       .imageCrop('button')
       .imageCrop('dblclick')
+      .imageShadow()
       .then((prev) => {
         console.log('end prev', prev)
       })
