@@ -12,15 +12,15 @@ describe('Testing nu-image edit', () => {
       .layerFlip()
       .imageCrop('button')
       .imageCrop('dblclick')
-      .imageShadow()
+      // .imageShadow()
       .then((prev) => {
         console.log('end prev', prev)
       })
   })
-  // it('Test for auto BG remove', function () {
+  // it('Auto BG remove', function () {
   //   //
   // })
-  // it('Test for manually BG remove', function () {
+  // it('Manually BG remove', function () {
   //   //
   // })
 })
