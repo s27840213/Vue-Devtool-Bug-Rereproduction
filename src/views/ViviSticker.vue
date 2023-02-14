@@ -10,7 +10,6 @@
       transition(name="panel-up")
         mobile-panel(v-show="showMobilePanel"
           :currActivePanel="currActivePanel"
-          :currColorEvent="currColorEvent"
           @switchTab="switchTab")
     footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
       @switchTab="switchTab"
@@ -37,7 +36,7 @@ import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import stepsUtils from '@/utils/stepsUtils'
 import layerUtils from '@/utils/layerUtils'
-import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import { IGroup } from '@/interfaces/layer'
 import { IFooterTabProps } from '@/interfaces/editor'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -47,6 +46,7 @@ import vivistickerUtils from '@/utils/vivistickerUtils'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { ColorEventType } from '@/store/types'
 import modalUtils from '@/utils/modalUtils'
+import colorUtils from '@/utils/colorUtils'
 
 declare let window: CustomWindow
 
@@ -66,7 +66,7 @@ export default Vue.extend({
   data() {
     return {
       currColorEvent: '',
-      defaultWindowHeight: window.innerHeight,
+      defaultWindowHeight: window.outerHeight,
       headerOffset: 0
     }
   },
@@ -95,7 +95,7 @@ export default Vue.extend({
       /**
        * @param nearHrEdge - is used to prevnt the IOS navagation gesture, this is just a workaround
        */
-      const nearHrEdge = (event as TouchEvent).touches[0].clientX <= 5 || (event as TouchEvent).touches[0].clientX > window.innerWidth - 5
+      const nearHrEdge = (event as TouchEvent).touches[0].clientX <= 5 || (event as TouchEvent).touches[0].clientX > window.outerWidth - 5
 
       if (event.touches.length > 1 || nearHrEdge) {
         event.preventDefault()
@@ -129,6 +129,18 @@ export default Vue.extend({
     // show popup
     const btn_txt = modalInfo.btn_txt
     if (btn_txt) {
+      const options = {
+        imgSrc: modalInfo.img_url,
+        noClose: !!exp,
+        noCloseIcon: true,
+        backdropStyle: {
+          backgroundColor: 'rgba(24,25,31,0.3)'
+        },
+        cardStyle: {
+          backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(255,255,255,0.9)'
+        }
+      }
       modalUtils.setModalInfo(
         modalInfo.title,
         modalInfo.msg,
@@ -152,16 +164,7 @@ export default Vue.extend({
             backgroundColor: '#D3D3D3'
           }
         },
-        modalInfo.img_url,
-        !!exp,
-        true,
-        {
-          backgroundColor: 'rgba(24,25,31,0.3)'
-        },
-        {
-          backdropFilter: 'blur(10px)',
-          backgroundColor: 'rgba(255,255,255,0.9)'
-        }
+        options
       )
     }
   },
@@ -199,7 +202,7 @@ export default Vue.extend({
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup) => {
+      const types = groupLayer.layers.map((layer) => {
         return layer.type
       })
       return new Set(types)
@@ -227,7 +230,7 @@ export default Vue.extend({
   watch: {
     closeMobilePanelFlag(newVal) {
       if (newVal) {
-        this.setCurrActivePanel('none')
+        editorUtils.setCurrActivePanel('none')
         this.setCurrActiveSubPanel('none')
         this.setCloseMobilePanelFlag(false)
         editorUtils.setShowMobilePanel(false)
@@ -243,7 +246,6 @@ export default Vue.extend({
     ...mapMutations({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
-      setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
       setCurrActiveTab: 'vivisticker/SET_currActiveTab',
       setShowTutorial: 'vivisticker/SET_showTutorial',
@@ -272,25 +274,23 @@ export default Vue.extend({
       }
     },
     switchTab(panelType: string, props?: IFooterTabProps) {
-      if (this.currActivePanel === panelType || panelType === 'none') {
-        editorUtils.setShowMobilePanel(false)
-        this.setCurrActivePanel('none')
+      // Switch between color and text-color panel without close panel
+      if (this.currActivePanel === panelType && panelType === 'color' &&
+        props?.currColorEvent && this.currColorEvent !== props.currColorEvent) {
+        this.currColorEvent = props.currColorEvent
+      // Close panel if re-click
+      } else if (this.currActivePanel === panelType || panelType === 'none') {
+        editorUtils.setCurrActivePanel('none')
       } else {
-        if (panelType !== 'replace') {
-          editorUtils.setShowMobilePanel(true)
-        }
-        this.setCurrActivePanel(panelType)
-        if (props) {
-          if (panelType === 'color' && props.currColorEvent) {
-            this.currColorEvent = props.currColorEvent
-          }
+        editorUtils.setCurrActivePanel(panelType)
+        if (panelType === 'color' && props?.currColorEvent) {
+          this.currColorEvent = props.currColorEvent
         }
       }
     },
     handleOpenColorPicker() {
-      editorUtils.setShowMobilePanel(true)
-      this.setCurrActivePanel('color-picker')
-      this.currColorEvent = ColorEventType.background
+      editorUtils.setCurrActivePanel('color-picker')
+      colorUtils.setCurrEvent(ColorEventType.background)
     },
     switchMainTab(panelType: string) {
       this.setIsInMyDesign(false)
@@ -307,7 +307,7 @@ export default Vue.extend({
       }
     },
     handleResize() {
-      this.headerOffset = this.defaultWindowHeight - window.innerHeight - 1
+      this.headerOffset = this.defaultWindowHeight - window.outerHeight - 1
     }
   }
 })

@@ -15,6 +15,8 @@ import logUtils from './logUtils'
 import tiptapUtils from './tiptapUtils'
 import pageUtils from './pageUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
+import layerFactary from './layerFactary'
+import { ICalculatedGroupStyle } from '@/interfaces/group'
 
 class ShortcutUtils {
   copySourcePageIndex: number
@@ -41,9 +43,9 @@ class ShortcutUtils {
     this.copySourcePageIndex = -1
   }
 
-  private regenerateLayerInfo(layer: IText | IShape | IImage | IGroup | ITmp | IFrame, props: { toCenter?: boolean, offset?: number, targetPageIndex?: number }) {
+  private regenerateLayerInfo(_layer: IText | IShape | IImage | IGroup | ITmp | IFrame, props: { toCenter?: boolean, offset?: number, targetPageIndex?: number }) {
     const { toCenter = false, offset = 10, targetPageIndex } = props
-
+    const layer = GeneralUtils.deepCopy(_layer)
     if (toCenter && targetPageIndex !== undefined) {
       const targetPage = pageUtils.getPage(targetPageIndex)
       const { x, y, width, height } = layer.styles
@@ -61,29 +63,31 @@ class ShortcutUtils {
 
     switch (layer.type) {
       case 'image':
-        (layer as IImage).imgControl = false
-        break
+        layer.imgControl = false
+        return layerFactary.newImage(layer)
       case 'shape':
-        (layer as IShape).className = ShapeUtils.classGenerator()
-        break
+        layer.className = ShapeUtils.classGenerator()
+        return layerFactary.newShape(layer)
       case 'group':
-        (layer as IGroup).layers
+        layer.layers
           .forEach(l => {
             if (l.type === 'shape') {
               l.className = ShapeUtils.classGenerator()
             }
             l.id = GeneralUtils.generateRandomString(8)
           })
-        break
+        return layerFactary.newGroup(layer as IGroup, (layer as IGroup).layers)
       case 'tmp':
-        (layer as IGroup).layers
+        layer.layers
           .forEach(l => {
             if (l.type === 'shape') {
               l.className = ShapeUtils.classGenerator()
             }
             l.id = GeneralUtils.generateRandomString(8)
           })
-        break
+        return layerFactary.newTmp((layer as ITmp).styles as ICalculatedGroupStyle, (layer as ITmp).layers)
+      case 'text':
+        return layerFactary.newText(layer as IText)
     }
     return layer
   }
@@ -159,7 +163,7 @@ class ShortcutUtils {
         GroupUtils.set(targetPageIndex, tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(clipboardInfo[0].layers) as Array<IShape | IText | IImage | IGroup | IFrame>)
       } else {
         store.commit('ADD_layersToPos', { pageIndex: targetPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
-        GroupUtils.set(targetPageIndex, tmpIndex + tmpLayersNum, [...GeneralUtils.deepCopy(clipboardInfo)])
+        GroupUtils.set(targetPageIndex, tmpIndex + tmpLayersNum, [...GeneralUtils.deepCopy(clipboardInfo)] as (IShape | IText | IImage | IGroup | IFrame)[])
       }
       ZindexUtils.reassignZindex(targetPageIndex)
     } else {
@@ -171,7 +175,7 @@ class ShortcutUtils {
         GroupUtils.set(targetPageIndex, store.getters.getLayersNum(targetPageIndex) - 1, GeneralUtils.deepCopy(clipboardInfo[0].layers) as Array<IShape | IText | IImage | IGroup | IFrame>)
       } else {
         store.commit('ADD_newLayers', { pageIndex: targetPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)] })
-        GroupUtils.set(targetPageIndex, store.getters.getLayersNum(targetPageIndex) - 1, [...GeneralUtils.deepCopy(clipboardInfo)])
+        GroupUtils.set(targetPageIndex, store.getters.getLayersNum(targetPageIndex) - 1, [...GeneralUtils.deepCopy(clipboardInfo)] as (IShape | IText | IImage | IGroup | IFrame)[])
       }
       ZindexUtils.reassignZindex(targetPageIndex)
     }
@@ -194,7 +198,7 @@ class ShortcutUtils {
       const tmpLayers = store.getters.getCurrSelectedLayers
       const tmpLayersNum = isTmp ? tmpLayers.length : 1
       GroupUtils.deselect()
-      if (isTmp) {
+      if (newLayer.type === 'tmp') {
         store.commit('ADD_layersToPos', { pageIndex: currActivePageIndex, layers: [newLayer], pos: tmpIndex + tmpLayersNum })
         GroupUtils.set(currActivePageIndex, tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(newLayer.layers as Array<IShape | IText | IImage | IGroup | IFrame>))
       } else {
@@ -207,7 +211,7 @@ class ShortcutUtils {
       if (store.getters.getCurrSelectedIndex >= 0) {
         GroupUtils.deselect()
       }
-      if (isTmp) {
+      if (newLayer.type === 'tmp') {
         store.commit('ADD_newLayers', { pageIndex: currFocusPageIndex, layers: [newLayer] })
         GroupUtils.set(currFocusPageIndex, store.getters.getLayersNum(currFocusPageIndex) - 1, GeneralUtils.deepCopy(newLayer.layers as Array<IShape | IText | IImage | IGroup | IFrame>))
       } else {
@@ -220,24 +224,25 @@ class ShortcutUtils {
   }
 
   altDuplicate(targetPageIndex: number, targetLayerIndex: number, config: ILayer) {
+    const ori_config = config as any
     const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(config as IShape | IText | IImage | IGroup | IFrame), { offset: 0 })
     newLayer.active = false
 
-    const isTmp: boolean = config.type === 'tmp'
+    const isTmp: boolean = newLayer.type === 'tmp'
     const { index, layers } = LayerUtils.currSelectedInfo
     const currFocusPageIndex = pageUtils.currFocusPageIndex
 
     const tmpIndex = index
     const tmpLayersNum = isTmp ? layers.length : 1
 
-    if (isTmp) {
+    if (newLayer.type === 'tmp') {
       // const layers2Page = GroupUtils.mapLayersToPage(layers, config as ITmp)
       // store.commit('ADD_layersToPos', { pageIndex: currFocusPageIndex, layers: [...layers2Page], pos: tmpIndex })
       // GroupUtils.set(currFocusPageIndex, tmpIndex + tmpLayersNum, [newLayer])
       return
     } else {
       store.commit('ADD_layersToPos', { pageIndex: currFocusPageIndex, layers: [newLayer], pos: tmpIndex })
-      GroupUtils.set(currFocusPageIndex, tmpIndex + 1, [newLayer])
+      GroupUtils.set(currFocusPageIndex, tmpIndex + 1, [ori_config])
     }
     ZindexUtils.reassignZindex(currFocusPageIndex)
   }

@@ -9,41 +9,55 @@
           input(class="body-3 page-size-selector__body__custom__box__input" type="number" min="0" ref="inputWidth"
                 :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
                 :style="{position: this.isInputFocused ? 'static' : 'fixed'}"
-                :value="pageWidth || null" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
+                :value="this.valPageSize.width" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
                 @click="selectFormat('custom')"
                 @input="setPageWidth"
-                @blur="handleInputBlur")
+                @focus="lastFocusedInput = 'width'"
+                @blur="handleInputBlur('width')")
           input(v-if="!isInputFocused"
                 class="body-3 page-size-selector__body__custom__box__input dummy" type="number" min="0"
                 readonly
                 :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
-                :value="pageWidth || null" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
-                @click="handleDummyClick($event, $refs.inputWidth)")
+                :value="this.valPageSize.width" :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
+                @click="handleDummyClick($event, $refs.inputWidth, 'width')")
           span(class="body-4 page-size-selector__body__custom__box__input-label"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") W
         svg-icon(class="pointer"
             :iconName="isLocked ? 'lock' : 'unlock'"
-            iconWidth="20px" :iconColor="!isLockDisabled ? (selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-4')) : 'gray-4'"
+            iconWidth="20px" :iconColor="selectedFormatKey === 'custom' ? 'black' : (isDarkTheme ? 'white' : 'gray-4')"
             @click.native="toggleLock()")
         property-bar(class="page-size-selector__body__custom__box"
                     :class="(selectedFormatKey === 'custom' ? 'border-black-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormatKey === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
           input(class="body-3 page-size-selector__body__custom__box__input" type="number" min="0" ref="inputHeight"
                 :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor"
                 :style="{position: this.isInputFocused ? 'static' : 'fixed'}"
-                :value="pageHeight || null" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
+                :value="this.valPageSize.height" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
                 @click="selectFormat('custom')"
                 @input="setPageHeight"
-                @blur="handleInputBlur")
+                @focus="lastFocusedInput = 'height'"
+                @blur="handleInputBlur('height')")
           input(v-if="!isInputFocused"
                 class="body-3 page-size-selector__body__custom__box__input dummy" type="number" min="0"
                 readonly
                 :class="(selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor)"
-                :value="pageHeight || null" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
-                @click="handleDummyClick($event, $refs.inputHeight)")
+                :value="this.valPageSize.height" :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
+                @click="handleDummyClick($event, $refs.inputHeight, 'height')")
           span(class="body-4 page-size-selector__body__custom__box__input-label"
               :class="selectedFormatKey === 'custom' ? 'text-black' : defaultTextColor") H
+        property-bar(v-click-outside="() => {showUnitOptions = false}"
+                      class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
+                      @click.native="showUnitOptions = !showUnitOptions")
+          span(class="page-size-selector__body__custom__unit__label body-XXS" :class="this.selectedFormatKey === 'custom' ? 'black' : defaultTextColor") {{selectedUnit}}
+          svg-icon(class="page-size-selector__body__custom__unit__icon"
+            iconName="chevron-down"
+            iconWidth="16px"
+            :iconColor="selectedFormatKey === 'custom' ? 'black' : 'gray-3'")
+          div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option bg-white")
+            div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-black" @click="selectUnit($event, unit)")
+              span(class="body-XS text-black") {{unit}}
         div(v-if="selectedFormatKey === 'custom' && isValidate && !isCustomValid"
-          class="page-size-selector__body__custom__err text-red") {{$t('NN0767', { num: 0 })}}
+          class="page-size-selector__body__custom__err body-XS text-red") {{errMsg}}
+          span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{'Fix it for me.'}}
     div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
     div(class="page-size-selector__container"
       @touchmove="handleTouchMove")
@@ -58,11 +72,14 @@
                     :circleColor="isDarkTheme ? 'white' : 'light-gray'"
                     :formatKey="`recent-${index}`",
                     @select="selectFormat")
-          div(class="page-size-selector__body-row__content")
+          div(v-if="isMobile" class="page-size-selector__body-row__content")
             span(class="page-size-selector__body__recently body-3 pointer"
-                  :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ isMobile ? format.title : makeFormatString(format) }}
-            span(v-if="isMobile" class="page-size-selector__body__typical body-3"
-                  :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ isMobile ? format.description :makeFormatString(format)}}
+                  :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ format.description ? format.title : makeFormatTitle(format) }}
+            span(v-if="format.description" class="page-size-selector__body__recently body-3 pointer"
+                  :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatDescription(format) }}
+          div(v-else class="page-size-selector__body-row__content")
+            span(class="page-size-selector__body__recently body-3 pointer"
+              :class="selectedFormatKey === `recent-${index}` ? 'text-black' : defaultTextColor") {{ makeFormatTitle(format) }}
         div(v-if="isLayoutReady && formatList.length > 0" class="page-size-selector__body-row first-row")
           span(class="page-size-selector__body__title subtitle-2 text-black") {{$t('NN0025')}}
         div(v-for="(format, index) in formatList" class="page-size-selector__body-row item pointer"
@@ -72,19 +89,26 @@
                     :circleColor="isDarkTheme ? 'white' : 'light-gray'"
                     :formatKey="`preset-${index}`",
                     @select="selectFormat")
-          div(class="page-size-selector__body-row__content")
-            span(class="page-size-selector__body__typical body-3"
-                  :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ isMobile ? format.title : makeFormatString(format)}}
-            span(v-if="isMobile" class="page-size-selector__body__typical body-3"
-                  :class="selectedFormatKey === `preset-${index}` ? 'text-black' : defaultTextColor") {{ isMobile ? format.description : makeFormatString(format)}}
+          div(v-if="isMobile" class="page-size-selector__body-row__content")
+            span(class="page-size-selector__body__typical-name body-4"
+                  :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
+            span(class="page-size-selector__body__typical-size body-4"
+                  :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
+          div(v-else class="page-size-selector__body-row__content")
+            span(class="page-size-selector__body__typical-name body-4"
+                  :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatTitle(format) }}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import vClickOutside from 'v-click-outside'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { ILayout } from '@/interfaces/layout'
 import { IListServiceContentData } from '@/interfaces/api'
+import unitUtils, { IMapSize, PRECISION, STR_UNITS } from '@/utils/unitUtils'
+import pageUtils from '@/utils/pageUtils'
+import { floor, round } from 'lodash'
 
 export default Vue.extend({
   props: {
@@ -101,8 +125,14 @@ export default Vue.extend({
       default: false
     }
   },
+  directives: {
+    clickOutside: vClickOutside.directive
+  },
   components: {
     RadioBtn
+  },
+  created() {
+    this.pageSizes = unitUtils.convertAllSize(0, 0, this.selectedUnit)
   },
   mounted() {
     document.addEventListener('scroll', this.handleScroll)
@@ -125,14 +155,20 @@ export default Vue.extend({
   data() {
     return {
       selectedFormatKey: 'custom',
-      pageWidth: NaN,
-      pageHeight: NaN,
+      valPageSize: { width: '', height: '' },
+      pageWidth: 0,
+      pageHeight: 0,
+      pageSizes: {} as IMapSize,
       aspectRatio: 1,
       isLocked: false,
+      unitOptions: STR_UNITS,
+      selectedUnit: 'px',
+      showUnitOptions: false,
       formatList: new Array<ILayout>(),
       recentlyUsed: new Array<ILayout>(),
       isLayoutReady: false,
-      isInputFocused: false
+      isInputFocused: false,
+      lastFocusedInput: 'width'
     }
   },
   watch: {
@@ -141,9 +177,6 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapState(
       'layouts',
       [
@@ -160,7 +193,7 @@ export default Vue.extend({
       getPageSize: 'getPageSize'
     }),
     isCustomValid(): boolean {
-      return this.widthValid && this.heightValid
+      return this.widthValid && this.heightValid && !this.isOverArea()
     },
     defaultTextColor(): string {
       return this.isDarkTheme ? 'text-white' : 'text-gray-3'
@@ -169,18 +202,61 @@ export default Vue.extend({
       return this.selectedFormatKey === 'custom' ? this.isCustomValid : (this.selectedFormatKey !== '')
     },
     widthValid(): boolean {
-      return !!this.pageWidth && this.pageWidth > 0
+      if (!this.pageWidth) return false
+      if (this.pageWidth < 0) return false
+      if (this.isOverSize(this.pageSizes.px.width) || this.isUnderSize(this.pageSizes.px.width)) return false
+      if ((this.isOverArea() && (this.isLocked || this.lastFocusedInput === 'width'))) return false
+      return true
     },
     heightValid(): boolean {
-      return !!this.pageHeight && this.pageHeight > 0
+      if (!this.pageHeight) return false
+      if (this.pageHeight < 0) return false
+      if (this.isOverSize(this.pageSizes.px.height) || this.isUnderSize(this.pageSizes.px.height)) return false
+      if ((this.isOverArea() && (this.isLocked || this.lastFocusedInput === 'height'))) return false
+      return true
     },
-    isLockDisabled(): boolean {
-      return this.selectedFormatKey !== 'custom' || !this.isCustomValid
+    fixedSize(): {[key: string]: number, width: number, height: number} {
+      const res = {
+        width: this.pageWidth,
+        height: this.pageHeight
+      }
+      if (this.isOverArea()) {
+        const pxSize = this.pageSizes.px
+        if (this.isLocked) {
+          res.height = Math.sqrt(pageUtils.MAX_AREA / pxSize.width * pxSize.height)
+          res.width = res.height / pxSize.height * pxSize.width
+        } else {
+          res.height = pageUtils.MAX_AREA / pxSize.width
+          res.width = pageUtils.MAX_AREA / pxSize.height
+        }
+      } else return res
+      return unitUtils.convertSize(floor(res.width), floor(res.height), 'px', this.selectedUnit)
+    },
+    errMsg(): string {
+      // if (!this.pageWidth || !this.pageHeight || this.pageWidth <= 0 || this.pageHeight <= 0) return this.$t('NN0767', { num: 0 }).toString()
+      if (this.isOverSize(this.pageSizes.px.width) || this.isUnderSize(this.pageSizes.px.width) || this.isOverSize(this.pageSizes.px.height) || this.isUnderSize(this.pageSizes.px.height)) {
+        if (this.selectedUnit === 'px') return 'Size must between 40px and 8000px.'
+        const dpi = {
+          width: this.pageSizes.px.width / unitUtils.convert(this.pageWidth, this.selectedUnit, 'in'),
+          height: this.pageSizes.px.height / unitUtils.convert(this.pageHeight, this.selectedUnit, 'in')
+        }
+        const minSize: {[index: string]: number} = {
+          width: unitUtils.convert(40, 'px', this.selectedUnit, dpi.width),
+          height: unitUtils.convert(40, 'px', this.selectedUnit, dpi.height)
+        }
+        const maxSize: {[index: string]: number} = {
+          width: unitUtils.convert(8000, 'px', this.selectedUnit, dpi.width),
+          height: unitUtils.convert(8000, 'px', this.selectedUnit, dpi.height)
+        }
+        return `Size must between ${round(minSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit} and ${round(maxSize[this.lastFocusedInput], PRECISION)}${this.selectedUnit}.`
+      }
+      if (this.isOverArea()) return `Must be less than ${this.isLocked ? `${floor(this.fixedSize.width, PRECISION)} x ${floor(this.fixedSize.height, PRECISION)}` : floor(this.fixedSize[this.lastFocusedInput], PRECISION)} ${this.selectedUnit} to stay within our maximum allowed area. `
+      return ''
     },
     selectedFormat(): ILayout | undefined {
       if (this.selectedFormatKey === 'custom') {
         if (!this.isCustomValid) return undefined
-        return { id: '', width: this.pageWidth as number, height: this.pageHeight as number, title: '', description: '' }
+        return { id: '', width: this.pageWidth, height: this.pageHeight, title: '', description: '', unit: this.selectedUnit }
       } else if (this.selectedFormatKey.startsWith('recent')) {
         const [type, index] = this.selectedFormatKey.split('-')
         const format = this.recentlyUsed[parseInt(index)]
@@ -203,12 +279,18 @@ export default Vue.extend({
         'getRecently'
       ]
     ),
+    isOverArea(): boolean {
+      return this.pageSizes.px.width * this.pageSizes.px.height > pageUtils.MAX_AREA
+    },
+    isOverSize(size: number): boolean {
+      return size > pageUtils.MAX_SIZE
+    },
+    isUnderSize(size: number): boolean {
+      return size < pageUtils.MIN_SIZE
+    },
     toggleLock() {
-      if (this.isLockDisabled) return
       this.isLocked = !this.isLocked
-      if (this.isLocked) {
-        this.aspectRatio = (this.pageWidth ?? 1) / (this.pageHeight ?? 1)
-      }
+      if (this.isLocked) this.aspectRatio = this.pageWidth * this.pageHeight <= 0 ? 1 : this.pageWidth / this.pageHeight
     },
     makeFormatString(format: ILayout) {
       if (format.id !== '') {
@@ -217,30 +299,81 @@ export default Vue.extend({
         return `${format.width} x ${format.height}`
       }
     },
+    makeFormatTitle(format: ILayout) {
+      if (format.id !== '') {
+        return `${format.title} ${this.makeFormatDescription(format)}`
+      } else {
+        return `${format.width} x ${format.height} ${format.unit}`
+      }
+    },
+    makeFormatDescription(format: ILayout): string {
+      return format.description.includes(' ') ? format.description.replace(' ', ` ${format.unit ?? 'px'} `) : `${format.description} ${format.unit ?? 'px'}`
+    },
     setPageWidth(event: Event) {
       const value = (event.target as HTMLInputElement).value
-      this.pageWidth = parseInt(value)
+      this.valPageSize.width = value
+      const numValue = typeof value === 'string' ? parseFloat(value) : value
+      const striped = numValue.toString() !== value
+      const roundedValue = round(numValue, this.selectedUnit === 'px' ? 0 : PRECISION)
+      const rounded = this.pageWidth !== roundedValue
+      this.pageWidth = roundedValue
+      // set input value to this.pageWidth if no trailing zeros in value or value has been rounded
+      if (!striped || rounded) this.valPageSize.width = this.pageWidth.toString()
+
+      this.selectFormat('custom')
       if (this.isLocked) {
         if (value === '') {
+          this.pageWidth = NaN
           this.pageHeight = NaN
         } else {
-          this.pageHeight = Math.round(parseInt(value) / this.aspectRatio)
+          this.pageHeight = this.pageWidth / this.aspectRatio
+          if (this.selectedUnit === 'px') this.pageHeight = round(this.pageHeight)
+          this.valPageSize.height = round(this.pageHeight, PRECISION).toString()
         }
       }
     },
     setPageHeight(event: Event) {
       const value = (event.target as HTMLInputElement).value
-      this.pageHeight = parseInt(value)
+      this.valPageSize.height = value
+      const numValue = typeof value === 'string' ? parseFloat(value) : value
+      const striped = numValue.toString() !== value
+      const roundedValue = round(numValue, this.selectedUnit === 'px' ? 0 : PRECISION)
+      const rounded = this.pageHeight !== roundedValue
+      this.pageHeight = roundedValue
+      // set input value to this.pageHeight if no trailing zeros in value or value has been rounded
+      if (!striped || rounded) this.valPageSize.height = this.pageHeight.toString()
+
+      this.selectFormat('custom')
       if (this.isLocked) {
         if (value === '') {
           this.pageWidth = NaN
+          this.pageHeight = NaN
         } else {
-          this.pageWidth = Math.round(parseInt(value) * this.aspectRatio)
+          this.pageWidth = this.pageHeight * this.aspectRatio
+          if (this.selectedUnit === 'px') this.pageWidth = round(this.pageWidth)
+          this.valPageSize.width = round(this.pageWidth, PRECISION).toString()
         }
       }
+      this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     },
     selectFormat(key: string) {
       this.selectedFormatKey = key
+    },
+    selectUnit(evt: Event, unit: string) {
+      evt.stopPropagation()
+      this.selectFormat('custom')
+      this.showUnitOptions = false
+      if (this.selectedUnit === unit) return
+      this.pageWidth = this.pageSizes[unit].width
+      this.pageHeight = this.pageSizes[unit].height
+      if (unit === 'px') {
+        this.pageWidth = round(this.pageWidth)
+        this.pageHeight = round(this.pageHeight)
+      }
+      this.valPageSize.width = round(this.pageWidth, PRECISION).toString()
+      this.valPageSize.height = round(this.pageHeight, PRECISION).toString()
+      this.selectedUnit = unit
+      // this.fixSize(false)
     },
     fetchLayouts() {
       this.isLayoutReady = false
@@ -254,7 +387,8 @@ export default Vue.extend({
               width: item.width ?? 0,
               height: item.height ?? 0,
               title: item.title ?? '',
-              description: item.description ?? ''
+              description: item.description ?? '',
+              unit: item.unit ?? 'px'
             }))
           }
           if (category.title === `${this.$t('NN0024')}`) {
@@ -263,8 +397,12 @@ export default Vue.extend({
               width: item.width ?? 0,
               height: item.height ?? 0,
               title: item.title ?? '',
-              description: item.description ?? ''
-            }))
+              description: item.description ?? '',
+              unit: item.unit ?? 'px'
+            })).filter((layout: ILayout) => {
+              const pxSize = unitUtils.convertSize(layout.width, layout.height, layout.unit, 'px')
+              return !(pxSize.width * pxSize.height > pageUtils.MAX_AREA)
+            })
           }
         }
         if (this.formatList.length > 0) {
@@ -279,21 +417,44 @@ export default Vue.extend({
       (this.$refs.inputWidth as HTMLElement).blur();
       (this.$refs.inputHeight as HTMLElement).blur()
     },
-    handleDummyClick(evt: Event, target: any) {
+    handleDummyClick(evt: Event, target: any, targetKey: string) {
       evt.preventDefault()
       this.selectFormat('custom')
       target = target as HTMLInputElement
       target.focus({ preventScroll: true })
+      this.lastFocusedInput = targetKey
       // prevent document scroll
       setTimeout(() => {
         this.isInputFocused = true
       }, 100)
     },
-    handleInputBlur() {
-      if (!this.isMobile) return
-      setTimeout(() => {
-        if (document.activeElement !== this.$refs.inputWidth && document.activeElement !== this.$refs.inputHeight) this.isInputFocused = false
-      }, 0)
+    handleInputBlur(target: string) {
+      if ((target === 'width' || this.isLocked) && isNaN(this.pageWidth)) {
+        this.pageWidth = 0
+        this.valPageSize.width = ''
+      }
+      if ((target === 'height' || this.isLocked) && isNaN(this.pageHeight)) {
+        this.pageHeight = 0
+        this.valPageSize.height = ''
+      }
+      this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
+      if (this.isMobile) {
+        setTimeout(() => {
+          if (document.activeElement !== this.$refs.inputWidth && document.activeElement !== this.$refs.inputHeight) this.isInputFocused = false
+        }, 0)
+      }
+    },
+    fixSize(convert = true) {
+      const fixedSize = this.fixedSize
+      if (this.lastFocusedInput === 'width' || this.isLocked) {
+        this.pageWidth = floor(fixedSize.width, PRECISION)
+        this.valPageSize.width = this.pageWidth.toString()
+      }
+      if (this.lastFocusedInput === 'height' || this.isLocked) {
+        this.pageHeight = floor(fixedSize.height, PRECISION)
+        this.valPageSize.height = this.pageHeight.toString()
+      }
+      if (convert) this.pageSizes = unitUtils.convertAllSize(this.pageWidth, this.pageHeight, this.selectedUnit)
     }
   }
 })
@@ -360,9 +521,9 @@ export default Vue.extend({
     &__custom {
       width: 100%;
       display: grid;
-      grid-template-columns: 1fr auto 1fr;
+      grid-template-columns: auto 20px auto 50px;
       grid-template-rows: auto;
-      column-gap: 15px;
+      column-gap: 6px;
       align-items: center;
       &__box {
         height: 30px;
@@ -395,8 +556,46 @@ export default Vue.extend({
           }
         }
       }
+      &__unit {
+        display: flex;
+        align-items: center;
+        position: relative;
+        &__label {
+          height: 18px;
+          line-height: 18px;
+        }
+        &__option {
+          position: absolute;
+          top: 36px;
+          left: 0px;
+          right: 0px;
+          border-radius: 4px;
+          box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
+          display: grid;
+          overflow: hidden;
+          padding: 4px;
+          &__item {
+            height: 30px;
+            padding: 4px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            &:hover {
+              background-color: setColor(blue-3);
+            }
+            > span {
+              display: block;
+              text-align: left;
+              height: 100%;
+            }
+          }
+        }
+      }
       &__err{
-        grid-column: 1 / 4;
+        grid-column: 1 / span 4;
+        > span {
+          cursor: pointer;
+          text-decoration: underline;
+        }
       }
     }
     &__hr {

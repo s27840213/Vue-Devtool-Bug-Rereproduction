@@ -125,11 +125,6 @@ export default Vue.extend({
     onPaste(event: ClipboardEvent) {
       console.log(event.clipboardData)
     },
-    colorStyles(color: string) {
-      return {
-        backgroundColor: color
-      }
-    },
     onmouseup() {
       this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: this.color })
     },

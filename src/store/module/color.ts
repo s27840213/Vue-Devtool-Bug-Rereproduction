@@ -11,6 +11,9 @@ interface IColorState {
   defaultViviStickerBgColors: Array<string>,
   documentColors: Array<string>,
   recentlyColors: Array<string>
+  // ColorUtils variable
+  currEvent: string
+  currColor: string
 }
 
 const getDefaultState = (): IColorState => ({
@@ -90,8 +93,12 @@ const getDefaultState = (): IColorState => ({
     '#BB6BD9',
     '#4F4F4F',
     '#828282',
-    '#F2F2F2'],
-  recentlyColors: []
+    '#F2F2F2'
+  ],
+  recentlyColors: [],
+  // ColorUtils variable
+  currEvent: '',
+  currColor: '#ffffff'
 })
 
 const state = getDefaultState()
@@ -109,18 +116,34 @@ const getters: GetterTree<IColorState, IEditorState> = {
     return state.brandColors
   },
   getDocumentColors(state, getters, rootState): Array<string> {
-    const pageColors = rootState.pages[store.getters.getCurrFocusPageIndex].documentColors
+    const pageColors = rootState.pages[store.getters.getCurrFocusPageIndex].config.documentColors
     if (!pageColors.length) {
       return state.documentColors
     }
-    return rootState.pages[store.getters.getCurrFocusPageIndex].documentColors
+    return rootState.pages[store.getters.getCurrFocusPageIndex].config.documentColors
   },
   getRecentlyColors(state): Array<string> {
     return state.recentlyColors
+  },
+  currEvent(state): string {
+    return state.currEvent
+  },
+  currColor(state): string {
+    return state.currColor
   }
 }
 
 const mutations: MutationTree<IColorState> = {
+  SET_STATE(state: IColorState, data: Partial<IColorState>) {
+    const newState = data || getDefaultState()
+    const keys = Object.keys(newState) as Array<keyof IColorState>
+    keys
+      .forEach(key => {
+        if (key in state) {
+          (state[key] as unknown) = newState[key]
+        }
+      })
+  },
   SET_defaultColor(state, updateInfo: { index: number, color: string }) {
     state.defaultColors[updateInfo.index] = updateInfo.color
   },

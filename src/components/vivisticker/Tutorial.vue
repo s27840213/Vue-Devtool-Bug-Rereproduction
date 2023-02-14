@@ -3,11 +3,6 @@
     div(ref="main" class="tutorial relative" v-touch
         @swipeleft="handleSwipeLeft"
         @swiperight="handleSwipeRight")
-      div(class="tutorial__close"
-          @click.prevent.stop="handleClose")
-        svg-icon(iconName="vivisticker_close"
-                iconColor="white"
-                iconWidth="24px")
       div(class="tutorial__video")
         video(autoplay playsinline muted :src="videoSource" @ended="handleEnded" @canplay="handleVideoLoaded")
       div(class="tutorial__content")
@@ -30,6 +25,11 @@
               class="tutorial__content__indicator"
               :class="{current: index === step}"
               @click.prevent.stop="step = index")
+      div(class="tutorial__close"
+          @click.prevent.stop="handleClose")
+        svg-icon(iconName="vivisticker_close"
+                iconColor="white"
+                iconWidth="24px")
 </template>
 
 <script lang="ts">
@@ -65,7 +65,7 @@ export default Vue.extend({
           video: `https://template.vivipic.com/static/video/${i18n.locale}-04-background.mp4`
         }
       ],
-      basicWidth: window.innerWidth
+      basicWidth: window.outerWidth
     }
   },
   computed: {

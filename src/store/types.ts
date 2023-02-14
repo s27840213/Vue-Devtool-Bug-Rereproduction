@@ -1,4 +1,4 @@
-import { IPage } from '@/interfaces/page'
+import { IPage, IPageState } from '@/interfaces/page'
 import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { ITextState } from './text'
@@ -13,7 +13,7 @@ import { Itheme } from '@/interfaces/theme'
    @param groupId: for template group used (only for admin),
  */
 export interface IEditorState {
-  pages: Array<IPage>,
+  pages: Array<IPageState>
   name: string,
   designId: string,
   assetId: string,
@@ -28,6 +28,7 @@ export interface IEditorState {
   },
   currSidebarPanelType: number,
   mobileSidebarPanelOpen: boolean,
+  showColorSlips: boolean
   currFunctionPanelType: number,
   pageScaleRatio: number,
   isSettingScaleRatio: boolean,
@@ -79,7 +80,9 @@ export interface IEditorState {
   _3dEnabledPageIndex: number,
   currFocusPageIndex: number,
   enalbleComponentLog: boolean,
-  inScreenshotPreviewRoute: boolean
+  inScreenshotPreviewRoute: boolean,
+  cursor: string,
+  isPageScaling: boolean
 }
 
 export enum SidebarPanelType {
@@ -147,6 +150,10 @@ export interface ILayerInfo {
   pageIndex: number,
   layerIndex: number,
   subLayerIdx?: number
+}
+
+export interface IExtendLayerInfo extends ILayerInfo {
+  priPrimaryLayerIndex?: number
 }
 
 export enum LineTemplatesType {

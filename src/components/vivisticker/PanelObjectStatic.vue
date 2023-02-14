@@ -250,8 +250,8 @@ export default Vue.extend({
     generalUtils.panelInit('object',
       this.handleSearch,
       this.handleCategorySearch,
-      async () => {
-        this.getRecAndCate('objects')
+      async ({ reset }: {reset: boolean}) => {
+        await this.getRecAndCate({ reset, key: 'objects' })
         this.initFavorites()
       }
     )
@@ -311,7 +311,7 @@ export default Vue.extend({
         }
       }
     },
-    handleSearch(keyword: string) {
+    async handleSearch(keyword: string) {
       if (this.showFav) {
         this.searchTagInFavoritesCategory(keyword)
       } else {
@@ -321,7 +321,7 @@ export default Vue.extend({
         }
       }
     },
-    handleCategorySearch(keyword: string, locale = '') {
+    async handleCategorySearch(keyword: string, locale = '') {
       if (this.showFav) {
         this.searchFavorites(keyword)
         vivistickerUtils.setIsInCategory('object', true)

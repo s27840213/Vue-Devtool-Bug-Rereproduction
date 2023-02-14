@@ -11,7 +11,7 @@ import * as type from '@/interfaces/payment'
 
 interface IPaymentState {
   isLoading: boolean
-  initView: string
+  initView: type.IPaymentView
   templateImg: string
   // Constant
   status: string
@@ -93,7 +93,8 @@ const ITrialStatue = {
 const IPayType = {
   0: '',
   1: 'tappay',
-  2: 'stripe'
+  2: 'stripe',
+  3: 'tcloud' // 雲市集 政府輔助方案
 }
 
 const ICouponError = [
@@ -130,7 +131,7 @@ function recordThePlanToGTM(trialStatus: string, isYearlyPlan: boolean) {
 
 const getDefaultState = (): IPaymentState => ({
   isLoading: false,
-  initView: '',
+  initView: 'brandkit',
   templateImg: '',
   // Constant
   status: 'Loading',
@@ -588,9 +589,9 @@ const mutations: MutationTree<IPaymentState> = {
     const keys = Object.keys(newState) as Array<keyof IPaymentState>
     keys.forEach(key => {
       if (['paymentPaidDate', 'myPaidDate', 'switchPaidDate'].includes(key) && newState[key]) {
-        (state[key] as any) = string2Date(newState[key] as string)
+        (state[key] as unknown) = string2Date(newState[key] as string)
       } else if (key in state) {
-        (state[key] as any) = newState[key]
+        (state[key] as unknown) = newState[key]
       }
     })
   },
@@ -603,7 +604,7 @@ const mutations: MutationTree<IPaymentState> = {
   SET_isLoading(state: IPaymentState, isLoading) {
     state.isLoading = isLoading
   },
-  SET_initView(state: IPaymentState, initView) {
+  SET_initView(state: IPaymentState, initView: type.IPaymentView) {
     state.initView = initView
   },
   SET_templateImg(state: IPaymentState, templateImg) {

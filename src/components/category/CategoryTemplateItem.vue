@@ -23,6 +23,8 @@ import GeneralUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import { PRECISION } from '@/utils/unitUtils'
+import { round } from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -92,8 +94,8 @@ export default Vue.extend({
         .map(theme => theme.id).join(',')
       const isSameTheme = themeUtils.compareThemesWithPage(theme)
       */
-      const currPage = pageUtils.getPage(pageUtils.currFocusPageIndex)
-      const isSameSize = currPage.width === width && currPage.height === height
+      const pageSize = pageUtils.currFocusPageSize
+      const isSameSize = pageSize.physicalWidth === width && pageSize.physicalHeight === height && pageSize.unit === 'px'
       const cb = this.groupItem
         ? (resize?: any) => {
           AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
@@ -126,13 +128,13 @@ export default Vue.extend({
         }
         modalUtils.setModalInfo(
           this.$t('NN0695') as string,
-          [`${this.$t('NN0209', { tsize: `${width}x${height}`, psize: `${currPage.width}x${currPage.height}` })}`],
+          [`${this.$t('NN0209', { tsize: `${width}x${height} px`, psize: `${round(pageSize.physicalWidth, PRECISION)}x${round(pageSize.physicalHeight, PRECISION)} ${pageSize.unit}` })}`],
           {
             msg: `${this.$t('NN0021')}`,
             class: 'btn-light-mid',
             style: { border: '1px solid #4EABE6' },
             action: () => {
-              const resize = { width: currPage.width, height: currPage.height }
+              const resize = { width: pageSize.width, height: pageSize.height, physicalWidth: pageSize.physicalWidth, physicalHeight: pageSize.physicalHeight, unit: pageSize.unit }
               cb(resize)
             }
           },
@@ -142,7 +144,7 @@ export default Vue.extend({
           }
         )
       } else {
-        const resize = { width: currPage.width, height: currPage.height }
+        const resize = { width: pageSize.width, height: pageSize.height }
         cb(resize)
       }
     },

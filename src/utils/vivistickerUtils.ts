@@ -1,4 +1,4 @@
-import { IAsset, IAssetProps } from '@/interfaces/module'
+import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import Vue from 'vue'
@@ -23,8 +23,11 @@ import i18n from '@/i18n'
 import generalUtils from './generalUtils'
 import modalUtils from './modalUtils'
 import frameUtils from './frameUtils'
+import colorUtils from './colorUtils'
+import logUtils from './logUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
+  hostId: '',
   appVer: '100.0',
   locale: 'us',
   isFirstOpen: false,
@@ -32,10 +35,20 @@ const STANDALONE_USER_INFO: IUserInfo = {
   osVer: '100.0'
 }
 
-const USER_SETTINGS_CONFIG: {[key: string]: {default: any, description: string}} = {
+/**
+ * shown prop indicates if the user-setting-config is shown in the setting page
+ */
+const USER_SETTINGS_CONFIG: {[key: string]: {default: any, description: string, shown: boolean, val?: any}} = {
   autoSave: {
     default: false,
-    description: 'STK0012'
+    description: 'STK0012',
+    shown: true
+  },
+  mydesignShowMissingPhotoAsk: {
+    default: true,
+    description: 'STK0036',
+    shown: false,
+    val: true
   }
 }
 
@@ -143,7 +156,9 @@ class ViviStickerUtils {
   getDefaultUserSettings(): IUserSettings {
     const res = {} as {[key: string]: any}
     for (const [key, value] of Object.entries(USER_SETTINGS_CONFIG)) {
-      res[key] = value.default
+      if (value.shown) {
+        res[key] = value.default
+      }
     }
     return res as IUserSettings
   }
@@ -193,7 +208,7 @@ class ViviStickerUtils {
   }
 
   sendToIOS(messageType: string, message: any) {
-    console.log(messageType, message)
+    logUtils.setLogAndConsoleLog(messageType, message)
     if (messageType === 'SCREENSHOT' && !this.hasCopied && this.checkOSVersion('16.0')) {
       this.hasCopied = true
       this.setState('hasCopied', { data: this.hasCopied })
@@ -206,7 +221,10 @@ class ViviStickerUtils {
           })
           modalUtils.clearModalInfo()
         }
-      }, undefined, undefined, true, true)
+      }, undefined, {
+        noClose: true,
+        noCloseIcon: true
+      })
     }
     try {
       const webkit = (window as any).webkit
@@ -217,7 +235,7 @@ class ViviStickerUtils {
       }
       messageHandler.postMessage(message)
     } catch (error) {
-      console.log(error)
+      logUtils.setLogAndConsoleLog(error)
     }
   }
 
@@ -226,12 +244,10 @@ class ViviStickerUtils {
   }
 
   sendDoneLoading(width: number, height: number, options: string, needCrop = false) {
-    console.log(width, height, options)
     this.sendToIOS('DONE_LOADING', { width, height, options, needCrop })
   }
 
   sendScreenshotUrl(query: string, action = 'copy') {
-    console.log(query)
     this.sendToIOS('SCREENSHOT', { params: query, action })
     if (this.isStandaloneMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
@@ -247,7 +263,7 @@ class ViviStickerUtils {
   }
 
   createUrl(item: IAsset): string {
-    console.log(item)
+    logUtils.setLogAndConsoleLog(item)
     switch (item.type) {
       case 5:
       case 11:
@@ -308,7 +324,8 @@ class ViviStickerUtils {
     return (jsonData: any) => {
       if ([5, 11, 10].includes(asset.type)) {
         if (jsonData.color && jsonData.color.length > 0) {
-          eventUtils.emit(PanelEvent.switchTab, 'color', { currColorEvent: ColorEventType.shape })
+          colorUtils.setCurrEvent(ColorEventType.shape)
+          eventUtils.emit(PanelEvent.switchTab, 'color')
         } else {
           eventUtils.emit(PanelEvent.switchTab, 'opacity')
         }
@@ -331,7 +348,7 @@ class ViviStickerUtils {
   }
 
   startEditing(editorType: string, assetInfo: {[key: string]: any}, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
-    const pageWidth = window.innerWidth - 32
+    const pageWidth = window.outerWidth - 32
     pageUtils.setPages([pageUtils.newPage({
       width: pageWidth,
       height: Math.round(pageWidth * 420 / 358),
@@ -366,15 +383,16 @@ class ViviStickerUtils {
     }
   }
 
-  makeFlagKey(layerIndex: number, subLayerIndex = -1, clipIndex = -1) {
-    return subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}_c${clipIndex}`)
+  makeFlagKey(layerIndex: number, subLayerIndex = -1, clipIndex?: number) {
+    return subLayerIndex === -1 ? `i${layerIndex}` : (`i${layerIndex}_s${subLayerIndex}` + (typeof clipIndex !== 'undefined' ? `_c${clipIndex}` : ''))
   }
 
-  initLoadingFlagsForLayer(layer: ILayer, layerIndex: number, subLayerIndex = -1, clipIndex = -1) {
+  initLoadingFlagsForLayer(layer: ILayer, layerIndex: number, subLayerIndex = -1, clipIndex?: number) {
     switch (layer.type) {
       case LayerType.group:
         for (const [subIndex, subLayer] of (layer as IGroup).layers.entries()) {
-          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex, clipIndex)
+          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
+          // this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex, clipIndex)
         }
         break
       case LayerType.frame: {
@@ -389,7 +407,7 @@ class ViviStickerUtils {
         }
         if (subLayerIndex === -1) {
           for (const [_clipIndex, subLayer] of layers.entries()) {
-            this.initLoadingFlagsForLayer(subLayer, layerIndex, _clipIndex, -1)
+            this.initLoadingFlagsForLayer(subLayer, layerIndex, _clipIndex)
           }
         } else {
           for (const [_clipIndex, subLayer] of layers.entries()) {
@@ -409,7 +427,7 @@ class ViviStickerUtils {
     this.loadingFlags[this.makeFlagKey(0, -1)] = false
   }
 
-  setLoadingFlag(layerIndex: number, subLayerIndex = -1, clipIndex = -1) {
+  setLoadingFlag(layerIndex: number, subLayerIndex = -1, clipIndex?: number) {
     const key = this.makeFlagKey(layerIndex, subLayerIndex, clipIndex)
     if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
       this.loadingFlags[key] = true
@@ -444,13 +462,25 @@ class ViviStickerUtils {
       }
     } else {
       const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
-      if (currLayer.type === 'text') {
-        layerUtils.updateLayerProps(pageIndex, layerIndex, { contentEditable: false })
-      } else if (['group', 'tmp'].includes(currLayer.type) && subLayerIdx !== -1) {
-        const subLayer = (currLayer as IGroup).layers[subLayerIdx]
-        if (subLayer.type === 'text') {
-          layerUtils.updateLayerProps(pageIndex, layerIndex, { contentEditable: false }, subLayerIdx)
-        }
+      switch (currLayer.type) {
+        case 'text':
+          layerUtils.updateLayerProps(pageIndex, layerIndex, { contentEditable: false })
+          break
+        case 'group':
+        case 'tmp':
+          if (subLayerIdx !== -1) {
+            const subLayer = (currLayer as IGroup).layers[subLayerIdx]
+            const updateData = { active: false } as { [key: string]: string | boolean }
+            if (subLayer.type === 'text') {
+              updateData.contentEditable = false
+            }
+            layerUtils.updateLayerProps(pageIndex, layerIndex, updateData, subLayerIdx)
+          }
+          break
+        case 'frame':
+          if (subLayerIdx !== -1) {
+            frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { active: false })
+          }
       }
       if (imageUtils.isImgControl()) {
         imageUtils.setImgControlDefault(false)
@@ -496,8 +526,10 @@ class ViviStickerUtils {
     }
   }
 
-  preCopyEditor() {
-    this.handleTextResize()
+  preCopyEditor(toResize = true) {
+    if (toResize) {
+      this.handleTextResize()
+    }
     this.editorStateBuffer.controllerHidden = this.controllerHidden
     this.hideController()
     store.commit('vivisticker/SET_isDuringCopy', true)
@@ -584,7 +616,7 @@ class ViviStickerUtils {
   }
 
   loginResult(info: IUserInfo) {
-    console.log(JSON.stringify(info))
+    logUtils.setLogAndConsoleLog(JSON.stringify(info))
     store.commit('vivisticker/SET_userInfo', info)
     vivistickerUtils.handleCallback('login')
   }
@@ -599,7 +631,7 @@ class ViviStickerUtils {
 
   updateInfoDone(data: { flag: string, msg?: string }) {
     if (data.flag !== '0') {
-      console.log(data.msg)
+      logUtils.setLogAndConsoleLog(data.msg)
       this.errorMessageMap.locale = data.msg ?? ''
     }
     vivistickerUtils.handleCallback('update-user-info')
@@ -776,6 +808,13 @@ class ViviStickerUtils {
     }, id ?? '')
   }
 
+  async fetchMyDesign(myDesign: IMyDesign) {
+    const { id, type } = myDesign
+    const data = await this.getAsset(`mydesign-${this.mapEditorType2MyDesignKey(type)}`, id, 'config')
+    data.pages = pageUtils.newPages(data.pages)
+    return data
+  }
+
   initWithMyDesign(myDesign: IMyDesign, option?: { callback?: (pages: Array<IPage>) => void, tab?: string }) {
     const { callback, tab = 'opacity' } = option || {}
     const {
@@ -783,10 +822,9 @@ class ViviStickerUtils {
       type,
       assetInfo
     } = myDesign
-    const myDesignKey = this.mapEditorType2MyDesignKey(type)
-    this.getAsset(`mydesign-${myDesignKey}`, id, 'config').then((data) => {
+    this.fetchMyDesign(myDesign).then((data) => {
+      const pages = data.pages
       this.startEditing(type, assetInfo ?? {}, this.getFetchDesignInitiator(() => {
-        const pages = pageUtils.newPages(generalUtils.deepCopy(data.pages))
         if (callback) {
           callback(pages)
         }
@@ -794,7 +832,7 @@ class ViviStickerUtils {
       }), () => {
         if (type === 'object') {
           groupUtils.select(0, [0])
-          const firstObject = (data.pages[0] as IPage).layers[0]
+          const firstObject = (pages[0] as IPage).layers[0]
           if (firstObject.type === 'shape' && ((firstObject as IShape).color?.length ?? 0) > 0) {
             eventUtils.emit(PanelEvent.switchTab, 'color', { currColorEvent: ColorEventType.shape })
           } else {
@@ -818,7 +856,7 @@ class ViviStickerUtils {
     return await new Promise<string>((resolve, reject) => {
       try {
         Vue.nextTick(() => {
-          this.preCopyEditor()
+          this.preCopyEditor(false)
           setTimeout(() => {
             const { x, y, width, height } = this.getEditorDimensions()
             const editorType = store.getters['vivisticker/getEditorType']
@@ -966,7 +1004,7 @@ class ViviStickerUtils {
     }
   }
 
-  handleFrameClipError(page: IPage) {
+  handleFrameClipError(page: IPage, showCheckContent = false) {
     const { layers } = page
     const frames = (layers
       .filter((l: ILayer) => l.type === 'frame') as Array<IFrame>)
@@ -1008,11 +1046,25 @@ class ViviStickerUtils {
         }, frame.clips[subLayerIdx])
       }
 
-      const modalBtn = {
-        msg: i18n.t('STK0023') as string,
-        action
+      if (USER_SETTINGS_CONFIG.mydesignShowMissingPhotoAsk.val) {
+        let options
+        if (showCheckContent) {
+          options = {
+            checkboxText: USER_SETTINGS_CONFIG.mydesignShowMissingPhotoAsk.description as string,
+            checked: false,
+            onCheckedChange: (val: boolean) => {
+              USER_SETTINGS_CONFIG.mydesignShowMissingPhotoAsk.val = !val
+            }
+          }
+        }
+        const modalBtn = {
+          msg: i18n.t('STK0023') as string,
+          action
+        }
+        modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn, undefined, options)
+      } else {
+        action && action()
       }
-      modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn)
     }
   }
 

@@ -50,7 +50,7 @@ class HintUtils {
     Vue.nextTick(() => {
       const el = document.querySelector('.hint') as HTMLElement
       const [width, height] = [el.offsetWidth, el.offsetHeight]
-      const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
+      const [vw, vh] = [window.outerWidth || document.documentElement.clientWidth, window.outerHeight || document.documentElement.clientHeight]
       const { left, bottom, width: targetWidth, height: targetHeight } = target?.getBoundingClientRect() as DOMRect
       let xDiff = 0
       let yDiff = 0

@@ -7,6 +7,7 @@ $colors: (
 	blue-4: #E7EFFF,
 	blue-5: #ebf4fa,
 	blue-hover: #2DB3FF,
+	blue-active: #4279CC,
 	dark-blue: #113251,
 	dark-blue-2: #09467E,
 	bu: #3C64B1,
@@ -46,7 +47,8 @@ $colors: (
 	green-2: #27ae60,
 	yellow: #FFECA8,
 	orange: #F28606,
-	transparent: transparent
+	transparent: transparent,
+	alarm: #FFBA49
 );
 
 $linear-gradient: (

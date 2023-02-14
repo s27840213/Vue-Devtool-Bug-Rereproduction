@@ -5,7 +5,7 @@
         @showAllPages="showAllPages"
         :currTab="currActivePanel"
         :inAllPagesMode="inAllPagesMode")
-      div(class="mobile-editor__content" :style="contentStyle")
+      div(class="mobile-editor__content" :style="contentStyle" id="mobile-editor__content" ref="mobile-editor__content")
         keep-alive
           component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
             :currActivePanel="currActivePanel"
@@ -17,7 +17,6 @@
                 @after-leave="afterLeave")
         mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
-          :currColorEvent="currColorEvent"
           @switchTab="switchTab"
           @panelHeight="setPanelHeight")
       //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
@@ -51,6 +50,8 @@ import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import unitUtils from '@/utils/unitUtils'
+import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   name: 'MobileEditor',
@@ -76,7 +77,17 @@ export default Vue.extend({
   created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
   },
+  beforeDestroy() {
+    eventUtils.off(PanelEvent.switchTab)
+  },
   mounted() {
+    const { pageRect, editorRect } = pageUtils.getEditorRenderSize
+    pageUtils.pageSize = { width: pageRect.width, height: pageRect.height }
+    pageUtils.editorSize = { width: editorRect.width, height: editorRect.height }
+    // const el = this.$refs['mobile-editor__content'] as HTMLElement
+    // const pz = new PinchZoom(el, {
+    //   minZoom: (pageUtils.mobileMinScaleRatio * 0.01)
+    // })
     /**
      * @Note the codes below is used to prevent the zoom in/out effect of mobile phone, especially for the "IOS"
      * Remember to set passive to "false", or the preventDefault() function won't work.
@@ -89,7 +100,7 @@ export default Vue.extend({
       /**
        * @param nearHrEdge - is used to prevnt the IOS navagation gesture, this is just a workaround
        */
-      const nearHrEdge = (event as TouchEvent).touches[0].clientX <= 5 || (event as TouchEvent).touches[0].clientX > window.innerWidth - 5
+      const nearHrEdge = (event as TouchEvent).touches[0].clientX <= 5 || (event as TouchEvent).touches[0].clientX > window.outerWidth - 5
 
       if (event.touches.length > 1 || nearHrEdge) {
         event.preventDefault()
@@ -115,8 +126,10 @@ export default Vue.extend({
     // load size from query for new design
     const newDesignWidth = parseInt(this.$route.query.width as string)
     const newDesignHeight = parseInt(this.$route.query.height as string)
+    const newDesignUnit = (this.$route.query.unit || 'px') as string
     if (newDesignWidth && newDesignHeight) {
-      pageUtils.setPageSize(0, newDesignWidth, newDesignHeight)
+      const pxSize = unitUtils.convertSize(newDesignWidth, newDesignHeight, newDesignUnit, 'px')
+      pageUtils.setPageSize(0, pxSize.width, pxSize.height, newDesignWidth, newDesignHeight, newDesignUnit)
       pageUtils.fitPage()
     }
   },
@@ -127,9 +140,8 @@ export default Vue.extend({
       mobilePanel: 'currActivePanel'
     }),
     ...mapState('user', [
-      'role',
-      'adminMode',
-      'viewGuide']),
+      'viewGuide'
+    ]),
     ...mapGetters({
       groupId: 'getGroupId',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -159,15 +171,12 @@ export default Vue.extend({
     isLogin(): boolean {
       return store.getters['user/isLogin']
     },
-    isAdmin(): boolean {
-      return this.role === 0
-    },
     isLocked(): boolean {
       return layerUtils.getTmpLayer().locked
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup) => {
+      const types = groupLayer.layers.map((layer) => {
         return layer.type
       })
       return new Set(types)
@@ -206,25 +215,25 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
-      _setAdminMode: 'user/SET_ADMIN_MODE',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
-      setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
     }),
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'
     }),
     switchTab(panelType: string, props?: IFooterTabProps) {
-      if (this.currActivePanel === panelType || panelType === 'none') {
+      // Switch between color and text-color panel without close panel
+      if (this.currActivePanel === panelType && panelType === 'color' &&
+        props?.currColorEvent && this.currColorEvent !== props.currColorEvent) {
+        this.currColorEvent = props.currColorEvent
+      // Close panel if re-click
+      } else if (this.currActivePanel === panelType || panelType === 'none') {
         editorUtils.setShowMobilePanel(false)
         editorUtils.setInMultiSelectionMode(false)
       } else {
-        editorUtils.setShowMobilePanel(true)
-        this.setCurrActivePanel(panelType)
-        if (props) {
-          if (panelType === 'color' && props.currColorEvent) {
-            this.currColorEvent = props.currColorEvent
-          }
+        editorUtils.setCurrActivePanel(panelType)
+        if (panelType === 'color' && props?.currColorEvent) {
+          this.currColorEvent = props.currColorEvent
         }
       }
 
@@ -248,7 +257,7 @@ export default Vue.extend({
       this.showMobilePanelAfterTransitoin = true
     },
     afterLeave() {
-      this.setCurrActivePanel('none')
+      editorUtils.setCurrActivePanel('none')
       setTimeout(() => {
         this.showMobilePanelAfterTransitoin = false
       }, 300)

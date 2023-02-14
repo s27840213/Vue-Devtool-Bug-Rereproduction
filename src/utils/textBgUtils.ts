@@ -9,7 +9,7 @@ import mathUtils from '@/utils/mathUtils'
 import _ from 'lodash'
 
 // For text effect gooey
-class Point {
+export class Point {
   x: number
   y: number
   constructor(x: number, y: number) {
@@ -17,25 +17,25 @@ class Point {
     this.y = y
   }
 
-  middle(p: Point) {
+  middle(p: Point): Point {
     return new Point(
       (this.x + p.x) / 2,
       (this.y + p.y) / 2
     )
   }
 
-  add(p: {x: number, y: number}) {
+  add(p: {x: number, y: number}): Point {
     return new Point(
       this.x + p.x,
       this.y + p.y
     )
   }
 
-  dist(p: Point) {
+  dist(p: Point): number {
     return Math.pow(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2), 0.5)
   }
 
-  toString() {
+  toString(): string {
     return `${this.x} ${this.y}`
   }
 }
@@ -44,7 +44,7 @@ function obj2Point(p: {x: number, y: number}) {
 }
 
 // For text effect gooey
-class Path {
+export class Path {
   pathArray = [] as string[]
   pointArray = [] as Point[]
   currPos: Point
@@ -54,49 +54,49 @@ class Path {
     this.pathArray.push(`M${p}`)
   }
 
-  L(end: Point) {
+  L(end: Point): void {
     if (this.currPos.dist(end) < 0.1) return
     this.currPos = end
     this.pointArray.push(this.currPos)
     this.pathArray.push(`L${end}`)
   }
 
-  C(c1: Point, c2: Point, end: Point) {
+  C(c1: Point, c2: Point, end: Point): void {
     if (this.currPos.dist(end) < 0.1) return
     this.currPos = end
     this.pointArray.push(this.currPos)
     this.pathArray.push(`C${c1} ${c2} ${end}`)
   }
 
-  v(dist: number) {
+  v(dist: number): void {
     this.currPos = this.currPos.add(new Point(0, dist))
     this.pointArray.push(this.currPos)
     this.pathArray.push(`v${dist}`)
   }
 
-  h(dist: number) {
+  h(dist: number): void {
     this.currPos = this.currPos.add(new Point(dist, 0))
     this.pointArray.push(this.currPos)
     this.pathArray.push(`h${dist}`)
   }
 
-  l(x: number, y: number) {
+  l(x: number, y: number): void {
     this.currPos = this.currPos.add(new Point(x, y))
     this.pointArray.push(this.currPos)
     this.pathArray.push(`l${x} ${y}`)
   }
 
-  a(rx: number, ry: number, sweepFlag: number, x: number, y: number) {
+  a(rx: number, ry: number, sweepFlag: number, x: number, y: number): void {
     this.currPos = this.currPos.add(new Point(x, y))
     this.pointArray.push(this.currPos)
     this.pathArray.push(`a${rx} ${ry} 0 0${sweepFlag}${x} ${y}`)
   }
 
-  result() {
+  result(): string {
     return this.pathArray.join('') + 'z'
   }
 
-  toCircle() {
+  toCircle(): { tag: string, attrs: { cx: number, cy: number, r: string, fill: string } }[] {
     return this.pointArray.map(p => {
       return {
         tag: 'circle',
@@ -628,6 +628,10 @@ class TextBg {
   setColor(color: string) {
     const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
     this.setTextBg(effectName, { [this.currColorKey]: color })
+  }
+
+  get currColor(): string {
+    return (textEffectUtils.getCurrentLayer().styles.textBg as Record<string, string>)[this.currColorKey]
   }
 
   getEffectMainColor(effect: ITextBgEffect) {

@@ -65,8 +65,6 @@ import { IImage } from '@/interfaces/layer'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
-import generalUtils from '@/utils/generalUtils'
-import imageUtils from '@/utils/imageUtils'
 import i18n from '@/i18n'
 
 export default Vue.extend({
@@ -112,7 +110,8 @@ export default Vue.extend({
       setLoading: 'bgRemove/SET_loading',
       setIsProcessing: 'bgRemove/SET_isProcessing',
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
-      uploadMyfileImg: 'file/UPDATE_IMAGE_URLS'
+      uploadMyfileImg: 'file/UPDATE_IMAGE_URLS',
+      deletePreviewSrc: 'DELETE_previewSrc'
     }),
     toggleShowInitImage(val: boolean): void {
       this.setShowInitImage(!val)
@@ -151,7 +150,8 @@ export default Vue.extend({
         this.setPageScaleRatio(this.prevPageScaleRatio)
         stepsUtils.record()
       } else {
-        const { teamId, id, assetIndex } = (this.autoRemoveResult as IBgRemoveInfo)
+        const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
+        const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
         const previewSrc = this.canvas.toDataURL('image/png;base64')
         const { pageId, layerId } = this.bgRemoveIdInfo
         layerUtils.updateLayerProps(pageIndex, index, {
@@ -184,6 +184,12 @@ export default Vue.extend({
               srcObj,
               trace: 1
             })
+            this.deletePreviewSrc({
+              type: this.isAdmin ? 'public' : 'private',
+              userId: teamId,
+              assetId: this.isAdmin ? json.data.id : json.data.asset_index,
+              assetIndex: json.data.asset_index
+            })
             const image = layerUtils.getLayer(pageIndex, index) as IImage
             if (image.type === LayerType.image) {
               if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
@@ -200,7 +206,7 @@ export default Vue.extend({
             this.setLoading(false)
             this.setIsProcessing(false)
           },
-          id: id ?? assetIndex,
+          id: id ?? privateId,
           needCompressed: false
         })
       }

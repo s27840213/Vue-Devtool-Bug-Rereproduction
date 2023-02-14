@@ -1,6 +1,7 @@
 import store from '@/store'
 import { VNode } from 'vue'
 import { DirectiveBinding } from 'vue/types/options'
+import layerUtils from './layerUtils'
 
 let pressTimer = -1
 
@@ -8,7 +9,7 @@ const start = (callback: (e: PointerEvent) => void) => {
   return (e: PointerEvent) => {
     if (pressTimer === -1) {
       pressTimer = setTimeout((e: PointerEvent) => {
-        const isImgControl = store.getters['imgControl/isImgControl']
+        const isImgControl = store.getters['imgControl/isImgCtrl']
         if (!isImgControl) {
           callback(e)
         }

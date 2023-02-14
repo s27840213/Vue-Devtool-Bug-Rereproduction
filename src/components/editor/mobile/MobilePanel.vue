@@ -37,9 +37,9 @@
           div(class="mobile-panel__btn-click-zone"
             @pointerdown="rightButtonAction"
             @touchstart="disableTouchEvent")
-      tabs(v-if="innerTabs.label" class="mobile-panel__inner-tab" theme="light"
-          :tabs="innerTabs.label" @switchTab="switchInnerTab")
     div(class="mobile-panel__bottom-section")
+      tabs(v-if="innerTabs.label" theme="light"
+          :tabs="innerTabs.label" v-model="innerTabIndex")
       keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
         //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
         component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
@@ -57,6 +57,7 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
@@ -106,10 +107,6 @@ export default Vue.extend({
       default: 'none',
       type: String
     },
-    currColorEvent: {
-      default: 'text',
-      type: String
-    },
     isSubPanel: {
       default: false,
       type: Boolean
@@ -155,7 +152,7 @@ export default Vue.extend({
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
       currSubColorEvent: '',
-      innerTab: '',
+      innerTabIndex: 0,
       fitPage: _.debounce(() => {
         this.$nextTick(() => {
           pageUtils.fitPage()
@@ -208,9 +205,6 @@ export default Vue.extend({
     },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
-        case 'color': {
-          return this.currColorEvent === ColorEventType.shape && this.panelHistory.length === 0
-        }
         case 'text-effect': {
           return this.panelHistory.length === 0
         }
@@ -242,21 +236,27 @@ export default Vue.extend({
       return this.whiteTheme
     },
     showLeftBtn(): boolean {
-      return this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize' || this.showExtraColorPanel)
+      return this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel)
     },
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop' || this.inSelectionState
+    },
+    noRowGap(): boolean {
+      return this.inSelectionState || ['crop', 'color'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
       return Object.assign(
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
-          'row-gap': this.hideDynamicComp ? '0px' : '10px',
+          'row-gap': this.noRowGap ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
             ? 'initial' : this.panelHeight + 'px'
         }
       )
+    },
+    innerTab(): string {
+      return this.innerTabs.key[this.innerTabIndex]
     },
     innerTabs(): Record<string, string[]> {
       switch (this.currActivePanel) {
@@ -310,13 +310,7 @@ export default Vue.extend({
         }
         case 'color': {
           return Object.assign(defaultVal, {
-            currEvent: this.currColorEvent,
             panelHistory: this.panelHistory
-          })
-        }
-        case 'resize': {
-          return Object.assign(defaultVal, {
-            ref: 'panelResize'
           })
         }
         case 'brand-list': {
@@ -382,14 +376,10 @@ export default Vue.extend({
       }
     },
     leftBtnName(): string {
-      if (this.panelHistory.length > 0 && this.currActivePanel !== 'resize') {
-        return 'back-circle'
-      } else {
-        return 'close-circle'
-      }
+      return 'back-circle'
     },
     rightBtnName(): string {
-      if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop', 'resize'].includes(this.currActivePanel)) {
+      if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop'].includes(this.currActivePanel)) {
         return 'check-mobile-circle'
       } else {
         return 'close-circle'
@@ -453,16 +443,14 @@ export default Vue.extend({
             break
           }
 
-          case 'resize': {
-            (this.$refs.panelResize as any).applySelectedFormat()
-            break
-          }
-
           case 'color': {
             if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
               this.addRecentlyColors(colorUtils.currColor)
             }
           }
+        }
+        if (this.showExtraColorPanel) {
+          this.addRecentlyColors(colorUtils.currColor)
         }
         this.closeMobilePanel()
 
@@ -480,7 +468,7 @@ export default Vue.extend({
     },
     currActivePanel(newVal) {
       this.panelHistory = []
-      this.innerTab = this.innerTabs.key[0]
+      this.innerTabIndex = 0
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
       this.panelHeight = newVal === 'none' ? 0 : this.initHeightPx()
@@ -505,7 +493,6 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setBgImageControl: 'SET_backgroundImageControl',
-      setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
     }),
     ...mapActions({
@@ -517,38 +504,28 @@ export default Vue.extend({
       return {
         handler: this.closeMobilePanel,
         middleware: this.middleware,
-        events: ['contextmenu', 'touchstart', 'pointerdown']
+        events: ['touchstart', 'pointerdown',
+          ...window.location.host === 'localhost:8080' ? [] : ['contextmenu']]
       }
-    },
-    keepPanel(target: HTMLElement): boolean {
-      if (!target || target.id === 'app') return false
-      // If target is modal or panel-icon, don't close Panel.
-      else if (target.className.includes?.('modal')) return true
-      else if (target.className.includes?.('panel-icon')) return true
-      return this.keepPanel(target.parentNode as HTMLElement)
     },
     middleware(event: MouseEvent | TouchEvent | PointerEvent) {
       const target = event.target as HTMLElement
-      // If target is a Svg <use>, its class will be SVGAnimatedString obj.
-      // Ignor its className check using optional chaining "?.includes()"
-      return !(this.keepPanel(target) ||
-        target.className.includes?.('footer-tabs') ||
+      return !(target.matches('.header-bar .panel-icon *') || // Skip header-bar icon
+        target.matches('.modal-container, .modal-container *') || // Skip modal-card
+        target.className.includes?.('footer-tabs') || // Skip footer-bar icon
         target.className === 'inputNode'
       )
     },
     closeMobilePanel() {
       this.$emit('switchTab', 'none')
       this.panelHistory = []
-      this.setCurrActivePanel('none')
+      editorUtils.setCurrActivePanel('none')
     },
     initHeightPx() {
       return ((this.$el.parentElement as HTMLElement).clientHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
     },
     maxHeightPx() {
       return (this.$el.parentElement as HTMLElement).clientHeight
-    },
-    getMaxHeightPx(): number {
-      return parseFloat((this.$el as HTMLElement).style.maxHeight.split('px')[0])
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
       if (this.fixSize) {
@@ -585,7 +562,7 @@ export default Vue.extend({
       }
     },
     handleLockedNotify() {
-      this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+      this.$notify({ group: 'copy', text: i18n.tc('NN0804') })
     },
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActiveSubPanel === panelType) {
@@ -598,9 +575,6 @@ export default Vue.extend({
           }
         }
       }
-    },
-    switchInnerTab(panelIndex: number) {
-      this.innerTab = this.innerTabs.key[panelIndex]
     }
   }
 })
@@ -661,10 +635,6 @@ export default Vue.extend({
     overflow-y: scroll;
     overflow-x: hidden;
     @include no-scrollbar;
-  }
-
-  &__inner-tab {
-    margin: 15px 0 14px 0;
   }
 
   &__title {

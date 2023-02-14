@@ -53,7 +53,7 @@ export default Vue.extend({
       default: 'brandkit'
     },
     maxheight: {
-      default: window.innerHeight * 0.9,
+      default: window.outerHeight * 0.9,
       type: Number
     },
     settingmode: {
@@ -229,7 +229,7 @@ export default Vue.extend({
   &__content {
     margin-top: 30px;
     &.editor-theme {
-      height: calc(100% - 150px);
+      height: calc(100% - 138px);
     }
     &.mobile-editor-theme {
       margin-top: 0;

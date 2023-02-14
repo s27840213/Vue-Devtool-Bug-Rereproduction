@@ -93,8 +93,11 @@ class ConstantData {
           label: '邀請卡',
           url: 'https://blog.vivipic.com/tw/invitation-card/'
         },
-        ...[20, 19, 18, 22].map((id) => themeItem(id))
-        ]
+        ...[20, 19, 18, 22].map((id) => themeItem(id)), {
+          label: i18n.t('NN0790', { type: i18n.tc('NN0001', 3) }),
+          url: i18n.t('NN0791'),
+          newTab: true
+        }]
       }],
       us: [{
         label: i18n.t('NN0667'),
@@ -121,6 +124,10 @@ class ConstantData {
         }, {
           label: 'Polaroid Frame',
           url: 'https://blog.vivipic.com/us/free-polaroid-frame-templates/'
+        }, {
+          label: i18n.t('NN0790', { type: i18n.tc('NN0001', 3) }),
+          url: i18n.t('NN0791'),
+          newTab: true
         }]
       }],
       jp: [{
@@ -142,6 +149,10 @@ class ConstantData {
         }, {
           label: '招待状',
           url: 'https://blog.vivipic.com/jp/invitation/'
+        }, {
+          label: i18n.t('NN0790', { type: i18n.tc('NN0001', 3) }),
+          url: i18n.t('NN0791'),
+          newTab: true
         }]
       }]
     }
@@ -160,6 +171,10 @@ class ConstantData {
         }, {
           label: '特色功能',
           url: 'https://blog.vivipic.com/tw/features/'
+        }, {
+          label: i18n.t('NN0790', { type: i18n.tc('NN0793', 1) }),
+          url: i18n.t('NN0791'),
+          newTab: true
         }]
       }, {
         label: i18n.t('NN0674'),
@@ -191,6 +206,10 @@ class ConstantData {
         }, {
           label: i18n.t('NN0147'),
           url: 'https://blog.vivipic.com/us/us-faq/'
+        }, {
+          label: i18n.t('NN0790', { type: i18n.tc('NN0793', 1) }),
+          url: i18n.t('NN0791'),
+          newTab: true
         }]
       }, {
         label: i18n.t('NN0671'),
@@ -217,6 +236,10 @@ class ConstantData {
         content: [{
           label: i18n.t('NN0673'),
           url: 'https://blog.vivipic.com/jp/4step/'
+        }, {
+          label: i18n.t('NN0790', { type: i18n.tc('NN0793', 1) }),
+          url: i18n.t('NN0791'),
+          newTab: true
         }]
       }, {
         label: i18n.t('NN0674'),
@@ -225,6 +248,22 @@ class ConstantData {
           url: 'https://blog.vivipic.com/jp/category/digital-marketing-jp/'
         }]
       }]
+    }
+
+    const pricing = i18n.locale === 'tw' ? {
+      singleLayer: true,
+      label: i18n.t('NN0643'),
+      content: [{
+        label: i18n.t('NN0643'),
+        url: '/pricing'
+      }, {
+        label: '政府輔助方案',
+        url: 'https://blog.vivipic.com/tw/tcloud/'
+      }]
+    } : {
+      name: 'Pricing',
+      url: '/pricing',
+      label: i18n.t('NN0643')
     }
 
     const list = [{
@@ -237,11 +276,9 @@ class ConstantData {
     }, {
       label: i18n.t('NN0670'),
       content: resource[i18n.locale as keyof typeof resource]
-    }, {
-      name: 'Pricing',
-      url: '/pricing',
-      label: i18n.t('NN0643')
-    }, {
+    },
+    ...[pricing],
+    {
       hidden: !this.isLogin,
       name: 'MyDesign',
       url: '/mydesign',
@@ -489,7 +526,7 @@ class ConstantData {
       i18n.t('NN0527'), true, true,
       i18n.t('NN0528'), '-', true,
       i18n.t('NN0529'), '-', true,
-      i18n.t('NN0530'), true, true,
+      i18n.t('NN0530'), '-', true,
       i18n.t('NN0531'), true, true,
       i18n.t('NN0532'), true, true
     ]
@@ -532,7 +569,9 @@ class ConstantData {
       i18n.t('NN0570'),
       i18n.t('NN0571'),
       i18n.t('NN0572'),
-      i18n.t('NN0573')
+      i18n.t('NN0573'),
+      i18n.t('NN0769'),
+      i18n.t('NN0805')
     ]
   }
 

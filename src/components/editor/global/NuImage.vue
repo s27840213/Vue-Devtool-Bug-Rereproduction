@@ -15,14 +15,14 @@
         class="nu-image__picture-shadow"
         draggable="false"
         :src="shadowSrc()"
-        @error="onError"
-        @load="onLoad")
+        @error="onError")
     div(class="img-wrapper"
       :style="imgWrapperstyle()")
       div(class='nu-image__picture'
         :style="imgStyles()")
         svg(v-if="isAdjustImage()"
           :style="flipStyles()"
+          class="nu-image__svg"
           :class="{'layer-flip': flippedAnimation() }"
           :viewBox="svgViewBox()"
           :width="svgImageWidth()"
@@ -78,6 +78,7 @@ import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
+import unitUtils from '@/utils/unitUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { AxiosError } from 'axios'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -86,6 +87,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
 
 export default Vue.extend({
+  inheritAttrs: false,
   props: {
     config: Object,
     pageIndex: Number,
@@ -171,6 +173,7 @@ export default Vue.extend({
       hasDestroyed: false,
       isOnError: false,
       src: '',
+      initFlag: false,
       shadowBuff: {
         canvasShadowImg: undefined as undefined | HTMLImageElement,
         canvasSize: { width: 0, height: 0 },
@@ -190,8 +193,8 @@ export default Vue.extend({
         if (this.forRender) {
           return
         }
-        this.handleIsTransparent()
         this.previewAsLoading()
+        this.handleIsTransparent()
       },
       deep: true
     },
@@ -317,7 +320,7 @@ export default Vue.extend({
       isProcessing: 'shadow/isProcessing'
     }),
     ...mapState('vivisticker', ['isDuringCopy']),
-    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'dpi']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     canvas: {
       get(): HTMLCanvasElement | undefined {
@@ -334,9 +337,9 @@ export default Vue.extend({
       return src
     },
     filterId(): string {
-      const { styles: { adjust } } = this.config
+      const { styles: { adjust }, id: layerId } = this.config
       const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
-      const id = blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
+      const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
       return `filter__${id}`
     },
     showCanvas(): boolean {
@@ -355,21 +358,42 @@ export default Vue.extend({
       })()
       return isCurrShadowEffectApplied && isHandling
     },
-    getImgDimension(): number {
+    getImgDimension(): number | string {
       const { srcObj } = this.config
       const { imgWidth, imgHeight } = this.config.styles
       let renderW = imgWidth
       let renderH = imgHeight
-      const primaryLayer = this.config.primaryLayer || [LayerType.group, LayerType.frame].includes(layerUtils.getLayer(this.pageIndex, this.layerIndex).type as LayerType)
+      const primaryLayer = this.primaryLayer || [layerUtils.getLayer(this.pageIndex, this.layerIndex)].filter(i => [LayerType.group, LayerType.frame].includes(i.type as LayerType))[0]
       const isPrimaryFrameImg = primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.clips[0].isFrameImg
       if (!this.forRender && (this.config.parentLayerStyles || primaryLayer) && !isPrimaryFrameImg && srcObj.type !== 'ios') {
         const { scale = 1 } = this.config.parentLayerStyles || primaryLayer?.styles || {}
         renderW *= scale
         renderH *= scale
       }
+      const { dpi } = this
+      if (dpi !== -1) {
+        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.pageSizeData
+        if (unit !== 'px' && physicalHeight && physicalWidth) {
+          const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
+          renderW *= dpi / physicaldpi
+          renderH *= dpi / physicaldpi
+        } else {
+          renderW *= dpi / 96
+          renderH *= dpi / 96
+        }
+      }
       return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
     },
-    parentLayerDimension(): number {
+    pageSizeData() {
+      return {
+        width: pageUtils.getPage(this.pageIndex).width,
+        height: pageUtils.getPage(this.pageIndex).height,
+        physicalWidth: pageUtils.getPage(this.pageIndex).physicalWidth,
+        physicalHeight: pageUtils.getPage(this.pageIndex).physicalHeight,
+        unit: pageUtils.getPage(this.pageIndex).unit
+      }
+    },
+    parentLayerDimension(): number | string {
       const { width, height } = this.config.parentLayerStyles || {}
       const { imgWidth, imgHeight } = this.config.styles
       const imgRatio = imgWidth / imgHeight
@@ -475,26 +499,26 @@ export default Vue.extend({
       const img = e.target as HTMLImageElement
       const physicalRatio = img.naturalWidth / img.naturalHeight
       const layerRatio = this.config.styles.imgWidth / this.config.styles.imgHeight
-      if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1) {
+      if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1 && this.config.srcObj.type !== 'frame') {
         const newW = this.config.styles.imgHeight * physicalRatio
         const offsetW = this.config.styles.imgWidth - newW
-        if (this.primaryLayerType() === 'group') {
-          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-            imgWidth: newW,
-            imgX: this.config.styles.imgX + offsetW / 2
-          }, this.subLayerIndex)
-        } else {
+        if (this.primaryLayerType() === 'frame') {
           frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
             imgWidth: newW,
             imgX: this.config.styles.imgX + offsetW / 2
           })
+        } else {
+          layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+            imgWidth: newW,
+            imgX: this.config.styles.imgX + offsetW / 2
+          }, this.subLayerIndex)
         }
       }
     },
     onLoadShadow() {
       this.isOnError = false
       const shadowImg = this.$refs['shadow-img'] as HTMLImageElement
-      if (!this.forRender && (!shadowImg.width || !shadowImg.height)) {
+      if (!this.initFlag && !this.forRender && (!shadowImg.width || !shadowImg.height)) {
         imageShadowUtils.updateShadowSrc(this.layerInfo(), { type: '', assetId: '', userId: '' })
         imageShadowUtils.setEffect(ShadowEffectType.none, {}, this.layerInfo())
       }
@@ -543,40 +567,40 @@ export default Vue.extend({
             this.src = src
             resolve()
           }
-        }, () => {
-          const error = new Error(`cannot load the current image, src: ${this.src}`)
-          console.log(error)
-          reject(new Error(`cannot load the current image, src: ${this.src}`))
-          if (this.primaryLayer.type === LayerType.frame) {
-            if (this.config.srcObj.type === 'ios') {
-              frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex,
-                {
-                  type: 'frame',
-                  assetId: '',
-                  userId: ''
-                }
-              )
-              frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
-                imgWidth: (this.config as IImage).styles.width,
-                imgHeight: (this.config as IImage).styles.height,
-                imgX: 0,
-                imgY: 0,
-                opacity: 100,
-                adjust: {}
-              })
-              this.src = ImageUtils.getSrc(this.config)
+        }, {
+          error: () => {
+            reject(new Error(`cannot load the current image, src: ${this.src}`))
+            if (this.primaryLayer.type === LayerType.frame) {
+              if (this.config.srcObj.type === 'ios') {
+                frameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, this.subLayerIndex,
+                  {
+                    type: 'frame',
+                    assetId: '',
+                    userId: ''
+                  }
+                )
+                frameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, {
+                  imgWidth: (this.config as IImage).styles.width,
+                  imgHeight: (this.config as IImage).styles.height,
+                  imgX: 0,
+                  imgY: 0,
+                  opacity: 100,
+                  adjust: {}
+                })
+                this.src = ImageUtils.getSrc(this.config)
+              }
+            } else {
+              fetch(src)
+                .then(res => {
+                  const { status, statusText } = res
+                  this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
+                })
+                .catch((e) => {
+                  if (src.indexOf('data:image/png;base64') !== 0) {
+                    this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
+                  }
+                })
             }
-          } else {
-            fetch(src)
-              .then(res => {
-                const { status, statusText } = res
-                this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
-              })
-              .catch((e) => {
-                if (src.indexOf('data:image/png;base64') !== 0) {
-                  this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
-                }
-              })
           }
         })
       })
@@ -603,7 +627,7 @@ export default Vue.extend({
         })
       }
     },
-    async preLoadImg(preLoadType: 'pre' | 'next', val: number) {
+    async preLoadImg(preLoadType: 'pre' | 'next', val: number | string) {
       return new Promise<void>((resolve, reject) => {
         const img = new Image()
         img.onload = () => resolve()
@@ -622,20 +646,25 @@ export default Vue.extend({
       })
     },
     handleIsTransparent() {
-      if (this.forRender || this.primaryLayerType() === 'frame') return
-      const img = new Image()
+      if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
       const imgSize = ImageUtils.getSrcSize(this.config.srcObj, 100)
-      img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      img.crossOrigin = 'anoynous'
-      img.onload = () => {
-        imageShadowUtils.updateEffectProps(this.layerInfo(), {
-          isTransparent: imageShadowUtils.isTransparentBg(img)
-        })
-      }
+      const src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      ImageUtils.imgLoadHandler(src,
+        (img) => {
+          if (!this.hasDestroyed) {
+            const isTransparent = imageShadowUtils.isTransparentBg(img)
+            imageShadowUtils.updateEffectProps(this.layerInfo(), { isTransparent })
+            if (!isTransparent && this.config.styles.adjust.blur > 0) {
+              this.$forceUpdate()
+            }
+          }
+        }, { crossOrigin: true }
+      )
     },
     async handleInitLoad() {
       const { type } = this.config.srcObj
       if (this.userId !== 'backendRendering') {
+        this.handleIsTransparent()
         await this.previewAsLoading()
         const preImg = new Image()
         preImg.onerror = (error) => {
@@ -669,9 +698,11 @@ export default Vue.extend({
         }
         preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'pre'))
       } else {
+        if (this.isAdjustImage()) {
+          this.handleIsTransparent()
+        }
         this.src = ImageUtils.getSrc(this.config, this.getImgDimension)
       }
-      this.handleIsTransparent()
     },
     handleShadowInit() {
       if (this.forRender) return
@@ -1043,7 +1074,7 @@ export default Vue.extend({
       let scaleX = horizontalFlip ? -1 : 1
       let scaleY = verticalFlip ? -1 : 1
 
-      if (typeof this.subLayerIndex !== 'undefined') {
+      if (typeof this.subLayerIndex !== 'undefined' && this.subLayerIndex !== -1) {
         const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
         if (primaryLayer.type === 'frame' && this.config.srcObj.type === 'frame') {
           scaleX = primaryLayer.styles.horizontalFlip ? -1 : 1
@@ -1111,7 +1142,7 @@ export default Vue.extend({
         transform: `translate(${xFactor * imgX * scale}px, ${yFactor * imgY * scale}px) scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
       }
     },
-    getPreviewSize(): number {
+    getPreviewSize(): number | string {
       const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
       return ImageUtils
         .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
@@ -1128,8 +1159,9 @@ export default Vue.extend({
       return (this.config as IImage).srcObj
     },
     adjustImgStyles(): any {
-      const styles = generalUtils.deepCopy(this.config.styles)
+      let styles = this.config.styles
       if (this.isBgImgControl) {
+        styles = generalUtils.deepCopy(this.config.styles)
         Object.assign(styles.adjust, {
           halation: 0
         })
@@ -1138,7 +1170,7 @@ export default Vue.extend({
     },
     flippedAnimation(): boolean {
       const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
-      if (typeof this.subLayerIndex !== 'undefined' && primaryLayer.type === 'frame') {
+      if (typeof this.subLayerIndex !== 'undefined' && this.subLayerIndex !== -1 && primaryLayer.type === 'frame') {
         return false
       } else {
         return true
@@ -1170,7 +1202,11 @@ export default Vue.extend({
       if (!this.shadow() || !this.shadow().srcObj) {
         return ''
       }
-      return ImageUtils.getSrc(this.shadow().srcObj, ImageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension))
+      const src = ImageUtils.getSrc(this.shadow().srcObj, ImageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension))
+      if (this.$route.name === 'Preview') {
+        return ImageUtils.appendCompQueryForVivipic(src)
+      }
+      return src
     },
     id(): ILayerIdentifier {
       return {
@@ -1196,7 +1232,10 @@ export default Vue.extend({
   align-items: center;
 
   &__picture {
+    touch-action: none;
     object-fit: cover;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
     position: absolute;
     top: 0px;
     left: 0px;
@@ -1205,11 +1244,18 @@ export default Vue.extend({
   }
 
   &__picture-shadow {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
     position: absolute;
     top: 0px;
     left: 0px;
     width: 100%;
     height: 100%;
+  }
+
+  &__svg {
+    display: block;
   }
 
   .img-wrapper {

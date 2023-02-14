@@ -1,11 +1,15 @@
 <template lang="pug">
   div(class="panel-text")
+    //- Search bar
     search-bar(class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
       clear
       :defaultKeyword="keywordLabel"
       @search="handleSearch")
-    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+    //- Search result empty msg
+    div(v-if="emptyResultMessage")
+      span {{ emptyResultMessage }}
+    //- Default text preset & brandkit text preset
     template(v-if="!keyword")
       template(v-if="isBrandkitAvailable")
         div(class="panel-text__brand-header relative")
@@ -33,14 +37,10 @@
             :style="getFontStyles(config.type.toLowerCase())"
             :type="`text-${config.type.toLowerCase()}`"
             @click.native="handleAddText(config)") {{ config.text }}
+    //- Search result and main content
     category-list(v-for="item in categoryListArray"
                   v-show="item.show" :ref="item.key" :key="item.key"
                   :list="item.content" @loadMore="handleLoadMore")
-      template(v-if="pending" #after)
-        div(class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
           v-if="!keyword"
@@ -60,6 +60,18 @@
             class="panel-text__item"
             :key="item.id"
             :item="item")
+      template(#after)
+        //- Loading icon
+        div(v-if="pending" class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
+        //- Text wishing pool
+        div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
+          span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
+          nubtn(size="mid" class="mt-30")
+            url(:url="$t('NN0791')" :newTab="true")
+              span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 </template>
 
 <script lang="ts">
@@ -71,6 +83,7 @@ import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
+import Url from '@/components/global/Url.vue'
 import AssetUtils from '@/utils/assetUtils'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import DragUtils from '@/utils/dragUtils'
@@ -87,7 +100,8 @@ export default Vue.extend({
     CategoryList,
     CategoryListRows,
     CategoryTextItem,
-    BrandSelector
+    BrandSelector,
+    Url
   },
   data() {
     return {
@@ -190,8 +204,8 @@ export default Vue.extend({
     generalUtils.panelInit('text',
       this.handleSearch,
       this.handleCategorySearch,
-      async () => {
-        this.getRecAndCate()
+      async ({ reset }: {reset: boolean}) => {
+        this.getRecAndCate({ reset })
         this.getContent()
         textUtils.loadDefaultFonts(this.extractFonts)
       })
@@ -245,16 +259,16 @@ export default Vue.extend({
       res.fontFamily = textStyle.isDefault ? brandkitUtils.getDefaultFontId(this.$i18n.locale) : textStyle.fontId
       return res
     },
-    handleSearch(keyword: string) {
+    async handleSearch(keyword: string) {
       this.resetSearch()
       if (keyword) {
-        this.getTagContent({ keyword })
+        await this.getTagContent({ keyword })
       }
     },
-    handleCategorySearch(keyword: string, locale = '') {
+    async handleCategorySearch(keyword: string, locale = '') {
       this.resetSearch()
       if (keyword) {
-        this.getContent({ keyword, locale })
+        await this.getContent({ keyword, locale })
       }
     },
     handleLoadMore() {
@@ -334,6 +348,8 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  color: white;
+  text-align: left;
   &__brand-header {
     margin-top: 10px;
     margin-bottom: 13px;

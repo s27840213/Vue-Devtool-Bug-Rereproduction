@@ -1,8 +1,8 @@
 <template lang="pug">
-  div(class="vvstk-editor" :style="copyingStyles()")
+  div(class="vvstk-editor" :style="copyingStyles()" @pointerdown="selectStart")
     div(class="vvstk-editor__pseudo-page" :style="styles('page')")
       div(class="vvstk-editor__scale-container" :style="styles('scale')")
-        page-content(id="vvstk-editor" :config="config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio")
+        page-content(id="vvstk-editor" :config="config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
         div(class="page-control" :style="styles('control')")
           template(v-for="(layer, index) in config.layers")
             nu-controller(v-if="layer.type !== 'image' || !layer.imgControl"
@@ -15,7 +15,7 @@
               :contentScaleRatio="contentScaleRatio"
               @getClosestSnaplines="getClosestSnaplines"
               @clearSnap="clearSnap")
-        dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
+        dim-background(v-if="isImgCtrl" :config="config" :contentScaleRatio="contentScaleRatio")
 </template>
 
 <script lang="ts">
@@ -31,12 +31,15 @@ import generalUtils from '@/utils/generalUtils'
 import { ISnapline } from '@/interfaces/snap'
 import groupUtils from '@/utils/groupUtils'
 import frameUtils from '@/utils/frameUtils'
+import layerUtils from '@/utils/layerUtils'
+import controlUtils from '@/utils/controlUtils'
+import { MovingUtils } from '@/utils/movingUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   data() {
     return {
       pageIndex: 0,
-      snapUtils: new SnapUtils(0),
       closestSnaplines: {
         v: [] as Array<number>,
         h: [] as Array<number>
@@ -44,22 +47,30 @@ export default Vue.extend({
       imageUtils
     }
   },
+  created() {
+    this.pagesState[this.pageIndex].modules.snapUtils.pageIndex = this.pageIndex
+  },
   computed: {
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
+      getMiddlemostPageIndex: 'getMiddlemostPageIndex',
       currActivePageIndex: 'getCurrActivePageIndex',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
-      pages: 'getPages',
+      pagesState: 'getPagesState',
       getLayer: 'getLayer',
       editorBg: 'vivisticker/getEditorBg',
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
       contentScaleRatio: 'getContentScaleRatio',
-      isDuringCopy: 'vivisticker/getIsDuringCopy'
+      isDuringCopy: 'vivisticker/getIsDuringCopy',
+      isImgCtrl: 'imgControl/isImgCtrl'
     }),
     config(): IPage {
-      return this.pages[this.pageIndex]
+      return this.pagesState[this.pageIndex].config
+    },
+    snapUtils(): SnapUtils {
+      return this.pagesState[this.pageIndex].modules.snapUtils
     },
     getCurrLayer(): ILayer {
       return generalUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
@@ -143,6 +154,30 @@ export default Vue.extend({
       this.snapUtils.clear()
       this.closestSnaplines.v = []
       this.closestSnaplines.h = []
+    },
+    selectStart(e: PointerEvent) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      if (this.isImgCtrl) return
+
+      if (layerUtils.layerIndex !== -1) {
+        /**
+         * when the user click the control-region outsize the page,
+         * the moving logic should be applied to the EditorView.
+         */
+        if (controlUtils.isClickOnController(e)) {
+          const movingUtils = new MovingUtils({
+            _config: { config: layerUtils.getCurrLayer },
+            snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
+            body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
+          })
+          movingUtils.moveStart(e)
+          return
+        }
+
+        if (imageUtils.isImgControl()) {
+          controlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+        }
+      }
     }
   }
 })

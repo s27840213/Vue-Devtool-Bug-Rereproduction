@@ -234,33 +234,10 @@ export default Vue.extend({
             vivistickerUtils.endEditing()
           })
         } else {
-          modalUtils.setModalInfo(
-            `${this.$t('STK0008')}`,
-            `${this.$t('STK0009')}`,
-            {
-              msg: `${this.$t('STK0004')}`,
-              action: () => {
-                vivistickerUtils.saveAsMyDesign().then(() => {
-                  vivistickerUtils.endEditing()
-                })
-              }
-            },
-            {
-              msg: `${this.$t('STK0011')}`,
-              action: () => { vivistickerUtils.endEditing() },
-              style: {
-                color: '#474A57',
-                backgroundColor: '#D9DBE1'
-              }
-            },
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            `${this.$t('STK0010')}`,
-            this.userSettings.autoSave,
-            (checked: boolean) => {
+          const options = {
+            checkboxText: `${this.$t('STK0010')}`,
+            checked: this.userSettings.autoSave,
+            onCheckedChange: (checked: boolean) => {
               this.updateUserSettings({
                 autoSave: checked
               })
@@ -281,7 +258,27 @@ export default Vue.extend({
                 })
               }
             }
-          )
+          }
+          modalUtils.setModalInfo(
+            `${this.$t('STK0008')}`,
+            `${this.$t('STK0009')}`,
+            {
+              msg: `${this.$t('STK0004')}`,
+              action: () => {
+                vivistickerUtils.saveAsMyDesign().then(() => {
+                  vivistickerUtils.endEditing()
+                })
+              }
+            },
+            {
+              msg: `${this.$t('STK0011')}`,
+              action: () => { vivistickerUtils.endEditing() },
+              style: {
+                color: '#474A57',
+                backgroundColor: '#D9DBE1'
+              }
+            },
+            options)
         }
       } else {
         vivistickerUtils.endEditing()

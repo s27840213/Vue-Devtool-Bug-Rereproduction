@@ -160,7 +160,7 @@ class ImageAdjustUtil {
         attrs: { stdDeviation: 0.275 * value }
       })
     ]
-    if (config && !config.styles.shadow.isTransparent) {
+    if (config && config.styles.shadow && !config.styles.shadow.isTransparent) {
       res.push(this.createSvgFilter({
         tag: 'feComponentTransfer',
         child: [

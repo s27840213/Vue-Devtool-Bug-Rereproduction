@@ -51,11 +51,47 @@
             min="1"
             v-ratio-change
             type="range")
+        div(v-if="selectedTypeVal === 'pdf_print' && 'bleed' in selected")
+          download-check-button(type="checkbox"
+            class="mb-10"
+            :label="`${$t('NN0774')}`"
+            :default-checked="selected.bleed === 2"
+            @change="({ checked }) => handleUpdate('bleed', checked ? 2 : 1)")
+        div(v-if="'bleed' in selected")
+          download-check-button(type="checkbox"
+            class="mb-10"
+            :label="`${$t('NN0775')}`"
+            :default-checked="selected.bleed > 0"
+            @change="({ checked }) => handleUpdate('bleed', checked ? 1 : 0)")
+        div(v-if="selectedTypeVal === 'pdf_print' && 'outline' in selected")
+          download-check-button(type="checkbox"
+            class="mb-10"
+            :label="`${$t('NN0794')}`"
+            :default-checked="selected.outline===1"
+            :info="`${$t('NN0799')}`"
+            :infoUrl="`${$t('NN0802')}`"
+            @change="({ checked }) => handleUpdate('outline', checked ? 1 : 0)")
+        div(v-if="'outline' in selected")
+          download-check-button(type="checkbox"
+            class="mb-10"
+            :label="`${$t('NN0776')}`"
+            :default-checked="selected.outline===2"
+            :info="`${$t('NN0800')}`"
+            :infoUrl="`${$t('NN0803')}`"
+            @change="({ checked }) => handleUpdate('outline', checked ? 2 : 0)")
+        div(v-if="selectedTypeVal.includes('pdf')"
+          class="flex items-center mb-10")
+          span {{$t('NN0777')}}
+          dropdown(v-if="colorFormats[selectedTypeVal].length > 1" class="mx-5 popup-download__color-format"
+            :options="colorFormats[selectedTypeVal]"
+            @select="option => handleUpdate('cmyk', option === 'CMYK' ? 1 : 0)") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
+          div(v-if="colorFormats[selectedTypeVal].length === 1" class="popup-download__color-format fixed")
+            span(class="body-XS") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0] }}
         div(v-if="isDetailPage" class="mb-10 pt-5") {{ $t('NN0344') }}
           dropdown(class="mt-5"
             :options="detailPageDownloadOptions"
             @select="handleDetailPageOption") {{ detailPageOptionLabel }}
-          div(v-if="selectedDetailPage.option === 'splice'"
+          div(v-if="selectedDetailPage.option === 'splice' && !selectedTypeVal.includes('pdf')"
             class="mt-10")
             download-check-button(type="radio"
               class="mb-10"
@@ -111,12 +147,6 @@
             dropdown(class="body-3 full-width"
                     :options="devs"
                     @select="handleDevSelect") {{ selectedDevLabel }}
-          download-check-button(
-            type="checkbox"
-            class="mb-20 body-3"
-            label="使用新後端瀏覽器"
-            :default-checked="newChrome"
-            @change="({ checked }) => handleNewChrome(checked)")
           div
             btn(class="full-width body-3 rounded"
               :disabled="isButtonDisabled"
@@ -142,14 +172,16 @@
             iconName="loading"
             iconColor="white"
             iconWidth="20px")
-          span(v-else) {{$t('NN0010')}}
+          span(v-else class="popup-download__btn")
+            svg-icon(v-if="selectedTypeVal === 'pdf_print'" iconName="pro" iconWidth="22px" iconColor="alarm")
+            span {{$t('NN0010')}}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import { ITypeOption } from '@/interfaces/download'
+import { IDownloadServiceParams, ITypeOption } from '@/interfaces/download'
 import DownloadUtil from '@/utils/downloadUtil'
 import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
 import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
@@ -158,6 +190,8 @@ import GeneralUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import pageUtils from '@/utils/pageUtils'
 import gtmUtils from '@/utils/gtmUtils'
+import { Tooltip } from 'floating-vue'
+import paymentUtils from '@/utils/paymentUtils'
 
 const submission = `${process.env.VUE_APP_VERSION}::download_submission`
 
@@ -165,7 +199,8 @@ export default Vue.extend({
   components: {
     DownloadCheckButton,
     DownloadTypeOption,
-    DownloadPageSelection
+    DownloadPageSelection,
+    VTooltip: Tooltip
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -185,19 +220,39 @@ export default Vue.extend({
       pageRange = [],
       selectedDetailPage,
       selectedDev = 1,
-      newChrome = false,
       ...prevSubmission
     } = JSON.parse(localStorage.getItem(submission) || '{}')
+
+    const typeOptions = [
+      { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
+      { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` },
+      { value: 'pdf_standard', name: `${this.$t('NN0770')}`, desc: `${this.$t('NN0772')}` },
+      { value: 'pdf_print', name: `${this.$t('NN0771')}`, desc: `${this.$t('NN0773')}`, tag: 'pro' }
+      // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
+      // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
+      // { id: 'gif', name: 'GIF', desc: '短片' }
+    ] as ITypeOption[]
+
+    let defaultSelectedTypeVal = 'jpg'
+    let defaultOptions = DownloadUtil.getTypeAttrs(defaultSelectedTypeVal)
+
+    // apply saved options if exist
+    if (typeOptions.map(v => v.value).includes(selectedTypeVal)) {
+      defaultSelectedTypeVal = selectedTypeVal
+      defaultOptions = DownloadUtil.getTypeAttrs(selectedTypeVal)
+      Object.keys(defaultOptions).forEach(key => {
+        defaultOptions[key] = (key in prevSubmission ? prevSubmission : defaultOptions)[key]
+      })
+    }
 
     const prevInfo = {
       saveSubmission: true,
       // saveSubmission: !!selectedTypeVal,
-      selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('jpg'),
-      selectedTypeVal: selectedTypeVal || 'jpg',
+      selected: defaultOptions,
+      selectedTypeVal: defaultSelectedTypeVal,
       rangeType,
       pageRange: rangeType === 'spec' ? pageRange : [],
-      selectedDev,
-      newChrome
+      selectedDev
     }
     const currentPageIndex = this.pageIndex || 0
     const host = window.location.hostname
@@ -209,6 +264,10 @@ export default Vue.extend({
       exportId: '',
       functionQueue: [] as Array<() => void>,
       scaleOptions: [0.5, 0.75, 1, 1.5, 2, 2.5, 3],
+      colorFormats: {
+        pdf_standard: ['RGB'],
+        pdf_print: ['RGB', 'CMYK']
+      },
       detailPageDownloadOptions: [
         { value: 'whole', label: this.$t('NN0347') as string },
         { value: 'splice', label: this.$t('NN0348') as string }
@@ -218,15 +277,7 @@ export default Vue.extend({
         noLimit: false,
         height: 1500
       },
-      typeOptions: [
-        { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
-        { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` }
-        // { value: 'pdf_stardand', name: 'PDF 標準', desc: '檔案大小：小 - 適合多頁文件' }
-        // { id: 'pdf_print', name: 'PDF 列印', desc: '檔案大小：高 - 適合多頁文件' },
-        // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
-        // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
-        // { id: 'gif', name: 'GIF', desc: '短片' }
-      ] as ITypeOption[],
+      typeOptions,
       devs: [
         { value: 1, label: 'dev0' },
         { value: 2, label: 'dev1' },
@@ -234,9 +285,10 @@ export default Vue.extend({
         { value: 4, label: 'dev3' },
         { value: 5, label: 'dev4' },
         { value: 6, label: 'dev5' },
+        { value: 998, label: 'qa' },
         { value: 999, label: 'rd' }
       ],
-      onDev: host.startsWith('rd') || host.startsWith('dev') || host.startsWith('localhost')
+      onDev: host.startsWith('qa') || host.startsWith('rd') || host.startsWith('dev') || host.startsWith('localhost')
     }
   },
   computed: {
@@ -364,17 +416,15 @@ export default Vue.extend({
     handleSubmission(checked: boolean) {
       this.saveSubmission = checked
     },
-    handleNewChrome(checked: boolean) {
-      this.newChrome = checked
-    },
     handleSubmit(useDev = false) {
+      if (this.selectedTypeVal === 'pdf_print' && !paymentUtils.checkPro({ plan: 1 }, 'export-pdf-print')) return
       this.polling = true
       this.exportId ? this.handleDownload(useDev) : (this.functionQueue = [() => this.handleDownload(useDev)])
     },
     handleSubmissionInfo() {
       const pageLimit = pageUtils.getPages.length - 1
       this.pageRange = this.pageRange.filter((pageIndex: number) => pageIndex <= pageLimit)
-      const { selectedDetailPage, saveSubmission, selected, selectedTypeVal, rangeType, pageRange, selectedDev, newChrome } = this
+      const { selectedDetailPage, saveSubmission, selected, selectedTypeVal, rangeType, pageRange, selectedDev } = this
 
       const info = {
         ...selected,
@@ -382,8 +432,7 @@ export default Vue.extend({
         rangeType,
         pageRange,
         selectedDetailPage,
-        selectedDev,
-        newChrome
+        selectedDev
       }
 
       saveSubmission
@@ -400,18 +449,23 @@ export default Vue.extend({
       } = this
       this.handleSubmissionInfo()
 
-      const fileInfo = {
+      const fileInfo = Object.assign({}, {
         exportId,
         teamId: '',
-        format: selectedTypeVal,
+        format: selectedTypeVal.includes('pdf') ? 'pdf' : selectedTypeVal,
         ...selected
-      }
+      }, selectedTypeVal.includes('pdf') && {
+        pdfQuality: selectedTypeVal === 'pdf_standard' ? 0
+          : selectedTypeVal === 'pdf_print' ? 1
+            : undefined
+      }) as IDownloadServiceParams
 
       if (this.isDetailPage) {
         this.selectedDetailPage.option === 'whole' && (fileInfo.merge = 1)
-        this.selectedDetailPage.option === 'splice' &&
-          !this.selectedDetailPage.noLimit &&
-          (fileInfo.splitSize = this.selectedDetailPage.height)
+        if (this.selectedDetailPage.option === 'splice') {
+          fileInfo.merge = 0
+          if (!this.selectedDetailPage.noLimit && !selectedTypeVal.includes('pdf')) fileInfo.splitSize = this.selectedDetailPage.height
+        }
       }
 
       if (['spec', 'current'].includes(rangeType)) {
@@ -419,7 +473,7 @@ export default Vue.extend({
       }
       this.$emit('inprogress', true)
       DownloadUtil
-        .getFileUrl(fileInfo, ((this.isAdmin || this.onDev) && useDev) ? this.selectedDev : 0, this.newChrome ? 1 : 0)
+        .getFileUrl(fileInfo, ((this.isAdmin || this.onDev) && useDev) ? this.selectedDev : 0)
         .then(this.handleDownloadProgress)
     },
     handleDownloadProgress(response: any) {
@@ -512,6 +566,16 @@ export default Vue.extend({
   &__size-scale {
     width: 65px;
   }
+  &__color-format {
+    width: 65px;
+    &.fixed {
+      width: auto;
+      margin-left: 8px;
+      padding: 0px 8px;
+      border: 1px solid setColor(gray-4);
+      border-radius: 4px;
+    }
+  }
   &__progress {
     width: 100%;
     height: 8px;
@@ -528,6 +592,11 @@ export default Vue.extend({
     transition: 0.3s;
     border-radius: 4px;
     background-color: setColor(blue-1);
+  }
+  &__btn{
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
   .property-bar,
   .btn {

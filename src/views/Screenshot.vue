@@ -103,10 +103,10 @@ export default Vue.extend({
             if (!vSize) {
               vSize = [json.styles.width, json.styles.height]
             }
-            const pageAspectRatio = window.innerWidth / window.innerHeight
+            const pageAspectRatio = window.outerWidth / window.outerHeight
             const svgAspectRatio = vSize[0] / vSize[1]
-            const svgWidth = svgAspectRatio > pageAspectRatio ? window.innerWidth : window.innerHeight * svgAspectRatio
-            const svgHeight = svgAspectRatio > pageAspectRatio ? window.innerWidth / svgAspectRatio : window.innerHeight
+            const svgWidth = svgAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * svgAspectRatio
+            const svgHeight = svgAspectRatio > pageAspectRatio ? window.outerWidth / svgAspectRatio : window.outerHeight
             json.ratio = 1
             this.config = layerFactary.newShape({
               ...json,
@@ -124,10 +124,10 @@ export default Vue.extend({
             break
           }
           case 'svgImage': {
-            const pageAspectRatio = window.innerWidth / window.innerHeight
+            const pageAspectRatio = window.outerWidth / window.outerHeight
             const photoAspectRatio = parseInt(width ?? '1') / parseInt(height ?? '1')
-            const photoWidth = photoAspectRatio > pageAspectRatio ? window.innerWidth : window.innerHeight * photoAspectRatio
-            const photoHeight = photoAspectRatio > pageAspectRatio ? window.innerWidth / photoAspectRatio : window.innerHeight
+            const photoWidth = photoAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * photoAspectRatio
+            const photoHeight = photoAspectRatio > pageAspectRatio ? window.outerWidth / photoAspectRatio : window.outerHeight
 
             const srcObj = {
               type: 'svg',
@@ -162,10 +162,10 @@ export default Vue.extend({
             const xDiff = (boundingWidth - styles.width) / 2
             const yDiff = (boundingHeight - styles.height) / 2
 
-            const pageAspectRatio = window.innerWidth / window.innerHeight
+            const pageAspectRatio = window.outerWidth / window.outerHeight
             const photoAspectRatio = boundingWidth / boundingHeight
-            const photoWidth = photoAspectRatio > pageAspectRatio ? window.innerWidth : window.innerHeight * photoAspectRatio
-            const photoHeight = photoAspectRatio > pageAspectRatio ? window.innerWidth / photoAspectRatio : window.innerHeight
+            const photoWidth = photoAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * photoAspectRatio
+            const photoHeight = photoAspectRatio > pageAspectRatio ? window.outerWidth / photoAspectRatio : window.outerHeight
 
             const { imgWidth = photoWidth, imgHeight = photoHeight, imgX = 0, imgY = 0 } = styles as IImageStyle
 
@@ -195,7 +195,7 @@ export default Vue.extend({
           }
           case 'text': {
             const json = await (await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)).json()
-            const page = pageUtils.newPage({ width: window.innerWidth, height: window.innerHeight })
+            const page = pageUtils.newPage({ width: window.outerWidth, height: window.outerHeight })
             page.isAutoResizeNeeded = true
             pageUtils.setPages([page])
             vivistickerUtils.initLoadingFlags({ layers: [json] }, () => {
@@ -203,10 +203,10 @@ export default Vue.extend({
             })
 
             const { width, height, scale } = json.styles
-            const pageAspectRatio = window.innerWidth / window.innerHeight
+            const pageAspectRatio = window.outerWidth / window.outerHeight
             const textAspectRatio = width / height
-            const textWidth = textAspectRatio > pageAspectRatio ? window.innerWidth : window.innerHeight * textAspectRatio
-            const textHeight = textAspectRatio > pageAspectRatio ? window.innerWidth / textAspectRatio : window.innerHeight
+            const textWidth = textAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * textAspectRatio
+            const textHeight = textAspectRatio > pageAspectRatio ? window.outerWidth / textAspectRatio : window.outerHeight
             const config = {
               ...json,
               widthLimit: json.widthLimit === -1 ? -1 : json.widthLimit * (textWidth / width),
@@ -259,8 +259,8 @@ export default Vue.extend({
       })
     },
     bgStyles() {
-      const screenWidth = window.innerWidth
-      const screenHeight = window.innerHeight
+      const screenWidth = window.outerWidth
+      const screenHeight = window.outerHeight
       let width = screenWidth
       let height = width * 16 / 9
       if (height > screenHeight) {
@@ -317,12 +317,12 @@ export default Vue.extend({
         const { width, height } = target.getBoundingClientRect()
         vivistickerUtils.sendDoneLoading(width, height, this.options)
       } else {
-        vivistickerUtils.sendDoneLoading(window.innerWidth, window.innerHeight, this.options)
+        vivistickerUtils.sendDoneLoading(window.outerWidth, window.outerHeight, this.options)
       }
     }
     // fitPageToScreen(width: number, height: number): number {
-    //   const screenWidth = window.innerWidth
-    //   const screenHeight = window.innerHeight
+    //   const screenWidth = window.outerWidth
+    //   const screenHeight = window.outerHeight
     //   const screenRatio = screenWidth / screenHeight
     //   const objectRatio = width / height
     //   if (screenRatio > objectRatio) {

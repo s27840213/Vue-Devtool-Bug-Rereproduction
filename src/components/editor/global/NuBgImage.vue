@@ -1,24 +1,22 @@
 <template lang="pug">
-  div(v-if="!image.config.imgContorl" class="nu-background-image"
-    :style="mainStyles"
-    @pointerdown="setInBgSettingMode"
-    draggable="false")
-    div(v-show="!isColorBackground")
-      div(v-if="isAdjustImage" :style="frameStyles")
-        nu-adjust-image(:src="src"
-          @error="onError"
-          :styles="adjustImgStyles"
-          :contentScaleRatio="contentScaleRatio")
-      img(v-else-if="src" :src="src"
+  div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles")
+    div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
+      nu-adjust-image(v-if="isAdjustImage"
+        :src="finalSrc"
+        :styles="adjustImgStyles"
+        :contentScaleRatio="contentScaleRatio"
+        @error="onError")
+      img(v-else-if="src"
+        :src="finalSrc"
         draggable="false"
-        :style="imgStyles()"
         class="body"
-        @error="onError"
-        ref="body")
-    component(v-for="(elm, idx) in cssFilterElms"
-      :key="`cssFilter${idx}`"
-      :is="elm.tag"
-      v-bind="elm.attrs")
+        ref="body"
+        @error="onError")
+    div(:style="filterContainerStyles()" class="filter-container")
+      component(v-for="(elm, idx) in cssFilterElms"
+        :key="`cssFilter${idx}`"
+        :is="elm.tag"
+        v-bind="elm.attrs")
 </template>
 
 <script lang="ts">
@@ -33,6 +31,8 @@ import { IImage, IImageStyle } from '@/interfaces/layer'
 import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import imageShadowUtils from '@/utils/imageShadowUtils'
+import unitUtils from '@/utils/unitUtils'
 
 export default Vue.extend({
   props: {
@@ -42,6 +42,10 @@ export default Vue.extend({
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    padding: {
+      type: String,
+      default: '0'
     }
   },
   data() {
@@ -58,6 +62,7 @@ export default Vue.extend({
           this.src = ''
         } else {
           this.previewAsLoading()
+          this.handleIsTransparent()
         }
       }
     },
@@ -89,6 +94,7 @@ export default Vue.extend({
     }
 
     if (this.userId !== 'backendRendering') {
+      this.handleIsTransparent()
       this.previewAsLoading()
       const nextImg = new Image()
       nextImg.onerror = () => {
@@ -106,7 +112,10 @@ export default Vue.extend({
       }
       nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
     } else {
-      this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config))
+      if (this.isAdjustImage) {
+        this.handleIsTransparent()
+      }
+      this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, this.getImgDimension))
     }
   },
   components: { NuAdjustImage },
@@ -114,19 +123,44 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize',
-      getEditorViewImages: 'file/getEditorViewImages'
+      getEditorViewImages: 'file/getEditorViewImages',
+      imgControlPageIdx: 'imgControl/imgControlPageIdx',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
-    ...mapState('user', ['imgSizeMap', 'userId']),
+    ...mapState('user', ['imgSizeMap', 'userId', 'dpi']),
     configStyles(): IImageStyle {
       return this.image.config.styles
+    },
+    finalSrc(): string {
+      if (this.$route.name === 'Preview') {
+        return ImageUtils.appendCompQueryForVivipic(this.src)
+      }
+      return this.src
     },
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
       return !srcObj || srcObj.assetId === ''
     },
-    getImgDimension(): number {
+    getImgDimension(): number | string {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
-      return ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100))
+      const { dpi } = this
+      let renderW = imgWidth
+      let renderH = imgHeight
+      if (dpi !== -1) {
+        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.pageSizeData
+        if (unit !== 'px' && physicalHeight && physicalWidth) {
+          const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
+          renderW *= dpi / physicaldpi
+          renderH *= dpi / physicaldpi
+        } else {
+          renderW *= dpi / 96
+          renderH *= dpi / 96
+        }
+      }
+      return ImageUtils.getSrcSize(srcObj, Math.max(renderW, renderH) * (this.scaleRatio / 100))
+    },
+    pageSizeData(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
+      return this.getPageSize(this.pageIndex)
     },
     srcObj(): SrcObj {
       return this.image.config.srcObj
@@ -137,18 +171,24 @@ export default Vue.extend({
     },
     imageSize(): { width: number, height: number, x: number, y: number } {
       const { image } = this
+      const offset = 1
+      const aspectRatio = image.config.styles.imgWidth / image.config.styles.imgHeight
+      const width = image.config.styles.imgWidth + (aspectRatio < 1 ? offset * 2 : offset * 2 * aspectRatio)
+      const height = image.config.styles.imgHeight + (aspectRatio > 1 ? offset * 2 : offset * 2 / aspectRatio)
+      const x = image.posX - (aspectRatio < 1 ? offset : offset * aspectRatio)
+      const y = image.posY - (aspectRatio > 1 ? offset : offset / aspectRatio)
       return {
-        width: image.config.styles.imgWidth * this.contentScaleRatio,
-        height: image.config.styles.imgHeight * this.contentScaleRatio,
-        x: image.posX * this.contentScaleRatio,
-        y: image.posY * this.contentScaleRatio
+        width: width * this.contentScaleRatio,
+        height: height * this.contentScaleRatio,
+        x: x * this.contentScaleRatio,
+        y: y * this.contentScaleRatio
       }
     },
     mainStyles(): any {
-      const { image, color } = this
       return {
-        opacity: image.config.styles.opacity / 100,
-        backgroundColor: color
+        padding: this.padding,
+        opacity: this.image.config.styles.opacity / 100,
+        backgroundColor: this.color
       }
     },
     isAdjustImage(): boolean {
@@ -157,32 +197,15 @@ export default Vue.extend({
         .values(styles.adjust || {})
         .some(val => typeof val === 'number' && val !== 0)
     },
-    frameStyles(): { [key: string]: string | number } {
-      const { flipStyles } = this
-      return {
-        width: `${this.imageSize.width}px`,
-        height: `${this.imageSize.height}px`,
-        transform: `translate(${this.imageSize.x}px, ${this.imageSize.y}px) ${flipStyles.transform}`
-      }
-    },
     adjustImgStyles(): { [key: string]: string | number } {
       return Object.assign(generalUtils.deepCopy(this.image.config.styles), {
         width: this.getPageSize(this.pageIndex).width,
         height: this.getPageSize(this.pageIndex).height,
-        imgX: this.image.posX,
-        imgY: this.image.posY
+        imgX: this.imageSize.x,
+        imgY: this.imageSize.y,
+        imgWidth: this.imageSize.width,
+        imgHeight: this.imageSize.height
       })
-    },
-    bgStyles(): { [key: string]: string | number } {
-      const { image } = this
-      return {
-        backgroundImage: `url(${this.src})`,
-        width: `${this.imageSize.width}px`,
-        height: `${this.imageSize.height}px`,
-        backgroundSize: `${this.imageSize.width}px ${this.imageSize.height}px`,
-        backgroundPosition: this.imageSize.x === -1 ? 'center center' : `${this.imageSize.x}px ${this.imageSize.y}px`,
-        ...this.flipStyles
-      }
     },
     cssFilterElms(): any[] {
       const { adjust } = this.image.config.styles
@@ -223,7 +246,7 @@ export default Vue.extend({
       if (updater !== undefined) {
         try {
           updater().then(() => {
-            const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config))
+            const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, this.getImgDimension))
             ImageUtils.imgLoadHandler(src, () => {
               this.src = src
             })
@@ -232,8 +255,27 @@ export default Vue.extend({
         }
       }
     },
+    handleIsTransparent() {
+      const img = new Image()
+      const imgSize = ImageUtils.getSrcSize(this.image.config.srcObj, 100)
+      img.src = ImageUtils.getSrc(this.image.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      img.crossOrigin = 'anoynous'
+      img.onload = () => {
+        this.$store.commit('SET_backgroundImageStyles', {
+          pageIndex: this.pageIndex,
+          styles: {
+            shadow: {
+              isTransparent: imageShadowUtils.isTransparentBg(img)
+            }
+          }
+        })
+      }
+    },
     imgStyles(): Partial<IImage> {
       return this.stylesConverter()
+    },
+    filterContainerStyles() {
+      return { margin: this.padding }
     },
     async previewAsLoading() {
       let isPrimaryImgLoaded = false
@@ -262,8 +304,10 @@ export default Vue.extend({
             this.src = src
             resolve()
           }
-        }, () => {
-          reject(new Error('cannot load the current image'))
+        }, {
+          error: () => {
+            reject(new Error('cannot load the current image'))
+          }
         })
       })
     },
@@ -276,6 +320,28 @@ export default Vue.extend({
     },
     setInBgSettingMode() {
       editorUtils.setInBgSettingMode(true)
+      //   if (!this.dblTabsFlag && this.isActive) {
+      //   const touchtime = Date.now()
+      //   const interval = 500
+      //   const doubleTap = (e: PointerEvent) => {
+      //     e.preventDefault()
+      //     if (Date.now() - touchtime < interval && !this.dblTabsFlag) {
+      //       /**
+      //        * This is the dbl-click callback block
+      //        */
+      //       if (this.getLayerType === LayerType.image) {
+      //         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+      //         setTimeout(() => eventUtils.emit(PanelEvent.switchTab, 'crop'), 0)
+      //       }
+      //       this.dblTabsFlag = true
+      //     }
+      //   }
+      //   this.eventTarget.addEventListener('pointerdown', doubleTap)
+      //   setTimeout(() => {
+      //     this.eventTarget.removeEventListener('pointerdown', doubleTap)
+      //     this.dblTabsFlag = false
+      //   }, interval)
+      // }
     },
     handleDimensionUpdate(newVal: number, oldVal: number) {
       if (this.image.config.previewSrc === undefined) {
@@ -314,17 +380,41 @@ export default Vue.extend({
   // will-change: opacity, transform;
   position: absolute;
   top: 0;
-  left: 0;
   right: 0;
   bottom: 0;
+  left: 0;
   &__picture {
     object-fit: cover;
     width: 100%;
     height: 100%;
   }
+  text-align: left;
+
+  &__color {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  &__image{
+    position: relative;
+    >img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+  }
 }
 
 .body {
   transition: opacity 1s;
+}
+
+.filter-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 </style>

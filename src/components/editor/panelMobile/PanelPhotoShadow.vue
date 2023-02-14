@@ -57,11 +57,7 @@ export default Vue.extend({
   mounted() {
     imageShadowPanelUtils.mount()
   },
-  // beforeDestroy() {
-  //   imageShadowPanelUtils.handleShadowUpload()
-  // },
   computed: {
-    // ...mapState('mobileEditor', { mobilePanel: 'currActivePanel' }),
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
@@ -103,9 +99,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapMutations({
-      setCurrActivePanel: 'mobileEditor/SET_currActivePanel'
-    }),
     getFieldValue(field: string): number | boolean {
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     },
@@ -120,16 +113,10 @@ export default Vue.extend({
     },
     handleColorModal() {
       if (generalUtils.isTouchDevice()) {
+        colorUtils.setCurrEvent(ColorEventType.photoShadow)
         this.handleColor = true
         this.$emit('openExtraColorModal', ColorEventType.photoShadow, MobileColorPanelType.palette)
       }
-      // TODO
-      // if (tab.panelType !== undefined) {
-      //   this.$emit('switchTab', tab.panelType, tab.props)
-      // }
-      // this.$emit('toggleColorPanel', true)
-      // colorUtils.setCurrEvent(ColorEventType.photoShadow)
-      // colorUtils.setCurrColor(this.currentStyle.shadow.effects.color)
     }
   }
 })

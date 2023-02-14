@@ -125,12 +125,15 @@ class DragUtils {
         assetUtils.addStandardText(textType, text, locale, pageIndex, { styles }, spanStyles)
       } else {
         if (data.type === 6) {
-          const currPage = pageUtils.currFocusPage
+          const pageSize = data.groupChildId ? pageUtils.currFocusPageSize : pageUtils.getPageSize(pageIndex)
           const newPageIndex = data.groupChildId ? data.content_ids.findIndex((content: any) => content.id === data.groupChildId) : 0
           const aspectRatio = data.content_ids[newPageIndex].height / data.content_ids[newPageIndex].width
           const resize = {
-            width: currPage.width,
-            height: currPage.width * aspectRatio
+            width: pageSize.width,
+            height: pageSize.width * aspectRatio,
+            physicalWidth: pageSize.physicalWidth,
+            physicalHeight: pageSize.physicalWidth * aspectRatio,
+            unit: pageSize.unit
           }
 
           if (data.groupChildId) { // For group template

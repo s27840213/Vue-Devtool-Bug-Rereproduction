@@ -48,7 +48,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel-brand {
   margin-top: 12px;
-  @include size(100%, 100%);
+  @include size(100%, calc(100% - 12px));
   &__header {
     width: 100%;
   }

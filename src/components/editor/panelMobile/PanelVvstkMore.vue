@@ -16,7 +16,7 @@
           svg-icon(iconName="vivisticker_version"
                     iconWidth="24px"
                     iconColor="gray-3")
-        span(class="panel-vvstk-more__option-title version") {{ `${$t('NN0743')} : v. ${appVersion} ${buildNumber}${domain}` }}
+        span(class="panel-vvstk-more__option-title version") {{ `${$t('NN0743')} : v. ${appVersion} ${buildNumber}${domain} - ${hostId}` }}
     template(v-else)
       div(class="panel-vvstk-more__options")
         div(v-for="option in options"
@@ -71,7 +71,7 @@ export default Vue.extend({
     return {
       debugModeTimer: -1,
       debugModeCounter: 0,
-      domain: window.location.hostname !== 'sticker.vivipic.com' ? `- ${window.location.hostname.replace('.vivipic.com', '')}` : '',
+      domain: window.location.hostname !== 'sticker.vivipic.com' ? ` - ${window.location.hostname.replace('.vivipic.com', '')}` : '',
       debugMode: false
     }
   },
@@ -89,6 +89,9 @@ export default Vue.extend({
     ...mapGetters({
       userInfo: 'vivisticker/getUserInfo'
     }),
+    hostId(): string {
+      return this.userInfo.hostId
+    },
     mainOptions(): OptionConfig[] {
       return [...vivistickerUtils.checkOSVersion('16.0') ? [
         {

@@ -186,8 +186,8 @@ export default Vue.extend({
     generalUtils.panelInit('text',
       this.handleSearch,
       this.handleCategorySearch,
-      async () => {
-        await this.getRecAndCate('textStock')
+      async ({ reset }: {reset: boolean}) => {
+        await this.getRecAndCate({ reset, key: 'textStock' })
       })
     eventUtils.on(PanelEvent.scrollPanelTextToTop, this.scrollToTop)
   },
@@ -240,13 +240,13 @@ export default Vue.extend({
         }
       }
     },
-    handleSearch(keyword: string) {
+    async handleSearch(keyword: string) {
       this.resetSearch()
       if (keyword) {
         this.getTagContent({ keyword })
       }
     },
-    handleCategorySearch(keyword: string, locale = '') {
+    async handleCategorySearch(keyword: string, locale = '') {
       this.resetSearch()
       if (keyword) {
         if (keyword === `${this.$t('NN0024')}`) {

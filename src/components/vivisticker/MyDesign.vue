@@ -88,7 +88,7 @@ export default Vue.extend({
                 id: `result_${rowItems.map(item => item.id).join('_')}`,
                 type: 'my-design-text-item',
                 list: rowItems,
-                size: (window.innerWidth / 2 - 20),
+                size: (window.outerWidth / 2 - 20),
                 title: '',
                 moreType: 'text'
               }

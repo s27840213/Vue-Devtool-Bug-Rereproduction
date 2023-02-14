@@ -30,8 +30,10 @@
         div(class="panel-fonts__category-title") {{ title }}
       template(v-slot:category-font-item="{ list }")
         category-font-item(v-for="item in list"
+          :key="item.id"
           :item="item"
           :textStyleType="textStyleType")
+    div(v-if="showMore" class="cover-background")
 </template>
 
 <script lang="ts">
@@ -88,7 +90,7 @@ export default Vue.extend({
       pending: 'pending',
       keyword: 'keyword'
     }),
-    ...mapState('fontTag', ['tags']),
+    ...mapState('fontTag', ['tags', 'showMore']),
     ...mapState('text', ['sel', 'props', 'fontPreset']),
     ...mapGetters('font', ['hasNextPage']),
     ...mapGetters('user', {
@@ -299,5 +301,10 @@ export default Vue.extend({
 }
 .category-list::v-deep::-webkit-scrollbar-thumb {
   border: 3px solid #ffffff;
+}
+.cover-background {
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 </style>

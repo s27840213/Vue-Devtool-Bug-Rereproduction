@@ -23,10 +23,10 @@ class LayerUtils {
   get pageIndex(): number { return pageUtils.currFocusPageIndex }
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
-  get getCurrLayer(): IImage | IText | IShape | IGroup | IFrame { return this.getLayer(this.pageIndex, this.layerIndex) }
+  get getCurrLayer(): IImage | IText | IShape | IGroup | IFrame | ITmp { return this.getLayer(this.pageIndex, this.layerIndex) }
   get getPage(): (pageInde: number) => IPage { return store.getters.getPage }
   get getCurrPage(): IPage { return this.getPage(this.pageIndex) }
-  get getLayer(): (pageIndex: number, layerIndex: number) => IImage | IText | IShape | IGroup | IFrame {
+  get getLayer(): (pageIndex: number, layerIndex: number) => IImage | IText | IShape | IGroup | IFrame | ITmp {
     return store.getters.getLayer
   }
 
@@ -194,7 +194,7 @@ class LayerUtils {
     })
   }
 
-  replaceLayer(pageIndex: number, layerIndex: number, layer: IImage | IText | IShape | IGroup) {
+  replaceLayer(pageIndex: number, layerIndex: number, layer: IImage | IText | IShape | IGroup | IFrame) {
     store.commit('REPLACE_layer', {
       pageIndex,
       layerIndex,
@@ -224,7 +224,7 @@ class LayerUtils {
     }
   }
 
-  updateLayerProps(pageIndex: number, layerIndex: number, props: Partial<IImage | IText | IGroup | IShape> | { [key: string]: string | number | ITiptapSelection }, subLayerIdx = -1) {
+  updateLayerProps(pageIndex: number, layerIndex: number, props: Partial<IImage | IText | IGroup | IShape | ITmp> | { [key: string]: string | number | ITiptapSelection }, subLayerIdx = -1) {
     if (subLayerIdx === -1 || typeof subLayerIdx === 'undefined') {
       store.commit('UPDATE_layerProps', {
         pageIndex,
@@ -257,7 +257,8 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: Partial<IImage | IText | IGroup | IShape> | { [index: string]: number | string | boolean | number[] | IParagraph[] | SrcObj }) {
+  updateSubLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: Partial<IImage | IText | IGroup | IShape | ITmp> | { [index: string]: number | string | boolean | number[] | IParagraph[] | SrcObj }) {
+    if (targetIndex === -1) return
     store.commit('UPDATE_subLayerProps', {
       pageIndex,
       layerIndex,
@@ -517,6 +518,12 @@ class LayerUtils {
       }
     }
   }
+
+  updateInGroupFrame(pageIndex: number, primaryLayerIndex: number, layerIndex: number, clipIndex: number, props?: Partial<IImage>, styles?: { [key: string]: string | boolean | number }) {
+    store.commit('UPDATE_frameInGroup', {
+      pageIndex, primaryLayerIndex, layerIndex, clipIndex, props, styles
+    })
+  }
 }
 
 const layerUtils = new LayerUtils()
@@ -525,7 +532,7 @@ export default layerUtils
 
 export const DELETE_subLayer = function (state: IEditorState, layerInfo: ILayerInfo) {
   const { pageIndex, layerIndex, subLayerIdx } = layerInfo
-  const primaryL = state.pages[pageIndex].layers[layerIndex] as IGroup
+  const primaryL = state.pages[pageIndex].config.layers[layerIndex] as IGroup
   if (primaryL.type !== LayerType.group || typeof subLayerIdx === 'undefined' || subLayerIdx === -1) {
     return
   }
@@ -535,7 +542,7 @@ export const DELETE_subLayer = function (state: IEditorState, layerInfo: ILayerI
 export const ADD_subLayer = function (state: IEditorState, payload: { layerInfo: ILayerInfo, config: IImage | IShape | IText }) {
   const { layerInfo, config } = payload
   const { pageIndex, layerIndex, subLayerIdx } = layerInfo
-  const primaryL = state.pages[pageIndex].layers[layerIndex] as IGroup
+  const primaryL = state.pages[pageIndex].config.layers[layerIndex] as IGroup
   if (primaryL.type !== LayerType.group || typeof subLayerIdx === 'undefined' || subLayerIdx === -1) {
     return
   }

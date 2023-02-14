@@ -162,7 +162,7 @@ export default Vue.extend({
       menuItems: designUtils.makeNormalMenuItems(),
       isFolderMenuOpen: false,
       isSortMenuOpen: false,
-      windowWidth: window.innerWidth,
+      windowWidth: window.outerWidth,
       sortMenuItems: [
         {
           icon: 'chevron-duo-left',
@@ -331,7 +331,7 @@ export default Vue.extend({
       }, false)
     },
     handleResize() {
-      this.windowWidth = window.innerWidth
+      this.windowWidth = window.outerWidth
     },
     checkFolderNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter' && this.editableFolderName === this.folderName) {

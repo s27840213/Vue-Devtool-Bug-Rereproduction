@@ -3,14 +3,16 @@ import VueRouter, { RawLocation, Route, RouteConfig } from 'vue-router'
 import ViviSticker from '../views/ViviSticker.vue'
 import Screenshot from '../views/Screenshot.vue'
 import SvgIconView from '../views/SvgIconView.vue'
+import NubtnList from '@/views/NubtnList.vue'
+import CopyTool from '@/views/CopyTool.vue'
 import store from '@/store'
 import i18n from '@/i18n'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import { IUserInfo } from '@/interfaces/vivisticker'
 import { CustomWindow } from '@/interfaces/customWindow'
+import uploadUtils from '@/utils/uploadUtils'
 
 declare let window: CustomWindow
 
@@ -64,7 +66,11 @@ const routes: Array<RouteConfig> = [
           vivistickerUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
           const tempDesign = await vivistickerUtils.fetchDesign()
           if (tempDesign) {
-            vivistickerUtils.initWithTempDesign(tempDesign)
+            try {
+              vivistickerUtils.initWithTempDesign(tempDesign)
+            } catch (error) {
+              logUtils.setLogAndConsoleLog(error)
+            }
           }
         }
         next()
@@ -86,11 +92,6 @@ const routes: Array<RouteConfig> = [
       }
     }
   },
-  ...(process.env.NODE_ENV !== 'production') ? [{
-    path: 'svgicon',
-    name: 'SvgIconView',
-    component: SvgIconView
-  }] : [],
   {
     path: '*',
     name: 'Fallback',
@@ -105,6 +106,24 @@ const routes: Array<RouteConfig> = [
   }
 ]
 
+if (window.location.host !== 'vivipic.com') {
+  routes.push({
+    path: 'svgicon',
+    name: 'SvgIconView',
+    component: SvgIconView
+  })
+  routes.push({
+    path: 'copytool',
+    name: 'CopyTool',
+    component: CopyTool
+  })
+  routes.push({
+    path: 'nubtnlist',
+    name: 'NubtnList',
+    component: NubtnList
+  })
+}
+
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
@@ -116,10 +135,6 @@ const router = new VueRouter({
         render(h) { return h('router-view') }
       },
       async beforeEnter(to, from, next) {
-        if (logUtils.getLog()) {
-          logUtils.uploadLog()
-        }
-        logUtils.setLog('App Start')
         vivistickerUtils.registerCallbacks('router')
         const urlParams = new URLSearchParams(window.location.search)
         const standalone = urlParams.get('standalone')
@@ -128,6 +143,13 @@ const router = new VueRouter({
           vivistickerUtils.setDefaultLocale()
         }
         const userInfo = await vivistickerUtils.getUserInfo()
+        if (logUtils.getLog()) { // hostId for uploading log is obtained after getUserInfo
+          logUtils.uploadLog().then(() => {
+            logUtils.setLog('App Start')
+          })
+        } else {
+          logUtils.setLog('App Start')
+        }
         const locale = userInfo.locale
         i18n.locale = locale
         localStorage.setItem('locale', locale)
@@ -175,7 +197,9 @@ router.beforeEach(async (to, from, next) => {
     store.commit('user/SET_STATE', {
       verUni: json.ver_uni,
       verApi: json.ver_api,
-      imgSizeMap: json.image_size_map
+      imgSizeMap: json.image_size_map,
+      imgSizeMapExtra: json.image_size_map_extra,
+      dimensionMap: json.dimension_map
     })
     let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
 
@@ -195,6 +219,8 @@ router.beforeEach(async (to, from, next) => {
       })
 
     store.commit('vivisticker/SET_modalInfo', json.modal)
+
+    uploadUtils.setLoginOutput({ upload_log_map: json.ul_log_map })
   }
 
   next()

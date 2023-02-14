@@ -4,17 +4,18 @@ div(class="ruler-vr"
   div(class="ruler-vr__body"
     ref="rulerBody"
     :style="rulerBodyStyles")
-    div(v-for="i in rulerLineCount.count" class="ruler-vr__block ruler-vr__block--int")
-      span(class="ruler-vr__number") {{(i-1)*SPLIT_UNIT}}
+    div(v-for="i in scaleCount" class="ruler-vr__block ruler-vr__block--int")
+      span(class="ruler-vr__number") {{(i-1)*scale}}
       div(v-for="i in 5" class="ruler-vr__line")
-    div(v-if="rulerLineCount.float > 0" class="ruler-vr__block ruler-vr__block--float")
-      span(class="ruler-vr__number") {{rulerLineCount.count * SPLIT_UNIT}}
+    div(v-if="scaleCount" class="ruler-vr__block ruler-vr__block--float")
+      span(class="ruler-vr__number") {{scaleCount * scale}}
 </template>
 
 <script lang="ts">
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
+import unitUtils from '@/utils/unitUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -25,7 +26,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      rulerBodyOffset: 0
+      rulerBodyOffset: 0,
+      scale: rulerUtils.adjRulerScale()
     }
   },
   computed: {
@@ -38,6 +40,12 @@ export default Vue.extend({
     currFocusPage(): IPage {
       return pageUtils.currFocusPage
     },
+    currFocusPageSize() {
+      return pageUtils.currFocusPageSize
+    },
+    currFocusPageSizeWithBleeds() {
+      return pageUtils.currFocusPageSizeWithBleeds
+    },
     rulerRootStyles(): { [index: string]: string } {
       return {
         cursor: `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`,
@@ -47,21 +55,19 @@ export default Vue.extend({
     rulerBodyStyles(): { [index: string]: number | string } {
       return {
         width: `${rulerUtils.RULER_SIZE}px`,
-        height: `${this.currFocusPage.height * (this.pageScaleRatio / 100)}px`,
+        height: `${this.currFocusPageSize.height * (this.pageScaleRatio / 100)}px`,
         transform: `translate3d(0px,${this.rulerBodyOffset}px,0px)`,
-        'grid-template-rows': `repeat(${this.rulerLineCount.count},1fr) ${this.rulerLineCount.float}fr`
-
+        'grid-template-rows': `repeat(${this.scaleCount},${this.scaleSpace}px) auto`
       }
     },
-    rulerLineCount(): { count: number, float: number } {
-      const lineCount = (pageUtils.currFocusPage.height / this.SPLIT_UNIT).toFixed(2).split('.')
-      return {
-        count: parseInt(lineCount[0]),
-        float: parseFloat(`0.${lineCount[1]}`)
-      }
+    pxScale(): number {
+      return unitUtils.convert(this.scale, this.currFocusPageSize.unit, 'px', pageUtils.getPageDPI().height)
     },
-    SPLIT_UNIT(): number {
-      return rulerUtils.mapSplitUnit()
+    scaleCount(): number {
+      return Math.ceil(this.currFocusPageSize.height / this.pxScale)
+    },
+    scaleSpace(): number {
+      return this.pxScale * this.pageScaleRatio / 100
     }
   },
   mounted() {
@@ -70,9 +76,15 @@ export default Vue.extend({
   watch: {
     pageScaleRatio() {
       this.calcRulerBodyOffset()
+      this.scale = rulerUtils.adjRulerScale(this.scale)
     },
     currFocusPage() {
       this.calcRulerBodyOffset()
+      this.scale = rulerUtils.adjRulerScale()
+    },
+    currFocusPageSizeWithBleeds() {
+      this.calcRulerBodyOffset()
+      this.scale = rulerUtils.adjRulerScale(this.scale)
     }
   },
   methods: {
@@ -123,7 +135,7 @@ export default Vue.extend({
     position: absolute;
     top: 0;
     left: 20%;
-    font-size: 2px;
+    font-size: 12px;
     transform: scale(0.8) rotate(180deg);
     writing-mode: vertical-lr;
   }

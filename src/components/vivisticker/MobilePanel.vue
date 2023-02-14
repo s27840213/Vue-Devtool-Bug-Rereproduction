@@ -40,7 +40,7 @@
             @pointerdown="rightButtonAction"
             @touchstart="disableTouchEvent")
       tabs(v-if="innerTabs.label" class="mobile-panel__inner-tab" theme="light"
-          :tabs="innerTabs.label" @switchTab="switchInnerTab")
+          :tabs="innerTabs.label" v-model="innerTabIndex")
     div(class="mobile-panel__bottom-section")
       //- keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-file']")
       //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
@@ -53,12 +53,12 @@
     transition(name="panel-up")
       mobile-panel(v-if="!isSubPanel && currActiveSubPanel !== 'none'"
         :currActivePanel="currActiveSubPanel"
-        :currColorEvent="currSubColorEvent"
         :isSubPanel="true"
         @switchTab="switchTab")
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
@@ -114,10 +114,6 @@ export default Vue.extend({
       default: 'none',
       type: String
     },
-    currColorEvent: {
-      default: 'text',
-      type: String
-    },
     isSubPanel: {
       default: false,
       type: Boolean
@@ -169,7 +165,7 @@ export default Vue.extend({
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
       currSubColorEvent: '',
-      innerTab: '',
+      innerTabIndex: 0,
       draggedPanelHeight: 0
     }
   },
@@ -227,9 +223,6 @@ export default Vue.extend({
     },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
-        case 'color': {
-          return this.currColorEvent === ColorEventType.shape && this.panelHistory.length === 0
-        }
         case 'text-effect': {
           return this.panelHistory.length === 0
         }
@@ -267,19 +260,19 @@ export default Vue.extend({
       return this.whiteTheme || this.insertTheme
     },
     showLeftBtn(): boolean {
-      return (this.whiteTheme && (this.panelHistory.length > 0 || ['resize', 'color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel)) || (this.insertTheme && this.isTextInCategory)
+      return (this.whiteTheme && (this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel)) || (this.insertTheme && this.isTextInCategory)
     },
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop' || this.inSelectionState
     },
-    noGap(): boolean {
-      return ['vvstk-more', 'select-design'].includes(this.currActivePanel)
+    noRowGap(): boolean {
+      return this.inSelectionState || ['crop', 'color', 'vvstk-more', 'select-design'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
       return Object.assign(
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
-          'row-gap': (this.hideDynamicComp || this.noGap) ? '0px' : '10px',
+          'row-gap': this.noRowGap ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#1F1F1F',
           maxHeight: this.isDuringCopy ? '0' : (
             this.fixSize || this.extraFixSizeCondition
@@ -290,6 +283,9 @@ export default Vue.extend({
         },
         this.isDuringCopy ? { padding: '0' } : {}
       )
+    },
+    innerTab(): string {
+      return this.innerTabs.key[this.innerTabIndex]
     },
     innerTabs(): Record<string, string[]> {
       switch (this.currActivePanel) {
@@ -342,18 +338,12 @@ export default Vue.extend({
         }
         case 'color': {
           return Object.assign(defaultVal, {
-            currEvent: this.currColorEvent,
             panelHistory: this.panelHistory
           })
         }
         case 'color-picker': {
           return Object.assign(defaultVal, {
-            currEvent: this.currColorEvent
-          })
-        }
-        case 'resize': {
-          return Object.assign(defaultVal, {
-            ref: 'panelResize'
+            currEvent: colorUtils.currEvent
           })
         }
         case 'brand-list': {
@@ -461,10 +451,8 @@ export default Vue.extend({
     leftBtnName(): string {
       if (this.insertTheme) {
         return 'vivisticker_back'
-      } else if (this.panelHistory.length > 0 && !['resize', 'color-picker'].includes(this.currActivePanel)) {
-        return 'back-circle'
       } else {
-        return 'close-circle'
+        return 'back-circle'
       }
     },
     rightBtnName(): string {
@@ -541,11 +529,6 @@ export default Vue.extend({
             break
           }
 
-          case 'resize': {
-            (this.$refs.panelResize as any).applySelectedFormat()
-            break
-          }
-
           case 'color': {
             if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
               this.addRecentlyColors(colorUtils.currColor)
@@ -557,6 +540,9 @@ export default Vue.extend({
             vivistickerUtils.commitNewBgColor()
             break
           }
+        }
+        if (this.showExtraColorPanel) {
+          this.addRecentlyColors(colorUtils.currColor)
         }
         this.closeMobilePanel()
 
@@ -574,7 +560,7 @@ export default Vue.extend({
     },
     currActivePanel(newVal) {
       this.panelHistory = []
-      this.innerTab = this.innerTabs.key[0]
+      this.innerTabIndex = 0
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
       this.panelHeight = this.initHeightPx()
@@ -605,29 +591,23 @@ export default Vue.extend({
       return {
         handler: this.closeMobilePanel,
         middleware: this.middleware,
-        events: ['contextmenu', 'touchstart', 'pointerdown']
+        events: ['touchstart', 'pointerdown',
+          ...window.location.host === 'localhost:8080' ? [] : ['contextmenu']]
       }
-    },
-    keepPanel(target: HTMLElement): boolean {
-      if (!target || target.id === 'app') return false
-      // If target is modal or panel-icon, don't close Panel.
-      else if (target.className.includes?.('modal')) return true
-      else if (target.className.includes?.('panel-icon')) return true
-      return this.keepPanel(target.parentNode as HTMLElement)
     },
     middleware(event: MouseEvent | TouchEvent | PointerEvent) {
       const target = event.target as HTMLElement
-      // If target is a Svg <use>, its class will be SVGAnimatedString obj.
-      // Ignor its className check using optional chaining "?.includes()"
-      return !(this.currActivePanel === 'select-design' ||
-        this.keepPanel(target) ||
-        target.className.includes?.('footer-tabs') ||
-        target.className === 'inputNode'
+      return !(target.matches('.header-bar .panel-icon *') || // Skip header-bar icon
+        target.matches('.modal-container, .modal-container *') || // Skip modal-card
+        target.className.includes?.('footer-tabs') || // Skip footer-bar icon
+        target.className === 'inputNode' ||
+        this.currActivePanel === 'select-design'
       )
     },
     closeMobilePanel() {
       this.$emit('switchTab', 'none')
       this.panelHistory = []
+      editorUtils.setCurrActivePanel('none')
     },
     initHeightPx() {
       // 40 = HeaderTabs height
@@ -635,9 +615,6 @@ export default Vue.extend({
     },
     maxHeightPx() {
       return ((this.$el.parentElement as HTMLElement).clientHeight - (this.trueWholeSize ? 0 : 40)) * 1.0
-    },
-    getMaxHeightPx(): number {
-      return parseFloat((this.$el as HTMLElement).style.maxHeight.split('px')[0])
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
       if (this.fixSize) {
@@ -682,22 +659,14 @@ export default Vue.extend({
       }
     },
     handleLockedNotify() {
-      this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+      this.$notify({ group: 'copy', text: i18n.tc('NN0804') })
     },
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActiveSubPanel === panelType) {
         this.setCurrActiveSubPanel('none')
       } else {
         this.setCurrActiveSubPanel(panelType)
-        if (props) {
-          if (panelType === 'color' && props.currColorEvent) {
-            this.currSubColorEvent = props.currColorEvent
-          }
-        }
       }
-    },
-    switchInnerTab(panelIndex: number) {
-      this.innerTab = this.innerTabs.key[panelIndex]
     },
     fitPage() {
       this.$nextTick(() => {
@@ -795,10 +764,6 @@ export default Vue.extend({
     height: 100%;
     overflow-y: scroll;
     @include no-scrollbar;
-  }
-
-  &__inner-tab {
-    margin: 15px 0 14px 0;
   }
 
   &__title {

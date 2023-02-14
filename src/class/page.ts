@@ -2,12 +2,19 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import { IBackgroundImage, IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import layerFactary from '@/utils/layerFactary'
+import SnapUtils from '@/utils/snapUtils'
 
 export class Page implements IPage {
   [index: string]: unknown
   id: string
+  snapUtils: SnapUtils
   width: number
   height: number
+  x: number
+  y: number
+  physicalWidth: number
+  physicalHeight: number
+  unit: string
   backgroundColor: string
   backgroundImage: IBackgroundImage
   name: string
@@ -21,11 +28,32 @@ export class Page implements IPage {
     h: Array<number>
   }
 
+  isEnableBleed: boolean
+  bleeds: {
+    top: number
+    bottom: number
+    left: number
+    right: number
+  }
+
+  physicalBleeds: {
+    top: number
+    bottom: number
+    left: number
+    right: number
+  }
+
   isAutoResizeNeeded: boolean
 
   constructor() {
+    this.snapUtils = new SnapUtils(-1)
     this.width = 1080
     this.height = 1080
+    this.x = 0
+    this.y = 0
+    this.physicalWidth = 1080
+    this.physicalHeight = 1080
+    this.unit = 'px'
     this.backgroundColor = '#ffffff'
     this.backgroundImage = {
       config: layerFactary.newImage({
@@ -54,6 +82,19 @@ export class Page implements IPage {
     this.guidelines = {
       v: [],
       h: []
+    }
+    this.isEnableBleed = false
+    this.bleeds = {
+      top: 11,
+      bottom: 11,
+      left: 11,
+      right: 11
+    }
+    this.physicalBleeds = {
+      top: 11,
+      bottom: 11,
+      left: 11,
+      right: 11
     }
     this.isAutoResizeNeeded = false
   }

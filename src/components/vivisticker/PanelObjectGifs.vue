@@ -309,7 +309,7 @@ export default Vue.extend({
         }
       }
     },
-    handleSearch(keyword: string) {
+    async handleSearch(keyword: string) {
       if (this.showFav) {
         this.searchTagInFavoritesCategory(keyword)
       } else {
@@ -319,7 +319,7 @@ export default Vue.extend({
         }
       }
     },
-    handleCategorySearch(categoryName: string) {
+    async handleCategorySearch(categoryName: string) {
       if (this.showFav) {
         this.searchFavorites(categoryName)
       } else {
