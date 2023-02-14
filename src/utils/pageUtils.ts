@@ -614,18 +614,6 @@ class PageUtils {
     })
   }
 
-  getPageWidth(excludes: number[] = []) {
-    // return width and height of first page
-    const pages = this.getPages
-    for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
-      if (!excludes.includes(pageIndex)) {
-        const { width, height } = pages[pageIndex]
-        return { width, height }
-      }
-    }
-    return {}
-  }
-
   hasDesignId(pageIndex: number) {
     return this.getPage(pageIndex).designId !== ''
   }
