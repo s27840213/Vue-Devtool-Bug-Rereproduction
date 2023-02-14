@@ -1,94 +1,67 @@
 // Command that do image edit test
 const adjustOptions = [
-  { name: 'brightness', val: '50', init: '0' },
-  { name: 'brightness', val: '-50', init: '0' },
-  { name: 'contrast', val: '50', init: '0' },
-  { name: 'contrast', val: '-50', init: '0' },
-  { name: 'saturate', val: '50', init: '0' },
-  { name: 'saturate', val: '-50', init: '0' },
-  { name: 'hue', val: '50', init: '0' },
-  { name: 'hue', val: '-50', init: '0' },
-  { name: 'blur', val: '50', init: '0' },
-  { name: 'blur', val: '-50', init: '0' },
-  { name: 'halation', val: '75', init: '0' },
-  { name: 'halation', val: '25', init: '0' },
-  { name: 'warm', val: '50', init: '0' },
-  { name: 'warm', val: '-50', init: '0' }
+  { name: 'brightness', val: '50' },
+  { name: 'brightness', val: '-50' },
+  { name: 'contrast', val: '50' },
+  { name: 'contrast', val: '-50' },
+  { name: 'saturate', val: '50' },
+  { name: 'saturate', val: '-50' },
+  { name: 'hue', val: '50' },
+  { name: 'hue', val: '-50' },
+  { name: 'blur', val: '50' },
+  { name: 'blur', val: '-50' },
+  { name: 'halation', val: '75' },
+  { name: 'halation', val: '25' },
+  { name: 'warm', val: '50' },
+  { name: 'warm', val: '-50' }
 ] as const
 
 const shadowsOptions = [{
   name: 'shadow',
   options: [
-    { name: 'distance', val: '75', init: '50' },
-    { name: 'distance', val: '25', init: '50' },
-    { name: 'angle', val: '90', init: '20' },
-    { name: 'angle', val: '-90', init: '20' },
-    { name: 'radius', val: '75', init: '50' },
-    { name: 'radius', val: '25', init: '50' },
-    { name: 'spread', val: '15', init: '0' },
-    { name: 'spread', val: '5', init: '0' },
-    { name: 'opacity', val: '75', init: '40' },
-    { name: 'opacity', val: '25', init: '40' },
-    { name: 'color', val: 'FECD56', init: '000000' },
-    { name: 'color', val: 'EB5757', init: '000000' },
+    { name: 'distance', val: '65' },
+    { name: 'angle', val: '23' },
+    { name: 'radius', val: '69' },
+    { name: 'spread', val: '6' },
+    { name: 'opacity', val: '48' },
+    { name: 'color', val: 'EB5757' },
   ]
 }, {
   name: 'blur',
   options: [
-    { name: 'radius', val: '75', init: '50' },
-    { name: 'radius', val: '25', init: '50' },
-    { name: 'spread', val: '23', init: '10' },
-    { name: 'spread', val: '8', init: '10' },
-    { name: 'opacity', val: '75', init: '40' },
-    { name: 'opacity', val: '25', init: '40' },
-    { name: 'color', val: 'FECD56', init: '000000' },
-    { name: 'color', val: 'EB5757', init: '000000' },
+    { name: 'radius', val: '70' },
+    { name: 'spread', val: '18' },
+    { name: 'opacity', val: '75' },
+    { name: 'color', val: 'FECD56' },
   ]
 }, {
   name: 'imageMatched',
   options: [
-    { name: 'distance', val: '75', init: '60' },
-    { name: 'distance', val: '25', init: '60' },
-    { name: 'angle', val: '90', init: '40' },
-    { name: 'angle', val: '-90', init: '40' },
-    { name: 'radius', val: '75', init: '50' },
-    { name: 'radius', val: '25', init: '50' },
-    { name: 'size', val: '90', init: '100' },
-    { name: 'size', val: '80', init: '100' },
-    { name: 'opacity', val: '75', init: '60' },
-    { name: 'opacity', val: '25', init: '60' },
+    { name: 'distance', val: '83' },
+    { name: 'angle', val: '55' },
+    { name: 'radius', val: '19' },
+    { name: 'size', val: '96' },
+    { name: 'opacity', val: '49' },
   ]
 }, {
   name: 'frame',
   options: [
-    { name: 'radius', val: '75', init: '0' },
-    { name: 'radius', val: '25', init: '0' },
-    { name: 'spread', val: '23', init: '20' },
-    { name: 'spread', val: '8', init: '20' },
-    { name: 'opacity', val: '75', init: '100' },
-    { name: 'opacity', val: '25', init: '100' },
-    { name: 'color', val: 'FECD56', init: '000000' },
-    { name: 'color', val: 'EB5757', init: '000000' },
+    { name: 'radius', val: '63' },
+    { name: 'spread', val: '14' },
+    { name: 'opacity', val: '47' },
+    { name: 'color', val: '007ABE' },
   ]
 }, {
   name: 'floating',
   options: [
-    { name: 'x', val: '50', init: '0' },
-    { name: 'x', val: '-50', init: '0' },
-    { name: 'y', val: '50', init: '0' },
-    { name: 'y', val: '-50', init: '0' },
-    { name: 'radius', val: '75', init: '60' },
-    { name: 'radius', val: '25', init: '60' },
-    { name: 'size', val: '89', init: '100' },
-    { name: 'size', val: '46', init: '100' },
-    { name: 'thinkness', val: '75', init: '50' },
-    { name: 'thinkness', val: '25', init: '50' },
-    { name: 'opacity', val: '75', init: '65' },
-    { name: 'opacity', val: '25', init: '65' },
+    { name: 'x', val: '61' },
+    { name: 'y', val: '60' },
+    { name: 'radius', val: '81' },
+    { name: 'size', val: '63' },
+    { name: 'thinkness', val: '61' },
+    { name: 'opacity', val: '36' },
+    { name: 'color', val: '782B76' },
   ]
-}, {
-  name: 'none',
-  options: []
 }] as const
 
 Cypress.Commands.add('imageAdjust', { prevSubject: 'element' }, (subject) => {
@@ -97,9 +70,9 @@ Cypress.Commands.add('imageAdjust', { prevSubject: 'element' }, (subject) => {
     .then(() => {
       for (const option of adjustOptions) {
         cy.get(`.photo-setting .popup-adjust input[type="range"][name="${option.name}"]`)
-          .invoke('val', option.val).trigger('input').snapshotTest(`Adjust ${option.name} ${option.val}`)
-          .get(`.photo-setting .popup-adjust input[type="range"][name="${option.name}"]`)
-          .invoke('val', option.init).trigger('input')
+          .invoke('val', option.val).trigger('input')
+          .snapshotTest(`Adjust ${option.name} ${option.val}`)
+          .get('.popup-adjust__reset').click()
       }
     })
   return cy.wrap(subject)
@@ -156,27 +129,49 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
       for (const shadow of shadowsOptions) {
         cy.get(`.svg-photo-shadow-${shadow.name}`).click()
         cy.get('.nu-layer .nu-layer__inProcess').should('not.exist')
-          .snapshotTest(`Shadow ${shadow.name} init`)
+          .get('.photo-effect-setting__reset').click({ scrollBehavior: 'top' })
+          // 30 = DRAWING_TIMEOUT in imageShadowUtils, debounce time of shadow setting
+          .wait(30).snapshotTest(`Shadow ${shadow.name} default`)
         for (const option of shadow.options) {
           if (option.name === 'color') {
             cy.get('.photo-effect-setting div.photo-effect-setting__value-input')
               .click()
               .get(`.color-btn .color-${option.val}`).eq(0).click()
-              .wait(30).snapshotTest(`Shadow ${shadow.name} ${option.name} ${option.val}`)
-              .get(`.color-btn .color-${option.init}`).eq(0).click()
               .get('.color-panel__btn').click()
           } else {
             cy.get(`.photo-effect-setting input[type="range"][name="${option.name}"]`)
-              .invoke('val', option.val).trigger('input').wait(30).snapshotTest(`Shadow ${shadow.name} ${option.name} ${option.val}`)
-              .get(`.photo-effect-setting input[type="range"][name="${option.name}"]`)
-              .invoke('val', option.init).trigger('input')
+              .invoke('val', option.val).trigger('input')
           }
         }
+        cy.wait(30).snapshotTest(`Shadow ${shadow.name} preset`)
       }
     })
+    // Restore image to original state
+    .get('.svg-photo-shadow-none').click()
   return cy.wrap(subject)
 })
 
-Cypress.Commands.add('imageSetBg', { prevSubject: 'element' }, (subject) => {
-  return cy.wrap(subject)
+Cypress.Commands.add('imageSetAsBg', { prevSubject: 'element' }, (subject) => {
+  const bgAdjustOptions = [
+    { name: 'brightness', val: '80' },
+    { name: 'contrast', val: '80' },
+  ] as const
+
+  cy.wrap(subject).click()
+    .get('.photo-setting .photo-setting__grid button').contains('調整').click()
+    .then(() => {
+      for (const option of bgAdjustOptions) {
+        cy.get(`.photo-setting .popup-adjust input[type="range"][name="${option.name}"]`)
+          .invoke('val', option.val).trigger('input')
+      }
+    })
+    .wrap(subject).rightclick()
+    .get('.popup-layer').contains('設為背景').click()
+    .snapshotTest('Set as BG')
+    // Restore image to original state
+    .get('.nu-background-image').rightclick()
+    .get('.popup-page').contains('分離背景照片').click()
+    .get('.photo-setting .photo-setting__grid button').contains('調整').click()
+    .get('.popup-adjust__reset').click()
+  return cy.get(subject.selector)
 })

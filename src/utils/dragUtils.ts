@@ -113,7 +113,7 @@ class DragUtils {
     if (data.type === 'image') {
       mouseUtils.onDrop(e, pageIndex)
     } else {
-      const target = document.querySelector(`.nu-page-${pageIndex}`) as HTMLElement
+      const target = document.querySelector(`.nu-page-content-${pageIndex}`) as HTMLElement
       const targetPos = {
         x: target.getBoundingClientRect().x,
         y: target.getBoundingClientRect().y
@@ -133,15 +133,21 @@ class DragUtils {
           const pageSize = data.groupChildId ? pageUtils.currFocusPageSize : pageUtils.getPageSize(pageIndex)
           const newPageIndex = data.groupChildId ? data.content_ids.findIndex((content: any) => content.id === data.groupChildId) : 0
           const { height, width, unit } = data.content_ids[newPageIndex]
-          // const aspectRatio = height / width
-          // const precision = pageSize.unit === 'px' ? 0 : PRECISION
-          // const resize = {
-          //   width: pageSize.width,
-          //   height: round(pageSize.width * aspectRatio, precision),
-          //   physicalWidth: pageSize.physicalWidth,
-          //   physicalHeight: round(pageSize.physicalWidth * aspectRatio, precision),
-          //   unit: pageSize.unit
-          // }
+          let resize = pageSize
+
+          if (pageUtils.isDetailPage) {
+            const aspectRatio = height / width
+            const precision = pageSize.unit === 'px' ? 0 : PRECISION
+            resize = {
+              width: pageSize.width,
+              height: round(pageSize.width * aspectRatio, precision),
+              physicalWidth: pageSize.physicalWidth,
+              physicalHeight: round(pageSize.physicalWidth * aspectRatio, precision),
+              unit: pageSize.unit
+            }
+            addTemplate(resize)
+            return
+          }
 
           const isSameSize = pageSize.physicalWidth === width && pageSize.physicalHeight === height && pageSize.unit === unit
           if (!isSameSize) {
@@ -152,13 +158,15 @@ class DragUtils {
                 msg: `${i18n.global.t('NN0021')}`,
                 class: 'btn-light-mid',
                 style: { border: '1px solid #4EABE6' },
-                action: () => addTemplate(pageSize)
+                action: () => addTemplate(resize)
               },
               {
                 msg: `${i18n.global.t('NN0208')}`,
                 action: () => addTemplate()
               }
             )
+          } else {
+            addTemplate()
           }
         } else {
           assetUtils.addAsset(data, {

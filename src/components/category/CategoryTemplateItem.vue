@@ -126,7 +126,7 @@ export default defineComponent({
        * @todo show the modal if the width,height are not the same in detailed page mode
        */
       if (this.isDetailPage) {
-        const { width: pageWidth = 1000 } = pageUtils.getPageWidth()
+        const { width: pageWidth = 1000 } = pageSize
         const ratio = pageWidth / (matchCover.width || width)
         const resize = { width: pageWidth, height: (matchCover.height || height) * ratio }
         return cb(resize)

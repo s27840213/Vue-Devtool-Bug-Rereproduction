@@ -7,6 +7,7 @@ import { IBleed, IPage } from '@/interfaces/page'
 import store from '@/store'
 import { notify } from '@kyvg/vue3-notification'
 import { captureException } from '@sentry/browser'
+import { round } from 'lodash'
 import { nextTick } from 'vue'
 import backgroundUtils from './backgroundUtils'
 import ControlUtils from './controlUtils'
@@ -26,7 +27,7 @@ import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
 import TextUtils from './textUtils'
 import tiptapUtils from './tiptapUtils'
-import unitUtils from './unitUtils'
+import unitUtils, { PRECISION } from './unitUtils'
 import ZindexUtils from './zindexUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
@@ -615,12 +616,13 @@ class AssetUtils {
   addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
     const currGroupType = store.getters.getGroupType
+    const isDetailPage = groupType === 1 || currGroupType === 1
     store.commit('SET_groupId', groupId)
     store.commit('SET_mobileSidebarPanelOpen', false)
     // groupType: -1 normal/0 group/1 detail
     // if detail, no updates; if not, do not update to detail
     // -> update when {old, new} !== detail
-    if (currGroupType !== 1 && groupType !== 1) {
+    if (!isDetailPage) {
       store.commit('SET_groupType', groupType)
     }
     const promises = contents?.filter(content => childId ? content.id === childId : true)
@@ -644,38 +646,72 @@ class AssetUtils {
           targetIndex = this.getPages.length
           replace = false
         }
+
+        // get bleeds of detail page
+        let detailPageBleeds: IBleed
+        if (isDetailPage) {
+          detailPageBleeds = currFocusPage.physicalBleeds
+          const pages = this.getPages
+          detailPageBleeds = {
+            ...detailPageBleeds,
+            top: pages[0].physicalBleeds.top,
+            bottom: pages[pages.length - 1].physicalBleeds.bottom,
+          } as IBleed
+        }
+
         pageUtils.setAutoResizeNeededForPages(jsonDataList, true)
         pageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
         nextTick(() => {
           pageUtils.scrollIntoPage(targetIndex)
           // @TODO: resize page/layer before adding to the store.
           if (resize) resizeUtils.resizePage(targetIndex, this.getPage(targetIndex), resize)
-          if ((groupType === 1 || currGroupType === 1) && !resize) {
+          if (isDetailPage && !resize) {
             // 電商詳情頁模板 + 全部加入 = 所有寬度設為1000
-            const { width: pageWidth = 1000 } = pageUtils.getPageWidth()
+            const { width: pageWidth = 1000, physicalWidth: pagePhysicalWidth = pageWidth, unit: pageUnit = 'px' } = currFocusPage
+            const precision = pageUnit === 'px' ? 0 : PRECISION
             for (const idx in jsonDataList) {
-              const { height, width } = jsonDataList[idx]
+              const { height, width, physicalWidth = width, physicalHeight = height, unit = 'px' } = jsonDataList[idx]
+              const templateSize = unitUtils.convertSize(physicalWidth, physicalHeight, unit, pageUnit)
               const pageIndex = +idx + targetIndex
-              const newSize = { height: height * pageWidth / width, width: pageWidth }
-              resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
+              const newPhysicalSize = { physicalHeight: round(templateSize.height * pagePhysicalWidth / templateSize.width, precision), physicalWidth: pagePhysicalWidth }
+              const newPxSize = { height: round(height * pageWidth / width), width: pageWidth }
+              resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), {
+                ...newPxSize,
+                ...newPhysicalSize,
+                unit: pageUnit
+              })
             }
           }
 
           // apply bleeds of currFocusPage
-          if (resize && Object.keys(resize).length > 0) {
+          if ((resize && Object.keys(resize).length > 0) || isDetailPage) {
             let physicalBleeds
             if (currFocusPage.bleeds && currFocusPage.physicalBleeds) {
               // convert bleeds to template unit
+              physicalBleeds = isDetailPage ? detailPageBleeds : currFocusPage.physicalBleeds
               const dpi = pageUtils.getPageDPI(currFocusPage)
-              const unit = resize?.unit ?? jsonDataList[0]?.unit ?? 'px'
-              physicalBleeds = currFocusPage.unit === unit ? currFocusPage.physicalBleeds
-                : Object.fromEntries(Object.entries(currFocusPage.physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, currFocusPage.unit, unit, k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
+              const unit = resize?.unit ?? (isDetailPage ? currFocusPage.unit : jsonDataList[0]?.unit) ?? 'px'
+              if (currFocusPage.unit !== unit) physicalBleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, unitUtils.convert(v, currFocusPage.unit, unit, k === 'left' || k === 'right' ? dpi.width : dpi.height)])) as IBleed
             }
             for (const idx in jsonDataList) {
               const pageIndex = +idx + targetIndex
               pageUtils.setIsEnableBleed(!!currFocusPage.isEnableBleed, pageIndex)
-              if (physicalBleeds) pageUtils.setBleeds(pageIndex, physicalBleeds)
+              if (!physicalBleeds) continue
+
+              let newPhysicalBleeds: IBleed = physicalBleeds
+              if (isDetailPage) {
+                newPhysicalBleeds = {
+                  ...newPhysicalBleeds,
+                  top: pageIndex === 0 ? physicalBleeds.top : 0,
+                  bottom: pageIndex === (this.getPages.length - 1) ? physicalBleeds.bottom : 0,
+                }
+              }
+              pageUtils.setBleeds(pageIndex, newPhysicalBleeds)
             }
+
+            // remove bottom bleed if template is add to last page
+            if (isDetailPage && !replace) pageUtils.setBleeds(targetIndex - 1, { ...this.getPage(targetIndex - 1).physicalBleeds, bottom: 0 })
+
             backgroundUtils.fitPageBackground(targetIndex)
           }
           store.commit('SET_currActivePageIndex', targetIndex)
