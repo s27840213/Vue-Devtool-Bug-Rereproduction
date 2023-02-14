@@ -176,7 +176,7 @@ const actions: ActionTree<ITextState, unknown> = {
           link.rel = 'stylesheet'
           document.head.appendChild(link)
           return new Promise<void>(resolve => {
-            const checkLoaded = window.setTimeout(() => {
+            const checkLoaded = window.setInterval(() => {
               if (Array.from(document.styleSheets).find(s => s.href === cssUrl)) {
                 clearInterval(checkLoaded)
                 commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
@@ -201,7 +201,7 @@ const actions: ActionTree<ITextState, unknown> = {
         // })
       } else {
         return new Promise<void>(resolve => {
-          const checkLoaded = window.setTimeout(() => {
+          const checkLoaded = window.setInterval(() => {
             if (font.loaded) {
               clearInterval(checkLoaded)
               resolve()
@@ -221,7 +221,7 @@ const actions: ActionTree<ITextState, unknown> = {
         if (check()) {
           resolve(true)
         } else {
-          const checkLoaded = window.setTimeout(() => {
+          const checkLoaded = window.setInterval(() => {
             if (check()) {
               clearInterval(checkLoaded)
               resolve(true)

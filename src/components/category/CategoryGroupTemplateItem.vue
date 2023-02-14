@@ -94,7 +94,7 @@ export default defineComponent({
     },
     handleCarouse () {
       this.isHover = true
-      this.waitTimer = window.setTimeout(() => {
+      this.waitTimer = window.setInterval(() => {
         if (this.isHover) {
           this.showCarousel = true
         }

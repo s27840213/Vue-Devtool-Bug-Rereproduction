@@ -226,7 +226,7 @@ class UploadUtils {
             progress: uploadProgress / 2
           })
           if (uploadProgress === 100) {
-            increaseInterval = window.setTimeout(() => {
+            increaseInterval = window.setInterval(() => {
               const targetIndex = this.images.findIndex((img: IAssetPhoto) => {
                 return img.id === assetId
               })
@@ -240,7 +240,7 @@ class UploadUtils {
         xhr.onerror = networkUtils.notifyNetworkError
         xhr.onload = () => {
           // polling the JSON file of uploaded image
-          const interval = window.setTimeout(() => {
+          const interval = window.setInterval(() => {
             const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
             fetch(pollingTargetSrc).then((response) => {
               if (response.status === 200) {
@@ -376,7 +376,7 @@ class UploadUtils {
                   progress: uploadProgress / 2
                 })
                 if (uploadProgress === 100) {
-                  increaseInterval = window.setTimeout(() => {
+                  increaseInterval = window.setInterval(() => {
                     const targetIndex = this.images.findIndex((img: IAssetPhoto) => {
                       return img.id === assetId
                     })
@@ -391,7 +391,7 @@ class UploadUtils {
             xhr.onerror = networkUtils.notifyNetworkError
             xhr.onload = () => {
               // polling the JSON file of uploaded image
-              const interval = window.setTimeout(() => {
+              const interval = window.setInterval(() => {
                 const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
                 fetch(pollingTargetSrc).then((response) => {
                   if (response.status === 200) {
@@ -439,7 +439,7 @@ class UploadUtils {
           xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
             // polling the JSON file of uploaded image
-            const interval = window.setTimeout(() => {
+            const interval = window.setInterval(() => {
               const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
@@ -469,7 +469,7 @@ class UploadUtils {
           xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
             // polling the JSON file of uploaded image
-            const interval = window.setTimeout(() => {
+            const interval = window.setInterval(() => {
               const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/avatar/result.json?ver=${generalUtils.generateRandomString(6)}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
@@ -503,7 +503,7 @@ class UploadUtils {
           xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
             // polling the JSON file of uploaded image
-            const interval = window.setTimeout(() => {
+            const interval = window.setInterval(() => {
               const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {

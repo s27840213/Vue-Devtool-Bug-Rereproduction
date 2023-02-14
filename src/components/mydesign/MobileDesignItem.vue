@@ -279,7 +279,7 @@ export default defineComponent({
     },
     startCarousel() {
       if (this.config.pageNum === 1) return
-      this.waitTimer = window.setTimeout(() => {
+      this.waitTimer = window.setInterval(() => {
         const success = this.getThumbnailSize()
         if (success) {
           clearInterval(this.waitTimer)

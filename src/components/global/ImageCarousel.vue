@@ -30,7 +30,7 @@ export default defineComponent({
     }
   },
   mounted () {
-    this.handler = window.setTimeout(() => {
+    this.handler = window.setInterval(() => {
       this.handleNext()
     }, this.speed)
   },

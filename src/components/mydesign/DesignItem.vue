@@ -292,7 +292,7 @@ export default defineComponent({
       if (!thumbnailElement) return
       this.isMouseOver = true
       if (this.config.pageNum === 1) return
-      this.waitTimer = window.setTimeout(() => {
+      this.waitTimer = window.setInterval(() => {
         if (this.isMouseOver) {
           this.showCarousel = true
           this.renderedWidth = thumbnailElement.width
