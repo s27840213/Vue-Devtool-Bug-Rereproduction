@@ -646,6 +646,9 @@ export default Vue.extend({
     justify-content: center;
     box-sizing: border-box;
     padding: 0px 4px;
+    & .color-btn {
+      margin: 1px;
+    }
     > span {
       transition: background-color 0.2s, color 0.2s;
       @include body-XXS;
