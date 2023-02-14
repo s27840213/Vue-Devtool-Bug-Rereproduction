@@ -605,7 +605,7 @@ export default defineComponent({
         return
       }
       GroupUtils.deselect()
-      const page = generalUtils.deepCopy(this.config) as IPage
+      const page = generalUtils.deepCopy(this.pageState.config) as IPage
       page.layers.forEach(l => {
         l.id = generalUtils.generateRandomString(8)
         if (l.type === LayerType.frame) {
