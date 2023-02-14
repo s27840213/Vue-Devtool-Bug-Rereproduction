@@ -82,7 +82,7 @@ export default defineComponent({
     if (!webViewUtils.isBrowserMode) {
       webViewUtils.registerCallbacks('main')
     }
-    webViewUtils.sendAppLoaded()
+    this.$router.isReady().then(() => { webViewUtils.sendAppLoaded() })
   },
   beforeMount() {
     networkUtils.registerNetworkListener()
