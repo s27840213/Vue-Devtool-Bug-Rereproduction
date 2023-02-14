@@ -7,7 +7,7 @@
             class="footer-tabs__item"
             :class="{'click-disabled': (tab.disabled || isLocked)}"
             @click="handleTabAction(tab)")
-          color-btn(v-if="tab.icon === 'color'" size="22px"
+          color-btn(v-if="tab.icon === 'color'" size="24px"
                     class="click-disabled"
                     :color="globalSelectedColor")
           svg-icon(v-else class="click-disabled"

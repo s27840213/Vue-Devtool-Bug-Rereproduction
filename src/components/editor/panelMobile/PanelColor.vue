@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="panel-color px-5")
     div(v-if="showDocumentColors")
-      div(class="text-left") {{$t('NN0798')}}
+      div(class="text-left body-SM") {{$t('NN0798')}}
       div(class="panel-color__shape-colors" :style="colorsStyle"
           @scroll.passive="updateColorsOverflow" ref="colors")
         color-btn(v-for="(color, index) in getDocumentColors"
@@ -142,7 +142,7 @@ export default Vue.extend({
     colorsStyle(): Record<string, string> {
       // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
       return {
-        gridTemplateColumns: `repeat(${this.getDocumentColors.length}, calc((100% - 30px) / 7))`,
+        gridTemplateColumns: `repeat(${this.getDocumentColors.length}, calc((100% - 60px) / 7))`,
         maskImage: `linear-gradient(to right, transparent 0, black ${this.leftOverflow ? '48px' : 0}, black calc(100% - ${this.rightOverflow ? '48px' : '0px'}), transparent 100%)`
       }
     },
@@ -304,9 +304,10 @@ export default Vue.extend({
   &__shape-colors {
     @include no-scrollbar;
     width: 100%;
-    padding: 10px 0 16px 0;
+    padding: 10px 12px 16px 12px;
+    box-sizing: border-box;
     display: grid;
-    gap: 5px;
+    gap: 10px;
     overflow-x: auto;
   }
   &__hr {
