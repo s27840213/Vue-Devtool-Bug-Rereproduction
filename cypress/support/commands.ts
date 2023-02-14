@@ -68,6 +68,11 @@ Cypress.Commands.add('deleteAllLayers', () => {
   cy.get('body').type('{ctrl+A}').type('{del}')
 })
 
+Cypress.Commands.add('deselectAllLayers', () => {
+  cy.get('.pages-wrapper').eq(0).type('{ctrl+D}')
+    .get('.page-control').children().should('have.length', 0)
+})
+
 Cypress.Commands.add('importDesign', (designName: string) => {
   // TODO: Use @/ instead of ../
   const designJson = require(`../fixtures/design/${designName}`)
