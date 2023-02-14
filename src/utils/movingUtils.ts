@@ -308,6 +308,9 @@ export class MovingUtils {
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
+    if (eventUtils.checkIsMultiTouch(e)) {
+      return
+    }
     this.isControlling = true
     switch (this.config.type) {
       case LayerType.group:
@@ -433,8 +436,6 @@ export class MovingUtils {
     const isReachTopEdge = currPage.y > 0 && offsetPos.y > 0 && diff.y > limitRange.y
     const isReachBottomEdge = currPage.y <= 0 && offsetPos.y < 0 && diff.y > limitRange.y
 
-    console.log(diff.y, limitRange.y)
-
     if (isReachRightEdge || isReachLeftEdge) {
       pageUtils.updatePagePos(this.pageIndex, {
         x: isReachRightEdge ? originPageSize.width - newPageSize.w : 0
@@ -459,6 +460,9 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
+    if (eventUtils.checkIsMultiTouch(e)) {
+      return
+    }
     this.isControlling = false
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
