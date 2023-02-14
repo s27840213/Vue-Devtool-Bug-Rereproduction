@@ -29,7 +29,7 @@ declare namespace Cypress {
     imageAdjust(): Chainable<JQuery<HTMLElement>>
     imageCrop(enterCrop: 'button'|'dblclick'): Chainable<JQuery<HTMLElement>>
     imageShadow(): Chainable<JQuery<HTMLElement>>
-    imageSetBg(): Chainable<JQuery<HTMLElement>>
+    imageSetAsBg(): Chainable<JQuery<HTMLElement>>
 
     // npm package type define
     compareSnapshot(

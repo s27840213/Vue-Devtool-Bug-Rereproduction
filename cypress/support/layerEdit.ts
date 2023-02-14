@@ -9,6 +9,7 @@ Cypress.Commands.add('layerFlip', { prevSubject: 'element' }, (subject) => {
     .snapshotTest('Flip hv')
     .get('.popup-flip .svg-flip-h').click()
     .snapshotTest('Flip v')
+    // Restore image to original state
     .get('.popup-flip .svg-flip-v').click()
   return cy.wrap(subject)
 })
@@ -31,6 +32,7 @@ Cypress.Commands.add('layerAlign', { prevSubject: 'element' }, (subject) => {
           .snapshotTest(`Align ${align}`)
       }
     })
+    // Restore layer to original state
     .get('.svg-center-horizontally').click()
     .get('.svg-center-vertically').click()
   return cy.wrap(subject)

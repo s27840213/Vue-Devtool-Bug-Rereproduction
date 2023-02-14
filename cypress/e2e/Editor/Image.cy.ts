@@ -14,10 +14,9 @@ describe('Testing nu-image edit', () => {
       .imageCrop('dblclick')
       .imageShadow()
       .layerAlign()
+      .imageSetAsBg()
+      // TODO: Find reason why image mismatch after imageSetAsBg
       // .deselectAllLayers().snapshotTest('init').get('.nu-image') // Check if image restore to init
-      .then((prev) => {
-        console.log('end prev', prev)
-      })
   })
   // it('Auto BG remove', function () {
   //   //

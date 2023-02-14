@@ -1,19 +1,19 @@
 // Command that do image edit test
 const adjustOptions = [
-  { name: 'brightness', val: '50', init: '0' },
-  { name: 'brightness', val: '-50', init: '0' },
-  { name: 'contrast', val: '50', init: '0' },
-  { name: 'contrast', val: '-50', init: '0' },
-  { name: 'saturate', val: '50', init: '0' },
-  { name: 'saturate', val: '-50', init: '0' },
-  { name: 'hue', val: '50', init: '0' },
-  { name: 'hue', val: '-50', init: '0' },
-  { name: 'blur', val: '50', init: '0' },
-  { name: 'blur', val: '-50', init: '0' },
-  { name: 'halation', val: '75', init: '0' },
-  { name: 'halation', val: '25', init: '0' },
-  { name: 'warm', val: '50', init: '0' },
-  { name: 'warm', val: '-50', init: '0' }
+  { name: 'brightness', val: '50' },
+  { name: 'brightness', val: '-50' },
+  { name: 'contrast', val: '50' },
+  { name: 'contrast', val: '-50' },
+  { name: 'saturate', val: '50' },
+  { name: 'saturate', val: '-50' },
+  { name: 'hue', val: '50' },
+  { name: 'hue', val: '-50' },
+  { name: 'blur', val: '50' },
+  { name: 'blur', val: '-50' },
+  { name: 'halation', val: '75' },
+  { name: 'halation', val: '25' },
+  { name: 'warm', val: '50' },
+  { name: 'warm', val: '-50' }
 ] as const
 
 const shadowsOptions = [{
@@ -70,9 +70,9 @@ Cypress.Commands.add('imageAdjust', { prevSubject: 'element' }, (subject) => {
     .then(() => {
       for (const option of adjustOptions) {
         cy.get(`.photo-setting .popup-adjust input[type="range"][name="${option.name}"]`)
-          .invoke('val', option.val).trigger('input').snapshotTest(`Adjust ${option.name} ${option.val}`)
-          .get(`.photo-setting .popup-adjust input[type="range"][name="${option.name}"]`)
-          .invoke('val', option.init).trigger('input')
+          .invoke('val', option.val).trigger('input')
+          .snapshotTest(`Adjust ${option.name} ${option.val}`)
+          .get('.popup-adjust__reset').click()
       }
     })
   return cy.wrap(subject)
@@ -146,10 +146,32 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
         cy.wait(30).snapshotTest(`Shadow ${shadow.name} preset`)
       }
     })
+    // Restore image to original state
     .get('.svg-photo-shadow-none').click()
   return cy.wrap(subject)
 })
 
-Cypress.Commands.add('imageSetBg', { prevSubject: 'element' }, (subject) => {
-  return cy.wrap(subject)
+Cypress.Commands.add('imageSetAsBg', { prevSubject: 'element' }, (subject) => {
+  const bgAdjustOptions = [
+    { name: 'brightness', val: '80' },
+    { name: 'contrast', val: '80' },
+  ] as const
+
+  cy.wrap(subject).click()
+    .get('.photo-setting .photo-setting__grid button').contains('調整').click()
+    .then(() => {
+      for (const option of bgAdjustOptions) {
+        cy.get(`.photo-setting .popup-adjust input[type="range"][name="${option.name}"]`)
+          .invoke('val', option.val).trigger('input')
+      }
+    })
+    .wrap(subject).rightclick()
+    .get('.popup-layer').contains('設為背景').click()
+    .snapshotTest('Set as BG')
+    // Restore image to original state
+    .get('.nu-background-image').rightclick()
+    .get('.popup-page').contains('分離背景照片').click()
+    .get('.photo-setting .photo-setting__grid button').contains('調整').click()
+    .get('.popup-adjust__reset').click()
+  return cy.get(subject.selector)
 })
