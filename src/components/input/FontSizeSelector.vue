@@ -142,7 +142,7 @@ export default defineComponent({
     },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
-      const interval = window.setTimeout(() => {
+      const interval = window.setInterval(() => {
         if (new Date().getTime() - startTime > 500) {
           try {
             textPropUtils.fontSizeStepping(step)

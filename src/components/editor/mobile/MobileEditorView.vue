@@ -41,6 +41,7 @@ import store from '@/store'
 import backgroundUtils from '@/utils/backgroundUtils'
 import ControlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
+import eventUtils from '@/utils/eventUtils'
 import GroupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -290,6 +291,10 @@ export default defineComponent({
       ]
     ),
     outerClick(e: MouseEvent) {
+      console.log('outer click')
+      if (eventUtils.checkIsMultiTouch(e)) {
+        return
+      }
       if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         editorUtils.setInBgSettingMode(false)
         GroupUtils.deselect()

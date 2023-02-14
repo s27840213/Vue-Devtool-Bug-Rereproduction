@@ -158,14 +158,12 @@ import i18n from '@/i18n'
 import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IStyle, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import { ILayerInfo, FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
+import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
 import DragUtils from '@/utils/dragUtils'
-import editorUtils from '@/utils/editorUtils'
-import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
-import formatUtils from '@/utils/formatUtils'
+import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import FrameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -175,6 +173,7 @@ import LayerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import mathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
+import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
@@ -187,7 +186,6 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { MovingUtils } from '@/utils/movingUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -1206,6 +1204,9 @@ export default defineComponent({
       window.addEventListener('keydown', this.handleScaleOffset)
     },
     scaling(event: MouseEvent | TouchEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       if (generalUtils.getEventType(event) !== 'touch') {
         event.preventDefault()
       }
@@ -1361,7 +1362,10 @@ export default defineComponent({
         ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x + scaleOffset.x, trans.y + scaleOffset.y)
       }
     },
-    scaleEnd() {
+    scaleEnd(event: PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       this.isControlling = false
       // StepsUtils.record()
       StepsUtils.asyncRecord()
@@ -1375,6 +1379,9 @@ export default defineComponent({
       this.snapUtils.event.emit('clearSnapLines')
     },
     lineEndMoveStart(event: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.isControlling = true
       this.isLineEndMoving = true
@@ -1400,6 +1407,9 @@ export default defineComponent({
       eventUtils.addPointerEvent('pointerup', this.lineEndMoveEnd)
     },
     lineEndMoving(event: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       event.preventDefault()
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
@@ -1426,7 +1436,10 @@ export default defineComponent({
       ControlUtils.updateShapeLinePoint(this.pageIndex, this.layerIndex, newPoint)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
     },
-    lineEndMoveEnd() {
+    lineEndMoveEnd(event: PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       this.isControlling = false
       this.isLineEndMoving = false
       StepsUtils.asyncRecord()
@@ -1439,6 +1452,9 @@ export default defineComponent({
       this.snapUtils.event.emit('clearSnapLines')
     },
     resizeStart(event: MouseEvent, type: string) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
@@ -1514,6 +1530,9 @@ export default defineComponent({
       }
     },
     resizing(event: MouseEvent | TouchEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       event.preventDefault()
       const altPressed = generalUtils.exact([event.altKey])
 
@@ -1616,7 +1635,10 @@ export default defineComponent({
         ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x + scaleOffset.x, trans.y + scaleOffset.y)
       }
     },
-    resizeEnd() {
+    resizeEnd(event: PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       ImageUtils.imgBuffer = {
         width: 0,
         height: 0,
@@ -1638,6 +1660,9 @@ export default defineComponent({
       this.$emit('setFocus')
     },
     rotateStart(event: MouseEvent | PointerEvent, index = -1) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
       const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
       const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
@@ -1668,6 +1693,9 @@ export default defineComponent({
       eventUtils.addPointerEvent('pointerup', this.rotateEnd)
     },
     rotating(event: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
       }
@@ -1711,7 +1739,10 @@ export default defineComponent({
         this.setCursorStyle(ControlUtils.getCornerRataterMap[(index + 8) % 8])
       }
     },
-    rotateEnd() {
+    rotateEnd(event: PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       this.isRotating = false
       this.isControlling = false
       this.initCornerRotate = -1

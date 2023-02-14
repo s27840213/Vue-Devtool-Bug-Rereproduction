@@ -14,6 +14,7 @@ declare namespace Cypress {
     // commands.ts
     login(): Chainable<void>
     deleteAllLayers(): Chainable<void>
+    deselectAllLayers(): Chainable<void>
     importDesign(designName: string): Chainable<void>
     snapshotTest(testName: string): Chainable<void>
     getAllCategoryName(panel: ISidebarData, categoryName?: string[], last?: boolean): Chainable<string[]>
@@ -28,7 +29,7 @@ declare namespace Cypress {
     imageAdjust(): Chainable<JQuery<HTMLElement>>
     imageCrop(enterCrop: 'button'|'dblclick'): Chainable<JQuery<HTMLElement>>
     imageShadow(): Chainable<JQuery<HTMLElement>>
-    imageSetBg(): Chainable<JQuery<HTMLElement>>
+    imageSetAsBg(): Chainable<JQuery<HTMLElement>>
 
     // npm package type define
     compareSnapshot(
