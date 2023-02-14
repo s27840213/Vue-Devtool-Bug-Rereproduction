@@ -192,7 +192,8 @@ class PageUtils {
       isEnableBleed: false,
       bleeds: defaultBleeds,
       physicalBleeds: defaultBleeds,
-      isAutoResizeNeeded: false
+      isAutoResizeNeeded: false,
+      contentScaleRatio: 1
     }
     // pageData.snapUtils && delete pageData.snapUtils
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))

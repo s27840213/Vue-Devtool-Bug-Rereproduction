@@ -49,6 +49,7 @@ class EditorUtils {
       const page = pageUtils.getPage(pageIndex)
       const contentScaleRatio = this.handleContentScaleCalc(page)
       this.setContentScaleRatio(contentScaleRatio)
+      store.commit('SET_contentScaleRatio4Page', { pageIndex, contentScaleRatio })
     }
   }
 

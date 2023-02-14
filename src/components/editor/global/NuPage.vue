@@ -306,7 +306,7 @@ export default defineComponent({
       lockGuideline: 'getLockGuideline',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
-      contentScaleRatio: 'getContentScaleRatio',
+      // contentScaleRatio: 'getContentScaleRatio',
       pagesLength: 'getPagesLength',
       showAllAdminTool: 'user/showAllAdminTool',
       useMobileEditor: 'getUseMobileEditor',
@@ -316,6 +316,13 @@ export default defineComponent({
       isImgCtrl: 'imgControl/isImgCtrl',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
+    contentScaleRatio(): number {
+      if (this.$isTouchDevice) {
+        return this.config.contentScaleRatio
+      } else {
+        return 1
+      }
+    },
     config(): IPage {
       if (!this.pageState.config.isEnableBleed) return this.pageState.config
       return {
