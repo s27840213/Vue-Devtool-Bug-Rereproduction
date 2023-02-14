@@ -25,6 +25,7 @@ import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
 import unsplash from '@/store/module/unsplash'
 import user from '@/store/module/user'
+import webView from '@/store/module/webView'
 import photos from '@/store/photos'
 import text from '@/store/text'
 import imgShadowMutations from '@/store/utils/imgShadow'
@@ -1072,7 +1073,8 @@ const store = createStore({
     payment,
     shadow,
     fontTag,
-    imgControl
+    imgControl,
+    webView
   }
 })
 export default store

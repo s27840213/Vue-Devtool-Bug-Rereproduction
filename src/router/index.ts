@@ -5,6 +5,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
+import webViewUtils from '@/utils/vivipicWebViewUtils'
 import BrandKit from '@/views/BrandKit.vue'
 import CopyTool from '@/views/CopyTool.vue'
 import Editor from '@/views/Editor.vue'
@@ -234,7 +235,12 @@ const router = createRouter({
       component: {
         render() { return h(resolveComponent('router-view')) }
       },
-      beforeEnter(to, from, next) {
+      async beforeEnter(to, from, next) {
+        webViewUtils.detectIfInApp()
+        if (!webViewUtils.isBrowserMode) {
+          webViewUtils.registerCallbacks('router')
+        }
+        await webViewUtils.getUserInfo()
         if (logUtils.getLog()) {
           logUtils.uploadLog()
         }

@@ -1,5 +1,5 @@
 import { IUserInfo } from '@/interfaces/webView'
-import webViewUtils from '@/utils/webViewUtils'
+import webViewUtils from '@/utils/vivipicWebViewUtils'
 import { GetterTree, MutationTree } from 'vuex'
 
 interface IViviStickerState {
@@ -9,7 +9,7 @@ interface IViviStickerState {
 
 const getDefaultState = (): IViviStickerState => ({
   userInfo: webViewUtils.getDefaultUserInfo(),
-  isBrowserMode: true
+  isBrowserMode: false
 })
 
 const state = getDefaultState()

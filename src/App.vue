@@ -51,6 +51,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
 import popupUtils from './utils/popupUtils'
+import webViewUtils from './utils/vivipicWebViewUtils'
 
 export default defineComponent({
   emits: [],
@@ -77,6 +78,11 @@ export default defineComponent({
       document.dispatchEvent(new Event('render-event'))
       window.dispatchEvent(new Event('render-event'))
     }
+
+    if (!webViewUtils.isBrowserMode) {
+      webViewUtils.registerCallbacks('main')
+    }
+    webViewUtils.sendAppLoaded()
   },
   beforeMount() {
     networkUtils.registerNetworkListener()
