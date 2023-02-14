@@ -13,6 +13,8 @@ describe('Testing nu-image edit', () => {
       .imageCrop('button')
       .imageCrop('dblclick')
       .imageShadow()
+      .layerAlign()
+      // .deselectAllLayers().snapshotTest('init').get('.nu-image') // Check if image restore to init
       .then((prev) => {
         console.log('end prev', prev)
       })

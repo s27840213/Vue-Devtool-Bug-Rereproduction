@@ -129,12 +129,12 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
       for (const shadow of shadowsOptions) {
         cy.get(`.svg-photo-shadow-${shadow.name}`).click()
         cy.get('.nu-layer .nu-layer__inProcess').should('not.exist')
-          .get('.photo-effect-setting__reset').click()
+          .get('.photo-effect-setting__reset').click({ scrollBehavior: 'top' })
           // 30 = DRAWING_TIMEOUT in imageShadowUtils, debounce time of shadow setting
           .wait(30).snapshotTest(`Shadow ${shadow.name} default`)
         for (const option of shadow.options) {
           if (option.name === 'color') {
-            cy.pause().get('.photo-effect-setting div.photo-effect-setting__value-input')
+            cy.get('.photo-effect-setting div.photo-effect-setting__value-input')
               .click()
               .get(`.color-btn .color-${option.val}`).eq(0).click()
               .get('.color-panel__btn').click()

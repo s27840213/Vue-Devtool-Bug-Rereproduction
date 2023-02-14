@@ -14,6 +14,7 @@ declare namespace Cypress {
     // commands.ts
     login(): Chainable<void>
     deleteAllLayers(): Chainable<void>
+    deselectAllLayers(): Chainable<void>
     importDesign(designName: string): Chainable<void>
     snapshotTest(testName: string): Chainable<void>
     getAllCategoryName(panel: ISidebarData, categoryName?: string[], last?: boolean): Chainable<string[]>
