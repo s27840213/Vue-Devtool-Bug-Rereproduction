@@ -14,7 +14,7 @@ div(class="overflow-container"
         @dblclick="pageDblClickHandler()"
         @tap="tapPageContent")
       //- @dblclick will not be trigger in mobile, use @tap + doubleTapUtils instead.
-      div(class="content" :style="contentStyles")
+      div(class="content" :class="`nu-page-content-${pageIndex}`" :style="contentStyles")
         nu-bg-image(
             :image="config.backgroundImage"
             :pageIndex="pageIndex"

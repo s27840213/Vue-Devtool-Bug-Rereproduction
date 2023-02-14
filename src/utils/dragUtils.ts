@@ -113,7 +113,7 @@ class DragUtils {
     if (data.type === 'image') {
       mouseUtils.onDrop(e, pageIndex)
     } else {
-      const target = document.querySelector(`.nu-page-${pageIndex}`) as HTMLElement
+      const target = document.querySelector(`.nu-page-content-${pageIndex}`) as HTMLElement
       const targetPos = {
         x: target.getBoundingClientRect().x,
         y: target.getBoundingClientRect().y
