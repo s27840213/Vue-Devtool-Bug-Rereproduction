@@ -7,7 +7,7 @@
             class="footer-tabs__item"
             :class="{'click-disabled': (tab.disabled || isLocked)}"
             @click="handleTabAction(tab)")
-          color-btn(v-if="tab.icon === 'color'" size="24px"
+          color-btn(v-if="tab.icon === 'color'" size="22px"
                     class="click-disabled"
                     :color="globalSelectedColor")
           svg-icon(v-else class="click-disabled"
@@ -646,6 +646,9 @@ export default Vue.extend({
     justify-content: center;
     box-sizing: border-box;
     padding: 0px 4px;
+    & .color-btn {
+      margin: 1px;
+    }
     > span {
       transition: background-color 0.2s, color 0.2s;
       @include body-XXS;
