@@ -6,7 +6,7 @@ export default defineConfig({
   viewportHeight: 900,
   defaultCommandTimeout: 10000,
   requestTimeout: 10000,
-  scrollBehavior: false,
+  // scrollBehavior: false,
   // To prevent browser out of memory, only keep one task in memory, https://blog.hao.dev/fixing-cypress-errors-part-1-chromium-out-of-memory-crashes
   numTestsKeptInMemory: 1,
   env: {

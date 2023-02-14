@@ -19,76 +19,49 @@ const adjustOptions = [
 const shadowsOptions = [{
   name: 'shadow',
   options: [
-    { name: 'distance', val: '75', init: '50' },
-    { name: 'distance', val: '25', init: '50' },
-    { name: 'angle', val: '90', init: '20' },
-    { name: 'angle', val: '-90', init: '20' },
-    { name: 'radius', val: '75', init: '50' },
-    { name: 'radius', val: '25', init: '50' },
-    { name: 'spread', val: '15', init: '0' },
-    { name: 'spread', val: '5', init: '0' },
-    { name: 'opacity', val: '75', init: '40' },
-    { name: 'opacity', val: '25', init: '40' },
-    { name: 'color', val: 'FECD56', init: '000000' },
-    { name: 'color', val: 'EB5757', init: '000000' },
+    { name: 'distance', val: '65' },
+    { name: 'angle', val: '23' },
+    { name: 'radius', val: '69' },
+    { name: 'spread', val: '6' },
+    { name: 'opacity', val: '48' },
+    { name: 'color', val: 'EB5757' },
   ]
 }, {
   name: 'blur',
   options: [
-    { name: 'radius', val: '75', init: '50' },
-    { name: 'radius', val: '25', init: '50' },
-    { name: 'spread', val: '23', init: '10' },
-    { name: 'spread', val: '8', init: '10' },
-    { name: 'opacity', val: '75', init: '40' },
-    { name: 'opacity', val: '25', init: '40' },
-    { name: 'color', val: 'FECD56', init: '000000' },
-    { name: 'color', val: 'EB5757', init: '000000' },
+    { name: 'radius', val: '70' },
+    { name: 'spread', val: '18' },
+    { name: 'opacity', val: '75' },
+    { name: 'color', val: 'FECD56' },
   ]
 }, {
   name: 'imageMatched',
   options: [
-    { name: 'distance', val: '75', init: '60' },
-    { name: 'distance', val: '25', init: '60' },
-    { name: 'angle', val: '90', init: '40' },
-    { name: 'angle', val: '-90', init: '40' },
-    { name: 'radius', val: '75', init: '50' },
-    { name: 'radius', val: '25', init: '50' },
-    { name: 'size', val: '90', init: '100' },
-    { name: 'size', val: '80', init: '100' },
-    { name: 'opacity', val: '75', init: '60' },
-    { name: 'opacity', val: '25', init: '60' },
+    { name: 'distance', val: '83' },
+    { name: 'angle', val: '55' },
+    { name: 'radius', val: '19' },
+    { name: 'size', val: '96' },
+    { name: 'opacity', val: '49' },
   ]
 }, {
   name: 'frame',
   options: [
-    { name: 'radius', val: '75', init: '0' },
-    { name: 'radius', val: '25', init: '0' },
-    { name: 'spread', val: '23', init: '20' },
-    { name: 'spread', val: '8', init: '20' },
-    { name: 'opacity', val: '75', init: '100' },
-    { name: 'opacity', val: '25', init: '100' },
-    { name: 'color', val: 'FECD56', init: '000000' },
-    { name: 'color', val: 'EB5757', init: '000000' },
+    { name: 'radius', val: '63' },
+    { name: 'spread', val: '14' },
+    { name: 'opacity', val: '47' },
+    { name: 'color', val: '007ABE' },
   ]
 }, {
   name: 'floating',
   options: [
-    { name: 'x', val: '50', init: '0' },
-    { name: 'x', val: '-50', init: '0' },
-    { name: 'y', val: '50', init: '0' },
-    { name: 'y', val: '-50', init: '0' },
-    { name: 'radius', val: '75', init: '60' },
-    { name: 'radius', val: '25', init: '60' },
-    { name: 'size', val: '89', init: '100' },
-    { name: 'size', val: '46', init: '100' },
-    { name: 'thinkness', val: '75', init: '50' },
-    { name: 'thinkness', val: '25', init: '50' },
-    { name: 'opacity', val: '75', init: '65' },
-    { name: 'opacity', val: '25', init: '65' },
+    { name: 'x', val: '61' },
+    { name: 'y', val: '60' },
+    { name: 'radius', val: '81' },
+    { name: 'size', val: '63' },
+    { name: 'thinkness', val: '61' },
+    { name: 'opacity', val: '36' },
+    { name: 'color', val: '782B76' },
   ]
-}, {
-  name: 'none',
-  options: []
 }] as const
 
 Cypress.Commands.add('imageAdjust', { prevSubject: 'element' }, (subject) => {
@@ -156,24 +129,24 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
       for (const shadow of shadowsOptions) {
         cy.get(`.svg-photo-shadow-${shadow.name}`).click()
         cy.get('.nu-layer .nu-layer__inProcess').should('not.exist')
-          .snapshotTest(`Shadow ${shadow.name} init`)
+          .get('.photo-effect-setting__reset').click()
+          // 30 = DRAWING_TIMEOUT in imageShadowUtils, debounce time of shadow setting
+          .wait(30).snapshotTest(`Shadow ${shadow.name} default`)
         for (const option of shadow.options) {
           if (option.name === 'color') {
-            cy.get('.photo-effect-setting div.photo-effect-setting__value-input')
+            cy.pause().get('.photo-effect-setting div.photo-effect-setting__value-input')
               .click()
               .get(`.color-btn .color-${option.val}`).eq(0).click()
-              .wait(30).snapshotTest(`Shadow ${shadow.name} ${option.name} ${option.val}`)
-              .get(`.color-btn .color-${option.init}`).eq(0).click()
               .get('.color-panel__btn').click()
           } else {
             cy.get(`.photo-effect-setting input[type="range"][name="${option.name}"]`)
-              .invoke('val', option.val).trigger('input').wait(30).snapshotTest(`Shadow ${shadow.name} ${option.name} ${option.val}`)
-              .get(`.photo-effect-setting input[type="range"][name="${option.name}"]`)
-              .invoke('val', option.init).trigger('input')
+              .invoke('val', option.val).trigger('input')
           }
         }
+        cy.wait(30).snapshotTest(`Shadow ${shadow.name} preset`)
       }
     })
+    .get('.svg-photo-shadow-none').click()
   return cy.wrap(subject)
 })
 

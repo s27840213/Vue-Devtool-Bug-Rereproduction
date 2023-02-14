@@ -12,7 +12,7 @@ describe('Testing nu-image edit', () => {
       .layerFlip()
       .imageCrop('button')
       .imageCrop('dblclick')
-      // .imageShadow()
+      .imageShadow()
       .then((prev) => {
         console.log('end prev', prev)
       })
