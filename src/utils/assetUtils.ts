@@ -177,7 +177,7 @@ class AssetUtils {
         pageUtils.setIsEnableBleed(true, targetPageIndex)
         if (json.bleeds && json.physicalBleeds) pageUtils.setBleeds(targetPageIndex, json.physicalBleeds, json.bleeds) // use bleeds of page if it has
       } else pageUtils.setIsEnableBleed(false, targetPageIndex)
-    } else if (attrs && Object.keys(attrs).length > 0) { // use page size
+    } else if (attrs && attrs.width && attrs.height) { // use page size
       let physicalBleeds
       if (targetPage.bleeds && targetPage.physicalBleeds) {
         const resizedPage = this.getPage(targetPageIndex)
