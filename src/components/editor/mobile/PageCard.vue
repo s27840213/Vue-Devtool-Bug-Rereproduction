@@ -75,7 +75,7 @@ export default defineComponent({
         const card = (this.$refs.card as HTMLElement[])[this.currCardIndex]
         generalUtils.scaleFromCenter(card)
       }
-    },
+    }
   }
 })
 </script>
@@ -89,7 +89,6 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid gray;
   @include no-scrollbar;
   overflow: hidden;
   // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container
