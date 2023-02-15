@@ -1,20 +1,27 @@
 // Command that do image edit test
-const adjustOptions = [
-  { name: 'brightness', val: '50' },
-  { name: 'brightness', val: '-50' },
-  { name: 'contrast', val: '50' },
-  { name: 'contrast', val: '-50' },
-  { name: 'saturate', val: '50' },
-  { name: 'saturate', val: '-50' },
-  { name: 'hue', val: '50' },
-  { name: 'hue', val: '-50' },
-  { name: 'blur', val: '50' },
-  { name: 'blur', val: '-50' },
-  { name: 'halation', val: '75' },
-  { name: 'halation', val: '25' },
-  { name: 'warm', val: '50' },
-  { name: 'warm', val: '-50' }
-] as const
+const adjustOptions = [{
+  name: 'preset1',
+  options: [
+    { name: 'brightness', val: '26' },
+    { name: 'contrast', val: '-36' },
+    { name: 'saturate', val: '31' },
+    { name: 'hue', val: '42' },
+    { name: 'blur', val: '-38' },
+    { name: 'halation', val: '38' },
+    { name: 'warm', val: '32' },
+  ]
+}, {
+  name: 'preset2',
+  options: [
+    { name: 'brightness', val: '-34' },
+    { name: 'contrast', val: '44' },
+    { name: 'saturate', val: '-40' },
+    { name: 'hue', val: '-22' },
+    { name: 'blur', val: '35' },
+    { name: 'halation', val: '64' },
+    { name: 'warm', val: '-6' },
+  ]
+}] as const
 
 const shadowsOptions = [{
   name: 'shadow',
@@ -67,13 +74,16 @@ const shadowsOptions = [{
 Cypress.Commands.add('imageAdjust', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
     .get('.photo-setting .photo-setting__grid button').contains('調整').click()
+    .snapshotTest('Adjust init')
     .then(() => {
-      for (const option of adjustOptions) {
-        cy.get(`.photo-setting .popup-adjust input[type="range"][name="${option.name}"]`)
-          .invoke('val', option.val).trigger('input')
-          .snapshotTest(`Adjust ${option.name} ${option.val}`)
-          .get('.popup-adjust__reset').click()
+      for (const adjustPreset of adjustOptions) {
+        for (const option of adjustPreset.options) {
+          cy.get(`.photo-setting .popup-adjust input[type="range"][name="${option.name}"]`)
+            .invoke('val', option.val).trigger('input')
+        }
+        cy.snapshotTest(`Adjust ${adjustPreset.name}`)
       }
+      cy.get('.popup-adjust__reset').click()
     })
   return cy.wrap(subject)
 })
