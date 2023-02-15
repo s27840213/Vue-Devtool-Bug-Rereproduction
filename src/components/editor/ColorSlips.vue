@@ -1,58 +1,58 @@
 <template lang="pug">
-  div(class="color-panel"
-      :style="bgStyle"
-      v-click-outside="vcoConfig"
-      ref="colorPanel")
-    img(v-if="showPanelBtn" class="color-panel__btn"
-      :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
-      @click="closePanel()")
-    div(class="color-panel__scroll" :class="{'p-0': noPadding}")
-      //- Recently colors
+div(class="color-panel"
+    :style="bgStyle"
+    v-click-outside="vcoConfig"
+    ref="colorPanel")
+  img(v-if="showPanelBtn" class="color-panel__btn"
+    :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
+    @click="closePanel()")
+  div(class="color-panel__scroll" :class="{'p-0': noPadding}")
+    //- Recently colors
+    div(class="color-panel__colors"
+        :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+      div(class="text-left")
+        div(class="flex-center")
+          svg-icon(v-if="showAllRecentlyColor && mode!=='PanelColor'" iconName="chevron-left"
+                iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
+                class="mr-5" @click.native="lessRecently()")
+          span {{$t('NN0679')}}
+        span(v-if="!showAllRecentlyColor" class="btn-XS" @click="moreRecently()") {{$t('NN0082')}}
+      div
+        color-btn(color="add" :active="openColorPicker"
+                  @click="openColorPanel($event)")
+        color-btn(v-for="color in recentlyColors" :color="color" :key="color"
+                  :active="color === selectedColor"
+                  @click="handleColorEvent(color)")
+    template(v-if="!showAllRecentlyColor")
+      //- Document colors
       div(class="color-panel__colors"
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
         div(class="text-left")
-          div(class="flex-center")
-            svg-icon(v-if="showAllRecentlyColor && mode!=='PanelColor'" iconName="chevron-left"
-                  iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
-                  class="mr-5" @click.native="lessRecently()")
-            span {{$t('NN0679')}}
-          span(v-if="!showAllRecentlyColor" class="btn-XS" @click="moreRecently()") {{$t('NN0082')}}
+          span {{$t('NN0091')}}
         div
-          color-btn(color="add" :active="openColorPicker"
-                    @click="openColorPanel($event)")
-          color-btn(v-for="color in recentlyColors" :color="color" :key="color"
+          color-btn(v-for="color in documentColors" :color="color" :key="color"
                     :active="color === selectedColor"
                     @click="handleColorEvent(color)")
-      template(v-if="!showAllRecentlyColor")
-        //- Document colors
-        div(class="color-panel__colors"
-            :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-          div(class="text-left")
-            span {{$t('NN0091')}}
-          div
-            color-btn(v-for="color in documentColors" :color="color" :key="color"
-                      :active="color === selectedColor"
-                      @click="handleColorEvent(color)")
-        //- Preset Colors
-        div(class="color-panel__colors"
-            :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-          div(class="text-left")
-            span {{$t('NN0089')}}
-          div
-            color-btn(v-for="color in defaultColors" :color="color" :key="color"
-                      :active="color === selectedColor"
-                      @click="handleColorEvent(color)")
-            img(v-if="mode==='PanelBG'"
-              src="@/assets/img/svg/transparent.svg"
-              width="100%" height="100%"
-              @click="handleColorEvent('#ffffff00')")
-    color-picker(v-if="openColorPicker"
-      class="color-panel__color-picker"
-      ref="colorPicker"
-      v-click-outside="closeColorModal"
-      :currentColor="currentColor"
-      @update="handleDragUpdate"
-      @final="handleChangeStop")
+      //- Preset Colors
+      div(class="color-panel__colors"
+          :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+        div(class="text-left")
+          span {{$t('NN0089')}}
+        div
+          color-btn(v-for="color in defaultColors" :color="color" :key="color"
+                    :active="color === selectedColor"
+                    @click="handleColorEvent(color)")
+          img(v-if="mode==='PanelBG'"
+            src="@/assets/img/svg/transparent.svg"
+            width="100%" height="100%"
+            @click="handleColorEvent('#ffffff00')")
+  color-picker(v-if="openColorPicker"
+    class="color-panel__color-picker"
+    ref="colorPicker"
+    v-click-outside="closeColorModal"
+    :currentColor="currentColor"
+    @update="handleDragUpdate"
+    @final="handleChangeStop")
 </template>
 
 <script lang="ts">

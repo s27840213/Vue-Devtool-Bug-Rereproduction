@@ -1,76 +1,76 @@
 <template lang="pug">
-  div(class="panel-template" ref="panel")
-    div(v-if="showPrompt && !currentGroup"
-      class="panel-template__prompt body-2")
-      span {{$t('NN0247')}}
-      svg-icon(class="pl-5 pointer"
-        iconColor="gray-2"
-        iconName="close"
-        iconWidth="24px"
-        @click.native="handleClosePrompt")
-    //- Group template UI
-    panel-group-template(v-if="currentGroup"
-      :showId="showAdminTool"
-      :groupItem="currentGroup"
-      @close="currentGroup = null")
-    //- Search bar and themes
-    div
-      div(class="panel-template__search")
-        search-bar(class="mb-15"
-          :placeholder="$t('NN0092', {target: $tc('NN0001',1)})"
-          clear
-          :defaultKeyword="keywordLabel"
-          @search="handleSearch")
-          nubtn(theme="icon" icon="sliders" :status="!allThemesChecked?'active':'default'"
-              @click.native="onAdvancedClicked()" :hint="$t('NN0795')")
-        popup-theme(v-if="showTheme"
-          class="panel-template__theme"
-          :style="themeStyle()"
-          :preSelected="theme.split(',')"
-          @change="handleTheme"
-          @close="showTheme = false")
-      div(v-if="showTheme" class="panel-template__wrap")
-    //- Search result empty msg
-    div(v-if="theme && emptyResultMessage") {{ emptyResultMessage }}
-    //- Search result counter (only for admin)
-    div(v-if="showAdminTool && keyword && !pending && !emptyResultMessage"
-      class="pb-10")
-      span {{sum}} {{sum === 1 ? 'item' : 'items'}} in total (not work for category search)
-    //- Search result and main content
-    category-list(v-for="item in categoryListArray"
-                  v-show="item.show" :ref="item.key" :key="item.key"
-                  :list="item.content" @loadMore="handleLoadMore")
-      template(v-slot:category-list-rows="{ list, title }")
-        category-list-rows(:list="list" :title="title"
-          @action="handleCategorySearch")
-          template(v-slot:preview="{ item }")
-            component(class="panel-template__item"
-              :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
-              :showId="showAdminTool"
-              :item="item"
-              @click="handleShowGroup")
-      template(v-slot:category-template-item="{ list, title }")
-        div(v-if="title" class="panel-template__header") {{ title }}
-        div(class="panel-template__items")
-          component(v-for="item in list"
-            class="panel-template__item"
+div(class="panel-template" ref="panel")
+  div(v-if="showPrompt && !currentGroup"
+    class="panel-template__prompt body-2")
+    span {{$t('NN0247')}}
+    svg-icon(class="pl-5 pointer"
+      iconColor="gray-2"
+      iconName="close"
+      iconWidth="24px"
+      @click.native="handleClosePrompt")
+  //- Group template UI
+  panel-group-template(v-if="currentGroup"
+    :showId="showAdminTool"
+    :groupItem="currentGroup"
+    @close="currentGroup = null")
+  //- Search bar and themes
+  div
+    div(class="panel-template__search")
+      search-bar(class="mb-15"
+        :placeholder="$t('NN0092', {target: $tc('NN0001',1)})"
+        clear
+        :defaultKeyword="keywordLabel"
+        @search="handleSearch")
+        nubtn(theme="icon" icon="sliders" :status="!allThemesChecked?'active':'default'"
+            @click.native="onAdvancedClicked()" :hint="$t('NN0795')")
+      popup-theme(v-if="showTheme"
+        class="panel-template__theme"
+        :style="themeStyle()"
+        :preSelected="theme.split(',')"
+        @change="handleTheme"
+        @close="showTheme = false")
+    div(v-if="showTheme" class="panel-template__wrap")
+  //- Search result empty msg
+  div(v-if="theme && emptyResultMessage") {{ emptyResultMessage }}
+  //- Search result counter (only for admin)
+  div(v-if="showAdminTool && keyword && !pending && !emptyResultMessage"
+    class="pb-10")
+    span {{sum}} {{sum === 1 ? 'item' : 'items'}} in total (not work for category search)
+  //- Search result and main content
+  category-list(v-for="item in categoryListArray"
+                v-show="item.show" :ref="item.key" :key="item.key"
+                :list="item.content" @loadMore="handleLoadMore")
+    template(v-slot:category-list-rows="{ list, title }")
+      category-list-rows(:list="list" :title="title"
+        @action="handleCategorySearch")
+        template(v-slot:preview="{ item }")
+          component(class="panel-template__item"
             :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
             :showId="showAdminTool"
             :item="item"
-            :key="item.group_id"
             @click="handleShowGroup")
-      template(#after)
-        //- Loading icon
-        div(v-if="!theme || pending" class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
-        //- Template wishing pool
-        div(v-if="keyword && theme && !pending && resultGroupCounter<=10")
-          span {{$t('NN0796', {type: $tc('NN0001', 3)})}}
-          nubtn(size="mid" class="mt-30")
-            url(:url="$t('NN0791')" :newTab="true")
-              span {{$t('NN0790', {type: $tc('NN0001', 3)})}}
+    template(v-slot:category-template-item="{ list, title }")
+      div(v-if="title" class="panel-template__header") {{ title }}
+      div(class="panel-template__items")
+        component(v-for="item in list"
+          class="panel-template__item"
+          :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
+          :showId="showAdminTool"
+          :item="item"
+          :key="item.group_id"
+          @click="handleShowGroup")
+    template(#after)
+      //- Loading icon
+      div(v-if="!theme || pending" class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
+      //- Template wishing pool
+      div(v-if="keyword && theme && !pending && resultGroupCounter<=10")
+        span {{$t('NN0796', {type: $tc('NN0001', 3)})}}
+        nubtn(size="mid" class="mt-30")
+          url(:url="$t('NN0791')" :newTab="true")
+            span {{$t('NN0790', {type: $tc('NN0001', 3)})}}
 </template>
 
 <script lang="ts">

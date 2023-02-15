@@ -1,17 +1,17 @@
 <template lang="pug">
-  div(class="font-size-selector relative")
-    div(class="font-size-selector__number")
-      div(class="pointer"
-        @pointerdown="fontSizeStepping(-step)"
-        @contextmenu.prevent)
-        svg-icon(iconName="minus-small" iconWidth="24px" iconColor="gray-2")
-      button(class="font-size-selector__range-input-button")
-        input(class="text-gray-2 center record-selection" type="text" ref="input-fontSize"
-              @change="setSize" :value="fontSize" :disabled="fontSize === '--'")
-      div(class="pointer"
-        @pointerdown="fontSizeStepping(step)"
-        @contextmenu.prevent)
-        svg-icon(iconName="plus-small" iconWidth="24px" iconColor="gray-2")
+div(class="font-size-selector relative")
+  div(class="font-size-selector__number")
+    div(class="pointer"
+      @pointerdown="fontSizeStepping(-step)"
+      @contextmenu.prevent)
+      svg-icon(iconName="minus-small" iconWidth="24px" iconColor="gray-2")
+    button(class="font-size-selector__range-input-button")
+      input(class="text-gray-2 center record-selection" type="text" ref="input-fontSize"
+            @change="setSize" :value="fontSize" :disabled="fontSize === '--'")
+    div(class="pointer"
+      @pointerdown="fontSizeStepping(step)"
+      @contextmenu.prevent)
+      svg-icon(iconName="plus-small" iconWidth="24px" iconColor="gray-2")
 </template>
 
 <script lang="ts">

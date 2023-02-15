@@ -1,14 +1,14 @@
 <template lang="pug">
-  div(class="nu-shape" :style="styles()")
-    svg(:view-box.camel="viewBoxFormatter" :style="styles()")
-      defs(v-if="config.category === 'E'" v-html="svgFormatter")
-      defs
-        filter(v-if="config.category === 'C'" :id="className()" v-html="filterFormatter")
-        clipPath(v-if="config.category === 'E'" :id="clipPathId()")
-          use(:xlink:href="svgId()")
-      g(v-if="config.category === 'E'")
-        use(:xlink:href="svgId()" :clip-path="'url(#' + clipPathId() + ')'" :style="styleTextContent[0]")
-      g(v-else :filter="config.category === 'C' ? filterId() : 'none'" v-html="svgFormatter")
+div(class="nu-shape" :style="styles()")
+  svg(:view-box.camel="viewBoxFormatter" :style="styles()")
+    defs(v-if="config.category === 'E'" v-html="svgFormatter")
+    defs
+      filter(v-if="config.category === 'C'" :id="className()" v-html="filterFormatter")
+      clipPath(v-if="config.category === 'E'" :id="clipPathId()")
+        use(:xlink:href="svgId()")
+    g(v-if="config.category === 'E'")
+      use(:xlink:href="svgId()" :clip-path="'url(#' + clipPathId() + ')'" :style="styleTextContent[0]")
+    g(v-else :filter="config.category === 'C' ? filterId() : 'none'" v-html="svgFormatter")
 </template>
 
 <script lang="ts">

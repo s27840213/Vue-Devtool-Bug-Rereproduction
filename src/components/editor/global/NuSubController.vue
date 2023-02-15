@@ -1,46 +1,46 @@
 <template lang="pug">
-  //- :style="transformStyle")
-  div(class="nu-sub-controller")
-    div(class="nu-sub-controller__wrapper" :style="positionStyles()")
-      div(class="nu-sub-controller__wrapper" :style="wrapperStyles")
-        div(class="nu-sub-controller__content"
-            ref="body"
-            :layer-index="`${layerIndex}`"
-            :style="styles")
-            div(v-if="config.type === 'text' && config.active"
-              class="text text__wrapper" :style="textWrapperStyle()" draggable="false"
-              @pointerdown="onPointerdown")
-              nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
-                :style="textBodyStyle()"
-                :pageIndex="pageIndex"
-                :layerIndex="primaryLayerIndex"
-                :subLayerIndex="layerIndex"
-                @keydown.native.37.stop
-                @keydown.native.38.stop
-                @keydown.native.39.stop
-                @keydown.native.40.stop
-                @keydown.native.ctrl.67.exact.stop.self
-                @keydown.native.meta.67.exact.stop.self
-                @keydown.native.ctrl.86.exact.stop.self
-                @keydown.native.meta.86.exact.stop.self
-                @keydown.native.ctrl.88.exact.stop.self
-                @keydown.native.meta.88.exact.stop.self
-                @keydown.native.ctrl.65.exact.stop.self
-                @keydown.native.meta.65.exact.stop.self
-                @keydown.native.ctrl.90.exact.stop.self
-                @keydown.native.meta.90.exact.stop.self
-                @keydown.native.ctrl.shift.90.exact.stop.self
-                @keydown.native.meta.shift.90.exact.stop.self
-                @update="handleTextChange"
-                @compositionend="handleTextCompositionEnd")
-        //- input(
-        //-   type="file"
-        //-   accept="image/jpeg, image/png"
-        //-   ref="fileInput"
-        //-   class="d-none"
-        //-   :id="`input-${primaryLayerIndex}-${layerIndex}`"
-        //-   :multiple="false"
-        //-   @change="onImgFileChange")
+//- :style="transformStyle")
+div(class="nu-sub-controller")
+  div(class="nu-sub-controller__wrapper" :style="positionStyles()")
+    div(class="nu-sub-controller__wrapper" :style="wrapperStyles")
+      div(class="nu-sub-controller__content"
+          ref="body"
+          :layer-index="`${layerIndex}`"
+          :style="styles")
+          div(v-if="config.type === 'text' && config.active"
+            class="text text__wrapper" :style="textWrapperStyle()" draggable="false"
+            @pointerdown="onPointerdown")
+            nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
+              :style="textBodyStyle()"
+              :pageIndex="pageIndex"
+              :layerIndex="primaryLayerIndex"
+              :subLayerIndex="layerIndex"
+              @keydown.native.37.stop
+              @keydown.native.38.stop
+              @keydown.native.39.stop
+              @keydown.native.40.stop
+              @keydown.native.ctrl.67.exact.stop.self
+              @keydown.native.meta.67.exact.stop.self
+              @keydown.native.ctrl.86.exact.stop.self
+              @keydown.native.meta.86.exact.stop.self
+              @keydown.native.ctrl.88.exact.stop.self
+              @keydown.native.meta.88.exact.stop.self
+              @keydown.native.ctrl.65.exact.stop.self
+              @keydown.native.meta.65.exact.stop.self
+              @keydown.native.ctrl.90.exact.stop.self
+              @keydown.native.meta.90.exact.stop.self
+              @keydown.native.ctrl.shift.90.exact.stop.self
+              @keydown.native.meta.shift.90.exact.stop.self
+              @update="handleTextChange"
+              @compositionend="handleTextCompositionEnd")
+      //- input(
+      //-   type="file"
+      //-   accept="image/jpeg, image/png"
+      //-   ref="fileInput"
+      //-   class="d-none"
+      //-   :id="`input-${primaryLayerIndex}-${layerIndex}`"
+      //-   :multiple="false"
+      //-   @change="onImgFileChange")
 </template>
 <script lang="ts">
 import Vue from 'vue'

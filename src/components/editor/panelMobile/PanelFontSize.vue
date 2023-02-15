@@ -1,15 +1,15 @@
 <template lang="pug">
-  div(class="panel-font-size")
-    font-size-selector
-    input(class="panel-font-size__range-input"
-      :style="progressStyles()"
-      v-model.number="fontSize"
-      :max="fieldRange.fontSize.max"
-      :min="fieldRange.fontSize.min"
-      step="1"
-      type="range"
-      :disabled="fontSize === '--'"
-      @pointerup="handleChangeStop")
+div(class="panel-font-size")
+  font-size-selector
+  input(class="panel-font-size__range-input"
+    :style="progressStyles()"
+    v-model.number="fontSize"
+    :max="fieldRange.fontSize.max"
+    :min="fieldRange.fontSize.min"
+    step="1"
+    type="range"
+    :disabled="fontSize === '--'"
+    @pointerup="handleChangeStop")
 </template>
 
 <script lang="ts">

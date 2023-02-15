@@ -1,25 +1,25 @@
 <template lang="pug">
-  div(class="category-fonts pointer feature-button"
-    :class="{ active: props.font === item.id }"
-    draggable="false"
-    @click="setFont()")
-    div(class="category-fonts__item-wrapper")
-      img(class="category-fonts__item"
-        :src="fallbackSrc || `${getPreview}`"
-        @error="handleNotFound")
-    div(class="category-fonts__item-wrapper")
-      img(class="category-fonts__item"
-        :src="fallbackSrc || `${getPreview2}`"
-        @error="handleNotFound")
-    div(class="category-fonts__icon")
-      svg-icon(v-if="props.font === item.id"
-        iconName="done"
-        iconColor="gray-2"
-        iconWidth="25px")
-      svg-icon(v-else-if="pending && pending === item.id"
-        iconName="loading"
-        iconColor="gray-1"
-        iconWidth="20px")
+div(class="category-fonts pointer feature-button"
+  :class="{ active: props.font === item.id }"
+  draggable="false"
+  @click="setFont()")
+  div(class="category-fonts__item-wrapper")
+    img(class="category-fonts__item"
+      :src="fallbackSrc || `${getPreview}`"
+      @error="handleNotFound")
+  div(class="category-fonts__item-wrapper")
+    img(class="category-fonts__item"
+      :src="fallbackSrc || `${getPreview2}`"
+      @error="handleNotFound")
+  div(class="category-fonts__icon")
+    svg-icon(v-if="props.font === item.id"
+      iconName="done"
+      iconColor="gray-2"
+      iconWidth="25px")
+    svg-icon(v-else-if="pending && pending === item.id"
+      iconName="loading"
+      iconColor="gray-1"
+      iconWidth="20px")
 </template>
 
 <script lang="ts">

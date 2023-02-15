@@ -1,45 +1,45 @@
 <template lang="pug">
-  div(class="color-picker" ref="colorPicker"
-      :style="{'box-shadow': isMobile ? 'none' : '0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3)'}")
-    div(v-if="isTouchDevice")
-      div(class="color-picker__mobile__hex")
-        span(class="body-1") Hex
-        div(class="color-picker__mobile__input")
-          div(:style="{'background-color': convertedHex}")
-          input(
-            ref="input"
-            type="text"
-            spellcheck="false"
-            v-model="color"
-            maxlength="7")
-    chrome-picker(
-      class="color-picker__picker"
-      :value="convertedHex"
-      @input="updateHex"
-      @paste="onPaste"
-      @mouseup.native="onmouseup"
-      :disableFields="true"
-      :disableAlpha="true"
-      :isMobile="isMobile"
-      :fullWidth="isMobile"
-      :aspectRatio="aspectRatio")
-    div(v-if="!isTouchDevice" class="px-10")
-      div(class="color-picker__hex")
-        svg-icon(class="pointer"
-          iconName="eye-dropper"
-          :iconWidth="'20px'"
-          :iconColor="'gray-2'"
-          @click.native="eyeDropper"
-          v-hint="$t('NN0407')")
-        span(class="body-1") Hex
-        div(class="color-picker__input")
-          div(:style="{'background-color': convertedHex}")
-          input(
-            ref="input"
-            type="text"
-            spellcheck="false"
-            v-model="color"
-            maxlength="7")
+div(class="color-picker" ref="colorPicker"
+    :style="{'box-shadow': isMobile ? 'none' : '0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3)'}")
+  div(v-if="isTouchDevice")
+    div(class="color-picker__mobile__hex")
+      span(class="body-1") Hex
+      div(class="color-picker__mobile__input")
+        div(:style="{'background-color': convertedHex}")
+        input(
+          ref="input"
+          type="text"
+          spellcheck="false"
+          v-model="color"
+          maxlength="7")
+  chrome-picker(
+    class="color-picker__picker"
+    :value="convertedHex"
+    @input="updateHex"
+    @paste="onPaste"
+    @mouseup.native="onmouseup"
+    :disableFields="true"
+    :disableAlpha="true"
+    :isMobile="isMobile"
+    :fullWidth="isMobile"
+    :aspectRatio="aspectRatio")
+  div(v-if="!isTouchDevice" class="px-10")
+    div(class="color-picker__hex")
+      svg-icon(class="pointer"
+        iconName="eye-dropper"
+        :iconWidth="'20px'"
+        :iconColor="'gray-2'"
+        @click.native="eyeDropper"
+        v-hint="$t('NN0407')")
+      span(class="body-1") Hex
+      div(class="color-picker__input")
+        div(:style="{'background-color': convertedHex}")
+        input(
+          ref="input"
+          type="text"
+          spellcheck="false"
+          v-model="color"
+          maxlength="7")
 </template>
 
 <script lang="ts">

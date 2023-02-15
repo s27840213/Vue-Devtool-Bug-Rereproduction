@@ -1,17 +1,17 @@
 <template lang="pug">
-  div(class="category-object-item" v-touch)
-    div(v-if="item.list" class="category-object-item__4in1" @tap="click4in1")
-      img(v-for="img, index in item.list" v-if="index < 4"
-        class="category-object-item__img"
-        draggable="false" :src="img.src || `https://template.vivipic.com/svg/${img.id}/prev?ver=${img.ver}`")
-    template(v-else)
-      img(class="category-object-item__img" draggable="false" @tap="clickObject" v-press="addSvg"
-        :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
-      //- pro-item(v-if="item.plan")
-      div(v-if="showEditor" class="category-object-item__icon" @click.stop.prevent="handleEditObject")
-        svg-icon(iconName="pen" iconColor="white" iconWidth="18px")
-      div(v-if="item.type === 16" class="category-object-item__icon" @click.stop.prevent="openGiphyMore")
-        svg-icon(iconName="more_vertical" :iconColor="'white'" iconWidth="18px")
+div(class="category-object-item" v-touch)
+  div(v-if="item.list" class="category-object-item__4in1" @tap="click4in1")
+    img(v-for="img, index in item.list" v-if="index < 4"
+      class="category-object-item__img"
+      draggable="false" :src="img.src || `https://template.vivipic.com/svg/${img.id}/prev?ver=${img.ver}`")
+  template(v-else)
+    img(class="category-object-item__img" draggable="false" @tap="clickObject" v-press="addSvg"
+      :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
+    //- pro-item(v-if="item.plan")
+    div(v-if="showEditor" class="category-object-item__icon" @click.stop.prevent="handleEditObject")
+      svg-icon(iconName="pen" iconColor="white" iconWidth="18px")
+    div(v-if="item.type === 16" class="category-object-item__icon" @click.stop.prevent="openGiphyMore")
+      svg-icon(iconName="more_vertical" :iconColor="'white'" iconWidth="18px")
 </template>
 
 <script lang="ts">

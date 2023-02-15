@@ -1,30 +1,30 @@
 <template lang="pug">
-  div(class="nu-text" :style="textWrapperStyle()" draggable="false")
-    //- Svg BG for text effex gooey.
-    svg(v-if="svgBG && !noShadow" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
-      component(v-for="(elm, idx) in svgBG.content"
-                :key="`textSvgBg${idx}`"
-                :is="elm.tag"
-                v-bind="elm.attrs")
-    div(v-for="text, idx in duplicatedText" class="nu-text__body" ref="body"
-        :style="Object.assign(bodyStyles(), text.extraBody)")
-      nu-curve-text(v-if="isCurveText"
-        :config="config"
-        :layerIndex="layerIndex"
-        :pageIndex="pageIndex"
-        :subLayerIndex="subLayerIndex"
-        :isDuplicated="idx !== duplicatedText.length-1"
-        :isTransparent="isTransparent")
-      p(v-else
-        v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
-        :key="p.id"
-        :style="pStyle(p.styles)")
-        span(v-for="(span, sIndex) in p.spans"
-          class="nu-text__span"
-          :data-sindex="sIndex"
-          :key="span.id"
-          :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan, transParentStyles)") {{ span.text }}
-          br(v-if="!span.text && p.spans.length === 1")
+div(class="nu-text" :style="textWrapperStyle()" draggable="false")
+  //- Svg BG for text effex gooey.
+  svg(v-if="svgBG && !noShadow" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
+    component(v-for="(elm, idx) in svgBG.content"
+              :key="`textSvgBg${idx}`"
+              :is="elm.tag"
+              v-bind="elm.attrs")
+  div(v-for="text, idx in duplicatedText" class="nu-text__body" ref="body"
+      :style="Object.assign(bodyStyles(), text.extraBody)")
+    nu-curve-text(v-if="isCurveText"
+      :config="config"
+      :layerIndex="layerIndex"
+      :pageIndex="pageIndex"
+      :subLayerIndex="subLayerIndex"
+      :isDuplicated="idx !== duplicatedText.length-1"
+      :isTransparent="isTransparent")
+    p(v-else
+      v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+      :key="p.id"
+      :style="pStyle(p.styles)")
+      span(v-for="(span, sIndex) in p.spans"
+        class="nu-text__span"
+        :data-sindex="sIndex"
+        :key="span.id"
+        :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan, transParentStyles)") {{ span.text }}
+        br(v-if="!span.text && p.spans.length === 1")
 </template>
 
 <script lang="ts">

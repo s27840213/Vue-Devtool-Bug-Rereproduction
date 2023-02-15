@@ -1,37 +1,37 @@
 <template lang="pug">
-  div(class="wrapper")
-    //- Show search button on mobile, https://www.paddingleft.com/2019/09/18/Show-Search-on-mobile-devices-keyboard
-    form(class="search-bar bg-gray-6"
+div(class="wrapper")
+  //- Show search button on mobile, https://www.paddingleft.com/2019/09/18/Show-Search-on-mobile-devices-keyboard
+  form(class="search-bar bg-gray-6"
+    :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
+    action @submit="onSearch")
+    svg-icon(class="pointer"
+      iconName="search"
+      :iconColor="color.search || 'gray-3'"
+      iconWidth="20px")
+    input(class="search-bar__input body-2"
       :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
-      action @submit="onSearch")
-      svg-icon(class="pointer"
-        iconName="search"
-        :iconColor="color.search || 'gray-3'"
-        iconWidth="20px")
-      input(class="search-bar__input body-2"
-        :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
-        ref="searchbar"
-        type="search"
-        v-model="keyword"
-        @input="onUpdate"
-        :placeholder="placeholder"
-        :style="inputStyles()")
-      svg-icon(v-if="clear && keyword"
-        class="pointer"
-        :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
-        iconName="close"
-        :iconColor="color.close || 'gray-3'"
-        iconWidth="20px"
-        @click.native="onClear")
-      slot
-    div(v-if="isFavorite !== undefined"
-        class="search-bar__favorite")
-      svg-icon(:iconName="isFavorite ? 'favorites-fill' : 'heart'"
-        class="pointer"
-        :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
-        :iconColor="color.close || 'gray-3'"
-        iconWidth="24px"
-        @click.native="clickHeart")
+      ref="searchbar"
+      type="search"
+      v-model="keyword"
+      @input="onUpdate"
+      :placeholder="placeholder"
+      :style="inputStyles()")
+    svg-icon(v-if="clear && keyword"
+      class="pointer"
+      :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
+      iconName="close"
+      :iconColor="color.close || 'gray-3'"
+      iconWidth="20px"
+      @click.native="onClear")
+    slot
+  div(v-if="isFavorite !== undefined"
+      class="search-bar__favorite")
+    svg-icon(:iconName="isFavorite ? 'favorites-fill' : 'heart'"
+      class="pointer"
+      :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
+      :iconColor="color.close || 'gray-3'"
+      iconWidth="24px"
+      @click.native="clickHeart")
 </template>
 
 <script lang="ts">

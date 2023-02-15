@@ -1,13 +1,13 @@
 <template lang="pug">
-  div(class="category-background-item")
-    img(class="pointer"
-      :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'smal', item.ver)"
-      draggable="false"
-      v-press="handleShare"
-      @click="addBackground"
-      @error="handleNotFound")
-    div(class="category-background-item__share" @click.stop.prevent="handleShare")
-      svg-icon(iconName="share" iconColor="white" iconWidth="16px")
+div(class="category-background-item")
+  img(class="pointer"
+    :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'smal', item.ver)"
+    draggable="false"
+    v-press="handleShare"
+    @click="addBackground"
+    @error="handleNotFound")
+  div(class="category-background-item__share" @click.stop.prevent="handleShare")
+    svg-icon(iconName="share" iconColor="white" iconWidth="16px")
 </template>
 
 <script lang="ts">

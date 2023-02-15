@@ -1,22 +1,22 @@
 <template lang="pug">
-  div(class="tags" v-click-outside="clickOutsideHandler")
-    template(v-if="!isTouchDevice")
-      div(class="tags__flex-container"
-          :style="containerStyle")
-        div(class="tags__tag-wrapper pointer" v-for="tag in tags"
-          @click="onClick(tag.value || tag)")
+div(class="tags" v-click-outside="clickOutsideHandler")
+  template(v-if="!isTouchDevice")
+    div(class="tags__flex-container"
+        :style="containerStyle")
+      div(class="tags__tag-wrapper pointer" v-for="tag in tags"
+        @click="onClick(tag.value || tag)")
+        div(class="tags__tag") {{ tag.label || tag }}
+    div(v-if="!showMore" class="tags__more-wrapper")
+      div(class="tags__tag-wrapper pointer"
+        @click="onClickMore")
+        div(class="tags__tag") {{ `${$t('NN0082')}...` }}
+  template(v-else)
+    div(class="tags__container-mobile")
+      div(class="tags__flex-container-mobile")
+        div(v-for="tag in tags" :active="tag.active"
+            class="tags__tag-wrapper pointer" :class="{[theme]: true}"
+            @click="onClick(tag.value || tag)")
           div(class="tags__tag") {{ tag.label || tag }}
-      div(v-if="!showMore" class="tags__more-wrapper")
-        div(class="tags__tag-wrapper pointer"
-          @click="onClickMore")
-          div(class="tags__tag") {{ `${$t('NN0082')}...` }}
-    template(v-else)
-      div(class="tags__container-mobile")
-        div(class="tags__flex-container-mobile")
-          div(v-for="tag in tags" :active="tag.active"
-              class="tags__tag-wrapper pointer" :class="{[theme]: true}"
-              @click="onClick(tag.value || tag)")
-            div(class="tags__tag") {{ tag.label || tag }}
 
 </template>
 

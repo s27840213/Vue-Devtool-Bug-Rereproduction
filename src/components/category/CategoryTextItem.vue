@@ -1,10 +1,10 @@
 <template lang="pug">
-  div(class="category-text-item"
-      :style="itemStyle"
-      @click="addText")
-    img(class="category-text-item__img"
-      :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
-      @error="handleNotFound")
+div(class="category-text-item"
+    :style="itemStyle"
+    @click="addText")
+  img(class="category-text-item__img"
+    :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
+    @error="handleNotFound")
 </template>
 
 <script lang="ts">

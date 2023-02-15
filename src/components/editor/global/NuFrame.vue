@@ -1,22 +1,22 @@
 <template lang="pug">
-  div(class="nu-frame"
-      :style="styles()")
-    div(v-if="shadowSrc()" class="shadow__wrapper" :style="shadowWrapperStyles")
-      img(class="shadow__img"
-        draggable="false"
-        :src="shadowSrc()")
-    nu-layer(v-for="(layer,index) in layers"
-      :key="`layer-${layer.id}`"
-      :pageIndex="pageIndex"
-      :layerIndex="subLayerIndex !== -1 ? subLayerIndex : layerIndex"
-      :inFrame="true"
-      :inImageFrame="inImageFrame()"
-      :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
-      :contentScaleRatio="contentScaleRatio"
-      :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
-      :primaryLayer="config"
-      :config="layer"
-      :isSubLayer="true")
+div(class="nu-frame"
+    :style="styles()")
+  div(v-if="shadowSrc()" class="shadow__wrapper" :style="shadowWrapperStyles")
+    img(class="shadow__img"
+      draggable="false"
+      :src="shadowSrc()")
+  nu-layer(v-for="(layer,index) in layers"
+    :key="`layer-${layer.id}`"
+    :pageIndex="pageIndex"
+    :layerIndex="subLayerIndex !== -1 ? subLayerIndex : layerIndex"
+    :inFrame="true"
+    :inImageFrame="inImageFrame()"
+    :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
+    :contentScaleRatio="contentScaleRatio"
+    :priPrimaryLayerIndex="subLayerIndex !== -1 ? layerIndex : -1"
+    :primaryLayer="config"
+    :config="layer"
+    :isSubLayer="true")
 </template>
 
 <script lang="ts">

@@ -1,5 +1,5 @@
 <template lang="pug">
-  img(class="pro" :src="require('@/assets/img/svg/pricing/vivisticker_pro.svg')" loading="lazy")
+img(class="pro" :src="require('@/assets/img/svg/pricing/vivisticker_pro.svg')" loading="lazy")
 </template>
 
 <script lang="ts">

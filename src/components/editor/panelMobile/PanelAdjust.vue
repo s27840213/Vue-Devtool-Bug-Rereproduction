@@ -1,15 +1,15 @@
 <template lang="pug">
-  div(class="panel-adjust")
-    div(v-for="field in fields" :key="field.name")
-      mobile-slider(:title="`${field.label}`"
-        :borderTouchArea="true"
-        :name="field.name"
-        :value="adjustVal[field.name] || 0"
-        :min="field.min"
-        :max="field.max"
-        @update="handleField")
-    div(class="panel-adjust__reset")
-      button(@click="reset") {{ 'Reset' }}
+div(class="panel-adjust")
+  div(v-for="field in fields" :key="field.name")
+    mobile-slider(:title="`${field.label}`"
+      :borderTouchArea="true"
+      :name="field.name"
+      :value="adjustVal[field.name] || 0"
+      :min="field.min"
+      :max="field.max"
+      @update="handleField")
+  div(class="panel-adjust__reset")
+    button(@click="reset") {{ 'Reset' }}
 </template>
 
 <script lang="ts">

@@ -1,29 +1,29 @@
 <template lang="pug">
-  div(class="panel-color px-5")
-    div(v-if="showDocumentColors")
-      div(class="text-left body-SM") {{$t('NN0798')}}
-      div(class="panel-color__shape-colors" :style="colorsStyle"
-          @scroll.passive="updateColorsOverflow" ref="colors")
-        color-btn(v-for="(color, index) in getDocumentColors"
-                  :color="color" :focus="index === currSelectedColorIndex"
-                  @click="selectColor(index)")
-      div(class="panel-color__hr")
-    //- There is no row-gap in MobilePanel while active PanelColor.
-    //- Instead, control gap by PanelColor itself.
-    div(v-else class="mt-10")
-    color-picker(
-      v-if="showColorPicker"
-      :isMobile="true" :aspectRatio="40"
-      :currentColor="colorUtils.currColor"
-      @update="handleDragUpdate"
-      @final="handleChangeStop")
-    color-slips(v-if="showPalette"
-      :class="{'show-document-colors': showDocumentColors}"
-      mode="PanelColor"
-      :allRecentlyControl="showAllRecently"
-      :selectedColor="selectedColor"
-      @openColorPicker="openColorPicker"
-      @openColorMore="openColorMore")
+div(class="panel-color px-5")
+  div(v-if="showDocumentColors")
+    div(class="text-left body-SM") {{$t('NN0798')}}
+    div(class="panel-color__shape-colors" :style="colorsStyle"
+        @scroll.passive="updateColorsOverflow" ref="colors")
+      color-btn(v-for="(color, index) in getDocumentColors"
+                :color="color" :focus="index === currSelectedColorIndex"
+                @click="selectColor(index)")
+    div(class="panel-color__hr")
+  //- There is no row-gap in MobilePanel while active PanelColor.
+  //- Instead, control gap by PanelColor itself.
+  div(v-else class="mt-10")
+  color-picker(
+    v-if="showColorPicker"
+    :isMobile="true" :aspectRatio="40"
+    :currentColor="colorUtils.currColor"
+    @update="handleDragUpdate"
+    @final="handleChangeStop")
+  color-slips(v-if="showPalette"
+    :class="{'show-document-colors': showDocumentColors}"
+    mode="PanelColor"
+    :allRecentlyControl="showAllRecently"
+    :selectedColor="selectedColor"
+    @openColorPicker="openColorPicker"
+    @openColorMore="openColorMore")
 </template>
 
 <script lang="ts">

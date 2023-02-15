@@ -1,18 +1,18 @@
 <template lang="pug">
-  recycle-scroller(class="category-list" id="recycle" :items="list")
-    template(v-slot="{ item }")
-      observer-sentinel(v-if="item.sentinel"
-        :key="item.id"
-        :target="`.category-list_${item.type}`"
-        @callback="onLoadMore(item.moreType)")
-      slot(:name="item.type"
-        :list="item.list"
-        :title="item.title"
-        :isFavorite="item.isFavorite")
-    template(#before)
-      slot(name="before")
-    template(#after)
-      slot(name="after")
+recycle-scroller(class="category-list" id="recycle" :items="list")
+  template(v-slot="{ item }")
+    observer-sentinel(v-if="item.sentinel"
+      :key="item.id"
+      :target="`.category-list_${item.type}`"
+      @callback="onLoadMore(item.moreType)")
+    slot(:name="item.type"
+      :list="item.list"
+      :title="item.title"
+      :isFavorite="item.isFavorite")
+  template(#before)
+    slot(name="before")
+  template(#after)
+    slot(name="after")
 </template>
 
 <script lang="ts">

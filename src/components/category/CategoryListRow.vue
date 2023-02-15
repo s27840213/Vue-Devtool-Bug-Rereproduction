@@ -1,15 +1,15 @@
 <template lang="pug">
-  div(class="category-row")
-    div(v-if="prevIcon"
-      class="category-row__move category-row__move--left")
-      div(class="category-row__icon")
-        //- svg-icon(iconName="arrow-left" iconWidth="20px" iconColor="gray-1")
-    div(v-if="nextIcon"
-      class="category-row__move category-row__move--right")
-      div(class="category-row__icon")
-        //- svg-icon(iconName="arrow-right" iconWidth="20px" iconColor="gray-1")
-    div(class="category-row__items" ref="items" @scroll.passive="handleScroll")
-      slot
+div(class="category-row")
+  div(v-if="prevIcon"
+    class="category-row__move category-row__move--left")
+    div(class="category-row__icon")
+      //- svg-icon(iconName="arrow-left" iconWidth="20px" iconColor="gray-1")
+  div(v-if="nextIcon"
+    class="category-row__move category-row__move--right")
+    div(class="category-row__icon")
+      //- svg-icon(iconName="arrow-right" iconWidth="20px" iconColor="gray-1")
+  div(class="category-row__items" ref="items" @scroll.passive="handleScroll")
+    slot
 </template>
 
 <script lang="ts">
