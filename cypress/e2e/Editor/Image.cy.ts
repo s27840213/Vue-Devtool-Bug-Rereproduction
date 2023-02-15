@@ -5,9 +5,9 @@ describe('Testing nu-image edit', () => {
 
   it('Unsplash image', function () {
     cy.visit('/editor')
-    cy.importDesign('flower.json')
-    cy.get('.nu-layer .nu-image img').snapshotTest('init')
-    cy.get('.nu-image')
+      .importDesign('flower.json')
+      .get('.nu-layer .nu-image img').snapshotTest('init')
+      .get('.nu-image')
       .imageAdjust()
       .layerFlip()
       .imageCrop('button')

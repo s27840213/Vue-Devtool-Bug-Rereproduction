@@ -89,12 +89,12 @@ Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCro
         throw new Error(`Unexpected enterCrop value: '${enterCrop}' in imageCrop command`)
       }
     })
-    .snapshotTest('Image crop, init')
+    .snapshotTest('Crop init')
     .get('.dim-background .nu-controller__body .controller-point').eq(1)
     .realMouseDown()
     .realMouseMove(30, -30)
     .realMouseUp()
-    .snapshotTest('Image crop, scale top right').then(() => {
+    .snapshotTest('Crop scale top right').then(() => {
       const moves = [
         { name: 'left', x: -30, y: 0 },
         { name: 'down', x: 0, y: 30 },
@@ -105,7 +105,7 @@ Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCro
           .realMouseDown()
           .realMouseMove(move.x, move.y, { position: 'center' })
           .realMouseUp()
-          .snapshotTest(`Image crop, move ${move.name}`)
+          .snapshotTest(`Crop move ${move.name}`)
       }
     })
     // Restore image to original state
@@ -117,7 +117,7 @@ Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCro
     .realMouseDown()
     .realMouseMove(-100, 100)
     .realMouseUp()
-    .snapshotTest('Image crop, init')
+    .snapshotTest('Crop init')
     .get('.panel-group .panel-group__adjust button').contains('取消').click()
   return cy.get(subject.selector)
 })
@@ -128,7 +128,7 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
     .then(() => {
       for (const shadow of shadowsOptions) {
         cy.get(`.svg-photo-shadow-${shadow.name}`).click()
-        cy.get('.nu-layer .nu-layer__inProcess').should('not.exist')
+          .get('.nu-layer .nu-layer__inProcess').should('not.exist')
           .get('.photo-effect-setting__reset').click({ scrollBehavior: 'top' })
           // 30 = DRAWING_TIMEOUT in imageShadowUtils, debounce time of shadow setting
           .wait(30).snapshotTest(`Shadow ${shadow.name} default`)
