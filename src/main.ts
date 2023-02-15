@@ -78,7 +78,14 @@ declare module '@vue/runtime-core' {
     $isTouchDevice: boolean
   }
 }
-app.config.globalProperties.$isTouchDevice = generalUtils.isTouchDevice()
+const isTouchDevice = generalUtils.isTouchDevice()
+app.config.globalProperties.$isTouchDevice = isTouchDevice
+// if (isTouchDevice) {
+//   editorUtils.setMobileHW({
+//     width: document.body.clientWidth,
+//     height: document.body.clientHeight
+//   })
+// }
 
 const tooltipUtils = new TooltipUtils()
 

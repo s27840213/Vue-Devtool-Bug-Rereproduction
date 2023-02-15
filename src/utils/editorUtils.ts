@@ -5,6 +5,17 @@ import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
 
 class EditorUtils {
+  private _mobileWidth = 0
+  private _mobileHeight = 0
+
+  get mobileWidth() {
+    return this._mobileWidth
+  }
+
+  get mobileHeight() {
+    return this._mobileHeight
+  }
+
   get mobileAllPageMode() {
     return store.getters['mobileEditor/getMobileAllPageMode']
   }
@@ -33,12 +44,30 @@ class EditorUtils {
     return store.state.showColorSlips
   }
 
+  setMobileHW(size: { width?: number, height?: number }) {
+    console.warn(size.width, size.height)
+    if (size.width) {
+      this._mobileWidth = size.width
+    }
+    if (size.height) {
+      this._mobileHeight = size.height
+    }
+  }
+
   handleContentScaleCalc(page: IPage) {
     const { width, height } = page
-    const PAGE_SIZE_W = 324
-    const PAGE_SIZE_H = 400
+    const PAGE_SIZE_W = (this.mobileWidth || Number.MAX_SAFE_INTEGER) * 0.926
+    const PAGE_SIZE_H = (this.mobileHeight || Number.MAX_SAFE_INTEGER) * 0.926
     if (width > PAGE_SIZE_W || height > PAGE_SIZE_H) {
-      return width >= height ? PAGE_SIZE_W / width : PAGE_SIZE_H / height
+      if (width >= height) {
+        return PAGE_SIZE_W / width
+      } else {
+        const scale = PAGE_SIZE_H / height
+        if (width * scale > PAGE_SIZE_W) {
+          return PAGE_SIZE_W / width
+        }
+        return scale
+      }
     } else {
       return 1
     }

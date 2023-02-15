@@ -430,8 +430,8 @@ export default defineComponent({
         transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
         opacity: `${this.contentEditable ? 0 : 1}`,
         maskImage: this.contentEditable ? 'none'
-          : `linear-gradient(to right, 
-          transparent 0, black ${this.leftOverflow ? '56px' : 0}, 
+          : `linear-gradient(to right,
+          transparent 0, black ${this.leftOverflow ? '56px' : 0},
           black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
       }
     },
