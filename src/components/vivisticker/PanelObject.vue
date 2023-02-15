@@ -12,9 +12,9 @@
               @click.native="doubleTapTips")
     keep-alive
       panel-object-static(v-if="isStatic || isFavoritesStatic"
-        :showFav="isFavoritesStatic" ref="static")
+        :showFav="isFavoritesStatic" :itemHeight="itemHeight" ref="static")
       panel-object-gifs(v-if="isGifs || isFavoritesGifs"
-        :showFav="isFavoritesGifs" ref="gif")
+        :showFav="isFavoritesGifs" :itemHeight="itemHeight" ref="gif")
 </template>
 
 <script lang="ts">
@@ -36,14 +36,18 @@ export default Vue.extend({
   data() {
     return {
       tabIndex: 0,
-      favoritesTabIndex: 0
+      favoritesTabIndex: 0,
+      itemHeight: 80
     }
   },
   mounted() {
     eventUtils.on(PanelEvent.scrollPanelObjectToTop, this.scrollToTop)
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize()
   },
   beforeDestroy() {
     eventUtils.off(PanelEvent.scrollPanelObjectToTop)
+    window.removeEventListener('resize', this.handleResize)
   },
   computed: {
     ...mapGetters({
@@ -74,6 +78,9 @@ export default Vue.extend({
         i18n.tc('NN0764'),
         { msg: i18n.tc('NN0563') }
       )
+    },
+    handleResize() {
+      this.itemHeight = window.outerWidth >= 768 ? 120 : 80
     }
   }
 })
