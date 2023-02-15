@@ -30,7 +30,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   get isBrowserMode(): boolean {
-    return store.getters['webView/isBrowserMode']
+    return store.getters['webView/getIsBrowserMode']
   }
 
   detectIfInApp() {
