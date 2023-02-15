@@ -46,7 +46,7 @@ export default defineConfig({
           launchOptions.args.push('--height='.concat(height))
         }
 
-        console.log('launchOptions', launchOptions)
+        // console.log('launchOptions', launchOptions)
         return launchOptions
       })
     },

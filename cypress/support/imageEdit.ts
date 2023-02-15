@@ -175,3 +175,15 @@ Cypress.Commands.add('imageSetAsBg', { prevSubject: 'element' }, (subject) => {
     .get('.popup-adjust__reset').click()
   return cy.get(subject.selector)
 })
+
+Cypress.Commands.add('imageAutoBgRemove', { prevSubject: 'element' }, (subject) => {
+  cy.wrap(subject).click()
+    .get('.photo-setting .photo-setting__grid button').contains('去背').click()
+    .get('.nu-layer .nu-layer__inProcess').should('not.exist')
+  return cy.wrap(subject)
+})
+
+Cypress.Commands.add('imageManuallyBgRemove', { prevSubject: 'element' }, (subject) => {
+  //
+  return cy.wrap(subject)
+})

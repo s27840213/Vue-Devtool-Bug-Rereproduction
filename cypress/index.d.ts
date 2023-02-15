@@ -24,12 +24,21 @@ declare namespace Cypress {
     // layerEdit.ts
     layerFlip(): Chainable<JQuery<HTMLElement>>
     layerAlign(): Chainable<JQuery<HTMLElement>>
+    layerOrder(subjectBack: JQuery<HTMLElement>): Chainable<JQuery<HTMLElement>>
+    layerCopy(): Chainable<JQuery<HTMLElement>>
+    layerLock(): Chainable<JQuery<HTMLElement>>
+    layerDelete(): Chainable<JQuery<HTMLElement>>
+    layerCopyFormat(): Chainable<JQuery<HTMLElement>>
+    layerRotate(): Chainable<JQuery<HTMLElement>>
+    layerScale(): Chainable<JQuery<HTMLElement>>
 
     // imageEdit.ts
     imageAdjust(): Chainable<JQuery<HTMLElement>>
     imageCrop(enterCrop: 'button'|'dblclick'): Chainable<JQuery<HTMLElement>>
     imageShadow(): Chainable<JQuery<HTMLElement>>
     imageSetAsBg(): Chainable<JQuery<HTMLElement>>
+    imageAutoBgRemove(): Chainable<JQuery<HTMLElement>>
+    imageManuallyBgRemove(): Chainable<JQuery<HTMLElement>>
 
     // npm package type define
     compareSnapshot(
