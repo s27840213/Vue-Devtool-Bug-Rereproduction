@@ -10,7 +10,8 @@ interface ISidebarData {
 }
 
 declare namespace Cypress {
-  interface Chainable {
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  interface Chainable<Subject> {
     // commands.ts
     login(): Chainable<void>
     deleteAllLayers(): Chainable<void>

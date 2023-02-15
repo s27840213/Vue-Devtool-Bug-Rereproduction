@@ -49,6 +49,19 @@ Cypress.Commands.add('layerOrder', { prevSubject: 'element' }, (subjectFront, su
 })
 
 Cypress.Commands.add('layerCopy', { prevSubject: 'element' }, (subject) => {
+  cy.wrap(subject).click()
+    .get('.nu-page .nu-layer').then((oldLayers) => {
+      // If use click() to trigger clipboard r/w, Chrome will throw 'Document is not focused.' error.
+      // This will only happen when click 'Run All Test' button in cy spec sidebar and unfocus browser.
+      // Use realClick() can prevent the error.
+      cy.get('.panel-group .svg-copy').realClick()
+        .get('.nu-page .nu-layer').should('have.length', oldLayers.length + 1)
+        .snapshotTest('Copy layer')
+        .get('.nu-page .nu-layer').then((newLayers) => {
+          const newLayer = newLayers.not(oldLayers)
+          cy.wrap(newLayer).click().type('{del}')
+        })
+    })
   return cy.wrap(subject)
 })
 

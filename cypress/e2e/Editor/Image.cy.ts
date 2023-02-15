@@ -44,8 +44,8 @@ describe('Testing nu-image edit', () => {
       .get('.nu-layer__wrapper:nth-child(2) .nu-image').then((flowerBack) => {
         cy.get('.nu-layer__wrapper:nth-child(3) .nu-image')
           .layerOrder(flowerBack)
-          // .layerCopy()
-          // .deselectAllLayers().snapshotTest('init') // Check if image restore to init
+          .layerCopy()
+          .deselectAllLayers().snapshotTest('init') // Check if image restore to init
       })
   })
 })
