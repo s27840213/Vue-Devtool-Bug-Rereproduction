@@ -42,11 +42,15 @@ export default Vue.extend({
   },
   mounted() {
     eventUtils.on(PanelEvent.scrollPanelObjectToTop, this.scrollToTop)
-    window.addEventListener('resize', this.handleResize)
-    this.handleResize()
   },
   beforeDestroy() {
     eventUtils.off(PanelEvent.scrollPanelObjectToTop)
+  },
+  activated() {
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize()
+  },
+  deactivated() {
     window.removeEventListener('resize', this.handleResize)
   },
   computed: {

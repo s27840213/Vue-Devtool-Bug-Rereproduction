@@ -28,6 +28,7 @@
               category-background-item(class="panel-bg__item"
                 :item="item"
                 :locked="false"
+                :style="itemStyles"
                 @share="handleShareImage")
         template(v-slot:category-background-item="{ list, title }")
           div(class="panel-bg__items")
@@ -38,6 +39,7 @@
               :key="item.id"
               :item="item"
               :locked="false"
+              :style="itemStyles"
               @share="handleShareImage")
         template(v-if="pending" #after)
           div(class="text-center")
@@ -119,6 +121,7 @@ import vivistickerUtils from '@/utils/vivistickerUtils'
 import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import { round } from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -141,7 +144,8 @@ export default Vue.extend({
       opacity: 100,
       showAllRecentlyBgColors: false,
       colorAreaHeight: 0,
-      bgSizeStyles: {}
+      bgSizeStyles: {},
+      itemWidth: 80
     }
   },
   computed: {
@@ -165,10 +169,10 @@ export default Vue.extend({
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       newBgColor: 'vivisticker/getNewBgColor'
     }),
-    itemWidth(): number {
+    itemHeight(): number {
       // const basicWidth = (window.outerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
       // return basicWidth < 145 ? basicWidth : 145 // 145px is the default width
-      return 142
+      return round(this.itemWidth / 9 * 16)
     },
     isInCategory(): boolean {
       return this.isTabInCategory('background')
@@ -187,7 +191,7 @@ export default Vue.extend({
       return (categories as IListServiceContentData[])
         .filter(category => category.list.length > 0)
         .map((category, index) => ({
-          size: this.itemWidth + 10 + 46,
+          size: this.itemHeight + 10 + 46,
           id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.is_recent ? category.list.slice(0, 10) : category.list,
@@ -205,7 +209,7 @@ export default Vue.extend({
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-background-item',
             list: rowItems,
-            size: this.itemWidth + 32,
+            size: this.itemHeight + 32,
             title: ''
           }
         })
@@ -252,6 +256,12 @@ export default Vue.extend({
     },
     showImageTab(): boolean {
       return this.tabIndex === 0
+    },
+    itemStyles(): {[key: string]: string} {
+      return {
+        width: this.itemWidth + 'px',
+        height: this.itemHeight + 'px'
+      }
     }
   },
   mounted() {
@@ -362,6 +372,7 @@ export default Vue.extend({
         height: `${height}px`
       }
       this.colorAreaHeight = window.outerHeight - 176
+      this.itemWidth = window.outerWidth >= 768 ? 120 : 80
     },
     shareBgStyles() {
       return this.shareItem ? {
@@ -483,7 +494,7 @@ export default Vue.extend({
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-background-item',
             list: rowItems,
-            size: this.itemWidth + 24 + (title ? 46 : 0), // (bg height) + 24(gap) + 0/46(title)
+            size: this.itemHeight + 24 + (title ? 46 : 0), // (bg height) + 24(gap) + 0/46(title)
             title
           }
         })
