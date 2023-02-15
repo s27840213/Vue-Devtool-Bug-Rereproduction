@@ -1,10 +1,10 @@
 import { IPage } from '@/interfaces/page'
 import router from '@/router'
 import store from '@/store'
+import _ from 'lodash'
 import Vue from 'vue'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
-import _ from 'lodash'
 
 class GeneralUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
@@ -189,7 +189,11 @@ class GeneralUtils {
   }
 
   isTouchDevice(): boolean {
-    return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase())
+    return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase()) || this.isIPadOS()
+  }
+
+  isIPadOS(): boolean {
+    return /macintosh/i.test(navigator.userAgent.toLowerCase()) && navigator.maxTouchPoints > 0
   }
 
   getListRowItemSize(): number {
