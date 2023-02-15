@@ -38,6 +38,9 @@ export async function editorRouteHandler(_to: VueRouter.RouteLocationNormalized,
         case 'design': {
           if (teamId) {
             designUtils.fetchDesign(teamId, designId, { width, height })
+              .then(() => {
+                editorUtils.handleContentScaleRatio(0)
+              })
           }
           break
         }

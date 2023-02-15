@@ -45,7 +45,6 @@ class EditorUtils {
   }
 
   setMobileHW(size: { width?: number, height?: number }) {
-    console.warn(size.width, size.height)
     if (size.width) {
       this._mobileWidth = size.width
     }
@@ -56,6 +55,15 @@ class EditorUtils {
 
   handleContentScaleCalc(page: IPage) {
     const { width, height } = page
+    if (!this.mobileHeight || this.mobileWidth) {
+      const mobileEditor = document.getElementById('mobile-editor__content')
+      if (mobileEditor) {
+        this.setMobileHW({
+          width: mobileEditor.clientWidth,
+          height: mobileEditor.clientHeight
+        })
+      }
+    }
     const PAGE_SIZE_W = (this.mobileWidth || Number.MAX_SAFE_INTEGER) * 0.926
     const PAGE_SIZE_H = (this.mobileHeight || Number.MAX_SAFE_INTEGER) * 0.926
     if (width > PAGE_SIZE_W || height > PAGE_SIZE_H) {
