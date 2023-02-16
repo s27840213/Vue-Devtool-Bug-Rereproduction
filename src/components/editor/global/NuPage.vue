@@ -328,6 +328,9 @@ export default defineComponent({
       isImgCtrl: 'imgControl/isImgCtrl',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
+    // contentScaleRatio():number {
+    //   return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this._contentScaleRatio
+    // },
     contentScaleRatio(): number {
       // return this.pageState.config.contentScaleRatio
       // if (this.$isTouchDevice) {
@@ -336,9 +339,6 @@ export default defineComponent({
       } else {
         return 1
       }
-    // contentScaleRatio():number {
-    //   return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this._contentScaleRatio
-    // },
     },
     config(): IPage {
       if (!this.pageState.config.isEnableBleed) return this.pageState.config
