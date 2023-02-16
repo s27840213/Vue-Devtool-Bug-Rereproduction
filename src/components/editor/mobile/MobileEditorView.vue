@@ -291,7 +291,6 @@ export default defineComponent({
       ]
     ),
     outerClick(e: MouseEvent) {
-      console.log('outer click')
       if (eventUtils.checkIsMultiTouch(e)) {
         return
       }
