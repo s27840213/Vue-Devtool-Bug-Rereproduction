@@ -44,6 +44,7 @@ export class Page implements IPage {
   }
 
   isAutoResizeNeeded: boolean
+  contentScaleRatio: number
 
   constructor() {
     this.snapUtils = new SnapUtils(-1)
@@ -97,5 +98,6 @@ export class Page implements IPage {
       right: 11
     }
     this.isAutoResizeNeeded = false
+    this.contentScaleRatio = 1
   }
 }
