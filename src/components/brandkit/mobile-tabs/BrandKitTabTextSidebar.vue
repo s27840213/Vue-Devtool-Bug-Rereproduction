@@ -11,13 +11,13 @@ div(class="brand-kit-tab-text" :style="minHeightStyles()")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
-import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
+import assetUtils from '@/utils/assetUtils'
+import brandkitUtils from '@/utils/brandkitUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import assetUtils from '@/utils/assetUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],

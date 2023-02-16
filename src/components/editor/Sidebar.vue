@@ -26,12 +26,12 @@ div(class="sidebar")
       :iconWidth="'30px'")
 </template>
 <script lang="ts">
+import Avatar from '@/components/Avatar.vue'
+import { SidebarPanelType } from '@/store/types'
+import brandkitUtils from '@/utils/brandkitUtils'
+import pageUtils from '@/utils/pageUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { SidebarPanelType } from '@/store/types'
-import pageUtils from '@/utils/pageUtils'
-import Avatar from '@/components/Avatar.vue'
-import brandkitUtils from '@/utils/brandkitUtils'
 
 export default defineComponent({
   components: {

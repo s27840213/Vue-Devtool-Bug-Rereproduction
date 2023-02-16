@@ -1,86 +1,86 @@
 <template lang="pug">
-  div(class="panel-static" :class="{'in-category': isInCategory}")
-    //- Search bar
-    search-bar(v-if="!isInCategory && !showFav"
-      class="panel-static__searchbar"
-      :placeholder="$t('NN0092', { target: $tc('NN0003', 1) })"
-      clear
-      :defaultKeyword="keywordLabel"
-      vivisticker="dark"
-      :color="{close: 'black-5', search: 'black-5'}"
-      :isFavorite="keywordIsFavaorites"
-      @search="handleSearch"
-      @favorite="toggleFavoritesTag")
-    tags(v-if="isInCategory && tags && tags.length" class="panel-static__tags"
-        :tags="tags" theme="dark" @search="handleSearch")
-    //- Search result and static main content
-    category-list(v-for="item in categoryListArray"
-                  v-show="item.show" :ref="item.key" :key="item.key"
-                  :list="item.content" @loadMore="item.loadMore")
-      template(#before)
-        div(class="panel-static__top-item")
-        tags(v-if="!isInCategory && tags && tags.length" class="panel-static__tags" style="margin-top: 0"
-            :tags="tags" theme="dark" @search="handleSearch")
-        //- Search result empty msg
-        div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
-        //- Empty favorites view
-        div(v-if="showFav && !item.content.length && !pending"
-            class="panel-static__favorites-empty")
-          svg-icon(iconName="favorites-empty" iconWidth="42px" iconColor="white")
-          span(class="panel-static__favorites-empty--title") {{$t('NN0765')}}
-          span(class="text-black-5") {{$t('NN0764')}}
-      template(v-slot:category-list-rows="{ list, title, isFavorite }")
-        category-list-rows(
-          :list="list"
-          :title="title"
-          :isFavorite="isFavorite")
-          template(v-slot:action)
-            div(class="panel-static__list-rows-action")
-              svg-icon(v-if="isFavorite !== undefined"
-                      :iconName="isFavorite ? 'favorites-fill' : 'heart'"
-                      iconWidth="24px" iconColor="gray-2" @click.native="toggleFaovoritesCategoryByTitle(title)")
-              span(@click="item.categorySearch(title)") {{$t('NN0082')}}
-          template(v-slot:preview="{ item }")
-            category-object-item(class="panel-static__item"
-              :src="item.src"
-              :item="item"
-              @click4in1="click4in1"
-              @dbclick4in1="toggleFavorites4in1"
-              @dbclick="toggleFavoritesItem")
-      template(v-slot:category-object-item="{ list }")
-        div(class="panel-static__items")
-          category-object-item(v-for="item in list"
-            class="panel-static__item"
-            :key="item.id"
+div(class="panel-static" :class="{'in-category': isInCategory}")
+  //- Search bar
+  search-bar(v-if="!isInCategory && !showFav"
+    class="panel-static__searchbar"
+    :placeholder="$t('NN0092', { target: $tc('NN0003', 1) })"
+    clear
+    :defaultKeyword="keywordLabel"
+    vivisticker="dark"
+    :color="{close: 'black-5', search: 'black-5'}"
+    :isFavorite="keywordIsFavaorites"
+    @search="handleSearch"
+    @favorite="toggleFavoritesTag")
+  tags(v-if="isInCategory && tags && tags.length" class="panel-static__tags"
+      :tags="tags" theme="dark" @search="handleSearch")
+  //- Search result and static main content
+  category-list(v-for="item in categoryListArray"
+                v-show="item.show" :ref="item.key" :key="item.key"
+                :list="item.content" @loadMore="item.loadMore")
+    template(#before)
+      div(class="panel-static__top-item")
+      tags(v-if="!isInCategory && tags && tags.length" class="panel-static__tags" style="margin-top: 0"
+          :tags="tags" theme="dark" @search="handleSearch")
+      //- Search result empty msg
+      div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+      //- Empty favorites view
+      div(v-if="showFav && !item.content.length && !pending"
+          class="panel-static__favorites-empty")
+        svg-icon(iconName="favorites-empty" iconWidth="42px" iconColor="white")
+        span(class="panel-static__favorites-empty--title") {{$t('NN0765')}}
+        span(class="text-black-5") {{$t('NN0764')}}
+    template(v-slot:category-list-rows="{ list, title, isFavorite }")
+      category-list-rows(
+        :list="list"
+        :title="title"
+        :isFavorite="isFavorite")
+        template(v-slot:action)
+          div(class="panel-static__list-rows-action")
+            svg-icon(v-if="isFavorite !== undefined"
+                    :iconName="isFavorite ? 'favorites-fill' : 'heart'"
+                    iconWidth="24px" iconColor="gray-2" @click.native="toggleFaovoritesCategoryByTitle(title)")
+            span(@click="item.categorySearch && item.categorySearch(title)") {{$t('NN0082')}}
+        template(v-slot:preview="{ item }")
+          category-object-item(class="panel-static__item"
             :src="item.src"
             :item="item"
             @click4in1="click4in1"
             @dbclick4in1="toggleFavorites4in1"
             @dbclick="toggleFavoritesItem")
-      template(v-if="pending" #after)
-        div(class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
+    template(v-slot:category-object-item="{ list }")
+      div(class="panel-static__items")
+        category-object-item(v-for="item in list"
+          class="panel-static__item"
+          :key="item.id"
+          :src="item.src"
+          :item="item"
+          @click4in1="click4in1"
+          @dbclick4in1="toggleFavorites4in1"
+          @dbclick="toggleFavoritesItem")
+    template(v-if="pending" #after)
+      div(class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import i18n from '@/i18n'
-import { mapActions, mapGetters, mapState } from 'vuex'
-import SearchBar from '@/components/SearchBar.vue'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import { IAsset, ICategoryExtend, isICategory, isITag, ITagExtend } from '@/interfaces/module'
-import CategoryList from '@/components/category/CategoryList.vue'
+import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import Tags from '@/components/global/Tags.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import i18n from '@/i18n'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { IAsset, ICategoryExtend, isICategory, isITag, ITagExtend } from '@/interfaces/module'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 type refTarget = 'mainContent' | 'searchResult' | 'favoritesContent' | 'favoritesSearchResult'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     CategoryList,
@@ -186,9 +186,9 @@ export default Vue.extend({
     },
     favoritesContent(): ICategoryItem[] {
       let result = [] as ICategoryItem[];
-      [{ title: i18n.tc('NN0762'), list: this.favoritesItems },
-        { title: i18n.tc('NN0761'), list: this.favoritesTags },
-        { title: i18n.tc('NN0760'), list: this.favoritesCategories }].forEach(({ title, list }) => {
+      [{ title: i18n.global.tc('NN0762'), list: this.favoritesItems },
+        { title: i18n.global.tc('NN0761'), list: this.favoritesTags },
+        { title: i18n.global.tc('NN0760'), list: this.favoritesCategories }].forEach(({ title, list }) => {
         result = result.concat(this.processListCategory([{
           id: -1,
           title,
@@ -235,9 +235,9 @@ export default Vue.extend({
       const { showFav, keyword, pending } = this
       if (pending || this.showAllRecently) return ''
       if (!showFav && keyword && this.searchResult.length === 0) {
-        return `${i18n.t('NN0393', {
+        return `${i18n.global.t('NN0393', {
           keyword: this.keywordLabel,
-          target: i18n.tc('NN0003', 1)
+          target: i18n.global.tc('NN0003', 1)
         })}`
       } else return ''
     },
@@ -257,14 +257,14 @@ export default Vue.extend({
     )
   },
   activated() {
-    const ref = this.$refs as Record<string, Vue[]>
+    const ref = this.$refs as Record<string, CCategoryList[]>
     for (const name of this.targets) {
       ref[name][0].$el.scrollTop = this.scrollTop[name]
       ref[name][0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, name))
     }
   },
   deactivated() {
-    const ref = this.$refs as Record<string, Vue[]>
+    const ref = this.$refs as Record<string, CCategoryList[]>
     for (const name of this.targets) {
       ref[name][0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, name))
     }
@@ -274,13 +274,13 @@ export default Vue.extend({
       if (!newVal) {
         this.$nextTick(() => {
           // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          (this.$refs.mainContent as Vue[])[0].$el.scrollTop = this.scrollTop.mainContent
+          (this.$refs.mainContent as CCategoryList[])[0].$el.scrollTop = this.scrollTop.mainContent
         })
       }
     },
     categoryListArray() {
       this.$nextTick(() => {
-        const ref = this.$refs as Record<string, Vue[]>
+        const ref = this.$refs as Record<string, CCategoryList[]>
         for (const name of this.targets) {
           ref[name][0].$el.scrollTop = this.scrollTop[name]
         }
@@ -305,7 +305,7 @@ export default Vue.extend({
     scrollToTop() {
       for (const list of this.categoryListArray) {
         if (list.show) {
-          const categoryList = (this.$refs[list.key] as Vue[])[0]
+          const categoryList = (this.$refs[list.key] as CCategoryList[])[0]
           const top = categoryList.$el.querySelector('.panel-static__top-item') as HTMLElement
           top.scrollIntoView({ behavior: 'smooth' })
         }

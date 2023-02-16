@@ -1,66 +1,66 @@
 <template lang="pug">
-  div(class="panel-text" :class="{'in-category': isInCategory}")
-    search-bar(v-if="!isInCategory"
-      class="panel-text__searchbar"
-      :class="{'no-top': isInEditor}"
-      :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
-      clear
-      :defaultKeyword="keywordLabel"
-      vivisticker="dark"
-      :color="{close: 'black-5', search: 'black-5'}"
-      @search="handleSearch")
-    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
-    template(v-if="!keyword && !showAllRecently")
-      div(class="panel-text__text-button-wrapper"
-          :style="`font-family: ${localeFont()}`"
-          @click="handleAddText")
-        span {{ $t('STK0001') }}
-        svg-icon(iconName="plus-square" iconWidth="22px" iconColor="white")
-    category-list(v-for="item in categoryListArray"
-      v-show="item.show" :ref="item.key" :key="item.key"
-      :list="item.content" @loadMore="handleLoadMore")
-      template(#before)
-        div(class="panel-text__top-item")
-      template(v-if="pending" #after)
-        div(class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
-      template(v-slot:category-list-rows="{ list, title }")
-        category-list-rows(
-          v-if="!keyword"
-          :list="list"
-          :title="title"
-          @action="handleCategorySearch")
-          template(v-slot:preview="{ item }")
-            category-text-item(class="panel-text__item"
-              :item="item")
-      template(v-slot:category-text-item="{ list, title }")
-        div(class="panel-text__items")
-          div(v-if="title"
-            class="panel-text__header") {{ title }}
-          category-text-item(v-for="item in list"
-            class="panel-text__item"
-            :key="item.id"
+div(class="panel-text" :class="{'in-category': isInCategory}")
+  search-bar(v-if="!isInCategory"
+    class="panel-text__searchbar"
+    :class="{'no-top': isInEditor}"
+    :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
+    clear
+    :defaultKeyword="keywordLabel"
+    vivisticker="dark"
+    :color="{close: 'black-5', search: 'black-5'}"
+    @search="handleSearch")
+  div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+  template(v-if="!keyword && !showAllRecently")
+    div(class="panel-text__text-button-wrapper"
+        :style="`font-family: ${localeFont()}`"
+        @click="handleAddText")
+      span {{ $t('STK0001') }}
+      svg-icon(iconName="plus-square" iconWidth="22px" iconColor="white")
+  category-list(v-for="item in categoryListArray"
+    v-show="item.show" :ref="item.key" :key="item.key"
+    :list="item.content" @loadMore="handleLoadMore")
+    template(#before)
+      div(class="panel-text__top-item")
+    template(v-if="pending" #after)
+      div(class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
+    template(v-slot:category-list-rows="{ list, title }")
+      category-list-rows(
+        v-if="!keyword"
+        :list="list"
+        :title="title"
+        @action="handleCategorySearch")
+        template(v-slot:preview="{ item }")
+          category-text-item(class="panel-text__item"
             :item="item")
+    template(v-slot:category-text-item="{ list, title }")
+      div(class="panel-text__items")
+        div(v-if="title"
+          class="panel-text__header") {{ title }}
+        category-text-item(v-for="item in list"
+          class="panel-text__item"
+          :key="item.id"
+          :item="item")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
-import i18n from '@/i18n'
-import SearchBar from '@/components/SearchBar.vue'
-import CategoryList from '@/components/category/CategoryList.vue'
+import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
-import AssetUtils from '@/utils/assetUtils'
+import SearchBar from '@/components/SearchBar.vue'
+import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import VueI18n from 'vue-i18n'
+import AssetUtils from '@/utils/assetUtils'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import { defineComponent } from 'vue'
+import VueI18n from 'vue-i18n'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     CategoryList,
@@ -175,9 +175,9 @@ export default Vue.extend({
     emptyResultMessage(): string {
       const { keyword, pending } = this
       if (pending || !keyword || this.searchResult.length > 0 || this.showAllRecently) return ''
-      return `${i18n.t('NN0393', {
+      return `${i18n.global.t('NN0393', {
           keyword: this.keywordLabel,
-          target: i18n.tc('NN0005', 1)
+          target: i18n.global.tc('NN0005', 1)
         })}`
     }
   },
@@ -191,20 +191,20 @@ export default Vue.extend({
       })
     eventUtils.on(PanelEvent.scrollPanelTextToTop, this.scrollToTop)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     eventUtils.off(PanelEvent.scrollPanelTextToTop)
   },
   activated() {
-    const mainContent = (this.$refs.mainContent as Vue[])[0].$el
-    const searchResult = (this.$refs.searchResult as Vue[])[0].$el
+    const mainContent = (this.$refs.mainContent as CCategoryList[])[0].$el
+    const searchResult = (this.$refs.searchResult as CCategoryList[])[0].$el
     mainContent.scrollTop = this.scrollTop.mainContent
     searchResult.scrollTop = this.scrollTop.searchResult
     mainContent.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
     searchResult.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   deactivated() {
-    const mainContent = (this.$refs.mainContent as Vue[])[0].$el
-    const searchResult = (this.$refs.searchResult as Vue[])[0].$el
+    const mainContent = (this.$refs.mainContent as CCategoryList[])[0].$el
+    const searchResult = (this.$refs.searchResult as CCategoryList[])[0].$el
     mainContent.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
     searchResult.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
@@ -212,7 +212,7 @@ export default Vue.extend({
     keyword(newVal: string) {
       if (!newVal) {
         this.$nextTick(() => {
-          const mainContent = (this.$refs.mainContent as Vue[])[0].$el
+          const mainContent = (this.$refs.mainContent as CCategoryList[])[0].$el
           // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
           mainContent.scrollTop = this.scrollTop.mainContent
         })
@@ -234,7 +234,7 @@ export default Vue.extend({
     scrollToTop() {
       for (const list of this.categoryListArray) {
         if (list.show) {
-          const categoryList = (this.$refs[list.key] as Vue[])[0]
+          const categoryList = (this.$refs[list.key] as CCategoryList[])[0]
           const top = categoryList.$el.querySelector('.panel-text__top-item') as HTMLElement
           top.scrollIntoView({ behavior: 'smooth' })
         }
@@ -266,7 +266,7 @@ export default Vue.extend({
         recentFont = await vivistickerUtils.getState('recentFont')
       }
       const color = vivistickerUtils.getContrastColor(this.editorBg)
-      await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.locale, undefined, undefined, {
+      await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.global.locale, undefined, undefined, {
         size: 21,
         color,
         weight: 'normal',
@@ -290,7 +290,7 @@ export default Vue.extend({
       }
     },
     localeFont() {
-      return AssetUtils.getFontMap()[i18n.locale]
+      return AssetUtils.getFontMap()[i18n.global.locale]
     },
     handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
       this.scrollTop[key] = (event.target as HTMLElement).scrollTop

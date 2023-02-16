@@ -1,42 +1,39 @@
 <template lang="pug">
-  div(class="vvstk-editor" :style="copyingStyles()" @pointerdown="selectStart")
-    div(class="vvstk-editor__pseudo-page" :style="styles('page')")
-      div(class="vvstk-editor__scale-container" :style="styles('scale')")
-        page-content(id="vvstk-editor" :config="config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
-        div(class="page-control" :style="styles('control')")
-          template(v-for="(layer, index) in config.layers")
-            nu-controller(v-if="layer.type !== 'image' || !layer.imgControl"
-              data-identifier="controller"
-              :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
-              :layerIndex="index"
-              :pageIndex="pageIndex"
-              :config="layer"
-              :snapUtils="snapUtils"
-              :contentScaleRatio="contentScaleRatio"
-              @getClosestSnaplines="getClosestSnaplines"
-              @clearSnap="clearSnap")
-        dim-background(v-if="isImgCtrl" :config="config" :contentScaleRatio="contentScaleRatio")
+div(class="vvstk-editor" :style="copyingStyles()" @pointerdown="selectStart")
+  div(class="vvstk-editor__pseudo-page" :style="styles('page')")
+    div(class="vvstk-editor__scale-container" :style="styles('scale')")
+      page-content(id="vvstk-editor" :config="config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+      dim-background(v-if="isImgCtrl" :config="config" :contentScaleRatio="contentScaleRatio")
+    div(class="page-control" :style="styles('control')")
+      nu-controller(v-if="currFocusPageIndex === pageIndex && currLayer.type" data-identifier="controller"
+        :key="`controller-${currLayer.id}`"
+        :layerIndex="currSelectedIndex"
+        :pageIndex="pageIndex"
+        :page="config"
+        :config="currLayer"
+        :snapUtils="snapUtils"
+        :contentScaleRatio="contentScaleRatio")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import PageContent from '@/components/editor/page/PageContent.vue'
 import DimBackground from '@/components/editor/page/DimBackground.vue'
-import { IPage } from '@/interfaces/page'
-import { mapGetters } from 'vuex'
+import PageContent from '@/components/editor/page/PageContent.vue'
 import { IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
-import imageUtils from '@/utils/imageUtils'
-import SnapUtils from '@/utils/snapUtils'
-import generalUtils from '@/utils/generalUtils'
+import { IPage } from '@/interfaces/page'
 import { ISnapline } from '@/interfaces/snap'
-import groupUtils from '@/utils/groupUtils'
-import frameUtils from '@/utils/frameUtils'
-import layerUtils from '@/utils/layerUtils'
 import controlUtils from '@/utils/controlUtils'
+import frameUtils from '@/utils/frameUtils'
+import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
+import SnapUtils from '@/utils/snapUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       pageIndex: 0,
@@ -72,8 +69,14 @@ export default Vue.extend({
     snapUtils(): SnapUtils {
       return this.pagesState[this.pageIndex].modules.snapUtils
     },
+    currLayer(): ILayer {
+      return layerUtils.getCurrLayer
+    },
     getCurrLayer(): ILayer {
       return generalUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
+    },
+    currFocusPageIndex(): number {
+      return pageUtils.currFocusPageIndex
     },
     getCurrSubSelectedLayerShown(): IImage | undefined {
       const layer = this.getCurrLayer

@@ -1,17 +1,17 @@
 <template lang="pug">
-  div(class="panel-color-picker")
-    color-picker(
-      :isMobile="true" :aspectRatio="40"
-      :currentColor="colorUtils.currColor"
-      @update="handleDragUpdate")
+div(class="panel-color-picker")
+  color-picker(
+    :isMobile="true" :aspectRatio="40"
+    :currentColor="colorUtils.currColor"
+    @update="handleDragUpdate")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import colorUtils from '@/utils/colorUtils'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       colorUtils

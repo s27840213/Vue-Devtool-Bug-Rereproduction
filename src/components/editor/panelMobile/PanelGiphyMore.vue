@@ -9,14 +9,14 @@ div(class="p-giphy" v-click-outside="vcoConfig")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import i18n from '@/i18n'
-import { mapActions, mapGetters, mapState } from 'vuex'
-import vClickOutside from 'v-click-outside'
-import editorUtils from '@/utils/editorUtils'
 import { IGif } from '@/interfaces/giphy'
+import editorUtils from '@/utils/editorUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'PanelGiphyMore',
   directives: {
     clickOutside: vClickOutside.directive
@@ -39,10 +39,10 @@ export default Vue.extend({
     content(): Record<string, string> {
       return this.checkItemFavorites((this.selectedGif as IGif).id) ? {
         iconName: 'favorites-fill',
-        desc: i18n.tc('NN0207')
+        desc: i18n.global.tc('NN0207')
       } : {
         iconName: 'heart',
-        desc: i18n.tc('NN0205')
+        desc: i18n.global.tc('NN0205')
       }
     }
   },

@@ -106,14 +106,14 @@ div(class="nu-footer text-black")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import store from '@/store'
-import { mapGetters } from 'vuex'
 import { Itheme } from '@/interfaces/theme'
-import themeUtils from '@/utils/themeUtils'
+import store from '@/store'
 import designUtils from '@/utils/designUtils'
 import localeUtils, { ILocale } from '@/utils/localeUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import themeUtils from '@/utils/themeUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],

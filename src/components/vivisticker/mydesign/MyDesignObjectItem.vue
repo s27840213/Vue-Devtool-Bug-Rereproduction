@@ -1,40 +1,39 @@
 <template lang="pug">
-  div(class="my-design-object-item"
-      @click="copySvg"
-      v-press="copySvg")
-    img(class="my-design-object-item__img"
-      draggable="false"
-      :src="src")
-    //- pro-item(v-if="item.assetInfo.plan")
-    div(v-if="isInSelectionMode"
-        class="my-design-object-item__checkbox"
-        :class="{checked: checkSelected()}"
-        @click.prevent.stop="handleToggleDesignSelected")
-      svg-icon(v-if="checkSelected()" iconName="check" iconColor="white" iconWidth="20.7px")
-    div(v-else class="my-design-object-item__more" @click.stop.prevent="handleMoreActions")
-      svg-icon(iconName="more" iconColor="white" iconWidth="24px")
+div(class="my-design-object-item"
+    @click="copySvg"
+    v-press="copySvg")
+  img(class="my-design-object-item__img"
+    draggable="false"
+    :src="src")
+  //- pro-item(v-if="item.assetInfo.plan")
+  div(v-if="isInSelectionMode"
+      class="my-design-object-item__checkbox"
+      :class="{checked: checkSelected()}"
+      @click.prevent.stop="handleToggleDesignSelected")
+    svg-icon(v-if="checkSelected()" iconName="check" iconColor="white" iconWidth="20.7px")
+  div(v-else class="my-design-object-item__more" @click.stop.prevent="handleMoreActions")
+    svg-icon(iconName="more" iconColor="white" iconWidth="24px")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import vivistickerUtils from '@/utils/vivistickerUtils'
-import { mapGetters, mapMutations } from 'vuex'
+import { IPage } from '@/interfaces/page'
+import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
-import { IPage } from '@/interfaces/page'
-import { IFrame, IGroup, ILayer } from '@/interfaces/layer'
-import i18n from '@/i18n'
-import frameUtils from '@/utils/frameUtils'
-import modalUtils from '@/utils/modalUtils'
-import { LayerType } from '@/store/types'
+import vivistickerUtils from '@/utils/vivistickerUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ProItem
   },
   props: {
-    item: Object
+    item: {
+      type: Object as PropType<IMyDesign>,
+      required: true
+    }
   },
   computed: {
     ...mapGetters({

@@ -40,7 +40,7 @@ div(class="panel-template" ref="panel")
   category-list(v-for="item in categoryListArray"
                 v-show="item.show" :ref="item.key" :key="item.key"
                 :list="item.content" @loadMore="handleLoadMore"
-                @scroll.passive="handleScrollTop($event, item.key)")
+                @scroll.passive="handleScrollTop($event, item.key as 'mainContent'|'searchResult')")
     template(v-slot:category-list-rows="{ list, title }")
       category-list-rows(:list="list" :title="title"
         @action="handleCategorySearch")

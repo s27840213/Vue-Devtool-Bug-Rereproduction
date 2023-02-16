@@ -13,9 +13,9 @@ div(class="animation")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import axios from 'axios'
 import lottie, { AnimationItem } from 'lottie-web'
+import { defineComponent } from 'vue'
 // :src="require('@/assets/img/svg/homepage/tw/remover.mp4')"
 
 export default defineComponent({

@@ -163,11 +163,11 @@ export interface ICategoryItem {
   sentinel?: boolean
 }
 export interface ICategoryList {
-  key: 'mainContent'|'searchResult'
+  key: 'mainContent' | 'searchResult' | 'favoritesContent' | 'favoritesSearchResult'
   show: boolean
   content: ICategoryItem[]
-  loadMore?: ()=>void
-  categorySearch?: (arg0: string)=>void
+  loadMore?: () => void
+  categorySearch?: (arg0: string) => void
 }
 
 export interface IListServiceContentData {

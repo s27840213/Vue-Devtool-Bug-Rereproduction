@@ -33,15 +33,15 @@ div(class="field")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import { createHelpers } from 'vuex-map-fields'
 import Options from '@/components/global/Options.vue'
 import paymentData from '@/utils/constantData'
 import mappingUtils from '@/utils/mappingUtils'
+import { notify } from '@kyvg/vue3-notification'
 import { Stripe, StripeElements, StripePaymentElementOptions } from '@stripe/stripe-js'
 import { loadStripe } from '@stripe/stripe-js/pure'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { createHelpers } from 'vuex-map-fields'
 
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',

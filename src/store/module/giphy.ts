@@ -1,16 +1,16 @@
-import store from '@/store/index'
-import { ActionTree, GetterTree, MutationTree } from 'vuex'
-import i18n from '@/i18n'
 import giphyApi from '@/apis/giphy'
+import i18n from '@/i18n'
 import {
   ICategoryContentApiParams, IGif, IGifCategory, IGifCategoryContent, IGifCategoryExtend,
   IGifCategoryList, IGiphyFavorite, IGiphyFavoriteCategoryContent, IGiphyFavoritesSearchResult,
   IGiphyFavoriteTagContent, isIGifCategory, isITag, ITag, ITagContentApiParams, ITagExtend
 } from '@/interfaces/giphy'
+import store from '@/store/index'
 import localStorageUtils from '@/utils/localStorageUtils'
 import popupUtils from '@/utils/popupUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { cloneDeep, filter, find, map, pull } from 'lodash'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 interface IGiphyState {
   categories: IGifCategory[]
@@ -119,12 +119,12 @@ function processGiphy(data: IGifCategoryList, gifs = [] as IGif[]) {
   })
 }
 
-function keyword2tag(_keyword: string): {keyword: string, type: 0|1} {
+function keyword2tag(_keyword: string): { keyword: string, type: 0 | 1 } {
   if (!/.*:\d/.test(_keyword)) {
     _keyword = `${_keyword}:0`
   }
   const [keyword, _type] = _keyword.split(':')
-  const type = parseInt(_type) as 0|1
+  const type = parseInt(_type) as 0 | 1
   return { keyword, type }
 }
 
@@ -161,7 +161,7 @@ const actions: ActionTree<IGiphyState, unknown> = {
       if (nextCategory === 0) {
         oldCategories = [{
           id: -1,
-          title: i18n.t('NN0024'),
+          title: i18n.global.t('NN0024'),
           list: [],
           is_recent: 1
         } as IGifCategory]
@@ -416,10 +416,10 @@ const actions: ActionTree<IGiphyState, unknown> = {
   selectGif({ commit }, gif: IGif) {
     commit('SET_STATE', { selectedGif: gif })
   },
-  async toggleFavorite({ commit, dispatch, getters }, favs: Record<string, IGif|string|number>) {
+  async toggleFavorite({ commit, dispatch, getters }, favs: Record<string, IGif | string | number>) {
     for (const [type, target] of Object.entries(favs)) {
       let key: string
-      let saveData: true|IGif = true
+      let saveData: true | IGif = true
       let getContent = () => { /**/ }
 
       switch (type) {
@@ -433,31 +433,31 @@ const actions: ActionTree<IGiphyState, unknown> = {
           key = (target as number).toString()
           getContent = () => { dispatch('getFavoritesCategoriesContent', key) }
           break
-        default:
         case 'items':
           saveData = target as IGif
           key = saveData.id
           break
+        default:
       }
 
       commit('UPDATE_favorites', {
-        [type]: await localStorageUtils.appUpdate('favorites', `giphy.${type}`, (old: IGiphyFavorite<true|IGif>) => {
+        [type]: await localStorageUtils.appUpdate('favorites', `giphy.${type}`, (old: IGiphyFavorite<true | IGif>) => {
           if (old.obj[key]) {
             old.order = pull(old.order, key)
             delete old.obj[key]
-            popupUtils.openPopup('icon', { }, { iconName: 'favorites' })
+            popupUtils.openPopup('icon', {}, { iconName: 'favorites' })
           } else {
             old.order = [key, ...old.order]
             old.obj[key] = saveData
             getContent()
-            popupUtils.openPopup('icon', { }, { iconName: 'favorites-fill' })
+            popupUtils.openPopup('icon', {}, { iconName: 'favorites-fill' })
           }
           return old
         })
       })
     }
   },
-  searchFavorites({ commit }, target: string|unknown) {
+  searchFavorites({ commit }, target: string | unknown) {
     commit('UPDATE_favorites', { searchTarget: target })
   },
   searchMoreFavorites({ dispatch }) {
@@ -471,10 +471,10 @@ const actions: ActionTree<IGiphyState, unknown> = {
       dispatch('getFavoritesTagsContent', activeTag)
     }
     switch (searchTarget) {
-      case i18n.tc('NN0761'):
+      case i18n.global.tc('NN0761'):
         dispatch('getFavoritesTags')
         break
-      case i18n.tc('NN0760'):
+      case i18n.global.tc('NN0760'):
         dispatch('getFavoritesCategories')
         break
     }
@@ -506,7 +506,7 @@ const mutations: MutationTree<IGiphyState> = {
         }
       })
   },
-  SET_pending(state: IGiphyState, data: Record<'giphy'|'favorites', boolean>) {
+  SET_pending(state: IGiphyState, data: Record<'giphy' | 'favorites', boolean>) {
     for (const item of Object.entries(data)) {
       switch (item[0]) {
         case 'giphy':
@@ -518,19 +518,19 @@ const mutations: MutationTree<IGiphyState> = {
       }
     }
   },
-  UPDATE_searchResult(state: IGiphyState, result: {tags?: ITag[], content: IGif[]}) {
+  UPDATE_searchResult(state: IGiphyState, result: { tags?: ITag[], content: IGif[] }) {
     if (result.tags && result.tags.length !== 0) {
       // Add a special tag that show category search result instead tag result.
       state.searchResult.tags = [$all, ...result.tags]
     }
     state.searchResult.content = result.content
   },
-  UPDATE_nextCategoryContent(state: IGiphyState, next: {keyword: string, nextPage: number}) {
+  UPDATE_nextCategoryContent(state: IGiphyState, next: { keyword: string, nextPage: number }) {
     state.nextCategoryContent.keyword = next.keyword
     state.nextCategoryContent.nextPage = next.nextPage
     state.pending = false
   },
-  UPDATE_nextTagContent(state: IGiphyState, next: {nextPage: number}) {
+  UPDATE_nextTagContent(state: IGiphyState, next: { nextPage: number }) {
     state.nextTagContent.nextPage = next.nextPage
     state.pending = false
   },
@@ -546,7 +546,7 @@ function processTags(tag: ITag) {
   return tag.keyword === '$all' ? {
     active: tag.active,
     value: tag.keyword,
-    label: i18n.tc('NN0324')
+    label: i18n.global.tc('NN0324')
   } : {
     active: tag.active,
     value: `${tag.keyword}:${tag.type}`,
@@ -585,7 +585,7 @@ const getters: GetterTree<IGiphyState, unknown> = {
     return (id: string): boolean => state.favorites.categories.obj[id] !== undefined
   },
   checkTagFavorite() {
-    return (rawKeyword: string): boolean|undefined => {
+    return (rawKeyword: string): boolean | undefined => {
       if (rawKeyword === '') return undefined
       const { keyword, type } = keyword2tag(rawKeyword)
       return state.favorites.tags.obj[`${keyword}:${type}`] !== undefined
@@ -628,14 +628,14 @@ const getters: GetterTree<IGiphyState, unknown> = {
         content: state.favorites.tagsContent[searchTarget.id]?.gifs,
         tags: []
       }
-    // Searching a category, while $all tag active.
+      // Searching a category, while $all tag active.
     } else if (isIGifCategory(searchTarget) && activeTag === '$all:0') {
       return {
         title: searchTarget.title,
         content: state.favorites.categoriesContent[searchTarget.id]?.gifs,
         tags: state.favorites.categoriesContent[searchTarget.id]?.tags
       }
-    // Searching a category, while $all tag inactive. Aka searching a tag.
+      // Searching a category, while $all tag inactive. Aka searching a tag.
     } else if (isIGifCategory(searchTarget)) {
       return {
         title: searchTarget.title,
@@ -644,19 +644,19 @@ const getters: GetterTree<IGiphyState, unknown> = {
       }
     }
     switch (searchTarget) {
-      case i18n.tc('NN0762'):
+      case i18n.global.tc('NN0762'):
         return {
           title: searchTarget,
           content: getters.favoritesItems as IGif[],
           tags: []
         }
-      case i18n.tc('NN0761'):
+      case i18n.global.tc('NN0761'):
         return {
           title: searchTarget,
           content: getters.favoritesTags as ITagExtend[],
           tags: []
         }
-      case i18n.tc('NN0760'):
+      case i18n.global.tc('NN0760'):
         return {
           title: searchTarget,
           content: getters.favoritesCategories as IGifCategoryExtend[],
@@ -673,25 +673,25 @@ const getters: GetterTree<IGiphyState, unknown> = {
     const { searchTarget } = state.favorites
     const activeTag = favoritesCategoryActiveTag()
     let isFavorite: boolean
-    let action: ()=>void
+    let action: () => void
 
     // Giphy tag search result in category
     if (categoryId !== -1 && tagKeyword) {
       isFavorite = getters.checkTagFavorite(`${tagKeyword}:${tagType}`)
       action = () => store.dispatch('giphy/toggleFavorite', { tags: `${tagKeyword}:${tagType}` })
-    // Giphy category search result
+      // Giphy category search result
     } else if (categoryId !== -1) {
       isFavorite = getters.checkCategoryFavorite(categoryId)
       action = () => store.dispatch('giphy/toggleFavorite', { categories: categoryId })
-    // Favorites giphy category
+      // Favorites giphy category
     } else if (isIGifCategory(searchTarget) && activeTag === '$all:0') {
       isFavorite = getters.checkCategoryFavorite(searchTarget.id)
       action = () => store.dispatch('giphy/toggleFavorite', { categories: searchTarget.id })
-    // Searching a category, while $all tag inactive. Aka searching a tag.
+      // Searching a category, while $all tag inactive. Aka searching a tag.
     } else if (isIGifCategory(searchTarget)) {
       isFavorite = getters.checkTagFavorite(activeTag)
       action = () => store.dispatch('giphy/toggleFavorite', { tags: activeTag })
-    // Favorites giphy tag
+      // Favorites giphy tag
     } else if (isITag(searchTarget)) {
       isFavorite = getters.checkTagFavorite(searchTarget.id)
       action = () => store.dispatch('giphy/toggleFavorite', { tags: searchTarget.id })

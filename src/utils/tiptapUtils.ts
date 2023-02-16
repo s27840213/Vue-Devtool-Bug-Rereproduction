@@ -13,6 +13,8 @@ import Text from '@tiptap/extension-text'
 import TextStyle from '@tiptap/extension-text-style'
 import { Editor, EditorEvents, FocusPosition } from '@tiptap/vue-3'
 import { EventEmitter } from 'events'
+import { Slice } from 'prosemirror-model'
+import { EditorView } from 'prosemirror-view'
 import shortcutUtils from './shortcutUtils'
 
 class TiptapUtils {
@@ -45,7 +47,7 @@ class TiptapUtils {
         handleScrollToSelection: () => {
           return this.editor?.storage.nuTextStyle.pasting
         },
-        handlePaste: (view, event: ClipboardEvent, slice) => {
+        handlePaste: (view: EditorView, event: ClipboardEvent, slice: Slice) => {
           if (!event.clipboardData) return false
           const items = event.clipboardData.items
           for (let i = items.length - 1; i >= 0; i--) {

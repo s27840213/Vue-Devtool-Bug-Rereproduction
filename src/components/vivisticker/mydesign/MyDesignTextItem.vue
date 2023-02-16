@@ -1,34 +1,38 @@
 <template lang="pug">
-  div(class="my-design-text-item"
-      @click="copyText"
-      v-press="copyText")
-    img(class="my-design-text-item__img"
-      draggable="false"
-      :src="src")
-    //- pro-item(v-if="item.assetInfo.plan")
-    div(v-if="isInSelectionMode"
-        class="my-design-text-item__checkbox"
-        :class="{checked: checkSelected()}"
-        @click.prevent.stop="handleToggleDesignSelected")
-      svg-icon(v-if="checkSelected()" iconName="check" iconColor="white" iconWidth="20.7px")
-    div(v-else class="my-design-text-item__more" @click.stop.prevent="handleMoreActions")
-      svg-icon(iconName="more" iconColor="white" iconWidth="24px")
+div(class="my-design-text-item"
+    @click="copyText"
+    v-press="copyText")
+  img(class="my-design-text-item__img"
+    draggable="false"
+    :src="src")
+  //- pro-item(v-if="item.assetInfo.plan")
+  div(v-if="isInSelectionMode"
+      class="my-design-text-item__checkbox"
+      :class="{checked: checkSelected()}"
+      @click.prevent.stop="handleToggleDesignSelected")
+    svg-icon(v-if="checkSelected()" iconName="check" iconColor="white" iconWidth="20.7px")
+  div(v-else class="my-design-text-item__more" @click.stop.prevent="handleMoreActions")
+    svg-icon(iconName="more" iconColor="white" iconWidth="24px")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import vivistickerUtils from '@/utils/vivistickerUtils'
-import { mapGetters, mapMutations } from 'vuex'
+import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ProItem
   },
   props: {
-    item: Object
+    item: {
+      type: Object as PropType<IMyDesign>,
+      required: true
+    }
   },
   computed: {
     ...mapGetters({

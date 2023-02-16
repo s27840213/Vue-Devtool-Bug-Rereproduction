@@ -25,10 +25,10 @@ div(class="block" :style="blockStyle")
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { mapState } from 'vuex'
 import Animation from '@/components/Animation.vue'
 import { IHomeBlockData } from '@/utils/homeBlockData'
+import { defineComponent, PropType } from 'vue'
+import { mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],

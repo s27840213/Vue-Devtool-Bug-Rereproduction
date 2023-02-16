@@ -1,22 +1,22 @@
 <template lang="pug">
-  transition(name="panel-up")
-    div(ref="main" class="full-page relative")
-      template(v-if="fullPageType === 'iOS16Video'")
-        div(class="full-page__video")
-          video(autoplay playsinline muted loop :src="videoSource" :poster="thumbnail")
-        div(v-if="showCloseButton"
-            class="full-page__close"
-            @click.prevent.stop="handleClose")
-          svg-icon(iconName="vivisticker_close"
-                  iconColor="white"
-                  iconWidth="24px")
+transition(name="panel-up")
+  div(ref="main" class="full-page relative")
+    template(v-if="fullPageType === 'iOS16Video'")
+      div(class="full-page__video")
+        video(autoplay playsinline muted loop :src="videoSource" :poster="thumbnail")
+      div(v-if="showCloseButton"
+          class="full-page__close"
+          @click.prevent.stop="handleClose")
+        svg-icon(iconName="vivisticker_close"
+                iconColor="white"
+                iconWidth="24px")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       showCloseButton: false

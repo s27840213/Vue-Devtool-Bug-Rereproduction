@@ -1,45 +1,45 @@
 <template lang="pug">
-  transition(name="panel-up")
-    div(ref="main" class="tutorial relative" v-touch
-        @swipeleft="handleSwipeLeft"
-        @swiperight="handleSwipeRight")
-      div(class="tutorial__video")
-        video(autoplay playsinline muted :src="videoSource" @ended="handleEnded" @canplay="handleVideoLoaded")
-      div(class="tutorial__content")
-        div(class="tutorial__content__container")
-          div(v-for="(stepConfig, index) in stepConfigs"
-              class="tutorial__content__step"
-              :style="transformStyles()")
-            div(class="tutorial__content__title") {{ stepConfig.title }}
-            div(class="tutorial__content__description") {{ stepConfig.description }}
-            div(class="tutorial__content__button-container")
-              div(class="tutorial__content__button"
-                  @click.prevent.stop="handleNextStep")
-                span {{ buttonText(index) }}
-                div(class="tutorial__content__button-icon")
-                  svg-icon(iconName="chevron-right"
-                            iconColor="black-3"
-                            iconWidth="32px")
-        div(class="tutorial__content__indicators")
-          div(v-for="(stepConfig, index) in stepConfigs"
-              class="tutorial__content__indicator"
-              :class="{current: index === step}"
-              @click.prevent.stop="step = index")
-      div(class="tutorial__close"
-          @click.prevent.stop="handleClose")
-        svg-icon(iconName="vivisticker_close"
-                iconColor="white"
-                iconWidth="24px")
+transition(name="panel-up")
+  div(ref="main" class="tutorial relative" v-touch
+      @swipeleft="handleSwipeLeft"
+      @swiperight="handleSwipeRight")
+    div(class="tutorial__video")
+      video(autoplay playsinline muted :src="videoSource" @ended="handleEnded" @canplay="handleVideoLoaded")
+    div(class="tutorial__content")
+      div(class="tutorial__content__container")
+        div(v-for="(stepConfig, index) in stepConfigs"
+            class="tutorial__content__step"
+            :style="transformStyles()")
+          div(class="tutorial__content__title") {{ stepConfig.title }}
+          div(class="tutorial__content__description") {{ stepConfig.description }}
+          div(class="tutorial__content__button-container")
+            div(class="tutorial__content__button"
+                @click.prevent.stop="handleNextStep")
+              span {{ buttonText(index) }}
+              div(class="tutorial__content__button-icon")
+                svg-icon(iconName="chevron-right"
+                          iconColor="black-3"
+                          iconWidth="32px")
+      div(class="tutorial__content__indicators")
+        div(v-for="(stepConfig, index) in stepConfigs"
+            class="tutorial__content__indicator"
+            :class="{current: index === step}"
+            @click.prevent.stop="step = index")
+    div(class="tutorial__close"
+        @click.prevent.stop="handleClose")
+      svg-icon(iconName="vivisticker_close"
+              iconColor="white"
+              iconWidth="24px")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { AnyTouchEvent } from 'any-touch'
-import { mapMutations } from 'vuex'
-import vivistickerUtils from '@/utils/vivistickerUtils'
 import i18n from '@/i18n'
+import vivistickerUtils from '@/utils/vivistickerUtils'
+import { AnyTouchEvent } from 'any-touch'
+import { defineComponent } from 'vue'
+import { mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       step: 0,
@@ -47,22 +47,22 @@ export default Vue.extend({
         {
           title: `${this.$t('NN0746')}`,
           description: `${this.$t('NN0750')}`,
-          video: `https://template.vivipic.com/static/video/${i18n.locale}-01-copy_paste.mp4`
+          video: `https://template.vivipic.com/static/video/${i18n.global.locale}-01-copy_paste.mp4`
         },
         {
           title: `${this.$t('NN0747')}`,
           description: `${this.$t('NN0751')}`,
-          video: `https://template.vivipic.com/static/video/${i18n.locale}-02-text.mp4`
+          video: `https://template.vivipic.com/static/video/${i18n.global.locale}-02-text.mp4`
         },
         {
           title: `${this.$t('NN0748')}`,
           description: `${this.$t('NN0752')}`,
-          video: `https://template.vivipic.com/static/video/${i18n.locale}-03-objects.mp4`
+          video: `https://template.vivipic.com/static/video/${i18n.global.locale}-03-objects.mp4`
         },
         {
           title: `${this.$t('NN0749')}`,
           description: `${this.$t('NN0753')}`,
-          video: `https://template.vivipic.com/static/video/${i18n.locale}-04-background.mp4`
+          video: `https://template.vivipic.com/static/video/${i18n.global.locale}-04-background.mp4`
         }
       ],
       basicWidth: window.outerWidth

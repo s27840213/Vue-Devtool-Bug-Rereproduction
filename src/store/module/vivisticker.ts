@@ -3,15 +3,14 @@ import { IMyDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import _ from 'lodash'
-import Vue from 'vue'
-import { GetterTree, MutationTree, ActionTree } from 'vuex'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 interface IViviStickerState {
   userInfo: IUserInfo,
   userSettings: IUserSettings,
   currActiveTab: string,
-  isInCategoryDict: {[key: string]: boolean},
-  showAllRecentlyDict: {[key: string]: boolean},
+  isInCategoryDict: { [key: string]: boolean },
+  showAllRecentlyDict: { [key: string]: boolean },
   isInBgShare: boolean,
   shareItem: IAsset | undefined,
   shareColor: string,
@@ -21,7 +20,7 @@ interface IViviStickerState {
   isStandaloneMode: boolean,
   showTutorial: boolean,
   fullPageType: string,
-  fullPageParams: {[key: string]: any},
+  fullPageParams: { [key: string]: any },
   recentlyBgColors: string[],
   newBgColor: string,
   isDuringCopy: boolean,
@@ -29,13 +28,13 @@ interface IViviStickerState {
   myDesignTab: string,
   isInSelectionMode: boolean,
   slideType: string,
-  myDesignFiles: {[key: string]: IMyDesign[]},
-  myDesignNextPages: {[key: string]: number},
+  myDesignFiles: { [key: string]: IMyDesign[] },
+  myDesignNextPages: { [key: string]: number },
   myDesignBuffer: IMyDesign | undefined,
   editingDesignId: string,
-  editingAssetInfo: {[key: string]: any},
+  editingAssetInfo: { [key: string]: any },
   selectedDesigns: { [key: string]: IMyDesign },
-  modalInfo: {[key: string]: any},
+  modalInfo: { [key: string]: any },
 }
 
 const EDITOR_BGS = [
@@ -136,7 +135,7 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getFullPageType(state: IViviStickerState): string {
     return state.fullPageType
   },
-  getFullPageParams(state: IViviStickerState): {[key: string]: any} {
+  getFullPageParams(state: IViviStickerState): { [key: string]: any } {
     return state.fullPageParams
   },
   getRecentlyBgColors(state: IViviStickerState): string[] {
@@ -179,13 +178,13 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getEditingDesignId(state: IViviStickerState): string {
     return state.editingDesignId
   },
-  getEditingAssetInfo(state: IViviStickerState): {[key: string]: any} {
+  getEditingAssetInfo(state: IViviStickerState): { [key: string]: any } {
     return state.editingAssetInfo
   },
-  getSelectedDesigns(state: IViviStickerState): {[key: string]: IMyDesign} {
+  getSelectedDesigns(state: IViviStickerState): { [key: string]: IMyDesign } {
     return state.selectedDesigns
   },
-  getModalInfo(state: IViviStickerState): {[key: string]: string} {
+  getModalInfo(state: IViviStickerState): { [key: string]: string } {
     return state.modalInfo
   }
 }
@@ -246,10 +245,10 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_fullPageType(state: IViviStickerState, fullPageType: string) {
     state.fullPageType = fullPageType
   },
-  SET_fullPageParams(state: IViviStickerState, fullPageParams: {[key: string]: any}) {
+  SET_fullPageParams(state: IViviStickerState, fullPageParams: { [key: string]: any }) {
     state.fullPageParams = fullPageParams
   },
-  SET_fullPageConfig(state: IViviStickerState, data: { type: string, params?: {[key: string]: any} }) {
+  SET_fullPageConfig(state: IViviStickerState, data: { type: string, params?: { [key: string]: any } }) {
     state.fullPageType = data.type
     state.fullPageParams = data.params ?? {}
   },
@@ -350,13 +349,13 @@ const mutations: MutationTree<IViviStickerState> = {
     list.unshift(design)
   },
   UPDATE_selectDesign(state: IViviStickerState, design: IMyDesign) {
-    Vue.set(state.selectedDesigns, design.id, design)
+    state.selectedDesigns[design.id] = design
   },
   UPDATE_deselectDesign(state: IViviStickerState, design: IMyDesign) {
-    Vue.delete(state.selectedDesigns, design.id)
+    delete state.selectedDesigns[design.id]
   },
   UPDATE_selectAllDesigns(state: IViviStickerState, tab: string) {
-    const newSelection = {} as {[key: string]: IMyDesign}
+    const newSelection = {} as { [key: string]: IMyDesign }
     for (const design of state.myDesignFiles[tab]) {
       newSelection[design.id] = design
     }

@@ -1,30 +1,30 @@
+import listApis from '@/apis/list'
+import i18n from '@/i18n'
+import { IListServiceContentDataItem } from '@/interfaces/api'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
+import { IIosImgData, IMyDesign, IMyDesignTag, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import store from '@/store'
+import { ColorEventType, LayerType } from '@/store/types'
 import Vue from 'vue'
 import assetUtils from './assetUtils'
-import groupUtils from './groupUtils'
-import pageUtils from './pageUtils'
-import stepsUtils from './stepsUtils'
-import uploadUtils from './uploadUtils'
-import eventUtils, { PanelEvent } from './eventUtils'
-import { ColorEventType, LayerType } from '@/store/types'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import colorUtils from './colorUtils'
 import editorUtils from './editorUtils'
+import eventUtils, { PanelEvent } from './eventUtils'
+import frameUtils from './frameUtils'
+import generalUtils from './generalUtils'
+import groupUtils from './groupUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
-import textPropUtils from './textPropUtils'
-import { IIosImgData, IMyDesign, IMyDesignTag, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import localeUtils from './localeUtils'
-import listApis from '@/apis/list'
-import { IListServiceContentDataItem } from '@/interfaces/api'
-import textUtils from './textUtils'
-import i18n from '@/i18n'
-import generalUtils from './generalUtils'
-import modalUtils from './modalUtils'
-import frameUtils from './frameUtils'
-import colorUtils from './colorUtils'
 import logUtils from './logUtils'
+import modalUtils from './modalUtils'
+import pageUtils from './pageUtils'
+import stepsUtils from './stepsUtils'
+import textPropUtils from './textPropUtils'
+import textUtils from './textUtils'
+import uploadUtils from './uploadUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
   hostId: '',
@@ -38,7 +38,7 @@ const STANDALONE_USER_INFO: IUserInfo = {
 /**
  * shown prop indicates if the user-setting-config is shown in the setting page
  */
-const USER_SETTINGS_CONFIG: {[key: string]: {default: any, description: string, shown: boolean, val?: any}} = {
+const USER_SETTINGS_CONFIG: { [key: string]: { default: any, description: string, shown: boolean, val?: any } } = {
   autoSave: {
     default: false,
     description: 'STK0012',
@@ -52,7 +52,7 @@ const USER_SETTINGS_CONFIG: {[key: string]: {default: any, description: string, 
   }
 }
 
-export const MODULE_TYPE_MAPPING: {[key: string]: string} = {
+export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
   objects: 'svg',
   textStock: 'text',
   background: 'background',
@@ -110,7 +110,7 @@ const DOCUMENT_URLS = {
     privacyPolicy: 'https://blog.vivipic.com/tw/tw-privacy-policy/ ',
     termOfUse: 'https://blog.vivipic.com/tw/tw-agreement/'
   }
-} as {[key: string]: {[key: string]: string} }
+} as { [key: string]: { [key: string]: string } }
 
 class ViviStickerUtils {
   appLoadedSent = false
@@ -118,9 +118,9 @@ class ViviStickerUtils {
   hasCopied = false
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
-  callbackMap = {} as {[key: string]: (data?: any) => void}
-  errorMessageMap = {} as {[key: string]: string}
-  editorStateBuffer = {} as {[key: string]: any}
+  callbackMap = {} as { [key: string]: (data?: any) => void }
+  errorMessageMap = {} as { [key: string]: string }
+  editorStateBuffer = {} as { [key: string]: any }
   designDeletionQueue = [] as { key: string, id: string, thumbType: string }[]
 
   get editorType(): string {
@@ -154,7 +154,7 @@ class ViviStickerUtils {
   }
 
   getDefaultUserSettings(): IUserSettings {
-    const res = {} as {[key: string]: any}
+    const res = {} as { [key: string]: any }
     for (const [key, value] of Object.entries(USER_SETTINGS_CONFIG)) {
       if (value.shown) {
         res[key] = value.default
@@ -171,16 +171,16 @@ class ViviStickerUtils {
     return MYDESIGN_TAGS
   }
 
-  getDefaultMyDesignFiles(): {[key: string]: IMyDesign[]} {
-    const res = {} as {[key: string]: IMyDesign[]}
+  getDefaultMyDesignFiles(): { [key: string]: IMyDesign[] } {
+    const res = {} as { [key: string]: IMyDesign[] }
     for (const tag of MYDESIGN_TAGS) {
       res[tag.tab] = []
     }
     return res
   }
 
-  getDefaultMyDesignNextPages(): {[key: string]: number} {
-    const res = {} as {[key: string]: number}
+  getDefaultMyDesignNextPages(): { [key: string]: number } {
+    const res = {} as { [key: string]: number }
     for (const tag of MYDESIGN_TAGS) {
       res[tag.tab] = -1
     }
@@ -191,7 +191,7 @@ class ViviStickerUtils {
     return DOCUMENT_URLS[locale][key]
   }
 
-  getEmptyMessage(): {[key: string]: string} {
+  getEmptyMessage(): { [key: string]: string } {
     return { empty: '' }
   }
 
@@ -212,8 +212,8 @@ class ViviStickerUtils {
     if (messageType === 'SCREENSHOT' && !this.hasCopied && this.checkOSVersion('16.0')) {
       this.hasCopied = true
       this.setState('hasCopied', { data: this.hasCopied })
-      modalUtils.setModalInfo(i18n.t('STK0033').toString(), i18n.t('STK0034').toString(), {
-        msg: i18n.t('STK0035').toString(),
+      modalUtils.setModalInfo(i18n.global.t('STK0033').toString(), i18n.global.t('STK0034').toString(), {
+        msg: i18n.global.t('STK0035').toString(),
         action: () => {
           store.commit('vivisticker/SET_fullPageConfig', {
             type: 'iOS16Video',
@@ -344,10 +344,10 @@ class ViviStickerUtils {
 
   getEmptyCallback(): (jsonData: any) => void {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    return (jsonData: any) => {}
+    return (jsonData: any) => { }
   }
 
-  startEditing(editorType: string, assetInfo: {[key: string]: any}, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
+  startEditing(editorType: string, assetInfo: { [key: string]: any }, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
     const pageWidth = window.outerWidth - 32
     pageUtils.setPages([pageUtils.newPage({
       width: pageWidth,
@@ -709,7 +709,7 @@ class ViviStickerUtils {
     return resList
   }
 
-  async addAsset(key: string, asset: any, limit = 100, files: {[key: string]: any} = {}) {
+  async addAsset(key: string, asset: any, limit = 100, files: { [key: string]: any } = {}) {
     if (this.isStandaloneMode) return
     if (this.checkVersion('1.9')) {
       await this.callIOSAsAPI('ADD_ASSET', { key, asset, limit, files }, 'addAsset')
@@ -1058,10 +1058,10 @@ class ViviStickerUtils {
           }
         }
         const modalBtn = {
-          msg: i18n.t('STK0023') as string,
+          msg: i18n.global.t('STK0023') as string,
           action
         }
-        modalUtils.setModalInfo(i18n.t('STK0024') as string, i18n.t('STK0022') as string, modalBtn, undefined, options)
+        modalUtils.setModalInfo(i18n.global.t('STK0024') as string, i18n.global.t('STK0022') as string, modalBtn, undefined, options)
       } else {
         action && action()
       }

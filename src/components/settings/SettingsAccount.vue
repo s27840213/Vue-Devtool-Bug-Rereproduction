@@ -62,15 +62,15 @@ div(class="settings-account")
   spinner(v-if="isLoading")
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapState, mapGetters } from 'vuex'
-import PopupVerify from '@/components/popup/PopupVerify.vue'
 import Avatar from '@/components/Avatar.vue'
+import PopupVerify from '@/components/popup/PopupVerify.vue'
 import store from '@/store'
-import uploadUtils from '@/utils/uploadUtils'
-import localeUtils, { ILocale } from '@/utils/localeUtils'
 import GeneralUtils from '@/utils/generalUtils'
+import localeUtils, { ILocale } from '@/utils/localeUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
