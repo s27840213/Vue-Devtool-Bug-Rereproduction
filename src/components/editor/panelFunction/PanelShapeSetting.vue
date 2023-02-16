@@ -1,233 +1,236 @@
 <template lang="pug">
-  div(class="shape-setting")
-    //- Line shape setting
-    div(class="action-bar flex-around line-actions" style="padding: 8px 0"
-              v-if="isLine")
+div(class="shape-setting")
+  //- Line shape setting
+  div(class="action-bar flex-around line-actions" style="padding: 8px 0"
+            v-if="isLine")
+    div(class="shape-setting__line-action-wrapper")
+      svg-icon(class="pointer feature-button"
+              iconName="line-width" iconWidth="24px" iconColor="gray-2"
+              @click="openLineSliderPopup")
+    div(class="shape-setting__line-action-wrapper")
+      svg-icon(class="pointer feature-button"
+              iconName="line-dash" iconWidth="24px" iconColor="gray-2"
+              @click="handleValueModal('line-dash')")
+      general-value-selector(v-if="openValueSelector === 'line-dash'"
+                    :valueArray="[[1, 2], [3, 4]]"
+                    class="shape-setting__value-selector-dash-and-edge"
+                    v-click-outside="handleValueModal"
+                    :values="dashAndEdge"
+                    @update="handleLineDashEdgeUpdate"
+                    itemMinWidth="70",
+                    buttonHeight="20")
+        template(class="pointer" v-slot:g0i0)
+          svg-icon(iconName="no-dash" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+        template(class="pointer" v-slot:g0i1)
+          svg-icon(iconName="dash-1" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+        template(class="pointer" v-slot:g1i0)
+          svg-icon(iconName="butt" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
+          div(class="shape-setting__value-selector__button-text") {{$t('NN0084')}}
+        template(class="pointer" v-slot:g1i1)
+          svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
+          div(class="shape-setting__value-selector__button-text") {{$t('NN0085')}}
+    div(class="vertical-rule bg-gray-4")
+    div(class="shape-setting__line-action-wrapper pointer feature-button"
+        @click="handleValueModal('start-marker')")
+      marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
+        :styleFormat="markerContentMap[startMarker].styleArray[0]"
+        :svg="markerContentMap[startMarker].svg"
+        :trimWidth="!!markerContentMap[startMarker].trimWidth"
+        :markerWidth="markerContentMap[startMarker].vSize[0]"
+        :trimOffset="markerContentMap[startMarker].trimOffset")
+      general-value-selector(v-if="openValueSelector === 'start-marker' && markerListReady"
+                    :valueArray="[markerIds]"
+                    class="shape-setting__value-selector-marker"
+                    v-click-outside="handleValueModal"
+                    :values="[startMarker]"
+                    @update="handleStartMarkerUpdate"
+                    itemMinWidth="76",
+                    buttonHeight="37")
+        template(v-for="markerslot in makeSlots(markerIds)" class="pointer" v-slot:[markerslot.name])
+          marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
+            :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
+            :svg="markerContentMap[markerslot.marker].svg"
+            :trimWidth="!!markerContentMap[markerslot.marker].trimWidth"
+            :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
+            :trimOffset="markerContentMap[markerslot.marker].trimOffset")
+      general-value-selector(v-if="openValueSelector === 'start-marker' && !markerListReady"
+                    :valueArray="[['pending']]"
+                    class="shape-setting__value-selector-marker"
+                    v-click-outside="handleValueModal"
+                    :values="['pending']"
+                    itemMinWidth="76",
+                    buttonHeight="37")
+          template(v-slot:g0i0)
+            svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
+    div(class="shape-setting__line-action-wrapper pointer feature-button"
+        @click="handleValueModal('end-marker')")
+      marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
+        :styleFormat="markerContentMap[endMarker].styleArray[0]"
+        :svg="markerContentMap[endMarker].svg"
+        :trimWidth="!!markerContentMap[endMarker].trimWidth"
+        :markerWidth="markerContentMap[endMarker].vSize[0]"
+        :trimOffset="markerContentMap[endMarker].trimOffset"
+        style="transform: rotate(180deg)")
+      general-value-selector(v-if="openValueSelector === 'end-marker' && markerListReady"
+                    :valueArray="[markerIds]"
+                    class="shape-setting__value-selector-marker"
+                    v-click-outside="handleValueModal"
+                    :values="[endMarker]"
+                    @update="handleEndMarkerUpdate"
+                    itemMinWidth="76",
+                    buttonHeight="37")
+        template(v-for="markerslot in makeSlots(markerIds)" class="pointer" v-slot:[markerslot.name])
+          marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
+            :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
+            :svg="markerContentMap[markerslot.marker].svg"
+            :trimWidth="!!markerContentMap[markerslot.marker].trimWidth"
+            :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
+            :trimOffset="markerContentMap[markerslot.marker].trimOffset"
+            style="transform: rotate(180deg)")
+      general-value-selector(v-if="openValueSelector === 'end-marker' && !markerListReady"
+                    :valueArray="[['pending']]"
+                    class="shape-setting__value-selector-marker"
+                    v-click-outside="handleValueModal"
+                    :values="['pending']"
+                    itemMinWidth="76",
+                    buttonHeight="37")
+          template(v-slot:g0i0)
+            svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
+  //- Other shape setting
+  div(class="shape-setting__basic-shape-action" v-if="isBasicShape")
+    div(class="action-bar flex-around basic-shape-actions" style="padding: 8px 0")
       div(class="shape-setting__line-action-wrapper")
-        svg-icon(class="pointer feature-button"
+        svg-icon(class="pointer feature-button" v-hint="$t('NN0681')"
                 iconName="line-width" iconWidth="24px" iconColor="gray-2"
-                @click.native="openLineSliderPopup")
+                @click="openBasicShapeSliderPopup")
       div(class="shape-setting__line-action-wrapper")
+        svg-icon(v-if="filled" v-hint="$t('NN0797')"
+                class="pointer feature-button"
+                iconName="filled" iconWidth="24px" iconColor="gray-2"
+                @click="handleValueModal('isFilled')")
         svg-icon(class="pointer feature-button"
-                iconName="line-dash" iconWidth="24px" iconColor="gray-2"
-                @click.native="handleValueModal('line-dash')")
-        general-value-selector(v-if="openValueSelector === 'line-dash'"
-                      :valueArray="[[1, 2], [3, 4]]"
-                      class="shape-setting__value-selector-dash-and-edge"
-                      v-click-outside="handleValueModal"
-                      :values="dashAndEdge"
-                      @update="handleLineDashEdgeUpdate"
-                      itemMinWidth="70",
-                      buttonHeight="20")
+                v-else
+                iconName="non-filled" iconWidth="24px" iconColor="gray-2"
+                @click="handleValueModal('isFilled')")
+        general-value-selector(v-if="openValueSelector === 'isFilled'"
+                    :valueArray="[[0, 1]]"
+                    class="shape-setting__value-selector-filled"
+                    v-click-outside="handleValueModal"
+                    :values="[filled ? 1 : 0]"
+                    @update="handleBasicShapeFilledUpdate"
+                    itemMinWidth="64",
+                    buttonHeight="26")
           template(class="pointer" v-slot:g0i0)
-            svg-icon(iconName="no-dash" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
+            svg-icon(iconName="non-filled" iconWidth="17px" iconColor="gray-2")
+            div(class="shape-setting__value-selector__button-text") {{$t('NN0088')}}
           template(class="pointer" v-slot:g0i1)
-            svg-icon(iconName="dash-1" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
-          template(class="pointer" v-slot:g1i0)
-            svg-icon(iconName="butt" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
-            div(class="shape-setting__value-selector__button-text") {{$t('NN0084')}}
-          template(class="pointer" v-slot:g1i1)
-            svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
-            div(class="shape-setting__value-selector__button-text") {{$t('NN0085')}}
-      div(class="vertical-rule bg-gray-4")
-      div(class="shape-setting__line-action-wrapper pointer feature-button"
-          @click="handleValueModal('start-marker')")
-        marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
-          :styleFormat="markerContentMap[startMarker].styleArray[0]"
-          :svg="markerContentMap[startMarker].svg"
-          :trimWidth="markerContentMap[startMarker].trimWidth"
-          :markerWidth="markerContentMap[startMarker].vSize[0]"
-          :trimOffset="markerContentMap[startMarker].trimOffset")
-        general-value-selector(v-if="openValueSelector === 'start-marker' && markerListReady"
-                      :valueArray="[markerIds]"
-                      class="shape-setting__value-selector-marker"
-                      v-click-outside="handleValueModal"
-                      :values="[startMarker]"
-                      @update="handleStartMarkerUpdate"
-                      itemMinWidth="76",
-                      buttonHeight="37")
-          template(v-for="markerslot in makeSlots(markerIds)" class="pointer" v-slot:[markerslot.name])
-            marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
-              :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
-              :svg="markerContentMap[markerslot.marker].svg"
-              :trimWidth="markerContentMap[markerslot.marker].trimWidth"
-              :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
-              :trimOffset="markerContentMap[markerslot.marker].trimOffset")
-        general-value-selector(v-if="openValueSelector === 'start-marker' && !markerListReady"
-                      :valueArray="[['pending']]"
-                      class="shape-setting__value-selector-marker"
-                      v-click-outside="handleValueModal"
-                      :values="['pending']"
-                      itemMinWidth="76",
-                      buttonHeight="37")
-            template(v-slot:g0i0)
-              svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
-      div(class="shape-setting__line-action-wrapper pointer feature-button"
-          @click="handleValueModal('end-marker')")
-        marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
-          :styleFormat="markerContentMap[endMarker].styleArray[0]"
-          :svg="markerContentMap[endMarker].svg"
-          :trimWidth="markerContentMap[endMarker].trimWidth"
-          :markerWidth="markerContentMap[endMarker].vSize[0]"
-          :trimOffset="markerContentMap[endMarker].trimOffset"
-          style="transform: rotate(180deg)")
-        general-value-selector(v-if="openValueSelector === 'end-marker' && markerListReady"
-                      :valueArray="[markerIds]"
-                      class="shape-setting__value-selector-marker"
-                      v-click-outside="handleValueModal"
-                      :values="[endMarker]"
-                      @update="handleEndMarkerUpdate"
-                      itemMinWidth="76",
-                      buttonHeight="37")
-          template(v-for="markerslot in makeSlots(markerIds)" class="pointer" v-slot:[markerslot.name])
-            marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="12px"
-              :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
-              :svg="markerContentMap[markerslot.marker].svg"
-              :trimWidth="markerContentMap[markerslot.marker].trimWidth"
-              :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
-              :trimOffset="markerContentMap[markerslot.marker].trimOffset"
-              style="transform: rotate(180deg)")
-        general-value-selector(v-if="openValueSelector === 'end-marker' && !markerListReady"
-                      :valueArray="[['pending']]"
-                      class="shape-setting__value-selector-marker"
-                      v-click-outside="handleValueModal"
-                      :values="['pending']"
-                      itemMinWidth="76",
-                      buttonHeight="37")
-            template(v-slot:g0i0)
-              svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
-    //- Other shape setting
-    div(class="shape-setting__basic-shape-action" v-if="isBasicShape")
-      div(class="action-bar flex-around basic-shape-actions" style="padding: 8px 0")
-        div(class="shape-setting__line-action-wrapper")
-          svg-icon(class="pointer feature-button" v-hint="$t('NN0681')"
-                  iconName="line-width" iconWidth="24px" iconColor="gray-2"
-                  @click.native="openBasicShapeSliderPopup")
-        div(class="shape-setting__line-action-wrapper")
-          svg-icon(v-if="filled" v-hint="$t('NN0797')"
-                  class="pointer feature-button"
-                  iconName="filled" iconWidth="24px" iconColor="gray-2"
-                  @click.native="handleValueModal('isFilled')")
-          svg-icon(class="pointer feature-button"
-                  v-else
-                  iconName="non-filled" iconWidth="24px" iconColor="gray-2"
-                  @click.native="handleValueModal('isFilled')")
-          general-value-selector(v-if="openValueSelector === 'isFilled'"
-                      :valueArray="[[0, 1]]"
-                      class="shape-setting__value-selector-filled"
-                      v-click-outside="handleValueModal"
-                      :values="[filled ? 1 : 0]"
-                      @update="handleBasicShapeFilledUpdate"
-                      itemMinWidth="64",
-                      buttonHeight="26")
-            template(class="pointer" v-slot:g0i0)
-              svg-icon(iconName="non-filled" iconWidth="17px" iconColor="gray-2")
-              div(class="shape-setting__value-selector__button-text") {{$t('NN0088')}}
-            template(class="pointer" v-slot:g0i1)
-              svg-icon(iconName="filled" iconWidth="17px" iconColor="gray-2")
-              div(class="shape-setting__value-selector__button-text") {{$t('NN0087')}}
-      label-with-range(:value="corRadPercentage" :min="0" :max="100"
-                      @update="handleBasicShapeCorRadPercentUpdate"
-                      :event="corRadEvent"
-                      :disabled="corRadDisabled")
-        template
-          div(class="shape-setting__basic-shape-corner-radius flex-evenly")
-            svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
-            div(:style="`font-size: ${$i18n.locale === 'us' ? '12px': ''}`") {{$t('NN0086')}}
-    //- Shape color setting
-    div(class="shape-setting__shape-colors")
-      span {{$t('NN0798')}}
-      div(class="shape-setting__colors")
-        color-btn(v-if="hasMultiColors"
-                  :color="groupColor()"
-                  :active="showColorSlips"
-                  @click="selectColor(0)")
-        color-btn(v-else v-for="(color, index) in getDocumentColors" :color="color"
-                  :active="showColorSlips && index === currSelectedColorIndex"
-                  @click="selectColor(index)")
-    //- 管理介面
-    div(class="shape-setting__info")
-      div(v-if="showAdminTool && isObjectElement")
-        div(class="shape-setting__info__divider pb-10")
-        btn(:type="'primary-sm'"
-          class="shape-setting__info__button rounded my-5"
-          @click.native="getDataClicked()") 取 得 元 素 資 料
-        div(class="shape-setting__info__divider2 pb-10")
-        span(class="py-5 text-gray-1 label-lg") 元 素 資 訊
-        div(class="shape-setting__info__line" style="background: #eee;")
+            svg-icon(iconName="filled" iconWidth="17px" iconColor="gray-2")
+            div(class="shape-setting__value-selector__button-text") {{$t('NN0087')}}
+    label-with-range(:value="corRadPercentage" :min="0" :max="100"
+                    @update="handleBasicShapeCorRadPercentUpdate"
+                    :event="corRadEvent"
+                    :disabled="corRadDisabled")
+      template
+        div(class="shape-setting__basic-shape-corner-radius flex-evenly")
+          svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
+          div(:style="`font-size: ${$i18n.locale === 'us' ? '12px': ''}`") {{$t('NN0086')}}
+  //- Shape color setting
+  div(class="shape-setting__shape-colors")
+    span {{$t('NN0798')}}
+    div(class="shape-setting__colors")
+      color-btn(v-if="hasMultiColors"
+                :color="groupColor()"
+                :active="showColorSlips"
+                @click="selectColor(0)")
+      color-btn(v-else v-for="(color, index) in getDocumentColors" :color="color"
+                :active="showColorSlips && index === currSelectedColorIndex"
+                @click="selectColor(index)")
+  //- 管理介面
+  div(class="shape-setting__info")
+    div(v-if="showAdminTool && isObjectElement")
+      div(class="shape-setting__info__divider pb-10")
+      btn(:type="'primary-sm'"
+        class="shape-setting__info__button rounded my-5"
+        @click="getDataClicked()") 取 得 元 素 資 料
+      div(class="shape-setting__info__divider2 pb-10")
+      span(class="py-5 text-gray-1 label-lg") 元 素 資 訊
+      div(class="shape-setting__info__line" style="background: #eee;")
+        span(class="body-1") id
+        span(class="pl-15 body-2" @click="copyText(focusDesignId)") {{focusDesignId}}
+      img(v-if="focusDesignId.length > 0"
+        class="shape-setting__info__image"
+        :src="`https://template.vivipic.com/svg/${focusDesignId}/prev?ver=${imgRandQuery}`")
+      div(v-if="isGetSvgInfo")
+        div(class="shape-setting__info__line")
           span(class="body-1") id
-          span(class="pl-15 body-2" @click="copyText(focusDesignId)") {{focusDesignId}}
-        img(v-if="focusDesignId.length > 0"
-          class="shape-setting__info__image"
-          :src="`https://template.vivipic.com/svg/${focusDesignId}/prev?ver=${imgRandQuery}`")
-        div(v-if="isGetSvgInfo")
-          div(class="shape-setting__info__line")
-            span(class="body-1") id
-            span(class="pl-15 body-2"
-              @click="copyText(svgInfo.key_id)") {{svgInfo.key_id}}
-          div(class="shape-setting__info__line")
-            span(class="body-1") 語系
-            select(class="shape-setting__info__select"
-              v-model="svgInfo.locale")
-              option(v-for="locale in localeOptions"
-                :value="locale") {{locale}}
-          div(class="shape-setting__info__line") tags_tw
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="svgInfo.tags_tw")
-          div(class="shape-setting__info__line") tags_us
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="svgInfo.tags_us")
-          div(class="shape-setting__info__line") tags_jp
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="svgInfo.tags_jp")
-          div(class="shape-setting__info__line") plan(0：預設一般 / 1：Pro)
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="svgInfo.plan")
-          div(class="pt-10")
-            btn(:type="'primary-sm'"
-              class="shape-setting__info__button rounded my-5"
-              @click.native="updateDataClicked()") 更新
-    spinner(v-if="isLoading")
+          span(class="pl-15 body-2"
+            @click="copyText(svgInfo.key_id)") {{svgInfo.key_id}}
+        div(class="shape-setting__info__line")
+          span(class="body-1") 語系
+          select(class="shape-setting__info__select"
+            v-model="svgInfo.locale")
+            option(v-for="locale in localeOptions"
+              :value="locale") {{locale}}
+        div(class="shape-setting__info__line") tags_tw
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="svgInfo.tags_tw")
+        div(class="shape-setting__info__line") tags_us
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="svgInfo.tags_us")
+        div(class="shape-setting__info__line") tags_jp
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="svgInfo.tags_jp")
+        div(class="shape-setting__info__line") plan(0：預設一般 / 1：Pro)
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="svgInfo.plan")
+        div(class="pt-10")
+          btn(:type="'primary-sm'"
+            class="shape-setting__info__button rounded my-5"
+            @click="updateDataClicked()") 更新
+  spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
-import vClickOutside from 'v-click-outside'
-import SearchBar from '@/components/SearchBar.vue'
+import designApis from '@/apis/design-info'
 import ColorPicker from '@/components/ColorPicker.vue'
 import GeneralValueSelector from '@/components/GeneralValueSelector.vue'
-import LayerUtils from '@/utils/layerUtils'
-import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
-import shapeUtils from '@/utils/shapeUtils'
-import { IListServiceContentData } from '@/interfaces/api'
-import AssetUtils from '@/utils/assetUtils'
-import { IMarker } from '@/interfaces/shape'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import LabelWithRange from '@/components/LabelWithRange.vue'
-import ColorBtn from '@/components/global/ColorBtn.vue'
-import controlUtils from '@/utils/controlUtils'
+import SearchBar from '@/components/SearchBar.vue'
+import { IListServiceContentData } from '@/interfaces/api'
+import { AllLayerTypes, IFrame, IShape } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import { IMarker } from '@/interfaces/shape'
 import { ColorEventType, PopupSliderEventType } from '@/store/types'
+import AssetUtils from '@/utils/assetUtils'
 import colorUtils from '@/utils/colorUtils'
-import popupUtils from '@/utils/popupUtils'
-import MappingUtils from '@/utils/mappingUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import GeneralUtils from '@/utils/generalUtils'
-import designApis from '@/apis/design-info'
-import pageUtils from '@/utils/pageUtils'
-import frameUtils from '@/utils/frameUtils'
+import controlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
+import frameUtils from '@/utils/frameUtils'
+import GeneralUtils from '@/utils/generalUtils'
+import LayerUtils from '@/utils/layerUtils'
+import MappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import shapeUtils from '@/utils/shapeUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
 import { cloneDeep } from 'lodash'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  name: 'PanelShapeSetting',
   components: {
     SearchBar,
     ColorPicker,
@@ -238,6 +241,13 @@ export default Vue.extend({
   },
   directives: {
     clickOutside: vClickOutside.directive
+  },
+  emits: ['toggleColorPanel'],
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
   },
   data() {
     return {
@@ -288,6 +298,8 @@ export default Vue.extend({
     colorUtils.setCurrEvent(ColorEventType.shape)
     colorUtils.setCurrColor(this.getDocumentColors[this.currSelectedColorIndex])
     this.fetchMarkers().then(async () => {
+      // If unmounted PanelShapeSetting before fetch completed, categories will not updated.
+      if (!this.categories[0]) return
       const markerList = (this.categories[0] as IListServiceContentData).list
       this.markerIds = ['none', ...markerList.map(marker => (marker.id))]
       for (const marker of markerList) {
@@ -312,7 +324,6 @@ export default Vue.extend({
     ...mapGetters({
       currSelectedIndex: 'getCurrSelectedIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer',
       token: 'user/getToken',
       showAdminTool: 'user/showAdminTool'
     }),
@@ -336,8 +347,8 @@ export default Vue.extend({
       const { currLayer } = this
       return (currLayer as IShape).shapeType === 'e'
     },
-    currLayer(): ILayer {
-      return this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex) as ILayer
+    currLayer(): AllLayerTypes {
+      return this.currPage.layers[this.currSelectedIndex]
     },
     showColorSlips(): boolean {
       return editorUtils.showColorSlips
@@ -361,7 +372,7 @@ export default Vue.extend({
       return this.markerListReady ? (this.currLayer as IShape).markerId?.[1] ?? 'none' : 'none'
     },
     focusDesignId(): string {
-      return this.currSelectedInfo.layers[0].designId ?? ''
+      return this.currSelectedInfo.layers[0]?.designId ?? ''
     },
     isObjectElement(): boolean {
       return this.currSelectedInfo.layers[0].db !== 'text'
@@ -384,15 +395,6 @@ export default Vue.extend({
         plan: ''
       }
       this.imgRandQuery = GeneralUtils.generateRandomString(5)
-    },
-    getDocumentColors: function () {
-      const currLayer = LayerUtils.getCurrLayer
-      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        if ((currLayer as IGroup).layers
-          .some(l => l.type === 'shape' && l.active && (l as IShape).color.length === 1)) {
-          this.currSelectedColorIndex = 0
-        }
-      }
     }
   },
   methods: {
@@ -409,14 +411,14 @@ export default Vue.extend({
       else if (value > max) return max.toString()
       return value.toString()
     },
-    groupColor() {
-      const currLayer = this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex)
+    groupColor(): string {
+      const currLayer = this.currLayer
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        const origin = currLayer.layers
-          .find((l: ILayer) => l.type === 'shape' && (l as IShape).color.length === 1).color[0]
+        const oneColorShape = currLayer.layers.find((l) => l.type === 'shape' && l.color.length === 1) as IShape
+        const origin = oneColorShape.color[0]
         const isGroupSameColor = (() => {
           for (const layer of currLayer.layers) {
-            if (layer.type === 'shape' && (layer as IShape).color.length === 1 && (layer as IShape).color[0] !== origin) {
+            if (layer.type === 'shape' && layer.color.length === 1 && layer.color[0] !== origin) {
               return false
             }
           }
@@ -424,6 +426,7 @@ export default Vue.extend({
         })()
         return isGroupSameColor ? origin : 'multi'
       }
+      return ''
     },
     handleColorModalOn(e: MouseEvent) {
       this.openColorPicker = true
@@ -539,7 +542,8 @@ export default Vue.extend({
         this.handleLineEdge(value)
       }
       stepsUtils.record()
-      this.$set(this.dashAndEdge, index, value)
+      // this.$set(this.dashAndEdge, index, value)
+      this.dashAndEdge[index] = value
     },
     handleLineDash(dash: number) {
       LayerUtils.updateLayerProps(
@@ -639,7 +643,7 @@ export default Vue.extend({
       }
       GeneralUtils.copyText(text)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${text} 已複製` })
+          notify({ group: 'copy', text: `${text} 已複製` })
         })
     },
     async getDataClicked() {
@@ -647,7 +651,7 @@ export default Vue.extend({
 
       const data = {}
       if (this.focusDesignId.length === 0) {
-        this.$notify({ group: 'copy', text: '無元素id' })
+        notify({ group: 'copy', text: '無元素id' })
       }
 
       if (this.focusDesignId.length > 0) {
@@ -657,7 +661,7 @@ export default Vue.extend({
           this.svgInfo = res.data.data
           this.svgInfo.edit_time = this.svgInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
         } else {
-          this.$notify({ group: 'copy', text: '找不到模板資料' })
+          notify({ group: 'copy', text: '找不到模板資料' })
         }
       }
 
@@ -665,7 +669,7 @@ export default Vue.extend({
     },
     async updateDataClicked() {
       if (!this.svgInfo.key_id) {
-        this.$notify({ group: 'copy', text: '請先取得元素資料' })
+        notify({ group: 'copy', text: '請先取得元素資料' })
         return
       }
 
@@ -679,11 +683,11 @@ export default Vue.extend({
       }
       const res = await designApis.updateDesignInfo(this.token, 'svg', this.svgInfo.key_id, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
-        this.$notify({ group: 'copy', text: '元素資料更新成功' })
+        notify({ group: 'copy', text: '元素資料更新成功' })
         this.svgInfo = res.data.data
         this.svgInfo.edit_time = this.svgInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
       } else {
-        this.$notify({ group: 'copy', text: '更新時發生錯誤' })
+        notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.isLoading = false
     },

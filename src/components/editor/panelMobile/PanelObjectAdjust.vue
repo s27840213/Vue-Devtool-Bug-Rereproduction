@@ -9,7 +9,7 @@ div(class="panel-object-adjust")
           :iconName="option"
           iconWidth="24px"
           :iconColor="currMode === index ? 'white' :'gray-2'"
-          @pointerdown.native="switchMode(index)")
+          @pointerdown="switchMode(index)")
     div(v-if="currMode !== -1" class="panel-object-adjust__settings mt-25")
       mobile-slider(v-if="currMode === 0" :title="`${$t('NN0681')}`"
         :borderTouchArea="true"
@@ -46,7 +46,7 @@ div(class="panel-object-adjust")
               marker-icon(iconWidth="18px" iconColor="#474A57" iconHeight="12px"
                 :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
                 :svg="markerContentMap[markerslot.marker].svg"
-                :trimWidth="markerContentMap[markerslot.marker].trimWidth"
+                :trimWidth="!!markerContentMap[markerslot.marker].trimWidth"
                 :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
                 :trimOffset="markerContentMap[markerslot.marker].trimOffset")
       div(v-if="currMode === 3" class="panel-object-adjust__markers")
@@ -57,7 +57,7 @@ div(class="panel-object-adjust")
             marker-icon(iconWidth="18px" iconColor="#474A57" iconHeight="12px"
               :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
               :svg="markerContentMap[markerslot.marker].svg"
-              :trimWidth="markerContentMap[markerslot.marker].trimWidth"
+              :trimWidth="!!markerContentMap[markerslot.marker].trimWidth"
               :markerWidth="markerContentMap[markerslot.marker].vSize[0]"
               :trimOffset="markerContentMap[markerslot.marker].trimOffset"
               style="transform: rotate(180deg)")
@@ -109,27 +109,27 @@ div(class="panel-object-adjust")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import { ILayer, IShape } from '@/interfaces/layer'
-import controlUtils from '@/utils/controlUtils'
-import pageUtils from '@/utils/pageUtils'
+import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import { IListServiceContentData } from '@/interfaces/api'
+import { AllLayerTypes, IShape } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import { IMarker } from '@/interfaces/shape'
 import assetUtils from '@/utils/assetUtils'
-import MarkerIcon from '@/components/global/MarkerIcon.vue'
-import shapeUtils from '@/utils/shapeUtils'
-import mappingUtils from '@/utils/mappingUtils'
-import stepsUtils from '@/utils/stepsUtils'
+import controlUtils from '@/utils/controlUtils'
 import layerUtils from '@/utils/layerUtils'
+import mappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
+import shapeUtils from '@/utils/shapeUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     MobileSlider,
     MarkerIcon
-  },
-  props: {
   },
   data() {
     const { min: lineWidthMin, max: lineWidthMax } = mappingUtils.mappingMinMax('lineWidth')
@@ -150,6 +150,12 @@ export default Vue.extend({
       } as { [key: string]: IMarker }),
       lineWidthMin,
       lineWidthMax
+    }
+  },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
   mounted() {
@@ -177,7 +183,6 @@ export default Vue.extend({
     ...mapGetters({
       currSelectedIndex: 'getCurrSelectedIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer',
       token: 'user/getToken'
     }),
     ...mapState(
@@ -203,8 +208,8 @@ export default Vue.extend({
       const { currLayer } = this
       return (currLayer as IShape).shapeType === 'e'
     },
-    currLayer(): ILayer {
-      return this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex) as ILayer
+    currLayer(): AllLayerTypes {
+      return this.currPage.layers[this.currSelectedIndex]
     },
     isLine(): boolean {
       return this.currLayer.type === 'shape' && this.currLayer.category === 'D'

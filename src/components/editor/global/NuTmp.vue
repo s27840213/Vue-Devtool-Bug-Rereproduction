@@ -1,32 +1,49 @@
 <template lang="pug">
-  div(class="nu-tmp"
-      :style="styles()")
-    nu-layer(v-for="(layer,index) in config.layers"
-      :key="`layer-${index}`"
-      :pageIndex="pageIndex"
-      :layerIndex="layerIndex"
-      :subLayerIndex="index"
-      :primaryLayer="config"
-      :contentScaleRatio="contentScaleRatio"
-      :config="layer"
-      :style="subLayerStyles(layer)"
-      :isSubLayer="true")
+div(class="nu-tmp"
+    :style="styles()")
+  nu-layer(v-for="(layer,index) in config.layers"
+    :key="`layer-${index}`"
+    :pageIndex="pageIndex"
+    :page="page"
+    :layerIndex="layerIndex"
+    :subLayerIndex="index"
+    :contentScaleRatio="contentScaleRatio"
+    :config="layer"
+    :style="subLayerStyles(layer)"
+    :isSubLayer="true"
+    :inTmp="true"
+    :primaryScale="config.styles.scale"
+    :primaryLayer="config")
 </template>
 
 <script lang="ts">
 import { ILayer, ITmp } from '@/interfaces/layer'
-import generalUtils from '@/utils/generalUtils'
+import { IPage } from '@/interfaces/page'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import textPropUtils from '@/utils/textPropUtils'
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
+    config: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -41,9 +58,6 @@ export default Vue.extend({
     textPropUtils.updateTextPropsState()
   },
   computed: {
-    ...mapGetters({
-      getLayer: 'getLayer'
-    }),
     transformStyle(): { [index: string]: string } {
       return {
         transformStyle: this.enalble3dTransform ? 'preserve-3d' : 'initial'

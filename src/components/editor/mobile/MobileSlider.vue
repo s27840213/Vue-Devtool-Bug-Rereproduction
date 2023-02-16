@@ -20,7 +20,7 @@ div(class="mobile-slider")
       v-ratio-change
       type="range"
       @pointerdown="!borderTouchArea ? $emit('pointerdown', $event) : null"
-      @pointerup="!borderTouchArea ? handlePointerup() : null")
+      @pointerup="!borderTouchArea ? handlePointerup : null")
     input(v-if="borderTouchArea"
       class="mobile-slider__range-input mobile-slider__range-input-top"
       :class="theme"
@@ -37,16 +37,21 @@ div(class="mobile-slider")
 
 <script lang="ts">
 import stepsUtils from '@/utils/stepsUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
     }
   },
   props: {
-    title: String,
-    name: String,
+    title: {
+      type: String,
+      required: true
+    },
+    name: {
+      type: String,
+    },
     borderTouchArea: {
       type: Boolean,
       default: false
@@ -98,7 +103,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    progressStyles() {
+    progressStyles(): {[key: string]: string} {
       return {
         '--progress': (typeof this.value === 'string') ? '50%' : `${(this.value - this.min) / (this.max - this.min) * 100}%`,
         'pointer-events': this.borderTouchArea ? 'none' : 'auto'

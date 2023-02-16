@@ -18,6 +18,6 @@ export interface ITemplate {
   ver: number,
   plan: number,
   content_ids: IContentTemplate[],
-  group_type?: number
-  group_id?: string
+  group_type: number
+  group_id: string
 }

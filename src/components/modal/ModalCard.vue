@@ -42,12 +42,13 @@ div(class="modal-card" :style="modalInfo.cardStyle")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { IModalInfo } from '@/interfaces/modal'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters } from 'vuex'
 import modalUtils from '@/utils/modalUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'ModalCard',
   data: () => {
     return {

@@ -1,93 +1,121 @@
 <template lang="pug">
-  div(class="folder-item")
-    div(class="folder-item__block"
-        :class="isMouseOver ? 'block-over' : 'block'"
-        :style="{'cursor' : isTempFolder ? 'not-allowed' : ''}"
-        :draggable="!undraggable && !isTempFolder"
-        @dragstart="handleDragStart"
-        @drag="handleDragging"
-        @dragend="handleDragEnd"
-        v-on="undroppable || isTempFolder ? {} : { dragenter: handleDragEnter, dragleave: handleDragLeave }"
-        @mouseenter="handleMouseEnter"
-        @mouseleave="handleMouseLeave"
-        @dragover.prevent
-        @drop="handleDrop"
-        @click="emitGoto")
-      svg-icon(style="pointer-events: none"
+div(class="folder-item")
+  div(class="folder-item__block"
+      :class="isMouseOver ? 'block-over' : 'block'"
+      :style="{'cursor' : isTempFolder ? 'not-allowed' : ''}"
+      :draggable="!undraggable && !isTempFolder"
+      @dragstart="handleDragStart"
+      @drag="handleDragging"
+      @dragend="handleDragEnd"
+      v-on="undroppable || isTempFolder ? {} : { dragenter: handleDragEnter, dragleave: handleDragLeave }"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
+      @dragover.prevent
+      @drop="handleDrop"
+      @click="emitGoto")
+    svg-icon(style="pointer-events: none"
+            iconName="folder"
+            iconWidth="24px"
+            iconColor="gray-2")
+    div(class="folder-item__controller")
+      div(class="folder-item__controller-content")
+        div(v-if="isSelected"
+          class="folder-item__checkbox-checked"
+          @click.stop="emitDeselect")
+          svg-icon(iconName="done"
+                  iconWidth="10px"
+                  iconHeight="8px"
+                  iconColor="white")
+        div(v-if="menuItems.length > 0 && !isSelected && (isMouseOver || isAnySelected)"
+          class="folder-item__checkbox"
+          @click.stop="emitSelect")
+        div(v-if="menuItems.length > 0 && isMouseOver"
+          class="folder-item__more"
+          @click.stop="toggleMenu()")
+          svg-icon(iconName="more_vertical"
+                  iconWidth="24px"
+                  iconColor="gray-2")
+        div(v-if="menuItems.length > 0 && isMenuOpen && isMouseOver"
+            class="folder-item__menu"
+            v-click-outside="closeMenu")
+          slot(v-for="(dummy, index) in menuItems" :name="`i${index}`") {{ index }}
+  div(ref="nameblock"
+      class="folder-item__name"
+      :folderid="config.id"
+      v-click-outside="() => { isNameEditing && handleNameEditEnd() }")
+    input(ref="name"
+          v-if="isNameEditing"
+          v-model="editableName"
+          @change="handleNameEditEnd"
+          @keyup="checkNameEnter")
+    span(v-else
+        :title="config.name"
+        @dblclick="handleNameEditStart"
+        @click.right.stop.prevent="handleNameEditStart") {{ config.name }}
+  transition(name="fade")
+    div(v-if="isShowHint" class="folder-item__name-hint" :style="hintStyles()")
+      span {{$t('NN0226')}}
+  div(class="dragged-folder" :style="draggedFolderStyles()")
+    div
+      div(class="dragged-folder__icon")
+        svg-icon(style="pointer-events: none"
               iconName="folder"
               iconWidth="24px"
               iconColor="gray-2")
-      div(class="folder-item__controller")
-        div(class="folder-item__controller-content")
-          div(v-if="isSelected"
-            class="folder-item__checkbox-checked"
-            @click.stop="emitDeselect")
-            svg-icon(iconName="done"
-                    iconWidth="10px"
-                    iconHeight="8px"
-                    iconColor="white")
-          div(v-if="menuItems.length > 0 && !isSelected && (isMouseOver || isAnySelected)"
-            class="folder-item__checkbox"
-            @click.stop="emitSelect")
-          div(v-if="menuItems.length > 0 && isMouseOver"
-            class="folder-item__more"
-            @click.stop="toggleMenu()")
-            svg-icon(iconName="more_vertical"
-                    iconWidth="24px"
-                    iconColor="gray-2")
-          div(v-if="menuItems.length > 0 && isMenuOpen && isMouseOver"
-              class="folder-item__menu"
-              v-click-outside="closeMenu")
-            slot(v-for="(dummy, index) in menuItems" :name="`i${index}`") {{ index }}
-    div(ref="nameblock"
-        class="folder-item__name"
-        :folderid="config.id"
-        v-click-outside="() => { isNameEditing && handleNameEditEnd() }")
-      input(ref="name"
-            v-if="isNameEditing"
-            v-model="editableName"
-            @change="handleNameEditEnd"
-            @keyup="checkNameEnter")
-      span(v-else
-          :title="config.name"
-          @dblclick="handleNameEditStart"
-          @click.right.stop.prevent="handleNameEditStart") {{ config.name }}
-    transition(name="fade")
-      div(v-if="isShowHint" class="folder-item__name-hint" :style="hintStyles()")
-        span {{$t('NN0226')}}
-    div(class="dragged-folder" :style="draggedFolderStyles()")
-      div
-        div(class="dragged-folder__icon")
-          svg-icon(style="pointer-events: none"
-                iconName="folder"
-                iconWidth="24px"
-                iconColor="gray-2")
-        div(class="dragged-folder__name")
-          span {{ config.name }}
+      div(class="dragged-folder__name")
+        span {{ config.name }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'v-click-outside'
 import { IDesign, IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
-    path: Array,
-    config: Object,
-    menuItemNum: Number,
-    undraggable: Boolean,
-    undroppable: Boolean,
-    nameIneditable: Boolean,
-    isAnySelected: Boolean,
-    isSelected: Boolean,
-    index: Number
+    path: {
+      type: Array,
+      required: true
+    },
+    config: {
+      type: Object,
+      required: true
+    },
+    menuItemNum: {
+      type: Number,
+      required: true
+    },
+    undraggable: {
+      type: Boolean,
+      required: true
+    },
+    undroppable: {
+      type: Boolean,
+      required: true
+    },
+    nameIneditable: {
+      type: Boolean,
+      required: true
+    },
+    isAnySelected: {
+      type: Boolean,
+      required: true
+    },
+    isSelected: {
+      type: Boolean,
+      required: true
+    },
+    index: {
+      type: Number,
+      required: true
+    }
   },
   directives: {
     clickOutside: vClickOutside.directive
   },
+  emits: ['metaSelectFolder', 'deselect', 'select', 'goto', 'moveItem'],
   data() {
     return {
       isDragged: false,
@@ -97,7 +125,8 @@ export default Vue.extend({
       editableName: '',
       isShowHint: false,
       messageTimer: -1,
-      draggedFolderCoordinate: { x: 0, y: 0 }
+      draggedFolderCoordinate: { x: 0, y: 0 },
+      lastOnId: ''
     }
   },
   computed: {
@@ -125,7 +154,23 @@ export default Vue.extend({
       handler: function (newVal) {
         this.editableName = newVal
       }
+    },
+    'config.id': function(newVal) {
+      designUtils.off(`edit-folder-${this.lastOnId}`)
+      this.lastOnId = newVal
+      designUtils.on(`edit-folder-${newVal}`, () => {
+        this.handleNameEditStart()
+      })
     }
+  },
+  mounted() {
+    this.lastOnId = this.config.id
+    designUtils.on(`edit-folder-${this.config.id}`, () => {
+      this.handleNameEditStart()
+    })
+  },
+  unmounted() {
+    designUtils.off(this.lastOnId)
   },
   methods: {
     ...mapMutations('design', {
@@ -265,12 +310,12 @@ export default Vue.extend({
           })
           this.deleteFolder(this.config)
         } else {
-          designUtils.createFolder(this.path as string[], this.config, this.editableName)
+          designUtils.createFolder(this.path as string[], this.config as IFolder, this.editableName)
         }
       } else {
         if (this.editableName === '' || this.editableName === this.config.name) return
         this.checkNameLength()
-        designUtils.setFolderName(this.config, this.editableName, this.path as string[])
+        designUtils.setFolderName(this.config as IFolder, this.editableName, this.path as string[])
       }
     },
     checkNameEnter(e: KeyboardEvent) {
@@ -286,7 +331,7 @@ export default Vue.extend({
           clearTimeout(this.messageTimer)
         }
         this.isShowHint = true
-        this.messageTimer = setTimeout(() => {
+        this.messageTimer = window.setTimeout(() => {
           this.isShowHint = false
           this.messageTimer = -1
         }, 3000)
@@ -404,57 +449,12 @@ export default Vue.extend({
     left: 100%;
     top: 7px;
     z-index: 2;
-    & .folder-menu-item {
-      position: relative;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: start;
-      gap: 5px;
-      padding: 6px 0;
-      cursor: pointer;
-      &:hover {
-        background-color: setColor(gray-5);
-      }
-      &__icon {
-        margin-left: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 10px;
-        height: 10px;
-      }
-      &__text {
-        display: flex;
-        align-items: center;
-        justify-content: start;
-        height: 12px;
-        transform: scale(0.8);
-        transform-origin: left;
-        > span {
-          font-weight: 400;
-          font-size: 12px;
-          line-height: 12px;
-          color: setColor(gray-2);
-          white-space: nowrap;
-        }
-      }
-      &__right {
-        position: absolute;
-        right: 3px;
-        top: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transform: translateY(-50%);
-      }
-    }
   }
   &__name {
     width: 120px;
     height: 40px;
     display: flex;
-    align-items: start;
+    align-items: flex-start;
     justify-content: center;
     > span {
       text-align: center;
@@ -563,7 +563,7 @@ export default Vue.extend({
   &-leave-active {
     transition: 0.2s;
   }
-  &-enter,
+  &-enter-from,
   &-leave-to {
     opacity: 0;
   }

@@ -23,29 +23,36 @@ div(class="category-fonts pointer feature-button"
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import TextUtils from '@/utils/textUtils'
-import TextPropUtils from '@/utils/textPropUtils'
-import StepsUtils from '@/utils/stepsUtils'
+import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import { ISelection } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
-import layerUtils from '@/utils/layerUtils'
-import { IGroup, IParagraph, IText } from '@/interfaces/layer'
-import tiptapUtils from '@/utils/tiptapUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
+import layerUtils from '@/utils/layerUtils'
+import TextPropUtils from '@/utils/textPropUtils'
+import TextUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
     // host: String,
     // preview: String,
     // preview2: String,
-    item: Object,
-    textStyleType: String
+    item: {
+      type: Object,
+      required: true
+    },
+    textStyleType: {
+      type: String,
+      required: true
+    }
   },
-  data() {
+  data () {
     return {
       fallbackSrc: ''
     }
@@ -289,7 +296,7 @@ export default Vue.extend({
           const newConfig = TextPropUtils.spanParagraphPropertyHandler('fontFamily', updateItem, start, end, config as IText)
           this.updateLayerProps(layerUtils.layerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
           tiptapUtils.updateHtml(newConfig.paragraphs)
-          !generalUtils.isTouchDevice() && tiptapUtils.focus()
+          !this.$isTouchDevice && tiptapUtils.focus()
         }
 
         AssetUtils.addAssetToRecentlyUsed({
@@ -323,7 +330,7 @@ export default Vue.extend({
       } catch (error: any) {
         const code = error.message === 'timeout' ? 'timeout' : error.code
         console.error(error)
-        this.$notify({
+        notify({
           group: 'error',
           text: `${this.$t('NN0248')} (ErrorCode: ${code})`
         })

@@ -1,16 +1,16 @@
 /**
  */
+import { ICoordinate } from '@/interfaces/frame'
+import { IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
-import { IFrame, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { SidebarPanelType } from '@/store/types'
 import LayerFactary from '@/utils/layerFactary'
-import { ICoordinate } from '@/interfaces/frame'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import groupUtils from './groupUtils'
-import zindexUtils from './zindexUtils'
 import AssetUtils from './assetUtils'
 import generalUtils from './generalUtils'
+import groupUtils from './groupUtils'
+import zindexUtils from './zindexUtils'
 class MouseUtils {
   private getEventType(e: MouseEvent | TouchEvent | PointerEvent) {
     if (e.type.includes('pointer')) {
@@ -98,7 +98,7 @@ class MouseUtils {
     const dropData = e.dataTransfer ? e.dataTransfer.getData('data') : null
     if (dropData === null || typeof dropData !== 'string') return
     const data = JSON.parse(dropData)
-    const target = document.querySelector(`.nu-page-${pageIndex}`) as HTMLElement
+    const target = document.querySelector(`.nu-page-content-${pageIndex}`) as HTMLElement
     const targetPos = {
       x: target.getBoundingClientRect().x,
       y: target.getBoundingClientRect().y
@@ -131,7 +131,8 @@ class MouseUtils {
         opacity: 100,
         horizontalFlip: data.styles.horizontalFlip || false,
         verticalFlip: data.styles.verticalFlip || false
-      }
+      },
+      id: ''
     }
 
     switch (data.type) {
@@ -145,7 +146,6 @@ class MouseUtils {
         }
       }
       case 'shape': {
-        console.log(data.category)
         Object.assign(layerConfig, { category: data.category })
         return LayerFactary.newShape(layerConfig)
       }

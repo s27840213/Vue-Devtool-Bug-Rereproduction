@@ -8,7 +8,7 @@ import _ from 'lodash'
 interface BillingInfoInput {
   label: TranslateResult
   ph?: TranslateResult
-  key?: string
+  key: string
   optional?: boolean
   error?: string
 }
@@ -18,7 +18,7 @@ export interface IEffectOption {
   type: 'range' | 'color' | 'select'
   min?: number
   max?: number
-  select?: {key: string, label: string}[]
+  select?: { key: string, label: string }[]
 }
 export interface IEffect {
   key: string
@@ -26,7 +26,7 @@ export interface IEffect {
   options: IEffectOption[]
 }
 export interface IEffectCategory {
-  name: string
+  name: 'shadow' | 'bg' | 'shape'
   label: string
   effects2d: IEffect[][]
 }
@@ -59,7 +59,7 @@ class ConstantData {
     }
     const templateType = {
       tw: [{
-        label: i18n.t('NN0667'),
+        label: i18n.global.t('NN0667'),
         content: [{
           label: 'FB 貼文',
           url: 'https://blog.vivipic.com/tw/facebook-post/'
@@ -73,7 +73,7 @@ class ConstantData {
         ...[3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
         ]
       }, {
-        label: i18n.t('NN0668'),
+        label: i18n.global.t('NN0668'),
         content: [{
           label: '電商商品圖',
           url: 'https://blog.vivipic.com/tw/ecimage/'
@@ -85,7 +85,7 @@ class ConstantData {
           url: 'https://blog.vivipic.com/tw/ec-landingpage/'
         }]
       }, {
-        label: i18n.t('NN0669'),
+        label: i18n.global.t('NN0669'),
         content: [{
           label: '喜帖',
           url: 'https://blog.vivipic.com/tw/wedding-invitation/'
@@ -94,13 +94,13 @@ class ConstantData {
           url: 'https://blog.vivipic.com/tw/invitation-card/'
         },
         ...[20, 19, 18, 22].map((id) => themeItem(id)), {
-          label: i18n.t('NN0790', { type: i18n.tc('NN0001', 3) }),
-          url: i18n.t('NN0791'),
+          label: i18n.global.t('NN0790', { type: i18n.global.tc('NN0001', 3) }),
+          url: i18n.global.t('NN0791'),
           newTab: true
         }]
       }],
       us: [{
-        label: i18n.t('NN0667'),
+        label: i18n.global.t('NN0667'),
         content: [
           ...[1].map((id) => themeItem(id)), {
             label: 'Facebook Cover',
@@ -114,10 +114,10 @@ class ConstantData {
             url: 'https://blog.vivipic.com/us/pfp-profile-pictures/'
           }]
       }, {
-        label: i18n.t('NN0668'),
+        label: i18n.global.t('NN0668'),
         content: [5, 6].map((id) => themeItem(id))
       }, {
-        label: i18n.t('NN0669'),
+        label: i18n.global.t('NN0669'),
         content: [{
           label: 'Invitation',
           url: 'https://blog.vivipic.com/us/invitations/'
@@ -125,13 +125,13 @@ class ConstantData {
           label: 'Polaroid Frame',
           url: 'https://blog.vivipic.com/us/free-polaroid-frame-templates/'
         }, {
-          label: i18n.t('NN0790', { type: i18n.tc('NN0001', 3) }),
-          url: i18n.t('NN0791'),
+          label: i18n.global.t('NN0790', { type: i18n.global.tc('NN0001', 3) }),
+          url: i18n.global.t('NN0791'),
           newTab: true
         }]
       }],
       jp: [{
-        label: i18n.t('NN0667'),
+        label: i18n.global.t('NN0667'),
         content: [
           ...[1, 8, 2, 3, 4, 9].map((id) => themeItem(id)), {
             label: 'プロフィール写真',
@@ -139,10 +139,10 @@ class ConstantData {
           }
         ]
       }, {
-        label: i18n.t('NN0668'),
+        label: i18n.global.t('NN0668'),
         content: [5, 6, 7].map((id) => themeItem(id))
       }, {
-        label: i18n.t('NN0669'),
+        label: i18n.global.t('NN0669'),
         content: [{
           label: 'ポラロイドフレーム',
           url: 'https://blog.vivipic.com/jp/free-polaroid-frame-templates-2/'
@@ -150,45 +150,45 @@ class ConstantData {
           label: '招待状',
           url: 'https://blog.vivipic.com/jp/invitation/'
         }, {
-          label: i18n.t('NN0790', { type: i18n.tc('NN0001', 3) }),
-          url: i18n.t('NN0791'),
+          label: i18n.global.t('NN0790', { type: i18n.global.tc('NN0001', 3) }),
+          url: i18n.global.t('NN0791'),
           newTab: true
         }]
       }]
     }
     const resource = {
       tw: [{
-        label: i18n.t('NN0671'),
+        label: i18n.global.t('NN0671'),
         url: 'https://blog.vivipic.com/tw/'
       }, {
-        label: i18n.t('NN0672'),
+        label: i18n.global.t('NN0672'),
         content: [{
-          label: i18n.t('NN0673'),
+          label: i18n.global.t('NN0673'),
           url: 'https://blog.vivipic.com/tw/tutorial/'
         }, {
-          label: i18n.t('NN0147'),
+          label: i18n.global.t('NN0147'),
           url: 'https://blog.vivipic.com/tw/faq/'
         }, {
           label: '特色功能',
           url: 'https://blog.vivipic.com/tw/features/'
         }, {
-          label: i18n.t('NN0790', { type: i18n.tc('NN0793', 1) }),
-          url: i18n.t('NN0791'),
+          label: i18n.global.t('NN0790', { type: i18n.global.tc('NN0793', 1) }),
+          url: i18n.global.t('NN0791'),
           newTab: true
         }]
       }, {
-        label: i18n.t('NN0674'),
+        label: i18n.global.t('NN0674'),
         content: [{
-          label: i18n.t('NN0675'),
+          label: i18n.global.t('NN0675'),
           url: 'https://blog.vivipic.com/tw/新手入門/'
         }, {
-          label: i18n.t('NN0676'),
+          label: i18n.global.t('NN0676'),
           url: 'https://blog.vivipic.com/tw/設計教學/'
         }, {
-          label: i18n.t('NN0677'),
+          label: i18n.global.t('NN0677'),
           url: 'https://blog.vivipic.com/tw/數位行銷/'
         }, {
-          label: i18n.t('NN0678'),
+          label: i18n.global.t('NN0678'),
           url: 'https://blog.vivipic.com/tw/趨勢分享/'
         }]
       }],
@@ -199,62 +199,62 @@ class ConstantData {
           url: 'https://blog.vivipic.com/us/objects/'
         }]
       }, {
-        label: i18n.t('NN0672'),
+        label: i18n.global.t('NN0672'),
         content: [{
-          label: i18n.t('NN0673'),
+          label: i18n.global.t('NN0673'),
           url: 'https://blog.vivipic.com/us/us-tutorial/'
         }, {
-          label: i18n.t('NN0147'),
+          label: i18n.global.t('NN0147'),
           url: 'https://blog.vivipic.com/us/us-faq/'
         }, {
-          label: i18n.t('NN0790', { type: i18n.tc('NN0793', 1) }),
-          url: i18n.t('NN0791'),
+          label: i18n.global.t('NN0790', { type: i18n.global.tc('NN0793', 1) }),
+          url: i18n.global.t('NN0791'),
           newTab: true
         }]
       }, {
-        label: i18n.t('NN0671'),
+        label: i18n.global.t('NN0671'),
         url: 'https://blog.vivipic.com/us/',
         content: [{
-          label: i18n.t('NN0675'),
+          label: i18n.global.t('NN0675'),
           url: 'https://blog.vivipic.com/us/category/tutorial-us/'
         }, {
-          label: i18n.t('NN0676'),
+          label: i18n.global.t('NN0676'),
           url: 'https://blog.vivipic.com/us/category/design-us/'
         }, {
-          label: i18n.t('NN0677'),
+          label: i18n.global.t('NN0677'),
           url: 'https://blog.vivipic.com/us/category/digital-marketing-us/'
         }, {
-          label: i18n.t('NN0678'),
+          label: i18n.global.t('NN0678'),
           url: 'https://blog.vivipic.com/us/category/trend-us/'
         }]
       }],
       jp: [{
-        label: i18n.t('NN0671'),
+        label: i18n.global.t('NN0671'),
         url: 'https://blog.vivipic.com/jp/'
       }, {
-        label: i18n.t('NN0672'),
+        label: i18n.global.t('NN0672'),
         content: [{
-          label: i18n.t('NN0673'),
+          label: i18n.global.t('NN0673'),
           url: 'https://blog.vivipic.com/jp/4step/'
         }, {
-          label: i18n.t('NN0790', { type: i18n.tc('NN0793', 1) }),
-          url: i18n.t('NN0791'),
+          label: i18n.global.t('NN0790', { type: i18n.global.tc('NN0793', 1) }),
+          url: i18n.global.t('NN0791'),
           newTab: true
         }]
       }, {
-        label: i18n.t('NN0674'),
+        label: i18n.global.t('NN0674'),
         content: [{
-          label: i18n.t('NN0677'),
+          label: i18n.global.t('NN0677'),
           url: 'https://blog.vivipic.com/jp/category/digital-marketing-jp/'
         }]
       }]
     }
 
-    const pricing = i18n.locale === 'tw' ? {
+    const pricing = i18n.global.locale === 'tw' ? {
       singleLayer: true,
-      label: i18n.t('NN0643'),
+      label: i18n.global.t('NN0643'),
       content: [{
-        label: i18n.t('NN0643'),
+        label: i18n.global.t('NN0643'),
         url: '/pricing'
       }, {
         label: '政府輔助方案',
@@ -263,31 +263,31 @@ class ConstantData {
     } : {
       name: 'Pricing',
       url: '/pricing',
-      label: i18n.t('NN0643')
+      label: i18n.global.t('NN0643')
     }
 
     const list = [{
-      label: i18n.t('NN0666'),
-      content: templateType[i18n.locale as keyof typeof templateType]
+      label: i18n.global.t('NN0666'),
+      content: templateType[i18n.global.locale as keyof typeof templateType]
     }, {
       name: 'TemplateCenter',
       url: '/templates',
-      label: i18n.t('NN0145')
+      label: i18n.global.t('NN0145')
     }, {
-      label: i18n.t('NN0670'),
-      content: resource[i18n.locale as keyof typeof resource]
+      label: i18n.global.t('NN0670'),
+      content: resource[i18n.global.locale as keyof typeof resource]
     },
     ...[pricing],
     {
       hidden: !this.isLogin,
       name: 'MyDesign',
       url: '/mydesign',
-      label: i18n.t('NN0080')
+      label: i18n.global.t('NN0080')
     }, {
       hidden: !this.isLogin,
       name: 'BrandKit',
       url: '/brandkit',
-      label: i18n.t('NN0007')
+      label: i18n.global.t('NN0007')
     }]
     themeUtils.checkThemeState()
     if (mobile) return _.filter(list, (it) => it.name !== 'BrandKit')
@@ -304,26 +304,26 @@ class ConstantData {
 
     function toOptions(array: string[]) {
       const effectI18nMap = {
-        distance: i18n.tc('NN0063'),
-        angle: i18n.tc('NN0064'),
-        blur: i18n.tc('NN0065'),
-        opacity: i18n.tc('NN0066'),
-        color: i18n.tc('NN0067'),
-        spread: i18n.tc('NN0068'),
-        stroke: i18n.tc('NN0069'),
-        shape: i18n.tc('NN0070'),
-        bend: i18n.tc('NN0071'),
-        bStroke: i18n.tc('NN0733'),
-        bColor: i18n.tc('NN0734'),
-        bRadius: i18n.tc('NN0086'),
-        pStrokeY: i18n.tc('NN0319'),
-        pColor: i18n.tc('NN0735'),
-        height: i18n.tc('NN0319'),
-        yOffset: i18n.tc('NN0736'),
-        distanceInverse: i18n.tc('NN0737'),
-        textStrokeColor: i18n.tc('NN0739'),
-        shadowStrokeColor: i18n.tc('NN0740'),
-        endpoint: i18n.tc('NN0738')
+        distance: i18n.global.tc('NN0063'),
+        angle: i18n.global.tc('NN0064'),
+        blur: i18n.global.tc('NN0065'),
+        opacity: i18n.global.tc('NN0066'),
+        color: i18n.global.tc('NN0067'),
+        spread: i18n.global.tc('NN0068'),
+        stroke: i18n.global.tc('NN0069'),
+        shape: i18n.global.tc('NN0070'),
+        bend: i18n.global.tc('NN0071'),
+        bStroke: i18n.global.tc('NN0733'),
+        bColor: i18n.global.tc('NN0734'),
+        bRadius: i18n.global.tc('NN0086'),
+        pStrokeY: i18n.global.tc('NN0319'),
+        pColor: i18n.global.tc('NN0735'),
+        height: i18n.global.tc('NN0319'),
+        yOffset: i18n.global.tc('NN0736'),
+        distanceInverse: i18n.global.tc('NN0737'),
+        textStrokeColor: i18n.global.tc('NN0739'),
+        shadowStrokeColor: i18n.global.tc('NN0740'),
+        endpoint: i18n.global.tc('NN0738')
       }
 
       return array.map((name: string) => {
@@ -341,13 +341,13 @@ class ConstantData {
             option.type = 'select'
             option.select = [{
               key: 'triangle',
-              label: i18n.tc('NN0730')
+              label: i18n.global.tc('NN0730')
             }, {
               key: 'rounded',
-              label: i18n.tc('NN0731')
+              label: i18n.global.tc('NN0731')
             }, {
               key: 'square',
-              label: i18n.tc('NN0732')
+              label: i18n.global.tc('NN0732')
             }]
             break
           case 'angle':
@@ -371,90 +371,90 @@ class ConstantData {
 
     const categories = [{
       name: 'shadow',
-      label: i18n.t('NN0112'),
+      label: i18n.global.t('NN0112'),
       effects2d: arrTo2darr([{
         key: 'none',
-        label: i18n.t('NN0111'),
+        label: i18n.global.t('NN0111'),
         options: toOptions([])
       }, {
         key: 'shadow',
-        label: i18n.t('NN0112'),
+        label: i18n.global.t('NN0112'),
         options: toOptions(['distance', 'angle', 'blur', 'opacity', 'color'])
       }, {
         key: 'lift',
-        label: i18n.t('NN0113'),
+        label: i18n.global.t('NN0113'),
         options: toOptions(['spread'])
       }, {
         key: 'hollow',
-        label: i18n.t('NN0114'),
+        label: i18n.global.t('NN0114'),
         options: toOptions(['stroke'])
       }, {
         key: 'splice',
-        label: i18n.t('NN0115'),
+        label: i18n.global.t('NN0115'),
         options: toOptions(['stroke', 'distance', 'angle', 'color'])
       }, {
         key: 'echo',
-        label: i18n.t('NN0116'),
+        label: i18n.global.t('NN0116'),
         options: toOptions(['distance', 'angle', 'color'])
       }, {
         key: 'funky3d',
-        label: i18n.tc('NN0728'),
+        label: i18n.global.tc('NN0728'),
         options: toOptions(['distance', 'distanceInverse', 'angle', 'opacity', 'color'])
       }, {
         key: 'bold3d',
-        label: i18n.tc('NN0729'),
+        label: i18n.global.tc('NN0729'),
         options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
       }])
     }, {
       name: 'shape',
-      label: i18n.t('NN0070'),
+      label: i18n.global.t('NN0070'),
       effects2d: arrTo2darr([{
         key: 'none',
-        label: i18n.t('NN0117'),
+        label: i18n.global.t('NN0117'),
         options: toOptions([])
       }, {
         key: 'curve',
-        label: i18n.t('NN0118'),
+        label: i18n.global.t('NN0118'),
         options: toOptions(['bend'])
       }])
     }, {
       name: 'bg',
-      label: i18n.tc('NN0719'),
+      label: i18n.global.tc('NN0719'),
       effects2d: arrTo2darr([{
         key: 'none',
-        label: i18n.t('NN0111'),
+        label: i18n.global.t('NN0111'),
         options: toOptions([])
       }, {
         key: 'square-borderless',
-        label: i18n.tc('NN0720'),
+        label: i18n.global.tc('NN0720'),
         options: toOptions(['opacity', 'pStrokeY', 'pColor'])
       }, {
         key: 'rounded-borderless',
-        label: i18n.tc('NN0721'),
+        label: i18n.global.tc('NN0721'),
         options: toOptions(['opacity', 'bRadius', 'pStrokeY', 'pColor'])
       }, {
         key: 'square-hollow',
-        label: i18n.tc('NN0722'),
+        label: i18n.global.tc('NN0722'),
         options: toOptions(['opacity', 'bStroke', 'pStrokeY', 'bColor'])
       }, {
         key: 'rounded-hollow',
-        label: i18n.tc('NN0723'),
+        label: i18n.global.tc('NN0723'),
         options: toOptions(['opacity', 'bRadius', 'bStroke', 'pStrokeY', 'bColor'])
       }, {
         key: 'square-both',
-        label: i18n.tc('NN0724'),
+        label: i18n.global.tc('NN0724'),
         options: toOptions(['opacity', 'bStroke', 'pStrokeY', 'bColor', 'pColor'])
       }, {
         key: 'rounded-both',
-        label: i18n.tc('NN0725'),
+        label: i18n.global.tc('NN0725'),
         options: toOptions(['opacity', 'bRadius', 'bStroke', 'pStrokeY', 'bColor', 'pColor'])
       }, {
         key: 'gooey',
-        label: i18n.tc('NN0726'),
+        label: i18n.global.tc('NN0726'),
         options: toOptions(['distance', 'bRadius', 'opacity', 'color'])
       }, {
         key: 'underline',
-        label: i18n.tc('NN0727'),
+        label: i18n.global.tc('NN0727'),
         options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
       }])
     }]
@@ -465,21 +465,21 @@ class ConstantData {
   settingsItems() {
     const list = [{
       name: 'account',
-      label: i18n.tc('NN0165', 1),
+      label: i18n.global.tc('NN0165', 1),
       icon: 'settings'
     }, {
       name: 'security',
-      label: i18n.tc('NN0166', 1),
+      label: i18n.global.tc('NN0166', 1),
       icon: 'lock'
     }, {
       name: 'hr'
     }, {
       name: 'payment',
-      label: i18n.t('NN0585'),
+      label: i18n.global.t('NN0585'),
       icon: 'pro'
     }, {
       name: 'billing',
-      label: i18n.t('NN0614'),
+      label: i18n.global.t('NN0614'),
       icon: 'invoice'
     }]
     return list
@@ -508,31 +508,31 @@ class ConstantData {
 
   periodOptions() {
     return [{
-      label: i18n.t('NN0514'),
+      label: i18n.global.t('NN0514'),
       value: 'monthly'
     }, {
-      label: i18n.t('NN0515'),
+      label: i18n.global.t('NN0515'),
       value: 'yearly'
     }]
   }
 
   compareTable() {
     return [
-      i18n.t('NN0520'), i18n.t('NN0521'), i18n.t('NN0522'),
-      i18n.t('NN0523'), '-', true,
-      i18n.t('NN0524'), true, true,
-      i18n.t('NN0525'), true, true,
-      i18n.t('NN0526'), '1GB', '100GB',
-      i18n.t('NN0527'), true, true,
-      i18n.t('NN0528'), '-', true,
-      i18n.t('NN0529'), '-', true,
-      i18n.t('NN0530'), '-', true,
-      i18n.t('NN0531'), true, true,
-      i18n.t('NN0532'), true, true
+      i18n.global.t('NN0520'), i18n.global.t('NN0521'), i18n.global.t('NN0522'),
+      i18n.global.t('NN0523'), '-', true,
+      i18n.global.t('NN0524'), true, true,
+      i18n.global.t('NN0525'), true, true,
+      i18n.global.t('NN0526'), '1GB', '100GB',
+      i18n.global.t('NN0527'), true, true,
+      i18n.global.t('NN0528'), '-', true,
+      i18n.global.t('NN0529'), '-', true,
+      i18n.global.t('NN0530'), '-', true,
+      i18n.global.t('NN0531'), true, true,
+      i18n.global.t('NN0532'), true, true
     ]
   }
 
-  addLink(text: string):string {
+  addLink(text: string): string {
     const link = text.match(/(https:\/\/[\w./]+)/)?.[0] as string
     text = text.replace(link, `<a href=${link}>${link}</a>`)
     const email = text.match(/([\w]+@vivipic.com)/)?.[0] as string
@@ -542,23 +542,23 @@ class ConstantData {
 
   faqs() {
     return [{
-      Q: i18n.t('NN0534'),
-      A: i18n.t('NN0535')
+      Q: i18n.global.t('NN0534'),
+      A: i18n.global.t('NN0535')
     }, {
-      Q: i18n.t('NN0536'),
-      A: this.addLink(i18n.t('NN0537') as string)
+      Q: i18n.global.t('NN0536'),
+      A: this.addLink(i18n.global.t('NN0537') as string)
     }, {
-      Q: i18n.t('NN0538'),
-      A: this.addLink(i18n.t('NN0539') as string)
+      Q: i18n.global.t('NN0538'),
+      A: this.addLink(i18n.global.t('NN0539') as string)
     }, {
-      Q: i18n.t('NN0540'),
-      A: i18n.t('NN0541')
+      Q: i18n.global.t('NN0540'),
+      A: i18n.global.t('NN0541')
     }, {
-      Q: i18n.t('NN0542'),
-      A: i18n.t('NN0543')
+      Q: i18n.global.t('NN0542'),
+      A: i18n.global.t('NN0543')
     }, {
       isPath: true,
-      Q: i18n.t('NN0650'),
+      Q: i18n.global.t('NN0650'),
       A: 'NN0651'
     }]
   }
@@ -566,23 +566,23 @@ class ConstantData {
   // For PopupPayment.vue
   cancel1() {
     return [
-      i18n.t('NN0570'),
-      i18n.t('NN0571'),
-      i18n.t('NN0572'),
-      i18n.t('NN0573'),
-      i18n.t('NN0769'),
-      i18n.t('NN0805')
+      i18n.global.t('NN0570'),
+      i18n.global.t('NN0571'),
+      i18n.global.t('NN0572'),
+      i18n.global.t('NN0573'),
+      i18n.global.t('NN0769'),
+      i18n.global.t('NN0805')
     ]
   }
 
   cancel2() {
     return [
-      i18n.t('NN0577'),
-      i18n.t('NN0578'),
-      i18n.t('NN0579'),
-      i18n.t('NN0580'),
-      i18n.t('NN0581'),
-      i18n.t('NN0582')
+      i18n.global.t('NN0577'),
+      i18n.global.t('NN0578'),
+      i18n.global.t('NN0579'),
+      i18n.global.t('NN0580'),
+      i18n.global.t('NN0581'),
+      i18n.global.t('NN0582')
     ]
   }
 
@@ -633,76 +633,76 @@ class ConstantData {
   }
 
   // For billing info input in PaymentField.vue and SettingsPayment.vue
-  country():BillingInfoInput[] {
+  country(): BillingInfoInput[] {
     return [{
       label: 'country',
       key: 'country'
     }]
   }
 
-  gerneral():BillingInfoInput[] {
+  gerneral(): BillingInfoInput[] {
     return [{
-      label: i18n.tc('NN0173', 1) as string,
-      ph: i18n.t('NN0602') as string,
+      label: i18n.global.tc('NN0173', 1) as string,
+      ph: i18n.global.t('NN0602') as string,
       key: 'email',
-      error: i18n.t('NN0297') as string
+      error: i18n.global.t('NN0297') as string
     }, {
-      label: i18n.t('NN0172') as string,
-      ph: i18n.t('NN0603') as string,
+      label: i18n.global.t('NN0172') as string,
+      ph: i18n.global.t('NN0603') as string,
       key: 'name'
     }]
   }
 
-  TWonly():BillingInfoInput[] {
+  TWonly(): BillingInfoInput[] {
     return [{
-      label: i18n.t('NN0557') as string,
-      ph: i18n.t('NN0557') as string,
+      label: i18n.global.t('NN0557') as string,
+      ph: i18n.global.t('NN0557') as string,
       key: 'phone',
-      error: i18n.t('NN0632') as string
+      error: i18n.global.t('NN0632') as string
     }, {
-      label: i18n.t('NN0558') as string,
-      ph: i18n.t('NN0559') as string,
+      label: i18n.global.t('NN0558') as string,
+      ph: i18n.global.t('NN0559') as string,
       key: 'GUI',
       optional: true,
-      error: i18n.t('NN0633') as string
+      error: i18n.global.t('NN0633') as string
     }]
   }
 
-  USonly():BillingInfoInput[] {
+  USonly(): BillingInfoInput[] {
     return [{
-      label: i18n.t('NN0604') as string,
-      ph: i18n.t('NN0605') as string,
+      label: i18n.global.t('NN0604') as string,
+      ph: i18n.global.t('NN0605') as string,
       key: 'company',
       optional: true
     }, {
-      label: i18n.t('NN0608', { number: 1 }) as string,
-      ph: i18n.t('NN0609') as string,
+      label: i18n.global.t('NN0608', { number: 1 }) as string,
+      ph: i18n.global.t('NN0609') as string,
       key: 'address1'
     }, {
-      label: i18n.t('NN0608', { number: 2 }) as string,
-      ph: i18n.t('NN0610') as string,
+      label: i18n.global.t('NN0608', { number: 2 }) as string,
+      ph: i18n.global.t('NN0610') as string,
       key: 'address2',
       optional: true
     }, {
-      label: i18n.t('NN0611') as string,
-      ph: i18n.t('NN0611') as string,
+      label: i18n.global.t('NN0611') as string,
+      ph: i18n.global.t('NN0611') as string,
       key: 'city'
     }, {
       label: 'state & zip',
       key: 'zip',
-      error: i18n.t('NN0634') as string
+      error: i18n.global.t('NN0634') as string
     }]
   }
 
-  others():BillingInfoInput[] {
+  others(): BillingInfoInput[] {
     return [{
-      label: i18n.t('NN0604') as string,
-      ph: i18n.t('NN0605') as string,
+      label: i18n.global.t('NN0604') as string,
+      ph: i18n.global.t('NN0605') as string,
       key: 'company',
       optional: true
     }, {
-      label: i18n.t('NN0606') as string,
-      ph: i18n.t('NN0607') as string,
+      label: i18n.global.t('NN0606') as string,
+      ph: i18n.global.t('NN0607') as string,
       key: 'address1'
     }]
   }

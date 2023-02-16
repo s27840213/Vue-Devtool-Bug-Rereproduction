@@ -1,59 +1,59 @@
 <template lang="pug">
-  div(class="bill")
-    div(class="bill__title") {{$t('NN0614')}}
-    template(v-if="!historys.length")
-      img(:src="require('@/assets/img/svg/pricing/E-payment.svg')")
-      p(class="text-H6") {{$t('NN0621')}}
-    div(v-else class="bill-table")
-      span {{$t('NN0615')}}
-      span {{$t('NN0616')}}
-      span {{$t('NN0617')}}
-      span {{$t('NN0618')}}
-      template(v-for="his, idx in historys")
-        div {{his.date}}
-        div(class="bill-table-description")
-          span {{his.description}}
-          span(class="body-XS text-gray-3") {{his.couponCentent}}
-        div {{his.price}}
-        div(v-if="!his.success" class="text-red")
-          span {{$t('NN0620')}}
-          svg-icon(iconName="error" iconWidth="24px" iconColor="red")
-        div(v-else-if="canDownloadInvoice(his)" class="text-blue-1 pointer" @click="pdf(idx, his)")
-          span {{$t('NN0619')}}
-          svg-icon(iconName="download" iconWidth="24px" iconColor="gray-2")
-        span(v-else)
-    //- observer-sentinel(@callback="getBillingHistroy")
-    //- For Stripe invoice pdf generation
-    div(v-if="historys.length" class="bill-invoice-wrapper")
-      div(class="bill-invoice" id="bill-invoice")
-        div(class="bill-invoice__title")
-          img(:src="require('@/assets/img/jpg/logo.jpg')" style="height: 32px;")
-          span {{'INVOICE'}}
-        div {{`Invoice number: ${curInvoice.id}`}}
-        div {{`Invoice date: ${curInvoice.date}`}}
-        div(class="bill-invoice-fromto")
-          span {{'From:'}}
-          span {{'To:'}}
-          span {{'Artily, Inc.\n651 N Broad St, Ste 206\nMiddletown, Delaware 19709-6402 US\nservice@vivipic.com'}}
-          span {{customerAddr}}
-        div(class="bill-invoice-detail")
-          span {{'Descriptions'}}
-          span {{'Date'}}
-          span {{'Price'}}
-          template(v-for="item in curInvoice.items")
-            span {{item.description}}
-            span {{item.date}}
-            span {{item.price}}
-          span
-          span(class="caption-LG") {{'Total price'}}
-          span(class="caption-LG") {{`$${totalPrice} USD`}}
-        div(class="caption-LG mt-50")
-          span {{'NOTE'}}
-    spinner(v-if="isLoading")
+div(class="bill")
+  div(class="bill__title") {{$t('NN0614')}}
+  template(v-if="!historys.length")
+    img(:src="require('@/assets/img/svg/pricing/E-payment.svg')")
+    p(class="text-H6") {{$t('NN0621')}}
+  div(v-else class="bill-table")
+    span {{$t('NN0615')}}
+    span {{$t('NN0616')}}
+    span {{$t('NN0617')}}
+    span {{$t('NN0618')}}
+    template(v-for="his, idx in historys")
+      div {{his.date}}
+      div(class="bill-table-description")
+        span {{his.description}}
+        span(class="body-XS text-gray-3") {{his.couponCentent}}
+      div {{his.price}}
+      div(v-if="!his.success" class="text-red")
+        span {{$t('NN0620')}}
+        svg-icon(iconName="error" iconWidth="24px" iconColor="red")
+      div(v-else-if="canDownloadInvoice(his)" class="text-blue-1 pointer" @click="pdf(idx, his)")
+        span {{$t('NN0619')}}
+        svg-icon(iconName="download" iconWidth="24px" iconColor="gray-2")
+      span(v-else)
+  //- observer-sentinel(@callback="getBillingHistroy")
+  //- For Stripe invoice pdf generation
+  div(v-if="historys.length" class="bill-invoice-wrapper")
+    div(class="bill-invoice" id="bill-invoice")
+      div(class="bill-invoice__title")
+        img(:src="require('@/assets/img/jpg/logo.jpg')" style="height: 32px;")
+        span {{'INVOICE'}}
+      div {{`Invoice number: ${curInvoice.id}`}}
+      div {{`Invoice date: ${curInvoice.date}`}}
+      div(class="bill-invoice-fromto")
+        span {{'From:'}}
+        span {{'To:'}}
+        span {{'Artily, Inc.\n651 N Broad St, Ste 206\nMiddletown, Delaware 19709-6402 US\nservice@vivipic.com'}}
+        span {{customerAddr}}
+      div(class="bill-invoice-detail")
+        span {{'Descriptions'}}
+        span {{'Date'}}
+        span {{'Price'}}
+        template(v-for="item in curInvoice.items")
+          span {{item.description}}
+          span {{item.date}}
+          span {{item.price}}
+        span
+        span(class="caption-LG") {{'Total price'}}
+        span(class="caption-LG") {{`$${totalPrice} USD`}}
+      div(class="caption-LG mt-50")
+        span {{'NOTE'}}
+  spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import * as type from '@/interfaces/payment'
 // import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -61,7 +61,8 @@ import * as type from '@/interfaces/payment'
 // @ts-ignore
 import html2pdf from 'html2pdf.js'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'SettingsBill',
   // components: {
   //   ObserverSentinel

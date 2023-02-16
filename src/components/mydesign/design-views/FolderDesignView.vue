@@ -1,142 +1,143 @@
 <template lang="pug">
-  div(class="folder-design-view")
-    div(class="folder-design-view__folder-name")
-      span
-        div(v-if="isFolderNameEditing"
-            class="input-container"
-            v-click-outside="handleFolderNameEditEnd")
-          input(ref="folderName"
-                v-model="editableFolderName"
-                @change="handleFolderNameEditEnd"
-                @keyup="checkFolderNameEnter")
-          div(class="pen-container")
-            svg-icon(iconName="pen"
-                    iconWidth="20px"
-                    iconColor="gray-3")
-        button(v-else
-              @mouseenter="handleFolderNameMouseEnter"
-              @mouseleave="handleFolderNameMouseLeave"
-              @click="handleFolderNameClick")
-          span(:title="folderName") {{ folderName }}
+div(class="folder-design-view")
+  div(class="folder-design-view__folder-name")
+    span
+      div(v-if="isFolderNameEditing"
+          class="input-container"
+          v-click-outside="handleFolderNameEditEnd")
+        input(ref="folderName"
+              v-model="editableFolderName"
+              @change="handleFolderNameEditEnd"
+              @keyup="checkFolderNameEnter")
+        div(class="pen-container")
           svg-icon(iconName="pen"
                   iconWidth="20px"
                   iconColor="gray-3")
-        transition(name="fade")
-          svg-icon(v-if="isShowHint"
-                  class="folder-design-view__folder-name-hint-arrow"
-                  iconName="arrow-up"
-                  iconWidth="13.76px"
-                  iconHeight="9.79px"
-                  iconColor="red-1")
-        transition(name="fade")
-          div(v-if="isShowHint" class="folder-design-view__folder-name-hint-text")
-            span {{$t('NN0226')}}
-    div(class="folder-design-view__toolbar")
-      div(class="folder-design-view__path")
-        template(v-for="(parent, index) in shownParents")
-          span(class="folder-design-view__path__node"
-              :style="nodeStyles(false)"
-              @click="goToParent(index + 1)") {{ parent + ' ' }}
-          span(class="folder-design-view__path__text") {{ ' > ' }}
-          span(class="folder-design-view__path__text") {{ ' ' }}
+      button(v-else
+            @mouseenter="handleFolderNameMouseEnter"
+            @mouseleave="handleFolderNameMouseLeave"
+            @click="handleFolderNameClick")
+        span(:title="folderName") {{ folderName }}
+        svg-icon(iconName="pen"
+                iconWidth="20px"
+                iconColor="gray-3")
+      transition(name="fade")
+        svg-icon(v-if="isShowHint"
+                class="folder-design-view__folder-name-hint-arrow"
+                iconName="arrow-up"
+                iconWidth="13.76px"
+                iconHeight="9.79px"
+                iconColor="red-1")
+      transition(name="fade")
+        div(v-if="isShowHint" class="folder-design-view__folder-name-hint-text")
+          span {{$t('NN0226')}}
+  div(class="folder-design-view__toolbar")
+    div(class="folder-design-view__path")
+      template(v-for="(parent, index) in shownParents")
         span(class="folder-design-view__path__node"
-            :style="nodeStyles(true)"
-            :title="folderName") {{ folderName }}
-      div(class="folder-design-view__actions")
-        div(class="folder-design-view__more"
-            @click="toggleFolderMenu"
-            v-click-outside="closeFolderMenu")
-          div(ref="more"
-              class="folder-design-view__more__icon")
-            svg-icon(class="header-icon"
-                    iconName="more_vertical"
-                    iconWidth="18px"
-                    iconColor="gray-2")
-          div(v-if="isFolderMenuOpen"
-              class="folder-design-view__more__menu"
-              @click.stop)
-            div(class="folder-design-view__more__menu__title")
-              span(:title="folderName") {{ folderName }}
-            div(class="folder-design-view__more__menu__text")
-              span {{ `${$t('NN0196', { name:folder ? folder.author : '' })} | ${$t('NN0197', { num:itemCount })}` }}
-            div(class="folder-design-view__more__menu__divider")
-            div(class="folder-design-view__more__menu__actions")
-              div(@click="handleFolderNameClick")
-                div(class="more-menu-icon")
-                  svg-icon(iconName="pen"
-                          iconWidth="15px"
-                          iconColor="gray-2")
-                div(class="more-menu-text")
-                  span {{$t('NN0198')}}
-              div(@click="handleDeleteFolder")
-                div(class="more-menu-icon")
-                  svg-icon(iconName="trash"
-                          iconWidth="15px"
-                          iconColor="gray-2")
-                div(class="more-menu-text")
-                  span {{$t('NN0199')}}
-        div(ref="newFolder"
-            class="folder-design-view__new-folder"
-            :style="newFolderStyles()"
-            @click="handleNewFolder")
+            :style="nodeStyles(false)"
+            @click="goToParent(index + 1)") {{ parent + ' ' }}
+        span(class="folder-design-view__path__text") {{ ' > ' }}
+        span(class="folder-design-view__path__text") {{ ' ' }}
+      span(class="folder-design-view__path__node"
+          :style="nodeStyles(true)"
+          :title="folderName") {{ folderName }}
+    div(class="folder-design-view__actions")
+      div(class="folder-design-view__more"
+          @click="toggleFolderMenu"
+          v-click-outside="closeFolderMenu")
+        div(ref="more"
+            class="folder-design-view__more__icon")
           svg-icon(class="header-icon"
-                  iconName="folder_plus"
-                  iconWidth="18px"
-                  :iconColor="isMaxLevelReached ? 'gray-3' : 'gray-2'")
-        div(class="folder-design-view__sort-by"
-            @click="toggleSortMenu"
-            v-click-outside="closeSortMenu")
-          svg-icon(class="header-sort"
-                  iconName="sequence"
+                  iconName="more_vertical"
                   iconWidth="18px"
                   iconColor="gray-2")
-          span(class="header-sort") {{$t('NN0191')}}
-          div(v-if="isSortMenuOpen"
-              class="folder-design-view__sort-by__menu"
-              @click.stop)
-            div(v-for="sortMenuItem in sortMenuItems"
-                @click="handleSortByClick(sortMenuItem.payload)")
-              div(class="sort-menu-icon")
-                svg-icon(:iconName="sortMenuItem.icon"
-                        iconWidth="15px"
-                        iconColor="gray-2"
-                        :style="sortMenuItem.style")
-              div(class="sort-menu-text")
-                span {{ sortMenuItem.text }}
-              div(v-if="checkSortSelected(sortMenuItem.payload)" class="sort-menu-right")
-                svg-icon(iconName="done"
+        div(v-if="isFolderMenuOpen"
+            class="folder-design-view__more__menu"
+            @click.stop)
+          div(class="folder-design-view__more__menu__title")
+            span(:title="folderName") {{ folderName }}
+          div(class="folder-design-view__more__menu__text")
+            span {{ `${$t('NN0196', { name:folder ? folder.author : '' })} | ${$t('NN0197', { num:itemCount })}` }}
+          div(class="folder-design-view__more__menu__divider")
+          div(class="folder-design-view__more__menu__actions")
+            div(@click="handleFolderNameClick")
+              div(class="more-menu-icon")
+                svg-icon(iconName="pen"
                         iconWidth="15px"
                         iconColor="gray-2")
-        btn-new-design
-    div(class="horizontal-rule")
-    folder-gallery(:path="path"
-                  :menuItems="[]"
-                  :allFolders="allFolders"
-                  :selectedNum="selectedNum"
-                  @menuAction="handleMenuAction"
-                  @moveItem="handleMoveItem")
-    design-gallery(:menuItems="menuItems"
-                  :allDesigns="allDesigns"
-                  :selectedNum="selectedNum"
-                  @menuAction="handleMenuAction"
-                  @loadMore="handleLoadMore")
-    div(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading" class="folder-design-view__empty")
-      img(class="folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
-      span(class="folder-design-view__empty__text") {{$t('NN0239')}}
+              div(class="more-menu-text")
+                span {{$t('NN0198')}}
+            div(@click="handleDeleteFolder")
+              div(class="more-menu-icon")
+                svg-icon(iconName="trash"
+                        iconWidth="15px"
+                        iconColor="gray-2")
+              div(class="more-menu-text")
+                span {{$t('NN0199')}}
+      div(ref="newFolder"
+          class="folder-design-view__new-folder"
+          :style="newFolderStyles()"
+          @click="handleNewFolder")
+        svg-icon(class="header-icon"
+                iconName="folder_plus"
+                iconWidth="18px"
+                :iconColor="isMaxLevelReached ? 'gray-3' : 'gray-2'")
+      div(class="folder-design-view__sort-by"
+          @click="toggleSortMenu"
+          v-click-outside="closeSortMenu")
+        svg-icon(class="header-sort"
+                iconName="sequence"
+                iconWidth="18px"
+                iconColor="gray-2")
+        span(class="header-sort") {{$t('NN0191')}}
+        div(v-if="isSortMenuOpen"
+            class="folder-design-view__sort-by__menu"
+            @click.stop)
+          div(v-for="sortMenuItem in sortMenuItems"
+              @click="handleSortByClick(sortMenuItem.payload)")
+            div(class="sort-menu-icon")
+              svg-icon(:iconName="sortMenuItem.icon"
+                      iconWidth="15px"
+                      iconColor="gray-2"
+                      :style="sortMenuItem.style")
+            div(class="sort-menu-text")
+              span {{ sortMenuItem.text }}
+            div(v-if="checkSortSelected(sortMenuItem.payload)" class="sort-menu-right")
+              svg-icon(iconName="done"
+                      iconWidth="15px"
+                      iconColor="gray-2")
+      btn-new-design
+  div(class="horizontal-rule")
+  folder-gallery(:path="path"
+                :menuItems="[]"
+                :allFolders="allFolders"
+                :selectedNum="selectedNum"
+                @menuAction="handleMenuAction"
+                @moveItem="handleMoveItem")
+  design-gallery(:menuItems="menuItems"
+                :allDesigns="allDesigns"
+                :selectedNum="selectedNum"
+                @menuAction="handleMenuAction"
+                @loadMore="handleLoadMore")
+  div(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading" class="folder-design-view__empty")
+    img(class="folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
+    span(class="folder-design-view__empty__text") {{$t('NN0239')}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import vClickOutside from 'v-click-outside'
-import { IFolder, IQueueItem } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
-import hintUtils from '@/utils/hintUtils'
+import FolderGallery from '@/components/mydesign/FolderGallery.vue'
 import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
+import { IFolder, IQueueItem } from '@/interfaces/design'
+import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@/utils/designUtils'
+import hintUtils from '@/utils/hintUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: ['clearSelection', 'moveItem', 'deleteFolder', ...DESIGN_MENU_EVENTS()],
   mounted() {
     hintUtils.bind(this.$refs.more as HTMLElement, `${this.$t('NN0225')}`, 500)
     hintUtils.bind(this.$refs.newFolder as HTMLElement, `${this.$t('NN0190')}`, 500)
@@ -144,7 +145,7 @@ export default Vue.extend({
     this.refreshItemCount()
     window.addEventListener('resize', this.handleResize)
   },
-  destroyed() {
+  unmounted() {
     window.removeEventListener('resize', this.handleResize)
   },
   components: {
@@ -188,7 +189,7 @@ export default Vue.extend({
           text: `${this.$t('NN0195')}`,
           payload: ['update', false]
         }
-      ]
+      ] as { icon: string, style: string, text: string, payload: [string, boolean] }[]
     }
   },
   directives: {
@@ -198,12 +199,14 @@ export default Vue.extend({
     allDesigns() {
       this.$emit('clearSelection')
     },
-    currLocation() {
+    currLocation(newVal) {
       this.isFolderNameMouseOver = false
       this.isFolderNameEditing = false
       this.isFolderMenuOpen = false
-      this.refreshItems()
-      this.refreshItemCount()
+      if (newVal.startsWith('f:')) {
+        this.refreshItems()
+        this.refreshItemCount()
+      }
     }
   },
   computed: {
@@ -258,7 +261,7 @@ export default Vue.extend({
       setSortByField: 'SET_sortByField',
       setSortByDescending: 'SET_sortByDescending'
     }),
-    newFolderStyles() {
+    newFolderStyles(): {[key: string]: string} {
       return this.isMaxLevelReached ? { pointerEvents: 'none' } : {}
     },
     nodeStyles(isCurrent: boolean) {
@@ -293,7 +296,7 @@ export default Vue.extend({
       this.checkNameLength()
       designUtils.setFolderName(this.folder, this.editableFolderName, this.parents)
     },
-    handleMenuAction(extraEvent: { event: string, payload: any }) {
+    handleMenuAction(extraEvent: { event: IDesignMenuEvents, payload: any }) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
     },
@@ -309,10 +312,7 @@ export default Vue.extend({
     handleNewFolder() {
       const folderId = designUtils.addNewFolder(this.path, true)
       this.$nextTick(() => {
-        const folderItemName = document.querySelector(`.folder-item__name[folderid="${folderId}"] span`)
-        if (folderItemName) {
-          setTimeout(() => { folderItemName.dispatchEvent(new MouseEvent('dblclick')) }, 0)
-        }
+        designUtils.emit(`edit-folder-${folderId}`)
       })
     },
     handleSortByClick(payload: [string, boolean]) {
@@ -346,7 +346,7 @@ export default Vue.extend({
           clearTimeout(this.messageTimer)
         }
         this.isShowHint = true
-        this.messageTimer = setTimeout(() => {
+        this.messageTimer = window.setTimeout(() => {
           this.isShowHint = false
           this.messageTimer = -1
         }, 3000)
@@ -747,7 +747,7 @@ export default Vue.extend({
   &-leave-active {
     transition: 0.2s;
   }
-  &-enter,
+  &-enter-from,
   &-leave-to {
     opacity: 0;
   }

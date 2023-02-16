@@ -1,26 +1,51 @@
 <template lang="pug">
-  editor-content(:editor="editor")
+editor-content(:editor="(editor as Editor)")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { Editor, EditorContent } from '@tiptap/vue-2'
-import tiptapUtils from '@/utils/tiptapUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import { IGroup, IText, ITmp } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import layerUtils from '@/utils/layerUtils'
-import generalUtils from '@/utils/generalUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import { Editor, EditorContent } from '@tiptap/vue-3'
+import { isEqual } from 'lodash'
+import { defineComponent, PropType } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     EditorContent
   },
   props: {
-    initText: Object,
-    pageIndex: Number,
-    layerIndex: Number,
-    subLayerIndex: Number
+    initText: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    config: {
+      type: Object as PropType<IText>,
+      required: true
+    },
+    primaryLayer: {
+      type: Object
+    },
+    subLayerIndex: {
+      type: Number,
+      required: true
+    }
   },
+  emits: ['update', 'compositionend'],
   data() {
     return {
       editor: undefined as Editor | undefined,
@@ -31,49 +56,43 @@ export default Vue.extend({
       } | undefined
     }
   },
-  computed: {
-    config(): IText | undefined {
-      const currLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
-      switch (currLayer.type) {
-        case 'text':
-          return currLayer as IText
-        case 'group':
-          return (currLayer as IGroup).layers.find(l => l.active) as IText ?? undefined
-        default:
-          console.error('cannt access acitve text config')
-          return undefined
-      }
-    }
-  },
   mounted() {
     this.layerInfo = {
-      currLayer: layerUtils.getLayer(this.pageIndex, this.layerIndex) as IText | IGroup | ITmp,
+      currLayer: (this.primaryLayer ? this.primaryLayer : this.config) as IText | IGroup | ITmp,
       layerIndex: this.layerIndex,
       subLayerIdx: this.subLayerIndex
     }
 
-    const contentEditable = this.subLayerIndex === -1 ? (this.layerInfo.currLayer as IText).contentEditable : ((this.layerInfo.currLayer as IGroup).layers[this.subLayerIndex] as IText).contentEditable
+    const contentEditable = this.config.contentEditable
 
     tiptapUtils.init(this.initText, contentEditable)
-    this.editor = tiptapUtils.editor
+    /**
+     * @Note why I use as any is bcz when I update the tiptap from vue2 ver to vue 3 ver, it throw some weird error
+     * If TingAn is avalible, maybe we could discuss and fix the error.
+     */
+    this.editor = tiptapUtils.editor as any
     tiptapUtils.on('update', ({ editor }) => {
       let toRecord = false
-      const newText = tiptapUtils.getText(editor)
+      const newJSON = editor.getJSON()
+      const newText = tiptapUtils.getText(newJSON)
       if (!editor.view.composing && (tiptapUtils.prevText !== newText)) {
         toRecord = true
       }
-      this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord })
-      tiptapUtils.prevText = newText
-      this.updateLayerProps({ isEdited: true })
-      if (Object.prototype.hasOwnProperty.call(this.config, 'loadFontEdited')) {
-        this.updateLayerProps({ loadFontEdited: true })
+      this.$emit('update', { ...tiptapUtils.toIParagraph(newJSON), toRecord })
+      if (!isEqual(newJSON, tiptapUtils.prevJSON)) {
+        this.updateLayerProps({ isEdited: true })
+        if (Object.prototype.hasOwnProperty.call(this.config, 'loadFontEdited')) {
+          this.updateLayerProps({ loadFontEdited: true })
+        }
       }
+      tiptapUtils.prevText = newText
+      tiptapUtils.prevJSON = newJSON
     })
     tiptapUtils.onForceUpdate((editor, toRecord, keepCenter) => {
       this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord, keepCenter })
     })
     tiptapUtils.on('create', ({ editor }) => {
-      // if (!this.config?.isEdited && !generalUtils.isTouchDevice()) {
+      // if (!this.config?.isEdited && !this.$isTouchDevice) {
       //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
       //   editor.commands.focus()
       // }
@@ -108,12 +127,12 @@ export default Vue.extend({
     })
     tiptapUtils.on('blur', () => {
       this.updateLayerProps({ isTyping: false })
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice) {
         this.updateLayerProps({ contentEditable: false })
       }
     })
   },
-  destroyed() {
+  unmounted() {
     if (this.editor) {
       this.editor.destroy()
     }

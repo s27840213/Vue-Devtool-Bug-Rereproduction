@@ -1,22 +1,22 @@
+import { IListServiceContentDataItem } from '@/interfaces/api'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import { IStep } from '@/interfaces/steps'
 import store from '@/store'
+import { FunctionPanelType } from '@/store/types'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
-import { IStep } from '@/interfaces/steps'
-import TextPropUtils from './textPropUtils'
-import Vue from 'vue'
-import { FunctionPanelType } from '@/store/types'
-import pageUtils from './pageUtils'
-import popupUtils from './popupUtils'
-import { IPage } from '@/interfaces/page'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
-import shapeUtils from './shapeUtils'
-import { IListServiceContentDataItem } from '@/interfaces/api'
+import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import layerFactary from './layerFactary'
+import pageUtils from './pageUtils'
+import popupUtils from './popupUtils'
+import shapeUtils from './shapeUtils'
+import TextPropUtils from './textPropUtils'
 import textUtils from './textUtils'
+import uploadUtils from './uploadUtils'
 import vivistickerUtils from './vivistickerUtils'
 import workerUtils from './workerUtils'
-import uploadUtils from './uploadUtils'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -254,29 +254,24 @@ class StepsUtils {
   }
 
   async asyncRecord() {
+    const pages = GeneralUtils.unproxify(store.getters.getPages)
+    const selectedInfo = GeneralUtils.unproxify(store.getters.getCurrSelectedInfo)
     const clonedData = await workerUtils.asyncCloneDeep({
-      pages_1: store.getters.getPages,
-      // pages_2: GeneralUtils.deepCopy(store.getters.getPages),
-      selectedInfo: store.getters.getCurrSelectedInfo
+      pages_1: pages,
+      selectedInfo: selectedInfo
     })
-    const pages_2 = await workerUtils.asyncCloneDeep(store.getters.getPages)
+    const pages_2 = await workerUtils.asyncCloneDeep(pages)
 
     if (clonedData) {
       const pages = this.filterDataForLayersInPages(clonedData.pages_1)
       const currSelectedInfo = clonedData.selectedInfo
       const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
-      // console.log(GeneralUtils.deepCopy(clonedData.pages_1))
       /**
        * The following code modify the wrong config state cause by the async
        */
       if (currSelectedInfo.layers.length === 1) {
         currSelectedInfo.layers[0].active = true
       }
-      // pages[currSelectedInfo.pageIndex].layers[lastSelectedLayerIndex].active = true
-      // if (currIndex !== lastSelectedLayerIndex) {
-      //   pages[currSelectedInfo.pageIndex].layers[currIndex].active = false
-      //   clonedData.pages_2[currSelectedInfo.pageIndex].layers[currIndex].active = false
-      // }
 
       // There's not any steps before, create the initial step first
       if (this.currStep < 0) {
@@ -293,7 +288,6 @@ class StepsUtils {
         // Don't upload the design when initialize the steps
         if (uploadUtils.isLogin) {
           uploadUtils.uploadDesign(undefined, { clonedPages: pages_2 })
-          // uploadUtils.uploadDesign(undefined, { clonedPages: clonedData.pages_2 })
         }
       }
     }
@@ -312,7 +306,7 @@ class StepsUtils {
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages)
     if (this.currStep > 0) {
-      Vue.nextTick(() => {
+      nextTick(() => {
         if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
           TextPropUtils.updateTextPropsState()
         }
@@ -327,7 +321,7 @@ class StepsUtils {
       clearTimeout(this.timers[key])
       delete this.timers[key]
     }
-    this.timers[key] = setTimeout(() => {
+    this.timers[key] = window.setTimeout(() => {
       this.record()
     }, interval)
   }
@@ -344,7 +338,7 @@ class StepsUtils {
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages)
-    Vue.nextTick(() => {
+    nextTick(() => {
       if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
         TextPropUtils.updateTextPropsState()
       }

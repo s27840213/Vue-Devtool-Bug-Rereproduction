@@ -1,49 +1,49 @@
 <template lang="pug">
-  div(class="panel-brand-list" :class="{'new-brand': lastHistory === 'new-brand'}")
-    template(v-if="inInitialState")
-      div(class="panel-brand-list__brands-wrapper")
-        div(class="panel-brand-list__brands")
-          div(v-for="brand in brands"
-              class="panel-brand-list__brand-item"
-              :class="{selected: checkSelected(brand)}"
-              @click="handleSetCurrentBrand(brand)")
-            span(class="panel-brand-list__brand-title") {{ getDisplayedBrandName(brand) }}
-            div(class="panel-brand-list__brand-more")
-              svg-icon(iconName="more_vertical" iconColor="gray-2" iconWidth="24px")
-      template(v-if="defaultOption")
-        div(class="horizontal-rule")
-        div(class="panel-brand-list__brand-item"
-          :class="{selected: isDefaultSelected}"
-          @click="handleSelectDefault")
-          span(class="panel-brand-list__brand-title") {{ $t('NN0089') }}
-      template(v-if="hasAddBrand")
-        div(class="horizontal-rule")
-        div(class="panel-brand-list__add-brand" @click.stop.prevent="addNewBrand")
-          div(class="panel-brand-list__add-brand__icon")
-            svg-icon(iconName="plus-origin" iconColor="gray-2" iconWidth="16px")
-          span(class="panel-brand-list__add-brand__text") {{ $t('NN0396') }}
-    template(v-if="lastHistory === 'new-brand'")
-      div(class="panel-brand-list__name-editor")
-        input(ref="name"
-              class="panel-brand-list__input"
-              :placeholder="$t('NN0713')"
-              v-model="editableName"
-              @change="handleNewBrand")
-        div(v-if="editableName.length" class="panel-brand-list__icon" @click.stop="handleClearNewBrandName")
-          svg-icon(iconName="close" iconColor="gray-3" iconWidth="24px")
-      div(class="panel-brand-list__confirm"
-          :class="{disabled: !editableName.length}"
-          @click.stop="handleNewBrand") {{ $t('NN0396') }}
+div(class="panel-brand-list" :class="{'new-brand': lastHistory === 'new-brand'}")
+  template(v-if="inInitialState")
+    div(class="panel-brand-list__brands-wrapper")
+      div(class="panel-brand-list__brands")
+        div(v-for="brand in brands"
+            class="panel-brand-list__brand-item"
+            :class="{selected: checkSelected(brand)}"
+            @click="handleSetCurrentBrand(brand)")
+          span(class="panel-brand-list__brand-title") {{ getDisplayedBrandName(brand) }}
+          div(class="panel-brand-list__brand-more")
+            svg-icon(iconName="more_vertical" iconColor="gray-2" iconWidth="24px")
+    template(v-if="defaultOption")
+      div(class="horizontal-rule")
+      div(class="panel-brand-list__brand-item"
+        :class="{selected: isDefaultSelected}"
+        @click="handleSelectDefault")
+        span(class="panel-brand-list__brand-title") {{ $t('NN0089') }}
+    template(v-if="hasAddBrand")
+      div(class="horizontal-rule")
+      div(class="panel-brand-list__add-brand" @click.stop.prevent="addNewBrand")
+        div(class="panel-brand-list__add-brand__icon")
+          svg-icon(iconName="plus-origin" iconColor="gray-2" iconWidth="16px")
+        span(class="panel-brand-list__add-brand__text") {{ $t('NN0396') }}
+  template(v-if="lastHistory === 'new-brand'")
+    div(class="panel-brand-list__name-editor")
+      input(ref="name"
+            class="panel-brand-list__input"
+            :placeholder="$t('NN0713')"
+            v-model="editableName"
+            @change="handleNewBrand")
+      div(v-if="editableName.length" class="panel-brand-list__icon" @click.stop="handleClearNewBrandName")
+        svg-icon(iconName="close" iconColor="gray-3" iconWidth="24px")
+    div(class="panel-brand-list__confirm"
+        :class="{disabled: !editableName.length}"
+        @click.stop="handleNewBrand") {{ $t('NN0396') }}
 </template>
 
 <script lang="ts">
 import { IBrand } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import editorUtils from '@/utils/editorUtils'
-import Vue, { PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       editableName: '',
@@ -65,7 +65,8 @@ export default Vue.extend({
       default: false
     }
   },
-  destroyed() {
+  emits: ['pushHistory', 'back'],
+  unmounted() {
     this.isDestroyed = true
   },
   computed: {

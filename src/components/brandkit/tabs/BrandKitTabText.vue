@@ -1,57 +1,58 @@
 <template lang="pug">
-  div(class="brand-kit-tab-text")
-    transition-group(class="brand-kit-tab-text__font-column" name="font-list" tag="div")
-      template(v-for="font in renderedFonts")
-        div(v-if="font === 'add'"
-          class="brand-kit-tab-text__font-column__item add pointer"
-          key="add")
-          div(class="brand-kit-tab-text__font-column__upload-icon")
-            svg-icon(iconName="cloud-upload" iconWidth="32px" iconColor="gray-1")
-          div(class="brand-kit-tab-text__font-column__upload-hint" @click="handleUploadFont")
-            span {{ $t('NN0402') }}
-        div(v-else-if="font === 'loading'"
-          class="brand-kit-tab-text__font-column__loading no-trans"
-          key="loading")
-          svg-icon(iconName="loading"
-                    iconWidth="50px"
-                    iconColor="gray-3")
-        observer-sentinel(v-else-if="font === 'sentinel'"
-                        class="no-trans"
-                        key="sentinel"
-                        @callback="handleLoadMore")
-        template(v-else)
-          div(v-if="checkUploading(font)"
-            class="brand-kit-tab-text__font-column__item-uploading"
-            :key="font.id.replace('new_', '')")
-            div(class="brand-kit-tab-text__font-column__item-uploading-imgs")
-              div(class="brand-kit-tab-text__font-column__font-img loading")
-                svg-icon(iconName="loading" iconWidth="34px" iconColor="gray-3")
-              div(class="brand-kit-tab-text__font-column__font-img loading")
-                svg-icon(iconName="loading" iconWidth="34px" iconColor="gray-3")
-            div(class="brand-kit-tab-text__font-column__item-uploading-text")
-              span {{ $t('NN0503') }}
-          div(v-else
-            class="brand-kit-tab-text__font-column__item pointer relative"
-            :key="font.id")
-            div(class="brand-kit-tab-text__font-column__font-img")
-              img(:src="font.namePrevUrl" @error="onError(font)")
-            div(class="brand-kit-tab-text__font-column__font-img")
-              img(:src="font.textPrevUrl")
-            svg-icon(class="brand-kit-tab-text__font-column__trash-icon"
-                    iconName="trash" iconWidth="24px" iconColor="gray-2"
-                    @click.native="handleDeleteFont(font)")
-    div(class="brand-kit-tab-text__style-column")
-      brand-kit-text-setting(class="brand-kit-tab-text__style-column__item"
-                            type="heading" :textStyleSetting="textStyleSetting")
-      brand-kit-text-setting(class="brand-kit-tab-text__style-column__item"
-                            type="subheading" :textStyleSetting="textStyleSetting")
-      brand-kit-text-setting(class="brand-kit-tab-text__style-column__item"
-                            type="body" :textStyleSetting="textStyleSetting")
+div(class="brand-kit-tab-text")
+  transition-group(class="brand-kit-tab-text__font-column" name="font-list" tag="div")
+    template(v-for="font in renderedFonts")
+      div(v-if="font === 'add'"
+        class="brand-kit-tab-text__font-column__item add pointer"
+        key="add")
+        div(class="brand-kit-tab-text__font-column__upload-icon")
+          svg-icon(iconName="cloud-upload" iconWidth="32px" iconColor="gray-1")
+        div(class="brand-kit-tab-text__font-column__upload-hint" @click="handleUploadFont")
+          span {{ $t('NN0402') }}
+      div(v-else-if="font === 'loading'"
+        class="brand-kit-tab-text__font-column__loading no-trans"
+        key="loading")
+        svg-icon(iconName="loading"
+                  iconWidth="50px"
+                  iconColor="gray-3")
+      observer-sentinel(v-else-if="font === 'sentinel'"
+                      class="no-trans"
+                      key="sentinel"
+                      @callback="handleLoadMore")
+      template(v-else-if="(typeof font !== 'string')")
+        div(v-if="checkUploading(font)"
+          class="brand-kit-tab-text__font-column__item-uploading"
+          :key="font.id.replace('new_', '')")
+          div(class="brand-kit-tab-text__font-column__item-uploading-imgs")
+            div(class="brand-kit-tab-text__font-column__font-img loading")
+              svg-icon(iconName="loading" iconWidth="34px" iconColor="gray-3")
+            div(class="brand-kit-tab-text__font-column__font-img loading")
+              svg-icon(iconName="loading" iconWidth="34px" iconColor="gray-3")
+          div(class="brand-kit-tab-text__font-column__item-uploading-text")
+            span {{ $t('NN0503') }}
+        div(v-else
+          class="brand-kit-tab-text__font-column__item pointer relative"
+          :key="font.id")
+          div(class="brand-kit-tab-text__font-column__font-img")
+            img(:src="font.namePrevUrl" @error="onError(font)")
+          div(class="brand-kit-tab-text__font-column__font-img")
+            img(:src="font.textPrevUrl")
+          svg-icon(class="brand-kit-tab-text__font-column__trash-icon"
+                  iconName="trash" iconWidth="24px" iconColor="gray-2"
+                  @click="handleDeleteFont(font)")
+  div(class="brand-kit-tab-text__style-column")
+    brand-kit-text-setting(class="brand-kit-tab-text__style-column__item"
+                          type="heading" :textStyleSetting="textStyleSetting")
+    brand-kit-text-setting(class="brand-kit-tab-text__style-column__item"
+                          type="subheading" :textStyleSetting="textStyleSetting")
+    brand-kit-text-setting(class="brand-kit-tab-text__style-column__item"
+                          type="body" :textStyleSetting="textStyleSetting")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
+import { notify } from '@kyvg/vue3-notification'
 import BrandKitTextSetting from '@/components/brandkit/BrandKitTextSetting.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
@@ -64,7 +65,8 @@ interface IUrledFont extends IBrandFont {
   textPrevUrl?: string
 }
 
-export default Vue.extend({
+export default defineComponent({
+  emits: ['deleteItem'],
   data() {
     return {
       fonts: [] as IUrledFont[]
@@ -77,20 +79,20 @@ export default Vue.extend({
     this.refreshFontUrls()
     uploadUtils.onFontUploadStatus((status) => {
       if (status === 'success') {
-        this.$notify({
+        notify({
           group: 'copy',
           text: `${this.$t('NN0135')}`
         })
       }
       if (status === 'fail') { // Fail will not goto here
-        this.$notify({
+        notify({
           group: 'error',
           text: `${this.$t('NN0137')}`
         })
       }
     })
   },
-  destroyed() {
+  unmounted() {
     uploadUtils.offFontUploadStatus()
   },
   components: {
@@ -286,13 +288,18 @@ export default Vue.extend({
 
 .font-list {
   &-enter-active,
-  &-leave-active {
+  &-leave-active,
+  &-move {
     &:not(.no-trans) {
       transition: 0.3s ease;
     }
   }
 
-  &-enter,
+  &-leave-active {
+    position: absolute;
+  }
+
+  &-enter-from,
   &-leave-to {
     &:not(.no-trans) {
       transform: translateX(-30%);

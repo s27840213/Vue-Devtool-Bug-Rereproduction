@@ -1,6 +1,5 @@
-import { IGroup, IStyle, ITextStyle, ITmp, ILayer } from '@/interfaces/layer'
+import { IGroup, ILayer, IStyle, ITextStyle, ITmp } from '@/interfaces/layer'
 import { IBounding } from '@/interfaces/math'
-import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import Flatten from '@flatten-js/core'
 
@@ -62,11 +61,10 @@ class MathUtils {
     }
   }
 
-  getActualMoveOffset(x: number, y: number) {
-    const scaleRatio = store.getters.getPageScaleRatio
+  getActualMoveOffset(x: number, y: number, scale = 100 / store.getters.getPageScaleRatio) {
     return {
-      offsetX: x * (100 / scaleRatio),
-      offsetY: y * (100 / scaleRatio)
+      offsetX: x * scale,
+      offsetY: y * scale
     }
   }
 

@@ -1,20 +1,21 @@
 <template lang="pug">
-  div(class="popup-page bg-gray-6"
-      @click.stop="closePopup")
-    div(v-for="(data,index) in shortcutMenu()"
-        :key="`popup-page__shortcut-${index}`"
-        class="popup-page__item"
-        @click="data.action")
-      span(class="ml-10 body-2") {{data.text}}
-      span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
+div(class="popup-page bg-gray-6"
+    @click.stop="closePopup")
+  div(v-for="(data,index) in shortcutMenu()"
+      :key="`popup-page__shortcut-${index}`"
+      class="popup-page__item"
+      @click="data.action")
+    span(class="ml-10 body-2") {{data.text}}
+    span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import popupUtils from '@/utils/popupUtils'
 import rulerUtils from '@/utils/rulerUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
     }

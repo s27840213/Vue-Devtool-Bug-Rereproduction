@@ -1,5 +1,4 @@
 image: node:14.16.0
-
 pipelines:
   default: #for feature
     - parallel:
@@ -13,23 +12,25 @@ pipelines:
             size: 2x
             caches: #set caches for node modules to speed up building
               - node
-            image: cypress/browsers:node14.17.0-chrome88-ff89
+            image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
             script:
               - yarn install
               - yarn build:prerender
             artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
               - dist/**
-        # - step:
-        #     name: 'Run E2E Tests'
-        #     caches:
-        #       - node
-        #     image: cypress/browsers:node14.17.0-chrome88-ff89
-        #     script:
-        #       - npx cypress install
-        #       - yarn install
-        #       - yarn serve & npx wait-on http://localhost:8080
-        #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+              - node_modules/**
     - parallel:
+        - step:
+            name: "Run E2E Tests"
+            size: 2x
+            image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+            script:
+              - npx cypress install
+              - yarn serve & npx wait-on http://localhost:8080
+              - npx cypress run --record --browser chrome || true
+            artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+              - cypress-visual-report/**
+              - cypress-visual-screenshots/**
         - step:
             name: "dev5 Alan"
             deployment: stkdev5
@@ -223,22 +224,13 @@ pipelines:
               size: 2x
               caches: #set caches for node modules to speed up building
                 - node
-              image: cypress/browsers:node14.17.0-chrome88-ff89
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
               script:
                 - yarn install
                 - yarn build:prerender
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
-          # - step:
-          #     name: 'Run E2E Tests'
-          #     caches:
-          #       - node
-          #     image: cypress/browsers:node14.17.0-chrome88-ff89
-          #     script:
-          #       - npx cypress install
-          #       - yarn install
-          #       - yarn serve & npx wait-on http://localhost:8080
-          #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+                - node_modules/**
       - step:
           name: "deploy test"
           deployment: test
@@ -343,23 +335,25 @@ pipelines:
               size: 2x
               caches: #set caches for node modules to speed up building
                 - node
-              image: cypress/browsers:node14.17.0-chrome88-ff89
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
               script:
                 - yarn install
                 - yarn build:prerender
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
-          # - step:
-          #     name: 'Run E2E Tests'
-          #     caches:
-          #       - node
-          #     image: cypress/browsers:node14.17.0-chrome88-ff89
-          #     script:
-          #       - npx cypress install
-          #       - yarn install
-          #       - yarn serve & npx wait-on http://localhost:8080
-          #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+                - node_modules/**
       - parallel:
+          - step:
+              name: "Run E2E Tests"
+              size: 2x
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+              script:
+                - npx cypress install
+                - yarn serve & npx wait-on http://localhost:8080
+                - npx cypress run --record --browser chrome || true
+              artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+                - cypress-visual-report/**
+                - cypress-visual-screenshots/**
           - step:
               name: "deploy rd"
               deployment: rd
@@ -437,23 +431,25 @@ pipelines:
               size: 2x
               caches: #set caches for node modules to speed up building
                 - node
-              image: cypress/browsers:node14.17.0-chrome88-ff89
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
               script:
                 - yarn install
                 - yarn build:prerender
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
-          # - step:
-          #     name: 'Run E2E Tests'
-          #     caches:
-          #       - node
-          #     image: cypress/browsers:node14.17.0-chrome88-ff89
-          #     script:
-          #       - npx cypress install
-          #       - yarn install
-          #       - yarn serve & npx wait-on http://localhost:8080
-          #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+                - node_modules/**
       - parallel:
+          - step:
+              name: "Run E2E Tests"
+              size: 2x
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+              script:
+                - npx cypress install
+                - yarn serve & npx wait-on http://localhost:8080
+                - npx cypress run --record --browser chrome || true
+              artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+                - cypress-visual-report/**
+                - cypress-visual-screenshots/**
           - step:
               name: "deploy qa"
               deployment: qa

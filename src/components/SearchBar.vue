@@ -3,7 +3,7 @@ div(class="wrapper")
   //- Show search button on mobile, https://www.paddingleft.com/2019/09/18/Show-Search-on-mobile-devices-keyboard
   form(class="search-bar bg-gray-6"
     :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
-    action @submit="onSearch")
+    action="" @submit="onSearch")
     svg-icon(class="pointer"
       iconName="search"
       :iconColor="color.search || 'gray-3'"
@@ -22,7 +22,7 @@ div(class="wrapper")
       iconName="close"
       :iconColor="color.close || 'gray-3'"
       iconWidth="20px"
-      @click.native="onClear")
+      @click="onClear")
     slot
   div(v-if="isFavorite !== undefined"
       class="search-bar__favorite")
@@ -31,20 +31,19 @@ div(class="wrapper")
       :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
       :iconColor="color.close || 'gray-3'"
       iconWidth="24px"
-      @click.native="clickHeart")
+      @click="clickHeart")
 </template>
 
 <script lang="ts">
-import i18n from '@/i18n'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
   },
   props: {
     placeholder: {
       type: String,
-      default: `${i18n.t('NN0092')}`
+      required: true
     },
     clear: {
       type: Boolean
@@ -75,6 +74,7 @@ export default Vue.extend({
       default: undefined
     }
   },
+  emits: ['search', 'update', 'favorite'],
   data() {
     return {
       keyword: this.defaultKeyword

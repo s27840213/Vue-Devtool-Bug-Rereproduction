@@ -1,4 +1,4 @@
-import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, ShadowEffectType } from '@/interfaces/imgShadow'
 import { ColorEventType, FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import colorUtils from './colorUtils'
 import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SPACE, fieldRange, logMark, setMark } from './imageShadowUtils'
@@ -446,7 +446,7 @@ export default new class ImageShadowPanelUtils {
       const oldEffect = generalUtils.deepCopy((layerUtils.getCurrConfig as IImage).styles.shadow.effects[currentEffect])
       imageShadowUtils.setEffect(currentEffect, {
         [currentEffect]:
-          Object.assign(oldEffect, { [name]: +value > max ? max : (+value < min ? min : +value) })
+          Object.assign(oldEffect as any, { [name]: +value > max ? max : (+value < min ? min : +value) })
       })
     }
   }

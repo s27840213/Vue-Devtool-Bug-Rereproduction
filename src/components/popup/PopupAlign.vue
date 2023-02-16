@@ -1,43 +1,44 @@
 <template lang="pug">
-  div(class="popup-align bg-white")
-    div(class="popup-align__group")
-      div
-        span {{$t('NN0045')}}
-      div
-        div(v-for="(data,index) in alignDatas()"
-            :key="`popup-${index}`"
-            class="popup-align__item"
-            @click="MappingUtils.mappingIconAction(data.icon)")
-          svg-icon(
-            class="pointer"
-            :iconName="data.icon"
-            :iconWidth="'18px'"
-            :iconColor="'gray-1'")
-          span(class="ml-5 body-2") {{data.text}}
-    hr(v-if="layerNum >=3" class="popup-align__hr")
-    div(v-if="layerNum >=3" class="popup-align__group")
-      div
-        span {{$t('NN0219')}}
-      div
-        div(v-for="(data,index) in distributeDatas()"
-            :key="`popup-${index}`"
-            class="popup-align__item"
-            @click="MappingUtils.mappingIconAction(data.icon)")
-          svg-icon(
-            class="pointer"
-            :iconName="data.icon"
-            :iconWidth="'16px'"
-            :iconColor="'gray-1'")
-          span(class="ml-5 body-2") {{data.text}}
+div(class="popup-align bg-white")
+  div(class="popup-align__group")
+    div
+      span {{$t('NN0045')}}
+    div
+      div(v-for="(data,index) in alignDatas()"
+          :key="`popup-${index}`"
+          class="popup-align__item"
+          @click="MappingUtils.mappingIconAction(data.icon)")
+        svg-icon(
+          class="pointer"
+          :iconName="data.icon"
+          :iconWidth="'18px'"
+          :iconColor="'gray-1'")
+        span(class="ml-5 body-2") {{data.text}}
+  hr(v-if="layerNum >=3" class="popup-align__hr")
+  div(v-if="layerNum >=3" class="popup-align__group")
+    div
+      span {{$t('NN0219')}}
+    div
+      div(v-for="(data,index) in distributeDatas()"
+          :key="`popup-${index}`"
+          class="popup-align__item"
+          @click="MappingUtils.mappingIconAction(data.icon)")
+        svg-icon(
+          class="pointer"
+          :iconName="data.icon"
+          :iconWidth="'16px'"
+          :iconColor="'gray-1'")
+        span(class="ml-5 body-2") {{data.text}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters } from 'vuex'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
       MappingUtils

@@ -8,19 +8,22 @@ div(class="category-text-item"
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import store from '@/store'
-import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
 import textPropUtils from '@/utils/textPropUtils'
-import DragUtils from '@/utils/dragUtils'
-import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    src: String,
-    item: Object
+    src: {
+      type: String
+    },
+    item: {
+      type: Object as PropType<any>,
+      required: true
+    }
   },
   data() {
     return {
@@ -33,7 +36,7 @@ export default Vue.extend({
     }),
     itemStyle(): any {
       const { width } = this.item.preview || {
-        width: generalUtils.isTouchDevice()
+        width: this.$isTouchDevice
           ? (window.outerWidth - 68) / 3 - 10
           : 135
       }

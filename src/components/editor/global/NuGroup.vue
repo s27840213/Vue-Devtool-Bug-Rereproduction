@@ -4,6 +4,7 @@ div(class="nu-group"
   nu-layer(v-for="(layer,index) in config.layers"
     :key="`layer-${layer.id}`"
     :pageIndex="pageIndex"
+    :page="page"
     :primaryLayer="config"
     :layerIndex="layerIndex"
     :subLayerIndex="index"
@@ -13,15 +14,28 @@ div(class="nu-group"
 </template>
 
 <script lang="ts">
-import vivistickerUtils from '@/utils/vivistickerUtils'
-import Vue from 'vue'
+import { IPage } from '@/interfaces/page'
+import { defineComponent, PropType } from 'vue'
 
-export default Vue.extend({
-  inheritAttrs: false,
+export default defineComponent({
+  emits: [],
   props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
+    config: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number

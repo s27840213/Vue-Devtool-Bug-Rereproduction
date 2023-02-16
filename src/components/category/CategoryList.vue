@@ -5,7 +5,7 @@ recycle-scroller(class="category-list" id="recycle" :items="list")
       :key="item.id"
       :target="`.category-list_${item.type}`"
       @callback="onLoadMore(item.moreType)")
-    slot(:name="item.type"
+    slot(:name="item.type" :key="item.id"
       :list="item.list"
       :title="item.title"
       :isFavorite="item.isFavorite")
@@ -16,10 +16,11 @@ recycle-scroller(class="category-list" id="recycle" :items="list")
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import { defineComponent, PropType } from 'vue'
 
-export default Vue.extend({
+const component = defineComponent({
+  emits: ['loadMore'],
   props: {
     list: {
       type: Array as PropType<any[]>,
@@ -42,6 +43,8 @@ export default Vue.extend({
     }
   }
 })
+export default component
+export type CCategoryList = InstanceType<typeof component>
 </script>
 
 <style lang="scss" scoped>

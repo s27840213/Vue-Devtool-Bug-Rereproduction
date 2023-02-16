@@ -1,71 +1,72 @@
 <template lang="pug">
-  transition-group(v-else class="brand-kit-tab-logo" name="logo-list" tag="div")
-    template(v-for="logo in renderedLogos")
-      div(v-if="logo === 'add'"
-        class="brand-kit-tab-logo__item add pointer relative"
-        key="add"
-        @click="handleUploadLogo")
-        span(class="primary") {{ $t('NN0411') }}
-        i18n(class="secondary" path="NN0412" tag="span")
-          template(#newline)
-            br
-        svg-icon(class="hover"
-                iconName="plus-origin"
-                iconWidth="16px"
-                iconColor="gray-2")
-      div(v-else-if="logo === 'loading'"
-          class="brand-kit-tab-logo-loading no-trans"
-          key="loading")
-        svg-icon(iconName="loading"
-                iconWidth="50px"
-                iconColor="gray-3")
-      observer-sentinel(v-else-if="logo === 'sentinel'"
-                        class="no-trans"
-                        key="sentinel"
-                        :target="$route.name === 'Editor' ? '.popup-brand-settings__window' : undefined"
-                        @callback="handleLoadMore")
-      div(v-else
-        class="brand-kit-tab-logo__item relative"
-        :class="{hovered: checkMenuOpen(logo)}"
-        :key="logo.id.replace('new_', '')")
-        svg-icon(v-if="checkUploading(logo)" iconName="loading" iconWidth="24px" iconColor="gray-3")
-        img(v-else :src="getUrl(logo)" class="brand-kit-tab-logo__item__img")
-        div(v-if="!checkUploading(logo)" class="brand-kit-tab-logo__item__more pointer"
-          @click="handleOpenMenu(logo)")
-          div(class="brand-kit-tab-logo__item__more-container relative")
-            svg-icon(iconName="more_vertical"
-                    iconWidth="24px"
-                    iconColor="gray-2")
-            div(v-if="checkMenuOpen(logo)"
-              class="brand-kit-tab-logo__item__menu"
-              v-click-outside="() => { menuOpenLogoId = '' }")
-              div(class="brand-kit-tab-logo__item__menu__name")
-                span {{ logo.name }}
-              div(class="brand-kit-tab-logo__item__menu__hr")
-              div(class="brand-kit-tab-logo__item__menu__row pointer"
-                @click="handleDownload(logo)")
-                svg-icon(iconName="download"
-                        iconWidth="24px"
-                        iconColor="gray-2")
-                span {{ $t('NN0010') }}
-              div(class="brand-kit-tab-logo__item__menu__row pointer"
-                @click="handleDeleteLogo(logo)")
-                svg-icon(iconName="trash"
-                        iconWidth="24px"
-                        iconColor="gray-2")
-                span {{ $t('NN0034') }}
+transition-group(class="brand-kit-tab-logo" name="logo-list" tag="div")
+  template(v-for="logo in renderedLogos")
+    div(v-if="logo === 'add'"
+      class="brand-kit-tab-logo__item add pointer relative"
+      key="add"
+      @click="handleUploadLogo")
+      span(class="primary") {{ $t('NN0411') }}
+      i18n-t(class="secondary" keypath="NN0412" tag="span")
+        template(#newline)
+          br
+      svg-icon(class="hover"
+              iconName="plus-origin"
+              iconWidth="16px"
+              iconColor="gray-2")
+    div(v-else-if="logo === 'loading'"
+        class="brand-kit-tab-logo-loading no-trans"
+        key="loading")
+      svg-icon(iconName="loading"
+              iconWidth="50px"
+              iconColor="gray-3")
+    observer-sentinel(v-else-if="logo === 'sentinel'"
+                      class="no-trans"
+                      key="sentinel"
+                      :target="$route.name === 'Editor' ? '.popup-brand-settings__window' : undefined"
+                      @callback="handleLoadMore")
+    div(v-else-if="(typeof logo !== 'string')"
+      class="brand-kit-tab-logo__item relative"
+      :class="{hovered: checkMenuOpen(logo)}"
+      :key="logo.id.replace('new_', '')")
+      svg-icon(v-if="checkUploading(logo)" iconName="loading" iconWidth="24px" iconColor="gray-3")
+      img(v-else :src="getUrl(logo)" class="brand-kit-tab-logo__item__img")
+      div(v-if="!checkUploading(logo)" class="brand-kit-tab-logo__item__more pointer"
+        @click="handleOpenMenu(logo)")
+        div(class="brand-kit-tab-logo__item__more-container relative")
+          svg-icon(iconName="more_vertical"
+                  iconWidth="24px"
+                  iconColor="gray-2")
+          div(v-if="checkMenuOpen(logo)"
+            class="brand-kit-tab-logo__item__menu"
+            v-click-outside="() => { menuOpenLogoId = '' }")
+            div(class="brand-kit-tab-logo__item__menu__name")
+              span {{ logo.name }}
+            div(class="brand-kit-tab-logo__item__menu__hr")
+            div(class="brand-kit-tab-logo__item__menu__row pointer"
+              @click="handleDownload(logo)")
+              svg-icon(iconName="download"
+                      iconWidth="24px"
+                      iconColor="gray-2")
+              span {{ $t('NN0010') }}
+            div(class="brand-kit-tab-logo__item__menu__row pointer"
+              @click="handleDeleteLogo(logo)")
+              svg-icon(iconName="trash"
+                      iconWidth="24px"
+                      iconColor="gray-2")
+              span {{ $t('NN0034') }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: ['deleteItem'],
   data() {
     return {
       menuOpenLogoId: ''
@@ -272,7 +273,7 @@ export default Vue.extend({
         padding: 0px 8px;
         display: flex;
         align-items: center;
-        justify-content: start;
+        justify-content: flex-start;
         & > span {
           @include caption-LG;
           text-align: left;
@@ -307,13 +308,18 @@ export default Vue.extend({
 
 .logo-list {
   &-enter-active,
-  &-leave-active {
+  &-leave-active,
+  &-move {
     &:not(.no-trans) {
-      transition: 0.1s ease;
+      transition: 0.3s ease;
     }
   }
 
-  &-enter,
+  &-leave-active {
+    position: absolute;
+  }
+
+  &-enter-from,
   &-leave-to {
     &:not(.no-trans) {
       transform: translateY(-30%);

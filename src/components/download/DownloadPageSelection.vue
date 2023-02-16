@@ -1,32 +1,32 @@
 <template lang="pug">
-  div(class="download-page-selection")
-    dropdown(ref="dropdown"
-      isCustomOptions
-      @open="handleReset")
-      span(class="download-page-selection__label") {{ rangeLabel }} {{$t('NN0128')}}
-      template(v-slot:custom)
-        div(class="download-page-selection__options py-10 px-15 flex")
-          div(class="mb-10 pointer" @click.self="handleCancel") {{$t('NN0130')}}
-          download-check-button(v-for="(status, idx) in preSelected"
-            class="mb-10"
-            type="checkbox"
-            :key="`page_${idx}`"
-            :default-checked="status"
-            :label="$t('NN0134', { num:`${idx + 1}` })"
-            @change="({ checked }) => handleSelect(idx, checked)")
-          div
-            btn(class="full-width body-3 rounded"
-              @click.native="handleSubmit") {{$tc('NN0133', 2)}}
+div(class="download-page-selection")
+  dropdown(ref="dropdown"
+    isCustomOptions
+    @open="handleReset")
+    span(class="download-page-selection__label") {{ rangeLabel }} {{$t('NN0128')}}
+    template(v-slot:custom)
+      div(class="download-page-selection__options py-10 px-15 flex")
+        div(class="mb-10 pointer" @click.self="handleCancel") {{$t('NN0130')}}
+        checkbox(v-for="(status, idx) in preSelected"
+                class="mb-10" v-model="preSelected[idx]")
+          span {{ $t('NN0134', { num:`${idx + 1}` }) }}
+        div
+          btn(class="full-width body-3 rounded"
+            @click="handleSubmit") {{$tc('NN0133', 2)}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
-import DownloadCheckButton from './DownloadCheckButton.vue'
+import Checkbox from '@/components/global/Checkbox.vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: ['confirm'],
   props: {
-    defaultSelected: Array
+    defaultSelected: {
+      type: Array,
+      required: true
+    }
   },
   data() {
     return {
@@ -42,7 +42,7 @@ export default Vue.extend({
     this.handleLabel()
   },
   components: {
-    DownloadCheckButton
+    Checkbox
   },
   computed: {
     ...mapGetters({
@@ -50,9 +50,6 @@ export default Vue.extend({
     })
   },
   methods: {
-    handleSelect(pageIndex: number, checked: boolean) {
-      this.preSelected = this.preSelected.map((status, idx) => idx === pageIndex ? checked : status)
-    },
     handleCancel() {
       this.preSelected = this.preSelected.map(() => false)
     },

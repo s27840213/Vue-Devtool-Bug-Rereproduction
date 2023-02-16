@@ -1,16 +1,16 @@
 <template lang="pug">
-  svg(v-if="iconName === 'loading'"
-      class="svg-icon"
-      :class="`text-${iconColor}`"
-      viewBox="0 0 120 30"
-      :style="iconStyles()"
-      v-html="loadingSvg")
-  svg(v-else class="svg-icon" :class="`text-${iconColor}`"
-      :style="iconStyles()")
-    use(:xlink:href="`#${iconName}`")
+svg(v-if="iconName === 'loading'"
+    class="svg-icon"
+    :class="`text-${iconColor} svg-${iconName}`"
+    viewBox="0 0 120 30"
+    :style="iconStyles()"
+    v-html="loadingSvg")
+svg(v-else class="svg-icon" :class="`text-${iconColor} svg-${iconName}`"
+    :style="iconStyles()")
+  use(:xlink:href="`#${iconName}`")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
 /**
  * 這個 Components 我把它註冊在全域，使用時可以用不Import
@@ -24,7 +24,8 @@ import Vue from 'vue'
  * 2021.9.24 更新: 如果說圖片是 svg 格式，但沒有顏色切換需求，其實也可以用這個元件，就只是改顏色不會影響到他而已
  */
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'SvgIcon',
   props: {
     iconName: {
@@ -39,7 +40,9 @@ export default Vue.extend({
       type: String,
       default: 'blue-1'
     },
-    iconHeight: String
+    iconHeight: {
+      type: String
+    }
   },
   data() {
     return {

@@ -12,7 +12,8 @@ import layerUtils from './layerUtils'
 import tiptapUtils from './tiptapUtils'
 
 export default class SubControllerUtils {
-  private component = undefined as Vue | undefined
+  // private component = undefined as Vue | undefined
+  private component = undefined as any | undefined
   private body = undefined as unknown as HTMLElement
   private _config = { config: null as unknown as ILayer }
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as IExtendLayerInfo
@@ -38,7 +39,7 @@ export default class SubControllerUtils {
     return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp
   }
 
-  constructor({ _config, body, layerInfo }: { _config: { config: ILayer }, body: HTMLElement, layerInfo?: ILayerInfo, component?: Vue }) {
+  constructor({ _config, body, layerInfo }: { _config: { config: ILayer }, body: HTMLElement, layerInfo?: ILayerInfo, component?: any }) {
     this._config = _config
     this.body = body
     layerInfo && (this.layerInfo = layerInfo)
@@ -78,7 +79,9 @@ export default class SubControllerUtils {
                   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true }, this.subLayerIdx)
                   break
                 case LayerType.frame:
-                  frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { imgControl: true })
+                  if ((this.config as IImage).srcObj.type !== 'frame') {
+                    frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { imgControl: true })
+                  }
                   break
               }
               eventUtils.emit(PanelEvent.switchTab, 'crop')

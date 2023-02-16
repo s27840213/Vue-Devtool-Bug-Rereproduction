@@ -1,43 +1,39 @@
-import Vue from 'vue'
-import Vuex, { GetterTree, MutationTree } from 'vuex'
-import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame, IImageStyle, ILayer } from '@/interfaces/layer'
-import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData, LayerType } from './types'
-import { IBleed, IPage, IPageState } from '@/interfaces/page'
-import zindexUtils from '@/utils/zindexUtils'
-
-import photos from '@/store/photos'
-import user from '@/store/module/user'
-import color from '@/store/module/color'
-import bgRemove from '@/store/module/bgRemove'
-import text from '@/store/text'
-import objects from '@/store/module/objects'
-import giphy from '@/store/module/giphy'
-import textStock from '@/store/module/text'
-import shadow from '@/store/module/shadow'
-import font from '@/store/module/font'
-import background from '@/store/module/background'
-import modal from '@/store/module/modal'
-import popup from '@/store/module/popup'
-import page from '@/store/module/page'
-import markers from '@/store/module/markers'
-import mobileEditor from '@/store/module/mobileEditor'
-import vivisticker from '@/store/module/vivisticker'
-import groupUtils from '@/utils/groupUtils'
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
-import pageUtils from '@/utils/pageUtils'
+import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IBleed, IPage, IPageState } from '@/interfaces/page'
+import { Itheme } from '@/interfaces/theme'
+import background from '@/store/module/background'
+import bgRemove from '@/store/module/bgRemove'
+import color from '@/store/module/color'
+import font from '@/store/module/font'
+import fontTag from '@/store/module/fontTag'
+import giphy from '@/store/module/giphy'
+import imgControl from '@/store/module/imgControl'
+import markers from '@/store/module/markers'
+import mobileEditor from '@/store/module/mobileEditor'
+import modal from '@/store/module/modal'
+import objects from '@/store/module/objects'
+import page from '@/store/module/page'
+import popup from '@/store/module/popup'
+import shadow from '@/store/module/shadow'
+import textStock from '@/store/module/text'
+import user from '@/store/module/user'
+import vivisticker from '@/store/module/vivisticker'
+import photos from '@/store/photos'
+import text from '@/store/text'
+import imgShadowMutations from '@/store/utils/imgShadow'
 import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
-import { Itheme } from '@/interfaces/theme'
-import uploadUtils from '@/utils/uploadUtils'
-import imgShadowMutations from '@/store/utils/imgShadow'
-import fontTag from '@/store/module/fontTag'
-import imgControl from '@/store/module/imgControl'
+import groupUtils from '@/utils/groupUtils'
 import { ADD_subLayer } from '@/utils/layerUtils'
-import { throttle } from 'lodash'
+import pageUtils from '@/utils/pageUtils'
 import SnapUtils from '@/utils/snapUtils'
-
-Vue.use(Vuex)
+import uploadUtils from '@/utils/uploadUtils'
+import zindexUtils from '@/utils/zindexUtils'
+import { throttle } from 'lodash'
+import { createStore, GetterTree, MutationTree } from 'vuex'
+import { FunctionPanelType, IEditorState, ISpecLayerData, LayerType, SidebarPanelType } from './types'
 
 const getDefaultState = (): IEditorState => ({
   pages: [{
@@ -107,26 +103,28 @@ const getDefaultState = (): IEditorState => ({
   showRuler: localStorage.getItem('showRuler') === 'true' ?? false,
   showGuideline: true,
   lockGuideline: false,
+  isDraggingGuideline: false,
   themes: [],
   hasCopiedFormat: false,
   inGestureToolMode: false,
-  isMobile: false,
-  isLargeDesktop: false,
+  isMobile: generalUtils.getWidth() <= 768,
+  isLargeDesktop: generalUtils.getWidth() >= 1440,
   isGlobalLoading: false,
   useMobileEditor: false,
-  defaultContentScaleRatio: 1,
+  contentScaleRatio: 1,
   _3dEnabledPageIndex: -1,
   enalbleComponentLog: false,
   inScreenshotPreviewRoute: false,
   cursor: '',
-  isPageScaling: false
+  isPageScaling: false,
+  isGettingDesign: false
 })
 
 const state = getDefaultState()
 const getters: GetterTree<IEditorState, unknown> = {
   getPage(state: IEditorState) {
-    return (pageIndex: number): IPage => {
-      return state.pages[pageIndex].config
+    return (pageIndex: number): IPage | undefined => {
+      return state.pages[pageIndex] ? state.pages[pageIndex].config : undefined
     }
   },
   getPageState(state: IEditorState) {
@@ -166,12 +164,13 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getPageSize(state: IEditorState) {
     return (pageIndex: number): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } => {
+      const { width, height, physicalWidth, physicalHeight, unit } = state.pages[pageIndex].config
       return {
-        width: state.pages[pageIndex].config.width,
-        height: state.pages[pageIndex].config.height,
-        physicalWidth: state.pages[pageIndex].config.physicalWidth,
-        physicalHeight: state.pages[pageIndex].config.physicalHeight,
-        unit: state.pages[pageIndex].config.unit
+        width,
+        height,
+        physicalWidth,
+        physicalHeight,
+        unit
       }
     }
   },
@@ -270,6 +269,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   getLockGuideline(state: IEditorState) {
     return state.lockGuideline
   },
+  getIsDraggingGuideline(state: IEditorState) {
+    return state.isDraggingGuideline
+  },
   getThemes(state: IEditorState) {
     return state.themes
   },
@@ -291,16 +293,19 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.useMobileEditor
   },
   getContentScaleRatio(state: IEditorState) {
-    return state.defaultContentScaleRatio
+    return state.contentScaleRatio
   },
   get3dEnabledPageIndex(state: IEditorState) {
-    return state._3dEnabledPageIndex
+    return state.useMobileEditor ? -1 : state._3dEnabledPageIndex
   },
   getEnalbleComponentLog(state: IEditorState) {
     return state.enalbleComponentLog
   },
   getInScreenshotPreview(state: IEditorState) {
     return state.inScreenshotPreviewRoute
+  },
+  getHasBleed(state: IEditorState) {
+    return state.pages.some((page: IPageState) => page.config.isEnableBleed)
   }
 }
 
@@ -387,7 +392,7 @@ const mutations: MutationTree<IEditorState> = {
     /**
      * @Note the reason why I replace the splice method is bcz its low performance
      */
-    //  state.pages.splice(pageIndex, 1)
+    // state.pages.splice(pageIndex, 1)
   },
   SET_pagesName(state: IEditorState, name: string) {
     state.name = name
@@ -420,7 +425,6 @@ const mutations: MutationTree<IEditorState> = {
     state.exportIds = exportIds.join(',')
   },
   SET_groupType(state: IEditorState, groupType: number) {
-    console.log('SET_groupType')
     state.groupType = groupType
   },
   SET_folderInfo(state: IEditorState, folderInfo: { isRoot: boolean, parentFolder: string, path: string }) {
@@ -596,6 +600,8 @@ const mutations: MutationTree<IEditorState> = {
     /**
      * This Mutation is used to update the layer's properties excluding styles
      */
+    const { pageIndex, layerIndex } = updateInfo
+
     Object.entries(updateInfo.props).forEach(([k, v]) => {
       if (state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex]) {
         state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex][k] = v
@@ -858,7 +864,11 @@ const mutations: MutationTree<IEditorState> = {
       switch (l.type) {
         case LayerType.image:
           if ((l as IImage).srcObj.assetId === assetId && l.previewSrc) {
-            Vue.delete(l, 'previewSrc')
+            /**
+             * @Vue3Update
+             */
+            // Vue.delete(l, 'previewSrc')
+            delete l.previewSrc
             Object.assign((l as IImage).srcObj, {
               type,
               userId,
@@ -928,6 +938,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_showGuideline(state: IEditorState, bool: boolean) {
     state.showGuideline = bool
   },
+  SET_isDraggingGuideline(state: IEditorState, bool: boolean) {
+    state.isDraggingGuideline = bool
+  },
   SET_lockGuideline(state: IEditorState, bool: boolean) {
     state.lockGuideline = bool
   },
@@ -954,6 +967,17 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
     Object.assign((state as any).pages[pageIndex].config.layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
   },
+  UPDATE_frameBlendLayer(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIdx: number, shape: IShape }) {
+    const { pageIndex, layerIndex, subLayerIdx, shape } = data
+    const frame = state.pages[pageIndex].config.layers[layerIndex] as IFrame
+    if (frame.type === LayerType.frame) {
+      if (subLayerIdx === -1) {
+        frame.blendLayers!.push(shape)
+      } else {
+        Object.assign(frame.blendLayers![subLayerIdx], shape)
+      }
+    }
+  },
   CLEAR_state(state: IEditorState) {
     const tmpUseMobileEditor = state.useMobileEditor
     Object.assign(state, getDefaultState())
@@ -970,7 +994,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_3dEnabledPageIndex(state: IEditorState, index: number) {
     if (index !== state._3dEnabledPageIndex) {
-      state._3dEnabledPageIndex = index
+      state._3dEnabledPageIndex = this.useMobileEditor ? -1 : index
     }
   },
   SET_enalbleComponentLog(state: IEditorState, bool: boolean) {
@@ -984,6 +1008,12 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isPageScaling(state: IEditorState, bool: boolean) {
     state.isPageScaling = bool
+  },
+  SET_isGettingDesign(state: IEditorState, bool: boolean) {
+    state.isGettingDesign = bool
+  },
+  SET_contentScaleRatio(state: IEditorState, ratio: number) {
+    state.contentScaleRatio = ratio
   },
   UPDATE_pagePos(state: IEditorState, data: { pageIndex: number, styles: { [key: string]: number } }) {
     const { pageIndex, styles } = data
@@ -1009,10 +1039,12 @@ const mutations: MutationTree<IEditorState> = {
         })
     }
   },
+  UPDATE_snapUtilsIndex(state: IEditorState, index: number) {
+    state.pages[index].modules.snapUtils.pageIndex = index
+  },
   ...imgShadowMutations,
   ADD_subLayer
 }
-
 const handleResize = throttle(() => {
   state.isMobile = generalUtils.getWidth() <= 768
   state.isLargeDesktop = generalUtils.getWidth() >= 1440
@@ -1021,7 +1053,7 @@ const handleResize = throttle(() => {
 window.addEventListener('resize', handleResize)
 handleResize()
 
-export default new Vuex.Store({
+const store = createStore({
   state,
   getters,
   mutations,
@@ -1047,3 +1079,4 @@ export default new Vuex.Store({
     imgControl
   }
 })
+export default store

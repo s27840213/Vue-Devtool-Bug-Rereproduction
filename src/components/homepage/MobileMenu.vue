@@ -1,55 +1,56 @@
 <template lang="pug">
-  div(class="menu")
-    div(class="menu-top")
-      template(v-for="item in navItems")
-        details(v-if="!item.hidden" :class="{'text-blue-1': currentPage === item.name}")
-          summary
-            url(:url="item.url") {{item.label}}
-            svg-icon(v-if="item.content" iconName="chevron-down"
-                    iconColor="gray-1" iconWidth="16px")
-          div(v-if="item.content")
-            details(v-for="it in item.content")
-              summary
-                url(:url="it.url") {{it.label}}
-                svg-icon(v-if="it.content" iconName="chevron-down"
+div(class="menu")
+  div(class="menu-top")
+    template(v-for="item in navItems")
+      details(v-if="!item.hidden" :class="{'text-blue-1': currentPage === item.name}")
+        summary
+          url(:url="item.url") {{item.label}}
+          svg-icon(v-if="item.content" iconName="chevron-down"
                   iconColor="gray-1" iconWidth="16px")
-              url(v-for="i in it.content" :url="i.url" :newTab="i.newTab") {{i.label}}
-    div(class="menu-bottom")
-      template(v-if="!isLogin")
-        div(class="menu-bottom__link")
-          router-link(:to="{ path: '/login', query: { redirect: currPath }}") {{$tc('NN0168', 1)}}
-        div(class="menu-bottom__link")
-          router-link(:to="{ path: '/signup', query: { redirect: currPath }}") {{$tc('NN0169', 1)}}
-      template(v-else)
-        div(class="menu-bottom__profile")
-          avatar(class="mr-10"
-            :textSize="14"
-            :avatarSize="35")
-        div(class="menu-bottom__link")
-          details
+        div(v-if="item.content")
+          details(v-for="it in item.content")
             summary
-              span {{$tc('NN0649')}}
-              svg-icon(iconName="chevron-down" iconColor="gray-1" iconWidth="16px")
-            div(@click="close()")
-              url(v-for="item in settingsItems" :url="`/settings/${item.name}`"
-                  :class="{'text-blue-1': currentPage === item.name}") {{item.label}}
-        div(class="menu-bottom__link"
-          @click="onLogoutClicked()")
-          span {{$tc('NN0167', 1)}}
+              url(:url="it.url") {{it.label}}
+              svg-icon(v-if="it.content" iconName="chevron-down"
+                iconColor="gray-1" iconWidth="16px")
+            url(v-for="i in it.content" :url="i.url" :newTab="i.newTab") {{i.label}}
+  div(class="menu-bottom")
+    template(v-if="!isLogin")
+      div(class="menu-bottom__link")
+        router-link(:to="{ path: '/login', query: { redirect: currPath }}") {{$tc('NN0168', 1)}}
+      div(class="menu-bottom__link")
+        router-link(:to="{ path: '/signup', query: { redirect: currPath }}") {{$tc('NN0169', 1)}}
+    template(v-else)
+      div(class="menu-bottom__profile")
+        avatar(class="mr-10"
+          :textSize="14"
+          :avatarSize="35")
+      div(class="menu-bottom__link")
+        details
+          summary
+            span {{$tc('NN0649')}}
+            svg-icon(iconName="chevron-down" iconColor="gray-1" iconWidth="16px")
+          div(@click="close()")
+            url(v-for="item in settingsItems" :url="`/settings/${item.name}`"
+                :class="{'text-blue-1': currentPage === item.name}") {{item.label}}
+      div(class="menu-bottom__link"
+        @click="onLogoutClicked()")
+        span {{$tc('NN0167', 1)}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
 import constantData from '@/utils/constantData'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     Avatar,
     Url
   },
+  emits: ['closeMenu'],
   data() {
     return {
       settingsItems: constantData.settingsItems()
@@ -65,9 +66,10 @@ export default Vue.extend({
       return constantData.headerItems(true)
     },
     currentPage(): string {
-      return this.$route.name === 'Settings'
-        ? this.$route.params.view
-        : this.$route.name || ''
+      const { name, params } = this.$router.currentRoute.value
+      return (name as string) === 'Settings'
+        ? this.$route.params.view as string
+        : (name as string) || ''
     },
     currPath(): string {
       return this.$route.path || '/'

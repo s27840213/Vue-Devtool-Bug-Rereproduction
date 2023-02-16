@@ -1,22 +1,23 @@
 <template lang="pug">
-  div(class="favorite-design-view")
-    div(class="favorite-design-view__folder-name")  {{$t('NN0188')}}
-    div(class="horizontal-rule")
-    design-gallery(:noHeader="true"
-                  :menuItems="menuItems"
-                  :allDesigns="allDesigns"
-                  :selectedNum="selectedNum"
-                  @menuAction="handleDesignMenuAction"
-                  @loadMore="handleLoadMore")
+div(class="favorite-design-view")
+  div(class="favorite-design-view__folder-name")  {{$t('NN0188')}}
+  div(class="horizontal-rule")
+  design-gallery(:noHeader="true"
+                :menuItems="menuItems"
+                :allDesigns="allDesigns"
+                :selectedNum="selectedNum"
+                @menuAction="handleDesignMenuAction"
+                @loadMore="handleLoadMore")
 </template>
 
 <script lang="ts">
-import designUtils from '@/utils/designUtils'
-import Vue from 'vue'
+import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@/utils/designUtils'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: ['clearSelection', ...DESIGN_MENU_EVENTS()],
   components: {
     DesignGallery
   },
@@ -47,7 +48,7 @@ export default Vue.extend({
       fetchFavoriteDesigns: 'fetchFavoriteDesigns',
       fetchMoreFavoriteDesigns: 'fetchMoreFavoriteDesigns'
     }),
-    handleDesignMenuAction(extraEvent: { event: string, payload: any }) {
+    handleDesignMenuAction(extraEvent: { event: IDesignMenuEvents, payload: any }) {
       const { event, payload } = extraEvent
       this.$emit(event, payload)
     },

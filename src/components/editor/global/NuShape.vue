@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="nu-shape" :style="styles()")
-  svg(:view-box.camel="viewBoxFormatter" :style="styles()")
+  svg(:view-box.camel="viewBoxFormatter")
     defs(v-if="config.category === 'E'" v-html="svgFormatter")
     defs
       filter(v-if="config.category === 'C'" :id="className()" v-html="filterFormatter")
@@ -12,13 +12,15 @@ div(class="nu-shape" :style="styles()")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import shapeUtils from '@/utils/shapeUtils'
 import { IFrame, IGroup, IShape } from '@/interfaces/layer'
-import layerUtils from '@/utils/layerUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import { IPage } from '@/interfaces/page'
 import { LayerType } from '@/store/types'
+import layerUtils from '@/utils/layerUtils'
+import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
+import { defineComponent, PropType } from 'vue'
+import { useRoute } from 'vue-router'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'
@@ -52,7 +54,41 @@ const VIEWBOX_HEIGHT_REG = new RegExp(`\\${VIEWBOX_HEIGHT}`, 'g')
 const CROP_X_REG = new RegExp(`\\${CROP_X}`, 'g')
 const CROP_Y_REG = new RegExp(`\\${CROP_Y}`, 'g')
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
+  props: {
+    config: {
+      type: Object as PropType<any>,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    subLayerIndex: {
+      type: Number
+    },
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    },
+    primaryLayer: {
+      type: Object,
+      default: () => { return undefined }
+    },
+    primaryLayerIndex: {
+      type: Number,
+      default: -1
+    }
+  },
   data() {
     return {
       filterTemplate: '',
@@ -251,24 +287,6 @@ export default Vue.extend({
       return ''
     }
   },
-  props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
-    subLayerIndex: Number,
-    contentScaleRatio: {
-      default: 1,
-      type: Number
-    },
-    primaryLayer: {
-      type: Object,
-      default: () => { return undefined }
-    },
-    primaryLayerIndex: {
-      type: Number,
-      default: -1
-    }
-  },
   methods: {
     className(): string {
       return this.config.className + this.pageIndex.toString()
@@ -289,7 +307,8 @@ export default Vue.extend({
       if (this.paramsReady) {
         return {
           width: `${(this.config.category === 'D') ? this.config.styles.initWidth : (this.config.vSize[0] + this.config.pDiff[0])}px`,
-          height: `${(this.config.category === 'D') ? this.config.styles.initHeight : (this.config.vSize[1] + this.config.pDiff[1])}px`
+          height: `${(this.config.category === 'D') ? this.config.styles.initHeight : (this.config.vSize[1] + this.config.pDiff[1])}px`,
+          ...(this.config.wkf && useRoute().path === '/preview' && { '-webkit-filter': 'opacity(1)' })
         }
       } else {
         return {

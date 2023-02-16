@@ -1,67 +1,73 @@
 <template lang="pug">
-  div(class="editor-view" v-touch
-      :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
-      :style="editorViewStyle"
-      @wheel="handleWheel"
-      @scroll="!inBgRemoveMode ? scrollUpdate() : null"
-      @pointerdown="selectStart"
-      @mousewheel="handleWheel"
-      @pinch="pinchHandler"
-      ref="editorView")
-    div(class="editor-view__abs-container"
-        :style="absContainerStyle")
-      div(class="editor-view__canvas"
-          ref="canvas"
-          @swipeup="swipeUpHandler"
-          @swipedown="swipeDownHandler"
-          :style="canvasStyle")
-        div(v-for="(page,index) in pagesState"
-            :key="`page-${index}`"
-            class="editor-view__card"
-            :style="cardStyle"
-            @pointerdown.self.prevent="outerClick($event)"
-            ref="card")
-          nu-page(
-            :ref="`page-${index}`"
-            :pageIndex="index"
-            :overflowContainer="editorView"
-            :style="pageStyle(index)"
-            :pageState="page"
-            :index="index"
-            :inScaling="isScaling"
-            :isAnyBackgroundImageControl="isBackgroundImageControl")
+div(class="editor-view" v-touch
+    :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
+    :style="editorViewStyle"
+    @wheel="handleWheel"
+    @scroll="!inBgRemoveMode ? scrollUpdate() : null"
+    @pointerdown="selectStart"
+    @mousewheel="handleWheel"
+    @pinch="pinchHandler"
+    ref="editorView")
+  div(class="editor-view__abs-container"
+      :style="absContainerStyle")
+    div(v-if="editorView" class="editor-view__canvas"
+        ref="canvas"
+        @swipeup="swipeUpHandler"
+        @swipedown="swipeDownHandler"
+        :style="canvasStyle")
+      page-card(v-for="(page,index) in pagesState"
+          :key="`page-${index}`"
+          :config="page"
+          :cardWidth="cardWidth"
+          :cardHeight="cardHeight"
+          :pageIndex="index"
+          :editorView="editorView"
+          :isAnyBackgroundImageControl="isBackgroundImageControl"
+          @pointerdown="selectStart"
+          @pointerdown.self.prevent="outerClick($event)")
+  page-number(v-if="!hasSelectedLayer"
+    :pageNum="pageNum"
+    :currCardIndex="currCardIndex")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import GroupUtils from '@/utils/groupUtils'
-import StepsUtils from '@/utils/stepsUtils'
-import ControlUtils from '@/utils/controlUtils'
-import pageUtils from '@/utils/pageUtils'
-import { IPage, IPageState } from '@/interfaces/page'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
-import imageUtils from '@/utils/imageUtils'
-import EditorHeader from '@/components/editor/EditorHeader.vue'
-import tiptapUtils from '@/utils/tiptapUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
-import generalUtils from '@/utils/generalUtils'
-import AnyTouch, { AnyTouchEvent } from 'any-touch'
-import layerUtils from '@/utils/layerUtils'
-import editorUtils from '@/utils/editorUtils'
-import backgroundUtils from '@/utils/backgroundUtils'
-import modalUtils from '@/utils/modalUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import { MovingUtils } from '@/utils/movingUtils'
+import EditorHeader from '@/components/editor/EditorHeader.vue'
+import PageCard from '@/components/editor/mobile/PageCard.vue'
+import PageNumber from '@/components/editor/PageNumber.vue'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IPage, IPageState } from '@/interfaces/page'
 import store from '@/store'
+import backgroundUtils from '@/utils/backgroundUtils'
+import ControlUtils from '@/utils/controlUtils'
+import editorUtils from '@/utils/editorUtils'
+import eventUtils from '@/utils/eventUtils'
+import GroupUtils from '@/utils/groupUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import modalUtils from '@/utils/modalUtils'
+import { MovingUtils } from '@/utils/movingUtils'
+import pageUtils from '@/utils/pageUtils'
+import StepsUtils from '@/utils/stepsUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { AnyTouchEvent } from 'any-touch'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     EditorHeader,
-    BgRemoveArea
+    BgRemoveArea,
+    PageNumber,
+    PageCard
   },
   props: {
-    isConfigPanelOpen: Boolean,
+    isConfigPanelOpen: {
+      type: Boolean,
+      required: true
+    },
     inAllPagesMode: {
       type: Boolean,
       required: true
@@ -100,7 +106,6 @@ export default Vue.extend({
       editorViewResizeObserver: null as unknown as ResizeObserver,
       isSwiping: false,
       isScaling: false,
-      uploadUtils: uploadUtils,
       hanleWheelTimer: -1,
       handleWheelTransition: false,
       oriX: 0,
@@ -116,7 +121,7 @@ export default Vue.extend({
           uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
           modalUtils.setModalInfo(
             `${this.$t('NN0788')}`,
-            [`${this.$t('NN0789', { size: '6000 x 6000' })}`],
+            [`${this.$t('NN0789', { size: `${pageUtils.MAX_WIDTH} x ${pageUtils.MAX_HEIGHT}` })}`],
             {
               msg: `${this.$t('NN0358')}`,
               class: 'btn-blue-mid',
@@ -149,9 +154,8 @@ export default Vue.extend({
     pageUtils.fitPage(false, true)
     this.tmpScaleRatio = pageUtils.scaleRatio
 
-    if (generalUtils.isTouchDevice()) {
+    if (this.$isTouchDevice) {
       pageUtils.mobileMinScaleRatio = this.isDetailPage ? 20 : this.tmpScaleRatio
-      console.log(pageUtils.getPages[0].width * this.pageUtils.mobileMinScaleRatio * 0.01)
       pageUtils.originPageSize.width = pageUtils.getPages[0].width * this.pageUtils.mobileMinScaleRatio * 0.01
       pageUtils.originPageSize.height = pageUtils.getPages[0].height * this.pageUtils.mobileMinScaleRatio * 0.01
     }
@@ -168,18 +172,10 @@ export default Vue.extend({
 
     this.editorViewResizeObserver.observe(this.editorView as HTMLElement)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.editorViewResizeObserver.disconnect()
   },
   watch: {
-    pageScaleRatio() {
-      if (this.isDetailPage) {
-        generalUtils.scaleFromCenter(this.editorView)
-      } else {
-        const card = (this.$refs.card as HTMLElement[])[this.currCardIndex]
-        generalUtils.scaleFromCenter(card)
-      }
-    },
     currFocusPageIndex(newVal) {
       this.setCurrCardIndex(newVal)
       if (backgroundUtils.inBgSettingMode) {
@@ -190,12 +186,16 @@ export default Vue.extend({
       this.$nextTick(() => {
         this.cardHeight = this.editorView?.clientHeight
       })
+    },
+    currCardIndex(newVal) {
+      editorUtils.handleContentScaleRatio(newVal)
     }
   },
 
   computed: {
     ...mapState({
-      mobileAllPageMode: 'mobileEditor/mobileAllPageMode'
+      mobileAllPageMode: 'mobileEditor/mobileAllPageMode',
+      isGettingDesign: 'isGettingDesign'
     }),
     ...mapGetters({
       groupId: 'getGroupId',
@@ -204,8 +204,6 @@ export default Vue.extend({
       geCurrActivePageIndex: 'getCurrActivePageIndex',
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer',
-      getPageSize: 'getPageSize',
       pageScaleRatio: 'getPageScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview',
       hasCopiedFormat: 'getHasCopiedFormat',
@@ -217,6 +215,9 @@ export default Vue.extend({
     }),
     pages(): Array<IPage> {
       return this.pagesState.map((p: IPageState) => p.config)
+    },
+    hasSelectedLayer(): boolean {
+      return this.currSelectedInfo.layers.length > 0
     },
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -238,9 +239,6 @@ export default Vue.extend({
     },
     currFocusPage(): IPage {
       return this.pageUtils.currFocusPage
-    },
-    pageSize(): { width: number, height: number } {
-      return this.getPageSize(0)
     },
     minScaleRatio(): number {
       return pageUtils.mobileMinScaleRatio
@@ -272,12 +270,9 @@ export default Vue.extend({
     absContainerStyle(): { [index: string]: string | number } {
       const transformDuration = !this.showMobilePanel ? 0.3 : 0
       return {
-        transform: this.isDetailPage ? 'initail' : `translate3d(0, -${this.currCardIndex * this.cardHeight}px,0)`,
+        transform: this.isDetailPage ? 'initial' : `translate(0, -${this.currCardIndex * this.cardHeight}px)`,
         transition: `transform ${transformDuration}s`
       }
-    },
-    isGettingDesign(): boolean {
-      return this.uploadUtils.isGettingDesign
     }
   },
   methods: {
@@ -296,6 +291,10 @@ export default Vue.extend({
       ]
     ),
     outerClick(e: MouseEvent) {
+      console.log('outer click')
+      if (eventUtils.checkIsMultiTouch(e)) {
+        return
+      }
       if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         editorUtils.setInBgSettingMode(false)
         GroupUtils.deselect()
@@ -309,6 +308,7 @@ export default Vue.extend({
       }
     },
     selectStart(e: PointerEvent) {
+      e.stopPropagation()
       if (ControlUtils.isClickOnController(e)) {
         const movingUtils = new MovingUtils({
           _config: { config: layerUtils.getCurrLayer },
@@ -332,12 +332,6 @@ export default Vue.extend({
        */
       pageUtils.findCentralPageIndexInfo(tiptapUtils.editor?.view?.hasFocus?.())
     },
-    addSelectedLayer(layerIndexs: Array<number>) {
-      this.addLayer({
-        pageIndex: this.pageIndex,
-        layerIndexs: [...layerIndexs]
-      })
-    },
     detectBlur(event: Event) {
       // The reason why I used setTimeout event here is to make the callback function being executed after the activeElement has been changed
       // or we just put the function in this callback function, the activeElement will always get 'BODY'
@@ -353,23 +347,13 @@ export default Vue.extend({
         })
       }, 0)
     },
-    getPageZIndex(index: number) {
-      if (this.isBackgroundImageControl) {
-        return this.backgroundControllingPageIndex === index ? 1 : 0
-      } else {
-        /**
-         * @Note if the page was focused, make it bring the highest z-index to prevent from being blocking by other page's layer
-         */
-        return pageUtils.currFocusPageIndex === index ? this.pageNum + 1 : this.pageNum - index
-      }
-    },
     handleWheel(e: WheelEvent) {
       if ((e.metaKey || e.ctrlKey) && !this.handleWheelTransition) {
         if (!store.state.isPageScaling) {
           store.commit('SET_isPageScaling', true)
         }
         clearTimeout(this.hanleWheelTimer)
-        this.hanleWheelTimer = setTimeout(() => {
+        this.hanleWheelTimer = window.setTimeout(() => {
           store.commit('SET_isPageScaling', false)
           console.log('reach limit', pageUtils.mobileMinScaleRatio)
           if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
@@ -393,72 +377,72 @@ export default Vue.extend({
       }
     },
     pinchHandler(event: AnyTouchEvent) {
-      switch (event.phase) {
-        /**
-         * @Note the very first event won't fire start phase, it's very strange and need to pay attention
-         */
-        case 'start': {
-          this.oriX = pageUtils.getCurrPage.x
-          this.oriPageSize = (pageUtils.getCurrPage.width * (pageUtils.scaleRatio / 100))
-          this.tmpScaleRatio = pageUtils.scaleRatio
-          this.isScaling = true
-          store.commit('SET_isPageScaling', true)
-          break
-        }
-        case 'move': {
-          if (!this.isScaling) {
-            this.isScaling = true
-            store.commit('SET_isPageScaling', true)
-          }
-          window.requestAnimationFrame(() => {
-            const limitMultiplier = 4
-            if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
-              pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
-              return
-            }
-            const newScaleRatio = Math.min(this.tmpScaleRatio * event.scale, pageUtils.mobileMinScaleRatio * limitMultiplier)
-            if (newScaleRatio >= pageUtils.mobileMinScaleRatio * 0.8) {
-              pageUtils.setScaleRatio(newScaleRatio)
+      // switch (event.phase) {
+      //   /**
+      //    * @Note the very first event won't fire start phase, it's very strange and need to pay attention
+      //    */
+      //   case 'start': {
+      //     this.oriX = pageUtils.getCurrPage.x
+      //     this.oriPageSize = (pageUtils.getCurrPage.width * (pageUtils.scaleRatio / 100))
+      //     this.tmpScaleRatio = pageUtils.scaleRatio
+      //     this.isScaling = true
+      //     store.commit('SET_isPageScaling', true)
+      //     break
+      //   }
+      //   case 'move': {
+      //     if (!this.isScaling) {
+      //       this.isScaling = true
+      //       store.commit('SET_isPageScaling', true)
+      //     }
+      //     window.requestAnimationFrame(() => {
+      //       const limitMultiplier = 4
+      //       if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
+      //         pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
+      //         return
+      //       }
+      //       const newScaleRatio = Math.min(this.tmpScaleRatio * event.scale, pageUtils.mobileMinScaleRatio * limitMultiplier)
+      //       if (newScaleRatio >= pageUtils.mobileMinScaleRatio * 0.8) {
+      //         pageUtils.setScaleRatio(newScaleRatio)
 
-              const baseX = (pageUtils.getCurrPage.width * (newScaleRatio / 100) - this.oriPageSize) * 0.5
-              pageUtils.updatePagePos(0, {
-                x: this.oriX - baseX
-              })
-            }
-            clearTimeout(this.hanleWheelTimer)
-            this.hanleWheelTimer = setTimeout(() => {
-              if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
-                const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-                page.style.transition = '0.2s linear'
-                this.handleWheelTransition = true
-                pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
-                this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
-                setTimeout(() => {
-                  page.style.transition = ''
-                  this.handleWheelTransition = false
-                }, 500)
-              }
-            }, 500)
-          })
-          break
-        }
+      //         const baseX = (pageUtils.getCurrPage.width * (newScaleRatio / 100) - this.oriPageSize) * 0.5
+      //         pageUtils.updatePagePos(0, {
+      //           x: this.oriX - baseX
+      //         })
+      //       }
+      //       clearTimeout(this.hanleWheelTimer)
+      //       this.hanleWheelTimer = setTimeout(() => {
+      //         if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
+      //           const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
+      //           page.style.transition = '0.2s linear'
+      //           this.handleWheelTransition = true
+      //           pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
+      //           this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
+      //           setTimeout(() => {
+      //             page.style.transition = ''
+      //             this.handleWheelTransition = false
+      //           }, 500)
+      //         }
+      //       }, 500)
+      //     })
+      //     break
+      //   }
 
-        case 'end': {
-          this.isScaling = false
-          store.commit('SET_isPageScaling', false)
-          break
-        }
-      }
+      //   case 'end': {
+      //     this.isScaling = false
+      //     store.commit('SET_isPageScaling', false)
+      //     break
+      //   }
+      // }
 
-      this.$nextTick(() => {
-        // here is a workaround to fix the problem of selecting layer after pinching
-        if (layerUtils.currSelectedInfo.layers.length > 0) {
-          GroupUtils.deselect()
-        }
-      })
+      // this.$nextTick(() => {
+      //   // here is a workaround to fix the problem of selecting layer after pinching
+      //   if (layerUtils.currSelectedInfo.layers.length > 0) {
+      //     GroupUtils.deselect()
+      //   }
+      // })
     },
     swipeUpHandler(e: AnyTouchEvent) {
-      if (!this.isDetailPage) {
+      if (!this.isDetailPage && !this.hasSelectedLayer) {
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }
@@ -475,7 +459,18 @@ export default Vue.extend({
           })
         } else {
           GroupUtils.deselect()
-          this.addPage(pageUtils.newPage({}))
+          const lastPage = pageUtils.pageNum > 0 ? pageUtils.getPages[pageUtils.pageNum - 1] : undefined
+          this.addPage(pageUtils.newPage({
+            width: lastPage?.width,
+            height: lastPage?.height,
+            backgroundColor: lastPage?.backgroundColor,
+            physicalWidth: lastPage?.physicalWidth,
+            physicalHeight: lastPage?.physicalHeight,
+            isEnableBleed: lastPage?.isEnableBleed,
+            bleeds: lastPage?.bleeds,
+            physicalBleeds: lastPage?.physicalBleeds,
+            unit: lastPage?.unit
+          }))
           this.$nextTick(() => {
             editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
             this.setCurrActivePageIndex(this.currCardIndex)
@@ -489,7 +484,7 @@ export default Vue.extend({
       }
     },
     swipeDownHandler(e: AnyTouchEvent) {
-      if (!this.isDetailPage) {
+      if (!this.isDetailPage && !this.hasSelectedLayer) {
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }
@@ -506,12 +501,6 @@ export default Vue.extend({
           })
         }
         this.isSwiping = false
-      }
-    },
-    pageStyle(index: number) {
-      return {
-        // 'z-index': `${this.getPageZIndex(index)}`,
-        // margin: 'auto'
       }
     }
   }
@@ -543,23 +532,12 @@ $REULER_SIZE: 20px;
     max-width: 100%;
     min-height: 100%;
     max-height: 100%;
-    display: flex;
-    flex-direction: column;
-    transform-style: preserve-3d;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+    // transform-style: preserve-3d;
     transform: scale(1);
     box-sizing: border-box;
-  }
-
-  &__card {
-    width: 100%;
-    touch-action: none;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    // justify-content: center;
-    @include no-scrollbar;
-    // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container
-    // justify-content: center;
   }
 }
 

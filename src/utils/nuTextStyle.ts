@@ -1,19 +1,20 @@
-import Vue from 'vue'
 import { IGroup, IText } from '@/interfaces/layer'
+import { checkAndConvertToHex } from '@/utils/colorUtils'
 import { Extension } from '@tiptap/core'
-import { Editor } from '@tiptap/vue-2'
-import tiptapUtils from './tiptapUtils'
+import { Editor } from '@tiptap/vue-3'
+import { nextTick } from 'vue'
 import layerUtils from './layerUtils'
+import shortcutUtils from './shortcutUtils'
 import stepsUtils from './stepsUtils'
 import textPropUtils from './textPropUtils'
-import shortcutUtils from './shortcutUtils'
-import { checkAndConvertToHex } from '@/utils/colorUtils'
+import tiptapUtils from './tiptapUtils'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     nuTextStyle: {
       selectPrevious: () => ReturnType,
-      sync: () => ReturnType
+      sync: () => ReturnType,
+      insertPlainText: (text: string) => ReturnType
     }
   }
 }
@@ -54,7 +55,7 @@ export default Extension.create({
       layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, {
         selection: { from, to }
       })
-      if (tiptapUtils.getText(this.editor as Editor) === tiptapUtils.prevText && !this.editor.view.composing) {
+      if (tiptapUtils.getText((this.editor as Editor).getJSON()) === tiptapUtils.prevText && !this.editor.view.composing) {
         stepsUtils.updateHead(layerUtils.pageIndex, layerUtils.layerIndex, {
           selection: { from, to }
         })
@@ -363,11 +364,11 @@ export default Extension.create({
     return {
       'Mod-z': ({ editor }) => {
         stepsUtils.undo().then(() => {
-          Vue.nextTick(() => {
+          nextTick(() => {
             const currLayer = layerUtils.getCurrLayer as IText
             if (!currLayer.active) return
             editor.commands.sync()
-            tiptapUtils.prevText = tiptapUtils.getText(editor as Editor)
+            tiptapUtils.updatePrevData(editor as Editor)
             textPropUtils.updateTextPropsState()
           })
         })
@@ -375,11 +376,11 @@ export default Extension.create({
       },
       'Shift-Mod-z': ({ editor }) => {
         stepsUtils.redo().then(() => {
-          Vue.nextTick(() => {
+          nextTick(() => {
             const currLayer = layerUtils.getCurrLayer as IText
             if (!currLayer.active) return
             editor.commands.sync()
-            tiptapUtils.prevText = tiptapUtils.getText(editor as Editor)
+            tiptapUtils.updatePrevData(editor as Editor)
             textPropUtils.updateTextPropsState()
           })
         })
@@ -439,6 +440,12 @@ export default Extension.create({
         const paragraphs = targetLayer.paragraphs
         const selection = targetLayer.selection
         return chain().setContent(tiptapUtils.toJSON(paragraphs)).setTextSelection(selection).run()
+      },
+      insertPlainText: (text: string) => ({ commands }) => {
+        return commands.command(({ tr }) => {
+          tr.insertText(text)
+          return true
+        })
       }
     }
   }

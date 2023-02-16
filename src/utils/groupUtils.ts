@@ -1,25 +1,25 @@
-import store from '@/store'
-import { IShape, IText, IImage, IGroup, ITmp, IFrame, ILayer } from '@/interfaces/layer'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import store from '@/store'
+import { LayerType } from '@/store/types'
+import GeneralUtils from '@/utils/generalUtils'
 import LayerFactary from '@/utils/layerFactary'
+import LayerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import MathUtils from '@/utils/mathUtils'
 import ZindexUtils from '@/utils/zindexUtils'
-import GeneralUtils from '@/utils/generalUtils'
-import LayerUtils from '@/utils/layerUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import ShapeUtils from './shapeUtils'
+import _ from 'lodash'
+import backgroundUtils from './backgroundUtils'
+import editorUtils from './editorUtils'
+import frameUtils from './frameUtils'
 import ImageUtils from './imageUtils'
+import pageUtils from './pageUtils'
+import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import textUtils from './textUtils'
-import pageUtils from './pageUtils'
-import { LayerType } from '@/store/types'
-import editorUtils from './editorUtils'
-import backgroundUtils from './backgroundUtils'
 import vivistickerUtils from './vivistickerUtils'
-import { IPage } from '@/interfaces/page'
-import _ from 'lodash'
-import frameUtils from './frameUtils'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup | IFrame>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -181,7 +181,7 @@ class GroupUtils {
       } else {
         // when we select multiple layer
         const layers = MappingUtils.mappingLayers(pageIndex, layerIndexs)
-          .filter(l => !l.locked)
+          .filter(l => !l?.locked)
         const tmpStyles = calcTmpProps(layers)
         const currSelectedLayers = this.mapLayersToTmp(layers, tmpStyles)
         const topIndex = Math.max(...layerIndexs)
@@ -256,6 +256,7 @@ class GroupUtils {
     this.deselect()
     const indices = [...Array(store.getters.getLayersNum(pageUtils.currFocusPageIndex)).keys()]
       .filter(i => !pageUtils.currFocusPage.layers[i].locked)
+    if (indices.length === 0) return
     this.select(pageUtils.currFocusPageIndex, indices)
   }
 
@@ -289,6 +290,9 @@ class GroupUtils {
                 scale: l.styles.scale * tmpLayer.styles.scale
               }, i)
             }
+            LayerUtils.updateLayerProps(this.pageIndex, LayerUtils.layerIndex, {
+              parentLayerStyles: undefined
+            }, i)
           })
         store.commit('DELETE_selectedLayer')
         store.commit('SET_lastSelectedLayerIndex', -1)
@@ -314,7 +318,7 @@ class GroupUtils {
      *  4. Update Layer order
      */
     const { index, pageIndex, layers } = this.currSelectedInfo
-    const tmpLayer = LayerUtils.getTmpLayer() as ITmp
+    const tmpLayer = LayerUtils.getSelectedLayer() as ITmp
 
     /**
      * @param targetLayer - the layer we want to remove from tmp

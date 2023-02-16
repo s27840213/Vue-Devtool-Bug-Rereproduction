@@ -1,100 +1,102 @@
 <template lang="pug">
-  div(class="panel-text")
-    //- Search bar
-    search-bar(class="mb-15"
-      :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
-      clear
-      :defaultKeyword="keywordLabel"
-      @search="handleSearch")
-    //- Search result empty msg
-    div(v-if="emptyResultMessage")
-      span {{ emptyResultMessage }}
-    //- Default text preset & brandkit text preset
-    template(v-if="!keyword")
-      template(v-if="isBrandkitAvailable")
-        div(class="panel-text__brand-header relative")
-          brand-selector(theme="panel" :defaultOption="true")
-          div(class="panel-text__brand-settings pointer"
-          @click="handleOpenSettings")
-            svg-icon(iconName="settings" iconColor="white" iconWidth="24px")
-      template(v-if="!isBrandkitAvailable || isDefaultSelected")
-        div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText"
-            :key="config.type"
-            draggable="true"
-            @dragstart="standardTextDrag($event, config)")
-          btn(
-            class="panel-text__text-button mb-10"
-            :type="`text-${config.type.toLowerCase()}`"
-            :fontFamily="localeFont()"
-            @click.native="handleAddText(config)") {{ config.text }}
-      template(v-else)
-        div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText"
-            :key="config.type"
-            draggable="true"
-            @dragstart="standardTextDrag($event, config)")
-          btn(
-            class="panel-text__text-button mb-10"
-            :style="getFontStyles(config.type.toLowerCase())"
-            :type="`text-${config.type.toLowerCase()}`"
-            @click.native="handleAddText(config)") {{ config.text }}
-    //- Search result and main content
-    category-list(v-for="item in categoryListArray"
-                  v-show="item.show" :ref="item.key" :key="item.key"
-                  :list="item.content" @loadMore="handleLoadMore")
-      template(v-slot:category-list-rows="{ list, title }")
-        category-list-rows(
-          v-if="!keyword"
-          :list="list"
-          :title="title"
-          @action="handleCategorySearch")
-          template(v-slot:preview="{ item }")
-            category-text-item(class="panel-text__item"
-              :item="item")
-      template(v-slot:category-text-item="{ list, title }")
-        div(class="panel-text__items"
-          :style="{gridTemplateColumns: `repeat(${amountInRow}, 1fr)`}")
-          div(v-if="title"
-            :style="{gridColumn: `1 / ${amountInRow+1}`}"
-            class="panel-text__header") {{ title }}
-          category-text-item(v-for="item in list"
-            class="panel-text__item"
-            :key="item.id"
+div(class="panel-text")
+  //- Search bar
+  search-bar(class="mb-15"
+    :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
+    clear
+    :defaultKeyword="keywordLabel"
+    @search="handleSearch")
+  //- Search result empty msg
+  div(v-if="emptyResultMessage")
+    span {{ emptyResultMessage }}
+  //- Default text preset & brandkit text preset
+  template(v-if="!keyword")
+    template(v-if="isBrandkitAvailable")
+      div(class="panel-text__brand-header relative")
+        brand-selector(theme="panel" :defaultOption="true")
+        div(class="panel-text__brand-settings pointer"
+        @click="handleOpenSettings")
+          svg-icon(iconName="settings" iconColor="white" iconWidth="24px")
+    template(v-if="!isBrandkitAvailable || isDefaultSelected")
+      div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText"
+          :key="config.type"
+          draggable="true"
+          @dragstart="standardTextDrag($event, config)")
+        btn(
+          class="panel-text__text-button mb-10"
+          :type="`text-${config.type.toLowerCase()}`"
+          :fontFamily="localeFont()"
+          @click="handleAddText(config)") {{ config.text }}
+    template(v-else)
+      div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText"
+          :key="config.type"
+          draggable="true"
+          @dragstart="standardTextDrag($event, config)")
+        btn(
+          class="panel-text__text-button mb-10"
+          :style="getFontStyles(config.type.toLowerCase())"
+          :type="`text-${config.type.toLowerCase()}`"
+          @click="handleAddText(config)") {{ config.text }}
+  //- Search result and main content
+  category-list(v-for="item in categoryListArray"
+                v-show="item.show" :ref="item.key" :key="item.key"
+                :list="item.content" @loadMore="handleLoadMore"
+                @scroll.passive="handleScrollTop($event, item.key)")
+    template(v-slot:category-list-rows="{ list, title }")
+      category-list-rows(
+        v-if="!keyword"
+        :list="list"
+        :title="title"
+        @action="handleCategorySearch")
+        template(v-slot:preview="{ item }")
+          category-text-item(class="panel-text__item"
             :item="item")
-      template(#after)
-        //- Loading icon
-        div(v-if="pending" class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
-        //- Text wishing pool
-        div(v-if="keyword && !pending && rawSearchResult.list.length<=10")
-          span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
-          nubtn(size="mid" class="mt-30")
-            url(:url="$t('NN0791')" :newTab="true")
-              span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
+    template(v-slot:category-text-item="{ list, title }")
+      div(class="panel-text__items"
+        :style="{gridTemplateColumns: `repeat(${amountInRow}, 1fr)`}")
+        div(v-if="title"
+          :style="{gridColumn: `1 / ${amountInRow+1}`}"
+          class="panel-text__header") {{ title }}
+        category-text-item(v-for="item in list"
+          class="panel-text__item"
+          :key="item.id"
+          :item="item")
+    template(#after)
+      //- Loading icon
+      div(v-if="pending" class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
+      //- Text wishing pool
+      div(v-if="keyword && !pending && rawSearchResult.list?.length<=10")
+        span {{$t('NN0796', {type: $tc('NN0792', 1)})}}
+        nubtn(size="mid-center" class="mt-30")
+          url(:url="$t('NN0791')" :newTab="true")
+            span {{$t('NN0790', {type: $tc('NN0792', 1)})}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
-import i18n from '@/i18n'
-import SearchBar from '@/components/SearchBar.vue'
-import CategoryList from '@/components/category/CategoryList.vue'
+import BrandSelector from '@/components/brandkit/BrandSelector.vue'
+import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
-import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import Url from '@/components/global/Url.vue'
-import AssetUtils from '@/utils/assetUtils'
+import SearchBar from '@/components/SearchBar.vue'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import DragUtils from '@/utils/dragUtils'
-import textUtils from '@/utils/textUtils'
 import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
+import AssetUtils from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
-import VueI18n from 'vue-i18n'
-import tiptapUtils from '@/utils/tiptapUtils'
+import DragUtils from '@/utils/dragUtils'
 import generalUtils from '@/utils/generalUtils'
+import textUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import { defineComponent } from 'vue'
+import VueI18n from 'vue-i18n'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  name: 'PanelText',
+  emits: [],
   components: {
     SearchBar,
     CategoryList,
@@ -114,7 +116,6 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      getLayersNum: 'getLayersNum',
       isDefaultSelected: 'brandkit/getIsDefaultSelected',
       currentBrand: 'brandkit/getCurrentBrand'
     }),
@@ -161,7 +162,7 @@ export default Vue.extend({
         }))
     },
     amountInRow():number {
-      return generalUtils.isTouchDevice() ? 3 : 2
+      return this.$isTouchDevice ? 3 : 2
     },
     listResult(): ICategoryItem[] {
       return this.processListResult(this.rawContent.list, false)
@@ -194,9 +195,9 @@ export default Vue.extend({
     emptyResultMessage(): string {
       const { keyword, pending } = this
       if (pending || !keyword || this.searchResult.length > 0) return ''
-      return `${i18n.t('NN0393', {
+      return `${this.$t('NN0393', {
           keyword: this.keywordLabel,
-          target: i18n.tc('NN0005', 1)
+          target: this.$tc('NN0005', 1)
         })}`
     }
   },
@@ -211,14 +212,12 @@ export default Vue.extend({
       })
   },
   activated() {
-    this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
-    this.$refs.searchResult[0].$el.scrollTop = this.scrollTop.searchResult
-    this.$refs.mainContent[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
-  },
-  deactivated() {
-    this.$refs.mainContent[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
+      const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
+      mainContent.$el.scrollTop = this.scrollTop.mainContent
+      searchResult.$el.scrollTop = this.scrollTop.searchResult
+    })
   },
   watch: {
     currentBrand() {
@@ -228,7 +227,8 @@ export default Vue.extend({
       if (!newVal) {
         this.$nextTick(() => {
           // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+          const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
+          mainContent.$el.scrollTop = this.scrollTop.mainContent
         })
       }
     }
@@ -275,13 +275,13 @@ export default Vue.extend({
       this.getMoreContent()
     },
     async handleAddText(config: { type: string, text: string }) {
-      await AssetUtils.addStandardText(config.type.toLowerCase(), config.text, i18n.locale, undefined, undefined, this.getSpanStyles(config.type.toLowerCase()))
+      await AssetUtils.addStandardText(config.type.toLowerCase(), config.text, this.$i18n.locale, undefined, undefined, this.getSpanStyles(config.type.toLowerCase()))
     },
     handleOpenSettings() {
       this.setSettingsOpen(true)
     },
     localeFont() {
-      return AssetUtils.getFontMap()[i18n.locale]
+      return AssetUtils.getFontMap()[this.$i18n.locale]
     },
     handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
       this.scrollTop[key] = (event.target as HTMLElement).scrollTop
@@ -291,7 +291,7 @@ export default Vue.extend({
       new DragUtils().itemDragStart(e, 'standardText', {
         textType: textType.toLowerCase(),
         text,
-        locale: i18n.locale,
+        locale: this.$i18n.locale,
         spanStyles: this.getSpanStyles(textType.toLowerCase())
       }, {
         offsetX: 20,

@@ -1,43 +1,66 @@
 <template lang="pug">
-  div(class=" popup-layer bg-gray-6"
-      @click.stop="closePopup")
-    //- for page and layer
-    template(v-for="option in [...updateOptions, ...layerOptions]")
-      template(v-if="option.condition")
-        div(class="popup-layer__item"
-            :class="{disabled: isFontLoading}"
-            @click="!isFontLoading && option.action($event)")
-          svg-icon(
-            class="pointer"
-            :iconName="option.icon"
-            :iconWidth="'16px'"
-            :iconColor="'gray-1'")
-          span(class="ml-10 body-2") {{option.text}}
-          span(class="shortcut ml-10 body-2 text-gray-3") {{option.shortcutText}}
-    //- for other purpose
-    template(v-if="isImage")
+div(class=" popup-layer bg-gray-6"
+    @click.stop="closePopup")
+  //- for page and layer
+  template(v-for="option in [...updateOptions, ...layerOptions]")
+    template(v-if="option.condition")
       div(class="popup-layer__item"
-          @click="updateImageAsFrame().action()")
+          :class="{disabled: isFontLoading}"
+          @click="!isFontLoading && option.action($event)")
         svg-icon(
           class="pointer"
-          :iconName="updateImageAsFrame().icon"
+          :iconName="option.icon"
           :iconWidth="'16px'"
           :iconColor="'gray-1'")
-        span(class="ml-10 body-2") {{updateImageAsFrame().text}}
-        span(class="shortcut ml-10 body-2 text-gray-3") {{''}}
-    template(v-if="isFrame")
-      div(class="popup-layer__item"
-          @click="detachImage().action()")
-        svg-icon(
-          class="pointer"
-          :iconName="detachImage().icon"
-          :iconWidth="'16px'"
-          :iconColor="'gray-1'")
-        span(class="ml-10 body-2") {{detachImage().text}}
-        span(class="shortcut ml-10 body-2 text-gray-3") {{''}}
-    hr(v-if="showAdminTool && isLogin" class="popup-layer__hr")
-    div(v-for="(data,index) in shortcutMenu()"
-        :key="`popup-layer__shortcut-${index}`"
+        span(class="ml-10 body-2") {{option.text}}
+        span(class="shortcut ml-10 body-2 text-gray-3") {{option.shortcutText}}
+  //- for other purpose
+  template(v-if="isImage")
+    div(class="popup-layer__item"
+        @click="updateImageAsFrame().action()")
+      svg-icon(
+        class="pointer"
+        :iconName="updateImageAsFrame().icon"
+        :iconWidth="'16px'"
+        :iconColor="'gray-1'")
+      span(class="ml-10 body-2") {{updateImageAsFrame().text}}
+      span(class="shortcut ml-10 body-2 text-gray-3") {{''}}
+  template(v-if="isFrame")
+    div(class="popup-layer__item"
+        @click="detachImage().action()")
+      svg-icon(
+        class="pointer"
+        :iconName="detachImage().icon"
+        :iconWidth="'16px'"
+        :iconColor="'gray-1'")
+      span(class="ml-10 body-2") {{detachImage().text}}
+      span(class="shortcut ml-10 body-2 text-gray-3") {{''}}
+  hr(v-if="showAdminTool && isLogin" class="popup-layer__hr")
+  div(v-for="(data,index) in shortcutMenu()"
+      :key="`popup-layer__shortcut-${index}`"
+      class="popup-layer__item"
+      @click="data.action")
+    svg-icon(
+      class="pointer"
+      :iconName="data.icon"
+      :iconWidth="'16px'"
+      :iconColor="'gray-1'")
+    span(class="ml-10 body-2") {{data.text}}
+    span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
+  div(v-if="(isGroup && currSelectedInfo.layers.length === 1) || (!isGroup && currSelectedInfo.layers.length > 1)"
+      class="popup-layer__item"
+      @click="groupOption.action")
+    svg-icon(
+      class="pointer"
+      :iconName="groupOption.icon"
+      :iconWidth="'16px'"
+      :iconColor="'gray-1'")
+    span(class="ml-10 body-2") {{groupOption.text}}
+    span(class="shortcut ml-10 body-2 text-gray-3") {{groupOption.shortcutText}}
+  hr(v-if="layerNum > 1" class="popup-layer__hr")
+  div(v-if="layerNum > 1")
+    div(v-for="(data,index) in orderMenu()"
+        :key="`popup-layer__order-${index}`"
         class="popup-layer__item"
         @click="data.action")
       svg-icon(
@@ -46,64 +69,44 @@
         :iconWidth="'16px'"
         :iconColor="'gray-1'")
       span(class="ml-10 body-2") {{data.text}}
-      span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
-    div(v-if="(isGroup && currSelectedInfo.layers.length === 1) || (!isGroup && currSelectedInfo.layers.length > 1)"
-        class="popup-layer__item"
-        @click="groupOption.action")
-      svg-icon(
-        class="pointer"
-        :iconName="groupOption.icon"
-        :iconWidth="'16px'"
-        :iconColor="'gray-1'")
-      span(class="ml-10 body-2") {{groupOption.text}}
-      span(class="shortcut ml-10 body-2 text-gray-3") {{groupOption.shortcutText}}
-    hr(v-if="layerNum > 1" class="popup-layer__hr")
-    div(v-if="layerNum > 1")
-      div(v-for="(data,index) in orderMenu()"
-          :key="`popup-layer__order-${index}`"
-          class="popup-layer__item"
-          @click="data.action")
-        svg-icon(
-          class="pointer"
-          :iconName="data.icon"
-          :iconWidth="'16px'"
-          :iconColor="'gray-1'")
-        span(class="ml-10 body-2") {{data.text}}
-        div(class="shortcut")
-          span(class="ml-10 body-2 text-gray-3") {{data.shortcutText}}
-    hr(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image'))" class="popup-layer__hr")
-    div(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image')) && currSelectedInfo.layers[0].previewSrc === undefined"
-        class="popup-layer__item"
-        @click="setBackgroundImage")
-      svg-icon(
-        class="pointer"
-        :iconName="'copy'"
-        :iconWidth="'16px'"
-        :iconColor="'gray-1'")
-      span(class="ml-10 body-2") {{$t('NN0097')}}
+      div(class="shortcut")
+        span(class="ml-10 body-2 text-gray-3") {{data.shortcutText}}
+  hr(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image'))" class="popup-layer__hr")
+  div(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image')) && currSelectedInfo.layers[0].previewSrc === undefined"
+      class="popup-layer__item"
+      @click="setBackgroundImage")
+    svg-icon(
+      class="pointer"
+      :iconName="'copy'"
+      :iconWidth="'16px'"
+      :iconColor="'gray-1'")
+    span(class="ml-10 body-2") {{$t('NN0097')}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import MappingUtils from '@/utils/mappingUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
-import { mapGetters, mapMutations, mapState } from 'vuex'
 import { IImage } from '@/interfaces/layer'
-import uploadUtils from '@/utils/uploadUtils'
-import groupUtils from '@/utils/groupUtils'
-import layerUtils from '@/utils/layerUtils'
-import popupUtils from '@/utils/popupUtils'
-import imageUtils from '@/utils/imageUtils'
-import pageUtils from '@/utils/pageUtils'
-import frameUtils from '@/utils/frameUtils'
 import { IPopupOptions } from '@/interfaces/popup'
-import tiptapUtils from '@/utils/tiptapUtils'
-import store from '@/store'
+import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import MappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import ShortcutUtils from '@/utils/shortcutUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    updateOptions: Array as () => Array<IPopupOptions>
+    updateOptions: {
+      type: Array as () => Array<IPopupOptions>,
+      required: true
+    }
   },
   data() {
     return {
@@ -165,9 +168,6 @@ export default Vue.extend({
     },
     isFrame(): boolean {
       return this.currSelectedInfo.layers.length === 1 && this.getType.includes('frame')
-    },
-    hasPageDesignId(): boolean {
-      return this.getPage(pageUtils.currFocusPageIndex).designId !== ''
     },
     hasLayerDesignId(): boolean {
       return this.currSelectedInfo.layers[0] ? this.currSelectedInfo.layers[0].designId !== '' : false
@@ -254,7 +254,6 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _setBackgroundImage: 'SET_backgroundImage',
       set_popupComponent: 'SET_popupComponent',
       _setBgImgSrc: 'SET_backgroundImageSrc'
     }),

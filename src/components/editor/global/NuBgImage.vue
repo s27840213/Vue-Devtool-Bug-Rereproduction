@@ -1,44 +1,60 @@
 <template lang="pug">
-  div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles")
-    div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
-      nu-adjust-image(v-if="isAdjustImage"
-        :src="finalSrc"
-        :styles="adjustImgStyles"
-        :contentScaleRatio="contentScaleRatio"
-        @error="onError")
-      img(v-else-if="src"
-        :src="finalSrc"
-        draggable="false"
-        class="body"
-        ref="body"
-        @error="onError")
-    div(:style="filterContainerStyles()" class="filter-container")
-      component(v-for="(elm, idx) in cssFilterElms"
-        :key="`cssFilter${idx}`"
-        :is="elm.tag"
-        v-bind="elm.attrs")
+div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @pointerdown="setInBgSettingMode")
+  div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
+    nu-adjust-image(v-if="isAdjustImage"
+          :src="finalSrc"
+          :styles="adjustImgStyles"
+          :page="page"
+          :contentScaleRatio="contentScaleRatio"
+          @error="onError")
+    img(v-else-if="src"
+      :src="finalSrc"
+      draggable="false"
+      class="body"
+      ref="body"
+      @error="onError")
+  div(:style="filterContainerStyles()" class="filter-container")
+    component(v-for="(elm, idx) in cssFilterElms"
+      :key="`cssFilter${idx}`"
+      :is="elm.tag"
+      v-bind="elm.attrs")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import NuAdjustImage from './NuAdjustImage.vue'
-import ImageUtils from '@/utils/imageUtils'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import cssConverter from '@/utils/cssConverter'
-import generalUtils from '@/utils/generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImage, IImageStyle } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import cssConverter from '@/utils/cssConverter'
 import editorUtils from '@/utils/editorUtils'
-import pageUtils from '@/utils/pageUtils'
+import generalUtils from '@/utils/generalUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
+import ImageUtils from '@/utils/imageUtils'
+import pageUtils from '@/utils/pageUtils'
 import unitUtils from '@/utils/unitUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import NuAdjustImage from './NuAdjustImage.vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    image: Object,
-    color: String,
-    pageIndex: Number,
+    image: {
+      type: Object,
+      required: true
+    },
+    color: {
+      type: String,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -122,7 +138,6 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      getPageSize: 'getPageSize',
       getEditorViewImages: 'file/getEditorViewImages',
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
@@ -147,7 +162,7 @@ export default Vue.extend({
       let renderW = imgWidth
       let renderH = imgHeight
       if (dpi !== -1) {
-        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.pageSizeData
+        const { width, height, physicalHeight, physicalWidth, unit = 'px' } = this.pageSize
         if (unit !== 'px' && physicalHeight && physicalWidth) {
           const physicaldpi = Math.max(height, width) / unitUtils.convert(Math.max(physicalHeight, physicalWidth), unit, 'in')
           renderW *= dpi / physicaldpi
@@ -159,8 +174,8 @@ export default Vue.extend({
       }
       return ImageUtils.getSrcSize(srcObj, Math.max(renderW, renderH) * (this.scaleRatio / 100))
     },
-    pageSizeData(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return this.getPageSize(this.pageIndex)
+    pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
+      return pageUtils.removeBleedsFromPageSize(this.page)
     },
     srcObj(): SrcObj {
       return this.image.config.srcObj
@@ -186,6 +201,7 @@ export default Vue.extend({
     },
     mainStyles(): any {
       return {
+        margin: this.padding.split(' ').map(val => '-' + val).join(' '),
         padding: this.padding,
         opacity: this.image.config.styles.opacity / 100,
         backgroundColor: this.color
@@ -199,8 +215,8 @@ export default Vue.extend({
     },
     adjustImgStyles(): { [key: string]: string | number } {
       return Object.assign(generalUtils.deepCopy(this.image.config.styles), {
-        width: this.getPageSize(this.pageIndex).width,
-        height: this.getPageSize(this.pageIndex).height,
+        width: this.pageSize.width,
+        height: this.pageSize.height,
         imgX: this.imageSize.x,
         imgY: this.imageSize.y,
         imgWidth: this.imageSize.width,
@@ -209,7 +225,7 @@ export default Vue.extend({
     },
     cssFilterElms(): any[] {
       const { adjust } = this.image.config.styles
-      const { width, height } = pageUtils.getPage(this.pageIndex)
+      const { width, height } = this.pageSize
       if (!adjust) return []
 
       const elms = []
@@ -271,7 +287,7 @@ export default Vue.extend({
         })
       }
     },
-    imgStyles(): Partial<IImage> {
+    imgStyles(): Record<string, string> {
       return this.stylesConverter()
     },
     filterContainerStyles() {

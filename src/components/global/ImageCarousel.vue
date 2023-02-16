@@ -1,25 +1,27 @@
 <template lang="pug">
-  div(class="image-carousel")
-    div(class="image-carousel__overflow")
-      transition-group(tag="div" class="image-carousel__inner" leave-active-class="image-carousel__item--active")
-        div(v-for="(url, idx) in range"
-          :key="`${current}_${idx}_${url}`"
-          class="image-carousel__item")
-          slot(:url="url")
+div(class="image-carousel")
+  div(class="image-carousel__overflow")
+    transition-group(tag="div" class="image-carousel__inner" leave-active-class="image-carousel__item--active")
+      div(v-for="(url, idx) in range"
+        :key="`${current}_${idx}_${url}`"
+        class="image-carousel__item")
+        slot(:url="url")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-export default Vue.extend({
+import { defineComponent } from 'vue'
+export default defineComponent({
   props: {
     speed: {
       type: Number,
       default: 1000
     },
     imgs: {
-      type: Array
+      type: Array,
+      required: true
     }
   },
+  emits: ['change'],
   data () {
     return {
       handler: 0,
@@ -28,11 +30,11 @@ export default Vue.extend({
     }
   },
   mounted () {
-    this.handler = setInterval(() => {
+    this.handler = window.setInterval(() => {
       this.handleNext()
     }, this.speed)
   },
-  beforeDestroy () {
+  beforeUnmount () {
     clearInterval(this.handler)
     this.$emit('change', 0)
   },

@@ -1,19 +1,19 @@
-import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
+import list from '@/apis/list'
+import i18n from '@/i18n'
 import { IListServiceContentData, IListServiceData } from '@/interfaces/api'
 import {
   IAsset, ICategory, ICategoryExtend, IFavorite, IListModuleState, isICategory,
   isITag, ITag, ITagExtend
 } from '@/interfaces/module'
-import { captureException } from '@sentry/browser'
-import localeUtils from '@/utils/localeUtils'
-import themeUtils from '@/utils/themeUtils'
 import store from '@/store'
-import i18n from '@/i18n'
-import list from '@/apis/list'
-import vivistickerUtils, { MODULE_TYPE_MAPPING } from '@/utils/vivistickerUtils'
+import localeUtils from '@/utils/localeUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import popupUtils from '@/utils/popupUtils'
+import themeUtils from '@/utils/themeUtils'
+import vivistickerUtils, { MODULE_TYPE_MAPPING } from '@/utils/vivistickerUtils'
+import { captureException } from '@sentry/browser'
 import { cloneDeep, filter, find, pull } from 'lodash'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 function $all(keyword: string): ITag {
   return {
@@ -32,7 +32,7 @@ function processTags(tag: ITag) { // Split value and label
   return tag.keyword.startsWith('$all:') ? {
     active: tag.active,
     value: tag.keyword,
-    label: i18n.tc('NN0324')
+    label: i18n.global.tc('NN0324')
   } : {
     active: tag.active,
     value: tag.keyword,
@@ -108,7 +108,7 @@ export default function (this: any) {
         if (data.data.content.length === 0) {
           data.data.content = [{
             id: -1,
-            title: i18n.t('NN0024'),
+            title: i18n.global.t('NN0024'),
             list: [],
             is_recent: 1
           } as IListServiceContentData]
@@ -177,11 +177,14 @@ export default function (this: any) {
     // For all item or single category search result.
     getContent: async ({ commit, state }, params = {}) => {
       let { theme } = state
-      const { keyword } = params
+      const { keyword }: { keyword: string } = params
       const locale = params.locale || localeUtils.currLocale()
       commit('SET_STATE', { pending: true, locale })
-      if (keyword)commit('SET_STATE', { keyword })
-      if (keyword && this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
+      if (keyword) commit('SET_STATE', { keyword })
+      if (keyword && keyword.startsWith('tag::') &&
+        this.namespace === 'templates') {
+        theme = themeUtils.sortSelectedTheme(theme)
+      }
       try {
         const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
@@ -292,7 +295,7 @@ export default function (this: any) {
     },
 
     // Clear search keyword and result.
-    resetSearch: async({ state, commit }, { resetCategoryInfo = false, keepSearchResult = false } = {}) => {
+    resetSearch: async ({ state, commit }, { resetCategoryInfo = false, keepSearchResult = false } = {}) => {
       const tags = cloneDeep(state.tags) as ITag[]
       tags.forEach((tag) => { tag.active = false })
       const searchCategoryInfo = cloneDeep(state.searchCategoryInfo)
@@ -334,7 +337,7 @@ export default function (this: any) {
       }
     },
 
-    initFavorites: async({ state, commit, dispatch }) => {
+    initFavorites: async ({ state, commit, dispatch }) => {
       commit('SET_pending', { favorites: true })
       for (const target of ['categories', 'tags', 'items']) {
         commit('UPDATE_favorites', {
@@ -389,7 +392,7 @@ export default function (this: any) {
       }
     },
 
-    getFavoritesCategoriesContent: async ({ state, commit }, target: string[]|ICategoryExtend&{next: number}) => {
+    getFavoritesCategoriesContent: async ({ state, commit }, target: string[] | ICategoryExtend & { next: number }) => {
       const { theme } = state
       const { pending } = state.favorites
       const locale = localeUtils.currLocale()
@@ -504,7 +507,7 @@ export default function (this: any) {
       }
     },
 
-    toggleFavorite: async ({ state, commit, dispatch, getters }, favs: Record<string, IAsset|ITagExtend|ICategoryExtend>) => {
+    toggleFavorite: async ({ state, commit, dispatch, getters }, favs: Record<string, IAsset | ITagExtend | ICategoryExtend>) => {
       for (const [type, target] of Object.entries(favs)) {
         let key: string
         let getContent = () => { /**/ }
@@ -534,12 +537,12 @@ export default function (this: any) {
             if (old.obj[key]) {
               delete old.obj[key]
               old.order = pull(old.order, key)
-              popupUtils.openPopup('icon', { }, { iconName: 'favorites' })
+              popupUtils.openPopup('icon', {}, { iconName: 'favorites' })
             } else {
               old.obj[key] = true
               old.order = [key, ...old.order]
               getContent()
-              popupUtils.openPopup('icon', { }, { iconName: 'favorites-fill' })
+              popupUtils.openPopup('icon', {}, { iconName: 'favorites-fill' })
             }
             return old
           })
@@ -547,11 +550,11 @@ export default function (this: any) {
       }
     },
 
-    searchFavorites: async({ commit }, target: string|ITag|ICategory) => {
+    searchFavorites: async ({ commit }, target: string | ITag | ICategory) => {
       commit('UPDATE_favorites', { searchTarget: target })
     },
 
-    searchMoreFavorites: async({ state, dispatch, getters }) => {
+    searchMoreFavorites: async ({ state, dispatch, getters }) => {
       const { searchTarget } = state.favorites
       const activeTag = getters.favoritesCategoryActiveTag as string
       if (isITag(searchTarget)) {
@@ -563,13 +566,13 @@ export default function (this: any) {
         dispatch('getFavoritesTagsContent', [activeTag])
       }
       switch (searchTarget) {
-        case i18n.tc('NN0762'):
+        case i18n.global.tc('NN0762'):
           dispatch('getFavoritesItems')
           break
-        case i18n.tc('NN0761'):
+        case i18n.global.tc('NN0761'):
           dispatch('getFavoritesTags')
           break
-        case i18n.tc('NN0760'):
+        case i18n.global.tc('NN0760'):
           dispatch('getFavoritesCategories')
           break
       }
@@ -590,7 +593,7 @@ export default function (this: any) {
       dispatch('searchMoreFavorites')
     },
 
-    resetFavoritesSearch: async({ commit }) => {
+    resetFavoritesSearch: async ({ commit }) => {
       commit('UPDATE_favorites', { searchTarget: '' })
     }
   }
@@ -606,7 +609,7 @@ export default function (this: any) {
           }
         })
     },
-    SET_pending(state: IListModuleState, data: Record<'main'|'favorites', boolean>) {
+    SET_pending(state: IListModuleState, data: Record<'main' | 'favorites', boolean>) {
       for (const item of Object.entries(data)) {
         switch (item[0]) {
           case 'main':
@@ -654,14 +657,14 @@ export default function (this: any) {
     },
     UPDATE_RECENTLY_PAGE(state: IListModuleState, { index, format }) {
       const targetCategory = state.categories.find((category: any) => {
-        return category.title === `${i18n.t('NN0024')}`
+        return category.title === `${i18n.global.t('NN0024')}`
       })?.list
       if (targetCategory) {
         targetCategory.splice(index, 1)
         targetCategory.unshift(format)
       }
     },
-    SET_CONTENT(state: IListModuleState, { objects, isSearch = false }: {objects: IListServiceData, isSearch: boolean}) {
+    SET_CONTENT(state: IListModuleState, { objects, isSearch = false }: { objects: IListServiceData, isSearch: boolean }) {
       const { keyword } = state
       const {
         content = [],
@@ -735,7 +738,10 @@ export default function (this: any) {
     nextParams: (state) => {
       let { nextPage, nextSearch, keyword, theme, locale } = state
       const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
-      if (keyword && this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
+      if (keyword && keyword.startsWith('tag::') &&
+        this.namespace === 'templates') {
+        theme = themeUtils.sortSelectedTheme(theme)
+      }
       return {
         token: needCache ? '1' : store.getters['user/getToken'],
         locale,
@@ -771,7 +777,7 @@ export default function (this: any) {
       return (id: string): boolean => state.favorites.categories.obj[id] !== undefined
     },
     checkTagFavorite(state) {
-      return (keyword: string): boolean|undefined => {
+      return (keyword: string): boolean | undefined => {
         if (keyword === '') return undefined
         return state.favorites.tags.obj[keyword] !== undefined
       }
@@ -822,14 +828,14 @@ export default function (this: any) {
           content: state.favorites.tagsContent[searchTarget.keyword]?.asset,
           tags: []
         }
-      // Searching a category, while $all tag active.
+        // Searching a category, while $all tag active.
       } else if (isICategory(searchTarget) && activeTag.startsWith('$all:')) {
         return {
           title: state.favorites.categoriesContent[searchTarget.id]?.title,
           content: state.favorites.categoriesContent[searchTarget.id]?.asset,
           tags: state.favorites.categoriesContent[searchTarget.id]?.tags
         }
-      // Searching a category, while $all tag inactive. Aka searching a tag.
+        // Searching a category, while $all tag inactive. Aka searching a tag.
       } else if (isICategory(searchTarget)) {
         return {
           title: state.favorites.categoriesContent[searchTarget.id]?.title,
@@ -838,19 +844,19 @@ export default function (this: any) {
         }
       }
       switch (searchTarget) {
-        case i18n.tc('NN0762'):
+        case i18n.global.tc('NN0762'):
           return {
             title: searchTarget,
             content: getters.favoritesItems as IAsset[],
             tags: []
           }
-        case i18n.tc('NN0761'):
+        case i18n.global.tc('NN0761'):
           return {
             title: searchTarget,
             content: getters.favoritesTags as ITagExtend[],
             tags: []
           }
-        case i18n.tc('NN0760'):
+        case i18n.global.tc('NN0760'):
           return {
             title: searchTarget,
             content: getters.favoritesCategories as ICategoryExtend[],
@@ -870,37 +876,37 @@ export default function (this: any) {
       let title = ''
       let bulbUrl = ''
       let isFavorite: boolean
-      let action: ()=>void
+      let action: () => void
 
       // Searching a favorites tag.
       if (isITag(searchTarget)) {
         title = searchTarget.keyword
         isFavorite = getters.checkTagFavorite(searchTarget.keyword)
         action = () => store.dispatch(`${namespace}/toggleFavorite`, { tags: { keyword: searchTarget.keyword } })
-      // Searching a favorites category, while $all tag active.
+        // Searching a favorites category, while $all tag active.
       } else if (isICategory(searchTarget) && activeTag.startsWith('$all:')) {
         const category = state.favorites.categoriesContent[searchTarget.id]
         title = category.title
         bulbUrl = category.url
         isFavorite = getters.checkCategoryFavorite(searchTarget.id)
         action = () => store.dispatch(`${namespace}/toggleFavorite`, { categories: { id: searchTarget.id } })
-      // Searching a favorites category, while $all tag inactive. Aka searching a tag.
+        // Searching a favorites category, while $all tag inactive. Aka searching a tag.
       } else if (isICategory(searchTarget)) {
         const category = state.favorites.categoriesContent[searchTarget.id]
         title = category.title
         bulbUrl = category.url
         isFavorite = getters.checkTagFavorite(activeTag)
         action = () => store.dispatch(`${namespace}/toggleFavorite`, { tags: { keyword: activeTag } })
-      // Searching favorites Item/Keyword/Category
+        // Searching favorites Item/Keyword/Category
       } else if (searchTarget !== '') {
         return { title: searchTarget }
-      // Svg tag search result. (non-fav)
+        // Svg tag search result. (non-fav)
       } else if (searchingCategory && keyword.startsWith('tag::')) {
         title = state.searchCategoryInfo.categoryName
         bulbUrl = state.searchCategoryInfo.url
         isFavorite = getters.checkTagFavorite(keyword.replace('tag::', ''))
         action = () => store.dispatch(`${namespace}/toggleFavorite`, { tags: { keyword: keyword.replace('tag::', '') } })
-      // Svg category search result. (non-fav)
+        // Svg category search result. (non-fav)
       } else if (searchingCategory && !keyword.startsWith('tag::')) {
         const category = find(state.categories, ['title', keyword])
         title = state.searchCategoryInfo.categoryName

@@ -1,11 +1,11 @@
 import store from '@/store'
 import { round } from 'lodash'
 
-interface IMapUnit {
+export interface IMapUnit {
   [key: string]: number
 }
 
-interface IMapSize {
+export interface IMapSize {
   [key: string]: {
     width: number,
     height: number
@@ -16,13 +16,14 @@ const STR_UNITS = ['px', 'cm', 'mm', 'in']
 const IDX_UNITS = Object.fromEntries(STR_UNITS.map((v, i) => [v, i]))
 const PRECISION = 3
 
+/* eslint-disable no-multi-spaces, comma-spacing */
 function mulConvUnit(dpi = 96): number[][] {
   return [
-    // px cm mm in
-    [1, 1 / dpi * 2.54, 1 / dpi * 25.4, 1 / dpi], // px
-    [dpi / 2.54, 1, 10, 1 / 2.54], // cm
-    [dpi / 25.4, 1 / 10, 1, 1 / 25.4], // mm
-    [dpi, 2.54, 25.4, 1] // in
+    // px        cm          mm          in
+    [1         , 2.54 / dpi, 25.4 / dpi, 1 / dpi], // px
+    [dpi / 2.54, 1         , 10        , 1 / 2.54], // cm
+    [dpi / 25.4, 1 / 10    , 1         , 1 / 25.4], // mm
+    [dpi       , 2.54      , 25.4      , 1] // in
   ]
 }
 
@@ -125,7 +126,5 @@ class UnitUtils {
 export default new UnitUtils()
 export {
   STR_UNITS,
-  PRECISION,
-  IMapUnit,
-  IMapSize
+  PRECISION
 }

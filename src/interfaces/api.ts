@@ -163,7 +163,7 @@ export interface ICategoryItem {
   sentinel?: boolean
 }
 export interface ICategoryList {
-  key: string
+  key: 'mainContent'|'searchResult'
   show: boolean
   content: ICategoryItem[]
   loadMore?: ()=>void
@@ -212,7 +212,8 @@ export interface IUserDesignContentData {
   signed_url?: { [key: string]: string },
   page_num: number,
   polling: boolean,
-  unit: string
+  unit: string,
+  group_type: number
 }
 
 export interface IAssetDesignParams {

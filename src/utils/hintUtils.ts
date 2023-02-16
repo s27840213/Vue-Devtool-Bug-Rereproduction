@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import { nextTick } from 'vue'
 
 class HintUtils {
   showHint: boolean
@@ -23,7 +23,7 @@ class HintUtils {
 
   bind(el: HTMLElement, hint: string, timeInterval = 300) {
     el.addEventListener('mouseenter', () => {
-      this.timerId = setTimeout(() => {
+      this.timerId = window.setTimeout(() => {
         this.openHint(el, hint)
       }, timeInterval)
     })
@@ -35,7 +35,7 @@ class HintUtils {
 
   unbind(el: HTMLElement, hint: string, timeInterval = 300) {
     el.removeEventListener('mouseenter', () => {
-      this.timerId = setTimeout(() => {
+      this.timerId = window.setTimeout(() => {
         this.openHint(el, hint)
       }, timeInterval)
     })
@@ -47,7 +47,7 @@ class HintUtils {
   }
 
   private showHintUnderTarget(target: HTMLElement) {
-    Vue.nextTick(() => {
+    nextTick(() => {
       const el = document.querySelector('.hint') as HTMLElement
       const [width, height] = [el.offsetWidth, el.offsetHeight]
       const [vw, vh] = [window.outerWidth || document.documentElement.clientWidth, window.outerHeight || document.documentElement.clientHeight]

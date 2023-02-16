@@ -1,15 +1,14 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
-import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle, ILayer, IParagraph } from '@/interfaces/layer'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { LayerProcessType, LayerType } from '@/store/types'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import localeUtils from './localeUtils'
+import mouseUtils from './mouseUtils'
 import textPropUtils from './textPropUtils'
 import ZindexUtils from './zindexUtils'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
-import mouseUtils from './mouseUtils'
-
 class LayerFactary {
   newImage(config: any, parentLayer?: any): IImage {
     const {
@@ -125,7 +124,12 @@ class LayerFactary {
       })
     } else if (clips.length) {
       // Template frame with image, need to copy the info of the image
-      clips[0] = this.newImage(Object.assign(GeneralUtils.deepCopy(clips[0])))
+      clips[0].styles.width = styles.width
+      clips[0].styles.height = styles.height
+      clips[0].styles.initHeight = styles.initHeight
+      clips[0].styles.initWidth = styles.initWidth
+      clips[0] = this.newImage(clips[0])
+      // clips[0] = this.newImage(Object.assign(GeneralUtils.deepCopy(clips[0])))
       clips[0].isFrameImg = true
     } else {
       // New image-frame no image info need to be resored
@@ -531,7 +535,7 @@ class LayerFactary {
     return config
   }
 
-  newByLayerType(config: any, parentLayer? : any): IShape | IText | IImage | IFrame | IGroup | ITmp {
+  newByLayerType(config: any, parentLayer?: any): IShape | IText | IImage | IFrame | IGroup | ITmp {
     this.paramsExaminer(config)
     switch (config.type) {
       case 'shape':

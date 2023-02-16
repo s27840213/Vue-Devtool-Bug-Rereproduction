@@ -1,85 +1,106 @@
 <template lang="pug">
-  div(class="mobile-design-item")
-    div(class="mobile-design-item__block pointer")
-      div(class="mobile-design-item__img-container")
-        image-carousel(v-if="showCarousel && previewCheckReady"
-          :imgs="pageImages"
-          :speed="2000"
-          @change="handleCarouselIdx")
-          template(v-slot="{ url }")
-            img(class="mobile-design-item__thumbnail"
-                draggable="false"
-                :style="imageStyles()"
-                :src="url")
-        img(ref="thumbnail"
-            v-if="!showCarousel && previewCheckReady"
-            class="mobile-design-item__thumbnail"
-            draggable="false"
-            :src="appliedUrl")
-      div(class="mobile-design-item__controller")
-        div(v-if="!isTempDesign"
-            class="mobile-design-item__controller-content"
-            @click.self="handleClick")
-          div(v-if="isSelected"
-            class="mobile-design-item__checkbox-checked"
-            @click.stop="emitDeselect")
-            svg-icon(iconName="done"
-                    iconWidth="10px"
-                    iconHeight="8px"
-                    iconColor="white")
-          div(v-if="!isSelected && isAnySelected"
-            class="mobile-design-item__checkbox"
-            @click.stop="emitSelect")
-          div(class="mobile-design-item__more"
-            @click.stop="openMenu()")
-            svg-icon(iconName="more_vertical"
-                    iconWidth="24px"
-                    iconColor="gray-2")
-          //- div(v-if="favorable && !isMultiSelected" class="mobile-design-item__favorite" @click.stop="emitLike")
-            svg-icon(v-if="isMouseOver && !config.favorite"
-                    iconName="favorites"
-                    iconWidth="20px"
-                    iconColor="white")
-            svg-icon(v-if="isMouseOver && config.favorite"
-                    iconName="favorites-fill"
-                    iconWidth="20px"
-                    iconColor="white")
-            svg-icon(v-if="!isMouseOver && config.favorite"
-                    iconName="favorites-fill"
-                    iconWidth="20px"
-                    iconColor="gray-4")
-          span(class="mobile-design-item__index") {{ carouselIdx + 1 }}/{{ config.pageNum }}
-    div(class="mobile-design-item__name"
-        @click.prevent.stop)
-      div(class="mobile-design-item__name__container")
-        span(:title="config.name") {{ config.name }}
-    div(class="mobile-design-item__size"
-        @click.prevent.stop)
-      span {{ `${sizeToShow.width} x ${sizeToShow.height} ${sizeToShow.unit}` }}
+div(class="mobile-design-item")
+  div(class="mobile-design-item__block pointer")
+    div(class="mobile-design-item__img-container")
+      image-carousel(v-if="showCarousel && previewCheckReady"
+        :imgs="pageImages"
+        :speed="2000"
+        @change="handleCarouselIdx")
+        template(v-slot="{ url }")
+          img(class="mobile-design-item__thumbnail"
+              draggable="false"
+              :style="imageStyles()"
+              :src="url")
+      img(ref="thumbnail"
+          v-if="!showCarousel && previewCheckReady"
+          class="mobile-design-item__thumbnail"
+          draggable="false"
+          :src="appliedUrl")
+    div(class="mobile-design-item__controller")
+      div(v-if="!isTempDesign"
+          class="mobile-design-item__controller-content"
+          @click.self="handleClick")
+        div(v-if="isSelected"
+          class="mobile-design-item__checkbox-checked"
+          @click.stop="emitDeselect")
+          svg-icon(iconName="done"
+                  iconWidth="20px"
+                  iconHeight="20px"
+                  iconColor="white")
+        div(v-if="!isSelected && isAnySelected"
+          class="mobile-design-item__checkbox"
+          @click.stop="emitSelect")
+        div(class="mobile-design-item__more"
+          @click.stop="openMenu()")
+          svg-icon(iconName="more_vertical"
+                  iconWidth="24px"
+                  iconColor="gray-2")
+        //- div(v-if="favorable && !isMultiSelected" class="mobile-design-item__favorite" @click.stop="emitLike")
+          svg-icon(v-if="isMouseOver && !config.favorite"
+                  iconName="favorites"
+                  iconWidth="20px"
+                  iconColor="white")
+          svg-icon(v-if="isMouseOver && config.favorite"
+                  iconName="favorites-fill"
+                  iconWidth="20px"
+                  iconColor="white")
+          svg-icon(v-if="!isMouseOver && config.favorite"
+                  iconName="favorites-fill"
+                  iconWidth="20px"
+                  iconColor="gray-4")
+        span(class="mobile-design-item__index") {{ carouselIdx + 1 }}/{{ config.pageNum }}
+  div(class="mobile-design-item__name"
+      @click.prevent.stop)
+    div(class="mobile-design-item__name__container")
+      span(:title="config.name") {{ config.name }}
+  div(class="mobile-design-item__size"
+      @click.prevent.stop)
+    span {{ `${sizeToShow.width} x ${sizeToShow.height} ${sizeToShow.unit}` }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
-import vClickOutside from 'v-click-outside'
-import imageUtils from '@/utils/imageUtils'
+import { IDesign } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
+import imageUtils from '@/utils/imageUtils'
+import modalUtils from '@/utils/modalUtils'
 import { PRECISION } from '@/utils/unitUtils'
+import vClickOutside from 'click-outside-vue3'
 import { round } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ImageCarousel
   },
   props: {
-    config: Object,
-    unenterable: Boolean,
-    isAnySelected: Boolean,
-    isSelected: Boolean,
-    isMultiSelected: Boolean,
-    index: Number
+    config: {
+      type: Object,
+      required: true
+    },
+    unenterable: {
+      type: Boolean,
+      required: true
+    },
+    isAnySelected: {
+      type: Boolean,
+      required: true
+    },
+    isSelected: {
+      type: Boolean,
+      required: true
+    },
+    isMultiSelected: {
+      type: Boolean,
+      required: true
+    },
+    index: {
+      type: Number,
+      required: true
+    }
   },
+  emits: ['select', 'deselect'],
   data() {
     return {
       imgWidth: 150,
@@ -103,7 +124,7 @@ export default Vue.extend({
   mounted() {
     window.addEventListener('resize', this.handleResize)
   },
-  destroyed() {
+  unmounted() {
     window.removeEventListener('resize', this.handleResize)
   },
   watch: {
@@ -140,7 +161,8 @@ export default Vue.extend({
     ...mapMutations('design', {
       clearSelection: 'UPDATE_clearSelection',
       setBottomMenu: 'SET_bottomMenu',
-      setMobileDesignBuffer: 'SET_mobileDesignBuffer'
+      setMobileDesignBuffer: 'SET_mobileDesignBuffer',
+      setDesignThumbnail: 'UPDATE_setDesignThumbnail'
     }),
     imageStyles() {
       return { width: `${this.renderedWidth}px`, height: `${this.renderedHeight}px` }
@@ -151,7 +173,19 @@ export default Vue.extend({
         return
       }
       if (this.unenterable || this.isTempDesign) return
-      designUtils.setDesign(this.config)
+      if (this.$isTouchDevice && this.config.group_type === 1) {
+        modalUtils.setModalInfo(
+            `${this.$t('NN0808')}`,
+            [],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+        )
+        return
+      }
+      designUtils.setDesign(this.config as IDesign)
     },
     handleCarouselIdx(idx: number) {
       this.carouselIdx = idx
@@ -172,7 +206,10 @@ export default Vue.extend({
       if (this.config.polling) {
         this.pageImages = Array(this.config.pageNum).fill(this.previewPlaceholder)
         this.previewCheckReady = true
-        this.config.thumbnail = this.previewPlaceholder
+        this.setDesignThumbnail({
+          asset_index: this.config.asset_index,
+          thumbnail: this.previewPlaceholder
+        })
         this.pollingStep(0, callback)
       } else {
         if (this.isTempDesign) return
@@ -182,7 +219,10 @@ export default Vue.extend({
           this.imgWidth = width
           this.imgHeight = height
           this.previewCheckReady = true
-          this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
+          this.setDesignThumbnail({
+            asset_index: this.config.asset_index,
+            thumbnail: exists ? this.configPreview : this.previewPlaceholder
+          })
           this.$nextTick(() => {
             callback()
           })
@@ -204,7 +244,10 @@ export default Vue.extend({
         this.imgWidth = width
         this.imgHeight = height
         if (exists) {
-          this.config.thumbnail = this.configPreview
+          this.setDesignThumbnail({
+            asset_index: this.config.asset_index,
+            thumbnail: this.configPreview
+          })
           this.$nextTick(() => {
             callback()
           })
@@ -236,7 +279,7 @@ export default Vue.extend({
     },
     startCarousel() {
       if (this.config.pageNum === 1) return
-      this.waitTimer = setInterval(() => {
+      this.waitTimer = window.setInterval(() => {
         const success = this.getThumbnailSize()
         if (success) {
           clearInterval(this.waitTimer)

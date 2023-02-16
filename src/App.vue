@@ -1,7 +1,9 @@
 <template lang="pug">
+metainfo
+  template(v-slot:title ="{ content }") {{ content ? `${content}` : `SITE_NAME` }}
 div(id="app" :style="appStyles()")
   link(rel="preconnect" href="https://fonts.googleapis.com")
-  link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+  link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="")
   link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
   link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
   //- div(class="coordinate" ref="coordinate")
@@ -14,9 +16,9 @@ div(id="app" :style="appStyles()")
     popup
     res-info(v-show="currSelectedResInfo.type"
       :info="currSelectedResInfo"
-      @blur.native="setCurrSelectedResInfo()"
+      @blur="setCurrSelectedResInfo()"
       tabindex="0")
-  fps(v-if="!inScreenshotPreview && showAllAdminTool")
+  debug-tool(v-if="!inScreenshotPreview && showAllAdminTool")
   div(class="modal-container"
       v-if="isModalOpen"
       :style="modalInfo.backdropStyle")
@@ -40,25 +42,24 @@ div(id="app" :style="appStyles()")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'v-click-outside'
-import Popup from '@/components/popup/Popup.vue'
-import { Chrome } from 'vue-color'
-import ResInfo from '@/components/modal/ResInfo.vue'
+import DebugTool from '@/components/componentLog/DebugTool.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
-import Fps from '@/components/componentLog/Fps.vue'
-import popupUtils from './utils/popupUtils'
+import ResInfo from '@/components/modal/ResInfo.vue'
+import Popup from '@/components/popup/Popup.vue'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
+import popupUtils from './utils/popupUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     Popup,
-    'chrome-picker': Chrome,
     ResInfo,
     ModalCard,
-    Fps
+    DebugTool
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -72,11 +73,16 @@ export default Vue.extend({
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
+
+    if ((window as any).__PRERENDER_INJECTED !== undefined) {
+      document.dispatchEvent(new Event('render-event'))
+      window.dispatchEvent(new Event('render-event'))
+    }
   },
   beforeMount() {
     networkUtils.registerNetworkListener()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     networkUtils.unregisterNetworkListener()
   },
   computed: {
@@ -89,7 +95,7 @@ export default Vue.extend({
     }),
     currLocale(): string {
       return localeUtils.currLocale()
-    }
+    },
   },
   methods: {
     ...mapMutations('text', {
@@ -99,7 +105,7 @@ export default Vue.extend({
       setDropdown: 'popup/SET_STATE',
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
     }),
-    appStyles() {
+    appStyles(): Record<string, string> {
       if (this.$route.name === 'Preview') {
         return {
           display: 'flex',
@@ -144,7 +150,7 @@ export default Vue.extend({
 })
 </script>
 <style lang="scss">
-@use "~@/assets/scss/main.scss";
+@use "@/assets/scss/main.scss";
 
 #app {
   @include size(100%, 100%);

@@ -4,14 +4,14 @@ div(class="panel-group-template py-20 px-10 flex flex-column" :style="panelStyle
     svg-icon(class="panel-group-template__close pointer"
       iconName="chevron-left"
       iconColor="white"
-      @click.native="$emit('close')")
+      @click="$emit('close')")
     button(class="panel-group-template__apply lead-2"
       @click="handleApplyGroupTemplate") {{ $t('NN0392', { num: count })}}
     svg-icon(v-if="showAdminTool"
       class="panel-group-template__delete pointer"
       iconName="trash"
       iconColor="white"
-      @click.native="handleDeleteGroupTemplate")
+      @click="handleDeleteGroupTemplate")
   div(class="panel-group-template__list" :style="listStyle")
     category-template-item(v-for="(item, idx) in contents"
       class="panel-group-template__item"
@@ -22,55 +22,61 @@ div(class="panel-group-template py-20 px-10 flex flex-column" :style="panelStyle
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters } from 'vuex'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
 import assetUtils from '@/utils/assetUtils'
+import editorUtils from '@/utils/editorUtils'
 import modalUtils from '@/utils/modalUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import generalUtils from '@/utils/generalUtils'
-import editorUtils from '@/utils/editorUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   components: { CategoryTemplateItem },
   props: {
-    showId: Boolean,
-    groupItem: Object
+    showId: {
+      type: Boolean,
+      required: true
+    },
+    groupItem: {
+      type: Object,
+      required: true
+    }
   },
+  emits: ['close'],
   computed: {
     ...mapGetters({
       token: 'user/getToken',
       showAdminTool: 'user/showAdminTool'
     }),
     count(): number {
-      return this.groupItem.content_ids.length
+      return this.groupItem.content_ids ? this.groupItem.content_ids.length : 0
     },
     contents(): Array<{ [key: string]: any }> {
       const { content_ids: ids } = this.groupItem
-      return (ids as Array<{ [key: string]: any }>)
+      return ids ? (ids as Array<{ [key: string]: any }>)
         .map(content => ({
           ...content,
           type: 6
-        }))
+        })) : []
     },
     isDetailPage(): boolean {
       return this.groupItem.group_type === 1
     },
     panelStyle(): Record<string, string> {
-      return generalUtils.isTouchDevice() ? {
+      return this.$isTouchDevice ? {
         padding: '20px 15px'
       } : {}
     },
     listStyle(): Record<string, string> {
-      return generalUtils.isTouchDevice() ? {
-        gridTemplateColumns: `repeat(${window.outerWidth >= 600 ? 3 : 2}, 1fr)`
+      return this.$isTouchDevice ? {
+        gridTemplateColumns: `repeat(${window.innerWidth >= 600 ? 3 : 2}, 1fr)`
       } : {}
     }
   },
   methods: {
     handleApplyGroupTemplate() {
-      if (!paymentUtils.checkProGroupTemplate(this.groupItem, this.groupItem.content_ids[0])) return
-      assetUtils.addGroupTemplate(this.groupItem)
+      if (!paymentUtils.checkProGroupTemplate(this.groupItem as any, this.groupItem.content_ids[0])) return
+      assetUtils.addGroupTemplate(this.groupItem as any)
         .then(() => {
           editorUtils.setMobileAllPageMode(true)
         })

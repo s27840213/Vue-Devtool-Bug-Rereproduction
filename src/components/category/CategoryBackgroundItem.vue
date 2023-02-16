@@ -11,19 +11,27 @@ div(class="category-background-item")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import i18n from '@/i18n'
-import store from '@/store'
-import { mapGetters } from 'vuex'
+import { IAsset } from '@/interfaces/module'
 import AssetUtils from '@/utils/assetUtils'
 import imageUtils from '@/utils/imageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: ['share'],
   props: {
-    src: String,
-    item: Object,
-    locked: Boolean
+    src: {
+      type: String
+    },
+    item: {
+      type: Object as PropType<IAsset>,
+      required: true
+    },
+    locked: {
+      type: Boolean,
+      required: true
+    }
   },
   data() {
     return {
@@ -37,7 +45,7 @@ export default Vue.extend({
     })
   },
   methods: {
-    handleNotFound(event: Event) {
+    handleNotFound() {
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addBackground() {

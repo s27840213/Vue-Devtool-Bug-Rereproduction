@@ -13,16 +13,18 @@ div(class="panel-adjust")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import imageAdjustUtil from '@/utils/imageAdjustUtil'
-import { mapGetters, mapState } from 'vuex'
-import frameUtils from '@/utils/frameUtils'
-import pageUtils from '@/utils/pageUtils'
 import { IFrame, IImage } from '@/interfaces/layer'
 import backgroundUtils from '@/utils/backgroundUtils'
+import frameUtils from '@/utils/frameUtils'
+import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import layerUtils from '@/utils/layerUtils'
-export default Vue.extend({
+import pageUtils from '@/utils/pageUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
+
+export default defineComponent({
+  emits: [],
   components: {
     MobileSlider
   },

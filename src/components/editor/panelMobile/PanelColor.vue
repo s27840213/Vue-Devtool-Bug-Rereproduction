@@ -22,33 +22,35 @@ div(class="panel-color px-5")
     mode="PanelColor"
     :allRecentlyControl="showAllRecently"
     :selectedColor="selectedColor"
+    :currPage="currPage"
     @openColorPicker="openColorPicker"
     @openColorMore="openColorMore")
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-import { mapGetters, mapState } from 'vuex'
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
+import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
-import { IFrame, IImage, IShape } from '@/interfaces/layer'
-import { ColorEventType } from '@/store/types'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IFrame, IImage, IShape } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import { ColorEventType } from '@/store/types'
 import colorUtils, { checkAndConvertToHex } from '@/utils/colorUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import layerUtils from '@/utils/layerUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
-import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
-import textBgUtils from '@/utils/textBgUtils'
+import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
 import shapeUtils from '@/utils/shapeUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import textBgUtils from '@/utils/textBgUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 import { cloneDeep } from 'lodash'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       currColor: '#fff',
@@ -62,8 +64,13 @@ export default Vue.extend({
     panelHistory: {
       type: Array as PropType<string[]>,
       default: () => []
+    },
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
+  emits: ['pushHistory'],
   components: {
     MobileSlider,
     ColorPicker,
@@ -74,10 +81,7 @@ export default Vue.extend({
     colorUtils.on(this.currEvent, this.handleColorUpdate)
     colorUtils.onStop(this.currEvent, this.recordChange)
   },
-  mounted() {
-    this.updateColorsOverflow()
-  },
-  beforeDestroy() {
+  beforeUnmount() {
     colorUtils.event.off(this.currEvent, this.handleColorUpdate)
     colorUtils.offStop(this.currEvent, this.recordChange)
   },
@@ -96,7 +100,6 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       layerIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer'
     }),
     historySize(): number {
       return this.panelHistory.length
@@ -314,7 +317,7 @@ export default Vue.extend({
     height: 1px;
     background-color: setColor(gray-4);
   }
-  & .show-document-colors::v-deep .color-panel__scroll {
+  & .show-document-colors:deep(.color-panel__scroll) {
     padding-top: 16px;
   }
 }

@@ -3,12 +3,12 @@ div(class="popup-window")
   div(class="wrapper")
     div(class="payment" v-click-outside="vcoConfig()")
       svg-icon(class="payment__close" iconName="close" iconWidth="32px"
-              iconColor="gray-0" @click.native="closePopup()")
+              iconColor="gray-0" @click="closePopup()")
       div(class="payment-left")
         div(class="payment-left-top")
           div(class="payment-left-top__step")
             svg-icon(v-if="showPreStep" iconName="left-arrow" iconWidth="24px"
-                    iconColor="gray1" @click.native="preStep()")
+                    iconColor="gray1" @click="preStep()")
             span(v-if="totalStep") {{$t('NN0544')}} {{currentStep}} of {{totalStep}}
           div(class="text-H4" v-html="title")
           div(v-if="description" class="mt-15") {{description}}
@@ -45,16 +45,16 @@ div(class="popup-window")
           //- case cancel2
           template(v-if="view === 'cancel2'")
             div(v-for="can, idx in cancel2" class="payment-left-content-cancel")
-              radio-btn(:isSelected="reasonIndex === idx"
+              radio-btn(:isSelected="reasonIndex === String(idx)"
                         :formatKey="String(idx)" circleColor="gray-4"
-                        @select="selectCancelReason(idx)")
+                        @select="selectCancelReason(String(idx))")
               span {{can}}
             input(class="payment-left-content-cancel__other"
                   v-model="otherReason" :placeholder="$t('NN0584')")
         div(class="payment-left-button")
           btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
               :disabled="button.disabled ? button.disabled() : false"
-              @click.native="button.func()") {{button.label}}
+              @click="button.func()") {{button.label}}
       div(class="payment-right")
         img(class="payment-right-bg" loading="lazy"
             :src="require(`@/assets/img/jpg/pricing/${locale}/${img}`)")
@@ -64,15 +64,15 @@ div(class="popup-window")
         div(class="payment-finish-content")
           animation(path="/lottie/pro.json")
           span {{$t('NN0562')}}
-          btn(type="primary-mid" @click.native="closePopup()") {{$t('NN0563')}}
+          btn(type="primary-mid" @click="closePopup()") {{$t('NN0563')}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
-import vClickOutside from 'v-click-outside'
-import i18n from '@/i18n'
+import vClickOutside from 'click-outside-vue3'
 import paymentUtils from '@/utils/paymentUtils'
 import {
   IPaymentPayingView, IPaymentView, IPaymentWarningView, _IPaymentWarningView
@@ -89,7 +89,7 @@ const { mapFields } = createHelpers({
   mutationType: 'payment/updateField'
 })
 
-export default Vue.extend({
+export default defineComponent({
   name: 'PopupPayment',
   components: {
     PaymentField,
@@ -138,7 +138,7 @@ export default Vue.extend({
       planSelected: 'planSelected',
       trialStatus: 'trialStatus'
     }),
-    locale(): string { return i18n.locale },
+    locale(): string { return this.$i18n.locale },
     userPeriod(): string {
       return ['switch1', 'switch2'].includes(this.view)
         ? (this.isBundle ? 'monthly' : 'yearly')
@@ -180,18 +180,18 @@ export default Vue.extend({
     getAd(name: IPaymentWarningView): string[] {
       switch (name) {
         case 'export-pdf-print':
-          return [i18n.tc('NN0806'), 'export-pdf-print.jpg']
+          return [this.$tc('NN0806'), 'export-pdf-print.jpg']
         case 'page-resize':
-          return [i18n.tc('NN0768'), 'page-resize.jpg']
+          return [this.$tc('NN0768'), 'page-resize.jpg']
         case 'brandkit':
-          return [i18n.tc('NN0583'), 'brandkit.jpg']
+          return [this.$tc('NN0583'), 'brandkit.jpg']
         case 'bgrm':
-        default:
-          return [i18n.tc('NN0652'), 'remover.jpg']
         case 'pro-template':
-          return [i18n.tc('NN0653'), 'cb.jpg']
+          return [this.$tc('NN0653'), 'cb.jpg']
         case 'pro-object':
-          return [i18n.tc('NN0658'), 'pro-object.jpg']
+          return [this.$tc('NN0658'), 'pro-object.jpg']
+        default:
+          return [this.$tc('NN0652'), 'remover.jpg']
       }
     },
     async changeView(name: IPaymentView) {
@@ -204,9 +204,9 @@ export default Vue.extend({
         case 'pro-template':
         case 'pro-object':
           [this.description, this.img] = this.getAd(name)
-          this.title = i18n.tc('NN0507', 2)
+          this.title = this.$tc('NN0507', 2)
           this.buttons = [{
-            label: i18n.tc('NN0561'),
+            label: this.$tc('NN0561'),
             func: () => this.changeView('step1')
           }]
           break
@@ -215,10 +215,10 @@ export default Vue.extend({
           this.init()
           this.currentStep = 1
           this.totalStep = 2
-          this.title = i18n.tc('NN0701')
-          this.description = i18n.tc('NN0702')
+          this.title = this.$tc('NN0701')
+          this.description = this.$tc('NN0702')
           this.buttons = [{
-            label: i18n.tc('NN0550'),
+            label: this.$tc('NN0550'),
             func: () => {
               this.applyCoupon()
               this.changeView(name.replace('1', '2') as IPaymentPayingView)
@@ -231,12 +231,12 @@ export default Vue.extend({
           this.init()
           this.currentStep = 1
           this.totalStep = 2
-          this.title = i18n.tc('NN0545')
+          this.title = this.$tc('NN0545')
           this.description = this.trialStatus === 'not used'
-            ? i18n.tc('NN0546')
-            : i18n.tc('NN0547')
+            ? this.$tc('NN0546')
+            : this.$tc('NN0547')
           this.buttons = [{
-            label: i18n.tc('NN0550'),
+            label: this.$tc('NN0550'),
             func: () => {
               this.changeView(name.replace('1', '2') as IPaymentPayingView)
             }
@@ -246,7 +246,7 @@ export default Vue.extend({
         case 'step2-coupon':
         case 'step2':
           this.currentStep = 2
-          this.title = i18n.tc('NN0551')
+          this.title = this.$tc('NN0551')
           this.description = ''
           this.buttons = [] // Use button in PaymentField.vue
           this.img = 'pro-template1.jpg'
@@ -255,12 +255,12 @@ export default Vue.extend({
           this.getBillingInfo()
           break
         case 'switch1':
-          this.title = i18n.t('NN0564', { period: this.isBundle ? i18n.tc('NN0514') : i18n.tc('NN0515') }) as string
+          this.title = this.$t('NN0564', { period: this.isBundle ? this.$tc('NN0514') : this.$tc('NN0515') }) as string
           this.description = this.isBundle
-            ? i18n.tc('NN0566')
-            : i18n.tc('NN0565')
+            ? this.$tc('NN0566')
+            : this.$tc('NN0565')
           this.buttons = [{
-            label: i18n.t('NN0567', { period: this.isBundle ? i18n.tc('NN0514') : i18n.tc('NN0515') }) as string,
+            label: this.$t('NN0567', { period: this.isBundle ? this.$tc('NN0514') : this.$tc('NN0515') }) as string,
             func: () => this.changeView('switch2')
           }]
           await this.getPrice(this.userCountryInfo)
@@ -269,10 +269,10 @@ export default Vue.extend({
           // it will let user cannot switch plan since they should switch in the same plan.
           break
         case 'switch2':
-          this.title = i18n.tc('NN0551')
-          this.description = i18n.tc('NN0568')
+          this.title = this.$tc('NN0551')
+          this.description = this.$tc('NN0568')
           this.buttons = [{
-            label: i18n.t('NN0564', { period: this.isBundle ? i18n.tc('NN0514') : i18n.tc('NN0515') }) as string,
+            label: this.$t('NN0564', { period: this.isBundle ? this.$tc('NN0514') : this.$tc('NN0515') }) as string,
             func: async () => {
               await this.switch()
               this.closePopup()
@@ -281,19 +281,19 @@ export default Vue.extend({
           this.img = 'pro-template1.jpg'
           break
         case 'cancel1':
-          this.title = i18n.tc('NN0569')
+          this.title = this.$tc('NN0569')
           this.buttons = [{
-            label: i18n.tc('NN0575'),
+            label: this.$tc('NN0575'),
             func: () => this.closePopup()
           }, {
             type: 'light-lg',
-            label: i18n.tc('NN0574'),
+            label: this.$tc('NN0574'),
             func: () => this.changeView('cancel2')
           }]
           this.img = 'pro-template2.jpg'
           break
         case 'cancel2':
-          this.title = i18n.tc('NN0576')
+          this.title = this.$tc('NN0576')
           this.buttons[1].disabled = () => !this.cancelReason
           this.buttons[1].func = this.cancel
           this.img = 'brandkit.jpg'
@@ -316,7 +316,7 @@ export default Vue.extend({
       else if (this.view === 'switch2') this.changeView('switch1')
     },
     curPlan(period: string): string {
-      return this.view === 'switch1' && period !== this.userPeriod ? `(${i18n.tc('NN0655')})` : ''
+      return this.view === 'switch1' && period !== this.userPeriod ? `(${this.$tc('NN0655')})` : ''
     },
     selectCancelReason(index: string) {
       this.reasonIndex = index
@@ -324,7 +324,9 @@ export default Vue.extend({
     cancel() {
       this.cancelApi(this.cancelReason).then(
         this.closePopup
-      ).catch(msg => Vue.notify({ group: 'error', text: msg }))
+      ).catch(msg => {
+        notify({ group: 'error', text: msg })
+      })
     },
     closePopup() {
       this.$emit('close')
@@ -463,7 +465,7 @@ input {
   &:not([isSelected]) &__off {
     color: setColor(red-1);
   }
-  &[isSelected] {
+  &[isSelected="true"] {
     background-color: setColor(blue-1);
     border: 1px solid setColor(blue-1);
     color: white;

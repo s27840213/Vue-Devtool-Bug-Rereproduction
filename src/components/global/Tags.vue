@@ -1,11 +1,11 @@
 <template lang="pug">
 div(class="tags" v-click-outside="clickOutsideHandler")
-  template(v-if="!isTouchDevice")
+  template(v-if="!$isTouchDevice")
     div(class="tags__flex-container"
         :style="containerStyle")
       div(class="tags__tag-wrapper pointer" v-for="tag in tags"
-        @click="onClick(tag.value || tag)")
-        div(class="tags__tag") {{ tag.label || tag }}
+        @click="onClick(typeof tag === 'string' ? tag : tag.value)")
+        div(class="tags__tag") {{ typeof tag === 'string' ? tag : tag.label}}
     div(v-if="!showMore" class="tags__more-wrapper")
       div(class="tags__tag-wrapper pointer"
         @click="onClickMore")
@@ -13,25 +13,30 @@ div(class="tags" v-click-outside="clickOutsideHandler")
   template(v-else)
     div(class="tags__container-mobile")
       div(class="tags__flex-container-mobile")
-        div(v-for="tag in tags" :active="tag.active"
+        div(v-for="tag in tags" :active="typeof tag === 'string' ? undefined : tag.active"
             class="tags__tag-wrapper pointer" :class="{[theme]: true}"
-            @click="onClick(tag.value || tag)")
-          div(class="tags__tag") {{ tag.label || tag }}
+            @click="onClick(typeof tag === 'string' ? tag : tag.value)")
+          div(class="tags__tag") {{ typeof tag === 'string' ? tag : tag.label }}
 
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import vClickOutside from 'v-click-outside'
-import generalUtils from '@/utils/generalUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent, PropType } from 'vue'
 
-export default Vue.extend({
+interface ITag {
+  label: string,
+  value: string,
+  active: boolean
+}
+
+export default defineComponent({
   directives: {
     clickOutside: vClickOutside.directive
   },
   props: {
     tags: {
-      type: Array,
+      type: Array as PropType<string[] | ITag[]>,
       required: true
     },
     theme: {
@@ -44,10 +49,8 @@ export default Vue.extend({
       showMore: false
     }
   },
+  emits: ['search', 'showMore'],
   computed: {
-    isTouchDevice(): boolean {
-      return generalUtils.isTouchDevice()
-    },
     containerStyle(): Record<string, string|number> {
       return this.showMore ? {
         position: 'absolute',

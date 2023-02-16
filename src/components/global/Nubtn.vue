@@ -1,17 +1,17 @@
 <template lang="pug">
-div(:class="`nubtn ${theme} ${sizeClass} ${status}`"
+div(:class="`nubtn ${theme} ${sizeClass} ${status} ${$isTouchDevice?'mobile':'desktop'}`"
     v-hint="hint"
     @click="click")
   svg-icon(v-if="theme.includes('icon')"
           :iconName="icon" :iconWidth="iconSize" :iconColor="iconColor")
-  span(v-if="theme !== 'icon'")
+  span(v-if="!theme.includes('icon') || theme === 'icon_text'")
     slot
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { defineComponent, PropType } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'Nubtn',
   // Let status prop and @status will be the target of v-model, https://bit.ly/3ukz2Yq
   model: {
@@ -20,12 +20,16 @@ export default Vue.extend({
   },
   props: {
     theme: {
-      type: String as PropType<'primary'|'outline'|'text'|'icon_text'|'icon'|'ghost'|'ghost_outline'|'danger'|'secondary'>,
+      type: String as PropType<
+        'primary'|'outline'|'text'|'icon_text'|'icon'|'icon2'|
+        'ghost'|'ghost_outline'|'danger'|'secondary'
+      >,
       default: 'primary'
     },
     // *-full mean button will occupy all width.
+    // *-center mean button have ml/mr: auto
     size: {
-      type: String as PropType<'sm'|'sm-full'|'mid'|'mid-full'>,
+      type: String as PropType<'sm'|'sm-full'|'sm-center'|'mid'|'mid-full'|'mid-center'>,
       default: 'sm'
     },
     // Use v-model if you want Nubtn switch between active/default.
@@ -68,11 +72,10 @@ export default Vue.extend({
           : 'default'
       this.$emit('status', newStatus)
     },
-    click(event: Event) {
+    click() {
       if (this.status === 'disabled') return
       this.active = !this.active
       this.updateStatus()
-      this.$emit('click', event)
     }
   }
 })
@@ -87,10 +90,15 @@ export default Vue.extend({
   box-sizing: border-box;
   cursor: pointer;
   user-select: none;
+  &.full {
+    width: 100%;
+  }
   &:not(.full) {
+    width: fit-content;
+  }
+  &.center {
     margin-left: auto;
     margin-right: auto;
-    width: fit-content;
   }
 }
 
@@ -116,10 +124,10 @@ export default Vue.extend({
 .active {
   --blue: #{setColor(blue-active)};
 }
-:hover, .hover { // In this way, :hover can overwrite default and active but not disabled.
+.desktop:hover, .hover { // In this way, .desktop:hover can overwrite default and active but not disabled.
   --blue: #{setColor(blue-hover)};
 }
-.disabled {
+.desktop.disabled, .mobile.disabled { // Add .desktop can make .disabled css weight > .desktop:hover
   --blue: #{setColor(gray-4)};
 }
 
@@ -165,11 +173,32 @@ export default Vue.extend({
   &.active {
     background-color: setColor(blue-3);
   }
-  &:hover, &.hover {
+  &.desktop:hover, &.hover {
     background-color: setColor(blue-3, 0.5);
   }
-  &.disabled {
-    opacity: 0.5;
+  &.desktop.disabled, &.mobile.disabled {
+    background-color: transparent;
+  }
+}
+.nubtn.icon2 {
+  // &.sm {
+  //   width: 24px;
+  //   height: 24px;
+  // }
+  &.mid {
+    width: 44px;
+    height: 44px;
+  }
+  border: 1px solid setColor(gray-3);
+  background-color: white;
+  &.active {
+    background-color: setColor(blue-3);
+  }
+  &.desktop:hover, &.hover {
+    background-color: setColor(blue-4);
+  }
+  &.desktop.disabled, &.mobile.disabled {
+    background-color: white;
   }
 }
 .nubtn.ghost {
@@ -180,11 +209,11 @@ export default Vue.extend({
     color: setColor(blue-1);
     background-color: setColor(blue-4);
   }
-  &:hover, &.hover {
+  &.desktop:hover, &.hover {
     color: setColor(blue-1);
     background-color: setColor(white);
   }
-  &.disabled {
+  &.desktop.disabled, &.mobile.disabled {
     color: setColor(gray-4);
     background-color: setColor(white);
   }
@@ -197,11 +226,11 @@ export default Vue.extend({
     color: setColor(blue-3);
     border: 1px solid setColor(blue-3);
   }
-  &:hover, &.hover {
+  &.desktop:hover, &.hover {
     color: setColor(white);
     border: 1px solid setColor(white);
   }
-  &.disabled {
+  &.desktop.disabled, &.mobile.disabled {
     color: setColor(gray-4);
     border: 1px solid setColor(gray-4);
   }
@@ -215,10 +244,10 @@ export default Vue.extend({
   &.active {
     background-color: #D9624E;
   }
-  &:hover, &.hover {
+  &.desktop:hover, &.hover {
     background-color: #FC5757;
   }
-  &.disabled {
+  &.desktop.disabled, &.mobile.disabled {
     background-color: setColor(gray-4);
   }
 }
@@ -232,12 +261,12 @@ export default Vue.extend({
     color: setColor(gray-2);
     border: 1px solid setColor(gray-2);
   }
-  &:hover, &.hover {
+  &.desktop:hover, &.hover {
     color: setColor(gray-2);
     background-color: setColor(gray-4);
     border: 1px solid setColor(gray-3);
   }
-  &.disabled {
+  &.desktop.disabled, &.mobile.disabled {
     color: setColor(white);
     background-color: setColor(gray-4);
     border: none;

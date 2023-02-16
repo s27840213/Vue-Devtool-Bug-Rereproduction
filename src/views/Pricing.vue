@@ -1,66 +1,65 @@
 <template lang="pug">
-  div(class="pricing")
-    nu-header(v-header-border)
-    div(class="pricing-content")
-      div(class="pricing-top")
-        span(class="text-H2 mb-20" v-html="$t('NN0505')")
-        span(class="body-LG text-gray-2") {{$t('NN0506')}}
-        img(v-for="cb in colorBlock" class="pricing-top__cb"
-            :src="require('@/assets/img/svg/color-block/' + cb.name)"
-            :style="{'top': `${cb.top}px`, 'left': `${cb.left}px`}")
-      div(class="pricing-plan")
-        div(class="pricing-plan-left")
-          div(class="pricing-plan-left-top")
-            span(class="text-H4 mb-15") {{$tc('NN0507', 1)}}
-            span(class="body-LG text-gray-3") {{$t('NN0508')}}
-          div(class="pricing-plan-left-divider")
-            span {{$t('NN0509')}}
-            hr
-          div(class="pricing-plan-left-bottom")
-            div(v-for="item in ['NN0510', 'NN0511', 'NN0512', 'NN0513', 'NN0769']")
-              svg-icon(iconName="item-check" iconWidth="20px")
-              span {{$t(item)}}
-        div(class="pricing-plan-right")
-          div(class="relative")
-            slide-toggle(class="body-XS" :options="periods"
-                        v-model="periodUi" bgColor="#F4F5F7")
-            img(class="pricing-plan-right__off"
-                :src="require(`@/assets/img/svg/pricing/${off}.svg`)")
-          div(class="pricing-plan-right-price")
-            span(class="pricing-plan-right-price__del") {{`$${plans[planSelected][periodUi].original}${$t('NN0516')}`}}
-            br
-            span(class="pricing-plan-right-price__dollar") {{'$ '}}
-            span(class="text-H1") {{plans[planSelected][periodUi].now}}
-            span {{' ' + $t('NN0516')}}
-          btn(class="pricing-plan-right-buy" type="light-lg" @click.native="tryAddCard()")
-            span(class="btn-LG") {{buyLabel}}
-      span(class="pricing-currency") {{$t('NN0519')}}
-      div(class="pricing-compare")
-        div(v-for="item in compareTable")
-          svg-icon(v-if="item === true" iconName="feature-true")
-          span(v-else) {{item}}
-      div(class="pricing-faq")
-        span(class="text-H2 mb-20") {{$t('NN0533')}}
-        details(v-for="item in faqs")
-          summary {{item.Q}}
-            svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
-          i18n(v-if="item.isPath" :path="item.A" tag="p" class="body-MD text-gray-2 mt-20")
-            template(#history)
-              router-link(to="/settings/billing") {{$t('NN0614')}}
-          p(v-else class="body-MD text-gray-2 mt-20" v-html="item.A")
-      nu-footer
+div(class="pricing")
+  nu-header(v-header-border)
+  div(class="pricing-content")
+    div(class="pricing-top")
+      span(class="text-H2 mb-20" v-html="$t('NN0505')")
+      span(class="body-LG text-gray-2") {{$t('NN0506')}}
+      img(v-for="cb in colorBlock" class="pricing-top__cb"
+          :src="require('@/assets/img/svg/color-block/' + cb.name)"
+          :style="{'top': `${cb.top}px`, 'left': `${cb.left}px`}")
+    div(class="pricing-plan")
+      div(class="pricing-plan-left")
+        div(class="pricing-plan-left-top")
+          span(class="text-H4 mb-15") {{$tc('NN0507', 1)}}
+          span(class="body-LG text-gray-3") {{$t('NN0508')}}
+        div(class="pricing-plan-left-divider")
+          span {{$t('NN0509')}}
+          hr
+        div(class="pricing-plan-left-bottom")
+          div(v-for="item in ['NN0510', 'NN0511', 'NN0512', 'NN0513', 'NN0769']")
+            svg-icon(iconName="item-check" iconWidth="20px")
+            span {{$t(item)}}
+      div(class="pricing-plan-right")
+        div(class="relative")
+          slide-toggle(class="body-XS" :options="periods"
+                      v-model="periodUi" bgColor="#F4F5F7")
+          img(class="pricing-plan-right__off"
+              :src="require(`@/assets/img/svg/pricing/${off}.svg`)")
+        div(class="pricing-plan-right-price")
+          span(class="pricing-plan-right-price__del") {{`$${plans[planSelected][periodUi].original}${$t('NN0516')}`}}
+          br
+          span(class="pricing-plan-right-price__dollar") {{'$ '}}
+          span(class="text-H1") {{plans[planSelected][periodUi].now}}
+          span {{' ' + $t('NN0516')}}
+        btn(class="pricing-plan-right-buy" type="light-lg" @click="tryAddCard()")
+          span(class="btn-LG") {{buyLabel}}
+    span(class="pricing-currency") {{$t('NN0519')}}
+    div(class="pricing-compare")
+      div(v-for="item in compareTable")
+        svg-icon(v-if="item === true" iconName="feature-true")
+        span(v-else) {{item}}
+    div(class="pricing-faq")
+      span(class="text-H2 mb-20") {{$t('NN0533')}}
+      details(v-for="item in faqs")
+        summary {{item.Q}}
+          svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
+        i18n-t(v-if="item.isPath" :keypath="item.A" tag="p" class="body-MD text-gray-2 mt-20")
+          template(#history)
+            router-link(to="/settings/billing") {{$t('NN0614')}}
+        p(v-else class="body-MD text-gray-2 mt-20" v-html="item.A")
+    nu-footer
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
-import { createHelpers } from 'vuex-map-fields'
-import i18n from '@/i18n'
-import NuHeader from '@/components/NuHeader.vue'
-import NuFooter from '@/components/NuFooter.vue'
 import SlideToggle from '@/components/global/SlideToggle.vue'
+import NuFooter from '@/components/NuFooter.vue'
+import NuHeader from '@/components/NuHeader.vue'
 import paymentData from '@/utils/constantData'
 import paymentUtils from '@/utils/paymentUtils'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapState } from 'vuex'
+import { createHelpers } from 'vuex-map-fields'
 
 // Pricing testing doc: https://www.notion.so/vivipic/Pricing
 
@@ -69,7 +68,8 @@ const { mapFields } = createHelpers({
   mutationType: 'payment/updateField'
 })
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'Pricing',
   components: {
     NuHeader,
@@ -101,10 +101,10 @@ export default Vue.extend({
     canAddCard():boolean { return ['Initial', 'Deleted'].includes(this.status) },
     buyLabel():string {
       return (this.trialStatus === 'not used'
-        ? i18n.t('NN0517', { day: this.trialDay })
+        ? this.$t('NN0517', { day: this.trialDay })
         : this.canAddCard
-          ? i18n.t('NN0587')
-          : i18n.t('NN0518')) as string
+          ? this.$t('NN0587')
+          : this.$t('NN0518')) as string
     }
   },
   async mounted() {
