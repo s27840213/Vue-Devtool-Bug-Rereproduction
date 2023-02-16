@@ -56,8 +56,7 @@ Cypress.Commands.add('layerCopy', { prevSubject: 'element' }, (subject) => {
       // Use realClick() can prevent the error.
       cy.get('.panel-group .svg-copy').realClick()
         .get('.nu-page .nu-layer').should('have.length', oldLayers.length + 1)
-        .snapshotTest('Copy layer')
-        .get('.nu-page .nu-layer').then((newLayers) => {
+        .snapshotTest('Copy layer').then((newLayers) => {
           const newLayer = newLayers.not(oldLayers)
           cy.wrap(newLayer).click().type('{del}')
         })
@@ -66,21 +65,41 @@ Cypress.Commands.add('layerCopy', { prevSubject: 'element' }, (subject) => {
 })
 
 Cypress.Commands.add('layerLock', { prevSubject: 'element' }, (subject) => {
+  cy.wrap(subject).click()
+    .realMouseDown()
+    .realMouseMove(30, 30, { position: 'center' })
+    .realMouseUp()
+    .snapshotTest('Lock unlocked')
+    .get('.panel-group .svg-lock').click()
+    .wrap(subject)
+    .realMouseDown()
+    .realMouseMove(-30, -30, { position: 'center' })
+    .realMouseUp()
+    .snapshotTest('Lock locked')
+    .get('.panel-group .svg-unlock').click()
+    .wrap(subject)
+    .realMouseDown()
+    .realMouseMove(-30, -30, { position: 'center' })
+    .realMouseUp()
   return cy.wrap(subject)
 })
 
 Cypress.Commands.add('layerDelete', { prevSubject: 'element' }, (subject) => {
+  cy.wrap(subject).click()
   return cy.wrap(subject)
 })
 
 Cypress.Commands.add('layerCopyFormat', { prevSubject: 'element' }, (subject) => {
+  cy.wrap(subject).click()
   return cy.wrap(subject)
 })
 
 Cypress.Commands.add('layerRotate', { prevSubject: 'element' }, (subject) => {
+  cy.wrap(subject).click()
   return cy.wrap(subject)
 })
 
 Cypress.Commands.add('layerScale', { prevSubject: 'element' }, (subject) => {
+  cy.wrap(subject).click()
   return cy.wrap(subject)
 })

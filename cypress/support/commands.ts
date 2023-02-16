@@ -81,7 +81,7 @@ Cypress.Commands.add('importDesign', (designName: string) => {
   })
 })
 
-Cypress.Commands.add('snapshotTest', (testName: string) => {
+Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQuery<unknown>, testName: string) => {
   // TODO: Need to find a way that keep 0.01 threshold and prevent command fail
   // Workaround is set threshold to 100% to prevent fail, but it will not create diff image
   // TODO: Investigation why compareSnapshot fail and other image that not take snapshot still appear in report
@@ -101,6 +101,7 @@ Cypress.Commands.add('snapshotTest', (testName: string) => {
     { limit: 3, delay: 1000 }
   // Remove special css
   ).get('style.cy-visual-test-style').invoke('remove')
+  if (subject && subject.length) return cy.wrap(subject)
 })
 
 Cypress.Commands.add('getAllCategoryName', (panel: ISidebarData, categoryName = [], last = false) => {

@@ -10,14 +10,13 @@ interface ISidebarData {
 }
 
 declare namespace Cypress {
-  // eslint-disable-next-line unused-imports/no-unused-vars
   interface Chainable<Subject> {
     // commands.ts
     login(): Chainable<void>
     deleteAllLayers(): Chainable<void>
     deselectAllLayers(): Chainable<void>
     importDesign(designName: string): Chainable<void>
-    snapshotTest(testName: string): Chainable<void>
+    snapshotTest(testName: string): Chainable<Subject>
     getAllCategoryName(panel: ISidebarData, categoryName?: string[], last?: boolean): Chainable<string[]>
     addAsset(panel: ISidebarData, categoryIndex: number, itemIndex: number): Chainable<void>
     // addAsset(panel: ISidebarData, categoryName: string, itemIndex: number): Chainable<void>
