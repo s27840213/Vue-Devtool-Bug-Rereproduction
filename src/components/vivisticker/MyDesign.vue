@@ -26,7 +26,8 @@
             my-design-object-item(v-for="item in list"
               class="my-design__objects__item"
               :key="item.id"
-              :item="item")
+              :item="item"
+              :style="itemStyles")
 </template>
 
 <script lang="ts">
@@ -45,7 +46,8 @@ export default Vue.extend({
     const tags = vivistickerUtils.getMyDesignTags()
     return {
       tags,
-      scrollTops: Object.fromEntries(tags.map(tag => [tag.tab, 0]))
+      scrollTops: Object.fromEntries(tags.map(tag => [tag.tab, 0])),
+      itemHeight: 80
     }
   },
   components: {
@@ -57,11 +59,14 @@ export default Vue.extend({
     const content = this.$refs.content as Vue
     if (!content) return
     content.$el.addEventListener('scroll', this.handleScroll)
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize()
   },
   destroyed() {
     const content = this.$refs.content as Vue
     if (!content) return
     content.$el.removeEventListener('scroll', this.handleScroll)
+    window.removeEventListener('resize', this.handleResize)
   },
   computed: {
     ...mapGetters({
@@ -103,7 +108,7 @@ export default Vue.extend({
                 id: `result_${rowItems.map(item => item.id).join('_')}`,
                 type: 'my-design-object-item',
                 list: rowItems,
-                size: 104,
+                size: this.itemHeight + 24,
                 title: '',
                 moreType: 'object'
               }
@@ -113,6 +118,12 @@ export default Vue.extend({
         Object.assign(result[result.length - 1], { sentinel: true })
       }
       return result
+    },
+    itemStyles(): {[key: string]: string} {
+      return {
+        width: this.itemHeight + 'px',
+        height: this.itemHeight + 'px'
+      }
     }
   },
   watch: {
@@ -175,6 +186,9 @@ export default Vue.extend({
       const content = this.$refs.content as Vue
       if (!content) return
       content.$el.scrollTop = this.scrollTops[tab]
+    },
+    handleResize() {
+      this.itemHeight = window.outerWidth >= 768 ? 120 : 80
     }
   }
 })
