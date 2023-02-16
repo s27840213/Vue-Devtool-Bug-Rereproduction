@@ -35,6 +35,7 @@
     "@tiptap/extension-paragraph": "^2.0.0-beta.23",
     "@tiptap/extension-text": "^2.0.0-beta.15",
     "@tiptap/extension-text-style": "^2.0.0-beta.23",
+    "@tiptap/pm": "^2.0.0-beta.217",
     "@tiptap/starter-kit": "^2.0.0-beta.209",
     "@tiptap/vue-3": "^2.0.0-beta.209",
     "@volar/vue-language-plugin-pug": "^1.0.24",

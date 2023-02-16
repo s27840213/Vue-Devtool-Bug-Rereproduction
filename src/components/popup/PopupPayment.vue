@@ -73,9 +73,7 @@ import RadioBtn from '@/components/global/RadioBtn.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
 import CouponInput from '@/components/payment/CouponInput.vue'
 import PaymentField from '@/components/payment/PaymentField.vue'
-import {
-IPaymentPayingView, IPaymentView, IPaymentWarningView, _IPaymentWarningView
-} from '@/interfaces/payment'
+import { IPaymentPayingView, IPaymentView, IPaymentWarningView, _IPaymentWarningView } from '@/interfaces/payment'
 import paymentData from '@/utils/constantData'
 import paymentUtils from '@/utils/paymentUtils'
 import { notify } from '@kyvg/vue3-notification'
