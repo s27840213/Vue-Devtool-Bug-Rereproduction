@@ -189,7 +189,11 @@ class GeneralUtils {
   }
 
   isTouchDevice(): boolean {
-    return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase())
+    return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase()) || this.isIPadOS()
+  }
+
+  isIPadOS(): boolean {
+    return /macintosh/i.test(navigator.userAgent.toLowerCase()) && navigator.maxTouchPoints > 0
   }
 
   getListRowItemSize(): number {
