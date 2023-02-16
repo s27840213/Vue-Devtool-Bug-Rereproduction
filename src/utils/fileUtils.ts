@@ -4,6 +4,7 @@
  */
 import store from '@/store'
 import GroupUtils from '@/utils/groupUtils'
+import pageUtils from './pageUtils'
 class FileUtils {
   import() {
     // Because inputNode won't be appended to DOM, so we don't need to release it
@@ -49,7 +50,7 @@ function handleFileSelect(evt: any) {
   const reader = new FileReader()
   reader.onload = (evt: Event) => {
     const target = evt.target as FileReader
-    store.commit('SET_pages', JSON.parse(target.result as string))
+    store.commit('SET_pages', pageUtils.newPages(JSON.parse(target.result as string)))
   }
   reader.readAsText(file)
 }

@@ -4,6 +4,7 @@
   "javascript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": true,
   "javascript.format.insertSpaceAfterSemicolonInForStatements": true,
   "javascript.format.semicolons": "remove",
+  "typescript.format.semicolons": "remove",
   "editor.tabSize": 2,
 
   // Format file when save file

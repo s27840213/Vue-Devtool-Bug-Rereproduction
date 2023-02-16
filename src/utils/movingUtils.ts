@@ -308,6 +308,9 @@ export class MovingUtils {
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
+    if (eventUtils.checkIsMultiTouch(e)) {
+      return
+    }
     this.isControlling = true
     switch (this.config.type) {
       case LayerType.group:
@@ -433,8 +436,6 @@ export class MovingUtils {
     const isReachTopEdge = currPage.y > 0 && offsetPos.y > 0 && diff.y > limitRange.y
     const isReachBottomEdge = currPage.y <= 0 && offsetPos.y < 0 && diff.y > limitRange.y
 
-    console.log(diff.y, limitRange.y)
-
     if (isReachRightEdge || isReachLeftEdge) {
       pageUtils.updatePagePos(this.pageIndex, {
         x: isReachRightEdge ? originPageSize.width - newPageSize.w : 0
@@ -459,13 +460,19 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
+    if (eventUtils.checkIsMultiTouch(e)) {
+      return
+    }
     this.isControlling = false
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
     layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
     this.setMoving(false)
 
-    const posDiff = {
+    const posDiff = this.isTouchDevice ? {
+      x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
+      y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
+    } : {
       x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
       y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
     }

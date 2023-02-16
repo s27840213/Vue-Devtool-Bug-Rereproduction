@@ -37,7 +37,7 @@ class DoubleTapUtils {
       this.prev = {
         el: event.target,
         time: now,
-        timer: clickWaitForDelay ? setTimeout(clickCallback, delay) : 0
+        timer: clickWaitForDelay ? window.setTimeout(clickCallback, delay) : 0
       }
     }
   }

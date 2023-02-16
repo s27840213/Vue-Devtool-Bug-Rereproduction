@@ -41,6 +41,7 @@ import store from '@/store'
 import backgroundUtils from '@/utils/backgroundUtils'
 import ControlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
+import eventUtils from '@/utils/eventUtils'
 import GroupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -290,6 +291,9 @@ export default defineComponent({
       ]
     ),
     outerClick(e: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(e)) {
+        return
+      }
       if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         editorUtils.setInBgSettingMode(false)
         GroupUtils.deselect()
@@ -348,7 +352,7 @@ export default defineComponent({
           store.commit('SET_isPageScaling', true)
         }
         clearTimeout(this.hanleWheelTimer)
-        this.hanleWheelTimer = setTimeout(() => {
+        this.hanleWheelTimer = window.setTimeout(() => {
           store.commit('SET_isPageScaling', false)
           console.log('reach limit', pageUtils.mobileMinScaleRatio)
           if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
@@ -455,7 +459,18 @@ export default defineComponent({
           })
         } else {
           GroupUtils.deselect()
-          this.addPage(pageUtils.newPage({}))
+          const lastPage = pageUtils.pageNum > 0 ? pageUtils.getPages[pageUtils.pageNum - 1] : undefined
+          this.addPage(pageUtils.newPage({
+            width: lastPage?.width,
+            height: lastPage?.height,
+            backgroundColor: lastPage?.backgroundColor,
+            physicalWidth: lastPage?.physicalWidth,
+            physicalHeight: lastPage?.physicalHeight,
+            isEnableBleed: lastPage?.isEnableBleed,
+            bleeds: lastPage?.bleeds,
+            physicalBleeds: lastPage?.physicalBleeds,
+            unit: lastPage?.unit
+          }))
           this.$nextTick(() => {
             editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
             this.setCurrActivePageIndex(this.currCardIndex)

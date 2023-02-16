@@ -1,25 +1,26 @@
-import ControlUtils from '@/utils/controlUtils'
-import store from '@/store'
 import {
-  ILayer, IParagraph, IParagraphStyle, ISpan,
-  ISpanStyle, IText, ITmp, IGroup
+  IGroup, ILayer, IParagraph, IParagraphStyle, ISpan,
+  ISpanStyle, IText, ITmp
 } from '@/interfaces/layer'
-import { IFont, ISelection } from '@/interfaces/text'
-import GeneralUtils from './generalUtils'
-import LayerUtils from './layerUtils'
 import { IPage } from '@/interfaces/page'
+import { IFont, ISelection } from '@/interfaces/text'
+import router from '@/router'
+import store from '@/store'
+import { checkAndConvertToHex } from '@/utils/colorUtils'
+import ControlUtils from '@/utils/controlUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
-import tiptapUtils from './tiptapUtils'
-import pageUtils from './pageUtils'
-import textShapeUtils from './textShapeUtils'
-import mathUtils from './mathUtils'
-import router from '@/router'
 import _ from 'lodash'
 import cssConverter from './cssConverter'
+import GeneralUtils from './generalUtils'
+import LayerUtils from './layerUtils'
+import logUtils from './logUtils'
+import mathUtils from './mathUtils'
+import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
 import textBgUtils from './textBgUtils'
-import { checkAndConvertToHex } from '@/utils/colorUtils'
+import textShapeUtils from './textShapeUtils'
+import tiptapUtils from './tiptapUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -1278,7 +1279,8 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      // console.log(error)
+      console.log(error)
+      logUtils.setLog(JSON.stringify(error))
       isError = true
     } finally {
       if (isError === true) {

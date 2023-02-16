@@ -126,15 +126,15 @@ div(class="folder-design-view")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import vClickOutside from 'click-outside-vue3'
+import DesignGallery from '@/components/mydesign/DesignGallery.vue'
+import FolderGallery from '@/components/mydesign/FolderGallery.vue'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 import { IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils, { DESIGN_MENU_EVENTS, IDesignMenuEvents } from '@/utils/designUtils'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import FolderGallery from '@/components/mydesign/FolderGallery.vue'
-import DesignGallery from '@/components/mydesign/DesignGallery.vue'
 import hintUtils from '@/utils/hintUtils'
-import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: ['clearSelection', 'moveItem', 'deleteFolder', ...DESIGN_MENU_EVENTS()],
@@ -346,7 +346,7 @@ export default defineComponent({
           clearTimeout(this.messageTimer)
         }
         this.isShowHint = true
-        this.messageTimer = setTimeout(() => {
+        this.messageTimer = window.setTimeout(() => {
           this.isShowHint = false
           this.messageTimer = -1
         }, 3000)

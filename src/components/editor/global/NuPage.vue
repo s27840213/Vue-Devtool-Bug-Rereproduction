@@ -250,6 +250,13 @@ export default defineComponent({
     isScaling: {
       type: Boolean,
       default: false
+    },
+    /**
+     * @param minContentScaleRatio - pre-calculated contentScaleRatio to prevent the size switch animation when doing swipe up/down gesture
+     */
+    minContentScaleRatio: {
+      type: Number,
+      default: 0
     }
   },
   emits: ['stepChange'],
@@ -311,7 +318,7 @@ export default defineComponent({
       lockGuideline: 'getLockGuideline',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
-      // contentScaleRatio: 'getContentScaleRatio',
+      _contentScaleRatio: 'getContentScaleRatio',
       pagesLength: 'getPagesLength',
       showAllAdminTool: 'user/showAllAdminTool',
       useMobileEditor: 'getUseMobileEditor',
@@ -329,6 +336,9 @@ export default defineComponent({
       } else {
         return 1
       }
+    // contentScaleRatio():number {
+    //   return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this._contentScaleRatio
+    // },
     },
     config(): IPage {
       if (!this.pageState.config.isEnableBleed) return this.pageState.config
@@ -618,7 +628,7 @@ export default defineComponent({
         return
       }
       GroupUtils.deselect()
-      const page = generalUtils.deepCopy(this.config) as IPage
+      const page = generalUtils.deepCopy(this.pageState.config) as IPage
       page.layers.forEach(l => {
         l.id = generalUtils.generateRandomString(8)
         if (l.type === LayerType.frame) {

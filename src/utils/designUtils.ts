@@ -84,7 +84,8 @@ class DesignUtils {
       thumbnail: '',
       signedUrl: design.signed_url,
       pageNum: design.page_num,
-      polling: design.polling
+      polling: design.polling,
+      group_type: design.group_type
     }
   }
 

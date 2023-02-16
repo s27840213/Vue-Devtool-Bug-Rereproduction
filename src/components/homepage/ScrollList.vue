@@ -58,16 +58,17 @@ div(class="list")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters } from 'vuex'
 import DesignItem from '@/components/homepage/DesignItem.vue'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import themeUtils from '@/utils/themeUtils'
-import paymentUtils from '@/utils/paymentUtils'
 import { IAssetTemplate } from '@/interfaces/api'
 import { Itheme } from '@/interfaces/theme'
+import modalUtils from '@/utils/modalUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import templateCenterUtils from '@/utils/templateCenterUtils'
-import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
+import themeUtils from '@/utils/themeUtils'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -186,6 +187,18 @@ export default defineComponent({
       }).href
     },
     clickTemplate(item: IAssetTemplate) {
+      if (this.$isTouchDevice && this.theme === '7') {
+        modalUtils.setModalInfo(
+            `${this.$t('NN0808')}`,
+            [],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+        )
+        return
+      }
       const template = templateCenterUtils.iAssetTemplate2Template(item, 4)
       if (!paymentUtils.checkProTemplate(template)) return
       window.open(this.templateUrl(item), '_blank')

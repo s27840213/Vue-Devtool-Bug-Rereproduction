@@ -166,20 +166,20 @@ div(class="my-design-pc")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
-import Sidebar from '@/components/mydesign/Sidebar.vue'
-import NuHeader from '@/components/NuHeader.vue'
 import AllDesignView from '@/components/mydesign/design-views/AllDesignView.vue'
 import FavoriteDesignView from '@/components/mydesign/design-views/FavoriteDesignView.vue'
-import TrashDesignView from '@/components/mydesign/design-views/TrashDesignView.vue'
 import FolderDesignView from '@/components/mydesign/design-views/FolderDesignView.vue'
+import TrashDesignView from '@/components/mydesign/design-views/TrashDesignView.vue'
+import Sidebar from '@/components/mydesign/Sidebar.vue'
 import StructureFolder from '@/components/mydesign/StructureFolder.vue'
+import NuHeader from '@/components/NuHeader.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import { IDesign, IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import hintUtils from '@/utils/hintUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -320,7 +320,7 @@ export default defineComponent({
         if (this.errorMessageTimer > 0) {
           clearTimeout(this.errorMessageTimer)
         }
-        this.errorMessageTimer = setTimeout(() => {
+        this.errorMessageTimer = window.setTimeout(() => {
           this.setIsErrorShowing(false)
         }, 2000)
       }
@@ -365,7 +365,7 @@ export default defineComponent({
       const item = queue[0]
       if (item) {
         this[flag] = true
-        const timer = setTimeout(() => {
+        const timer = window.setTimeout(() => {
           this[flag] = false
           setTimeout(() => {
             queue.shift()

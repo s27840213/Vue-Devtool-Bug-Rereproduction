@@ -54,7 +54,8 @@ class EditorUtils {
   }
 
   handleContentScaleCalc(page: IPage) {
-    const { width, height } = page
+    const { hasBleed } = pageUtils
+    const { width, height } = hasBleed ? pageUtils.getPageSizeWithBleeds(page) : page
     if (!this.mobileHeight || this.mobileWidth) {
       const mobileEditor = document.getElementById('mobile-editor__content')
       if (mobileEditor) {

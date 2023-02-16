@@ -104,7 +104,7 @@ export default defineComponent({
     }
   },
   created() {
-    this.inputLocale = this.$i18n.locale
+    this.inputLocale = this.$i18n.locale as 'us' | 'tw' | 'jp'
     // this.$root.$on('on-re-rendering', (component: IComponentUpdatedLog) => {
     //   if (this.componentLogs.length >= 50) {
     //     this.componentLogs.shift()

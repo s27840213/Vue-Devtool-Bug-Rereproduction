@@ -1,5 +1,5 @@
 import { IModalInfo } from '@/interfaces/modal'
-import { GetterTree, MutationTree, ActionTree } from 'vuex'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 interface IModalState {
   modalInfo: IModalInfo,
@@ -53,6 +53,7 @@ const mutations: MutationTree<IModalState> = {
   },
   [SET_MODAL_OPEN](state: IModalState, open: boolean) {
     state.modalOpen = open
+    console.log(state.modalOpen)
   },
   [SET_IS_PENDING](state: IModalState, pending: boolean) {
     state.pending = pending
