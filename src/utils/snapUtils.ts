@@ -1,19 +1,19 @@
 
-import store from '@/store'
+import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
-import MathUtils from '@/utils/mathUtils'
-import { IConsideredEdges, ISnaplineInfo, ISnaplinePos, ISnapline } from '@/interfaces/snap'
+import { IConsideredEdges, ISnapline, ISnaplineInfo, ISnaplinePos } from '@/interfaces/snap'
+import store from '@/store'
 import LayerUtils from '@/utils/layerUtils'
+import MathUtils from '@/utils/mathUtils'
 import shapeUtils from '@/utils/shapeUtils'
+import { EventEmitter } from 'events'
 import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
-import { EventEmitter } from 'events'
 class SnapUtils {
   id: string
   event: any
   pageIndex: number
-  GUIDELINE_OFFSET: number
+  private _GUIDELINE_OFFSET: number
   GUIDEANGLE_OFFSET: number
   closestSnaplines: {
     v: Array<ISnapline>,
@@ -26,7 +26,7 @@ class SnapUtils {
     this.event = new EventEmitter()
     this.id = generalUtils.generateRandomString(4)
     this.pageIndex = pageIndex
-    this.GUIDELINE_OFFSET = 5
+    this._GUIDELINE_OFFSET = 5
     this.GUIDEANGLE_OFFSET = 1
     this.closestSnaplines = {
       v: [],
@@ -37,6 +37,10 @@ class SnapUtils {
 
   get guidelinePos(): { [index: string]: Array<number> } {
     return pageUtils.currFocusPage.guidelines
+  }
+
+  get GUIDELINE_OFFSET(): number {
+    return generalUtils.isTouchDevice() ? this._GUIDELINE_OFFSET / (pageUtils.getPage(pageUtils.currActivePageIndex)?.contentScaleRatio || 1) : 5
   }
 
   on(type: string, callback: () => void): void {

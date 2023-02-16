@@ -44,6 +44,10 @@ export default defineComponent({
     snapUtils: {
       type: SnapUtils,
       required: true
+    },
+    contentScaleRatio: {
+      type: Number,
+      required: true
     }
   },
   data() {
@@ -88,8 +92,8 @@ export default defineComponent({
   methods: {
     wrapperStyles(): Record<string, string> {
       return {
-        width: `${this.config.width * (this.scaleRatio / 100)}px`,
-        height: `${this.config.height * (this.scaleRatio / 100)}px`,
+        width: `${this.config.width * this.contentScaleRatio * (this.scaleRatio / 100)}px`,
+        height: `${this.config.height * this.contentScaleRatio * (this.scaleRatio / 100)}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },

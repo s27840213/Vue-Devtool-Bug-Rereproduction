@@ -147,6 +147,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
         div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{resizerHint}}
       snap-line-area(
         :config="config"
+        :contentScaleRatio="contentScaleRatio"
         :pageIndex="pageIndex"
         :snapUtils="snapUtils"
       )
@@ -293,9 +294,6 @@ export default defineComponent({
           }
         }
       }
-    },
-    contentScaleRatio(val) {
-      console.warn(this.pageIndex, val)
     }
   },
   computed: {
