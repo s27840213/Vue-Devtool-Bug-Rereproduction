@@ -248,6 +248,9 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    /**
+     * @param minContentScaleRatio - pre-calculated contentScaleRatio to prevent the size switch animation when doing swipe up/down gesture
+     */
     minContentScaleRatio: {
       type: Number,
       default: 0
@@ -344,7 +347,6 @@ export default defineComponent({
       }
     },
     scaleContainerStyles(): { [index: string]: string } {
-      // console.log(this.scaleRatio, this.scaleRatio / 100 / this.contentScaleRatio)
       return {
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,

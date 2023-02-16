@@ -35,7 +35,6 @@ class EditorUtils {
 
   handleContentScaleCalc(page: IPage) {
     const { hasBleed } = pageUtils
-    console.log(hasBleed)
     const { width, height } = hasBleed ? pageUtils.getPageSizeWithBleeds(page) : page
     const PAGE_SIZE_W = 324
     const PAGE_SIZE_H = 400

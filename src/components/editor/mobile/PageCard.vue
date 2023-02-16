@@ -57,7 +57,6 @@ export default defineComponent({
   },
   mounted() {
     this.minContentScaleRatio = editorUtils.handleContentScaleCalc(this.config.config)
-    console.log(this.minContentScaleRatio)
   },
   computed: {
     ...mapGetters({
