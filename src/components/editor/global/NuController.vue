@@ -102,7 +102,6 @@ div(:layer-index="`${layerIndex}`"
               :key="`resizer-text-${index}`"
               :ref="`moveStart-bar_${index}`"
               :style="resizerBarStyles(resizer.styles)")
-              //- @pointerdown="moveStart")
         div(v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="`scaler-${index}`"
@@ -160,7 +159,7 @@ import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
+import { ILayerInfo, FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
 import DragUtils from '@/utils/dragUtils'
 import eventUtils, { ImageEvent } from '@/utils/eventUtils'
@@ -173,7 +172,6 @@ import LayerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import mathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
-import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
@@ -186,6 +184,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import { MovingUtils } from '@/utils/movingUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'

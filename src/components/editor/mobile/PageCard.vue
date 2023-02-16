@@ -8,11 +8,13 @@ div(class="page-card"
     :overflowContainer="editorView"
     :pageState="config"
     :isScaling="isScaling"
-    :isAnyBackgroundImageControl="isAnyBackgroundImageControl")
+    :isAnyBackgroundImageControl="isAnyBackgroundImageControl"
+    :minContentScaleRatio="minContentScaleRatio")
 </template>
 
 <script lang="ts">
-import { IPage } from '@/interfaces/page'
+import { IPageState } from '@/interfaces/page'
+import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
@@ -21,7 +23,7 @@ export default defineComponent({
   props: {
     config: {
       required: true,
-      type: Object as PropType<IPage>
+      type: Object as PropType<IPageState>
     },
     cardWidth: {
       type: Number,
@@ -48,10 +50,19 @@ export default defineComponent({
       default: false
     }
   },
+  data() {
+    return {
+      minContentScaleRatio: 0
+    }
+  },
+  mounted() {
+    this.minContentScaleRatio = editorUtils.handleContentScaleCalc(this.config.config)
+  },
   computed: {
     ...mapGetters({
       groupType: 'getGroupType',
-      currCardIndex: 'mobileEditor/getCurrCardIndex'
+      currCardIndex: 'mobileEditor/getCurrCardIndex',
+      hasBleed: 'getHasBleed'
     }),
     cardStyle(): { [index: string]: string | number } {
       return {
@@ -76,6 +87,9 @@ export default defineComponent({
         generalUtils.scaleFromCenter(card)
       }
     },
+    hasBleed() {
+      this.minContentScaleRatio = editorUtils.handleContentScaleCalc(this.config.config)
+    }
   }
 })
 </script>
@@ -89,7 +103,6 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid gray;
   @include no-scrollbar;
   overflow: hidden;
   // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container

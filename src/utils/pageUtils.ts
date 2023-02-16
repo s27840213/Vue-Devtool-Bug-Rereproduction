@@ -28,6 +28,7 @@ class PageUtils {
 
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get isDetailPage(): boolean { return store.getters.getGroupType === 1 }
+  get isMobile(): boolean { return store.getters.getUseMobileEditor }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get inBgRemoveMode(): boolean { return store.getters['bgRemove/getInBgRemoveMode'] }
   get autoRemoveResult(): IBgRemoveInfo { return store.getters['bgRemove/getAutoRemoveResult'] }
@@ -35,6 +36,7 @@ class PageUtils {
   get getCurrPage(): IPage { return this.getPage(layerUtils.pageIndex) }
   get getPageState(): (pageIndex: number) => IPageState { return store.getters.getPageState }
   get getPages(): Array<IPage> { return store.getters.getPages }
+  get hasBleed(): boolean { return store.getters.getHasBleed }
   get pageNum(): number { return this.getPages.length }
   get getPageSize(): (pageIndex: number) => { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } { return store.getters.getPageSize }
   get pagesName(): string { return store.getters.getPagesName }
@@ -192,7 +194,8 @@ class PageUtils {
       isEnableBleed: false,
       bleeds: defaultBleeds,
       physicalBleeds: defaultBleeds,
-      isAutoResizeNeeded: false
+      isAutoResizeNeeded: false,
+      contentScaleRatio: 1
     }
     // pageData.snapUtils && delete pageData.snapUtils
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))
@@ -512,9 +515,8 @@ class PageUtils {
       return
     }
 
-    const isMobile = generalUtils.isTouchDevice()
     // If mobile user zoom in page, don't fitPage.
-    if (isMobile && !minRatioFiRestricttDisable && pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
+    if (this.isMobile && !minRatioFiRestricttDisable && pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
       return
     }
 
@@ -527,11 +529,11 @@ class PageUtils {
     let { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
     const { width: targetWidth, height: targetHeight }: { width: number, height: number } =
       (this.inBgRemoveMode ? this.autoRemoveResult
-        : this.currFocusPageSizeWithBleeds)
+        : (this.hasBleed ? this.currFocusPageSizeWithBleeds : this.currFocusPageSize))
 
-    const RESIZE_MULTIPLIER = isMobile ? 1 : 0.8
+    const RESIZE_MULTIPLIER = this.isMobile ? 1 : 0.8
 
-    if (isMobile) {
+    if (this.isMobile) {
       editorWidth -= this.MOBILE_CARD_PADDING * 2
       editorHeight -= this.MOBILE_CARD_PADDING * 2
     }
@@ -591,6 +593,42 @@ class PageUtils {
     if (!this.inBgRemoveMode) {
       this.findCentralPageIndexInfo()
     }
+  }
+
+  getMinScaleRatio(pageState: IPageState, editorView: Element) {
+    // Get size of target(design) and editor.
+    // Target size can be pass by param or get according to situation.
+    const mobilePanelHeight = editorUtils.showMobilePanel ? 0 : document.getElementsByClassName('mobile-panel')[0]?.clientHeight
+
+    let { clientWidth: editorWidth, clientHeight: editorHeight } = editorView
+    const { width: targetWidth, height: targetHeight }: { width: number, height: number } = pageState.config
+
+    const RESIZE_MULTIPLIER = this.isMobile ? 1 : 0.8
+
+    if (this.isMobile) {
+      editorWidth -= this.MOBILE_CARD_PADDING * 2
+      editorHeight -= this.MOBILE_CARD_PADDING * 2
+    }
+
+    // Calculate and do resize
+    const resizeRatio = Math.min(
+      editorWidth / (targetWidth * (this.scaleRatio / 100)),
+      (editorHeight - mobilePanelHeight) / (targetHeight * (this.scaleRatio / 100))
+    ) * RESIZE_MULTIPLIER
+
+    const newRatio = Math.max(3, Math.round(this.scaleRatio * resizeRatio))
+
+    return newRatio
+    // if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
+    //   store.commit('SET_pageScaleRatio', 100)
+    // } else {
+    //   // @testing not use scaleRatio in mobile
+    //   if (!generalUtils.isTouchDevice()) {
+    //     store.commit('SET_pageScaleRatio', newRatio)
+    //   } else {
+    //     store.commit('SET_pageScaleRatio', 100)
+    //   }
+    // }
   }
 
   isAllPageSizeEqual() {
