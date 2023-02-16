@@ -86,6 +86,13 @@ Cypress.Commands.add('layerLock', { prevSubject: 'element' }, (subject) => {
 
 Cypress.Commands.add('layerDelete', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
+    .get('.nu-page .nu-layer').then((oldLayers) => {
+      cy.get('body').realPress(['Meta', 'c']).realPress(['Meta', 'v'])
+        .get('.nu-page .nu-layer').should('have.length', oldLayers.length + 1)
+        .snapshotTest('Delete before')
+        .get('.panel-group .svg-trash').realClick()
+        .snapshotTest('Delete after')
+    })
   return cy.wrap(subject)
 })
 

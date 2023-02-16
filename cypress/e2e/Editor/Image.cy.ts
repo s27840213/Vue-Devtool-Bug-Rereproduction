@@ -46,6 +46,7 @@ describe('Testing nu-image edit', () => {
           .layerOrder(flowerBack)
           .layerCopy()
           .layerLock()
+          .layerDelete()
           .deselectAllLayers().snapshotTest('init') // Check if image restore to init
       })
   })
