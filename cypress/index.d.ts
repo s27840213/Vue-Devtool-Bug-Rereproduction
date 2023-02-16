@@ -28,7 +28,9 @@ declare namespace Cypress {
     layerCopy(): Chainable<JQuery<HTMLElement>>
     layerLock(): Chainable<JQuery<HTMLElement>>
     layerDelete(): Chainable<JQuery<HTMLElement>>
-    layerCopyFormat(): Chainable<JQuery<HTMLElement>>
+    layerCopyFormat(subjectBack: JQuery<HTMLElement>,
+                  before: (subject: JQuery<HTMLElement>) => void,
+                  after: (subject: JQuery<HTMLElement>) => void): Chainable<JQuery<HTMLElement>>
     layerRotate(): Chainable<JQuery<HTMLElement>>
     layerScale(): Chainable<JQuery<HTMLElement>>
 

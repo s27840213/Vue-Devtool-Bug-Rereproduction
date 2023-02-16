@@ -90,15 +90,23 @@ Cypress.Commands.add('layerDelete', { prevSubject: 'element' }, (subject) => {
       cy.get('body').realPress(['Meta', 'c']).realPress(['Meta', 'v'])
         .get('.nu-page .nu-layer').should('have.length', oldLayers.length + 1)
         .snapshotTest('Delete before')
-        .get('.panel-group .svg-trash').realClick()
+        .get('.panel-group .svg-trash').click()
         .snapshotTest('Delete after')
     })
   return cy.wrap(subject)
 })
 
-Cypress.Commands.add('layerCopyFormat', { prevSubject: 'element' }, (subject) => {
-  cy.wrap(subject).click()
-  return cy.wrap(subject)
+Cypress.Commands.add('layerCopyFormat', { prevSubject: 'element' }, (subjectFront, subjectBack, before, after) => {
+  cy.wrap(subjectFront).click()
+    .then(before)
+    .snapshotTest('Copy format before')
+    .get('.panel-group .svg-brush').click()
+    .wrap(subjectBack).click('topLeft')
+    .snapshotTest('Copy format after')
+    .then(after)
+    .get('.panel-group .svg-brush').click()
+    .wrap(subjectFront).click('topLeft')
+  return cy.wrap(subjectFront)
 })
 
 Cypress.Commands.add('layerRotate', { prevSubject: 'element' }, (subject) => {

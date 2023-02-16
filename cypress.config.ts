@@ -36,8 +36,8 @@ export default defineConfig({
 
         if (browser.name === 'electron') {
           // eslint-disable-next-line no-param-reassign
-          launchOptions.preferences.width = Number.parseInt(width, 10) // eslint-disable-next-line no-param-reassign
-
+          launchOptions.preferences.width = Number.parseInt(width, 10)
+          // eslint-disable-next-line no-param-reassign
           launchOptions.preferences.height = Number.parseInt(height, 10)
         }
 
