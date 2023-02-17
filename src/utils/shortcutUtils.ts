@@ -22,6 +22,7 @@ import uploadUtils from './uploadUtils'
 class ShortcutUtils {
   copySourcePageIndex: number
   prevPasteTargetPageIndex: number
+  prevLayerId: string
   offsetCount: number
 
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -45,6 +46,7 @@ class ShortcutUtils {
   constructor() {
     this.copySourcePageIndex = -1
     this.prevPasteTargetPageIndex = -1
+    this.prevLayerId = ''
     this.offsetCount = 0
   }
 
@@ -136,7 +138,11 @@ class ShortcutUtils {
     const { index, layers, pageIndex } = layerUtils.currSelectedInfo
     this.prevPasteTargetPageIndex = -1
     if (index >= 0 && !layerUtils.getSelectedLayer().locked) {
-      const layer = store.getters.getLayer(pageIndex, index)
+      const layer = store.getters.getLayer(pageIndex, index) as ILayer
+      if (this.prevLayerId !== layer.id) {
+        this.offsetCount = 0
+        this.prevLayerId = layer.id
+      }
       navigator.clipboard.writeText(JSON.stringify(GeneralUtils.deepCopy(layer)))
       this.copySourcePageIndex = pageIndex
       // store.commit('SET_clipboard', GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)))
