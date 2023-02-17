@@ -44,8 +44,11 @@ div(class="mobile-panel"
   div(class="mobile-panel__bottom-section")
     //- keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-file']")
     //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-    component(v-if="currActivePanel && !bgRemoveMode && !hideDynamicComp"
+    component(v-if="dynamicBindIs && !bgRemoveMode && !hideDynamicComp"
       class="border-box"
+      :is="dynamicBindIs"
+      :key="dynamicBindIs"
+      :currPage="currPage"
       v-bind="dynamicBindProps"
       v-on="dynamicBindMethod"
       @close="closeMobilePanel"
@@ -54,7 +57,9 @@ div(class="mobile-panel"
     mobile-panel(v-if="!isSubPanel && currActiveSubPanel !== 'none'"
       :currActivePanel="currActiveSubPanel"
       :isSubPanel="true"
-      @switchTab="switchTab")
+      :currPage="currPage"
+      @switchTab="switchTab"
+      @close="closeMobilePanel")
 </template>
 <script lang="ts">
 import ColorPanel from '@/components/editor/ColorSlips.vue'
@@ -93,6 +98,7 @@ import i18n from '@/i18n'
 
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IFrame } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -104,7 +110,7 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import vClickOutside from 'click-outside-vue3'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -117,6 +123,10 @@ export default defineComponent({
     isSubPanel: {
       default: false,
       type: Boolean
+    },
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
   directives: {
@@ -304,6 +314,27 @@ export default defineComponent({
           return {
             key: ['']
           }
+      }
+    },
+    dynamicBindIs(): string {
+      if (this.showExtraColorPanel) {
+        return 'panel-color'
+      }
+
+      const defaultVal = `panel-${this.currActivePanel}`
+
+      switch (this.currActivePanel) {
+        case 'download': {
+          return 'popup-download'
+        }
+        // case 'replace': {
+        //   return `panel-${this.innerTab}`
+        // }
+        case 'none':
+          return ''
+        default: {
+          return defaultVal
+        }
       }
     },
     dynamicBindProps(): { [index: string]: any } {

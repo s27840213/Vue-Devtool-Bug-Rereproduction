@@ -10,6 +10,7 @@ div(class="vivisticker" :style="copyingStyles()")
     transition(name="panel-up")
       mobile-panel(v-show="showMobilePanel"
         :currActivePanel="currActivePanel"
+        :currPage="currPage"
         @switchTab="switchTab")
   footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
     @switchTab="switchTab"
@@ -34,12 +35,14 @@ import Tutorial from '@/components/vivisticker/Tutorial.vue'
 import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { IFooterTabProps } from '@/interfaces/editor'
+import { IPage } from '@/interfaces/page'
 import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import modalUtils from '@/utils/modalUtils'
+import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textUtils from '@/utils/textUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -181,6 +184,7 @@ export default defineComponent({
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
+      getPage: 'getPage',
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
       currActiveTab: 'vivisticker/getCurrActiveTab',
@@ -197,6 +201,9 @@ export default defineComponent({
     }),
     contentEditable(): boolean {
       return this.currSelectedInfo.layers[0]?.contentEditable
+    },
+    currPage(): IPage {
+      return this.getPage(pageUtils.currFocusPageIndex)
     }
   },
   watch: {

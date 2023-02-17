@@ -31,7 +31,7 @@ div(class="panel-vvstk-more")
     template(v-if="lastHistory === 'subscribe'")
       div(class="horizontal-rule")
       div(class="panel-vvstk-more__option version")
-        i18n(class="panel-vvstk-more__option-title version" tag="span" path="STK0029")
+        i18n-t(class="panel-vvstk-more__option-title version" tag="span" keypath="STK0029")
           template(#privacyPolicy)
             span(class="panel-vvstk-more__option-link" @click="handleOpenUrl('privacyPolicy')") {{ $t('STK0030') }}
           template(#termOfUse)
