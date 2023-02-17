@@ -88,7 +88,7 @@ export default defineComponent({
       }
     },
     hasBleed() {
-      this.minContentScaleRatio = editorUtils.handleContentScaleCalc(this.config.config)
+      this.minContentScaleRatio = editorUtils.handleContentScaleRatio(this.pageIndex) as number
     }
   }
 })

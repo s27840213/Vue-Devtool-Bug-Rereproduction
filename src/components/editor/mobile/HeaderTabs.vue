@@ -1,13 +1,13 @@
 <template lang="pug">
 div(class="header-bar" @pointerdown.stop)
   div(class="header-bar__left")
-    div(class="header-bar__feature-icon mr-25"
+    div(class="header-bar__feature-icon mr-20"
         @pointerdown="backBtnAction()")
       svg-icon(
         :iconName="'chevron-left'"
         :iconColor="'white'"
         :iconWidth="'22px'")
-    div(class="header-bar__feature-icon mr-20"
+    div(class="header-bar__feature-icon mr-15"
         :class="{'click-disabled': stepsUtils.isInFirstStep || isCropping}"
         @pointerdown="undo()")
       svg-icon(:iconName="'undo'"
@@ -299,7 +299,7 @@ export default defineComponent({
     grid-auto-flow: column;
     grid-template-rows: auto;
     grid-auto-columns: auto;
-    column-gap: 20px;
+    column-gap: 12px;
   }
 }
 </style>

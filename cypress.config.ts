@@ -25,6 +25,7 @@ export default defineConfig({
       // So I copy it from 'cypress-image-diff-js/dist/plugin' and add something.
       // Detail plz see: https://github.com/cypress-io/cypress/issues/5240
       on('before:browser:launch', function (browser, launchOptions) {
+        // Launch API DOC: https://docs.cypress.io/api/plugins/browser-launch-api
         const width = String(config.viewportWidth) || '1280'
         const height = String(config.viewportHeight) || '720'
 
@@ -36,8 +37,8 @@ export default defineConfig({
 
         if (browser.name === 'electron') {
           // eslint-disable-next-line no-param-reassign
-          launchOptions.preferences.width = Number.parseInt(width, 10) // eslint-disable-next-line no-param-reassign
-
+          launchOptions.preferences.width = Number.parseInt(width, 10)
+          // eslint-disable-next-line no-param-reassign
           launchOptions.preferences.height = Number.parseInt(height, 10)
         }
 

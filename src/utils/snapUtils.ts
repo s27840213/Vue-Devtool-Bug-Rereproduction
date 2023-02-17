@@ -294,6 +294,7 @@ class SnapUtils {
     } else {
       layerSnapInfo = this.getLayerSnappingPos(styles, 'move')
     }
+
     const targetSnapLines = this.getClosestSnaplines(snaplinePos, layerSnapInfo)
 
     const snaplines = [...targetSnapLines.v, ...targetSnapLines.h]

@@ -206,7 +206,7 @@ export default defineComponent({
       return ImageUtils.getSrcSize(srcObj, Math.max(renderW, renderH) * (this.scaleRatio / 100))
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return pageUtils.removeBleedsFromPageSize(this.page)
+      return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
     srcObj(): SrcObj {
       return this.image.config.srcObj
