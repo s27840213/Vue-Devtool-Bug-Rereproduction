@@ -223,10 +223,6 @@ export default defineComponent({
       coordinateWidth: 0,
       coordinateHeight: 0,
       // snapUtils: new SnapUtils(this.pageIndex),
-      closestSnaplines: {
-        v: [] as Array<number>,
-        h: [] as Array<number>
-      },
       generalUtils,
       pageUtils,
       currDraggingIndex: -1
