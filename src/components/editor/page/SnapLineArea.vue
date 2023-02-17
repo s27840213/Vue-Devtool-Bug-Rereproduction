@@ -104,7 +104,7 @@ export default defineComponent({
           : dir === 'h' ? bleeds.top
             : 0
       }
-      pos = pos * (this.scaleRatio / 100)
+      pos = pos * (this.scaleRatio * this.contentScaleRatio / 100)
       return dir === 'v' ? {
         height: '100%',
         width: '1px',
@@ -120,6 +120,8 @@ export default defineComponent({
     getClosestSnaplines() {
       this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v.map((snapline: ISnapline) => snapline.pos)]
       this.closestSnaplines.h = [...this.snapUtils.closestSnaplines.h.map((snapline: ISnapline) => snapline.pos)]
+
+      console.log(this.closestSnaplines)
     },
     clearSnap(): void {
       this.snapUtils.clear()
@@ -147,6 +149,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .snap-area {
   @include size(100%, 100%);
+  z-index: setZindex(snap-area);
   position: absolute;
   top: 0;
   left: 0;
