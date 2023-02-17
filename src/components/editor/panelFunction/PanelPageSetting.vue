@@ -87,7 +87,7 @@ div(class="page-setting")
         div(class="pt-10")
           btn(:type="'primary-sm'" class="rounded my-5"
             style="padding: 8px 0; margin: 0 auto; width: 70%;"
-            @click.native="updateGroupClicked()") 更新
+            @click="updateGroupClicked()") 更新
     div(class="template-information__divider2")
     span(class="text-gray-1 label-lg") 模 板 資 訊
     div(class="template-information__content")

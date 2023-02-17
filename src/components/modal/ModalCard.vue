@@ -38,14 +38,14 @@ div(class="modal-card" :style="modalInfo.cardStyle")
         @click="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
     div(v-if="!modalInfo.noClose && !modalInfo.noCloseIcon" class="modal-card__close")
       svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'"
-              iconColor="gray-3" @click.native="closePopup()")
+              iconColor="gray-3" @click="closePopup()")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import { IModalInfo } from '@/interfaces/modal'
-import { mapGetters } from 'vuex'
 import modalUtils from '@/utils/modalUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],

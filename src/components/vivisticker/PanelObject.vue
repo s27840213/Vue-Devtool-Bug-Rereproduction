@@ -9,7 +9,7 @@ div(class="panel-objects")
     tabs(:tabs="[$t('NN0758'), 'GIFs']" theme="dark-rect"
         v-model="favoritesTabIndex")
     svg-icon(iconName="info-reverse" iconWidth="24px" iconColor="white"
-            @click.native="doubleTapTips")
+            @click="doubleTapTips")
   keep-alive
     panel-object-static(v-if="isStatic || isFavoritesStatic"
       :showFav="isFavoritesStatic" ref="static")

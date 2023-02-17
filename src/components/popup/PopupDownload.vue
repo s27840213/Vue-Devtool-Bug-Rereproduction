@@ -10,7 +10,7 @@ div(class="popup-download text-left"
         iconName="close"
         iconWidth="16px"
         iconColor="gray-2"
-        @click.native="$emit('close')")
+        @click="$emit('close')")
     div(class="popup-download__progress mt-5")
       div(class="popup-download__progress-value" :style="{ width: `${progress}%`}")
   div(v-else class="popup-download__form")
@@ -152,7 +152,7 @@ div(class="popup-download text-left"
         div
           btn(class="full-width body-3 rounded"
             :disabled="isButtonDisabled"
-            @click.native="handleSubmit(true)")
+            @click="handleSubmit(true)")
             svg-icon(v-if="polling"
               class="align-middle"
               iconName="loading"
@@ -168,7 +168,7 @@ div(class="popup-download text-left"
     div
       btn(class="full-width body-3 rounded"
         :disabled="isButtonDisabled"
-        @click.native="handleSubmit()")
+        @click="handleSubmit()")
         svg-icon(v-if="polling"
           class="align-middle"
           iconName="loading"
@@ -180,21 +180,21 @@ div(class="popup-download text-left"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapGetters, mapMutations, mapState } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
+import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
+import DownloadPageSelection from '@/components/download/DownloadPageSelection.vue'
+import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
 import { IDownloadServiceParams, IOutputType, ITypeOption } from '@/interfaces/download'
 import DownloadUtil from '@/utils/downloadUtil'
-import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
-import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
-import DownloadPageSelection from '@/components/download/DownloadPageSelection.vue'
 import GeneralUtils from '@/utils/generalUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import pageUtils from '@/utils/pageUtils'
 import gtmUtils from '@/utils/gtmUtils'
-import { Tooltip } from 'floating-vue'
+import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
+import { Tooltip } from 'floating-vue'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 const submission = `${process.env.VUE_APP_VERSION}::download_submission`
 

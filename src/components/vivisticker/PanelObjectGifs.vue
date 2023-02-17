@@ -38,7 +38,7 @@ div(class="panel-gifs" :class="{'in-category': isInCategory}")
           div(class="panel-gifs__list-rows-action")
             svg-icon(v-if="isFavorite !== undefined"
                     :iconName="isFavorite ? 'favorites-fill' : 'heart'"
-                    iconWidth="24px" iconColor="gray-2" @click.native="toggleFaovoritesCategoryByTitle(title)")
+                    iconWidth="24px" iconColor="gray-2" @click="toggleFaovoritesCategoryByTitle(title)")
             span(@click="item.categorySearch && item.categorySearch(title)") {{$t('NN0082')}}
         template(v-slot:preview="{ item }")
           category-object-item(class="panel-gifs__item"
