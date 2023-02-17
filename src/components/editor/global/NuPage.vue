@@ -293,9 +293,6 @@ export default defineComponent({
           }
         }
       }
-    },
-    contentScaleRatio(val) {
-      console.warn(this.pageIndex, val)
     }
   },
   computed: {
@@ -334,8 +331,8 @@ export default defineComponent({
     contentScaleRatio(): number {
       // return this.pageState.config.contentScaleRatio
       // if (this.$isTouchDevice) {
-      if (generalUtils.isTouchDevice()) {
-        return this.pageState.config.contentScaleRatio
+      if (this.$isTouchDevice) {
+        return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this.pageState.config.contentScaleRatio
       } else {
         return 1
       }
