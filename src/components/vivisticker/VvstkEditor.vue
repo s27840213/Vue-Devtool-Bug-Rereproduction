@@ -35,8 +35,16 @@ import layerUtils from '@/utils/layerUtils'
 import controlUtils from '@/utils/controlUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
+import resizeUtils from '@/utils/resizeUtils'
 
 export default Vue.extend({
+  props: {
+    isInEditor: {
+      type: Boolean,
+      default: false,
+      required: true
+    }
+  },
   data() {
     return {
       pageIndex: 0,
@@ -44,11 +52,24 @@ export default Vue.extend({
         v: [] as Array<number>,
         h: [] as Array<number>
       },
-      imageUtils
+      imageUtils,
+      pageSize: 0
     }
   },
   created() {
     this.pagesState[this.pageIndex].modules.snapUtils.pageIndex = this.pageIndex
+  },
+  mounted() {
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize()
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.handleResize)
+  },
+  watch: {
+    isInEditor(newVal, oldVal): void {
+      if (newVal && !oldVal) this.handleResize()
+    }
   },
   computed: {
     ...mapGetters({
@@ -178,6 +199,16 @@ export default Vue.extend({
           controlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
         }
       }
+    },
+    handleResize() {
+      const elTop = document.getElementsByClassName('vivisticker__top')[0]
+      const headerHeight = 44
+      const topSize = {
+        width: elTop.clientWidth,
+        height: elTop.clientHeight
+      }
+      const pageSize = Math.min(topSize.width, topSize.height - headerHeight) - 32
+      resizeUtils.resizePage(0, this.config, { width: pageSize, height: pageSize })
     }
   }
 })

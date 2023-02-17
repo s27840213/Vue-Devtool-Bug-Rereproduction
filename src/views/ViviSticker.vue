@@ -5,7 +5,7 @@
       div(class="vivisticker__content"
           @pointerdown="outerClick")
         my-design(v-show="isInMyDesign && !isInEditor")
-        vvstk-editor(v-show="isInEditor")
+        vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor")
         main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
       transition(name="panel-up")
         mobile-panel(v-show="showMobilePanel"
