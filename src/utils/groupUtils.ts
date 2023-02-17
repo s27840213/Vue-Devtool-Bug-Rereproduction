@@ -30,7 +30,7 @@ export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup | IF
       minX = Math.min(minX, layer.styles.x)
       minY = Math.min(minY, layer.styles.y)
     } else {
-      const layerBouding = MathUtils.getBounding(layer)
+      const layerBouding = MathUtils.getBounding(layer.styles)
       minX = Math.min(minX, layerBouding.x)
       minY = Math.min(minY, layerBouding.y)
     }
@@ -41,7 +41,7 @@ export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup | IF
       maxWidth = Math.max(maxWidth, layer.styles.x + (layer.styles.width as number) - minX)
       maxHeight = Math.max(maxHeight, layer.styles.y + (layer.styles.height as number) - minY)
     } else {
-      const layerBouding = MathUtils.getBounding(layer)
+      const layerBouding = MathUtils.getBounding(layer.styles)
       maxWidth = Math.max(maxWidth, layerBouding.x + (layerBouding.width as number) - minX)
       maxHeight = Math.max(maxHeight, layerBouding.y + (layerBouding.height as number) - minY)
     }

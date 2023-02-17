@@ -532,7 +532,7 @@ class AssetUtils {
     }
 
     if (styles && categoryType === 14) {
-      const { width: boundingWidth, height: boundingHeight } = mathUtils.getBounding({ styles: styles as IStyle })
+      const { width: boundingWidth, height: boundingHeight } = mathUtils.getBounding(styles as IStyle)
       photoAspectRatio = boundingWidth / boundingHeight
 
       const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * RESIZE_RATIO_IMAGE : (this.pageSize.height * RESIZE_RATIO_IMAGE) * photoAspectRatio

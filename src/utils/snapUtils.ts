@@ -1,19 +1,19 @@
 
-import store from '@/store'
+import { IGroup, IImage, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
-import MathUtils from '@/utils/mathUtils'
-import { IConsideredEdges, ISnaplineInfo, ISnaplinePos, ISnapline } from '@/interfaces/snap'
+import { IConsideredEdges, ISnapline, ISnaplineInfo, ISnaplinePos } from '@/interfaces/snap'
+import store from '@/store'
 import LayerUtils from '@/utils/layerUtils'
+import MathUtils from '@/utils/mathUtils'
 import shapeUtils from '@/utils/shapeUtils'
+import { EventEmitter } from 'events'
 import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
-import { EventEmitter } from 'events'
 class SnapUtils {
   id: string
   event: any
   pageIndex: number
-  GUIDELINE_OFFSET: number
+  private _GUIDELINE_OFFSET: number
   GUIDEANGLE_OFFSET: number
   closestSnaplines: {
     v: Array<ISnapline>,
@@ -26,7 +26,7 @@ class SnapUtils {
     this.event = new EventEmitter()
     this.id = generalUtils.generateRandomString(4)
     this.pageIndex = pageIndex
-    this.GUIDELINE_OFFSET = 5
+    this._GUIDELINE_OFFSET = 5
     this.GUIDEANGLE_OFFSET = 1
     this.closestSnaplines = {
       v: [],
@@ -37,6 +37,10 @@ class SnapUtils {
 
   get guidelinePos(): { [index: string]: Array<number> } {
     return pageUtils.currFocusPage.guidelines
+  }
+
+  get GUIDELINE_OFFSET(): number {
+    return generalUtils.isTouchDevice() ? this._GUIDELINE_OFFSET / (pageUtils.getPage(pageUtils.currActivePageIndex)?.contentScaleRatio || 1) : 5
   }
 
   on(type: string, callback: () => void): void {
@@ -76,7 +80,7 @@ class SnapUtils {
           v.push(...[x + dx, x + dx + rawWidth * ratio / 2, x + dx + rawWidth * ratio])
           h.push(...[y + dy, y + dy + rawHeight * ratio / 2, y + dy + rawHeight * ratio])
         } else {
-          const rect = MathUtils.getBounding(layer)
+          const rect = MathUtils.getBounding(layer.styles)
 
           v.push(...[rect.x, rect.x + rect.width / 2, rect.x + rect.width])
           h.push(...[rect.y, rect.y + rect.height / 2, rect.y + rect.height])
@@ -92,51 +96,9 @@ class SnapUtils {
   /**
    * Get the edges and center that will trigger snapping
    */
-  getLayerSnappingPos(layer: IShape | IText | IImage | IGroup | ITmp, type: string): ISnaplineInfo {
-    const layerBounding = MathUtils.getBounding(layer)
-    const { x, y } = layer.styles
-
-    if (type === 'move' && layer.type === 'shape' && layer.category === 'D') {
-      // svg line snaps to the line edges not the whole layer.
-      const { point, size } = layer as IShape
-      const { width, initWidth } = layer.styles
-      const scale = (size ?? [1])[0]
-      const { width: rawWidth, height: rawHeight, baseDegree } = shapeUtils.lineDimension(point ?? [])
-      const ratio = width / initWidth
-      const dx = 2 * scale * Math.sin(baseDegree) * ratio
-      const dy = 2 * scale * Math.cos(baseDegree) * ratio
-
-      return {
-        v: [
-          {
-            pos: x + dx,
-            offset: -dx
-          },
-          {
-            pos: x + dx + rawWidth * ratio / 2,
-            offset: -dx - rawWidth * ratio / 2
-          },
-          {
-            pos: x + dx + rawWidth * ratio,
-            offset: -dx - rawWidth * ratio
-          }
-        ],
-        h: [
-          {
-            pos: y + dy,
-            offset: -dy
-          },
-          {
-            pos: y + dy + rawHeight * ratio / 2,
-            offset: -dy - rawHeight * ratio / 2
-          },
-          {
-            pos: y + dy + rawHeight * ratio,
-            offset: -dy - rawHeight * ratio
-          }
-        ]
-      }
-    }
+  getLayerSnappingPos(styles: IStyle, type: string): ISnaplineInfo {
+    const layerBounding = MathUtils.getBounding(styles)
+    const { x, y } = styles
 
     return type === 'move' ? {
       v: [
@@ -189,6 +151,53 @@ class SnapUtils {
         }
       ]
     }
+  }
+
+  getLayerSnappingPos4Line(styles: IStyle, layer: IShape, type: string) {
+    const { x, y } = styles
+
+    if (type === 'move' && layer.type === 'shape' && layer.category === 'D') {
+      // svg line snaps to the line edges not the whole layer.
+      const { point, size } = layer as IShape
+      const { width, initWidth } = styles
+      const scale = (size ?? [1])[0]
+      const { width: rawWidth, height: rawHeight, baseDegree } = shapeUtils.lineDimension(point ?? [])
+      const ratio = width / initWidth
+      const dx = 2 * scale * Math.sin(baseDegree) * ratio
+      const dy = 2 * scale * Math.cos(baseDegree) * ratio
+
+      return {
+        v: [
+          {
+            pos: x + dx,
+            offset: -dx
+          },
+          {
+            pos: x + dx + rawWidth * ratio / 2,
+            offset: -dx - rawWidth * ratio / 2
+          },
+          {
+            pos: x + dx + rawWidth * ratio,
+            offset: -dx - rawWidth * ratio
+          }
+        ],
+        h: [
+          {
+            pos: y + dy,
+            offset: -dy
+          },
+          {
+            pos: y + dy + rawHeight * ratio / 2,
+            offset: -dy - rawHeight * ratio / 2
+          },
+          {
+            pos: y + dy + rawHeight * ratio,
+            offset: -dy - rawHeight * ratio
+          }
+        ]
+      }
+    }
+    return { v: [], h: [] }
   }
 
   // find all snapping possibilities
@@ -277,13 +286,20 @@ class SnapUtils {
     }
   }
 
-  calcMoveSnap(layer: ITmp | IGroup | IShape | IText | IImage, layerIndex: number): { x: number, y: number } {
+  calcMoveSnap(styles: IStyle, line?: IShape): { x: number, y: number } {
     const snaplinePos = this.getSnaplinePos()
-    const layerSnapInfo = this.getLayerSnappingPos(layer, 'move')
+    let layerSnapInfo = null as unknown as ISnaplineInfo
+    if (line) {
+      layerSnapInfo = this.getLayerSnappingPos4Line(styles, line, 'move')
+    } else {
+      layerSnapInfo = this.getLayerSnappingPos(styles, 'move')
+    }
+
+    console.log(layerSnapInfo)
     const targetSnapLines = this.getClosestSnaplines(snaplinePos, layerSnapInfo)
 
     const snaplines = [...targetSnapLines.v, ...targetSnapLines.h]
-    const snapResult = { x: layer.styles.x, y: layer.styles.y }
+    const snapResult = { x: styles.x, y: styles.y }
     /**
      * @param {x:number, y:number} offset - The difference of snapped layer pos and original layer pos
      * It's used to prevent the layer from always snapping to the snapline if the mouse move offset is too small
@@ -300,23 +316,30 @@ class SnapUtils {
     snaplines.forEach((snapline: ISnapline) => {
       if (snapline.orientation === 'V') {
         snapResult.x = snapline.pos + snapline.offset
-        offset.x = snapResult.x - layer.styles.x
+        offset.x = snapResult.x - styles.x
       } else {
         snapResult.y = snapline.pos + snapline.offset
-        offset.y = snapResult.y - layer.styles.y
+        offset.y = snapResult.y - styles.y
       }
     })
-    LayerUtils.updateLayerStyles(this.pageIndex, layerIndex, { x: snapResult.x, y: snapResult.y })
+    // LayerUtils.updateLayerStyles(this.pageIndex, layerIndex, { x: snapResult.x, y: snapResult.y })
     return offset
   }
 
-  calcScaleSnap(layer: ITmp | IGroup | IShape | IText | IImage, layerIndex: number): { x: number, y: number, width: number, height: number } {
+  calcScaleSnap(styles: IStyle, layerIndex: number, line?: IShape): { x: number, y: number, width: number, height: number } {
     const snaplinePos = this.getSnaplinePos()
-    const layerSnapInfo = this.getLayerSnappingPos(layer, 'scale')
+    // const layerSnapInfo = this.getLayerSnappingPos(layer, 'scale')
+    let layerSnapInfo = null as unknown as ISnaplineInfo
+    if (line) {
+      layerSnapInfo = this.getLayerSnappingPos4Line(styles, line, 'move')
+    } else {
+      layerSnapInfo = this.getLayerSnappingPos(styles, 'move')
+    }
+
     const targetSnapLines = this.getClosestSnaplines(snaplinePos, layerSnapInfo)
 
     const snaplines = [...targetSnapLines.v, ...targetSnapLines.h]
-    const snapResult = { width: layer.styles.width, height: layer.styles.height, scale: layer.styles.scale }
+    const snapResult = { width: styles.width, height: styles.height, scale: styles.scale }
     // const aspectRatio = layer.styles.width / layer.styles.height
     /**
      * @param {x:number, y:number} offset - The difference of snapped layer pos and original layer pos
@@ -334,16 +357,16 @@ class SnapUtils {
     }
     snaplines.forEach((snapline: ISnapline) => {
       if (snapline.orientation === 'V') {
-        snapResult.width = layer.styles.width + (snapline.pos - (layer.styles.x + layer.styles.width))
-        const ratio = snapResult.width / layer.styles.width
-        snapResult.height = layer.styles.height * ratio
-        snapResult.scale = layer.styles.scale * ratio
+        snapResult.width = styles.width + (snapline.pos - (styles.x + styles.width))
+        const ratio = snapResult.width / styles.width
+        snapResult.height = styles.height * ratio
+        snapResult.scale = styles.scale * ratio
         // offset.width = snapResult.width - layer.styles.width
       } else {
-        snapResult.height = layer.styles.height + (snapline.pos - (layer.styles.y + layer.styles.height))
-        const ratio = snapResult.height / layer.styles.height
-        snapResult.width = layer.styles.width * ratio
-        snapResult.scale = layer.styles.scale * ratio
+        snapResult.height = styles.height + (snapline.pos - (styles.y + styles.height))
+        const ratio = snapResult.height / styles.height
+        snapResult.width = styles.width * ratio
+        snapResult.scale = styles.scale * ratio
         // offset.height = snapResult.height - layer.styles.height
       }
     })
