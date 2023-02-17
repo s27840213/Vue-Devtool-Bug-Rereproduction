@@ -383,7 +383,7 @@ export default defineComponent({
       return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return pageUtils.removeBleedsFromPageSize(this.page)
+      return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
     parentLayerDimension(): number | string {
       const { width, height } = this.config.parentLayerStyles || {}

@@ -112,7 +112,7 @@ export default defineComponent({
       }
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return PageUtils.removeBleedsFromPageSize(this.page)
+      return this.page.isEnableBleed ? PageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
   },
   methods: {
@@ -187,6 +187,7 @@ export default defineComponent({
         width: (this.getImgWidth - this.pageSize.width / this.getPageScale) / 2,
         height: (this.getImgHeight - this.pageSize.height / this.getPageScale) / 2
       }
+      console.log(baseLine, translateLimit)
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
 
