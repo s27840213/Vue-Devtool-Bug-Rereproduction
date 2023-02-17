@@ -4,7 +4,7 @@ div(class="panel-bg" :class="{'in-category': isInCategory}")
         class="panel-bg__tabs"
         :tabs="[$tc('NN0002', 2),$t('NN0017')]"
         v-model="tabIndex")
-  template(v-show="showImageTab")
+  div(v-show="showImageTab" class="panel-bg__list-wrapper")
     search-bar(v-if="!isInCategory && showImageTab" class="panel-bg__searchbar"
       :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
       clear
@@ -515,8 +515,12 @@ export default defineComponent({
   &__searchbar {
     margin-bottom: 14px;
   }
+  &__list-wrapper {
+    height: 100%;
+  }
   &__list {
     flex-grow: 1;
+    height: 100%;
   }
   &__item {
     width: 80px;

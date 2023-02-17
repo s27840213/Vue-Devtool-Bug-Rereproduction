@@ -1,12 +1,12 @@
 import axios from '@/apis'
-import authToken from './auth-token'
-import localeUtils from '@/utils/localeUtils'
 import {
   IListServiceParams,
   IListServiceResponse
 } from '@/interfaces/api'
 import store from '@/store'
+import localeUtils from '@/utils/localeUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import authToken from './auth-token'
 
 class ListService {
   getList(params: IListServiceParams) {

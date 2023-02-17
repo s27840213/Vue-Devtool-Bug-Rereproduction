@@ -7,7 +7,7 @@ import { IPage } from '@/interfaces/page'
 import { IIosImgData, IMyDesign, IMyDesignTag, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import store from '@/store'
 import { ColorEventType, LayerType } from '@/store/types'
-import Vue from 'vue'
+import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import colorUtils from './colorUtils'
 import editorUtils from './editorUtils'
@@ -233,7 +233,7 @@ class ViviStickerUtils {
       if (!messageHandler) {
         throw new Error(`message type: ${messageType} does not exist!`)
       }
-      messageHandler.postMessage(message)
+      messageHandler.postMessage(generalUtils.unproxify(message))
     } catch (error) {
       logUtils.setLogAndConsoleLog(error)
     }
@@ -506,7 +506,7 @@ class ViviStickerUtils {
 
   copyEditor(callback?: (flag: string) => void) {
     const executor = () => {
-      Vue.nextTick(() => {
+      nextTick(() => {
         this.preCopyEditor()
         setTimeout(() => {
           this.sendCopyEditor().then((flag) => {
@@ -665,9 +665,11 @@ class ViviStickerUtils {
     }
     const designIds = data.assets.map(asset => asset.id)
     listApis.getInfoList(MODULE_TYPE_MAPPING[data.key], designIds).then((response) => {
-      const updateList = response.data.data.content[0].list
-      data.assets = vivistickerUtils.updateAssetContent(data.assets, updateList)
-      assetUtils.setRecentlyUsed(data.key, data.assets)
+      if (response.data.data.content.length !== 0) {
+        const updateList = response.data.data.content[0].list
+        data.assets = vivistickerUtils.updateAssetContent(data.assets, updateList)
+        assetUtils.setRecentlyUsed(data.key, data.assets)
+      }
       vivistickerUtils.handleCallback(`list-asset-${data.key}`)
     })
   }
@@ -855,7 +857,7 @@ class ViviStickerUtils {
     if (this.isStandaloneMode) return '0'
     return await new Promise<string>((resolve, reject) => {
       try {
-        Vue.nextTick(() => {
+        nextTick(() => {
           this.preCopyEditor(false)
           setTimeout(() => {
             const { x, y, width, height } = this.getEditorDimensions()
