@@ -195,18 +195,14 @@ export default defineComponent({
     eventUtils.off(PanelEvent.scrollPanelTextToTop)
   },
   activated() {
-    const mainContent = (this.$refs.mainContent as CCategoryList[])[0].$el
-    const searchResult = (this.$refs.searchResult as CCategoryList[])[0].$el
-    mainContent.scrollTop = this.scrollTop.mainContent
-    searchResult.scrollTop = this.scrollTop.searchResult
-    mainContent.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    searchResult.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
-  },
-  deactivated() {
-    const mainContent = (this.$refs.mainContent as CCategoryList[])[0].$el
-    const searchResult = (this.$refs.searchResult as CCategoryList[])[0].$el
-    mainContent.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    searchResult.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CCategoryList[])[0].$el
+      const searchResult = (this.$refs.searchResult as CCategoryList[])[0].$el
+      mainContent.scrollTop = this.scrollTop.mainContent
+      searchResult.scrollTop = this.scrollTop.searchResult
+      mainContent.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+      searchResult.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    })
   },
   watch: {
     keyword(newVal: string) {

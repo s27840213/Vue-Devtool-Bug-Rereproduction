@@ -257,17 +257,13 @@ export default defineComponent({
     )
   },
   activated() {
-    const ref = this.$refs as Record<string, CCategoryList[]>
-    for (const name of this.targets) {
-      ref[name][0].$el.scrollTop = this.scrollTop[name]
-      ref[name][0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, name))
-    }
-  },
-  deactivated() {
-    const ref = this.$refs as Record<string, CCategoryList[]>
-    for (const name of this.targets) {
-      ref[name][0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, name))
-    }
+    this.$nextTick(() => {
+      const ref = this.$refs as Record<string, CCategoryList[]>
+      for (const name of this.targets) {
+        ref[name][0].$el.scrollTop = this.scrollTop[name]
+        ref[name][0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, name))
+      }
+    })
   },
   watch: {
     keyword(newVal: string) {
