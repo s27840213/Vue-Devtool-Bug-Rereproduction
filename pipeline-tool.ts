@@ -3,11 +3,14 @@ const fs = require('fs-extra')
 const YAML = require('yaml')
 const lodash = require('lodash')
 
-const versionCheckAndBuild = () => ([
+const versionCheckAndBuild = (prerender = true) => ([
   {
     step: {
       name: '"Verify build environment"',
-      script: ['node -v', 'yarn -v'],
+      script: [
+        'node -v',
+        'yarn -v'
+      ],
     }
   }, {
     step: {
@@ -15,7 +18,10 @@ const versionCheckAndBuild = () => ([
       size: '2x',
       caches: ['node'],
       image: 'cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1',
-      script: ['yarn install', 'yarn build:prerender'],
+      script: [
+        'yarn install',
+        `yarn build${prerender ? ':prerender' : ''}`
+      ],
       artifacts: ['dist/**', 'node_modules/**'],
     }
   },
@@ -54,9 +60,9 @@ const _deploy = {
       {
         pipe: 'atlassian/aws-s3-deploy:1.1.0',
         variables: {
-          AWS_ACCESS_KEY_ID: '$AWS_ACCESS_KEY_ID_TEST',
-          AWS_SECRET_ACCESS_KEY: '$AWS_SECRET_ACCESS_KEY_TEST',
-          AWS_DEFAULT_REGION: '$AWS_DEFAULT_REGION_TEST',
+          AWS_ACCESS_KEY_ID: '$AWS_ACCESS_KEY_ID_$AWSName',
+          AWS_SECRET_ACCESS_KEY: '$AWS_SECRET_ACCESS_KEY_$AWSName',
+          AWS_DEFAULT_REGION: '$AWS_DEFAULT_REGION_$AWSName',
           S3_BUCKET: '$AWS_BUCKET_$SUBDOMAIN',
           LOCAL_PATH: '"dist"',
           EXTRA_ARGS: '"--exclude=app.html --exclude=*.js.map"',
@@ -65,9 +71,9 @@ const _deploy = {
       {
         pipe: 'atlassian/aws-s3-deploy:1.1.0',
         variables: {
-          AWS_ACCESS_KEY_ID: '$AWS_ACCESS_KEY_ID_TEST',
-          AWS_SECRET_ACCESS_KEY: '$AWS_SECRET_ACCESS_KEY_TEST',
-          AWS_DEFAULT_REGION: '$AWS_DEFAULT_REGION_TEST',
+          AWS_ACCESS_KEY_ID: '$AWS_ACCESS_KEY_ID_$AWSName',
+          AWS_SECRET_ACCESS_KEY: '$AWS_SECRET_ACCESS_KEY_$AWSName',
+          AWS_DEFAULT_REGION: '$AWS_DEFAULT_REGION_$AWSName',
           S3_BUCKET: '$AWS_BUCKET_$SUBDOMAIN',
           LOCAL_PATH: '"dist"',
           EXTRA_ARGS: '"--exclude=* --include=app.html"',
@@ -76,9 +82,9 @@ const _deploy = {
       {
         pipe: 'atlassian/aws-s3-deploy:1.1.0',
         variables: {
-          AWS_ACCESS_KEY_ID: '$AWS_ACCESS_KEY_ID_TEST',
-          AWS_SECRET_ACCESS_KEY: '$AWS_SECRET_ACCESS_KEY_TEST',
-          AWS_DEFAULT_REGION: '$AWS_DEFAULT_REGION_TEST',
+          AWS_ACCESS_KEY_ID: '$AWS_ACCESS_KEY_ID_$AWSName',
+          AWS_SECRET_ACCESS_KEY: '$AWS_SECRET_ACCESS_KEY_$AWSName',
+          AWS_DEFAULT_REGION: '$AWS_DEFAULT_REGION_$AWSName',
           S3_BUCKET: '$AWS_BUCKET_$SUBDOMAIN',
           LOCAL_PATH: '"dist"',
           EXTRA_ARGS: '"--exclude=*.js.map"',
@@ -89,7 +95,7 @@ const _deploy = {
   },
 }
 
-function getDeploy(stepName, deployment, subdomain, prod) {
+function getDeploy(stepName, deployment, subdomain, AWSName = 'TEST', prod = false) {
   const deploy = lodash.cloneDeep(_deploy)
   deploy.step.name = `"${stepName}"`
   deploy.step.deployment = deployment
@@ -98,14 +104,18 @@ function getDeploy(stepName, deployment, subdomain, prod) {
     deploy.step.script[index].variables.S3_BUCKET
       .replace('$SUBDOMAIN', subdomain.toUpperCase())
   }
-  if (prod) {
-    for (const index of [0, 1, 2]) {
-      for (const key of ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_DEFAULT_REGION']) {
-        deploy.step.script[index].variables[key] =
-        deploy.step.script[index].variables[key]
-          .replace('TEST', subdomain.toUpperCase())
-      }
+  for (const index of [0, 1, 2]) {
+    for (const key of ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_DEFAULT_REGION']) {
+      deploy.step.script[index].variables[key] =
+      deploy.step.script[index].variables[key]
+        .replace('$AWSName', AWSName)
     }
+    if (AWSName === 'STICKER') {
+      deploy.step.script[index].variables.EXTRA_ARGS =
+      deploy.step.script[index].variables.EXTRA_ARGS.replace('app.html', 'index.html')
+    }
+  }
+  if (prod) {
     deploy.step.script.push('$curl')
   }
   return deploy
@@ -129,8 +139,21 @@ function allDeploy() {
   ]
   return [
     e2e(),
-    ...deploys.map((dep) => getDeploy(dep.name, dep.sub, dep.sub, false)),
+    ...deploys.map((dep) => getDeploy(dep.name, dep.sub, dep.sub)),
     pullRequest()
+  ]
+}
+function stkAllDeploy() {
+  const deploys = [
+    { sub: 'dev5', name: 'dev5 Alan' },
+    { sub: 'dev4', name: 'dev4 Gary' },
+    { sub: 'dev3', name: 'dev3 HsingChi' },
+    { sub: 'dev2', name: 'dev2 TingAn' },
+    { sub: 'dev1', name: 'dev1 Nathan' },
+    { sub: 'dev0', name: 'dev0 ZhengYan' },
+  ]
+  return [
+    ...deploys.map((dep) => getDeploy(dep.name, `stk${dep.sub}`, `STICKER_${dep.sub}`, 'STICKER')),
   ]
 }
 
@@ -138,25 +161,25 @@ const result = {
   image: 'node:14.16.0',
   pipelines: {
     default: [{
-      parallel: versionCheckAndBuild()
+      parallel: versionCheckAndBuild(false)
     }, {
-      parallel: allDeploy(),
+      parallel: stkAllDeploy(),
     }],
     branches: {
       master: [{
         parallel: versionCheckAndBuild()
       },
-      getDeploy('deploy test', 'test', 'TEST', false),
-      getDeploy('deploy edit', 'staging', 'EDIT', true),
-      getDeploy('deploy prod', 'production', 'PROD', true)
+      getDeploy('deploy test', 'test', 'TEST'),
+      getDeploy('deploy edit', 'staging', 'EDIT', 'EDIT', true),
+      getDeploy('deploy prod', 'production', 'PROD', 'PROD', true)
       ],
       develop: [{
         parallel: versionCheckAndBuild()
       }, {
         parallel: [
           e2e(),
-          getDeploy('deploy rd', 'rd', 'RD', false),
-          getDeploy('test3', 'test3', 'TEST3', false),
+          getDeploy('deploy rd', 'rd', 'RD'),
+          getDeploy('test3', 'test3', 'TEST3'),
           pullRequest()
         ]
       }],
@@ -165,9 +188,24 @@ const result = {
       }, {
         parallel: [
           e2e(),
-          getDeploy('deploy qa', 'qa', 'QA', false),
+          getDeploy('deploy qa', 'qa', 'QA'),
           pullRequest()
         ]
+      }],
+      'stk-hotfix': [{
+        parallel: versionCheckAndBuild(false)
+      }, {
+        parallel: stkAllDeploy(),
+      }],
+      'app/vivisticker': [{
+        parallel: versionCheckAndBuild(false)
+      }, {
+        parallel: [getDeploy('deploy prod', 'stickerproduction', 'STICKER', 'STICKER', true)]
+      }],
+      'app/vivisticker-develop': [{
+        parallel: versionCheckAndBuild(false)
+      }, {
+        parallel: [getDeploy('deploy test', 'stkrd', 'STICKER_RD', 'STICKER')]
       }],
       // 'feature/?': [{
       //   parallel: versionCheckAndBuild()
