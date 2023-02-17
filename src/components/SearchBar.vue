@@ -159,8 +159,8 @@ export default Vue.extend({
     &.vivisticker {
       @include body-SM;
     }
-    // Remove webkit default magnifier & cancle icon for search input, https://stackoverflow.com/a/23296152
-    -webkit-appearance: textfield;
+    // Remove webkit default magnifier, cancle icon & bg color for search input, https://stackoverflow.com/a/23296152
+    -webkit-appearance: none;
     &::-webkit-search-cancel-button { display: none; }
   }
   & > svg.vivisticker {
