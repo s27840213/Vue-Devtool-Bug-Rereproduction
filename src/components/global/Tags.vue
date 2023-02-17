@@ -13,7 +13,7 @@ div(class="tags" v-click-outside="clickOutsideHandler")
   template(v-else)
     div(class="tags__container-mobile")
       div(class="tags__flex-container-mobile")
-        div(v-for="tag in tags" :active="typeof tag === 'string' ? undefined : tag.active"
+        div(v-for="tag in tags" :active="typeof tag === 'string' ? undefined : (tag.active ? 'true' : undefined)"
             class="tags__tag-wrapper pointer" :class="{[theme]: true}"
             @click="onClick(typeof tag === 'string' ? tag : tag.value)")
           div(class="tags__tag") {{ typeof tag === 'string' ? tag : tag.label }}
