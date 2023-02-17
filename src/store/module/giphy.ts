@@ -555,48 +555,48 @@ function processTags(tag: ITag) {
 }
 
 const getters: GetterTree<IGiphyState, unknown> = {
-  pending(state) {
+  pending(state: IGiphyState) {
     return { content: state.pending, favorites: state.favorites.pending }
   },
-  isSearchingCategory(state) {
+  isSearchingCategory(state: IGiphyState) {
     return state.nextCategoryContent.categoryId !== -1
   },
-  isSearchingTag(state) {
+  isSearchingTag(state: IGiphyState) {
     return state.nextTagContent.keyword !== ''
   },
-  tagsBar(state, getters) { // Data for tags.vue component
+  tagsBar(state: IGiphyState, getters) { // Data for tags.vue component
     const target = getters.isSearchingCategory
       ? state.searchResult.tags : state.tags
     return target.map(processTags)
   },
-  favoritesTagsBar(state, getters) { // Data for tags.vue component
+  favoritesTagsBar(state: IGiphyState, getters) { // Data for tags.vue component
     const fsr = getters.favoritesSearchResult as IGiphyFavoritesSearchResult
     const target = fsr.title
       ? fsr.tags : []
     return target.map(processTags)
   },
-  keyword(state, getters) {
+  keyword(state: IGiphyState, getters) {
     return getters.favoritesSearchResult.title || state.nextCategoryContent.categoryName || state.nextTagContent.keyword
   },
-  checkItemFavorites() {
+  checkItemFavorites(state: IGiphyState) {
     return (id: string): boolean => state.favorites.items.obj[id] !== undefined
   },
-  checkCategoryFavorite() {
+  checkCategoryFavorite(state: IGiphyState) {
     return (id: string): boolean => state.favorites.categories.obj[id] !== undefined
   },
-  checkTagFavorite() {
+  checkTagFavorite(state: IGiphyState) {
     return (rawKeyword: string): boolean | undefined => {
       if (rawKeyword === '') return undefined
       const { keyword, type } = keyword2tag(rawKeyword)
       return state.favorites.tags.obj[`${keyword}:${type}`] !== undefined
     }
   },
-  favoritesItems(): IGif[] {
+  favoritesItems(state: IGiphyState): IGif[] {
     return state.favorites.items.order.map((key) => {
       return state.favorites.items.obj[key]
     })
   },
-  favoritesTags(): ITagExtend[] {
+  favoritesTags(state: IGiphyState): ITagExtend[] {
     return filter(state.favorites.tags.order.map((id) => {
       const { keyword, type } = keyword2tag(id)
       return {
@@ -608,7 +608,7 @@ const getters: GetterTree<IGiphyState, unknown> = {
       }
     }), 'list')
   },
-  favoritesCategories(): IGifCategoryExtend[] {
+  favoritesCategories(state: IGiphyState): IGifCategoryExtend[] {
     return filter(state.favorites.categories.order.map((id) => {
       const content = state.favorites.categoriesContent[id]
       return {
@@ -618,7 +618,7 @@ const getters: GetterTree<IGiphyState, unknown> = {
       }
     }), 'list')
   },
-  favoritesSearchResult(state, getters): IGiphyFavoritesSearchResult {
+  favoritesSearchResult(state: IGiphyState, getters): IGiphyFavoritesSearchResult {
     const { searchTarget } = state.favorites
     const activeTag = favoritesCategoryActiveTag()
     // Searching a tag.
@@ -667,7 +667,7 @@ const getters: GetterTree<IGiphyState, unknown> = {
         return { title: '', content: [], tags: [] }
     }
   },
-  headerTab(state, getters) {
+  headerTab(state: IGiphyState, getters) {
     const { categoryId } = state.nextCategoryContent
     const { keyword: tagKeyword, type: tagType } = state.nextTagContent
     const { searchTarget } = state.favorites
