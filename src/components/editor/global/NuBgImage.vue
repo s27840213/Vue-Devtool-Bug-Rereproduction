@@ -16,8 +16,6 @@ div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false
     svg(v-if="isAdjustImage"
       class="nu-background-image__svg"
       :viewBox="svgViewBox"
-      :width="svgImageWidth"
-      :height="svgImageHeight"
       preserveAspectRatio="none"
       role="image")
       defs
@@ -31,13 +29,13 @@ div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false
               :key="child.tag"
               :is="child.tag"
               v-bind="child.attrs")
-      g
-        g(:filter="`url(#${filterId})`")
-          image(:xlink:href="finalSrc" ref="img"
-            class="nu-background-image__adjust-picture"
-            draggable="false"
-            @error="onError"
-            @load="onLoad")
+              //- class="nu-background-image__adjust-picture"
+      image(:xlink:href="finalSrc" ref="img"
+        :filter="`url(#${filterId})`"
+        :width="svgImageWidth"
+        :height="svgImageHeight"
+        @error="onError"
+        @load="onLoad")
     img(v-else-if="src" ref="img"
       class='nu-image__picture'
       :src="finalSrc"
@@ -206,7 +204,7 @@ export default defineComponent({
       return ImageUtils.getSrcSize(srcObj, Math.max(renderW, renderH) * (this.scaleRatio / 100))
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
+      return pageUtils.removeBleedsFromPageSize(this.page)
     },
     srcObj(): SrcObj {
       return this.image.config.srcObj
@@ -272,11 +270,13 @@ export default defineComponent({
     },
     svgImageWidth(): number {
       const { imgWidth } = this.image.config.styles
-      return imgWidth * this.contentScaleRatio
+      // return imgWidth * this.contentScaleRatio
+      return Math.round(imgWidth * this.contentScaleRatio)
     },
     svgImageHeight(): number {
       const { imgHeight } = this.image.config.styles
-      return imgHeight * this.contentScaleRatio
+      // return imgHeight * this.contentScaleRatio
+      return Math.round(imgHeight * this.contentScaleRatio)
     },
     svgViewBox(): string {
       return `0 0 ${this.svgImageWidth} ${this.svgImageHeight}`
@@ -286,10 +286,8 @@ export default defineComponent({
       return imageAdjustUtil.convertAdjustToSvgFilter(adjust || {}, { styles: this.image.config.styles } as IImage)
     },
     filterId(): string {
-      const { styles: { adjust }, id: layerId } = this.image.config
-      const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
-      const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
-      return `filter__${id}`
+      const randomId = generalUtils.generateRandomString(5)
+      return `filter__${randomId}`
     },
     imageFilter(): string {
       if (this.svgFilterElms.length) {
@@ -493,6 +491,9 @@ export default defineComponent({
 
   &__svg {
     display: block;
+    height: 100%;
+    position: absolute;
+    width: 100%;
   }
 }
 

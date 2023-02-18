@@ -2014,7 +2014,8 @@ export default defineComponent({
       let layerY = this.getLayerPos().y
 
       if (widthLimit === -1) {
-        const pageSize = (this.$parent?.$el as HTMLElement)
+        const pageSize = (pageUtils.getPage(this.pageIndex) as IPage)[isVertical ? 'height' : 'width']
+        const _pageSize = (this.$parent?.$el as HTMLElement)
           .getBoundingClientRect()[isVertical ? 'height' : 'width'] / (this.scaleRatio * 0.01)
         const currTextSize = textHW[isVertical ? 'height' : 'width']
 
