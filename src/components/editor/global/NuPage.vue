@@ -67,7 +67,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
     template(v-if="!isOutOfBound || hasEditingText")
       div(class='pages-wrapper'
           :class="`nu-page-${pageIndex}`"
-          :style="wrapperStyles()"
+          :style="wrapperStyles"
           @keydown.self="handleSpecialCharacter"
           @keydown.delete.exact.self.prevent.stop="ShortcutUtils.del()"
           @keydown.ctrl.c.exact.self.prevent.stop="ShortcutUtils.copy()"
@@ -115,7 +115,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
           div(:style="sizeStyles")
             div(class="scale-container relative"
                 :style="scaleContainerStyles")
-              page-content(:config="config" :pageIndex="pageIndex" :page="config" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+              page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
               div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
               dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
             div(v-if="imgControlPageIdx !== pageIndex" class="page-control" :style="styles('control')")
@@ -131,7 +131,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
                 @isDragging="handleDraggingController")
       div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex)"
         class="page-highlighter"
-        :style="wrapperStyles()")
+        :style="wrapperStyles")
       //- for ruler to get rectangle of page content (without bleeds)
       div(v-if="config.isEnableBleed" :class="`nu-page-bleed-${pageIndex}`" :style="bleedLineAreaStyles()")
       div(v-if="(currActivePageIndex === pageIndex && isDetailPage && !isImgCtrl && !isBgImgCtrl)"
@@ -147,13 +147,14 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
         div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{resizerHint}}
       snap-line-area(
         :config="config"
+        :contentScaleRatio="contentScaleRatio"
         :pageIndex="pageIndex"
         :snapUtils="snapUtils"
       )
     template(v-else)
       div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
-        :style="wrapperStyles()")
+        :style="wrapperStyles")
 </template>
 
 <script lang="ts">
@@ -198,6 +199,9 @@ export default defineComponent({
   created() {
     this.updateSnapUtilsIndex(this.pageIndex)
   },
+  // updated() {
+  //   console.warn('updated! ', this.pageIndex)
+  // },
   data() {
     return {
       initialAbsPos: { x: 0, y: 0 },
@@ -219,10 +223,6 @@ export default defineComponent({
       coordinateWidth: 0,
       coordinateHeight: 0,
       // snapUtils: new SnapUtils(this.pageIndex),
-      closestSnaplines: {
-        v: [] as Array<number>,
-        h: [] as Array<number>
-      },
       generalUtils,
       pageUtils,
       currDraggingIndex: -1
@@ -247,6 +247,13 @@ export default defineComponent({
     isScaling: {
       type: Boolean,
       default: false
+    },
+    /**
+     * @param minContentScaleRatio - pre-calculated contentScaleRatio to prevent the size switch animation when doing swipe up/down gesture
+     */
+    minContentScaleRatio: {
+      type: Number,
+      default: 0
     }
   },
   emits: ['stepChange'],
@@ -280,7 +287,6 @@ export default defineComponent({
           if (target) {
             const layerInfo = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
             imageShadowUtils.updateShadowSrc(layerInfo, target.styles.shadow.srcObj)
-            // imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
           }
         }
       }
@@ -306,7 +312,7 @@ export default defineComponent({
       lockGuideline: 'getLockGuideline',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
-      contentScaleRatio: 'getContentScaleRatio',
+      _contentScaleRatio: 'getContentScaleRatio',
       pagesLength: 'getPagesLength',
       showAllAdminTool: 'user/showAllAdminTool',
       useMobileEditor: 'getUseMobileEditor',
@@ -316,6 +322,18 @@ export default defineComponent({
       isImgCtrl: 'imgControl/isImgCtrl',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
+    // contentScaleRatio():number {
+    //   return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this._contentScaleRatio
+    // },
+    contentScaleRatio(): number {
+      // return this.pageState.config.contentScaleRatio
+      // if (this.$isTouchDevice) {
+      if (this.$isTouchDevice) {
+        return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this.pageState.config.contentScaleRatio
+      } else {
+        return 1
+      }
+    },
     config(): IPage {
       if (!this.pageState.config.isEnableBleed) return this.pageState.config
       return {
@@ -337,7 +355,6 @@ export default defineComponent({
       }
     },
     scaleContainerStyles(): { [index: string]: string } {
-      // console.log(this.scaleRatio, this.scaleRatio / 100 / this.contentScaleRatio)
       return {
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
@@ -446,6 +463,12 @@ export default defineComponent({
         width: `${this.config.width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
         height: `${this.config.height * this.contentScaleRatio * this.scaleRatio * 0.01}px`
       }
+    },
+    wrapperStyles(): Record<string, string> {
+      return {
+        ...this.sizeStyles,
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
+      }
     }
   },
   methods: {
@@ -458,16 +481,6 @@ export default defineComponent({
       setCurrHoveredPageIndex: 'SET_currHoveredPageIndex',
       updateSnapUtilsIndex: 'UPDATE_snapUtilsIndex'
     }),
-    handleSpecialCharacter(e: KeyboardEvent) {
-      // For those using keyCode in their codebase, we recommend converting them to their kebab-cased named equivalents.
-      // The keys for some punctuation marks can just be included literally. e.g. For the , key:
-      // Limitations of the syntax prevent certain characters from being matched, such as ", ', /, =, >, and .. For those characters you should check event.key inside the listener instead.
-      if (e.key === '=' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault()
-        e.stopPropagation()
-        ShortcutUtils.zoomIn()
-      }
-    },
     styles(type: string): Record<string, string> {
       return type === 'content' ? {
         width: `${this.config.width * this.contentScaleRatio}px`,
@@ -483,10 +496,14 @@ export default defineComponent({
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
-    wrapperStyles(): Record<string, string> {
-      return {
-        ...this.sizeStyles,
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
+    handleSpecialCharacter(e: KeyboardEvent) {
+      // For those using keyCode in their codebase, we recommend converting them to their kebab-cased named equivalents.
+      // The keys for some punctuation marks can just be included literally. e.g. For the , key:
+      // Limitations of the syntax prevent certain characters from being matched, such as ", ', /, =, >, and .. For those characters you should check event.key inside the listener instead.
+      if (e.key === '=' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault()
+        e.stopPropagation()
+        ShortcutUtils.zoomIn()
       }
     },
     snapLineStyles(dir: string, pos: number, isGuideline?: string) {

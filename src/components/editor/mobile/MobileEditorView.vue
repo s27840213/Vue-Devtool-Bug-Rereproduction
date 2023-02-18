@@ -16,7 +16,7 @@ div(class="editor-view" v-touch
         @swipedown="swipeDownHandler"
         :style="canvasStyle")
       page-card(v-for="(page,index) in pagesState"
-          :key="`page-${index}`"
+          :key="`page-${page.config.id}`"
           :config="page"
           :cardWidth="cardWidth"
           :cardHeight="cardHeight"
@@ -186,10 +186,10 @@ export default defineComponent({
       this.$nextTick(() => {
         this.cardHeight = this.editorView?.clientHeight
       })
-    },
-    currCardIndex(newVal) {
-      editorUtils.handleContentScaleRatio(newVal)
     }
+    // currCardIndex(newVal) {
+    //   editorUtils.handleContentScaleRatio(newVal)
+    // }
   },
 
   computed: {
@@ -291,7 +291,6 @@ export default defineComponent({
       ]
     ),
     outerClick(e: MouseEvent) {
-      console.log('outer click')
       if (eventUtils.checkIsMultiTouch(e)) {
         return
       }
@@ -453,9 +452,10 @@ export default defineComponent({
           GroupUtils.deselect()
           this.setCurrActivePageIndex(this.currCardIndex)
           this.$nextTick(() => {
-            setTimeout(() => {
-              pageUtils.fitPage()
-            }, 300)
+            pageUtils.fitPage()
+            // setTimeout(() => {
+            //   pageUtils.fitPage()
+            // }, 300)
           })
         } else {
           GroupUtils.deselect()
@@ -474,9 +474,10 @@ export default defineComponent({
           this.$nextTick(() => {
             editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
             this.setCurrActivePageIndex(this.currCardIndex)
-            setTimeout(() => {
-              pageUtils.fitPage()
-            }, 300)
+            pageUtils.fitPage()
+            // setTimeout(() => {
+            //   pageUtils.fitPage()
+            // }, 300)
           })
           StepsUtils.record()
         }
@@ -495,9 +496,10 @@ export default defineComponent({
           GroupUtils.deselect()
           this.setCurrActivePageIndex(this.currCardIndex)
           this.$nextTick(() => {
-            setTimeout(() => {
-              pageUtils.fitPage()
-            }, 300)
+            pageUtils.fitPage()
+            // setTimeout(() => {
+            //   pageUtils.fitPage()
+            // }, 300)
           })
         }
         this.isSwiping = false

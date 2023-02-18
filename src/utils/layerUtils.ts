@@ -317,7 +317,7 @@ class LayerUtils {
   }
 
   resizeLayerConfig(pageIndex: number, layer: IShape | IText | IImage | IGroup | IFrame | ITmp, toPageCenter = false, resizeRatio = 0.8): (IText | IShape | IImage | IGroup | ITmp | IFrame) {
-    const { width: initBoundingWidth, height: initBoundingHeight } = mathUtils.getBounding({ styles: layer.styles as IStyle })
+    const { width: initBoundingWidth, height: initBoundingHeight } = mathUtils.getBounding(layer.styles as IStyle)
     const boundingboxAspectRatio = initBoundingWidth / initBoundingHeight
     const pageSize = store.getters.getPageSize(pageIndex)
     const pageAspectRatio = pageSize.width / pageSize.height

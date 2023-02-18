@@ -101,18 +101,18 @@ function getDeploy(stepName, deployment, subdomain, AWSName = 'TEST', prod = fal
   deploy.step.deployment = deployment
   for (const index of [0, 1, 2]) {
     deploy.step.script[index].variables.S3_BUCKET =
-    deploy.step.script[index].variables.S3_BUCKET
-      .replace('$SUBDOMAIN', subdomain.toUpperCase())
+      deploy.step.script[index].variables.S3_BUCKET
+        .replace('$SUBDOMAIN', subdomain.toUpperCase())
   }
   for (const index of [0, 1, 2]) {
     for (const key of ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_DEFAULT_REGION']) {
       deploy.step.script[index].variables[key] =
-      deploy.step.script[index].variables[key]
-        .replace('$AWSName', AWSName)
+        deploy.step.script[index].variables[key]
+          .replace('$AWSName', AWSName)
     }
     if (AWSName === 'STICKER') {
       deploy.step.script[index].variables.EXTRA_ARGS =
-      deploy.step.script[index].variables.EXTRA_ARGS.replace('app.html', 'index.html')
+        deploy.step.script[index].variables.EXTRA_ARGS.replace('app.html', 'index.html')
     }
   }
   if (prod) {

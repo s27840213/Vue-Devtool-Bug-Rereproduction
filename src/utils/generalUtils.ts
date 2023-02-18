@@ -367,11 +367,11 @@ class GeneralUtils {
   }
 
   unproxify<T>(val: T): T {
-    if (val instanceof Array) {
+    if (Array.isArray(val)) {
       return val.map((i) => this.unproxify(i)) as unknown as T
     }
-    if (val instanceof Object) {
-      return Object.fromEntries(Object.entries({ ...val }).map(([k, v]) => {
+    if (typeof val === 'object') {
+      return Object.fromEntries(Object.entries({ ...val as object }).map(([k, v]) => {
         return [k, this.unproxify(v)]
       })) as unknown as T
     }

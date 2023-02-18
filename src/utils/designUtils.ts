@@ -8,6 +8,7 @@ import { EventEmitter } from 'events'
 import _ from 'lodash'
 import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
+import editorUtils from './editorUtils'
 import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
 import resizeUtils from './resizeUtils'
@@ -821,6 +822,7 @@ class DesignUtils {
       unit
     })])
     pageUtils.clearPagesInfo()
+    editorUtils.handleContentScaleRatio(0)
     // Set default url query 'unit' in Editor.vue
   }
 

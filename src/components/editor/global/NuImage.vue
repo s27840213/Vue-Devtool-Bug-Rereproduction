@@ -40,13 +40,12 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 :key="child.tag"
                 :is="child.tag"
                 v-bind="child.attrs")
-        g
-          g(:filter="`url(#${filterId})`")
-            image(:xlink:href="finalSrc" ref="img"
-              class="nu-image__picture"
-              draggable="false"
-              @error="onError"
-              @load="onLoad($event, 'main')")
+        image(:xlink:href="finalSrc" ref="img"
+          :filter="`url(#${filterId})`"
+          class="nu-image__picture"
+          draggable="false"
+          @error="onError"
+          @load="onLoad($event, 'main')")
       img(v-else-if="src" ref="img"
         :style="flipStyles()"
         :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation() }"
@@ -360,11 +359,15 @@ export default defineComponent({
       src = ImageUtils.appendQuery(src, `ver=${generalUtils.generateRandomString(4)}`)
       return src
     },
+    // filterId(): string {
+    //   const { styles: { adjust }, id: layerId } = this.config
+    //   const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
+    //   const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
+    //   return `filter__${id}`
+    // },
     filterId(): string {
-      const { styles: { adjust }, id: layerId } = this.config
-      const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
-      const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
-      return `filter__${id}`
+      const randomId = generalUtils.generateRandomString(5)
+      return `filter__${randomId}`
     },
     showCanvas(): boolean {
       const { subLayerIndex, handleId } = this
@@ -410,7 +413,7 @@ export default defineComponent({
       return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return pageUtils.removeBleedsFromPageSize(this.page)
+      return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
     parentLayerDimension(): number | string {
       const { width, height } = this.config.parentLayerStyles || {}

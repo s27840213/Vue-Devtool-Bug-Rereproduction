@@ -38,6 +38,21 @@ describe('Testing nu-image edit', () => {
   // })
 
   it('Other image test', function() {
+    function beforeCopyFormat () {
+      cy.get('.photo-setting .photo-setting__grid button').contains('調整').click()
+        .get('.photo-setting .popup-adjust input[type="range"][name="brightness"]')
+        .invoke('val', 50).trigger('input')
+        .get('.photo-setting .popup-adjust input[type="range"][name="contrast"]')
+        .invoke('val', 50).trigger('input')
+    }
+    function afterCopyFormat () {
+      cy.get('.photo-setting .photo-setting__grid button').contains('調整').click()
+        .get('.photo-setting .popup-adjust input[type="range"][name="brightness"]')
+        .invoke('val', 0).trigger('input')
+        .get('.photo-setting .popup-adjust input[type="range"][name="contrast"]')
+        .invoke('val', 0).trigger('input')
+    }
+
     cy.visit('/editor')
       .importDesign('2flower.json')
       .get('.nu-layer .nu-image img').snapshotTest('init')
@@ -45,6 +60,9 @@ describe('Testing nu-image edit', () => {
         cy.get('.nu-layer__wrapper:nth-child(3) .nu-image')
           .layerOrder(flowerBack)
           .layerCopy()
+          .layerLock()
+          .layerDelete()
+          .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
           .deselectAllLayers().snapshotTest('init') // Check if image restore to init
       })
   })
