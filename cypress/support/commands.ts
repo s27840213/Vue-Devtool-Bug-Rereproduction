@@ -69,6 +69,12 @@ Cypress.Commands.add('notMobile', (callback: () => void) => {
   })
 })
 
+Cypress.Commands.add('waitTransition', { prevSubject: 'element' }, (subject) => {
+  cy.wrap(subject).invoke('prop', 'class')
+    .should('not.match', /(-leave-active|-enter-active)/)
+  return cy.wrap(subject)
+})
+
 Cypress.Commands.add('login', () => {
   cy.request('POST', 'https://apiv2.vivipic.com/login', loginData.email)
     .then((response) => {
@@ -98,7 +104,8 @@ Cypress.Commands.add('togglePanel', (buttonText: string) => {
     if (isMobile) {
       cy.get('.footer-tabs').contains('div', buttonText)
         .should('not.have.class', 'click-disabled')
-        .click({ scrollBehavior: 'top' })
+        .click()
+        .get('.mobile-panel').waitTransition()
     } else {
       cy.get('.function-panel').contains(buttonText).click()
     }
@@ -191,7 +198,7 @@ function addAsset(panel: ISidebarData, category: string | number, itemIndex: num
   if (typeof category === 'number') {
     categoryIndex = category
   } else {
-    // TODO: search category name
+    // TODO: Search category name
     throw new Error('TODO: search category name in addAsset command.')
   }
 

@@ -14,6 +14,7 @@ declare namespace Cypress {
     // commands.ts
     isMobile(callback: () => void): Chainable<void>
     notMobile(callback: () => void): Chainable<void>
+    waitTransition(): Chainable<Subject>
     login(): Chainable<void>
     deleteAllLayers(): Chainable<void>
     deselectAllLayers(): Chainable<void>

@@ -78,13 +78,13 @@ Cypress.Commands.add('imageAdjust', { prevSubject: 'element' }, (subject) => {
         // Set adjust options as preset
         for (const option of adjustPreset.options) {
           cy.get(`input[type="range"][name="${option.name}"]`).eq(-1)
-            .invoke('val', option.val).trigger('input', { scrollBehavior: 'top' })
+            .invoke('val', option.val).trigger('input')
         }
         cy.snapshotTest(`Adjust ${adjustPreset.name}`, { toggleMobilePanel: '調整' })
       }
     })
   // Restore image to original state
-  cy.contains('重置效果').click({ scrollBehavior: 'top' })
+  cy.contains('重置效果').click()
     .togglePanel('調整')
   return cy.wrap(subject)
 })
@@ -125,7 +125,7 @@ Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCro
     .realMouseMove(100, -100, { position: 'center' })
     .realMouseUp()
     .get('.dim-background .nu-controller__body .controller-point').eq(1)
-    .realMouseDown({ scrollBehavior: 'top' })
+    .realMouseDown()
     .realMouseMove(-100, 100)
     .realMouseUp()
     .snapshotTest('Crop init')
@@ -139,21 +139,21 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
     .togglePanel('陰影')
     .then(() => {
       for (const shadow of shadowsOptions) {
-        cy.get(`.svg-photo-shadow-${shadow.name}, .svg-mobile-photo-shadow-${shadow.name}`).click({ scrollBehavior: 'top' })
+        cy.get(`.svg-photo-shadow-${shadow.name}, .svg-mobile-photo-shadow-${shadow.name}`).click()
           .get('.nu-layer .nu-layer__inProcess').should('not.exist')
-        cy.contains('重置效果').click({ scrollBehavior: 'top' })
+        cy.contains('重置效果').click()
           // 30 = DRAWING_TIMEOUT in imageShadowUtils, debounce time of shadow setting
           .wait(30)
           .snapshotTest(`Shadow ${shadow.name} default`, { toggleMobilePanel: '陰影' })
         for (const option of shadow.options) {
           if (option.name === 'color') {
             cy.get('div.photo-effect-setting__value-input, .photo-shadow__color').click()
-              .get('.color-panel').should('not.have.class', 'panel-up-enter-to')
-              .get(`.color-btn .color-${option.val}`).eq(0).click({ scrollBehavior: 'top' })
+              .get('.color-panel').waitTransition()
+              .get(`.color-btn .color-${option.val}`).eq(0).click()
               .get('.color-panel__btn, .mobile-panel__left-btn').click()
           } else {
             cy.get(`input[type="range"][name="${option.name}"]`).eq(-1)
-              .invoke('val', option.val).trigger('input', { scrollBehavior: 'top' })
+              .invoke('val', option.val).trigger('input')
           }
         }
         cy.wait(30).snapshotTest(`Shadow ${shadow.name} preset`, { toggleMobilePanel: '陰影' })
@@ -193,7 +193,7 @@ Cypress.Commands.add('imageSetAsBg', { prevSubject: 'element' }, (subject) => {
     })
     .get(subject.selector)
     .togglePanel('調整')
-  cy.contains('重置效果').click({ scrollBehavior: 'top' })
+  cy.contains('重置效果').click()
     .togglePanel('調整')
   return cy.get(subject.selector)
 })

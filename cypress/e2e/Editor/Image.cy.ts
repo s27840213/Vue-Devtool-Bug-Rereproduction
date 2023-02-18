@@ -76,11 +76,10 @@ for (const isMobile of [true, false]) {
             .layerLock()
             .layerDelete()
             .then((subject: JQuery<HTMLElement>) => {
-              if (!isMobile) {
-                cy.wrap(subject)
-                  .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
-              }
+              // TODO: Implement layer copy format in mobile
+              if (isMobile) return cy.wrap(subject)
               return cy.wrap(subject)
+                .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
             })
             .deselectAllLayers().snapshotTest('init') // Check if image restore to init
         })
