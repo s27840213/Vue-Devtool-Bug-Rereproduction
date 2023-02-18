@@ -208,15 +208,16 @@ export default class SubControllerUtils {
       }
       const isFrameSub = this.primaryLayer.type === LayerType.frame && !(this.primaryLayer as IFrame).clips[this.subLayerIdx].active
       const isGroupSub = this.primaryLayer.type === LayerType.group && !(this.primaryLayer as IGroup).layers[this.subLayerIdx].active
+      console.log(isGroupSub)
       if (isFrameSub || isGroupSub) {
         if (this.isControllerShown) {
           updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { active: true })
+          layerUtils.setCurrSubSelectedInfo(this.subLayerIdx, this.config.type)
         } else {
           groupUtils.deselect()
           groupUtils.select(this.pageIndex, [this.layerIndex])
         }
       }
-      layerUtils.setCurrSubSelectedInfo(this.subLayerIdx, this.config.type)
     }
   }
 }
