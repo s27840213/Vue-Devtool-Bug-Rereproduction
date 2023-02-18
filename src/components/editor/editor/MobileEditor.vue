@@ -239,6 +239,10 @@ export default defineComponent({
         if (panelType === 'color' && props?.currColorEvent) {
           this.currColorEvent = props.currColorEvent
         }
+
+        if (this.inMultiSelectionMode) {
+          editorUtils.setInMultiSelectionMode(false)
+        }
       }
 
       if (this.currActivePanel !== 'none' && this.inAllPagesMode) {
