@@ -115,7 +115,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
           div(:style="sizeStyles")
             div(class="scale-container relative"
                 :style="scaleContainerStyles")
-              page-content(:config="config" :pageIndex="pageIndex" :page="config" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+              page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
               div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
               dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
             div(v-if="imgControlPageIdx !== pageIndex" class="page-control" :style="styles('control')")

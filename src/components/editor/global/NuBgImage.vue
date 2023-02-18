@@ -1,18 +1,49 @@
 <template lang="pug">
 div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @pointerdown="setInBgSettingMode")
   div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
-    nu-adjust-image(v-if="isAdjustImage"
-          :src="finalSrc"
-          :styles="adjustImgStyles"
-          :page="page"
-          :contentScaleRatio="contentScaleRatio"
-          @error="onError")
-    img(v-else-if="src"
+    //- nu-adjust-image(v-if="isAdjustImage"
+    //-       :src="finalSrc"
+    //-       :styles="adjustImgStyles"
+    //-       :page="page"
+    //-       :contentScaleRatio="contentScaleRatio"
+    //-       @error="onError")
+    //- img(v-else-if="src"
+    //-   :src="finalSrc"
+    //-   draggable="false"
+    //-   class="body"
+    //-   ref="body"
+    //-   @error="onError")
+    svg(v-if="isAdjustImage"
+      class="nu-background-image__svg"
+      :viewBox="svgViewBox"
+      :width="svgImageWidth"
+      :height="svgImageHeight"
+      preserveAspectRatio="none"
+      role="image")
+      defs
+        filter(:id="filterId"
+          color-interpolation-filters="sRGB")
+          component(v-for="(elm, idx) in svgFilterElms"
+            :key="`${filterId + idx}`"
+            :is="elm.tag"
+            v-bind="elm.attrs")
+            component(v-for="child in elm.child"
+              :key="child.tag"
+              :is="child.tag"
+              v-bind="child.attrs")
+      g
+        g(:filter="`url(#${filterId})`")
+          image(:xlink:href="finalSrc" ref="img"
+            class="nu-background-image__adjust-picture"
+            draggable="false"
+            @error="onError"
+            @load="onLoad")
+    img(v-else-if="src" ref="img"
+      class='nu-image__picture'
       :src="finalSrc"
       draggable="false"
-      class="body"
-      ref="body"
-      @error="onError")
+      @error="onError"
+      @load="onLoad")
   div(:style="filterContainerStyles()" class="filter-container")
     component(v-for="(elm, idx) in cssFilterElms"
       :key="`cssFilter${idx}`"
@@ -175,7 +206,7 @@ export default defineComponent({
       return ImageUtils.getSrcSize(srcObj, Math.max(renderW, renderH) * (this.scaleRatio / 100))
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return pageUtils.removeBleedsFromPageSize(this.page)
+      return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
     srcObj(): SrcObj {
       return this.image.config.srcObj
@@ -238,6 +269,33 @@ export default defineComponent({
         elms.push(...imageAdjustUtil.getHalation(adjust.halation, position))
       }
       return elms
+    },
+    svgImageWidth(): number {
+      const { imgWidth } = this.image.config.styles
+      return imgWidth * this.contentScaleRatio
+    },
+    svgImageHeight(): number {
+      const { imgHeight } = this.image.config.styles
+      return imgHeight * this.contentScaleRatio
+    },
+    svgViewBox(): string {
+      return `0 0 ${this.svgImageWidth} ${this.svgImageHeight}`
+    },
+    svgFilterElms(): any[] {
+      const { adjust } = this.image.config.styles
+      return imageAdjustUtil.convertAdjustToSvgFilter(adjust || {}, { styles: this.image.config.styles } as IImage)
+    },
+    filterId(): string {
+      const { styles: { adjust }, id: layerId } = this.image.config
+      const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
+      const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
+      return `filter__${id}`
+    },
+    imageFilter(): string {
+      if (this.svgFilterElms.length) {
+        return `url(#${this.filterId})`
+      }
+      return ''
     }
   },
   methods: {
@@ -419,6 +477,22 @@ export default defineComponent({
       width: 100%;
       height: 100%;
     }
+  }
+
+  &__adjust-picture {
+  touch-action: none;
+  object-fit: cover;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+}
+
+  &__svg {
+    display: block;
   }
 }
 

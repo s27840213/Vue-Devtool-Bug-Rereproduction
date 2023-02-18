@@ -53,8 +53,6 @@ export default defineComponent({
     },
   },
   computed: {
-    ...mapGetters({
-    }),
     svgImageWidth(): number {
       const { imgWidth } = this.styles
       return imgWidth
