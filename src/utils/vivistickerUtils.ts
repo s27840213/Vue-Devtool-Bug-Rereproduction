@@ -768,14 +768,15 @@ class ViviStickerUtils {
     vivistickerUtils.handleCallback('copy-editor', data)
   }
 
-  saveDesign() {
+  saveDesign(pages_?: IPage[]) {
     if (this.isStandaloneMode) return
-    const pages = pageUtils.getPages
+    const useArgPages = pages_ !== undefined
+    const pages = useArgPages ? pages_ : pageUtils.getPages
     const editorType = store.getters['vivisticker/getEditorType']
     const editingDesignId = store.getters['vivisticker/getEditingDesignId']
     const assetInfo = store.getters['vivisticker/getEditingAssetInfo']
     const design = {
-      pages: uploadUtils.prepareJsonToUpload(pages),
+      pages: uploadUtils.prepareJsonToUpload(pages, useArgPages),
       editorType,
       id: editingDesignId,
       assetInfo

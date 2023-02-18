@@ -1298,9 +1298,9 @@ class UploadUtils {
     })
   }
 
-  prepareJsonToUpload(pages: IPage[]): IPage[] {
+  prepareJsonToUpload(pages: IPage[], noCopy = false): IPage[] {
     return pages.map((page: IPage) => {
-      const newPage = this.default(generalUtils.deepCopy(page)) as IPage
+      const newPage = this.default(noCopy ? page : generalUtils.deepCopy(page)) as IPage
       for (const [i, layer] of newPage.layers.entries()) {
         if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
           newPage.layers[i] = this.layerInfoFilter(layer)

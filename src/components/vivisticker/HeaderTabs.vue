@@ -24,6 +24,7 @@ div(class="header-bar relative" @pointerdown.stop)
 </template>
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
+import eventUtils from '@/utils/eventUtils'
 import imageUtils from '@/utils/imageUtils'
 import modalUtils from '@/utils/modalUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
@@ -47,17 +48,16 @@ type TabConfig = {
 export default defineComponent({
   data() {
     return {
-      stepCount: stepsUtils.steps.length,
-      stepsUtils
+      stepCount: stepsUtils.steps.length
     }
   },
-  watch: {
-    'stepsUtils.steps': {
-      handler(newVal) {
-        this.stepCount = newVal.length
-      },
-      deep: true
-    }
+  mounted() {
+    eventUtils.on('stepsUpdate', (stepCount: number) => {
+      this.stepCount = stepCount
+    })
+  },
+  unmounted() {
+    eventUtils.off('stepsUpdate')
   },
   computed: {
     ...mapGetters('objects', {
