@@ -25,14 +25,6 @@ export default defineComponent({
       required: true,
       type: Object as PropType<IPageState>
     },
-    cardWidth: {
-      type: Number,
-      required: true
-    },
-    cardHeight: {
-      type: Number,
-      required: true
-    },
     pageIndex: {
       required: true,
       type: Number
@@ -66,8 +58,8 @@ export default defineComponent({
     }),
     cardStyle(): { [index: string]: string | number } {
       return {
-        width: `${this.cardWidth}px`,
-        height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
+        // width: `${this.cardWidth}px`,
+        // height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
         // padding: this.isDetailPage ? '0px' : `${pageUtils.MOBILE_CARD_PADDING}px`,
         flexDirection: this.isDetailPage ? 'column' : 'initial',
         // 'overflow-y': this.isDetailPage ? 'initial' : 'scroll',

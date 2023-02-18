@@ -12,11 +12,14 @@ interface ISidebarData {
 declare namespace Cypress {
   interface Chainable<Subject> {
     // commands.ts
+    isMobile(callback: () => void): Chainable<void>
+    notMobile(callback: () => void): Chainable<void>
     login(): Chainable<void>
     deleteAllLayers(): Chainable<void>
     deselectAllLayers(): Chainable<void>
     importDesign(designName: string): Chainable<void>
-    snapshotTest(testName: string): Chainable<Subject>
+    togglePanel(buttonText: string): Chainable<void>
+    snapshotTest(testName: string, { toggleMobilePanel }?: { toggleMobilePanel: string }): Chainable<Subject>
     getAllCategoryName(panel: ISidebarData, categoryName?: string[], last?: boolean): Chainable<string[]>
     addAsset(panel: ISidebarData, categoryIndex: number, itemIndex: number): Chainable<void>
     // addAsset(panel: ISidebarData, categoryName: string, itemIndex: number): Chainable<void>

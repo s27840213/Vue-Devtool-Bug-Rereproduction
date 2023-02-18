@@ -2,15 +2,16 @@
 
 Cypress.Commands.add('layerFlip', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
-    .get('.panel-group .panel-group__adjust button').contains('翻轉').click()
-    .get('.popup-flip .svg-flip-h').click()
+    .togglePanel('翻轉')
+    .get('.svg-flip-h').click()
     .snapshotTest('Flip h')
-    .get('.popup-flip .svg-flip-v').click()
+    .get('.svg-flip-v').click()
     .snapshotTest('Flip hv')
-    .get('.popup-flip .svg-flip-h').click()
+    .get('.svg-flip-h').click()
     .snapshotTest('Flip v')
     // Restore image to original state
-    .get('.popup-flip .svg-flip-v').click()
+    .get('.svg-flip-v').click()
+    .togglePanel('翻轉')
   return cy.wrap(subject)
 })
 
@@ -25,7 +26,7 @@ Cypress.Commands.add('layerAlign', { prevSubject: 'element' }, (subject) => {
   ]
 
   cy.wrap(subject).click()
-    .get('.panel-group .panel-group__adjust button').contains('位置對齊').click()
+    .togglePanel('對齊')
     .then(() => {
       for (const align of alignOptions) {
         cy.get(`.svg-${align}`).click()
