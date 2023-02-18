@@ -2,7 +2,7 @@ for (const isMobile of [true, false]) {
   // if (!isMobile) continue
   const suffix = isMobile ? ' mobile' : ''
 
-  describe('Testing nu-image edit', () => {
+  describe(`Testing nu-image${suffix} edit`, () => {
     beforeEach(() => {
       cy.login()
 
@@ -51,34 +51,39 @@ for (const isMobile of [true, false]) {
     //   //
     // })
 
-    // it(`Other image test${suffix}`, function() {
-    //   function beforeCopyFormat () {
-    //     cy.get('.photo-setting .photo-setting__grid button').contains('調整').click()
-    //       .get('.photo-setting .popup-adjust input[type="range"][name="brightness"]')
-    //       .invoke('val', 50).trigger('input')
-    //       .get('.photo-setting .popup-adjust input[type="range"][name="contrast"]')
-    //       .invoke('val', 50).trigger('input')
-    //   }
-    //   function afterCopyFormat () {
-    //     cy.get('.photo-setting .photo-setting__grid button').contains('調整').click()
-    //       .get('.photo-setting .popup-adjust input[type="range"][name="brightness"]')
-    //       .invoke('val', 0).trigger('input')
-    //       .get('.photo-setting .popup-adjust input[type="range"][name="contrast"]')
-    //       .invoke('val', 0).trigger('input')
-    //   }
+    it(`Other image test${suffix}`, function() {
+      function beforeCopyFormat () {
+        cy.togglePanel('調整')
+          .get('input[type="range"][name="brightness"]').eq(-1)
+          .invoke('val', 50).trigger('input')
+          .get('input[type="range"][name="contrast"]').eq(-1)
+          .invoke('val', 50).trigger('input')
+          .togglePanel('調整')
+      }
+      function afterCopyFormat () {
+        cy.togglePanel('調整')
+        cy.contains('重置效果').click()
+          .togglePanel('調整')
+      }
 
-    //   cy.visit('/editor')
-    //     .importDesign('2flower.json')
-    //     .get('.nu-layer .nu-image img').snapshotTest('init')
-    //     .get('.nu-layer__wrapper:nth-child(2) .nu-image').then((flowerBack) => {
-    //       cy.get('.nu-layer__wrapper:nth-child(3) .nu-image')
-    //         .layerOrder(flowerBack)
-    //         .layerCopy()
-    //         .layerLock()
-    //         .layerDelete()
-    //         .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
-    //         .deselectAllLayers().snapshotTest('init') // Check if image restore to init
-    //     })
-    // })
+      cy.visit('/editor')
+        .importDesign('2flower.json')
+        .get('.nu-layer .nu-image img').snapshotTest('init')
+        .get('.nu-layer__wrapper:nth-child(2) .nu-image').then((flowerBack) => {
+          cy.get('.nu-layer__wrapper:nth-child(3) .nu-image')
+            .layerOrder(flowerBack)
+            .layerCopy()
+            .layerLock()
+            .layerDelete()
+            .then((subject: JQuery<HTMLElement>) => {
+              if (!isMobile) {
+                cy.wrap(subject)
+                  .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
+              }
+              return cy.wrap(subject)
+            })
+            .deselectAllLayers().snapshotTest('init') // Check if image restore to init
+        })
+    })
   })
 }
