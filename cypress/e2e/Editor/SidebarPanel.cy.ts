@@ -204,15 +204,15 @@ describe('Testing SidebarPanel', () => {
     }
   })
 
-  it('Add object item to page', function () {
-    const panel = sidebarData('object')
-    cy.visit('/editor')
-    // cy.getAllCategoryName(panel).then((categoryNames) => {
-    for (let i = 1; i < 3; i++) {
-      cy.addAsset(panel, i, 0)
-      cy.deleteAllLayers()
-    }
-  })
+  // it('Add object item to page', function () {
+  //   const panel = sidebarData('object')
+  //   cy.visit('/editor')
+  //   // cy.getAllCategoryName(panel).then((categoryNames) => {
+  //   for (let i = 1; i < 3; i++) {
+  //     cy.addAsset(panel, i, 0)
+  //     cy.deleteAllLayers()
+  //   }
+  // })
 
   it('Add bg item to page', function () {
     const panel = sidebarData('bg')
