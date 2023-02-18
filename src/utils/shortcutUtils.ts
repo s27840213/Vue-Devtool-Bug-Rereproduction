@@ -234,7 +234,9 @@ class ShortcutUtils {
 
   duplicate() {
     const { getCurrLayer: currLayer } = layerUtils
+    this.offsetCount = 1
     const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(currLayer) as IShape | IText | IImage | IGroup | IFrame | ITmp, {})
+    this.offsetCount = 0
 
     const currActivePageIndex = pageUtils.currActivePageIndex
     const isTmp: boolean = currLayer.type === 'tmp'
