@@ -555,7 +555,6 @@ export default defineComponent({
           pageUtils.addPageToPos(pageUtils.newPage({
             width: page.width,
             height: page.height,
-            backgroundColor: page.backgroundColor,
             bleeds: currPage.bleeds,
             physicalBleeds: currPage.physicalBleeds,
             isEnableBleed: currPage.isEnableBleed,
