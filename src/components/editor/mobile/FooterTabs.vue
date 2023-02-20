@@ -110,7 +110,13 @@ export default defineComponent({
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
-        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          hidden: this.isInFrame,
+          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
       ]
@@ -122,7 +128,13 @@ export default defineComponent({
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         ...(this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
-        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          hidden: this.isInFrame,
+          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : [])
@@ -631,10 +643,11 @@ export default defineComponent({
           break
         }
         case 'effect': {
-          if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
-            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
-            return
-          }
+          // Unreachable, becaues button is disabled
+          // if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
+          //   notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+          //   return
+          // }
           break
         }
         case 'color':

@@ -2,15 +2,16 @@
 
 Cypress.Commands.add('layerFlip', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
-    .get('.panel-group .panel-group__adjust button').contains('翻轉').click()
-    .get('.popup-flip .svg-flip-h').click()
+    .togglePanel('翻轉')
+    .get('.svg-flip-h').click()
     .snapshotTest('Flip h')
-    .get('.popup-flip .svg-flip-v').click()
+    .get('.svg-flip-v').click()
     .snapshotTest('Flip hv')
-    .get('.popup-flip .svg-flip-h').click()
+    .get('.svg-flip-h').click()
     .snapshotTest('Flip v')
     // Restore image to original state
-    .get('.popup-flip .svg-flip-v').click()
+    .get('.svg-flip-v').click()
+    .togglePanel('翻轉')
   return cy.wrap(subject)
 })
 
@@ -25,7 +26,7 @@ Cypress.Commands.add('layerAlign', { prevSubject: 'element' }, (subject) => {
   ]
 
   cy.wrap(subject).click()
-    .get('.panel-group .panel-group__adjust button').contains('位置對齊').click()
+    .togglePanel('對齊')
     .then(() => {
       for (const align of alignOptions) {
         cy.get(`.svg-${align}`).click()
@@ -40,11 +41,13 @@ Cypress.Commands.add('layerAlign', { prevSubject: 'element' }, (subject) => {
 
 Cypress.Commands.add('layerOrder', { prevSubject: 'element' }, (subjectFront, subjectBack) => {
   cy.wrap(subjectBack).click('topLeft')
-    .get('.panel-group .svg-layers-alt').click()
-    .get('.popup-order .svg-layers-forward').click()
+    .get('.svg-layers-alt').realClick({ scrollBehavior: 'top' })
+    .get('.svg-layers-forward').click()
     .snapshotTest('Oredr change')
-    .get('.popup-order .svg-layers-backward').click()
+    .get('.svg-layers-backward').click()
     .snapshotTest('Oredr restore')
+    // Restore layer to original state (close panel)
+    .get('.svg-layers-alt').realClick({ scrollBehavior: 'top' })
   return cy.wrap(subjectFront)
 })
 
@@ -54,12 +57,11 @@ Cypress.Commands.add('layerCopy', { prevSubject: 'element' }, (subject) => {
       // If use click() to trigger clipboard r/w, Chrome will throw 'Document is not focused.' error.
       // This will only happen when click 'Run All Test' button in cy spec sidebar and unfocus browser.
       // Use realClick() can prevent the error.
-      cy.get('.panel-group .svg-copy').realClick()
+      cy.get('.svg-copy').click()
         .get('.nu-page .nu-layer').should('have.length', oldLayers.length + 1)
-        .snapshotTest('Copy layer').then((newLayers) => {
-          const newLayer = newLayers.not(oldLayers)
-          cy.wrap(newLayer).click().type('{del}')
-        })
+        .snapshotTest('Copy layer')
+        .get('body').type('{del}')
+        .get('.nu-page .nu-layer').should('have.length', oldLayers.length)
     })
   return cy.wrap(subject)
 })
@@ -70,13 +72,13 @@ Cypress.Commands.add('layerLock', { prevSubject: 'element' }, (subject) => {
     .realMouseMove(30, 30, { position: 'center' })
     .realMouseUp()
     .snapshotTest('Lock unlocked')
-    .get('.panel-group .svg-lock').click()
+    .get('.svg-unlock').click()
     .wrap(subject)
     .realMouseDown()
     .realMouseMove(-30, -30, { position: 'center' })
     .realMouseUp()
     .snapshotTest('Lock locked')
-    .get('.panel-group .svg-unlock').click()
+    .get('.panel-group, .header-bar').find('.svg-lock').click()
     .wrap(subject)
     .realMouseDown()
     .realMouseMove(-30, -30, { position: 'center' })
@@ -85,12 +87,13 @@ Cypress.Commands.add('layerLock', { prevSubject: 'element' }, (subject) => {
 })
 
 Cypress.Commands.add('layerDelete', { prevSubject: 'element' }, (subject) => {
-  cy.wrap(subject).click()
+  cy.wait(500) // Prevent click trigger double click, TODO: fix it in app
+    .wrap(subject).click()
     .get('.nu-page .nu-layer').then((oldLayers) => {
       cy.get('body').realPress(['Meta', 'c']).realPress(['Meta', 'v'])
         .get('.nu-page .nu-layer').should('have.length', oldLayers.length + 1)
         .snapshotTest('Delete before')
-        .get('.panel-group .svg-trash').click()
+        .get('.svg-trash').click()
         .snapshotTest('Delete after')
     })
   return cy.wrap(subject)

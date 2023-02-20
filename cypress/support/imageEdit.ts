@@ -73,18 +73,19 @@ const shadowsOptions = [{
 
 Cypress.Commands.add('imageAdjust', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
-    .get('.photo-setting .photo-setting__grid button').contains('調整').click()
-    .snapshotTest('Adjust init')
-    .then(() => {
+    .togglePanel('調整').then(() => {
       for (const adjustPreset of adjustOptions) {
+        // Set adjust options as preset
         for (const option of adjustPreset.options) {
-          cy.get(`.photo-setting .popup-adjust input[type="range"][name="${option.name}"]`)
-            .invoke('val', option.val).trigger('input')
+          cy.get(`input[type="range"][name="${option.name}"]`).eq(-1)
+            .invoke('val', option.val).trigger('input', { scrollBehavior: 'top' })
         }
-        cy.snapshotTest(`Adjust ${adjustPreset.name}`)
+        cy.snapshotTest(`Adjust ${adjustPreset.name}`, { toggleMobilePanel: '調整' })
       }
-      cy.get('.popup-adjust__reset').click()
     })
+  // Restore image to original state
+  cy.contains('重置效果').click({ scrollBehavior: 'top' })
+    .togglePanel('調整')
   return cy.wrap(subject)
 })
 
@@ -92,7 +93,7 @@ Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCro
   cy.wrap(subject).click()
     .then(() => {
       if (enterCrop === 'button') {
-        cy.get('.photo-setting .photo-setting__grid button').contains('裁切').click()
+        cy.togglePanel('裁切')
       } else if (enterCrop === 'dblclick') {
         cy.wrap(subject).dblclick()
       } else {
@@ -124,40 +125,43 @@ Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCro
     .realMouseMove(100, -100, { position: 'center' })
     .realMouseUp()
     .get('.dim-background .nu-controller__body .controller-point').eq(1)
-    .realMouseDown()
+    .realMouseDown({ scrollBehavior: 'top' })
     .realMouseMove(-100, 100)
     .realMouseUp()
     .snapshotTest('Crop init')
-    .get('.panel-group .panel-group__adjust button').contains('取消').click()
+    .isMobile(() => { cy.togglePanel('裁切') })
+    .notMobile(() => { cy.togglePanel('取消') })
   return cy.get(subject.selector)
 })
 
 Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
-    .get('.photo-setting__grid button').contains('陰影').click()
+    .togglePanel('陰影')
     .then(() => {
       for (const shadow of shadowsOptions) {
-        cy.get(`.svg-photo-shadow-${shadow.name}`).click()
+        cy.get(`.svg-photo-shadow-${shadow.name}, .svg-mobile-photo-shadow-${shadow.name}`).click({ scrollBehavior: 'top' })
           .get('.nu-layer .nu-layer__inProcess').should('not.exist')
-          .get('.photo-effect-setting__reset').click({ scrollBehavior: 'top' })
+        cy.contains('重置效果').click({ scrollBehavior: 'top' })
           // 30 = DRAWING_TIMEOUT in imageShadowUtils, debounce time of shadow setting
-          .wait(30).snapshotTest(`Shadow ${shadow.name} default`)
+          .wait(30)
+          .snapshotTest(`Shadow ${shadow.name} default`, { toggleMobilePanel: '陰影' })
         for (const option of shadow.options) {
           if (option.name === 'color') {
-            cy.get('.photo-effect-setting div.photo-effect-setting__value-input')
-              .click()
-              .get(`.color-btn .color-${option.val}`).eq(0).click()
-              .get('.color-panel__btn').click()
+            cy.get('div.photo-effect-setting__value-input, .photo-shadow__color').click()
+              .get('.color-panel').should('not.have.class', 'panel-up-enter-to')
+              .get(`.color-btn .color-${option.val}`).eq(0).click({ scrollBehavior: 'top' })
+              .get('.color-panel__btn, .mobile-panel__left-btn').click()
           } else {
-            cy.get(`.photo-effect-setting input[type="range"][name="${option.name}"]`)
-              .invoke('val', option.val).trigger('input')
+            cy.get(`input[type="range"][name="${option.name}"]`).eq(-1)
+              .invoke('val', option.val).trigger('input', { scrollBehavior: 'top' })
           }
         }
-        cy.wait(30).snapshotTest(`Shadow ${shadow.name} preset`)
+        cy.wait(30).snapshotTest(`Shadow ${shadow.name} preset`, { toggleMobilePanel: '陰影' })
       }
     })
     // Restore image to original state
-    .get('.svg-photo-shadow-none').click()
+    .get('.svg-photo-shadow-none, .svg-mobile-photo-shadow-none').click()
+    .isMobile(() => { cy.togglePanel('陰影') })
   return cy.wrap(subject)
 })
 
@@ -168,27 +172,35 @@ Cypress.Commands.add('imageSetAsBg', { prevSubject: 'element' }, (subject) => {
   ] as const
 
   cy.wrap(subject).click()
-    .get('.photo-setting .photo-setting__grid button').contains('調整').click()
+    .togglePanel('調整')
     .then(() => {
       for (const option of bgAdjustOptions) {
-        cy.get(`.photo-setting .popup-adjust input[type="range"][name="${option.name}"]`)
+        cy.get(`input[type="range"][name="${option.name}"]`).eq(-1)
           .invoke('val', option.val).trigger('input')
       }
     })
-    .wrap(subject).rightclick()
-    .get('.popup-layer').contains('設為背景').click()
+    .isMobile(() => { cy.togglePanel('設為背景') })
+    .notMobile(() => {
+      cy.wrap(subject).rightclick()
+        .get('.popup-layer').contains('設為背景').click()
+    })
     .snapshotTest('Set as BG')
     // Restore image to original state
-    .get('.nu-background-image').rightclick()
-    .get('.popup-page').contains('分離背景照片').click()
-    .get('.photo-setting .photo-setting__grid button').contains('調整').click()
-    .get('.popup-adjust__reset').click()
+    .isMobile(() => { cy.togglePanel('分離背景') })
+    .notMobile(() => {
+      cy.get('.nu-background-image').rightclick()
+        .get('.popup-page').contains('分離背景照片').click()
+    })
+    .get(subject.selector)
+    .togglePanel('調整')
+  cy.contains('重置效果').click({ scrollBehavior: 'top' })
+    .togglePanel('調整')
   return cy.get(subject.selector)
 })
 
 Cypress.Commands.add('imageAutoBgRemove', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
-    .get('.photo-setting .photo-setting__grid button').contains('去背').click()
+    .togglePanel('去背')
     .get('.nu-layer .nu-layer__inProcess').should('not.exist')
   return cy.wrap(subject)
 })

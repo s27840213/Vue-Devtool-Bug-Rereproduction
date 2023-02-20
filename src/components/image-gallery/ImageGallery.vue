@@ -63,7 +63,7 @@ const component = defineComponent({
     return {
       nextIndex: 0,
       rows: [] as any[],
-      galleryUtils: new GalleryUtils(this.$isTouchDevice ? window.innerWidth - 34 : 300, 95, 5)
+      galleryUtils: new GalleryUtils(this.$isTouchDevice() ? window.innerWidth - 34 : 300, 95, 5)
     }
   },
   watch: {

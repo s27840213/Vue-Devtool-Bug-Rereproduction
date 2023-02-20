@@ -154,7 +154,7 @@ export default defineComponent({
     pageUtils.fitPage(false, true)
     this.tmpScaleRatio = pageUtils.scaleRatio
 
-    if (this.$isTouchDevice) {
+    if (this.$isTouchDevice()) {
       pageUtils.mobileMinScaleRatio = this.isDetailPage ? 20 : this.tmpScaleRatio
       pageUtils.originPageSize.width = pageUtils.getPages[0].width * this.pageUtils.mobileMinScaleRatio * 0.01
       pageUtils.originPageSize.height = pageUtils.getPages[0].height * this.pageUtils.mobileMinScaleRatio * 0.01
@@ -249,17 +249,6 @@ export default defineComponent({
     editorViewStyle(): { [index: string]: string | number } {
       return {
         overflow: this.isDetailPage ? 'scroll' : 'initial'
-      }
-    },
-    cardStyle(): { [index: string]: string | number } {
-      return {
-        width: `${this.cardWidth}px`,
-        height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
-        padding: this.isDetailPage ? '0px' : `${pageUtils.MOBILE_CARD_PADDING}px`,
-        flexDirection: this.isDetailPage ? 'column' : 'initial',
-        'overflow-y': this.isDetailPage ? 'initial' : 'scroll',
-        // overflow: this.isDetailPage ? 'initial' : 'scroll',
-        minHeight: this.isDetailPage ? 'none' : '100%'
       }
     },
     canvasStyle(): { [index: string]: string | number } {

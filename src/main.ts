@@ -72,15 +72,14 @@ window.onerror = function (msg, url, line) {
 const app = createApp(App).use(i18n).use(router).use(store)
 
 // Add variable that bind in vue this and its type define
-// Ex: div(v-if="$isTouchDevice" ...) in pug
-// Ex: if (this.$isTouchDevice) in .vue ts
+// Ex: div(v-if="$isTouchDevice()" ...) in pug
+// Ex: if (this.$isTouchDevice()) in .vue ts
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
-    $isTouchDevice: boolean
+    $isTouchDevice: () => boolean
   }
 }
-const isTouchDevice = generalUtils.isTouchDevice()
-app.config.globalProperties.$isTouchDevice = isTouchDevice
+app.config.globalProperties.$isTouchDevice = () => generalUtils.isTouchDevice()
 // if (isTouchDevice) {
 //   editorUtils.setMobileHW({
 //     width: document.body.clientWidth,

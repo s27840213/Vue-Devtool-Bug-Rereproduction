@@ -34,7 +34,7 @@
 //     }
 //   }
 // }
-import { uniq } from 'lodash'
+import { cloneDeep, uniq } from 'lodash'
 import loginData from '../fixtures/loginData.json'
 
 const snapshotStyles = `
@@ -57,6 +57,18 @@ const snapshotStyles = `
   }
 `
 
+Cypress.Commands.add('isMobile', (callback: () => void) => {
+  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile) => {
+    if (isMobile()) callback()
+  })
+})
+
+Cypress.Commands.add('notMobile', (callback: () => void) => {
+  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile) => {
+    if (!isMobile()) callback()
+  })
+})
+
 Cypress.Commands.add('login', () => {
   cy.request('POST', 'https://apiv2.vivipic.com/login', loginData.email)
     .then((response) => {
@@ -75,13 +87,25 @@ Cypress.Commands.add('deselectAllLayers', () => {
 
 Cypress.Commands.add('importDesign', (designName: string) => {
   // TODO: Use @/ instead of ../
-  const designJson = require(`../fixtures/design/${designName}`)
+  const designJson = cloneDeep(require(`../fixtures/design/${designName}`))
   cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$store').then((vuex) => {
     vuex.commit('SET_pages', designJson)
   })
 })
 
-Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQuery<unknown>, testName: string) => {
+Cypress.Commands.add('togglePanel', (buttonText: string) => {
+  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile) => {
+    if (isMobile()) {
+      cy.get('.footer-tabs').contains('div', buttonText)
+        .should('not.have.class', 'click-disabled')
+        .click({ scrollBehavior: 'top' })
+    } else {
+      cy.get('.function-panel').contains(buttonText).click()
+    }
+  })
+})
+
+Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQuery<unknown>, testName: string, { toggleMobilePanel = '' } = {}) => {
   // TODO: Need to find a way that keep 0.01 threshold and prevent command fail
   // Workaround is set threshold to 100% to prevent fail, but it will not create diff image
   // TODO: Investigation why compareSnapshot fail and other image that not take snapshot still appear in report
@@ -89,19 +113,33 @@ Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQue
 
   const threshold = Cypress.browser.isHeadless ? 0 : 1
 
-  cy.document().then((document) => {
-    // Add special css that hide/remove some element during snapshot.
-    const css = document.createElement('style')
-    css.setAttribute('class', 'cy-visual-test-style')
-    css.textContent = snapshotStyles
-    document.body.appendChild(css)
-  }).get('.nu-page').compareSnapshot(
-    `${Cypress.currentTest.title}-${testName}`,
-    threshold,
-    { limit: 3, delay: 1000 }
-  // Remove special css
-  ).get('style.cy-visual-test-style').invoke('remove')
-  if (subject && subject.length) return cy.wrap(subject)
+  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile) => {
+    // If toggleMobilePanel given, close mobile panel before snapshot and re-open the panel.
+    if (isMobile() && toggleMobilePanel) {
+      cy.togglePanel(toggleMobilePanel)
+        // Wait for panel transition
+        .get('.mobile-panel').should('have.css', 'display', 'none')
+    }
+    cy.document().then((document) => {
+      // Add special css that hide/remove some element during snapshot.
+      const css = document.createElement('style')
+      css.setAttribute('class', 'cy-visual-test-style')
+      css.textContent = snapshotStyles
+      document.body.appendChild(css)
+    }).get('.nu-page').compareSnapshot(
+      `${Cypress.currentTest.title}-${testName}`,
+      threshold,
+      { limit: 3, delay: 1000 }
+    // Remove special css
+    ).get('style.cy-visual-test-style').invoke('remove')
+    if (isMobile() && toggleMobilePanel) {
+      cy.togglePanel(toggleMobilePanel)
+        // Wait for panel transition
+        .get('.mobile-panel').should('not.have.css', 'display', 'none')
+        .should('not.have.class', 'panel-up-leave-to')
+    }
+    if (subject && subject.length) return cy.wrap(subject)
+  })
 })
 
 Cypress.Commands.add('getAllCategoryName', (panel: ISidebarData, categoryName = [], last = false) => {

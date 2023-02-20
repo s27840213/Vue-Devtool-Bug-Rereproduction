@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice}")
+div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
   div(class="page-size-selector__body-row first-row")
     span(class="page-size-selector__body__title subtitle-2"
       :class="defaultTextColor") {{$t('NN0023')}}
@@ -469,7 +469,7 @@ export default defineComponent({
         format
       })
 
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         pageUtils.fitPage()
       }
       if (record) {
