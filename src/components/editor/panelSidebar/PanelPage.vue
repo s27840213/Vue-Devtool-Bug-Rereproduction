@@ -23,6 +23,7 @@ import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewP
 import PanelPagePlus from '@/components/editor/pagePreview/PanelPagePlus.vue'
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -46,15 +47,23 @@ export default defineComponent({
       _addPageToPos: 'ADD_pageToPos'
     }),
     addPage(position: number) {
-      const currPage = pageUtils.getCurrPage
-      this._addPageToPos({
-        newPage: pageUtils.newPage({
-          widht: currPage.width,
-          height: currPage.height,
-          backgorundColor: currPage.backgroundColor
-        }),
-        pos: position
-      })
+      const refPage = pageUtils.pageNum === 0 ? undefined // add new page if no pages
+        : pageUtils.pageNum === 1 ? pageUtils.getPage(0) // apply size of the last page if there is only one
+          : pageUtils.getPage(position + (position === 0 ? 1 : -1)) // apply size of the previous page, or next page if dosen't exist
+      pageUtils.addPageToPos(
+        pageUtils.newPage(refPage ? {
+          width: refPage.width,
+          height: refPage.height,
+          physicalWidth: refPage.physicalWidth,
+          physicalHeight: refPage.physicalHeight,
+          isEnableBleed: refPage.isEnableBleed,
+          bleeds: refPage.bleeds,
+          physicalBleeds: refPage.physicalBleeds,
+          unit: refPage.unit
+        } : {}),
+        position
+      )
+      stepsUtils.record()
     },
     wrappedPage(page: IPage) {
       return { ...page, isAutoResizeNeeded: false }

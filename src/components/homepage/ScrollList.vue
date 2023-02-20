@@ -188,7 +188,7 @@ export default defineComponent({
       }).href
     },
     clickTemplate(item: IAssetTemplate) {
-      if (this.$isTouchDevice && this.theme === '7') {
+      if (this.$isTouchDevice() && this.theme === '7') {
         modalUtils.setModalInfo(
             `${this.$t('NN0808')}`,
             [],
@@ -214,14 +214,14 @@ export default defineComponent({
       }
     },
     themeRouteInfo(theme: Itheme) {
-      if (this.$isTouchDevice && theme.id === 7) {
+      if (this.$isTouchDevice() && theme.id === 7) {
         return ''
       } else {
         return `/editor?type=new-design-size&themeId=${theme.id}&width=${theme.width}&height=${theme.height}`
       }
     },
     openProductPageNotification(theme: Itheme) {
-      if (this.$isTouchDevice && theme.id === 7) {
+      if (this.$isTouchDevice() && theme.id === 7) {
         modalUtils.setModalInfo(
               `${this.$t('NN0808')}`,
               [],

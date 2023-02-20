@@ -38,14 +38,14 @@ import { cloneDeep, uniq } from 'lodash'
 import loginData from '../fixtures/loginData.json'
 
 Cypress.Commands.add('isMobile', (callback: () => void) => {
-  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile) => {
-    if (isMobile) callback()
+  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile: () => boolean) => {
+    if (isMobile()) callback()
   })
 })
 
 Cypress.Commands.add('notMobile', (callback: () => void) => {
-  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile) => {
-    if (!isMobile) callback()
+  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile: () => boolean) => {
+    if (!isMobile()) callback()
   })
 })
 
@@ -80,8 +80,8 @@ Cypress.Commands.add('importDesign', (designName: string) => {
 })
 
 Cypress.Commands.add('togglePanel', (buttonText: string) => {
-  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile) => {
-    if (isMobile) {
+  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile: () => boolean) => {
+    if (isMobile()) {
       cy.get('.footer-tabs').contains('div', buttonText)
         .should('not.have.class', 'click-disabled')
         .click()

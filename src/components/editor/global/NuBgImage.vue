@@ -1,5 +1,5 @@
 <template lang="pug">
-div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @pointerdown="setInBgSettingMode")
+div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode")
   div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
     //- nu-adjust-image(v-if="isAdjustImage"
     //-       :src="finalSrc"
@@ -31,13 +31,13 @@ div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false
               v-bind="child.attrs")
               //- class="nu-background-image__adjust-picture"
       image(:xlink:href="finalSrc" ref="img"
+        class="nu-background-image__adjust-image"
         :filter="`url(#${filterId})`"
         :width="svgImageWidth"
         :height="svgImageHeight"
         @error="onError"
         @load="onLoad")
     img(v-else-if="src" ref="img"
-      class='nu-image__picture'
       :src="finalSrc"
       draggable="false"
       @error="onError"
@@ -477,17 +477,9 @@ export default defineComponent({
     }
   }
 
-  &__adjust-picture {
-  touch-action: none;
-  object-fit: cover;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 100%;
-}
+  &__adjust-image {
+    // will-change: contents;
+  }
 
   &__svg {
     display: block;

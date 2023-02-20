@@ -7,7 +7,7 @@ div(class="snap-area"
   div(v-for="line in closestSnaplines.h"
     class="snap-area__line snap-area__line--hr"
     :style="snapLineStyles('h', line)")
-  template(v-if="isShowGuideline")
+  template(v-if="isShowGuideline && !useMobileEditor")
     div(v-for="(line,index) in guidelines.v"
       class="snap-area__line snap-area__line--vr"
       :style="snapLineStyles('v', line, true)"
@@ -72,7 +72,8 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       groupType: 'getGroupType',
-      lockGuideline: 'getLockGuideline'
+      lockGuideline: 'getLockGuideline',
+      useMobileEditor: 'getUseMobileEditor'
     }),
     isShowGuideline(): boolean {
       return rulerUtils.showGuideline
@@ -120,8 +121,6 @@ export default defineComponent({
     getClosestSnaplines() {
       this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v.map((snapline: ISnapline) => snapline.pos)]
       this.closestSnaplines.h = [...this.snapUtils.closestSnaplines.h.map((snapline: ISnapline) => snapline.pos)]
-
-      console.log(this.closestSnaplines)
     },
     clearSnap(): void {
       this.snapUtils.clear()

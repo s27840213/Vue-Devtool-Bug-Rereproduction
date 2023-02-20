@@ -126,7 +126,7 @@ export default defineComponent({
       imageShadowPanelUtils.handleEffectUpdate(name, value)
     },
     handleColorModal() {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         colorUtils.setCurrEvent(ColorEventType.photoShadow)
         this.handleColor = true
         this.$emit('openExtraColorModal', ColorEventType.photoShadow, MobileColorPanelType.palette)
