@@ -37,26 +37,6 @@
 import { cloneDeep, uniq } from 'lodash'
 import loginData from '../fixtures/loginData.json'
 
-const snapshotStyles = `
-  /* Hide carets */
-  * { caret-color: transparent !important; }
-
-  /* Generic hide */
-  [cy-visual-test="transparent"] {
-    color: transparent !important;
-    font-family: monospace !important;
-    opacity: 0 !important;
-  }
-
-  [cy-visual-test="removed"] {
-    display: none !important;
-  }
-
-  [cy-test-no-radius] {
-    border-radius: 0 !important;
-  }
-`
-
 Cypress.Commands.add('isMobile', (callback: () => void) => {
   cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile) => {
     if (isMobile) callback()
@@ -109,43 +89,6 @@ Cypress.Commands.add('togglePanel', (buttonText: string) => {
     } else {
       cy.get('.function-panel').contains(buttonText).click()
     }
-  })
-})
-
-Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQuery<unknown>, testName: string, { toggleMobilePanel = '' } = {}) => {
-  // TODO: Need to find a way that keep 0.01 threshold and prevent command fail
-  // Workaround is set threshold to 100% to prevent fail, but it will not create diff image
-  // TODO: Investigation why compareSnapshot fail and other image that not take snapshot still appear in report
-  // This will happend if using on('fail') to force image mismatch test pass when 'cy open' mode
-
-  const threshold = Cypress.browser.isHeadless ? 0 : 1
-
-  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile) => {
-    // If toggleMobilePanel given, close mobile panel before snapshot and re-open the panel.
-    if (isMobile && toggleMobilePanel) {
-      cy.togglePanel(toggleMobilePanel)
-        // Wait for panel transition
-        .get('.mobile-panel').should('have.css', 'display', 'none')
-    }
-    cy.document().then((document) => {
-      // Add special css that hide/remove some element during snapshot.
-      const css = document.createElement('style')
-      css.setAttribute('class', 'cy-visual-test-style')
-      css.textContent = snapshotStyles
-      document.body.appendChild(css)
-    }).get('.nu-page').compareSnapshot(
-      `${Cypress.currentTest.title}-${testName}`,
-      threshold,
-      { limit: 3, delay: 1000 }
-    // Remove special css
-    ).get('style.cy-visual-test-style').invoke('remove')
-    if (isMobile && toggleMobilePanel) {
-      cy.togglePanel(toggleMobilePanel)
-        // Wait for panel transition
-        .get('.mobile-panel').should('not.have.css', 'display', 'none')
-        .should('not.have.class', 'panel-up-leave-to')
-    }
-    if (subject && subject.length) return cy.wrap(subject)
   })
 })
 
