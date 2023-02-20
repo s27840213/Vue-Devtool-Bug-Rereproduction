@@ -84,7 +84,6 @@ export default defineComponent({
       pageUtils.addPageToPos(pageUtils.newPage(lastPage ? {
         width: lastPage.width,
         height: lastPage.height,
-        backgroundColor: lastPage.backgroundColor,
         physicalWidth: lastPage.physicalWidth,
         physicalHeight: lastPage.physicalHeight,
         isEnableBleed: lastPage.isEnableBleed,

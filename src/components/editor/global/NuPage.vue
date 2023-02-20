@@ -586,7 +586,6 @@ export default defineComponent({
       pageUtils.addPageToPos(pageUtils.newPage({
         width: this.pageState.config.width,
         height: this.pageState.config.height,
-        backgroundColor: this.pageState.config.backgroundColor,
         physicalWidth: this.pageState.config.physicalWidth,
         physicalHeight: this.pageState.config.physicalHeight,
         isEnableBleed: this.pageState.config.isEnableBleed,
