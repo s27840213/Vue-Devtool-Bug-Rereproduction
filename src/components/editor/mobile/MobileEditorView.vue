@@ -18,6 +18,8 @@ div(class="editor-view" v-touch
       page-card(v-for="(page,index) in pagesState"
           :key="`page-${page.config.id}`"
           :config="page"
+          :cardWidth="cardWidth"
+          :cardHeight="cardHeight"
           :pageIndex="index"
           :editorView="editorView"
           :isAnyBackgroundImageControl="isBackgroundImageControl"
@@ -100,6 +102,7 @@ export default defineComponent({
       tmpScaleRatio: 0,
       mounted: false,
       cardHeight: 0,
+      cardWidth: 0,
       editorViewResizeObserver: null as unknown as ResizeObserver,
       isSwiping: false,
       isScaling: false,
@@ -146,6 +149,7 @@ export default defineComponent({
     this.editorView = this.$refs.editorView as HTMLElement
     this.editorCanvas = this.$refs.canvas as HTMLElement
     this.cardHeight = this.editorView ? this.editorView.clientHeight : 0
+    this.cardWidth = this.editorView ? this.editorView.clientWidth : 0
 
     pageUtils.fitPage(false, true)
     this.tmpScaleRatio = pageUtils.scaleRatio
