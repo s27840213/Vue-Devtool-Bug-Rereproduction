@@ -207,12 +207,10 @@ app.directive('touch', {
 })
 
 app.directive('custom-swipe', {
-  /**
-   * Useage: div(v-touch @tap="..." @swipeleft="...")
-   * If you want to prevetDefault, use: div(v-touch="true" ...)
-   */
   mounted: (el, binding, vnode) => {
-    const at = new Core(el as HTMLElement)
+    const at = new Core(el as HTMLElement, {
+      preventDefault: false
+    })
     anyTouchWeakMap.set(el, at)
     // trigger the swipe if moving velocity larger than "velocity" per ms
     // and move distance larger than threshhold
@@ -227,7 +225,6 @@ app.directive('custom-swipe', {
     })
   },
   unmounted: (el, binding, vnode) => {
-    console.log('unmount custom swipe')
     if (anyTouchWeakMap.has(el)) {
       (anyTouchWeakMap.get(el) as Core).off('swipe')
       anyTouchWeakMap.delete(el)
