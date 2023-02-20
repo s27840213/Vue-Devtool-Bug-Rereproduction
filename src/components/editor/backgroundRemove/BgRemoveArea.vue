@@ -8,7 +8,7 @@ div(class="bg-remove-area"
   div(class="bg-remove-area__scale-area"
       :style="areaStyles"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
-    canvas(class="bg-remove-area" ref="canvas" :cy-ready="initialized")
+    canvas(class="bg-remove-area" ref="canvas" :cy-ready="cyReady")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
     svg-icon(class="spiner"
@@ -35,7 +35,7 @@ export default defineComponent({
   },
   data() {
     return {
-      initialized: false,
+      cyReady: false,
       canvasWidth: 1600,
       canvasHeight: 1600,
       canvas: undefined as unknown as HTMLCanvasElement,
@@ -82,6 +82,7 @@ export default defineComponent({
       this.initCanvas()
       this.initBlurCanvas()
       this.initClearModeCanvas()
+      this.cyReady = true
     }
 
     this.initImageElement = new Image()
@@ -248,7 +249,6 @@ export default defineComponent({
       this.drawImageToCtx()
       this.ctx.filter = `blur(${this.blurPx}px)`
       this.pushStep()
-      this.initialized = true
     },
     initBlurCanvas() {
       this.blurCanvas = document.createElement('canvas') as HTMLCanvasElement
@@ -346,6 +346,7 @@ export default defineComponent({
       }
     },
     drawInClearMode(e: MouseEvent) {
+      this.cyReady = false
       this.setCompositeOperationMode('source-over', this.ctx)
       this.ctx.filter = 'none'
       this.clearCtx(this.ctx)
@@ -356,6 +357,7 @@ export default defineComponent({
       this.setCompositeOperationMode('destination-out')
       this.ctx.filter = `blur(${this.blurPx}px)`
       this.ctx.drawImage(this.clearModeCanvas, 0, 0, this.size.width, this.size.height)
+      this.cyReady = true
     },
     drawInRestoreMode(e: MouseEvent) {
       this.clearCtx(this.blurCtx)

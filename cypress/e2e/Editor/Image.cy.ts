@@ -50,8 +50,21 @@ for (const isMobile of [true, false]) {
           .layerAlign()
           .imageSetAsBg()
       })
-      // it('Manually BG remove', function () {
-      //   //
+      // it.only('Manually BG remove', function () {
+      //   cy.visit('/editor')
+      //     .importDesign('flower.json')
+      //     .get('.nu-image')
+      //     .imageManuallyBgRemove()
+      //     // .deselectAllLayers()
+      //     // .snapshotTest('init')
+      //     // .get('.nu-image')
+      //     // .imageAdjust()
+      //     // .layerFlip()
+      //     // .imageCrop('button')
+      //     // .imageCrop('dblclick')
+      //     // .imageShadow()
+      //     // .layerAlign()
+      //     // .imageSetAsBg()
       // })
     }
 
