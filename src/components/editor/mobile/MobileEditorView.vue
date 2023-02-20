@@ -210,7 +210,9 @@ export default defineComponent({
       currFocusPageIndex: 'getCurrFocusPageIndex',
       currCardIndex: 'mobileEditor/getCurrCardIndex',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
-      groupType: 'getGroupType'
+      groupType: 'getGroupType',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      isImgCtrl: 'imgControl/isImgCtrl'
     }),
     pages(): Array<IPage> {
       return this.pagesState.map((p: IPageState) => p.config)
@@ -429,7 +431,7 @@ export default defineComponent({
       // })
     },
     swipeUpHandler(e: AnyTouchEvent) {
-      if (!this.isDetailPage && !this.hasSelectedLayer) {
+      if (!this.isDetailPage && !this.hasSelectedLayer && !this.isBgImgCtrl && !this.isImgCtrl) {
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }
@@ -473,7 +475,7 @@ export default defineComponent({
       }
     },
     swipeDownHandler(e: AnyTouchEvent) {
-      if (!this.isDetailPage && !this.hasSelectedLayer) {
+      if (!this.isDetailPage && !this.hasSelectedLayer && !this.isBgImgCtrl && !this.isImgCtrl) {
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }
