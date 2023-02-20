@@ -12,8 +12,7 @@ div(class="editor-view" v-touch
       :style="absContainerStyle")
     div(v-if="editorView" class="editor-view__canvas"
         ref="canvas"
-        @swipeup="swipeUpHandler"
-        @swipedown="swipeDownHandler"
+        v-custom-swipe="handleSwipe"
         :style="canvasStyle")
       page-card(v-for="(page,index) in pagesState"
           :key="`page-${page.config.id}`"
@@ -492,6 +491,13 @@ export default defineComponent({
           })
         }
         this.isSwiping = false
+      }
+    },
+    handleSwipe(event: AnyTouchEvent) {
+      if (event.direction === 'up') {
+        this.swipeUpHandler(event)
+      } else if (event.direction === 'down') {
+        this.swipeDownHandler(event)
       }
     }
   }
