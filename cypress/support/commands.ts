@@ -59,13 +59,13 @@ const snapshotStyles = `
 
 Cypress.Commands.add('isMobile', (callback: () => void) => {
   cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile) => {
-    if (isMobile) callback()
+    if (isMobile()) callback()
   })
 })
 
 Cypress.Commands.add('notMobile', (callback: () => void) => {
   cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile) => {
-    if (!isMobile) callback()
+    if (!isMobile()) callback()
   })
 })
 
@@ -95,7 +95,7 @@ Cypress.Commands.add('importDesign', (designName: string) => {
 
 Cypress.Commands.add('togglePanel', (buttonText: string) => {
   cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile) => {
-    if (isMobile) {
+    if (isMobile()) {
       cy.get('.footer-tabs').contains('div', buttonText)
         .should('not.have.class', 'click-disabled')
         .click({ scrollBehavior: 'top' })
@@ -115,7 +115,7 @@ Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQue
 
   cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile) => {
     // If toggleMobilePanel given, close mobile panel before snapshot and re-open the panel.
-    if (isMobile && toggleMobilePanel) {
+    if (isMobile() && toggleMobilePanel) {
       cy.togglePanel(toggleMobilePanel)
         // Wait for panel transition
         .get('.mobile-panel').should('have.css', 'display', 'none')
@@ -132,7 +132,7 @@ Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQue
       { limit: 3, delay: 1000 }
     // Remove special css
     ).get('style.cy-visual-test-style').invoke('remove')
-    if (isMobile && toggleMobilePanel) {
+    if (isMobile() && toggleMobilePanel) {
       cy.togglePanel(toggleMobilePanel)
         // Wait for panel transition
         .get('.mobile-panel').should('not.have.css', 'display', 'none')

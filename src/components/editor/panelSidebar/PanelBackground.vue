@@ -225,7 +225,7 @@ export default defineComponent({
         color: color
       })
 
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         this.setCloseMobilePanelFlag(true)
       }
     },

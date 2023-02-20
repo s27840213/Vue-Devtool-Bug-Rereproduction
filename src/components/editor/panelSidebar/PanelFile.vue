@@ -5,7 +5,7 @@ div(class="panel-file"
     @dragenter.prevent)
   div(class="panel-file__topbtn")
     nubtn(size="mid-full" @click="uploadImage()") {{$t('NN0014')}}
-    nubtn(v-if="$isTouchDevice" theme="icon2" icon="trash" size="mid"
+    nubtn(v-if="$isTouchDevice()" theme="icon2" icon="trash" size="mid"
           :status="inMultiSelectMode === 'on' ? 'active': 'default'"
           @click="toggleMultiSelect()")
   image-gallery(
@@ -53,7 +53,7 @@ export default defineComponent({
         mainContent: 0
         // searchResult: 0
       },
-      inMultiSelectMode: this.$isTouchDevice ? 'off' : 'hover' as 'hover' | 'on' | 'off'
+      inMultiSelectMode: this.$isTouchDevice() ? 'off' : 'hover' as 'hover' | 'on' | 'off'
     }
   },
   computed: {

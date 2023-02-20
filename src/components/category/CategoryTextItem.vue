@@ -40,7 +40,7 @@ export default defineComponent({
     }),
     itemStyle(): any {
       const { width } = this.item.preview || {
-        width: this.$isTouchDevice
+        width: this.$isTouchDevice()
           ? (window.innerWidth - 54) / 3 - 10 // ([window width] - [padding and gap]) / 3 - [item margin]
           : 135
       }

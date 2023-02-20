@@ -181,7 +181,7 @@ export default defineComponent({
         pageUtils.scrollIntoPage(this.index)
       }
 
-      if (this.$isTouchDevice && clickFocusedPreview) {
+      if (this.$isTouchDevice() && clickFocusedPreview) {
         this.$nextTick(() => {
           if (pageUtils.isDetailPage) {
             pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 'auto')

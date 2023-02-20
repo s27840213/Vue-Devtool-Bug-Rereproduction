@@ -390,7 +390,7 @@ export default defineComponent({
     },
     handleClickWaterfall(template: ITemplate) {
       if (template.group_type === 1) {
-        if (this.$isTouchDevice) {
+        if (this.$isTouchDevice()) {
           modalUtils.setModalInfo(
             `${this.$t('NN0808')}`,
             [],

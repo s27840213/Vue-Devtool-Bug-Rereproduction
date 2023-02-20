@@ -342,7 +342,7 @@ export default defineComponent({
         return
       }
       if (this.unenterable || this.isTempDesign) return
-      if (this.$isTouchDevice && this.config.group_type === 1) {
+      if (this.$isTouchDevice() && this.config.group_type === 1) {
         modalUtils.setModalInfo(
             `${this.$t('NN0808')}`,
             [],
