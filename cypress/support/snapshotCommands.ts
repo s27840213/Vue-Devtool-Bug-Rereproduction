@@ -83,9 +83,9 @@ Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQue
   // For BG Remove test, use original test title to verify
   imageName = imageName.replace('Auto BG remove/', 'Unsplash image/')
 
-  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile) => {
+  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile: () => boolean) => {
     // If toggleMobilePanel given, close mobile panel before snapshot and re-open the panel.
-    if (isMobile && toggleMobilePanel) {
+    if (isMobile() && toggleMobilePanel) {
       cy.togglePanel(toggleMobilePanel)
         // Wait for panel transition
         .get('.mobile-panel').should('have.css', 'display', 'none')
@@ -103,7 +103,7 @@ Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQue
       .get('style.cy-visual-test-style').invoke('remove')
 
     // Re-open the panel
-    if (isMobile && toggleMobilePanel) {
+    if (isMobile() && toggleMobilePanel) {
       cy.togglePanel(toggleMobilePanel)
         // Wait for panel transition
         .get('.mobile-panel').should('not.have.css', 'display', 'none')
