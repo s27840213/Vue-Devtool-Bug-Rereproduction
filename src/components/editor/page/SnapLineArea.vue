@@ -120,8 +120,6 @@ export default defineComponent({
     getClosestSnaplines() {
       this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v.map((snapline: ISnapline) => snapline.pos)]
       this.closestSnaplines.h = [...this.snapUtils.closestSnaplines.h.map((snapline: ISnapline) => snapline.pos)]
-
-      console.log(this.closestSnaplines)
     },
     clearSnap(): void {
       this.snapUtils.clear()

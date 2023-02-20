@@ -199,9 +199,6 @@ export default defineComponent({
   created() {
     this.updateSnapUtilsIndex(this.pageIndex)
   },
-  // updated() {
-  //   console.warn('updated! ', this.pageIndex)
-  // },
   data() {
     return {
       initialAbsPos: { x: 0, y: 0 },
@@ -322,12 +319,7 @@ export default defineComponent({
       isImgCtrl: 'imgControl/isImgCtrl',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
-    // contentScaleRatio():number {
-    //   return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this._contentScaleRatio
-    // },
     contentScaleRatio(): number {
-      // return this.pageState.config.contentScaleRatio
-      // if (this.$isTouchDevice) {
       if (this.$isTouchDevice) {
         return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this.pageState.config.contentScaleRatio
       } else {
