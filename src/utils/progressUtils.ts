@@ -43,7 +43,7 @@ class ColorUtils {
       // })
     }
     xhr.upload.onloadend = (event) => {
-      this.increaseIntervalHash[hashId] = setInterval(() => {
+      this.increaseIntervalHash[hashId] = window.setInterval(() => {
         const curr = this.progressHash[hashId]
         const increaseNum = (90 - curr) * 0.05
         this.progressHash[hashId] = curr + increaseNum

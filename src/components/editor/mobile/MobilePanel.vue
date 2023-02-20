@@ -529,7 +529,7 @@ export default defineComponent({
     vcoConfig() {
       return {
         handler: (e: Event) => {
-          if (!this.isImgCtrl) {
+          if (!this.isImgCtrl && !this.inMultiSelectionMode) {
             this.closeMobilePanel()
           }
         },

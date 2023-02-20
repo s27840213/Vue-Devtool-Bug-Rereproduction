@@ -22,6 +22,7 @@ import Notifications from '@kyvg/vue3-notification'
 import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
 import { createApp, nextTick } from 'vue'
+import { createMetaManager, plugin as metaPlugin } from 'vue-meta'
 import VueRecyclerviewNew from 'vue-recyclerview'
 import { RecycleScroller } from 'vue-virtual-scroller'
 import i18n from './i18n'
@@ -78,7 +79,14 @@ declare module '@vue/runtime-core' {
     $isTouchDevice: boolean
   }
 }
-app.config.globalProperties.$isTouchDevice = generalUtils.isTouchDevice()
+const isTouchDevice = generalUtils.isTouchDevice()
+app.config.globalProperties.$isTouchDevice = isTouchDevice
+// if (isTouchDevice) {
+//   editorUtils.setMobileHW({
+//     width: document.body.clientWidth,
+//     height: document.body.clientHeight
+//   })
+// }
 
 const tooltipUtils = new TooltipUtils()
 
@@ -87,7 +95,8 @@ if (process.env.NODE_ENV !== 'production') {
 }
 app.use(VueRecyclerviewNew)
 app.use(Notifications)
-// app.use(VueMeta)
+app.use(createMetaManager())
+app.use(metaPlugin) // optional, only needed for OptionsAPI (see below)
 app.use(FloatingVue, {
   themes: tooltipUtils.themes
 })
@@ -252,5 +261,4 @@ if (urlParams.has('token')) {
 //   })
 //   // app.config.devtools = false
 // }
-
 app.mount('#app')

@@ -130,12 +130,12 @@ div(class="bottom-menu")
 </template>
 
 <script lang="ts">
-import designUtils from '@/utils/designUtils'
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
 import MobileStructureFolder from '@/components/mydesign/MobileStructureFolder.vue'
 import { IDesign, IFolder } from '@/interfaces/design'
+import designUtils from '@/utils/designUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 const PREV_BUTTON_MENUS = ['new-folder', 'move-folder']
 
@@ -443,7 +443,7 @@ export default defineComponent({
           clearTimeout(this.messageTimer)
         }
         this.isShowHint = true
-        this.messageTimer = setTimeout(() => {
+        this.messageTimer = window.setTimeout(() => {
           this.isShowHint = false
           this.messageTimer = -1
         }, 3000)

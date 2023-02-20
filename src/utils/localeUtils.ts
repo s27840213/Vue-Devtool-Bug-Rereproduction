@@ -63,7 +63,7 @@ class LocaleUtils {
     return this.SUPPORTED_LOCALES.find(loc => loc.code === i18n.global.locale) as ILocale
   }
 
-  getBrowserLang(): string {
+  getBrowserLang(): 'tw' | 'us' | 'jp' {
     return navigator.language.includes('zh') ? 'tw' : navigator.language.includes('ja') ? 'jp' : 'us'
   }
 }

@@ -16,10 +16,8 @@ div(class="editor-view" v-touch
         @swipedown="swipeDownHandler"
         :style="canvasStyle")
       page-card(v-for="(page,index) in pagesState"
-          :key="`page-${index}`"
+          :key="`page-${page.config.id}`"
           :config="page"
-          :cardWidth="cardWidth"
-          :cardHeight="cardHeight"
           :pageIndex="index"
           :editorView="editorView"
           :isAnyBackgroundImageControl="isBackgroundImageControl"
@@ -41,6 +39,7 @@ import store from '@/store'
 import backgroundUtils from '@/utils/backgroundUtils'
 import ControlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
+import eventUtils from '@/utils/eventUtils'
 import GroupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -101,7 +100,6 @@ export default defineComponent({
       tmpScaleRatio: 0,
       mounted: false,
       cardHeight: 0,
-      cardWidth: 0,
       editorViewResizeObserver: null as unknown as ResizeObserver,
       isSwiping: false,
       isScaling: false,
@@ -148,7 +146,6 @@ export default defineComponent({
     this.editorView = this.$refs.editorView as HTMLElement
     this.editorCanvas = this.$refs.canvas as HTMLElement
     this.cardHeight = this.editorView ? this.editorView.clientHeight : 0
-    this.cardWidth = this.editorView ? this.editorView.clientWidth : 0
 
     pageUtils.fitPage(false, true)
     this.tmpScaleRatio = pageUtils.scaleRatio
@@ -186,6 +183,9 @@ export default defineComponent({
         this.cardHeight = this.editorView?.clientHeight
       })
     }
+    // currCardIndex(newVal) {
+    //   editorUtils.handleContentScaleRatio(newVal)
+    // }
   },
 
   computed: {
@@ -247,17 +247,6 @@ export default defineComponent({
         overflow: this.isDetailPage ? 'scroll' : 'initial'
       }
     },
-    cardStyle(): { [index: string]: string | number } {
-      return {
-        width: `${this.cardWidth}px`,
-        height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
-        padding: this.isDetailPage ? '0px' : `${pageUtils.MOBILE_CARD_PADDING}px`,
-        flexDirection: this.isDetailPage ? 'column' : 'initial',
-        'overflow-y': this.isDetailPage ? 'initial' : 'scroll',
-        // overflow: this.isDetailPage ? 'initial' : 'scroll',
-        minHeight: this.isDetailPage ? 'none' : '100%'
-      }
-    },
     canvasStyle(): { [index: string]: string | number } {
       return {
         padding: this.isDetailPage ? '40px 0px' : '0px'
@@ -287,6 +276,9 @@ export default defineComponent({
       ]
     ),
     outerClick(e: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(e)) {
+        return
+      }
       if (!this.inBgRemoveMode && !ControlUtils.isClickOnController(e)) {
         editorUtils.setInBgSettingMode(false)
         GroupUtils.deselect()
@@ -300,6 +292,7 @@ export default defineComponent({
       }
     },
     selectStart(e: PointerEvent) {
+      e.stopPropagation()
       if (ControlUtils.isClickOnController(e)) {
         const movingUtils = new MovingUtils({
           _config: { config: layerUtils.getCurrLayer },
@@ -344,7 +337,7 @@ export default defineComponent({
           store.commit('SET_isPageScaling', true)
         }
         clearTimeout(this.hanleWheelTimer)
-        this.hanleWheelTimer = setTimeout(() => {
+        this.hanleWheelTimer = window.setTimeout(() => {
           store.commit('SET_isPageScaling', false)
           console.log('reach limit', pageUtils.mobileMinScaleRatio)
           if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
@@ -444,19 +437,32 @@ export default defineComponent({
           GroupUtils.deselect()
           this.setCurrActivePageIndex(this.currCardIndex)
           this.$nextTick(() => {
-            setTimeout(() => {
-              pageUtils.fitPage()
-            }, 300)
+            pageUtils.fitPage()
+            // setTimeout(() => {
+            //   pageUtils.fitPage()
+            // }, 300)
           })
         } else {
           GroupUtils.deselect()
-          this.addPage(pageUtils.newPage({}))
+          const lastPage = pageUtils.pageNum > 0 ? pageUtils.getPages[pageUtils.pageNum - 1] : undefined
+          this.addPage(pageUtils.newPage({
+            width: lastPage?.width,
+            height: lastPage?.height,
+            backgroundColor: lastPage?.backgroundColor,
+            physicalWidth: lastPage?.physicalWidth,
+            physicalHeight: lastPage?.physicalHeight,
+            isEnableBleed: lastPage?.isEnableBleed,
+            bleeds: lastPage?.bleeds,
+            physicalBleeds: lastPage?.physicalBleeds,
+            unit: lastPage?.unit
+          }))
           this.$nextTick(() => {
             editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
             this.setCurrActivePageIndex(this.currCardIndex)
-            setTimeout(() => {
-              pageUtils.fitPage()
-            }, 300)
+            pageUtils.fitPage()
+            // setTimeout(() => {
+            //   pageUtils.fitPage()
+            // }, 300)
           })
           StepsUtils.record()
         }
@@ -475,9 +481,10 @@ export default defineComponent({
           GroupUtils.deselect()
           this.setCurrActivePageIndex(this.currCardIndex)
           this.$nextTick(() => {
-            setTimeout(() => {
-              pageUtils.fitPage()
-            }, 300)
+            pageUtils.fitPage()
+            // setTimeout(() => {
+            //   pageUtils.fitPage()
+            // }, 300)
           })
         }
         this.isSwiping = false

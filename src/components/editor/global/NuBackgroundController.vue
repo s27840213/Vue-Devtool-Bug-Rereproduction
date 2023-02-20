@@ -112,7 +112,7 @@ export default defineComponent({
       }
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return PageUtils.removeBleedsFromPageSize(this.page)
+      return this.page.isEnableBleed ? PageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
   },
   methods: {
@@ -160,6 +160,9 @@ export default defineComponent({
       }
     },
     moveStart(event: PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initImgControllerPos = this.getImgController
@@ -171,6 +174,9 @@ export default defineComponent({
       this.setCursorStyle('move')
     },
     moving(event: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       this.setCursorStyle('move')
       event.preventDefault()
       const baseLine = {
@@ -181,6 +187,7 @@ export default defineComponent({
         width: (this.getImgWidth - this.pageSize.width / this.getPageScale) / 2,
         height: (this.getImgHeight - this.pageSize.height / this.getPageScale) / 2
       }
+      console.log(baseLine, translateLimit)
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
 
@@ -203,7 +210,10 @@ export default defineComponent({
         y: -offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad) + this.initImgPos.imgY
       }
     },
-    moveEnd() {
+    moveEnd(event: PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       PageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
       PageUtils.startBackgroundImageControl(this.pageIndex)
@@ -213,6 +223,9 @@ export default defineComponent({
       eventUtils.removePointerEvent('pointerup', this.moveEnd)
     },
     scaleStart(event: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initImgControllerPos = this.getImgController
@@ -236,6 +249,9 @@ export default defineComponent({
       eventUtils.addPointerEvent('pointerup', this.scaleEnd)
     },
     scaling(event: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       event.preventDefault()
       let width = this.getImgWidth
       let height = this.getImgHeight
@@ -311,7 +327,10 @@ export default defineComponent({
       // PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
       this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y, imgWidth: width, imgHeight: height })
     },
-    scaleEnd() {
+    scaleEnd(e: PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(e)) {
+        return
+      }
       this.isControlling = false
       PageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()

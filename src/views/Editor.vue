@@ -55,6 +55,7 @@ export default defineComponent({
         this.isSaving = false
         next()
       })
+      this.initMobileEditorState()
     } else {
       logUtils.setLog('Leave editor')
       next()
@@ -81,7 +82,8 @@ export default defineComponent({
       setCurrFunctionPanel: 'SET_currFunctionPanelType',
       clearState: 'CLEAR_state',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
-      setIsGettingDesign: 'SET_isGettingDesign'
+      setIsGettingDesign: 'SET_isGettingDesign',
+      initMobileEditorState: 'mobileEditor/INIT_STATE'
     }),
     setIsLoading() {
       this.isLoading = true

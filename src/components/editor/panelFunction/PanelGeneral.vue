@@ -26,7 +26,7 @@ div(class="panel-group mb-10")
     )
     svg-icon(class="pointer feature-button p-5"
       :class="{ active: isLocked }"
-      :iconName="isLocked ? 'unlock' : 'lock'" :iconWidth="'20px'" :iconColor="'gray-2'"
+      :iconName="isLocked ? 'lock' : 'unlock'" :iconWidth="'20px'" :iconColor="'gray-2'"
       @click="iconAction(isLocked ? 'lock' : 'unlock')"
       v-hint="isLocked ? `${$t('NN0033')}` : `${$t('NN0213')}`"
     )
@@ -50,16 +50,16 @@ div(class="panel-group mb-10")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import MappingUtils from '@/utils/mappingUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
-import GroupUtils from '@/utils/groupUtils'
-import { mapGetters } from 'vuex'
-import layerUtils from '@/utils/layerUtils'
-import popupUtils from '@/utils/popupUtils'
 import { IFrame, IGroup } from '@/interfaces/layer'
 import { PopupSliderEventType } from '@/store/types'
 import formatUtils from '@/utils/formatUtils'
+import GroupUtils from '@/utils/groupUtils'
+import layerUtils from '@/utils/layerUtils'
+import MappingUtils from '@/utils/mappingUtils'
+import popupUtils from '@/utils/popupUtils'
+import ShortcutUtils from '@/utils/shortcutUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],

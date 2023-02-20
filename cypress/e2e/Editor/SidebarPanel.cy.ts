@@ -42,15 +42,25 @@ const _sidebarData = [{
   apiUrl: '',
   apiType: '',
   testCategory: ''
-}]
+}] as ISidebarData[]
 
-function sidebarData (condition?: string) {
+function sidebarData (): ISidebarData[]
+function sidebarData (condition:
+  'has.search'|'has.category'|'is.template'|'is.photo'|'is.object'|'is.bg'|'is.text'|'is.file'
+): ISidebarData[]
+function sidebarData (condition: 'template'|'photo'|'object'|'bg'|'text'|'file'): ISidebarData
+function sidebarData (condition?: string): ISidebarData[] | ISidebarData {
   switch (condition) {
     case 'has.search':
       return _sidebarData.filter((side) => side.panelName !== 'file')
     case 'has.category':
       return _sidebarData.filter((side) => side.testCategory !== '')
     default:
+      if (condition && condition.startsWith('is.')) {
+        return _sidebarData.filter((side) => side.panelName === condition.replace('is.', ''))
+      } else if (condition) {
+        return _sidebarData.filter((side) => side.panelName === condition)[0]
+      }
       return _sidebarData
   }
 }
@@ -60,7 +70,7 @@ describe('Testing SidebarPanel', () => {
     cy.login()
   })
 
-  it('Keep scroll position', () => {
+  it('Keep scroll position', function () {
     cy.visit('/editor')
 
     for (const panel of sidebarData()) {
@@ -76,7 +86,7 @@ describe('Testing SidebarPanel', () => {
     }
   })
 
-  it('Keep scroll position after search', () => {
+  it('Keep scroll position after search', function () {
     cy.visit('/editor')
 
     for (const panel of sidebarData('has.search')) {
@@ -102,7 +112,7 @@ describe('Testing SidebarPanel', () => {
     }
   })
 
-  it('Open sidebar panel by url', () => {
+  it('Open sidebar panel by url', function () {
     for (const panel of sidebarData()) {
       cy.visit(`/editor?panel=${panel.panelName}`)
 
@@ -118,7 +128,7 @@ describe('Testing SidebarPanel', () => {
     }
   })
 
-  it('Search keyword in sidebar panel by url', () => {
+  it('Search keyword in sidebar panel by url', function () {
     for (const panel of sidebarData('has.search')) {
       const keyword = panel.panelName === 'photo' ? '紙' : 'tag::紙'
       cy.intercept({
@@ -142,7 +152,7 @@ describe('Testing SidebarPanel', () => {
       cy.get(panel.icon).should('have.css', 'color', colors.blue1)
 
       // Check content type
-      const itemClass = panel.panelName === 'photo'
+      const itemClass = ['photo', 'file'].includes(panel.panelName)
         ? '.gallery-photo__img'
         : `.panel-${panel.componentName}__item`
       cy.get(`.panel > .panel-${panel.componentName}
@@ -150,7 +160,7 @@ describe('Testing SidebarPanel', () => {
     }
   })
 
-  it('Search category in sidebar panel by url', () => {
+  it('Search category in sidebar panel by url', function () {
     for (const panel of sidebarData('has.category')) {
       if (panel.panelName === 'photo') continue
 
@@ -178,6 +188,52 @@ describe('Testing SidebarPanel', () => {
       const itemClass = `.panel-${panel.componentName}__item`
       cy.get(`.panel > .panel-${panel.componentName}
           > .vue-recycle-scroller:visible ${itemClass}`)
+    }
+  })
+
+  // TODO
+  // it('Add template item to page', function () {
+  // })
+
+  it('Add image item to page', function () {
+    const panel = sidebarData('photo')
+    cy.visit('/editor')
+    for (let i = 1; i < 5; i++) {
+      cy.addAsset(panel, i, 0)
+      cy.deleteAllLayers()
+    }
+  })
+
+  // it('Add object item to page', function () {
+  //   const panel = sidebarData('object')
+  //   cy.visit('/editor')
+  //   // cy.getAllCategoryName(panel).then((categoryNames) => {
+  //   for (let i = 1; i < 3; i++) {
+  //     cy.addAsset(panel, i, 0)
+  //     cy.deleteAllLayers()
+  //   }
+  // })
+
+  it('Add bg item to page', function () {
+    const panel = sidebarData('bg')
+    cy.visit('/editor')
+    // cy.getAllCategoryName(panel).then((categoryNames) => {
+    for (let i = 1; i < 4; i++) {
+      cy.addAsset(panel, i, 0)
+      cy.deleteAllLayers()
+    }
+  })
+
+  // TODO
+  // it('Add text item to page', function () {
+  // })
+
+  it('Add myfile item to page', function () {
+    const panel = sidebarData('file')
+    cy.visit('/editor')
+    for (let i = 1; i < 5; i++) {
+      cy.addAsset(panel, i, 0)
+      cy.deleteAllLayers()
     }
   })
 })

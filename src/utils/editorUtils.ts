@@ -1,8 +1,21 @@
+import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { IMobileEditorState } from '@/store/module/mobileEditor'
 import generalUtils from './generalUtils'
+import pageUtils from './pageUtils'
 
 class EditorUtils {
+  private _mobileWidth = 0
+  private _mobileHeight = 0
+
+  get mobileWidth() {
+    return this._mobileWidth
+  }
+
+  get mobileHeight() {
+    return this._mobileHeight
+  }
+
   get mobileAllPageMode() {
     return store.getters['mobileEditor/getMobileAllPageMode']
   }
@@ -29,6 +42,54 @@ class EditorUtils {
 
   get showColorSlips(): boolean {
     return store.state.showColorSlips
+  }
+
+  setMobileHW(size: { width?: number, height?: number }) {
+    if (size.width) {
+      this._mobileWidth = size.width
+    }
+    if (size.height) {
+      this._mobileHeight = size.height
+    }
+  }
+
+  handleContentScaleCalc(page: IPage) {
+    const { hasBleed } = pageUtils
+    const { width, height } = hasBleed ? pageUtils.getPageSizeWithBleeds(page) : page
+    if (!this.mobileHeight || this.mobileWidth) {
+      const mobileEditor = document.getElementById('mobile-editor__content')
+      if (mobileEditor) {
+        this.setMobileHW({
+          width: mobileEditor.clientWidth,
+          height: mobileEditor.clientHeight
+        })
+      }
+    }
+    const PAGE_SIZE_W = (this.mobileWidth || Number.MAX_SAFE_INTEGER) * 0.926
+    const PAGE_SIZE_H = (this.mobileHeight || Number.MAX_SAFE_INTEGER) * 0.926
+    if (width > PAGE_SIZE_W || height > PAGE_SIZE_H) {
+      if (width >= height) {
+        return PAGE_SIZE_W / width
+      } else {
+        const scale = PAGE_SIZE_H / height
+        if (width * scale > PAGE_SIZE_W) {
+          return PAGE_SIZE_W / width
+        }
+        return scale
+      }
+    } else {
+      return 1
+    }
+  }
+
+  handleContentScaleRatio(pageIndex: number) {
+    if (generalUtils.isTouchDevice()) {
+      const page = pageUtils.getPage(pageIndex)
+      const contentScaleRatio = this.handleContentScaleCalc(page)
+      this.setContentScaleRatio(contentScaleRatio)
+      store.commit('SET_contentScaleRatio4Page', { pageIndex, contentScaleRatio })
+      return contentScaleRatio
+    }
   }
 
   toggleColorSlips(bool: boolean) {
@@ -89,6 +150,12 @@ class EditorUtils {
   setShowMobilePanel(bool: boolean): void {
     if (generalUtils.isTouchDevice()) {
       store.commit('mobileEditor/SET_showMobilePanel', bool)
+    }
+  }
+
+  setContentScaleRatio(ratio: number): void {
+    if (generalUtils.isTouchDevice()) {
+      store.commit('SET_contentScaleRatio', ratio)
     }
   }
 }

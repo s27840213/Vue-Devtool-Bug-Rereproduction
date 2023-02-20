@@ -44,6 +44,10 @@ export default defineComponent({
     snapUtils: {
       type: SnapUtils,
       required: true
+    },
+    contentScaleRatio: {
+      type: Number,
+      required: true
     }
   },
   data() {
@@ -88,8 +92,8 @@ export default defineComponent({
   methods: {
     wrapperStyles(): Record<string, string> {
       return {
-        width: `${this.config.width * (this.scaleRatio / 100)}px`,
-        height: `${this.config.height * (this.scaleRatio / 100)}px`,
+        width: `${this.config.width * this.contentScaleRatio * (this.scaleRatio / 100)}px`,
+        height: `${this.config.height * this.contentScaleRatio * (this.scaleRatio / 100)}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
@@ -100,7 +104,7 @@ export default defineComponent({
           : dir === 'h' ? bleeds.top
             : 0
       }
-      pos = pos * (this.scaleRatio / 100)
+      pos = pos * (this.scaleRatio * this.contentScaleRatio / 100)
       return dir === 'v' ? {
         height: '100%',
         width: '1px',
@@ -116,6 +120,8 @@ export default defineComponent({
     getClosestSnaplines() {
       this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v.map((snapline: ISnapline) => snapline.pos)]
       this.closestSnaplines.h = [...this.snapUtils.closestSnaplines.h.map((snapline: ISnapline) => snapline.pos)]
+
+      console.log(this.closestSnaplines)
     },
     clearSnap(): void {
       this.snapUtils.clear()
@@ -123,7 +129,7 @@ export default defineComponent({
       this.closestSnaplines.h = []
     },
     showGuideline(pos: number, type: string, index: number) {
-      this.guidelineTimer = setTimeout(() => {
+      this.guidelineTimer = window.setTimeout(() => {
         if (!rulerUtils.isDragging) {
           rulerUtils.deleteGuideline(
             index,
@@ -143,6 +149,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .snap-area {
   @include size(100%, 100%);
+  z-index: setZindex(snap-area);
   position: absolute;
   top: 0;
   left: 0;

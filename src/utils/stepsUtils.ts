@@ -343,7 +343,7 @@ class StepsUtils {
       clearTimeout(this.timers[key])
       delete this.timers[key]
     }
-    this.timers[key] = setTimeout(() => {
+    this.timers[key] = window.setTimeout(() => {
       this.record()
     }, interval)
   }

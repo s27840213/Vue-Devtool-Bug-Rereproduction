@@ -156,7 +156,7 @@ export default defineComponent({
     },
     delayedFinalize(formatedColor: string) {
       clearTimeout(this.finalizeTimer)
-      this.finalizeTimer = setTimeout(() => {
+      this.finalizeTimer = window.setTimeout(() => {
         this.$emit('final', formatedColor)
       }, 500)
     }

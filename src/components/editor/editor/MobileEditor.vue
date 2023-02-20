@@ -88,7 +88,14 @@ export default defineComponent({
     eventUtils.off(PanelEvent.switchTab)
   },
   mounted() {
-    // const el = this.$refs['mobile-editor__content'] as HTMLElement
+    if (this.$isTouchDevice) {
+      const el = this.$refs['mobile-editor__content'] as HTMLElement
+      editorUtils.setMobileHW({
+        width: el.clientWidth,
+        height: el.clientHeight
+      })
+      editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
+    }
     // const pz = new PinchZoom(el, {
     //   minZoom: (pageUtils.mobileMinScaleRatio * 0.01)
     // })
@@ -231,6 +238,10 @@ export default defineComponent({
         editorUtils.setCurrActivePanel(panelType)
         if (panelType === 'color' && props?.currColorEvent) {
           this.currColorEvent = props.currColorEvent
+        }
+
+        if (this.inMultiSelectionMode) {
+          editorUtils.setInMultiSelectionMode(false)
         }
       }
 

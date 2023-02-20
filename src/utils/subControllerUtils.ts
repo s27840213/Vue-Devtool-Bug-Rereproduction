@@ -20,13 +20,12 @@ export default class SubControllerUtils {
   private dblTapFlag = false
   private posDiff = { x: 0, y: 0 }
   private _onMouseup = null as unknown
-  private primaryActive = false
-
   private get config(): ILayer { return this._config.config }
   private get pageIndex(): number { return this.layerInfo.pageIndex }
   private get layerIndex(): number { return this.layerInfo.layerIndex }
   private get subLayerIdx(): number { return this.layerInfo.subLayerIdx ?? -1 }
   private get primaryLayer(): IGroup | IFrame | ITmp { return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp }
+  private get primaryActive(): boolean { return this.primaryLayer.active }
 
   constructor({ _config, body, layerInfo }: { _config: { config: ILayer }, body: HTMLElement, layerInfo?: ILayerInfo, component?: any }) {
     this._config = _config
@@ -36,14 +35,17 @@ export default class SubControllerUtils {
 
   onPointerdown(e: PointerEvent) {
     if (this.primaryLayer.type === 'tmp') {
-      if (generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || store.getters['mobileEditor/getInMultiSelectionMode']) {
+      if (generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
         groupUtils.deselectTargetLayer(this.subLayerIdx)
+      }
+      if (groupUtils.inMultiSelecitonMode) {
+        this._onMouseup = this.onMouseup.bind(this)
+        eventUtils.addPointerEvent('pointerup', this._onMouseup)
       }
       return
     }
     if (e.button !== 0) return
 
-    this.primaryActive = this.primaryLayer.active
     if (imageUtils.isImgControl()) {
       imageUtils.setImgControlDefault()
     }
@@ -129,16 +131,12 @@ export default class SubControllerUtils {
     eventUtils.removePointerEvent('pointerup', this._onMouseup)
     // this.isControlling = false
     this.onClickEvent(e)
-    this.primaryActive = false
   }
 
   onClickEvent(e: MouseEvent) {
     if (!this.primaryLayer.active) return
 
     colorUtils.event.emit('closeColorPanel', false)
-    if (!this.primaryLayer.active) {
-      return
-    }
     let updateSubLayerProps = null as any
     let layers = null as any
     switch (this.primaryLayer.type) {
@@ -152,6 +150,10 @@ export default class SubControllerUtils {
     }
 
     if (!store.getters['shadow/isHandling'] && this.primaryActive && !store.state.isMoving) {
+      if (groupUtils.inMultiSelecitonMode) {
+        groupUtils.deselectTargetLayer(this.subLayerIdx)
+        return
+      }
       if (layerUtils.layerIndex !== -1) {
         for (let idx = 0; idx < layers.length; idx++) {
           if (idx !== this.subLayerIdx) {
