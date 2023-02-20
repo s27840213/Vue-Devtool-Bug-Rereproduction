@@ -18,6 +18,8 @@ import Nubtn from '@/components/global/Nubtn.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
 import Spinner from '@/components/global/Spinner.vue'
 import SvgIcon from '@/components/global/SvgIcon.vue'
+import Core from '@any-touch/core'
+import swipe from '@any-touch/swipe'
 import Notifications from '@kyvg/vue3-notification'
 import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
@@ -203,6 +205,33 @@ app.directive('touch', {
     anyTouchWeakMap.delete(el)
   }
 })
+
+app.directive('custom-swipe', {
+  mounted: (el, binding, vnode) => {
+    const at = new Core(el as HTMLElement, {
+      preventDefault: false
+    })
+    anyTouchWeakMap.set(el, at)
+    // trigger the swipe if moving velocity larger than "velocity" per ms
+    // and move distance larger than threshhold
+    at.use(swipe, {
+      // means 10px/ms
+      velocity: 0.1,
+      threshold: 5
+    })
+
+    at.on('swipe', (event) => {
+      binding.value(event)
+    })
+  },
+  unmounted: (el, binding, vnode) => {
+    if (anyTouchWeakMap.has(el)) {
+      (anyTouchWeakMap.get(el) as Core).off('swipe')
+      anyTouchWeakMap.delete(el)
+    }
+  }
+})
+
 app.directive('press', longpress)
 
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)

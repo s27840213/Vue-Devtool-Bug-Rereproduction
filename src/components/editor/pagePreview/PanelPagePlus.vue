@@ -141,7 +141,6 @@ export default defineComponent({
         pageUtils.newPage(refPage ? {
           width: refPage.width,
           height: refPage.height,
-          backgroundColor: refPage.backgroundColor,
           physicalWidth: refPage.physicalWidth,
           physicalHeight: refPage.physicalHeight,
           isEnableBleed: refPage.isEnableBleed,

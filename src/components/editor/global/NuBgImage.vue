@@ -1,5 +1,5 @@
 <template lang="pug">
-div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @pointerdown="setInBgSettingMode")
+div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode")
   div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
     //- nu-adjust-image(v-if="isAdjustImage"
     //-       :src="finalSrc"
