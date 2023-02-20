@@ -110,7 +110,7 @@ export default Vue.extend({
       }
       lastTouchEnd = now
     }, false)
-    window.visualViewport.addEventListener('resize', this.handleResize)
+    document.addEventListener('scroll', this.handleScroll)
 
     // parse modal info
     const exp = !vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0') ? 'exp_' : ''
@@ -169,7 +169,7 @@ export default Vue.extend({
     }
   },
   destroyed() {
-    window.visualViewport.removeEventListener('resize', this.handleResize)
+    document.removeEventListener('scroll', this.handleScroll)
   },
   computed: {
     ...mapState('mobileEditor', {
@@ -306,8 +306,9 @@ export default Vue.extend({
         vivistickerUtils.deselect()
       }
     },
-    handleResize() {
-      this.headerOffset = this.defaultWindowHeight - window.outerHeight - 1
+    handleScroll() {
+      // handle page scroll by mobile keyboard
+      this.headerOffset = document.documentElement.scrollTop ? document.documentElement.scrollTop - 1 : 0
     }
   }
 })
@@ -379,6 +380,6 @@ export default Vue.extend({
 }
 
 .header-bar {
-  transition: 0.2s ease;
+  transition: 0.5s cubic-bezier(0.380, 0.700, 0.125, 1.000);
 }
 </style>
