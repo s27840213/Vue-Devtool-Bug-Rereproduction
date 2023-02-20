@@ -1,24 +1,24 @@
 /* eslint-disable */
 
-import Vue from 'vue'
 import '@/globalComponents'
+import VueGtm from '@gtm-support/vue2-gtm'
+import AnyTouch from 'any-touch'
+import FloatingVue from 'floating-vue'
+import 'floating-vue/dist/style.css'
+import Vue from 'vue'
+import vueColor from 'vue-color'
+import VueMeta from 'vue-meta'
+import Notifications from 'vue-notification'
 import VueRecyclerviewNew from 'vue-recyclerview'
+import { RecycleScroller } from 'vue-virtual-scroller'
 import App from './App.vue'
+import i18n from './i18n'
 import router from './router'
 import store from './store'
-import i18n from './i18n'
-import vueColor from 'vue-color'
-import { RecycleScroller } from 'vue-virtual-scroller'
-import Notifications from 'vue-notification'
-import VueMeta from 'vue-meta'
-import 'floating-vue/dist/style.css'
-import FloatingVue from 'floating-vue'
-import TooltipUtils from './utils/tooltipUtils'
-import VueGtm from '@gtm-support/vue2-gtm'
-import svgIconUtils from './utils/svgIconUtils'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
-import AnyTouch from 'any-touch'
+import svgIconUtils from './utils/svgIconUtils'
+import TooltipUtils from './utils/tooltipUtils'
 
 window.onerror = function (msg, url, line) {
   const message = [
@@ -118,7 +118,13 @@ Vue.directive('touch', {
    * If you want to prevetDefault, use: div(v-touch="true" ...)
    */
   bind(el, binding) {
-    anyTouchWeakMap.set(el, new AnyTouch(el, { preventDefault: Boolean(binding.value) }))
+    // pass preventDefault as function to fix tap event issue of apple pencil for unknown reason
+    const preventDefault = (event: Event) => {
+      return !!binding.expression;
+    }
+    const at = new AnyTouch(el, { preventDefault })
+    at.get('tap').maxDistance = 10 // raise max move distance to trigger double tap event more easily for apple pencil
+    anyTouchWeakMap.set(el, at)
   },
   unbind(el) {
     (anyTouchWeakMap.get(el) as AnyTouch).destroy()

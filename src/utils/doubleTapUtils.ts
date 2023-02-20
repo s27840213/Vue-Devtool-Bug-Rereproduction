@@ -22,6 +22,7 @@ class DoubleTapUtils {
     if (event.type === 'click') {
       console.error('!! Don\'t use click event in doubleTapUtils. Use pointerdown instead. !!')
     }
+    event.preventDefault() // fix tap event issue of apple pencil for unknown reason
     const now = Date.now()
 
     if (this.prev.el === event.target && now - this.prev.time < delay) {
