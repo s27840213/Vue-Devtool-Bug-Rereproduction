@@ -8,7 +8,7 @@ div(class="bg-remove-area"
   div(class="bg-remove-area__scale-area"
       :style="areaStyles"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
-    canvas(class="bg-remove-area" ref="canvas")
+    canvas(class="bg-remove-area" ref="canvas" :cy-ready="initialized")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
     svg-icon(class="spiner"
@@ -35,6 +35,7 @@ export default defineComponent({
   },
   data() {
     return {
+      initialized: false,
       canvasWidth: 1600,
       canvasHeight: 1600,
       canvas: undefined as unknown as HTMLCanvasElement,
@@ -247,6 +248,7 @@ export default defineComponent({
       this.drawImageToCtx()
       this.ctx.filter = `blur(${this.blurPx}px)`
       this.pushStep()
+      this.initialized = true
     },
     initBlurCanvas() {
       this.blurCanvas = document.createElement('canvas') as HTMLCanvasElement

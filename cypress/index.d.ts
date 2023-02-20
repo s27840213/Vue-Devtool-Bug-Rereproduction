@@ -56,6 +56,7 @@ declare namespace Cypress {
     // Modified CompareSnapshot command in cypress-image-diff-js
     myCompareSnapshot(
       name: string,
+      logName: string,
       testThreshold?: number,
       retryOptions?: Record<string, unknown>
     ): Chainable<Element>

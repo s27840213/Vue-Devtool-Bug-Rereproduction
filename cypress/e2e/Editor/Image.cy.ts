@@ -33,23 +33,27 @@ for (const isMobile of [true, false]) {
         // .deselectAllLayers().snapshotTest('init').get('.nu-image') // Check if image restore to init
     })
 
-    // it.only('Auto BG remove', function () {
-    //   cy.visit('/editor')
-    //     .importDesign('flower.json')
-    //     .get('.nu-layer .nu-image img')
-    //     .get('.nu-image')
-    //     .imageAutoBgRemove().snapshotTest('init')
-    //     // .imageAdjust()
-    //     // .layerFlip()
-    //     // .imageCrop('button')
-    //     // .imageCrop('dblclick')
-    //     // .imageShadow()
-    //     // .layerAlign()
-    //     // .imageSetAsBg()
-    // })
-    // it('Manually BG remove', function () {
-    //   //
-    // })
+    if (!isMobile) {
+      it(`Auto BG remove${suffix}`, function () {
+        cy.visit('/editor')
+          .importDesign('flower.json')
+          .get('.nu-image')
+          .imageAutoBgRemove()
+          .deselectAllLayers()
+          .snapshotTest('init')
+          .get('.nu-image')
+          .imageAdjust()
+          .layerFlip()
+          .imageCrop('button')
+          .imageCrop('dblclick')
+          .imageShadow()
+          .layerAlign()
+          .imageSetAsBg()
+      })
+      // it('Manually BG remove', function () {
+      //   //
+      // })
+    }
 
     it(`Other image test${suffix}`, function() {
       function beforeCopyFormat () {

@@ -201,8 +201,10 @@ Cypress.Commands.add('imageSetAsBg', { prevSubject: 'element' }, (subject) => {
 Cypress.Commands.add('imageAutoBgRemove', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
     .togglePanel('去背')
-    .get('.nu-layer .nu-layer__inProcess').should('not.exist')
-  return cy.wrap(subject)
+    .get('.nu-layer .nu-layer__inProcess', { timeout: 20000 }).should('not.exist')
+    .get('canvas.bg-remove-area').invoke('attr', 'cy-ready').should('eq', 'true')
+    .togglePanel('完成')
+  return cy.get(subject.selector)
 })
 
 Cypress.Commands.add('imageManuallyBgRemove', { prevSubject: 'element' }, (subject) => {
