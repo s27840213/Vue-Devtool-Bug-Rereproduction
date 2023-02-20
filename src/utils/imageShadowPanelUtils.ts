@@ -396,7 +396,6 @@ export default new class ImageShadowPanelUtils {
             imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
             imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
             imageShadowUtils.setUploadProcess(false)
-            // console.warn('shadow upload finish')
           })
         }
       })
