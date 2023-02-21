@@ -47,7 +47,7 @@ export default class SubControllerUtils {
   }
 
   onPointerdown(e: PointerEvent) {
-    e.stopPropagation()
+    // e.stopPropagation()
     this.initTranslate = {
       x: this.primaryLayer.styles?.x || 0,
       y: this.primaryLayer.styles?.y || 0
