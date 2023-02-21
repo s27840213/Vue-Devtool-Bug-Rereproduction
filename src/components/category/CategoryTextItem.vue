@@ -20,20 +20,13 @@ import vivistickerUtils from '@/utils/vivistickerUtils'
 export default Vue.extend({
   props: {
     src: String,
-    item: Object
+    item: Object,
+    itemWidth: Number
   },
   data() {
     return {
-      fallbackSrc: '',
-      windowWidth: window.outerWidth
+      fallbackSrc: ''
     }
-  },
-  mounted() {
-    window.addEventListener('resize', this.handleResize)
-    this.handleResize()
-  },
-  beforeDestroy() {
-    window.removeEventListener('resize', this.handleResize)
   },
   computed: {
     ...mapGetters({
@@ -41,9 +34,7 @@ export default Vue.extend({
     }),
     itemStyle(): any {
       const { width } = this.item.preview || {
-        width: generalUtils.isTouchDevice()
-          ? (this.windowWidth - 68) / 3 - 10
-          : 135
+        width: generalUtils.isTouchDevice() ? this.itemWidth : 135
       }
       return {
         width: `${width}px`
@@ -65,9 +56,6 @@ export default Vue.extend({
           assetId: this.item.id
         }, vivistickerUtils.getAssetInitiator(this.item), vivistickerUtils.getAssetCallback(this.item))
       }
-    },
-    handleResize() {
-      this.windowWidth = window.outerWidth
     }
   }
 })

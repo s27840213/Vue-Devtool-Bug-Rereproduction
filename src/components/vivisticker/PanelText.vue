@@ -34,7 +34,8 @@
           @action="handleCategorySearch")
           template(v-slot:preview="{ item }")
             category-text-item(class="panel-text__item"
-              :item="item")
+              :item="item"
+              :itemWidth="itemWidth")
       template(v-slot:category-text-item="{ list, title }")
         div(class="panel-text__items")
           div(v-if="title"
@@ -42,7 +43,8 @@
           category-text-item(v-for="item in list"
             class="panel-text__item"
             :key="item.id"
-            :item="item")
+            :item="item"
+            :itemWidth="itemWidth")
 </template>
 
 <script lang="ts">
@@ -72,7 +74,8 @@ export default Vue.extend({
       scrollTop: {
         mainContent: 0,
         searchResult: 0
-      }
+      },
+      itemWidth: 80
     }
   },
   computed: {
@@ -201,12 +204,15 @@ export default Vue.extend({
     searchResult.scrollTop = this.scrollTop.searchResult
     mainContent.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
     searchResult.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize()
   },
   deactivated() {
     const mainContent = (this.$refs.mainContent as Vue[])[0].$el
     const searchResult = (this.$refs.searchResult as Vue[])[0].$el
     mainContent.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
     searchResult.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    window.removeEventListener('resize', this.handleResize)
   },
   watch: {
     keyword(newVal: string) {
@@ -309,6 +315,9 @@ export default Vue.extend({
             size: 104 + (title ? 46 : 0) // 80(object height) + 24(gap) + 0/46(title)
           }
         })
+    },
+    handleResize() {
+      this.itemWidth = (window.outerWidth - 68) / 3 - 10
     }
   }
 })
@@ -346,7 +355,7 @@ export default Vue.extend({
   &__item {
     width: 80px;
     height: 80px;
-    margin: 0 auto;
+    // margin: 0 auto;
     padding: 0 5px;
     // object-fit: contain;
     // vertical-align: middle;
