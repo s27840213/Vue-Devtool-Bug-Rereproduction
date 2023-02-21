@@ -57,16 +57,23 @@ export class WebViewUtils<T extends { [key: string]: any }> {
 
   async callIOSAsAPI(type: string, message: any, event: string, timeout = 5000): Promise<any> {
     this.sendToIOS(type, message)
-    const result = await Promise.race([
-      new Promise<any>(resolve => {
+    let result
+    if (timeout === -1) {
+      result = await (new Promise<any>(resolve => {
         this.callbackMap[event] = resolve
-      }),
-      new Promise<undefined>(resolve => {
-        setTimeout(() => {
-          resolve(undefined)
-        }, timeout)
-      })
-    ])
+      }))
+    } else {
+      result = await Promise.race([
+        new Promise<any>(resolve => {
+          this.callbackMap[event] = resolve
+        }),
+        new Promise<undefined>(resolve => {
+          setTimeout(() => {
+            resolve(undefined)
+          }, timeout)
+        })
+      ])
+    }
     delete this.callbackMap[event]
     return result
   }

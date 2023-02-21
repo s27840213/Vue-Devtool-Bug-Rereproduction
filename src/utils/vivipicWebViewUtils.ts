@@ -67,7 +67,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async login(type: 'APPLE' | 'Google' | 'Facebook', locale: string): Promise<{ data: ILoginResult, flag: number, msg?: string }> {
-    return await this.callIOSAsAPI('LOGIN', { type, locale }, 'login')
+    return await this.callIOSAsAPI('LOGIN', { type, locale }, 'login', -1)
   }
 
   loginResult(data: { data: ILoginResult, flag: string | number, msg?: string }) {
