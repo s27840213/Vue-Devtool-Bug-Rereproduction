@@ -431,13 +431,8 @@ export default defineComponent({
       //   }
       // })
     },
-<<<<<<< HEAD
-    swipeUpHandler(e: AnyTouchEvent) {
-      if (!this.isDetailPage && !this.hasSelectedLayer && !this.isBgImgCtrl && !this.isImgCtrl) {
-=======
     swipeUpHandler() {
-      if (!this.isDetailPage && !this.hasSelectedLayer) {
->>>>>>> e716488b679158ff840834631ec0332c391ed633
+      if (!this.isDetailPage && !this.hasSelectedLayer && !this.isBgImgCtrl && !this.isImgCtrl) {
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }
@@ -480,7 +475,7 @@ export default defineComponent({
         this.isSwiping = false
       }
     },
-    swipeDownHandler(e: AnyTouchEvent) {
+    swipeDownHandler() {
       if (!this.isDetailPage && !this.hasSelectedLayer && !this.isBgImgCtrl && !this.isImgCtrl) {
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
