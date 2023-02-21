@@ -14,6 +14,7 @@ declare namespace Cypress {
     // commands.ts
     isMobile(callback: () => void): Chainable<void>
     notMobile(callback: () => void): Chainable<void>
+    waitTransition(): Chainable<Subject>
     login(): Chainable<void>
     deleteAllLayers(): Chainable<void>
     deselectAllLayers(): Chainable<void>
@@ -48,6 +49,14 @@ declare namespace Cypress {
     // npm package type define
     compareSnapshot(
       name: string,
+      testThreshold?: number,
+      retryOptions?: Record<string, unknown>
+    ): Chainable<Element>
+
+    // Modified CompareSnapshot command in cypress-image-diff-js
+    myCompareSnapshot(
+      name: string,
+      logName: string,
       testThreshold?: number,
       retryOptions?: Record<string, unknown>
     ): Chainable<Element>
