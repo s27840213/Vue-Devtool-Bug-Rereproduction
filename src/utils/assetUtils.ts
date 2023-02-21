@@ -507,8 +507,8 @@ class AssetUtils {
         LayerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false, contentEditable: true }))])
         editorUtils.setCloseMobilePanelFlag(true)
         setTimeout(() => {
-          tiptapUtils.agent(editor => editor.chain().selectAll().focus().run())
-        }, 500)
+          tiptapUtils.agent(editor => editor.commands.selectAll())
+        }, 100)
       })
       .catch(() => {
         console.log('Cannot find the file')
