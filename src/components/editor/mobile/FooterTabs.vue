@@ -18,6 +18,7 @@ div(class="footer-tabs" ref="tabs" :style="rootStyles")
         span(class="body-3 no-wrap click-disabled"
         :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
+
 <script lang="ts">
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import i18n from '@/i18n'
