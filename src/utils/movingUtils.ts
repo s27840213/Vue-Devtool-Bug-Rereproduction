@@ -120,6 +120,10 @@ export class MovingUtils {
     this.initPageTranslate.x = pageUtils.getCurrPage.x
     this.initPageTranslate.y = pageUtils.getCurrPage.y
     const currLayerIndex = layerUtils.layerIndex
+
+    formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
+    formatUtils.clearCopiedFormat()
+
     if (currLayerIndex !== this.layerIndex) {
       const layer = layerUtils.getLayer(this.pageIndex, currLayerIndex)
       if (layer.type === 'image' && layer.imgControl) {
@@ -209,8 +213,6 @@ export class MovingUtils {
     if (!this.isLocked) {
       event.stopPropagation()
     }
-    formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
-    formatUtils.clearCopiedFormat()
 
     if (inCopyMode) {
       shortcutUtils.altDuplicate(this.pageIndex, this.layerIndex, this.config)
