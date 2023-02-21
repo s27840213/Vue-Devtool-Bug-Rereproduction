@@ -37,9 +37,8 @@
               :item="item"
               :itemWidth="itemWidth")
       template(v-slot:category-text-item="{ list, title }")
+        div(v-if="title" class="panel-text__header") {{ title }}
         div(class="panel-text__items")
-          div(v-if="title"
-            class="panel-text__header") {{ title }}
           category-text-item(v-for="item in list"
             class="panel-text__item"
             :key="item.id"
@@ -361,9 +360,10 @@ export default Vue.extend({
     // vertical-align: middle;
   }
   &__items {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    column-gap: 10px;
+    display: flex;
+    justify-content: space-around;
+    // grid-template-columns: repeat(3, 1fr);
+    // column-gap: 10px;
   }
   &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
     margin-top: 24px;
