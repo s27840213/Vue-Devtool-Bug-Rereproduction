@@ -591,6 +591,11 @@ class TextBg {
         bRadius: 40,
         opacity: 100,
         color: 'fontColorL+-40/BC/00'
+      },
+      svgbg: {
+        xOffset: 50,
+        yOffset: 50,
+        opacity: 100,
       }
     }
   }
@@ -608,6 +613,7 @@ class TextBg {
     const textBg = config.styles.textBg
     if (textBg.name === 'none') return null
 
+    const opacity = textBg.opacity * 0.01
     const myRect = new Rect(config)
     myRect.preprocess()
     const { vertical, width, height, transform, rects, rows } = myRect.get()
@@ -615,7 +621,7 @@ class TextBg {
     if (isITextGooey(textBg)) {
       const padding = textBg.distance
       const color = textEffectUtils.colorParser(textBg.color, config)
-      const fill = this.rgba(color, textBg.opacity * 0.01)
+      const fill = this.rgba(color, opacity)
 
       // Add padding.
       rects.forEach((rect: DOMRect) => {
@@ -642,7 +648,7 @@ class TextBg {
       }
     } else if (isITextUnderline(textBg)) {
       const color = textEffectUtils.colorParser(textBg.color, config)
-      const fill = this.rgba(color, textBg.opacity * 0.01)
+      const fill = this.rgba(color, opacity)
       const paths = [] as Record<string, unknown>[]
       rects.forEach(rect => {
         const capWidth = rect.height * 0.005 * textBg.height
@@ -685,7 +691,6 @@ class TextBg {
     } else if (isITextBox(textBg)) {
       const pColor = textEffectUtils.colorParser(textBg.pColor, config)
       const bColor = textEffectUtils.colorParser(textBg.bColor, config)
-      const opacity = textBg.opacity * 0.01
       let boxWidth = (width + textBg.bStroke)
       let boxHeight = (height + textBg.bStroke)
       let top = -textBg.bStroke
@@ -730,7 +735,8 @@ class TextBg {
         // .concat(path.toCircle() as any) // Show control point
       }
     } else if (isITextSvgbg(textBg)) {
-      const pos = [] as Record<string, number>[]
+      const pos = [] as (Record<'x' | 'y' | 'width' | 'height', number> & {color: string})[]
+      let i = 0
 
       rows.forEach((row) => {
         row.spanData.forEach((span) => {
@@ -738,23 +744,26 @@ class TextBg {
           if (text !== ' ') {
             pos.push({
               x: x - span.letterSpacing / 2,
-              y: y + height,
+              y: y + height / 2,
               width,
-              height
+              height,
+              color: ['red', 'green', 'blue'][i % 3],
             })
+            i += 1
           }
         })
       })
       return {
-        attrs: { width, height },
+        attrs: { width, height, style: `opacity: ${opacity}` },
         content: pos.map(p => ({
           tag: 'use',
           attrs: {
-            'xlink:href': '#arrow-up',
+            href: '#filled',
             transform,
             width: p.height,
-            x: p.x - (p.height - p.width) / 2,
-            y: p.y - height / 2
+            x: p.x - (p.height - p.width) / 2 + p.width * (textBg.xOffset - 50) / 100,
+            y: p.y - height / 2 + p.height * (textBg.yOffset - 50) / 100,
+            style: `color: ${p.color}`
           }
         }))
       }

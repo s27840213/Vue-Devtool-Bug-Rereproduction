@@ -46,6 +46,8 @@ export interface ITextGooey {
 
 export interface ITextSvgbg {
   name: 'svgbg'
+  xOffset: number
+  yOffset: number
   opacity: number
 }
 
@@ -62,7 +64,7 @@ export function isITextUnderline(object: ITextBgEffect): object is ITextUnderlin
 export function isITextGooey(object: ITextBgEffect): object is ITextGooey {
   return object && object.name && ['gooey'].includes(object.name)
 }
-export function isITextSvgbg(object: ITextBgEffect): object is ITextGooey {
+export function isITextSvgbg(object: ITextBgEffect): object is ITextSvgbg {
   return object && object.name && ['svgbg'].includes(object.name)
 }
 

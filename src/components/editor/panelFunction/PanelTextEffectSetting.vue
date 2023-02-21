@@ -64,21 +64,21 @@ div(class="text-effect-setting mt-25")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import textEffectUtils from '@/utils/textEffectUtils'
-import textShapeUtils from '@/utils/textShapeUtils'
-import textBgUtils from '@/utils/textBgUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
-import colorUtils from '@/utils/colorUtils'
-import { ColorEventType } from '@/store/types'
-import stepsUtils from '@/utils/stepsUtils'
-import textPropUtils from '@/utils/textPropUtils'
-import constantData, { IEffect, IEffectCategory, IEffectOption } from '@/utils/constantData'
 import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
-import localStorageUtils from '@/utils/localStorageUtils'
+import { ColorEventType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
+import constantData, { IEffect, IEffectCategory, IEffectOption } from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
+import localStorageUtils from '@/utils/localStorageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import textBgUtils from '@/utils/textBgUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import textPropUtils from '@/utils/textPropUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 import _ from 'lodash'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   components: {
@@ -136,8 +136,7 @@ export default defineComponent({
       localStorageUtils.set('textEffectSetting', 'tab', category)
     },
     getOptions(effects1d: IEffect[]) {
-      return _.find(effects1d, ['key',
-        this.currentStyle.name])?.options
+      return _.find(effects1d, ['key', this.currentStyle.name])?.options
     },
     setEffect(options:{
       effectName?: string,

@@ -1,9 +1,9 @@
-import store from '@/store'
 import i18n from '@/i18n'
-import { TranslateResult } from 'vue-i18n'
 import { Itheme } from '@/interfaces/theme'
-import themeUtils from './themeUtils'
+import store from '@/store'
 import _ from 'lodash'
+import { TranslateResult } from 'vue-i18n'
+import themeUtils from './themeUtils'
 
 interface BillingInfoInput {
   label: TranslateResult
@@ -459,7 +459,7 @@ class ConstantData {
       }, {
         key: 'svgbg',
         label: 'svgbg',
-        options: toOptions(['opacity'])
+        options: toOptions(['xOffset', 'yOffset', 'opacity'])
       }])
     }]
     return categories as IEffectCategory[]
