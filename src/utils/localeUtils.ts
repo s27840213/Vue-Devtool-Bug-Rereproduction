@@ -40,11 +40,11 @@ class LocaleUtils {
   }
 
   isDefaultLocale(): boolean {
-    return i18n.locale === this.defaultLocale
+    return i18n.global.locale === this.defaultLocale
   }
 
   currLocale(): string {
-    return i18n.locale
+    return i18n.global.locale
   }
 
   getLocaleRegex(): string {
@@ -60,10 +60,10 @@ class LocaleUtils {
   }
 
   getLocaleInfo(): ILocale {
-    return this.SUPPORTED_LOCALES.find(loc => loc.code === i18n.locale) as ILocale
+    return this.SUPPORTED_LOCALES.find(loc => loc.code === i18n.global.locale) as ILocale
   }
 
-  getBrowserLang(): string {
+  getBrowserLang(): 'tw' | 'us' | 'jp' {
     return navigator.language.includes('zh') ? 'tw' : navigator.language.includes('ja') ? 'jp' : 'us'
   }
 }

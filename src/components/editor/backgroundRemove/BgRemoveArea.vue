@@ -8,7 +8,7 @@ div(class="bg-remove-area"
   div(class="bg-remove-area__scale-area"
       :style="areaStyles"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
-    canvas(class="bg-remove-area" ref="canvas")
+    canvas(class="bg-remove-area" ref="canvas" :cy-ready="cyReady")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
     svg-icon(class="spiner"
@@ -22,15 +22,20 @@ import { IBgRemoveInfo } from '@/interfaces/image'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    editorViewCanvas: HTMLElement
+    editorViewCanvas: {
+      type: HTMLElement,
+      required: true
+    }
   },
   data() {
     return {
+      cyReady: false,
       canvasWidth: 1600,
       canvasHeight: 1600,
       canvas: undefined as unknown as HTMLCanvasElement,
@@ -77,6 +82,7 @@ export default Vue.extend({
       this.initCanvas()
       this.initBlurCanvas()
       this.initClearModeCanvas()
+      this.cyReady = true
     }
 
     this.initImageElement = new Image()
@@ -93,7 +99,7 @@ export default Vue.extend({
     this.setPrevPageScaleRatio(this.scaleRatio)
     pageUtils.fitPage()
   },
-  destroyed() {
+  unmounted() {
     window.removeEventListener('mouseup', this.drawEnd)
     window.removeEventListener('mousemove', this.brushMoving)
     this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
@@ -340,6 +346,7 @@ export default Vue.extend({
       }
     },
     drawInClearMode(e: MouseEvent) {
+      this.cyReady = false
       this.setCompositeOperationMode('source-over', this.ctx)
       this.ctx.filter = 'none'
       this.clearCtx(this.ctx)
@@ -350,6 +357,7 @@ export default Vue.extend({
       this.setCompositeOperationMode('destination-out')
       this.ctx.filter = `blur(${this.blurPx}px)`
       this.ctx.drawImage(this.clearModeCanvas, 0, 0, this.size.width, this.size.height)
+      this.cyReady = true
     },
     drawInRestoreMode(e: MouseEvent) {
       this.clearCtx(this.blurCtx)
@@ -372,10 +380,13 @@ export default Vue.extend({
       this.setCompositeOperationMode('destination-in', this.initImgCtx)
     },
     setCompositeOperationMode(mode: string, ctx?: CanvasRenderingContext2D) {
+      /**
+       * @Note GlobalCompositeOperation type has some problems
+       */
       if (ctx) {
-        ctx.globalCompositeOperation = mode
+        ctx.globalCompositeOperation = mode as any
       } else {
-        this.ctx.globalCompositeOperation = mode
+        this.ctx.globalCompositeOperation = mode as any
       }
     },
     getCanvasBlob(mycanvas: HTMLCanvasElement) {

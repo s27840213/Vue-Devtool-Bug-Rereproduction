@@ -1,16 +1,15 @@
-import Vue from 'vue'
-import store from '@/store'
-import { IStyle, IText } from '@/interfaces/layer'
 import { isITextBox, isITextGooey, isITextSvgbg, isITextUnderline, ITextBgEffect, ITextGooey } from '@/interfaces/format'
+import { IStyle, IText } from '@/interfaces/layer'
+import store from '@/store'
 import LayerUtils from '@/utils/layerUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 import _ from 'lodash'
 
 // For text effect gooey
-class Point {
+export class Point {
   x: number
   y: number
   constructor(x: number, y: number) {
@@ -18,29 +17,29 @@ class Point {
     this.y = y
   }
 
-  middle(p: Point) {
+  middle(p: Point): Point {
     return new Point(
       (this.x + p.x) / 2,
       (this.y + p.y) / 2
     )
   }
 
-  add(p: {x: number, y: number}) {
+  add(p: { x: number, y: number }): Point {
     return new Point(
       this.x + p.x,
       this.y + p.y
     )
   }
 
-  dist(p: Point) {
+  dist(p: Point): number {
     return Math.pow(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2), 0.5)
   }
 
-  toString() {
+  toString(): string {
     return `${this.x} ${this.y}`
   }
 }
-function obj2Point(p: {x: number, y: number}) {
+function obj2Point(p: { x: number, y: number }) {
   return new Point(p.x, p.y)
 }
 
@@ -185,7 +184,7 @@ class Rect {
           curr.width += next.width
           curr.height = Math.max(curr.height, next.height)
           row.spanData = row.spanData.concat(rows[nextIndex].spanData)
-          Vue.delete(rows, nextIndex)
+          rows.splice(nextIndex, 1)
         } else break
       }
     })
@@ -249,7 +248,7 @@ class Rect {
 }
 
 // For text effect gooey
-class Path {
+export class Path {
   pathArray = [] as string[]
   pointArray = [] as Point[]
   currPos: Point
@@ -259,49 +258,49 @@ class Path {
     this.pathArray.push(`M${p}`)
   }
 
-  L(end: Point) {
+  L(end: Point): void {
     if (this.currPos.dist(end) < 0.1) return
     this.currPos = end
     this.pointArray.push(this.currPos)
     this.pathArray.push(`L${end}`)
   }
 
-  C(c1: Point, c2: Point, end: Point) {
+  C(c1: Point, c2: Point, end: Point): void {
     if (this.currPos.dist(end) < 0.1) return
     this.currPos = end
     this.pointArray.push(this.currPos)
     this.pathArray.push(`C${c1} ${c2} ${end}`)
   }
 
-  v(dist: number) {
+  v(dist: number): void {
     this.currPos = this.currPos.add(new Point(0, dist))
     this.pointArray.push(this.currPos)
     this.pathArray.push(`v${dist}`)
   }
 
-  h(dist: number) {
+  h(dist: number): void {
     this.currPos = this.currPos.add(new Point(dist, 0))
     this.pointArray.push(this.currPos)
     this.pathArray.push(`h${dist}`)
   }
 
-  l(x: number, y: number) {
+  l(x: number, y: number): void {
     this.currPos = this.currPos.add(new Point(x, y))
     this.pointArray.push(this.currPos)
     this.pathArray.push(`l${x} ${y}`)
   }
 
-  a(rx: number, ry: number, sweepFlag: number, x: number, y: number) {
+  a(rx: number, ry: number, sweepFlag: number, x: number, y: number): void {
     this.currPos = this.currPos.add(new Point(x, y))
     this.pointArray.push(this.currPos)
     this.pathArray.push(`a${rx} ${ry} 0 0${sweepFlag}${x} ${y}`)
   }
 
-  result() {
+  result(): string {
     return this.pathArray.join('') + 'z'
   }
 
-  toCircle() {
+  toCircle(): { tag: string, attrs: { cx: number, cy: number, r: string, fill: string } }[] {
     return this.pointArray.map(p => {
       return {
         tag: 'circle',
@@ -317,7 +316,7 @@ class Path {
 }
 
 class Gooey {
-  controlPoints = [[], []] as {top: Point, bottom: Point, oldHeight: number}[][]
+  controlPoints = [[], []] as { top: Point, bottom: Point, oldHeight: number }[][]
   bRadius: number
   constructor(textBg: ITextGooey, rects: DOMRect[]) {
     this.bRadius = textBg.bRadius
@@ -382,7 +381,8 @@ class Gooey {
       for (let i = 1; i < side.length - 1;) {
         const cps = side[i]
         if (side.length > 3 && cps.bottom.y - cps.top.y < cps.oldHeight * 0.1) {
-          Vue.delete(side, i)
+          // Vue.delete(side, i)
+          delete side[i]
           count++
         } else i++
       }
@@ -770,6 +770,10 @@ class TextBg {
     this.setTextBg(effectName, { [this.currColorKey]: color })
   }
 
+  get currColor(): string {
+    return (textEffectUtils.getCurrentLayer().styles.textBg as Record<string, string>)[this.currColorKey]
+  }
+
   getEffectMainColor(effect: ITextBgEffect) {
     if (isITextBox(effect) &&
       ['square-hollow', 'rounded-hollow'].includes(effect.name)) {
@@ -779,7 +783,7 @@ class TextBg {
     } else if (isITextGooey(effect) || isITextUnderline(effect)) {
       return ['color', effect.color]
     } else {
-      return ['color', (effect as unknown as {color:string}).color || '']
+      return ['color', (effect as unknown as { color: string }).color || '']
     }
   }
 
@@ -791,7 +795,7 @@ class TextBg {
     const newShareAttrs = { opacity: textBg.opacity }
     const newEffect = { opacity: shareAttrs.opacity }
     if (isITextBox(textBg) &&
-        ['square-hollow', 'rounded-hollow', 'square-both', 'rounded-both'].includes(textBg.name)) {
+      ['square-hollow', 'rounded-hollow', 'square-both', 'rounded-both'].includes(textBg.name)) {
       Object.assign(newShareAttrs, { bStroke: textBg.bStroke })
       Object.assign(newEffect, { bStroke: shareAttrs.bStroke })
     }

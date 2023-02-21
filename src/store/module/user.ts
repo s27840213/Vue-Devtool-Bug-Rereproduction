@@ -1,22 +1,27 @@
 /* eslint-disable camelcase */
-import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
-import * as Sentry from '@sentry/browser'
 import userApis from '@/apis/user'
-import uploadUtils from '@/utils/uploadUtils'
-import { IAssetPhoto, IGroupDesignInputParams, IUserAssetsData, IUserFontContentData, IUserImageContentData } from '@/interfaces/api'
-import modalUtils from '@/utils/modalUtils'
-import Vue from 'vue'
-import themeUtils from '@/utils/themeUtils'
 import i18n from '@/i18n'
+import { IGroupDesignInputParams, IUserAssetsData, IUserFontContentData } from '@/interfaces/api'
 // import apiUtils from '@/utils/apiUtils'
-import generalUtils from '@/utils/generalUtils'
 import logUtils from '@/utils/logUtils'
+import modalUtils from '@/utils/modalUtils'
+import themeUtils from '@/utils/themeUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { notify } from '@kyvg/vue3-notification'
+import * as Sentry from '@sentry/browser'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 const SET_TOKEN = 'SET_TOKEN' as const
 const SET_STATE = 'SET_STATE' as const
 const SET_ADMIN_MODE = 'SET_ADMIN_MODE' as const
+const SET_BroswerInfo = 'SET_BroswerInfo' as const
 
+export interface BrowserInfo {
+  name: string,
+  version: string
+}
 export interface IUserModule {
+  browserInfo: BrowserInfo,
   token: string,
   uname: string,
   shortName: string,
@@ -24,8 +29,9 @@ export interface IUserModule {
   teamId: string,
   role: number,
   roleRaw: number,
-  adminMode: boolean,
+  adminMode: boolean, // Control in DesktopEditor
   isAuthenticated: boolean,
+  enableAdminView: boolean, // Control in PopupFile
   account: string,
   email: string
   upassUpdate: string,
@@ -35,6 +41,7 @@ export interface IUserModule {
   verUni: string,
   verApi: string,
   imgSizeMap: Array<{ [key: string]: string | number }>,
+  imgSizeMapExtra: Array<{ [key: string]: string | number }>,
   avatar: {
     prev: string,
     prev_2x: string,
@@ -43,10 +50,31 @@ export interface IUserModule {
   viewGuide: number,
   isUpdateDesignOpen: boolean,
   updateDesignId: string,
-  updateDesignType: string
+  updateDesignType: string,
+  renderForPDF: boolean,
+  dimensionMap: {
+    [key: string]: {
+      [key: number]: {
+        [key: string]: number
+      }
+    }
+  },
+  dpi?: number,
+  backendRenderParams: {
+    isBleed: boolean,
+    isTrim: boolean,
+    margin: {
+      bottom: number,
+      right: number
+    }
+  }
 }
 
 const getDefaultState = (): IUserModule => ({
+  browserInfo: {
+    name: '',
+    version: ''
+  },
   token: '',
   uname: '',
   shortName: '',
@@ -55,6 +83,7 @@ const getDefaultState = (): IUserModule => ({
   role: -1,
   roleRaw: -1,
   adminMode: true,
+  enableAdminView: true,
   isAuthenticated: false,
   account: '',
   email: '',
@@ -82,6 +111,7 @@ const getDefaultState = (): IUserModule => ({
   verUni: '',
   verApi: '',
   imgSizeMap: [],
+  imgSizeMapExtra: [],
   avatar: {
     prev: '',
     prev_2x: '',
@@ -90,14 +120,25 @@ const getDefaultState = (): IUserModule => ({
   viewGuide: +localStorage.guest_view_guide || 0,
   isUpdateDesignOpen: false,
   updateDesignId: '',
-  updateDesignType: ''
+  updateDesignType: '',
+  dimensionMap: {},
+  dpi: -1,
+  renderForPDF: false,
+  backendRenderParams: {
+    isBleed: false,
+    isTrim: false,
+    margin: {
+      bottom: 0,
+      right: 0
+    }
+  }
 })
 
 const state = getDefaultState()
 
 const getters: GetterTree<IUserModule, any> = {
   isLogin: state => {
-    return state.isAuthenticated
+    return state.token.length > 0
   },
   getUserId: state => {
     return state.userId
@@ -162,7 +203,7 @@ const getters: GetterTree<IUserModule, any> = {
   getAvatar(state) {
     return state.avatar
   },
-  hasAvatar(): boolean {
+  hasAvatar(state): boolean {
     return state.avatar.prev_2x !== undefined
   },
   getViewGuide(state): number {
@@ -171,20 +212,37 @@ const getters: GetterTree<IUserModule, any> = {
   getImgSizeMap(state): Array<{ [key: string]: string | number }> {
     return state.imgSizeMap
   },
-  getIsUpdateDesignOpen() {
+  getIsUpdateDesignOpen(state) {
     return state.isUpdateDesignOpen
   },
-  getUpdateDesignId() {
+  getUpdateDesignId(state) {
     return state.updateDesignId
   },
-  getUpdateDesignType() {
+  getUpdateDesignType(state) {
     return state.updateDesignType
+  },
+  getDimensionMap(state) {
+    return state.dimensionMap
+  },
+  getBackendRenderParams(state) {
+    return state.backendRenderParams
+  },
+  getRenderForPDF(state) {
+    return state.renderForPDF
+  },
+  showAdminTool(state) { // Partial admin tool
+    return state.role === 0 && state.adminMode && state.enableAdminView
+  },
+  showAllAdminTool(state) {
+    return state.role === 0 && state.enableAdminView
+  },
+  getBrowserInfo(state) {
+    return state.browserInfo
   }
 }
 
 const mutations: MutationTree<IUserModule> = {
   [SET_TOKEN](state: IUserModule, token: string) {
-    state.isAuthenticated = token.length > 0
     state.token = token
     localStorage.setItem('token', token)
   },
@@ -194,12 +252,18 @@ const mutations: MutationTree<IUserModule> = {
     keys
       .forEach(key => {
         if (key in state) {
-          (state[key] as any) = newState[key]
+          (state[key] as unknown) = newState[key]
         }
       })
   },
   [SET_ADMIN_MODE](state: IUserModule, mode: boolean) {
     state.adminMode = mode
+  },
+  [SET_BroswerInfo](state: IUserModule, browserInfo: Partial<BrowserInfo>) {
+    state.browserInfo = {
+      ...state.browserInfo,
+      ...browserInfo
+    }
   }
 }
 
@@ -227,7 +291,6 @@ const actions: ActionTree<IUserModule, unknown> = {
     try {
       const { data } = await userApis.groupDesign(params)
       const { flag, group_id: groupId, msg } = data
-      console.log(data)
       const isDelete = params.list?.length === 0 && params.update === 1
       if (flag === 0) {
         commit('SET_groupId', groupId, { root: true })
@@ -240,7 +303,6 @@ const actions: ActionTree<IUserModule, unknown> = {
           commit('SET_groupType', 0, { root: true })
         }
         themeUtils.fetchTemplateContent()
-        console.log(`Success: ${groupId}}`)
       } else if (flag === 1) {
         modalUtils.setModalInfo('上傳失敗', [`Error msg: ${msg}`])
         commit('SET_groupId', '', { root: true })
@@ -253,7 +315,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       console.log(error)
     }
   },
-  async putAssetDesign({ dispatch }, { assetId, type }) {
+  async putAssetDesign({ dispatch }, { assetId, type, wait }) {
     try {
       if (type === 0) {
         logUtils.setLog('Update DB')
@@ -262,20 +324,20 @@ const actions: ActionTree<IUserModule, unknown> = {
       } else if (type === 2) {
         logUtils.setLog('Update DB and preview')
       }
-      const { data } = await userApis.putAssetDesign(state.token, state.teamId || state.userId, assetId, type)
+      const { data } = await userApis.putAssetDesign(state.token, state.teamId || state.userId, assetId, type, wait)
       const { flag, msg } = data
       if (flag === 0) {
         logUtils.setLog(`Put asset success: ${msg}`)
         dispatch('getAllAssets', { token: state.token })
-        Vue.notify({ group: 'copy', text: `${i18n.t('NN0357')}` })
       }
       if (flag === 1) {
         logUtils.setLog(`Put asset failed: ${msg}`)
-        Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+        notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
       } else if (flag === 2) {
         logUtils.setLog(`Token invalid!: ${msg}`)
-        Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
+        notify({ group: 'error', text: `${i18n.global.t('NN0360')}` })
       }
+      return data
     } catch (error) {
       logUtils.setLog(error as string)
     }
@@ -283,7 +345,6 @@ const actions: ActionTree<IUserModule, unknown> = {
   async login({ commit, dispatch }, { token, account, password }) {
     try {
       const { data } = await userApis.login(token, account, password)
-      state.isAuthenticated = token.length > 0
       await dispatch('loginSetup', { data: data })
       return Promise.resolve(data)
     } catch (error) {
@@ -334,10 +395,9 @@ const actions: ActionTree<IUserModule, unknown> = {
       })
 
       // locale settings
-      process.env.NODE_ENV === 'development' && console.log(data.data)
       const locale = localStorage.getItem('locale') as string
       if (locale !== data.data.locale) {
-        i18n.locale = data.data.locale
+        i18n.global.locale = data.data.locale
         localStorage.setItem('locale', data.data.locale)
       }
       uploadUtils.setLoginOutput(data.data)
@@ -395,4 +455,4 @@ export default {
   getters,
   mutations,
   actions
-} as ModuleTree<IUserModule>
+}

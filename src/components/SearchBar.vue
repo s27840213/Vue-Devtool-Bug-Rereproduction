@@ -1,37 +1,35 @@
 <template lang="pug">
-  form(class="search-bar bg-gray-6"
-    @submit="onSearch")
-    input(class="search-bar__input body-2"
-      type="text"
-      v-model="keyword"
-      @input="onUpdate"
-      :placeholder="placeholder"
-      :style="inputStyles()")
-    svg-icon(v-if="clear && keyword"
-      class="pointer mr-5"
-      iconName="close"
-      :iconColor="color.close || 'gray-3'"
-      iconWidth="20px"
-      @click.native="onClear")
-    svg-icon(class="pointer"
-      iconName="search"
-      :iconColor="color.search || 'gray-3'"
-      iconWidth="20px"
-      @click.native="onSearch")
-    slot
+//- Show search button on mobile, https://www.paddingleft.com/2019/09/18/Show-Search-on-mobile-devices-keyboard
+form(class="search-bar bg-gray-6" action="" @submit="onSearch")
+  svg-icon(class="pointer"
+    iconName="search"
+    :iconColor="color.search || 'gray-3'"
+    iconWidth="20px")
+  input(class="search-bar__input body-2" ref="searchbar"
+    type="search"
+    v-model="keyword"
+    @input="onUpdate"
+    :placeholder="placeholder"
+    :style="inputStyles()")
+  svg-icon(v-if="clear && keyword"
+    class="pointer"
+    iconName="close"
+    :iconColor="color.close || 'gray-3'"
+    iconWidth="20px"
+    @click="onClear")
+  slot
 </template>
 
 <script lang="ts">
-import i18n from '@/i18n'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
   },
   props: {
     placeholder: {
       type: String,
-      default: `${i18n.t('NN0092')}`
+      required: true
     },
     clear: {
       type: Boolean
@@ -54,6 +52,7 @@ export default Vue.extend({
       }
     }
   },
+  emits: ['search', 'update'],
   data() {
     return {
       keyword: this.defaultKeyword
@@ -69,7 +68,8 @@ export default Vue.extend({
       return { fontFamily: this.fontFamily }
     },
     onSearch(event: Event) {
-      event.preventDefault()
+      event.preventDefault();
+      (this.$refs.searchbar as HTMLElement).blur()
       this.$emit('search', this.keyword)
     },
     onClear() {
@@ -85,17 +85,22 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .search-bar {
-  @include size(100%, 40px);
-  display: flex;
-  justify-content: space-between;
+  @include size(100%, 42px);
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: auto 1fr;
   align-items: center;
+  gap: 4px;
   padding: 5px 16px;
   box-sizing: border-box;
   border-radius: 3px;
   &__input {
     flex: 1;
-    margin-right: 10px;
+    padding: 0;
     background-color: transparent;
+    // Remove webkit default magnifier & cancle icon for search input, https://stackoverflow.com/a/23296152
+    -webkit-appearance: textfield;
+    &::-webkit-search-cancel-button { display: none; }
   }
 }
 </style>

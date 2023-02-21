@@ -1,32 +1,53 @@
+import designApis from '@/apis/design'
+import i18n from '@/i18n'
 import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
 import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
-import designApis from '@/apis/design'
 import router from '@/router'
 import store from '@/store'
+import { EventEmitter } from 'events'
+import _ from 'lodash'
+import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
+import editorUtils from './editorUtils'
 import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
-import themeUtils from './themeUtils'
-import uploadUtils from './uploadUtils'
 import resizeUtils from './resizeUtils'
-import Vue from 'vue'
-import i18n from '@/i18n'
 import stepsUtils from './stepsUtils'
-import _ from 'lodash'
-import { EventEmitter } from 'events'
+import unitUtils from './unitUtils'
+import uploadUtils from './uploadUtils'
 
 interface Item {
   name: string,
   lastUpdatedTime: string
 }
 
+export function DESIGN_MENU_EVENTS(): typeof eventNames {
+  const eventNames = [
+    'deleteItem', 'deleteForever',
+    'recoverItem', 'moveDesignToFolder', 'downloadDesign',
+    'favorDesign', 'unfavorDesign', 'rootDesign'
+  ] as const
+  return eventNames
+}
+
+export type IDesignMenuEvents = ReturnType<typeof DESIGN_MENU_EVENTS>[number]
+
+export function FOLDER_MENU_EVENTS(): typeof eventNames {
+  const eventNames = [
+    'deleteFolderForever', 'recoverItem'
+  ] as const
+  return eventNames
+}
+
+export type IFolderMenuEvents = ReturnType<typeof FOLDER_MENU_EVENTS>[number]
+
 class DesignUtils {
   ROOT = '$ROOT$'
-  ROOT_DISPLAY = i18n.t('NN0187')
   event = new EventEmitter()
-  eventHash: {[key: string]: () => void} = {}
+  eventHash: { [key: string]: () => void } = {}
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get teamId(): string { return store.getters['user/getTeamId'] }
+  get ROOT_DISPLAY(): string { return i18n.global.t('NN0187') }
 
   on(type: string, callback: () => void) {
     if (this.eventHash[type]) {
@@ -55,6 +76,7 @@ class DesignUtils {
       name: design.name,
       width: design.width,
       height: design.height,
+      unit: design.unit,
       createdTime: design.create_time,
       lastUpdatedTime: design.update_time,
       favorite: design.favorite > 0,
@@ -62,7 +84,8 @@ class DesignUtils {
       thumbnail: '',
       signedUrl: design.signed_url,
       pageNum: design.page_num,
-      polling: design.polling
+      polling: design.polling,
+      group_type: design.group_type
     }
   }
 
@@ -196,16 +219,16 @@ class DesignUtils {
     return [
       {
         icon: 'copy',
-        text: `${i18n.t('NN0251')}`
+        text: `${i18n.global.t('NN0251')}`
       },
       {
         icon: 'folder',
-        text: `${i18n.t('NN0206')}`,
+        text: `${i18n.global.t('NN0206')}`,
         extendable: true
       },
       {
         icon: 'trash',
-        text: `${i18n.t('NN0034')}`
+        text: `${i18n.global.t('NN0034')}`
       }
     ]
     // ,
@@ -223,16 +246,16 @@ class DesignUtils {
     return [
       {
         icon: 'trash',
-        text: `${i18n.t('NN0034')}`
+        text: `${i18n.global.t('NN0034')}`
       }
     ]
     // {
     //   icon: 'share-alt',
-    //   text: `${i18n.t('NN0214')}`
+    //   text: `${useI18n().t('NN0214')}`
     // },
     // {
     //   icon: 'download',
-    //   text: `${i18n.t('NN0010')}`
+    //   text: `${useI18n().t('NN0010')}`
     // },
   }
 
@@ -240,11 +263,11 @@ class DesignUtils {
     return [
       {
         icon: 'reduction',
-        text: `${i18n.t('NN0204')}`
+        text: `${i18n.global.t('NN0204')}`
       },
       {
         icon: 'trash',
-        text: `${i18n.t('NN0200')}`
+        text: `${i18n.global.t('NN0200')}`
       }
     ]
   }
@@ -253,29 +276,29 @@ class DesignUtils {
     const res = [
       {
         icon: 'copy',
-        text: `${i18n.t('NN0251')}`
+        text: `${i18n.global.t('NN0251')}`
       },
       {
         icon: 'folder',
-        text: `${i18n.t('NN0206')}`
+        text: `${i18n.global.t('NN0206')}`
       },
       {
         icon: isInFavorites ? 'favorites-fill' : 'favorites',
-        text: isInFavorites ? `${i18n.t('NN0207')}` : `${i18n.t('NN0205')}`
+        text: isInFavorites ? `${i18n.global.t('NN0207')}` : `${i18n.global.t('NN0205')}`
       },
       {
         icon: 'confirm-circle',
-        text: `${i18n.t('NN0680')}`
+        text: `${i18n.global.t('NN0680')}`
       },
       {
         icon: 'trash',
-        text: `${i18n.t('NN0034')}`
+        text: `${i18n.global.t('NN0034')}`
       }
     ]
     if (isInFolderView) {
       res.splice(2, 0, {
         icon: 'folder_minus',
-        text: `${i18n.t('NN0692')}`
+        text: `${i18n.global.t('NN0692')}`
       })
     }
     return res
@@ -285,15 +308,15 @@ class DesignUtils {
     return [
       {
         icon: 'favorites-fill',
-        text: `${i18n.t('NN0207')}`
+        text: `${i18n.global.t('NN0207')}`
       },
       {
         icon: 'confirm-circle',
-        text: `${i18n.t('NN0680')}`
+        text: `${i18n.global.t('NN0680')}`
       },
       {
         icon: 'trash',
-        text: `${i18n.t('NN0034')}`
+        text: `${i18n.global.t('NN0034')}`
       }
     ]
   }
@@ -302,15 +325,15 @@ class DesignUtils {
     return [
       {
         icon: 'undo',
-        text: `${i18n.t('NN0204')}`
+        text: `${i18n.global.t('NN0204')}`
       },
       {
         icon: 'confirm-circle',
-        text: `${i18n.t('NN0680')}`
+        text: `${i18n.global.t('NN0680')}`
       },
       {
         icon: 'trash',
-        text: `${i18n.t('NN0200')}`
+        text: `${i18n.global.t('NN0200')}`
       }
     ]
   }
@@ -319,17 +342,17 @@ class DesignUtils {
     const res = [
       {
         icon: 'folder',
-        text: `${i18n.t('NN0206')}`
+        text: `${i18n.global.t('NN0206')}`
       },
       {
         icon: 'trash',
-        text: `${i18n.t('NN0034')}`
+        text: `${i18n.global.t('NN0034')}`
       }
     ]
     if (isInFolderView) {
       res.splice(1, 0, {
         icon: 'folder_minus',
-        text: `${i18n.t('NN0692')}`
+        text: `${i18n.global.t('NN0692')}`
       })
     }
     return res
@@ -339,15 +362,15 @@ class DesignUtils {
     return [
       {
         icon: 'undo',
-        text: `${i18n.t('NN0204')}`
+        text: `${i18n.global.t('NN0204')}`
       },
       {
         icon: 'confirm-circle',
-        text: `${i18n.t('NN0690')}`
+        text: `${i18n.global.t('NN0690')}`
       },
       {
         icon: 'trash',
-        text: `${i18n.t('NN0200')}`
+        text: `${i18n.global.t('NN0200')}`
       }
     ]
   }
@@ -608,7 +631,7 @@ class DesignUtils {
   }
 
   addNewFolder(path: string[], fromFolderView = false, name: string | undefined = undefined, insertToCopied = false): string {
-    const folder = this.newFolder(name ?? `${i18n.t('NN0249')}`, 'SYSTEM')
+    const folder = this.newFolder(name ?? `${i18n.global.t('NN0249')}`, 'SYSTEM')
     store.commit('design/UPDATE_insertFolder', {
       parents: path,
       folder
@@ -769,60 +792,59 @@ class DesignUtils {
     return Array(pageNum).fill('').map((_, index) => this.getDesignPreview(assetId, scale, ver, signedUrl, index))
   }
 
-  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, id: number | string | undefined = undefined) {
+  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, unit = 'px', id: number | string | undefined = undefined, path?: string, folderName?: string) {
     // Redirect user to editor and create new design, will be use by login redirect.
     const query = {
       type: 'new-design-size',
       width: width.toString(),
       height: id?.toString() === '7' ? width.toString() : height.toString(),
-      themeId: id ? id.toString() : undefined
+      unit,
+      themeId: id ? id.toString() : undefined,
+      path,
+      folderName
     }
-    const route = router.resolve({
-      name: 'Editor',
-      query
-    })
-    router.push(route.href)
+    router.push({ name: 'Editor', query })
   }
 
   // Below function is used to update the page
-  async newDesign(width?: number, height?: number, newDesignType?: number) {
+  async newDesign(width = 1080, height = 1080, unit = 'px') {
     store.commit('file/SET_setLayersDone')
+    const pxSize = unitUtils.convertSize(width, height, unit, 'px')
+    const bleeds = pageUtils.getPageDefaultBleeds({ physicalWidth: width, physicalHeight: height, unit }, 'px')
+
     pageUtils.setPages([pageUtils.newPage({
-      width: width ?? 1080,
-      height: height ?? 1080
+      width: pxSize.width,
+      height: pxSize.height,
+      physicalWidth: width,
+      physicalHeight: height,
+      bleeds,
+      physicalBleeds: unit === 'px' ? bleeds : pageUtils.getPageDefaultBleeds({ physicalWidth: width, physicalHeight: height, unit }),
+      unit
     })])
     pageUtils.clearPagesInfo()
-    await themeUtils.refreshTemplateState(undefined, newDesignType)
-    if (this.isLogin) {
-      router.replace({ query: Object.assign({}) })
-      // uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
-      // /**
-      //  * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
-      //  */
-      // router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: uploadUtils.assetId }) })
-    }
+    editorUtils.handleContentScaleRatio(0)
+    // Set default url query 'unit' in Editor.vue
   }
 
-  newDesignWithTemplae(width: number, height: number, json: any, templateId:string, groupId: string) {
+  newDesignWithTemplae(width: number, height: number, json: any, templateId: string, groupId: string) {
     console.log(json)
     assetUtils.addTemplateToRecentlyUsedPure(templateId).then(() => {
       assetUtils.addTemplate(json, {}, false).then(() => {
         stepsUtils.reset()
         pageUtils.clearPagesInfo()
-        Vue.nextTick(() => {
+        nextTick(() => {
           resizeUtils.resizePage(0, json, { width, height })
           store.commit('UPDATE_pageProps', {
             pageIndex: 0,
             props: { width, height }
           })
-          themeUtils.refreshTemplateState()
           if (this.isLogin) {
             /**
              * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
              */
             store.commit('SET_assetId', generalUtils.generateAssetId())
             // eslint-disable-next-line camelcase
-            const query = _.omit(router.currentRoute.query,
+            const query = _.omit(router.currentRoute.value.query,
               ['width', 'height'])
             query.type = 'design'
             query.design_id = uploadUtils.assetId
@@ -839,8 +861,7 @@ class DesignUtils {
 
   setDesign(design: IDesign) {
     const design_id = design.id ? design.id : this.getPrivateDesignId(design.signedUrl?.['config.json'])
-    const url = router.resolve({ name: 'Editor', query: { type: 'design', design_id, team_id: this.teamId } }).href
-    window.location.href = url
+    router.push({ name: 'Editor', query: { type: 'design', design_id, team_id: this.teamId } })
   }
 
   getPrivateDesignId(jsonUrl?: string): string {
@@ -852,6 +873,9 @@ class DesignUtils {
   }
 
   async renameDesign(name: string) {
+    if (!store.getters.getAssetId) {
+      await uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+    }
     let assetIndex = store.getters.getAssetIndex
     if (assetIndex === -1) {
       const teamId = designApis.getTeamId()
@@ -860,8 +884,9 @@ class DesignUtils {
       assetIndex = designData.asset_index
       store.commit('SET_assetIndex', assetIndex)
     }
-    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getTeamId(),
+    await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getTeamId(),
       'rename', assetIndex.toString(), null, name)
+    store.commit('SET_pagesName', name)
   }
 }
 

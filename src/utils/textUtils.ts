@@ -1,22 +1,26 @@
-import ControlUtils from '@/utils/controlUtils'
-import store from '@/store'
-import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp, IGroup, IImage, IShape } from '@/interfaces/layer'
-import { IFont, ISelection } from '@/interfaces/text'
-import GeneralUtils from './generalUtils'
-import LayerUtils from './layerUtils'
+import {
+  IGroup, ILayer, IParagraph, IParagraphStyle, ISpan,
+  ISpanStyle, IText, ITmp
+} from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import { IFont, ISelection } from '@/interfaces/text'
+import router from '@/router'
+import store from '@/store'
+import { checkAndConvertToHex } from '@/utils/colorUtils'
+import ControlUtils from '@/utils/controlUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
-import tiptapUtils from './tiptapUtils'
-import pageUtils from './pageUtils'
-import textShapeUtils from './textShapeUtils'
-import mathUtils from './mathUtils'
-import router from '@/router'
 import _ from 'lodash'
 import cssConverter from './cssConverter'
+import GeneralUtils from './generalUtils'
+import LayerUtils from './layerUtils'
+import logUtils from './logUtils'
+import mathUtils from './mathUtils'
+import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
 import textBgUtils from './textBgUtils'
-import { checkAndConvertToHex } from '@/utils/colorUtils'
+import textShapeUtils from './textShapeUtils'
+import tiptapUtils from './tiptapUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -24,6 +28,9 @@ class TextUtils {
   get getCurrSel(): { start: ISelection, end: ISelection } { return (store.state as any).text.sel }
   get isFontLoading(): boolean { return (store.state as any).text.isFontLoading }
 
+  observer: IntersectionObserver
+  observerCallbackMap: { [key: string]: (size: { width: number, height: number }) => void }
+  trashDivs: HTMLDivElement[] = []
   toRecordId: string
   toSetFlagId: string
   fieldRange: {
@@ -34,6 +41,8 @@ class TextUtils {
   }
 
   constructor() {
+    this.observerCallbackMap = {}
+    this.observer = new IntersectionObserver(this.intersectionHandler.bind(this))
     this.toRecordId = ''
     this.toSetFlagId = ''
     this.fieldRange = {
@@ -41,6 +50,29 @@ class TextUtils {
       lineHeight: { min: 0.5, max: 2.5 },
       fontSpacing: { min: -200, max: 800 },
       opacity: { min: 0, max: 100 }
+    }
+
+    setInterval(() => {
+      // ---------- snapshot current list in case that new divs are pushed into the list while deleting --------
+      const currentDivCount = this.trashDivs.length
+      const divsToDelete = this.trashDivs.slice(0, currentDivCount)
+      this.trashDivs = this.trashDivs.slice(currentDivCount)
+      // -------------------------------------------------------------------------------------------------------
+      while (divsToDelete.length) {
+        const div = divsToDelete.pop()
+        if (!div) break
+        document.body.removeChild(div)
+      }
+    }, 5000)
+  }
+
+  intersectionHandler(entries: IntersectionObserverEntry[]) {
+    for (const entry of entries) {
+      const id = entry.target.id
+      if (this.observerCallbackMap[id]) {
+        this.observerCallbackMap[id](entry.boundingClientRect)
+        this.trashDivs.push(entry.target as HTMLDivElement)
+      }
     }
   }
 
@@ -573,6 +605,31 @@ class TextUtils {
   }
 
   getTextHW(_content: IText, widthLimit = -1): { width: number, height: number } {
+    const body = this.genTextDiv(_content, widthLimit)
+    const scale = _content.styles.scale ?? 1
+    document.body.appendChild(body)
+    const textHW = this.getHWByRect(body, scale, widthLimit)
+    document.body.removeChild(body)
+    return textHW
+  }
+
+  async getTextHWAsync(_content: IText, widthLimit = -1): Promise<{ width: number, height: number }> {
+    const textId = GeneralUtils.generateRandomString(12)
+    const body = this.genTextDiv(_content, widthLimit)
+    body.setAttribute('id', textId)
+    const scale = _content.styles.scale ?? 1
+    return new Promise(resolve => {
+      this.observerCallbackMap[textId] = (size) => {
+        const textHW = this.getHWBySize(size, body, scale, widthLimit)
+        this.observer.unobserve(body)
+        resolve(textHW)
+      }
+      document.body.appendChild(body)
+      this.observer.observe(body)
+    })
+  }
+
+  genTextDiv(_content: IText, widthLimit = -1): HTMLDivElement {
     const body = document.createElement('div')
     const content = GeneralUtils.deepCopy(_content) as IText
     content.paragraphs.forEach(pData => {
@@ -630,16 +687,22 @@ class TextUtils {
     }
     body.classList.add('nu-text')
     body.style.writingMode = content.styles.writingMode
-    document.body.appendChild(body)
+    body.style.position = 'fixed'
+    body.style.top = '100%'
+    body.style.left = '100%'
+    body.style.opacity = '0'
+    return body
+  }
 
-    const scale = content.styles.scale ?? 1
-    const textHW = {
-      width: body.style.width !== 'max-content' ? widthLimit : body.getBoundingClientRect().width * scale,
-      height: body.style.height !== 'max-content' ? widthLimit : body.getBoundingClientRect().height * scale,
-      body: body
+  getHWByRect(body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number } {
+    return this.getHWBySize(body.getBoundingClientRect(), body, scale, widthLimit)
+  }
+
+  getHWBySize(size: { width: number, height: number }, body: HTMLDivElement, scale: number, widthLimit = -1): { width: number, height: number } {
+    return {
+      width: body.style.width !== 'max-content' ? widthLimit : size.width * scale,
+      height: body.style.height !== 'max-content' ? widthLimit : size.height * scale
     }
-    document.body.removeChild(body)
-    return textHW
   }
 
   updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, compensateX = false, noPush = false) {
@@ -808,7 +871,7 @@ class TextUtils {
     if (!group.layers) return
     group.layers
       .forEach(l => {
-        minX = Math.min(minX, mathUtils.getBounding(l).x)
+        minX = Math.min(minX, mathUtils.getBounding(l.styles).x)
       })
     for (const [idx, layer] of Object.entries(group.layers)) {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
@@ -826,7 +889,7 @@ class TextUtils {
     if (!group.layers) return
     group.layers
       .forEach(l => {
-        minY = Math.min(minY, mathUtils.getBounding(l).y)
+        minY = Math.min(minY, mathUtils.getBounding(l.styles).y)
       })
     for (const [idx, layer] of Object.entries(group.layers)) {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
@@ -1048,13 +1111,13 @@ class TextUtils {
     }
   }
 
-  autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number }): number {
+  async autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number }): Promise<number> {
     if (config.widthLimit === -1) return config.widthLimit
-    const { widthLimit, otherDimension } = this.autoResizeCore(config, initSize)
+    const { widthLimit, otherDimension } = await this.autoResizeCore(config, initSize)
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const limitDiff = Math.abs(widthLimit - initSize.widthLimit)
     const firstPText = config.paragraphs[0].spans.map(span => span.text).join('')
-    if (router.currentRoute.name === 'Preview') {
+    if (router.currentRoute.value.name === 'Preview') {
       const writingMode = config.styles.writingMode.includes('vertical') ? 'hw' : 'wh'
       console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText}`)
     }
@@ -1065,17 +1128,17 @@ class TextUtils {
     }
   }
 
-  autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number }): {
+  async autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number }): Promise<{
     widthLimit: number,
     otherDimension: number
-  } {
+  }> {
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const scale = config.styles.scale
     let direction = 0
     let shouldContinue = true
     let widthLimit = initSize.widthLimit
     let autoDimension = -1
-    let autoSize = this.getTextHW(config, widthLimit)
+    let autoSize = await this.getTextHWAsync(config, widthLimit)
     const originDimension = initSize[dimension]
     let prevDiff = Number.MAX_VALUE
     let minDiff = Number.MAX_VALUE
@@ -1109,7 +1172,7 @@ class TextUtils {
         if (direction >= 100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension }
         widthLimit += scale
         direction += 1
-        autoSize = this.getTextHW(config, widthLimit)
+        autoSize = await this.getTextHWAsync(config, widthLimit)
         continue
       }
       if (originDimension - autoDimension > 5 * scale) {
@@ -1117,7 +1180,7 @@ class TextUtils {
         if (direction <= -100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension }
         widthLimit -= scale
         direction -= 1
-        autoSize = this.getTextHW(config, widthLimit)
+        autoSize = await this.getTextHWAsync(config, widthLimit)
         continue
       }
       shouldContinue = false
@@ -1215,11 +1278,12 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      // console.log(error)
+      console.log(error)
+      logUtils.setLog(JSON.stringify(error))
       isError = true
     } finally {
       if (isError === true) {
-        // console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (toSetFlag && this.toSetFlagId === setFlagId) {
         this.setIsFontLoading(false)

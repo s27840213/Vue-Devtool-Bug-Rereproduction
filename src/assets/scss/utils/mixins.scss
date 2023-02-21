@@ -20,6 +20,7 @@
 }
 
 @mixin firefoxOnly {
+
   // Only for Firefox, https://stackoverflow.com/a/32455002
   @supports (-moz-appearance: none) {
     @content;
@@ -27,11 +28,10 @@
 }
 
 @mixin safariOnly {
+
   // Only for Safari, https://stackoverflow.com/a/25975282
-  @media not all and (min-resolution: 0.001dpcm) {
-    @supports (-webkit-appearance: none) {
-      @content;
-    }
+  @supports (font: -apple-system-body) and (-webkit-appearance: none) {
+    @content;
   }
 }
 
@@ -51,10 +51,14 @@
   box-sizing: border-box;
   margin-right: -10px;
 
-  // Firefox mobile never display scrollbar, add padding right back.
-  @include firefoxOnly {
-    .mobile-panel & {
-      padding-right: 10px;
+  // Firefox & Safari mobile never display scrollbar, cancel minus margin.
+  .mobile-panel & {
+    @include firefoxOnly {
+      margin-right: 0;
+    }
+
+    @include safariOnly {
+      margin-right: 0;
     }
   }
 }
@@ -65,17 +69,26 @@
   $trackColor: white;
   $scrollbarWidth: 12px;
   $borderRadius: 6px;
-  @if $theme == dark {
+
+  @if $theme ==dark {
     $thumbColor: setColor(gray-4);
     $trackColor: setColor(sidebar-panel);
     $scrollbarWidth : 10px;
     $borderRadius: 5px;
   }
-  
+
   overflow-y: scroll;
-  @if $showX == true {
+
+  // If in vue-recycle-scroller, overwrite its overflow-y: auto css.
+  &.vue-recycle-scroller.direction-vertical:not(.page-mode) {
+    overflow-y: scroll;
+  }
+
+  @if $showX ==true {
     overflow-x: scroll;
-  } @else {
+  }
+
+  @else {
     overflow-x: hidden;
   }
 
@@ -90,15 +103,15 @@
     border-radius: $borderRadius;
     background-color: $thumbColor;
     visibility: hidden;
-    @if $trackColor != none {
-      border: 3px solid $trackColor;
-    }
+    border: 3px solid $trackColor;
   }
+
   &:hover::-webkit-scrollbar-thumb {
     visibility: visible;
   }
 
-  &::-webkit-scrollbar-corner { // Coner of scrollbar x and y.
+  &::-webkit-scrollbar-corner {
+    // Coner of scrollbar x and y.
     background-color: transparent;
   }
 
@@ -106,6 +119,7 @@
   @include firefoxOnly {
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;
+
     &:hover {
       scrollbar-color: $thumbColor transparent;
     }
@@ -117,7 +131,7 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -133,51 +147,58 @@
   border-radius: 4px;
   color: setColor(gray-2);
   border: 1px solid setColor(gray-4);
+
   &:focus {
     border-color: setColor(blue-1);
   }
+
   &[invalid="true"] {
     border-color: setColor(red);
   }
 }
 
 @mixin progressSlider($height: 5px, $thumbSize: 12px, $marginTop: -3.5px, $thumbColor: white, $scale: false) {
-	height: $height;
-	display: block;
-	appearance: none;
-	outline: none;
-	background: linear-gradient(to right, var(--lower-color) var(--progress), var(--upper-color) var(--progress));
-	border-radius: $height / 2;
-	&::-webkit-slider-runnable-track {
-		height: $height / 2;
-	}
-	&::-webkit-slider-thumb {
-		appearance: none;
-		width: $thumbSize;
-		height: $thumbSize;
-		border-radius: 50%;
-		background-color: $thumbColor;
-		box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
-		margin-top: $marginTop;
-		position: relative;
-}
-	&::-moz-range-thumb {
-		appearance: none;
-		width: $thumbSize;
-		height: $thumbSize;
-		border-radius: 50%;
-		background-color: $thumbColor;
-		box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
-		border: none;
-		margin-top: $marginTop;
-		position: relative;
-	}
-	@if $scale {
-		&::-webkit-slider-thumb:hover {
-			transform: scale(1.333);
-		}
-		&::-moz-range-thumb:hover {
-			transform: scale(1.333);
-		}
-	}
+  height: $height;
+  display: block;
+  appearance: none;
+  outline: none;
+  background: linear-gradient(to right, var(--lower-color) var(--progress), var(--upper-color) var(--progress));
+  border-radius: $height / 2;
+
+  &::-webkit-slider-runnable-track {
+    height: $height / 2;
+  }
+
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: $thumbSize;
+    height: $thumbSize;
+    border-radius: 50%;
+    background-color: $thumbColor;
+    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
+    margin-top: $marginTop;
+    position: relative;
+  }
+
+  &::-moz-range-thumb {
+    appearance: none;
+    width: $thumbSize;
+    height: $thumbSize;
+    border-radius: 50%;
+    background-color: $thumbColor;
+    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
+    border: none;
+    margin-top: $marginTop;
+    position: relative;
+  }
+
+  @if $scale {
+    &::-webkit-slider-thumb:hover {
+      transform: scale(1.333);
+    }
+
+    &::-moz-range-thumb:hover {
+      transform: scale(1.333);
+    }
+  }
 }

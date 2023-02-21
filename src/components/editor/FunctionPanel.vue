@@ -1,73 +1,75 @@
 <template lang="pug">
-  div(class="function-panel"
-    :style="functionPanelStyles")
-    //- span {{pageUtils._3dEnabledPageIndex}},
-    //- span {{pageUtils.currFocusPageIndex}},
-    //- span {{pageUtils._3dEnabledPageIndex === pageUtils.currFocusPageIndex}}
-    div(class="function-panel__topbar")
-      svg-icon(:class="{'pointer': !isInFirstStep}"
-        :iconName="'undo'"
-        :iconWidth="'20px'"
-        :iconColor="(!inBgRemoveMode && !isInFirstStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveFirstStep) ? 'gray-2' : 'gray-4'"
-        @click.native="undo"
-        v-hint="$t('NN0119')"
-      )
-      svg-icon(:class="{'pointer': !isInLastStep}"
-        :iconName="'redo'"
-        :iconWidth="'20px'"
-        :iconColor="(!inBgRemoveMode && !isInLastStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveLastStep) ? 'gray-2' : 'gray-4'"
-        @click.native="redo"
-        v-hint="$t('NN0120')")
-      download-btn
-      btn(:hasIcon="true"
-        :iconName="'menu'"
-        :iconWidth="'25px'"
-        :type="!inBgRemoveMode  ? 'primary-sm' : 'inactive-sm'"
-        :disabled="inBgRemoveMode"
-        :squared="true"
-        class="btn-file rounded full-height"
-        @click.native="openFilePopup")
-    div(v-if="!isShowPagePreview"
-        class="function-panel__content"
-        :class="{'dim-background': showMore}")
-      panel-bg-remove(v-if="showBgRemove")
-      panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
-      panel-general(v-if="showGeneral")
-      panel-page-setting(v-if="showPageSetting")
-      panel-background-setting(v-if="showPageSetting" v-on="$listeners")
-      panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel" v-on="$listeners")
-      panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
-      panel-photo-setting(v-if="showPhotoSetting" v-on="$listeners")
-      panel-shape-setting(v-if="showShapeSetting" v-on="$listeners")
-      panel-img-ctrl(v-if="isImgCtrl" v-on="$listeners")
+div(class="function-panel"
+  :style="functionPanelStyles")
+  //- span {{pageUtils._3dEnabledPageIndex}},
+  //- span {{pageUtils.currFocusPageIndex}},
+  //- span {{pageUtils._3dEnabledPageIndex === pageUtils.currFocusPageIndex}}
+  div(class="function-panel__topbar")
+    svg-icon(:class="{'pointer': !isInFirstStep}"
+      :iconName="'undo'"
+      :iconWidth="'20px'"
+      :iconColor="(!inBgRemoveMode && !isInFirstStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveFirstStep) ? 'gray-2' : 'gray-4'"
+      @click="undo"
+      v-hint="$t('NN0119')"
+    )
+    svg-icon(:class="{'pointer': !isInLastStep}"
+      :iconName="'redo'"
+      :iconWidth="'20px'"
+      :iconColor="(!inBgRemoveMode && !isInLastStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveLastStep) ? 'gray-2' : 'gray-4'"
+      @click="redo"
+      v-hint="$t('NN0120')")
+    download-btn
+    btn(:hasIcon="true"
+      :iconName="'menu'"
+      :iconWidth="'25px'"
+      :type="!inBgRemoveMode  ? 'primary-sm' : 'inactive-sm'"
+      :disabled="inBgRemoveMode"
+      :squared="true"
+      class="btn-file rounded full-height"
+      @click="openFilePopup")
+  div(v-if="!isShowPagePreview"
+      class="function-panel__content"
+      :class="{'dim-background': showMore}")
+    panel-bg-remove(v-if="showBgRemove" :currPage="currPage")
+    panel-fonts(v-if="showFont" :currPage="currPage" @closeFontsPanel="closeFontsPanel")
+    panel-general(v-if="showGeneral" :currPage="currPage")
+    panel-page-setting(v-if="showPageSetting" :currPage="currPage")
+    panel-background-setting(v-if="showPageSetting" :currPage="currPage")
+    panel-shape-setting(v-if="showShapeSetting" :currPage="currPage")
+    panel-text-setting(v-if="showTextSetting" :currPage="currPage" @openFontsPanel="openFontsPanel")
+    panel-text-effect-setting(v-if="showTextSetting" :currPage="currPage")
+    panel-photo-setting(v-if="showPhotoSetting" :currPage="currPage")
+    panel-img-ctrl(v-if="isImgCtrl" :currPage="currPage")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import PanelGeneral from '@/components/editor/panelFunction/PanelGeneral.vue'
-import PanelTextSetting from '@/components/editor/panelFunction/PanelTextSetting.vue'
-import PanelColorPicker from '@/components/editor/panelFunction/PanelColorPicker.vue'
+import DownloadBtn from '@/components/download/DownloadBtn.vue'
 import PanelBackgroundSetting from '@/components/editor/panelFunction/PanelBackgroundSetting.vue'
-import PanelPhotoSetting from '@/components/editor/panelFunction/PanelPhotoSetting.vue'
-import PanelPageSetting from '@/components/editor/panelFunction/PanelPageSetting.vue'
+import PanelBgRemove from '@/components/editor/panelFunction/PanelBgRemove.vue'
+import PanelColorPicker from '@/components/editor/panelFunction/PanelColorPicker.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
+import PanelGeneral from '@/components/editor/panelFunction/PanelGeneral.vue'
+import PanelImgCtrl from '@/components/editor/panelFunction/panelImgCtrl.vue'
+import PanelPageSetting from '@/components/editor/panelFunction/PanelPageSetting.vue'
+import PanelPhotoSetting from '@/components/editor/panelFunction/PanelPhotoSetting.vue'
+import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetting.vue'
 import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
-import PanelBgRemove from '@/components/editor/panelFunction/PanelBgRemove.vue'
-import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
-import PanelImgCtrl from '@/components/editor/panelFunction/panelImgCtrl.vue'
-import DownloadBtn from '@/components/download/DownloadBtn.vue'
-import { mapGetters, mapState } from 'vuex'
-import LayerUtils from '@/utils/layerUtils'
-import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
-import popupUtils from '@/utils/popupUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import shotcutUtils from '@/utils/shortcutUtils'
-import { FunctionPanelType, LayerType } from '@/store/types'
+import PanelTextSetting from '@/components/editor/panelFunction/PanelTextSetting.vue'
+import { IFrame, IGroup } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import { LayerType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
+import LayerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import shotcutUtils from '@/utils/shortcutUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     PanelGeneral,
     PanelTextSetting,
@@ -83,16 +85,23 @@ export default Vue.extend({
     PanelPhotoShadow,
     PanelImgCtrl
   },
+  emits: ['toggleColorPanel'],
   data() {
     return {
       isFontsPanelOpened: false,
       pageUtils
     }
   },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
+  },
   computed: {
     ...mapState('fontTag', ['tags', 'showMore']),
-    ...mapState(['isMoving']),
     ...mapState('imgControl', ['image']),
+    ...mapGetters('imgControl', ['isBgImgCtrl']),
     ...mapGetters({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -120,20 +129,21 @@ export default Vue.extend({
       return this.currSelectedInfo.layers.length
     },
     isLocked(): boolean {
-      return LayerUtils.getTmpLayer().locked
+      return LayerUtils.getSelectedLayer().locked
     },
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup, index: number) => {
+      const types = groupLayer.layers.map((layer) => {
         return layer.type
       })
       return new Set(types)
     },
     hasSubSelectedLayer(): boolean {
-      return this.currSubSelectedInfo.index !== -1
+      return LayerUtils.subLayerIdx !== -1
+      // return this.currSubSelectedInfo.index !== -1
     },
     subLayerType(): string {
       return this.currSubSelectedInfo.type
@@ -170,7 +180,7 @@ export default Vue.extend({
     },
     showPageSetting(): boolean {
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
-        this.selectedLayerNum === 0
+        this.selectedLayerNum === 0 && !this.isBgImgCtrl
     },
     showTextSetting(): boolean {
       return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
@@ -183,8 +193,9 @@ export default Vue.extend({
     showShapeSetting(): boolean {
       const { getCurrConfig } = LayerUtils
       const stateCondition = !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked
-      const typeConditon = (this.targetIs('shape') && this.singleTargetType()) || getCurrConfig.type === LayerType.frame
-      return stateCondition && typeConditon && !this.isImgCtrl
+      const typeConditon = [LayerType.shape, LayerType.frame, LayerType.group, LayerType.tmp].includes(getCurrConfig.type as LayerType)
+      const haveColorTarget = colorUtils.globalSelectedColor.color !== 'none'
+      return stateCondition && typeConditon && haveColorTarget && !this.isImgCtrl
     },
     isSuperUser(): boolean {
       return generalUtils.isSuperUser
@@ -196,7 +207,7 @@ export default Vue.extend({
         targetLayerType: (() => {
           if (subLayerIdx !== -1) {
             return currLayer.type === LayerType.group
-              ? (currLayer as IGroup).layers[subLayerIdx].type : LayerType.image
+              ? currLayer.layers[subLayerIdx].type : LayerType.image
           }
           return currLayer.type
         })()

@@ -1,9 +1,7 @@
+import { ILayer, IParagraph, IText } from '@/interfaces/layer'
 import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
-import { ILayer, IParagraph, IText } from '@/interfaces/layer'
 import LayerUtils from './layerUtils'
-import layerFactary from './layerFactary'
-import imageUtils from './imageUtils'
 
 class TemplateUtils {
   public readonly fields = ['heading', 'subheading', 'body']
@@ -19,7 +17,6 @@ class TemplateUtils {
 
   updateTemplate(json: any): any {
     if (!json) { return }
-    console.log(GeneralUtils.deepCopy(json))
     const layers = json.layers as Array<ILayer>
     for (const field of this.fields) {
       let isAssignField = false

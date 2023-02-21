@@ -1,26 +1,27 @@
 <template lang="pug">
-  div(class="tour-guide")
-    div(class="tour-guide__container" ref="tour")
-      div(class="tour-guide__step") {{ currentStep + 1 }} / {{ steps.length }}
-      div(class="tour-guide__title") {{ stepInfo.title }}
-      div {{ stepInfo.content }}
-      div(class="tour-guide__actions mt-15")
-        btn(v-if="stepInfo.skip"
-          class="skip"
-          @click.native="handleSkip") {{ stepInfo.skip.text }}
-        btn(v-if="stepInfo.next"
-          class="next"
-          @click.native="handleNextStep") {{ stepInfo.next.text }}
-        btn(v-if="stepInfo.finish"
-          class="finish"
-          @click.native="handleFinish") {{ stepInfo.finish.text }}
-    div(class="tour-guide__arrow" ref="arrow")
+div(class="tour-guide")
+  div(class="tour-guide__container" ref="tour")
+    div(class="tour-guide__step") {{ currentStep + 1 }} / {{ steps.length }}
+    div(class="tour-guide__title") {{ stepInfo.title }}
+    div {{ stepInfo.content }}
+    div(class="tour-guide__actions mt-15")
+      btn(v-if="stepInfo.skip"
+        class="skip"
+        @click="handleSkip") {{ stepInfo.skip.text }}
+      btn(v-if="stepInfo.next"
+        class="next"
+        @click="handleNextStep") {{ stepInfo.next.text }}
+      btn(v-if="stepInfo.finish"
+        class="finish"
+        @click="handleFinish") {{ stepInfo.finish.text }}
+  div(class="tour-guide__arrow" ref="arrow")
 </template>
 
 <script lang="ts">
 import guideUtils from '@/utils/guideUtils'
-import Vue from 'vue'
-export default Vue.extend({
+import { defineComponent } from 'vue'
+export default defineComponent({
+  emits: [],
   props: {
     startIndex: {
       type: Number,
@@ -48,7 +49,7 @@ export default Vue.extend({
           next: { text: this.$t('NN0272') }
         },
         {
-          target: '.nav-container .nav-item:nth-child(4)',
+          target: '.nav-container .nav-item:nth-child(3)',
           placement: 'right-end',
           title: this.$t('NN0265'),
           content: this.$t('NN0266'),
@@ -56,7 +57,7 @@ export default Vue.extend({
           next: { text: this.$t('NN0272') }
         },
         {
-          target: '.nav-container .nav-item:last-child',
+          target: '.nav-container .nav-item:nth-last-child(2)',
           placement: 'right-end',
           title: this.$t('NN0267'),
           content: this.$t('NN0268'),
@@ -182,7 +183,7 @@ export default Vue.extend({
     }
     &__actions {
       display: flex;
-      justify-content: end;
+      justify-content: flex-end;
     }
     &__arrow {
       position: absolute;
@@ -209,6 +210,7 @@ export default Vue.extend({
   .btn.skip,
   .btn.finish {
     border: 1px solid setColor(blue-3);
+    background-color: transparent;
     color: setColor(blue-3);
     &:hover {
       border-color: setColor(white);
@@ -220,7 +222,7 @@ export default Vue.extend({
     background-color: setColor(blue-4);
     color: setColor(blue-1);
     &:hover {
-      color: setColor(blue-4);
+      background-color: setColor(white);
     }
   }
 </style>

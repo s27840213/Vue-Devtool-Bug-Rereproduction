@@ -1,18 +1,20 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
-import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle, ILayer, IParagraph } from '@/interfaces/layer'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { LayerProcessType, LayerType } from '@/store/types'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import localeUtils from './localeUtils'
+import mouseUtils from './mouseUtils'
 import textPropUtils from './textPropUtils'
 import ZindexUtils from './zindexUtils'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
-import mouseUtils from './mouseUtils'
-
 class LayerFactary {
-  newImage(config: any): IImage {
-    const { width = 0, height = 0, initWidth = 0, initHeight = 0, zindex = 0, opacity = 0, scale = 1 } = config.styles
+  newImage(config: any, parentLayer?: any): IImage {
+    const {
+      width = 0, height = 0, initWidth = 0, initHeight = 0, imgWidth = 0, imgHeight = 0, imgX = 0, imgY = 0, zindex = 0, opacity = 0, scale = 1
+    } = config.styles
+
     const basicConfig = {
       type: 'image',
       ...(config.previewSrc && { previewSrc: config.previewSrc }),
@@ -76,8 +78,7 @@ class LayerFactary {
     if (config.styles.shadow && !Object.prototype.hasOwnProperty.call(config.styles.shadow, 'srcObj')) {
       config.styles.shadow = basicConfig.styles.shadow
     }
-    const { styles: { imgWidth, imgX, imgHeight, imgY } } = config
-    const isImgSizeWrong = !imgWidth || !imgHeight || imgWidth < Math.abs(imgX) + width || imgHeight < Math.abs(imgY) + height
+    const isImgSizeWrong = !imgWidth || !imgHeight || imgWidth + 1 < Math.abs(imgX) + width || imgHeight + 1 < Math.abs(imgY) + height
     if (isImgSizeWrong) {
       const layer = { styles: { width: basicConfig.styles.imgWidth, height: basicConfig.styles.imgHeight } } as unknown as IImage
       const clipperStyles = { width: basicConfig.styles.width, height: basicConfig.styles.height, scale: 1 } as IStyle
@@ -119,11 +120,16 @@ class LayerFactary {
             userId: ''
           }
         }
-        Object.assign(img, this.newImage(imgConfig))
+        Object.assign(img, this.newImage(imgConfig, config))
       })
     } else if (clips.length) {
       // Template frame with image, need to copy the info of the image
-      clips[0] = this.newImage(Object.assign(GeneralUtils.deepCopy(clips[0])))
+      clips[0].styles.width = styles.width
+      clips[0].styles.height = styles.height
+      clips[0].styles.initHeight = styles.initHeight
+      clips[0].styles.initWidth = styles.initWidth
+      clips[0] = this.newImage(clips[0])
+      // clips[0] = this.newImage(Object.assign(GeneralUtils.deepCopy(clips[0])))
       clips[0].isFrameImg = true
     } else {
       // New image-frame no image info need to be resored
@@ -146,7 +152,7 @@ class LayerFactary {
           userId: ''
         },
         isFrameImg: true
-      }))
+      }, config))
     }
     if (clips.some(img => img.styles.rotate !== 0)) {
       const img = clips.find(img => img.styles.rotate !== 0) as IImage
@@ -213,7 +219,7 @@ class LayerFactary {
         } as IStyle
         return decorationTop
       })()) : undefined
-    }
+    } as IFrame
     frame.clips.forEach(i => (i.parentLayerStyles = frame.styles))
     if (frame.decoration && !frame.decoration.svg) {
       (frame as any).needFetch = true
@@ -238,7 +244,7 @@ class LayerFactary {
       dragging: false,
       designId: '',
       isEdited: false,
-      contentEditable: false,
+      contentEditable: config.contentEditable ?? false,
       styles: {
         x: config.styles?.x,
         y: config.styles?.y,
@@ -339,14 +345,17 @@ class LayerFactary {
               delete paragraph.spanStyle
             }
           }
+        },
+        (span) => {
+          span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '')
         }
       )
     }
     return Object.assign(basicConfig, config)
   }
 
-  newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
-    const group = {
+  newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IFrame>): IGroup {
+    const group: IGroup = {
       type: 'group',
       id: config.id || GeneralUtils.generateRandomString(8),
       active: false,
@@ -394,14 +403,15 @@ class LayerFactary {
     return group
   }
 
-  newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
-    const tmp = {
+  newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup | IFrame>) {
+    const tmp: ITmp = {
       type: 'tmp',
       id: GeneralUtils.generateRandomString(8),
       active: true,
       shown: false,
       locked: false,
       moved: false,
+      moving: false,
       dragging: false,
       designId: '',
       styles: {
@@ -421,12 +431,13 @@ class LayerFactary {
         verticalFlip: false
       },
       layers
-    } as unknown as ITmp
+    }
     tmp.layers.forEach(l => l.type === LayerType.image && (l.parentLayerStyles = tmp.styles))
     return tmp
   }
 
-  newShape(config: any): IShape {
+  newShape(config?: any): IShape {
+    config = config || {}
     const { styles = {} } = GeneralUtils.deepCopy(config)
     const basicConfig = {
       type: 'shape',
@@ -438,7 +449,7 @@ class LayerFactary {
       size: [],
       styleArray: [],
       svg: '',
-      vSize: [0, 0],
+      vSize: styles.vSize ?? [0, 0],
       cSize: [0, 0],
       pSize: [0, 0],
       pDiff: [0, 0],
@@ -469,8 +480,11 @@ class LayerFactary {
         blendMode: config.blendMode || ''
       }
     }
+    if (config.category === 'A' && styles.scale && styles.initWidth && styles.initHeight) {
+      basicConfig.styles.width = styles.initWidth * styles.scale
+      basicConfig.styles.height = styles.initHeight * styles.scale
+    }
     delete config.styles
-    delete config.id
     delete config.blendMode
     return Object.assign(basicConfig, config)
   }
@@ -513,13 +527,15 @@ class LayerFactary {
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
     const bgImgConfig = config.backgroundImage.config
     bgImgConfig.id = GeneralUtils.generateRandomString(8)
-    if (bgImgConfig.srcObj.type && !bgImgConfig.srcObj.userId && !bgImgConfig.srcObj.assetId) {
-      config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+    if (bgImgConfig.srcObj.type) {
+      if (!bgImgConfig.srcObj.userId && !bgImgConfig.srcObj.assetId) {
+        config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+      }
     }
     return config
   }
 
-  newByLayerType(config: any): IShape | IText | IImage | IFrame | IGroup | ITmp {
+  newByLayerType(config: any, parentLayer?: any): IShape | IText | IImage | IFrame | IGroup | ITmp {
     this.paramsExaminer(config)
     switch (config.type) {
       case 'shape':
@@ -527,14 +543,14 @@ class LayerFactary {
       case 'text':
         return this.newText(config)
       case 'image':
-        return this.newImage(config)
+        return this.newImage(config, parentLayer)
       case 'frame':
         return this.newFrame(config)
       case 'group':
         return this.newGroup(config, config.layers)
       case 'tmp':
         for (const layerIndex in config.layers) {
-          config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
+          config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex], config)
         }
         console.error('Basically, the template should not have the layer type of tmp')
         return this.newTmp(config.styles, config.layers)

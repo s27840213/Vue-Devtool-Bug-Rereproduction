@@ -1,50 +1,56 @@
 <template lang="pug">
-  div(class="category-fonts pointer feature-button"
-    :class="{ active: props.font === item.id }"
-    draggable="false"
-    @click="setFont()")
-    div(class="category-fonts__item-wrapper")
-      img(class="category-fonts__item"
-        :src="fallbackSrc || `${getPreview}`"
-        @error="handleNotFound")
-    div(class="category-fonts__item-wrapper")
-      img(class="category-fonts__item"
-        :src="fallbackSrc || `${getPreview2}`"
-        @error="handleNotFound")
-    div(class="category-fonts__icon")
-      svg-icon(v-if="props.font === item.id"
-        iconName="done"
-        iconColor="gray-2"
-        iconWidth="25px")
-      svg-icon(v-else-if="pending && pending === item.id"
-        iconName="loading"
-        iconColor="gray-1"
-        iconWidth="20px")
+div(class="category-fonts pointer feature-button"
+  :class="{ active: props.font === item.id }"
+  draggable="false"
+  @click="setFont()")
+  div(class="category-fonts__item-wrapper")
+    img(class="category-fonts__item"
+      :src="fallbackSrc || `${getPreview}`"
+      @error="handleNotFound")
+  div(class="category-fonts__item-wrapper")
+    img(class="category-fonts__item"
+      :src="fallbackSrc || `${getPreview2}`"
+      @error="handleNotFound")
+  div(class="category-fonts__icon")
+    svg-icon(v-if="props.font === item.id"
+      iconName="done"
+      iconColor="gray-2"
+      iconWidth="25px")
+    svg-icon(v-else-if="pending && pending === item.id"
+      iconName="loading"
+      iconColor="gray-1"
+      iconWidth="20px")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import TextUtils from '@/utils/textUtils'
-import TextPropUtils from '@/utils/textPropUtils'
-import StepsUtils from '@/utils/stepsUtils'
+import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import { ISelection } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
-import layerUtils from '@/utils/layerUtils'
-import { IGroup, IParagraph, IText } from '@/interfaces/layer'
-import tiptapUtils from '@/utils/tiptapUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
-import generalUtils from '@/utils/generalUtils'
+import layerUtils from '@/utils/layerUtils'
+import TextPropUtils from '@/utils/textPropUtils'
+import TextUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
     // host: String,
     // preview: String,
     // preview2: String,
-    item: Object,
-    textStyleType: String
+    item: {
+      type: Object,
+      required: true
+    },
+    textStyleType: {
+      type: String,
+      required: true
+    }
   },
-  data() {
+  data () {
     return {
       fallbackSrc: ''
     }
@@ -70,11 +76,11 @@ export default Vue.extend({
       const { getCurrLayer: currLayer, layerIndex } = layerUtils
       switch (currLayer.type) {
         case 'group': {
-          const activeIdx = (currLayer as IGroup).layers
+          const activeIdx = currLayer.layers
             .findIndex(l => l.type === 'text' && l.active)
           if (activeIdx !== -1) {
             return {
-              layer: (currLayer as IGroup).layers[activeIdx] as IText,
+              layer: currLayer.layers[activeIdx] as IText,
               layerIndex: activeIdx,
               primaryLayerIndex: layerIndex,
               pageIndex: layerUtils.pageIndex
@@ -266,7 +272,7 @@ export default Vue.extend({
         }
 
         const currLayer = layerUtils.getCurrLayer
-        if ((!currLayer.active || currLayer.id !== id || (currLayer.type === 'group' && !(currLayer as IGroup).layers[subLayerIdx].active))) {
+        if ((!currLayer.active || currLayer.id !== id || (currLayer.type === 'group' && !currLayer.layers[subLayerIdx].active))) {
           const newConfig = TextPropUtils.spanParagraphPropertyHandler('fontFamily', updateItem, start, end, config as IText)
           this.updateLayerProps(currLayerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
           if (currLayer.active) {
@@ -286,7 +292,7 @@ export default Vue.extend({
           const newConfig = TextPropUtils.spanParagraphPropertyHandler('fontFamily', updateItem, start, end, config as IText)
           this.updateLayerProps(layerUtils.layerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
           tiptapUtils.updateHtml(newConfig.paragraphs)
-          !generalUtils.isTouchDevice() && tiptapUtils.focus()
+          !this.$isTouchDevice() && tiptapUtils.focus()
         }
 
         AssetUtils.addAssetToRecentlyUsed({
@@ -320,7 +326,7 @@ export default Vue.extend({
       } catch (error: any) {
         const code = error.message === 'timeout' ? 'timeout' : error.code
         console.error(error)
-        this.$notify({
+        notify({
           group: 'error',
           text: `${this.$t('NN0248')} (ErrorCode: ${code})`
         })

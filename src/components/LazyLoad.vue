@@ -1,18 +1,20 @@
 <template lang="pug">
-  div(class="lazy-load"
-      :style="styles"
-      ref="observer")
-    transition(name="fade-in")
-      slot(v-if="shoudBeRendered")
+div(class="lazy-load"
+    :style="styles"
+    ref="observer")
+  transition(:name="anamationEnabled && !forceRender ? 'fade-in': ''" mode="out-in")
+    slot(v-if="forceRender || shoudBeRendered")
+    slot(v-else name="placeholder")
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-import { some } from 'lodash'
 import generalUtils from '@/utils/generalUtils'
-import queueUtils from '@/utils/queueUtils'
+import { globalQueue } from '@/utils/queueUtils'
+import { some } from 'lodash'
+import { defineComponent, PropType } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
+  name: 'LazyLoad',
   props: {
     target: {
       type: String,
@@ -26,7 +28,12 @@ export default Vue.extend({
       default: 0,
       type: Number
     },
-    maxHeight: Number,
+    maxHeight: {
+      type: Number
+    },
+    minWidth: {
+      type: Number
+    },
     threshold: {
       type: Array as PropType<number[]>,
       default: () => [0, 1]
@@ -38,8 +45,21 @@ export default Vue.extend({
     unrenderDelay: {
       type: Number,
       default: 2000
+    },
+    pageIndex: {
+      type: Number,
+      default: -1
+    },
+    anamationEnabled: {
+      type: Boolean,
+      default: false
+    },
+    forceRender: {
+      type: Boolean,
+      default: false
     }
   },
+  emits: ['loaded', 'intersecting'],
   data() {
     return {
       intersectionObserver: null as unknown as IntersectionObserver,
@@ -52,11 +72,13 @@ export default Vue.extend({
     }
   },
   mounted() {
+    if (this.forceRender) return
     const options = {
       root: document.querySelector(this.target),
       rootMargin: this.rootMargin,
       threshold: this.threshold
     }
+
     this.intersectionObserver = new IntersectionObserver(
       // If element is created when it is intersecting,
       // there will be two entries in var `entries`.
@@ -64,26 +86,36 @@ export default Vue.extend({
       (entries) => {
         if (some(entries, ['isIntersecting', true])) {
           // perhaps the user re-scrolled to a component that was set to unrender. In that case stop the unrendering timer
-          queueUtils.deleteEvent(this.unrenderEventId)
-          clearTimeout(this.unrenderTimer)
-
+          if (this.unrenderEventId !== '') {
+            globalQueue.deleteEvent(this.unrenderEventId, this.pageIndex)
+            // this.consoleLog(`delete unrender eventId: ${this.unrenderEventId}`)
+          }
+          if (this.unrenderTimer !== -1) {
+            clearTimeout(this.unrenderTimer)
+            // this.consoleLog('clear unrender timeout')
+          }
           /**
            *  if we're dealing underndering lets add a waiting period of 200ms before rendering.
            *  If a component enters the viewport and also leaves it within 200ms it will not render at all.
            *  This saves work and improves performance when user scrolls very fast
            */
-          this.renderTimer = setTimeout(
+          this.renderTimer = window.setTimeout(
             () => {
               this.renderEventId = generalUtils.generateRandomString(3)
-              queueUtils.push(this.renderEventId, async () => {
+              // this.consoleLog(`push from lazyload: ${this.renderEventId}`)
+              globalQueue.push(this.renderEventId, async () => {
+                // this.consoleLog('render succeed')
                 this.shoudBeRendered = true
-                this.handleLoaded()
-              })
+                this.handleLoaded(true, entries)
+                this.renderEventId = ''
+              }, this.pageIndex)
             },
-            this.handleUnrender ? 150 : 0
+            this.handleUnrender ? 200 : 0
           )
 
-          // this.renderTimer = setTimeout(
+          // this.consoleLog(`setup render timer: ${this.renderTimer}`)
+
+          // this.renderTimer = window.setTimeout(
           //   () => {
           //     this.shoudBeRendered = true
           //     this.handleLoaded()
@@ -93,18 +125,32 @@ export default Vue.extend({
           if (!this.handleUnrender) {
             this.intersectionObserver && this.intersectionObserver.disconnect()
           }
-        } else {
-          queueUtils.deleteEvent(this.renderEventId)
-          clearTimeout(this.renderTimer)
 
-          this.unrenderTimer = setTimeout(() => {
+          this.handleIntersecting(entries)
+        } else {
+          if (this.renderEventId !== '') {
+            globalQueue.deleteEvent(this.renderEventId, this.pageIndex)
+            // this.consoleLog(`delete render eventId: ${this.unrenderEventId}`)
+          }
+          if (this.renderTimer !== -1) {
+            clearTimeout(this.renderTimer)
+            // this.consoleLog('clear render timeout')
+          }
+
+          this.unrenderTimer = window.setTimeout(() => {
             this.unrenderEventId = generalUtils.generateRandomString(3)
-            queueUtils.push(this.unrenderEventId, async () => {
+            // this.consoleLog(`push from lazyload: ${this.unrenderEventId}`)
+            globalQueue.push(this.unrenderEventId, async () => {
+              // this.consoleLog('unrender succeed')
               this.shoudBeRendered = false
-            })
+              this.handleLoaded(false, entries)
+              this.unrenderEventId = ''
+            }, this.pageIndex)
           }, this.unrenderDelay)
 
-          // this.unrenderTimer = setTimeout(() => {
+          // this.consoleLog(`setup unrender timer: ${this.unrenderTimer}`)
+
+          // this.unrenderTimer = window.setTimeout(() => {
           //   this.shoudBeRendered = false
           // }, this.unrenderDelay)
         }
@@ -116,16 +162,25 @@ export default Vue.extend({
     styles(): { [index: string]: string } {
       return {
         minHeight: `${this.minHeight}px`,
-        ...(this.maxHeight && { maxHeight: `${this.maxHeight}px` })
+        ...(this.maxHeight && { maxHeight: `${this.maxHeight}px` }),
+        ...(this.minWidth && { minWidth: `${this.minWidth}px` })
       }
     }
   },
   methods: {
-    handleLoaded() {
-      this.$emit('loaded')
+    handleLoaded(bool: boolean, entry: Array<IntersectionObserverEntry>) {
+      this.$emit('loaded', bool, entry)
+    },
+    handleIntersecting(entry: Array<IntersectionObserverEntry>) {
+      this.$emit('intersecting', entry)
+    },
+    consoleLog(str: string) {
+      // if (this.pageIndex === 3) {
+      //   console.log(str)
+      // }
     }
   },
-  destroyed() {
+  unmounted() {
     this.intersectionObserver && this.intersectionObserver.disconnect()
   }
 })

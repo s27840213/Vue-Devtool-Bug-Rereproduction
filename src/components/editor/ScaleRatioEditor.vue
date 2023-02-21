@@ -1,43 +1,43 @@
 <template lang="pug">
-  div(class="scale-ratio-editor")
-    input(class="scale-ratio-editor__input pointer"
-      ref="scale-ratio-editor" type="range" min="0.1" max="5" step="0.01"
-      v-model="ratioInPercent"
-      :style="ratioStyles()"
-      :disabled="isShowPagePreview"
-      @input="setScaleRatio(Math.round(ratioInPercent*100))"
-      @mousedown="setIsSettingScaleRatio(true)"
-      @mouseup="handleMouseUp"
-      v-ratio-change)
-    div(class="px-5 flex items-center  btn-page-resize hover-effect pointer"
-        @click="openResizePopup()")
-      div(class="scale-ratio-editor__percentage lead-2")
-        span(class="text-gray-2") {{pageScaleRatio}}%
-      svg-icon(class="pointer"
-        :class="[{'rotate-hr': isPageScalePopupOpen}]"
-        :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
-    svg-icon(:class="{'hover-effect': !inBgRemoveMode, 'click-disabled': inBgRemoveMode}"
-      @click.native="setIsShowPagePreview(!isShowPagePreview)"
-      :iconName="'grid'"
-      :iconColor="inBgRemoveMode ? 'gray-4' :'gray-2'"
-      :disabled="inBgRemoveMode"
-      :iconWidth="'24px'")
-    svg-icon(:class="{'hover-effect': !inBgRemoveMode, 'click-disabled': inBgRemoveMode}"
-      :iconName="'navPage'"
-      :iconColor="inBgRemoveMode? 'gray-4' :'gray-2'"
-      :iconWidth="'24px'"
-      :disabled="inBgRemoveMode"
-      @click.native="setShowPagePanel(!showPagePanel)")
+div(class="scale-ratio-editor" cy-visual-test="transparent")
+  input(class="scale-ratio-editor__input pointer"
+    ref="scale-ratio-editor" type="range" min="0.1" max="5" step="0.01"
+    v-model="ratioInPercent"
+    :style="ratioStyles()"
+    :disabled="isShowPagePreview"
+    @input="setScaleRatio(Math.round(ratioInPercent*100))"
+    @mousedown="setIsSettingScaleRatio(true)"
+    @mouseup="handleMouseUp"
+    v-ratio-change)
+  div(class="px-5 flex items-center  btn-page-resize hover-effect pointer"
+      @click="openResizePopup()")
+    div(class="scale-ratio-editor__percentage lead-2")
+      span(class="text-gray-2") {{pageScaleRatio}}%
+    svg-icon(class="pointer"
+      :class="[{'rotate-hr': isPageScalePopupOpen}]"
+      :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
+  svg-icon(:class="{'hover-effect': !inBgRemoveMode, 'click-disabled': inBgRemoveMode}"
+    @click="setIsShowPagePreview(!isShowPagePreview)"
+    :iconName="'grid'"
+    :iconColor="inBgRemoveMode ? 'gray-4' :'gray-2'"
+    :disabled="inBgRemoveMode"
+    :iconWidth="'24px'")
+  svg-icon(:class="{'hover-effect': !inBgRemoveMode, 'click-disabled': inBgRemoveMode}"
+    :iconName="'navPage'"
+    :iconColor="inBgRemoveMode? 'gray-4' :'gray-2'"
+    :iconWidth="'24px'"
+    :disabled="inBgRemoveMode"
+    @click="setShowPagePanel(!showPagePanel)")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
-import generalUtils from '@/utils/generalUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: ['toggleSidebarPanel'],
   data() {
     return {
     }
@@ -128,7 +128,8 @@ export default Vue.extend({
   }
   &__input {
     display: none;
-    .scale-ratio-editor:hover & { // Show range input when hovering this component.
+    .scale-ratio-editor:hover & {
+      // Show range input when hovering this component.
       display: block;
     }
     width: 180px;

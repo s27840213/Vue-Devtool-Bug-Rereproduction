@@ -1,19 +1,19 @@
 <template lang="pug">
-  div(class="settings")
-    nu-header(v-header-border="true")
-    div(class="settings__content")
-      sidebar(class="settings__sidebar" :style="sidebarStyle"
-        @switch="switchView"
-        :current="currentView")
-      section(class="settings__view")
-        settings-account(v-if="currentView === 'account'")
-        settings-security(v-if="currentView === 'security'")
-        settings-payment(v-if="currentView === 'payment'")
-        settings-bill(v-if="currentView === 'billing'")
+div(class="settings")
+  nu-header(v-header-border="true")
+  div(class="settings__content")
+    sidebar(class="settings__sidebar" :style="sidebarStyle"
+      @switch="switchView"
+      :current="currentView")
+    section(class="settings__view")
+      settings-account(v-if="currentView === 'account'")
+      settings-security(v-if="currentView === 'security'")
+      settings-payment(v-if="currentView === 'payment'")
+      settings-bill(v-if="currentView === 'billing'")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import router from '@/router'
 import Sidebar from '@/components/settings/Sidebar.vue'
 import NuHeader from '@/components/NuHeader.vue'
@@ -22,10 +22,14 @@ import SettingsSecurity from '@/components/settings/SettingsSecurity.vue'
 import SettingsPayment from '@/components/settings/SettingsPayment.vue'
 import SettingsBill from '@/components/settings/SettingsBill.vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'Settings',
   props: {
-    view: String
+    view: {
+      type: String,
+      required: true
+    }
   },
   components: {
     Sidebar,

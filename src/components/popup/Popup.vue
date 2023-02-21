@@ -1,36 +1,39 @@
 <template lang="pug">
-  div(class="popup bg-white")
-    component(:is="component"
+div(class="popup bg-white")
+  component(v-if="component"
+    :is="component"
     v-click-outside="vcoConfig"
     :updateOptions="sharedUpdateOptions"
+    :currPage="currPage"
     v-bind="props"
     @close="close")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import vClickOutside from 'v-click-outside'
-import PopupOrder from '@/components/popup/PopupOrder.vue'
 import PopupAlign from '@/components/popup/PopupAlign.vue'
-import PopupLayer from '@/components/popup/PopupLayer.vue'
-import PopupPage from '@/components/popup/PopupPage.vue'
-import PopupFlip from '@/components/popup/PopupFlip.vue'
 import PopupFile from '@/components/popup/PopupFile.vue'
-import PopupDownload from '@/components/popup/PopupDownload.vue'
-import PopupLineTemplate from '@/components/popup/PopupLineTemplate.vue'
+import PopupFlip from '@/components/popup/PopupFlip.vue'
 import PopupGuideline from '@/components/popup/PopupGuideline.vue'
-import PopupSlider from '@/components/popup/PopupSlider.vue'
+import PopupLayer from '@/components/popup/PopupLayer.vue'
+import PopupLineTemplate from '@/components/popup/PopupLineTemplate.vue'
+import PopupOrder from '@/components/popup/PopupOrder.vue'
+import PopupPage from '@/components/popup/PopupPage.vue'
 import PopupPageScale from '@/components/popup/PopupPageScale.vue'
-import PopupSubmit from '@/components/popup/PopupSubmit.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import PopupSlider from '@/components/popup/PopupSlider.vue'
+import PopupSubmit from '@/components/popup/PopupSubmit.vue'
+import { IPage } from '@/interfaces/page'
 import { IPopupComponent, IPopupOptions } from '@/interfaces/popup'
+import modalUtils from '@/utils/modalUtils'
+import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import pageUtils from '@/utils/pageUtils'
-import modalUtils from '@/utils/modalUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     PopupOrder,
     PopupLayer,
@@ -41,7 +44,6 @@ export default Vue.extend({
     PopupFile,
     PopupLineTemplate,
     PopupGuideline,
-    PopupDownload,
     PopupPageScale,
     PopupSubmit,
     PopupPayment
@@ -63,9 +65,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('user', [
-      'role',
-      'roleRaw',
-      'adminMode']),
+      'roleRaw'
+    ]),
     ...mapGetters({
       popupComponent: 'popup/getPopupComponent',
       getPage: 'getPage',
@@ -73,7 +74,8 @@ export default Vue.extend({
       isLogin: 'user/isLogin',
       groupId: 'getGroupId',
       groupType: 'getGroupType',
-      isOutsourcer: 'user/isOutsourcer'
+      isOutsourcer: 'user/isOutsourcer',
+      showAdminTool: 'user/showAdminTool'
     }),
     component(): string {
       return (this.popupComponent as IPopupComponent).component
@@ -82,10 +84,7 @@ export default Vue.extend({
       return (this.popupComponent as IPopupComponent).props
     },
     hasDesignId(): boolean {
-      return this.getPage(pageUtils.currFocusPageIndex)?.designId !== ''
-    },
-    inAdminMode(): boolean {
-      return this.role === 0 && this.adminMode === true
+      return this.currPage.designId !== ''
     },
     sharedUpdateOptions(): Array<IPopupOptions> {
       return [
@@ -93,7 +92,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '上傳單頁模板',
           shortcutText: '',
-          condition: this.inAdminMode && this.isLogin,
+          condition: this.showAdminTool && this.isLogin,
           action: () => {
             uploadUtils.uploadTemplate()
           }
@@ -102,7 +101,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '更新單頁模板',
           shortcutText: '',
-          condition: this.inAdminMode && this.hasDesignId && this.isLogin,
+          condition: this.showAdminTool && this.hasDesignId && this.isLogin,
           action: () => {
             uploadUtils.updateTemplate()
           }
@@ -111,7 +110,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '上傳群組模板',
           shortcutText: '',
-          condition: this.inAdminMode && !this.isOutsourcer && this.isLogin && pageUtils.getPages.length > 1,
+          condition: this.showAdminTool && !this.isOutsourcer && this.isLogin && pageUtils.getPages.length > 1,
           action: () => {
             uploadUtils.uploadGroupDesign(0, 0)
           }
@@ -120,7 +119,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '更新群組模板',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && !this.isOutsourcer && this.isLogin && this.groupType === 0,
+          condition: this.groupId && this.showAdminTool && !this.isOutsourcer && this.isLogin && this.groupType === 0,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 0)
           }
@@ -129,7 +128,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '刪除群組模板',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && !this.isOutsourcer && this.isLogin && this.groupType === 0,
+          condition: this.groupId && this.showAdminTool && !this.isOutsourcer && this.isLogin && this.groupType === 0,
           action: () => {
             modalUtils.setModalInfo(
               '確認刪除群組模板？',
@@ -147,7 +146,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '上傳詳情頁模板',
           shortcutText: '',
-          condition: this.inAdminMode && !this.isOutsourcer && this.isLogin && pageUtils.getPages.length > 1,
+          condition: this.showAdminTool && !this.isOutsourcer && this.isLogin && pageUtils.getPages.length > 1,
           action: () => {
             uploadUtils.uploadGroupDesign(0, 1)
           }
@@ -156,7 +155,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '更新詳情頁模板',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && !this.isOutsourcer && this.isLogin && this.groupType === 1,
+          condition: this.groupId && this.showAdminTool && !this.isOutsourcer && this.isLogin && this.groupType === 1,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 1)
           }
@@ -165,7 +164,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '刪除詳情頁模板',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && !this.isOutsourcer && this.isLogin && this.groupType === 1,
+          condition: this.groupId && this.showAdminTool && !this.isOutsourcer && this.isLogin && this.groupType === 1,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 1, true)
           }
@@ -174,7 +173,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '更新群組成詳情頁',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && !this.isOutsourcer && this.isLogin && this.groupType === 0,
+          condition: this.groupId && this.showAdminTool && !this.isOutsourcer && this.isLogin && this.groupType === 0,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 1)
           }
@@ -183,7 +182,7 @@ export default Vue.extend({
           icon: 'copy',
           text: '更新詳情頁成群組',
           shortcutText: '',
-          condition: this.groupId && this.inAdminMode && !this.isOutsourcer && this.isLogin && this.groupType === 1,
+          condition: this.groupId && this.showAdminTool && !this.isOutsourcer && this.isLogin && this.groupType === 1,
           action: () => {
             uploadUtils.uploadGroupDesign(1, 0)
           }
@@ -198,6 +197,9 @@ export default Vue.extend({
         //   }
         // }
       ]
+    },
+    currPage(): IPage {
+      return this.getPage(pageUtils.currFocusPageIndex)
     }
   },
   mounted() {

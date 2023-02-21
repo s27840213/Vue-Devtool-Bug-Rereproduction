@@ -1,21 +1,24 @@
 <template lang="pug">
-  div(class="nu-shape" :style="styles()")
-    svg(:view-box.camel="viewBoxFormatter" :style="styles()")
-      defs(v-if="config.category === 'E'" v-html="svgFormatter")
-      defs
-        filter(v-if="config.category === 'C'" :id="className()" v-html="filterFormatter")
-        clipPath(v-if="config.category === 'E'" :id="clipPathId()")
-          use(:xlink:href="svgId()")
-      g(v-if="config.category === 'E'")
-        use(:xlink:href="svgId()" :clip-path="'url(#' + clipPathId() + ')'" :style="styleTextContent[0]")
-      g(v-else :filter="config.category === 'C' ? filterId() : 'none'" v-html="svgFormatter")
+div(class="nu-shape" :style="styles()")
+  svg(:view-box.camel="viewBoxFormatter")
+    defs(v-if="config.category === 'E'" v-html="svgFormatter")
+    defs
+      filter(v-if="config.category === 'C'" :id="className()" v-html="filterFormatter")
+      clipPath(v-if="config.category === 'E'" :id="clipPathId()")
+        use(:xlink:href="svgId()")
+    g(v-if="config.category === 'E'")
+      use(:xlink:href="svgId()" :clip-path="'url(#' + clipPathId() + ')'" :style="styleTextContent[0]")
+    g(v-else :filter="config.category === 'C' ? filterId() : 'none'" v-html="svgFormatter")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
 import { IShape } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { IPage } from '@/interfaces/page'
+import { useRoute } from 'vue-router'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'
@@ -49,7 +52,33 @@ const VIEWBOX_HEIGHT_REG = new RegExp(`\\${VIEWBOX_HEIGHT}`, 'g')
 const CROP_X_REG = new RegExp(`\\${CROP_X}`, 'g')
 const CROP_Y_REG = new RegExp(`\\${CROP_Y}`, 'g')
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
+  props: {
+    config: {
+      type: Object as PropType<any>,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    subLayerIndex: {
+      type: Number
+    },
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
+  },
   data() {
     return {
       filterTemplate: '',
@@ -248,16 +277,6 @@ export default Vue.extend({
       return ''
     }
   },
-  props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
-    subLayerIndex: Number,
-    contentScaleRatio: {
-      default: 1,
-      type: Number
-    }
-  },
   methods: {
     className(): string {
       return this.config.className + this.pageIndex.toString()
@@ -278,7 +297,8 @@ export default Vue.extend({
       if (this.paramsReady) {
         return {
           width: `${(this.config.category === 'D') ? this.config.styles.initWidth : (this.config.vSize[0] + this.config.pDiff[0])}px`,
-          height: `${(this.config.category === 'D') ? this.config.styles.initHeight : (this.config.vSize[1] + this.config.pDiff[1])}px`
+          height: `${(this.config.category === 'D') ? this.config.styles.initHeight : (this.config.vSize[1] + this.config.pDiff[1])}px`,
+          ...(this.config.wkf && useRoute().path === '/preview' && { '-webkit-filter': 'opacity(1)' })
         }
       } else {
         return {
@@ -295,11 +315,35 @@ export default Vue.extend({
     },
     async checkAndFetchSvg(useConfig = true) {
       const svg = useConfig ? this.config.svg : undefined
-      switch (this.config.category) {
+      let shape = null as unknown as IShape
+      let hasChanged = false
+      const config = this.config as IShape
+      /**
+       * Check if the fetched svg.config's color array is changed,
+       */
+      if (!['D', 'E'].includes(config.category) && this.config.designId) {
+        shape = await shapeUtils.fetchSvg(this.config)
+        if (config.color && shape.color) {
+          if (config.color.length > shape.color.length) {
+            const newColor = [...config.color].slice(0, shape.color.length)
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: newColor }, this.subLayerIndex)
+            hasChanged = true
+          } else if (config.color.length < shape.color.length) {
+            const appendColors = [...shape.color].slice(config.color.length)
+            const newColor = [...config.color, ...appendColors]
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: newColor }, this.subLayerIndex)
+            hasChanged = true
+          }
+        } else if (!config.color && shape.color) {
+          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: [...shape.color] }, this.subLayerIndex)
+          hasChanged = true
+        }
+      }
+
+      switch (config.category) {
         case 'C': {
           // should be deleted after the new json format stablize
           if (!svg && this.config.designId) {
-            const shape = await shapeUtils.fetchSvg(this.config)
             if (shapeUtils.isSvgImg(shape)) {
               shapeUtils.svgImgHandler({
                 pageIndex: this.pageIndex,
@@ -309,12 +353,15 @@ export default Vue.extend({
               return
             }
             shape.color = this.config.color
-            this.config.styles.initWidth = shape.vSize[0]
-            this.config.styles.initHeight = shape.vSize[1]
-            Object.assign(this.config, shape)
-            if (!this.config.className) {
-              this.config.className = shapeUtils.classGenerator()
+            const props = {
+              ...(!this.config.className && { className: shapeUtils.classGenerator() }),
+              ...shape
             }
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, props, this.subLayerIndex)
+            layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+              initWidth: shape.vSize[0],
+              initHeight: shape.vSize[1]
+            }, this.subLayerIndex)
           }
           const transText = shapeUtils.transFormatter(this.className(), this.config.transArray, {
             cSize: this.config.cSize,
@@ -341,7 +388,7 @@ export default Vue.extend({
         }
         default: {
           if (!svg && this.config.designId) {
-            const shape = await shapeUtils.fetchSvg(this.config) as Partial<IShape>
+            // const shape = await shapeUtils.fetchSvg(this.config) as Partial<IShape>
             if (shapeUtils.isSvgImg(shape)) {
               shapeUtils.svgImgHandler({
                 pageIndex: this.pageIndex,
@@ -350,28 +397,29 @@ export default Vue.extend({
               }, this.config)
               return
             }
-            this.config.color && this.config.color.length && (shape.color = this.config.color)
-            !this.config.className && (this.config.className = shapeUtils.classGenerator())
 
-            const vSize = shape.vSize as number[]
-            delete shape.styles
-            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+            if (this.config.color && this.config.color.length) {
+              shape.color = this.config.color
+            }
+            delete (shape as any).styles
+            const props = {
+              ...(!this.config.className && { className: shapeUtils.classGenerator() }),
               ...shape
-            }, this.subLayerIndex)
+            }
+            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, props, this.subLayerIndex)
             layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-              initWidth: vSize[0],
-              initHeight: vSize[1]
+              initWidth: shape.vSize[0],
+              initHeight: shape.vSize[1]
             }, this.subLayerIndex)
           }
         }
       }
-      // Fix some bug that the color is empty array.
-      if (!(this.config as IShape).color?.length) {
-        if (this.config.designId) {
-          const shape = await shapeUtils.fetchSvg(this.config) as IShape
-          layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: shape.color })
-        }
+
+      if (hasChanged) {
+        stepsUtils.clearCurrStep()
+        stepsUtils.record()
       }
+
       const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
       this.updateStyleNode(styleText)
       this.paramsReady = true

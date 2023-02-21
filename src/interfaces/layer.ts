@@ -1,11 +1,12 @@
-import { SrcObj } from './gallery'
-import { ITiptapSelection } from './text'
 import { IAdjustJsonProps } from '@/interfaces/adjust'
-import { IShadowProps, IShadowStyles } from './imgShadow'
 import { LayerProcessType } from '@/store/types'
 import { ITextBgEffect, ITextEffect, ITextShape } from './format'
+import { SrcObj } from './gallery'
+import { IShadowProps, IShadowStyles } from './imgShadow'
+import { ITiptapSelection } from './text'
 
 export const jsonVer = '1.0.7'
+
 export interface ILayerIdentifier {
   pageId: string,
   layerId: string,
@@ -40,7 +41,7 @@ export interface IImageStyle extends IStyle {
 
 export interface ILayer<T extends IStyle = IStyle> {
   [key: string]: unknown,
-  type: string,
+  type: 'shape' | 'text' | 'image' | 'frame' | 'group' | 'tmp',
   active: boolean,
   shown: boolean,
   locked: boolean,
@@ -49,7 +50,7 @@ export interface ILayer<T extends IStyle = IStyle> {
   dragging: boolean,
   designId: string,
   styles: T,
-  id?: string
+  id: string
 }
 
 export interface ITextStyle extends IStyle {
@@ -57,6 +58,7 @@ export interface ITextStyle extends IStyle {
   textShape: ITextShape | Record<string, never>
   textEffect: ITextEffect | Record<string, never>
   textBg: ITextBgEffect
+  align: string
 }
 
 export interface IParagraphStyle {
@@ -93,6 +95,7 @@ export interface IParagraph {
 }
 
 export interface IText extends ILayer<ITextStyle> {
+  type: 'text'
   paragraphs: Array<IParagraph>,
   widthLimit: number,
   isHeading?: boolean,
@@ -106,32 +109,36 @@ export interface IText extends ILayer<ITextStyle> {
 }
 
 export interface IShape extends ILayer<IStyle> {
+  type: 'shape'
   // svgID: string,
+  className: string,
+  ratio: number,
   category: string,
   scaleType?: number,
-  svg: string,
-  className: string,
-  path?: string,
-  ratio: number,
+  styleArray: string[],
   color: [string],
+  size?: number[],
+  transArray?: string[],
+  markerTransArray?: string[],
+  svg: string,
   vSize: number[],
   cSize?: number[],
   pSize?: number[],
   pDiff?: number[],
   point?: number[],
-  size?: number[],
+  path?: string,
   dasharray?: number[],
   linecap?: 'butt' | 'round',
   markerId?: string[],
   markerWidth?: number[],
   trimWidth?: (boolean | undefined)[],
   trimOffset?: number[],
-  styleArray: string[],
   filled?: boolean,
   shapeType?: string,
   pDiffLimits?: number[]
 }
 export interface IImage extends ILayer<IImageStyle> {
+  type: 'image'
   previewSrc?: string,
   srcObj: SrcObj
   clipPath: string,
@@ -153,17 +160,21 @@ export interface IFrameStyle extends IStyle {
     styles: IShadowStyles
   }
 }
+export interface IFrame extends ILayer<IFrameStyle> {
+  type: 'frame'
+  clips: Array<IImage>
+  decoration?: IShape,
+  decorationTop?: IShape
+  blendLayers?: Array<IShape>
+}
 export interface IGroup extends ILayer<IStyle> {
-  layers: Array<IShape | IText | IImage | IGroup>,
+  type: 'group'
+  layers: Array<IShape | IText | IImage | IFrame>,
   db?: 'svg' | 'text'
 }
 export interface ITmp extends ILayer<IStyle> {
-  layers: Array<IShape | IText | IImage | IGroup>
+  type: 'tmp'
+  layers: Array<IShape | IText | IImage | IGroup | IFrame>
 }
 
-export interface IFrame extends ILayer<IFrameStyle> {
-  clips: Array<IImage>
-  decoration?: IShape,
-  decorationTop?: IShape,
-  blendLayers?: Array<IShape>
-}
+export type AllLayerTypes = IShape | IText | IImage | IGroup | IFrame | ITmp

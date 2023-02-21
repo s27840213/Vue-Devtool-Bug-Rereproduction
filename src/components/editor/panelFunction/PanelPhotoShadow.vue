@@ -1,101 +1,101 @@
 <template lang="pug">
-  div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
-    div(class="action-bar")
-      div(class="flex-between photo-effect-setting__options mb-10")
-        svg-icon(v-for="(icon, idx) in shadowOption.slice(0, 3)"
-          :key="`shadow-${icon}`"
-          :iconName="`photo-shadow-${icon}`"
-          @click.native="onEffectClick(icon)"
-          class="photo-effect-setting__option pointer"
-          :class="{ 'photo-effect-setting__option--selected': currentEffect === icon }"
-          iconWidth="60px"
-          iconColor="gray-2"
-          v-hint="$t(shadowPropI18nMap[icon]._effectName)")
-      div(v-if="shadowOption.slice(0, 3).includes(currentEffect)"
-        :class="['w-full', currentEffect !== 'none' ? 'photo-effect-setting__form' : '']")
-        div(v-for="field in shadowFields"
-          :key="field")
-          div(class="photo-effect-setting__field")
-            div(class="photo-effect-setting__field-name") {{$t(shadowPropI18nMap[currentEffect][field])}}
-            input(class="photo-effect-setting__value-input"
-              :value="getFieldValue(field)"
-              :name="field"
-              @change="handleEffectUpdate"
-              type="number")
-          input(class="photo-effect-setting__range-input"
+div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
+  div(class="action-bar")
+    div(class="flex-between photo-effect-setting__options mb-10")
+      svg-icon(v-for="(icon, idx) in shadowOption.slice(0, 3)"
+        :key="`shadow-${icon}`"
+        :iconName="`photo-shadow-${icon}`"
+        @click="onEffectClick(icon)"
+        class="photo-effect-setting__option pointer"
+        :class="{ 'photo-effect-setting__option--selected': currentEffect === icon }"
+        iconWidth="60px"
+        iconColor="gray-2"
+        v-hint="$t(shadowPropI18nMap[icon]._effectName)")
+    div(v-if="shadowOption.slice(0, 3).includes(currentEffect)"
+      :class="['w-full', currentEffect !== 'none' ? 'photo-effect-setting__form' : '']")
+      div(v-for="field in shadowFields"
+        :key="field")
+        div(class="photo-effect-setting__field")
+          div(class="photo-effect-setting__field-name") {{$t(shadowPropI18nMap[currentEffect][field])}}
+          input(class="photo-effect-setting__value-input"
             :value="getFieldValue(field)"
-            :max="fieldRange[currentEffect][field].max"
-            :min="fieldRange[currentEffect][field].min"
             :name="field"
-            @input="handleEffectUpdate"
-            v-ratio-change
-            type="range")
-        template(v-if="currentEffect !== 'none'")
-          div(class="photo-effect-setting__field")
-            div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
-            div(class="photo-effect-setting__value-input"
-              :style="{ backgroundColor: currentStyle.shadow.effects.color || '#000000' }"
-              @click="handleColorModal")
-          div(class="photo-effect-setting__reset")
-            button(@click="reset()") {{ 'Reset' }}
-      div(class="flex-between photo-effect-setting__options mb-10")
-        svg-icon(v-for="(icon, idx) in shadowOption.slice(3)"
-          :key="`shadow-${icon}`"
-          :iconName="`photo-shadow-${icon}`"
-          @click.native="onEffectClick(icon)"
-          class="photo-effect-setting__option pointer"
-          :class="{ 'photo-effect-setting__option--selected': currentEffect === icon }"
-          iconWidth="60px"
-          iconColor="gray-2"
-          v-hint="$t(shadowPropI18nMap[icon]._effectName)"
-        )
-      div(v-if="shadowOption.slice(3).includes(currentEffect)"
-        class="w-full photo-effect-setting__form")
-        div(v-for="field in shadowFields"
-          :key="field")
-          div(class="photo-effect-setting__field")
-            div(class="photo-effect-setting__field-name") {{$t(shadowPropI18nMap[currentEffect][field])}}
-            input(class="photo-effect-setting__value-input"
-              :value="getFieldValue(field)"
-              :name="field"
-              @change="handleEffectUpdate"
-              type="number")
-          input(class="photo-effect-setting__range-input"
-            :value="getFieldValue(field)"
-            :max="fieldRange[currentEffect][field].max"
-            :min="fieldRange[currentEffect][field].min"
-            :name="field"
-            @input="handleEffectUpdate"
-            v-ratio-change
-            type="range")
-        div(v-if="!['none', 'imageMatched'].includes(currentEffect)"
-          class="photo-effect-setting__field")
+            @change="handleEffectUpdate"
+            type="number")
+        input(class="photo-effect-setting__range-input"
+          :value="getFieldValue(field)"
+          :max="fieldRange[currentEffect][field].max"
+          :min="fieldRange[currentEffect][field].min"
+          :name="field"
+          @input="handleEffectUpdate"
+          v-ratio-change
+          type="range")
+      template(v-if="currentEffect !== 'none'")
+        div(class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
           div(class="photo-effect-setting__value-input"
-            :style="{ backgroundColor: currentEffect === 'frame' ? currentStyle.shadow.effects.frameColor : currentStyle.shadow.effects.color || '#000000' }"
+            :style="{ backgroundColor: currentStyle.shadow.effects.color || '#000000' }"
             @click="handleColorModal")
         div(class="photo-effect-setting__reset")
-          button(@click="reset()") {{ 'Reset' }}
+          button(@click="reset()") {{ $t('NN0754') }}
+    div(class="flex-between photo-effect-setting__options mb-10")
+      svg-icon(v-for="(icon, idx) in shadowOption.slice(3)"
+        :key="`shadow-${icon}`"
+        :iconName="`photo-shadow-${icon}`"
+        @click="onEffectClick(icon)"
+        class="photo-effect-setting__option pointer"
+        :class="{ 'photo-effect-setting__option--selected': currentEffect === icon }"
+        iconWidth="60px"
+        iconColor="gray-2"
+        v-hint="$t(shadowPropI18nMap[icon]._effectName)"
+      )
+    div(v-if="shadowOption.slice(3).includes(currentEffect)"
+      class="w-full photo-effect-setting__form")
+      div(v-for="field in shadowFields"
+        :key="field")
+        div(class="photo-effect-setting__field")
+          div(class="photo-effect-setting__field-name") {{$t(shadowPropI18nMap[currentEffect][field])}}
+          input(class="photo-effect-setting__value-input"
+            :value="getFieldValue(field)"
+            :name="field"
+            @change="handleEffectUpdate"
+            type="number")
+        input(class="photo-effect-setting__range-input"
+          :value="getFieldValue(field)"
+          :max="fieldRange[currentEffect][field].max"
+          :min="fieldRange[currentEffect][field].min"
+          :name="field"
+          @input="handleEffectUpdate"
+          v-ratio-change
+          type="range")
+      div(v-if="!['none', 'imageMatched'].includes(currentEffect)"
+        class="photo-effect-setting__field")
+        div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
+        div(class="photo-effect-setting__value-input"
+          :style="{ backgroundColor: currentEffect === 'frame' ? currentStyle.shadow.effects.frameColor : currentStyle.shadow.effects.color || '#000000' }"
+          @click="handleColorModal")
+      div(class="photo-effect-setting__reset")
+        button(@click="reset()") {{ $t('NN0754') }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import ColorPicker from '@/components/ColorPicker.vue'
-import ColorPanel from '@/components/editor/ColorSlips.vue'
-import colorUtils from '@/utils/colorUtils'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { ColorEventType, FunctionPanelType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
-import { IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
-import { IShadowEffects, ShadowEffectType } from '@/interfaces/imgShadow'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
-import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
-    ColorPicker,
-    ColorPanel
+    ColorPicker
   },
+  emits: ['toggleColorPanel'],
   data() {
     return {
       shadowPropI18nMap,
@@ -105,22 +105,20 @@ export default Vue.extend({
   mounted() {
     imageShadowPanelUtils.mount()
   },
-  beforeDestroy() {
-    console.log('destroy')
+  beforeUnmount() {
     imageShadowPanelUtils.handleShadowUpload()
   },
-  destroyed() {
+  unmounted() {
     this.$nextTick(() => {
       this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoSetting)
     })
   },
   computed: {
     ...mapGetters({
-      isAdmin: 'user/isAdmin',
       currFunctionPanelType: 'getCurrFunctionPanelType'
     }),
-    shadowOption(): string[] {
-      return Object.keys(this.effects)
+    shadowOption(): ShadowEffectType[] {
+      return Object.keys(this.effects) as ShadowEffectType[]
     },
     shadowFields(): string[] {
       const { effects, currentEffect } = this
@@ -159,7 +157,7 @@ export default Vue.extend({
       return { 'ml-auto': idx % 3 === 0, 'mx-16': idx % 3 === 1, 'mr-auto': idx % 3 === 2 }
     },
     handleColorModal() {
-      this.$emit('toggleColorPanel', true)
+      editorUtils.toggleColorSlips(true)
       colorUtils.setCurrEvent(ColorEventType.photoShadow)
       colorUtils.setCurrColor(this.currentStyle.shadow.effects.color)
     },

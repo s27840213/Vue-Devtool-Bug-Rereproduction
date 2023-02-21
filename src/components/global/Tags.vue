@@ -1,36 +1,34 @@
 <template lang="pug">
-  div(class="font-tag" v-click-outside="clickOutsideHandler")
-    template(v-if="!isTouchDevice")
-      div(class="font-tag__flex-container"
-          :style="containerStyle")
+div(class="font-tag" v-click-outside="clickOutsideHandler")
+  template(v-if="!$isTouchDevice()")
+    div(class="font-tag__flex-container"
+        :style="containerStyle")
+      div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
+        @click="onClick(tag)")
+        div(class="font-tag__tag") {{ tag }}
+    div(v-if="!showMore" class="font-tag__more-wrapper")
+      div(class="font-tag__tag-wrapper pointer"
+        @click="onClickMore")
+        div(class="font-tag__tag") {{ `${$t('NN0082')}...` }}
+  template(v-else)
+    div(class="font-tag__container-mobile")
+      div(class="font-tag__flex-container-mobile")
         div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
           @click="onClick(tag)")
           div(class="font-tag__tag") {{ tag }}
-      div(v-if="!showMore" class="font-tag__more-wrapper")
-        div(class="font-tag__tag-wrapper pointer"
-          @click="onClickMore")
-          div(class="font-tag__tag") {{ `${$t('NN0082')}...` }}
-    template(v-else)
-      div(class="font-tag__container-mobile")
-        div(class="font-tag__flex-container-mobile")
-          div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
-            @click="onClick(tag)")
-            div(class="font-tag__tag") {{ tag }}
-
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import vClickOutside from 'v-click-outside'
-import generalUtils from '@/utils/generalUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent, PropType } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   directives: {
     clickOutside: vClickOutside.directive
   },
   props: {
     tags: {
-      type: Array,
+      type: Array as PropType<string[]>,
       required: true
     }
   },
@@ -39,10 +37,8 @@ export default Vue.extend({
       showMore: false
     }
   },
+  emits: ['search', 'showMore'],
   computed: {
-    isTouchDevice(): boolean {
-      return generalUtils.isTouchDevice()
-    },
     containerStyle(): Record<string, string|number> {
       return this.showMore ? {
         position: 'absolute',

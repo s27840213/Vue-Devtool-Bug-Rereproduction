@@ -1,10 +1,10 @@
 import { IPage } from '@/interfaces/page'
 import router from '@/router'
 import store from '@/store'
-import Vue from 'vue'
+import _ from 'lodash'
+import { nextTick } from 'vue'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
-import _ from 'lodash'
 
 class GeneralUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
@@ -39,7 +39,7 @@ class GeneralUtils {
     const oldScrollWidth = el.scrollWidth
     const oldScrollHeight = el.scrollHeight
 
-    Vue.nextTick(() => {
+    nextTick(() => {
       el.scrollLeft = Math.round((scrollCenterX * el.scrollWidth / oldScrollWidth - el.clientWidth) / 2)
       el.scrollTop = Math.round((scrollCenterY * el.scrollHeight / oldScrollHeight - el.clientHeight) / 2)
     })
@@ -47,7 +47,7 @@ class GeneralUtils {
 
   scrollToCenter(el?: HTMLElement, vertical = true, horizontal = true) {
     const target = el !== undefined ? el : document.querySelector('.editor-view')
-    Vue.nextTick(() => {
+    nextTick(() => {
       if (!target) return
       if (vertical) {
         target.scrollTop = (target.scrollHeight - target.clientHeight) / 2
@@ -294,26 +294,28 @@ class GeneralUtils {
   //   }
   // }
 
-  panelInit(panelName: string,
-    searchF: (keyword: string) => void,
-    categoryF: (keyword: string, locale: string) => void,
-    normalInit: () => void) { // May move to a new file panelUtils.ts
+  async panelInit(panelName: string,
+    searchF: (keyword: string) => Promise<void>,
+    categoryF: (keyword: string, locale: string) => Promise<void>,
+    normalInit: ({ reset }: { reset: boolean }) => void) { // May move to a new file panelUtils.ts
     const urlParams = new URLSearchParams(window.location.search)
     const panel = urlParams.get('panel')
     const category = urlParams.get('category')
     const category_locale = urlParams.get('category_locale')
     const search = urlParams.get('search')
     if (panel !== panelName) {
-      normalInit()
+      normalInit({ reset: true })
     } else if (category && category_locale) {
-      categoryF(category, category_locale)
+      await categoryF(category, category_locale)
+      normalInit({ reset: false })
     } else if (search) {
-      searchF(search)
+      await searchF(search)
+      normalInit({ reset: false })
     } else {
-      normalInit()
+      normalInit({ reset: true })
     }
 
-    const query = _.omit(router.currentRoute.query,
+    const query = _.omit(router.currentRoute.value.query,
       ['panel', 'category', 'category_locale', 'search'])
     router.replace({ query })
   }
@@ -341,6 +343,39 @@ class GeneralUtils {
     const first = words[0]
     words[0] = first[0].toUpperCase() + first.substring(1)
     return words.join(' ')
+  }
+
+  // Get browser W/H, from jQuery lib, https://stackoverflow.com/a/1038781
+  getWidth() {
+    return Math.max(
+      document.body.scrollWidth,
+      document.documentElement.scrollWidth,
+      document.body.offsetWidth,
+      document.documentElement.offsetWidth,
+      document.documentElement.clientWidth
+    )
+  }
+
+  getHeight() {
+    return Math.max(
+      document.body.scrollHeight,
+      document.documentElement.scrollHeight,
+      document.body.offsetHeight,
+      document.documentElement.offsetHeight,
+      document.documentElement.clientHeight
+    )
+  }
+
+  unproxify<T>(val: T): T {
+    if (Array.isArray(val)) {
+      return val.map((i) => this.unproxify(i)) as unknown as T
+    }
+    if (typeof val === 'object') {
+      return Object.fromEntries(Object.entries({ ...val as object }).map(([k, v]) => {
+        return [k, this.unproxify(v)]
+      })) as unknown as T
+    }
+    return val
   }
 }
 

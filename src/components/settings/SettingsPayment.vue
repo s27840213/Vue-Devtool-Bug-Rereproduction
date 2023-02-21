@@ -1,81 +1,82 @@
 <template lang="pug">
-  div(class="sp")
-    div(class="sp-plan")
-      span(class="text-blue-1 body-MD") {{$t('NN0586')}}
-      svg-icon(v-if="isProIcon" iconName="pro" :iconColor="proIconColor")
-      svg-icon(v-else           iconName="free")
-      span(v-if="showDueDay")           {{$t('NN0593', {date: myPaidDate})}}
-      btn(v-if="canResume" class="rounded" type="primary-mid" @click.native="resume()")
-        span                            {{$t('NN0588')}}
-      btn(v-if="canAdd" class="rounded" type="primary-lg" @click.native="buy()")
-        span                            {{$t('NN0587')}}
-      span(v-if="isFail"
-          class="text-red overline-LG") {{$t('NN0626')}}
-      template(v-if="showPlan")
-        span                            {{$t('NN0589', { period: isBundle ? $t('NN0515') : $t('NN0514') })}}
-        span(                     v-html="$t('NN0590', { price: myPrice, date: myPaidDate  })")
-      span(v-if="canSwitch" class="text-blue-1 pointer"
-          @click="switchPeriod()")      {{isBundle ? $t('NN0591') : $t('NN0654')}}
-      span(v-if="canCancel" class="text-gray-3 pointer"
-          @click="cancelSub()")         {{$t('NN0592')}}
-    div(v-if="showUsage" class="sp-usage")
-      span(class="text-blue-1 mt-30")   {{$t('NN0594')}}
-      span(                       v-html="$t('NN0595', { amount: usage.bgrmRemain, date: myPaidDate })")
-      span(class="text-blue-1")         {{$t('NN0596')}}
-      div(class="sp-usage-disk")
-        div(class="sp-usage-disk-total")
-          div(class="sp-usage-disk-used" :style="diskPercent")
-        span {{`${diskUsedUi}/${usage.diskTotal} GB`}}
-      span(class="body-XS")             {{$t('NN0597')}}
-    hr(v-if="card.status !== 'none'")
-    div(v-if="card.status !== 'none'" class="sp-card")
-      span(class="text-blue-1")         {{$t('NN0598')}}
-      card-info(:card="card" :canDelete="isCancelingPro")
-      span(v-if="isFail"
-        class="text-red overline-LG")   {{$t('NN0626')}}
-      span(v-if="canUpdateCard" class="text-blue-1 body-SM pointer"
-        @click="openCardPopup()")       {{$t('NN0600')}}
-    hr
-    i18n(v-if="isErrorStatus" class="sp-error" path="NN0656" tag="div")
-      template(#contactus)
-        a(class="text-blue-1 pointer" :href="contactUsUrl") {{$t('NN0642')}}
-      template(#status)
-        span {{status}}
-    div(v-if="showBillingInfo" class="sp-info")
-      span(class="text-blue-1 body-MD") {{$t('NN0601')}}
-      //- switch(input.label)
-      template(v-for="input in billingInfoInput")
-        //- case country
-        options(v-if="input.label === 'country'" :options="countryData"
-                :value="userCountryInfo" @input="setUserCountryInfo")
-        //- case state & zip
-        div(v-else-if="input.label === 'state & zip'" class="sp-info__half")
-          span
-          label(for="zip") {{$t('NN0613')}}
-          options(:options="stateData" v-model="bi.state" :ph="$t('NN0612')")
-          input(id="zip" v-model="bi.zip" :invalid="biv.zip"
-                :placeholder="$t('NN0613')")
-          span
-          span(v-if="biv.zip" class="text-red") {{input.error}}
-        //- defualt
-        template(v-else)
-          label(:for="input.key") {{input.label}}
-          input(:id="input.key" v-model="bi[input.key]"
-                :placeholder="input.ph" :invalid="biv[input.key]")
-          span(v-if="biv[input.key]" class="text-red") {{input.error}}
-      btn(type="primary-mid" @click.native="updateBillingInfo()"
-          :disabled="!billingInfoCheck") {{$t('NN0176')}}
-    div(v-if="showCardPopup" class="popup-window")
-      div(class="sp-field" v-click-outside="closeCardPopup")
-        payment-field(isChange @next="closeCardPopup")
-    spinner(v-if="isLoading" class="sp-rocket")
+div(class="sp")
+  div(class="sp-plan")
+    span(class="text-blue-1 body-MD") {{$t('NN0586')}}
+    svg-icon(v-if="isProIcon" iconName="pro" :iconColor="proIconColor")
+    svg-icon(v-else           iconName="free")
+    span(v-if="showDueDay")           {{$t('NN0593', {date: myPaidDate})}}
+    btn(v-if="canResume" class="rounded" type="primary-mid" @click="resume()")
+      span                            {{$t('NN0588')}}
+    btn(v-if="canAdd" class="rounded" type="primary-lg" @click="buy()")
+      span                            {{$t('NN0587')}}
+    span(v-if="isFail"
+        class="text-red overline-LG") {{$t('NN0626')}}
+    template(v-if="showPlan")
+      span                            {{$t('NN0589', { period: isBundle ? $t('NN0515') : $t('NN0514') })}}
+      span(                     v-html="$t('NN0590', { price: myPrice, date: myPaidDate  })")
+    span(v-if="canSwitch" class="text-blue-1 pointer"
+        @click="switchPeriod()")      {{isBundle ? $t('NN0591') : $t('NN0654')}}
+    span(v-if="canCancel" class="text-gray-3 pointer"
+        @click="cancelSub()")         {{$t('NN0592')}}
+  div(v-if="showUsage" class="sp-usage")
+    span(class="text-blue-1 mt-30")   {{$t('NN0594')}}
+    span(                       v-html="$t('NN0595', { amount: usage.bgrmRemain, date: myPaidDate })")
+    span(class="text-blue-1")         {{$t('NN0596')}}
+    div(class="sp-usage-disk")
+      div(class="sp-usage-disk-total")
+        div(class="sp-usage-disk-used" :style="diskPercent")
+      span {{`${diskUsedUi}/${usage.diskTotal} GB`}}
+    span(class="body-XS")             {{$t('NN0597')}}
+  hr(v-if="card.status !== 'none'")
+  div(v-if="card.status !== 'none'" class="sp-card")
+    span(class="text-blue-1")         {{$t('NN0598')}}
+    card-info(:card="card" :canDelete="isCancelingPro")
+    span(v-if="isFail"
+      class="text-red overline-LG")   {{$t('NN0626')}}
+    span(v-if="canUpdateCard" class="text-blue-1 body-SM pointer"
+      @click="openCardPopup()")       {{$t('NN0600')}}
+  hr
+  i18n-t(v-if="isErrorStatus" class="sp-error" keypath="NN0656" tag="div")
+    template(#contactus)
+      a(class="text-blue-1 pointer" :href="contactUsUrl") {{$t('NN0642')}}
+    template(#status)
+      span {{status}}
+  div(v-if="showBillingInfo" class="sp-info")
+    span(class="text-blue-1 body-MD") {{$t('NN0601')}}
+    //- switch(input.label)
+    template(v-for="input in billingInfoInput")
+      //- case country
+      options(v-if="input.label === 'country'" :options="countryData"
+              :value="userCountryInfo" @input="setUserCountryInfo")
+      //- case state & zip
+      div(v-else-if="input.label === 'state & zip'" class="sp-info__half")
+        span
+        label(for="zip") {{$t('NN0613')}}
+        options(:options="stateData" v-model="bi.state" :ph="$t('NN0612')")
+        input(id="zip" v-model="bi.zip" :invalid="biv.zip"
+              :placeholder="$t('NN0613')")
+        span
+        span(v-if="biv.zip" class="text-red") {{input.error}}
+      //- defualt
+      template(v-else)
+        label(:for="input.key") {{input.label}}
+        input(:id="input.key" v-model="bi[input.key]"
+              :placeholder="input.ph" :invalid="biv[input.key]")
+        span(v-if="biv[input.key]" class="text-red") {{input.error}}
+    btn(type="primary-mid" @click="updateBillingInfo()"
+        :disabled="!billingInfoCheck") {{$t('NN0176')}}
+  div(v-if="showCardPopup" class="popup-window")
+    div(class="sp-field" v-click-outside="closeCardPopup")
+      payment-field(isChange @next="closeCardPopup")
+  spinner(v-if="isLoading" class="sp-rocket")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import Options from '@/components/global/Options.vue'
 import PaymentField from '@/components/payment/PaymentField.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
@@ -87,7 +88,8 @@ const { mapFields } = createHelpers({
   mutationType: 'payment/updateField'
 })
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'SettingsPayment',
   components: {
     Options,
@@ -197,7 +199,7 @@ export default Vue.extend({
       this.userCountryInfo = userCountryInfo
 
       if (userCountryInfo === 'tw') {
-        Vue.notify({ group: 'error', text: '如要取消開立統編，請先取消訂閱後選擇台灣再次訂閱。' })
+        notify({ group: 'error', text: '如要取消開立統編，請先取消訂閱後選擇台灣再次訂閱。' })
         this.$nextTick(() => {
           // userCountryInfo should be set to other value and set back to oldVal, or it will display tw in dropdown.
           this.userCountryInfo = oldVal
@@ -329,7 +331,7 @@ div.sp-rocket {
     padding: 24px 6.4%;
   }
   .sp-field {
-    padding: 65px 7.466% 175px 7.466%;
+    padding: 65px 7.466% 130px 7.466%;
     bottom: 0px;
   }
 }

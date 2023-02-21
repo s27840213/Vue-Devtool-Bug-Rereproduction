@@ -1,32 +1,49 @@
+import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import { IBleed, IPage, IPageSizeWithBleeds, IPageState } from '@/interfaces/page'
 import store from '@/store'
-import Vue from 'vue'
+import { LayerType } from '@/store/types'
+import { floor, round, throttle } from 'lodash'
+import { nextTick } from 'vue'
 import designUtils from './designUtils'
 import editorUtils from './editorUtils'
 import FocusUtils from './focusUtils'
 import generalUtils from './generalUtils'
-import layerFactary from './layerFactary'
-import resizeUtils from './resizeUtils'
-import { throttle } from 'lodash'
 import groupUtils from './groupUtils'
-import { LayerType } from '@/store/types'
+import layerFactary from './layerFactary'
+import layerUtils from './layerUtils'
+import resizeUtils from './resizeUtils'
+import unitUtils, { PRECISION } from './unitUtils'
 
 class PageUtils {
+  get MAX_WIDTH() { return 5200 }
+  get MAX_HEIGHT() { return 5200 }
+  get MAX_AREA() { return this.MAX_WIDTH * this.MAX_HEIGHT }
+  get MAX_SIZE() { return 8000 }
+  get MIN_SIZE() { return 40 }
+  get MAX_BLEED() { return { px: 216, mm: 18.288 } }
+  get MOBILE_CARD_PADDING() { return 16 }
+
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get isDetailPage(): boolean { return store.getters.getGroupType === 1 }
+  get isMobile(): boolean { return store.getters.getUseMobileEditor }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get inBgRemoveMode(): boolean { return store.getters['bgRemove/getInBgRemoveMode'] }
   get autoRemoveResult(): IBgRemoveInfo { return store.getters['bgRemove/getAutoRemoveResult'] }
   get getPage(): (pageIndex: number) => IPage { return store.getters.getPage }
+  get getCurrPage(): IPage { return this.getPage(layerUtils.pageIndex) }
+  get getPageState(): (pageIndex: number) => IPageState { return store.getters.getPageState }
   get getPages(): Array<IPage> { return store.getters.getPages }
+  get hasBleed(): boolean { return store.getters.getHasBleed }
   get pageNum(): number { return this.getPages.length }
-  get getPageSize(): (pageIndex: number) => { width: number, height: number } { return store.getters.getPageSize }
+  get getPageSize(): (pageIndex: number) => { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } { return store.getters.getPageSize }
   get pagesName(): string { return store.getters.getPagesName }
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get currFocusPageSize() { return store.getters.getPageSize(this.currFocusPageIndex) }
+  get currFocusPageSizeWithBleeds() { return this.getPageSizeWithBleeds(this.currFocusPage) }
+  get defaultBleed() { return i18n.global.locale === 'us' ? 3 : 2 } // mm
   get isLastPage(): boolean {
     return this.pageNum - 1 === this.currFocusPageIndex
   }
@@ -62,8 +79,21 @@ class PageUtils {
     return this.getPage(this.currFocusPageIndex)
   }
 
+  get currFocusPageInViewRatio(): number {
+    const focusPage = document.getElementsByClassName('nu-page')[this.currFocusPageIndex]
+    const rect = focusPage.getBoundingClientRect()
+    const windowHeight = window.innerHeight
+    const topInView = Math.max(rect.top, 0)
+    const bottomInView = Math.min(rect.bottom, windowHeight)
+    return (bottomInView - topInView) / windowHeight
+  }
+
+  get addAssetTargetPageIndex(): number {
+    return this.currFocusPageInViewRatio < 0.25 ? this.middlemostPageIndex : this.currFocusPageIndex
+  }
+
   get pageRect(): { [index: string]: number } {
-    const { left, top, bottom, right } = document.getElementsByClassName(`nu-page-${this.currFocusPageIndex}`)[0].getBoundingClientRect()
+    const { left, top, bottom, right } = document.getElementsByClassName(`nu-page-bleed-${this.currFocusPageIndex}`)[0]?.getBoundingClientRect() ?? document.getElementsByClassName(`nu-page-${this.currFocusPageIndex}`)[0].getBoundingClientRect()
     return {
       left,
       top,
@@ -72,16 +102,34 @@ class PageUtils {
     }
   }
 
-  topBound: number
-  bottomBound: number
+  get topBound() {
+    return store.getters['page/getTopBound']
+  }
+
+  get bottomBound() {
+    return store.getters['page/getBottomBound']
+  }
+
+  get getEditorRenderSize(): { pageRect: DOMRect, editorRect: DOMRect } {
+    const page = document.getElementById(`nu-page_${layerUtils.pageIndex}`) as HTMLElement
+    const editor = document.getElementById('mobile-editor__content') as HTMLElement
+    return {
+      pageRect: page.getBoundingClientRect(),
+      editorRect: editor.getBoundingClientRect()
+    }
+  }
+
   mobileMinScaleRatio: number
   isSwitchingToEditor: boolean
+  editorSize: { width: number, height: number }
+  pageSize: { width: number, height: number }
+  originPageSize = { width: -1, height: -1 }
 
   constructor() {
-    this.topBound = -1
-    this.bottomBound = Number.MAX_SAFE_INTEGER
     this.mobileMinScaleRatio = 0
     this.isSwitchingToEditor = false
+    this.editorSize = { width: 0, height: 0 }
+    this.pageSize = { width: 0, height: 0 }
   }
 
   newPage(pageData: Partial<IPage>) {
@@ -98,9 +146,22 @@ class PageUtils {
         }
       })
     }
+
+    // set physical size to px size if not exist
+    if (pageData.width) pageData.physicalWidth ||= pageData.width
+    if (pageData.height) pageData.physicalHeight ||= pageData.height
+    pageData.unit ||= 'px'
+
+    const defaultBleeds = this.getPageDefaultBleeds()
     const defaultPage: IPage = {
       width: 1080,
       height: 1080,
+      x: 0,
+      y: 0,
+      physicalWidth: 1080,
+      physicalHeight: 1080,
+      unit: 'px',
+      // snapUtils: new SnapUtils(-1),
       backgroundColor: '#ffffff',
       backgroundImage: {
         config: layerFactary.newImage({
@@ -130,8 +191,13 @@ class PageUtils {
         v: [],
         h: []
       },
-      isAutoResizeNeeded: false
+      isEnableBleed: false,
+      bleeds: defaultBleeds,
+      physicalBleeds: defaultBleeds,
+      isAutoResizeNeeded: false,
+      contentScaleRatio: 1
     }
+    // pageData.snapUtils && delete pageData.snapUtils
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))
   }
 
@@ -177,6 +243,34 @@ class PageUtils {
       newPage,
       pos
     })
+
+    // remove top and bottom bleeds for email marketing design
+    if (this.isDetailPage) {
+      if (pos !== 0) {
+        this.setBleeds(pos, { ...newPage.physicalBleeds, top: 0, ...(pos !== this.pageNum - 1 && { bottom: 0 }) })
+        this.setBleeds(pos - 1, { ...this.getPage(pos - 1).physicalBleeds, bottom: 0 })
+      } else if (this.pageNum > 1) {
+        this.setBleeds(pos, { ...newPage.physicalBleeds, top: this.getPage(this.pageNum - 1).physicalBleeds.bottom, bottom: 0 })
+        this.setBleeds(1, { ...this.getPage(1).physicalBleeds, top: 0 })
+      }
+    }
+  }
+
+  deletePage(pageIndex: number) {
+    const page = this.getPage(pageIndex)
+    store.commit('DELETE_page', pageIndex)
+
+    // add top and bottom bleeds for email marketing design
+    if (this.isDetailPage) {
+      if (this.pageNum === 1) {
+        pageUtils.setBleeds(0, {
+          ...page.physicalBleeds,
+          top: pageIndex === 0 ? page.physicalBleeds.top : this.getPage(0).physicalBleeds.top,
+          bottom: pageIndex === 1 ? page.physicalBleeds.bottom : this.getPage(0).physicalBleeds.bottom
+        })
+      } else if (pageIndex === 0) pageUtils.setBleeds(0, page.physicalBleeds)
+      else if (pageIndex === this.pageNum) pageUtils.setBleeds(this.pageNum - 1, page.physicalBleeds)
+    }
   }
 
   setPages(pages = [this.newPage({})]) {
@@ -186,6 +280,11 @@ class PageUtils {
   setPagesName(name: string) {
     store.commit('SET_pagesName', name)
     designUtils.renameDesign(name)
+  }
+
+  setPageSize(index: number, width: number, height: number, physicalWidth = width, physicalHeight = height, unit = 'px') {
+    store.commit('SET_pageSize', { index, width, height, physicalWidth, physicalHeight, unit })
+    if (!this.getPage(index).isEnableBleed) this.resetBleeds(index)
   }
 
   resizePage(format: { width: number, height: number }) {
@@ -206,18 +305,6 @@ class PageUtils {
   }
 
   activeMiddlemostPage(): number {
-    // pages.some((page: { top: number, bottom: number }, index: number) => {
-    //   if (page.top < centerLinePos && page.bottom > centerLinePos) {
-    //     targetIndex = index
-    //     return true
-    //   } else {
-    //     const dist = Math.min(Math.abs(centerLinePos - page.top), Math.abs(centerLinePos - page.bottom))
-    //     if (minDistance > dist) {
-    //       targetIndex = index
-    //       minDistance = dist
-    //     }
-    //   }
-    // })
     const targetIndex = generalUtils.isTouchDevice() && this.isDetailPage ? this.currActivePageIndex : this.middlemostPageIndex
     FocusUtils.focusElement(`.nu-page-${targetIndex}`, true)
     return this.middlemostPageIndex
@@ -361,8 +448,11 @@ class PageUtils {
     }
 
     if (!preventFocus) this.activeMiddlemostPage()
-    this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
-    this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
+
+    store.commit('page/SET_STATE', {
+      topBound: this.findBoundary(pages, containerRect, targetIndex - 1, true),
+      bottomBound: this.findBoundary(pages, containerRect, targetIndex + 1, false)
+    })
   }
 
   findBoundary(posArr: Array<{ top: number, bottom: number }>, containerRect: DOMRect, currIndex: number, toTop: boolean): number {
@@ -424,35 +514,53 @@ class PageUtils {
     if (editorUtils.mobileAllPageMode || this.isSwitchingToEditor) {
       return
     }
+
     // If mobile user zoom in page, don't fitPage.
-    if (generalUtils.isTouchDevice() && !minRatioFiRestricttDisable && pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
+    if (this.isMobile && !minRatioFiRestricttDisable && pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
       return
     }
 
     // Get size of target(design) and editor.
     // Target size can be pass by param or get according to situation.
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
+    const mobilePanelHeight = document.getElementsByClassName('mobile-panel')[0]?.clientHeight ?? 0
+
     if (!editorViewBox) return
-    const { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
+    let { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
     const { width: targetWidth, height: targetHeight }: { width: number, height: number } =
       (this.inBgRemoveMode ? this.autoRemoveResult
-        : this.currFocusPageSize)
+        : (this.hasBleed ? this.currFocusPageSizeWithBleeds : this.currFocusPageSize))
+
+    const RESIZE_MULTIPLIER = this.isMobile ? 1 : 0.8
+
+    if (this.isMobile) {
+      editorWidth -= this.MOBILE_CARD_PADDING * 2
+      editorHeight -= this.MOBILE_CARD_PADDING * 2
+    }
 
     // Calculate and do resize
-    const resizeRatio = Math.min(editorWidth / (targetWidth * (this.scaleRatio / 100)), editorHeight / (targetHeight * (this.scaleRatio / 100))) * 0.8
+    const resizeRatio = Math.min(
+      editorWidth / (targetWidth * (this.scaleRatio / 100)),
+      (editorHeight - mobilePanelHeight) / (targetHeight * (this.scaleRatio / 100))
+    ) * RESIZE_MULTIPLIER
     const newRatio = Math.max(3, Math.round(this.scaleRatio * resizeRatio))
 
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
       store.commit('SET_pageScaleRatio', 100)
     } else {
-      store.commit('SET_pageScaleRatio', newRatio)
+      // @testing not use scaleRatio in mobile
+      if (!generalUtils.isTouchDevice()) {
+        store.commit('SET_pageScaleRatio', newRatio)
+      } else {
+        store.commit('SET_pageScaleRatio', 100)
+      }
     }
 
     if (!this.inBgRemoveMode) {
       this.findCentralPageIndexInfo()
     }
     if (scrollToTop) {
-      Vue.nextTick(() => {
+      nextTick(() => {
         editorViewBox.scrollTo((editorViewBox.scrollWidth - editorWidth) / 2, 0)
       })
     }
@@ -460,13 +568,15 @@ class PageUtils {
       pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
     } else {
       this.isSwitchingToEditor = true
-      Vue.nextTick(() => {
+      nextTick(() => {
         setTimeout(() => {
           this.scrollIntoPage(this.currFocusPageIndex, 'auto')
           this.isSwitchingToEditor = false
         }, 0)
       })
     }
+
+    editorUtils.handleContentScaleRatio(this.currFocusPageIndex)
   }
 
   fillPage() {
@@ -483,6 +593,42 @@ class PageUtils {
     if (!this.inBgRemoveMode) {
       this.findCentralPageIndexInfo()
     }
+  }
+
+  getMinScaleRatio(pageState: IPageState, editorView: Element) {
+    // Get size of target(design) and editor.
+    // Target size can be pass by param or get according to situation.
+    const mobilePanelHeight = editorUtils.showMobilePanel ? 0 : document.getElementsByClassName('mobile-panel')[0]?.clientHeight
+
+    let { clientWidth: editorWidth, clientHeight: editorHeight } = editorView
+    const { width: targetWidth, height: targetHeight }: { width: number, height: number } = pageState.config
+
+    const RESIZE_MULTIPLIER = this.isMobile ? 1 : 0.8
+
+    if (this.isMobile) {
+      editorWidth -= this.MOBILE_CARD_PADDING * 2
+      editorHeight -= this.MOBILE_CARD_PADDING * 2
+    }
+
+    // Calculate and do resize
+    const resizeRatio = Math.min(
+      editorWidth / (targetWidth * (this.scaleRatio / 100)),
+      (editorHeight - mobilePanelHeight) / (targetHeight * (this.scaleRatio / 100))
+    ) * RESIZE_MULTIPLIER
+
+    const newRatio = Math.max(3, Math.round(this.scaleRatio * resizeRatio))
+
+    return newRatio
+    // if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
+    //   store.commit('SET_pageScaleRatio', 100)
+    // } else {
+    //   // @testing not use scaleRatio in mobile
+    //   if (!generalUtils.isTouchDevice()) {
+    //     store.commit('SET_pageScaleRatio', newRatio)
+    //   } else {
+    //     store.commit('SET_pageScaleRatio', 100)
+    //   }
+    // }
   }
 
   isAllPageSizeEqual() {
@@ -506,18 +652,6 @@ class PageUtils {
     })
   }
 
-  getPageWidth(excludes: number[] = []) {
-    // return width and height of first page
-    const pages = this.getPages
-    for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
-      if (!excludes.includes(pageIndex)) {
-        const { width, height } = pages[pageIndex]
-        return { width, height }
-      }
-    }
-    return {}
-  }
-
   hasDesignId(pageIndex: number) {
     return this.getPage(pageIndex).designId !== ''
   }
@@ -530,6 +664,256 @@ class PageUtils {
 
   setAutoResizeNeededForPage(page: IPage, isAutoResizeNeeded: boolean) {
     page.isAutoResizeNeeded = isAutoResizeNeeded
+  }
+
+  /**
+   * Returns DPI of target page based on it's px size and physical size.
+   * @param page Target page, use current focused page if undefined
+   * @returns DPI of target page if target page is in physical size, otherwise 96 (default DPI)
+   */
+  getPageDPI(pageSize: { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } = this.currFocusPageSize): { width: number, height: number } {
+    return {
+      width: pageSize.width / unitUtils.convert(pageSize.physicalWidth, pageSize.unit, 'in'),
+      height: pageSize.height / unitUtils.convert(pageSize.physicalHeight, pageSize.unit, 'in')
+    }
+  }
+
+  /**
+   * Returns page size with bleeds and size of bleeds
+   * @param pageSize Target page size, use size of current focused page if undefined
+   * @returns
+   ** width, height, physicalWidth, physicalHeight: page size with bleeds
+   ** bleeds, physicalBleeds: size of bleeds
+   ** unit: unit of physical size for page and bleeds
+   */
+  getPageSizeWithBleeds(pageSize: IPageSizeWithBleeds = this.currFocusPage): IPageSizeWithBleeds {
+    const noBleed = { top: 0, bottom: 0, left: 0, right: 0 } as IBleed
+    const { width, height, physicalWidth, physicalHeight, unit } = pageSize
+    let { bleeds, physicalBleeds } = pageSize
+    bleeds ??= noBleed
+    physicalBleeds ??= bleeds
+    return {
+      width: width + bleeds.left + bleeds.right,
+      height: height + bleeds.top + bleeds.bottom,
+      physicalWidth: physicalWidth + physicalBleeds.left + physicalBleeds.right,
+      physicalHeight: physicalHeight + physicalBleeds.top + physicalBleeds.bottom,
+      bleeds,
+      physicalBleeds,
+      unit
+    }
+  }
+
+  /**
+   * Returns page size without bleeds and size of bleeds
+   * @param pageSize Target page size
+   * @returns
+   ** width, height, physicalWidth, physicalHeight: page size without bleeds
+   ** bleeds, physicalBleeds: size of bleeds
+   ** unit: unit of physical size for page and bleeds
+   */
+  removeBleedsFromPageSize(pageSize: IPageSizeWithBleeds): IPageSizeWithBleeds {
+    const { width, height, physicalWidth, physicalHeight, bleeds, physicalBleeds, unit } = pageSize
+    if (!(bleeds && physicalBleeds)) return pageSize
+    return {
+      width: width - bleeds.left - bleeds.right,
+      height: height - bleeds.top - bleeds.bottom,
+      physicalWidth: physicalWidth - physicalBleeds.left - physicalBleeds.right,
+      physicalHeight: physicalHeight - physicalBleeds.top - physicalBleeds.bottom,
+      bleeds,
+      physicalBleeds,
+      unit
+    }
+  }
+
+  /**
+   * Set isEnableBleed for one or all pages
+   * @param value New value of isEnableBleed
+   * @param pageIndex Index of target page, apply to all pages if unspecified
+   */
+  setIsEnableBleed(value: boolean, pageIndex?: number) {
+    store.commit('SET_isEnableBleed', {
+      value,
+      pageIndex
+    })
+  }
+
+  setBleeds(pageIndex: number, physicalBleeds: IBleed, bleeds?: IBleed) {
+    const page = this.getPage(pageIndex)
+    const dpi = this.getPageDPI(page)
+    physicalBleeds = Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, isNaN(v) ? 0 : v])) as IBleed // map NaN to 0
+    const newBleeds = bleeds || Object.fromEntries(Object.entries(physicalBleeds).map(([k, v]) => [k, round(unitUtils.convert(v, page.unit, 'px', k === 'left' || k === 'right' ? dpi.width : dpi.height))])) as IBleed // convert bleed to px size
+    const newPhysicalBleeds = physicalBleeds
+    store.commit('SET_bleeds', { pageIndex, bleeds: newBleeds, physicalBleeds: newPhysicalBleeds })
+  }
+
+  resetBleeds(pageIndex: number) {
+    const page = this.getPage(pageIndex)
+    const defaultBleeds = this.getPageDefaultBleeds(page, 'px')
+    const unit = page.unit ?? 'px'
+    const pagesLength = store.getters.getPagesLength
+    defaultBleeds.top = this.isDetailPage && pageIndex !== 0 ? 0 : defaultBleeds.top
+    defaultBleeds.bottom = this.isDetailPage && pageIndex !== pagesLength - 1 ? 0 : defaultBleeds.bottom
+    const defaultPhysicalBleeds = unit === 'px' ? defaultBleeds : this.getPageDefaultBleeds(page)
+    if (unit !== 'px') {
+      defaultPhysicalBleeds.top = this.isDetailPage && pageIndex !== 0 ? 0 : defaultPhysicalBleeds.top
+      defaultPhysicalBleeds.bottom = this.isDetailPage && pageIndex !== pagesLength - 1 ? 0 : defaultPhysicalBleeds.bottom
+    }
+    store.commit('SET_bleeds', { pageIndex, bleeds: defaultBleeds, physicalBleeds: defaultPhysicalBleeds })
+  }
+
+  /**
+   * Resize pages oversized to max size
+   * @returns Whether any page has been fixed
+   */
+  fixPageSize(): boolean {
+    const pages = this.getPages
+    let fixed = false
+    if (this.isDetailPage) {
+      // resize all pages of email marketing design to minimum fixed width
+      let minFixedWidth = Number.POSITIVE_INFINITY
+      pages.forEach(page => {
+        if (page.width * page.height > this.MAX_AREA) {
+          const format = { width: page.width, height: page.height, physicalWidth: page.physicalWidth ?? page.width, physicalHeight: page.physicalHeight ?? page.height, unit: page.unit ?? 'px' }
+
+          // clamp aspect ratio within allowed range
+          const aspectRatio = Math.max(Math.min(format.width / format.height, this.MAX_SIZE / this.MIN_SIZE), this.MIN_SIZE / this.MAX_SIZE)
+
+          format.width = Math.sqrt(this.MAX_AREA * aspectRatio)
+          format.height = Math.floor(format.width / aspectRatio)
+          format.width = Math.floor(format.width)
+
+          // clamp fixed width within allowed range
+          if (Math.max(format.width, format.height) > this.MAX_SIZE) {
+            format.width = this.MAX_SIZE
+            if (aspectRatio < 1) {
+              format.width = Math.floor(format.width * aspectRatio)
+            }
+          }
+          if (Math.min(format.width, format.height) < this.MIN_SIZE) {
+            format.width = this.MIN_SIZE
+            if (aspectRatio < 1) {
+              format.width = Math.floor(format.width * aspectRatio)
+            }
+          }
+
+          minFixedWidth = Math.min(minFixedWidth, format.width)
+          fixed = true
+        }
+      })
+      if (fixed) {
+        pages.forEach((page, index) => {
+          const format = { width: page.width, height: page.height, physicalWidth: page.physicalWidth ?? page.width, physicalHeight: page.physicalHeight ?? page.height, unit: page.unit ?? 'px' }
+          const aspectRatio = format.width / format.height
+          const precision = format.unit === 'px' ? 0 : PRECISION
+          format.width = minFixedWidth
+          format.height = Math.max(Math.min(Math.floor(format.width / aspectRatio), this.MAX_SIZE), this.MIN_SIZE)
+
+          /**
+           * @Note don't use unitUtils.converSize() to get physical size, because DPI calculation for pages in email marketing designs is different.
+           */
+          format.physicalWidth = floor(format.physicalWidth * format.width / page.width, precision)
+          format.physicalHeight = floor(format.physicalHeight * format.height / page.height, precision)
+          resizeUtils.resizePage(index, page, format)
+        })
+      }
+    } else {
+      pages.forEach((page, index) => {
+        if (page.width * page.height > this.MAX_AREA) {
+          const format = { width: page.width, height: page.height, physicalWidth: page.physicalWidth ?? page.width, physicalHeight: page.physicalHeight ?? page.height, unit: page.unit ?? 'px' }
+          const precision = format.unit === 'px' ? 0 : PRECISION
+          const aspectRatio = format.width / format.height
+          format.width = Math.sqrt(this.MAX_AREA * aspectRatio)
+          format.height = Math.floor(format.width / aspectRatio)
+          format.width = Math.floor(format.width)
+          const cap = this.clampSize(format.width, format.height)
+          format.width = cap.width
+          format.height = cap.height
+          const physicalSize = format.unit === 'px' ? { width: format.width, height: format.height } : unitUtils.convertSize(format.width, format.height, 'px', format.unit)
+          format.physicalWidth = floor(physicalSize.width, precision)
+          format.physicalHeight = floor(physicalSize.height, precision)
+          resizeUtils.resizePage(index, page, format)
+          fixed = true
+        }
+      })
+    }
+    return fixed
+  }
+
+  clampSize(width: number, height: number) {
+    // resize oversized edge to limitation while preserves aspect ratio
+    const aspectRatio = width / height
+    if (Math.max(width, height) > this.MAX_SIZE) {
+      if (aspectRatio > 1) {
+        width = this.MAX_SIZE
+        height = Math.ceil(width / aspectRatio)
+      } else {
+        height = this.MAX_SIZE
+        width = Math.ceil(height * aspectRatio)
+      }
+    }
+    if (Math.min(width, height) < this.MIN_SIZE) {
+      if (aspectRatio > 1) {
+        height = this.MIN_SIZE
+        width = Math.floor(height * aspectRatio)
+      } else {
+        width = this.MIN_SIZE
+        height = Math.floor(width / aspectRatio)
+      }
+    }
+
+    // adjust aspect ratio to fit limitation if still oversize
+    if (Math.max(width, height) > this.MAX_SIZE) {
+      if (aspectRatio > 1) {
+        width = this.MAX_SIZE
+      } else {
+        height = this.MAX_SIZE
+      }
+    }
+    return { width, height }
+  }
+
+  getPageDefaultBleeds(pageSize = { physicalWidth: 1080, physicalHeight: 1080, unit: 'px' }, unit = pageSize.unit): IBleed {
+    const defaultBleed = this.defaultBleed
+    const precision = unit === 'px' ? 0 : PRECISION
+    const dpi = unitUtils.getConvertDpi(pageSize)
+    return {
+      top: round(unitUtils.convert(defaultBleed, 'mm', unit, dpi.height), precision),
+      bottom: round(unitUtils.convert(defaultBleed, 'mm', unit, dpi.height), precision),
+      left: round(unitUtils.convert(defaultBleed, 'mm', unit, dpi.width), precision),
+      right: round(unitUtils.convert(defaultBleed, 'mm', unit, dpi.width), precision)
+    } as IBleed
+  }
+
+  getDefaultBleedMap(pageIndex: number) {
+    const defaultBleed = this.defaultBleed
+    const toBleed = (val: number) => ({
+      top: this.isDetailPage && pageIndex !== 0 ? 0 : val,
+      bottom: this.isDetailPage && pageIndex !== store.getters.getPagesLength - 1 ? 0 : val,
+      left: val,
+      right: val
+    } as IBleed)
+    const defaultPxBleed = this.getPageDefaultBleeds(this.getPageSize(pageIndex), 'px')
+    if (this.isDetailPage) {
+      if (pageIndex !== 0) defaultPxBleed.top = 0
+      if (pageIndex !== store.getters.getPagesLength - 1) defaultPxBleed.bottom = 0
+    }
+    return {
+      px: defaultPxBleed,
+      cm: toBleed(round(unitUtils.convert(defaultBleed, 'mm', 'cm'), PRECISION)),
+      mm: toBleed(defaultBleed),
+      in: toBleed(round(unitUtils.convert(defaultBleed, 'mm', 'in'), PRECISION))
+    } as { [index: string]: IBleed }
+  }
+
+  updatePagePos(pageIndex: number, pos: { x?: number, y?: number }) {
+    const { x, y } = pos
+    store.commit('UPDATE_pagePos', {
+      pageIndex,
+      styles: {
+        ...((typeof x !== 'undefined') && { x }),
+        ...((typeof y !== 'undefined') && { y })
+      }
+    })
   }
 }
 

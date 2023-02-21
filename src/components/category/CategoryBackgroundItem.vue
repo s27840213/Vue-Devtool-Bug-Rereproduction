@@ -1,25 +1,37 @@
 <template lang="pug">
-  img(class="pointer"
-    ref="img"
-    :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
-    draggable="false"
-    @click="addBackground"
-    @click.right.prevent="openUpdateDesignPopup()"
-    @error="handleNotFound")
+img(class="pointer"
+  ref="img"
+  :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
+  draggable="false"
+  @click="addBackground"
+  @click.right.prevent="openUpdateDesignPopup()"
+  @error="handleNotFound")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
+import i18n from '@/i18n'
 import store from '@/store'
 import { mapGetters } from 'vuex'
+import { notify } from '@kyvg/vue3-notification'
 import AssetUtils from '@/utils/assetUtils'
 import imageUtils from '@/utils/imageUtils'
+import { IListServiceContentDataItem } from '@/interfaces/api'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    src: String,
-    item: Object,
-    locked: Boolean
+    src: {
+      type: String
+    },
+    item: {
+      type: Object as PropType<IListServiceContentDataItem>,
+      required: true
+    },
+    locked: {
+      type: Boolean,
+      required: true
+    }
   },
   data() {
     return {
@@ -38,7 +50,7 @@ export default Vue.extend({
     },
     addBackground() {
       if (this.locked) {
-        return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+        return notify({ group: 'copy', text: i18n.global.tc('NN0804') })
       }
       const img = this.$refs.img as HTMLImageElement
       if (!img) {

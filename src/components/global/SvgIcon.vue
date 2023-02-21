@@ -1,11 +1,16 @@
 <template lang="pug">
-  svg(class="svg-icon" :class="`text-${iconColor}`"
-      ref="icon"
-      :style="iconStyles()")
-    use(:xlink:href="`#${iconName}`")
+svg(v-if="iconName === 'loading'"
+    class="svg-icon"
+    :class="`text-${iconColor} svg-${iconName}`"
+    viewBox="0 0 120 30"
+    :style="iconStyles()"
+    v-html="loadingSvg")
+svg(v-else class="svg-icon" :class="`text-${iconColor} svg-${iconName}`"
+    :style="iconStyles()")
+  use(:xlink:href="`#${iconName}`")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
 /**
  * 這個 Components 我把它註冊在全域，使用時可以用不Import
@@ -19,7 +24,8 @@ import Vue from 'vue'
  * 2021.9.24 更新: 如果說圖片是 svg 格式，但沒有顏色切換需求，其實也可以用這個元件，就只是改顏色不會影響到他而已
  */
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'SvgIcon',
   props: {
     iconName: {
@@ -34,10 +40,44 @@ export default Vue.extend({
       type: String,
       default: 'blue-1'
     },
-    iconHeight: String
+    iconHeight: {
+      type: String
+    }
   },
   data() {
     return {
+      loadingSvg: `
+        <circle cx="15" cy="15" r="15">
+            <animate attributeName="r" from="15" to="15"
+                    begin="0s" dur="0.8s"
+                    values="15;9;15" calcMode="linear"
+                    repeatCount="indefinite" />
+            <animate attributeName="fill-opacity" from="1" to="1"
+                    begin="0s" dur="0.8s"
+                    values="1;.5;1" calcMode="linear"
+                    repeatCount="indefinite" />
+        </circle>
+        <circle cx="60" cy="15" r="9" fill-opacity="0.3">
+            <animate attributeName="r" from="9" to="9"
+                    begin="0s" dur="0.8s"
+                    values="9;15;9" calcMode="linear"
+                    repeatCount="indefinite" />
+            <animate attributeName="fill-opacity" from="0.5" to="0.5"
+                    begin="0s" dur="0.8s"
+                    values=".5;1;.5" calcMode="linear"
+                    repeatCount="indefinite" />
+        </circle>
+        <circle cx="105" cy="15" r="15">
+            <animate attributeName="r" from="15" to="15"
+                    begin="0s" dur="0.8s"
+                    values="15;9;15" calcMode="linear"
+                    repeatCount="indefinite" />
+            <animate attributeName="fill-opacity" from="1" to="1"
+                    begin="0s" dur="0.8s"
+                    values="1;.5;1" calcMode="linear"
+                    repeatCount="indefinite" />
+        </circle>
+      `
     }
   },
   methods: {

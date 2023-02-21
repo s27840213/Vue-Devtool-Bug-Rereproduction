@@ -1,32 +1,35 @@
 <template lang="pug">
-  div(class="panel-photo")
-    search-bar(class="mb-15"
-      :style="searchBarStyle()"
-      :placeholder="$t('NN0092', {target: $tc('NN0002',1)})"
-      clear
-      :defaultKeyword="keyword"
-      @search="handleSearch")
-    div(v-if="keyword && !pending && !searchResult.length"
-      class="text-white text-left") {{$t('NN0393', {keyword: keyword, target: $tc('NN0002',1)})}}
-    //- Search result and main content
-    image-gallery(v-for="item in categoryListArray"
-                  v-show="item.show" :ref="item.key" :key="item.key"
-                  :images="item.content" @loadMore="handleLoadMore" vendor="unsplash")
-      template(#pending)
-        div(v-if="pending" class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
+div(class="panel-photo")
+  search-bar(class="mb-15"
+    :style="searchBarStyle()"
+    :placeholder="$t('NN0092', {target: $tc('NN0002',1)})"
+    clear
+    :defaultKeyword="keyword"
+    @search="handleSearch")
+  div(v-if="keyword && !pending && !searchResult.length"
+    class="text-white text-left") {{$t('NN0393', {keyword: keyword, target: $tc('NN0002',1)})}}
+  //- Search result and main content
+  image-gallery(v-for="item in categoryListArray"
+                v-show="item.show" :ref="item.key" :key="item.key"
+                :images="item.content" @loadMore="handleLoadMore" vendor="unsplash"
+                @scroll.passive="handleScrollTop($event, item.key)")
+    template(#pending)
+      div(v-if="pending" class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
-import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
+import ImageGallery, { CImageGallery } from '@/components/image-gallery/ImageGallery.vue'
 import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  name: 'PanelPhoto',
+  emits: [],
   components: {
     SearchBar,
     ImageGallery
@@ -61,26 +64,25 @@ export default Vue.extend({
   mounted() {
     generalUtils.panelInit('photo',
       this.handleSearch,
-      () => { /**/ },
+      async () => { /**/ },
       () => this.getPhotos({ keyword: '' })
     )
   },
   activated() {
-    this.$refs.mainContent[0].$el.children[0].scrollTop = this.scrollTop.mainContent
-    this.$refs.searchResult[0].$el.children[0].scrollTop = this.scrollTop.searchResult
-    this.$refs.mainContent[0].$el.children[0].addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.children[0].addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
-  },
-  deactivated() {
-    this.$refs.mainContent[0].$el.children[0].removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.children[0].removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CImageGallery[])[0]
+      const searchResult = (this.$refs.searchResult as CImageGallery[])[0]
+      mainContent.$el.scrollTop = this.scrollTop.mainContent
+      searchResult.$el.scrollTop = this.scrollTop.searchResult
+    })
   },
   watch: {
     keyword(newVal: string) {
       if (!newVal) {
         this.$nextTick(() => {
           // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          this.$refs.mainContent[0].$el.children[0].scrollTop = this.scrollTop.mainContent
+          const mainContent = (this.$refs.mainContent as CImageGallery[])[0]
+          mainContent.$el.scrollTop = this.scrollTop.mainContent
         })
       }
     }
@@ -91,10 +93,10 @@ export default Vue.extend({
       'getMorePhotos',
       'resetSearch'
     ]),
-    handleSearch(keyword?: string) {
+    async handleSearch(keyword?: string) {
       this.resetSearch()
       if (keyword) {
-        this.getPhotos({ keyword })
+        await this.getPhotos({ keyword })
       }
     },
     handleLoadMore() {

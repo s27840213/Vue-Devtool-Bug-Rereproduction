@@ -1,25 +1,41 @@
 <template lang="pug">
-  div(class="nu-group"
-      :style="styles()")
-    nu-layer(v-for="(layer,index) in config.layers"
-      :key="`layer-${index}`"
-      :pageIndex="pageIndex"
-      :layerIndex="layerIndex"
-      :subLayerIndex="index"
-      :contentScaleRatio="contentScaleRatio"
-      :config="layer"
-      :isSubLayer="true")
+div(class="nu-group"
+    :style="styles()")
+  nu-layer(v-for="(layer,index) in config.layers"
+    :key="`layer-${layer.id}`"
+    :pageIndex="pageIndex"
+    :page="page"
+    :primaryLayer="config"
+    :layerIndex="layerIndex"
+    :subLayerIndex="index"
+    :contentScaleRatio="contentScaleRatio"
+    :config="layer"
+    :isSubLayer="true")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { IPage } from '@/interfaces/page'
+import { defineComponent, PropType } from 'vue'
 
-export default Vue.extend({
-  inheritAttrs: false,
+export default defineComponent({
+  emits: [],
   props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
+    config: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -28,8 +44,8 @@ export default Vue.extend({
   methods: {
     styles() {
       return {
-        width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
-        height: `${this.config.styles.initHeight * this.contentScaleRatio}px`,
+        // width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
+        // height: `${this.config.styles.initHeight * this.contentScaleRatio}px`,
         transform: `scale(${1 / this.contentScaleRatio})`,
         transformOrigin: 'top left'
       }

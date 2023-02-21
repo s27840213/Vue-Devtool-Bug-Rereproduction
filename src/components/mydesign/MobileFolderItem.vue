@@ -1,45 +1,61 @@
 <template lang="pug">
-  div(class="mobile-folder-item"
-      @click="emitGoto")
-    div(class="mobile-folder-item__body")
-      div(v-if="isSelected"
-          class="mobile-folder-item__checkbox-checked"
-          @click.stop="emitDeselect")
-          svg-icon(iconName="done"
-                  iconWidth="11.82px"
-                  iconHeight="8.71px"
-                  iconColor="white")
-      div(v-if="!isSelected && isAnySelected"
-        class="mobile-folder-item__checkbox"
-        @click.stop="emitSelect")
-      div(class="mobile-folder-item__block")
-        svg-icon(style="pointer-events: none"
-                iconName="folder"
-                iconWidth="24px"
-                iconColor="gray-3")
-      div(class="mobile-folder-item__info")
-        div(class="mobile-folder-item__name")
-          span(:title="config.name") {{ config.name }}
-        //- div(class="mobile-folder-item__description") {{ $t('NN0197', { num: 0 }) }}
-    div(class="mobile-folder-item__more"
-        @click.stop="openMenu()")
-      svg-icon(iconName="more_vertical"
+div(class="mobile-folder-item"
+    @click="emitGoto")
+  div(class="mobile-folder-item__body")
+    div(v-if="isSelected"
+        class="mobile-folder-item__checkbox-checked"
+        @click.stop="emitDeselect")
+        svg-icon(iconName="done"
+                iconWidth="20px"
+                iconHeight="20px"
+                iconColor="white")
+    div(v-if="!isSelected && isAnySelected"
+      class="mobile-folder-item__checkbox"
+      @click.stop="emitSelect")
+    div(class="mobile-folder-item__block")
+      svg-icon(style="pointer-events: none"
+              iconName="folder"
               iconWidth="24px"
-              iconColor="gray-2")
+              iconColor="gray-3")
+    div(class="mobile-folder-item__info")
+      div(class="mobile-folder-item__name")
+        span(:title="config.name") {{ config.name }}
+      //- div(class="mobile-folder-item__description") {{ $t('NN0197', { num: 0 }) }}
+  div(class="mobile-folder-item__more"
+      @click.stop="openMenu()")
+    svg-icon(iconName="more_vertical"
+            iconWidth="24px"
+            iconColor="gray-2")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
-    path: Array,
-    config: Object,
-    isAnySelected: Boolean,
-    isSelected: Boolean,
-    index: Number
+    path: {
+      type: Array,
+      required: true
+    },
+    config: {
+      type: Object,
+      required: true
+    },
+    isAnySelected: {
+      type: Boolean,
+      required: true
+    },
+    isSelected: {
+      type: Boolean,
+      required: true
+    },
+    index: {
+      type: Number,
+      required: true
+    }
   },
+  emits: ['select', 'deselect', 'goto'],
   computed: {
     ...mapGetters('design', {
       selectedDesigns: 'getSelectedDesigns'
@@ -99,12 +115,14 @@ export default Vue.extend({
   &__body {
     display: flex;
     align-items: center;
-    gap: 16px;
+    > div + div {
+      margin-left: 16px;
+    }
   }
   &__info {
     display: flex;
     flex-direction: column;
-    align-items: start;
+    align-items: flex-start;
   }
   &__block {
     width: 60px;

@@ -4,7 +4,7 @@ div(class="popup-file")
     class="popup-file__profile")
     router-link(to="/settings/account"
         class="popup-file__option__link"
-        @click.native="closePopup")
+        @click="closePopup")
       avatar(class="mr-10"
         :textSize="14"
         :avatarSize="35")
@@ -13,8 +13,10 @@ div(class="popup-file")
   div(class="popup-file__item" :class="{disabled: isFontLoading}" @click="save()")
     span {{$t('NN0009')}}
   div(class="popup-file__item" @click="newDesign()")
-    span {{$t('NN0072')}}
+    span {{$tc('NN0072')}}
   hr(class="popup-file__hr")
+  div(class="popup-file__item " @click="toggleBleed()")
+    span {{hasBleed ? `${$t('NN0779')}` : `${$t('NN0778')}`}}
   div(class="popup-file__item " @click="togglerRuler()")
     span {{$t('NN0073')}}
     svg-icon(v-if="isShownRuler" class="pointer"
@@ -32,14 +34,18 @@ div(class="popup-file")
       span 匯入設計
     div(class="popup-file__item" @click="exportJSON()")
       span 匯出設計
+    div(class="popup-file__item" @click="toogleAdminView()")
+      span {{enableAdminView ? '隱藏管理員介面' : '顯示管理員介面'}}
     //- div(class="popup-file__item" @click="testSubscribe()")
     //-   span 測試訂閱
     //- div(class="popup-file__item" @click="testTrail()")
     //-   span 測試試用
   hr(class="popup-file__hr")
-  div(class="popup-file__item"
-      @click="onLogoutClicked()")
-      span {{$tc('NN0167',2)}}
+  div(class="popup-file__item")
+    url(:url="$t('NN0791')" :newTab="true")
+      span {{$t('NN0790', {type: $tc('NN0793', 1)})}}
+  div(class="popup-file__item" @click="onLogoutClicked()")
+    span {{$tc('NN0167',2)}}
   div(class="popup-file__item" @click="gotoMobile()")
     span(class="text-gray-3") Version: {{buildNumber}}
   template(v-if="isAdmin")
@@ -58,21 +64,23 @@ div(class="popup-file")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import popupUtils from '@/utils/popupUtils'
-import pageUtils from '@/utils/pageUtils'
-import rulerUtils from '@/utils/rulerUtils'
-import { mapGetters, mapState } from 'vuex'
-import shortcutHandler from '@/utils/shortcutUtils'
-import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
-import stepsUtils from '@/utils/stepsUtils'
+import Url from '@/components/global/Url.vue'
+import fileUtils from '@/utils/fileUtils'
 import gtmUtils from '@/utils/gtmUtils'
-import page from '@/store/module/page'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import rulerUtils from '@/utils/rulerUtils'
+import shortcutHandler from '@/utils/shortcutUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
-    Avatar
+    Avatar,
+    Url
   },
   data() {
     return {
@@ -81,13 +89,17 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('user', [
-      'uname'
+      'uname',
+      'enableAdminView'
     ]),
     ...mapGetters({
       isLogin: 'user/isLogin',
       isAdmin: 'user/isAdmin',
       account: 'user/getAccount',
-      isFontLoading: 'text/getIsFontLoading'
+      isFontLoading: 'text/getIsFontLoading',
+      pagesLength: 'getPagesLength',
+      groupType: 'getGroupType',
+      hasBleed: 'getHasBleed'
     }),
     pageSize(): { w: number, h: number } {
       return {
@@ -101,7 +113,7 @@ export default Vue.extend({
     lockGuideline(): boolean {
       return rulerUtils.lockGuideline
     },
-    isShownRuler() {
+    isShownRuler(): boolean {
       return rulerUtils.showRuler
     },
     buildNumber(): string {
@@ -117,6 +129,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      setUserState: 'user/SET_STATE'
+    }),
     closePopup() {
       popupUtils.closePopup()
     },
@@ -137,8 +152,12 @@ export default Vue.extend({
     togglelockGuideline() {
       rulerUtils.setLockGuideline(!rulerUtils.lockGuideline)
     },
+    toggleBleed() {
+      const isEnableBleed = !this.hasBleed
+      for (let idx = 0; idx < this.pagesLength; idx++) pageUtils.setIsEnableBleed(isEnableBleed, idx)
+      stepsUtils.record()
+    },
     newDesign() {
-      // designUtils.newDesign()
       const path = `${window.location.origin}${window.location.pathname}`
       window.open(path)
       this.closePopup()
@@ -151,7 +170,9 @@ export default Vue.extend({
     },
     exportJSON() {
       fileUtils.export()
-      // designUtils.newDesign()
+    },
+    toogleAdminView() {
+      this.setUserState({ enableAdminView: !this.enableAdminView })
     },
     testSubscribe() {
       // fbPixelUtils.subscribe(false)
@@ -174,14 +195,14 @@ export default Vue.extend({
       pageUtils.setPages([pageUtils.newPage({})])
     },
     duplicatePageTwentyTimes() {
-      pageUtils.duplicatePage1(20)
+      pageUtils.duplicatePage1(40)
     },
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'
     },
     gotoMobile() { // TO-DELETE
-      window.location.href = this.$router.currentRoute.fullPath.replace('editor', 'mobile-editor')
+      window.location.href = this.$router.currentRoute.value.fullPath.replace('editor', 'mobile-editor')
     }
   }
 })
@@ -234,10 +255,11 @@ export default Vue.extend({
     padding: 0.35rem;
     border-radius: 0.25rem;
     position: relative;
+    cursor: pointer;
     &.disabled {
       color: setColor(gray-4);
     }
-    > span {
+    span {
       font-size: 0.75rem;
     }
     &:not(:last-child):not(.disabled) {

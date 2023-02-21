@@ -1,72 +1,72 @@
 <template lang="pug">
-  div(class="sidebar")
-    div(class="nav scrollbar-gray-thin")
-      div(class="nav-container")
-        div(class="nav-item-new-folder")
-          div(class="nav-item-new-folder__container"
-              @click="handleNewFolder")
-            div(class="nav-item-new-folder__icon")
-              svg-icon(iconName="plus-origin"
-                  iconColor="gray-4"
-                  iconWidth="18px")
-            div(class="nav-item-new-folder__text") {{$t('NN0190')}}
-        div(class="nav-item" :class="{'bg-blue-1': (currLocation === 'a')}"
-            :style="draggedOverStyles('a')"
-            @dragenter="handleDragEnter('a')"
-            @dragleave="handleDragLeave('a')"
-            @dragover.prevent
-            @drop="handleDrop('a')"
-            @click="handleSelection('a')")
-          svg-icon(iconName="all"
-              iconColor="white"
-              iconWidth="20px"
-              style="pointer-events: none")
-          div(class="nav-item__text"
-              style="pointer-events: none") {{$t('NN0187')}}
-        div(class="nav-item" :class="{'bg-blue-1': (currLocation === 'h')}"
-            @click="handleSelection('h')")
-          svg-icon(iconName="heart"
-              iconColor="white"
-              iconWidth="20px")
-          div(class="nav-item__text")  {{$t('NN0188')}}
-        sidebar-folder(v-for="folder in realFolders" :folder="folder" :level="0" :parents="[ROOT]"
-                      @moveItem="handleMoveItem"
-                      @showHint="handleShowHint")
-        div(class="nav-item" :class="{'bg-blue-1': (currLocation === 't')}"
-            :style="draggedOverStyles('t')"
-            @dragenter="handleDragEnter('t')"
-            @dragleave="handleDragLeave('t')"
-            @dragover.prevent
-            @drop="handleDrop('t')"
-            @click="handleSelection('t')")
-          svg-icon(iconName="trash"
-              iconColor="white"
-              iconWidth="20px"
-              style="pointer-events: none")
-          div(class="nav-item__text"
-              style="pointer-events: none")  {{$t('NN0189')}}
-        transition(name="fade")
-          svg-icon(v-if="isShowHint"
-                  class="nav-item__name-hint-arrow"
-                  :style="hintArrowStyles()"
-                  iconName="arrow-up"
-                  iconWidth="13.76px"
-                  iconHeight="9.79px"
-                  iconColor="red-1")
-        transition(name="fade")
-          div(v-if="isShowHint"
-              class="nav-item__name-hint-text"
-              :style="hintTextStyles()")
-            span {{$t('NN0226')}}
+div(class="sidebar")
+  div(class="nav scrollbar-gray-thin")
+    div(class="nav-container")
+      div(class="nav-item-new-folder")
+        div(class="nav-item-new-folder__container"
+            @click="handleNewFolder")
+          div(class="nav-item-new-folder__icon")
+            svg-icon(iconName="plus-origin"
+                iconColor="gray-4"
+                iconWidth="18px")
+          div(class="nav-item-new-folder__text") {{$t('NN0190')}}
+      div(class="nav-item" :class="{'bg-blue-1': (currLocation === 'a')}"
+          :style="draggedOverStyles('a')"
+          @dragenter="handleDragEnter('a')"
+          @dragleave="handleDragLeave('a')"
+          @dragover.prevent
+          @drop="handleDrop('a')"
+          @click="handleSelection('a')")
+        svg-icon(iconName="all"
+            iconColor="white"
+            iconWidth="20px"
+            style="pointer-events: none")
+        div(class="nav-item__text"
+            style="pointer-events: none") {{$t('NN0187')}}
+      div(class="nav-item" :class="{'bg-blue-1': (currLocation === 'h')}"
+          @click="handleSelection('h')")
+        svg-icon(iconName="heart"
+            iconColor="white"
+            iconWidth="20px")
+        div(class="nav-item__text")  {{$t('NN0188')}}
+      sidebar-folder(v-for="folder in realFolders" :folder="folder" :level="0" :parents="[ROOT]"
+                    @moveItem="handleMoveItem"
+                    @showHint="handleShowHint")
+      div(class="nav-item" :class="{'bg-blue-1': (currLocation === 't')}"
+          :style="draggedOverStyles('t')"
+          @dragenter="handleDragEnter('t')"
+          @dragleave="handleDragLeave('t')"
+          @dragover.prevent
+          @drop="handleDrop('t')"
+          @click="handleSelection('t')")
+        svg-icon(iconName="trash"
+            iconColor="white"
+            iconWidth="20px"
+            style="pointer-events: none")
+        div(class="nav-item__text"
+            style="pointer-events: none")  {{$t('NN0189')}}
+      transition(name="fade")
+        svg-icon(v-if="isShowHint"
+                class="nav-item__name-hint-arrow"
+                :style="hintArrowStyles()"
+                iconName="arrow-up"
+                iconWidth="13.76px"
+                iconHeight="9.79px"
+                iconColor="red-1")
+      transition(name="fade")
+        div(v-if="isShowHint"
+            class="nav-item__name-hint-text"
+            :style="hintTextStyles()")
+          span {{$t('NN0226')}}
 </template>
 <script lang="ts">
-import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
 import SidebarFolder from '@/components/mydesign/SidebarFolder.vue'
-import designUtils from '@/utils/designUtils'
 import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
+import designUtils from '@/utils/designUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SidebarFolder
   },
@@ -80,6 +80,7 @@ export default Vue.extend({
       isTrashDraggedOver: false
     }
   },
+  emits: ['moveItem', 'deleteAll', 'deleteFolder', 'deleteItem'],
   computed: {
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',
@@ -219,7 +220,7 @@ export default Vue.extend({
         clearTimeout(this.messageTimer)
       }
       this.isShowHint = true
-      this.messageTimer = setTimeout(() => {
+      this.messageTimer = window.setTimeout(() => {
         this.isShowHint = false
         this.messageTimer = -1
       }, 3000)
@@ -227,10 +228,7 @@ export default Vue.extend({
     handleNewFolder() {
       const folderId = designUtils.addNewFolder([designUtils.ROOT])
       this.$nextTick(() => {
-        const folderItemName = document.querySelector(`.nav-folder[folderid="${folderId}"]`)
-        if (folderItemName) {
-          setTimeout(() => { folderItemName.dispatchEvent(new MouseEvent('contextmenu')) }, 0)
-        }
+        designUtils.emit(`edit-sidebar-${folderId}`)
       })
     }
   }
@@ -356,7 +354,7 @@ export default Vue.extend({
   &-leave-active {
     transition: 0.2s;
   }
-  &-enter,
+  &-enter-from,
   &-leave-to {
     opacity: 0;
   }

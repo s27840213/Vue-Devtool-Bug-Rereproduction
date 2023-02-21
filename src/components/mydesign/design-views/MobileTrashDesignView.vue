@@ -1,25 +1,27 @@
 <template lang="pug">
-  div(class="mobile-trash-design-view")
-    mobile-folder-gallery(:path="[]"
-                          :allFolders="allFolders"
-                          :selectedNum="selectedNum")
-    div(v-if="isFolderDesignDivisionNeeded" class="mobile-trash-design-view__hr")
-    mobile-design-gallery(:allDesigns="allDesigns"
-                          :selectedNum="selectedNum"
-                          :limitFunctions="true"
-                          @loadMore="handleLoadMore")
-    div(class="scroll-space")
+div(class="mobile-trash-design-view")
+  mobile-folder-gallery(:path="[]"
+                        :allFolders="allFolders"
+                        :selectedNum="selectedNum")
+  div(v-if="isFolderDesignDivisionNeeded" class="mobile-trash-design-view__hr")
+  mobile-design-gallery(:noNewDesign="true"
+                        :noHeader="true"
+                        :allDesigns="allDesigns"
+                        :selectedNum="selectedNum"
+                        :limitFunctions="true"
+                        @loadMore="handleLoadMore")
+  div(class="scroll-space")
 </template>
 
 <script lang="ts">
 import designUtils from '@/utils/designUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import MobileFolderGallery from '@/components/mydesign/MobileFolderGallery.vue'
 import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     MobileFolderGallery,
     MobileDesignGallery,

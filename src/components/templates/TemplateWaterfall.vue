@@ -1,34 +1,34 @@
 <template lang="pug">
-  div(class="template-waterfall__wrapper")
-    div(class="template-waterfall")
-      div(v-for="waterfallTemplate in waterfallTemplates"
-          class="template-waterfall__column")
-        div(v-for="template in waterfallTemplate"
-            class="template-waterfall__column__template"
-            :style="templateStyles(template.aspect_ratio)"
-            @click="handleClickWaterfall(template)"
-            @mouseenter="handleMouseEnter(template.group_id)"
-            @mouseleave="handleMouseLeave(template.group_id)")
-          scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type) && useScrollablePreview"
-                                      :contentIds="template.content_ids")
-          img(v-else class="template-waterfall__column__template__img" :src="template.url" loading="lazy")
-          pro-item(v-if="template.plan === 1")
-          div(v-if="template.group_type !== 1" class="template-waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
-          div(v-if="template.content_ids.length > 1" class="template-waterfall__column__template__multi")
-            svg-icon(iconName="multiple-file"
-                    iconWidth="24px"
-                    iconColor="gray-7")
-    div(v-if="!isTemplateReady")
-      svg-icon(iconName="loading"
-              iconWidth="24px"
-              iconColor="gray-2")
-    observer-sentinel(v-if="isTemplateReady && hasNextPage"
-                      @callback="handleLoadMore")
-    div(v-if="useScrollSpace" class="template-waterfall__scroll-space")
+div(class="template-waterfall__wrapper")
+  div(class="template-waterfall")
+    div(v-for="waterfallTemplate in waterfallTemplates"
+        class="template-waterfall__column")
+      div(v-for="template in waterfallTemplate"
+          class="template-waterfall__column__template"
+          :style="templateStyles(template.aspect_ratio)"
+          @click="handleClickWaterfall(template)"
+          @mouseenter="handleMouseEnter(template.group_id)"
+          @mouseleave="handleMouseLeave(template.group_id)")
+        scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type) && useScrollablePreview"
+                                    :contentIds="template.content_ids")
+        img(v-else class="template-waterfall__column__template__img" :src="template.url" loading="lazy")
+        pro-item(v-if="template.plan === 1")
+        div(v-if="template.group_type !== 1" class="template-waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
+        div(v-if="template.content_ids.length > 1" class="template-waterfall__column__template__multi")
+          svg-icon(iconName="multiple-file"
+                  iconWidth="24px"
+                  iconColor="gray-7")
+  div(v-if="!isTemplateReady")
+    svg-icon(iconName="loading"
+            iconWidth="24px"
+            iconColor="gray-2")
+  observer-sentinel(v-if="isTemplateReady && hasNextPage"
+                    @callback="handleLoadMore")
+  div(v-if="useScrollSpace" class="template-waterfall__scroll-space")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import ScrollableTemplatePreview from '@/components/templates/ScrollableTemplatePreview.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
@@ -36,10 +36,16 @@ import { mapGetters } from 'vuex'
 import { ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
-    waterfallTemplates: Array,
-    isTemplateReady: Boolean,
+    waterfallTemplates: {
+      type: Array as PropType<ITemplate[][]>,
+      required: true
+    },
+    isTemplateReady: {
+      type: Boolean,
+      required: true
+    },
     useScrollablePreview: {
       type: Boolean,
       default: true
@@ -48,7 +54,10 @@ export default Vue.extend({
       type: Boolean,
       default: false
     },
-    themes: Array
+    themes: {
+      type: Array,
+      required: true
+    }
   },
   data() {
     return {
@@ -97,9 +106,13 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .template-waterfall {
   display: flex;
-  gap: 24px;
+  > div + div {
+    margin-left: 24px;
+  }
   @media screen and (max-width: 540px) {
-    gap: 15px;
+    > div + div {
+      margin-left: 15px;
+    }
     padding: 2px;
   }
   &__wrapper {
@@ -109,9 +122,13 @@ export default Vue.extend({
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    > div + div {
+      margin-top: 24px;
+    }
     @media screen and (max-width: 540px) {
-      gap: 15px;
+      > div + div {
+        margin-top: 15px;
+      }
     }
     &__template {
       position: relative;

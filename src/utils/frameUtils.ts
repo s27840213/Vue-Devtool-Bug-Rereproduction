@@ -10,9 +10,9 @@ import zindexUtils from './zindexUtils'
 import { ILayerInfo } from '@/store/types'
 import stepsUtils from './stepsUtils'
 import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
-import Vue from 'vue'
 import i18n from '@/i18n'
-import mathUtils from './mathUtils'
+import { notify } from '@kyvg/vue3-notification'
+
 class FrameUtils {
   isImageFrame(config: IFrame): boolean {
     return config.clips.length === 1 && (config.clips[0].isFrameImg as boolean)
@@ -113,7 +113,7 @@ class FrameUtils {
       const _shadow = currLayer.styles.shadow
       if (_shadow && _shadow.currentEffect !== ShadowEffectType.none) {
         if (['', 'upload'].includes(_shadow.srcObj.type)) {
-          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           return
         } else {
           shadow = generalUtils.deepCopy(_shadow) as IShadowProps

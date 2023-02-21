@@ -1,37 +1,37 @@
 <template lang="pug">
-  div(class="tabs")
-    div(v-for="(tab,index) in tabs"
-        class="tabs__item"
-        :style="tabStyle(index)"
-        @click="switchTab(index)")
-      span(
-        class="text-H6") {{tab}}
+div(class="tabs" :style="tabsStyle")
+  div(v-for="(tab,index) in tabs"
+      class="tabs__item"
+      :style="tabStyle(index)"
+      @click="switchTab(index)")
+    span(
+      class="text-H6") {{tab}}
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
+import { PropType, defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     tabs: {
       type: Array as PropType<string[]>,
-      default: () => []
+      default: [] as string[]
     },
-    defaultTab: {
+    // Use v-model to bind tabIndex.
+    modelValue: {
       type: Number,
-      default: 0
+      required: true
     },
-    theme: { // value: dark, light
-      type: String,
+    theme: {
+      type: String as PropType<'dark'|'light'|'dark-rect'>,
       default: 'dark'
     }
   },
-  data() {
-    return {
-      currActiveTabIndex: this.defaultTab
-    }
-  },
+  emits: ['update:modelValue'],
   computed: {
+    tabIndex() {
+      return this.modelValue
+    },
     colors() {
       switch (this.theme) {
         case 'light':
@@ -39,28 +39,54 @@ export default Vue.extend({
             active: '#4EABE6',
             inactive: '#969BAB'
           }
+        case 'dark-rect':
+          return {
+            active: '#18191F',
+            activeBG: '#E8E8E8',
+            inactive: '#9C9C9C',
+            inactiveBG: '#2E2E2E'
+          }
         case 'dark':
         default:
           return {
             active: 'white',
-            inactive: '#969BAB'
+            inactive: '#9C9C9C'
           }
+      }
+    },
+    tabsStyle() {
+      const type = this.theme.split('-')[1]
+      return type === 'rect' ? {
+      } : {
+        marginBottom: '24px'
       }
     }
   },
   methods: {
     tabStyle(tabIndex: number) {
-      const isActive = tabIndex === this.currActiveTabIndex
+      const isActive = tabIndex === this.tabIndex
       const activeMode = isActive ? 'active' : 'inactive'
-      return {
+      const type = this.theme.split('-')[1]
+      return type === 'rect' ? {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: '0 8px 0 8px',
+        width: `calc(100% / ${this.tabs.length} - 16px)`,
+        height: '36px',
+        borderRadius: '10px',
         color: this.colors[activeMode],
-        borderBottom: isActive ? `2px solid ${this.colors[activeMode]}` : 'none',
+        backgroundColor: this.colors[`${activeMode}BG` as 'activeBG'|'inactiveBG']
+      } : {
+        paddingBottom: '4px',
+        minWidth: 'fit-content',
+        color: this.colors[activeMode],
+        borderBottom: isActive ? `2px solid ${this.colors[activeMode]}` : '2px solid transparent',
         width: `${100 / this.tabs.length / 2}%`
       }
     },
     switchTab(tabIndex: number) {
-      this.currActiveTabIndex = tabIndex
-      this.$emit('switchTab', tabIndex)
+      this.$emit('update:modelValue', tabIndex)
     }
   }
 })
@@ -72,13 +98,10 @@ export default Vue.extend({
   display: flex;
   align-items: center;
   justify-content: space-around;
-  margin-bottom: 24px;
   &__item {
-    padding-bottom: 4px;
     box-sizing: border-box;
-    min-width: fit-content;
-    transition: border-color 0.2s, color 0.2s;
-    border-bottom: 2px solid transparent;
+    text-align: center;
+    transition: all 0.2s;
   }
 }
 </style>

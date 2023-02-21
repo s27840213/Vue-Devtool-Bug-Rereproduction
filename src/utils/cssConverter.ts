@@ -60,17 +60,6 @@ const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpaci
 class CssConveter {
   convertTransformStyle(x: number, y: number, zindex: number, rotate: number, cancel3D = false, contentScaleRatio = 1): { transform: string } {
     //  The scale feature only applied on "layer-scale" as a child-container of the layer
-
-    // if (scale !== 0 && scale !== undefined) {
-    //   tmpArr.push(`scale(${scale})`)
-    // }
-    // if (scaleX !== 0 && scaleX !== undefined) {
-    //   tmpArr.push(`scaleX(${scaleX})`)
-    // }
-    // if (scaleY !== 0 && scaleY !== undefined) {
-    //   tmpArr.push(`scaleY(${scaleY})`)
-    // }
-
     return {
       transform: cancel3D ? `translate(${x * contentScaleRatio}px, ${y * contentScaleRatio}px) rotate(${rotate}deg)` : `translate3d(${x * contentScaleRatio}px, ${y * contentScaleRatio}px, ${zindex}px) rotate(${rotate}deg)`
     }

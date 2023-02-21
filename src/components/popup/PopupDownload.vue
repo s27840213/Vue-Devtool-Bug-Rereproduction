@@ -1,155 +1,190 @@
 <template lang="pug">
-  div(class="popup-download text-left"
-    :style="containerStyles"
-    v-click-outside="handleClose")
-    div(v-if="polling" class="popup-download__form popup-download__form--polling")
-      div(class="body-3 text-gray-3") {{ name || `${$t('NN0079')}` }}
-      div(class="flex flex-between text-gray-2 items-center")
-        span(class="body-2") {{$t('NN0216')}}
-        svg-icon(class="pointer"
-          iconName="close"
-          iconWidth="16px"
-          iconColor="gray-2"
-          @click.native="$emit('close')")
-      div(class="popup-download__progress mt-5")
-        div(class="popup-download__progress-value" :style="{ width: `${progress}%`}")
-    div(v-else class="popup-download__form")
-      div(class="body-3 mb-10") {{$t('NN0121')}}
-      dropdown(class="mb-10"
-        :options="typeOptions"
-        @select="handleSelectType")
-        download-type-option(:name="selectedType.name" :tag="selectedType.tag")
-        template(v-slot:option="{ data }")
-          div(class="popup-download__type")
-            download-type-option(:name="data.name" :tag="data.tag")
-            div(class="popup-download__type-desc") {{ data.desc }}
-      div(class="body-3")
-        div(v-if="'omitBackground' in selected")
-          download-check-button(type="checkbox"
-            class="mb-10"
-            :label="`${$t('NN0215')}`"
-            :default-checked="selected.omitBackground === 1"
-            @change="({ checked }) => handleUpdate('omitBackground', checked ? 1 : 0)")
-        div(v-if="'scale' in selected"
-          class="flex items-center mb-10")
-          span {{`${$t('NN0122')} x`}}
-          dropdown(class="mx-5 popup-download__size-scale"
-            :options="scaleOptions"
-            @select="option => handleUpdate('scale', option)") {{ selected.scale }}
-          span {{$t('NN0123')}}
-        div(v-if="'quality' in selected"
-          class="flex flex-column items-center mb-10")
-          div(class="flex items-center full-width mb-5")
-            span {{$t('NN0132')}}
-            property-bar(class="popup-download__size-scale ml-15")
-              input(class="px-0"
-                type="text"
-                v-model.number="selectedTypeQuality")
-          input(class="popup-download__range-input input__slider--range"
-            v-model.number="selected.quality"
-            max="100"
-            min="1"
-            v-ratio-change
-            type="range")
-        div(v-if="isDetailPage" class="mb-10 pt-5") {{ $t('NN0344') }}
-          dropdown(class="mt-5"
-            :options="detailPageDownloadOptions"
-            @select="handleDetailPageOption") {{ detailPageOptionLabel }}
-          div(v-if="selectedDetailPage.option === 'splice'"
-            class="mt-10")
-            download-check-button(type="radio"
-              class="mb-10"
-              group-name="product_page"
-              :label="$t('NN0345')"
-              :default-checked="selectedDetailPage.noLimit"
-              @change="handleDetailPageIsLimited"
-              value="no-limit")
-            div
-              download-check-button(type="radio"
-                class="mb-5"
-                group-name="product_page"
-                :label="$t('NN0346')"
-                :default-checked="!selectedDetailPage.noLimit"
-                @change="handleDetailPageIsLimited"
-                value="height-limit")
-              div(class="flex items-center")
-                property-bar(class="popup-download__size-scale ml-20 mr-5")
-                  input(type="text"
-                    v-model.number="selectedDetailPage.height"
-                    :disabled="selectedDetailPage.noLimit"
-                    @blur="handleMaxHeight")
-                span px
-        div(class="mb-10 pt-5") {{$t('NN0124')}}
-        div
-          download-check-button(type="radio"
-            class="mb-10"
-            group-name="range"
-            :label="`${$t('NN0125')}（${$t('NN0134', { num:`${currentPageIndex + 1}` })}）`"
-            value="current"
-            :default-checked="rangeType === 'current'"
-            @change="handleRangeType")
-          download-check-button(type="radio"
-            class="mb-10"
-            group-name="range"
-            :label="`${$t('NN0126')}`"
-            value="all"
-            :default-checked="rangeType === 'all'"
-            @change="handleRangeType")
-          div(class="flex items-center")
-            download-check-button(type="radio"
-              group-name="range"
-              value="spec"
-              :label="`${$t('NN0127')}`"
-              :default-checked="rangeType === 'spec'"
-              @change="handleRangeType")
-            download-page-selection(class="ml-5 w-75"
-              :defaultSelected="pageRange"
-              @confirm="handleRangeConfirm")
-        template(v-if="isAdmin || onDev")
-          hr(class="popup-download__hr my-15")
-          div(class="dev-selector mb-10")
-            dropdown(class="body-3 full-width"
-                    :options="devs"
-                    @select="handleDevSelect") {{ selectedDevLabel }}
-          download-check-button(
-            type="checkbox"
-            class="mb-20 body-3"
-            label="使用新後端瀏覽器"
-            :default-checked="newChrome"
-            @change="({ checked }) => handleNewChrome(checked)")
-          div
-            btn(class="full-width body-3 rounded"
-              :disabled="isButtonDisabled"
-              @click.native="handleSubmit(true)")
-              svg-icon(v-if="polling"
-                class="align-middle"
-                iconName="loading"
-                iconColor="white"
-                iconWidth="20px")
-              span(v-else) {{`${$t('NN0010')} (${$t('NN0460')})`}}
-        hr(class="popup-download__hr my-15")
+div(class="popup-download text-left"
+  :style="containerStyles"
+  v-click-outside="handleClose")
+  div(v-if="polling" class="popup-download__form popup-download__form--polling")
+    div(class="body-3 text-gray-3") {{ name || `${$t('NN0079')}` }}
+    div(class="flex flex-between text-gray-2 items-center")
+      span(class="body-2") {{$t('NN0216')}}
+      svg-icon(class="pointer"
+        iconName="close"
+        iconWidth="16px"
+        iconColor="gray-2"
+        @click.native="$emit('close')")
+    div(class="popup-download__progress mt-5")
+      div(class="popup-download__progress-value" :style="{ width: `${progress}%`}")
+  div(v-else class="popup-download__form")
+    div(class="body-3 mb-10") {{$t('NN0121')}}
+    dropdown(class="mb-10"
+      :options="typeOptions"
+      @select="handleSelectType")
+      download-type-option(:name="selectedType.name" :tag="selectedType.tag")
+      template(v-slot:option="{ data }")
+        div(class="popup-download__type")
+          download-type-option(:name="data.name" :tag="data.tag")
+          div(class="popup-download__type-desc") {{ data.desc }}
+    div(class="body-3")
+      div(v-if="'omitBackground' in selected")
         download-check-button(type="checkbox"
-          class="mb-20"
-          :label="`${$t('NN0129')}`"
-          :default-checked="saveSubmission"
-          @change="({ checked }) => handleSubmission(checked)")
+          class="mb-10"
+          :label="`${$t('NN0215')}`"
+          :default-checked="selected.omitBackground === 1"
+          @change="({ checked }) => handleUpdate('omitBackground', checked ? 1 : 0)")
+      div(v-if="'scale' in selected"
+        class="flex items-center mb-10")
+        span {{`${$t('NN0122')} x`}}
+        dropdown(class="mx-5 popup-download__size-scale"
+          :options="scaleOptions"
+          @select="(option:number) => handleUpdate('scale', option)") {{ selected.scale }}
+        span {{$t('NN0123')}}
+      div(v-if="'quality' in selected"
+        class="flex flex-column items-center mb-10")
+        div(class="flex items-center full-width mb-5")
+          span {{$t('NN0132')}}
+          property-bar(class="popup-download__size-scale ml-15")
+            input(class="px-0"
+              type="text"
+              v-model.number="selectedTypeQuality")
+        input(class="popup-download__range-input input__slider--range"
+          v-model.number="selected.quality"
+          max="100"
+          min="1"
+          v-ratio-change
+          type="range")
+      div(v-if="selectedTypeVal === 'pdf_print' && 'bleed' in selected")
+        download-check-button(type="checkbox"
+          class="mb-10"
+          :label="`${$t('NN0774')}`"
+          :default-checked="selected.bleed === 2"
+          @change="({ checked }) => handleUpdate('bleed', checked ? 2 : 1)")
+      div(v-if="'bleed' in selected")
+        download-check-button(type="checkbox"
+          class="mb-10"
+          :label="`${$t('NN0775')}`"
+          :default-checked="selected.bleed! > 0"
+          @change="({ checked }) => handleUpdate('bleed', checked ? 1 : 0)")
+      div(v-if="selectedTypeVal === 'pdf_print' && 'outline' in selected")
+        download-check-button(type="checkbox"
+          class="mb-10"
+          :label="`${$t('NN0794')}`"
+          :default-checked="selected.outline===1"
+          :info="`${$t('NN0799')}`"
+          :infoUrl="`${$t('NN0802')}`"
+          @change="({ checked }) => handleUpdate('outline', checked ? 1 : 0)")
+      div(v-if="'outline' in selected")
+        download-check-button(type="checkbox"
+          class="mb-10"
+          :label="`${$t('NN0776')}`"
+          :default-checked="selected.outline===2"
+          :info="`${$t('NN0800')}`"
+          :infoUrl="`${$t('NN0803')}`"
+          @change="({ checked }) => handleUpdate('outline', checked ? 2 : 0)")
+      div(v-if="selectedTypeVal !== 'jpg' && selectedTypeVal !== 'png'"
+        class="flex items-center mb-10")
+        span {{$t('NN0777')}}
+        dropdown(v-if="colorFormats[selectedTypeVal].length > 1" class="mx-5 popup-download__color-format"
+          :current="colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0].label"
+          :placeholder="colorFormats[selectedTypeVal][0].label"
+          :options="colorFormats[selectedTypeVal]"
+          @select="handleColorModeSelect")
+        div(v-else-if="colorFormats[selectedTypeVal].length === 1" class="popup-download__color-format fixed")
+          span(class="body-XS") {{ colorFormats[selectedTypeVal][selected.cmyk ? 1 : 0].label }}
+      div(v-if="isDetailPage" class="mb-10 pt-5") {{ $t('NN0344') }}
+        dropdown(class="mt-5"
+          :options="detailPageDownloadOptions"
+          @select="handleDetailPageOption") {{ detailPageOptionLabel }}
+        div(v-if="selectedDetailPage.option === 'splice' && !selectedTypeVal.includes('pdf')"
+          class="mt-10")
+          download-check-button(type="radio"
+            class="mb-10"
+            group-name="product_page"
+            :label="$t('NN0345')"
+            :default-checked="selectedDetailPage.noLimit"
+            @change="handleDetailPageIsLimited"
+            value="no-limit")
+          div
+            download-check-button(type="radio"
+              class="mb-5"
+              group-name="product_page"
+              :label="$t('NN0346')"
+              :default-checked="!selectedDetailPage.noLimit"
+              @change="handleDetailPageIsLimited"
+              value="height-limit")
+            div(class="flex items-center")
+              property-bar(class="popup-download__size-scale ml-20 mr-5")
+                input(type="text"
+                  v-model.number="selectedDetailPage.height"
+                  :disabled="selectedDetailPage.noLimit"
+                  @blur="handleMaxHeight")
+              span px
+      div(class="mb-10 pt-5") {{$t('NN0124')}}
       div
-        btn(class="full-width body-3 rounded"
-          :disabled="isButtonDisabled"
-          @click.native="handleSubmit()")
-          svg-icon(v-if="polling"
-            class="align-middle"
-            iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
-          span(v-else) {{$t('NN0010')}}
+        download-check-button(type="radio"
+          class="mb-10"
+          group-name="range"
+          :label="`${$t('NN0125')}（${$t('NN0134', { num:`${currentPageIndex + 1}` })}）`"
+          value="current"
+          :default-checked="rangeType === 'current'"
+          @change="handleRangeType")
+        download-check-button(type="radio"
+          class="mb-10"
+          group-name="range"
+          :label="`${$t('NN0126')}`"
+          value="all"
+          :default-checked="rangeType === 'all'"
+          @change="handleRangeType")
+        div(class="flex items-center")
+          download-check-button(type="radio"
+            group-name="range"
+            value="spec"
+            :label="`${$t('NN0127')}`"
+            :default-checked="rangeType === 'spec'"
+            @change="handleRangeType")
+          download-page-selection(class="ml-5 w-75"
+            :defaultSelected="pageRange"
+            @confirm="handleRangeConfirm")
+      template(v-if="isAdmin || onDev")
+        hr(class="popup-download__hr my-15")
+        div(class="dev-selector mb-10")
+          dropdown(class="body-3 full-width"
+                  :options="devs"
+                  @select="handleDevSelect") {{ selectedDevLabel }}
+        div
+          btn(class="full-width body-3 rounded"
+            :disabled="isButtonDisabled"
+            @click.native="handleSubmit(true)")
+            svg-icon(v-if="polling"
+              class="align-middle"
+              iconName="loading"
+              iconColor="white"
+              iconWidth="20px")
+            span(v-else) {{`${$t('NN0010')} (${$t('NN0460')})`}}
+      hr(class="popup-download__hr my-15")
+      download-check-button(type="checkbox"
+        class="mb-20"
+        :label="`${$t('NN0129')}`"
+        :default-checked="saveSubmission"
+        @change="({ checked }) => handleSubmission(checked)")
+    div
+      btn(class="full-width body-3 rounded"
+        :disabled="isButtonDisabled"
+        @click.native="handleSubmit()")
+        svg-icon(v-if="polling"
+          class="align-middle"
+          iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
+        span(v-else class="popup-download__btn")
+          svg-icon(v-if="selectedTypeVal === 'pdf_print'" iconName="pro" iconWidth="22px" iconColor="alarm")
+          span {{$t('NN0010')}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-import vClickOutside from 'v-click-outside'
-import { ITypeOption } from '@/interfaces/download'
+import vClickOutside from 'click-outside-vue3'
+import { IDownloadServiceParams, IOutputType, ITypeOption } from '@/interfaces/download'
 import DownloadUtil from '@/utils/downloadUtil'
 import DownloadCheckButton from '@/components/download/DownloadCheckButton.vue'
 import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
@@ -158,26 +193,36 @@ import GeneralUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import pageUtils from '@/utils/pageUtils'
 import gtmUtils from '@/utils/gtmUtils'
+import { Tooltip } from 'floating-vue'
+import paymentUtils from '@/utils/paymentUtils'
 
 const submission = `${process.env.VUE_APP_VERSION}::download_submission`
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     DownloadCheckButton,
     DownloadTypeOption,
-    DownloadPageSelection
+    DownloadPageSelection,
+    VTooltip: Tooltip
   },
   directives: {
     clickOutside: vClickOutside.directive
   },
   props: {
-    useExternelJSON: Boolean,
-    pageIndex: Number,
+    useExternelJSON: {
+      type: Boolean,
+      default: false
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
     hideContainer: {
       default: false,
       type: Boolean
     }
   },
+  emits: ['close', 'inprogress'],
   data() {
     const {
       selectedTypeVal,
@@ -185,19 +230,39 @@ export default Vue.extend({
       pageRange = [],
       selectedDetailPage,
       selectedDev = 1,
-      newChrome = false,
       ...prevSubmission
     } = JSON.parse(localStorage.getItem(submission) || '{}')
+
+    const typeOptions = [
+      { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
+      { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` },
+      { value: 'pdf_standard', name: `${this.$t('NN0770')}`, desc: `${this.$t('NN0772')}` },
+      { value: 'pdf_print', name: `${this.$t('NN0771')}`, desc: `${this.$t('NN0773')}`, tag: 'pro' }
+      // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
+      // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
+      // { id: 'gif', name: 'GIF', desc: '短片' }
+    ] as ITypeOption[]
+
+    let defaultSelectedTypeVal = 'jpg'
+    let defaultOptions = DownloadUtil.getTypeAttrs(defaultSelectedTypeVal)
+
+    // apply saved options if exist
+    if (typeOptions.map(v => v.value).includes(selectedTypeVal)) {
+      defaultSelectedTypeVal = selectedTypeVal
+      defaultOptions = DownloadUtil.getTypeAttrs(selectedTypeVal)
+      Object.keys(defaultOptions).forEach(key => {
+        defaultOptions[key] = (key in prevSubmission ? prevSubmission : defaultOptions)[key]
+      })
+    }
 
     const prevInfo = {
       saveSubmission: true,
       // saveSubmission: !!selectedTypeVal,
-      selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('jpg'),
-      selectedTypeVal: selectedTypeVal || 'jpg',
+      selected: defaultOptions,
+      selectedTypeVal: defaultSelectedTypeVal as IOutputType,
       rangeType,
       pageRange: rangeType === 'spec' ? pageRange : [],
-      selectedDev,
-      newChrome
+      selectedDev
     }
     const currentPageIndex = this.pageIndex || 0
     const host = window.location.hostname
@@ -209,6 +274,13 @@ export default Vue.extend({
       exportId: '',
       functionQueue: [] as Array<() => void>,
       scaleOptions: [0.5, 0.75, 1, 1.5, 2, 2.5, 3],
+      colorFormats: {
+        pdf_standard: [{ value: 0, label: 'RGB' }],
+        pdf_print: [
+          { value: 0, label: 'RGB' },
+          { value: 1, label: 'CMYK' }
+        ]
+      } as {[key: string]: { value: number, label: string }[]},
       detailPageDownloadOptions: [
         { value: 'whole', label: this.$t('NN0347') as string },
         { value: 'splice', label: this.$t('NN0348') as string }
@@ -218,15 +290,7 @@ export default Vue.extend({
         noLimit: false,
         height: 1500
       },
-      typeOptions: [
-        { value: 'png', name: 'PNG', desc: `${this.$t('NN0217')}`, tag: `${this.$t('NN0131')}` },
-        { value: 'jpg', name: 'JPG', desc: `${this.$t('NN0218')}` }
-        // { value: 'pdf_stardand', name: 'PDF 標準', desc: '檔案大小：小 - 適合多頁文件' }
-        // { id: 'pdf_print', name: 'PDF 列印', desc: '檔案大小：高 - 適合多頁文件' },
-        // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
-        // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
-        // { id: 'gif', name: 'GIF', desc: '短片' }
-      ] as ITypeOption[],
+      typeOptions,
       devs: [
         { value: 1, label: 'dev0' },
         { value: 2, label: 'dev1' },
@@ -234,9 +298,10 @@ export default Vue.extend({
         { value: 4, label: 'dev3' },
         { value: 5, label: 'dev4' },
         { value: 6, label: 'dev5' },
+        { value: 998, label: 'qa' },
         { value: 999, label: 'rd' }
       ],
-      onDev: host.startsWith('rd') || host.startsWith('dev') || host.startsWith('localhost')
+      onDev: host.startsWith('qa') || host.startsWith('rd') || host.startsWith('dev') || host.startsWith('localhost')
     }
   },
   computed: {
@@ -314,10 +379,10 @@ export default Vue.extend({
           if (status === 204) {
             this.addExportId(id)
             this.exportId = id
-            this.$router.replace({ query: Object.assign({}, this.$router.currentRoute.query, { export_ids: this.exportIds }) })
+            this.$router.replace({ query: Object.assign({}, this.$router.currentRoute.value.query, { export_ids: this.exportIds }) })
             uploadUtils.uploadDesign()
           } else {
-            this.$notify({ group: 'error', text: `${this.$t('NN0461')} (status: ${status})` })
+            notify({ group: 'error', text: `${this.$t('NN0461')} (status: ${status})` })
             this.$emit('close')
           }
         })
@@ -343,6 +408,9 @@ export default Vue.extend({
     handleDevSelect(data: { value: number }) {
       this.selectedDev = data.value
     },
+    handleColorModeSelect(data: { value: number }) {
+      Object.assign(this.selected, { cmyk: data.value })
+    },
     handleMaxHeight(e: Event) {
       const value = +(e.target as HTMLInputElement).value
       if (Number.isNaN(value)) {
@@ -364,17 +432,15 @@ export default Vue.extend({
     handleSubmission(checked: boolean) {
       this.saveSubmission = checked
     },
-    handleNewChrome(checked: boolean) {
-      this.newChrome = checked
-    },
     handleSubmit(useDev = false) {
+      if (this.selectedTypeVal === 'pdf_print' && !paymentUtils.checkPro({ plan: 1 }, 'export-pdf-print')) return
       this.polling = true
       this.exportId ? this.handleDownload(useDev) : (this.functionQueue = [() => this.handleDownload(useDev)])
     },
     handleSubmissionInfo() {
       const pageLimit = pageUtils.getPages.length - 1
       this.pageRange = this.pageRange.filter((pageIndex: number) => pageIndex <= pageLimit)
-      const { selectedDetailPage, saveSubmission, selected, selectedTypeVal, rangeType, pageRange, selectedDev, newChrome } = this
+      const { selectedDetailPage, saveSubmission, selected, selectedTypeVal, rangeType, pageRange, selectedDev } = this
 
       const info = {
         ...selected,
@@ -382,8 +448,7 @@ export default Vue.extend({
         rangeType,
         pageRange,
         selectedDetailPage,
-        selectedDev,
-        newChrome
+        selectedDev
       }
 
       saveSubmission
@@ -400,18 +465,23 @@ export default Vue.extend({
       } = this
       this.handleSubmissionInfo()
 
-      const fileInfo = {
+      const fileInfo = Object.assign({}, {
         exportId,
         teamId: '',
-        format: selectedTypeVal,
+        format: selectedTypeVal.includes('pdf') ? 'pdf' : selectedTypeVal,
         ...selected
-      }
+      }, selectedTypeVal.includes('pdf') && {
+        pdfQuality: selectedTypeVal === 'pdf_standard' ? 0
+          : selectedTypeVal === 'pdf_print' ? 1
+            : undefined
+      }) as IDownloadServiceParams
 
       if (this.isDetailPage) {
         this.selectedDetailPage.option === 'whole' && (fileInfo.merge = 1)
-        this.selectedDetailPage.option === 'splice' &&
-          !this.selectedDetailPage.noLimit &&
-          (fileInfo.splitSize = this.selectedDetailPage.height)
+        if (this.selectedDetailPage.option === 'splice') {
+          fileInfo.merge = 0
+          if (!this.selectedDetailPage.noLimit && !selectedTypeVal.includes('pdf')) fileInfo.splitSize = this.selectedDetailPage.height
+        }
       }
 
       if (['spec', 'current'].includes(rangeType)) {
@@ -419,7 +489,7 @@ export default Vue.extend({
       }
       this.$emit('inprogress', true)
       DownloadUtil
-        .getFileUrl(fileInfo, ((this.isAdmin || this.onDev) && useDev) ? this.selectedDev : 0, this.newChrome ? 1 : 0)
+        .getFileUrl(fileInfo, ((this.isAdmin || this.onDev) && useDev) ? this.selectedDev : 0)
         .then(this.handleDownloadProgress)
     },
     handleDownloadProgress(response: any) {
@@ -434,7 +504,7 @@ export default Vue.extend({
 
             switch (rangeType) {
               case 'all': {
-                pageUtils.getPages.map((page, index) => {
+                pageUtils.getPages.forEach((page, index) => {
                   if (pageUtils.hasDesignId(index)) {
                     gtmUtils.trackPageDownload(page.designId)
                   }
@@ -442,7 +512,7 @@ export default Vue.extend({
                 break
               }
               case 'spec': {
-                this.pageRange.map((index: number) => {
+                this.pageRange.forEach((index: number) => {
                   if (pageUtils.hasDesignId(index)) {
                     gtmUtils.trackPageDownload(pageUtils.getPage(index).designId)
                   }
@@ -460,7 +530,7 @@ export default Vue.extend({
           }, 1000)
           break
         case 1:
-          this.$notify({ group: 'error', text: `${this.$t('NN0462')} (${msg})` })
+          notify({ group: 'error', text: `${this.$t('NN0462')} (${msg})` })
           this.$emit('close')
           break
         case 2:
@@ -512,6 +582,16 @@ export default Vue.extend({
   &__size-scale {
     width: 65px;
   }
+  &__color-format {
+    width: 65px;
+    &.fixed {
+      width: auto;
+      margin-left: 8px;
+      padding: 0px 8px;
+      border: 1px solid setColor(gray-4);
+      border-radius: 4px;
+    }
+  }
   &__progress {
     width: 100%;
     height: 8px;
@@ -528,6 +608,11 @@ export default Vue.extend({
     transition: 0.3s;
     border-radius: 4px;
     background-color: setColor(blue-1);
+  }
+  &__btn{
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
   .property-bar,
   .btn {

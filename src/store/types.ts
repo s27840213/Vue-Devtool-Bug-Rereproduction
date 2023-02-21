@@ -1,10 +1,8 @@
-import { IPage } from '@/interfaces/page'
-import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
-import { ITextState } from './text'
-import { IAsset } from '@/interfaces/module'
 import { SrcObj } from '@/interfaces/gallery'
-import { IUserModule } from './module/user'
+import { ITmp } from '@/interfaces/layer'
+import { IAsset } from '@/interfaces/module'
+import { IPageState } from '@/interfaces/page'
 import { Itheme } from '@/interfaces/theme'
 
 /**
@@ -13,7 +11,7 @@ import { Itheme } from '@/interfaces/theme'
    @param groupId: for template group used (only for admin),
  */
 export interface IEditorState {
-  pages: Array<IPage>,
+  pages: Array<IPageState>
   name: string,
   designId: string,
   assetId: string,
@@ -28,6 +26,7 @@ export interface IEditorState {
   },
   currSidebarPanelType: number,
   mobileSidebarPanelOpen: boolean,
+  showColorSlips: boolean
   currFunctionPanelType: number,
   pageScaleRatio: number,
   isSettingScaleRatio: boolean,
@@ -68,6 +67,7 @@ export interface IEditorState {
   showRuler: boolean,
   showGuideline: boolean,
   lockGuideline: boolean,
+  isDraggingGuideline: boolean,
   themes: Itheme[],
   hasCopiedFormat: boolean,
   inGestureToolMode: boolean,
@@ -75,8 +75,14 @@ export interface IEditorState {
   isLargeDesktop: boolean,
   isGlobalLoading: boolean,
   useMobileEditor: boolean,
-  defaultContentScaleRatio: number,
-  _3dEnabledPageIndex: number
+  contentScaleRatio: number,
+  _3dEnabledPageIndex: number,
+  currFocusPageIndex: number,
+  enalbleComponentLog: boolean,
+  inScreenshotPreviewRoute: boolean,
+  cursor: string,
+  isPageScaling: boolean,
+  isGettingDesign: boolean
 }
 
 export enum SidebarPanelType {

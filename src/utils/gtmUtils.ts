@@ -3,7 +3,6 @@
  */
 
 import store from '@/store'
-import Vue from 'vue'
 
 class GtmUtils {
   get userId(): string { return store.getters['user/getUserId'] }
@@ -13,10 +12,10 @@ class GtmUtils {
   get isLogin(): boolean { return store.getters['user/isLogin'] }
 
   track(eventName: string, params?: { [index: string]: string | boolean | number }) {
-    Vue.gtm.trackEvent({
-      event: eventName,
-      ...params
-    })
+    // Vue.gtm.trackEvent({
+    //   event: eventName,
+    //   ...params
+    // })
   }
 
   trackTemplateDownload(templateId: string) {

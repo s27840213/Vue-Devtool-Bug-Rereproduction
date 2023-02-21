@@ -2,49 +2,37 @@
 div(class="all-pages")
     page-preview-page-wrapper(v-for="(page, idx) in pages"
       :key="page.id"
-      class="m-10 border-box"
-      :index="idx" type="full"
+      class="border-box"
+      :index="idx"
+      type="full"
       :config="page"
-      :showMoreBtn="false")
+      :showMoreBtn="false"
+      :lazyLoadTarget="'.mobile-editor__content'"
+      :itemSize="itemSize")
     div(class="all-pages--last pointer border-box"
+      :style="btnStyle"
       @click="addPage()")
       div
         svg-icon(class="pb-5"
           :iconColor="'gray-2'"
           :iconName="'plus-origin'"
           :iconWidth="'25px'")
-
-//- recycle-scroller(class="all-pages" id="recycle" :items="pagesRows" :itemSize="itemSize")
-//-     template(v-slot="{ item, index:rowIndex }")
-//-       div(class="all-pages__row")
-//-         page-preview-page-wrapper(v-for="(page, index) in item.pages"
-//-           :key="page.id"
-//-           class="m-10 border-box"
-//-           :index="rowIndex*2 + index" type="full"
-//-           :config="page"
-//-           :showMoreBtn="false")
-//-         div(v-if="oddNumGroup && rowIndex === pagesRows.length -1" class="all-pages--last pointer border-box"
-//-           @click="addPage()")
-//-           div
-//-             svg-icon(class="pb-5"
-//-               :iconColor="'gray-2'"
-//-               :iconName="'plus-origin'"
-//-               :iconWidth="'25px'")
 </template>
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
-import pageUtils from '@/utils/pageUtils'
-import { floor } from 'lodash'
-import stepsUtils from '@/utils/stepsUtils'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IPage } from '@/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
-import generalUtils from '@/utils/generalUtils'
+import pageUtils from '@/utils/pageUtils'
+import { globalQueue } from '@/utils/queueUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { floor } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
       screenWidth: 0,
@@ -62,45 +50,47 @@ export default Vue.extend({
       getPagesPerRow: 'page/getPagesPerRow',
       allPageMode: 'mobileEditor/getMobileAllPageMode'
     }),
-    pagesRows(): Array<any> {
-      const pages = this.getPages
-      pageUtils.setAutoResizeNeededForPages(pages, false)
-      return generalUtils.createGroups(pages, 2).map((pageRow, idx) => {
-        return {
-          id: `row_${idx}`,
-          pages: pageRow
-        }
-      })
-    },
     pages(): IPage[] {
       const pages = this.getPages
       pageUtils.setAutoResizeNeededForPages(pages, false)
       return pages
     },
-    oddNumGroup(): boolean {
-      return pageUtils.getPages.length % 2 !== 0
+    btnStyle(): { [index: string]: string } {
+      return {
+        width: `${this.itemSize}px`,
+        height: `${this.itemSize}px`
+      }
     }
   },
   mounted() {
     this.screenWidth = document.body.clientWidth - 130
     // 40 -> column gap, 64 -> padding
-    this.itemSize = (document.body.clientWidth - 40 - 64) / 2 + 30
+    this.itemSize = (document.body.clientWidth - 32 - 64) / 2 - 10
     this._setPagesPerRow(floor(this.screenWidth / 180))
     window.addEventListener('resize', () => {
       this.screenWidth = document.body.clientWidth - 130
       this._setPagesPerRow(floor(this.screenWidth / 180))
     })
+
+    globalQueue.batchNum = 10
   },
   methods: {
     ...mapMutations({
-      _addPage: 'ADD_page',
       _setPagesPerRow: 'page/SET_PagesPerRow',
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
     addPage() {
-      const { width, height } = pageUtils.getPageSize(pageUtils.pageNum - 1)
-      pageUtils.addPage(pageUtils.newPage({ width, height }))
-
+      const lastPage = pageUtils.pageNum > 0 ? pageUtils.getPages[pageUtils.pageNum - 1] : undefined
+      pageUtils.addPageToPos(pageUtils.newPage(lastPage ? {
+        width: lastPage.width,
+        height: lastPage.height,
+        physicalWidth: lastPage.physicalWidth,
+        physicalHeight: lastPage.physicalHeight,
+        isEnableBleed: lastPage.isEnableBleed,
+        bleeds: lastPage.bleeds,
+        physicalBleeds: lastPage.physicalBleeds,
+        unit: lastPage.unit
+      } : {}), pageUtils.pageNum)
       this._setCurrActivePageIndex(pageUtils.pageNum - 1)
       editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
       stepsUtils.record()
@@ -116,7 +106,7 @@ export default Vue.extend({
 
 .all-pages {
   display: grid;
-  justify-content: center;
+  justify-items: center;
   align-items: center;
   width: 100%;
   max-height: 100%;
@@ -124,7 +114,7 @@ export default Vue.extend({
   grid-template-rows: auto;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-row-gap: 40px;
-  grid-column-gap: 40px;
+  grid-column-gap: 32px;
   padding: 32px;
   box-sizing: border-box;
   @include no-scrollbar;
@@ -142,12 +132,11 @@ export default Vue.extend({
   // }
   &--last {
     // aspect-ratio: 1/1;
+    @include size(100%);
     position: relative;
-    padding-bottom: calc(100% - 20px);
     background: setColor(gray-4);
     border-radius: 5px;
     transition: 0.25s ease-in-out;
-    margin: 10px;
     box-sizing: border-box;
     > div {
       @include size(100%);

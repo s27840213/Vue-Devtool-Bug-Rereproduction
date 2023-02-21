@@ -1,258 +1,249 @@
 <template lang="pug">
-  div(class="page-setting")
-    div(class="page-setting-row page-setting__title")
-      span(class="text-gray-2 label-mid") {{$t('NN0021')}}
-    div(class="page-setting-row page-setting__size")
-      property-bar(class="page-setting__size__box pointer" @click.native="setSuggestionPanel(true)")
-        span(class="body-3 text-gray-2") {{ currentPageWidth }}
-        span(class="body-4 text-gray-3") W
-      svg-icon(class="pointer"
-          :iconName="isLocked ? 'lock' : 'unlock'" :iconWidth="'20px'" :iconColor="'gray-2'"
-          @click.native="toggleLock()")
-      property-bar(class="page-setting__size__box pointer" @click.native="setSuggestionPanel(true)")
-        span(class="body-3 text-gray-2") {{ currentPageHeight }}
-        span(class="body-4 text-gray-3") H
-    div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
-        @click="toggleSuggestionPanel()")
-      span(class="page-setting__apply__text") {{$t('NN0022')}}
-    transition(name="slide-fade")
-      div(v-if="isPanelOpen"
-        class="page-setting__suggestion-panel")
-        img(class="page-setting__suggestion-panel__arrow" :src="require('@/assets/img/svg/up-arrow.svg')")
-        div(class="page-setting__suggestion-panel__body")
-          div(class="page-setting__suggestion-panel__body__close pointer"
-              @click="setSuggestionPanel(false)")
-            svg-icon(class="page-setting__suggestion-panel__body__close"
-                    iconName="close" iconWidth="19px" iconColor="white")
-          keep-alive
-            page-size-selector(:isDarkTheme="true" @selectFormat="selectFormat" ref="pageSizeSelector")
-          div(class="page-setting__suggestion-panel__body__buttons")
-            div(class="page-setting__suggestion-panel__body__button text-white"
-                :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
-                @click="applySelectedFormat")
-              span(class="page-setting__suggestion-panel__body__button__text") {{$t('NN0022')}}
-            div(class="page-setting__suggestion-panel__body__button text-white"
-                :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
-                @click="copyAndApplySelectedFormat")
-              span(class="page-setting__suggestion-panel__body__button__text") {{$t('NN0211')}}
-    div(class="page-setting__footer")
-    div(v-if="inAdminMode"
-      class="template-information")
-      div(class="template-information__divider pb-10")
-      btn(:type="'primary-sm'" class="rounded my-5"
-          style="padding: 8px 0; margin-left: 6%; width: 88%;"
-          @click.native="getDataClicked()") 取 得 群 組 / 模 板 資 料
-      div(v-if="groupId.length > 0"
-        class="pt-10")
-        span(class="text-gray-1 label-lg") 群 組 資 訊
+div(class="page-setting")
+  div(class="page-setting-row page-setting__title")
+    span(class="text-gray-2 label-mid") {{$t('NN0021')}}
+  div(class="page-setting-row page-setting__size bg-gray-6 pointer" @click="toggleSuggestionPanel()")
+    div(class="page-setting__size__box")
+      span(class="body-XS text-gray-2") {{ `${sizeToShow.width} ${sizeToShow.unit}` }}
+    span(class="body-XS text-gray-3") W
+    span(class="body-XS text-gray-2 text-center") x
+    div(class="page-setting__size__box")
+      span(class="body-XS text-gray-2") {{ `${sizeToShow.height} ${sizeToShow.unit}` }}
+    span(class="body-XS text-gray-3") H
+  div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
+      @click="toggleSuggestionPanel()")
+    svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm" class="mr-10")
+    span(class="page-setting__apply__text") {{$t('NN0022')}}
+  transition(name="slide-fade")
+    div(v-if="isPanelOpen"
+      class="page-setting__suggestion-panel")
+      img(class="page-setting__suggestion-panel__arrow" :src="require('@/assets/img/svg/up-arrow.svg')")
+      div(class="page-setting__suggestion-panel__body")
+        div(class="page-setting__suggestion-panel__body__close pointer"
+            @click="setSuggestionPanel(false)")
+          svg-icon(class="page-setting__suggestion-panel__body__close"
+                  iconName="close" iconWidth="19px" iconColor="white")
+        keep-alive
+          page-size-selector(:isDarkTheme="true" @close="setSuggestionPanel(false)" ref="pageSizeSelector")
+  div(v-if="hasBleed" class="page-setting__bleed")
+    div(class="page-setting-row page-setting__bleed__title pointer" @click="() => showBleedSettings = !showBleedSettings")
+      span(class="text-gray-2 label-mid") {{$t('NN0780')}}
+      svg-icon(class='page-setting__bleed__expand-icon'
+              iconName="chevron-up"
+              iconWidth="14px"
+              iconColor="gray-2"
+              :style="expandIconStyles()")
+    div(v-if="showBleedSettings" class="page-setting-row page-setting__bleed__content")
+      bleed-settings(:page="currPage")
+  div(class="page-setting__footer")
+  div(v-if="showAdminTool"
+    class="template-information")
+    div(class="template-information__divider pb-10")
+    btn(:type="'primary-sm'" class="rounded my-5"
+        style="padding: 8px 0; margin-left: 6%; width: 88%;"
+        @click="getDataClicked()") 取 得 群 組 / 模 板 資 料
+    div(v-if="groupId.length > 0"
+      class="pt-10")
+      span(class="text-gray-1 label-lg") 群 組 資 訊
+      div(class="template-information__line")
+        span(class="body-1") groupId
+        span(class="pl-15 body-2"
+          @click="copyText(groupId)") {{groupId}}
+      div(class="pt-5 text-red body-2") {{groupErrorMsg}}
+      div(v-for="id in unsetThemeTemplate"
+        class="pt-5 text-red body-2"
+        @click="copyText(id)") {{id}}
+      div(v-if="isGetGroup")
+        div(v-if="showDbGroup"
+          class="py-5 text-red body-2") 提醒：原有的設定不合法，已自動修正。請在下方修正版確認內容後按下更新按鈕
+        div(v-if="showDbGroup"
+          class="template-information__line")
+          span(class="body-1 text-red-1") 原設定內容
+        div(v-if="showDbGroup"
+          class="mb-10 square-wrapper wrong text-center")
+          div(v-if="dbGroupThemes.length === 0"
+            class="body-1") 尚未設定
+          div(v-else
+            class="pr-10 cover-option body-4")
+            span theme
+            span 封面頁碼
+          div(v-for="(item, idx) in dbGroupThemes"
+            class="pt-5 pr-10 cover-option")
+            span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
+            span 第{{item.coverIndex+1}}頁
+        div(v-if="showDbGroup"
+          class="template-information__line")
+          span(class="body-1 ") 修正版
+        div(class="square-wrapper text-center")
+          div(class="pr-10 cover-option body-4")
+            span theme
+            span 封面頁碼
+          div(v-for="(item, idx) in groupInfo.groupThemes"
+            class="pt-5 pr-10 cover-option")
+            span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
+            select(class="template-information__cover-select text-center"
+              v-model="item.coverIndex")
+              option(v-for="option in item.options" :value="option.index") 第{{option.index+1}}頁
+        div(class="pt-10")
+          btn(:type="'primary-sm'" class="rounded my-5"
+            style="padding: 8px 0; margin: 0 auto; width: 70%;"
+            @click.native="updateGroupClicked()") 更新
+    div(class="template-information__divider2")
+    span(class="text-gray-1 label-lg") 模 板 資 訊
+    div(class="template-information__content")
+      div(class="template-information__line" style="background: #eee;")
+        span(class="body-1") focus
+        span(class="pl-15 body-2" @click="copyText(key_id)") {{key_id}}
+      img(v-if="key_id.length > 0" style="margin: 0 auto;"
+        :src="`https://template.vivipic.com/template/${key_id}/prev?ver=${imgRandQuery}`")
+      div(v-if="isGetTemplate")
+        div(v-if="groupId.length > 0 && !isGroupMember"
+          class="text-red") 此模板不是上列群組的成員
         div(class="template-information__line")
-          span(class="body-1") groupId
-          span(class="pl-15 body-2"
-            @click="copyText(groupId)") {{groupId}}
-        div(class="pt-5 text-red body-2") {{groupErrorMsg}}
-        div(v-for="id in unsetThemeTemplate"
-          class="pt-5 text-red body-2"
-          @click="copyText(id)") {{id}}
-        div(v-if="isGetGroup")
-          div(v-if="showDbGroup"
-            class="py-5 text-red body-2") 提醒：原有的設定不合法，已自動修正。請在下方修正版確認內容後按下更新按鈕
-          div(v-if="showDbGroup"
-            class="template-information__line")
-            span(class="body-1 text-red-1") 原設定內容
-          div(v-if="showDbGroup"
-            class="mb-10 square-wrapper wrong text-center")
-            div(v-if="dbGroupThemes.length === 0"
-              class="body-1") 尚未設定
-            div(v-else
-              class="pr-10 cover-option body-4")
-              span theme
-              span 封面頁碼
-            div(v-for="(item, idx) in dbGroupThemes"
-              class="pt-5 pr-10 cover-option")
-              span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
-              span 第{{item.coverIndex+1}}頁
-          div(v-if="showDbGroup"
-            class="template-information__line")
-            span(class="body-1 ") 修正版
-          div(class="square-wrapper text-center")
-            div(class="pr-10 cover-option body-4")
-              span theme
-              span 封面頁碼
-            div(v-for="(item, idx) in groupInfo.groupThemes"
-              class="pt-5 pr-10 cover-option")
-              span(class="pl-15 body-1 text-left") {{item.id}}: {{item.title}}
-              select(class="template-information__cover-select text-center"
-                v-model="item.coverIndex")
-                option(v-for="option in item.options" :value="option.index") 第{{option.index+1}}頁
-          div(class="pt-10")
-            btn(:type="'primary-sm'" class="rounded my-5"
-              style="padding: 8px 0; margin: 0 auto; width: 70%;"
-              @click.native="updateGroupClicked()") 更新
-      div(class="template-information__divider2")
-      span(class="text-gray-1 label-lg") 模 板 資 訊
-      div(class="template-information__content")
-        div(class="template-information__line" style="background: #eee;")
-          span(class="body-1") focus
-          span(class="pl-15 body-2" @click="copyText(key_id)") {{key_id}}
-        img(v-if="key_id.length > 0" style="margin: 0 auto;"
-          :src="`https://template.vivipic.com/template/${key_id}/prev?ver=${imgRandQuery}`")
-        div(v-if="isGetTemplate")
-          div(v-if="groupId.length > 0 && !isGroupMember"
-            class="text-red") 此模板不是上列群組的成員
+          span(class="body-1") key_id
+          span(class="pl-15 body-2" @click="copyText(templateInfo.key_id)") {{templateInfo.key_id}}
+        div(class="template-information__line")
+          span(class="body-1") 創建者
+          span(class="pl-15 body-2" @click="copyText(templateInfo.creator)") {{templateInfo.creator}}
+        div(class="template-information__line")
+          span(class="body-1") 修改者
+          span(class="pl-15 body-2" @click="copyText(templateInfo.author)") {{templateInfo.author}}
+        div(class="template-information__line")
+          span(class="body-1") 上次更新
+          span(class="pl-15 body-2") {{templateInfo.edit_time}}
+        div(class="template-information__line")
+          span(class="body-1") 模板尺寸
+          span(class="pl-15 body-2") {{templateInfo.width}} x {{templateInfo.height}}
+        div(class="pt-10") plan(0：預設一般 / 1：Pro)
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="templateInfo.plan")
+        div(class="template-information__line")
+          span(class="body-1") Theme_ids
+        template(v-if="showDbTemplate")
+          div(class="py-5 text-red body-2") 提醒：主題設定有誤。請在下方修正版確認內容後按下更新按鈕
           div(class="template-information__line")
-            span(class="body-1") key_id
-            span(class="pl-15 body-2" @click="copyText(templateInfo.key_id)") {{templateInfo.key_id}}
-          div(class="template-information__line")
-            span(class="body-1") 創建者
-            span(class="pl-15 body-2" @click="copyText(templateInfo.creator)") {{templateInfo.creator}}
-          div(class="template-information__line")
-            span(class="body-1") 修改者
-            span(class="pl-15 body-2" @click="copyText(templateInfo.author)") {{templateInfo.author}}
-          div(class="template-information__line")
-            span(class="body-1") 上次更新
-            span(class="pl-15 body-2") {{templateInfo.edit_time}}
-          div(class="template-information__line")
-            span(class="body-1") 模板尺寸
-            span(class="pl-15 body-2") {{templateInfo.width}} x {{templateInfo.height}}
-          div(class="pt-10") plan(0：預設一般 / 1：Pro)
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="templateInfo.plan")
-          div(class="template-information__line")
-            span(class="body-1") Theme_ids
-          template(v-if="showDbTemplate")
-            div(class="py-5 text-red body-2") 提醒：主題設定有誤。請在下方修正版確認內容後按下更新按鈕
-            div(class="template-information__line")
-              span(class="body-1 text-red-1") 原設定內容 (x表示設定錯誤)
-          div(v-if="showDbTemplate"
-            class="square-wrapper wrong")
-            template(v-for="(item, idx) in themeList")
-              div(v-if="dbTemplateThemes[item.id]"
-                class="pt-5 theme-option")
-                span(class="text-red-1 text-center") {{isDisabled(item.id, item.width, item.height) ? 'x' : ''}}
-                span(class="body-1") {{item.title}}
-                span(class="body-2 text-gray-2") {{item.description}}
-          div(v-if="showDbTemplate"
-            class="pt-10 template-information__line")
-            span(class="body-1 ") 修正版
-          div(class="square-wrapper")
-            div(v-for="(item, idx) in themeList"
+            span(class="body-1 text-red-1") 原設定內容 (x表示設定錯誤)
+        div(v-if="showDbTemplate"
+          class="square-wrapper wrong")
+          template(v-for="(item, idx) in themeList")
+            div(v-if="dbTemplateThemes[item.id]"
               class="pt-5 theme-option")
-              input(type="checkbox"
-                class="theme-option__check"
-                :disabled="isDisabled(item.id, item.width, item.height)"
-                v-model="templateThemes[item.id]")
+              span(class="text-red-1 text-center") {{isDisabled(item.id, item.width, item.height) ? 'x' : ''}}
               span(class="body-1") {{item.title}}
               span(class="body-2 text-gray-2") {{item.description}}
-          div(class="template-information__line pt-10")
-            span(class="body-1") 語系
-            select(class="template-information__select" v-model="templateInfo.locale")
-              option(v-for="locale in localeOptions" :value="locale") {{locale}}
-          div(class="pt-10") tags_tw
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="templateInfo.tags_tw")
-          div(class="pt-10") tags_us
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="templateInfo.tags_us")
-          div(class="pt-10") tags_jp
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="templateInfo.tags_jp")
-          div(class="pt-10")
-            btn(:type="'primary-sm'" class="rounded my-5"
-              style="padding: 8px 0; margin: 0 auto; width: 70%;"
-              @click.native="updateDataClicked()") 更新
-          div(class="template-information__divider")
-          div(class="template-information__line bg-blue")
-            span(class="body-1") 父
-            span(class="pl-15 body-2"
-              @click="copyText(templateInfo.parent_id)") {{templateInfo.parent_id || '無'}}
-            span(class="text-blue-1") {{templateInfo.parent_locale}}
-          div(class="template-information__line bg-blue border-bottom pb-5")
-            span(class="body-1") 爺
-            span(class="pl-15 body-2"
-              @click="copyText(templateInfo.grandparent_id)") {{templateInfo.grandparent_id || '無'}}
-            span(class="text-blue-1") {{templateInfo.grandparent_locale}}
-          div(class="bg-blue")
-            div(v-for="(item) in templateInfo.grandchildren_id"
-              class="border-bottom py-5")
-              div(class="child-item")
-                span(class="body-1") 子
-                span(class="body-2"
-                  @click="copyText(item.childrenId)") {{item.childrenId}}
-                span {{item.childrenLocale}}
-              div(v-for="(item2) in item.grandchildren"
-                class="child-item")
-                span 孫
-                span(class="body-2"
-                  @click="copyText(item2.key_id)") {{item2.key_id}}
-                span {{item2.locale}}
-          div(class="template-information__line")
-            span(class="body-1 pt-10") parent_id (父模板)
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="userParentId")
-            div(class="pt-5 text-red body-3") 注意: parent_id的修改會更新模板的json，請修改時注意模板內容有無更動，避免複寫
-          div(class="template-information__line pt-10")
-            div(style="width: 50%;")
-              input(type="checkbox"
-                class="template-information__check"
-                v-model="updateParentIdChecked")
-              label 確定修改
-            btn(:type="'primary-sm'" class="rounded my-5"
-              style="padding: 5px 40px;"
-              @click.native="updateParentIdClicked()") 修改
+        div(v-if="showDbTemplate"
+          class="pt-10 template-information__line")
+          span(class="body-1 ") 修正版
+        div(class="square-wrapper")
+          div(v-for="(item, idx) in themeList"
+            class="pt-5 theme-option")
+            input(type="checkbox"
+              class="theme-option__check"
+              :disabled="isDisabled(item.id, item.width, item.height)"
+              v-model="templateThemes[item.id]")
+            span(class="body-1") {{item.title}}
+            span(class="body-2 text-gray-2") {{item.description}}
+        div(class="template-information__line pt-10")
+          span(class="body-1") 語系
+          select(class="template-information__select" v-model="templateInfo.locale")
+            option(v-for="locale in localeOptions" :value="locale") {{locale}}
+        div(class="pt-10") tags_tw
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="templateInfo.tags_tw")
+        div(class="pt-10") tags_us
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="templateInfo.tags_us")
+        div(class="pt-10") tags_jp
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="templateInfo.tags_jp")
+        div(class="pt-10")
+          btn(:type="'primary-sm'" class="rounded my-5"
+            style="padding: 8px 0; margin: 0 auto; width: 70%;"
+            @click="updateDataClicked()") 更新
+        div(class="template-information__divider")
+        div(class="template-information__line bg-blue")
+          span(class="body-1") 父
+          span(class="pl-15 body-2"
+            @click="copyText(templateInfo.parent_id)") {{templateInfo.parent_id || '無'}}
+          span(class="text-blue-1") {{templateInfo.parent_locale}}
+        div(class="template-information__line bg-blue border-bottom pb-5")
+          span(class="body-1") 爺
+          span(class="pl-15 body-2"
+            @click="copyText(templateInfo.grandparent_id)") {{templateInfo.grandparent_id || '無'}}
+          span(class="text-blue-1") {{templateInfo.grandparent_locale}}
+        div(class="bg-blue")
+          div(v-for="(item) in templateInfo.grandchildren_id"
+            class="border-bottom py-5")
+            div(class="child-item")
+              span(class="body-1") 子
+              span(class="body-2"
+                @click="copyText(item.childrenId)") {{item.childrenId}}
+              span {{item.childrenLocale}}
+            div(v-for="(item2) in item.grandchildren"
+              class="child-item")
+              span 孫
+              span(class="body-2"
+                @click="copyText(item2.key_id)") {{item2.key_id}}
+              span {{item2.locale}}
+        div(class="template-information__line")
+          span(class="body-1 pt-10") parent_id (父模板)
+        div
+          property-bar
+            input(class="body-2 text-gray-2" min="0"
+              v-model="userParentId")
+          div(class="pt-5 text-red body-3") 注意: parent_id的修改會更新模板的json，請修改時注意模板內容有無更動，避免複寫
+        div(class="template-information__line pt-10")
+          div(style="width: 50%;")
+            input(type="checkbox"
+              class="template-information__check"
+              v-model="updateParentIdChecked")
+            label 確定修改
+          btn(:type="'primary-sm'" class="rounded my-5"
+            style="padding: 5px 40px;"
+            @click="updateParentIdClicked()") 修改
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import SearchBar from '@/components/SearchBar.vue'
-import RadioBtn from '@/components/global/RadioBtn.vue'
-import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import StepsUtils from '@/utils/stepsUtils'
-import ResizeUtils from '@/utils/resizeUtils'
 import designApis from '@/apis/design-info'
+import BleedSettings from '@/components/editor/BleedSettings.vue'
+import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
+import RadioBtn from '@/components/global/RadioBtn.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import { IPage } from '@/interfaces/page'
+import { ICoverTheme, Itheme, IThemeTemplate } from '@/interfaces/theme'
 import GeneralUtils from '@/utils/generalUtils'
-import GroupUtils from '@/utils/groupUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import { ILayout } from '@/interfaces/layout'
-import listApi from '@/apis/list'
-import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
 import pageUtils from '@/utils/pageUtils'
+import { PRECISION } from '@/utils/unitUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { round } from 'lodash'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     SearchBar,
     RadioBtn,
-    PageSizeSelector
-  },
-  mounted() {
-    this.pageWidth = this.currentPageWidth
-    this.pageHeight = this.currentPageHeight
+    PageSizeSelector,
+    BleedSettings
   },
   data() {
     return {
-      formatList: [] as ILayout[],
-      recentlyUsed: [] as ILayout[],
-      selectedFormat: '',
-      pageWidth: '' as string | number,
-      pageHeight: '' as string | number,
-      isLayoutReady: false,
       isLocked: true,
       isPanelOpen: false,
       isGetGroup: false,
       isGetTemplate: false,
       updateParentIdChecked: false,
       localeOptions: ['tw', 'us', 'jp'],
-      currentKeyId: '',
       imgRandQuery: '',
       templateInfo: {
         key_id: '' as string,
@@ -271,7 +262,14 @@ export default Vue.extend({
         parent_locale: '' as string,
         grandparent_id: '' as string,
         grandparent_locale: '' as string,
-        grandchildren_id: []
+        grandchildren_id: [] as {
+          childrenId: string
+          childrenLocale: string
+          grandchildren: {
+            key_id: string
+            locale: string
+          }[]
+        }[]
       },
       themeList: [] as Itheme[],
       userParentId: '',
@@ -286,15 +284,17 @@ export default Vue.extend({
       templateThemes: [] as boolean[],
       dbTemplateThemes: [] as boolean[],
       groupErrorMsg: '',
-      unsetThemeTemplate: [] as string[]
+      unsetThemeTemplate: [] as string[],
+      showBleedSettings: true,
+    }
+  },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
   watch: {
-    isPanelOpen(newVal) {
-      if (!newVal) {
-        this.selectedFormat = ''
-      }
-    },
     key_id: function () {
       this.isGetTemplate = false
       this.isGetGroup = false
@@ -331,51 +331,31 @@ export default Vue.extend({
         groupThemes: []
       }
     },
-    currentPageWidth: function (newVal) {
-      this.pageWidth = newVal
-      this.pageHeight = this.currentPageHeight
-    },
-    currentPageHeight: function (newVal) {
-      this.pageWidth = this.currentPageWidth
-      this.pageHeight = newVal
+    hasBleed: function () {
+      this.showBleedSettings = true
     }
   },
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapState('layouts', [
       'categories'
     ]),
     ...mapGetters({
       getPage: 'getPage',
+      hasBleed: 'getHasBleed',
       token: 'user/getToken',
-      getAsset: 'getAsset',
       groupId: 'getGroupId',
-      groupType: 'getGroupType',
-      pagesLength: 'getPagesLength',
-      getPageSize: 'getPageSize'
+      showAdminTool: 'user/showAdminTool'
     }),
-    currentPageWidth(): number {
-      return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.width ?? 0)
-    },
-    currentPageHeight(): number {
-      return Math.round(this.getPage(pageUtils.currFocusPageIndex)?.height ?? 0)
-    },
-    aspectRatio(): number {
-      return (this.getPage(pageUtils.currFocusPageIndex)?.width ?? 1) / this.getPage(pageUtils.currFocusPageIndex)?.height ?? 1
-    },
-    isCustomValid(): boolean {
-      return this.pageWidth !== '' && this.pageHeight !== ''
-    },
-    isFormatApplicable(): boolean {
-      return this.selectedFormat === 'custom' ? this.isCustomValid : (this.selectedFormat !== '')
-    },
-    inAdminMode(): boolean {
-      return this.role === 0 && this.adminMode === true
+    sizeToShow(): {width: number, height: number, unit: string} {
+      const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSize
+      return {
+        width: round(physicalWidth ?? width ?? 0, PRECISION),
+        height: round(physicalHeight ?? height ?? 0, PRECISION),
+        unit: unit ?? 'px'
+      }
     },
     key_id(): string {
-      return this.getPage(pageUtils.currFocusPageIndex).designId
+      return this.currPage.designId
     },
     isGroupMember(): boolean {
       if (this.groupId.length === 0) {
@@ -390,40 +370,11 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       updatePageProps: 'UPDATE_pageProps',
-      addPageToPos: 'ADD_pageToPos',
-      setCurrActivePageIndex: 'SET_currActivePageIndex',
       setIsloading: 'SET_isGlobalLoading'
     }),
     ...mapActions('layouts', [
       'getRecently'
     ]),
-    getSelectedFormat(): ILayout | undefined {
-      if (this.selectedFormat === 'custom') {
-        if (!this.isCustomValid) return undefined
-        return { id: '', width: this.pageWidth as number, height: this.pageHeight as number, title: '', description: '' }
-      } else if (this.selectedFormat.startsWith('recent')) {
-        const [type, index] = this.selectedFormat.split('-')
-        const format = this.recentlyUsed[parseInt(index)]
-        return format
-      } else if (this.selectedFormat.startsWith('preset')) {
-        const [type, index] = this.selectedFormat.split('-')
-        const format = this.formatList[parseInt(index)]
-        return format
-      } else {
-        return undefined
-      }
-    },
-    applySelectedFormat(record = true) {
-      (this.$refs.pageSizeSelector as any).applySelectedFormat()
-      this.setSuggestionPanel(false)
-      if (record) {
-        StepsUtils.record()
-      }
-    },
-    copyAndApplySelectedFormat() {
-      (this.$refs.pageSizeSelector as any).copyAndApplySelectedFormat()
-      this.setSuggestionPanel(false)
-    },
     toggleLock() {
       this.isLocked = !this.isLocked
     },
@@ -433,50 +384,13 @@ export default Vue.extend({
     toggleSuggestionPanel() {
       this.setSuggestionPanel(!this.isPanelOpen)
     },
-    dropDownStyles() {
-      return this.isPanelOpen ? { transform: 'translateX(-50%) rotate(180deg)' } : {}
-    },
-    makeFormatString(format: ILayout) {
-      if (format.id !== '') {
-        return `${format.title} ${format.description}`
-      } else {
-        return `${format.width} x ${format.height}`
-      }
-    },
-    setPageWidth(event: Event) {
-      const value = (event.target as HTMLInputElement).value
-      this.pageWidth = typeof value === 'string' ? parseInt(value) : value
-      this.selectedFormat = 'custom'
-      if (this.isLocked) {
-        if (value === '') {
-          this.pageHeight = ''
-        } else {
-          this.pageHeight = Math.round(parseInt(value) / this.aspectRatio)
-        }
-      }
-    },
-    setPageHeight(event: Event) {
-      const value = (event.target as HTMLInputElement).value
-      this.pageHeight = typeof value === 'string' ? parseInt(value) : value
-      this.selectedFormat = 'custom'
-      if (this.isLocked) {
-        if (value === '') {
-          this.pageWidth = ''
-        } else {
-          this.pageWidth = Math.round(parseInt(value) * this.aspectRatio)
-        }
-      }
-    },
-    selectFormat(key: string) {
-      this.selectedFormat = key
-    },
     async getDataClicked() {
       this.setIsloading(true)
 
       this.resetStatus()
       const data = {}
       if (this.groupId.length === 0 && this.key_id.length === 0) {
-        this.$notify({ group: 'copy', text: '無群組及模板id' })
+        notify({ group: 'copy', text: '無群組及模板id' })
       }
       if (this.groupId.length > 0) {
         const groupRes = await designApis.getDesignInfo(this.token, 'group', this.groupId, 'select', JSON.stringify(data))
@@ -484,7 +398,7 @@ export default Vue.extend({
           this.isGetGroup = true
           this.setGroupInfo(groupRes.data)
         } else {
-          this.$notify({ group: 'copy', text: '找不到群組資料' })
+          notify({ group: 'copy', text: '找不到群組資料' })
         }
       }
 
@@ -498,7 +412,7 @@ export default Vue.extend({
           }
           this.userParentId = this.templateInfo.parent_id
         } else {
-          this.$notify({ group: 'copy', text: '找不到模板資料' })
+          notify({ group: 'copy', text: '找不到模板資料' })
         }
       }
 
@@ -516,10 +430,10 @@ export default Vue.extend({
 
       const res = await designApis.updateDesignInfo(this.token, 'group', this.groupId, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
-        this.$notify({ group: 'copy', text: '群組資料更新成功' })
+        notify({ group: 'copy', text: '群組資料更新成功' })
         this.setGroupInfo(res.data)
       } else {
-        this.$notify({ group: 'copy', text: '更新時發生錯誤' })
+        notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.resetStatus()
       this.setIsloading(false)
@@ -535,11 +449,11 @@ export default Vue.extend({
       const themeIds = arr.join()
 
       if (!this.templateInfo.key_id) {
-        this.$notify({ group: 'copy', text: '請先取得模板資料' })
+        notify({ group: 'copy', text: '請先取得模板資料' })
         return
       }
       if (themeIds === '' || themeIds.length === 0) {
-        this.$notify({ group: 'copy', text: 'theme_ids不得為空' })
+        notify({ group: 'copy', text: 'theme_ids不得為空' })
         return
       }
 
@@ -554,10 +468,10 @@ export default Vue.extend({
       }
       const res = await designApis.updateDesignInfo(this.token, 'template', this.templateInfo.key_id, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {
-        this.$notify({ group: 'copy', text: '模板資料更新成功' })
+        notify({ group: 'copy', text: '模板資料更新成功' })
         this.setTemplateInfo(res.data)
       } else {
-        this.$notify({ group: 'copy', text: '更新時發生錯誤' })
+        notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.resetStatus()
       this.isGetGroup = false
@@ -567,7 +481,7 @@ export default Vue.extend({
     },
     updateParentIdClicked() {
       if (!this.updateParentIdChecked) {
-        this.$notify({ group: 'copy', text: '請先勾選確定修改' })
+        notify({ group: 'copy', text: '請先勾選確定修改' })
         return
       }
       this.updatePageProps({
@@ -600,7 +514,7 @@ export default Vue.extend({
       this.groupInfo.contents.forEach((content, idx) => {
         const themes = content.theme_ids.split(',')
         if (themes.length === 0 || themes[0] === '0') {
-          // this.$notify({ group: 'copy', text: '有模板尚未設定theme，請設定完後再更新群組資訊' })
+          notify({ group: 'copy', text: '有模板尚未設定theme，請設定完後再更新群組資訊' })
           this.groupErrorMsg = '以下模板尚未設定theme，請設定完後再更新群組資訊：'
           this.unsetThemeTemplate.push(content.key_id)
           this.isGetGroup = false
@@ -632,7 +546,7 @@ export default Vue.extend({
 
       // fill in cover_ids
       const coverList = this.groupInfo.cover_ids.split(',')
-      coverList.map((cover) => {
+      coverList.forEach((cover) => {
         const id = parseInt(cover.split(':')[0])
         if (id === 0) {
           return
@@ -685,7 +599,7 @@ export default Vue.extend({
       this.templateInfo.edit_time = this.templateInfo.edit_time.replace(/T/, ' ').replace(/\..+/, '')
       if (this.templateInfo.theme_ids === '0' ||
         this.templateInfo.theme_ids.length === 0) {
-        this.$notify({ group: 'copy', text: '尚未設定主題' })
+        notify({ group: 'copy', text: '尚未設定主題' })
       }
       const themes = this.templateInfo.theme_ids.split(',')
       themes.forEach((item) => {
@@ -699,19 +613,18 @@ export default Vue.extend({
       }
       GeneralUtils.copyText(text)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${text} 已複製` })
+          notify({ group: 'copy', text: `${text} 已複製` })
         })
     },
-    isDisabled(idx: number, themeWidth: string, themeHeight: string) {
-      const themeAspectRatio = parseInt(themeWidth) / parseInt(themeHeight)
+    isDisabled(idx: number, themeWidth: number, themeHeight: number) {
+      const themeAspectRatio = themeWidth / themeHeight
       const templateAspectRatio = parseInt(this.templateInfo.width) / parseInt(this.templateInfo.height)
-
-      if (parseInt(themeHeight) === 0) { // 詳情頁模板
+      if (themeHeight === 0) { // 詳情頁模板
         return false
       } else if (themeAspectRatio === templateAspectRatio) {
         return false
-      } else if ((themeWidth === this.templateInfo.width || parseInt(themeWidth) === 0) &&
-        (themeHeight === this.templateInfo.height || parseInt(themeHeight) === 0)) {
+      } else if ((String(themeWidth) === this.templateInfo.width || themeWidth === 0) &&
+        (String(themeHeight) === this.templateInfo.height || themeHeight === 0)) {
         return false
       } else { // Disabled
         if (this.templateThemes[idx]) {
@@ -720,7 +633,10 @@ export default Vue.extend({
         }
         return true
       }
-    }
+    },
+    expandIconStyles() {
+      return this.showBleedSettings ? {} : { transform: 'scaleY(-1)' }
+    },
   }
 })
 </script>
@@ -743,25 +659,33 @@ export default Vue.extend({
     }
   }
   &__size {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    grid-template-rows: auto;
-    column-gap: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border-radius: 4px;
     &__box {
-      height: 26px;
+      width: 64px;
+      height: 22px;
       box-sizing: border-box;
-      & input {
-        line-height: 16px;
+      display: flex;
+      align-items: center;
+      text-align: center;
+      & span {
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
       }
     }
   }
   &__apply {
-    height: 28px;
+    height: 36px;
     border-radius: 3px;
     text-align: center;
     margin-top: 19px;
-    width: 88%;
+    width: 90%;
     margin-left: auto;
     margin-right: auto;
     display: flex;
@@ -774,6 +698,17 @@ export default Vue.extend({
       font-weight: 700;
       font-size: 12px;
       line-height: 16px;
+    }
+  }
+  &__bleed {
+    margin-top: 19px;
+    &__title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    &__content {
+      margin-top: 10px;
     }
   }
   &__hr {
@@ -807,6 +742,10 @@ export default Vue.extend({
   }
 
   &__suggestion-panel {
+    height: calc(100vh - 248px); // fill the rest of function panel
+    min-height: 287px;
+    max-height: 742px;
+    color: white;
     &__arrow {
       margin-left: auto;
       margin-right: 30%;
@@ -815,6 +754,7 @@ export default Vue.extend({
       display: block;
     }
     &__body {
+      height: calc(100% - 35px);
       background-color: setColor(gray-1-5);
       box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.25);
       border-radius: 4px;
@@ -877,28 +817,6 @@ export default Vue.extend({
         width: 45%;
         white-space: nowrap;
         transform: scale(0.85);
-      }
-      &__buttons {
-        display: flex;
-        width: 95%;
-        margin-left: auto;
-        margin-right: auto;
-        margin-top: 29px;
-        margin-bottom: 17.43px;
-        gap: 11px;
-      }
-      &__button {
-        flex-grow: 1;
-        border-radius: 3px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 4px;
-        text-align: center;
-        &__text {
-          font-weight: 700;
-          font-size: 12px;
-        }
       }
     }
   }
@@ -991,7 +909,7 @@ export default Vue.extend({
   transition: 0.3s ease;
 }
 
-.slide-fade-enter,
+.slide-fade-enter-from,
 .slide-fade-leave-to {
   transform: translateY(-10px);
   opacity: 0;

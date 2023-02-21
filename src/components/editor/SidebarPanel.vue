@@ -1,35 +1,30 @@
 <template lang="pug">
-  div(class="panel")
-    transition(name="panel-up")
-      div(v-if="isColorPanelOpen"
-      class="panel__color-panel")
-        color-panel(@toggleColorPanel="toggleColorPanel"
-          :alignLeft="false")
-    keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file', 'panel-brand']")
-      component(v-show="isSidebarPanelOpen && !isShowPagePreview && !bgRemoveMode"
-        class="p-10 border-box"
-        :style="panelStyles()"
-        @toggleColorPanel="toggleColorPanel"
-        :is="showPagePanel ? 'panel-page' : panelComponents[currPanel]")
+div(class="panel")
+  keep-alive(:include="['PanelTemplate', 'PanelPhoto', 'PanelObject', 'PanelBackground', 'PanelText', 'PanelFile', 'PanelBrand']")
+    component(v-show="isSidebarPanelOpen && !isShowPagePreview && !bgRemoveMode"
+      class="p-10 border-box"
+      :style="panelStyles()"
+      :is="showPagePanel ? 'panel-page' : panelComponents[currPanel]"
+      :currPage="currPage")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
-import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
 import PanelBrand from '@/components/editor/panelSidebar/PanelBrand.vue'
-import PanelPexels from '@/components/editor/panelSidebar/PanelPexels.vue'
 import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
+import { IPage } from '@/interfaces/page'
 // import { CartType } from '@/store/types'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     PanelTemplate,
     PanelPhoto,
@@ -38,12 +33,17 @@ export default Vue.extend({
     PanelText,
     PanelFile,
     PanelBrand,
-    PanelPexels, // for testing purposes
-    PanelPage,
-    ColorPanel
+    PanelPage
   },
   props: {
-    isSidebarPanelOpen: Boolean
+    isSidebarPanelOpen: {
+      type: Boolean,
+      required: true
+    },
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
   },
   data() {
     return {
@@ -64,11 +64,13 @@ export default Vue.extend({
         'panel-page-setting',
         'panel-photo-setting'
       ],
-      isActive: true,
-      isColorPanelOpen: false
+      isActive: true
     }
   },
   computed: {
+    ...mapState({
+      isMobile: 'isMobile'
+    }),
     ...mapGetters({
       currPanel: 'getCurrSidebarPanelType',
       isShowPagePreview: 'page/getIsShowPagePreview',
@@ -80,12 +82,9 @@ export default Vue.extend({
     togglePanel() {
       this.isActive = !this.isActive
     },
-    toggleColorPanel(bool: boolean) {
-      this.isColorPanelOpen = bool
-    },
     panelStyles() {
       return {
-        width: matchMedia('screen and (max-width: 767px)').matches ? 'calc(100vw - 75px)' : (this.showPagePanel ? '200px' : '320px')
+        width: this.isMobile ? 'calc(100vw - 75px)' : (this.showPagePanel ? '200px' : '320px')
       }
     }
   }

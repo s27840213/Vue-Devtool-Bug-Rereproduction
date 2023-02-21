@@ -4,40 +4,48 @@ div(class="ruler-hr"
   div(class="ruler-hr__body"
     ref="rulerBody"
     :style="rulerBodyStyles")
-    div(v-for="i in rulerLineCount.count" class="ruler-hr__block ruler-hr__block--int")
-      span(class="ruler-hr__number") {{(i-1)*SPLIT_UNIT}}
+    div(v-for="i in scaleCount" class="ruler-hr__block ruler-hr__block--int")
+      span(class="ruler-hr__number") {{(i-1)*scale}}
       div(v-for="i in 5" class="ruler-hr__line")
-    div(v-if="rulerLineCount.float > 0" class="ruler-hr__block ruler-hr__block--float")
-      span(class="ruler-hr__number") {{rulerLineCount.count * SPLIT_UNIT}}
+    div(v-if="scaleCount" class="ruler-hr__block ruler-hr__block--float")
+      span(class="ruler-hr__number") {{scaleCount * scale}}
 </template>
 
 <script lang="ts">
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
+import unitUtils from '@/utils/unitUtils'
 import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
     canvasRect: DOMRect,
     editorView: HTMLElement
   },
   data() {
     return {
-      rulerBodyOffset: 0
+      rulerBodyOffset: 0,
+      scale: rulerUtils.adjRulerScale()
     }
   },
   computed: {
     ...mapGetters({
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer',
       pageScaleRatio: 'getPageScaleRatio',
       showPagePanel: 'page/getShowPagePanel'
     }),
     currFocusPage(): IPage {
       return pageUtils.currFocusPage
+    },
+    currFocusPageSize() {
+      return pageUtils.currFocusPageSize
+    },
+    currFocusPageSizeWithBleeds() {
+      return pageUtils.currFocusPageSizeWithBleeds
     },
     rulerRootStyles(): { [index: string]: string } {
       return {
@@ -47,21 +55,20 @@ export default Vue.extend({
     },
     rulerBodyStyles(): { [index: string]: number | string } {
       return {
-        width: `${this.currFocusPage.width * (this.pageScaleRatio / 100)}px`,
+        width: `${this.currFocusPageSize.width * (this.pageScaleRatio / 100)}px`,
         height: `${rulerUtils.RULER_SIZE}px`,
         transform: `translate3d(${this.rulerBodyOffset}px,0px,0px)`,
-        'grid-template-columns': `repeat(${this.rulerLineCount.count},1fr) ${this.rulerLineCount.float}fr`
+        'grid-template-columns': `repeat(${this.scaleCount},${this.scaleSpace}px) auto`
       }
     },
-    rulerLineCount(): { count: number, float: number } {
-      const lineCount = (pageUtils.currFocusPage.width / this.SPLIT_UNIT).toFixed(2).split('.')
-      return {
-        count: parseInt(lineCount[0]),
-        float: parseFloat(`0.${lineCount[1]}`)
-      }
+    pxScale(): number {
+      return unitUtils.convert(this.scale, this.currFocusPageSize.unit, 'px', pageUtils.getPageDPI().width)
     },
-    SPLIT_UNIT(): number {
-      return rulerUtils.mapSplitUnit()
+    scaleCount(): number {
+      return Math.ceil(this.currFocusPageSize.width / this.pxScale)
+    },
+    scaleSpace(): number {
+      return this.pxScale * this.pageScaleRatio / 100
     }
   },
   mounted() {
@@ -70,9 +77,15 @@ export default Vue.extend({
   watch: {
     pageScaleRatio() {
       this.calcRulerBodyOffset()
+      this.scale = rulerUtils.adjRulerScale(this.scale)
     },
     currFocusPage() {
       this.calcRulerBodyOffset()
+      this.scale = rulerUtils.adjRulerScale()
+    },
+    currFocusPageSizeWithBleeds() {
+      this.calcRulerBodyOffset()
+      this.scale = rulerUtils.adjRulerScale(this.scale)
     },
     showPagePanel() {
       this.calcRulerBodyOffset()
@@ -81,7 +94,7 @@ export default Vue.extend({
   methods: {
     calcRulerBodyOffset(): void {
       this.$nextTick(() => {
-        this.rulerBodyOffset = pageUtils.pageRect.left - this.canvasRect.left + this.editorView.scrollLeft
+        this.rulerBodyOffset = pageUtils.pageRect.left - this.canvasRect!.left + this.editorView!.scrollLeft
       })
     }
   }
@@ -120,7 +133,7 @@ export default Vue.extend({
     position: absolute;
     left: 0;
     top: 20%;
-    font-size: 2px;
+    font-size: 12px;
     transform: scale(0.8);
   }
 

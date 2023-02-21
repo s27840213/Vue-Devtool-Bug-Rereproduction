@@ -1,11 +1,13 @@
-import store from '@/store'
+import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
 import { IShape } from '@/interfaces/layer'
-import shapeUtils from '@/utils/shapeUtils'
+import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
-import layerUtils from './layerUtils'
-import editorUtils from './editorUtils'
+import shapeUtils from '@/utils/shapeUtils'
 import { svg1, svg2, svg3, svg4, svg5, svg6, svg7, svg8 } from './cornerRotate'
+import editorUtils from './editorUtils'
+import layerUtils from './layerUtils'
+import mathUtils from './mathUtils'
 
 const blob1 = new Blob([svg1], { type: 'image/svg+xml' })
 const blob2 = new Blob([svg2], { type: 'image/svg+xml' })
@@ -59,7 +61,7 @@ class Controller {
           height: `${scalerSize}px`,
           left: '0',
           top: '0',
-          transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(-50%,-50%) scale(${contentScaleRatio})`,
           borderRadius: '50%'
           // background: 'red'
         },
@@ -70,7 +72,7 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(50%,-50%) scale(${contentScaleRatio})`,
           right: '0',
           top: '0',
           borderRadius: '50%'
@@ -83,7 +85,7 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(50%,50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(50%,50%) scale(${contentScaleRatio})`,
           right: '0',
           bottom: '0',
           borderRadius: '50%'
@@ -96,7 +98,7 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(-50%,50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(-50%,50%) scale(${contentScaleRatio})`,
           left: '0',
           bottom: '0',
           borderRadius: '50%'
@@ -107,125 +109,159 @@ class Controller {
     ]
   }
 
-  getControlPoints = (resizerShort: number, resizerLong: number) => {
+  private getScalers = (scalerSize: number, isTouchArea = false) => {
     const contentScaleRatio = editorUtils.contentScaleRatio
     const scaleRatio = store.getters.getPageScaleRatio
-    const isMobile = generalUtils.isTouchDevice()
-    const scalerSize = isMobile ? 12 : 8
-
-    const getScalers = (scalerSize: number, cursors?: Array<number | string>) => [
+    return [
       {
-        cursor: cursors?.[0] ?? 0,
+        cursor: 0,
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
           left: '0',
           top: '0',
-          transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
-          borderRadius: '50%'
+          // transform: `translate(-50%,-50%) scale(${contentScaleRatio})`,
+          transform: 'translate(-50%,-50%)',
+          borderRadius: '50%',
+          opacity: isTouchArea ? '0' : '1'
         },
         scalerSize
       },
       {
-        cursor: cursors?.[1] ?? 2,
+        cursor: 2,
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          // transform: `translate(50%,-50%) scale(${contentScaleRatio})`,
+          transform: 'translate(50%,-50%)',
           right: '0',
           top: '0',
-          borderRadius: '50%'
+          borderRadius: '50%',
+          opacity: isTouchArea ? '0' : '1'
         },
         scalerSize
       },
       {
-        cursor: cursors?.[2] ?? 4,
+        cursor: 4,
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(50%,50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          // transform: `translate(50%,50%) scale(${contentScaleRatio})`,
+          transform: 'translate(50%,50%)',
           right: '0',
           bottom: '0',
-          borderRadius: '50%'
+          borderRadius: '50%',
+          opacity: isTouchArea ? '0' : '1'
         },
         scalerSize
       },
       {
-        cursor: cursors?.[3] ?? 6,
+        cursor: 6,
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(-50%,50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          // transform: `translate(-50%,50%) scale(${contentScaleRatio})`,
+          transform: 'translate(-50%,50%)',
           left: '0',
           bottom: '0',
-          borderRadius: '50%'
+          borderRadius: '50%',
+          opacity: isTouchArea ? '0' : '1'
         },
         scalerSize
       }
-    ]
+    ] as {
+      cursor: number
+      styles: Record<string, string>
+      scalerSize: number
+    }[]
+  }
+
+  private getResizers = (resizerShort: number, resizerLong: number, contentScaleRatio: number, isTouchArea = false) => {
+    return [
+      {
+        type: 'H',
+        cursor: 7,
+        styles: {
+          height: `${resizerLong}px`,
+          width: `${resizerShort}px`,
+          left: '0',
+          // transform: isTouchArea ? `translate(-75%, 0%) scale(${contentScaleRatio})` : `translate(-50%, 0%) scale(${contentScaleRatio})`,
+          transform: isTouchArea ? 'translate(-75%, 0%)' : 'translate(-50%, 0%)',
+          opacity: isTouchArea ? '0' : '1'
+        }
+      },
+      {
+        type: 'H',
+        cursor: 3,
+        styles: {
+          height: `${resizerLong}px`,
+          width: `${resizerShort}px`,
+          right: '0',
+          // transform: isTouchArea ? `translate(75%, 0%) scale(${contentScaleRatio})` : `translate(50%, 0%) scale(${contentScaleRatio})`,
+          transform: isTouchArea ? 'translate(75%, 0%)' : 'translate(50%, 0%)',
+          opacity: isTouchArea ? '0' : '1'
+        }
+      },
+      {
+        type: 'V',
+        cursor: 5,
+        styles: {
+          width: `${resizerLong}px`,
+          height: `${resizerShort}px`,
+          bottom: '0',
+          // transform: isTouchArea ? `translate(0%, 75%) scale(${contentScaleRatio})` : `translate(0%, 50%) scale(${contentScaleRatio})`,
+          transform: isTouchArea ? 'translate(0%, 75%)' : 'translate(0%, 50%)',
+          opacity: isTouchArea ? '0' : '1'
+        }
+      },
+      {
+        type: 'V',
+        cursor: 1,
+        styles: {
+          width: `${resizerLong}px`,
+          height: `${resizerShort}px`,
+          top: '0',
+          // transform: isTouchArea ? `translate(0%, -75%) scale(${contentScaleRatio})` : `translate(0%, -50%) scale(${contentScaleRatio})`,
+          transform: isTouchArea ? 'translate(0%, -75%)' : 'translate(0%, -50%)',
+          opacity: isTouchArea ? '0' : '1'
+        }
+      }
+    ] as {
+      type: 'V' | 'H',
+      cursor: number,
+      styles: IResizer
+    }[]
+  }
+
+  getControlPoints = (resizerShort: number, resizerLong: number, scaleRatio = 1) => {
+    const scale = editorUtils.contentScaleRatio * scaleRatio
+    const isMobile = generalUtils.isTouchDevice()
+    const scalerSize = isMobile ? 12 : 8
+
     return {
-      scalers: getScalers(scalerSize),
-      cornerRotaters: this.getCornerRatater(scalerSize * 4),
+      scalers: this.getScalers(scalerSize * scaleRatio),
+      scalerTouchAreas: this.getScalers(scalerSize * 3 * scaleRatio, true),
+      cornerRotaters: this.getCornerRatater(scalerSize * 4 * scaleRatio),
       lineEnds: [
         {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
           left: '0',
           top: '50%',
-          transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(-50%,-50%) scale(${scale})`,
           borderRadius: '50%'
         },
         {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
+          transform: `translate(50%,-50%) scale(${scale})`,
           right: '0',
           top: '50%',
           borderRadius: '50%'
         }
       ],
-      resizers: [
-        {
-          type: 'H',
-          cursor: 7,
-          styles: {
-            height: `${resizerLong}px`,
-            width: `${resizerShort}px`,
-            left: '0',
-            transform: `translate(-50%, -50%) scale(${contentScaleRatio})`
-          }
-        },
-        {
-          type: 'H',
-          cursor: 3,
-          styles: {
-            height: `${resizerLong}px`,
-            width: `${resizerShort}px`,
-            right: '0',
-            transform: `translate(50%, -50%) scale(${contentScaleRatio})`
-          }
-        },
-        {
-          type: 'V',
-          cursor: 5,
-          styles: {
-            width: `${resizerLong}px`,
-            height: `${resizerShort}px`,
-            bottom: '0',
-            transform: `translate(-50%, 50%) scale(${contentScaleRatio})`
-          }
-        },
-        {
-          type: 'V',
-          cursor: 1,
-          styles: {
-            width: `${resizerLong}px`,
-            height: `${resizerShort}px`,
-            top: '0',
-            transform: `translate(-50%, -50%) scale(${contentScaleRatio})`
-          }
-        }
-      ],
+      resizers: this.getResizers(resizerShort, resizerLong, scale),
+      resizerTouchAreas: this.getResizers(resizerShort * 3, resizerLong * 3, scale, true),
       cursors: [
         'nwse-resize',
         'ns-resize',
@@ -237,23 +273,6 @@ class Controller {
         'ew-resize'
       ]
     }
-  }
-
-  dirHandler(clientP: ICoordinate, rect: DOMRect): boolean {
-    const center: ICoordinate = this.getRectCenter(rect)
-    const H = {
-      left: center.x - rect.width / 2,
-      right: center.x + rect.width / 2
-    }
-    const V = {
-      top: center.y - rect.height / 2,
-      bottom: center.y + rect.height / 2
-    }
-    const xmin = Math.min(Math.abs(clientP.x - H.left), Math.abs(clientP.x - H.right))
-    const ymin = Math.min(Math.abs(clientP.y - V.top), Math.abs(clientP.y - V.bottom))
-    /**  If it's in horizontal direction, return true
-     *  */
-    return xmin < ymin
   }
 
   getTranslateCompensation(initData: { xSign: number, ySign: number, x: number, y: number, angle: number },
@@ -311,7 +330,7 @@ class Controller {
     return this.getAbsPointWithRespectToReferencePoint(referencePoint, newPoint, styles, scale, newQuadrantByMarkerIndex)
   }
 
-  getControllerStyleParameters(point: number[], styles: { x: number, y: number, width: number, height: number, initWidth: number, rotate: number }, isLine: boolean, scale: number): { x: number, y: number, width: number, height: number, rotate: number } {
+  getControllerStyleParameters(point: number[], styles: { x: number, y: number, width: number, height: number, initWidth: number, rotate: number }, isLine: boolean, scale?: number): { x: number, y: number, width: number, height: number, rotate: number } {
     if (isLine) {
       scale = scale ?? 1
       const { x, y, width, height } = styles
@@ -450,6 +469,67 @@ class Controller {
       }
     }
     return [width, height]
+  }
+
+  /**
+   * This function determine if the point 'c' is on the left-hand-side of the line p1_p2
+   */
+  private isOnLeftHandSide(p1: ICoordinate, p2: ICoordinate, c: ICoordinate) {
+    const p1_p2 = {
+      x: p2.x - p1.x,
+      y: p2.y - p1.y
+    }
+    const p1_c = {
+      x: c.x - p1.x,
+      y: c.y - p1.y
+    }
+    return p1_p2.x * p1_c.y - p1_p2.y * p1_c.x > 0
+  }
+
+  isClickOnController(e: MouseEvent, layerIndex = layerUtils.layerIndex, subLayerIdx = layerUtils.subLayerIdx): boolean {
+    let layer = document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement
+    if (layer) {
+      // need to check layerIndex !== -1 i.e. layer !== undefined before accessing styles on layerConfig
+      const layerConfig = layerUtils.getCurrLayer
+      let rotate = layerConfig.styles.rotate
+      if (layerConfig.type === 'shape' && layerConfig.category === 'D') {
+        layer = document.getElementById(`nu-layer__line-mover_${layerUtils.pageIndex}_${layerIndex}_${subLayerIdx}`) as HTMLElement
+        const { xDiff, yDiff } = shapeUtils.lineDimension(layerConfig.point ?? [])
+        rotate = Math.atan2(yDiff, xDiff) / Math.PI * 180
+      }
+      const rect = layer.getBoundingClientRect()
+      const c = { x: e.clientX, y: e.clientY }
+      const { x: x0, y: y0, width: W, height: H } = rect
+      const sinT = mathUtils.sin((rotate + 360) % 90)
+      const cosT = mathUtils.cos((rotate + 360) % 90)
+      const w = (H * sinT - W * cosT) / (sinT * sinT - cosT * cosT)
+      const h = (H * cosT - W * sinT) / (cosT * cosT - sinT * sinT)
+      const yt = y0
+      const yb = y0 + H
+      const xl = x0
+      const xr = x0 + W
+      const p1 = {
+        x: xl + h * sinT,
+        y: yt
+      }
+      const p2 = {
+        x: xr,
+        y: yt + w * sinT
+      }
+      const p3 = {
+        x: xr - h * sinT,
+        y: yb
+      }
+      const p4 = {
+        x: xl,
+        y: yb - w * sinT
+      }
+      return this.isOnLeftHandSide(p1, p2, c) &&
+        this.isOnLeftHandSide(p2, p3, c) &&
+        this.isOnLeftHandSide(p3, p4, c) &&
+        this.isOnLeftHandSide(p4, p1, c)
+    }
+    return false
   }
 
   updateImgPos(pageIndex: number, layerIndex: number, imgX: number, imgY: number) {

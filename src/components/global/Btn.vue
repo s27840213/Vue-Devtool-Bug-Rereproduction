@@ -1,21 +1,23 @@
 <template lang="pug">
-  button(class="btn"
-      :class="`btn-${squared ? 'squared-' : ''}${buttonType}`"
-      :disabled="disabled" ref="btn")
-    svg-icon(v-if="hasIcon"
-      class="btn__icon"
-      :style="`margin-right: ${iconMargin}px`"
-      :iconName="iconName"
-      :iconColor="iconColor"
-      :iconWidth="iconWidth")
-    span(class="btn__text")
-      slot
+button(class="btn"
+    :class="`btn-${squared ? 'squared-' : ''}${buttonType}`"
+    :disabled="disabled" ref="btn")
+  svg-icon(v-if="hasIcon"
+    class="btn__icon"
+    :style="`margin-right: ${iconMargin}px`"
+    :iconName="iconName"
+    :iconColor="iconColor"
+    :iconWidth="iconWidth")
+  span(class="btn__text")
+    slot
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
+  name: 'Btn',
   components: {
   },
   props: {

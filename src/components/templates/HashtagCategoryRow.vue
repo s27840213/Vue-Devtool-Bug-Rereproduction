@@ -1,22 +1,28 @@
 <template lang="pug">
-  div(class="hashtag-row")
-    div(class="hashtag-row__title") {{ list.title }}
-    div(class="hashtag-row__tags")
-      div(class="hashtag-row__tags__tag"
-          :class="{'selected': selected.length === 0}"
-          @click="handleSelectAll") {{ $t('NN0324') }}
-      div(v-for="tag in list.list" class="hashtag-row__tags__tag"
-          :class="{'selected': checkSelection(tag)}"
-          @click="handleSelect(tag)") {{ tag.name }}
+div(class="hashtag-row")
+  div(class="hashtag-row__title") {{ list.title }}
+  div(class="hashtag-row__tags")
+    div(class="hashtag-row__tags__tag"
+        :class="{'selected': selected.length === 0}"
+        @click="handleSelectAll") {{ $t('NN0324') }}
+    div(v-for="tag in list.list" class="hashtag-row__tags__tag"
+        :class="{'selected': checkSelection(tag)}"
+        @click="handleSelect(tag)") {{ tag.name }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
-    list: Object,
-    defaultSelection: Array
+    list: {
+      type: Object,
+      required: true
+    },
+    defaultSelection: {
+      type: Array,
+      required: true
+    }
   },
   mounted() {
     this.selected = this.defaultSelection as string[]

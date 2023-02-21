@@ -1,24 +1,32 @@
 <template lang="pug">
-  div(class="category-list-rows")
-    div(class="category-list-rows__header py-10 text-bold text-white")
-      div {{title}}
-      div(class="category-list-rows__action pointer"
-        @click="onAction(title)")
-        slot(name="action") {{$t('NN0082')}}
-    category-list-row
-      div(v-for="item in list" :key="item.id")
-        slot(name="preview" :item="item")
-          img(:src="require('@/assets/img/svg/image-preview.svg')")
+div(class="category-list-rows")
+  div(class="category-list-rows__header py-10 text-bold text-white")
+    div {{title}}
+    div(class="category-list-rows__action pointer"
+      @click="onAction(title)")
+      slot(name="action") {{$t('NN0082')}}
+  category-list-row
+    div(v-for="item in list" :key="item.id")
+      slot(name="preview" :item="item")
+        img(:src="require('@/assets/img/svg/image-preview.svg')")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
+import { ICategoryItem } from '@/interfaces/api'
 import CategoryListRow from './CategoryListRow.vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: ['action'],
   props: {
-    list: Array,
-    title: String
+    list: {
+      type: Array as PropType<ICategoryItem[]>,
+      required: true
+    },
+    title: {
+      type: String,
+      required: true
+    }
   },
   components: {
     CategoryListRow

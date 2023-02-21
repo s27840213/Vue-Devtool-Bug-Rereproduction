@@ -1,15 +1,17 @@
 <template lang="pug">
-  div(class="my-design")
-    my-design-mobile(v-if="isMobile > 0" :view="view")
-    my-design-pc(v-if="isMobile < 0" :view="view")
+div(class="my-design")
+  my-design-mobile(v-if="isMobile > 0" :view="view")
+  my-design-pc(v-if="isMobile < 0" :view="view")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MyDesignPc from '@/components/mydesign/MyDesignPC.vue'
 import MyDesignMobile from '@/components/mydesign/MyDesignMobile.vue'
+import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'MyDesign',
   data() {
     return {
@@ -17,7 +19,10 @@ export default Vue.extend({
     }
   },
   props: {
-    view: String
+    view: {
+      type: String,
+      required: true
+    }
   },
   components: {
     MyDesignPc,
@@ -28,12 +33,12 @@ export default Vue.extend({
 
     this.handleResize()
   },
-  destroyed() {
+  unmounted() {
     window.removeEventListener('resize', this.handleResize)
   },
   methods: {
     handleResize() {
-      this.isMobile = window.matchMedia('screen and (max-width: 540px)').matches ? 1 : -1
+      this.isMobile = generalUtils.getWidth() <= 540 ? 1 : -1
     }
   }
 })

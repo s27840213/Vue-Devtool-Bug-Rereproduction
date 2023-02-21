@@ -1,113 +1,104 @@
 <template lang="pug">
-  div(class="color-panel"
-      :class="[whiteTheme ? 'bg-white': 'bg-gray-1-5']"
-      v-click-outside="vcoConfig"
-      ref="colorPanel")
-    img(v-if="showPanelBtn" class="color-panel__btn"
-      :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
-      @click="closePanel()")
-    div(class="color-panel__scroll" :style="noPadding ? {padding:0} : {}")
-      //- Recently colors
+div(class="color-panel"
+    :style="bgStyle"
+    v-click-outside="vcoConfig"
+    ref="colorPanel")
+  img(v-if="showPanelBtn" class="color-panel__btn"
+    :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
+    @click="closePanel()")
+  div(class="color-panel__scroll" :class="{'p-0': noPadding}")
+    //- Recently colors
+    div(class="color-panel__colors"
+        :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+      div(class="text-left mb-5")
+        div(class="flex-center")
+          svg-icon(v-if="showAllRecentlyColor && mode!=='PanelColor'" iconName="chevron-left"
+                iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
+                class="mr-5" @click="lessRecently()")
+          span {{$t('NN0679')}}
+        span(v-if="!showAllRecentlyColor" class="btn-LG" @click="moreRecently()") {{$t('NN0082')}}
+      div
+        color-btn(color="add" :active="openColorPicker"
+                  @click="openColorPanel($event)")
+        color-btn(v-for="color in recentlyColors" :color="color" :key="color"
+                  :active="color === selectedColor"
+                  @click="handleColorEvent(color)")
+    template(v-if="!showAllRecentlyColor")
+      template(v-if="isBrandkitAvailable")
+        //- Brandkit select
+        div(class="relative")
+          brand-selector(:theme="$isTouchDevice() ? 'mobile-panel' : 'panel'")
+          div(class="color-panel__brand-settings pointer"
+              @click="handleOpenSettings")
+            svg-icon(iconName="settings" :iconColor="$isTouchDevice() ? 'gray-2' : 'white'" iconWidth="24px")
+        //- Brandkit palettes
+        div(v-if="isPalettesLoading" class="color-panel__colors")
+          svg-icon(iconName="loading"
+                  iconWidth="20px"
+                  iconColor="white")
+        div(v-else v-for="palette in currentPalettes"
+            class="color-panel__colors"
+            :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+          div(class="text-left mb-5")
+            span {{getDisplayedPaletteName(palette)}}
+          div
+            color-btn(v-for="color in palette.colors" :color="color.color"
+                      :active="color.color === selectedColor"
+                      @click="handleColorEvent(color.color)")
+      //- Document colors
       div(class="color-panel__colors"
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
         div(class="text-left mb-5")
-          div(class="flex-center")
-            svg-icon(v-if="showAllRecentlyColor && !isTouchDevice" iconName="chevron-left"
-                  iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
-                  class="mr-5" @click.native="lessRecently()")
-            span {{$t('NN0679')}}
-          span(v-if="!showAllRecentlyColor" class="btn-LG" @click="moreRecently()") {{$t('NN0082')}}
+          span {{$t('NN0091')}}
         div
-          div(class="color-panel__add-color pointer"
-            @click="openColorPanel($event)")
-          div(v-for="color in recentlyColors"
-            class="color-panel__color"
-            :style="colorStyles(color)"
-            @click="handleColorEvent(color)")
-      template(v-if="!showAllRecentlyColor")
-        template(v-if="isBrandkitAvailable")
-          //- Brandkit select
-          div(class="relative")
-            brand-selector(theme="mobile-panel")
-            div(class="color-panel__brand-settings pointer"
-                @click="handleOpenSettings")
-              svg-icon(iconName="settings" iconColor="gray-2" iconWidth="24px")
-          //- Brandkit palettes
-          div(v-if="isPalettesLoading" class="color-panel__colors")
-            svg-icon(iconName="loading"
-                    iconWidth="20px"
-                    iconColor="white")
-          div(v-else v-for="palette in currentPalettes"
-              class="color-panel__colors"
-              :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-            div(class="text-left mb-5")
-              span {{getDisplayedPaletteName(palette)}}
-            div
-              div(v-for="color in palette.colors"
-                class="color-panel__color"
-                :style="colorStyles(color.color)"
-                @click="handleColorEvent(color.color)")
-        //- Document colors
-        div(class="color-panel__colors"
-            :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-          div(class="text-left mb-5")
-            span {{$t('NN0091')}}
-          div
-            div(v-for="color in documentColors"
-              class="color-panel__color"
-              :style="colorStyles(color)"
-              @click="handleColorEvent(color)")
-        //- Preset Colors
-        div(class="color-panel__colors"
-            :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-          div(class="text-left mb-5")
-            span {{$t('NN0089')}}
-          div
-            div(v-for="color in defaultColors"
-              class="color-panel__color"
-              :style="colorStyles(color)"
-              @click="handleColorEvent(color)")
-    color-picker(v-if="isColorPickerOpen"
-      class="color-panel__color-picker"
-      ref="colorPicker"
-      v-click-outside="closeColorModal"
-      :currentColor="colorUtils.currColor"
-      @update="handleDragUpdate"
-      @final="handleChangeStop")
+          color-btn(v-for="color in documentColors" :color="color" :key="color"
+                    :active="color === selectedColor"
+                    @click="handleColorEvent(color)")
+      //- Preset Colors
+      div(class="color-panel__colors"
+          :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+        div(class="text-left mb-5")
+          span {{$t('NN0089')}}
+        div
+          color-btn(v-for="color in defaultColors" :color="color" :key="color"
+                    :active="color === selectedColor"
+                    @click="handleColorEvent(color)")
+          img(v-if="selectingBg"
+            class="full-width full-height"
+            src="@/assets/img/svg/transparent.svg"
+            @click="handleColorEvent('#ffffff00')")
+  color-picker(v-if="openColorPicker"
+    class="color-panel__color-picker"
+    ref="colorPicker"
+    v-click-outside="closeColorModal"
+    :currentColor="currentColor"
+    @update="handleDragUpdate"
+    @final="handleChangeStop")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import vClickOutside from 'v-click-outside'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import colorUtils from '@/utils/colorUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
+import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
+import { IPage } from '@/interfaces/page'
+import { ColorEventType, SidebarPanelType } from '@/store/types'
+import brandkitUtils from '@/utils/brandkitUtils'
+import colorUtils from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
 import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
-import { LayerType, SidebarPanelType } from '@/store/types'
-import brandkitUtils from '@/utils/brandkitUtils'
-import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
-import generalUtils from '@/utils/generalUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'ColorSlips',
   props: {
-    whiteTheme: {
-      type: Boolean,
-      default: false
-    },
-    alignLeft: {
-      type: Boolean,
-      default: true
-    },
-    noPadding: {
-      type: Boolean,
-      default: false
-    },
-    showPanelBtn: {
-      type: Boolean,
-      default: true
+    // Defind some style or logic difference.
+    mode: {
+      type: String as PropType<'FunctionPanel' | 'PanelBG' | 'PanelColor'>,
+      required: true
     },
     /**
      * @param allRecentlyControl - is used when you want to switch the all recently panel from parent component
@@ -115,15 +106,25 @@ export default Vue.extend({
     allRecentlyControl: {
       type: Boolean,
       required: false
+    },
+    selectedColor: {
+      type: String,
+      default: ''
+    },
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
   components: {
     ColorPicker,
-    BrandSelector
+    BrandSelector,
+    ColorBtn
   },
   directives: {
     clickOutside: vClickOutside.directive
   },
+  emits: ['selectColor', 'selectColorEnd', 'toggleColorPanel', 'openColorPicker', 'openColorMore'],
   data() {
     return {
       vcoConfig: {
@@ -133,11 +134,6 @@ export default Vue.extend({
         // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
       },
       openColorPicker: false,
-      colorUtils,
-      middlewareMap: {
-        text: 'shape-setting__color',
-        shapge: 'shape-setting__color'
-      },
       lastPickColor: '',
       showAllRecently: false
     }
@@ -154,7 +150,7 @@ export default Vue.extend({
     }
     this.initRecentlyColors()
   },
-  destroyed() {
+  unmounted() {
     this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
     this.setIsColorPanelOpened(false)
   },
@@ -168,14 +164,15 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       documentColors: 'color/getDocumentColors',
-      defaultColors: 'color/getDefaultColors',
-      allRecentlyColors: 'color/getRecentlyColors',
+      _defaultColors: 'color/getDefaultColors',
+      defaultBgColor: 'color/getDefaultBgColors',
+      _recentlyColors: 'color/getRecentlyColors',
       currSelectedInfo: 'getCurrSelectedInfo',
       currentBrand: 'brandkit/getCurrentBrand',
       selectedTab: 'brandkit/getSelectedTab',
       isPalettesLoading: 'brandkit/getIsPalettesLoading',
       currPanel: 'getCurrSidebarPanelType',
-      getCurrFunctionPanelType: 'getCurrFunctionPanelType'
+      getBackgroundColor: 'getBackgroundColor'
     }),
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable
@@ -183,37 +180,51 @@ export default Vue.extend({
     isColorPanelHandling(): boolean {
       return this.isBrandkitAvailable && (this.currPanel !== SidebarPanelType.brand || this.selectedTab !== 'color')
     },
-    isShape(): boolean {
-      return layerUtils.getCurrConfig.type === LayerType.shape
-    },
-    isFrame(): boolean {
-      return layerUtils.getCurrConfig.type === LayerType.frame
-    },
     isText(): boolean {
       return this.currSelectedInfo.types.has('text') && this.currSelectedInfo.layers.length === 1
     },
-    isColorPickerOpen(): boolean {
-      return colorUtils.isColorPickerOpen
+    bgStyle(): Record<string, string> {
+      return this.mode === 'FunctionPanel' ? {
+        background: '#2C2F43'// gray-1-5
+      } : {
+        background: 'transparent'
+      }
+    },
+    whiteTheme(): boolean {
+      return ['PanelColor'].includes(this.mode)
+    },
+    noPadding(): boolean {
+      return ['PanelColor', 'PanelBG'].includes(this.mode)
+    },
+    showPanelBtn(): boolean {
+      return !['PanelColor', 'PanelBG'].includes(this.mode)
     },
     currentPalettes(): IBrandColorPalette[] {
       return (this.currentBrand as IBrand).colorPalettes
     },
+    currentColor(): string {
+      return this.mode === 'PanelBG'
+        ? this.currPage.backgroundColor
+        : colorUtils.currColor
+    },
     showAllRecentlyColor(): boolean {
-      return this.allRecentlyControl ?? this.showAllRecently
+      return ['PanelColor'].includes(this.mode) ? this.allRecentlyControl : this.showAllRecently
     },
     recentlyColors(): string[] {
       return this.showAllRecentlyColor
-        ? this.allRecentlyColors
-        : this.allRecentlyColors.slice(0, 20)
+        ? this._recentlyColors
+        : this._recentlyColors.slice(0, 20)
     },
-    isTouchDevice(): boolean {
-      return generalUtils.isTouchDevice()
-    }
+    selectingBg(): boolean {
+      return this.mode === 'PanelBG' || colorUtils.currEvent === ColorEventType.background
+    },
+    defaultColors(): unknown {
+      return this.selectingBg ? this.defaultBgColor : this._defaultColors
+    },
   },
   methods: {
     ...mapMutations({
       updateDocumentColors: 'UPDATE_documentColors',
-      setCurrFunctionPanel: 'SET_currFunctionPanelType',
       setSettingsOpen: 'brandkit/SET_isSettingsOpen',
       setIsColorPanelOpened: 'SET_isColorPanelOpened'
     }),
@@ -225,64 +236,68 @@ export default Vue.extend({
     handleOpenSettings() {
       this.setSettingsOpen(true)
     },
-    colorStyles(color: string) {
-      return {
-        backgroundColor: color
-      }
-    },
     getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {
       return brandkitUtils.getDisplayedPaletteName(colorPalette)
     },
     handleColorEvent(color: string) {
-      colorUtils.event.emit(colorUtils.currEvent, color)
-      colorUtils.event.emit(colorUtils.currStopEvent, color)
-      colorUtils.setCurrColor(color)
+      if (this.mode === 'PanelBG') {
+        this.$emit('selectColor', color)
+      } else {
+        colorUtils.event.emit(colorUtils.currEvent, color)
+        colorUtils.event.emit(colorUtils.currStopEvent, color)
+        colorUtils.setCurrColor(color)
+      }
       this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color })
     },
     handleDragUpdate(color: string) {
       window.requestAnimationFrame(() => {
-        colorUtils.event.emit(colorUtils.currEvent, color)
-        colorUtils.setCurrColor(color)
+        if (this.mode === 'PanelBG') {
+          this.$emit('selectColor', color)
+        } else {
+          colorUtils.event.emit(colorUtils.currEvent, color)
+          colorUtils.setCurrColor(color)
+        }
       })
       this.lastPickColor = color
     },
     handleChangeStop(color: string) {
       window.requestAnimationFrame(() => {
-        colorUtils.event.emit(colorUtils.currStopEvent, color)
+        if (this.mode === 'PanelBG') {
+          this.$emit('selectColorEnd')
+        } else {
+          colorUtils.event.emit(colorUtils.currStopEvent, color)
+        }
       })
     },
     closeColorModal(): void {
-      if (this.isColorPickerOpen && this.lastPickColor !== '') {
+      if (this.openColorPicker && this.lastPickColor !== '') {
         this.addRecentlyColors(this.lastPickColor)
       }
-      colorUtils.setIsColorPickerOpen(false)
+      this.openColorPicker = false
     },
     clickOutside(): void {
-      const sel = window.getSelection()
-      if (sel && sel.rangeCount) {
-        const target = sel?.getRangeAt(0).startContainer
-        if (target && target instanceof HTMLElement && target.classList.contains('input-color')) {
-          return
-        }
-      }
       this.closeColorModal()
-      this.$emit('toggleColorPanel', false)
+      this.closePanel()
     },
     middleware(event: MouseEvent): boolean {
-      return this.isShape || this.isFrame ? (event.target as HTMLElement).className !== 'shape-setting__color' : true
+      const target = event.target as HTMLElement
+      return this.mode === 'PanelBG' ? false // Never close in PanelBG
+        // Don't close when selecting color target
+        : !(target.matches('.function-panel .color-btn *') || // Object, BG, text effect color
+        target.matches('.function-panel .text-setting__color *')) // Text color
     },
     closePanel(): void {
-      this.$emit('toggleColorPanel', false)
+      editorUtils.toggleColorSlips(false)
     },
     openColorPanel(event: MouseEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice()) {
         this.$emit('openColorPicker')
         return
       }
-      colorUtils.setIsColorPickerOpen(true)
-      Vue.nextTick(() => {
+      this.openColorPicker = true
+      this.$nextTick(() => {
         const colorPanel = this.$refs.colorPanel as HTMLElement
-        const colorPicker = document.getElementsByClassName('color-panel__color-picker')[0] as HTMLElement
+        const colorPicker = (this.$refs.colorPicker as any).$el as HTMLElement
         const [width, height] = [colorPicker.offsetWidth, colorPicker.offsetHeight]
         const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
         const mousePos = mouseUtils.getMouseAbsPoint(event)
@@ -295,20 +310,12 @@ export default Vue.extend({
           topPos -= ((top + height) - vh)
         }
 
-        const pickerPos = this.alignLeft ? {
-          left: `${left - colorPanel.getBoundingClientRect().left - width - margin}px`,
-          top: `${topPos}px`
-        } : {
+        const pickerPos = {
           right: `${colorPanel.getBoundingClientRect().right - right - width - margin}px`,
           top: `${topPos}px`
         }
-        if (this.alignLeft) {
-          colorPicker.style.left = pickerPos.left ?? '0px'
-          colorPicker.style.top = pickerPos.top
-        } else {
-          colorPicker.style.right = pickerPos.right ?? '0px'
-          colorPicker.style.top = pickerPos.top
-        }
+        colorPicker.style.right = pickerPos.right ?? '0px'
+        colorPicker.style.top = pickerPos.top
       })
     },
     lessRecently() { this.showAllRecently = false },
@@ -330,10 +337,15 @@ export default Vue.extend({
   box-sizing: border-box;
   filter: drop-shadow(0px -1px 5px setColor(white, 0.2));
   &__scroll {
+    .mobile-panel & { // only for mobile editor
+      @include no-scrollbar;
+    }
     @include hover-scrollbar(dark);
     box-sizing: border-box;
     height: 100%;
-    padding: 20px 4px 20px 14px; // padding-right: 14 - 10(scrollbar width)
+    &:not(.p-0) {
+      padding: 20px 4px 20px 14px; // padding-right: 14 - 10(scrollbar width)
+    }
     > div + div {
       margin-top: 8px;
     }
@@ -367,25 +379,6 @@ export default Vue.extend({
       justify-content: center;
       align-items: center;
     }
-  }
-
-  &__add-color {
-    width: 100%;
-    // height: 100%;
-    padding-top: 100%;
-    background-image: url("~@/assets/img/svg/addColor.png");
-    background-size: cover;
-    box-shadow: 0px 1px 4px setColor(gray-1-5, 0.2);
-  }
-
-  &__color {
-    width: 100%;
-    padding-top: 100%;
-    border-radius: 2px;
-    border: 1px solid setColor(gray-4, 0.3);
-    box-sizing: border-box;
-    box-shadow: 0px 1px 4px setColor(gray-1-5, 0.2);
-    cursor: pointer;
   }
 
   &__color-picker {

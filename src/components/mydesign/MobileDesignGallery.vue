@@ -1,6 +1,7 @@
 <template lang="pug">
-  div(v-if="allDesigns.length > 0 || isDesignsLoading" class="mobile-design-gallery")
-    div(v-if="!noHeader && allDesigns.length > 0" class="mobile-design-gallery__header")
+div(class="mobile-design-gallery")
+  div(v-if="folderLength > 0 || allDesigns.length > 0")
+    div(v-if="!noHeader" class="mobile-design-gallery__header")
       div(class="mobile-design-gallery__title")
         span {{$tc('NN0252', 2)}}
       div(class="mobile-design-gallery__expand-icon-container"
@@ -10,6 +11,14 @@
                 iconWidth="24px"
                 iconColor="gray-1")
     div(v-if="isExpanded" class="mobile-design-gallery__designs")
+      btn-new-design(v-if="!noNewDesign" class="mobile-design-gallery__designs__new" v-slot="slotProps")
+        div(class="mobile-design-gallery__designs__new__icon" @click="slotProps.openPopup")
+          svg-icon(iconName="plus-origin"
+            iconWidth="16%"
+            iconColor="gray-2")
+        div(class="mobile-design-gallery__designs__new__name")
+          span(class="text-gray-1") {{$tc('NN0072')}}
+        div(class="mobile-design-gallery__designs__new__size")
       mobile-design-item(v-for="(design, index) in allDesigns"
                   :key="design.asset_index"
                   :index="index"
@@ -20,26 +29,27 @@
                   :isMultiSelected="isMultiSelected"
                   @select="selectDesign(design)"
                   @deselect="deselectDesign(design)")
-    div(v-if="isExpanded && isDesignsLoading" class="mobile-design-gallery__loading")
-      svg-icon(iconName="loading"
-                iconWidth="32px"
-                iconColor="gray-3")
-    observer-sentinel(v-if="!isDesignsLoading && designsPageIndex >= 0"
-                      @callback="handleLoadMore")
+  div(v-if="isExpanded && isDesignsLoading" class="mobile-design-gallery__loading")
+    svg-icon(iconName="loading"
+              iconWidth="32px"
+              iconColor="gray-3")
+  observer-sentinel(v-if="!isDesignsLoading && designsPageIndex >= 0"
+                    @callback="handleLoadMore")
 </template>
 
 <script lang="ts">
 import { IDesign } from '@/interfaces/design'
-import designUtils from '@/utils/designUtils'
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import MobileDesignItem from '@/components/mydesign/MobileDesignItem.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     MobileDesignItem,
-    ObserverSentinel
+    ObserverSentinel,
+    BtnNewDesign
   },
   data() {
     return {
@@ -47,11 +57,29 @@ export default Vue.extend({
     }
   },
   props: {
-    allDesigns: Array,
-    selectedNum: Number,
-    limitFunctions: Boolean,
-    noHeader: Boolean
+    allDesigns: {
+      type: Array as PropType<IDesign[]>,
+      required: true
+    },
+    folderLength: {
+      type: Number,
+      default: 0
+    },
+    selectedNum: {
+      type: Number,
+      required: true
+    },
+    limitFunctions: {
+      type: Boolean,
+      default: false
+    },
+    noHeader: {
+      type: Boolean,
+      default: false
+    },
+    noNewDesign: Boolean
   },
+  emits: ['loadMore'],
   computed: {
     ...mapGetters('design', {
       favoriteDesigns: 'getFavoriteDesigns',
@@ -134,6 +162,46 @@ export default Vue.extend({
     grid-gap: 16px;
     padding: 0 16px;
     grid-template-columns: repeat(2, 1fr);
+    &__new {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      &__icon {
+        position: relative;
+        box-sizing: border-box;
+        padding-top: 90%;
+        background-color: setColor(gray-5);
+        border-radius: 4px;
+        > svg {
+          position: absolute;
+          max-width: 28px;
+          max-height: 28px;
+          left: calc(50% - min(14px, 8%));
+          top: calc(50% - min(14px, 8%));
+        }
+      }
+      &__name {
+        box-sizing: border-box;
+        height: 24px;
+        margin-top: 10px;
+        padding: 4px 0px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        > span {
+          height: 24px;
+          max-width: 30vw;
+          line-height: 180%;
+          font-size: 14px;
+          font-weight: 400;
+          text-overflow: ellipsis;
+        }
+      }
+      &__size {
+        height: 22px;
+      }
+    }
   }
   &__loading {
     display: flex;

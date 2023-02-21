@@ -1,7 +1,11 @@
 .DS_Store
 node_modules
 /dist
-/cypress/screenshots
+/cypress/screenshots/
+/cypress/videos/
+cypress-visual-report/
+cypress-visual-screenshots/comparison/
+cypress-visual-screenshots/diff/
 
 
 # local env files
@@ -16,7 +20,6 @@ pnpm-debug.log*
 
 # Editor directories and files
 .idea
-.vscode
 *.suo
 *.ntvs*
 *.njsproj

@@ -1,27 +1,49 @@
 <template lang="pug">
-  svg(class="marker-icon"
-      ref="icon"
-      :style="iconStyles()")
-    g(v-html="svg" :style="styleFormatter")
-    line(:x1="x1" y1="5" :x2="iconWidth" y2="5" :stroke="iconColor" strokeWidth="2.5px")
+svg(class="marker-icon"
+    ref="icon"
+    :style="iconStyles()")
+  g(v-html="svg" :style="styleFormatter")
+  line(:x1="x1" y1="5" :x2="iconWidth" y2="5" :stroke="iconColor" strokeWidth="2.5px")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'MarkerIcon',
   props: {
     iconWidth: {
       type: String,
       default: '40px'
     },
-    iconColor: String,
-    styleFormat: String,
-    svg: String,
-    trimWidth: Boolean,
-    markerWidth: Number,
-    trimOffset: Number,
-    iconHeight: String
+    iconColor: {
+      type: String,
+      required: true
+    },
+    styleFormat: {
+      type: String,
+      required: true
+    },
+    svg: {
+      type: String,
+      required: true
+    },
+    trimWidth: {
+      type: Boolean,
+      required: true
+    },
+    markerWidth: {
+      type: Number,
+      required: true
+    },
+    trimOffset: {
+      type: Number,
+      required: true
+    },
+    iconHeight: {
+      type: String,
+      required: true
+    }
   },
   data() {
     return {
@@ -51,8 +73,7 @@ export default Vue.extend({
     },
     styleFormatter(): string {
       let style = this.styleFormat
-      const reg = new RegExp('\\$color\\[0\\]', 'g')
-      style = style.replace(reg, this.iconColor)
+      style = style.replace(/\$color\[0\]/g, this.iconColor)
       return style + `transform: rotate(180deg) translate(-${2.5 * this.markerWidth}px, -10px) scale(2.5);`
     }
   }

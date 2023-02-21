@@ -1,5 +1,5 @@
-import { IShape, IText, IImage, IGroup, IFrame } from '@/interfaces/layer'
-import { SrcObj } from './gallery'
+import { IFrame, IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
+import SnapUtils from '@/utils/snapUtils'
 
 export interface IBackgroundImage {
   config: IImage,
@@ -7,15 +7,34 @@ export interface IBackgroundImage {
   posY: number,
   newDisplayMode?: boolean
 }
-export interface IPage {
-  [index: string]: unknown,
-  id: string,
+export interface IBleed {
+  [index: string]: number
+  top: number,
+  bottom: number,
+  left: number,
+  right: number
+}
+export interface IPageSize {
   width: number,
   height: number,
+  physicalWidth: number,
+  physicalHeight: number,
+  unit: string
+}
+export interface IPageSizeWithBleeds extends IPageSize {
+  bleeds: IBleed,
+  physicalBleeds: IBleed,
+}
+export interface IPage extends IPageSizeWithBleeds {
+  [index: string]: unknown,
+  id: string,
+  x: number,
+  y: number,
   backgroundColor: string,
   backgroundImage: IBackgroundImage,
   name: string,
-  layers: Array<IShape | IText | IImage | IGroup | IFrame>,
+  layers: Array<IShape | IText | IImage | IGroup | IFrame | ITmp>,
+  // snapUtils: SnapUtils,
   documentColors: Array<string>,
   designId: string,
   modified?: boolean,
@@ -24,5 +43,14 @@ export interface IPage {
     v: Array<number>,
     h: Array<number>
   },
-  isAutoResizeNeeded: boolean
+  isEnableBleed: boolean,
+  isAutoResizeNeeded: boolean,
+  contentScaleRatio: number
+}
+
+export interface IPageState {
+  config: IPage,
+  modules: {
+    snapUtils: SnapUtils
+  }
 }

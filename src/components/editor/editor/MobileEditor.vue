@@ -1,58 +1,60 @@
 <template lang="pug">
-  div(class="mobile-editor")
-    div(class="mobile-editor__top")
-      header-tabs(@switchTab="switchTab"
-        @showAllPages="showAllPages"
-        :currTab="currActivePanel"
-        :inAllPagesMode="inAllPagesMode")
-      div(class="mobile-editor__content" :style="contentStyle")
-        keep-alive
-          component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
-            :currActivePanel="currActivePanel"
-            :isConfigPanelOpen="isConfigPanelOpen"
-            :inAllPagesMode="inAllPagesMode"
-            :showMobilePanel="showMobilePanelAfterTransitoin")
-      transition(name="panel-up"
-                @before-enter="beforeEnter"
-                @after-leave="afterLeave")
-        mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
-          :currActivePanel="currActivePanel"
-          :currColorEvent="currColorEvent"
-          @switchTab="switchTab"
-          @panelHeight="setPanelHeight")
-      //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
-      //-   :currActivePanel="'color'"
-      //-   :currColorEvent="ColorEventType.background"
-      //-   :isExtraPanel="true"
-      //-   @switchTab="switchTab")
-    footer-tabs(class="mobile-editor__bottom"
-      @switchTab="switchTab"
+div(class="mobile-editor")
+  div(class="mobile-editor__top")
+    header-tabs(@switchTab="switchTab"
+      @showAllPages="showAllPages"
       :currTab="currActivePanel"
-      :inAllPagesMode="inAllPagesMode"
-      @showAllPages="showAllPages")
+      :inAllPagesMode="inAllPagesMode")
+    div(class="mobile-editor__content" :style="contentStyle" id="mobile-editor__content" ref="mobile-editor__content")
+      keep-alive
+        component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
+          :currActivePanel="currActivePanel"
+          :isConfigPanelOpen="isConfigPanelOpen"
+          :inAllPagesMode="inAllPagesMode"
+          :showMobilePanel="showMobilePanelAfterTransitoin")
+    transition(name="panel-up"
+              @before-enter="beforeEnter"
+              @after-leave="afterLeave")
+      mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
+        :currActivePanel="currActivePanel"
+        :currPage="currPage"
+        @switchTab="switchTab"
+        @panelHeight="setPanelHeight")
+    //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
+    //-   :currActivePanel="'color'"
+    //-   :currColorEvent="ColorEventType.background"
+    //-   :isExtraPanel="true"
+    //-   @switchTab="switchTab")
+  footer-tabs(class="mobile-editor__bottom"
+    @switchTab="switchTab"
+    :currTab="currActivePanel"
+    :inAllPagesMode="inAllPagesMode"
+    @showAllPages="showAllPages")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import AllPages from '@/components/editor/mobile/AllPages.vue'
+import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
+import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import MobileEditorView from '@/components/editor/mobile/MobileEditorView.vue'
 import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
-import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
-import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import { FunctionPanelType, SidebarPanelType, ColorEventType } from '@/store/types'
-import store from '@/store'
-import stepsUtils from '@/utils/stepsUtils'
-import layerUtils from '@/utils/layerUtils'
-import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import { IFooterTabProps } from '@/interfaces/editor'
-import AllPages from '@/components/editor/mobile/AllPages.vue'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import editorUtils from '@/utils/editorUtils'
-import pageUtils from '@/utils/pageUtils'
+import { IGroup } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import store from '@/store'
+import { ColorEventType, FunctionPanelType, SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
+import editorUtils from '@/utils/editorUtils'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'MobileEditor',
   components: {
     MobileEditorView,
@@ -73,10 +75,30 @@ export default Vue.extend({
       panelHeight: 0
     }
   },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
+  },
   created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
   },
+  beforeUnmount() {
+    eventUtils.off(PanelEvent.switchTab)
+  },
   mounted() {
+    if (this.$isTouchDevice()) {
+      const el = this.$refs['mobile-editor__content'] as HTMLElement
+      editorUtils.setMobileHW({
+        width: el.clientWidth,
+        height: el.clientHeight
+      })
+      editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
+    }
+    // const pz = new PinchZoom(el, {
+    //   minZoom: (pageUtils.mobileMinScaleRatio * 0.01)
+    // })
     /**
      * @Note the codes below is used to prevent the zoom in/out effect of mobile phone, especially for the "IOS"
      * Remember to set passive to "false", or the preventDefault() function won't work.
@@ -111,6 +133,8 @@ export default Vue.extend({
     }
 
     brandkitUtils.fetchBrands(this.fetchBrands)
+
+    this.setUserState({ enableAdminView: false })
   },
   computed: {
     ...mapState('mobileEditor', {
@@ -119,9 +143,8 @@ export default Vue.extend({
       mobilePanel: 'currActivePanel'
     }),
     ...mapState('user', [
-      'role',
-      'adminMode',
-      'viewGuide']),
+      'viewGuide'
+    ]),
     ...mapGetters({
       groupId: 'getGroupId',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -151,15 +174,12 @@ export default Vue.extend({
     isLogin(): boolean {
       return store.getters['user/isLogin']
     },
-    isAdmin(): boolean {
-      return this.role === 0
-    },
     isLocked(): boolean {
-      return layerUtils.getTmpLayer().locked
+      return layerUtils.getSelectedLayer().locked
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup) => {
+      const types = groupLayer.layers.map((layer) => {
         return layer.type
       })
       return new Set(types)
@@ -198,25 +218,30 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
-      _setAdminMode: 'user/SET_ADMIN_MODE',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
-      setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
-      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
+      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
+      setUserState: 'user/SET_STATE'
     }),
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'
     }),
     switchTab(panelType: string, props?: IFooterTabProps) {
-      if (this.currActivePanel === panelType || panelType === 'none') {
+      // Switch between color and text-color panel without close panel
+      if (this.currActivePanel === panelType && panelType === 'color' &&
+        props?.currColorEvent && this.currColorEvent !== props.currColorEvent) {
+        this.currColorEvent = props.currColorEvent
+      // Close panel if re-click
+      } else if (this.currActivePanel === panelType || panelType === 'none') {
         editorUtils.setShowMobilePanel(false)
         editorUtils.setInMultiSelectionMode(false)
       } else {
-        editorUtils.setShowMobilePanel(true)
-        this.setCurrActivePanel(panelType)
-        if (props) {
-          if (panelType === 'color' && props.currColorEvent) {
-            this.currColorEvent = props.currColorEvent
-          }
+        editorUtils.setCurrActivePanel(panelType)
+        if (panelType === 'color' && props?.currColorEvent) {
+          this.currColorEvent = props.currColorEvent
+        }
+
+        if (this.inMultiSelectionMode) {
+          editorUtils.setInMultiSelectionMode(false)
         }
       }
 
@@ -240,7 +265,7 @@ export default Vue.extend({
       this.showMobilePanelAfterTransitoin = true
     },
     afterLeave() {
-      this.setCurrActivePanel('none')
+      editorUtils.setCurrActivePanel('none')
       setTimeout(() => {
         this.showMobilePanelAfterTransitoin = false
       }, 300)

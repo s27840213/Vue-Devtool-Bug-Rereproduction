@@ -5,49 +5,50 @@ import {
   IAdjustProps
 } from '@/interfaces/adjust'
 import i18n from '@/i18n'
+import { IImage } from '@/interfaces/layer'
 
 class ImageAdjustUtil {
   getFields() {
     return [
       {
         name: 'brightness',
-        label: `${i18n.t('NN0055')}`,
+        label: `${i18n.global.t('NN0055')}`,
         max: 100,
         min: -100
       },
       {
         name: 'contrast',
-        label: `${i18n.t('NN0056')}`,
+        label: `${i18n.global.t('NN0056')}`,
         max: 100,
         min: -100
       },
       {
         name: 'saturate',
-        label: `${i18n.t('NN0057')}`,
+        label: `${i18n.global.t('NN0057')}`,
         max: 100,
         min: -100
       },
       {
         name: 'hue',
-        label: `${i18n.t('NN0058')}`,
+        label: `${i18n.global.t('NN0058')}`,
         max: 100,
         min: -100
       },
       {
         name: 'blur',
-        label: `${i18n.t('NN0059')}`,
+        label: `${i18n.global.t('NN0059')}`,
         max: 100,
         min: -100
       },
       {
         name: 'halation',
-        label: `${i18n.t('NN0060')}`,
+        label: `${i18n.global.t('NN0060')}`,
         max: 100,
         min: 0
       },
       {
         name: 'warm',
-        label: `${i18n.t('NN0061')}`,
+        label: `${i18n.global.t('NN0061')}`,
         max: 100,
         min: -100
       }
@@ -61,7 +62,7 @@ class ImageAdjustUtil {
     }, {} as { [key: string]: number })
   }
 
-  createSvgFilter (element: ISvgFilterTag) {
+  createSvgFilter(element: ISvgFilterTag) {
     const { tag, attrs = {}, child = [] } = element
     return {
       tag,
@@ -70,7 +71,7 @@ class ImageAdjustUtil {
     }
   }
 
-  getBrightness (value: number) {
+  getBrightness(value: number) {
     const intercept = 0.005 * value
     return [
       this.createSvgFilter({
@@ -84,7 +85,7 @@ class ImageAdjustUtil {
     ]
   }
 
-  getContrast (value: number) {
+  getContrast(value: number) {
     const slopeMax = value > 0 ? 1.5 : 0.6
     const interceptMax = value > 0 ? 0.75 : 0.3
     const slope = 1 + (value * slopeMax / 100)
@@ -101,7 +102,7 @@ class ImageAdjustUtil {
     ]
   }
 
-  getSaturate (value: number) {
+  getSaturate(value: number) {
     const values = (value + 100) / 100
     return [
       this.createSvgFilter({
@@ -111,7 +112,7 @@ class ImageAdjustUtil {
     ]
   }
 
-  getHue (value: number) {
+  getHue(value: number) {
     const r = value > 0 ? 0.1 * Math.max(value - 66, 0) / 33 : Math.min(Math.abs(value / 33), 1) * 0.1
     const g = Math.abs(value) > 33 ? 0.1 * (1 - Math.min(Math.abs(value / 33) - 1, 1)) : 0.1
     const b = value > 0 ? Math.min((value / 33), 1) * 0.1 : 0.1 * Math.max(Math.abs(value) - 66, 0) / 33
@@ -128,7 +129,7 @@ class ImageAdjustUtil {
     ]
   }
 
-  getBlur (value: number) {
+  getBlur(value: number, config?: IImage) {
     if (value < 0) {
       return [
         this.createSvgFilter({
@@ -152,12 +153,14 @@ class ImageAdjustUtil {
         })
       ]
     }
-    return [
+    const res = [
       this.createSvgFilter({
         tag: 'feGaussianBlur',
         attrs: { stdDeviation: 0.275 * value }
-      }),
-      this.createSvgFilter({
+      })
+    ]
+    if (config && config.styles.shadow && !config.styles.shadow.isTransparent) {
+      res.push(this.createSvgFilter({
         tag: 'feComponentTransfer',
         child: [
           this.createSvgFilter({
@@ -165,11 +168,12 @@ class ImageAdjustUtil {
             attrs: { type: 'linear', slope: 0, intercept: 1 }
           })
         ]
-      })
-    ]
+      }))
+    }
+    return res
   }
 
-  getWarm (value: number) {
+  getWarm(value: number) {
     const rgbaOut = [
       `1 0 0 0 ${value / 1000}`,
       '0 1 0 0 0',
@@ -187,7 +191,7 @@ class ImageAdjustUtil {
     ]
   }
 
-  getHalation (value: number, position: { [key: string]: any }) {
+  getHalation(value: number, position: { [key: string]: any }) {
     const { width, x, y } = position
     const opacity = value * 0.7 / 100
     const style = {
@@ -196,7 +200,8 @@ class ImageAdjustUtil {
       top: 0,
       left: 0,
       right: 0,
-      bottom: 0
+      bottom: 0,
+      ...(store.getters['user/getUserId'] === 'backendRendering' && { '-webkit-filter': 'opacity(1)' })
     }
     return [{
       tag: 'div',
@@ -204,7 +209,7 @@ class ImageAdjustUtil {
     }]
   }
 
-  getSvgFilter (name: string, value: number): any {
+  getSvgFilter(name: string, value: number, config?: IImage): any {
     if (value === 0) return []
     // @TODO: handle more filter func
     switch (name) {
@@ -217,7 +222,7 @@ class ImageAdjustUtil {
       case 'hue':
         return this.getHue(value)
       case 'blur':
-        return this.getBlur(value)
+        return this.getBlur(value, config)
       case 'warm':
         return this.getWarm(value)
       default:
@@ -225,12 +230,12 @@ class ImageAdjustUtil {
     }
   }
 
-  convertAdjustToSvgFilter (adjust: IAdjustJsonProps) {
+  convertAdjustToSvgFilter(adjust: IAdjustJsonProps, config?: IImage) {
     return Object.entries(adjust)
-      .flatMap(([key, val]) => this.getSvgFilter(key, val))
+      .flatMap(([key, val]) => this.getSvgFilter(key, val, config))
   }
 
-  setAdjust (props: IAdjustProps) {
+  setAdjust(props: IAdjustProps) {
     const { adjust, pageIndex, layerIndex, subLayerIndex } = props
     store.commit('UPDATE_specLayerData', {
       pageIndex,

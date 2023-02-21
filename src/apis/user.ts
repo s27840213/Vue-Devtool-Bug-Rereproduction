@@ -1,11 +1,9 @@
-/* eslint-disable camelcase */
 import axios from '@/apis'
 import i18n from '@/i18n'
 import { IGroupDesignInputParams, IUpdateAssetParams } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
 import store from '@/store'
 import apiUtils from '@/utils/apiUtils'
-import generalUtils from '@/utils/generalUtils'
 import { AxiosPromise } from 'axios'
 
 export default {
@@ -13,7 +11,7 @@ export default {
     return store.getters['user/getToken']
   },
   getLocale(): string {
-    return i18n.locale
+    return i18n.global.locale
   },
   getTeamId(): string {
     return store.getters['user/getTeamId']
@@ -42,13 +40,14 @@ export default {
    * @param type - 0 for update db, 1 for update prev, 2 for update both
    * @returns
    */
-  putAssetDesign: (token: string, team_id: string, asset_id: string, type: number): AxiosPromise => axios('/put-asset-design', {
+  putAssetDesign: (token: string, team_id: string, asset_id: string, type: number, wait?: number): AxiosPromise => axios('/put-asset-design', {
     method: 'POST',
     data: {
       token,
       team_id,
       asset_id,
-      type
+      type,
+      ...(wait !== undefined && { wait })
     }
   }),
   deleteAssets: (token: string, keyList: string): AxiosPromise => axios('/delete-asset', {
@@ -146,7 +145,7 @@ export default {
         src_obj: srcObj,
         team_id: this.getTeamId(),
         ...(aspect !== undefined && { aspect }),
-        debug: 0
+        debug: process.env.NODE_ENV === 'production' ? 0 : 1
       }
     }))
   }

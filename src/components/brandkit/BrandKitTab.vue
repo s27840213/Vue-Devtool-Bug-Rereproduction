@@ -1,35 +1,35 @@
 <template lang="pug">
-  div(class="brand-kit-tab" :class="`${theme}-theme`" :style="gridStyles()")
-    div(class="brand-kit-tab__header"
-      :class="`${theme}-theme`")
-      div(v-for="tab in tabs" class="brand-kit-tab__tab-block pointer"
-        :class="[{selected: checkSelected(tab)}, `${theme}-theme`]"
-        @click="handleSelectTab(tab)")
-        div(class="brand-kit-tab__tab-name"
-          :class="`${theme}-theme`")
-          span(class="brand-kit-tab__tab-name-text"
-            :class="`${theme}-theme`") {{ $t(tabNames[tab]) }}
-    div(v-if="notNullBrand && isThemeMobile && settingmode"
-        class="brand-kit-tab__action"
-        :style="marginStyles()"
-        @click.stop.prevent="tabActions[selectedTab].action") {{ tabActions[selectedTab].text }}
-    div(v-if="notNullBrand" class="brand-kit-tab__content" :class="`${theme}-theme`")
-      component(:is="`brand-kit-tab-${selectedTab}${isThemeEditorLike ? '-sidebar' : ''}${isThemeMobile ? '-mobile' : ''}`"
-                :maxheight="maxheight"
-                :settingmode="settingmode"
-                @deleteItem="handleDeleteItem")
-    div(v-else class="brand-kit-tab__content brand-kit-tab__disconnect" :style="minHeightStyles()")
-      div
-        img(class="brand-kit-tab__disconnect-image"
-          :class="`${theme}-theme`"
-          :src="require('@/assets/img/png/brandkit/disconnect.png')")
-      span(class="brand-kit-tab__disconnect-title" :class="`${theme}-theme`") {{$t('NN0456')}}
-      span(class="brand-kit-tab__disconnect-description1" :class="`${theme}-theme`") {{$t('NN0457')}}
-      span(class="brand-kit-tab__disconnect-description2" :class="`${theme}-theme`") {{$t('NN0458')}}
+div(class="brand-kit-tab" :class="`${theme}-theme`" :style="gridStyles()")
+  div(class="brand-kit-tab__header"
+    :class="`${theme}-theme`")
+    div(v-for="tab in tabs" class="brand-kit-tab__tab-block pointer"
+      :class="[{selected: checkSelected(tab)}, `${theme}-theme`]"
+      @click="handleSelectTab(tab)")
+      div(class="brand-kit-tab__tab-name"
+        :class="`${theme}-theme`")
+        span(class="brand-kit-tab__tab-name-text"
+          :class="`${theme}-theme`") {{ $t(tabNames[tab]) }}
+  div(v-if="notNullBrand && isThemeMobile && settingmode"
+      class="brand-kit-tab__action"
+      :style="marginStyles()"
+      @click.stop.prevent="tabActions[selectedTab].action") {{ tabActions[selectedTab].text }}
+  div(v-if="notNullBrand" class="brand-kit-tab__content" :class="`${theme}-theme`")
+    component(:is="`brand-kit-tab-${selectedTab}${isThemeEditorLike ? '-sidebar' : ''}${isThemeMobile ? '-mobile' : ''}`"
+              :maxheight="maxheight"
+              :settingmode="settingmode"
+              @deleteItem="handleDeleteItem")
+  div(v-else class="brand-kit-tab__content brand-kit-tab__disconnect" :style="minHeightStyles()")
+    div
+      img(class="brand-kit-tab__disconnect-image"
+        :class="`${theme}-theme`"
+        :src="require('@/assets/img/png/brandkit/disconnect.png')")
+    span(class="brand-kit-tab__disconnect-title" :class="`${theme}-theme`") {{$t('NN0456')}}
+    span(class="brand-kit-tab__disconnect-description1" :class="`${theme}-theme`") {{$t('NN0457')}}
+    span(class="brand-kit-tab__disconnect-description2" :class="`${theme}-theme`") {{$t('NN0458')}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import BrandKitTabLogo from '@/components/brandkit/tabs/BrandKitTabLogo.vue'
 import BrandKitTabText from '@/components/brandkit/tabs/BrandKitTabText.vue'
@@ -46,7 +46,7 @@ import BrandKitTabColorSidebarMobile from '@/components/brandkit/mobile-tabs/Bra
 import { mapGetters, mapMutations } from 'vuex'
 import { IDeletingItem } from '@/interfaces/brandkit'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     theme: {
       type: String,
@@ -61,6 +61,7 @@ export default Vue.extend({
       type: Boolean
     }
   },
+  emits: ['deleteItem'],
   components: {
     BrandKitTabLogo,
     BrandKitTabText,
@@ -96,7 +97,7 @@ export default Vue.extend({
           action: () => { console.log('text') },
           margin: 16
         }
-      }
+      } as {[key: string]: { text: string, action: () => void, margin: number }}
     }
   },
   computed: {
@@ -229,7 +230,7 @@ export default Vue.extend({
   &__content {
     margin-top: 30px;
     &.editor-theme {
-      height: calc(100% - 150px);
+      height: calc(100% - 138px);
     }
     &.mobile-editor-theme {
       margin-top: 0;

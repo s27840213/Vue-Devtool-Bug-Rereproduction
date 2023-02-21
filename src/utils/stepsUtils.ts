@@ -1,20 +1,21 @@
+import { IListServiceContentDataItem } from '@/interfaces/api'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import { IStep } from '@/interfaces/steps'
 import store from '@/store'
+import { FunctionPanelType } from '@/store/types'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
-import { IStep } from '@/interfaces/steps'
-import TextPropUtils from './textPropUtils'
-import Vue from 'vue'
-import { FunctionPanelType } from '@/store/types'
-import pageUtils from './pageUtils'
-import popupUtils from './popupUtils'
-import uploadUtils from './uploadUtils'
-import { IPage } from '@/interfaces/page'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
-import shapeUtils from './shapeUtils'
-import { IListServiceContentDataItem } from '@/interfaces/api'
+import { nextTick } from 'vue'
 import assetUtils from './assetUtils'
 import layerFactary from './layerFactary'
+import pageUtils from './pageUtils'
+import popupUtils from './popupUtils'
+import shapeUtils from './shapeUtils'
+import TextPropUtils from './textPropUtils'
 import textUtils from './textUtils'
+import uploadUtils from './uploadUtils'
+import workerUtils from './workerUtils'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -98,8 +99,8 @@ class StepsUtils {
           delete shape.styles
           Object.assign(layer, shape)
           Object.assign(layer.styles, {
-            initWidth: vSize[0],
-            initHeight: vSize[1]
+            initWidth: vSize?.[0] ?? 0,
+            initHeight: vSize?.[1] ?? 0
           })
         }
         return layer
@@ -152,14 +153,14 @@ class StepsUtils {
     return layer
   }
 
-  fillLoadingSize(layer: IText): IText {
+  async fillLoadingSize(layer: IText): Promise<IText> {
     const dimension = layer.styles.writingMode.includes('vertical') ? layer.styles.height : layer.styles.width
     const initSize = {
       width: layer.styles.width,
       height: layer.styles.height,
       widthLimit: layer.widthLimit === -1 ? -1 : dimension
     }
-    layer.widthLimit = textUtils.autoResize(layer, initSize)
+    layer.widthLimit = await textUtils.autoResize(layer, initSize)
     return layer
   }
 
@@ -172,7 +173,7 @@ class StepsUtils {
         return await this.refetchForShape(typedLayer)
       case 'text':
         typedLayer = layer as IText
-        return this.fillLoadingSize(typedLayer)
+        return await this.fillLoadingSize(typedLayer)
       case 'tmp':
       case 'group':
         typedLayer = layer as IGroup
@@ -253,6 +254,46 @@ class StepsUtils {
     }
   }
 
+  async asyncRecord() {
+    const pages = GeneralUtils.unproxify(store.getters.getPages)
+    const selectedInfo = GeneralUtils.unproxify(store.getters.getCurrSelectedInfo)
+    const clonedData = await workerUtils.asyncCloneDeep({
+      pages_1: pages,
+      selectedInfo: selectedInfo
+    })
+    const pages_2 = await workerUtils.asyncCloneDeep(pages)
+
+    if (clonedData) {
+      const pages = this.filterDataForLayersInPages(clonedData.pages_1)
+      const currSelectedInfo = clonedData.selectedInfo
+      const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
+      /**
+       * The following code modify the wrong config state cause by the async
+       */
+      if (currSelectedInfo.layers.length === 1) {
+        currSelectedInfo.layers[0].active = true
+      }
+
+      // There's not any steps before, create the initial step first
+      if (this.currStep < 0) {
+        this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
+        this.currStep++
+      } else {
+        // if step isn't in last step and we record new step, we need to remove all steps larger than curr step
+        this.steps.length = this.currStep + 1
+        if (this.steps.length === this.MAX_STORAGE_COUNT) {
+          this.steps.shift()
+        }
+        this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
+        this.currStep = this.steps.length - 1
+        // Don't upload the design when initialize the steps
+        if (uploadUtils.isLogin) {
+          uploadUtils.uploadDesign(undefined, { clonedPages: pages_2 })
+        }
+      }
+    }
+  }
+
   async undo() {
     if (this.steps.length === 0 || this.currStep === 0 || textUtils.isFontLoading) {
       return
@@ -285,7 +326,7 @@ class StepsUtils {
       pageUtils.scrollIntoPage(pageIndex)
     }
     if (this.currStep > 0) {
-      Vue.nextTick(() => {
+      nextTick(() => {
         if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
           TextPropUtils.updateTextPropsState()
         }
@@ -302,7 +343,7 @@ class StepsUtils {
       clearTimeout(this.timers[key])
       delete this.timers[key]
     }
-    this.timers[key] = setTimeout(() => {
+    this.timers[key] = window.setTimeout(() => {
       this.record()
     }, interval)
   }
@@ -338,7 +379,7 @@ class StepsUtils {
     if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
       pageUtils.scrollIntoPage(pageIndex)
     }
-    Vue.nextTick(() => {
+    nextTick(() => {
       if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
         TextPropUtils.updateTextPropsState()
       }
@@ -373,6 +414,10 @@ class StepsUtils {
   clearSteps() {
     this.steps = []
     this.currStep = -1
+  }
+
+  clearCurrStep() {
+    this.steps.splice(this.currStep--, 1)
   }
 }
 

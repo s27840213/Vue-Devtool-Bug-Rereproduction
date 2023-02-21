@@ -1,10 +1,10 @@
-import { IBrandFont } from '@/interfaces/brandkit'
-import { IGroup, IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
-import { ISelection, IFont } from '@/interfaces/text'
+import { IGroup, IParagraph, IText } from '@/interfaces/layer'
+import { IFont, ISelection } from '@/interfaces/text'
+import router from '@/router'
 import brandkitUtils from '@/utils/brandkitUtils'
 import errorHandleUtils from '@/utils/errorHandleUtils'
 import generalUtils from '@/utils/generalUtils'
-import { ModuleTree, MutationTree, GetterTree, ActionTree } from 'vuex'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
 const UPDATE_FONTFACE = 'UPDATE_FONTFACE' as const
@@ -108,7 +108,7 @@ const mutations: MutationTree<ITextState> = {
     keys
       .forEach(key => {
         if (key in state) {
-          (state[key] as any) = data[key]
+          (state[key] as unknown) = data[key]
         }
       })
   },
@@ -176,7 +176,7 @@ const actions: ActionTree<ITextState, unknown> = {
           link.rel = 'stylesheet'
           document.head.appendChild(link)
           return new Promise<void>(resolve => {
-            const checkLoaded = setInterval(() => {
+            const checkLoaded = window.setInterval(() => {
               if (Array.from(document.styleSheets).find(s => s.href === cssUrl)) {
                 clearInterval(checkLoaded)
                 commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
@@ -201,7 +201,7 @@ const actions: ActionTree<ITextState, unknown> = {
         // })
       } else {
         return new Promise<void>(resolve => {
-          const checkLoaded = setInterval(() => {
+          const checkLoaded = window.setInterval(() => {
             if (font.loaded) {
               clearInterval(checkLoaded)
               resolve()
@@ -221,7 +221,7 @@ const actions: ActionTree<ITextState, unknown> = {
         if (check()) {
           resolve(true)
         } else {
-          const checkLoaded = setInterval(() => {
+          const checkLoaded = window.setInterval(() => {
             if (check()) {
               clearInterval(checkLoaded)
               resolve(true)
@@ -241,9 +241,11 @@ const actions: ActionTree<ITextState, unknown> = {
 const getFontUrl = async (type: string, url: string, face: string, userId: string, assetId: string, ver = 0): Promise<string> => {
   let cssUrl
   let response
+  const isInPrevew = router.currentRoute.value.name === 'Preview'
   switch (type) {
     case 'public':
       cssUrl = addPlatform(`https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`)
+      if (isInPrevew) return cssUrl
       try {
         response = await fetch(randomizeVer(cssUrl))
         if (response.ok) return cssUrl
@@ -257,6 +259,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       return ''
     case 'admin':
       cssUrl = addPlatform(`https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}&origin=true`)
+      if (isInPrevew) return cssUrl
       try {
         response = await fetch(randomizeVer(cssUrl))
         if (response.ok) return cssUrl
@@ -272,6 +275,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       let urlMap = brandkitUtils.getFontUrlMap(assetId)
       if (urlMap) { // if font is in font-list or has been seen before
         cssUrl = getCssUrl(urlMap, ver)
+        if (isInPrevew) return cssUrl
         response = await fetch(randomizeVer(cssUrl)) // check if the url is still valid
         if (response.ok) return cssUrl
         urlMap = await brandkitUtils.refreshFontAsset(assetId)
@@ -285,6 +289,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       return url
   }
   cssUrl = `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`
+  if (isInPrevew) return cssUrl
   try {
     response = await fetch(cssUrl)
     if (response.ok) return cssUrl
@@ -302,7 +307,7 @@ const randomizeVer = (url: string): string => {
   return url.replace(/ver=[0-9a-zA-Z]+/g, `ver=${generalUtils.generateRandomString(6)}`)
 }
 
-const getCssUrl = (urlMap: {[key:string]: string}, ver: number) => {
+const getCssUrl = (urlMap: { [key: string]: string }, ver: number) => {
   const cssUrl = urlMap.css
   return cssUrl ? addPlatform(`${cssUrl}&ver=${ver}&origin=true`) : ''
 }
@@ -321,4 +326,4 @@ export default {
   getters,
   mutations,
   actions
-} as ModuleTree<ITextState>
+}

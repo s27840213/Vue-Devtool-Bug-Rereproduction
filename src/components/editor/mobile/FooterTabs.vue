@@ -1,41 +1,50 @@
 <template lang="pug">
-  div(class="footer-tabs" ref="tabs")
-    div(class="footer-tabs__container" :style="containerStyles"  ref="container")
-      template(v-for="(tab, index) in tabs")
-        div(v-if="!tab.hidden"
-            class="footer-tabs__item"
-            :class="{'click-disabled': (tab.disabled || isLocked)}"
-            @click="handleTabAction(tab)")
-          svg-icon(class="mb-5 click-disabled"
-            :iconName="tab.icon"
-            :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
-            :iconWidth="'24px'")
-          span(class="text-body-4 no-wrap click-disabled"
-          :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
+div(class="footer-tabs" ref="tabs" :style="rootStyles")
+  div(class="footer-tabs__container" :style="containerStyles"
+      @scroll.passive="updateContainerOverflow" ref="container")
+    template(v-for="(tab, index) in tabs")
+      div(v-if="!tab.hidden" :key="tab.icon"
+          class="footer-tabs__item"
+          :class="{'click-disabled': (tab.disabled || isLocked)}"
+          @click="handleTabAction(tab)")
+        color-btn(v-if="tab.icon === 'color'" size="22px"
+                  class="mb-5 click-disabled"
+                  :color="globalSelectedColor")
+        svg-icon(v-else class="mb-5 click-disabled"
+          :iconName="tab.icon"
+          :iconColor="(tab.disabled || isLocked) ? 'gray-2' : tabActive(tab) ? 'blue-1' :'white'"
+          :iconWidth="'22px'"
+          :style="textIconStyle")
+        span(class="body-3 no-wrap click-disabled"
+        :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
 <script lang="ts">
-import layerUtils from '@/utils/layerUtils'
-import Vue from 'vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
-import stepsUtils from '@/utils/stepsUtils'
-import { ColorEventType, LayerType } from '@/store/types'
-import generalUtils from '@/utils/generalUtils'
-import imageUtils from '@/utils/imageUtils'
-import frameUtils from '@/utils/frameUtils'
-import { IFooterTab } from '@/interfaces/editor'
-import groupUtils from '@/utils/groupUtils'
-import pageUtils from '@/utils/pageUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
-import shapeUtils from '@/utils/shapeUtils'
-import mappingUtils from '@/utils/mappingUtils'
-import backgroundUtils from '@/utils/backgroundUtils'
-import editorUtils from '@/utils/editorUtils'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import i18n from '@/i18n'
+import { IFooterTab } from '@/interfaces/editor'
+import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
+import { ColorEventType, LayerType } from '@/store/types'
+import backgroundUtils from '@/utils/backgroundUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
+import colorUtils from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
+import frameUtils from '@/utils/frameUtils'
+import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import mappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { isEqual } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
+    ColorBtn
   },
   props: {
     currTab: {
@@ -47,6 +56,7 @@ export default Vue.extend({
       default: false
     }
   },
+  emits: ['switchTab', 'showAllPages'],
   data() {
     const mainMenu = { icon: 'main-menu', text: `${this.$t('NN0489')}` }
 
@@ -54,6 +64,8 @@ export default Vue.extend({
       mainMenu,
       isFontsPanelOpened: false,
       disableTabScroll: false,
+      leftOverflow: false,
+      rightOverflow: false,
       homeTabs: [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
         { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
@@ -61,6 +73,7 @@ export default Vue.extend({
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
+        { icon: 'add-page', text: `${this.$t('NN0139')}` },
         ...brandkitUtils.isBrandkitAvailable ? [{ icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }] : []
       ] as Array<IFooterTab>
     }
@@ -76,7 +89,8 @@ export default Vue.extend({
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
-      isHandleShadow: 'shadow/isHandling'
+      isHandleShadow: 'shadow/isHandling',
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
     }),
     backgroundImgControl(): boolean {
       return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
@@ -86,15 +100,23 @@ export default Vue.extend({
       return locked
     },
     groupTab(): IFooterTab {
-      return { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1 }
+      return {
+        icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1
+      }
     },
     photoInGroupTabs(): Array<IFooterTab> {
       return [
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
-        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          hidden: this.isInFrame,
+          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
       ]
@@ -103,44 +125,51 @@ export default Vue.extend({
       return [
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
-        // { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        { icon: 'set-as-frame', text: `${this.$t(this.isInFrame ? 'NN0098' : 'NN0706')}` },
-        { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
-        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        ...(this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          hidden: this.isInFrame,
+          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
         ...this.genearlLayerTabs,
-        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
+        ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : [])
+        // { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
     },
     frameTabs(): Array<IFooterTab> {
-      const frame = layerUtils.getCurrLayer as IFrame
+      const frame = layerUtils.getCurrLayer
+      if (frame.type !== 'frame') return []
       const showReplace = frame.clips.length === 1 || frame.clips.some(c => c.active)
       const replace = showReplace ? [{ icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' }] : []
       return [
         this.mainMenu,
         ...replace,
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: shapeUtils.getDocumentColors.length === 0,
+          hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust },
         ...this.genearlLayerTabs
       ]
     },
     fontTabs(): Array<IFooterTab> {
       return [
-        { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || this.hasSubSelectedLayer || this.isGroup },
+        { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer) },
         { icon: 'font', text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`), panelType: 'fonts' },
-        { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
+        { icon: 'font-size', text: `${this.$t('NN0122')}`, panelType: 'font-size' },
         {
-          icon: 'color',
+          icon: 'text-color-mobile',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
           props: {
@@ -148,7 +177,7 @@ export default Vue.extend({
           }
         },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
-        { icon: 'spacing', text: `${this.$t('NN0109')}`, panelType: 'font-spacing' },
+        { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
@@ -160,11 +189,12 @@ export default Vue.extend({
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !hasBgImage, disabled: this.backgroundLocked },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
+          hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.background
           },
@@ -176,7 +206,7 @@ export default Vue.extend({
     multiPhotoTabs(): Array<IFooterTab> {
       return [
         ...this.multiGeneralTabs,
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' }
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' }
       ]
     },
     multiFontTabs(): Array<IFooterTab> {
@@ -192,7 +222,7 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: shapeUtils.getSingleColorObjNum === 0 && !this.hasSubSelectedLayer,
+          hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.shape
           }
@@ -206,7 +236,7 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: shapeUtils.getDocumentColors.length === 0,
+          hidden: this.globalSelectedColor === 'none',
           props: {
             currColorEvent: ColorEventType.shape
           }
@@ -226,34 +256,42 @@ export default Vue.extend({
     },
     genearlLayerTabs(): Array<IFooterTab> {
       return [
-        { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, disabled: !this.isGroup && this.selectedLayerNum === 1 },
+        { icon: 'layers-alt', text: `${this.$t('NN0757')}`, panelType: 'order' },
+        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true },
-        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' }
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` },
+        // { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true }
       ]
     },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
         this.mainMenu,
+        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
+        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` }
+
       ]
     },
     tabs(): Array<IFooterTab> {
       if (this.inAllPagesMode) {
         return this.pageTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
-        /** tmp layer treated as group */
+      // A group that only has images
+      } else if (this.isGroupOrTmp && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
         return this.multiPhotoTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
+      } else if (this.isGroupOrTmp && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
         return this.photoInGroupTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('text')) {
+      // text + shape color
+      } else if (this.isGroupOrTmp && this.targetIs('text') && this.showObjectColorAndFontTabs) {
+        return [...this.multiObjectTabs, ...this.fontTabs]
+      // only text
+      } else if (this.isGroupOrTmp && this.targetIs('text')) {
         return this.multiFontTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('shape') && this.singleTargetType()) {
+      // only shape
+      } else if (this.isGroupOrTmp && this.targetIs('shape') && this.singleTargetType()) {
         return this.multiObjectTabs
       } else if ((this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer)) && !this.singleTargetType()) {
         return this.multiGeneralTabs
@@ -268,12 +306,22 @@ export default Vue.extend({
         return this.frameTabs
       } else if (this.showShapeSetting) {
         return this.objectTabs.concat(this.genearlLayerTabs)
-      } else if (this.showGeneralTabs) {
-        return [this.mainMenu, ...this.genearlLayerTabs]
       } else if (this.inBgSettingMode) {
         return this.bgSettingTab
       } else {
         return this.homeTabs
+      }
+    },
+    globalSelectedColor(): string {
+      return colorUtils.globalSelectedColor.color
+    },
+    textIconStyle(): Record<string, string> {
+      const textColor = colorUtils.globalSelectedColor.textColor
+      return textColor === 'multi' ? {
+        '--multi-text-color': '1' // For svg icon 'text-color-mobile.svg' rect fill multi-color
+      } : {
+        '--multi-text-color': '0',
+        '--text-color': textColor // For svg icon 'text-color-mobile.svg' rect fill color
       }
     },
     isWholeGroup(): boolean {
@@ -289,14 +337,18 @@ export default Vue.extend({
       return this.currSelectedInfo.layers.length
     },
     isLocked(): boolean {
-      return layerUtils.getTmpLayer().locked
+      return layerUtils.getSelectedLayer().locked
     },
     isGroup(): boolean {
-      return (layerUtils.getCurrLayer.type === LayerType.tmp || this.currSelectedInfo.types.has('group')) && this.currSelectedInfo.layers.length === 1
+      return layerUtils.getCurrLayer.type === LayerType.group
+    },
+    isGroupOrTmp(): boolean {
+      return (layerUtils.getCurrLayer.type === LayerType.tmp ||
+      layerUtils.getCurrLayer.type === LayerType.group)
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup, index: number) => {
+      const types = groupLayer.layers.map((layer) => {
         return layer.type
       })
       return new Set(types)
@@ -328,6 +380,16 @@ export default Vue.extend({
     showPhotoTabs(): boolean {
       return (!this.inBgRemoveMode && !this.isFontsPanelOpened &&
         this.targetIs('image') && this.singleTargetType()) || this.hasFrameClipActive
+    },
+    showObjectColorAndFontTabs(): boolean {
+      const { subLayerIdx } = layerUtils
+      const currLayer = layerUtils.getCurrLayer
+      if (!(currLayer.type === 'group' || currLayer.type === 'tmp') || subLayerIdx !== -1) return false
+      const singleColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length === 1) as IShape[]
+      const multiColorShapes = currLayer.layers.filter(l => l.type === 'shape' && l.color.length !== 1) as IShape[]
+      const hasImages = (currLayer.layers.filter(l => l.type === 'image') as IImage[]).length !== 0
+      if (hasImages || (singleColorShapes.length === 0 && multiColorShapes.length !== 1)) return false
+      else return true
     },
     hasFrameClipActive(): boolean {
       const layer = layerUtils.getCurrLayer
@@ -367,10 +429,20 @@ export default Vue.extend({
     contentEditable(): boolean {
       return this.currSelectedInfo.layers[0]?.contentEditable
     },
-    containerStyles(): { [index: string]: any } {
+    rootStyles(): Record<string, string> {
+      return {
+        backgroundColor: this.contentEditable ? '#EEEFF4' : '#14182A'
+      }
+    },
+    containerStyles(): { [index: string]: string } {
+      // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
       return {
         transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
-        opacity: `${this.contentEditable ? 0 : 1}`
+        opacity: `${this.contentEditable ? 0 : 1}`,
+        maskImage: this.contentEditable ? 'none'
+          : `linear-gradient(to right,
+          transparent 0, black ${this.leftOverflow ? '56px' : 0},
+          black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
       }
     },
     currLayer(): ILayer {
@@ -396,8 +468,8 @@ export default Vue.extend({
       }
     },
     tabs: {
-      handler() {
-        if (this.disableTabScroll) {
+      handler(newVal, oldVal) {
+        if (this.disableTabScroll || isEqual(newVal, oldVal)) {
           this.disableTabScroll = false
           return
         }
@@ -414,15 +486,17 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _addPage: 'ADD_page',
-      _addPageToPos: 'ADD_pageToPos',
-      _deletePage: 'DELETE_page',
       _setmiddlemostPageIndex: 'SET_middlemostPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex',
       _setIsDragged: 'page/SET_IsDragged',
       _setIsShowPagePreview: 'page/SET_isShowPagePreview',
       setBgImageControl: 'SET_backgroundImageControl'
     }),
+    updateContainerOverflow() {
+      const { scrollLeft, scrollWidth, offsetWidth } = this.$refs.container as HTMLElement
+      this.leftOverflow = scrollLeft > 0
+      this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
+    },
     handleTabAction(tab: IFooterTab) {
       switch (tab.icon) {
         case 'crop': {
@@ -476,8 +550,16 @@ export default Vue.extend({
           break
         }
         case 'add-page': {
-          const { width, height } = pageUtils.getPageSize(pageUtils.currFocusPageIndex)
-          pageUtils.addPageToPos(pageUtils.newPage({ width, height }), pageUtils.currActivePageIndex + 1)
+          const page = pageUtils.getPage(pageUtils.currFocusPageIndex)
+          const currPage = pageUtils.currFocusPage
+          pageUtils.addPageToPos(pageUtils.newPage({
+            width: page.width,
+            height: page.height,
+            bleeds: currPage.bleeds,
+            physicalBleeds: currPage.physicalBleeds,
+            isEnableBleed: currPage.isEnableBleed,
+            unit: currPage.unit
+          }), pageUtils.currFocusPageIndex + 1)
           this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
           stepsUtils.record()
           break
@@ -504,7 +586,7 @@ export default Vue.extend({
           const tmpIndex = pageUtils.currActivePageIndex
           this._setCurrActivePageIndex(pageUtils.isLastPage ? tmpIndex - 1 : tmpIndex)
           editorUtils.setCurrCardIndex(pageUtils.currActivePageIndex)
-          this._deletePage(tmpIndex)
+          pageUtils.deletePage(tmpIndex)
           stepsUtils.record()
           break
         }
@@ -525,11 +607,19 @@ export default Vue.extend({
               })
             }
 
-            tiptapUtils.focus({ scrollIntoView: false })
+            tiptapUtils.focus({ scrollIntoView: false }, currLayer.isEdited ? 'end' : null)
           } else {
             /**
              * @Todo handle the sub controler
              */
+            const { subLayerIdx } = layerUtils
+            const subLayer = (currLayer as IGroup).layers[subLayerIdx]
+            if (subLayer.type === 'text') {
+              layerUtils.updateLayerProps(pageIndex, index, {
+                contentEditable: true
+              }, subLayerIdx)
+            }
+            tiptapUtils.focus({ scrollIntoView: false }, 'end')
           }
           break
         }
@@ -537,6 +627,10 @@ export default Vue.extend({
         case 'ungroup': {
           this.disableTabScroll = true
           mappingUtils.mappingIconAction(tab.icon)
+          break
+        }
+        case 'multiple-select': {
+          editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
           break
         }
         case 'bg-separate': {
@@ -548,12 +642,17 @@ export default Vue.extend({
           break
         }
         case 'effect': {
-          if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
-            Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
-            return
-          }
+          // Unreachable, becaues button is disabled
+          // if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
+          //   notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+          //   return
+          // }
           break
         }
+        case 'color':
+        case 'text-color-mobile':
+          colorUtils.setCurrEvent(tab?.props?.currColorEvent as string)
+          break
         default: {
           break
         }
@@ -595,8 +694,15 @@ export default Vue.extend({
         return this.currSelectedInfo.types.size === 1
       }
     },
+    tabActive(tab: IFooterTab): boolean {
+      if (this.currTab === 'color') {
+        return this.currTab === tab.panelType &&
+          ((colorUtils.currEvent === 'setTextColor' && tab.icon === 'text-color-mobile') ||
+          (colorUtils.currEvent !== 'setTextColor' && tab.icon === 'color'))
+      } else return this.currTab === tab.panelType
+    },
     handleLockedNotify() {
-      this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     }
   }
 })
@@ -605,14 +711,16 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .footer-tabs {
   overflow: hidden;
-  background-color: setColor(gray-5);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
   &__container {
     overflow: scroll;
     display: grid;
     grid-template-rows: auto;
     grid-auto-flow: column;
-    grid-auto-columns: 65px;
-    column-gap: 32px;
+    grid-auto-columns: 56px;
+    column-gap: 16px;
     background-color: setColor(nav);
     padding: 8px 12px;
     @include no-scrollbar;
@@ -627,8 +735,8 @@ export default Vue.extend({
     box-sizing: border-box;
     padding: 0px 4px;
     > span {
-      transform: scale(0.8);
       transition: background-color 0.2s, color 0.2s;
+      transform: scale(calc(10 / 12));
     }
   }
 }

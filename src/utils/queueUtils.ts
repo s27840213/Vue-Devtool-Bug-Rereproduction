@@ -1,19 +1,17 @@
-import { EventEmitter } from 'events'
-
-class QueueUtils {
+class EventQueue {
   eventIds: Array<string>
   eventMap: Map<string, () => Promise<void | number>>
   isHandlingAsyncTask: boolean
   batchNum: number
 
-  constructor() {
+  constructor(batchNum?: number) {
     this.eventIds = []
     this.eventMap = new Map()
     this.isHandlingAsyncTask = false
-    this.batchNum = 1
+    this.batchNum = batchNum ?? 3
   }
 
-  push(id: string, callback: () => Promise<void | number>) {
+  push(id: string, callback: () => Promise<void | number>, index?: number): void {
     this.eventMap.set(id, callback)
     this.eventIds.push(id)
 
@@ -28,13 +26,14 @@ class QueueUtils {
     }
   }
 
-  deleteEvent(eventId: string) {
+  deleteEvent(eventId: string, index?: number): void {
     if (this.eventMap.has(eventId)) {
       this.eventMap.delete(eventId)
+      this.eventIds.splice(this.eventIds.indexOf(eventId), 1)
     }
   }
 
-  handleAsyncTask() {
+  handleAsyncTask(): void {
     if (this.eventIds.length === 0) {
       this.isHandlingAsyncTask = false
       return
@@ -62,9 +61,12 @@ class QueueUtils {
       targetIds.forEach((id) => {
         this.eventMap.delete(id)
       })
+
       this.handleAsyncTask()
     })
   }
 }
 
-export default new QueueUtils()
+const globalQueue = new EventQueue()
+
+export { globalQueue, EventQueue }

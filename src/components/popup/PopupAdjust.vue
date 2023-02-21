@@ -1,38 +1,40 @@
 <template lang="pug">
-  div(class="popup-adjust p-10")
-    div(class="popup-adjust__field"
-      v-for="field in fields"
-      :key="field.name")
-      div(class="popup-adjust__label")
-        div {{ field.label }}
-        input(class="popup-adjust__text body-2 text-gray-2 ml-10"
-          type="text"
-          :name="field.name"
-          @input="handleField"
-          @blur="handleChangeStop"
-          :value="adjustTmp[field.name] || 0")
-      input(class="popup-adjust__range-input input__slider--range"
-        :value="adjustTmp[field.name] || 0"
-        :max="field.max"
-        :min="field.min"
+div(class="popup-adjust p-10")
+  div(class="popup-adjust__field"
+    v-for="field in fields"
+    :key="field.name")
+    div(class="popup-adjust__label")
+      div {{ field.label }}
+      input(class="popup-adjust__text body-2 text-gray-2 ml-10"
+        type="text"
         :name="field.name"
         @input="handleField"
-        @mouseup="handleChangeStop"
-        type="range")
+        @blur="handleChangeStop"
+        :value="adjustTmp[field.name] || 0")
+    input(class="popup-adjust__range-input input__slider--range"
+      :value="adjustTmp[field.name] || 0"
+      :max="field.max"
+      :min="field.min"
+      :name="field.name"
+      @input="handleField"
+      @mouseup="handleChangeStop"
+      type="range")
+  span(class="popup-adjust__reset" @click="reset") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import stepsUtils from '@/utils/stepsUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     imageAdjust: {
       type: Object,
       required: true
     }
   },
+  emits: ['update'],
   data() {
     const fields = imageAdjustUtil.getFields()
     const adjustTmp = Object.assign(
@@ -60,6 +62,13 @@ export default Vue.extend({
       if (this.$route.name !== 'MobileImageAdjust') {
         stepsUtils.record()
       }
+    },
+    reset() {
+      const defaultVal = imageAdjustUtil.getDefaultProps()
+      this.fields.forEach(field => {
+        this.adjustTmp[field.name] = defaultVal[field.name]
+      })
+      this.$emit('update', this.adjustTmp)
     }
   }
 })
@@ -103,6 +112,11 @@ export default Vue.extend({
     &::-webkit-slider-thumb {
       border: 2px solid #4eabe6;
     }
+  }
+  &__reset {
+    @include body-SM;
+    text-align: right;
+    color: setColor(blue-1);
   }
 }
 </style>

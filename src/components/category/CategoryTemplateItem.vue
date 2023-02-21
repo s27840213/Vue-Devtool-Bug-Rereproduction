@@ -1,21 +1,20 @@
 <template lang="pug">
-  div(class="category-template-item" :style="itemStyle")
-    div(class="relative pointer"
-        @click="addTemplate"
-        @dragstart="dragStart($event)")
-      img(class="category-template-item__img"
-        draggable="true"
-        :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
-        :style="previewStyle"
-        @error="handleNotFound")
-      pro-item(v-if="item.plan")
-    div(v-if="showId"
-      class="category-template-item__id"
-      @click="copyId") {{ item.id }}
+div(class="category-template-item" :style="itemStyle")
+  div(class="relative pointer"
+      @click="addTemplate"
+      @dragstart="dragStart($event)")
+    img(class="category-template-item__img"
+      draggable="true"
+      :src="src || fallbackSrc || `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`"
+      :style="previewStyle"
+      @error="handleNotFound")
+    pro-item(v-if="item.plan")
+  div(v-if="showId"
+    class="category-template-item__id"
+    @click="copyId") {{ item.id }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import AssetUtils from '@/utils/assetUtils'
@@ -23,17 +22,36 @@ import GeneralUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import { PRECISION } from '@/utils/unitUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { round } from 'lodash'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+/**
+ * @Todo - fix the any type problems -> TingAn
+ */
+
+export default defineComponent({
+  emits: [],
   components: {
     ImageCarousel,
     ProItem
   },
   props: {
-    src: String,
-    item: Object,
-    showId: Boolean,
-    groupItem: Object
+    src: {
+      type: String
+    },
+    item: {
+      type: Object,
+      required: true
+    },
+    showId: {
+      type: Boolean,
+      required: true
+    },
+    groupItem: {
+      type: Object
+    }
   },
   data() {
     return {
@@ -65,8 +83,8 @@ export default Vue.extend({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     dragStart(event: DragEvent) {
-      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem, this.item)) return
-      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item)) return
+      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem as any, this.item as any)) return
+      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item as any)) return
       const dataTransfer = event.dataTransfer as DataTransfer
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
@@ -76,15 +94,16 @@ export default Vue.extend({
         : this.item))
     },
     addTemplate() {
-      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem, this.item)) return
-      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item)) return
+      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem as any, this.item as any)) return
+      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item as any)) return
       const { match_cover: matchCover = {} } = this.item
-      let { height, width } = this.item
+      let { height, width, unit } = this.item
 
       // in some cases (single page group template), there is no item.width/item.height (unknown reason), then we get them by match_cover
-      if (width === undefined) {
+      if (width === undefined || height === undefined || unit === undefined) {
         width = this.item.match_cover.width
         height = this.item.match_cover.height
+        unit = this.item.match_cover.unit
       }
       /*
       const theme = themeUtils
@@ -92,24 +111,22 @@ export default Vue.extend({
         .map(theme => theme.id).join(',')
       const isSameTheme = themeUtils.compareThemesWithPage(theme)
       */
-      const currPage = pageUtils.getPage(pageUtils.currFocusPageIndex)
-      const isSameSize = currPage.width === width && currPage.height === height
-      const cb = this.groupItem
-        ? (resize?: any) => {
-          AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
-        }
-        : (resize?: any) => {
-          AssetUtils.addAsset(this.item, resize)
-          GeneralUtils.fbq('track', 'AddToWishlist', {
-            content_ids: [this.item.id]
-          })
-        }
+      const pageSize = pageUtils.currFocusPageSize
+      const isSameSize = pageSize.physicalWidth === width && pageSize.physicalHeight === height && pageSize.unit === unit
+      const cb = this.groupItem ? (resize?: any) => {
+        AssetUtils.addGroupTemplate(this.groupItem as any, this.item.id, resize)
+      } : (resize?: any) => {
+        AssetUtils.addAsset(this.item as any, resize)
+        GeneralUtils.fbq('track', 'AddToWishlist', {
+          content_ids: [this.item.id]
+        })
+      }
 
       /**
        * @todo show the modal if the width,height are not the same in detailed page mode
        */
       if (this.isDetailPage) {
-        const { width: pageWidth = 1000 } = pageUtils.getPageWidth()
+        const { width: pageWidth = 1000 } = pageSize
         const ratio = pageWidth / (matchCover.width || width)
         const resize = { width: pageWidth, height: (matchCover.height || height) * ratio }
         return cb(resize)
@@ -126,14 +143,13 @@ export default Vue.extend({
         }
         modalUtils.setModalInfo(
           this.$t('NN0695') as string,
-          [`${this.$t('NN0209', { tsize: `${width}x${height}`, psize: `${currPage.width}x${currPage.height}` })}`],
+          [`${this.$t('NN0209', { tsize: `${width}x${height} ${unit}`, psize: `${round(pageSize.physicalWidth, PRECISION)}x${round(pageSize.physicalHeight, PRECISION)} ${pageSize.unit}` })}`],
           {
             msg: `${this.$t('NN0021')}`,
             class: 'btn-light-mid',
             style: { border: '1px solid #4EABE6' },
             action: () => {
-              const resize = { width: currPage.width, height: currPage.height }
-              cb(resize)
+              cb(pageSize)
             }
           },
           {
@@ -142,14 +158,13 @@ export default Vue.extend({
           }
         )
       } else {
-        const resize = { width: currPage.width, height: currPage.height }
-        cb(resize)
+        cb()
       }
     },
     copyId() {
       GeneralUtils.copyText(this.item.id)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${this.item.id} 已複製` })
+          notify({ group: 'copy', text: `${this.item.id} 已複製` })
         })
     }
   }

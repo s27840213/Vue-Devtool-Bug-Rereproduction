@@ -1,61 +1,64 @@
 <template lang="pug">
-  div(id="app" :style="appStyles()")
-    link(rel="preconnect" href="https://fonts.googleapis.com")
-    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
-    link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
-    link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
-    //- div(class="coordinate" ref="coordinate")
-    //-   div(class="coordinate__val coordinate__width")
-    //-     span {{coordinateWidth}}px
-    //-   div(class="coordinate__val coordinate__height")
-    //-     span {{coordinateHeight}}px
-    router-view
-    div(class="popup-area")
-      popup
-      res-info(v-show="currSelectedResInfo.type"
-        :info="currSelectedResInfo"
-        @blur.native="setCurrSelectedResInfo()"
-        tabindex="0")
-    div(class="modal-container"
-        v-if="isModalOpen")
-      modal-card
-    notifications(group="copy"
-      position="top center"
-      width="300px"
-      :max="2"
-      :duration="2000")
-      template(v-slot:body="{ item }")
-        div(class="notification copy"
-          v-html="item.text")
-    notifications(group="error"
-      position="top center"
-      width="300px"
-      :max="1"
-      :duration="5000")
-      template(v-slot:body="{ item }")
-        div(class="notification error"
-          v-html="item.text")
+metainfo
+  template(v-slot:title ="{ content }") {{ content ? `${content}` : `SITE_NAME` }}
+div(id="app" :style="appStyles()")
+  link(rel="preconnect" href="https://fonts.googleapis.com")
+  link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="")
+  link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
+  link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
+  //- div(class="coordinate" ref="coordinate")
+  //-   div(class="coordinate__val coordinate__width")
+  //-     span {{coordinateWidth}}px
+  //-   div(class="coordinate__val coordinate__height")
+  //-     span {{coordinateHeight}}px
+  router-view
+  div(class="popup-area")
+    popup
+    res-info(v-show="currSelectedResInfo.type"
+      :info="currSelectedResInfo"
+      @blur="setCurrSelectedResInfo()"
+      tabindex="0")
+  debug-tool(v-if="!inScreenshotPreview && showAllAdminTool")
+  div(class="modal-container"
+      v-if="isModalOpen")
+    modal-card
+  notifications(group="copy"
+    position="top center"
+    width="300px"
+    :max="2"
+    :duration="2000")
+    template(v-slot:body="{ item }")
+      div(class="notification copy"
+        v-html="item.text")
+  notifications(group="error"
+    position="top center"
+    width="300px"
+    :max="1"
+    :duration="5000")
+    template(v-slot:body="{ item }")
+      div(class="notification error"
+        v-html="item.text")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'v-click-outside'
-import Popup from '@/components/popup/Popup.vue'
-import { Chrome } from 'vue-color'
-import ResInfo from '@/components/modal/ResInfo.vue'
+import DebugTool from '@/components/componentLog/DebugTool.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
-import popupUtils from './utils/popupUtils'
+import ResInfo from '@/components/modal/ResInfo.vue'
+import Popup from '@/components/popup/Popup.vue'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
-import generalUtils from './utils/generalUtils'
+import popupUtils from './utils/popupUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     Popup,
-    'chrome-picker': Chrome,
     ResInfo,
-    ModalCard
+    ModalCard,
+    DebugTool
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -67,23 +70,30 @@ export default Vue.extend({
       coordinateHeight: 0
     }
   },
+  mounted() {
+    this.coordinate = this.$refs.coordinate as HTMLElement
+
+    if ((window as any).__PRERENDER_INJECTED !== undefined) {
+      document.dispatchEvent(new Event('render-event'))
+      window.dispatchEvent(new Event('render-event'))
+    }
+  },
   beforeMount() {
     networkUtils.registerNetworkListener()
   },
-  mounted() {
-    this.coordinate = this.$refs.coordinate as HTMLElement
-  },
-  beforeDestroy() {
+  beforeUnmount() {
     networkUtils.unregisterNetworkListener()
   },
   computed: {
     ...mapGetters({
       currSelectedResInfo: 'getCurrSelectedResInfo',
-      isModalOpen: 'modal/getModalOpen'
+      isModalOpen: 'modal/getModalOpen',
+      inScreenshotPreview: 'getInScreenshotPreview',
+      showAllAdminTool: 'user/showAllAdminTool'
     }),
     currLocale(): string {
       return localeUtils.currLocale()
-    }
+    },
   },
   methods: {
     ...mapMutations('text', {
@@ -93,7 +103,7 @@ export default Vue.extend({
       setDropdown: 'popup/SET_STATE',
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
     }),
-    appStyles() {
+    appStyles(): Record<string, string> {
       if (this.$route.name === 'Preview') {
         return {
           display: 'flex',
@@ -138,12 +148,14 @@ export default Vue.extend({
 })
 </script>
 <style lang="scss">
-@use "~@/assets/scss/main.scss";
+@use "@/assets/scss/main.scss";
 
 #app {
   @include size(100%, 100%);
   position: relative;
   max-height: 100%;
+  user-select: none;
+  -webkit-user-select: none;
   -webkit-font-smoothing: subpixel-antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -221,7 +233,6 @@ export default Vue.extend({
     background-color: setColor(red-2);
   }
 }
-
 // .vc-chrome-toggle-btn {
 //   display: none;
 // }

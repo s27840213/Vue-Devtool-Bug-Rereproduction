@@ -1,24 +1,24 @@
 <template lang="pug">
-  div(class="animation")
-    div(v-if="isJSON"
-      class="lottie"
-      :style="lottieStyle" ref="lavContainer")
-    video(v-if="isMp4"
-      class="video"
-      :src="require('@/' + path.slice(2))"
-      :width="width"
-      :height="height"
-      type="video/mp4"
-      autoplay muted loop playsinline)
+div(class="animation")
+  div(v-if="isJSON"
+    class="lottie"
+    :style="lottieStyle" ref="lavContainer")
+  video(v-if="isMp4"
+    class="video"
+    :src="require(`@/assets/img/svg/homepage/${mp4FileName}`)"
+    :width="width"
+    :height="height"
+    type="video/mp4"
+    autoplay muted loop playsinline)
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import i18n from '@/i18n'
+import { defineComponent } from 'vue'
 import axios from 'axios'
 import lottie, { AnimationItem } from 'lottie-web'
+// :src="require('@/assets/img/svg/homepage/tw/remover.mp4')"
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     path: {
       type: String,
@@ -57,6 +57,7 @@ export default Vue.extend({
       default: 0
     }
   },
+  emits: ['AnimControl'],
   data() {
     return {
       rendererSettings: {
@@ -65,7 +66,8 @@ export default Vue.extend({
         progressiveLoad: false,
         hideOnTransparent: true
       },
-      anim: null as unknown as AnimationItem
+      anim: null as unknown as AnimationItem,
+      test: 'remover.mp4'
     }
   },
   computed: {
@@ -82,15 +84,23 @@ export default Vue.extend({
         overflow: 'hidden',
         margin: '0 auto'
       }
+    },
+    mp4FileName(): string {
+      const splitResult = this.path.split('/')
+      const len = splitResult.length
+      return `${splitResult[len - 2]}/${splitResult[len - 1]}`
     }
   },
   mounted() {
     this.init()
   },
+  unmounted() {
+    this.anim && this.anim.destroy()
+  },
   methods: {
     async loadJsonData(path: string) {
       if (path.startsWith('@/')) {
-        return await require('@/' + path.slice(2))
+        return await require(`@/assets/img/svg/homepage/${this.mp4FileName}`)
       } else {
         return await axios.get(path).then(response => {
           return response.data
@@ -114,7 +124,7 @@ export default Vue.extend({
         autoplay: this.autoPlay,
         animationData: jsonData,
         rendererSettings: this.rendererSettings,
-        assetsPath: `/lottie/${i18n.locale}/${this.lottieName}/images/`
+        assetsPath: `/lottie/${this.$i18n.locale}/${this.lottieName}/images/`
       })
       this.$emit('AnimControl', this.anim)
       this.anim.setSpeed(this.speed)

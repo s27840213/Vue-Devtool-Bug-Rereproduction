@@ -1,79 +1,83 @@
 <template lang="pug">
-  div(class="list")
-    div(class="list-title text-H5")
-      span(class="list-title__text text-gray-1") {{title}}
-      router-link(v-if="type !== 'theme'"
-        class="list-title__more body-MD text-gray-2"
-        :to="moreLink")
-        span {{$t('NN0082')}}
-    div(class="list-content" :style="listContentSytle")
-      div(v-if="prevIcon"
-        class="list-content__lefticon"
-        @click="scroll(false)")
-        svg-icon(iconName="chevron-left"
-          iconWidth="25px"
+div(class="list")
+  div(class="list-title text-H5")
+    span(class="list-title__text text-gray-1") {{title}}
+    router-link(v-if="type !== 'theme'"
+      class="list-title__more body-MD text-gray-2"
+      :to="moreLink")
+      span {{$t('NN0082')}}
+  div(class="list-content" :style="listContentSytle")
+    div(v-if="prevIcon"
+      class="list-content__lefticon"
+      @click="scroll(false)")
+      svg-icon(iconName="chevron-left"
+        iconWidth="25px"
+        iconColor="gray-3")
+    div(v-if="nextIcon"
+      class="list-content__righticon"
+      @click="scroll(true)")
+      svg-icon(iconName="chevron-right"
+        iconWidth="25px"
+        iconColor="gray-3")
+    div(class="list-content-items"
+      @scroll.passive="updateIcon"
+      ref="items")
+      div(v-if="isLoading")
+        svg-icon(iconName="loading"
+          iconWidth="50px"
           iconColor="gray-3")
-      div(v-if="nextIcon"
-        class="list-content__righticon"
-        @click="scroll(true)")
-        svg-icon(iconName="chevron-right"
-          iconWidth="25px"
-          iconColor="gray-3")
-      div(class="list-content-items"
-        @scroll.passive="updateIcon"
-        ref="items")
-        div(v-if="isLoading")
-          svg-icon(iconName="loading"
-            iconWidth="50px"
-            iconColor="gray-3")
-        //- type theme
-        template(v-else-if="type === 'theme'")
-          div(class="list-content-items__theme-item")
+      //- type theme
+      template(v-else-if="type === 'theme'")
+        div(class="list-content-items__theme-item")
+          btn-new-design(v-slot="slotProps")
             img(class="list-content-items__theme-item-new pointer"
               :src="require('@/assets/img/svg/plus-origin.svg')"
-              @click="$emit('openSizePopup')")
+              @click="slotProps.openPopup")
             span(class="body-XS text-gray-1") {{$t('NN0023')}}
-          div(v-for="item in themeData"
-            class="list-content-items__theme-item")
-            router-link(:to="`/editor?type=new-design-size&themeId=${item.id}&width=${item.width}&height=${item.height}`")
-              img(class="list-content-items__theme-item-preset"
-                :src="item.url"
-                @error="imgOnerror")
-            span(class="body-XS text-gray-1") {{item.title}}
-            span(class="body-XXS text-gray-3") {{item.description}}
-        //- type mydesign
-        template(v-else-if="type === 'mydesign'")
-          design-item(v-for="item in mydesignData"
-            class="list-content-items__mydesign-item"
-            :config="item")
-        //- type template
-        template(v-else-if="type === 'template'")
-          div(v-for="item in templateData" class="list-content-items__template-item"
-              @click="clickTemplate(item)")
-            img(loading="lazy"
-              :src="`https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`"
-              :style="templateImgStyle(item.match_cover)")
-            pro-item(v-if="item.plan === 1")
+        div(v-for="item in themeData"
+          class="list-content-items__theme-item")
+          router-link(:to="themeRouteInfo(item)")
+            img(class="list-content-items__theme-item-preset"
+              :src="item.url"
+              @error="imgOnerror"
+              @click="openProductPageNotification(item)")
+          span(class="body-XS text-gray-1") {{item.title}}
+          span(class="body-XXS text-gray-3") {{item.description}}
+      //- type mydesign
+      template(v-else-if="type === 'mydesign'")
+        design-item(v-for="item in mydesignData"
+          class="list-content-items__mydesign-item"
+          :config="item")
+      //- type template
+      template(v-else-if="type === 'template'")
+        div(v-for="item in templateData" class="list-content-items__template-item"
+            @click="clickTemplate(item)")
+          img(loading="lazy"
+            :src="`https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`"
+            :style="templateImgStyle(item.match_cover)")
+          pro-item(v-if="item.plan === 1")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapActions, mapGetters } from 'vuex'
-import i18n from '@/i18n'
 import DesignItem from '@/components/homepage/DesignItem.vue'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import themeUtils from '@/utils/themeUtils'
-import paymentUtils from '@/utils/paymentUtils'
 import { IAssetTemplate } from '@/interfaces/api'
 import { Itheme } from '@/interfaces/theme'
+import modalUtils from '@/utils/modalUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import templateCenterUtils from '@/utils/templateCenterUtils'
-import generalUtils from '@/utils/generalUtils'
+import themeUtils from '@/utils/themeUtils'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'ScrollList',
   components: {
     DesignItem,
-    ProItem
+    ProItem,
+    BtnNewDesign
   },
   props: {
     type: {
@@ -95,13 +99,13 @@ export default Vue.extend({
       themeData: [] as Itheme[],
       templateData: [] as IAssetTemplate[],
       templateTitle: {
-        '1,2': i18n.t('NN0368'),
-        3: i18n.t('NN0026'),
-        8: i18n.tc('NN0151', 2, { media: 'Facebook' }),
-        6: i18n.t('NN0028'),
-        5: i18n.t('NN0027'),
-        7: i18n.t('NN0369'),
-        9: i18n.t('NN0370')
+        '1,2': this.$t('NN0368'),
+        3: this.$t('NN0026'),
+        8: this.$tc('NN0151', 2, { media: 'Facebook' }),
+        6: this.$t('NN0028'),
+        5: this.$t('NN0027'),
+        7: this.$t('NN0369'),
+        9: this.$t('NN0370')
       } as Record<string, string>
     }
   },
@@ -120,13 +124,13 @@ export default Vue.extend({
           this.themeData = themeUtils.themesMainHidden
           this.isLoading = false
         })
-        this.title = i18n.t('NN0154') as string
+        this.title = this.$t('NN0154') as string
         break
       case 'mydesign':
         this.fetchAllDesigns().then(() => {
           this.isLoading = false
         })
-        this.title = i18n.t('NN0080') as string
+        this.title = this.$t('NN0080') as string
         this.moreLink = '/mydesign'
         break
       case 'template':
@@ -138,7 +142,7 @@ export default Vue.extend({
           this.templateData = response.data.content[0].list
           this.isLoading = false
         })
-        this.title = this.templateTitle[this.theme]
+        this.title = this.templateTitle[this.theme!]
         this.moreLink = `/templates?themes=${this.theme}`
         break
     }
@@ -173,7 +177,7 @@ export default Vue.extend({
     },
     templateUrl(item: IAssetTemplate): string {
       return this.$router.resolve({
-        name: generalUtils.isTouchDevice() && this.theme === '7' ? 'MobileEditor' : 'Editor',
+        name: 'Editor',
         query: {
           type: this.theme === '7' ? 'product-page-template' : 'new-design-template',
           design_id: this.theme === '7' ? item.group_id : item.match_cover.id,
@@ -184,17 +188,49 @@ export default Vue.extend({
       }).href
     },
     clickTemplate(item: IAssetTemplate) {
+      if (this.$isTouchDevice() && this.theme === '7') {
+        modalUtils.setModalInfo(
+            `${this.$t('NN0808')}`,
+            [],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+        )
+        return
+      }
       const template = templateCenterUtils.iAssetTemplate2Template(item, 4)
       if (!paymentUtils.checkProTemplate(template)) return
       window.open(this.templateUrl(item), '_blank')
     },
-    templateImgStyle(match_cover: Record<string, number>): Record<string, string> {
+    templateImgStyle(match_cover: IAssetTemplate['match_cover']): Record<string, string> {
       const height = this.theme === '3' ? 284
         : this.theme === '7' ? 320
           : 160
       return {
         height: `${height}px`,
         width: `${match_cover.width / match_cover.height * height}px`
+      }
+    },
+    themeRouteInfo(theme: Itheme) {
+      if (this.$isTouchDevice() && theme.id === 7) {
+        return ''
+      } else {
+        return `/editor?type=new-design-size&themeId=${theme.id}&width=${theme.width}&height=${theme.height}`
+      }
+    },
+    openProductPageNotification(theme: Itheme) {
+      if (this.$isTouchDevice() && theme.id === 7) {
+        modalUtils.setModalInfo(
+              `${this.$t('NN0808')}`,
+              [],
+              {
+                msg: `${this.$t('NN0358')}`,
+                class: 'btn-blue-mid',
+                action: () => { return false }
+              }
+        )
       }
     }
   }

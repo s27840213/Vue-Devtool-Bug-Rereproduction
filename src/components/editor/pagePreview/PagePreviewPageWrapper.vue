@@ -1,94 +1,109 @@
 <template lang="pug">
-  lazy-load(
-      class="transition"
-      :target="lazyLoadTarget"
-      :threshold="[0,1]"
-      :minHeight="contentWidth"
-      @loaded="handleLoaded")
-    div(v-if="!allPageMode && !isShowPagePreview && !showPagePanel" :style="loadingStyle()")
-    div(v-else class="page-preview-page"
-      :style="styles2()"
-      :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
-      ref="pagePreview")
-      div(class="page-preview-page-content pointer"
-          :style="styles()"
-          @click="clickPage"
-          @dblclick="dbclickPage()"
-          draggable="true",
-          @dragstart="handleDragStart"
-          @dragend="handleDragEnd"
-          @mouseenter="handleMouseEnter"
-          @mouseleave="handleMouseLeave"
-          ref="content")
-        page-content(
-          class="click-disabled"
-          :style="contentScaleStyles()"
-          :config="config"
-          :pageIndex="index"
-          :contentScaleRatio="scaleRatio()"
-          :handleSequentially="true"
-          :isPagePreview="true")
-        div(class="page-preview-page__highlighter"
-          :class="{'focused': currFocusPageIndex === index}"
-          :style="hightlighterStyles()")
-        div(v-if="isMouseOver && showMoreBtn"
-          class="page-preview-page-content-more"
-          @click="toggleMenu()")
-          svg-icon(class="pb-5"
-            :iconName="'more_vertical'"
-            :iconWidth="'25px'")
-        div(v-if="isMenuOpen && currFocusPageIndex === index"
-          class="menu"
-          v-click-outside="closeMenu")
-          template(v-for="menuItem in menuItems")
-            div(class="menu-item"
-              @click="handleMenuAction(menuItem.icon)")
-              div(class="menu-item-icon")
-                svg-icon(:iconName="menuItem.icon"
-                  iconWidth="15px"
-                  iconColor="gray-2")
-              div(class="menu-item-text")
-                span {{ menuItem.text }}
-        div(v-if="type === 'panel'"
-          class="page-preview-page-icon")
-          span {{index+1}}
-      div(class="page-preview-page__background"
-        :style="styles")
-      div(v-if="type === 'full'"
-        class="page-preview-page-title")
-        span(:style="{'color': currFocusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
+lazy-load(
+    class="transition"
+    :target="lazyLoadTarget"
+    :threshold="[0,1]"
+    :minHeight="itemSize ? pageHeight() * scaleRatio() : contentWidth"
+    @loaded="handleLoaded")
+  div(class="page-preview-page"
+    :style="styles2()"
+    :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
+    ref="pagePreview")
+    div(class="page-preview-page-content pointer"
+        :style="styles()"
+        @click="clickPage"
+        @dblclick="dbclickPage()"
+        draggable="true",
+        @dragstart="handleDragStart"
+        @dragend="handleDragEnd"
+        @mouseenter="handleMouseEnter",
+        @mouseleave="handleMouseLeave"
+        ref="content")
+      page-content(
+        class="click-disabled"
+        :style="contentScaleStyles()"
+        :config="configWithBleed()"
+        :pageIndex="index"
+        :contentScaleRatio="scaleRatio()"
+        :handleSequentially="true"
+        :lazyLoadTarget="lazyLoadTarget")
+      div(class="page-preview-page__highlighter"
+        :class="{'focused': currFocusPageIndex === index}"
+        :style="hightlighterStyles()")
+      div(v-if="isMouseOver && showMoreBtn"
+        class="page-preview-page-content-more"
+        @click="toggleMenu()")
+        svg-icon(class="pb-5"
+          :iconName="'more_vertical'"
+          :iconWidth="'25px'")
+      div(v-if="isMenuOpen && currFocusPageIndex === index"
+        class="menu"
+        v-click-outside="closeMenu")
+        template(v-for="menuItem in menuItems")
+          div(class="menu-item"
+            @click="handleMenuAction(menuItem.icon)")
+            div(class="menu-item-icon")
+              svg-icon(:iconName="menuItem.icon"
+                iconWidth="15px"
+                iconColor="gray-2")
+            div(class="menu-item-text")
+              span {{ menuItem.text }}
+      div(v-if="type === 'panel'"
+        class="page-preview-page-icon")
+        span {{index+1}}
+    div(class="page-preview-page__background"
+      :style="styles")
+    div(v-if="type === 'full'"
+      class="page-preview-page-title")
+      span(:style="{'color': currFocusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
+  template(#placeholder)
+    div(v-if="itemSize" :style="loadingStyle()"
+      :key="'placeholder'")
 </template>
+
 <script lang="ts">
-import Vue from 'vue'
+import PageContent from '@/components/editor/page/PageContent.vue'
+import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
-import { mapGetters, mapMutations, mapState } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import { IPage } from '@/interfaces/page'
+import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import editorUtils from '@/utils/editorUtils'
-import LazyLoad from '@/components/LazyLoad.vue'
-import generalUtils from '@/utils/generalUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
-    type: String,
-    index: Number,
+    type: {
+      type: String,
+      required: true
+    },
+    index: {
+      type: Number,
+      required: true
+    },
     config: {
-      type: Object,
+      type: Object as PropType<IPage>,
       required: true
     },
     showMoreBtn: {
       default: true,
       type: Boolean
     },
+    itemSize: {
+      type: Number
+    },
     lazyLoadTarget: {
       type: String,
       default: '.mobile-editor__page-preview'
     }
   },
+  emits: ['loaded'],
   components: {
-    PageContent: () => import('@/components/editor/page/PageContent.vue'),
+    PageContent,
     LazyLoad
   },
   data() {
@@ -96,11 +111,11 @@ export default Vue.extend({
       menuItems: [
         {
           icon: 'copy',
-          text: i18n.t('NN0251')
+          text: i18n.global.t('NN0251')
         },
         {
           icon: 'trash',
-          text: i18n.t('NN0034')
+          text: i18n.global.t('NN0034')
         }
       ],
       isMouseOver: false,
@@ -129,13 +144,18 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _addPageToPos: 'ADD_pageToPos',
-      _deletePage: 'DELETE_page',
       _setmiddlemostPageIndex: 'SET_middlemostPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex',
       _setIsDragged: 'page/SET_IsDragged',
       _setIsShowPagePreview: 'page/SET_isShowPagePreview'
     }),
+    configWithBleed() {
+      if (!this.config.isEnableBleed) return this.config
+      return {
+        ...this.config,
+        ...pageUtils.getPageSizeWithBleeds(this.config)
+      }
+    },
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen
     },
@@ -161,7 +181,7 @@ export default Vue.extend({
         pageUtils.scrollIntoPage(this.index)
       }
 
-      if (generalUtils.isTouchDevice() && clickFocusedPreview) {
+      if (this.$isTouchDevice() && clickFocusedPreview) {
         this.$nextTick(() => {
           if (pageUtils.isDetailPage) {
             pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 'auto')
@@ -213,10 +233,7 @@ export default Vue.extend({
         case 'copy':
           page = generalUtils.deepCopy(this.getPage(this.index))
           page.designId = ''
-          this._addPageToPos({
-            newPage: page,
-            pos: this.index + 1
-          })
+          pageUtils.addPageToPos(page, this.index + 1)
           GroupUtils.deselect()
           this._setmiddlemostPageIndex(this.index + 1)
           this._setCurrActivePageIndex(this.index + 1)
@@ -224,7 +241,7 @@ export default Vue.extend({
           break
         case 'trash':
           GroupUtils.deselect()
-          this._deletePage(this.index)
+          pageUtils.deletePage(this.index)
           this._setmiddlemostPageIndex(this.index - 1)
           this._setCurrActivePageIndex(this.index - 1)
           StepsUtils.record()
@@ -242,13 +259,13 @@ export default Vue.extend({
     },
     // computed -> methods
     pageWidth(): number {
-      return this.config.width
+      return this.configWithBleed().width
     },
     pageHeight(): number {
-      return this.config.height
+      return this.configWithBleed().height
     },
     scaleRatio(): number {
-      return this.contentWidth / this.pageWidth()
+      return this.itemSize ? this.itemSize / this.pageWidth() : this.contentWidth / this.pageWidth()
     },
     contentScaleStyles(): { [index: string]: string } {
       return {
@@ -257,30 +274,35 @@ export default Vue.extend({
     },
     styles(): { [index: string]: string } {
       return {
-        height: `${this.pageHeight() * this.scaleRatio()}px`
+        height: `${this.pageHeight() * this.scaleRatio()}px`,
+        ...(this.itemSize && { width: `${this.itemSize}px` })
       }
     },
     styles2(): { [index: string]: string } {
       if (this.type === 'panel' &&
         this.isDragged && this.index !== pageUtils.currFocusPageIndex) {
         return {
-          'z-index': '-1'
+          'z-index': '-1',
+          width: `${this.itemSize}px`,
+          height: `${this.pageHeight() * this.scaleRatio()}px`
         }
       } else {
         return {
+          width: `${this.itemSize}px`,
+          height: `${this.pageHeight() * this.scaleRatio()}px`
         }
       }
     },
     hightlighterStyles(): { [index: string]: string } {
       return {
-        width: `${this.contentWidth + 20}px`,
+        width: this.itemSize ? `${this.itemSize + 20}px` : `${this.contentWidth + 20}px`,
         height: `${this.pageHeight() * this.scaleRatio() + 20}px`
       }
     },
     loadingStyle(): { [index: string]: string } {
       return {
-        width: '100%',
-        height: '100%'
+        width: this.itemSize ? `${this.itemSize}px` : '100%',
+        height: this.itemSize ? `${this.pageHeight() * this.scaleRatio()}px` : '100%'
       }
     }
   }
@@ -324,7 +346,7 @@ export default Vue.extend({
       height: 30px;
       display: flex;
       align-items: center;
-      justify-content: start;
+      justify-content: flex-start;
       gap: 10px;
       cursor: pointer;
       &:hover {
@@ -339,7 +361,7 @@ export default Vue.extend({
       &-text {
         display: flex;
         align-items: center;
-        justify-content: start;
+        justify-content: flex-start;
         > span {
           font-weight: 400;
           font-size: 12px;
@@ -388,7 +410,6 @@ export default Vue.extend({
     position: absolute;
     width: 100%;
     background: setColor(gray-3, 0.3);
-    z-index: -1;
   }
 }
 .focused {
@@ -397,7 +418,6 @@ export default Vue.extend({
   box-sizing: border-box;
   background: linear-gradient(90deg, rgba(#59c3e1, 0.3), rgba(#50a2d8, 0.3));
 }
-
 .transition {
   transition: 0.25s ease-in-out;
 }

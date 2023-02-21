@@ -1,14 +1,20 @@
 export interface IDownloadTypeAttrs {
+  [key: string]: number | undefined
   scale?: number
   quality?: number
   omitBackground?: 0 | 1
-  mark?: boolean
+  bleed?: 0 | 1 | 2
+  outline?: 0 | 1 | 2
+  cmyk?: 0 | 1
 }
 
+export type IOutputType = 'pdf_standard' | 'pdf_print' | 'jpg' | 'png'
+
 export interface ITypeOption {
-  value: string
+  value: IOutputType
   name: string
   desc: string
+  tag?: string
 }
 
 export interface IDownloadServiceParams {
@@ -21,8 +27,11 @@ export interface IDownloadServiceParams {
   quality?: number
   scale?: number
   pdfQuality?: 0 | 1
-  merge?: 1 | undefined
+  merge?: 0 | 1
   splitSize?: number
+  bleed?: 0 | 1 | 2
+  outline?: 0 | 1 | 2
+  cmyk?: 0 | 1
 }
 
 export interface IDownloadServiceResponse {

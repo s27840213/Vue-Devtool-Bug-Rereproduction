@@ -1,28 +1,33 @@
 <template lang="pug">
-  div(class="brand-kit-color-palette")
-    div(class="brand-kit-color-palette__header")
-      div(class="brand-kit-color-palette__name")
-        span(:title="paletteName") {{ paletteName }}
-    div(class="brand-kit-color-palette__colors")
-      div(v-for="(color, index) in colorPalette.colors"
-        class="brand-kit-color-palette__colors__color-wrapper")
-        div(class="brand-kit-color-palette__colors__color"
-          :style="backgroundColorStyles(color.color)"
-          @click="handleSetColor(index)")
+div(class="brand-kit-color-palette")
+  div(class="brand-kit-color-palette__header")
+    div(class="brand-kit-color-palette__name")
+      span(:title="paletteName") {{ paletteName }}
+  div(class="brand-kit-color-palette__colors")
+    color-btn(v-for="color in colorPalette.colors" :color="color.color"
+              @click="handleSetColor(color.color)")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
+import ColorBtn from '@/components/global/ColorBtn.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrandColorPalette } from '@/interfaces/brandkit'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
+  components: {
+    ColorBtn
+  },
   data() {
     return {
     }
   },
   props: {
-    colorPalette: Object,
+    colorPalette: {
+      type: Object as PropType<IBrandColorPalette>,
+      required: true
+    },
     settingmode: {
       default: false,
       type: Boolean
@@ -34,15 +39,12 @@ export default Vue.extend({
     }
   },
   methods: {
-    backgroundColorStyles(color: string) {
-      return { backgroundColor: color }
-    },
     getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {
       return brandkitUtils.getDisplayedPaletteName(colorPalette)
     },
-    handleSetColor(index: number) {
+    handleSetColor(color: string) {
       if (!this.settingmode) return
-      console.log('change color for', `${this.colorPalette.id}::${index}`)
+      console.log('change color for', `${this.colorPalette.id}::${color}`)
     }
   }
 })
@@ -53,7 +55,7 @@ export default Vue.extend({
   &__name {
     display: flex;
     align-items: center;
-    justify-content: start;
+    justify-content: flex-start;
     color: white;
     & > span {
       @include body-SM;
@@ -71,22 +73,6 @@ export default Vue.extend({
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
     gap: 12px;
-    &__color-wrapper {
-      position: relative;
-      width: 100%;
-      padding-top: 100%;
-      box-sizing: border-box;
-      border-radius: 10%;
-    }
-    &__color {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      box-sizing: border-box;
-      border-radius: 10%;
-    }
   }
 }
 </style>

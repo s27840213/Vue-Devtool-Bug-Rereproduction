@@ -12,80 +12,79 @@ div(class="overflow-container"
         @contextmenu.prevent
         @click.right.stop="onRightClick"
         @dblclick="pageDblClickHandler()"
-        @mouseover="togglePageHighlighter(true)"
-        @mouseout="togglePageHighlighter(false)")
-      nu-bg-image(:image="this.config.backgroundImage"
-        :pageIndex="pageIndex"
-        :color="this.config.backgroundColor"
-        :key="this.config.backgroundImage.id"
-        @mousedown.native.left="pageClickHandler()"
-        :contentScaleRatio="contentScaleRatio")
-      //- lazy-load(v-for="(layer,index) in config.layers"
-      //-     :key="layer.id"
-      //-     target=".editor-view"
-      //-     :threshold="[0,1]")
-      nu-layer(
-        v-for="(layer,index) in layerFilter"
-        :key="layer.id"
-        :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
-        :data-index="`${index}`"
-        :data-pindex="`${pageIndex}`"
-        :layerIndex="index"
-        :pageIndex="pageIndex"
-        :config="layer"
-        :currSelectedInfo="currSelectedInfo"
-        :contentScaleRatio="contentScaleRatio"
-        :scaleRatio="scaleRatio"
-        :getCurrFunctionPanelType="getCurrFunctionPanelType"
-        :isUploadingShadowImg="isUploadingShadowImg"
-        :isHandling="isHandling"
-        :isShowPagePanel="isShowPagePanel"
-        :imgSizeMap="imgSizeMap"
-        :userId="userId"
-        :verUni="verUni"
-        :uploadId="uploadId"
-        :handleId="handleId"
-        :uploadShadowImgs="uploadShadowImgs"
-        :isPagePreview="true")
+        @tap="tapPageContent")
+      //- @dblclick will not be trigger in mobile, use @tap + doubleTapUtils instead.
+      div(class="content" :class="`nu-page-content-${pageIndex}`" :style="contentStyles")
+        nu-bg-image(
+            :image="config.backgroundImage"
+            :pageIndex="pageIndex"
+            :page="config"
+            :color="config.backgroundColor"
+            :key="config.backgroundImage.config.id"
+            @mousedown.native.left="pageClickHandler()"
+            :contentScaleRatio="contentScaleRatio"
+            :padding="contentStyles.margin")
+        nu-layer(
+          v-for="(layer,index) in config.layers"
+          :key="layer.id"
+          :dataIndex="`${index}`"
+          :dataPindex="`${pageIndex}`"
+          :snapUtils="snapUtils"
+          :layerIndex="index"
+          :pageIndex="pageIndex"
+          :page="config"
+          :config="layer"
+          :contentScaleRatio="contentScaleRatio"
+          :forceRender="forceRender"
+          :lazyLoadTarget="lazyLoadTarget")
+      div(v-if="isShowBleed" class="bleed-line" :style="bleedLineStyles")
+      div(v-if="userId === 'backendRendering' && backendRenderParams.isTrim" class="trim")
+        div(class="trim__tl" :style="trimStyles.tl")
+        div(class="trim__tr" :style="trimStyles.tr")
+        div(class="trim__bl" :style="trimStyles.bl")
+        div(class="trim__br" :style="trimStyles.br")
     template(v-else)
       div(class='pages-loading')
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import groupUtils from '@/utils/groupUtils'
-import pageUtils from '@/utils/pageUtils'
-import popupUtils from '@/utils/popupUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import { LayerType, SidebarPanelType } from '@/store/types'
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
+import LazyLoad from '@/components/LazyLoad.vue'
+import i18n from '@/i18n'
+import { ILayer } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import { SidebarPanelType } from '@/store/types'
+import doubleTapUtils from '@/utils/doubleTapUtils'
+import DragUtils from '@/utils/dragUtils'
+import editorUtils from '@/utils/editorUtils'
+import groupUtils from '@/utils/groupUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
-import DragUtils from '@/utils/dragUtils'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
 import textUtils from '@/utils/textUtils'
-import editorUtils from '@/utils/editorUtils'
-import generalUtils from '@/utils/generalUtils'
-import LazyLoad from '@/components/LazyLoad.vue'
-import { ILayer } from '@/interfaces/layer'
+import uploadUtils from '@/utils/uploadUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     NuBgImage,
     LazyLoad
   },
   props: {
+    snapUtils: Object,
     config: {
-      type: Object,
+      type: Object as PropType<IPage>,
       required: true
     },
     pageIndex: {
       type: Number,
       required: true
-    },
-    isPagePreview: {
-      type: Boolean,
-      required: false
     },
     handleSequentially: {
       type: Boolean,
@@ -94,13 +93,20 @@ export default Vue.extend({
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    forceRender: {
+      default: false,
+      type: Boolean
+    },
+    lazyLoadTarget: {
+      type: String,
+      default: '.editor-view'
     }
   },
   data() {
     return {
       imgLoaded: false,
-      imgLoading: false,
-      pageIsHover: false
+      imgLoading: false
     }
   },
   computed: {
@@ -116,16 +122,20 @@ export default Vue.extend({
       isShowPagePanel: 'page/getShowPagePanel',
       currSelectedPageIndex: 'getCurrSelectedPageIndex'
     }),
-    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
+    ...mapGetters('imgControl', {
+      isImgCtrl: 'isImgCtrl'
+    }),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni', 'backendRenderParams']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     isHandleShadow(): boolean {
       return this.isProcessImgShadow || this.isUploadImgShadow
     },
     pageStyles(): { [index: string]: string } {
       return {
-        width: `${this.config.width * this.contentScaleRatio}px`,
-        height: `${this.config.height * this.contentScaleRatio}px`,
+        width: `${this.config.width * this.contentScaleRatio + this.margin.right}px`,
+        height: `${this.config.height * this.contentScaleRatio + this.margin.bottom}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
+        // ...(this.userId === 'backendRendering' && { paddingBottom: 8 + 'px' })
       }
     },
     stylesWith3DPreserve(): { [index: string]: string } {
@@ -136,14 +146,90 @@ export default Vue.extend({
       }
     },
     layerFilter(): any {
-      return this.config.layers.filter((layer: ILayer) => {
-        // return layer.type !== LayerType.text && layer.type !== LayerType.shape
+      const filterResult = this.config.layers.filter((layer: ILayer) => {
+        // return layer.type !== LayerType.shape
         // return layer.type !== LayerType.text
         return layer
       })
+
+      return filterResult
     },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
+    },
+    isShowBleed() {
+      if (this.userId === 'backendRendering') return false
+      return this.config.isEnableBleed
+    },
+    contentStyles() {
+      if (!this.config.isEnableBleed) {
+        return {
+          width: this.config.width * this.contentScaleRatio + 'px',
+          height: this.config.height * this.contentScaleRatio + 'px',
+          padding: [
+            '0px',
+            this.margin.right + 'px',
+            this.margin.bottom + 'px',
+            '0px'
+          ].join(' ')
+        }
+      }
+      return {
+        width: (this.config.width - this.config.bleeds.left - this.config.bleeds.right) * this.contentScaleRatio + 'px',
+        height: (this.config.height - this.config.bleeds.top - this.config.bleeds.bottom) * this.contentScaleRatio + 'px',
+        margin: [
+          this.config.bleeds.top * this.contentScaleRatio + 'px',
+          this.config.bleeds.right * this.contentScaleRatio + this.margin.right + 'px',
+          this.config.bleeds.bottom * this.contentScaleRatio + this.margin.bottom + 'px',
+          this.config.bleeds.left * this.contentScaleRatio + 'px'
+        ].join(' ')
+      }
+    },
+    bleedLineStyles() {
+      return {
+        top: (this.config.bleeds.top - 1) * this.contentScaleRatio + 'px',
+        bottom: (this.config.bleeds.bottom - 1) * this.contentScaleRatio + this.margin.bottom + 'px',
+        left: (this.config.bleeds.left - 1) * this.contentScaleRatio + 'px',
+        right: (this.config.bleeds.right - 1) * this.contentScaleRatio + this.margin.right + 'px',
+        border: this.userId === 'backendRendering' ? `${this.contentScaleRatio}px solid white` : `${this.config.isEnableBleed ? this.contentScaleRatio : 0}px dashed white`,
+        boxShadow: this.userId === 'backendRendering' ? 'none' : '0 0 3px 1px rgba(0, 0, 0, 0.15)'
+      }
+    },
+    trimStyles() {
+      return {
+        tl: {
+          top: '-2px',
+          bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio + this.margin.bottom}px`,
+          left: '-2px',
+          right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio + this.margin.right}px`,
+          borderWidth: `${this.contentScaleRatio}px`
+        },
+        tr: {
+          top: '-2px',
+          bottom: `${(this.config.height - this.config.bleeds.top) * this.contentScaleRatio + this.margin.bottom}px`,
+          left: `${(this.config.width - this.config.bleeds.right) * this.contentScaleRatio}px`,
+          right: '-2px',
+          borderWidth: `${this.contentScaleRatio}px`
+        },
+        bl: {
+          top: `${(this.config.height - this.config.bleeds.bottom) * this.contentScaleRatio}px`,
+          bottom: '-2px',
+          left: '-2px',
+          right: `${(this.config.width - this.config.bleeds.left) * this.contentScaleRatio + this.margin.right}px`,
+          borderWidth: `${this.contentScaleRatio}px`
+        },
+        br: {
+          top: `${(this.config.height - this.config.bleeds.bottom) * this.contentScaleRatio}px`,
+          bottom: '-2px',
+          left: `${(this.config.width - this.config.bleeds.right) * this.contentScaleRatio}px`,
+          right: '-2px',
+          borderWidth: `${this.contentScaleRatio}px`
+        }
+      }
+    },
+    margin() {
+      // additional margin for backend render
+      return (this.userId === 'backendRendering' ? this.backendRenderParams.margin : { bottom: 0, right: 0 })
     }
   },
   mounted() {
@@ -178,8 +264,6 @@ export default Vue.extend({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
       setDropdown: 'popup/SET_STATE',
-      _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page',
       updatePageProps: 'UPDATE_pageProps'
     }),
     ...mapActions({
@@ -219,25 +303,27 @@ export default Vue.extend({
         }
       }
     },
-    togglePageHighlighter(isHover: boolean): void {
-      if (this.isPagePreview) return
-      this.pageIsHover = isHover
-    },
-    pageClickHandler(e: PointerEvent): void {
-      if (this.isPagePreview) return
-      groupUtils.deselect()
-      // imageUtils.setImgControlDefault(false)
-      editorUtils.setInMultiSelectionMode(false)
-      this.setCurrActivePageIndex(this.pageIndex)
-      const sel = window.getSelection()
-      if (sel) {
-        sel.empty()
-        sel.removeAllRanges()
+    pageClickHandler(): void {
+      if (!this.isImgCtrl) {
+        groupUtils.deselect()
+        editorUtils.setInMultiSelectionMode(false)
+        // if (this.currSelectedPageIndex !== this.pageIndex) {
+        if (layerUtils.pageIndex !== this.pageIndex) {
+          pageUtils.setBackgroundImageControlDefault()
+          this.setCurrActivePageIndex(this.pageIndex)
+        }
+        const sel = window.getSelection()
+        if (sel) {
+          sel.empty()
+          sel.removeAllRanges()
+        }
+      } else {
+        imageUtils.setImgControlDefault()
+        editorUtils.setShowMobilePanel(false)
       }
     },
     onRightClick(event: MouseEvent) {
-      if (this.isPagePreview) return
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice()) {
         return
       }
 
@@ -247,18 +333,22 @@ export default Vue.extend({
       }
       popupUtils.openPopup('page', { event })
     },
+    tapPageContent(e: Event): void {
+      const target = e.target as HTMLElement
+      if (!target.matches('.nu-background-image img')) return
+      doubleTapUtils.click(e, { doubleClickCallback: this.pageDblClickHandler })
+    },
     pageDblClickHandler(): void {
-      if (this.isPagePreview) return
-
       if (this.isHandleShadow) {
         return
       }
       const { srcObj, locked } = this.config.backgroundImage.config
       if ((srcObj?.assetId ?? '') !== '' && !locked) {
         pageUtils.startBackgroundImageControl(this.pageIndex)
+        editorUtils.setCurrActivePanel('crop')
       }
       if ((srcObj?.assetId ?? '') !== '' && locked) {
-        this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+        notify({ group: 'copy', text: i18n.global.tc('NN0804') })
       }
     },
     async handleFontLoading() {
@@ -269,7 +359,7 @@ export default Vue.extend({
               pageIndex: this.pageIndex,
               props: { isAutoResizeNeeded: false }
             })
-          }, 100) // for the delay between font loading and dom rendering
+          }, 200) // for the delay between font loading and dom rendering
         })
       }
     }
@@ -294,5 +384,31 @@ export default Vue.extend({
   width: 100%;
   height: 100%;
   background-color: setColor(gray-4);
+}
+
+.content {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  transform-style: preserve-3d;
+}
+
+.bleed-line {
+  pointer-events: none;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  box-sizing: border-box;
+  border: 1px solid white
+}
+
+.trim {
+  >div {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  box-sizing: border-box;
+  border: 1px solid setColor(gray-2)
+  }
 }
 </style>

@@ -1,28 +1,36 @@
 <template lang="pug">
-  select(class="select" :value="value" autofocus required
-        @input="$emit('input', $event.target.value)")
-    option(v-if="ph" value="" disabled hidden selected) {{ph}}
-    option(v-for="op in options" :value="op.value || op") {{op.label || op}}
+select(class="select" :value="modelValue" autofocus required
+      @input="input")
+  option(v-if="ph" value="" disabled hidden selected) {{ph}}
+  option(v-for="op in options"
+        :value="typeof op === 'string' ? op : op.value") {{typeof op === 'string' ? op : op.label}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'Options',
   props: {
     options: {
-      type: Array,
+      type: Array as PropType<{value: string, label: string}[] | string[]>,
       required: true
     },
-    // Use v-model to two way bindings this props, don't use :value.
-    value: {
+    // Use v-model to two way bindings this props, don't use :modelValue.
+    modelValue: {
+      type: String,
       default: ''
     },
     // To use placeholder, you need to pass ph.
     // And keep initial v-model value as empty string or null.
     ph: {
       type: String
+    }
+  },
+  emits: ['update:modelValue'],
+  methods: {
+    input(e: Event) {
+      this.$emit('update:modelValue', (e.target as HTMLInputElement).value)
     }
   }
 })

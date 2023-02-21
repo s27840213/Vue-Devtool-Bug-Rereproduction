@@ -1,5 +1,4 @@
-import Vue from 'vue'
-import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
+import { ActionTree, MutationTree, GetterTree } from 'vuex'
 import { getField, updateField } from 'vuex-map-fields'
 import store from '..'
 import i18n from '@/i18n'
@@ -8,10 +7,11 @@ import generalUtils from '@/utils/generalUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import fbPixelUtils from '@/utils/fbPixelUtils'
 import * as type from '@/interfaces/payment'
+import { notify } from '@kyvg/vue3-notification'
 
 interface IPaymentState {
   isLoading: boolean
-  initView: string
+  initView: type.IPaymentView
   templateImg: string
   // Constant
   status: string
@@ -93,7 +93,8 @@ const ITrialStatue = {
 const IPayType = {
   0: '',
   1: 'tappay',
-  2: 'stripe'
+  2: 'stripe',
+  3: 'tcloud' // 雲市集 政府輔助方案
 }
 
 const ICouponError = [
@@ -130,7 +131,7 @@ function recordThePlanToGTM(trialStatus: string, isYearlyPlan: boolean) {
 
 const getDefaultState = (): IPaymentState => ({
   isLoading: false,
-  initView: '',
+  initView: 'brandkit',
   templateImg: '',
   // Constant
   status: 'Loading',
@@ -232,7 +233,7 @@ function isLegalGUI(GUI: string) { // Government Uniform Invoice, 統編
 
 function string2Date(time: string) {
   return new Date(time)
-    .toLocaleDateString(i18n.locale === 'us' ? 'en' : 'zh', {
+    .toLocaleDateString(i18n.global.locale === 'us' ? 'en' : 'zh', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -242,8 +243,8 @@ function string2Date(time: string) {
 const actions: ActionTree<IPaymentState, unknown> = {
   async getPrice({ commit }, country: string) {
     if (country === '') {
-      commit('SET_state', { userCountryUi: i18n.locale })
-      country = i18n.locale
+      commit('SET_state', { userCountryUi: i18n.global.locale })
+      country = i18n.global.locale
     }
 
     return paymentApi.planList(country).then((response) => {
@@ -388,9 +389,11 @@ const actions: ActionTree<IPaymentState, unknown> = {
       })
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
-    }).then(() => Vue.notify({ group: 'copy', text: 'Success' }))
-      .catch(msg => Vue.notify({ group: 'error', text: msg }))
-      .finally(() => { commit('SET_state', { isLoading: false }) })
+    }).then(() => {
+      notify({ group: 'copy', text: 'Success' })
+    }).catch(msg => {
+      notify({ group: 'error', text: msg })
+    }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async init({ commit }) {
     commit('SET_state', {
@@ -411,7 +414,9 @@ const actions: ActionTree<IPaymentState, unknown> = {
             name: userName
           })
         })
-      }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+      }).catch(msg => {
+        notify({ group: 'error', text: msg })
+      })
     })
   },
   async tappayAdd({ commit, getters }) {
@@ -463,7 +468,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       prime: state.prime
     }).then((response) => {
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: i18n.t('NN0630') as string })
+      notify({ group: 'copy', text: i18n.global.t('NN0630') as string })
       return response
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
@@ -471,7 +476,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
     commit('SET_state', { isLoading: true })
     return paymentApi.stripeUpdate().then((response) => {
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: i18n.t('NN0630') as string })
+      notify({ group: 'copy', text: i18n.global.t('NN0630') as string })
       return response
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
@@ -485,7 +490,9 @@ const actions: ActionTree<IPaymentState, unknown> = {
         switchPaidDate: data.charge_time,
         switchPrice: data.price
       })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+    }).catch(msg => {
+      notify({ group: 'error', text: msg })
+    })
   },
   async switch({ getters, dispatch, commit }) {
     commit('SET_state', { isLoading: true })
@@ -494,37 +501,41 @@ const actions: ActionTree<IPaymentState, unknown> = {
       is_bundle: 1 - Number(getters.getIsBundle)
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
-      Vue.notify({ group: 'copy', text: i18n.t('NN0627', { period: getters.getIsBundle ? i18n.t('NN0514') : i18n.t('NN0515') }) as string })
+      notify({ group: 'copy', text: i18n.global.t('NN0627', { period: getters.getIsBundle ? i18n.global.t('NN0514') : i18n.global.t('NN0515') }) as string })
       dispatch('getBillingInfo')
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
-      .finally(() => { commit('SET_state', { isLoading: false }) })
+    }).catch(msg => {
+      notify({ group: 'error', text: msg })
+    }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async cancel({ dispatch, commit }, reason: string) {
     commit('SET_state', { isLoading: true })
     return paymentApi.cancel(reason).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: i18n.t('NN0628') as string })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
-      .finally(() => { commit('SET_state', { isLoading: false }) })
+      notify({ group: 'copy', text: i18n.global.t('NN0628') as string })
+    }).catch(msg => {
+      notify({ group: 'error', text: msg })
+    }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async resume({ dispatch, commit }) {
     commit('SET_state', { isLoading: true })
     return paymentApi.resume().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: i18n.t('NN0629') as string })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
-      .finally(() => { commit('SET_state', { isLoading: false }) })
+      notify({ group: 'copy', text: i18n.global.t('NN0629') as string })
+    }).catch(msg => {
+      notify({ group: 'error', text: msg })
+    }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async deleteCard({ dispatch, commit }) {
     commit('SET_state', { isLoading: true })
     return paymentApi.deleteCard().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: i18n.t('NN0631') as string })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
-      .finally(() => { commit('SET_state', { isLoading: false }) })
+      notify({ group: 'copy', text: i18n.global.t('NN0631') as string })
+    }).catch(msg => {
+      notify({ group: 'error', text: msg })
+    }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   reloadDiskCapacity({ commit }) {
     commit('SET_diskLoading', true)
@@ -533,8 +544,9 @@ const actions: ActionTree<IPaymentState, unknown> = {
     const procId = `${userId}${timestamp}reloadDiskCapacity`
     const callback = (event: MessageEvent) => {
       const payload = JSON.parse(JSON.parse(event.data).message).payload
-      if (payload.flag) Vue.notify({ group: 'error', text: payload.msg })
-      else {
+      if (payload.flag) {
+        notify({ group: 'error', text: payload.msg })
+      } else {
         commit('SET_state', {
           usage: Object.assign(state.usage, {
             diskUsed: Number(payload.size) / 1024
@@ -553,7 +565,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
     })
     paymentApi.verifyCoupon(state.coupon.input).then(({ data }) => {
       commit('SET_coupon', {
-        msg: data.flag ? i18n.t('NN0698') : data.msg,
+        msg: data.flag ? i18n.global.t('NN0698') : data.msg,
         status: data.flag ? 'error' : 'accept'
       })
     })
@@ -569,7 +581,9 @@ const actions: ActionTree<IPaymentState, unknown> = {
         discount: data.price_original - data.price,
         paymentPaidDate: string2Date(data.charge_time)
       })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+    }).catch(msg => {
+      notify({ group: 'error', text: msg })
+    })
   },
   resetCouponResult({ commit }) {
     commit('SET_coupon', {
@@ -588,9 +602,9 @@ const mutations: MutationTree<IPaymentState> = {
     const keys = Object.keys(newState) as Array<keyof IPaymentState>
     keys.forEach(key => {
       if (['paymentPaidDate', 'myPaidDate', 'switchPaidDate'].includes(key) && newState[key]) {
-        (state[key] as any) = string2Date(newState[key] as string)
+        (state[key] as unknown) = string2Date(newState[key] as string)
       } else if (key in state) {
-        (state[key] as any) = newState[key]
+        (state[key] as unknown) = newState[key]
       }
     })
   },
@@ -603,7 +617,7 @@ const mutations: MutationTree<IPaymentState> = {
   SET_isLoading(state: IPaymentState, isLoading) {
     state.isLoading = isLoading
   },
-  SET_initView(state: IPaymentState, initView) {
+  SET_initView(state: IPaymentState, initView: type.IPaymentView) {
     state.initView = initView
   },
   SET_templateImg(state: IPaymentState, templateImg) {
@@ -622,13 +636,13 @@ const mutations: MutationTree<IPaymentState> = {
 
 const getters: GetterTree<IPaymentState, unknown> = {
   getField,
-  getStatus(): string {
+  getStatus(state): string {
     return state.status
   },
-  getDiskPercent(): number {
+  getDiskPercent(state): number {
     return state.usage.diskUsed / state.usage.diskTotal
   },
-  getDiskUsedUi() {
+  getDiskUsedUi(state) {
     return Number(state.usage.diskUsed.toFixed(2))
   },
   getIsBundle(state) {
@@ -651,4 +665,4 @@ export default {
   getters,
   mutations,
   actions
-} as ModuleTree<IPaymentState>
+}

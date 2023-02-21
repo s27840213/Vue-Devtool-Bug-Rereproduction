@@ -5,6 +5,7 @@ export interface IDesign {
   name: string,
   width: number,
   height: number,
+  unit: string,
   thumbnail: string,
   createdTime: string,
   lastUpdatedTime: string,
@@ -12,7 +13,8 @@ export interface IDesign {
   ver: number,
   signedUrl?: {[key: string]: string},
   pageNum: number,
-  polling: boolean
+  polling: boolean,
+  group_type: number
 }
 
 export interface IFolder {

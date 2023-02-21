@@ -1,13 +1,13 @@
 import store from '@/store'
-import ShortcutUtils from '@/utils/shortcutUtils'
 import AlignUtils from '@/utils/alignUtils'
-import OrderUtils from './orderUtils'
-import layerUtils from './layerUtils'
-import popupUtils from './popupUtils'
-import flipUtils from './flipUtils'
-import stepsUtils from './stepsUtils'
-import groupUtils from './groupUtils'
+import ShortcutUtils from '@/utils/shortcutUtils'
 import backgroundUtils from './backgroundUtils'
+import flipUtils from './flipUtils'
+import groupUtils from './groupUtils'
+import layerUtils from './layerUtils'
+import OrderUtils from './orderUtils'
+import popupUtils from './popupUtils'
+import stepsUtils from './stepsUtils'
 
 const iconAlign = ['left-align', 'center-horizontally', 'right-align', 'top-align', 'center-vertically', 'bottom-align']
 const iconDistribute = ['distribute-horizontally', 'distribute-vertically']
@@ -128,9 +128,7 @@ class MappingUtils {
         break
       }
       case 'copy': {
-        ShortcutUtils.copy()
-        ShortcutUtils.paste()
-        stepsUtils.record()
+        ShortcutUtils.duplicate()
         break
       }
       case 'unlock': {
@@ -147,8 +145,12 @@ class MappingUtils {
         if (backgroundUtils.inBgSettingMode) {
           backgroundUtils.handleLockBackground()
         } else {
-          const { index, pageIndex } = layerUtils.currSelectedInfo
-          layerUtils.updateLayerProps(pageIndex, index, { locked: false })
+          const { currSelectedInfo: { index, pageIndex }, getCurrConfig } = layerUtils
+          const props = { locked: false } as { [key: string]: string | boolean | number }
+          if (getCurrConfig.type === 'text') {
+            props.editing = false
+          }
+          layerUtils.updateLayerProps(pageIndex, index, props)
           stepsUtils.record()
         }
         break

@@ -1,37 +1,46 @@
 <template lang="pug">
-  div(class="nu-background-controller")
-    div(class="dim-background")
-    div(class="nu-controller__body"
-        ref="body"
-        :style="styles()"
-        @pointerdown.stop="moveStart"
-        @touchstart="disableTouchEvent")
-      div(v-for="(scaler, index)  in controlPoints.scalers"
-          class="controller-point"
-          :key="index"
-          :style="Object.assign(scaler.styles, cursorStyles(index, getPageRotate))"
-          @pointerdown.stop="scaleStart")
-    div(class="nu-controller"
-        :style="controllerStyles()")
+div(class="nu-background-controller")
+  div(class="nu-controller__body"
+      ref="body"
+      :style="styles"
+      @pointerdown.stop="moveStart"
+      @touchstart="disableTouchEvent")
+    div(v-for="(scaler, index)  in controlPoints.scalers"
+        class="controller-point"
+        :key="index"
+        :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getPageRotate))"
+        @pointerdown.stop="scaleStart")
+  //- div(class="nu-controller"
+  //-     :style="controllerStyles()")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
-import MouseUtils from '@/utils/mouseUtils'
-import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
-import MathUtils from '@/utils/mathUtils'
-import PageUtils from '@/utils/pageUtils'
 import { IPage } from '@/interfaces/page'
-import stepsUtils from '@/utils/stepsUtils'
+import ControlUtils from '@/utils/controlUtils'
 import eventUtils from '@/utils/eventUtils'
-import generalUtils from '@/utils/generalUtils'
+import MathUtils from '@/utils/mathUtils'
+import MouseUtils from '@/utils/mouseUtils'
+import PageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    config: Object,
-    pageIndex: Number,
+    config: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -49,13 +58,12 @@ export default Vue.extend({
       control: { xSign: 1, ySign: 1, isHorizon: false }
     }
   },
-  destroyed() {
+  unmounted() {
     PageUtils.setBackgroundImageControlDefault()
   },
   computed: {
     ...mapGetters({
-      scaleRatio: 'getPageScaleRatio',
-      getPage: 'getPage'
+      scaleRatio: 'getPageScaleRatio'
     }),
     isActive(): boolean {
       return this.config.active
@@ -63,14 +71,13 @@ export default Vue.extend({
     isShown(): boolean {
       return this.config.shown
     },
-    page(): IPage {
-      return this.getPage(this.pageIndex)
-    },
     getImgX(): number {
-      return this.page.backgroundImage.posX
+      // return this.page.backgroundImage.posX
+      return this.config.styles.imgX
     },
     getImgY(): number {
-      return this.page.backgroundImage.posY
+      // return this.page.backgroundImage.posY
+      return this.config.styles.imgY
     },
     getImgWidth(): number {
       return this.config.styles.imgWidth
@@ -82,14 +89,18 @@ export default Vue.extend({
       return this.config.styles.scale
     },
     getPageRotate(): number {
-      return this.config.styles.rotate
+      return 0
     },
     getImgController(): ICoordinate {
       return this.config.styles.imgController
-    }
-  },
-  methods: {
-    styles() {
+    },
+    dimBgStyles(): Record<string, string> {
+      return {
+        width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
+        height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`
+      }
+    },
+    styles(): Record<string, string> {
       // preserve in case the background image is needed to be rotatable in the future
       // const zindex = (this.pageIndex + 1) * 100
       // const pos = this.imgControllerPosHandler()
@@ -97,15 +108,22 @@ export default Vue.extend({
       return {
         width: `${this.config.styles.imgWidth * this.getPageScale * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.getPageScale * this.contentScaleRatio}px`,
-        outline: `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px dashed #7190CC`
+        outline: `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`
       }
     },
+    pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
+      return this.page.isEnableBleed ? PageUtils.removeBleedsFromPageSize(this.page) : this.page
+    },
+  },
+  methods: {
+    ...mapMutations({
+      updateConfig: 'imgControl/UPDATE_CONFIG'
+    }),
     imgControllerPosHandler(): ICoordinate {
-      const page = this.page
       const angleInRad = this.getPageRotate * Math.PI / 180
       const rectCenter = {
-        x: page.width / 2,
-        y: page.height / 2
+        x: this.pageSize.width / 2,
+        y: this.pageSize.height / 2
       }
       const pageVect = {
         x: -rectCenter.x,
@@ -133,17 +151,18 @@ export default Vue.extend({
       return imgControllerPos
     },
     controllerStyles() {
-      // rotate(${this.config.styles.rotate}deg)
-      console.log(this.contentScaleRatio)
       return {
         transform: `translate(${-this.page.backgroundImage.posX * this.contentScaleRatio}px, ${-this.page.backgroundImage.posY * this.contentScaleRatio}px)`,
-        width: `${this.page.width * this.contentScaleRatio}px`,
-        height: `${this.page.height * this.contentScaleRatio}px`,
+        width: `${this.pageSize.width * this.contentScaleRatio}px`,
+        height: `${this.pageSize.height * this.contentScaleRatio}px`,
         outline: `${3 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`,
         'pointer-events': 'none'
       }
     },
     moveStart(event: PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initImgControllerPos = this.getImgController
@@ -155,29 +174,33 @@ export default Vue.extend({
       this.setCursorStyle('move')
     },
     moving(event: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       this.setCursorStyle('move')
       event.preventDefault()
       const baseLine = {
-        x: -this.getImgWidth / 2 + (this.page.width / this.getPageScale) / 2,
-        y: -this.getImgHeight / 2 + (this.page.height / this.getPageScale) / 2
+        x: -this.getImgWidth / 2 + (this.pageSize.width / this.getPageScale) / 2,
+        y: -this.getImgHeight / 2 + (this.pageSize.height / this.getPageScale) / 2
       }
       const translateLimit = {
-        width: (this.getImgWidth - this.page.width / this.getPageScale) / 2,
-        height: (this.getImgHeight - this.page.height / this.getPageScale) / 2
+        width: (this.getImgWidth - this.pageSize.width / this.getPageScale) / 2,
+        height: (this.getImgHeight - this.pageSize.height / this.getPageScale) / 2
       }
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
 
-      offsetPos.x = (offsetPos.x / this.getPageScale) * (100 / this.scaleRatio)
-      offsetPos.y = (offsetPos.y / this.getPageScale) * (100 / this.scaleRatio)
+      offsetPos.x = (offsetPos.x / this.getPageScale) * (100 / this.scaleRatio) / this.page.contentScaleRatio
+      offsetPos.y = (offsetPos.y / this.getPageScale) * (100 / this.scaleRatio) / this.page.contentScaleRatio
       const imgPos = this.imgPosMapper(offsetPos)
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
-        imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.page.width / this.getPageScale - this.getImgWidth
+        imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.pageSize.width / this.getPageScale - this.getImgWidth
       }
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
-        imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.page.height / this.getPageScale - this.getImgHeight
+        imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.pageSize.height / this.getPageScale - this.getImgHeight
       }
-      PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
+      // PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
+      this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y })
     },
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
       const angleInRad = this.getPageRotate * Math.PI / 180
@@ -186,7 +209,10 @@ export default Vue.extend({
         y: -offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad) + this.initImgPos.imgY
       }
     },
-    moveEnd() {
+    moveEnd(event: PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       PageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
       PageUtils.startBackgroundImageControl(this.pageIndex)
@@ -196,6 +222,9 @@ export default Vue.extend({
       eventUtils.removePointerEvent('pointerup', this.moveEnd)
     },
     scaleStart(event: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initImgControllerPos = this.getImgController
@@ -219,6 +248,9 @@ export default Vue.extend({
       eventUtils.addPointerEvent('pointerup', this.scaleEnd)
     },
     scaling(event: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       event.preventDefault()
       let width = this.getImgWidth
       let height = this.getImgHeight
@@ -226,7 +258,7 @@ export default Vue.extend({
       const angleInRad = this.getPageRotate * Math.PI / 180
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
-      const [dx, dy] = [diff.offsetX / this.getPageScale, diff.offsetY / this.getPageScale]
+      const [dx, dy] = [diff.offsetX / this.getPageScale / this.page.contentScaleRatio, diff.offsetY / this.getPageScale / this.page.contentScaleRatio]
 
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
@@ -252,12 +284,12 @@ export default Vue.extend({
         y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
       }
       const baseLine = {
-        x: -width / 2 + (this.page.width / this.getPageScale) / 2,
-        y: -height / 2 + (this.page.height / this.getPageScale) / 2
+        x: -width / 2 + (this.pageSize.width / this.getPageScale) / 2,
+        y: -height / 2 + (this.pageSize.height / this.getPageScale) / 2
       }
       const translateLimit = {
-        width: (width - this.page.width / this.getPageScale) / 2,
-        height: (height - this.page.height / this.getPageScale) / 2
+        width: (width - this.pageSize.width / this.getPageScale) / 2,
+        height: (height - this.pageSize.height / this.getPageScale) / 2
       }
 
       const ratio = width / height
@@ -266,34 +298,38 @@ export default Vue.extend({
           imgPos.x = 0
           offsetSize.width = this.initImgPos.imgX
         } else {
-          offsetSize.width = this.page.width - this.initImgPos.imgX - initWidth
+          offsetSize.width = this.pageSize.width - this.initImgPos.imgX - initWidth
         }
         offsetSize.height = offsetSize.width / ratio
         imgPos.y = this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
 
-        baseLine.x = -width / 2 + (this.page.width / this.getPageScale) / 2
-        baseLine.y = -height / 2 + (this.page.height / this.getPageScale) / 2
-        translateLimit.width = (width - this.page.width / this.getPageScale) / 2
-        translateLimit.height = (height - this.page.height / this.getPageScale) / 2
+        baseLine.x = -width / 2 + (this.pageSize.width / this.getPageScale) / 2
+        baseLine.y = -height / 2 + (this.pageSize.height / this.getPageScale) / 2
+        translateLimit.width = (width - this.pageSize.width / this.getPageScale) / 2
+        translateLimit.height = (height - this.pageSize.height / this.getPageScale) / 2
       }
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         if (this.control.ySign < 0) {
           imgPos.y = 0
           offsetSize.height = this.initImgPos.imgY
         } else {
-          offsetSize.height = this.page.height - this.initImgPos.imgY - initHeight
+          offsetSize.height = this.pageSize.height - this.initImgPos.imgY - initHeight
         }
         offsetSize.width = offsetSize.height * ratio
         imgPos.x = this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
       }
-      PageUtils.updateBackgroundImageStyles(this.pageIndex, { width, height, imgWidth: width, imgHeight: height })
-      PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
+      // PageUtils.updateBackgroundImageStyles(this.pageIndex, { width, height, imgWidth: width, imgHeight: height })
+      // PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
+      this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y, imgWidth: width, imgHeight: height })
     },
-    scaleEnd() {
+    scaleEnd(e: PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(e)) {
+        return
+      }
       this.isControlling = false
       PageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
@@ -302,7 +338,7 @@ export default Vue.extend({
       eventUtils.removePointerEvent('pointermove', this.scaling)
       eventUtils.removePointerEvent('pointerup', this.scaleEnd)
     },
-    cursorStyles(index: number, rotateAngle: number) {
+    cursorStyles(index: number, rotateAngle: number): Record<string, string> {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
       return { cursor: this.controlPoints.cursors[cursorIndex] }
@@ -317,7 +353,7 @@ export default Vue.extend({
       this.setCursorStyle(el.style.cursor)
     },
     disableTouchEvent(e: TouchEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }
@@ -345,27 +381,18 @@ export default Vue.extend({
   box-sizing: border-box;
   &__body {
     position: absolute;
+    pointer-events: initial;
     display: flex;
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
     &:hover {
-      cursor: pointer;
+      cursor: move;
     }
     &__wrapper {
       width: max-content;
       height: max-content;
     }
   }
-}
-
-.dim-background {
-  @include size(100%, 100%);
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  background: rgba(0, 0, 0, 0.4);
-  pointer-events: none;
-  transform-style: preserve-3d;
 }
 </style>

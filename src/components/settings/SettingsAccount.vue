@@ -48,7 +48,7 @@ div(class="settings-account")
     div(class="settings-account__buttons mt-10")
       btn(class="pointer"
         :disabled="!isChanged"
-        @click.native="onConfirmClicked()") {{$t('NN0176')}}
+        @click="onConfirmClicked()") {{$t('NN0176')}}
   div(v-if="showVerifyPopup"
     class="settings-account__popup popup-window")
     popup-verify(type="vcode"
@@ -62,8 +62,8 @@ div(class="settings-account")
   spinner(v-if="isLoading")
 </template>
 <script lang="ts">
-import Vue from 'vue'
-import i18n from '@/i18n'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapState, mapGetters } from 'vuex'
 import PopupVerify from '@/components/popup/PopupVerify.vue'
 import Avatar from '@/components/Avatar.vue'
@@ -72,7 +72,8 @@ import uploadUtils from '@/utils/uploadUtils'
 import localeUtils, { ILocale } from '@/utils/localeUtils'
 import GeneralUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     PopupVerify,
     Avatar
@@ -84,7 +85,7 @@ export default Vue.extend({
       inputLocale: '',
       inputSubscribe: true,
       localeOptions: [] as Array<ILocale>,
-      accountErrorMessage: i18n.t('NN0297') as string,
+      accountErrorMessage: this.$t('NN0297') as string,
       isLoading: false,
       isConfirmClicked: false as boolean,
       isEmailVerified: false,
@@ -161,9 +162,9 @@ export default Vue.extend({
       this.isConfirmClicked = true
       if (!this.mailValid) {
         if (this.inputAccount.length === 0) {
-          this.accountErrorMessage = i18n.t('NN0163', { term: i18n.tc('NN0173', 2) }) as string
+          this.accountErrorMessage = this.$t('NN0163', { term: this.$tc('NN0173', 2) }) as string
         } else {
-          this.accountErrorMessage = i18n.t('NN0297') as string
+          this.accountErrorMessage = this.$t('NN0297') as string
         }
         this.isLoading = false
         return
@@ -255,7 +256,7 @@ export default Vue.extend({
       }
       GeneralUtils.copyText(text)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${text} 已複製` })
+          notify({ group: 'copy', text: `${text} 已複製` })
         })
     }
   }
@@ -278,6 +279,9 @@ export default Vue.extend({
     justify-content: center;
   }
   &__button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     color: setColor(gray-2);
     border-radius: 5px;
     border: 2px solid setColor(gray-3);
@@ -375,7 +379,7 @@ export default Vue.extend({
   }
   &__buttons {
     display: flex;
-    justify-content: end;
+    justify-content: flex-end;
     @include layout-mobile {
       padding-bottom: 30px;
     }

@@ -1,20 +1,23 @@
 <template lang="pug">
 div(class="page-preview")
-    template(v-for="(page, idx) in getPages")
-        page-preview-plus(:index="idx" :last="false"  :key="`${page.id}-top`")
-        page-preview-page-wrapper(:index="idx" type="full" :config="wrappedPage(page)"  :key="page.id" @loaded="handleLoaded")
-        page-preview-plus(v-if="(idx+1) % getPagesPerRow === 0"
-                        :index="idx+1" :last="false"  :key="`${page.id}-bottom`")
-    page-preview-plus(:index="getPages.length" last=true)
-    div(class="page-preview-page-last pointer"
-      @click="addPage()")
-      svg-icon(class="pb-5"
-        :iconColor="'gray-2'"
-        :iconName="'plus-origin'"
-        :iconWidth="'25px'")
+  template(v-for="(page, idx) in getPages" :key="page.id")
+    page-preview-plus(:index="idx" :last="false")
+    page-preview-page-wrapper(:index="idx"
+      type="full"
+      :config="wrappedPage(page)"
+      :lazyLoadTarget="'.page-preview'")
+    page-preview-plus(v-if="(idx+1) % getPagesPerRow === 0"
+      :index="idx+1" :last="false")
+  page-preview-plus(:index="getPages.length" :last="true")
+  div(class="page-preview-page-last pointer"
+    @click="addPage()")
+    svg-icon(class="pb-5"
+      :iconColor="'gray-2'"
+      :iconName="'plus-origin'"
+      :iconWidth="'25px'")
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
@@ -22,9 +25,9 @@ import pageUtils from '@/utils/pageUtils'
 import { floor } from 'lodash'
 import stepsUtils from '@/utils/stepsUtils'
 import { IPage } from '@/interfaces/page'
-import testUtils from '@/utils/testUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
       screenWidth: 0,
@@ -51,21 +54,24 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _addPage: 'ADD_page',
       _setPagesPerRow: 'page/SET_PagesPerRow'
     }),
     addPage() {
-      this._addPage(pageUtils.newPage({}))
+      const lastPage = pageUtils.pageNum > 0 ? pageUtils.getPages[pageUtils.pageNum - 1] : undefined
+      pageUtils.addPageToPos(pageUtils.newPage(lastPage ? {
+        width: lastPage.width,
+        height: lastPage.height,
+        physicalWidth: lastPage.physicalWidth,
+        physicalHeight: lastPage.physicalHeight,
+        isEnableBleed: lastPage.isEnableBleed,
+        bleeds: lastPage.bleeds,
+        physicalBleeds: lastPage.physicalBleeds,
+        unit: lastPage.unit
+      } : {}), pageUtils.pageNum)
       stepsUtils.record()
     },
     wrappedPage(page: IPage) {
       return { ...page, isAutoResizeNeeded: false }
-    },
-    handleLoaded() {
-      // if (this.renderCount === this.getPages.length - 1) {
-      //   testUtils.log('preview', 'Preview Test')
-      // }
-      // this.renderCount++
     }
   }
 })

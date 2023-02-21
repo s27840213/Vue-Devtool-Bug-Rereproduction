@@ -1,51 +1,50 @@
 <template lang="pug">
-  div(class="panel-file"
-      @drop.stop.prevent="onDrop($event)"
-      @dragover.prevent,
-      @dragenter.prevent)
-    btn(class="full-width mb-20" :type="'primary-mid'"
-        @click.native="uploadImage()") {{$t('NN0014')}}
-    image-gallery(
-      ref="mainContent"
-      :myfile="myfileImages"
-      vendor="myfile"
-      :inFilePanel="true"
-      @loadMore="handleLoadMore")
-      template(#pending)
-        div(v-if="pending" class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
-    transition(name="panel-up")
-      div(v-if="hasCheckedAssets"
-          class="panel-file__menu")
-        div
-          //- svg-icon(class="pointer"
-          //-   :iconName="'folder'"
-          //-   :iconColor="'white'"
-          //-   :iconWidth="'24px'")
-          svg-icon(class="pointer"
-            :iconName="'trash'"
-            :iconColor="'white'"
-            :iconWidth="'24px'"
-            @click.native="deleteAssets()")
-        span(class="text-blue-1 pointer" @click="clearCheckedAssets()") {{`${$t('NN0130')}(${checkedAssets.length})`}}
+div(class="panel-file"
+    @drop.stop.prevent="onDrop($event)"
+    @dragover.prevent,
+    @dragenter.prevent)
+  div(class="panel-file__topbtn")
+    nubtn(size="mid-full" @click="uploadImage()") {{$t('NN0014')}}
+    nubtn(v-if="$isTouchDevice()" theme="icon2" icon="trash" size="mid"
+          :status="inMultiSelectMode === 'on' ? 'active': 'default'"
+          @click="toggleMultiSelect()")
+  image-gallery(
+    ref="mainContent"
+    :myfile="myfileImages"
+    vendor="myfile"
+    :inFilePanel="true"
+    :multiSelectMode="inMultiSelectMode"
+    @loadMore="handleLoadMore"
+    @scroll.passive="handleScrollTop($event, 'mainContent')")
+    template(#pending)
+      div(v-if="pending" class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
+  transition(name="panel-up")
+    div(v-if="hasCheckedAssets"
+        class="panel-file__menu")
+      div
+        svg-icon(class="pointer"
+          :iconName="'trash'"
+          :iconColor="'white'"
+          :iconWidth="'24px'"
+          @click="deleteAssets()")
+      span(class="text-blue-1 pointer" @click="clearCheckedAssets()") {{`${$t('NN0130')}(${checkedAssets.length})`}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import SearchBar from '@/components/SearchBar.vue'
-import uploadUtils from '@/utils/uploadUtils'
-import GalleryPhoto from '@/components/GalleryPhoto.vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import ImageGallery, { CImageGallery } from '@/components/image-gallery/ImageGallery.vue'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
-import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
+import uploadUtils from '@/utils/uploadUtils'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  name: 'PanelFile',
+  emits: [],
   components: {
-    SearchBar,
-    GalleryPhoto,
     ImageGallery
   },
   data() {
@@ -53,7 +52,8 @@ export default Vue.extend({
       scrollTop: {
         mainContent: 0
         // searchResult: 0
-      }
+      },
+      inMultiSelectMode: this.$isTouchDevice() ? 'off' : 'hover' as 'hover' | 'on' | 'off'
     }
   },
   computed: {
@@ -69,14 +69,13 @@ export default Vue.extend({
     }
   },
   mounted() {
-    (this.$refs.mainContent as any).myfileUpdate()
+    (this.$refs.mainContent as CImageGallery).myfileUpdate()
   },
   activated() {
-    (this.$refs.mainContent as Vue).$el.children[0].scrollTop = this.scrollTop.mainContent;
-    (this.$refs.mainContent as Vue).$el.children[0].addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-  },
-  deactivated() {
-    (this.$refs.mainContent as Vue).$el.children[0].removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CImageGallery)
+      mainContent.$el.scrollTop = this.scrollTop.mainContent
+    })
   },
   methods: {
     ...mapActions({
@@ -86,6 +85,10 @@ export default Vue.extend({
     ...mapMutations({
       clearCheckedAssets: 'file/CLEAR_CHECKED_ASSETS'
     }),
+    toggleMultiSelect() {
+      this.inMultiSelectMode = this.inMultiSelectMode === 'on' ? 'off' : 'on'
+      if (this.inMultiSelectMode === 'off') this.clearCheckedAssets()
+    },
     handleLoadMore() {
       !this.pending && this.getMoreMyfiles()
     },
@@ -104,6 +107,7 @@ export default Vue.extend({
     onDrop(evt: DragEvent) {
       const dt = evt.dataTransfer
       if (evt.dataTransfer?.getData('data') || !dt) {
+        // console.log('')
       } else {
         const files = dt.files
         if (!networkUtils.check()) {
@@ -130,6 +134,15 @@ export default Vue.extend({
   text-align: center;
   &__title {
     margin-bottom: 20px;
+  }
+  &__topbtn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    * + * {
+      margin-left: 10px;
+    }
   }
   &__menu {
     display: flex;

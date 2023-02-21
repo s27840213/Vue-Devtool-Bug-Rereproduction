@@ -288,6 +288,10 @@ class Controller {
     this.setTextEffect(effectName, { [this.currColorKey]: color })
   }
 
+  get currColor(): string {
+    return (this.getCurrentLayer().styles.textEffect as Record<string, string>)[this.currColorKey]
+  }
+
   resetCurrTextEffect() {
     const effectName = this.getCurrentLayer().styles.textEffect.name
     this.setTextEffect(effectName, this.effects[effectName])

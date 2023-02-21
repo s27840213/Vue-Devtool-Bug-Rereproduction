@@ -1,58 +1,64 @@
 <template lang="pug">
-  div(class="popup-page bg-gray-6"
-      @click.stop="closePopup")
-    template(v-for="option in updateOptions")
-      template(v-if="option.condition")
-        div(class="popup-page__item"
-            :class="{disabled: isFontLoading}"
-            @click="!isFontLoading && option.action()")
-          svg-icon(
-            class="pointer"
-            :iconName="option.icon"
-            :iconWidth="'16px'"
-            :iconColor="'gray-1'")
-          span(class="ml-10 body-2") {{option.text}}
-          span(class="shortcut ml-10 body-2 text-gray-3") {{option.shortcutText}}
-    div(v-for="(data,index) in shortcutMenu()"
-        :key="`popup-page__shortcut-${index}`"
-        class="popup-page__item"
-        @click="data.action")
-      svg-icon(
-        class="pointer"
-        :iconName="data.icon"
-        :iconWidth="'16px'"
-        :iconColor="'gray-1'")
-      span(class="ml-10 body-2") {{data.text}}
-      span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
-    hr(v-if="getBackgroundImage(currFocusPageIndex).config.src !=='none'" class="popup-page__hr")
-    div(v-if="getBackgroundImage(currFocusPageIndex).config.src !=='none'"
-        class="popup-page__item"
-        @click="detachBackgroundImage")
-      svg-icon(
-        class="pointer"
-        :iconName="'copy'"
-        :iconWidth="'16px'"
-        :iconColor="'gray-1'")
-      span(class="ml-10 body-2") {{$t('NN0275')}}
+div(class="popup-page bg-gray-6"
+    @click.stop="closePopup")
+  template(v-for="option in updateOptions")
+    template(v-if="option.condition")
+      div(class="popup-page__item"
+          :class="{disabled: isFontLoading}"
+          @click="!isFontLoading && option.action()")
+        svg-icon(
+          class="pointer"
+          :iconName="option.icon"
+          :iconWidth="'16px'"
+          :iconColor="'gray-1'")
+        span(class="ml-10 body-2") {{option.text}}
+        span(class="shortcut ml-10 body-2 text-gray-3") {{option.shortcutText}}
+  div(v-for="(data,index) in shortcutMenu()"
+      :key="`popup-page__shortcut-${index}`"
+      class="popup-page__item"
+      @click="data.action")
+    svg-icon(
+      class="pointer"
+      :iconName="data.icon"
+      :iconWidth="'16px'"
+      :iconColor="'gray-1'")
+    span(class="ml-10 body-2") {{data.text}}
+    span(class="shortcut ml-10 body-2 text-gray-3") {{data.shortcutText}}
+  hr(v-if="currBackgroundImage.config.src !=='none'" class="popup-page__hr")
+  div(v-if="currBackgroundImage.config.src !=='none'"
+      class="popup-page__item"
+      @click="detachBackgroundImage")
+    svg-icon(
+      class="pointer"
+      :iconName="'copy'"
+      :iconWidth="'16px'"
+      :iconColor="'gray-1'")
+    span(class="ml-10 body-2") {{$t('NN0275')}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import MappingUtils from '@/utils/mappingUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
-import GeneralUtils from '@/utils/generalUtils'
-import { mapGetters, mapMutations, mapState } from 'vuex'
-import layerUtils from '@/utils/layerUtils'
-import popupUtils from '@/utils/popupUtils'
+import { IBackgroundImage, IPage } from '@/interfaces/page'
 import { IPopupOptions } from '@/interfaces/popup'
-import pageUtils from '@/utils/pageUtils'
 import assetUtils from '@/utils/assetUtils'
+import GeneralUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerFactary from '@/utils/layerFactary'
+import layerUtils from '@/utils/layerUtils'
+import MappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import ShortcutUtils from '@/utils/shortcutUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    updateOptions: Array as () => Array<IPopupOptions>
+    updateOptions: Array as () => Array<IPopupOptions>,
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
   },
   data() {
     return {
@@ -72,26 +78,15 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState('user', [
-      'role',
-      'adminMode']),
     ...mapGetters({
-      getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getBackgroundImage: 'getBackgroundImage',
       isLogin: 'user/isLogin',
       groupId: 'getGroupId',
       isFontLoading: 'text/getIsFontLoading'
     }),
-    hasDesignId(): boolean {
-      return this.getPage(pageUtils.currFocusPageIndex).designId !== ''
+    currBackgroundImage(): IBackgroundImage {
+      return this.currPage.backgroundImage
     },
-    inAdminMode(): boolean {
-      return this.role === 0 && this.adminMode === true
-    },
-    currFocusPageIndex(): number {
-      return pageUtils.currFocusPageIndex
-    }
   },
   methods: {
     ...mapMutations({
@@ -154,7 +149,7 @@ export default Vue.extend({
       })
     },
     detachBackgroundImage() {
-      const detachedBackgroundImage = GeneralUtils.deepCopy(this.getBackgroundImage(pageUtils.currFocusPageIndex))
+      const detachedBackgroundImage = GeneralUtils.deepCopy(this.currBackgroundImage)
       if (detachedBackgroundImage.config.srcObj.assetId) {
         /** get a tiny photo in order to get the aspectRatio of the image */
         const src = imageUtils.getSrc(detachedBackgroundImage.config, imageUtils.getSrcSize(detachedBackgroundImage.config.srcObj, 50))

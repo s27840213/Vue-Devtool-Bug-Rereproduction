@@ -1,16 +1,23 @@
-import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
+import i18n from '@/i18n'
 import { IListServiceData } from '@/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
-import { captureException } from '@sentry/browser'
-import localeUtils from '@/utils/localeUtils'
 import store from '@/store'
-import i18n from '@/i18n'
+import localeUtils from '@/utils/localeUtils'
+import themeUtils from '@/utils/themeUtils'
+import { captureException } from '@sentry/browser'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 export default function (this: any) {
   const getDefaultState = (): IListModuleState => ({
     content: {},
     categories: [],
     searchResult: {},
+    searchCategoryInfo: { // Extra data for category search.
+      categoryName: '',
+      tags: [],
+      url: ''
+    },
+    tags: [],
     keyword: '',
     theme: '',
     page: 0,
@@ -25,7 +32,29 @@ export default function (this: any) {
     // preview2: '',
     locale: '',
     error: '',
-    sum: 0
+    sum: 0,
+    favorites: {
+      items: {
+        order: [],
+        obj: {}
+      },
+      tags: {
+        order: [],
+        obj: {}
+      },
+      categories: {
+        order: [],
+        obj: {}
+      },
+      nextItems: [],
+      nextTags: [],
+      nextCategories: [],
+      itemsContent: {},
+      tagsContent: {},
+      categoriesContent: {},
+      searchTarget: '',
+      pending: false
+    }
   })
 
   const actions: ActionTree<IListModuleState, unknown> = {
@@ -46,6 +75,7 @@ export default function (this: any) {
         if (writeBack) commit('SET_RECENTLY', data.data)
         else return data.data
       } catch (error) {
+        console.error(error)
         captureException(error)
       }
     },
@@ -72,12 +102,14 @@ export default function (this: any) {
           dispatch('getMoreContent')
         }
       } catch (error) {
+        console.error(error)
         captureException(error)
       }
     },
 
     // For panel initial, get recently and categories at the same time.
-    getRecAndCate: async ({ dispatch, commit }) => {
+    getRecAndCate: async ({ dispatch, commit }, { reset = true } = {}) => {
+      if (reset) dispatch('resetContent')
       await Promise.all([
         dispatch('getRecently', false),
         dispatch('getCategories', false)
@@ -92,11 +124,15 @@ export default function (this: any) {
 
     // For all item or single category search result.
     getContent: async ({ commit, state }, params = {}) => {
-      const { theme } = state
-      const { keyword } = params
+      let { theme } = state
+      const { keyword }: {keyword: string} = params
       const locale = params.locale || localeUtils.currLocale()
       commit('SET_STATE', { pending: true, locale })
-      if (keyword)commit('SET_STATE', { keyword })
+      if (keyword) commit('SET_STATE', { keyword })
+      if (keyword && keyword.startsWith('tag::') &&
+        this.namespace === 'templates') {
+        theme = themeUtils.sortSelectedTheme(theme)
+      }
       try {
         const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
@@ -108,8 +144,9 @@ export default function (this: any) {
           listCategory: 0,
           cache: needCache
         })
-        commit('SET_CONTENT', data.data)
+        commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
+        console.error(error)
         captureException(error)
       }
     },
@@ -130,19 +167,21 @@ export default function (this: any) {
           listCategory: 0,
           cache: needCache
         })
-        commit('SET_CONTENT', data.data)
+        commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
+        console.error(error)
         captureException(error)
       }
     },
 
     // For search result.
     getTagContent: async ({ commit, state }, params = {}) => {
-      const { theme } = state
+      let { theme } = state
       let { keyword } = params
       const locale = localeUtils.currLocale()
       keyword = keyword.includes('::') ? keyword : `tag::${keyword}`
       commit('SET_STATE', { pending: true, keyword, locale })
+      if (this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
       try {
         const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
@@ -154,8 +193,9 @@ export default function (this: any) {
           listCategory: 0,
           cache: needCache
         })
-        commit('SET_CONTENT', data.data)
+        commit('SET_CONTENT', { objects: data.data, isSearch: true })
       } catch (error) {
+        console.error(error)
         captureException(error)
       }
     },
@@ -180,6 +220,7 @@ export default function (this: any) {
         const { data } = await this.api(nextParams)
         commit('SET_MORE_CONTENT', data.data)
       } catch (error) {
+        console.error(error)
         captureException(error)
       }
     },
@@ -196,7 +237,7 @@ export default function (this: any) {
     },
 
     // Clear search keyword and result.
-    resetSearch: async({ commit }) => {
+    resetSearch: async ({ commit }) => {
       commit('SET_STATE', {
         searchResult: {},
         nextSearch: 0,
@@ -205,10 +246,11 @@ export default function (this: any) {
     },
 
     getSum: async ({ commit, state }, params = {}) => {
-      const { theme } = state
+      let { theme } = state
       const { keyword } = params
       const locale = localeUtils.currLocale()
-      commit('SET_STATE', { pending: true, locale })
+      commit('SET_STATE', { locale, sum: -1 })
+      if (keyword && this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
       try {
         const { data } = await this.api({
           token: store.getters['user/getToken'],
@@ -220,6 +262,7 @@ export default function (this: any) {
         })
         commit('SET_STATE', { sum: data.data.sum })
       } catch (error) {
+        console.error(error)
         captureException(error)
       }
     }
@@ -232,7 +275,7 @@ export default function (this: any) {
       keys
         .forEach(key => {
           if (key in state) {
-            (state[key] as any) = newState[key]
+            (state[key] as unknown) = newState[key]
           }
         })
     },
@@ -252,15 +295,14 @@ export default function (this: any) {
     },
     UPDATE_RECENTLY_PAGE(state: IListModuleState, { index, format }) {
       const targetCategory = state.categories.find((category: any) => {
-        return category.title === `${i18n.t('NN0024')}`
+        return category.title === `${i18n.global.t('NN0024')}`
       })?.list
       if (targetCategory) {
         targetCategory.splice(index, 1)
         targetCategory.unshift(format)
       }
     },
-    SET_CONTENT(state: IListModuleState, objects: IListServiceData) {
-      const isSearch = Boolean(state.keyword)
+    SET_CONTENT(state: IListModuleState, { objects, isSearch = false }: { objects: IListServiceData, isSearch: boolean }) {
       const {
         content = [],
         // host = '',
@@ -316,9 +358,13 @@ export default function (this: any) {
   }
 
   const getters: GetterTree<IListModuleState, any> = {
-    nextParams(state) {
-      const { nextPage, nextSearch, keyword, theme, locale } = state
+    nextParams: (state) => {
+      let { nextPage, nextSearch, keyword, theme, locale } = state
       const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
+      if (keyword && keyword.startsWith('tag::') &&
+        this.namespace === 'templates') {
+        theme = themeUtils.sortSelectedTheme(theme)
+      }
       return {
         token: needCache ? '1' : store.getters['user/getToken'],
         locale,
@@ -342,5 +388,5 @@ export default function (this: any) {
     getters,
     mutations,
     actions
-  } as ModuleTree<IListModuleState>
+  }
 }

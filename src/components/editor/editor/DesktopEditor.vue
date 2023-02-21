@@ -1,68 +1,78 @@
 <template lang="pug">
-  div(class="desktop-editor")
-    sidebar(:isSidebarPanelOpen="isSidebarPanelOpen"
-      @toggleSidebarPanel="toggleSidebarPanel")
-    section
-      div(class="content")
-        sidebar-panel(:isSidebarPanelOpen="isSidebarPanelOpen")
-        div(class="content__main")
-          div(class="content__editor")
-            div(v-if="!inBgRemoveMode" class="header-container")
-              editor-header
-            div(v-if="isAdmin" class="admin-options")
-              div(class="admin-options__sticky-container"
-                  :style="stickyTopPos")
-                div(class="flex flex-column mr-10")
-                  span(class="ml-10 text-bold text-orange") {{templateText}}
-                  span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
-                svg-icon(v-if="isAdmin"
-                  class="mr-10"
-                  :iconName="`user-admin${getAdminModeText}`"
-                  :iconWidth="'20px'"
-                  :iconColor="'gray-2'"
-                  @click.native="setAdminMode()")
-                div(class="flex flex-column")
-                  select(class="locale-select" v-model="inputLocale")
-                    option(v-for="locale in localeOptions" :value="locale") {{locale}}
-            editor-view
-            scale-ratio-editor(@toggleSidebarPanel="toggleSidebarPanel")
-        div(class="content__panel"
-            :style="contentPanelStyles")
-          function-panel(@toggleColorPanel="toggleColorPanel")
-          transition(name="panel-up")
-            color-panel(v-if="isColorPanelOpen"
-              class="content__panel__color-panel"
-              @toggleColorPanel="toggleColorPanel")
-        div(v-if="isShowPagePreview" class="content__pages")
-          page-preview
-    tour-guide(v-if="showEditorGuide")
-    popup-brand-settings(v-if="isBrandSettingsOpen")
-    popup-update-design(v-if="isUpdateDesignOpen")
+div(class="desktop-editor")
+  sidebar(:isSidebarPanelOpen="isSidebarPanelOpen"
+    @toggleSidebarPanel="toggleSidebarPanel")
+  section
+    div(class="content")
+      sidebar-panel(:isSidebarPanelOpen="isSidebarPanelOpen" :currPage="currPage")
+      div(class="content__main")
+        div(class="content__editor")
+          div(v-if="!inBgRemoveMode" class="header-container")
+            editor-header
+          div(v-if="showAllAdminTool" class="admin-options")
+            div(class="admin-options__sticky-container"
+                :style="stickyTopPos")
+              div(class="flex flex-column mr-10")
+                span(class="ml-10 text-bold text-orange") {{templateText}}
+                span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
+              svg-icon(
+                class="mr-10"
+                :iconName="`user-admin${getAdminModeText}`"
+                :iconWidth="'20px'"
+                :iconColor="'gray-2'"
+                @click="setAdminMode()")
+              div(class="flex flex-column")
+                select(class="locale-select" v-model="inputLocale")
+                  option(v-for="locale in localeOptions" :value="locale") {{locale}}
+              div(class="ml-10" @click="setEnableComponentLog(!enableComponentLog)")
+                span {{`${enableComponentLog ? '關閉' : '開啟'} Log`}}
+          editor-view(:currPage="currPage")
+          scale-ratio-editor(v-if="!isShowPagePreview" @toggleSidebarPanel="toggleSidebarPanel")
+      div(class="content__panel"
+          :style="contentPanelStyles")
+        function-panel(:currPage="currPage")
+        transition(name="panel-up")
+          color-slips(v-if="showColorSlips" mode="FunctionPanel"
+            :selectedColor="currEventColor()"
+            :currPage="currPage"
+            class="content__panel__color-panel")
+      div(v-if="isShowPagePreview" class="content__pages")
+        page-preview
+  tour-guide(v-if="showEditorGuide")
+  popup-brand-settings(v-if="isBrandSettingsOpen")
+  popup-update-design(v-if="isUpdateDesignOpen")
+  component-log(v-if="enableComponentLog" :logs="componentLogs")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Sidebar from '@/components/editor/Sidebar.vue'
+import ComponentLog from '@/components/componentLog/ComponentLog.vue'
+import ColorSlips from '@/components/editor/ColorSlips.vue'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
-import SidebarPanel from '@/components/editor/SidebarPanel.vue'
-import FunctionPanel from '@/components/editor/FunctionPanel.vue'
-import ColorPanel from '@/components/editor/ColorSlips.vue'
 import EditorView from '@/components/editor/EditorView.vue'
-import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
+import FunctionPanel from '@/components/editor/FunctionPanel.vue'
 import PagePreview from '@/components/editor/PagePreview.vue'
+import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
+import Sidebar from '@/components/editor/Sidebar.vue'
+import SidebarPanel from '@/components/editor/SidebarPanel.vue'
 import TourGuide from '@/components/editor/TourGuide.vue'
 import PopupBrandSettings from '@/components/popup/PopupBrandSettings.vue'
 import PopupUpdateDesign from '@/components/popup/PopupUpdateDesign.vue'
-import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
-import { FunctionPanelType, SidebarPanelType } from '@/store/types'
-import store from '@/store'
-import rulerUtils from '@/utils/rulerUtils'
-import logUtils from '@/utils/logUtils'
 import i18n from '@/i18n'
-import colorUtils from '@/utils/colorUtils'
+import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
+import { IPage } from '@/interfaces/page'
+import store from '@/store'
+import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
+import colorUtils from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
+import logUtils from '@/utils/logUtils'
+import rulerUtils from '@/utils/rulerUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'DesktopEditor',
   components: {
     Sidebar,
@@ -71,49 +81,62 @@ export default Vue.extend({
     EditorView,
     ScaleRatioEditor,
     FunctionPanel,
-    ColorPanel,
+    ColorSlips,
     PagePreview,
     TourGuide,
     PopupBrandSettings,
-    PopupUpdateDesign
+    PopupUpdateDesign,
+    ComponentLog
   },
+  emits: ['setIsLoading'],
   data() {
     return {
       FunctionPanelType,
       isSidebarPanelOpen: true,
-      inputLocale: i18n.locale,
-      // isColorPanelOpen: false
-      colorPanelOpenState: {
-        val: false
-      }
+      inputLocale: i18n.global.locale,
+      componentLogs: [] as Array<IComponentUpdatedLog>
     }
+  },
+  props: {
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
+    }
+  },
+  created() {
+    this.inputLocale = this.$i18n.locale as 'us' | 'tw' | 'jp'
+    // this.$root.$on('on-re-rendering', (component: IComponentUpdatedLog) => {
+    //   if (this.componentLogs.length >= 50) {
+    //     this.componentLogs.shift()
+    //   }
+    //   this.componentLogs.push(component)
+    // })
   },
   watch: {
     isShowPagePreview() {
       this.toggleSidebarPanel = this.isShowPagePreview
     },
     async inputLocale() {
-      this.$emit('setIsLoading', true)
-      const updateValue: { [key: string]: string } = {}
-      updateValue.token = this.token
-      updateValue.locale = this.inputLocale
+      // this.$emit('setIsLoading', true)
+      // const updateValue: { [key: string]: string } = {}
+      // updateValue.token = this.token
+      // updateValue.locale = this.inputLocale
 
-      await store.dispatch('user/updateUser', updateValue)
-        .then((value) => {
-          if (!value.data.flag) {
-            localStorage.setItem('locale', value.data.locale)
-            this.$router.go(0)
-          } else {
-            this.networkError()
-          }
-        }, () => {
-          this.networkError()
-        })
+      // await store.dispatch('user/updateUser', updateValue)
+      //   .then((value) => {
+      //     if (!value.data.flag) {
+      //       localStorage.setItem('locale', value.data.locale)
+      //       this.$router.go(0)
+      //     } else {
+      //       this.networkError()
+      //     }
+      //   }, () => {
+      //     this.networkError()
+      //   })
     }
   },
   computed: {
     ...mapState('user', [
-      'role',
       'adminMode',
       'viewGuide']),
     ...mapGetters({
@@ -122,7 +145,9 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      enableComponentLog: 'getEnalbleComponentLog',
+      showAllAdminTool: 'user/showAllAdminTool'
     }),
     ...mapGetters('user', {
       token: 'getToken',
@@ -131,13 +156,8 @@ export default Vue.extend({
     ...mapGetters('brandkit', {
       isBrandSettingsOpen: 'getIsSettingsOpen'
     }),
-    isColorPanelOpen: {
-      get: function (): boolean {
-        return this.colorPanelOpenState ? this.colorPanelOpenState.val : false
-      },
-      set: function (newVal: boolean) {
-        this.colorPanelOpenState.val = newVal
-      }
+    showColorSlips(): boolean {
+      return editorUtils.showColorSlips
     },
     isShape(): boolean {
       return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
@@ -146,7 +166,7 @@ export default Vue.extend({
       return SidebarPanelType.page === this.currPanel
     },
     contentPanelStyles(): { [index: string]: string } {
-      return this.isColorPanelOpen ? {
+      return this.showColorSlips ? {
         'grid-template-rows': '1fr 1fr'
       } : {
         'grid-template-rows': '1fr'
@@ -154,9 +174,6 @@ export default Vue.extend({
     },
     isLogin(): boolean {
       return store.getters['user/isLogin']
-    },
-    isAdmin(): boolean {
-      return this.role === 0
     },
     getAdminModeText(): string {
       return this.adminMode ? '' : '-disable'
@@ -183,14 +200,14 @@ export default Vue.extend({
       return this.viewGuide === 0
     },
     localeOptions(): string[] {
-      return i18n.availableLocales
+      return this.$i18n.availableLocales
     }
   },
   mounted() {
     logUtils.setLog('Editor mounted')
     this.clearBgRemoveState()
     colorUtils.on('closeColorPanel', () => {
-      this.colorPanelOpenState.val = false
+      editorUtils.toggleColorSlips(false)
     })
     if (brandkitUtils.isBrandkitAvailable) {
       brandkitUtils.fetchBrands(this.fetchBrands)
@@ -200,19 +217,20 @@ export default Vue.extend({
     ...mapMutations({
       setCurrFunctionPanel: 'SET_currFunctionPanelType',
       _setAdminMode: 'user/SET_ADMIN_MODE',
-      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
+      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
+      setEnableComponentLog: 'SET_enalbleComponentLog'
     }),
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'
     }),
+    currEventColor(): string {
+      return colorUtils.globalSelectedColor.currEventColor
+    },
     setAdminMode() {
       this._setAdminMode(!this.adminMode)
     },
     setPanelType(type: number) {
       this.setCurrFunctionPanel(type)
-    },
-    toggleColorPanel(bool: boolean) {
-      this.isColorPanelOpen = bool
     },
     toggleSidebarPanel(bool: boolean) {
       this.isSidebarPanelOpen = bool
@@ -220,8 +238,12 @@ export default Vue.extend({
     confirmLeave() {
       return window.confirm('Do you really want to leave? you have unsaved changes!')
     },
+    copyText(text: string) {
+      generalUtils.copyText(text)
+      notify({ group: 'copy', text: `${text} 已複製` })
+    },
     networkError(): void {
-      Vue.notify({ group: 'error', text: `${i18n.t('NN0351')}` })
+      notify({ group: 'error', text: `${i18n.global.t('NN0351')}` })
       this.$emit('setIsLoading', false)
     }
   }

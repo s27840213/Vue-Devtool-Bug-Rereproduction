@@ -1,46 +1,47 @@
-import store from '@/store'
-import { IShape, IText, IImage, IGroup, ITmp, IFrame, ILayer } from '@/interfaces/layer'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import store from '@/store'
+import { LayerType } from '@/store/types'
+import GeneralUtils from '@/utils/generalUtils'
 import LayerFactary from '@/utils/layerFactary'
+import LayerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import MathUtils from '@/utils/mathUtils'
 import ZindexUtils from '@/utils/zindexUtils'
-import GeneralUtils from '@/utils/generalUtils'
-import LayerUtils from '@/utils/layerUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import ShapeUtils from './shapeUtils'
+import _ from 'lodash'
+import backgroundUtils from './backgroundUtils'
+import editorUtils from './editorUtils'
 import ImageUtils from './imageUtils'
+import pageUtils from './pageUtils'
+import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import textUtils from './textUtils'
-import pageUtils from './pageUtils'
-import { LayerType } from '@/store/types'
-import editorUtils from './editorUtils'
-import backgroundUtils from './backgroundUtils'
 
-export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>, scale = 1): ICalculatedGroupStyle {
+export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup | IFrame>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
   let minY = Number.MAX_SAFE_INTEGER
   let maxWidth = Number.MIN_SAFE_INTEGER
   let maxHeight = Number.MIN_SAFE_INTEGER
   layers = JSON.parse(JSON.stringify(layers))
 
-  layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+  layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame) => {
     if (layer.styles.rotate === 0) {
       minX = Math.min(minX, layer.styles.x)
       minY = Math.min(minY, layer.styles.y)
     } else {
-      const layerBouding = MathUtils.getBounding(layer)
+      const layerBouding = MathUtils.getBounding(layer.styles)
       minX = Math.min(minX, layerBouding.x)
       minY = Math.min(minY, layerBouding.y)
     }
   })
 
-  layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+  layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame) => {
     if (layer.styles.rotate === 0) {
       maxWidth = Math.max(maxWidth, layer.styles.x + (layer.styles.width as number) - minX)
       maxHeight = Math.max(maxHeight, layer.styles.y + (layer.styles.height as number) - minY)
     } else {
-      const layerBouding = MathUtils.getBounding(layer)
+      const layerBouding = MathUtils.getBounding(layer.styles)
       maxWidth = Math.max(maxWidth, layerBouding.x + (layerBouding.width as number) - minX)
       maxHeight = Math.max(maxHeight, layerBouding.y + (layerBouding.height as number) - minY)
     }
@@ -151,7 +152,7 @@ class GroupUtils {
 
   private ungroupInnerGroup() {
     while (this.currSelectedInfo.types.has('group')) {
-      const groupLayerIndex = this.currSelectedInfo.layers.findIndex((layer: IText | IImage | IShape | IGroup) => layer.type === 'group')
+      const groupLayerIndex = this.currSelectedInfo.layers.findIndex((layer) => layer.type === 'group')
       const selectedLayers = GeneralUtils.deepCopy(this.currSelectedInfo.layers)
       selectedLayers.splice(groupLayerIndex, 1, ...this.mapGroupLayersToTmp(this.currSelectedInfo.layers[groupLayerIndex] as IGroup))
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
@@ -177,7 +178,7 @@ class GroupUtils {
       } else {
         // when we select multiple layer
         const layers = MappingUtils.mappingLayers(pageIndex, layerIndexs)
-          .filter(l => !l.locked)
+          .filter(l => !l?.locked)
         const tmpStyles = calcTmpProps(layers)
         const currSelectedLayers = this.mapLayersToTmp(layers, tmpStyles)
         const topIndex = Math.max(...layerIndexs)
@@ -251,6 +252,7 @@ class GroupUtils {
     this.deselect()
     const indices = [...Array(store.getters.getLayersNum(pageUtils.currFocusPageIndex)).keys()]
       .filter(i => !pageUtils.currFocusPage.layers[i].locked)
+    if (indices.length === 0) return
     this.select(pageUtils.currFocusPageIndex, indices)
   }
 
@@ -279,6 +281,9 @@ class GroupUtils {
                 scale: l.styles.scale * tmpLayer.styles.scale
               }, i)
             }
+            LayerUtils.updateLayerProps(this.pageIndex, LayerUtils.layerIndex, {
+              parentLayerStyles: undefined
+            }, i)
           })
         store.commit('DELETE_selectedLayer')
         store.commit('SET_lastSelectedLayerIndex', -1)
@@ -304,7 +309,7 @@ class GroupUtils {
      *  4. Update Layer order
      */
     const { index, pageIndex, layers } = this.currSelectedInfo
-    const tmpLayer = LayerUtils.getTmpLayer() as ITmp
+    const tmpLayer = LayerUtils.getSelectedLayer() as ITmp
 
     /**
      * @param targetLayer - the layer we want to remove from tmp
@@ -335,7 +340,7 @@ class GroupUtils {
   }
 
   reselect() {
-    const selectedIndexs = this.currSelectedInfo.layers.map((layer: IShape | IText | IImage | IGroup, index: number) => {
+    const selectedIndexs = this.currSelectedInfo.layers.map((layer, index: number) => {
       return layer.styles.zindex - 1
     })
     const tmpPageIndex = this.currSelectedInfo.pageIndex
@@ -367,12 +372,6 @@ class GroupUtils {
     })
   }
 
-  updateTmpIndex() {
-    const { pageIndex, layers } = this.currSelectedInfo
-    const index = this.getLayer(this.pageIndex).findIndex((layer: ILayer) => layer.type === 'tmp')
-    this.set(pageIndex, index, layers)
-  }
-
   movingTmp(pageIndex: number, styles: { [index: string]: number }) {
     store.commit('UPDATE_tmpLayerStyles', {
       pageIndex: pageIndex,
@@ -396,7 +395,7 @@ class GroupUtils {
    * @param styles - the styles of tmp layer
    * @returns calculated layers in tmp layer
    */
-  mapLayersToPage(layers: Array<IShape | IText | IImage | IGroup>, tmpLayer: ITmp): Array<IShape | IText | IImage | IGroup> {
+  mapLayersToPage(layers: Array<IShape | IText | IImage | IFrame | IGroup>, tmpLayer: ITmp | IFrame | IGroup): Array<IShape | IText | IImage | IFrame | IGroup> {
     layers = JSON.parse(JSON.stringify(layers))
     layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame) => {
       // calculate scale offset
@@ -421,7 +420,7 @@ class GroupUtils {
           const [lineWidth] = (layer as IShape).size ?? [1]
           const point = (layer as IShape).point ?? []
 
-          const newLineWidth = Math.round(lineWidth * tmpLayer.styles.scale)
+          const newLineWidth = _.round(lineWidth * tmpLayer.styles.scale, 2)
           layer.size = [newLineWidth]
 
           const { width, height } = ShapeUtils.lineDimension(point)
@@ -447,7 +446,7 @@ class GroupUtils {
           layer.styles.initHeight = layer.styles.height
           layer.vSize = [layer.styles.width, layer.styles.height]
           const [lineWidth, corRad] = (layer as IShape).size ?? [1, 0]
-          layer.size = [Math.round(lineWidth * tmpLayer.styles.scale), corRad * tmpLayer.styles.scale]
+          layer.size = [_.round(lineWidth * tmpLayer.styles.scale, 2), corRad * tmpLayer.styles.scale]
           layer.styles.scale = 1
 
           // const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
@@ -600,7 +599,7 @@ class GroupUtils {
           const [lineWidth] = (layer as IShape).size ?? [1]
           const point = (layer as IShape).point ?? []
 
-          const newLineWidth = Math.round(lineWidth * groupLayer.styles.scale)
+          const newLineWidth = _.round(lineWidth * groupLayer.styles.scale, 2)
           layer.size = [newLineWidth]
 
           const { width, height } = ShapeUtils.lineDimension(point)
@@ -626,7 +625,7 @@ class GroupUtils {
           layer.styles.initHeight = layer.styles.height
           layer.vSize = [layer.styles.width, layer.styles.height]
           const [lineWidth, corRad] = (layer as IShape).size ?? [1, 0]
-          layer.size = [Math.round(lineWidth * groupLayer.styles.scale), corRad * groupLayer.styles.scale]
+          layer.size = [_.round(lineWidth * groupLayer.styles.scale, 2), corRad * groupLayer.styles.scale]
           layer.styles.scale = 1
 
           // const ratio = groupLayer.styles.width / groupLayer.styles.initWidth

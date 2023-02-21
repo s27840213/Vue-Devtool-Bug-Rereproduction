@@ -1,17 +1,17 @@
-import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, ShadowEffectType } from '@/interfaces/imgShadow'
+import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
+import { IUploadAssetResponse } from '@/interfaces/upload'
+import store from '@/store'
 import { ColorEventType, FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import colorUtils from './colorUtils'
-import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SPACE, fieldRange, logMark, setMark } from './imageShadowUtils'
-import layerUtils from './layerUtils'
-import pageUtils from './pageUtils'
-import store from '@/store'
-import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import generalUtils from './generalUtils'
-import stepsUtils from './stepsUtils'
+import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SPACE, fieldRange, logMark, setMark } from './imageShadowUtils'
 import imageUtils from './imageUtils'
-import uploadUtils from './uploadUtils'
-import { IUploadAssetResponse } from '@/interfaces/upload'
+import layerUtils from './layerUtils'
 import logUtils from './logUtils'
+import pageUtils from './pageUtils'
+import stepsUtils from './stepsUtils'
+import uploadUtils from './uploadUtils'
 
 export default new class ImageShadowPanelUtils {
   private get fieldRange() {
@@ -336,56 +336,57 @@ export default new class ImageShadowPanelUtils {
             } else {
               resolve()
             }
-          }).then(() => {
-            const newImg = new Image()
-            newImg.onload = () => {
-              const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
-              layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
-              const shadowImgStyles = {
-                imgWidth: newWidth,
-                imgHeight: newHeight,
-                imgX: newX,
-                imgY: newY
-              }
-              /** update the upload img in shadow module */
-              imageShadowUtils.addUploadImg({
-                id: uploadAssetId,
-                owner: { pageId, layerId, subLayerId },
-                srcObj,
-                styles: shadowImgStyles
-              })
-              const shadow = config.styles.shadow
-              imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
-              imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
-              imageShadowUtils.setShadowSrcState({ pageIndex, layerIndex, subLayerIdx }, {
-                effect: shadow.currentEffect,
-                effects: shadow.effects,
-                shadowSrcObj: srcObj,
-                layerSrcObj: config.srcObj,
-                layerState: {
-                  imgWidth: config.styles.imgWidth,
-                  imgHeight: config.styles.imgHeight,
-                  imgX: config.styles.imgX,
-                  imgY: config.styles.imgY
+          }).then(async () => {
+            return await imageUtils.imgLoadHandler(imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, Math.max(newWidth, newHeight))), () => {
+              if ((_config as IImage).styles.shadow.currentEffect === (config as IImage).styles.shadow.currentEffect) {
+                const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+                layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
+                const shadowImgStyles = {
+                  imgWidth: newWidth,
+                  imgHeight: newHeight,
+                  imgX: newX,
+                  imgY: newY
                 }
-              })
+                /** update the upload img in shadow module */
+                imageShadowUtils.addUploadImg({
+                  id: uploadAssetId,
+                  owner: { pageId, layerId, subLayerId },
+                  srcObj,
+                  styles: shadowImgStyles
+                })
+                const shadow = config.styles.shadow
+                imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
+                imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
+                imageShadowUtils.setShadowSrcState({ pageIndex, layerIndex, subLayerIdx }, {
+                  effect: shadow.currentEffect,
+                  effects: shadow.effects,
+                  shadowSrcObj: srcObj,
+                  layerSrcObj: config.srcObj,
+                  layerState: {
+                    imgWidth: config.styles.imgWidth,
+                    imgHeight: config.styles.imgHeight,
+                    imgX: config.styles.imgX,
+                    imgY: config.styles.imgY
+                  }
+                })
 
-              logUtils.setLog(`phase: finish whole process, srcObj: { userId: ${srcObj.userId}, assetId: ${srcObj.assetId}}
-              src: ${imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, Math.max(newWidth, newHeight)))}
-              pageIndex: ${pageIndex}, layerIndex: ${layerIndex}, subLayerIndex: ${subLayerIdx}
-              pageId: ${pageId}, layerId: ${layerId}, subLayerId: ${subLayerId}`)
-              setMark('upload', 7)
-              logMark('upload')
-            }
-            newImg.onerror = () => {
-              console.error('can not load the uploaded image shadow')
-              logUtils.setLog('error' + 'can not load the uploaded image shadow')
+                logUtils.setLog(`phase: finish whole process, srcObj: { userId: ${srcObj.userId}, assetId: ${srcObj.assetId}}
+                src: ${imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, Math.max(newWidth, newHeight)))}
+                pageIndex: ${pageIndex}, layerIndex: ${layerIndex}, subLayerIndex: ${subLayerIdx}
+                pageId: ${pageId}, layerId: ${layerId}, subLayerId: ${subLayerId}`)
+                setMark('upload', 7)
+                logMark('upload')
+              }
+            }, {
+              error: () => {
+                console.error('can not load the uploaded image shadow')
+                logUtils.setLog('error' + 'can not load the uploaded image shadow')
 
-              const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
-              imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, { type: '', assetId: '', userId: '' })
-              imageShadowUtils.updateEffectState({ pageIndex, layerIndex, subLayerIdx }, ShadowEffectType.none)
-            }
-            newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, Math.max(newWidth, newHeight)))
+                const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+                imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, { type: '', assetId: '', userId: '' })
+                imageShadowUtils.updateEffectState({ pageIndex, layerIndex, subLayerIdx }, ShadowEffectType.none)
+              }
+            })
           }).catch((e: Error) => {
             console.error(e)
             logUtils.setLog('error' + e.message)
@@ -395,7 +396,6 @@ export default new class ImageShadowPanelUtils {
             imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
             imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
             imageShadowUtils.setUploadProcess(false)
-            // console.warn('shadow upload finish')
           })
         }
       })
@@ -446,7 +446,7 @@ export default new class ImageShadowPanelUtils {
       const oldEffect = generalUtils.deepCopy((layerUtils.getCurrConfig as IImage).styles.shadow.effects[currentEffect])
       imageShadowUtils.setEffect(currentEffect, {
         [currentEffect]:
-          Object.assign(oldEffect, { [name]: +value > max ? max : (+value < min ? min : +value) })
+          Object.assign(oldEffect as any, { [name]: +value > max ? max : (+value < min ? min : +value) })
       })
     }
   }

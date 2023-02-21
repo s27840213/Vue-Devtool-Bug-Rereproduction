@@ -1,25 +1,42 @@
-/* eslint-disable */
-
-import Vue from 'vue'
-import '@/globalComponents'
+import App from '@/App.vue'
+import NuClipper from '@/components/editor/global/NuClipper.vue'
+import NuController from '@/components/editor/global/NuController.vue'
+import NuFrame from '@/components/editor/global/NuFrame.vue'
+import NuGroup from '@/components/editor/global/NuGroup.vue'
+import NuImage from '@/components/editor/global/NuImage.vue'
+import NuImgController from '@/components/editor/global/NuImgController.vue'
+import NuLayer from '@/components/editor/global/NuLayer.vue'
+import NuPage from '@/components/editor/global/NuPage.vue'
+import NuShape from '@/components/editor/global/NuShape.vue'
+import NuSubController from '@/components/editor/global/NuSubController.vue'
+import NuText from '@/components/editor/global/NuText.vue'
+import NuTmp from '@/components/editor/global/NuTmp.vue'
+import Btn from '@/components/global/Btn.vue'
+import Dropdown from '@/components/global/Dropdown.vue'
+import Hint from '@/components/global/Hint.vue'
+import Nubtn from '@/components/global/Nubtn.vue'
+import PropertyBar from '@/components/global/PropertyBar.vue'
+import Spinner from '@/components/global/Spinner.vue'
+import SvgIcon from '@/components/global/SvgIcon.vue'
+import Core from '@any-touch/core'
+import swipe from '@any-touch/swipe'
+import Notifications from '@kyvg/vue3-notification'
+import AnyTouch from 'any-touch'
+import FloatingVue from 'floating-vue'
+import platform from 'platform'
+import { createApp, nextTick } from 'vue'
+import { createMetaManager, plugin as metaPlugin } from 'vue-meta'
 import VueRecyclerviewNew from 'vue-recyclerview'
-import App from './App.vue'
+import { RecycleScroller } from 'vue-virtual-scroller'
+import i18n from './i18n'
 import router from './router'
 import store from './store'
-import i18n from './i18n'
-import vueColor from 'vue-color'
-import { RecycleScroller } from 'vue-virtual-scroller'
-import Notifications from 'vue-notification'
-import VueMeta from 'vue-meta'
-import 'floating-vue/dist/style.css'
-import FloatingVue from 'floating-vue'
-import TooltipUtils from './utils/tooltipUtils'
-import VueGtm from '@gtm-support/vue2-gtm'
-import svgIconUtils from './utils/svgIconUtils'
+import generalUtils from './utils/generalUtils'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
-import generalUtils from './utils/generalUtils'
-import imageShadowUtils from './utils/imageShadowUtils'
+import svgIconUtils from './utils/svgIconUtils'
+import TooltipUtils from './utils/tooltipUtils'
+
 window.onerror = function (msg, url, line) {
   const message = [
     'Message: ' + msg,
@@ -29,82 +46,93 @@ window.onerror = function (msg, url, line) {
   logUtils.setLog(message)
 }
 
-// const _console = console as any
-// if (_console.everything === undefined) {
-//   _console.everything = []
+const app = createApp(App).use(i18n).use(router).use(store)
 
-//   _console.defaultLog = console.log.bind(console)
-//   _console.log = function() {
-//     _console.everything.push({ type: 'log', datetime: Date().toLocaleString(), value: Array.from(arguments) })
-//     _console.defaultLog.apply(console, arguments)
-//   }
-//   _console.defaultError = console.error.bind(console)
-//   _console.error = function() {
-//     _console.everything.push({ type: 'error', datetime: Date().toLocaleString(), value: Array.from(arguments) })
-//     _console.defaultError.apply(console, arguments)
-//   }
-//   _console.defaultWarn = console.warn.bind(console)
-//   _console.warn = function() {
-//     _console.everything.push({ type: 'warn', datetime: Date().toLocaleString(), value: Array.from(arguments) })
-//     _console.defaultWarn.apply(console, arguments)
-//   }
-//   _console.defaultDebug = console.debug.bind(console)
-//   _console.debug = function() {
-//     _console.everything.push({ type: 'debug', datetime: Date().toLocaleString(), value: Array.from(arguments)})
-//     _console.defaultDebug.apply(_console, arguments)
-//   }
-// }
+store.commit('user/SET_BroswerInfo', {
+  name: platform.name,
+  version: platform.version
+})
+
+// Add variable that bind in vue this and its type define
+// Ex: div(v-if="$isTouchDevice()" ...) in pug
+// Ex: if (this.$isTouchDevice()) in .vue ts
+declare module '@vue/runtime-core' {
+  interface ComponentCustomProperties {
+    $isTouchDevice: () => boolean
+  }
+}
+app.config.globalProperties.$isTouchDevice = () => generalUtils.isTouchDevice()
 
 const tooltipUtils = new TooltipUtils()
 
-Vue.config.productionTip = false
 if (process.env.NODE_ENV !== 'production') {
-  Vue.config.performance = true
+  app.config.performance = true
 }
-Vue.use(VueRecyclerviewNew, vueColor)
-Vue.use(Notifications)
-Vue.use(VueMeta)
-Vue.use(FloatingVue, {
+app.use(VueRecyclerviewNew)
+app.use(Notifications)
+app.use(createMetaManager())
+app.use(metaPlugin) // optional, only needed for OptionsAPI (see below)
+app.use(FloatingVue, {
   themes: tooltipUtils.themes
 })
 
-// Vue.use(VueGtm, {
+// app.use(VueGtm, {
 //   id: 'GTM-T7LDWBP',
 //   enabled: true,
 //   // display console logs debugs or not (optional)
 //   debug: false
 // })
 
-Vue.component('RecycleScroller', RecycleScroller)
+app.component('RecycleScroller', RecycleScroller)
 
-Vue.directive('hint', {
+app.component('svg-icon', SvgIcon)
+app.component('btn', Btn)
+app.component('property-bar', PropertyBar)
+app.component('dropdown', Dropdown)
+app.component('nu-page', NuPage)
+app.component('nu-image', NuImage)
+app.component('nu-layer', NuLayer)
+app.component('nu-text', NuText)
+app.component('nu-group', NuGroup)
+app.component('nu-tmp', NuTmp)
+app.component('nu-clipper', NuClipper)
+app.component('nu-controller', NuController)
+app.component('nu-sub-controller', NuSubController)
+app.component('nu-shape', NuShape)
+app.component('nu-img-controller', NuImgController)
+app.component('nu-frame', NuFrame)
+app.component('nubtn', Nubtn)
+app.component('spinner', Spinner)
+app.component('hint', Hint)
+
+app.directive('hint', {
   // When the bound element is inserted into the DOM...
-  bind: (el, binding, vnode) => {
+  mounted: (el, binding, vnode) => {
     tooltipUtils.bind(el, binding)
   },
-  update: (el, binding) => {
+  beforeUpdate: (el, binding) => {
     tooltipUtils.bind(el, binding)
   },
-  unbind: (el) => {
+  unmounted: (el) => {
     tooltipUtils.unbind(el)
   }
 })
 
-Vue.directive('ratio-change', {
+app.directive('ratio-change', {
   // When the bound element is inserted into the DOM...
-  bind: (el, binding, vnode) => {
+  mounted: (el, binding, vnode) => {
     el.addEventListener('change', function () {
       el.blur()
     })
   },
-  unbind: (el) => {
+  unmounted: (el) => {
     el.removeEventListener('change', function () {
       el.blur()
     })
   }
 })
 
-Vue.directive('header-border', {
+app.directive('header-border', {
   /**
    * Useage: nu-header(v-header-border),
    * nu-header(v-header-border="true"),
@@ -114,11 +142,11 @@ Vue.directive('header-border', {
    * 顯示，target可以使用CSS語法選擇，第一個結果會成為target
    * 也可以直接給true指定永久顯示
   */
-  bind(el, binding) {
+  mounted(el, binding) {
     if (binding.value === true) {
       el.classList.add('navbar-shadow')
     } else {
-      Vue.nextTick(() => {
+      nextTick(() => {
         const target = binding.value
           ? document.querySelector(binding.value)
           : el.nextElementSibling
@@ -136,14 +164,56 @@ Vue.directive('header-border', {
   }
 })
 
-Vue.directive('press', longpress)
+// How to pass variable to unbind: https://github.com/vuejs/vue/issues/6385#issuecomment-323141918
+const anyTouchWeakMap = new WeakMap()
+app.directive('touch', {
+  /**
+   * Useage: div(v-touch @tap="..." @swipeleft="...")
+   * If you want to prevetDefault, use: div(v-touch="true" ...)
+   */
+  mounted: (el, binding, vnode) => {
+    anyTouchWeakMap.set(el, new AnyTouch(el, { preventDefault: Boolean(binding.value) }))
+  },
+  unmounted: (el, binding, vnode) => {
+    (anyTouchWeakMap.get(el) as AnyTouch).destroy()
+    anyTouchWeakMap.delete(el)
+  }
+})
+
+app.directive('custom-swipe', {
+  mounted: (el, binding, vnode) => {
+    const at = new Core(el as HTMLElement, {
+      preventDefault: false
+    })
+    anyTouchWeakMap.set(el, at)
+    // trigger the swipe if moving velocity larger than "velocity" per ms
+    // and move distance larger than threshhold
+    at.use(swipe, {
+      // means 10px/ms
+      velocity: 0.1,
+      threshold: 5
+    })
+
+    at.on('swipe', (event) => {
+      binding.value(event)
+    })
+  },
+  unmounted: (el, binding, vnode) => {
+    if (anyTouchWeakMap.has(el)) {
+      (anyTouchWeakMap.get(el) as Core).off('swipe')
+      anyTouchWeakMap.delete(el)
+    }
+  }
+})
+
+app.directive('press', longpress)
 
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
 const req = require.context('@/assets/icon', true, /\.svg$/)
 
-if (process.env.NODE_ENV !== 'production') {
+if (window.location.host !== 'vivipic.com') {
   svgIconUtils.setIcons(requireAll(req).map((context: any) => {
-    return context.default.id
+    return context.default?.id ?? ''
   }))
 } else {
   requireAll(req)
@@ -167,52 +237,30 @@ if (urlParams.has('token')) {
   }
 }
 
-if (['production'].includes(process.env.NODE_ENV)) {
-  const Sentry = require('@sentry/vue')
-  const { Integrations } = require('@sentry/tracing')
-  Sentry.init({
-    Vue,
-    trackComponents: true,
-    maxBreadcrumbs: 10,
-    tracesSampleRate: 1.0,
-    environment: process.env.NODE_ENV,
-    dsn: process.env.VUE_APP_SENTRY_DSN,
-    release: process.env.VUE_APP_SENTRY_RELEASE,
-    integrations: [
-      new Integrations.BrowserTracing({
-        routingInstrumentation: Sentry.vueRouterInstrumentation(router)
-      })
-    ],
-    beforeBreadcrumb(breadcrumb: any, hint: any) {
-      if (hint && breadcrumb.category && ['xhr'].includes(breadcrumb.category)) {
-        const { __sentry_xhr__: request, response } = hint.xhr
-        Object.assign(breadcrumb.data, { response, requestBody: request.body })
-      }
-      return breadcrumb
-    }
-  })
-  Vue.config.devtools = false
-}
-
-new Vue({
-  router,
-  store,
-  i18n,
-  mounted() {
-    if ((window as any).__PRERENDER_INJECTED !== undefined) {
-      document.dispatchEvent(new Event('render-event'))
-    }
-  },
-  render: (h) => h(App)
-}).$mount('#app')
-
-// Here is a testing code to export whole porject as a Library
-// export default {
-//   install(Vue: { component: (arg0: string, arg1: VueConstructor<Vue>) => void }, options: { store: { registerModule: (arg0: string, arg1: Store<IEditorState>) => void } }): void {
-//     if (!options || !options.store) {
-//       throw new Error('Please initialise plugin with a Vuex store.')
+// if (['production'].includes(process.env.NODE_ENV)) {
+//   const Sentry = require('@sentry/vue')
+//   const { Integrations } = require('@sentry/tracing')
+//   Sentry.init({
+//     Vue,
+//     trackComponents: true,
+//     maxBreadcrumbs: 10,
+//     tracesSampleRate: 1.0,
+//     environment: process.env.NODE_ENV,
+//     dsn: process.env.VUE_APP_SENTRY_DSN,
+//     release: process.env.VUE_APP_SENTRY_RELEASE,
+//     integrations: [
+//       new Integrations.BrowserTracing({
+//         routingInstrumentation: Sentry.vueRouterInstrumentation(router)
+//       })
+//     ],
+//     beforeBreadcrumb(breadcrumb: any, hint: any) {
+//       if (hint && breadcrumb.category && ['xhr'].includes(breadcrumb.category)) {
+//         const { __sentry_xhr__: request, response } = hint.xhr
+//         Object.assign(breadcrumb.data, { response, requestBody: request.body })
+//       }
+//       return breadcrumb
 //     }
-//     options.store.registerModule('nu-editor', store)
-//     Vue.component('nu-editor', App as VueConstructor<Vue>)
-//   }
+//   })
+//   // app.config.devtools = false
 // }
+app.mount('#app')
