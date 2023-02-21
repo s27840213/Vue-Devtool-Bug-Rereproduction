@@ -10,13 +10,17 @@ interface ISidebarData {
 }
 
 declare namespace Cypress {
-  interface Chainable {
+  interface Chainable<Subject> {
     // commands.ts
+    isMobile(callback: () => void): Chainable<void>
+    notMobile(callback: () => void): Chainable<void>
+    waitTransition(): Chainable<Subject>
     login(): Chainable<void>
     deleteAllLayers(): Chainable<void>
     deselectAllLayers(): Chainable<void>
     importDesign(designName: string): Chainable<void>
-    snapshotTest(testName: string): Chainable<void>
+    togglePanel(buttonText: string): Chainable<void>
+    snapshotTest(testName: string, { toggleMobilePanel }?: { toggleMobilePanel: string }): Chainable<Subject>
     getAllCategoryName(panel: ISidebarData, categoryName?: string[], last?: boolean): Chainable<string[]>
     addAsset(panel: ISidebarData, categoryIndex: number, itemIndex: number): Chainable<void>
     // addAsset(panel: ISidebarData, categoryName: string, itemIndex: number): Chainable<void>
@@ -24,16 +28,35 @@ declare namespace Cypress {
     // layerEdit.ts
     layerFlip(): Chainable<JQuery<HTMLElement>>
     layerAlign(): Chainable<JQuery<HTMLElement>>
+    layerOrder(subjectBack: JQuery<HTMLElement>): Chainable<JQuery<HTMLElement>>
+    layerCopy(): Chainable<JQuery<HTMLElement>>
+    layerLock(): Chainable<JQuery<HTMLElement>>
+    layerDelete(): Chainable<JQuery<HTMLElement>>
+    layerCopyFormat(subjectBack: JQuery<HTMLElement>,
+                  before: (subject: JQuery<HTMLElement>) => void,
+                  after: (subject: JQuery<HTMLElement>) => void): Chainable<JQuery<HTMLElement>>
+    layerRotate(): Chainable<JQuery<HTMLElement>>
+    layerScale(): Chainable<JQuery<HTMLElement>>
 
     // imageEdit.ts
     imageAdjust(): Chainable<JQuery<HTMLElement>>
     imageCrop(enterCrop: 'button'|'dblclick'): Chainable<JQuery<HTMLElement>>
     imageShadow(): Chainable<JQuery<HTMLElement>>
     imageSetAsBg(): Chainable<JQuery<HTMLElement>>
+    imageAutoBgRemove(): Chainable<JQuery<HTMLElement>>
+    imageManuallyBgRemove(): Chainable<JQuery<HTMLElement>>
 
     // npm package type define
     compareSnapshot(
       name: string,
+      testThreshold?: number,
+      retryOptions?: Record<string, unknown>
+    ): Chainable<Element>
+
+    // Modified CompareSnapshot command in cypress-image-diff-js
+    myCompareSnapshot(
+      name: string,
+      logName: string,
       testThreshold?: number,
       retryOptions?: Record<string, unknown>
     ): Chainable<Element>

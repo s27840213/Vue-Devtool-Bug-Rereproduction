@@ -38,14 +38,14 @@ export default defineComponent({
       const { scrollLeft } = this.items
       const itemWidth = parseInt(window.getComputedStyle(this.items.children[0]).width) || 145
       const gridGap = parseInt(window.getComputedStyle(this.items).getPropertyValue('column-gap')) || 10
-      const amountInRow = (this.$isTouchDevice && window.innerWidth >= 600) ? 3 : 2
+      const amountInRow = (this.$isTouchDevice() && window.innerWidth >= 600) ? 3 : 2
       this.items.scrollLeft = scrollLeft + (itemWidth + gridGap) * amountInRow
     },
     handlePrev() {
       const { scrollLeft } = this.items
       const itemWidth = parseInt(window.getComputedStyle(this.items.children[0]).width) || 145
       const gridGap = parseInt(window.getComputedStyle(this.items).getPropertyValue('column-gap')) || 10
-      const amountInRow = (this.$isTouchDevice && window.innerWidth >= 600) ? 3 : 2
+      const amountInRow = (this.$isTouchDevice() && window.innerWidth >= 600) ? 3 : 2
       this.items.scrollLeft = scrollLeft - (itemWidth + gridGap) * amountInRow
     },
     handleScroll(event: Event) {

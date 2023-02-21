@@ -1601,7 +1601,7 @@ class UploadUtils {
   }
 
   polling(targetSrc: string, callback: (json: any) => boolean, retryLimit = this.DEFAULT_POLLING_RETRY_LIMIT, retryTime = 0) {
-    const interval = window.setTimeout(() => {
+    const interval = window.setInterval(() => {
       if (retryTime === retryLimit) {
         clearInterval(interval)
         console.log('Polling failed')

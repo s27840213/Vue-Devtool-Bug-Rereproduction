@@ -529,7 +529,7 @@ export default defineComponent({
     vcoConfig() {
       return {
         handler: (e: Event) => {
-          if (!this.isImgCtrl) {
+          if (!this.isImgCtrl && !this.inMultiSelectionMode) {
             this.closeMobilePanel()
           }
         },
@@ -589,7 +589,7 @@ export default defineComponent({
       eventUtils.removePointerEvent('pointerup', this.dragPanelEnd)
     },
     disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }

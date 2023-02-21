@@ -18,9 +18,12 @@ import Nubtn from '@/components/global/Nubtn.vue'
 import PropertyBar from '@/components/global/PropertyBar.vue'
 import Spinner from '@/components/global/Spinner.vue'
 import SvgIcon from '@/components/global/SvgIcon.vue'
+import Core from '@any-touch/core'
+import swipe from '@any-touch/swipe'
 import Notifications from '@kyvg/vue3-notification'
 import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
+import platform from 'platform'
 import { createApp, nextTick } from 'vue'
 import { createMetaManager, plugin as metaPlugin } from 'vue-meta'
 import VueRecyclerviewNew from 'vue-recyclerview'
@@ -43,43 +46,22 @@ window.onerror = function (msg, url, line) {
   logUtils.setLog(message)
 }
 
-// const _console = console as any
-// if (_console.everything === undefined) {
-//   _console.everything = []
-
-//   _console.defaultLog = console.log.bind(console)
-//   _console.log = function() {
-//     _console.everything.push({ type: 'log', datetime: Date().toLocaleString(), value: Array.from(arguments) })
-//     _console.defaultLog.apply(console, arguments)
-//   }
-//   _console.defaultError = console.error.bind(console)
-//   _console.error = function() {
-//     _console.everything.push({ type: 'error', datetime: Date().toLocaleString(), value: Array.from(arguments) })
-//     _console.defaultError.apply(console, arguments)
-//   }
-//   _console.defaultWarn = console.warn.bind(console)
-//   _console.warn = function() {
-//     _console.everything.push({ type: 'warn', datetime: Date().toLocaleString(), value: Array.from(arguments) })
-//     _console.defaultWarn.apply(console, arguments)
-//   }
-//   _console.defaultDebug = console.debug.bind(console)
-//   _console.debug = function() {
-//     _console.everything.push({ type: 'debug', datetime: Date().toLocaleString(), value: Array.from(arguments)})
-//     _console.defaultDebug.apply(_console, arguments)
-//   }
-// }
-
 const app = createApp(App).use(i18n).use(router).use(store)
 
+store.commit('user/SET_BroswerInfo', {
+  name: platform.name,
+  version: platform.version
+})
+
 // Add variable that bind in vue this and its type define
-// Ex: div(v-if="$isTouchDevice" ...) in pug
-// Ex: if (this.$isTouchDevice) in .vue ts
+// Ex: div(v-if="$isTouchDevice()" ...) in pug
+// Ex: if (this.$isTouchDevice()) in .vue ts
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
-    $isTouchDevice: boolean
+    $isTouchDevice: () => boolean
   }
 }
-app.config.globalProperties.$isTouchDevice = generalUtils.isTouchDevice()
+app.config.globalProperties.$isTouchDevice = () => generalUtils.isTouchDevice()
 
 const tooltipUtils = new TooltipUtils()
 
@@ -197,6 +179,33 @@ app.directive('touch', {
     anyTouchWeakMap.delete(el)
   }
 })
+
+app.directive('custom-swipe', {
+  mounted: (el, binding, vnode) => {
+    const at = new Core(el as HTMLElement, {
+      preventDefault: false
+    })
+    anyTouchWeakMap.set(el, at)
+    // trigger the swipe if moving velocity larger than "velocity" per ms
+    // and move distance larger than threshhold
+    at.use(swipe, {
+      // means 10px/ms
+      velocity: 0.1,
+      threshold: 5
+    })
+
+    at.on('swipe', (event) => {
+      binding.value(event)
+    })
+  },
+  unmounted: (el, binding, vnode) => {
+    if (anyTouchWeakMap.has(el)) {
+      (anyTouchWeakMap.get(el) as Core).off('swipe')
+      anyTouchWeakMap.delete(el)
+    }
+  }
+})
+
 app.directive('press', longpress)
 
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)

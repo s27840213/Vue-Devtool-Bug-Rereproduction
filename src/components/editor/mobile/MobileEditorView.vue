@@ -12,11 +12,10 @@ div(class="editor-view" v-touch
       :style="absContainerStyle")
     div(v-if="editorView" class="editor-view__canvas"
         ref="canvas"
-        @swipeup="swipeUpHandler"
-        @swipedown="swipeDownHandler"
+        v-custom-swipe="handleSwipe"
         :style="canvasStyle")
       page-card(v-for="(page,index) in pagesState"
-          :key="`page-${index}`"
+          :key="`page-${page.config.id}`"
           :config="page"
           :cardWidth="cardWidth"
           :cardHeight="cardHeight"
@@ -154,7 +153,7 @@ export default defineComponent({
     pageUtils.fitPage(false, true)
     this.tmpScaleRatio = pageUtils.scaleRatio
 
-    if (this.$isTouchDevice) {
+    if (this.$isTouchDevice()) {
       pageUtils.mobileMinScaleRatio = this.isDetailPage ? 20 : this.tmpScaleRatio
       pageUtils.originPageSize.width = pageUtils.getPages[0].width * this.pageUtils.mobileMinScaleRatio * 0.01
       pageUtils.originPageSize.height = pageUtils.getPages[0].height * this.pageUtils.mobileMinScaleRatio * 0.01
@@ -186,10 +185,10 @@ export default defineComponent({
       this.$nextTick(() => {
         this.cardHeight = this.editorView?.clientHeight
       })
-    },
-    currCardIndex(newVal) {
-      editorUtils.handleContentScaleRatio(newVal)
     }
+    // currCardIndex(newVal) {
+    //   editorUtils.handleContentScaleRatio(newVal)
+    // }
   },
 
   computed: {
@@ -251,17 +250,6 @@ export default defineComponent({
         overflow: this.isDetailPage ? 'scroll' : 'initial'
       }
     },
-    cardStyle(): { [index: string]: string | number } {
-      return {
-        width: `${this.cardWidth}px`,
-        height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
-        padding: this.isDetailPage ? '0px' : `${pageUtils.MOBILE_CARD_PADDING}px`,
-        flexDirection: this.isDetailPage ? 'column' : 'initial',
-        'overflow-y': this.isDetailPage ? 'initial' : 'scroll',
-        // overflow: this.isDetailPage ? 'initial' : 'scroll',
-        minHeight: this.isDetailPage ? 'none' : '100%'
-      }
-    },
     canvasStyle(): { [index: string]: string | number } {
       return {
         padding: this.isDetailPage ? '40px 0px' : '0px'
@@ -291,7 +279,6 @@ export default defineComponent({
       ]
     ),
     outerClick(e: MouseEvent) {
-      console.log('outer click')
       if (eventUtils.checkIsMultiTouch(e)) {
         return
       }
@@ -453,9 +440,10 @@ export default defineComponent({
           GroupUtils.deselect()
           this.setCurrActivePageIndex(this.currCardIndex)
           this.$nextTick(() => {
-            setTimeout(() => {
-              pageUtils.fitPage()
-            }, 300)
+            pageUtils.fitPage()
+            // setTimeout(() => {
+            //   pageUtils.fitPage()
+            // }, 300)
           })
         } else {
           GroupUtils.deselect()
@@ -474,9 +462,10 @@ export default defineComponent({
           this.$nextTick(() => {
             editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
             this.setCurrActivePageIndex(this.currCardIndex)
-            setTimeout(() => {
-              pageUtils.fitPage()
-            }, 300)
+            pageUtils.fitPage()
+            // setTimeout(() => {
+            //   pageUtils.fitPage()
+            // }, 300)
           })
           StepsUtils.record()
         }
@@ -495,12 +484,20 @@ export default defineComponent({
           GroupUtils.deselect()
           this.setCurrActivePageIndex(this.currCardIndex)
           this.$nextTick(() => {
-            setTimeout(() => {
-              pageUtils.fitPage()
-            }, 300)
+            pageUtils.fitPage()
+            // setTimeout(() => {
+            //   pageUtils.fitPage()
+            // }, 300)
           })
         }
         this.isSwiping = false
+      }
+    },
+    handleSwipe(event: AnyTouchEvent) {
+      if (event.direction === 'up') {
+        this.swipeUpHandler(event)
+      } else if (event.direction === 'down') {
+        this.swipeDownHandler(event)
       }
     }
   }

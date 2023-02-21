@@ -1,11 +1,11 @@
 
-import store from '@/store'
-import { IShape, IText, IImage, IGroup, ITmp, IStyle, ILayer, IFrame } from '@/interfaces/layer'
-import GroupUtils from '@/utils/groupUtils'
-import mathUtils from './mathUtils'
-import LayerUtils from '@/utils/layerUtils'
-import { IPage } from '@/interfaces/page'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import store from '@/store'
+import GroupUtils from '@/utils/groupUtils'
+import LayerUtils from '@/utils/layerUtils'
+import mathUtils from './mathUtils'
 
 class AlignUtils {
   get currSelectedInfo(): ICurrSelectedInfo {
@@ -17,7 +17,7 @@ class AlignUtils {
   }
 
   private getTmpAlignPos(tmpStyles: IStyle, layer: IShape | IText | IImage | IGroup | IFrame | ITmp, type: string): { [key: string]: number } {
-    const bouding = mathUtils.getBounding(layer)
+    const bouding = mathUtils.getBounding(layer.styles)
     const layerWidth = layer.styles.width
     const layerHeight = layer.styles.height
     const offset = layer.styles.rotate === 0 ? { x: 0, y: 0 } : {
@@ -63,7 +63,7 @@ class AlignUtils {
 
   private getPageAlignPos(type: string): { [key: string]: number } {
     const layer = this.currSelectedInfo.layers[0] as ILayer
-    const bouding = mathUtils.getBounding(layer)
+    const bouding = mathUtils.getBounding(layer.styles)
     const layerWidth = layer.styles.width
     const layerHeight = layer.styles.height
     const pageWidth = this.currPage.width

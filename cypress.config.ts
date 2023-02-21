@@ -6,9 +6,9 @@ export default defineConfig({
   viewportHeight: 900,
   defaultCommandTimeout: 10000,
   requestTimeout: 10000,
-  scrollBehavior: false,
   // To prevent browser out of memory, only keep one task in memory, https://blog.hao.dev/fixing-cypress-errors-part-1-chromium-out-of-memory-crashes
   numTestsKeptInMemory: 1,
+  experimentalWebKitSupport: true,
   env: {
     // For cypress-image-diff-js to not delete snapshot in /cy/snapshot folder
     preserveOriginalScreenshot: true,
@@ -16,7 +16,6 @@ export default defineConfig({
   e2e: {
     baseUrl: 'http://localhost:8080/',
     experimentalRunAllSpecs: true,
-    experimentalWebKitSupport: true,
     setupNodeEvents(on, config) {
       require('cypress-terminal-report/src/installLogsPrinter')(on)
       require('cypress-image-diff-js/dist/plugin')(on, config)
@@ -25,6 +24,7 @@ export default defineConfig({
       // So I copy it from 'cypress-image-diff-js/dist/plugin' and add something.
       // Detail plz see: https://github.com/cypress-io/cypress/issues/5240
       on('before:browser:launch', function (browser, launchOptions) {
+        // Launch API DOC: https://docs.cypress.io/api/plugins/browser-launch-api
         const width = String(config.viewportWidth) || '1280'
         const height = String(config.viewportHeight) || '720'
 
@@ -36,8 +36,8 @@ export default defineConfig({
 
         if (browser.name === 'electron') {
           // eslint-disable-next-line no-param-reassign
-          launchOptions.preferences.width = Number.parseInt(width, 10) // eslint-disable-next-line no-param-reassign
-
+          launchOptions.preferences.width = Number.parseInt(width, 10)
+          // eslint-disable-next-line no-param-reassign
           launchOptions.preferences.height = Number.parseInt(height, 10)
         }
 
@@ -46,7 +46,7 @@ export default defineConfig({
           launchOptions.args.push('--height='.concat(height))
         }
 
-        console.log('launchOptions', launchOptions)
+        // console.log('launchOptions', launchOptions)
         return launchOptions
       })
     },

@@ -323,7 +323,7 @@ export default defineComponent({
       }
     },
     onRightClick(event: MouseEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         return
       }
 

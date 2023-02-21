@@ -36,10 +36,11 @@ div(class="list")
             span(class="body-XS text-gray-1") {{$t('NN0023')}}
         div(v-for="item in themeData"
           class="list-content-items__theme-item")
-          router-link(:to="`/editor?type=new-design-size&themeId=${item.id}&width=${item.width}&height=${item.height}`")
+          router-link(:to="themeRouteInfo(item)")
             img(class="list-content-items__theme-item-preset"
               :src="item.url"
-              @error="imgOnerror")
+              @error="imgOnerror"
+              @click="openProductPageNotification(item)")
           span(class="body-XS text-gray-1") {{item.title}}
           span(class="body-XXS text-gray-3") {{item.description}}
       //- type mydesign
@@ -187,7 +188,7 @@ export default defineComponent({
       }).href
     },
     clickTemplate(item: IAssetTemplate) {
-      if (this.$isTouchDevice && this.theme === '7') {
+      if (this.$isTouchDevice() && this.theme === '7') {
         modalUtils.setModalInfo(
             `${this.$t('NN0808')}`,
             [],
@@ -210,6 +211,26 @@ export default defineComponent({
       return {
         height: `${height}px`,
         width: `${match_cover.width / match_cover.height * height}px`
+      }
+    },
+    themeRouteInfo(theme: Itheme) {
+      if (this.$isTouchDevice() && theme.id === 7) {
+        return ''
+      } else {
+        return `/editor?type=new-design-size&themeId=${theme.id}&width=${theme.width}&height=${theme.height}`
+      }
+    },
+    openProductPageNotification(theme: Itheme) {
+      if (this.$isTouchDevice() && theme.id === 7) {
+        modalUtils.setModalInfo(
+              `${this.$t('NN0808')}`,
+              [],
+              {
+                msg: `${this.$t('NN0358')}`,
+                class: 'btn-blue-mid',
+                action: () => { return false }
+              }
+        )
       }
     }
   }

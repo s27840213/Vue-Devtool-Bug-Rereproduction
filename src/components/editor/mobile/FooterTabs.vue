@@ -110,7 +110,13 @@ export default defineComponent({
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
-        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          hidden: this.isInFrame,
+          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
       ]
@@ -119,11 +125,16 @@ export default defineComponent({
       return [
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}` },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         ...(this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
-        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          hidden: this.isInFrame,
+          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : [])
@@ -167,8 +178,7 @@ export default defineComponent({
         },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
-        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}` }
+        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
     },
@@ -231,8 +241,7 @@ export default defineComponent({
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust },
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}` }
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust }
       ]
     },
     pageTabs(): Array<IFooterTab> {
@@ -251,7 +260,8 @@ export default defineComponent({
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' }
+        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` },
         // { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true }
       ]
     },
@@ -430,8 +440,8 @@ export default defineComponent({
         transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
         opacity: `${this.contentEditable ? 0 : 1}`,
         maskImage: this.contentEditable ? 'none'
-          : `linear-gradient(to right, 
-          transparent 0, black ${this.leftOverflow ? '56px' : 0}, 
+          : `linear-gradient(to right,
+          transparent 0, black ${this.leftOverflow ? '56px' : 0},
           black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
       }
     },
@@ -545,7 +555,6 @@ export default defineComponent({
           pageUtils.addPageToPos(pageUtils.newPage({
             width: page.width,
             height: page.height,
-            backgroundColor: page.backgroundColor,
             bleeds: currPage.bleeds,
             physicalBleeds: currPage.physicalBleeds,
             isEnableBleed: currPage.isEnableBleed,
@@ -633,10 +642,11 @@ export default defineComponent({
           break
         }
         case 'effect': {
-          if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
-            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
-            return
-          }
+          // Unreachable, becaues button is disabled
+          // if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
+          //   notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+          //   return
+          // }
           break
         }
         case 'color':

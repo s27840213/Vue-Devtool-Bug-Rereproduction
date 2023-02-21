@@ -1033,6 +1033,10 @@ const mutations: MutationTree<IEditorState> = {
   UPDATE_snapUtilsIndex(state: IEditorState, index: number) {
     state.pages[index].modules.snapUtils.pageIndex = index
   },
+  SET_contentScaleRatio4Page(state: IEditorState, payload: { pageIndex: number, contentScaleRatio: number }) {
+    const { pageIndex, contentScaleRatio } = payload
+    state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
+  },
   ...imgShadowMutations,
   ADD_subLayer
 }

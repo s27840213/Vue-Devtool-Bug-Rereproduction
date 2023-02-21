@@ -40,13 +40,12 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 :key="child.tag"
                 :is="child.tag"
                 v-bind="child.attrs")
-        g
-          g(:filter="`url(#${filterId})`")
-            image(:xlink:href="finalSrc" ref="img"
-              class="nu-image__picture"
-              draggable="false"
-              @error="onError"
-              @load="onLoad")
+        image(:xlink:href="finalSrc" ref="img"
+          :filter="`url(#${filterId})`"
+          class="nu-image__picture"
+          draggable="false"
+          @error="onError"
+          @load="onLoad")
       img(v-else-if="src" ref="img"
         :style="flipStyles()"
         :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation() }"
@@ -87,6 +86,7 @@ import { AxiosError } from 'axios'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
+import { BrowserInfo } from '@/store/module/user'
 
 export default defineComponent({
   emits: [],
@@ -334,10 +334,16 @@ export default defineComponent({
       return this.src
     },
     filterId(): string {
-      const { styles: { adjust }, id: layerId } = this.config
-      const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
-      const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
-      return `filter__${id}`
+      const browserInfo = this.$store.getters['user/getBrowserInfo'] as BrowserInfo
+      if (browserInfo.name === 'Safari' && +browserInfo.version >= 16 && +browserInfo.version < 16.3) {
+        const { styles: { adjust }, id: layerId } = this.config
+        const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
+        const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
+        return `filter__${id}`
+      } else {
+        const randomId = generalUtils.generateRandomString(5)
+        return `filter__${randomId}`
+      }
     },
     showCanvas(): boolean {
       const { subLayerIndex, handleId } = this
@@ -383,7 +389,7 @@ export default defineComponent({
       return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return pageUtils.removeBleedsFromPageSize(this.page)
+      return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
     parentLayerDimension(): number | string {
       const { width, height } = this.config.parentLayerStyles || {}
