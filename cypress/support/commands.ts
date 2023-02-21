@@ -37,22 +37,38 @@
 import { cloneDeep, uniq } from 'lodash'
 import loginData from '../fixtures/loginData.json'
 
+// Option that prevent print command detail.
+const silent = { log: false }
+
 Cypress.Commands.add('isMobile', (callback: () => void) => {
-  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile: () => boolean) => {
-    if (isMobile()) callback()
-  })
+  cy.get('#app', silent)
+    .invoke(silent, 'prop', '__vue_app__')
+    .its('config.globalProperties.$isTouchDevice', silent)
+    .then((isMobile: () => boolean) => {
+      if (isMobile()) {
+        cy.log('isMobile:')
+        callback()
+      }
+    })
 })
 
 Cypress.Commands.add('notMobile', (callback: () => void) => {
-  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile: () => boolean) => {
-    if (!isMobile()) callback()
-  })
+  cy.get('#app', silent)
+    .invoke(silent, 'prop', '__vue_app__')
+    .its('config.globalProperties.$isTouchDevice', silent)
+    .then((isMobile: () => boolean) => {
+      if (!isMobile()) {
+        cy.log('!isMobile:')
+        callback()
+      }
+    })
 })
 
 Cypress.Commands.add('waitTransition', { prevSubject: 'element' }, (subject) => {
-  cy.wrap(subject).invoke('prop', 'class')
+  cy.wrap(subject, silent)
+    .invoke(silent, 'prop', 'class')
     .should('not.match', /(-leave-active|-enter-active)/)
-  return cy.wrap(subject)
+  return cy.wrap(subject, silent)
 })
 
 Cypress.Commands.add('login', () => {
@@ -63,33 +79,47 @@ Cypress.Commands.add('login', () => {
 })
 
 Cypress.Commands.add('deleteAllLayers', () => {
-  cy.get('body').type('{ctrl+A}').type('{del}')
+  cy.log('delete layers')
+    .get('body', silent)
+    .type('{ctrl+A}', silent)
+    .type('{del}', silent)
 })
 
 Cypress.Commands.add('deselectAllLayers', () => {
-  cy.get('.pages-wrapper').eq(0).type('{ctrl+D}')
-    .get('.page-control').children().should('have.length', 0)
+  cy.log('deselect layers')
+    .get('.pages-wrapper', silent)
+    .eq(0, silent)
+    .type('{ctrl+D}', silent)
+    .get('.page-control', silent)
+    .children(silent).should('have.length', 0)
 })
 
 Cypress.Commands.add('importDesign', (designName: string) => {
   // TODO: Use @/ instead of ../
   const designJson = cloneDeep(require(`../fixtures/design/${designName}`))
-  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$store').then((vuex) => {
-    vuex.commit('SET_pages', designJson)
-  })
+
+  cy.log(`Import design: ${designName}`)
+    .get('#app', silent)
+    .invoke(silent, 'prop', '__vue_app__')
+    .its('config.globalProperties.$store', silent).then((vuex) => {
+      vuex.commit('SET_pages', designJson)
+    })
 })
 
 Cypress.Commands.add('togglePanel', (buttonText: string) => {
-  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile: () => boolean) => {
-    if (isMobile()) {
-      cy.get('.footer-tabs').contains('div', buttonText)
-        .should('not.have.class', 'click-disabled')
-        .click()
-        .get('.mobile-panel').waitTransition()
-    } else {
-      cy.get('.function-panel').contains(buttonText).click()
-    }
-  })
+  cy.get('#app', silent)
+    .invoke(silent, 'prop', '__vue_app__')
+    .its('config.globalProperties.$isTouchDevice', silent)
+    .then((isMobile: () => boolean) => {
+      if (isMobile()) {
+        cy.get('.footer-tabs').contains('div', buttonText)
+          .should('not.have.class', 'click-disabled')
+          .click()
+          .get('.mobile-panel').waitTransition()
+      } else {
+        cy.get('.function-panel').contains(buttonText).click()
+      }
+    })
 })
 
 Cypress.Commands.add('getAllCategoryName', (panel: ISidebarData, categoryName = [], last = false) => {
