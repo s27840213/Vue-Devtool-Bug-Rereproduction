@@ -41,13 +41,14 @@ Cypress.Commands.add('layerAlign', { prevSubject: 'element' }, (subject) => {
 
 Cypress.Commands.add('layerOrder', { prevSubject: 'element' }, (subjectFront, subjectBack) => {
   cy.wrap(subjectBack).click('topLeft')
-    .get('.svg-layers-alt').realClick({ scrollBehavior: 'top' })
+    .get('.svg-layers-alt').realClick()
+    .isMobile(() => { cy.get('.mobile-panel').waitTransition() })
     .get('.svg-layers-forward').click()
     .snapshotTest('Oredr change')
     .get('.svg-layers-backward').click()
     .snapshotTest('Oredr restore')
     // Restore layer to original state (close panel)
-    .get('.svg-layers-alt').realClick({ scrollBehavior: 'top' })
+    .get('.svg-layers-alt').realClick()
   return cy.wrap(subjectFront)
 })
 
@@ -87,7 +88,7 @@ Cypress.Commands.add('layerLock', { prevSubject: 'element' }, (subject) => {
 })
 
 Cypress.Commands.add('layerDelete', { prevSubject: 'element' }, (subject) => {
-  cy.wait(500) // Prevent click trigger double click, TODO: fix it in app
+  cy.wait(500) // Prevent click trigger double click, TODO: Fix it in app
     .wrap(subject).click()
     .get('.nu-page .nu-layer').then((oldLayers) => {
       cy.get('body').realPress(['Meta', 'c']).realPress(['Meta', 'v'])
