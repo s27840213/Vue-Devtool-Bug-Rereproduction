@@ -508,7 +508,7 @@ class AssetUtils {
         editorUtils.setCloseMobilePanelFlag(true)
         setTimeout(() => {
           tiptapUtils.agent(editor => editor.commands.selectAll())
-        }, 100)
+        }, 300)
       })
       .catch(() => {
         console.log('Cannot find the file')
