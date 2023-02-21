@@ -607,7 +607,9 @@ export default defineComponent({
               })
             }
 
-            tiptapUtils.focus({ scrollIntoView: false }, currLayer.isEdited ? 'end' : null)
+            this.$nextTick(() => {
+              tiptapUtils.focus({ scrollIntoView: false }, currLayer.isEdited ? 'end' : null)
+            })
           } else {
             /**
              * @Todo handle the sub controler
@@ -619,7 +621,9 @@ export default defineComponent({
                 contentEditable: true
               }, subLayerIdx)
             }
-            tiptapUtils.focus({ scrollIntoView: false }, 'end')
+            this.$nextTick(() => {
+              tiptapUtils.focus({ scrollIntoView: false }, 'end')
+            })
           }
           break
         }
