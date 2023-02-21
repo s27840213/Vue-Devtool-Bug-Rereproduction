@@ -201,13 +201,14 @@ div(style="position: relative;")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import store from '@/store'
 import userApis from '@/apis/user'
+import store from '@/store'
+import fbPixelUtils from '@/utils/fbPixelUtils'
+import gtmUtils from '@/utils/gtmUtils'
 import localeUtils from '@/utils/localeUtils'
 import loginUtils from '@/utils/loginUtils'
-import gtmUtils from '@/utils/gtmUtils'
-import fbPixelUtils from '@/utils/fbPixelUtils'
+import webViewUtils from '@/utils/vivipicWebViewUtils'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   emits: [],
@@ -361,17 +362,7 @@ export default defineComponent({
       try {
         // code -> access_token
         const { data } = await userApis.fbLogin(code, redirectUri, this.currLocale)
-        if (data.flag === 0) {
-          if (data.data.new_user) {
-            fbPixelUtils.fbq('track', 'CompleteRegistration')
-            gtmUtils.signUp('Facebook')
-          }
-          store.dispatch('user/loginSetup', { data: data })
-          this.$router.push({ path: this.redirect || redirect || '/' })
-        } else {
-          console.log('fb login failed')
-        }
-        this.isLoading = false
+        this.handleLoginResult(data, 'Facebook', 'fb', redirect)
       } catch (error) {
       }
     },
@@ -379,19 +370,22 @@ export default defineComponent({
       try {
         // idToken -> token
         const { data } = await userApis.googleLogin(code, redirectUri, this.currLocale)
-        if (data.flag === 0) {
-          if (data.data.new_user) {
-            fbPixelUtils.fbq('track', 'CompleteRegistration')
-            gtmUtils.signUp('Google')
-          }
-          store.dispatch('user/loginSetup', { data: data })
-          this.$router.push({ path: this.redirect || redirect || '/' })
-        } else {
-          console.log('google login failed')
-        }
-        this.isLoading = false
+        this.handleLoginResult(data, 'Google', 'google', redirect)
       } catch (error) {
       }
+    },
+    handleLoginResult(data: any, gtmTitle: 'Facebook' | 'Google' | 'Vivipic', loginType: string, redirect?: string) {
+      if (data.flag === 0) {
+        if (data.data.new_user) {
+          fbPixelUtils.fbq('track', 'CompleteRegistration')
+          gtmUtils.signUp(gtmTitle)
+        }
+        store.dispatch('user/loginSetup', { data: data })
+        this.$router.push({ path: this.redirect || redirect || '/' })
+      } else {
+        console.log(`${loginType} login failed`)
+      }
+      this.isLoading = false
     },
     onSignupClicked() {
       if (this.redirect) {
@@ -559,11 +553,21 @@ export default defineComponent({
       }
       this.isLoading = false
     },
-    onFacebookClicked() {
-      loginUtils.onFacebookClicked(this.redirect)
+    async onFacebookClicked() {
+      if (webViewUtils.isBrowserMode) {
+        loginUtils.onFacebookClicked(this.redirect)
+      } else {
+        const data = await webViewUtils.login('Facebook', this.$i18n.locale)
+        this.handleLoginResult(data, 'Facebook', 'fb')
+      }
     },
-    onGoogleClicked() {
-      loginUtils.onGoogleClicked(this.redirect)
+    async onGoogleClicked() {
+      if (webViewUtils.isBrowserMode) {
+        loginUtils.onGoogleClicked(this.redirect)
+      } else {
+        const data = await webViewUtils.login('Facebook', this.$i18n.locale)
+        this.handleLoginResult(data, 'Google', 'google')
+      }
     }
   }
 })

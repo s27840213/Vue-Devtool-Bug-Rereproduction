@@ -66,17 +66,18 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback('launch')
   }
 
-  async login(type: 'APPLE' | 'Google' | 'Facebook', locale: string): Promise<boolean> {
+  async login(type: 'APPLE' | 'Google' | 'Facebook', locale: string): Promise<any> {
     if (this.isBrowserMode) return true
     return await this.callIOSAsAPI('LOGIN', { type, locale }, 'login')
   }
 
-  loginResult(data: { flag: string, msg?: string }) {
-    if (data.flag !== '0') {
-      logUtils.setLogAndConsoleLog(data.msg)
-      this.errorMessageMap.login = data.msg ?? ''
-    }
-    this.handleCallback('login', data.flag === '0')
+  loginResult(data: any) {
+    logUtils.setLogAndConsoleLog(data)
+    // if (data.flag !== '0') {
+    //   logUtils.setLogAndConsoleLog(data.msg)
+    //   this.errorMessageMap.login = data.msg ?? ''
+    // }
+    this.handleCallback('login', data)
   }
 
   async updateLocale(locale: string): Promise<void> {
