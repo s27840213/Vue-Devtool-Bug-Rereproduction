@@ -330,7 +330,7 @@ export default defineComponent({
       return new Set([...set, ...subset]).size === set.length
     },
     themeStyle(): Record<string, string> {
-      const gapTop = this.$isTouchDevice ? 60 : 80
+      const gapTop = this.$isTouchDevice() ? 60 : 80
       return {
         maxHeight: `${(this.$refs.panel as HTMLElement).clientHeight - gapTop}px`
       }
@@ -340,9 +340,9 @@ export default defineComponent({
       let galleryUtils = null
       if (this.isSubsetOf(['3', '7', '13'], theme.split(','))) {
         // 判斷如果版型為IG限時動態(3) or 電商詳情頁(7), 最小高度則為200px
-        galleryUtils = new GalleryUtils(this.$isTouchDevice ? window.innerWidth - 30 : 300, 200, 10)
+        galleryUtils = new GalleryUtils(this.$isTouchDevice() ? window.innerWidth - 30 : 300, 200, 10)
       } else {
-        galleryUtils = new GalleryUtils(this.$isTouchDevice ? window.innerWidth - 30 : 300, 140, 10)
+        galleryUtils = new GalleryUtils(this.$isTouchDevice() ? window.innerWidth - 30 : 300, 140, 10)
       }
       const idContainerHeight = this.showAdminTool ? 24 : 0
       const result = galleryUtils

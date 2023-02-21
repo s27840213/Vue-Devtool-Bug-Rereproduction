@@ -1,5 +1,5 @@
 <template lang="pug">
-div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @pointerdown="setInBgSettingMode")
+div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode")
   div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
     //- nu-adjust-image(v-if="isAdjustImage"
     //-       :src="finalSrc"
@@ -31,13 +31,13 @@ div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false
               v-bind="child.attrs")
               //- class="nu-background-image__adjust-picture"
       image(:xlink:href="finalSrc" ref="img"
+        class="nu-background-image__adjust-image"
         :filter="`url(#${filterId})`"
         :width="svgImageWidth"
         :height="svgImageHeight"
         @error="onError"
         @load="onLoad")
     img(v-else-if="src" ref="img"
-      class='nu-image__picture'
       :src="finalSrc"
       draggable="false"
       @error="onError"
@@ -64,6 +64,7 @@ import unitUtils from '@/utils/unitUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
+import { BrowserInfo } from '@/store/module/user'
 
 export default defineComponent({
   emits: [],
@@ -238,9 +239,10 @@ export default defineComponent({
     },
     isAdjustImage(): boolean {
       const { styles } = this.image.config
-      return Object
-        .values(styles.adjust || {})
-        .some(val => typeof val === 'number' && val !== 0)
+      const entries = Object
+        .entries(styles.adjust || {})
+        .filter(([key, val]) => typeof val === 'number' && val !== 0)
+      return entries.length > 1 || (entries.length === 1 && entries[0][0] !== 'halation')
     },
     adjustImgStyles(): { [key: string]: string | number } {
       return Object.assign(generalUtils.deepCopy(this.image.config.styles), {
@@ -286,8 +288,18 @@ export default defineComponent({
       return imageAdjustUtil.convertAdjustToSvgFilter(adjust || {}, { styles: this.image.config.styles } as IImage)
     },
     filterId(): string {
-      const randomId = generalUtils.generateRandomString(5)
-      return `filter__${randomId}`
+      const browserInfo = this.$store.getters['user/getBrowserInfo'] as BrowserInfo
+      console.log(browserInfo.name === 'Safari', +browserInfo.version)
+      if (browserInfo.name === 'Safari' && +browserInfo.version >= 16 && +browserInfo.version < 16.3) {
+        const { styles: { adjust }, id: layerId } = this.image.config
+        const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
+        const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
+        return `filter__${id}`
+        // return '1'
+      } else {
+        const randomId = generalUtils.generateRandomString(5)
+        return `filter__${randomId}`
+      }
     },
     imageFilter(): string {
       if (this.svgFilterElms.length) {
@@ -477,17 +489,9 @@ export default defineComponent({
     }
   }
 
-  &__adjust-picture {
-  touch-action: none;
-  object-fit: cover;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 100%;
-}
+  &__adjust-image {
+    // will-change: contents;
+  }
 
   &__svg {
     display: block;

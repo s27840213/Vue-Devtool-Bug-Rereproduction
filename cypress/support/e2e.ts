@@ -18,6 +18,7 @@ import 'cypress-real-events'
 import './commands'
 import './imageEdit'
 import './layerEdit'
+import './snapshotCommands'
 require('cypress-terminal-report/src/installLogsCollector')()
 require('cypress-image-diff-js/dist/command')()
 

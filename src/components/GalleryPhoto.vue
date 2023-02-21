@@ -120,7 +120,7 @@ export default defineComponent({
       return imageUtils.getSrc(data, photo.width)
     },
     showMoreBtn(): boolean {
-      return !this.inFilePanel && !this.inLogoPanel && !this.$isTouchDevice
+      return !this.inFilePanel && !this.inLogoPanel && !this.$isTouchDevice()
     },
     panelPreviewSrc(): string {
       const img = this.$refs.img as HTMLImageElement
@@ -206,7 +206,7 @@ export default defineComponent({
       })
     },
     onClick(e: MouseEvent, photo: IAssetPhoto) {
-      if (this.$isTouchDevice && this.mobilePanel === 'replace') {
+      if (this.$isTouchDevice() && this.mobilePanel === 'replace') {
         this.replaceImg(photo)
       } else if (this.multiSelectMode === 'on' || this.hasCheckedAssets) {
         this.modifyCheckedAssets(photo.assetIndex as number)
@@ -287,7 +287,7 @@ export default defineComponent({
           ...(this.isUploading && { isPreview: true, assetId: photo.id })
         }
       )
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         this.setCloseMobilePanelFlag(true)
       }
     },

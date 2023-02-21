@@ -354,7 +354,7 @@ export default defineComponent({
       this.setCursorStyle(el.style.cursor)
     },
     disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }

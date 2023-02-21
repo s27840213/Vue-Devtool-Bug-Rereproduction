@@ -329,6 +329,8 @@ export class MovingUtils {
         e.preventDefault()
       }
       this.setCursorStyle(e, 'move')
+
+      // this.movingHandler(e)
       if (!this.isHandleMovingHandler) {
         window.requestAnimationFrame(() => {
           this.movingHandler(e)
@@ -392,24 +394,19 @@ export class MovingUtils {
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
     const offsetRatio = generalUtils.isTouchDevice() ? 1 / store.state.contentScaleRatio : 100 / store.getters.getPageScaleRatio
     const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y, offsetRatio)
-    // groupUtils.movingTmp(
-    //   this.pageIndex,
-    //   {
-    //     x: moveOffset.offsetX,
-    //     y: moveOffset.offsetY
-    //   }
-    // )
-    const isLine = this.config.type === 'shape' && this.config.category === 'D'
+    const config = this.layerIndex === layerUtils.layerIndex ? this.config : layerUtils.getCurrLayer
+
+    const isLine = config.type === 'shape' && config.category === 'D'
     const _updateStyles = {
-      x: this.config.styles.x + moveOffset.offsetX,
-      y: this.config.styles.y + moveOffset.offsetY,
-      width: this.config.styles.width,
-      height: this.config.styles.height,
-      initWidth: this.config.styles.initWidth,
-      initHeight: this.config.styles.initHeight,
-      rotate: this.config.styles.rotate
+      x: config.styles.x + moveOffset.offsetX,
+      y: config.styles.y + moveOffset.offsetY,
+      width: config.styles.width,
+      height: config.styles.height,
+      initWidth: config.styles.initWidth,
+      initHeight: config.styles.initHeight,
+      rotate: config.styles.rotate
     } as IStyle
-    const offsetSnap = this.snapUtils.calcMoveSnap(_updateStyles, isLine ? this.config : undefined)
+    const offsetSnap = this.snapUtils.calcMoveSnap(_updateStyles, isLine ? config : undefined)
 
     const totalOffset = {
       x: offsetPos.x + (offsetSnap.x / offsetRatio),
@@ -420,12 +417,12 @@ export class MovingUtils {
 
     if (offsetSnap.x || offsetSnap.y) {
       this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
-      layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+      layerUtils.updateLayerStyles(this.pageIndex, layerUtils.layerIndex, {
         x: _updateStyles.x + offsetSnap.x,
         y: _updateStyles.y + offsetSnap.y
       })
     } else {
-      layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+      layerUtils.updateLayerStyles(this.pageIndex, layerUtils.layerIndex, {
         x: _updateStyles.x,
         y: _updateStyles.y
       })
