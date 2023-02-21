@@ -21,7 +21,10 @@ export default Vue.extend({
   props: {
     src: String,
     item: Object,
-    itemWidth: Number
+    itemWidth: {
+      type: Number,
+      default: NaN
+    }
   },
   data() {
     return {
@@ -34,7 +37,9 @@ export default Vue.extend({
     }),
     itemStyle(): any {
       const { width } = this.item.preview || {
-        width: generalUtils.isTouchDevice() ? this.itemWidth : 135
+        width: !isNaN(this.itemWidth) ? this.itemWidth
+          : generalUtils.isTouchDevice() ? (window.outerWidth - 68) / 3 - 10
+            : 135
       }
       return {
         width: `${width}px`
