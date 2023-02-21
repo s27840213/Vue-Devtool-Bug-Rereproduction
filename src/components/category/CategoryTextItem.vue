@@ -24,8 +24,16 @@ export default Vue.extend({
   },
   data() {
     return {
-      fallbackSrc: ''
+      fallbackSrc: '',
+      windowWidth: window.outerWidth
     }
+  },
+  mounted() {
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize()
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.handleResize)
   },
   computed: {
     ...mapGetters({
@@ -34,7 +42,7 @@ export default Vue.extend({
     itemStyle(): any {
       const { width } = this.item.preview || {
         width: generalUtils.isTouchDevice()
-          ? (window.outerWidth - 68) / 3 - 10
+          ? (this.windowWidth - 68) / 3 - 10
           : 135
       }
       return {
@@ -57,6 +65,9 @@ export default Vue.extend({
           assetId: this.item.id
         }, vivistickerUtils.getAssetInitiator(this.item), vivistickerUtils.getAssetCallback(this.item))
       }
+    },
+    handleResize() {
+      this.windowWidth = window.outerWidth
     }
   }
 })
