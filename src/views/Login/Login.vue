@@ -568,7 +568,7 @@ export default defineComponent({
       if (webViewUtils.isBrowserMode) {
         loginUtils.onGoogleClicked(this.redirect)
       } else {
-        const data = await webViewUtils.login('Facebook', this.$i18n.locale)
+        const data = await webViewUtils.login('Google', this.$i18n.locale)
         this.handleLoginResult(data, 'Google', 'google')
       }
     }
