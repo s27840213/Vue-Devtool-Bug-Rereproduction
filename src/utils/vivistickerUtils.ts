@@ -1,30 +1,30 @@
+import listApis from '@/apis/list'
+import i18n from '@/i18n'
+import { IListServiceContentDataItem } from '@/interfaces/api'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
+import { IIosImgData, IMyDesign, IMyDesignTag, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import store from '@/store'
+import { ColorEventType, LayerType } from '@/store/types'
 import Vue from 'vue'
 import assetUtils from './assetUtils'
-import groupUtils from './groupUtils'
-import pageUtils from './pageUtils'
-import stepsUtils from './stepsUtils'
-import uploadUtils from './uploadUtils'
-import eventUtils, { PanelEvent } from './eventUtils'
-import { ColorEventType, LayerType } from '@/store/types'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import colorUtils from './colorUtils'
 import editorUtils from './editorUtils'
+import eventUtils, { PanelEvent } from './eventUtils'
+import frameUtils from './frameUtils'
+import generalUtils from './generalUtils'
+import groupUtils from './groupUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
-import textPropUtils from './textPropUtils'
-import { IIosImgData, IMyDesign, IMyDesignTag, ITempDesign, IUserInfo, IUserSettings } from '@/interfaces/vivisticker'
 import localeUtils from './localeUtils'
-import listApis from '@/apis/list'
-import { IListServiceContentDataItem } from '@/interfaces/api'
-import textUtils from './textUtils'
-import i18n from '@/i18n'
-import generalUtils from './generalUtils'
-import modalUtils from './modalUtils'
-import frameUtils from './frameUtils'
-import colorUtils from './colorUtils'
 import logUtils from './logUtils'
+import modalUtils from './modalUtils'
+import pageUtils from './pageUtils'
+import stepsUtils from './stepsUtils'
+import textPropUtils from './textPropUtils'
+import textUtils from './textUtils'
+import uploadUtils from './uploadUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
   hostId: '',
@@ -348,10 +348,16 @@ class ViviStickerUtils {
   }
 
   startEditing(editorType: string, assetInfo: {[key: string]: any}, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
-    const pageWidth = window.outerWidth - 32
+    const elTop = document.getElementsByClassName('vivisticker__top')[0]
+    const headerHeight = 44
+    const topSize = {
+      width: elTop.clientWidth,
+      height: elTop.clientHeight
+    }
+    const pageSize = Math.min(topSize.width, topSize.height - headerHeight) - 32
     pageUtils.setPages([pageUtils.newPage({
-      width: pageWidth,
-      height: Math.round(pageWidth * 420 / 358),
+      width: pageSize,
+      height: pageSize,
       backgroundColor: '#F8F8F8',
       isAutoResizeNeeded: true
     })])
