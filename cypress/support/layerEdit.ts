@@ -55,12 +55,10 @@ Cypress.Commands.add('layerOrder', { prevSubject: 'element' }, (subjectFront, su
 Cypress.Commands.add('layerCopy', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
     .get('.nu-page .nu-layer').then((oldLayers) => {
-      // If use click() to trigger clipboard r/w, Chrome will throw 'Document is not focused.' error.
-      // This will only happen when click 'Run All Test' button in cy spec sidebar and unfocus browser.
-      // Use realClick() can prevent the error.
       cy.get('.svg-copy').click()
         .get('.nu-page .nu-layer').should('have.length', oldLayers.length + 1)
         .snapshotTest('Copy layer')
+        // Restore layer to original state
         .get('body').type('{del}')
         .get('.nu-page .nu-layer').should('have.length', oldLayers.length)
     })
@@ -79,6 +77,7 @@ Cypress.Commands.add('layerLock', { prevSubject: 'element' }, (subject) => {
     .realMouseMove(-30, -30, { position: 'center' })
     .realMouseUp()
     .snapshotTest('Lock locked')
+    // Restore layer to original state
     .get('.panel-group, .header-bar').find('.svg-lock').click()
     .wrap(subject)
     .realMouseDown()
@@ -91,6 +90,9 @@ Cypress.Commands.add('layerDelete', { prevSubject: 'element' }, (subject) => {
   cy.wait(500) // Prevent click trigger double click, TODO: Fix it in app
     .wrap(subject).click()
     .get('.nu-page .nu-layer').then((oldLayers) => {
+      // If use type() to trigger clipboard r/w, Chrome will throw 'Document is not focused.' error.
+      // This will only happen when click 'Run All Test' button in cy spec sidebar and unfocus browser.
+      // Use realPress() can prevent the error.
       cy.get('body').realPress(['Meta', 'c']).realPress(['Meta', 'v'])
         .get('.nu-page .nu-layer').should('have.length', oldLayers.length + 1)
         .snapshotTest('Delete before')
@@ -107,6 +109,7 @@ Cypress.Commands.add('layerCopyFormat', { prevSubject: 'element' }, (subjectFron
     .get('.panel-group .svg-brush').click()
     .wrap(subjectBack).click('topLeft')
     .snapshotTest('Copy format after')
+    // Restore layer to original state
     .then(after)
     .get('.panel-group .svg-brush').click()
     .wrap(subjectFront).click('topLeft')
@@ -120,5 +123,28 @@ Cypress.Commands.add('layerRotate', { prevSubject: 'element' }, (subject) => {
 
 Cypress.Commands.add('layerScale', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
+  return cy.wrap(subject)
+})
+
+Cypress.Commands.add('layerMoveToPage2', { prevSubject: 'element' }, (subject) => {
+  cy.wrap(subject).click()
+    .get('.svg-add-page').click()
+    .wrap(subject)
+    .realMouseDown()
+    .realMouseMove(100, 600, { position: 'center' })
+    .realMouseUp({ scrollBehavior: false })
+    .get('.editor-view').scrollTo(0, 0, { ensureScrollable: false })
+    .snapshotTest('Move to page 2 - p1')
+    .scrollTo(0, 9999, { ensureScrollable: false })
+    .snapshotTest('Move to page 2 - p2', { pageIndex: 1 })
+    // Restore layer to original state
+    .scrollTo(0, 300, { ensureScrollable: false })
+    .get('#nu-page_1 .nu-image').click({ scrollBehavior: false })
+    .realMouseDown({ scrollBehavior: false })
+    .realMouseMove(-100, -600, { position: 'center', scrollBehavior: false })
+    .realMouseUp({ scrollBehavior: false })
+    .get('.nu-page-content-1').children().should('have.length', 1)
+    .get('.page-title .svg-trash').eq(-1).click()
+    .get('.editor-view__canvas').children().should('have.length', 2)
   return cy.wrap(subject)
 })
