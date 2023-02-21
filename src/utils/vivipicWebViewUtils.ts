@@ -1,4 +1,4 @@
-import { IUserInfo } from '@/interfaces/webView'
+import { ILoginResult, IUserInfo } from '@/interfaces/webView'
 import store from '@/store'
 import { WebViewUtils } from '@/utils/webViewUtils'
 import logUtils from './logUtils'
@@ -66,17 +66,13 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     this.handleCallback('launch')
   }
 
-  async login(type: 'APPLE' | 'Google' | 'Facebook', locale: string): Promise<any> {
-    if (this.isBrowserMode) return true
+  async login(type: 'APPLE' | 'Google' | 'Facebook', locale: string): Promise<{ data: ILoginResult, flag: number, msg?: string }> {
     return await this.callIOSAsAPI('LOGIN', { type, locale }, 'login')
   }
 
-  loginResult(data: any) {
+  loginResult(data: { data: ILoginResult, flag: string | number, msg?: string }) {
     logUtils.setLogAndConsoleLog(data)
-    // if (data.flag !== '0') {
-    //   logUtils.setLogAndConsoleLog(data.msg)
-    //   this.errorMessageMap.login = data.msg ?? ''
-    // }
+    data.flag = typeof data.flag === 'string' ? parseInt(data.flag) : data.flag
     this.handleCallback('login', data)
   }
 

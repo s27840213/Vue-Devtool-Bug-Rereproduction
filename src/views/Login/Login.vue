@@ -202,6 +202,7 @@ div(style="position: relative;")
 
 <script lang="ts">
 import userApis from '@/apis/user'
+import { ILoginResult } from '@/interfaces/webView'
 import store from '@/store'
 import fbPixelUtils from '@/utils/fbPixelUtils'
 import gtmUtils from '@/utils/gtmUtils'
@@ -374,7 +375,7 @@ export default defineComponent({
       } catch (error) {
       }
     },
-    handleLoginResult(data: any, gtmTitle: 'Facebook' | 'Google' | 'Vivipic', loginType: string, redirect?: string) {
+    handleLoginResult(data: { data: ILoginResult, flag: number, msg?: string }, gtmTitle: 'Facebook' | 'Google' | 'Vivipic', loginType: string, redirect?: string) {
       if (data.flag === 0) {
         if (data.data.new_user) {
           fbPixelUtils.fbq('track', 'CompleteRegistration')
