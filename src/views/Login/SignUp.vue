@@ -155,6 +155,7 @@ import gtmUtils from '@/utils/gtmUtils'
 import localeUtils from '@/utils/localeUtils'
 import loginUtils from '@/utils/loginUtils'
 import webViewUtils from '@/utils/vivipicWebViewUtils'
+import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -337,6 +338,7 @@ export default defineComponent({
         this.$router.push({ path: this.redirect || redirect || '/' })
       } else {
         console.log(`${loginType} login failed`)
+        notify({ group: 'error', text: data.msg })
       }
       this.isLoading = false
     },
