@@ -28,6 +28,7 @@ div(class="header-bar" @pointerdown.stop)
           :iconColor="iconColor(tab)"
           :iconWidth="'22px'")
 </template>
+
 <script lang="ts">
 import i18n from '@/i18n'
 import { IFrame, IGroup } from '@/interfaces/layer'

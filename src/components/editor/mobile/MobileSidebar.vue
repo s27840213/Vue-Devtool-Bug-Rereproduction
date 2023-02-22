@@ -31,12 +31,13 @@ div(class="sidebar")
   div(v-if="buildNumber"
     class="text-white body-2 build-number") {{buildNumber}}
 </template>
+
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import Avatar from '@/components/Avatar.vue'
 import { SidebarPanelType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
-import Avatar from '@/components/Avatar.vue'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   components: {

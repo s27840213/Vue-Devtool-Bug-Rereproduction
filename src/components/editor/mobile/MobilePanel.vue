@@ -59,6 +59,7 @@ div(class="mobile-panel"
       @switchTab="switchTab"
       @close="closeMobilePanel")
 </template>
+
 <script lang="ts">
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
@@ -249,7 +250,7 @@ export default defineComponent({
       }
     },
     showRightBtn(): boolean {
-      return this.whiteTheme
+      return this.currActivePanel !== 'none'
     },
     showLeftBtn(): boolean {
       return this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel)
@@ -547,9 +548,7 @@ export default defineComponent({
       )
     },
     closeMobilePanel() {
-      this.$emit('switchTab', 'none')
-      this.panelHistory = []
-      editorUtils.setCurrActivePanel('none')
+      editorUtils.setShowMobilePanel(false)
     },
     initPanelHeight() {
       return ((this.$el.parentElement as HTMLElement).clientHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
@@ -686,7 +685,10 @@ export default defineComponent({
     position: absolute;
     touch-action: manipulation;
     top: 2px;
-    padding: 10px 20px;
+    // 47 = 15 (MobilePanel margin)
+    //    + 12 (half of gray-4 div width)
+    //    + 20 (left/right btn)
+    padding: 10px calc(50% - 47px);
     border-radius: 5px;
     > div {
       background-color: setColor(gray-4);

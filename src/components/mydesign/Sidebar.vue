@@ -59,6 +59,7 @@ div(class="sidebar")
             :style="hintTextStyles()")
           span {{$t('NN0226')}}
 </template>
+
 <script lang="ts">
 import SidebarFolder from '@/components/mydesign/SidebarFolder.vue'
 import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'

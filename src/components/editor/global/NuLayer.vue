@@ -46,6 +46,7 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
     ref="lineMover"
     :id="`nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`")
 </template>
+
 <script lang="ts">
 import SquareLoading from '@/components/global/SqureLoading.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
