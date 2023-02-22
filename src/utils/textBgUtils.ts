@@ -1,10 +1,10 @@
-import store from '@/store'
-import { IStyle, IText } from '@/interfaces/layer'
 import { isITextBox, isITextGooey, isITextUnderline, ITextBgEffect, ITextGooey } from '@/interfaces/format'
+import { IStyle, IText } from '@/interfaces/layer'
+import store from '@/store'
 import LayerUtils from '@/utils/layerUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 import _ from 'lodash'
 
 // For text effect gooey
@@ -176,8 +176,7 @@ class Gooey {
       for (let i = 1; i < side.length - 1;) {
         const cps = side[i]
         if (side.length > 3 && cps.bottom.y - cps.top.y < cps.oldHeight * 0.1) {
-          // Vue.delete(side, i)
-          delete side[i]
+          side.splice(i, 1)
           count++
         } else i++
       }
@@ -477,8 +476,7 @@ class TextBg {
           rect.width += next.width
           rect.height = Math.max(rect.height, next.height)
         } else break
-        // Vue.delete(rects, nextIndex)
-        delete rects[nextIndex]
+        rects.splice(nextIndex, 1)
       }
     })
     // Deal with empty line
