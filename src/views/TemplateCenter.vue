@@ -74,6 +74,7 @@ div(ref="body"
             :class="{'selected': selectedSorting === sortingCriterium.key}"
             @click="handleSelectSorting(sortingCriterium.key)") {{ sortingCriterium.text }}
       div(class="template-center__sorter__right")
+    template-no-result(v-if="hasNoResult" :keyword="searchbarKeyword" :allHashTagAll="allHashTagAll")
     template-waterfall(:waterfallTemplates="waterfallTemplates"
                       :isTemplateReady="isTemplateReady"
                       :useScrollablePreview="!isMobile"
@@ -149,6 +150,7 @@ import NuFooter from '@/components/NuFooter.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import HashtagCategoryRow from '@/components/templates/HashtagCategoryRow.vue'
+import TemplateNoResult from '@/components/templates/TemplateNoResult.vue'
 import TemplateWaterfall from '@/components/templates/TemplateWaterfall.vue'
 import { IContentTemplate, ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
@@ -172,7 +174,8 @@ export default defineComponent({
     SearchBar,
     NuFooter,
     HashtagCategoryRow,
-    TemplateWaterfall
+    TemplateWaterfall,
+    TemplateNoResult
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -341,6 +344,12 @@ export default defineComponent({
       } else {
         return this.waterfallTemplatesTAB
       }
+    },
+    hasNoResult(): boolean {
+      return this.isTemplateReady && this.templates.list.length === 0
+    },
+    allHashTagAll(): boolean {
+      return !Object.values(this.hashtagSelections).some((hashtagSelection) => hashtagSelection.selection.length !== 0)
     }
   },
   methods: {
