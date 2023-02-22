@@ -29,10 +29,6 @@ import i18n from './i18n'
 import router from './router'
 import store from './store'
 import generalUtils from './utils/generalUtils'
-/* eslint-disable */
-
-import '@/globalComponents'
-import 'floating-vue/dist/style.css'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import svgIconUtils from './utils/svgIconUtils'
