@@ -477,20 +477,32 @@ export default defineComponent({
       })
     },
     composeKeyword() {
+      const query = {} as {[key: string]: string}
       const res = ['group::0']
       const tags = []
       let themes: string[] = []
       if (this.searchbarKeyword !== '') {
         tags.push(this.searchbarKeyword)
+        query.q = this.searchbarKeyword
       }
+      let queryTags = [] as string[]
       for (const hashtagSelection of Object.values(this.hashtagSelections)) {
         if (hashtagSelection.type === 'tag' && hashtagSelection.selection.length > 0) {
           tags.push(hashtagSelection.selection.join(' '))
+          queryTags = queryTags.concat(hashtagSelection.selection)
         }
         if (hashtagSelection.type === 'theme') {
           themes = themes.concat(hashtagSelection.selection)
         }
       }
+      if (queryTags.length > 0) {
+        query.tags = queryTags.join(',')
+      }
+      if (themes.length > 0) {
+        query.themes = themes.join(',')
+      }
+      query.sort = this.selectedSorting
+      this.$router.replace({ query })
       if (tags.length > 0) {
         res.push('tag::' + tags.join('&&'))
       }
