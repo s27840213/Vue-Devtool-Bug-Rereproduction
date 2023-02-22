@@ -144,11 +144,13 @@ export default defineComponent({
       opacity: 100,
       showAllRecentlyBgColors: false,
       colorAreaHeight: 0,
-      bgSizeStyles: {},
-      itemWidth: 80
+      bgSizeStyles: {}
     }
   },
   computed: {
+    ...mapState({
+      isTablet: 'isTablet'
+    }),
     ...mapState('background', {
       categories: 'categories',
       rawContent: 'content',
@@ -169,6 +171,9 @@ export default defineComponent({
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       newBgColor: 'vivisticker/getNewBgColor'
     }),
+    itemWidth(): number {
+      return this.isTablet ? 120 : 80
+    },
     itemHeight(): number {
       // const basicWidth = (window.outerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
       // return basicWidth < 145 ? basicWidth : 145 // 145px is the default width
@@ -375,7 +380,6 @@ export default defineComponent({
         height: `${height}px`
       }
       this.colorAreaHeight = window.outerHeight - 176
-      this.itemWidth = window.outerWidth >= 768 ? 120 : 80
     },
     shareBgStyles() {
       return this.shareItem ? {

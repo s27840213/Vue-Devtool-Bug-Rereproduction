@@ -38,7 +38,7 @@ import { IMyDesign, IMyDesignTag } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'my-design',
@@ -46,8 +46,7 @@ export default defineComponent({
     const tags = vivistickerUtils.getMyDesignTags()
     return {
       tags,
-      scrollTops: Object.fromEntries(tags.map(tag => [tag.tab, 0])),
-      itemHeight: 80
+      scrollTops: Object.fromEntries(tags.map(tag => [tag.tab, 0]))
     }
   },
   components: {
@@ -59,14 +58,11 @@ export default defineComponent({
     const content = this.$refs.content as CCategoryList
     if (!content) return
     content.$el.addEventListener('scroll', this.handleScroll)
-    window.addEventListener('resize', this.handleResize)
-    this.handleResize()
   },
   unmounted() {
     const content = this.$refs.content as CCategoryList
     if (!content) return
     content.$el.removeEventListener('scroll', this.handleScroll)
-    window.removeEventListener('resize', this.handleResize)
   },
   computed: {
     ...mapGetters({
@@ -77,6 +73,9 @@ export default defineComponent({
       myDesignTab: 'vivisticker/getMyDesignTab',
       myDesignFileList: 'vivisticker/getMyDesignFileList',
       myDesignNextPage: 'vivisticker/getMyDesignNextPage'
+    }),
+    ...mapState({
+      isTablet: 'isTablet'
     }),
     list(): IMyDesign[] {
       return this.myDesignFileList(this.myDesignTab) as IMyDesign[]
@@ -124,6 +123,9 @@ export default defineComponent({
         width: this.itemHeight + 'px',
         height: this.itemHeight + 'px'
       }
+    },
+    itemHeight(): number {
+      return this.isTablet ? 120 : 80
     }
   },
   watch: {
@@ -186,9 +188,6 @@ export default defineComponent({
       const content = this.$refs.content as CCategoryList
       if (!content) return
       content.$el.scrollTop = this.scrollTops[tab]
-    },
-    handleResize() {
-      this.itemHeight = window.outerWidth >= 768 ? 120 : 80
     }
   }
 })

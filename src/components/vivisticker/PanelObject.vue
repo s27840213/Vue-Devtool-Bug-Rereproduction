@@ -26,7 +26,7 @@ import i18n from '@/i18n'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import modalUtils from '@/utils/modalUtils'
 import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import { CCategoryList } from '../category/CategoryList.vue'
 
 export default defineComponent({
@@ -39,8 +39,7 @@ export default defineComponent({
   data() {
     return {
       tabIndex: 0,
-      favoritesTabIndex: 0,
-      itemHeight: 80
+      favoritesTabIndex: 0
     }
   },
   mounted() {
@@ -49,16 +48,12 @@ export default defineComponent({
   beforeUnmount() {
     eventUtils.off(PanelEvent.scrollPanelObjectToTop)
   },
-  activated() {
-    window.addEventListener('resize', this.handleResize)
-    this.handleResize()
-  },
-  deactivated() {
-    window.removeEventListener('resize', this.handleResize)
-  },
   computed: {
     ...mapGetters({
       isTabInCategory: 'vivisticker/getIsInCategory'
+    }),
+    ...mapState({
+      isTablet: 'isTablet'
     }),
     isInCategory(): boolean {
       return this.isTabInCategory('object')
@@ -67,7 +62,10 @@ export default defineComponent({
     isGifs(): boolean { return this.tabIndex === 1 },
     isFavorites(): boolean { return this.tabIndex === 2 },
     isFavoritesStatic(): boolean { return this.tabIndex === 2 && this.favoritesTabIndex === 0 },
-    isFavoritesGifs(): boolean { return this.tabIndex === 2 && this.favoritesTabIndex === 1 }
+    isFavoritesGifs(): boolean { return this.tabIndex === 2 && this.favoritesTabIndex === 1 },
+    itemHeight(): number {
+      return this.isTablet ? 120 : 80
+    }
   },
   methods: {
     scrollToTop() {
@@ -85,9 +83,6 @@ export default defineComponent({
         i18n.global.tc('NN0764'),
         { msg: i18n.global.tc('NN0563') }
       )
-    },
-    handleResize() {
-      this.itemHeight = window.outerWidth >= 768 ? 120 : 80
     }
   }
 })

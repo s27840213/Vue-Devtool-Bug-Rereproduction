@@ -108,6 +108,7 @@ const getDefaultState = (): IEditorState => ({
   hasCopiedFormat: false,
   inGestureToolMode: false,
   isMobile: generalUtils.getWidth() <= 768,
+  isTablet: generalUtils.getWidth() >= 768,
   isLargeDesktop: generalUtils.getWidth() >= 1440,
   isGlobalLoading: false,
   useMobileEditor: false,
@@ -1051,6 +1052,7 @@ const mutations: MutationTree<IEditorState> = {
 }
 const handleResize = throttle(() => {
   state.isMobile = generalUtils.getWidth() <= 768
+  state.isTablet = generalUtils.getWidth() >= 768
   state.isLargeDesktop = generalUtils.getWidth() >= 1440
 }, 500)
 
