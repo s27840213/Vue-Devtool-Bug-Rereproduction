@@ -94,7 +94,8 @@ export default defineComponent({
       InBgRemoveLastStep: 'bgRemove/inLastStep',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
+      hasCopiedFormat: 'getHasCopiedFormat'
     }),
     layerNum(): number {
       return this.currSelectedInfo.layers.length
@@ -561,6 +562,12 @@ export default defineComponent({
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
+      if (tab.icon !== 'copy-style' && this.hasCopiedFormat) {
+        formatUtils.clearCopiedFormat()
+      }
+      if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
+        editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
+      }
       switch (tab.icon) {
         case 'crop': {
           if (this.selectedLayerNum > 0) {
@@ -717,7 +724,11 @@ export default defineComponent({
           break
         }
         case 'copy-style': {
-          this.handleCopyFormat()
+          if (this.hasCopiedFormat) {
+            formatUtils.clearCopiedFormat()
+          } else {
+            this.handleCopyFormat()
+          }
           break
         }
         case 'effect': {
