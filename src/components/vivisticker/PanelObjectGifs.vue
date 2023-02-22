@@ -44,6 +44,7 @@ div(class="panel-gifs" :class="{'in-category': isInCategory}")
           category-object-item(class="panel-gifs__item"
             :src="item.src"
             :item="item"
+            :style="itemStyles"
             @click4in1="click4in1"
             @dbclick4in1="toggleFavorites4in1"
             @dbclick="toggleFavoritesItem")
@@ -92,6 +93,10 @@ export default defineComponent({
     showFav: {
       type: Boolean,
       required: true
+    },
+    itemHeight: {
+      type: Number,
+      default: 80
     }
   },
   data() {
@@ -147,6 +152,7 @@ export default defineComponent({
     listRecently(): ICategoryItem[] {
       const { rawCategories } = this
       const list = (rawCategories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
+      const gap = 10
       const result = new Array(Math.ceil(list.length / 3))
         .fill('')
         .map((_, idx) => {
@@ -155,7 +161,7 @@ export default defineComponent({
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-object-item',
             list: rowItems,
-            size: 90,
+            size: this.itemHeight + gap,
             title: ''
           }
         })
@@ -242,6 +248,12 @@ export default defineComponent({
     tags(): string[] {
       return this.showAllRecently ? []
         : this.showFav ? this.favoritesTagsBar : this.tagsBar
+    },
+    itemStyles() {
+      return {
+        width: this.itemHeight + 'px',
+        height: this.itemHeight + 'px'
+      }
     }
   },
   mounted() {
@@ -366,10 +378,11 @@ export default defineComponent({
       this.scrollTop[key] = (event.target as HTMLElement).scrollTop
     },
     processListCategory(list: IListServiceContentData[]): ICategoryItem[] {
+      const gap = 60
       return list
         .filter(category => category.list.length > 0)
         .map((category, index) => ({
-          size: 140,
+          size: this.itemHeight + gap,
           id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.is_recent ? category.list.slice(0, 10) : category.list,
@@ -379,6 +392,7 @@ export default defineComponent({
         }))
     },
     processListResult(list = [] as IListServiceContentDataItem[]): ICategoryItem[] {
+      const gap = 24
       return new Array(Math.ceil(list.length / 3))
         .fill('')
         .map((_, idx) => {
@@ -387,7 +401,7 @@ export default defineComponent({
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-object-item',
             list: rowItems,
-            size: 104 // 80(object height) + 24(gap)
+            size: this.itemHeight + gap
           }
         })
     }

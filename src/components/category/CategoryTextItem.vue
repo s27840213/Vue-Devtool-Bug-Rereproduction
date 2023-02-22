@@ -23,6 +23,10 @@ export default defineComponent({
     item: {
       type: Object as PropType<any>,
       required: true
+    },
+    itemWidth: {
+      type: Number,
+      default: NaN
     }
   },
   data() {
@@ -36,9 +40,9 @@ export default defineComponent({
     }),
     itemStyle(): any {
       const { width } = this.item.preview || {
-        width: this.$isTouchDevice
-          ? (window.outerWidth - 68) / 3 - 10
-          : 135
+        width: !isNaN(this.itemWidth) ? this.itemWidth
+          : this.$isTouchDevice ? (window.outerWidth - 68) / 3 - 10
+            : 135
       }
       return {
         width: `${width}px`

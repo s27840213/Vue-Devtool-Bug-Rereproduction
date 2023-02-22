@@ -12,10 +12,10 @@ div(class="panel-objects")
             @click="doubleTapTips")
   keep-alive
     panel-object-static(v-if="isStatic || isFavoritesStatic"
-      :showFav="isFavoritesStatic" ref="static")
+      :showFav="isFavoritesStatic" :itemHeight="itemHeight" ref="static")
   keep-alive
     panel-object-gifs(v-if="isGifs || isFavoritesGifs"
-      :showFav="isFavoritesGifs" ref="gif")
+      :showFav="isFavoritesGifs" :itemHeight="itemHeight" ref="gif")
 </template>
 
 <script lang="ts">
@@ -38,7 +38,8 @@ export default defineComponent({
   data() {
     return {
       tabIndex: 0,
-      favoritesTabIndex: 0
+      favoritesTabIndex: 0,
+      itemHeight: 80
     }
   },
   mounted() {
@@ -46,6 +47,13 @@ export default defineComponent({
   },
   beforeUnmount() {
     eventUtils.off(PanelEvent.scrollPanelObjectToTop)
+  },
+  activated() {
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize()
+  },
+  deactivated() {
+    window.removeEventListener('resize', this.handleResize)
   },
   computed: {
     ...mapGetters({
@@ -76,6 +84,9 @@ export default defineComponent({
         i18n.global.tc('NN0764'),
         { msg: i18n.global.tc('NN0563') }
       )
+    },
+    handleResize() {
+      this.itemHeight = window.outerWidth >= 768 ? 120 : 80
     }
   }
 })

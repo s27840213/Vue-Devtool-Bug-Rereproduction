@@ -5,7 +5,7 @@ div(class="vivisticker" :style="copyingStyles()")
     div(class="vivisticker__content"
         @pointerdown="outerClick")
       my-design(v-show="isInMyDesign && !isInEditor")
-      vvstk-editor(v-show="isInEditor")
+      vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor")
       main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
     transition(name="panel-up")
       mobile-panel(v-show="showMobilePanel"
@@ -111,7 +111,7 @@ export default defineComponent({
       }
       lastTouchEnd = now
     }, false)
-    window.visualViewport && window.visualViewport.addEventListener('resize', this.handleResize)
+    document.addEventListener('scroll', this.handleScroll)
 
     // parse modal info
     const exp = !vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0') ? 'exp_' : ''
@@ -170,7 +170,7 @@ export default defineComponent({
     }
   },
   unmounted() {
-    window.visualViewport && window.visualViewport.removeEventListener('resize', this.handleResize)
+    document.removeEventListener('scroll', this.handleScroll)
   },
   computed: {
     ...mapState('mobileEditor', {
@@ -285,8 +285,9 @@ export default defineComponent({
         vivistickerUtils.deselect()
       }
     },
-    handleResize() {
-      this.headerOffset = this.defaultWindowHeight - window.outerHeight - 1
+    handleScroll() {
+      // handle page scroll by mobile keyboard
+      this.headerOffset = document.documentElement.scrollTop ? document.documentElement.scrollTop - 1 : 0
     }
   }
 })
@@ -358,6 +359,6 @@ export default defineComponent({
 }
 
 .header-bar {
-  transition: 0.2s ease;
+  transition: 0.5s cubic-bezier(0.380, 0.700, 0.125, 1.000);
 }
 </style>

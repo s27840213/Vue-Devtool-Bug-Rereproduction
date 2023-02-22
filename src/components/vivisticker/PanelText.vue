@@ -34,15 +34,16 @@ div(class="panel-text" :class="{'in-category': isInCategory}")
         @action="handleCategorySearch")
         template(v-slot:preview="{ item }")
           category-text-item(class="panel-text__item"
-            :item="item")
+            :item="item"
+            :itemWidth="itemWidth")
     template(v-slot:category-text-item="{ list, title }")
+      div(v-if="title" class="panel-text__header") {{ title }}
       div(class="panel-text__items")
-        div(v-if="title"
-          class="panel-text__header") {{ title }}
         category-text-item(v-for="item in list"
           class="panel-text__item"
           :key="item.id"
-          :item="item")
+          :item="item"
+          :itemWidth="itemWidth")
 </template>
 
 <script lang="ts">
@@ -72,7 +73,8 @@ export default defineComponent({
       scrollTop: {
         mainContent: 0,
         searchResult: 0
-      }
+      },
+      itemWidth: 80
     }
   },
   computed: {
@@ -202,7 +204,12 @@ export default defineComponent({
       searchResult.scrollTop = this.scrollTop.searchResult
       mainContent.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
       searchResult.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+      window.addEventListener('resize', this.handleResize)
+      this.handleResize()
     })
+  },
+  deactivated() {
+    window.removeEventListener('resize', this.handleResize)
   },
   watch: {
     keyword(newVal: string) {
@@ -305,6 +312,9 @@ export default defineComponent({
             size: 104 + (title ? 46 : 0) // 80(object height) + 24(gap) + 0/46(title)
           }
         })
+    },
+    handleResize() {
+      this.itemWidth = (window.outerWidth - 68) / 3 - 10
     }
   }
 })
@@ -342,15 +352,16 @@ export default defineComponent({
   &__item {
     width: 80px;
     height: 80px;
-    margin: 0 auto;
+    // margin: 0 auto;
     padding: 0 5px;
     // object-fit: contain;
     // vertical-align: middle;
   }
   &__items {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    column-gap: 10px;
+    display: flex;
+    justify-content: space-around;
+    // grid-template-columns: repeat(3, 1fr);
+    // column-gap: 10px;
   }
   &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
     margin-top: 24px;

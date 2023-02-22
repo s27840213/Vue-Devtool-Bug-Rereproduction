@@ -29,6 +29,10 @@ import i18n from './i18n'
 import router from './router'
 import store from './store'
 import generalUtils from './utils/generalUtils'
+/* eslint-disable */
+
+import '@/globalComponents'
+import 'floating-vue/dist/style.css'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import svgIconUtils from './utils/svgIconUtils'
@@ -196,8 +200,14 @@ app.directive('touch', {
    * Useage: div(v-touch @tap="..." @swipeleft="...")
    * If you want to prevetDefault, use: div(v-touch="true" ...)
    */
-  mounted: (el, binding, vnode) => {
-    anyTouchWeakMap.set(el, new AnyTouch(el, { preventDefault: Boolean(binding.value) }))
+  mounted(el, binding) {
+    // pass preventDefault as function to fix tap event issue of apple pencil for unknown reason
+    const preventDefault = (event: Event) => {
+      return Boolean(binding.value)
+    }
+    const at = new AnyTouch(el, { preventDefault })
+    at.get('tap').maxDistance = 10 // raise max move distance to trigger double tap event more easily for apple pencil
+    anyTouchWeakMap.set(el, at)
   },
   unmounted: (el, binding, vnode) => {
     (anyTouchWeakMap.get(el) as AnyTouch).destroy()
