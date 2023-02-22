@@ -72,6 +72,7 @@ export interface IEditorState {
   hasCopiedFormat: boolean,
   inGestureToolMode: boolean,
   isMobile: boolean
+  isTablet: boolean,
   isLargeDesktop: boolean,
   isGlobalLoading: boolean,
   useMobileEditor: boolean,

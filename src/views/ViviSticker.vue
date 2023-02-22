@@ -200,7 +200,7 @@ export default defineComponent({
       modalInfo: 'vivisticker/getModalInfo'
     }),
     contentEditable(): boolean {
-      return this.currSelectedInfo.layers[0]?.contentEditable
+      return this.currSubSelectedInfo.index >= 0 ? this.currSelectedInfo.layers[0]?.layers[this.currSubSelectedInfo.index]?.contentEditable : this.currSelectedInfo.layers[0]?.contentEditable
     },
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
