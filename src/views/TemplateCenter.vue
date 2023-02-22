@@ -74,7 +74,10 @@ div(ref="body"
             :class="{'selected': selectedSorting === sortingCriterium.key}"
             @click="handleSelectSorting(sortingCriterium.key)") {{ sortingCriterium.text }}
       div(class="template-center__sorter__right")
-    template-no-result(v-if="hasNoResult" :keyword="searchbarKeyword" :allHashTagAll="allHashTagAll")
+    template-no-result(v-if="hasNoResult"
+                      :keyword="searchbarKeyword"
+                      :allHashTagAll="allHashTagAll"
+                      @updateHashTagsAll="handleSelectAll")
     template-waterfall(:waterfallTemplates="waterfallTemplates"
                       :isTemplateReady="isTemplateReady"
                       :useScrollablePreview="!isMobile"
@@ -395,6 +398,12 @@ export default defineComponent({
     },
     handleSelectSorting(sortingCriterium: string) {
       this.selectedSorting = sortingCriterium
+      this.composeKeyword()
+    },
+    handleSelectAll() {
+      for (const hashtagSelection of Object.values(this.hashtagSelections)) {
+        hashtagSelection.selection = []
+      }
       this.composeKeyword()
     },
     handleClickWaterfall(template: ITemplate) {
