@@ -30,6 +30,7 @@ import { mapGetters } from 'vuex'
 import { CCategoryList } from '../category/CategoryList.vue'
 
 export default defineComponent({
+  name: 'panel-object',
   components: {
     Tabs,
     PanelObjectStatic,

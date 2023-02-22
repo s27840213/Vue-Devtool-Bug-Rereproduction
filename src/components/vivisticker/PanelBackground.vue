@@ -123,6 +123,7 @@ import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
+  name: 'panel-background',
   components: {
     SearchBar,
     MobileSlider,

@@ -62,6 +62,7 @@ import VueI18n from 'vue-i18n'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
+  name: 'panel-text',
   components: {
     SearchBar,
     CategoryList,
