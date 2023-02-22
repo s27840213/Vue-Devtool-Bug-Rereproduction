@@ -26,7 +26,6 @@ import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
 import TextUtils from './textUtils'
-import tiptapUtils from './tiptapUtils'
 import unitUtils, { PRECISION } from './unitUtils'
 import ZindexUtils from './zindexUtils'
 
@@ -504,13 +503,11 @@ class AssetUtils {
         }
 
         TextUtils.resetTextField(textLayer, targetPageIndex, field)
-        LayerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false, contentEditable: true }))])
+        LayerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false, contentEditable: !generalUtils.isTouchDevice() }))])
         editorUtils.setCloseMobilePanelFlag(true)
-        setTimeout(() => {
-          tiptapUtils.agent(editor => editor.commands.selectAll())
-        }, 100)
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log(error)
         console.log('Cannot find the file')
       })
   }

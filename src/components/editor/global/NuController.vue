@@ -150,6 +150,7 @@ div(:layer-index="`${layerIndex}`"
         @click="MappingUtils.mappingIconAction('lock')")
       svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'")
 </template>
+
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import LazyLoad from '@/components/LazyLoad.vue'

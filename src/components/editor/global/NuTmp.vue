@@ -23,7 +23,6 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import { defineComponent, PropType } from 'vue'
-import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],

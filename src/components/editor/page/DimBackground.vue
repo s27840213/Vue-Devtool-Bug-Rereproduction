@@ -55,6 +55,7 @@ div(v-else-if="isBgImgCtrl" class="dim-background")
   //-     :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
 
 </template>
+
 <script lang="ts">
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import { IImage } from '@/interfaces/layer'

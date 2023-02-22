@@ -289,13 +289,11 @@ export default defineComponent({
     },
     filterId(): string {
       const browserInfo = this.$store.getters['user/getBrowserInfo'] as BrowserInfo
-      console.log(browserInfo.name === 'Safari', +browserInfo.version)
       if (browserInfo.name === 'Safari' && +browserInfo.version >= 16 && +browserInfo.version < 16.3) {
         const { styles: { adjust }, id: layerId } = this.image.config
         const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
         const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
         return `filter__${id}`
-        // return '1'
       } else {
         const randomId = generalUtils.generateRandomString(5)
         return `filter__${randomId}`

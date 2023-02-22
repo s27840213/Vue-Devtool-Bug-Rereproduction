@@ -11,7 +11,7 @@ export default defineConfig({
   experimentalWebKitSupport: true,
   env: {
     // For cypress-image-diff-js to not delete snapshot in /cy/snapshot folder
-    preserveOriginalScreenshot: true,
+    // preserveOriginalScreenshot: true,
   },
   e2e: {
     baseUrl: 'http://localhost:8080/',

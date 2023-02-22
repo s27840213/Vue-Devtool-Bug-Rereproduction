@@ -6,13 +6,11 @@ div(class="editor-view" v-touch
     @scroll="!inBgRemoveMode ? scrollUpdate() : null"
     @pointerdown="selectStart"
     @mousewheel="handleWheel"
-    @pinch="pinchHandler"
     ref="editorView")
   div(class="editor-view__abs-container"
       :style="absContainerStyle")
     div(v-if="editorView" class="editor-view__canvas"
         ref="canvas"
-        v-custom-swipe="handleSwipe"
         :style="canvasStyle")
       page-card(v-for="(page,index) in pagesState"
           :key="`page-${page.config.id}`"
@@ -41,6 +39,7 @@ import backgroundUtils from '@/utils/backgroundUtils'
 import ControlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
+import formatUtils from '@/utils/formatUtils'
 import GroupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -48,6 +47,7 @@ import modalUtils from '@/utils/modalUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
+import SwipeDetector from '@/utils/SwipeDetector'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { AnyTouchEvent } from 'any-touch'
@@ -108,7 +108,8 @@ export default defineComponent({
       hanleWheelTimer: -1,
       handleWheelTransition: false,
       oriX: 0,
-      oriPageSize: 0
+      oriPageSize: 0,
+      swipeDetector: null as unknown as SwipeDetector
     }
   },
   created() {
@@ -146,7 +147,8 @@ export default defineComponent({
 
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
-    this.editorCanvas = this.$refs.canvas as HTMLElement
+    this.swipeDetector = new SwipeDetector(this.editorView, { targetDirection: 'vertical' }, this.handleSwipe)
+
     this.cardHeight = this.editorView ? this.editorView.clientHeight : 0
     this.cardWidth = this.editorView ? this.editorView.clientWidth : 0
 
@@ -173,6 +175,7 @@ export default defineComponent({
   },
   beforeUnmount() {
     this.editorViewResizeObserver.disconnect()
+    this.swipeDetector.unbind()
   },
   watch: {
     currFocusPageIndex(newVal) {
@@ -210,7 +213,9 @@ export default defineComponent({
       currFocusPageIndex: 'getCurrFocusPageIndex',
       currCardIndex: 'mobileEditor/getCurrCardIndex',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
-      groupType: 'getGroupType'
+      groupType: 'getGroupType',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      isImgCtrl: 'imgControl/isImgCtrl'
     }),
     pages(): Array<IPage> {
       return this.pagesState.map((p: IPageState) => p.config)
@@ -296,6 +301,9 @@ export default defineComponent({
     },
     selectStart(e: PointerEvent) {
       e.stopPropagation()
+      if (this.hasCopiedFormat) {
+        formatUtils.clearCopiedFormat()
+      }
       if (ControlUtils.isClickOnController(e)) {
         const movingUtils = new MovingUtils({
           _config: { config: layerUtils.getCurrLayer },
@@ -428,13 +436,13 @@ export default defineComponent({
       //   }
       // })
     },
-    swipeUpHandler(e: AnyTouchEvent) {
-      if (!this.isDetailPage && !this.hasSelectedLayer) {
+    swipeUpHandler() {
+      if (!this.isDetailPage && !this.hasSelectedLayer && !this.isBgImgCtrl && !this.isImgCtrl) {
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }
         this.isSwiping = true
-        e.stopImmediatePropagation()
+        // e.stopImmediatePropagation()
         if (this.pageNum - 1 !== this.currCardIndex) {
           this.setCurrCardIndex(this.currCardIndex + 1)
           GroupUtils.deselect()
@@ -472,13 +480,13 @@ export default defineComponent({
         this.isSwiping = false
       }
     },
-    swipeDownHandler(e: AnyTouchEvent) {
-      if (!this.isDetailPage && !this.hasSelectedLayer) {
+    swipeDownHandler() {
+      if (!this.isDetailPage && !this.hasSelectedLayer && !this.isBgImgCtrl && !this.isImgCtrl) {
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }
         this.isSwiping = true
-        e.stopImmediatePropagation()
+        // e.stopImmediatePropagation()
         if (this.currCardIndex !== 0) {
           this.setCurrCardIndex(this.currCardIndex - 1)
           GroupUtils.deselect()
@@ -493,11 +501,11 @@ export default defineComponent({
         this.isSwiping = false
       }
     },
-    handleSwipe(event: AnyTouchEvent) {
-      if (event.direction === 'up') {
-        this.swipeUpHandler(event)
-      } else if (event.direction === 'down') {
-        this.swipeDownHandler(event)
+    handleSwipe(dir: string) {
+      if (dir === 'up') {
+        this.swipeUpHandler()
+      } else if (dir === 'down') {
+        this.swipeDownHandler()
       }
     }
   }

@@ -37,6 +37,7 @@ div(class="nu-sub-controller")
               @update="handleTextChange"
               @compositionend="handleTextCompositionEnd")
 </template>
+
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import i18n from '@/i18n'

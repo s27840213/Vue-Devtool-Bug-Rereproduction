@@ -30,7 +30,6 @@ import { IPage } from '@/interfaces/page'
 import GeneralUtils from '@/utils/generalUtils'
 import ImageAdjustUtil from '@/utils/imageAdjustUtil'
 import { defineComponent, PropType } from 'vue'
-import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],
