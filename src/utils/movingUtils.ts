@@ -492,10 +492,11 @@ export class MovingUtils {
     layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
     this.setMoving(false)
 
-    const posDiff = this.isTouchDevice ? {
-      x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
-      y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
-    } : {
+    /**
+     * @Note the posDiff logic is different from the Vivipic version
+     * Vivipic won't update the initialPos in moving, but Vivisticker will.
+     */
+    const posDiff = {
       x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
       y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
     }
@@ -504,6 +505,7 @@ export class MovingUtils {
       y: Math.abs(pageUtils.getCurrPage.y - this.initPageTranslate.y)
     }
     const hasActualMove = posDiff.x !== 0 || posDiff.y !== 0
+
     const hasActualPageMove = Math.round(pagePosDiff.x) !== 0 || Math.round(pagePosDiff.y) !== 0
 
     if (this.isControllerShown) {
