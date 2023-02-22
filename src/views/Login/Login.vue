@@ -560,7 +560,9 @@ export default defineComponent({
       if (webViewUtils.isBrowserMode) {
         loginUtils.onFacebookClicked(this.redirect)
       } else {
+        this.isLoading = true
         const data = await webViewUtils.login('Facebook', this.$i18n.locale)
+        this.isLoading = false
         this.handleLoginResult(data, 'Facebook', 'fb')
       }
     },
@@ -568,7 +570,9 @@ export default defineComponent({
       if (webViewUtils.isBrowserMode) {
         loginUtils.onGoogleClicked(this.redirect)
       } else {
+        this.isLoading = true
         const data = await webViewUtils.login('Google', this.$i18n.locale)
+        this.isLoading = false
         this.handleLoginResult(data, 'Google', 'google')
       }
     }
