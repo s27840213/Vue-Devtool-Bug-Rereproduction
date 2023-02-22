@@ -18,7 +18,6 @@ import logUtils from './logUtils'
 import mathUtils from './mathUtils'
 import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
-import textBgUtils from './textBgUtils'
 import textShapeUtils from './textShapeUtils'
 import tiptapUtils from './tiptapUtils'
 

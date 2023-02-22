@@ -7,6 +7,16 @@ import mathUtils from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import _ from 'lodash'
+import generalUtils from './generalUtils'
+import textUtils from './textUtils'
+
+export interface textBgSvg {
+  attrs: Record<string, string|number>
+  content: {
+    tag: string
+    attrs: Record<string, string|number>
+  }[]
+}
 
 // For text effect gooey
 export class Point {
@@ -44,11 +54,11 @@ function obj2Point(p: { x: number, y: number }) {
 }
 
 class Rect {
-  bodyRect: DOMRect
-  vertical: boolean
-  width: number
-  height: number
-  transform: string
+  bodyRect = new DOMRect()
+  vertical = false
+  width = 0
+  height = 0
+  transform = ''
   rows: {
     rect: DOMRect
     spanData: {
@@ -59,9 +69,22 @@ class Rect {
       text: string
       letterSpacing: number
     }[]
-  }[]
+  }[] = []
 
-  constructor(config: IText) {
+  async waitForRender(body: HTMLElement): Promise<void> {
+    const textId = generalUtils.generateRandomString(12)
+    body.setAttribute('id', textId)
+    return new Promise(resolve => {
+      textUtils.observerCallbackMap[textId] = () => {
+        textUtils.observer.unobserve(body)
+        resolve()
+      }
+      document.body.appendChild(body)
+      textUtils.observer.observe(body)
+    })
+  }
+
+  async init(config: IText) {
     this.vertical = config.styles.writingMode === 'vertical-lr'
 
     const div = document.createElement('div')
@@ -111,6 +134,7 @@ class Rect {
 
     try {
       document.body.appendChild(div)
+      // await this.waitForRender(div)
       this.bodyRect = div.getClientRects()[0]
       this.width = this.bodyRect.width
       this.height = this.bodyRect.height
@@ -179,7 +203,7 @@ class Rect {
         if (((nextTop <= currTop && currTop <= nextBottom &&
           nextTop <= currBottom && currBottom <= nextBottom) ||
           (currTop <= nextTop && nextTop <= currBottom &&
-          currTop <= nextBottom && nextBottom <= currBottom))) {
+            currTop <= nextBottom && nextBottom <= currBottom))) {
           curr.y = Math.min(curr.y, next.y)
           curr.width += next.width
           curr.height = Math.max(curr.height, next.height)
@@ -201,7 +225,7 @@ class Rect {
       const { rect } = row
       if (rect.width < 1) {
         let nextIndex = index + 1
-        while (nextIndex < rows.length && rows[nextIndex].rect.width < 1)nextIndex++
+        while (nextIndex < rows.length && rows[nextIndex].rect.width < 1) nextIndex++
         const next = rows[nextIndex] ?? defaultLine
         const prev = rows[index - 1] ?? defaultLine
         const target = (prev.rect.width < next.rect.width) ? prev : next
@@ -609,12 +633,13 @@ class TextBg {
     if (!isITextBox(effect)) return {}
   }
 
-  drawSvgBg(config: IText) {
+  async drawSvgBg(config: IText): Promise<textBgSvg|null> {
     const textBg = config.styles.textBg
     if (textBg.name === 'none') return null
 
     const opacity = textBg.opacity * 0.01
-    const myRect = new Rect(config)
+    const myRect = new Rect()
+    await myRect.init(config)
     myRect.preprocess()
     const { vertical, width, height, transform, rects, rows } = myRect.get()
 
@@ -649,7 +674,7 @@ class TextBg {
     } else if (isITextUnderline(textBg)) {
       const color = textEffectUtils.colorParser(textBg.color, config)
       const fill = this.rgba(color, opacity)
-      const paths = [] as Record<string, unknown>[]
+      const paths = [] as textBgSvg['content']
       rects.forEach(rect => {
         const capWidth = rect.height * 0.005 * textBg.height
         const yOffset = (rect.height - capWidth * 2) * 0.01 * (100 - textBg.yOffset)
@@ -735,7 +760,7 @@ class TextBg {
         // .concat(path.toCircle() as any) // Show control point
       }
     } else if (isITextSvgbg(textBg)) {
-      const pos = [] as (Record<'x' | 'y' | 'width' | 'height', number> & {color: string})[]
+      const pos = [] as (Record<'x' | 'y' | 'width' | 'height', number> & { color: string })[]
       let i = 0
 
       rows.forEach((row) => {

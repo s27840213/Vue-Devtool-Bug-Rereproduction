@@ -36,7 +36,7 @@ import controlUtils from '@/utils/controlUtils'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
-import textBgUtils from '@/utils/textBgUtils'
+import textBgUtils, { textBgSvg } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
@@ -94,7 +94,7 @@ export default defineComponent({
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
       isLoading: true,
-      svgBG: {} as ReturnType<typeof textBgUtils.drawSvgBg>,
+      svgBG: {} as textBgSvg|null,
       widthLimitSetDuringComposition: false
     }
   },
@@ -347,8 +347,8 @@ export default defineComponent({
       }
     },
     drawSvgBG() {
-      this.$nextTick(() => {
-        this.svgBG = textBgUtils.drawSvgBg(this.config)
+      this.$nextTick(async () => {
+        this.svgBG = await textBgUtils.drawSvgBg(this.config)
       })
     },
     spans(): ISpan[] {
