@@ -22,6 +22,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
+
 export default defineComponent({
   emits: [],
   components: {

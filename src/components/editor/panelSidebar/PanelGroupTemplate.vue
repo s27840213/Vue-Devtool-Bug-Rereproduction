@@ -63,12 +63,12 @@ export default defineComponent({
       return this.groupItem.group_type === 1
     },
     panelStyle(): Record<string, string> {
-      return this.$isTouchDevice ? {
+      return this.$isTouchDevice() ? {
         padding: '20px 15px'
       } : {}
     },
     listStyle(): Record<string, string> {
-      return this.$isTouchDevice ? {
+      return this.$isTouchDevice() ? {
         gridTemplateColumns: `repeat(${window.innerWidth >= 600 ? 3 : 2}, 1fr)`
       } : {}
     }

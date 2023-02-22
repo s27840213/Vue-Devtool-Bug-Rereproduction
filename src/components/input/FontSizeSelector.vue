@@ -106,7 +106,7 @@ export default defineComponent({
       return value.toString()
     },
     handleValueModal() {
-      if (this.$isTouchDevice) return
+      if (this.$isTouchDevice()) return
       this.openValueSelector = !this.openValueSelector
       if (this.openValueSelector) {
         const input = this.$refs['input-fontSize'] as HTMLInputElement

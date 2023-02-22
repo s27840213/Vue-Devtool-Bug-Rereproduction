@@ -277,7 +277,7 @@ export default defineComponent({
       vivistickerUtils.deselect()
     },
     onRightClick(event: MouseEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         return
       }
 

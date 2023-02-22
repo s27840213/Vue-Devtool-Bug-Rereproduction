@@ -162,7 +162,7 @@ export default defineComponent({
         }))
     },
     amountInRow():number {
-      return this.$isTouchDevice ? 3 : 2
+      return this.$isTouchDevice() ? 3 : 2
     },
     listResult(): ICategoryItem[] {
       return this.processListResult(this.rawContent.list, false)

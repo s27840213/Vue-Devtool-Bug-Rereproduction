@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="tags" v-click-outside="clickOutsideHandler")
-  template(v-if="!$isTouchDevice")
+  template(v-if="!$isTouchDevice()")
     div(class="tags__flex-container"
         :style="containerStyle")
       div(class="tags__tag-wrapper pointer" v-for="tag in tags"

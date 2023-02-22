@@ -187,12 +187,11 @@ export default defineComponent({
         width: (this.getImgWidth - this.pageSize.width / this.getPageScale) / 2,
         height: (this.getImgHeight - this.pageSize.height / this.getPageScale) / 2
       }
-      console.log(baseLine, translateLimit)
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
 
-      offsetPos.x = (offsetPos.x / this.getPageScale) * (100 / this.scaleRatio)
-      offsetPos.y = (offsetPos.y / this.getPageScale) * (100 / this.scaleRatio)
+      offsetPos.x = (offsetPos.x / this.getPageScale) * (100 / this.scaleRatio) / this.page.contentScaleRatio
+      offsetPos.y = (offsetPos.y / this.getPageScale) * (100 / this.scaleRatio) / this.page.contentScaleRatio
       const imgPos = this.imgPosMapper(offsetPos)
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
         imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.pageSize.width / this.getPageScale - this.getImgWidth
@@ -259,7 +258,7 @@ export default defineComponent({
       const angleInRad = this.getPageRotate * Math.PI / 180
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
-      const [dx, dy] = [diff.offsetX / this.getPageScale, diff.offsetY / this.getPageScale]
+      const [dx, dy] = [diff.offsetX / this.getPageScale / this.page.contentScaleRatio, diff.offsetY / this.getPageScale / this.page.contentScaleRatio]
 
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
@@ -354,7 +353,7 @@ export default defineComponent({
       this.setCursorStyle(el.style.cursor)
     },
     disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }

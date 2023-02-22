@@ -22,6 +22,7 @@ import uploadUtils from './uploadUtils'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
+  get currSubSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSubSelectedInfo }
   get pageIndex(): number { return pageUtils.currFocusPageIndex }
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }

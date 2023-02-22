@@ -246,7 +246,7 @@ export default defineComponent({
       editorUtils.toggleColorSlips(false)
     },
     openColorPanel(event: MouseEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         this.$emit('openColorPicker')
         return
       }

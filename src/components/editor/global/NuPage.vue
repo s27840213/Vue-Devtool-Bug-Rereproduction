@@ -4,7 +4,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
       :id="`nu-page_${pageIndex}`"
       :style="pageStyles"
       ref="page")
-    div(v-if="!isDetailPage && !$isTouchDevice"
+    div(v-if="!isDetailPage && !$isTouchDevice()"
       class="page-title text-left pb-10"
       :style="{'width': `${config.width * (scaleRatio/100)}px`, 'transform': `translate3d(0, -100%, ${isAnyLayerActive ? 0 : 1}px)`}")
       //- span(class="pr-10") 第 {{pageIndex+1}} 頁
@@ -45,7 +45,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
           @click="deletePage()"
           v-hint="$t('NN0141')"
         )
-    div(v-if="isDetailPage && !$isTouchDevice" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
+    div(v-if="isDetailPage && !$isTouchDevice()" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
       div(class="page-bar__icons" v-if="!isBackgroundImageControl")
         div(class="body-2")
           span {{pageIndex + 1}}
@@ -199,9 +199,6 @@ export default defineComponent({
   created() {
     this.updateSnapUtilsIndex(this.pageIndex)
   },
-  // updated() {
-  //   console.warn('updated! ', this.pageIndex)
-  // },
   data() {
     return {
       initialAbsPos: { x: 0, y: 0 },
@@ -322,13 +319,10 @@ export default defineComponent({
       isImgCtrl: 'imgControl/isImgCtrl',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
-    // contentScaleRatio():number {
-    //   return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this._contentScaleRatio
-    // },
     contentScaleRatio(): number {
       // return this.pageState.config.contentScaleRatio
-      // if (this.$isTouchDevice) {
-      if (this.$isTouchDevice) {
+      // if (this.$isTouchDevice()) {
+      if (this.$isTouchDevice()) {
         return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this.pageState.config.contentScaleRatio
       } else {
         return 1
@@ -342,7 +336,7 @@ export default defineComponent({
       }
     },
     lazyloadSize(): unknown {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice()) {
         return {
           minHeight: this.config.height * this.contentScaleRatio,
           maxHeight: this.config.height * this.contentScaleRatio
@@ -409,7 +403,7 @@ export default defineComponent({
       const transform = ''
       let margin = ''
       let position = 'relative'
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         position = 'absolute'
       } else {
         margin = this.isDetailPage ? '0px auto' : '25px auto'
@@ -422,7 +416,7 @@ export default defineComponent({
       }
     },
     isOutOfBound(): boolean {
-      return this.$isTouchDevice && !this.isDetailPage ? (this.pageIndex <= this.currCardIndex - 2 || this.pageIndex >= this.currCardIndex + 2)
+      return this.$isTouchDevice() && !this.isDetailPage ? (this.pageIndex <= this.currCardIndex - 2 || this.pageIndex >= this.currCardIndex + 2)
         : this.pageIndex <= (this.topBound - 4) || this.pageIndex >= (this.bottomBound + 4)
     },
     hasEditingText(): boolean {
@@ -592,7 +586,6 @@ export default defineComponent({
       pageUtils.addPageToPos(pageUtils.newPage({
         width: this.pageState.config.width,
         height: this.pageState.config.height,
-        backgroundColor: this.pageState.config.backgroundColor,
         physicalWidth: this.pageState.config.physicalWidth,
         physicalHeight: this.pageState.config.physicalHeight,
         isEnableBleed: this.pageState.config.isEnableBleed,
@@ -745,7 +738,7 @@ export default defineComponent({
       }
     },
     disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }

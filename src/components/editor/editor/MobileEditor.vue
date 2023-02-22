@@ -88,7 +88,7 @@ export default defineComponent({
     eventUtils.off(PanelEvent.switchTab)
   },
   mounted() {
-    if (this.$isTouchDevice) {
+    if (this.$isTouchDevice()) {
       const el = this.$refs['mobile-editor__content'] as HTMLElement
       editorUtils.setMobileHW({
         width: el.clientWidth,

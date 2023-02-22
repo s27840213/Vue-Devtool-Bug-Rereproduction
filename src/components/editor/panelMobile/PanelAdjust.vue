@@ -9,7 +9,7 @@ div(class="panel-adjust")
       :max="field.max"
       @update="handleField")
   div(class="panel-adjust__reset")
-    button(@click="reset") {{ 'Reset' }}
+    button(@click="reset") {{ $t('NN0754') }}
 </template>
 
 <script lang="ts">

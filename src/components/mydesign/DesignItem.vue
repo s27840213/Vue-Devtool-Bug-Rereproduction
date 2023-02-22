@@ -292,7 +292,7 @@ export default defineComponent({
       if (!thumbnailElement) return
       this.isMouseOver = true
       if (this.config.pageNum === 1) return
-      this.waitTimer = window.setInterval(() => {
+      this.waitTimer = window.setTimeout(() => {
         if (this.isMouseOver) {
           this.showCarousel = true
           this.renderedWidth = thumbnailElement.width
@@ -307,7 +307,7 @@ export default defineComponent({
       this.isMouseOver = false
       this.isMenuOpen = false
       this.showCarousel = false
-      window.clearInterval(this.waitTimer)
+      window.clearTimeout(this.waitTimer)
     },
     handleNameMouseEnter() {
       if (this.nameIneditable) return
@@ -342,7 +342,7 @@ export default defineComponent({
         return
       }
       if (this.unenterable || this.isTempDesign) return
-      if (this.$isTouchDevice && this.config.group_type === 1) {
+      if (this.$isTouchDevice() && this.config.group_type === 1) {
         modalUtils.setModalInfo(
             `${this.$t('NN0808')}`,
             [],

@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="color-btn" :style="wrapperStyle")
-  div(class="color-btn__wrapper" :class="{active: active || focus, mobile: $isTouchDevice}")
+  div(class="color-btn__wrapper" :class="{active: active || focus, mobile: $isTouchDevice()}")
     div(v-if="color === 'add'" class="color-btn__add-color")
     div(v-else-if="color === 'multi'" class="color-btn__multi-color")
     div(v-else :style="{backgroundColor: color}"

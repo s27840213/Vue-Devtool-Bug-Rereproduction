@@ -41,7 +41,7 @@ export default defineComponent({
     itemStyle(): any {
       const { width } = this.item.preview || {
         width: !isNaN(this.itemWidth) ? this.itemWidth
-          : this.$isTouchDevice ? (window.outerWidth - 68) / 3 - 10
+          : this.$isTouchDevice() ? (window.outerWidth - 68) / 3 - 10
             : 135
       }
       return {

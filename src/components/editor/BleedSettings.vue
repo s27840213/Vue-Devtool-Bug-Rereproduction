@@ -3,7 +3,7 @@ div(class="bleed-settings")
   div(v-for="bleed in bleedsToShow" class='bleed-settings__item')
     div(class='bleed-settings__item__label')
       span(class="body-XS text-gray-2") {{bleed.label}}
-    div(v-if="!$isTouchDevice" class='bleed-settings__item__input')
+    div(v-if="!$isTouchDevice()" class='bleed-settings__item__input')
       div(class='bleed-settings__item__input__icon pointer'
           @click="addBleed(bleed.key, bleedStep, isLocked)")
         svg-icon(iconName="chevron-up"

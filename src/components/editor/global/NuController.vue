@@ -4,7 +4,7 @@ div(:layer-index="`${layerIndex}`"
     ref="self")
   div(class="nu-controller__line-hint" :style="hintStyles()" v-if="isLineEndMoving")
     | {{ Math.round(hintLength) + ' | ' + Math.round(hintAngle) % 360  + '°' }}
-  div(class="nu-controller__object-hint" :style="hintStyles()" v-if="isRotating && !$isTouchDevice")
+  div(class="nu-controller__object-hint" :style="hintStyles()" v-if="isRotating && !$isTouchDevice()")
     div(class="nu-controller__object-hint__icon")
       svg-icon(iconName="angle"
               iconWidth="12px"
@@ -59,7 +59,7 @@ div(:layer-index="`${layerIndex}`"
             @keydown.meta.shift.90.exact.stop.self
             @update="handleTextChange"
             @compositionend="handleTextCompositionEnd")
-        div(v-if="!$isTouchDevice" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
+        div(v-if="!$isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
             class="control-point__corner-rotate scaler"
             :ref="`corner-rotate-${index}`"
             :key="`corner-rotate-${index}`"
@@ -78,13 +78,13 @@ div(:layer-index="`${layerIndex}`"
           div(class="control-point resizer"
               :key="`resizer-${index}`"
               :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="!$isTouchDevice ? resizeStart($event, resizer.type) : null"
-              @touchstart="!$isTouchDevice ? disableTouchEvent($event) : null")
+              @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
+              @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
           div(class="control-point resizer"
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))"
-              @pointerdown.prevent.stop="!$isTouchDevice ? resizeStart($event, resizer.type) : null"
-              @touchstart="!$isTouchDevice ? disableTouchEvent($event) : null")
-        div(v-if="$isTouchDevice" v-for="(resizer, index) in getResizer(controlPoints, false, true)"
+              @pointerdown.prevent.stop="!$isTouchDevice() ? resizeStart($event, resizer.type) : null"
+              @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
+        div(v-if="$isTouchDevice()" v-for="(resizer, index) in getResizer(controlPoints, false, true)"
             class="control-point__resize-bar-wrapper")
           div(class="control-point resizer"
               :key="`resizer-touch-${index}`"
@@ -95,7 +95,7 @@ div(:layer-index="`${layerIndex}`"
               :style="Object.assign(resizerStyles(resizer.styles, true), cursorStyles(resizer.cursor, getLayerRotate()))"
               @pointerdown.prevent.stop="resizeStart($event, resizer.type)"
               @touchstart="disableTouchEvent")
-        div(v-if="config.type === 'text' && contentEditable && !$isTouchDevice"
+        div(v-if="config.type === 'text' && contentEditable && !$isTouchDevice()"
             class="control-point__resize-bar-wrapper")
           div(v-for="(resizer, index) in getResizer(controlPoints, true)"
               class="control-point resizer control-point__move-bar"
@@ -106,9 +106,9 @@ div(:layer-index="`${layerIndex}`"
             class="control-point scaler"
             :key="`scaler-${index}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
-            @pointerdown.prevent.stop="!$isTouchDevice ? scaleStart($event) : null"
-            @touchstart="!$isTouchDevice ? disableTouchEvent($event) : null")
-        div(v-if="$isTouchDevice" v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalerTouchAreas) : []"
+            @pointerdown.prevent.stop="!$isTouchDevice() ? scaleStart($event) : null"
+            @touchstart="!$isTouchDevice() ? disableTouchEvent($event) : null")
+        div(v-if="$isTouchDevice()" v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalerTouchAreas) : []"
             class="control-point scaler"
             :key="`scaler-touch-${index}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
@@ -158,7 +158,7 @@ import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import { ILayerInfo, FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
+import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
 import DragUtils from '@/utils/dragUtils'
 import eventUtils, { ImageEvent } from '@/utils/eventUtils'
@@ -171,6 +171,7 @@ import LayerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import mathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
+import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
@@ -184,7 +185,6 @@ import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import { MovingUtils } from '@/utils/movingUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -237,7 +237,7 @@ export default defineComponent({
       FrameUtils,
       ShortcutUtils,
       dragUtils: new DragUtils(this.config.id),
-      controlPoints: (this.$isTouchDevice
+      controlPoints: (this.$isTouchDevice()
         ? ControlUtils.getControlPoints(6, 25)
         : ControlUtils.getControlPoints(4, 25)) as ICP,
       isControlling: false,
@@ -454,7 +454,7 @@ export default defineComponent({
           editor.setEditable(newVal)
         })
       }
-      !this.$isTouchDevice && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
+      !this.$isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
   },
   unmounted() {
@@ -543,7 +543,7 @@ export default defineComponent({
       const width = parseFloat(resizerStyle.width.replace('px', ''))
       const height = parseFloat(resizerStyle.height.replace('px', ''))
       const isHorizon = width > height
-      const scalerOffset = this.$isTouchDevice ? 36 : 20
+      const scalerOffset = this.$isTouchDevice() ? 36 : 20
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
         width: isHorizon ? `${(this.getLayerWidth() - scalerOffset) * this.scaleRatio * 0.01}px` : `${width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
@@ -565,7 +565,7 @@ export default defineComponent({
       const width = parseFloat(resizerStyle.width.replace('px', ''))
       const height = parseFloat(resizerStyle.height.replace('px', ''))
       const scale = isTouchArea ? 2 : 1
-      const aspectRatio = this.$isTouchDevice ? 0.24 : 0.16
+      const aspectRatio = this.$isTouchDevice() ? 0.24 : 0.16
 
       const isHorizon = width > height
       const sizeForWidth = this.getLayerWidth() * this.contentScaleRatio - 10
@@ -663,7 +663,8 @@ export default defineComponent({
         opacity: `${this.config.styles.opacity / 100}`,
         transform: `scaleX(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.getLayerScale() * this.contentScaleRatio * this.scaleRatio * 0.01})`,
         textAlign: this.config.styles.align,
-        writingMode: this.config.styles.writingMode
+        writingMode: this.config.styles.writingMode,
+        ...(this.contentEditable ? { zIndex: 100 } : {})
       }
     },
     textBodyStyle() {
@@ -691,7 +692,7 @@ export default defineComponent({
       }
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
-      if (this.isLine() || this.$isTouchDevice) return
+      if (this.isLine() || this.$isTouchDevice()) return
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
         shown
       })
@@ -801,7 +802,7 @@ export default defineComponent({
     //   this.eventTarget = (event.target as HTMLElement)
     //   this.eventTarget.releasePointerCapture((event as PointerEvent).pointerId)
 
-    //   if (this.$isTouchDevice) {
+    //   if (this.$isTouchDevice()) {
     //     if (!this.dblTabsFlag && this.isActive) {
     //       const touchtime = Date.now()
     //       const interval = 500
@@ -842,7 +843,7 @@ export default defineComponent({
     //    * @Note - in Mobile version, we can't select the layer directly, we should make it active first
     //    * The exception is that we are in multi-selection mode
     //    */
-    //   if (this.$isTouchDevice && !this.isActive && !this.isLocked() && !this.inMultiSelectionMode) {
+    //   if (this.$isTouchDevice() && !this.isActive && !this.isLocked() && !this.inMultiSelectionMode) {
     //     this.eventTarget.addEventListener('touchstart', this.disableTouchEvent)
     //     this.initialPos = MouseUtils.getMouseAbsPoint(event)
     //     eventUtils.addPointerEvent('pointerup', this.moveEnd)
@@ -964,7 +965,7 @@ export default defineComponent({
     //       }
     //   }
 
-    //   if (this.$isTouchDevice && !this.isLocked()) {
+    //   if (this.$isTouchDevice() && !this.isLocked()) {
     //     if (!this.isActive) {
     //       if (posDiff.x > 1 || posDiff.y > 1) {
     //         this.isDoingGestureAction = true
@@ -1150,7 +1151,7 @@ export default defineComponent({
     //       }
     //     }
 
-    //     if (this.$isTouchDevice && !this.isPointerDownFromSubController && !hasActualMove) {
+    //     if (this.$isTouchDevice() && !this.isPointerDownFromSubController && !hasActualMove) {
     //       /**
     //        * This function is used for mobile-control, as one of the sub-controller is active
     //        * tap at the primary-controller should set the sub-controller to non-active
@@ -1239,7 +1240,7 @@ export default defineComponent({
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(event)
 
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y, this.$isTouchDevice ? 1 / this.contentScaleRatio : undefined)
+      const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y, this.$isTouchDevice() ? 1 / this.contentScaleRatio : undefined)
       const [dx, dy] = [diff.offsetX, diff.offsetY]
 
       /**
@@ -1564,7 +1565,7 @@ export default defineComponent({
       const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(event)
 
-      const _f = (this.$isTouchDevice ? 1 / this.contentScaleRatio : 1 / (this.scaleRatio * 0.01))
+      const _f = (this.$isTouchDevice() ? 1 / this.contentScaleRatio : 1 / (this.scaleRatio * 0.01))
       const [dx, dy] = [diff.x * _f, diff.y * _f]
 
       const offsetMultiplier = altPressed ? 2 : 1
@@ -2123,7 +2124,7 @@ export default defineComponent({
       }
     },
     onRightClick(event: MouseEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         // in touch device, right click will be triggered by long click
         event.preventDefault()
         return
@@ -2277,7 +2278,7 @@ export default defineComponent({
       }
     },
     disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }

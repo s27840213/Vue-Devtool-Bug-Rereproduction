@@ -6,14 +6,11 @@ div(class="editor-view" v-touch
     @scroll="!inBgRemoveMode ? scrollUpdate() : null"
     @pointerdown="selectStart"
     @mousewheel="handleWheel"
-    @pinch="pinchHandler"
     ref="editorView")
   div(class="editor-view__abs-container"
       :style="absContainerStyle")
     div(v-if="editorView" class="editor-view__canvas"
         ref="canvas"
-        @swipeup="swipeUpHandler"
-        @swipedown="swipeDownHandler"
         :style="canvasStyle")
       page-card(v-for="(page,index) in pagesState"
           :key="`page-${page.config.id}`"
@@ -42,6 +39,7 @@ import backgroundUtils from '@/utils/backgroundUtils'
 import ControlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
+import formatUtils from '@/utils/formatUtils'
 import GroupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -49,6 +47,7 @@ import modalUtils from '@/utils/modalUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
+import SwipeDetector from '@/utils/SwipeDetector'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { AnyTouchEvent } from 'any-touch'
@@ -109,7 +108,8 @@ export default defineComponent({
       hanleWheelTimer: -1,
       handleWheelTransition: false,
       oriX: 0,
-      oriPageSize: 0
+      oriPageSize: 0,
+      swipeDetector: null as unknown as SwipeDetector
     }
   },
   created() {
@@ -147,14 +147,15 @@ export default defineComponent({
 
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
-    this.editorCanvas = this.$refs.canvas as HTMLElement
+    this.swipeDetector = new SwipeDetector(this.editorView, { targetDirection: 'vertical' }, this.handleSwipe)
+
     this.cardHeight = this.editorView ? this.editorView.clientHeight : 0
     this.cardWidth = this.editorView ? this.editorView.clientWidth : 0
 
     pageUtils.fitPage(false, true)
     this.tmpScaleRatio = pageUtils.scaleRatio
 
-    if (this.$isTouchDevice) {
+    if (this.$isTouchDevice()) {
       pageUtils.mobileMinScaleRatio = this.isDetailPage ? 20 : this.tmpScaleRatio
       pageUtils.originPageSize.width = pageUtils.getPages[0].width * this.pageUtils.mobileMinScaleRatio * 0.01
       pageUtils.originPageSize.height = pageUtils.getPages[0].height * this.pageUtils.mobileMinScaleRatio * 0.01
@@ -174,6 +175,7 @@ export default defineComponent({
   },
   beforeUnmount() {
     this.editorViewResizeObserver.disconnect()
+    this.swipeDetector.unbind()
   },
   watch: {
     currFocusPageIndex(newVal) {
@@ -211,7 +213,9 @@ export default defineComponent({
       currFocusPageIndex: 'getCurrFocusPageIndex',
       currCardIndex: 'mobileEditor/getCurrCardIndex',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
-      groupType: 'getGroupType'
+      groupType: 'getGroupType',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      isImgCtrl: 'imgControl/isImgCtrl'
     }),
     pages(): Array<IPage> {
       return this.pagesState.map((p: IPageState) => p.config)
@@ -249,17 +253,6 @@ export default defineComponent({
     editorViewStyle(): { [index: string]: string | number } {
       return {
         overflow: this.isDetailPage ? 'scroll' : 'initial'
-      }
-    },
-    cardStyle(): { [index: string]: string | number } {
-      return {
-        width: `${this.cardWidth}px`,
-        height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
-        padding: this.isDetailPage ? '0px' : `${pageUtils.MOBILE_CARD_PADDING}px`,
-        flexDirection: this.isDetailPage ? 'column' : 'initial',
-        'overflow-y': this.isDetailPage ? 'initial' : 'scroll',
-        // overflow: this.isDetailPage ? 'initial' : 'scroll',
-        minHeight: this.isDetailPage ? 'none' : '100%'
       }
     },
     canvasStyle(): { [index: string]: string | number } {
@@ -308,6 +301,9 @@ export default defineComponent({
     },
     selectStart(e: PointerEvent) {
       e.stopPropagation()
+      if (this.hasCopiedFormat) {
+        formatUtils.clearCopiedFormat()
+      }
       if (ControlUtils.isClickOnController(e)) {
         const movingUtils = new MovingUtils({
           _config: { config: layerUtils.getCurrLayer },
@@ -440,13 +436,13 @@ export default defineComponent({
       //   }
       // })
     },
-    swipeUpHandler(e: AnyTouchEvent) {
-      if (!this.isDetailPage && !this.hasSelectedLayer) {
+    swipeUpHandler() {
+      if (!this.isDetailPage && !this.hasSelectedLayer && !this.isBgImgCtrl && !this.isImgCtrl) {
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }
         this.isSwiping = true
-        e.stopImmediatePropagation()
+        // e.stopImmediatePropagation()
         if (this.pageNum - 1 !== this.currCardIndex) {
           this.setCurrCardIndex(this.currCardIndex + 1)
           GroupUtils.deselect()
@@ -484,13 +480,13 @@ export default defineComponent({
         this.isSwiping = false
       }
     },
-    swipeDownHandler(e: AnyTouchEvent) {
-      if (!this.isDetailPage && !this.hasSelectedLayer) {
+    swipeDownHandler() {
+      if (!this.isDetailPage && !this.hasSelectedLayer && !this.isBgImgCtrl && !this.isImgCtrl) {
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }
         this.isSwiping = true
-        e.stopImmediatePropagation()
+        // e.stopImmediatePropagation()
         if (this.currCardIndex !== 0) {
           this.setCurrCardIndex(this.currCardIndex - 1)
           GroupUtils.deselect()
@@ -503,6 +499,13 @@ export default defineComponent({
           })
         }
         this.isSwiping = false
+      }
+    },
+    handleSwipe(dir: string) {
+      if (dir === 'up') {
+        this.swipeUpHandler()
+      } else if (dir === 'down') {
+        this.swipeDownHandler()
       }
     }
   }

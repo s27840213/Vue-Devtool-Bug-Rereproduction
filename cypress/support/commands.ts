@@ -34,28 +34,42 @@
 //     }
 //   }
 // }
-import { uniq } from 'lodash'
+import { cloneDeep, uniq } from 'lodash'
 import loginData from '../fixtures/loginData.json'
 
-const snapshotStyles = `
-  /* Hide carets */
-  * { caret-color: transparent !important; }
+// Option that prevent print command detail.
+const silent = { log: false }
 
-  /* Generic hide */
-  [cy-visual-test="transparent"] {
-    color: transparent !important;
-    font-family: monospace !important;
-    opacity: 0 !important;
-  }
+Cypress.Commands.add('isMobile', (callback: () => void) => {
+  cy.get('#app', silent)
+    .invoke(silent, 'prop', '__vue_app__')
+    .its('config.globalProperties.$isTouchDevice', silent)
+    .then((isMobile: () => boolean) => {
+      if (isMobile()) {
+        cy.log('isMobile:')
+        callback()
+      }
+    })
+})
 
-  [cy-visual-test="removed"] {
-    display: none !important;
-  }
+Cypress.Commands.add('notMobile', (callback: () => void) => {
+  cy.get('#app', silent)
+    .invoke(silent, 'prop', '__vue_app__')
+    .its('config.globalProperties.$isTouchDevice', silent)
+    .then((isMobile: () => boolean) => {
+      if (!isMobile()) {
+        cy.log('!isMobile:')
+        callback()
+      }
+    })
+})
 
-  [cy-test-no-radius] {
-    border-radius: 0 !important;
-  }
-`
+Cypress.Commands.add('waitTransition', { prevSubject: 'element' }, (subject) => {
+  cy.wrap(subject, silent)
+    .invoke(silent, 'prop', 'class')
+    .should('not.match', /(-leave-active|-enter-active)/)
+  return cy.wrap(subject, silent)
+})
 
 Cypress.Commands.add('login', () => {
   cy.request('POST', 'https://apiv2.vivipic.com/login', loginData.email)
@@ -65,43 +79,47 @@ Cypress.Commands.add('login', () => {
 })
 
 Cypress.Commands.add('deleteAllLayers', () => {
-  cy.get('body').type('{ctrl+A}').type('{del}')
+  cy.log('delete layers')
+    .get('body', silent)
+    .type('{ctrl+A}', silent)
+    .type('{del}', silent)
 })
 
 Cypress.Commands.add('deselectAllLayers', () => {
-  cy.get('.pages-wrapper').eq(0).type('{ctrl+D}')
-    .get('.page-control').children().should('have.length', 0)
+  cy.log('deselect layers')
+    .get('.pages-wrapper', silent)
+    .eq(0, silent)
+    .type('{ctrl+D}', silent)
+    .get('.page-control', silent)
+    .children(silent).should('have.length', 0)
 })
 
 Cypress.Commands.add('importDesign', (designName: string) => {
   // TODO: Use @/ instead of ../
-  const designJson = require(`../fixtures/design/${designName}`)
-  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$store').then((vuex) => {
-    vuex.commit('SET_pages', designJson)
-  })
+  const designJson = cloneDeep(require(`../fixtures/design/${designName}`))
+
+  cy.log(`Import design: ${designName}`)
+    .get('#app', silent)
+    .invoke(silent, 'prop', '__vue_app__')
+    .its('config.globalProperties.$store', silent).then((vuex) => {
+      vuex.commit('SET_pages', designJson)
+    })
 })
 
-Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQuery<unknown>, testName: string) => {
-  // TODO: Need to find a way that keep 0.01 threshold and prevent command fail
-  // Workaround is set threshold to 100% to prevent fail, but it will not create diff image
-  // TODO: Investigation why compareSnapshot fail and other image that not take snapshot still appear in report
-  // This will happend if using on('fail') to force image mismatch test pass when 'cy open' mode
-
-  const threshold = Cypress.browser.isHeadless ? 0 : 1
-
-  cy.document().then((document) => {
-    // Add special css that hide/remove some element during snapshot.
-    const css = document.createElement('style')
-    css.setAttribute('class', 'cy-visual-test-style')
-    css.textContent = snapshotStyles
-    document.body.appendChild(css)
-  }).get('.nu-page').compareSnapshot(
-    `${Cypress.currentTest.title}-${testName}`,
-    threshold,
-    { limit: 3, delay: 1000 }
-  // Remove special css
-  ).get('style.cy-visual-test-style').invoke('remove')
-  if (subject && subject.length) return cy.wrap(subject)
+Cypress.Commands.add('togglePanel', (buttonText: string) => {
+  cy.get('#app', silent)
+    .invoke(silent, 'prop', '__vue_app__')
+    .its('config.globalProperties.$isTouchDevice', silent)
+    .then((isMobile: () => boolean) => {
+      if (isMobile()) {
+        cy.get('.footer-tabs').contains('div', buttonText)
+          .should('not.have.class', 'click-disabled')
+          .click()
+          .get('.mobile-panel').waitTransition()
+      } else {
+        cy.get('.function-panel').contains(buttonText).click()
+      }
+    })
 })
 
 Cypress.Commands.add('getAllCategoryName', (panel: ISidebarData, categoryName = [], last = false) => {
@@ -153,7 +171,7 @@ function addAsset(panel: ISidebarData, category: string | number, itemIndex: num
   if (typeof category === 'number') {
     categoryIndex = category
   } else {
-    // TODO: search category name
+    // TODO: Search category name
     throw new Error('TODO: search category name in addAsset command.')
   }
 

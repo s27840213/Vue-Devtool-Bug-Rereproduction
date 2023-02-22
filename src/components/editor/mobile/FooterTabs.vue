@@ -28,6 +28,7 @@ import backgroundUtils from '@/utils/backgroundUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
+import formatUtils from '@/utils/formatUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -35,6 +36,7 @@ import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
+import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -74,6 +76,7 @@ export default defineComponent({
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
         { icon: 'add-page', text: `${this.$t('NN0139')}` },
+        { icon: 'paste', text: `${this.$t('NN0230')}` },
         ...brandkitUtils.isBrandkitAvailable ? [{ icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }] : []
       ] as Array<IFooterTab>
     }
@@ -92,6 +95,64 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
     }),
+    layerNum(): number {
+      return this.currSelectedInfo.layers.length
+    },
+    hasSubSelectedLayer(): boolean {
+      return this.currSubSelectedInfo.index !== -1
+    },
+    subLayerType(): string {
+      return this.currSubSelectedInfo.type
+    },
+    subActiveLayerIndex(): number {
+      return layerUtils.subLayerIdx
+    },
+    subActiveLayer(): any {
+      if (this.subActiveLayerIndex !== -1) {
+        return (layerUtils.getCurrLayer as IGroup).layers[this.subActiveLayerIndex]
+      }
+      return undefined
+    },
+    subActiveLayerType(): string {
+      const currLayer = layerUtils.getCurrLayer
+      if (currLayer.type === 'group' && this.subActiveLayerIndex !== -1) {
+        return (currLayer as IGroup).layers[this.subActiveLayerIndex].type
+      }
+      return ''
+    },
+    isCopyFormatDisabled(): boolean {
+      if (this.layerNum === 1) { // not tmp
+        const types = this.currSelectedInfo.types
+        const currLayer = layerUtils.getCurrLayer
+        if (types.has('group')) {
+          if (this.subActiveLayerIndex !== -1) {
+            if (['text', 'image'].includes(this.subActiveLayerType)) {
+              return this.isLocked
+            }
+            if (this.subActiveLayerType === 'frame') {
+              const frame = this.subActiveLayer as IFrame
+              if (frame.clips.length === 1) {
+                return this.isLocked
+              }
+            }
+          }
+        } else if (types.has('frame')) {
+          const frame = currLayer as IFrame
+          if (frame.clips.length === 1) {
+            return this.isLocked
+          } else {
+            if (this.subActiveLayerIndex !== -1 && frame.clips[this.subActiveLayerIndex].type === 'image') {
+              return this.isLocked
+            }
+          }
+        } else {
+          if (types.has('text') || types.has('image')) {
+            return this.isLocked
+          }
+        }
+      }
+      return true
+    },
     backgroundImgControl(): boolean {
       return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
     },
@@ -110,7 +171,13 @@ export default defineComponent({
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
-        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          hidden: this.isInFrame,
+          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
       ]
@@ -122,12 +189,19 @@ export default defineComponent({
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         ...(this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0098')}` }] : []),
-        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
+        {
+          icon: 'effect',
+          text: `${this.$t('NN0429')}`,
+          panelType: 'photo-shadow',
+          hidden: this.isInFrame,
+          disabled: this.isHandleShadow && this.mobilePanel !== 'photo-shadow'
+        },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
-        ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : [])
+        ...this.copyPasteTabs,
+        ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
+        { icon: 'copy-style', text: `${this.$t('NN0035')}` }
         // { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
-        // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
     },
     frameTabs(): Array<IFooterTab> {
@@ -138,7 +212,6 @@ export default defineComponent({
       return [
         this.mainMenu,
         ...replace,
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}` },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -148,7 +221,8 @@ export default defineComponent({
             currColorEvent: ColorEventType.shape
           }
         },
-        ...this.genearlLayerTabs
+        ...this.genearlLayerTabs,
+        ...this.copyPasteTabs
       ]
     },
     fontTabs(): Array<IFooterTab> {
@@ -166,8 +240,8 @@ export default defineComponent({
         },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
-        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
-        // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
+        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
+        { icon: 'copy-style', text: `${this.$t('NN0035')}` }
       ]
     },
     bgSettingTab(): Array<IFooterTab> {
@@ -249,7 +323,7 @@ export default defineComponent({
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}` },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` }
         // { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true }
       ]
     },
@@ -260,8 +334,14 @@ export default defineComponent({
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}` }
-
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}` },
+        ...this.copyPasteTabs
+      ]
+    },
+    copyPasteTabs(): Array<IFooterTab> {
+      return [
+        { icon: 'copy', text: `${this.$t('NN0032')}` },
+        { icon: 'paste', text: `${this.$t('NN0230')}` }
       ]
     },
     tabs(): Array<IFooterTab> {
@@ -286,14 +366,14 @@ export default defineComponent({
       } else if (this.showPhotoTabs) {
         return this.photoTabs
       } else if (this.showFontTabs) {
-        return [this.mainMenu, ...this.fontTabs, ...this.genearlLayerTabs]
+        return [this.mainMenu, ...this.fontTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
       } else if (this.showFrameTabs) {
         if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
           return this.photoTabs
         }
         return this.frameTabs
       } else if (this.showShapeSetting) {
-        return this.objectTabs.concat(this.genearlLayerTabs)
+        return [...this.objectTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
       } else if (this.inBgSettingMode) {
         return this.bgSettingTab
       } else {
@@ -340,12 +420,6 @@ export default defineComponent({
         return layer.type
       })
       return new Set(types)
-    },
-    hasSubSelectedLayer(): boolean {
-      return this.currSubSelectedInfo.index !== -1
-    },
-    subLayerType(): string {
-      return this.currSubSelectedInfo.type
     },
     isInFirstStep(): boolean {
       return stepsUtils.isInFirstStep
@@ -544,7 +618,6 @@ export default defineComponent({
           pageUtils.addPageToPos(pageUtils.newPage({
             width: page.width,
             height: page.height,
-            backgroundColor: page.backgroundColor,
             bleeds: currPage.bleeds,
             physicalBleeds: currPage.physicalBleeds,
             isEnableBleed: currPage.isEnableBleed,
@@ -597,7 +670,9 @@ export default defineComponent({
               })
             }
 
-            tiptapUtils.focus({ scrollIntoView: false }, currLayer.isEdited ? 'end' : null)
+            this.$nextTick(() => {
+              tiptapUtils.focus({ scrollIntoView: false }, currLayer.isEdited ? 'end' : null)
+            })
           } else {
             /**
              * @Todo handle the sub controler
@@ -609,7 +684,9 @@ export default defineComponent({
                 contentEditable: true
               }, subLayerIdx)
             }
-            tiptapUtils.focus({ scrollIntoView: false }, 'end')
+            this.$nextTick(() => {
+              tiptapUtils.focus({ scrollIntoView: false }, 'end')
+            })
           }
           break
         }
@@ -631,11 +708,24 @@ export default defineComponent({
           }
           break
         }
+        case 'copy': {
+          shortcutUtils.copy()
+          break
+        }
+        case 'paste': {
+          shortcutUtils.paste()
+          break
+        }
+        case 'copy-style': {
+          this.handleCopyFormat()
+          break
+        }
         case 'effect': {
-          if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
-            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
-            return
-          }
+          // Unreachable, becaues button is disabled
+          // if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
+          //   notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+          //   return
+          // }
           break
         }
         case 'color':
@@ -693,6 +783,34 @@ export default defineComponent({
     },
     handleLockedNotify() {
       notify({ group: 'copy', text: i18n.global.tc('NN0804') })
+    },
+    handleCopyFormat() {
+      if (this.isCopyFormatDisabled) return
+      const types = this.currSelectedInfo.types
+      const layer = this.currSelectedInfo.layers[0]
+      if (types.has('group')) {
+        const type = this.subActiveLayerType
+        const subLayer = this.subActiveLayer
+        if (type === 'text') {
+          formatUtils.copyTextFormat(subLayer)
+        }
+        if (type === 'image') {
+          formatUtils.copyImageFormat(subLayer)
+        }
+        if (type === 'frame') {
+          formatUtils.copyImageFormat(subLayer.clips[0])
+        }
+      } else {
+        if (types.has('text')) {
+          formatUtils.copyTextFormat(layer)
+        }
+        if (types.has('image')) {
+          formatUtils.copyImageFormat(layer)
+        }
+        if (types.has('frame')) {
+          formatUtils.copyImageFormat(layer.clips[Math.max(0, this.subActiveLayerIndex)])
+        }
+      }
     }
   }
 })

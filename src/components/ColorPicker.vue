@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="color-picker" ref="colorPicker"
     :style="{'box-shadow': isMobile ? 'none' : '0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3)'}")
-  div(v-if="$isTouchDevice")
+  div(v-if="$isTouchDevice()")
     div(class="color-picker__mobile__hex")
       span(class="body-1") Hex
       div(class="color-picker__mobile__input")
@@ -23,7 +23,7 @@ div(class="color-picker" ref="colorPicker"
     :isMobile="isMobile"
     :fullWidth="isMobile"
     :aspectRatio="aspectRatio")
-  div(v-if="!$isTouchDevice" class="px-10")
+  div(v-if="!$isTouchDevice()" class="px-10")
     div(class="color-picker__hex")
       svg-icon(class="pointer"
         iconName="eye-dropper"
@@ -79,7 +79,7 @@ export default defineComponent({
   mounted() {
     const root = this.$refs.colorPicker as HTMLElement
     const input = this.$refs.input as HTMLInputElement
-    if (!this.$isTouchDevice) {
+    if (!this.$isTouchDevice()) {
       root.focus()
       input.select()
     }
