@@ -200,7 +200,6 @@ export default defineComponent({
       }
     },
     handlePointerdown(e: PointerEvent) {
-      console.log('pointerdown')
       doubleTapUtils.click(e, { doubleClickCallback: this.clickPage })
     },
     handleDragStart(e: DragEvent) {

@@ -83,7 +83,6 @@ class FormatUtils {
   }
 
   applyFormatIfCopied(pageIndex: number, layerIndex: number, subLayerIndex = -1) {
-    console.log('applyFormatIfCopied')
     if (!this.copiedFormat) return
     const type = this.copiedFormat.type
     const layer = store.getters.getLayer(pageIndex, layerIndex)
