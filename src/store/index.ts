@@ -108,6 +108,7 @@ const getDefaultState = (): IEditorState => ({
   hasCopiedFormat: false,
   inGestureToolMode: false,
   isMobile: generalUtils.getWidth() <= 768,
+  isTablet: generalUtils.getWidth() >= 768,
   isLargeDesktop: generalUtils.getWidth() >= 1440,
   isGlobalLoading: false,
   useMobileEditor: false,
@@ -1046,16 +1047,15 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, contentScaleRatio } = payload
     state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
   },
+  UPDATE_RWD(state: IEditorState) {
+    state.isMobile = generalUtils.getWidth() <= 768
+    state.isTablet = generalUtils.getWidth() >= 768
+    state.isLargeDesktop = generalUtils.getWidth() >= 1440
+  },
   ...imgShadowMutations,
   ADD_subLayer
 }
-const handleResize = throttle(() => {
-  state.isMobile = generalUtils.getWidth() <= 768
-  state.isLargeDesktop = generalUtils.getWidth() >= 1440
-}, 500)
-
-window.addEventListener('resize', handleResize)
-handleResize()
+window.addEventListener('resize', throttle(() => store.commit('UPDATE_RWD'), 500))
 
 const store = createStore({
   state,

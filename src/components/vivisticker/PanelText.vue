@@ -38,12 +38,13 @@ div(class="panel-text" :class="{'in-category': isInCategory}")
             :itemWidth="itemWidth")
     template(v-slot:category-text-item="{ list, title }")
       div(v-if="title" class="panel-text__header") {{ title }}
-      div(class="panel-text__items")
+      div(class="panel-text__items" :style="itemsStyles")
         category-text-item(v-for="item in list"
           class="panel-text__item"
           :key="item.id"
           :item="item"
-          :itemWidth="itemWidth")
+          :itemWidth="itemWidth"
+          :style="itemStyles")
 </template>
 
 <script lang="ts">
@@ -62,6 +63,7 @@ import VueI18n from 'vue-i18n'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
+  name: 'panel-text',
   components: {
     SearchBar,
     CategoryList,
@@ -73,8 +75,7 @@ export default defineComponent({
       scrollTop: {
         mainContent: 0,
         searchResult: 0
-      },
-      itemWidth: 80
+      }
     }
   },
   computed: {
@@ -181,6 +182,23 @@ export default defineComponent({
           keyword: this.keywordLabel,
           target: i18n.global.tc('NN0005', 1)
         })}`
+    },
+    itemWidth(): number {
+      return generalUtils.isIPadOS() ? 200 : (window.outerWidth - 68) / 3 - 10
+    },
+    itemsStyles() {
+      return generalUtils.isIPadOS() ? {
+        gridTemplateColumns: 'repeat(3, 200px)',
+        justifyContent: 'space-around'
+      } : {
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        columnGap: '10px'
+      }
+    },
+    itemStyles() {
+      return generalUtils.isIPadOS() ? {} : {
+        margin: '0 auto'
+      }
     }
   },
   mounted() {
@@ -204,12 +222,7 @@ export default defineComponent({
       searchResult.scrollTop = this.scrollTop.searchResult
       mainContent.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
       searchResult.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
-      window.addEventListener('resize', this.handleResize)
-      this.handleResize()
     })
-  },
-  deactivated() {
-    window.removeEventListener('resize', this.handleResize)
   },
   watch: {
     keyword(newVal: string) {
@@ -312,9 +325,6 @@ export default defineComponent({
             size: 104 + (title ? 46 : 0) // 80(object height) + 24(gap) + 0/46(title)
           }
         })
-    },
-    handleResize() {
-      this.itemWidth = (window.outerWidth - 68) / 3 - 10
     }
   }
 })
@@ -352,16 +362,14 @@ export default defineComponent({
   &__item {
     width: 80px;
     height: 80px;
-    // margin: 0 auto;
     padding: 0 5px;
     // object-fit: contain;
     // vertical-align: middle;
   }
   &__items {
-    display: flex;
-    justify-content: space-around;
-    // grid-template-columns: repeat(3, 1fr);
-    // column-gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 10px;
   }
   &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
     margin-top: 24px;
