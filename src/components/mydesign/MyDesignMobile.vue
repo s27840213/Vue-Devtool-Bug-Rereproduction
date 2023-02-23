@@ -76,18 +76,18 @@ div(class="my-design-mobile")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
 import BottomMenu from '@/components/mydesign/BottomMenu.vue'
 import MobileAllDesignView from '@/components/mydesign/design-views/MobileAllDesignView.vue'
 import MobileFavoriteDesignView from '@/components/mydesign/design-views/MobileFavoriteDesignView.vue'
-import MobileListDesignView from '@/components/mydesign/design-views/MobileListDesignView.vue'
 import MobileFolderDesignView from '@/components/mydesign/design-views/MobileFolderDesignView.vue'
+import MobileListDesignView from '@/components/mydesign/design-views/MobileListDesignView.vue'
 import MobileTrashDesignView from '@/components/mydesign/design-views/MobileTrashDesignView.vue'
-import vClickOutside from 'click-outside-vue3'
+import { IDesign, IFolder, IMobileMessageItem, IPathedFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
-import { IDesign, IFolder, IPathedFolder, IMobileMessageItem } from '@/interfaces/design'
 import generalUtils from '@/utils/generalUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 interface IMenuButton {
   icon: string,
@@ -680,11 +680,23 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
 }
 
 .design-view {
+  @include hover-scrollbar();
   height: 100%;
   width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  @include no-scrollbar;
+  overflow-y: overlay;
+  // Always show scrollbar in mobile
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    visibility: visible;
+    border: none;
+  }
+  @include firefoxOnly {
+    scrollbar-color: setColor(gray-3) transparent;
+  }
 }
 
 .dim-background {

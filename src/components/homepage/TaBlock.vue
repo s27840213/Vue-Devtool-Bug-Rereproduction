@@ -25,10 +25,10 @@ div(class="block" :style="blockStyle")
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { mapState } from 'vuex'
 import Animation from '@/components/Animation.vue'
 import { IHomeBlockData } from '@/utils/homeBlockData'
+import { defineComponent, PropType } from 'vue'
+import { mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -86,6 +86,7 @@ export default defineComponent({
   justify-content: space-around;
   align-items: center;
   position: -webkit-sticky; // For safari < 13
+  max-width: 100%;
   &__colorBlock {
     position: absolute;
     z-index: -1;
