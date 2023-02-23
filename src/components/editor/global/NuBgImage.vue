@@ -1,18 +1,6 @@
 <template lang="pug">
-div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode")
+div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
   div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
-    //- nu-adjust-image(v-if="isAdjustImage"
-    //-       :src="finalSrc"
-    //-       :styles="adjustImgStyles"
-    //-       :page="page"
-    //-       :contentScaleRatio="contentScaleRatio"
-    //-       @error="onError")
-    //- img(v-else-if="src"
-    //-   :src="finalSrc"
-    //-   draggable="false"
-    //-   class="body"
-    //-   ref="body"
-    //-   @error="onError")
     svg(v-if="isAdjustImage"
       class="nu-background-image__svg"
       :viewBox="svgViewBox"
@@ -61,6 +49,7 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import ImageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
 import unitUtils from '@/utils/unitUtils'
+import doubleTapUtils from '@/utils/doubleTapUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
@@ -311,7 +300,8 @@ export default defineComponent({
     ...mapActions('brandkit', ['updateLogos']),
     ...mapMutations({
       setBgImageSrc: 'SET_backgroundImageSrc',
-      setBgImgConfig: 'imgControl/SET_BG_CONFIG'
+      setBgImgConfig: 'imgControl/SET_BG_CONFIG',
+      setBgImageControl: 'SET_backgroundImageControl'
     }),
     onError() {
       let updater
@@ -336,6 +326,17 @@ export default defineComponent({
         } catch (error) {
         }
       }
+    },
+    dblTap(e: PointerEvent) {
+      doubleTapUtils.click(e, {
+        doubleClickCallback: () => {
+          this.setBgImageControl({
+            pageIndex: this.pageIndex,
+            imgControl: true
+          })
+          editorUtils.setCurrActivePanel('crop')
+        }
+      })
     },
     handleIsTransparent() {
       const img = new Image()
