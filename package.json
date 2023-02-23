@@ -5,9 +5,9 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "test:e2e": "cypress run",
     "cyrun": "npx cypress run --browser chrome",
     "cyopen": "npx cypress open --e2e -b chrome",
+    "cyupdate": "npx cypress-image-diff-js -u",
     "lint": "vue-cli-service lint",
     "build-lib": "vue-cli-service build --target lib --name nueditor src/main.ts",
     "build:prerender": "vue-cli-service build --PRERENDER=1",

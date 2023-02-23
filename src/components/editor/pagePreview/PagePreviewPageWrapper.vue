@@ -200,7 +200,6 @@ export default defineComponent({
       }
     },
     handlePointerdown(e: PointerEvent) {
-      console.log('pointerdown')
       doubleTapUtils.click(e, { doubleClickCallback: this.clickPage })
     },
     handleDragStart(e: DragEvent) {
@@ -325,7 +324,7 @@ export default defineComponent({
   &-content {
     position: relative;
     box-sizing: border-box;
-    box-shadow: 0px 0px 10px setColor(gray-2, 0.4);
+    box-shadow: 0px 0px 7px setColor(gray-2, 0.4);
     transform-origin: 0 0;
     z-index: 1;
     &-more {

@@ -46,7 +46,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
           draggable="false"
           @error="onError"
           @load="onLoad")
-      img(v-else-if="src" ref="img"
+      img(v-else ref="img"
         :style="flipStyles()"
         :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation() }"
         :src="finalSrc"
@@ -67,6 +67,7 @@ import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/img
 import { IFrame, IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
+import { IBrowserInfo } from '@/store/module/user'
 import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -86,7 +87,6 @@ import { AxiosError } from 'axios'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
-import { IBrowserInfo } from '@/store/module/user'
 
 export default defineComponent({
   emits: [],

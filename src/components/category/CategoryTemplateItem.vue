@@ -26,6 +26,7 @@ import { PRECISION } from '@/utils/unitUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { round } from 'lodash'
 import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 /**
  * @Todo - fix the any type problems -> TingAn
@@ -59,6 +60,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapGetters({
+      useMobileEditor: 'getUseMobileEditor'
+    }),
     previewImage(): string {
       const { match_cover: cover, ver, id } = this.item
       return `https://template.vivipic.com/template/${cover.id ?? id}/prev?ver=${ver}`
@@ -94,6 +98,18 @@ export default defineComponent({
         : this.item))
     },
     addTemplate() {
+      if (this.isDetailPage && this.useMobileEditor) {
+        modalUtils.setModalInfo(
+            `${this.$t('NN0808')}`,
+            [],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+        )
+        return
+      }
       if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem as any, this.item as any)) return
       else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item as any)) return
       const { match_cover: matchCover = {} } = this.item
