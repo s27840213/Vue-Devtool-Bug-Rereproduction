@@ -33,14 +33,6 @@ const routes: Array<RouteRecordRaw> = [
           vivistickerUtils.hasCopied = hasCopied?.data ?? false
           vivistickerUtils.setState('hasCopied', { data: vivistickerUtils.hasCopied })
           vivistickerUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
-          const tempDesign = await vivistickerUtils.fetchDesign()
-          if (tempDesign) {
-            try {
-              vivistickerUtils.initWithTempDesign(tempDesign)
-            } catch (error) {
-              logUtils.setLogAndConsoleLog(error)
-            }
-          }
         }
         next()
       } catch (error) {

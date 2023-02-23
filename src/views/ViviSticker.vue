@@ -41,6 +41,7 @@ import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import logUtils from '@/utils/logUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -79,19 +80,27 @@ export default defineComponent({
       this.setShowTutorial(true)
     }
   },
-  mounted() {
-    /**
-     * @Note the codes below is used to prevent the zoom in/out effect of mobile phone, especially for the "IOS"
-     * Remember to set passive to "false", or the preventDefault() function won't work.
-     * check the blog below to see some method to prevent this error
-     * https://medium.com/@littleDog/%E5%A6%82%E4%BD%95%E8%A7%A3%E6%B1%BA-user-scalable-no-%E5%B1%AC%E6%80%A7%E8%A2%ABios-safari-ignore-e6a0531050ba
-     */
+  async mounted() {
+    const tempDesign = await vivistickerUtils.fetchDesign()
+    if (tempDesign) {
+      try {
+        vivistickerUtils.initWithTempDesign(tempDesign)
+      } catch (error) {
+        logUtils.setLogAndConsoleLog(error)
+      }
+    }
 
     if (!this.userInfo.isFirstOpen) {
       vivistickerUtils.sendAppLoaded()
     }
 
     stepsUtils.MAX_STORAGE_COUNT = 15
+    /**
+     * @Note the codes below is used to prevent the zoom in/out effect of mobile phone, especially for the "IOS"
+     * Remember to set passive to "false", or the preventDefault() function won't work.
+     * check the blog below to see some method to prevent this error
+     * https://medium.com/@littleDog/%E5%A6%82%E4%BD%95%E8%A7%A3%E6%B1%BA-user-scalable-no-%E5%B1%AC%E6%80%A7%E8%A2%ABios-safari-ignore-e6a0531050ba
+     */
     document.addEventListener('touchstart', (event: TouchEvent) => {
       /**
        * @param nearHrEdge - is used to prevnt the IOS navagation gesture, this is just a workaround
