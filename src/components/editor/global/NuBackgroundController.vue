@@ -4,7 +4,8 @@ div(class="nu-background-controller")
       ref="body"
       :style="styles"
       @pointerdown.stop="moveStart"
-      @touchstart="disableTouchEvent")
+      @pinch="pinchHandler")
+    //- @touchstart="disableTouchEvent"
     div(v-for="(scaler, index)  in controlPoints.scalers"
         class="controller-point"
         :key="index"
@@ -21,9 +22,10 @@ import ControlUtils from '@/utils/controlUtils'
 import eventUtils from '@/utils/eventUtils'
 import MathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
-import PageUtils from '@/utils/pageUtils'
+import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent, PropType } from 'vue'
+import { AnyTouchEvent } from 'any-touch'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -51,15 +53,17 @@ export default defineComponent({
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       initialPos: { x: 0, y: 0 },
-      initImgPos: { imgX: 0, imgY: 0 },
+      initImgPos: { x: 0, y: 0 },
       initImgControllerPos: { x: 0, y: 0 },
-      initialWH: { width: 0, height: 0 },
+      initImgSize: { width: this.config.styles.imgWidth, height: this.config.styles.imgHeight },
       center: { x: 0, y: 0 },
-      control: { xSign: 1, ySign: 1, isHorizon: false }
+      control: { xSign: 1, ySign: 1, isHorizon: false },
+      ptrSet: new Set(),
+      initPinchPos: null as null | { x: number, y: number }
     }
   },
   unmounted() {
-    PageUtils.setBackgroundImageControlDefault()
+    pageUtils.setBackgroundImageControlDefault()
   },
   computed: {
     ...mapGetters({
@@ -112,7 +116,7 @@ export default defineComponent({
       }
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return this.page.isEnableBleed ? PageUtils.removeBleedsFromPageSize(this.page) : this.page
+      return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
   },
   methods: {
@@ -159,6 +163,107 @@ export default defineComponent({
         'pointer-events': 'none'
       }
     },
+    pinchHandler(event: AnyTouchEvent) {
+      switch (event.phase) {
+        case 'start': {
+          console.log('start')
+          this.initImgPos = {
+            x: this.config.styles.imgX,
+            y: this.config.styles.imgY
+          }
+          this.initImgSize = {
+            width: this.config.styles.imgWidth,
+            height: this.config.styles.imgHeight
+          }
+          break
+        }
+        case 'move': {
+          if (!this.initPinchPos) {
+            // this.initPinchPos = { x: event.x - pageUtils.pageEventPosOffset.x, y: event.y - pageUtils.pageEventPosOffset.y }
+            this.initPinchPos = { x: event.x, y: event.y }
+          }
+
+          const translationRatio = {
+            x: -(this.initPinchPos.x - pageUtils.pageCenterPos.x) / pageUtils.originPageSize.width,
+            y: -(this.initPinchPos.y - pageUtils.pageCenterPos.y) / pageUtils.originPageSize.height
+          }
+          const sizeDiff = {
+            width: this.initImgSize.width * (event.scale - 1) * 0.5,
+            height: this.initImgSize.height * (event.scale - 1) * 0.5
+          }
+
+          const newSize = {
+            width: this.initImgSize.width + sizeDiff.width,
+            height: this.initImgSize.height + sizeDiff.height
+            // width: this.initImgSize.width,
+            // height: this.initImgSize.height
+          }
+          console.log(this.initImgSize.width * ((event.scale - 1) * 0.5 + 1), this.initImgSize.height * ((event.scale - 1) * 0.5 + 1))
+          const newPos = {
+            x: this.initImgPos.x + (sizeDiff.width * Math.min(Math.max(translationRatio.x - 0.5, -1), 1)),
+            y: this.initImgPos.y + (sizeDiff.height * Math.min(Math.max(translationRatio.y - 0.5, -1), 1)),
+          }
+          this.updateConfig({ imgX: newPos.x, imgY: newPos.y, imgWidth: newSize.width, imgHeight: newSize.height })
+          break
+        }
+        case 'end': {
+          this.initPinchPos = null
+          console.log('end')
+        }
+      }
+      //   case 'start': {
+      //     this.oriX = pageUtils.getCurrPage.x
+      //     this.oriPageSize = (pageUtils.getCurrPage.width * (pageUtils.scaleRatio / 100))
+      //     this.tmpScaleRatio = pageUtils.scaleRatio
+      //     this.isScaling = true
+      //     store.commit('SET_isPageScaling', true)
+      //     break
+      //   }
+      //   case 'move': {
+      //     if (!this.isScaling) {
+      //       this.isScaling = true
+      //       store.commit('SET_isPageScaling', true)
+      //     }
+      //     window.requestAnimationFrame(() => {
+      //       const limitMultiplier = 4
+      //       if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
+      //         pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
+      //         return
+      //       }
+      //       const newScaleRatio = Math.min(this.tmpScaleRatio * event.scale, pageUtils.mobileMinScaleRatio * limitMultiplier)
+      //       if (newScaleRatio >= pageUtils.mobileMinScaleRatio * 0.8) {
+      //         pageUtils.setScaleRatio(newScaleRatio)
+
+      //         const baseX = (pageUtils.getCurrPage.width * (newScaleRatio / 100) - this.oriPageSize) * 0.5
+      //         pageUtils.updatePagePos(0, {
+      //           x: this.oriX - baseX
+      //         })
+      //       }
+      //       clearTimeout(this.hanleWheelTimer)
+      //       this.hanleWheelTimer = setTimeout(() => {
+      //         if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
+      //           const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
+      //           page.style.transition = '0.2s linear'
+      //           this.handleWheelTransition = true
+      //           pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
+      //           this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
+      //           setTimeout(() => {
+      //             page.style.transition = ''
+      //             this.handleWheelTransition = false
+      //           }, 500)
+      //         }
+      //       }, 500)
+      //     })
+      //     break
+      //   }
+
+      //   case 'end': {
+      //     this.isScaling = false
+      //     store.commit('SET_isPageScaling', false)
+      //     break
+      //   }
+      // }
+    },
     moveStart(event: PointerEvent) {
       if (eventUtils.checkIsMultiTouch(event)) {
         return
@@ -166,15 +271,21 @@ export default defineComponent({
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initImgControllerPos = this.getImgController
-      Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
+      Object.assign(this.initImgPos, { x: this.getImgX, y: this.getImgY })
 
       eventUtils.addPointerEvent('pointermove', this.moving)
       eventUtils.addPointerEvent('pointerup', this.moveEnd)
 
       this.setCursorStyle('move')
     },
-    moving(event: MouseEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+    moving(event: PointerEvent) {
+      if (!this.ptrSet.has(event.pointerId)) {
+        this.ptrSet.add(event.pointerId)
+      }
+      // if (eventUtils.checkIsMultiTouch(event)) {
+      //   return
+      // }
+      if (eventUtils.checkIsMultiTouch(event) || this.ptrSet.size > 1) {
         return
       }
       this.setCursorStyle('move')
@@ -199,23 +310,24 @@ export default defineComponent({
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.pageSize.height / this.getPageScale - this.getImgHeight
       }
-      // PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
+      // pageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
       this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y })
     },
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
       const angleInRad = this.getPageRotate * Math.PI / 180
       return {
-        x: offsetPos.x * Math.cos(angleInRad) + offsetPos.y * Math.sin(angleInRad) + this.initImgPos.imgX,
-        y: -offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad) + this.initImgPos.imgY
+        x: offsetPos.x * Math.cos(angleInRad) + offsetPos.y * Math.sin(angleInRad) + this.initImgPos.x,
+        y: -offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad) + this.initImgPos.y
       }
     },
     moveEnd(event: PointerEvent) {
+      this.ptrSet.clear()
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
-      PageUtils.setBackgroundImageControlDefault()
+      pageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
-      PageUtils.startBackgroundImageControl(this.pageIndex)
+      pageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
 
       eventUtils.removePointerEvent('pointermove', this.moving)
@@ -228,7 +340,7 @@ export default defineComponent({
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initImgControllerPos = this.getImgController
-      this.initialWH = {
+      this.initImgSize = {
         width: this.getImgWidth,
         height: this.getImgHeight
       }
@@ -264,8 +376,8 @@ export default defineComponent({
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
       if (offsetWidth === 0 || offsetHeight === 0) return
 
-      const initWidth = this.initialWH.width
-      const initHeight = this.initialWH.height
+      const initWidth = this.initImgSize.width
+      const initHeight = this.initImgSize.height
 
       if ((width + offsetWidth) / initWidth >= (height + offsetHeight) / initHeight) {
         width = offsetWidth + initWidth
@@ -280,8 +392,8 @@ export default defineComponent({
         height: height - initHeight
       }
       const imgPos = {
-        x: this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX,
-        y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
+        x: this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.x : this.initImgPos.x,
+        y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.y : this.initImgPos.y
       }
       const baseLine = {
         x: -width / 2 + (this.pageSize.width / this.getPageScale) / 2,
@@ -296,12 +408,12 @@ export default defineComponent({
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
         if (this.control.xSign < 0) {
           imgPos.x = 0
-          offsetSize.width = this.initImgPos.imgX
+          offsetSize.width = this.initImgPos.x
         } else {
-          offsetSize.width = this.pageSize.width - this.initImgPos.imgX - initWidth
+          offsetSize.width = this.pageSize.width - this.initImgPos.x - initWidth
         }
         offsetSize.height = offsetSize.width / ratio
-        imgPos.y = this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
+        imgPos.y = this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.y : this.initImgPos.y
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
 
@@ -313,17 +425,17 @@ export default defineComponent({
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         if (this.control.ySign < 0) {
           imgPos.y = 0
-          offsetSize.height = this.initImgPos.imgY
+          offsetSize.height = this.initImgPos.y
         } else {
-          offsetSize.height = this.pageSize.height - this.initImgPos.imgY - initHeight
+          offsetSize.height = this.pageSize.height - this.initImgPos.y - initHeight
         }
         offsetSize.width = offsetSize.height * ratio
-        imgPos.x = this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.imgX : this.initImgPos.imgX
+        imgPos.x = this.control.xSign < 0 ? -offsetSize.width + this.initImgPos.x : this.initImgPos.x
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
       }
-      // PageUtils.updateBackgroundImageStyles(this.pageIndex, { width, height, imgWidth: width, imgHeight: height })
-      // PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
+      // pageUtils.updateBackgroundImageStyles(this.pageIndex, { width, height, imgWidth: width, imgHeight: height })
+      // pageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
       this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y, imgWidth: width, imgHeight: height })
     },
     scaleEnd(e: PointerEvent) {
@@ -331,9 +443,9 @@ export default defineComponent({
         return
       }
       this.isControlling = false
-      PageUtils.setBackgroundImageControlDefault()
+      pageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
-      PageUtils.startBackgroundImageControl(this.pageIndex)
+      pageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
       eventUtils.removePointerEvent('pointermove', this.scaling)
       eventUtils.removePointerEvent('pointerup', this.scaleEnd)

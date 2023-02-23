@@ -269,6 +269,23 @@ export default defineComponent({
       //   }
       // })
     })
+
+    if (!pageUtils.pageEventPosOffset) {
+      const page = this.$refs.page as HTMLElement
+      const rect = page.getBoundingClientRect()
+      pageUtils.pageEventPosOffset = {
+        x: rect.left,
+        y: rect.top
+      }
+      pageUtils.pageCenterPos = {
+        x: rect.left + rect.width * 0.5,
+        y: rect.top + rect.height * 0.5
+      }
+      pageUtils.originPageSize = {
+        width: rect.width,
+        height: rect.height
+      }
+    }
   },
   watch: {
     pageIndex(val) {
