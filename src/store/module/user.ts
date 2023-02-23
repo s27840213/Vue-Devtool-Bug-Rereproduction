@@ -16,12 +16,12 @@ const SET_STATE = 'SET_STATE' as const
 const SET_ADMIN_MODE = 'SET_ADMIN_MODE' as const
 const SET_BroswerInfo = 'SET_BroswerInfo' as const
 
-export interface BrowserInfo {
+export interface IBrowserInfo {
   name: string,
   version: string
 }
 export interface IUserModule {
-  browserInfo: BrowserInfo,
+  browserInfo: IBrowserInfo,
   token: string,
   uname: string,
   shortName: string,
@@ -259,7 +259,7 @@ const mutations: MutationTree<IUserModule> = {
   [SET_ADMIN_MODE](state: IUserModule, mode: boolean) {
     state.adminMode = mode
   },
-  [SET_BroswerInfo](state: IUserModule, browserInfo: Partial<BrowserInfo>) {
+  [SET_BroswerInfo](state: IUserModule, browserInfo: Partial<IBrowserInfo>) {
     state.browserInfo = {
       ...state.browserInfo,
       ...browserInfo

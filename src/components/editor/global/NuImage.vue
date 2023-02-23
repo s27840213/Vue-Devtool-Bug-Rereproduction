@@ -86,7 +86,7 @@ import { AxiosError } from 'axios'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
-import { BrowserInfo } from '@/store/module/user'
+import { IBrowserInfo } from '@/store/module/user'
 
 export default defineComponent({
   emits: [],
@@ -334,8 +334,8 @@ export default defineComponent({
       return this.src
     },
     filterId(): string {
-      const browserInfo = this.$store.getters['user/getBrowserInfo'] as BrowserInfo
-      if (browserInfo.name === 'Safari' && +browserInfo.version >= 16 && +browserInfo.version < 16.3) {
+      const browserInfo = this.$store.getters['user/getBrowserInfo'] as IBrowserInfo
+      if (browserInfo.name === 'Safari' && browserInfo.version !== '16.3' && generalUtils.OSversionCheck({ greaterThen: '16.0', lessThen: '16.3' })) {
         const { styles: { adjust }, id: layerId } = this.config
         const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
         const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
