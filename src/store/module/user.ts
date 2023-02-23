@@ -18,7 +18,11 @@ const SET_BroswerInfo = 'SET_BroswerInfo' as const
 
 export interface IBrowserInfo {
   name: string,
-  version: string
+  version: string,
+  os: {
+    family?: string,
+    version?: string
+  }
 }
 export interface IUserModule {
   browserInfo: IBrowserInfo,
@@ -73,7 +77,11 @@ export interface IUserModule {
 const getDefaultState = (): IUserModule => ({
   browserInfo: {
     name: '',
-    version: ''
+    version: '',
+    os: {
+      family: '',
+      version: ''
+    }
   },
   token: '',
   uname: '',
