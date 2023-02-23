@@ -12,7 +12,8 @@ lazy-load(
     div(class="page-preview-page-content pointer"
         :style="styles()"
         @click="clickPage"
-        @dblclick="dbclickPage()"
+        @pointerdown="handlePointerdown"
+        @dblclick="dbclickPage"
         draggable="true",
         @dragstart="handleDragStart"
         @dragend="handleDragEnd"
@@ -66,6 +67,7 @@ import PageContent from '@/components/editor/page/PageContent.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { IPage } from '@/interfaces/page'
+import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -194,7 +196,12 @@ export default defineComponent({
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'full') {
         this._setIsShowPagePreview(false)
+        editorUtils.setMobileAllPageMode(false)
       }
+    },
+    handlePointerdown(e: PointerEvent) {
+      console.log('pointerdown')
+      doubleTapUtils.click(e, { doubleClickCallback: this.clickPage })
     },
     handleDragStart(e: DragEvent) {
       this._setIsDragged(true)
