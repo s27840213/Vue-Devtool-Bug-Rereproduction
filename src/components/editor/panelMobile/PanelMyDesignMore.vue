@@ -19,6 +19,7 @@ div(class="panel-my-design-more")
 
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
@@ -44,8 +45,11 @@ export default defineComponent({
       setMyDesignBuffer: 'vivisticker/SET_myDesignBuffer'
     }),
     handleEdit() {
-      vivistickerUtils.initWithMyDesign(this.myDesignBuffer)
+      const mydesign = generalUtils.deepCopy(this.myDesignBuffer)
       editorUtils.setCloseMobilePanelFlag(true)
+      setTimeout(() => {
+        vivistickerUtils.initWithMyDesign(mydesign)
+      }, 300)
     },
     handleDelete() {
       modalUtils.setModalInfo(
