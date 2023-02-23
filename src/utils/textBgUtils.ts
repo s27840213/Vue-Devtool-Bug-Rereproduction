@@ -71,23 +71,23 @@ class Rect {
     }[]
   }[] = []
 
-  async waitForRender(body: HTMLElement): Promise<void> {
+  async waitForRender(div: HTMLElement): Promise<void> {
     const textId = generalUtils.generateRandomString(12)
-    body.setAttribute('id', textId)
+    div.setAttribute('id', textId)
     return new Promise(resolve => {
       textUtils.observerCallbackMap[textId] = () => {
-        textUtils.observer.unobserve(body)
+        textUtils.observer.unobserve(div)
         resolve()
       }
-      document.body.appendChild(body)
-      textUtils.observer.observe(body)
+      document.body.appendChild(div)
+      textUtils.observer.observe(div)
     })
   }
 
   async init(config: IText) {
     this.vertical = config.styles.writingMode === 'vertical-lr'
 
-    const div = document.createElement('div')
+    let div = document.createElement('div')
     div.classList.add('nu-text__body')
     config.paragraphs.forEach(para => {
       const p = document.createElement('p')
@@ -123,7 +123,9 @@ class Rect {
     })
 
     div.style.writingMode = config.styles.writingMode
-    const widthLimit = config.widthLimit
+    let { widthLimit } = config
+    const { scale, height } = config.styles
+    if (widthLimit !== -1) widthLimit += scale
     if (this.vertical) {
       div.style.width = 'max-content'
       div.style.height = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
@@ -131,37 +133,45 @@ class Rect {
       div.style.width = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
       div.style.height = 'max-content'
     }
+    await this.waitForRender(div)
 
-    try {
-      document.body.appendChild(div)
-      // await this.waitForRender(div)
-      this.bodyRect = div.getClientRects()[0]
-      this.width = this.bodyRect.width
-      this.height = this.bodyRect.height
-      this.transform = this.vertical ? 'rotate(90) scale(1,-1)' : ''
-      this.rows = []
+    // Add width limit to try to fit element height with config height.
+    const heightLimit = height / scale
+    const target = this.vertical ? 'height' : 'width'
+    let resizeTimes = 1
+    while (widthLimit !== -1 && resizeTimes < 100 &&
+      div.clientHeight - heightLimit > 5 * scale) {
+      resizeTimes++
+      widthLimit += scale * resizeTimes
+      div = div.cloneNode(true) as HTMLDivElement
+      div.style[target] = `${widthLimit / scale}px`
+      await this.waitForRender(div)
+    }
 
-      for (const p of div.children) {
-        const fontSize = parseFloat((p as HTMLElement).style.fontSize.match(/[\d.]+/)?.[0] ?? '0')
-        const letterSpacingEm = parseFloat((p as HTMLElement).style.letterSpacing.match(/[\d.-]+/)?.[0] ?? '0')
-        const letterSpacing = fontSize * letterSpacingEm
-        for (const span of p.children) {
-          const cr = span.getClientRects()[0]
-          this.rows.push({
-            rect: cr,
-            spanData: [{
-              x: cr.x,
-              y: cr.y,
-              width: cr.width,
-              height: cr.height,
-              text: span.textContent ?? '',
-              letterSpacing
-            }]
-          })
-        }
+    this.bodyRect = div.getClientRects()[0]
+    this.width = this.bodyRect.width
+    this.height = this.bodyRect.height
+    this.transform = this.vertical ? 'rotate(90) scale(1,-1)' : ''
+    this.rows = []
+
+    for (const p of div.children) {
+      const fontSize = parseFloat((p as HTMLElement).style.fontSize.match(/[\d.]+/)?.[0] ?? '0')
+      const letterSpacingEm = parseFloat((p as HTMLElement).style.letterSpacing.match(/[\d.-]+/)?.[0] ?? '0')
+      const letterSpacing = fontSize * letterSpacingEm
+      for (const span of p.children) {
+        const cr = span.getClientRects()[0]
+        this.rows.push({
+          rect: cr,
+          spanData: [{
+            x: cr.x,
+            y: cr.y,
+            width: cr.width,
+            height: cr.height,
+            text: span.textContent ?? '',
+            letterSpacing
+          }]
+        })
       }
-    } finally {
-      document.body.removeChild(div)
     }
   }
 
