@@ -117,7 +117,7 @@ const getDefaultState = (): IEditorState => ({
   isLargeDesktop: generalUtils.getWidth() >= 1440,
   isGlobalLoading: false,
   useMobileEditor: false,
-  defaultContentScaleRatio: generalUtils.isTouchDevice() ? 1 : 1,
+  contentScaleRatio: 1,
   _3dEnabledPageIndex: -1,
   enalbleComponentLog: false,
   inScreenshotPreviewRoute: false,
@@ -299,7 +299,7 @@ const getters: GetterTree<IEditorState, unknown> = {
     return state.useMobileEditor
   },
   getContentScaleRatio(state: IEditorState) {
-    return state.defaultContentScaleRatio
+    return state.contentScaleRatio
   },
   get3dEnabledPageIndex(state: IEditorState) {
     return state.useMobileEditor ? -1 : state._3dEnabledPageIndex
@@ -385,7 +385,6 @@ const mutations: MutationTree<IEditorState> = {
     })]
   },
   ADD_pageToPos(state: IEditorState, updateInfo: { newPage: IPage, pos: number }) {
-    console.log(updateInfo.pos)
     state.pages = state.pages.slice(0, updateInfo.pos).concat(
       {
         config: updateInfo.newPage,
@@ -1017,6 +1016,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_isGettingDesign(state: IEditorState, bool: boolean) {
     state.isGettingDesign = bool
   },
+  SET_contentScaleRatio(state: IEditorState, ratio: number) {
+    state.contentScaleRatio = ratio
+  },
   UPDATE_pagePos(state: IEditorState, data: { pageIndex: number, styles: { [key: string]: number } }) {
     const { pageIndex, styles } = data
     const page = state.pages[pageIndex]
@@ -1029,6 +1031,10 @@ const mutations: MutationTree<IEditorState> = {
   },
   UPDATE_snapUtilsIndex(state: IEditorState, index: number) {
     state.pages[index].modules.snapUtils.pageIndex = index
+  },
+  SET_contentScaleRatio4Page(state: IEditorState, payload: { pageIndex: number, contentScaleRatio: number }) {
+    const { pageIndex, contentScaleRatio } = payload
+    state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
   },
   ...imgShadowMutations,
   ADD_subLayer

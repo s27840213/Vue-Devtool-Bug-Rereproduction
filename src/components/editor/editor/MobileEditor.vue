@@ -15,7 +15,7 @@ div(class="mobile-editor")
     transition(name="panel-up"
               @before-enter="beforeEnter"
               @after-leave="afterLeave")
-      mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
+      mobile-panel(v-show="showMobilePanel || inMultiSelectionMode || hasCopiedFormat"
         :currActivePanel="currActivePanel"
         :currPage="currPage"
         @switchTab="switchTab"
@@ -88,7 +88,14 @@ export default defineComponent({
     eventUtils.off(PanelEvent.switchTab)
   },
   mounted() {
-    // const el = this.$refs['mobile-editor__content'] as HTMLElement
+    if (this.$isTouchDevice()) {
+      const el = this.$refs['mobile-editor__content'] as HTMLElement
+      editorUtils.setMobileHW({
+        width: el.clientWidth,
+        height: el.clientHeight
+      })
+      editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
+    }
     // const pz = new PinchZoom(el, {
     //   minZoom: (pageUtils.mobileMinScaleRatio * 0.01)
     // })
@@ -148,7 +155,8 @@ export default defineComponent({
       isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       currActivePanel: 'mobileEditor/getCurrActivePanel',
-      showMobilePanel: 'mobileEditor/getShowMobilePanel'
+      showMobilePanel: 'mobileEditor/getShowMobilePanel',
+      hasCopiedFormat: 'getHasCopiedFormat'
     }),
     inPagePanel(): boolean {
       return SidebarPanelType.page === this.currPanel
@@ -231,6 +239,10 @@ export default defineComponent({
         editorUtils.setCurrActivePanel(panelType)
         if (panelType === 'color' && props?.currColorEvent) {
           this.currColorEvent = props.currColorEvent
+        }
+
+        if (this.inMultiSelectionMode) {
+          editorUtils.setInMultiSelectionMode(false)
         }
       }
 

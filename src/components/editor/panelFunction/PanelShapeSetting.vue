@@ -230,6 +230,7 @@ import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
+  name: 'PanelShapeSetting',
   components: {
     SearchBar,
     ColorPicker,
@@ -297,6 +298,8 @@ export default defineComponent({
     colorUtils.setCurrEvent(ColorEventType.shape)
     colorUtils.setCurrColor(this.getDocumentColors[this.currSelectedColorIndex])
     this.fetchMarkers().then(async () => {
+      // If unmounted PanelShapeSetting before fetch completed, categories will not updated.
+      if (!this.categories[0]) return
       const markerList = (this.categories[0] as IListServiceContentData).list
       this.markerIds = ['none', ...markerList.map(marker => (marker.id))]
       for (const marker of markerList) {

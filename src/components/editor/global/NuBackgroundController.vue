@@ -112,7 +112,7 @@ export default defineComponent({
       }
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return PageUtils.removeBleedsFromPageSize(this.page)
+      return this.page.isEnableBleed ? PageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
   },
   methods: {
@@ -160,6 +160,9 @@ export default defineComponent({
       }
     },
     moveStart(event: PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initImgControllerPos = this.getImgController
@@ -171,6 +174,9 @@ export default defineComponent({
       this.setCursorStyle('move')
     },
     moving(event: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       this.setCursorStyle('move')
       event.preventDefault()
       const baseLine = {
@@ -184,8 +190,8 @@ export default defineComponent({
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
 
-      offsetPos.x = (offsetPos.x / this.getPageScale) * (100 / this.scaleRatio)
-      offsetPos.y = (offsetPos.y / this.getPageScale) * (100 / this.scaleRatio)
+      offsetPos.x = (offsetPos.x / this.getPageScale) * (100 / this.scaleRatio) / this.page.contentScaleRatio
+      offsetPos.y = (offsetPos.y / this.getPageScale) * (100 / this.scaleRatio) / this.page.contentScaleRatio
       const imgPos = this.imgPosMapper(offsetPos)
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
         imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.pageSize.width / this.getPageScale - this.getImgWidth
@@ -203,7 +209,10 @@ export default defineComponent({
         y: -offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad) + this.initImgPos.imgY
       }
     },
-    moveEnd() {
+    moveEnd(event: PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       PageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
       PageUtils.startBackgroundImageControl(this.pageIndex)
@@ -213,6 +222,9 @@ export default defineComponent({
       eventUtils.removePointerEvent('pointerup', this.moveEnd)
     },
     scaleStart(event: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initImgControllerPos = this.getImgController
@@ -236,6 +248,9 @@ export default defineComponent({
       eventUtils.addPointerEvent('pointerup', this.scaleEnd)
     },
     scaling(event: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
       event.preventDefault()
       let width = this.getImgWidth
       let height = this.getImgHeight
@@ -243,7 +258,7 @@ export default defineComponent({
       const angleInRad = this.getPageRotate * Math.PI / 180
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
-      const [dx, dy] = [diff.offsetX / this.getPageScale, diff.offsetY / this.getPageScale]
+      const [dx, dy] = [diff.offsetX / this.getPageScale / this.page.contentScaleRatio, diff.offsetY / this.getPageScale / this.page.contentScaleRatio]
 
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
@@ -311,7 +326,10 @@ export default defineComponent({
       // PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
       this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y, imgWidth: width, imgHeight: height })
     },
-    scaleEnd() {
+    scaleEnd(e: PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(e)) {
+        return
+      }
       this.isControlling = false
       PageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
@@ -335,7 +353,7 @@ export default defineComponent({
       this.setCursorStyle(el.style.cursor)
     },
     disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }

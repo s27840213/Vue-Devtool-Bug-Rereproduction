@@ -21,11 +21,11 @@ div(class="category-template-item" :style="itemStyle" @click="handleClickGroup")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import GeneralUtils from '@/utils/generalUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   emits: ['clickGroupItem'],
@@ -94,7 +94,7 @@ export default defineComponent({
     },
     handleCarouse () {
       this.isHover = true
-      this.waitTimer = setTimeout(() => {
+      this.waitTimer = window.setInterval(() => {
         if (this.isHover) {
           this.showCarousel = true
         }

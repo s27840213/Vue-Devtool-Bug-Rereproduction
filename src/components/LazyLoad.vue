@@ -8,10 +8,10 @@ div(class="lazy-load"
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from 'vue'
-import { some } from 'lodash'
 import generalUtils from '@/utils/generalUtils'
 import { globalQueue } from '@/utils/queueUtils'
+import { some } from 'lodash'
+import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
   name: 'LazyLoad',
@@ -99,7 +99,7 @@ export default defineComponent({
            *  If a component enters the viewport and also leaves it within 200ms it will not render at all.
            *  This saves work and improves performance when user scrolls very fast
            */
-          this.renderTimer = setTimeout(
+          this.renderTimer = window.setTimeout(
             () => {
               this.renderEventId = generalUtils.generateRandomString(3)
               // this.consoleLog(`push from lazyload: ${this.renderEventId}`)
@@ -115,7 +115,7 @@ export default defineComponent({
 
           // this.consoleLog(`setup render timer: ${this.renderTimer}`)
 
-          // this.renderTimer = setTimeout(
+          // this.renderTimer = window.setTimeout(
           //   () => {
           //     this.shoudBeRendered = true
           //     this.handleLoaded()
@@ -137,7 +137,7 @@ export default defineComponent({
             // this.consoleLog('clear render timeout')
           }
 
-          this.unrenderTimer = setTimeout(() => {
+          this.unrenderTimer = window.setTimeout(() => {
             this.unrenderEventId = generalUtils.generateRandomString(3)
             // this.consoleLog(`push from lazyload: ${this.unrenderEventId}`)
             globalQueue.push(this.unrenderEventId, async () => {
@@ -150,7 +150,7 @@ export default defineComponent({
 
           // this.consoleLog(`setup unrender timer: ${this.unrenderTimer}`)
 
-          // this.unrenderTimer = setTimeout(() => {
+          // this.unrenderTimer = window.setTimeout(() => {
           //   this.shoudBeRendered = false
           // }, this.unrenderDelay)
         }

@@ -92,11 +92,7 @@ export default defineComponent({
       this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord })
     })
     tiptapUtils.on('create', ({ editor }) => {
-      // if (!this.config?.isEdited && !this.$isTouchDevice) {
-      //   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
-      //   editor.commands.focus()
-      // }
-      if (this.config?.contentEditable) {
+      if (this.config?.contentEditable && !this.$isTouchDevice()) {
         editor.commands.focus()
       }
       const editorDiv = editor.view.dom as HTMLDivElement
@@ -127,7 +123,7 @@ export default defineComponent({
     })
     tiptapUtils.on('blur', () => {
       this.updateLayerProps({ isTyping: false })
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         this.updateLayerProps({ contentEditable: false })
       }
     })

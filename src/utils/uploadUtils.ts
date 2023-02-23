@@ -226,7 +226,7 @@ class UploadUtils {
             progress: uploadProgress / 2
           })
           if (uploadProgress === 100) {
-            increaseInterval = setInterval(() => {
+            increaseInterval = window.setInterval(() => {
               const targetIndex = this.images.findIndex((img: IAssetPhoto) => {
                 return img.id === assetId
               })
@@ -240,7 +240,7 @@ class UploadUtils {
         xhr.onerror = networkUtils.notifyNetworkError
         xhr.onload = () => {
           // polling the JSON file of uploaded image
-          const interval = setInterval(() => {
+          const interval = window.setInterval(() => {
             const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
             fetch(pollingTargetSrc).then((response) => {
               if (response.status === 200) {
@@ -376,7 +376,7 @@ class UploadUtils {
                   progress: uploadProgress / 2
                 })
                 if (uploadProgress === 100) {
-                  increaseInterval = setInterval(() => {
+                  increaseInterval = window.setInterval(() => {
                     const targetIndex = this.images.findIndex((img: IAssetPhoto) => {
                       return img.id === assetId
                     })
@@ -391,7 +391,7 @@ class UploadUtils {
             xhr.onerror = networkUtils.notifyNetworkError
             xhr.onload = () => {
               // polling the JSON file of uploaded image
-              const interval = setInterval(() => {
+              const interval = window.setInterval(() => {
                 const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
                 fetch(pollingTargetSrc).then((response) => {
                   if (response.status === 200) {
@@ -439,7 +439,7 @@ class UploadUtils {
           xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
             // polling the JSON file of uploaded image
-            const interval = setInterval(() => {
+            const interval = window.setInterval(() => {
               const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
@@ -469,7 +469,7 @@ class UploadUtils {
           xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
             // polling the JSON file of uploaded image
-            const interval = setInterval(() => {
+            const interval = window.setInterval(() => {
               const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/avatar/result.json?ver=${generalUtils.generateRandomString(6)}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
@@ -503,7 +503,7 @@ class UploadUtils {
           xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
             // polling the JSON file of uploaded image
-            const interval = setInterval(() => {
+            const interval = window.setInterval(() => {
               const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
@@ -658,7 +658,7 @@ class UploadUtils {
         if (this.designStatusTimer !== -1) {
           clearTimeout(this.designStatusTimer)
         }
-        this.designStatusTimer = setTimeout(() => {
+        this.designStatusTimer = window.setTimeout(() => {
           this.emitDesignUploadEvent('success')
         }, 300)
         if (putAssetDesignType !== undefined) {
@@ -1601,7 +1601,7 @@ class UploadUtils {
   }
 
   polling(targetSrc: string, callback: (json: any) => boolean, retryLimit = this.DEFAULT_POLLING_RETRY_LIMIT, retryTime = 0) {
-    const interval = setInterval(() => {
+    const interval = window.setInterval(() => {
       if (retryTime === retryLimit) {
         clearInterval(interval)
         console.log('Polling failed')

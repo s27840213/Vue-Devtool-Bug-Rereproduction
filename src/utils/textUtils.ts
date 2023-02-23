@@ -14,6 +14,7 @@ import _ from 'lodash'
 import cssConverter from './cssConverter'
 import GeneralUtils from './generalUtils'
 import LayerUtils from './layerUtils'
+import logUtils from './logUtils'
 import mathUtils from './mathUtils'
 import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
@@ -871,7 +872,7 @@ class TextUtils {
     if (!group.layers) return
     group.layers
       .forEach(l => {
-        minX = Math.min(minX, mathUtils.getBounding(l).x)
+        minX = Math.min(minX, mathUtils.getBounding(l.styles).x)
       })
     for (const [idx, layer] of Object.entries(group.layers)) {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
@@ -889,7 +890,7 @@ class TextUtils {
     if (!group.layers) return
     group.layers
       .forEach(l => {
-        minY = Math.min(minY, mathUtils.getBounding(l).y)
+        minY = Math.min(minY, mathUtils.getBounding(l.styles).y)
       })
     for (const [idx, layer] of Object.entries(group.layers)) {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
@@ -1278,7 +1279,8 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      // console.log(error)
+      console.log(error)
+      logUtils.setLog(JSON.stringify(error))
       isError = true
     } finally {
       if (isError === true) {

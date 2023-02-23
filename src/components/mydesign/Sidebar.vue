@@ -59,12 +59,13 @@ div(class="sidebar")
             :style="hintTextStyles()")
           span {{$t('NN0226')}}
 </template>
+
 <script lang="ts">
+import SidebarFolder from '@/components/mydesign/SidebarFolder.vue'
+import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
+import designUtils from '@/utils/designUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import SidebarFolder from '@/components/mydesign/SidebarFolder.vue'
-import designUtils from '@/utils/designUtils'
-import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
 
 export default defineComponent({
   components: {
@@ -220,7 +221,7 @@ export default defineComponent({
         clearTimeout(this.messageTimer)
       }
       this.isShowHint = true
-      this.messageTimer = setTimeout(() => {
+      this.messageTimer = window.setTimeout(() => {
         this.isShowHint = false
         this.messageTimer = -1
       }, 3000)

@@ -108,7 +108,7 @@ export default defineComponent({
       return value.toString()
     },
     handleValueModal() {
-      if (this.$isTouchDevice) return
+      if (this.$isTouchDevice()) return
       this.openValueSelector = !this.openValueSelector
       if (this.openValueSelector) {
         const input = this.$refs['input-fontSize'] as HTMLInputElement
@@ -143,7 +143,7 @@ export default defineComponent({
     },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
-      const interval = setInterval(() => {
+      const interval = window.setInterval(() => {
         if (new Date().getTime() - startTime > 500) {
           try {
             textPropUtils.fontSizeStepping(step)

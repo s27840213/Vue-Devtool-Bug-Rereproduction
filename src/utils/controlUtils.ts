@@ -120,7 +120,8 @@ class Controller {
           height: `${scalerSize}px`,
           left: '0',
           top: '0',
-          transform: `translate(-50%,-50%) scale(${contentScaleRatio})`,
+          // transform: `translate(-50%,-50%) scale(${contentScaleRatio})`,
+          transform: 'translate(-50%,-50%)',
           borderRadius: '50%',
           opacity: isTouchArea ? '0' : '1'
         },
@@ -131,7 +132,8 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate(50%,-50%) scale(${contentScaleRatio})`,
+          // transform: `translate(50%,-50%) scale(${contentScaleRatio})`,
+          transform: 'translate(50%,-50%)',
           right: '0',
           top: '0',
           borderRadius: '50%',
@@ -144,7 +146,8 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate(50%,50%) scale(${contentScaleRatio})`,
+          // transform: `translate(50%,50%) scale(${contentScaleRatio})`,
+          transform: 'translate(50%,50%)',
           right: '0',
           bottom: '0',
           borderRadius: '50%',
@@ -157,7 +160,8 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate(-50%,50%) scale(${contentScaleRatio})`,
+          // transform: `translate(-50%,50%) scale(${contentScaleRatio})`,
+          transform: 'translate(-50%,50%)',
           left: '0',
           bottom: '0',
           borderRadius: '50%',
@@ -181,7 +185,8 @@ class Controller {
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           left: '0',
-          transform: isTouchArea ? `translate(-75%, 0%) scale(${contentScaleRatio})` : `translate(-50%, 0%) scale(${contentScaleRatio})`,
+          // transform: isTouchArea ? `translate(-75%, 0%) scale(${contentScaleRatio})` : `translate(-50%, 0%) scale(${contentScaleRatio})`,
+          transform: isTouchArea ? 'translate(-75%, 0%)' : 'translate(-50%, 0%)',
           opacity: isTouchArea ? '0' : '1'
         }
       },
@@ -192,7 +197,8 @@ class Controller {
           height: `${resizerLong}px`,
           width: `${resizerShort}px`,
           right: '0',
-          transform: isTouchArea ? `translate(75%, 0%) scale(${contentScaleRatio})` : `translate(50%, 0%) scale(${contentScaleRatio})`,
+          // transform: isTouchArea ? `translate(75%, 0%) scale(${contentScaleRatio})` : `translate(50%, 0%) scale(${contentScaleRatio})`,
+          transform: isTouchArea ? 'translate(75%, 0%)' : 'translate(50%, 0%)',
           opacity: isTouchArea ? '0' : '1'
         }
       },
@@ -203,7 +209,8 @@ class Controller {
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           bottom: '0',
-          transform: isTouchArea ? `translate(0%, 75%) scale(${contentScaleRatio})` : `translate(0%, 50%) scale(${contentScaleRatio})`,
+          // transform: isTouchArea ? `translate(0%, 75%) scale(${contentScaleRatio})` : `translate(0%, 50%) scale(${contentScaleRatio})`,
+          transform: isTouchArea ? 'translate(0%, 75%)' : 'translate(0%, 50%)',
           opacity: isTouchArea ? '0' : '1'
         }
       },
@@ -214,7 +221,8 @@ class Controller {
           width: `${resizerLong}px`,
           height: `${resizerShort}px`,
           top: '0',
-          transform: isTouchArea ? `translate(0%, -75%) scale(${contentScaleRatio})` : `translate(0%, -50%) scale(${contentScaleRatio})`,
+          // transform: isTouchArea ? `translate(0%, -75%) scale(${contentScaleRatio})` : `translate(0%, -50%) scale(${contentScaleRatio})`,
+          transform: isTouchArea ? 'translate(0%, -75%)' : 'translate(0%, -50%)',
           opacity: isTouchArea ? '0' : '1'
         }
       }

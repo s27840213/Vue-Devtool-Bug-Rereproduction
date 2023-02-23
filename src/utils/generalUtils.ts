@@ -1,6 +1,7 @@
 import { IPage } from '@/interfaces/page'
 import router from '@/router'
 import store from '@/store'
+import { IBrowserInfo } from '@/store/module/user'
 import _ from 'lodash'
 import { nextTick } from 'vue'
 import modalUtils from './modalUtils'
@@ -367,15 +368,47 @@ class GeneralUtils {
   }
 
   unproxify<T>(val: T): T {
-    if (val instanceof Array) {
+    if (Array.isArray(val)) {
       return val.map((i) => this.unproxify(i)) as unknown as T
     }
-    if (val instanceof Object) {
-      return Object.fromEntries(Object.entries({ ...val }).map(([k, v]) => {
+    if (typeof val === 'object') {
+      return Object.fromEntries(Object.entries({ ...val as object }).map(([k, v]) => {
         return [k, this.unproxify(v)]
       })) as unknown as T
     }
     return val
+  }
+
+  OSversionCheck(data: { greaterThen?: string, lessThen?: string, version?: string }): boolean {
+    const { lessThen, greaterThen } = data
+    let { version } = data
+    if (!version) {
+      version = (store.getters['user/getBrowserInfo'] as IBrowserInfo).version
+    }
+    const vArr = version.split('.')
+    if (lessThen) {
+      const lessArr = lessThen.split('.')
+      for (const [i, e] of lessArr.entries()) {
+        if (+e < +vArr[i]) {
+          return false
+        }
+      }
+      if (lessArr.length < vArr.length && vArr[vArr.length - 2] === lessArr[lessArr.length - 1] && +vArr[vArr.length - 1] !== 0) {
+        return false
+      }
+    }
+    if (greaterThen) {
+      const greatArr = greaterThen.split('.')
+      for (const [i, e] of greatArr.entries()) {
+        if (+e > +vArr[i]) {
+          return false
+        }
+      }
+      if (greatArr.length > vArr.length && greatArr[greatArr.length - 2] === vArr[vArr.length - 1] && +greatArr[greatArr.length - 1] !== 0) {
+        return false
+      }
+    }
+    return true
   }
 }
 

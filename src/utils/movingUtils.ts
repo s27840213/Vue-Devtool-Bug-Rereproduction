@@ -1,5 +1,5 @@
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
 import controlUtils from './controlUtils'
@@ -106,7 +106,7 @@ export class MovingUtils {
   }
 
   pageMoving(e: PointerEvent) {
-    this.pageMovingHandler(e)
+    // this.pageMovingHandler(e)
   }
 
   pageMoveEnd(e: PointerEvent) {
@@ -120,6 +120,10 @@ export class MovingUtils {
     this.initPageTranslate.x = pageUtils.getCurrPage.x
     this.initPageTranslate.y = pageUtils.getCurrPage.y
     const currLayerIndex = layerUtils.layerIndex
+
+    formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
+    formatUtils.clearCopiedFormat()
+
     if (currLayerIndex !== this.layerIndex) {
       const layer = layerUtils.getLayer(this.pageIndex, currLayerIndex)
       if (layer.type === 'image' && layer.imgControl) {
@@ -209,8 +213,6 @@ export class MovingUtils {
     if (!this.isLocked) {
       event.stopPropagation()
     }
-    formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
-    formatUtils.clearCopiedFormat()
 
     if (inCopyMode) {
       shortcutUtils.altDuplicate(this.pageIndex, this.layerIndex, this.config)
@@ -308,6 +310,9 @@ export class MovingUtils {
   }
 
   moving(e: MouseEvent | TouchEvent | PointerEvent) {
+    if (eventUtils.checkIsMultiTouch(e)) {
+      return
+    }
     this.isControlling = true
     switch (this.config.type) {
       case LayerType.group:
@@ -326,6 +331,8 @@ export class MovingUtils {
         e.preventDefault()
       }
       this.setCursorStyle(e, 'move')
+
+      // this.movingHandler(e)
       if (!this.isHandleMovingHandler) {
         window.requestAnimationFrame(() => {
           this.movingHandler(e)
@@ -387,22 +394,41 @@ export class MovingUtils {
       layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
     }
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)
-    const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
-    groupUtils.movingTmp(
-      this.pageIndex,
-      {
-        x: moveOffset.offsetX,
-        y: moveOffset.offsetY
-      }
-    )
-    const offsetSnap = this.snapUtils.calcMoveSnap(this.config, layerUtils.layerIndex)
-    this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
+    const offsetRatio = generalUtils.isTouchDevice() ? 1 / store.state.contentScaleRatio : 100 / store.getters.getPageScaleRatio
+    const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y, offsetRatio)
+    const config = this.layerIndex === layerUtils.layerIndex ? this.config : layerUtils.getCurrLayer
+
+    const isLine = config.type === 'shape' && config.category === 'D'
+    const _updateStyles = {
+      x: config.styles.x + moveOffset.offsetX,
+      y: config.styles.y + moveOffset.offsetY,
+      width: config.styles.width,
+      height: config.styles.height,
+      initWidth: config.styles.initWidth,
+      initHeight: config.styles.initHeight,
+      rotate: config.styles.rotate
+    } as IStyle
+    const offsetSnap = this.snapUtils.calcMoveSnap(_updateStyles, isLine ? config : undefined)
+
     const totalOffset = {
-      x: offsetPos.x + (offsetSnap.x * this.scaleRatio * 0.01),
-      y: offsetPos.y + (offsetSnap.y * this.scaleRatio * 0.01)
+      x: offsetPos.x + (offsetSnap.x / offsetRatio),
+      y: offsetPos.y + (offsetSnap.y / offsetRatio)
     }
     this.initialPos.x += totalOffset.x
     this.initialPos.y += totalOffset.y
+
+    if (offsetSnap.x || offsetSnap.y) {
+      this.snapUtils.event.emit(`getClosestSnaplines-${this.snapUtils.id}`)
+      layerUtils.updateLayerStyles(this.pageIndex, layerUtils.layerIndex, {
+        x: _updateStyles.x + offsetSnap.x,
+        y: _updateStyles.y + offsetSnap.y
+      })
+    } else {
+      layerUtils.updateLayerStyles(this.pageIndex, layerUtils.layerIndex, {
+        x: _updateStyles.x,
+        y: _updateStyles.y
+      })
+    }
   }
 
   pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
@@ -431,8 +457,6 @@ export class MovingUtils {
     const isReachTopEdge = currPage.y > 0 && offsetPos.y > 0 && diff.y > limitRange.y
     const isReachBottomEdge = currPage.y <= 0 && offsetPos.y < 0 && diff.y > limitRange.y
 
-    console.log(diff.y, limitRange.y)
-
     if (isReachRightEdge || isReachLeftEdge) {
       pageUtils.updatePagePos(this.pageIndex, {
         x: isReachRightEdge ? originPageSize.width - newPageSize.w : 0
@@ -457,13 +481,19 @@ export class MovingUtils {
   }
 
   moveEnd(e: MouseEvent | TouchEvent) {
+    if (eventUtils.checkIsMultiTouch(e)) {
+      return
+    }
     this.isControlling = false
     eventUtils.removePointerEvent('pointerup', this._moveEnd)
     eventUtils.removePointerEvent('pointermove', this._moving)
     layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moving: false })
     this.setMoving(false)
 
-    const posDiff = {
+    const posDiff = this.isTouchDevice ? {
+      x: Math.abs(mouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
+      y: Math.abs(mouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
+    } : {
       x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
       y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
     }
@@ -476,6 +506,9 @@ export class MovingUtils {
 
     if (this.isActive) {
       if (hasActualMove) {
+        if (shortcutUtils.prevLayerId === this.config.id) {
+          shortcutUtils.offsetCount = 0
+        }
         if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex === -1) {
           layerUtils.deleteSelectedLayer()
         } else if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {

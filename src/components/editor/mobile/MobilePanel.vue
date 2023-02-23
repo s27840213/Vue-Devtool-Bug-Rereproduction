@@ -59,6 +59,7 @@ div(class="mobile-panel"
       @switchTab="switchTab"
       @close="closeMobilePanel")
 </template>
+
 <script lang="ts">
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
@@ -186,7 +187,8 @@ export default defineComponent({
       currSelectedInfo: 'getCurrSelectedInfo',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel',
-      showMobilePanel: 'mobileEditor/getShowMobilePanel'
+      showMobilePanel: 'mobileEditor/getShowMobilePanel',
+      hasCopiedFormat: 'getHasCopiedFormat'
     }),
     backgroundImgControl(): boolean {
       return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
@@ -201,6 +203,9 @@ export default defineComponent({
     inSelectionState(): boolean {
       return this.currActivePanel === 'none' && this.inMultiSelectionMode
     },
+    inCopyMode(): boolean {
+      return this.currActivePanel === 'none' && this.hasCopiedFormat
+    },
     whiteTheme(): boolean {
       const whiteThemePanel = [
         'bleed', 'replace', 'crop', 'bgRemove', 'position', 'flip',
@@ -208,13 +213,13 @@ export default defineComponent({
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list']
 
-      return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
+      return this.inSelectionState || this.inCopyMode || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
       return ['brand-list'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return this.inSelectionState || [
+      return this.inSelectionState || this.inCopyMode || [
         'bleed', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust', 'brand-list'].includes(this.currActivePanel)
@@ -239,7 +244,10 @@ export default defineComponent({
         }
         case 'none': {
           if (this.inMultiSelectionMode) {
-            return '已選取'
+            return `${this.$t('NN0657')}`
+          }
+          if (this.hasCopiedFormat) {
+            return `${this.$t('NN0809')}`
           }
           return ''
         }
@@ -249,7 +257,7 @@ export default defineComponent({
       }
     },
     showRightBtn(): boolean {
-      return this.whiteTheme
+      return this.currActivePanel !== 'none'
     },
     showLeftBtn(): boolean {
       return this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel)
@@ -258,7 +266,7 @@ export default defineComponent({
       return this.currActivePanel === 'crop' || this.inSelectionState
     },
     noRowGap(): boolean {
-      return this.inSelectionState || ['crop', 'color'].includes(this.currActivePanel)
+      return this.inSelectionState || this.inCopyMode || ['crop', 'color'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
       return Object.assign(
@@ -529,7 +537,7 @@ export default defineComponent({
     vcoConfig() {
       return {
         handler: (e: Event) => {
-          if (!this.isImgCtrl) {
+          if (!this.isImgCtrl && !this.inMultiSelectionMode) {
             this.closeMobilePanel()
           }
         },
@@ -547,9 +555,7 @@ export default defineComponent({
       )
     },
     closeMobilePanel() {
-      this.$emit('switchTab', 'none')
-      this.panelHistory = []
-      editorUtils.setCurrActivePanel('none')
+      editorUtils.setShowMobilePanel(false)
     },
     initPanelHeight() {
       return ((this.$el.parentElement as HTMLElement).clientHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
@@ -589,7 +595,7 @@ export default defineComponent({
       eventUtils.removePointerEvent('pointerup', this.dragPanelEnd)
     },
     disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }
@@ -686,7 +692,10 @@ export default defineComponent({
     position: absolute;
     touch-action: manipulation;
     top: 2px;
-    padding: 10px 20px;
+    // 47 = 15 (MobilePanel margin)
+    //    + 12 (half of gray-4 div width)
+    //    + 20 (left/right btn)
+    padding: 10px calc(50% - 47px);
     border-radius: 5px;
     > div {
       background-color: setColor(gray-4);

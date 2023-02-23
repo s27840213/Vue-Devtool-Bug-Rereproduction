@@ -12,17 +12,17 @@ div(class="panel-font-size")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
-import layerUtils from '@/utils/layerUtils'
-import textPropUtils from '@/utils/textPropUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
-import pageUtils from '@/utils/pageUtils'
-import { mapGetters, mapState } from 'vuex'
 import { IGroup, ILayer } from '@/interfaces/layer'
+import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import textPropUtils from '@/utils/textPropUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 export default defineComponent({
   emits: [],
   components: {
@@ -33,7 +33,7 @@ export default defineComponent({
     return {
       openValueSelector: false,
       fieldRange: {
-        fontSize: { min: 1, max: 9999 },
+        fontSize: { min: 1, max: 144 },
         lineHeight: { min: 0.5, max: 2.5 },
         fontSpacing: { min: -200, max: 800 },
         // fontSpacing: { min: -2, max: 8 },

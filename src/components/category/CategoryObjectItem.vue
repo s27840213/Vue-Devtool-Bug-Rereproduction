@@ -6,7 +6,7 @@ div(class="category-object-item"
   img(class="category-object-item__img"
     draggable="true"
     :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
-  svg-icon(v-if="!$isTouchDevice && (item.info || (item.tags && item.tags.length > 0))"
+  svg-icon(v-if="!$isTouchDevice() && (item.info || (item.tags && item.tags.length > 0))"
     class="category-object-item__more"
     @click="showSvgInfo"
     :iconName="'more_vertical'"

@@ -1,13 +1,13 @@
-import store from '@/store'
 import file from '@/apis/file'
 import userApis from '@/apis/user'
-import _ from 'lodash'
-import apiUtils from '@/utils/apiUtils'
-import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
-import { captureException } from '@sentry/browser'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
-import { IFrame, IGroup, IImage } from '@/interfaces/layer'
 import { SrcObj } from '@/interfaces/gallery'
+import { IFrame, IGroup, IImage } from '@/interfaces/layer'
+import store from '@/store'
+import apiUtils from '@/utils/apiUtils'
+import { captureException } from '@sentry/browser'
+import _ from 'lodash'
+import { ActionTree, GetterTree, ModuleTree, MutationTree } from 'vuex'
 
 interface IFileState {
   myfileImages: Array<IAssetPhoto>,
@@ -158,6 +158,7 @@ const actions: ActionTree<IFileState, unknown> = {
 
     imgToRequest.delete('') // delete empty asset id
     await dispatch('updateImages', { assetSet: imgToRequest })
+      .catch(e => console.log('updatePageImages', e))
   },
   async updateImages({ commit }, { assetSet }) {
     // Request unknown private image url

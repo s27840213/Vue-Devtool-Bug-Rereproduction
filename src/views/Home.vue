@@ -31,15 +31,15 @@ div(class="home")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
-import NuHeader from '@/components/NuHeader.vue'
 import Animation from '@/components/Animation.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
 import TaBlock from '@/components/homepage/TaBlock.vue'
 import NuFooter from '@/components/NuFooter.vue'
+import NuHeader from '@/components/NuHeader.vue'
 import blocklistData, { IHomeBlockData } from '@/utils/homeBlockData'
 import _ from 'lodash'
+import { defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -63,6 +63,11 @@ export default defineComponent({
       ]
     }
   },
+  // setup() {
+  //   useMeta({
+  //     title: 'Home'
+  //   })
+  // },
   metaInfo() {
     return {
       title: `${this.$t('SE0001')}`,

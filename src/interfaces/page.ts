@@ -44,7 +44,8 @@ export interface IPage extends IPageSizeWithBleeds {
     h: Array<number>
   },
   isEnableBleed: boolean,
-  isAutoResizeNeeded: boolean
+  isAutoResizeNeeded: boolean,
+  contentScaleRatio: number
 }
 
 export interface IPageState {

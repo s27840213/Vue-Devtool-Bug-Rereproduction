@@ -12,9 +12,9 @@ div(class="color-picker" ref="colorPicker"
     :isMobile="isMobile"
     :fullWidth="isMobile"
     :aspectRatio="aspectRatio")
-  div(:class="{'px-10': !$isTouchDevice}")
+  div(:class="{'px-10': !$isTouchDevice()}")
     div(class="color-picker__hex")
-      svg-icon(v-if="!$isTouchDevice"
+      svg-icon(v-if="!$isTouchDevice()"
         class="pointer"
         iconName="eye-dropper"
         :iconWidth="'20px'"
@@ -69,7 +69,7 @@ export default defineComponent({
   mounted() {
     const root = this.$refs.colorPicker as HTMLElement
     const input = this.$refs.input as HTMLInputElement
-    if (!this.$isTouchDevice) {
+    if (!this.$isTouchDevice()) {
       root.focus()
       input.select()
     }
@@ -156,7 +156,7 @@ export default defineComponent({
     },
     delayedFinalize(formatedColor: string) {
       clearTimeout(this.finalizeTimer)
-      this.finalizeTimer = setTimeout(() => {
+      this.finalizeTimer = window.setTimeout(() => {
         this.$emit('final', formatedColor)
       }, 500)
     }

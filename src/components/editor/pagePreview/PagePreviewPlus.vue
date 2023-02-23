@@ -17,13 +17,14 @@ div(class="page-preview-plus"
   div(v-if="actionType === 'drag'"
     class="page-preview-plus-drag")
 </template>
+
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
-import pageUtils from '@/utils/pageUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
+import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],
