@@ -20,7 +20,6 @@ declare namespace Cypress {
     deselectAllLayers(): Chainable<void>
     importDesign(designName: string): Chainable<void>
     togglePanel(buttonText: string): Chainable<void>
-    snapshotTest(testName: string, { toggleMobilePanel }?: { toggleMobilePanel: string }): Chainable<Subject>
     getAllCategoryName(panel: ISidebarData, categoryName?: string[], last?: boolean): Chainable<string[]>
     addAsset(panel: ISidebarData, categoryIndex: number, itemIndex: number): Chainable<void>
     // addAsset(panel: ISidebarData, categoryName: string, itemIndex: number): Chainable<void>
@@ -37,6 +36,7 @@ declare namespace Cypress {
                   after: (subject: JQuery<HTMLElement>) => void): Chainable<JQuery<HTMLElement>>
     layerRotate(): Chainable<JQuery<HTMLElement>>
     layerScale(): Chainable<JQuery<HTMLElement>>
+    layerMoveToPage2(): Chainable<JQuery<HTMLElement>>
 
     // imageEdit.ts
     imageAdjust(): Chainable<JQuery<HTMLElement>>
@@ -53,6 +53,7 @@ declare namespace Cypress {
       retryOptions?: Record<string, unknown>
     ): Chainable<Element>
 
+    // snapshotCommands.ts
     // Modified CompareSnapshot command in cypress-image-diff-js
     myCompareSnapshot(
       name: string,
@@ -60,5 +61,10 @@ declare namespace Cypress {
       testThreshold?: number,
       retryOptions?: Record<string, unknown>
     ): Chainable<Element>
+    snapshotTest(testName: string,
+      { toggleMobilePanel, pageIndex }?: {
+        toggleMobilePanel?: string
+        pageIndex?: number
+      }): Chainable<Subject>
   }
 }

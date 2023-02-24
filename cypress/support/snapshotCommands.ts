@@ -43,17 +43,16 @@ const compareSnapshotCommand = defaultScreenshotOptions => {
 
       recurse(
         () => {
-        // Clear the comparison/diff screenshots/reports for this test
-          cy.task('deleteScreenshot', { testName })
-          cy.task('deleteReport', { testName })
+          // Clear the comparison/diff screenshots/reports for this test
+          // Modified: add {log: false} to tasks
+          cy.task('deleteScreenshot', { testName }, { log: false })
+          cy.task('deleteReport', { testName }, { log: false })
 
           // Take a screenshot and copy to baseline if it does not exist
-          const objToOperateOn = subject ? cy.wrap(subject) : cy
+          const objToOperateOn = subject ? cy.wrap(subject, { log: false }) : cy
           objToOperateOn
             .screenshot(testName, defaultScreenshotOptions)
-            .task('copyScreenshot', {
-              testName,
-            })
+            .task('copyScreenshot', { testName }, { log: false })
 
           // Compare screenshots
           const options = {
@@ -61,7 +60,7 @@ const compareSnapshotCommand = defaultScreenshotOptions => {
             testThreshold,
           }
 
-          return cy.task('compareSnapshotsPlugin', options)
+          return cy.task('compareSnapshotsPlugin', options, { log: false })
         },
         (percentage) => percentage <= testThreshold,
         Object.assign({}, defaultRecurseOptions, recurseOptions)
@@ -69,9 +68,9 @@ const compareSnapshotCommand = defaultScreenshotOptions => {
     }
   )
 }
-compareSnapshotCommand({ disableTimersAndAnimations: false })
+compareSnapshotCommand({ disableTimersAndAnimations: false, log: false })
 
-Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQuery<unknown>, testName: string, { toggleMobilePanel = '' } = {}) => {
+Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQuery<unknown>, testName: string, { toggleMobilePanel = '', pageIndex = 0 } = {}) => {
   // TODO: Need to find a way that keep 0.01 threshold and prevent command fail
   // Workaround is set threshold to 100% to prevent fail, but it will not create diff image
   // TODO: Investigation why compareSnapshot fail and other image that not take snapshot still appear in report
@@ -83,32 +82,31 @@ Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQue
   // For BG Remove test, use original test title to verify
   imageName = imageName.replace('Auto BG remove/', 'Unsplash image/')
 
-  cy.get('#app').invoke('prop', '__vue_app__').its('config.globalProperties.$isTouchDevice').then((isMobile: () => boolean) => {
+  cy.get('#app', { log: false })
+    .invoke({ log: false }, 'prop', '__vue_app__')
+    .its('config.globalProperties.$isTouchDevice', { log: false })
+    .then((isMobile: () => boolean) => {
     // If toggleMobilePanel given, close mobile panel before snapshot and re-open the panel.
-    if (isMobile() && toggleMobilePanel) {
-      cy.togglePanel(toggleMobilePanel)
-        // Wait for panel transition
-        .get('.mobile-panel').should('have.css', 'display', 'none')
-    }
+      if (isMobile() && toggleMobilePanel) {
+        cy.togglePanel(toggleMobilePanel)
+      }
 
-    cy.document().then((document) => {
+      cy.document({ log: false }).then((document) => {
       // Add special css that hide/remove some element during snapshot.
-      const css = document.createElement('style')
-      css.setAttribute('class', 'cy-visual-test-style')
-      css.textContent = snapshotStyles
-      document.body.appendChild(css)
-    }).get('.nu-page')
-      .myCompareSnapshot(imageName, logName, threshold, { limit: 3, delay: 1000 })
-      // Remove special css
-      .get('style.cy-visual-test-style').invoke('remove')
+        const css = document.createElement('style')
+        css.setAttribute('class', 'cy-visual-test-style')
+        css.textContent = snapshotStyles
+        document.body.appendChild(css)
+      }).get(`#nu-page_${pageIndex}`)
+        .myCompareSnapshot(imageName, logName, threshold, { limit: 3, delay: 1000 })
+        // Remove special css
+        .get('style.cy-visual-test-style', { log: false })
+        .invoke({ log: false }, 'remove')
 
-    // Re-open the panel
-    if (isMobile() && toggleMobilePanel) {
-      cy.togglePanel(toggleMobilePanel)
-        // Wait for panel transition
-        .get('.mobile-panel').should('not.have.css', 'display', 'none')
-        .should('not.have.class', 'panel-up-leave-to')
-    }
-    if (subject && subject.length) return cy.wrap(subject)
-  })
+      // Re-open the panel
+      if (isMobile() && toggleMobilePanel) {
+        cy.togglePanel(toggleMobilePanel)
+      }
+      if (subject && subject.length) return cy.wrap(subject, { log: false })
+    })
 })

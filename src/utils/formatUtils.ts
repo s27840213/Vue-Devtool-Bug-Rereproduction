@@ -1,14 +1,14 @@
-import store from '@/store'
-import { ITextFormat, IImageFormat, IFormat } from '@/interfaces/format'
+import { IFormat, IImageFormat, ITextFormat } from '@/interfaces/format'
 import { IGroup, IImage, ILayer, IParagraph, IText } from '@/interfaces/layer'
-import generalUtils from './generalUtils'
-import tiptapUtils from './tiptapUtils'
-import layerUtils from './layerUtils'
-import textUtils from './textUtils'
-import stepsUtils from './stepsUtils'
-import imageAdjustUtil from './imageAdjustUtil'
+import store from '@/store'
 import frameUtils from './frameUtils'
+import generalUtils from './generalUtils'
+import imageAdjustUtil from './imageAdjustUtil'
+import layerUtils from './layerUtils'
+import stepsUtils from './stepsUtils'
 import textShapeUtils from './textShapeUtils'
+import textUtils from './textUtils'
+import tiptapUtils from './tiptapUtils'
 
 class FormatUtils {
   copiedFormat: IFormat | undefined

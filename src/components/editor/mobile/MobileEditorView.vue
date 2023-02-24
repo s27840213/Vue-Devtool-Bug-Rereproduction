@@ -39,6 +39,7 @@ import backgroundUtils from '@/utils/backgroundUtils'
 import ControlUtils from '@/utils/controlUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
+import formatUtils from '@/utils/formatUtils'
 import GroupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -174,6 +175,7 @@ export default defineComponent({
   },
   beforeUnmount() {
     this.editorViewResizeObserver.disconnect()
+    this.swipeDetector.unbind()
   },
   watch: {
     currFocusPageIndex(newVal) {
@@ -211,7 +213,9 @@ export default defineComponent({
       currFocusPageIndex: 'getCurrFocusPageIndex',
       currCardIndex: 'mobileEditor/getCurrCardIndex',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
-      groupType: 'getGroupType'
+      groupType: 'getGroupType',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl',
+      isImgCtrl: 'imgControl/isImgCtrl'
     }),
     pages(): Array<IPage> {
       return this.pagesState.map((p: IPageState) => p.config)
@@ -297,6 +301,9 @@ export default defineComponent({
     },
     selectStart(e: PointerEvent) {
       e.stopPropagation()
+      if (this.hasCopiedFormat) {
+        formatUtils.clearCopiedFormat()
+      }
       if (ControlUtils.isClickOnController(e)) {
         const movingUtils = new MovingUtils({
           _config: { config: layerUtils.getCurrLayer },
@@ -430,7 +437,7 @@ export default defineComponent({
       // })
     },
     swipeUpHandler() {
-      if (!this.isDetailPage && !this.hasSelectedLayer) {
+      if (!this.isDetailPage && !this.hasSelectedLayer && !this.isBgImgCtrl && !this.isImgCtrl) {
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }
@@ -474,7 +481,7 @@ export default defineComponent({
       }
     },
     swipeDownHandler() {
-      if (!this.isDetailPage && !this.hasSelectedLayer) {
+      if (!this.isDetailPage && !this.hasSelectedLayer && !this.isBgImgCtrl && !this.isImgCtrl) {
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }

@@ -9,6 +9,7 @@ svg(v-else class="svg-icon" :class="`text-${iconColor} svg-${iconName}`"
     :style="iconStyles()")
   use(:xlink:href="`#${iconName}`")
 </template>
+
 <script lang="ts">
 import { defineComponent } from 'vue'
 
