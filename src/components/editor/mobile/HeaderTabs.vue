@@ -64,7 +64,6 @@ export default defineComponent({
   },
   emits: ['switchTab', 'showAllPages'],
   setup() {
-    // const stepUtilsObj = reactive(stepsUtils)
     const isInFirstStep = computed(() => stepsUtils.isInFirstStep)
     const isInLastStep = computed(() => stepsUtils.isInLastStep)
     return {
