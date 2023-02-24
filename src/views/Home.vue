@@ -258,7 +258,7 @@ export default defineComponent({
     }
     &__button {
       position: fixed;
-      width: 70%;
+      width: calc(90% - 40px);
       bottom: 30px;
       z-index: 1;
     }
