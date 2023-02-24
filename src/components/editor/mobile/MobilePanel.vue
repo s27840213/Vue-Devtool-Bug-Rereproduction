@@ -446,7 +446,6 @@ export default defineComponent({
     },
     rightButtonAction(): () => void {
       return () => {
-        console.log(this.currActivePanel)
         switch (this.currActivePanel) {
           case 'crop': {
             if (this.selectedLayerNum > 0) {
