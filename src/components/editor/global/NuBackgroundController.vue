@@ -17,6 +17,7 @@ div(class="nu-background-controller")
 
 <script lang="ts">
 import { ICoordinate } from '@/interfaces/frame'
+import { ISize } from '@/interfaces/math'
 import { IPage } from '@/interfaces/page'
 import ControlUtils from '@/utils/controlUtils'
 import eventUtils from '@/utils/eventUtils'
@@ -24,8 +25,8 @@ import MathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { defineComponent, PropType } from 'vue'
 import { AnyTouchEvent } from 'any-touch'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -126,8 +127,8 @@ export default defineComponent({
     imgControllerPosHandler(): ICoordinate {
       const angleInRad = this.getPageRotate * Math.PI / 180
       const rectCenter = {
-        x: this.pageSize.width / 2,
-        y: this.pageSize.height / 2
+        x: this.pageSize.width * 0.5,
+        y: this.pageSize.height * 0.5
       }
       const pageVect = {
         x: -rectCenter.x,
@@ -144,8 +145,8 @@ export default defineComponent({
       }
       const [w, h] = [this.config.styles.imgWidth * scale, this.config.styles.imgHeight * scale]
       const center = {
-        x: imgAnchor.x + (w * Math.cos(angleInRad) - h * Math.sin(angleInRad)) / 2,
-        y: imgAnchor.y + (w * Math.sin(angleInRad) + h * Math.cos(angleInRad)) / 2
+        x: imgAnchor.x + (w * Math.cos(angleInRad) - h * Math.sin(angleInRad)) * 0.5,
+        y: imgAnchor.y + (w * Math.sin(angleInRad) + h * Math.cos(angleInRad)) * 0.5
       }
       const vect = {
         x: imgAnchor.x - center.x,
@@ -164,68 +165,126 @@ export default defineComponent({
       }
     },
     pinchHandler(event: AnyTouchEvent) {
-      window.requestAnimationFrame(() => {
-        switch (event.phase) {
-          case 'start': {
-            console.log('start')
-            this.initImgPos = {
-              x: this.config.styles.imgX,
-              y: this.config.styles.imgY
-            }
-            this.initImgSize = {
-              width: this.config.styles.imgWidth,
-              height: this.config.styles.imgHeight
-            }
-            break
+      // window.requestAnimationFrame(() => {
+      switch (event.phase) {
+        case 'start': {
+          console.log('start')
+          this.initImgPos = {
+            x: this.config.styles.imgX,
+            y: this.config.styles.imgY
           }
-          case 'move': {
-            const { mobilePysicalSize: { pageCenterPos, pageSize } } = this.page
-            const { styles } = this.config
-            const _sizeRatio = pageSize.width / styles.width
-
-            if (!this.initPinchPos) {
-              // this.initPinchPos = { x: event.x - pageUtils.pageEventPosOffset.x, y: event.y - pageUtils.pageEventPosOffset.y }
-              this.initPinchPos = { x: event.x, y: event.y }
-            }
-
-            // const translationRatio = {
-            //   x: -(this.initPinchPos.x - pageCenterPos.x) / pageSize.width,
-            //   y: -(this.initPinchPos.y - pageCenterPos.y) / pageSize.height
-            // }
-            const posInConfig = {
-              x: (this.initPinchPos.x - pageCenterPos.x + pageSize.width * 0.5) / _sizeRatio - styles.imgX,
-              y: (this.initPinchPos.y - pageCenterPos.y + pageSize.height * 0.5) / _sizeRatio - styles.imgY
-            }
-
-            const translationRatio = {
-              x: -posInConfig.x / styles.imgWidth,
-              y: -posInConfig.y / styles.imgHeight
-            }
-
-            const sizeDiff = {
-              width: this.initImgSize.width * (event.scale - 1) * 0.5,
-              height: this.initImgSize.height * (event.scale - 1) * 0.5
-            }
-
-            const newSize = {
-              width: this.initImgSize.width + sizeDiff.width,
-              height: this.initImgSize.height + sizeDiff.height
-            }
-            const newPos = {
-              x: this.initImgPos.x + (sizeDiff.width * translationRatio.x),
-              y: this.initImgPos.y + (sizeDiff.height * translationRatio.y),
-              // x: this.initImgPos.x + (sizeDiff.width * Math.min(Math.max(translationRatio.x - 0.5, -1), 1)),
-              // y: this.initImgPos.y + (sizeDiff.height * Math.min(Math.max(translationRatio.y - 0.5, -1), 1)),
-            }
-            this.updateConfig({ imgX: newPos.x, imgY: newPos.y, imgWidth: newSize.width, imgHeight: newSize.height })
-            break
+          this.initImgSize = {
+            width: this.config.styles.imgWidth,
+            height: this.config.styles.imgHeight
           }
-          case 'end': {
-            this.initPinchPos = null
-            console.log('end')
-          }
+          break
         }
-      })
+        case 'move': {
+          const { mobilePysicalSize: { pageCenterPos, pageSize } } = this.page
+          const { styles } = this.config
+          const _sizeRatio = pageSize.width / styles.width
+
+          if (!this.initPinchPos) {
+            this.initPinchPos = { x: event.x, y: event.y }
+          }
+          const posInConfig = {
+            x: (this.initPinchPos.x - pageCenterPos.x + pageSize.width * 0.5) / _sizeRatio - styles.imgX,
+            y: (this.initPinchPos.y - pageCenterPos.y + pageSize.height * 0.5) / _sizeRatio - styles.imgY
+          }
+          const translationRatio = {
+            x: -posInConfig.x / styles.imgWidth,
+            y: -posInConfig.y / styles.imgHeight
+          }
+          const sizeDiff = {
+            width: this.initImgSize.width * (event.scale - 1) * 0.5,
+            height: this.initImgSize.height * (event.scale - 1) * 0.5
+          }
+          const newSize = {
+            width: this.initImgSize.width + sizeDiff.width,
+            height: this.initImgSize.height + sizeDiff.height
+          }
+          const newPos = {
+            x: this.initImgPos.x + (sizeDiff.width * translationRatio.x),
+            y: this.initImgPos.y + (sizeDiff.height * translationRatio.y),
+          }
+          const { imgWidth, imgHeight, imgX, imgY } = this.imgPinchScaleClamp(newSize, newPos, translationRatio)
+          this.updateConfig({ imgX, imgY, imgWidth, imgHeight })
+          break
+        }
+        case 'end': {
+          this.initPinchPos = null
+          this.initImgPos = {
+            x: this.config.styles.imgX,
+            y: this.config.styles.imgY
+          }
+          this.initImgSize = {
+            width: this.config.styles.imgWidth,
+            height: this.config.styles.imgHeight
+          }
+          console.log('end')
+        }
+      }
+      // })
+    },
+    imgPinchScaleClamp(newSize: ISize, newPos: ICoordinate, translationRatio: { x: number, y: number }) {
+      const baseLine = {
+        x: -newSize.width * 0.5 + (this.pageSize.width / this.getPageScale) * 0.5,
+        y: -newSize.height * 0.5 + (this.pageSize.height / this.getPageScale) * 0.5
+      }
+      const translateLimit = {
+        width: (newSize.width - this.pageSize.width / this.getPageScale) * 0.5,
+        height: (newSize.height - this.pageSize.height / this.getPageScale) * 0.5
+      }
+      const sizeDiff = {
+        width: newSize.width - this.initImgSize.width,
+        height: newSize.height - this.initImgSize.height
+      }
+      if (Math.abs(newPos.x - baseLine.x) > translateLimit.width) {
+        let pinchScale = -1
+        if (newPos.x - baseLine.x > 0) {
+          newPos.x = 0
+          sizeDiff.width = -this.initImgPos.x / translationRatio.x
+        } else {
+          /**
+           * Derived from.
+           * newPos.x = this.pageSize.width - (this.pageSize.width + this.initImgSize.width)
+           * newPos.x = this.initImgPos.x + (sizeDiff.width * translationRatio.x)
+           */
+          sizeDiff.width = -(this.initImgPos.x - this.pageSize.width + this.initImgSize.width) / (1 + translationRatio.x)
+          newPos.x = this.pageSize.width - (this.initImgSize.width + sizeDiff.width)
+        }
+        newSize.width = this.initImgSize.width + sizeDiff.width
+        pinchScale = (sizeDiff.width * 2 / this.initImgSize.width) + 1
+        sizeDiff.height = this.initImgSize.height * (pinchScale - 1) * 0.5
+        newSize.height = this.initImgSize.height + sizeDiff.height
+        newPos.y = this.initImgPos.y + (sizeDiff.height * translationRatio.y)
+
+        baseLine.x = -newSize.width * 0.5 + (this.pageSize.width / this.getPageScale) * 0.5
+        baseLine.y = -newSize.height * 0.5 + (this.pageSize.height / this.getPageScale) * 0.5
+        translateLimit.width = (newSize.width - this.pageSize.width / this.getPageScale) * 0.5
+        translateLimit.height = (newSize.height - this.pageSize.height / this.getPageScale) * 0.5
+      }
+      if (Math.abs(newPos.y - baseLine.y) > translateLimit.height) {
+        let pinchScale = -1
+        if (newPos.y - baseLine.y > 0) {
+          newPos.y = 0
+          sizeDiff.height = -this.initImgPos.y / translationRatio.y
+        } else {
+          sizeDiff.height = -(this.initImgPos.y - this.pageSize.height + this.initImgSize.height) / (1 + translationRatio.y)
+          newPos.y = this.pageSize.height - (this.initImgSize.height + sizeDiff.height)
+        }
+        newSize.height = this.initImgSize.height + sizeDiff.height
+        pinchScale = (sizeDiff.height * 2 / this.initImgSize.height) + 1
+        sizeDiff.width = this.initImgSize.width * (pinchScale - 1) * 0.5
+        newSize.width = this.initImgSize.width + sizeDiff.width
+        newPos.x = this.initImgPos.x + (sizeDiff.width * translationRatio.x)
+      }
+      return {
+        imgWidth: newSize.width,
+        imgHeight: newSize.height,
+        imgX: newPos.x,
+        imgY: newPos.y
+      }
     },
     moveStart(event: PointerEvent) {
       if (eventUtils.checkIsMultiTouch(event)) {
@@ -251,15 +310,18 @@ export default defineComponent({
       if (eventUtils.checkIsMultiTouch(event) || this.ptrSet.size > 1) {
         return
       }
+      // if (eventUtils.checkIsMultiTouch(event)) {
+      //   return
+      // }
       this.setCursorStyle('move')
       event.preventDefault()
       const baseLine = {
-        x: -this.getImgWidth / 2 + (this.pageSize.width / this.getPageScale) / 2,
-        y: -this.getImgHeight / 2 + (this.pageSize.height / this.getPageScale) / 2
+        x: -this.getImgWidth * 0.5 + (this.pageSize.width / this.getPageScale) * 0.5,
+        y: -this.getImgHeight * 0.5 + (this.pageSize.height / this.getPageScale) * 0.5
       }
       const translateLimit = {
-        width: (this.getImgWidth - this.pageSize.width / this.getPageScale) / 2,
-        height: (this.getImgHeight - this.pageSize.height / this.getPageScale) / 2
+        width: (this.getImgWidth - this.pageSize.width / this.getPageScale) * 0.5,
+        height: (this.getImgHeight - this.pageSize.height / this.getPageScale) * 0.5
       }
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
@@ -270,6 +332,7 @@ export default defineComponent({
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
         imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.pageSize.width / this.getPageScale - this.getImgWidth
       }
+      console.log(Math.abs(imgPos.y - baseLine.y), translateLimit.height)
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.pageSize.height / this.getPageScale - this.getImgHeight
       }
@@ -359,12 +422,12 @@ export default defineComponent({
         y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.y : this.initImgPos.y
       }
       const baseLine = {
-        x: -width / 2 + (this.pageSize.width / this.getPageScale) / 2,
-        y: -height / 2 + (this.pageSize.height / this.getPageScale) / 2
+        x: -width * 0.5 + (this.pageSize.width / this.getPageScale) * 0.5,
+        y: -height * 0.5 + (this.pageSize.height / this.getPageScale) * 0.5
       }
       const translateLimit = {
-        width: (width - this.pageSize.width / this.getPageScale) / 2,
-        height: (height - this.pageSize.height / this.getPageScale) / 2
+        width: (width - this.pageSize.width / this.getPageScale) * 0.5,
+        height: (height - this.pageSize.height / this.getPageScale) * 0.5
       }
 
       const ratio = width / height
@@ -380,10 +443,10 @@ export default defineComponent({
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
 
-        baseLine.x = -width / 2 + (this.pageSize.width / this.getPageScale) / 2
-        baseLine.y = -height / 2 + (this.pageSize.height / this.getPageScale) / 2
-        translateLimit.width = (width - this.pageSize.width / this.getPageScale) / 2
-        translateLimit.height = (height - this.pageSize.height / this.getPageScale) / 2
+        baseLine.x = -width * 0.5 + (this.pageSize.width / this.getPageScale) * 0.5
+        baseLine.y = -height * 0.5 + (this.pageSize.height / this.getPageScale) * 0.5
+        translateLimit.width = (width - this.pageSize.width / this.getPageScale) * 0.5
+        translateLimit.height = (height - this.pageSize.height / this.getPageScale) * 0.5
       }
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         if (this.control.ySign < 0) {
