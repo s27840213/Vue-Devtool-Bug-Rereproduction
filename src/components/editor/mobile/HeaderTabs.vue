@@ -8,16 +8,16 @@ div(class="header-bar" @pointerdown.stop)
         :iconColor="'white'"
         :iconWidth="'22px'")
     div(class="header-bar__feature-icon mr-15"
-        :class="{'click-disabled': stepsUtils.isInFirstStep || isCropping}"
+        :class="{'click-disabled': isInFirstStep || isCropping}"
         @pointerdown="undo()")
       svg-icon(:iconName="'undo'"
-        :iconColor="(!stepsUtils.isInFirstStep && !isCropping) ? 'white' : 'gray-2'"
+        :iconColor="(!isInFirstStep && !isCropping) ? 'white' : 'gray-2'"
         :iconWidth="'22px'")
     div(class="header-bar__feature-icon"
-        :class="{'click-disabled': stepsUtils.isInLastStep || isCropping}"
+        :class="{'click-disabled': isInLastStep || isCropping}"
         @pointerdown="redo()")
       svg-icon(:iconName="'redo'"
-        :iconColor="(!stepsUtils.isInLastStep && !isCropping) ? 'white' : 'gray-2'"
+        :iconColor="(!isInLastStep && !isCropping) ? 'white' : 'gray-2'"
         :iconWidth="'22px'")
   div(class="header-bar__right")
     div(v-for="tab in rightTabs")
@@ -39,7 +39,7 @@ import mappingUtils from '@/utils/mappingUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
 interface IIcon {
@@ -63,6 +63,15 @@ export default defineComponent({
     }
   },
   emits: ['switchTab', 'showAllPages'],
+  setup() {
+    // const stepUtilsObj = reactive(stepsUtils)
+    const isInFirstStep = computed(() => stepsUtils.isInFirstStep)
+    const isInLastStep = computed(() => stepsUtils.isInLastStep)
+    return {
+      isInFirstStep,
+      isInLastStep
+    }
+  },
   data() {
     return {
       homeTabs: [

@@ -66,7 +66,7 @@ import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import { defineComponent, PropType } from 'vue'
+import { computed, defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -90,6 +90,15 @@ export default defineComponent({
     return {
       isFontsPanelOpened: false,
       pageUtils
+    }
+  },
+  setup() {
+    // const stepUtilsObj = reactive(stepsUtils)
+    const isInFirstStep = computed(() => stepsUtils.isInFirstStep)
+    const isInLastStep = computed(() => stepsUtils.isInLastStep)
+    return {
+      isInFirstStep,
+      isInLastStep
     }
   },
   props: {
@@ -147,12 +156,6 @@ export default defineComponent({
     },
     subLayerType(): string {
       return this.currSubSelectedInfo.type
-    },
-    isInFirstStep(): boolean {
-      return stepsUtils.isInFirstStep
-    },
-    isInLastStep(): boolean {
-      return stepsUtils.isInLastStep
     },
     isFrameImage(): boolean {
       const { layers, types } = this.currSelectedInfo
@@ -219,6 +222,12 @@ export default defineComponent({
       if ((newVal === 0) && this.isFontsPanelOpened) {
         this.closeFontsPanel()
       }
+    },
+    stepUtilsObj: {
+      handler (newVal, oldVal) {
+        console.log(newVal.currStep, oldVal.currStep)
+      },
+      deep: true
     }
   },
   methods: {

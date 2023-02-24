@@ -425,12 +425,6 @@ export default defineComponent({
       })
       return new Set(types)
     },
-    isInFirstStep(): boolean {
-      return stepsUtils.isInFirstStep
-    },
-    isInLastStep(): boolean {
-      return stepsUtils.isInLastStep
-    },
     isInFrame(): boolean {
       const layer = layerUtils.getCurrLayer
       return layer.type === LayerType.frame && (layer as IFrame).clips[0].srcObj.assetId !== ''
