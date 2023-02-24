@@ -1,4 +1,4 @@
-import { isITextBox, isITextGooey, isITextSvgbg, isITextUnderline, ITextBgEffect, ITextGooey } from '@/interfaces/format'
+import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, ITextBgEffect, ITextGooey } from '@/interfaces/format'
 import { IStyle, IText } from '@/interfaces/layer'
 import store from '@/store'
 import LayerUtils from '@/utils/layerUtils'
@@ -546,6 +546,27 @@ class Gooey {
   }
 }
 
+function getLetterBgSetting(name: string, index: number) {
+  let [href, color] = ['', '']
+  switch (name) {
+    case 'rainbow':
+      href = 'rainbow-circle'
+      color = ['FFA19B', 'FFC89F', 'F7DE97', 'C5DFAE', 'B5D0F9', 'EDD4F6'][index % 6]
+      break
+    case 'rainbow-dark':
+      href = 'rainbow-circle'
+      color = ['D0B0B1', 'DCC9BF', 'EBDEBB', 'BECBBC', 'B0BCC5', 'D1CADF'][index % 6]
+      break
+    case 'cloud':
+      href = `cloud${index % 4}`
+      break
+    default: // text-book
+      href = name
+      break
+  }
+  return { href, color }
+}
+
 class TextBg {
   private currColorKey = ''
   effects = {} as Record<string, Record<string, string | number>>
@@ -557,6 +578,13 @@ class TextBg {
     textEffectUtils.convertColor2rgba(color, opacity)
 
   getDefaultEffects() {
+    const letterBgDefault = {
+      xOffset: 50,
+      yOffset: 50,
+      size: 100,
+      opacity: 100,
+    }
+
     return {
       none: {},
       'square-borderless': {
@@ -626,11 +654,10 @@ class TextBg {
         opacity: 100,
         color: 'fontColorL+-40/BC/00'
       },
-      svgbg: {
-        xOffset: 50,
-        yOffset: 50,
-        opacity: 100,
-      }
+      rainbow: letterBgDefault,
+      'rainbow-dark': letterBgDefault,
+      cloud: letterBgDefault,
+      'text-book': letterBgDefault
     }
   }
 
@@ -769,36 +796,40 @@ class TextBg {
         }]
         // .concat(path.toCircle() as any) // Show control point
       }
-    } else if (isITextSvgbg(textBg)) {
-      const pos = [] as (Record<'x' | 'y' | 'width' | 'height', number> & { color: string })[]
-      let i = 0
+    } else if (isITextLetterBg(textBg)) {
+      const scale = textBg.size / 100
+      let { xOffset, yOffset } = textBg
+      if (vertical) [xOffset, yOffset] = [yOffset, xOffset]
 
+      const pos = [] as (Record<'x' | 'y' | 'width' | 'height', number> & Record<'color'|'href', string>)[]
+      let i = 0
       rows.forEach((row) => {
         row.spanData.forEach((span) => {
           const { x, y, width, height, text } = span
           if (text !== ' ') {
             pos.push({
-              x: x - span.letterSpacing / 2,
+              ...getLetterBgSetting(textBg.name, i),
+              x: x - (height - width) / 2 - span.letterSpacing / 2,
               y: y + height / 2,
               width,
               height,
-              color: ['red', 'green', 'blue'][i % 3],
             })
             i += 1
           }
         })
       })
+
       return {
         attrs: { width, height, style: `opacity: ${opacity}` },
         content: pos.map(p => ({
           tag: 'use',
           attrs: {
-            href: '#filled',
+            href: `#${p.href}`,
             transform,
-            width: p.height,
-            x: p.x - (p.height - p.width) / 2 + p.width * (textBg.xOffset - 50) / 100,
-            y: p.y - height / 2 + p.height * (textBg.yOffset - 50) / 100,
-            style: `color: ${p.color}`
+            width: p.height * scale,
+            x: p.x - (scale - 1) / 2 * p.height + p.width * (xOffset - 50) / 50,
+            y: p.y - height / 2 + p.height * (yOffset - 50) / 50,
+            style: `color: #${p.color}`
           }
         }))
       }

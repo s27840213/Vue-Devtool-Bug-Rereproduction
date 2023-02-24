@@ -44,14 +44,15 @@ export interface ITextGooey {
   color: string
 }
 
-export interface ITextSvgbg {
-  name: 'svgbg'
+export interface ITextLetterBg {
+  name: 'rainbow'|'rainbow-dark'|'cloud'|'text-book'
   xOffset: number
   yOffset: number
   opacity: number
+  size: number
 }
 
-export type ITextBgEffect = ITextBox | ITextUnderline | ITextGooey | ITextSvgbg | {name: 'none'}
+export type ITextBgEffect = ITextBox | ITextUnderline | ITextGooey | ITextLetterBg | {name: 'none'}
 
 export function isITextBox(object: ITextBgEffect): object is ITextBox {
   return object && object.name &&
@@ -64,8 +65,9 @@ export function isITextUnderline(object: ITextBgEffect): object is ITextUnderlin
 export function isITextGooey(object: ITextBgEffect): object is ITextGooey {
   return object && object.name && ['gooey'].includes(object.name)
 }
-export function isITextSvgbg(object: ITextBgEffect): object is ITextSvgbg {
-  return object && object.name && ['svgbg'].includes(object.name)
+export function isITextLetterBg(object: ITextBgEffect): object is ITextLetterBg {
+  return object && object.name &&
+    ['rainbow', 'rainbow-dark', 'cloud', 'text-book'].includes(object.name)
 }
 
 export interface ITextFormat {

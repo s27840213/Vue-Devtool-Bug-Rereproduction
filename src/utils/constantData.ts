@@ -319,11 +319,13 @@ class ConstantData {
         pStrokeY: i18n.global.tc('NN0319'),
         pColor: i18n.global.tc('NN0735'),
         height: i18n.global.tc('NN0319'),
+        xOffset: '水平位移',
         yOffset: i18n.global.tc('NN0736'),
         distanceInverse: i18n.global.tc('NN0737'),
         textStrokeColor: i18n.global.tc('NN0739'),
         shadowStrokeColor: i18n.global.tc('NN0740'),
-        endpoint: i18n.global.tc('NN0738')
+        endpoint: i18n.global.tc('NN0738'),
+        size: '大小',
       }
 
       return array.map((name: string) => {
@@ -357,6 +359,10 @@ class ConstantData {
           case 'bend': // For curve
             option.max = 100
             option.min = -100
+            break
+          case 'size':
+            option.max = 200
+            option.min = 50
             break
           default:
             /* distance, blur, opacity, spread, stroke,
@@ -457,9 +463,21 @@ class ConstantData {
         label: i18n.global.tc('NN0727'),
         options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
       }, {
-        key: 'svgbg',
+        key: 'rainbow',
         label: 'svgbg',
-        options: toOptions(['xOffset', 'yOffset', 'opacity'])
+        options: toOptions(['xOffset', 'yOffset', 'size', 'opacity'])
+      }, {
+        key: 'rainbow-dark',
+        label: 'svgbg',
+        options: toOptions(['xOffset', 'yOffset', 'size', 'opacity'])
+      }, {
+        key: 'cloud',
+        label: 'svgbg',
+        options: toOptions(['xOffset', 'yOffset', 'size', 'opacity'])
+      }, {
+        key: 'text-book',
+        label: 'svgbg',
+        options: toOptions(['xOffset', 'yOffset', 'size', 'opacity'])
       }])
     }]
     return categories as IEffectCategory[]
