@@ -6,7 +6,7 @@ div(class="list")
       class="list-title__more body-MD text-gray-2"
       :to="moreLink")
       span {{$t('NN0082')}}
-  div(class="list-content" :style="listContentSytle")
+  div(class="list-content")
     div(v-if="prevIcon"
       class="list-content__lefticon"
       @click="scroll(false)")
@@ -113,9 +113,6 @@ export default defineComponent({
     ...mapGetters({
       mydesignData: 'design/getAllDesigns'
     }),
-    listContentSytle(): Record<string, string> {
-      return { width: this.type === 'theme' ? 'fit-content' : '80vw' }
-    }
   },
   created() {
     switch (this.type) {
@@ -250,7 +247,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   position: relative;
-  max-width: 80vw;
+  width: 100%;
   &__lefticon,
   &__righticon {
     position: absolute;

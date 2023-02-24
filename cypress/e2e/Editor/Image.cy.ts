@@ -1,4 +1,5 @@
 for (const isMobile of [true, false]) {
+  // if (isMobile) continue
   // if (!isMobile) continue
   const suffix = isMobile ? ' mobile' : ''
 
@@ -50,22 +51,22 @@ for (const isMobile of [true, false]) {
           .layerAlign()
           .imageSetAsBg()
       })
-      // it('Manually BG remove', function () {
-      //   cy.visit('/editor')
-      //     .importDesign('flower.json')
-      //     .get('.nu-image')
-      //     .imageManuallyBgRemove()
-      //     .deselectAllLayers()
-      //     .snapshotTest('init')
-      //     .get('.nu-image')
-      //     .imageAdjust()
-      //     .layerFlip()
-      //     .imageCrop('button')
-      //     .imageCrop('dblclick')
-      //     .imageShadow()
-      //     .layerAlign()
-      //     .imageSetAsBg()
-      // })
+      it('Manually BG remove', function () {
+        cy.visit('/editor')
+          .importDesign('flower.json')
+          .get('.nu-image')
+          .imageManuallyBgRemove()
+          .deselectAllLayers()
+          .snapshotTest('init')
+          .get('.nu-image')
+          .imageAdjust()
+          .layerFlip()
+          .imageCrop('button')
+          .imageCrop('dblclick')
+          .imageShadow()
+          .layerAlign()
+          .imageSetAsBg()
+      })
     }
 
     it(`Other image test${suffix}`, function() {
@@ -97,8 +98,9 @@ for (const isMobile of [true, false]) {
               if (isMobile) return cy.wrap(subject)
               return cy.wrap(subject)
                 .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
+                .layerMoveToPage2()
             })
-            .deselectAllLayers().snapshotTest('init') // Check if image restore to init
+            // .deselectAllLayers().snapshotTest('init') // Check if image restore to init
         })
     })
   })

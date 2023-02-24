@@ -38,8 +38,8 @@ class ConstantData {
 
   // For header.vue and mobileMenu.vue
   headerItems(mobile = false) {
+    const host = window.location.host
     function themeItem(id: number | number[]) {
-      const host = window.location.host
       if (id instanceof Array) {
         let templateName = _.filter(store.getters.getEditThemes, (theme: Itheme) => {
           return id.includes(theme.id)
@@ -271,7 +271,7 @@ class ConstantData {
       content: templateType[i18n.global.locale as keyof typeof templateType]
     }, {
       name: 'TemplateCenter',
-      url: '/templates',
+      url: `http://${host}/templates`,
       label: i18n.global.t('NN0145')
     }, {
       label: i18n.global.t('NN0670'),

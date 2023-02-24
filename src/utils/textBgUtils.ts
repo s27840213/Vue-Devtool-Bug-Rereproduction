@@ -11,10 +11,10 @@ import generalUtils from './generalUtils'
 import textUtils from './textUtils'
 
 export interface textBgSvg {
-  attrs: Record<string, string|number>
+  attrs: Record<string, string | number>
   content: {
     tag: string
-    attrs: Record<string, string|number>
+    attrs: Record<string, string | number>
   }[]
 }
 
@@ -415,8 +415,7 @@ class Gooey {
       for (let i = 1; i < side.length - 1;) {
         const cps = side[i]
         if (side.length > 3 && cps.bottom.y - cps.top.y < cps.oldHeight * 0.1) {
-          // Vue.delete(side, i)
-          delete side[i]
+          side.splice(i, 1)
           count++
         } else i++
       }
@@ -670,7 +669,7 @@ class TextBg {
     if (!isITextBox(effect)) return {}
   }
 
-  async drawSvgBg(config: IText): Promise<textBgSvg|null> {
+  async drawSvgBg(config: IText): Promise<textBgSvg | null> {
     const textBg = config.styles.textBg
     if (textBg.name === 'none') return null
 
@@ -801,7 +800,7 @@ class TextBg {
       let { xOffset, yOffset } = textBg
       if (vertical) [xOffset, yOffset] = [yOffset, xOffset]
 
-      const pos = [] as (Record<'x' | 'y' | 'width' | 'height', number> & Record<'color'|'href', string>)[]
+      const pos = [] as (Record<'x' | 'y' | 'width' | 'height', number> & Record<'color' | 'href', string>)[]
       let i = 0
       rows.forEach((row) => {
         row.spanData.forEach((span) => {

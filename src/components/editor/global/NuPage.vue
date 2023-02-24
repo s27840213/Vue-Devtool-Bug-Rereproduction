@@ -130,7 +130,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
                 @setFocus="setFocus()"
                 @isDragging="handleDraggingController")
       div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex)"
-        class="page-highlighter"
+        :class="[useMobileEditor ? 'page-highlighter page-highlighter--mobile' : 'page-highlighter', {'page-highlighter--in-bg-settings': inBgSettingMode}]"
         :style="wrapperStyles")
       //- for ruler to get rectangle of page content (without bleeds)
       div(v-if="config.isEnableBleed" :class="`nu-page-bleed-${pageIndex}`" :style="bleedLineAreaStyles()")
@@ -293,7 +293,8 @@ export default defineComponent({
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapState('shadow', ['handleId']),
     ...mapGetters({
-      imgControlPageIdx: 'imgControl/imgControlPageIdx'
+      imgControlPageIdx: 'imgControl/imgControlPageIdx',
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode'
     }),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
@@ -810,9 +811,6 @@ export default defineComponent({
   position: relative;
   box-sizing: content-box;
   outline: none;
-  // &:empty {
-  //   background-color: setColor(gray-4);
-  // }
 }
 .scale-container {
   width: 0px;
@@ -824,11 +822,20 @@ export default defineComponent({
 
 .page-highlighter {
   position: absolute;
-  top: -2px;
-  left: -2px;
-  border: 2px solid setColor(blue-2);
+  top: 0px;
+  left: 0px;
+  outline: 2px solid setColor(blue-2);
   z-index: setZindex("page-highlighter");
   pointer-events: none;
+  box-sizing: border-box;
+  &--mobile {
+    outline: none;
+    box-shadow: 0px 0px 7px setColor(gray-2, 0.4);
+  }
+
+  &--in-bg-settings {
+    outline: 2px solid setColor(blue-2);
+  }
 }
 .page-control {
   position: absolute;

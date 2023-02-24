@@ -49,12 +49,13 @@ section
       div(:class="`nav-folder-${level}__text`"
           style="pointer-events: none") {{ folder.name }}
 </template>
+
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
 import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   name: 'sidebar-folder',
