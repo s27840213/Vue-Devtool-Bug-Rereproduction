@@ -182,6 +182,7 @@ export default defineComponent({
     }
   }
   &__button {
+    @include body-MD;
     margin-top: 25px;
     width: 216px;
     height: 44px;
