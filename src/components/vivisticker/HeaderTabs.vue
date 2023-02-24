@@ -24,7 +24,6 @@ div(class="header-bar relative" @pointerdown.stop)
 </template>
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
-import eventUtils from '@/utils/eventUtils'
 import imageUtils from '@/utils/imageUtils'
 import modalUtils from '@/utils/modalUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
@@ -46,19 +45,6 @@ type TabConfig = {
 }
 
 export default defineComponent({
-  data() {
-    return {
-      stepCount: stepsUtils.steps.length
-    }
-  },
-  mounted() {
-    eventUtils.on('stepsUpdate', (stepCount: number) => {
-      this.stepCount = stepCount
-    })
-  },
-  unmounted() {
-    eventUtils.off('stepsUpdate')
-  },
   computed: {
     ...mapGetters('objects', {
       staticHeaderTab: 'headerTab'
@@ -85,6 +71,9 @@ export default defineComponent({
       isInSelectionMode: 'vivisticker/getIsInSelectionMode',
       userSettings: 'vivisticker/getUserSettings'
     }),
+    stepCount(): number {
+      return stepsUtils.steps.length
+    },
     isInCategory(): boolean {
       return this.isCurrentInCategory(this.currActiveTab)
     },
