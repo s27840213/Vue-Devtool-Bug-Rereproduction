@@ -164,105 +164,68 @@ export default defineComponent({
       }
     },
     pinchHandler(event: AnyTouchEvent) {
-      switch (event.phase) {
-        case 'start': {
-          console.log('start')
-          this.initImgPos = {
-            x: this.config.styles.imgX,
-            y: this.config.styles.imgY
+      window.requestAnimationFrame(() => {
+        switch (event.phase) {
+          case 'start': {
+            console.log('start')
+            this.initImgPos = {
+              x: this.config.styles.imgX,
+              y: this.config.styles.imgY
+            }
+            this.initImgSize = {
+              width: this.config.styles.imgWidth,
+              height: this.config.styles.imgHeight
+            }
+            break
           }
-          this.initImgSize = {
-            width: this.config.styles.imgWidth,
-            height: this.config.styles.imgHeight
+          case 'move': {
+            const { mobilePysicalSize: { pageCenterPos, pageSize } } = this.page
+            const { styles } = this.config
+            const _sizeRatio = pageSize.width / styles.width
+
+            if (!this.initPinchPos) {
+              // this.initPinchPos = { x: event.x - pageUtils.pageEventPosOffset.x, y: event.y - pageUtils.pageEventPosOffset.y }
+              this.initPinchPos = { x: event.x, y: event.y }
+            }
+
+            // const translationRatio = {
+            //   x: -(this.initPinchPos.x - pageCenterPos.x) / pageSize.width,
+            //   y: -(this.initPinchPos.y - pageCenterPos.y) / pageSize.height
+            // }
+            const posInConfig = {
+              x: (this.initPinchPos.x - pageCenterPos.x + pageSize.width * 0.5) / _sizeRatio - styles.imgX,
+              y: (this.initPinchPos.y - pageCenterPos.y + pageSize.height * 0.5) / _sizeRatio - styles.imgY
+            }
+
+            const translationRatio = {
+              x: -posInConfig.x / styles.imgWidth,
+              y: -posInConfig.y / styles.imgHeight
+            }
+
+            const sizeDiff = {
+              width: this.initImgSize.width * (event.scale - 1) * 0.5,
+              height: this.initImgSize.height * (event.scale - 1) * 0.5
+            }
+
+            const newSize = {
+              width: this.initImgSize.width + sizeDiff.width,
+              height: this.initImgSize.height + sizeDiff.height
+            }
+            const newPos = {
+              x: this.initImgPos.x + (sizeDiff.width * translationRatio.x),
+              y: this.initImgPos.y + (sizeDiff.height * translationRatio.y),
+              // x: this.initImgPos.x + (sizeDiff.width * Math.min(Math.max(translationRatio.x - 0.5, -1), 1)),
+              // y: this.initImgPos.y + (sizeDiff.height * Math.min(Math.max(translationRatio.y - 0.5, -1), 1)),
+            }
+            this.updateConfig({ imgX: newPos.x, imgY: newPos.y, imgWidth: newSize.width, imgHeight: newSize.height })
+            break
           }
-          break
+          case 'end': {
+            this.initPinchPos = null
+            console.log('end')
+          }
         }
-        case 'move': {
-          if (!this.initPinchPos) {
-            // this.initPinchPos = { x: event.x - pageUtils.pageEventPosOffset.x, y: event.y - pageUtils.pageEventPosOffset.y }
-            this.initPinchPos = { x: event.x, y: event.y }
-          }
-
-          const translationRatio = {
-            x: -(this.initPinchPos.x - pageUtils.pageCenterPos.x) / pageUtils.originPageSize.width,
-            y: -(this.initPinchPos.y - pageUtils.pageCenterPos.y) / pageUtils.originPageSize.height
-          }
-          const sizeDiff = {
-            width: this.initImgSize.width * (event.scale - 1) * 0.5,
-            height: this.initImgSize.height * (event.scale - 1) * 0.5
-          }
-
-          const newSize = {
-            width: this.initImgSize.width + sizeDiff.width,
-            height: this.initImgSize.height + sizeDiff.height
-            // width: this.initImgSize.width,
-            // height: this.initImgSize.height
-          }
-          console.log(this.initImgSize.width * ((event.scale - 1) * 0.5 + 1), this.initImgSize.height * ((event.scale - 1) * 0.5 + 1))
-          const newPos = {
-            x: this.initImgPos.x + (sizeDiff.width * Math.min(Math.max(translationRatio.x - 0.5, -1), 1)),
-            y: this.initImgPos.y + (sizeDiff.height * Math.min(Math.max(translationRatio.y - 0.5, -1), 1)),
-          }
-          this.updateConfig({ imgX: newPos.x, imgY: newPos.y, imgWidth: newSize.width, imgHeight: newSize.height })
-          break
-        }
-        case 'end': {
-          this.initPinchPos = null
-          console.log('end')
-        }
-      }
-      //   case 'start': {
-      //     this.oriX = pageUtils.getCurrPage.x
-      //     this.oriPageSize = (pageUtils.getCurrPage.width * (pageUtils.scaleRatio / 100))
-      //     this.tmpScaleRatio = pageUtils.scaleRatio
-      //     this.isScaling = true
-      //     store.commit('SET_isPageScaling', true)
-      //     break
-      //   }
-      //   case 'move': {
-      //     if (!this.isScaling) {
-      //       this.isScaling = true
-      //       store.commit('SET_isPageScaling', true)
-      //     }
-      //     window.requestAnimationFrame(() => {
-      //       const limitMultiplier = 4
-      //       if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
-      //         pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
-      //         return
-      //       }
-      //       const newScaleRatio = Math.min(this.tmpScaleRatio * event.scale, pageUtils.mobileMinScaleRatio * limitMultiplier)
-      //       if (newScaleRatio >= pageUtils.mobileMinScaleRatio * 0.8) {
-      //         pageUtils.setScaleRatio(newScaleRatio)
-
-      //         const baseX = (pageUtils.getCurrPage.width * (newScaleRatio / 100) - this.oriPageSize) * 0.5
-      //         pageUtils.updatePagePos(0, {
-      //           x: this.oriX - baseX
-      //         })
-      //       }
-      //       clearTimeout(this.hanleWheelTimer)
-      //       this.hanleWheelTimer = setTimeout(() => {
-      //         if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
-      //           const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-      //           page.style.transition = '0.2s linear'
-      //           this.handleWheelTransition = true
-      //           pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
-      //           this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
-      //           setTimeout(() => {
-      //             page.style.transition = ''
-      //             this.handleWheelTransition = false
-      //           }, 500)
-      //         }
-      //       }, 500)
-      //     })
-      //     break
-      //   }
-
-      //   case 'end': {
-      //     this.isScaling = false
-      //     store.commit('SET_isPageScaling', false)
-      //     break
-      //   }
-      // }
+      })
     },
     moveStart(event: PointerEvent) {
       if (eventUtils.checkIsMultiTouch(event)) {
