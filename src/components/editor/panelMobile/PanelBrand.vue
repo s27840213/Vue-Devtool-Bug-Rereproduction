@@ -1,47 +1,48 @@
 <template lang="pug">
-  div(class="panel-brand relative")
-    div(v-if="isBrandsLoading" class="panel-brand__main")
-      svg-icon(iconName="loading"
-              iconWidth="20px"
-              iconColor="white")
-    div(v-else class="panel-brand__main")
-      div(class="panel-brand__header relative")
-        brand-selector(theme="mobile-editor")
-        div(class="panel-brand__settings pointer"
-          @click.stop="handleToggleSettings")
-          svg-icon(:iconName="isInSettingMode ? 'confirm-circle' : 'settings'"
-                    iconColor="white"
-                    iconWidth="24px")
-      div(class="panel-brand__tab")
-        brand-kit-tab(theme="mobile-editor" :maxheight="maxheight - 180" :settingmode="isInSettingMode")
-    div(v-if="isMobileConfirmOpen" class="dim-background")
-      div(class="panel-brand__confirm"
-          v-click-outside="handleClearDeletion")
-        div(class="panel-brand__confirm__close"
-            @click.stop="handleClearDeletion")
-          svg-icon(iconName="close" iconColor="gray-3" iconWidth="20px")
-        div(class="panel-brand__confirm__title") 確認刪除圖片？
-        div(class="panel-brand__confirm__descriptions")
-          div 您已選擇刪除圖片
-          div {{ `${ mobileDeleteBuffer.content.name }` }}
-          div 刪除後將無法復原。
-        div(class="panel-brand__confirm__buttons")
-            div(class="panel-brand__confirm__cancel" @click.stop="handleClearDeletion")
-              span {{$t('NN0203')}}
-            div(class="panel-brand__confirm__confirm" @click.stop="confirmAction")
-              span {{$tc('NN0164', 1)}}
+div(class="panel-brand relative")
+  div(v-if="isBrandsLoading" class="panel-brand__main")
+    svg-icon(iconName="loading"
+            iconWidth="20px"
+            iconColor="white")
+  div(v-else class="panel-brand__main")
+    div(class="panel-brand__header relative")
+      brand-selector(theme="mobile-editor")
+      div(class="panel-brand__settings pointer"
+        @click.stop="handleToggleSettings")
+        svg-icon(:iconName="isInSettingMode ? 'confirm-circle' : 'settings'"
+                  iconColor="white"
+                  iconWidth="24px")
+    div(class="panel-brand__tab")
+      brand-kit-tab(theme="mobile-editor" :maxheight="maxheight - 180" :settingmode="isInSettingMode")
+  div(v-if="isMobileConfirmOpen" class="dim-background")
+    div(class="panel-brand__confirm"
+        v-click-outside="handleClearDeletion")
+      div(class="panel-brand__confirm__close"
+          @click.stop="handleClearDeletion")
+        svg-icon(iconName="close" iconColor="gray-3" iconWidth="20px")
+      div(class="panel-brand__confirm__title") 確認刪除圖片？
+      div(class="panel-brand__confirm__descriptions")
+        div 您已選擇刪除圖片
+        div {{ `${ mobileDeleteBuffer.content.name }` }}
+        div 刪除後將無法復原。
+      div(class="panel-brand__confirm__buttons")
+          div(class="panel-brand__confirm__cancel" @click.stop="handleClearDeletion")
+            span {{$t('NN0203')}}
+          div(class="panel-brand__confirm__confirm" @click.stop="confirmAction")
+            span {{$tc('NN0164', 1)}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import vClickOutside from 'v-click-outside'
+import { defineComponent } from 'vue'
+import vClickOutside from 'click-outside-vue3'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
 import { mapGetters, mapMutations } from 'vuex'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrandLogo } from '@/interfaces/brandkit'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     BrandSelector,
     BrandKitTab

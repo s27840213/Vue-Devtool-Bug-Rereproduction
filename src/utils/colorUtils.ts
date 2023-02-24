@@ -1,5 +1,5 @@
 import store from '@/store'
-import { IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
 import { IPage } from '@/interfaces/page'
 import pageUtils from './pageUtils'

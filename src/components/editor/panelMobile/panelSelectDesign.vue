@@ -1,20 +1,20 @@
 <template lang="pug">
-  div(class="panel-select-design")
-    div(class="panel-select-design__left"
-        @click.prevent.stop="handleToggleAllSelected")
-      div(class="panel-select-design__left__checkbox"
-          :class="{checked: isAllSelected}")
-        svg-icon(v-if="isAllSelected" iconName="check" iconColor="white" iconWidth="20.7px")
-      div(class="panel-select-design__left__text")
-        span {{ isAllSelected ? $t('STK0016') : $t('STK0015') }}
-    div(class="panel-select-design__right"
-        :class="{disabled: !isAnySelected}"
-        @click.prevent.stop="handleDeleteSelected")
-      div(class="panel-select-design__right__icon")
-        svg-icon(iconName="trash" :iconColor="isAnySelected ? 'white' : 'gray-2'" iconWidth="19.5px")
-      div(class="panel-select-design__right__text"
-          :class="{disabled: !isAnySelected}")
-        span {{ $t('NN0034') }}
+div(class="panel-select-design")
+  div(class="panel-select-design__left"
+      @click.prevent.stop="handleToggleAllSelected")
+    div(class="panel-select-design__left__checkbox"
+        :class="{checked: isAllSelected}")
+      svg-icon(v-if="isAllSelected" iconName="check" iconColor="white" iconWidth="20.7px")
+    div(class="panel-select-design__left__text")
+      span {{ isAllSelected ? $t('STK0016') : $t('STK0015') }}
+  div(class="panel-select-design__right"
+      :class="{disabled: !isAnySelected}"
+      @click.prevent.stop="handleDeleteSelected")
+    div(class="panel-select-design__right__icon")
+      svg-icon(iconName="trash" :iconColor="isAnySelected ? 'white' : 'gray-2'" iconWidth="19.5px")
+    div(class="panel-select-design__right__text"
+        :class="{disabled: !isAnySelected}")
+      span {{ $t('NN0034') }}
 </template>
 
 <script lang="ts">
@@ -22,10 +22,10 @@ import { IMyDesign } from '@/interfaces/vivisticker'
 import editorUtils from '@/utils/editorUtils'
 import modalUtils from '@/utils/modalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
     }

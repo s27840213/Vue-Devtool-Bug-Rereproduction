@@ -1,30 +1,51 @@
 <template lang="pug">
-  p(class="nu-curve-text__p" :style="pStyle()")
-    span(v-if="focus()"  class="nu-curve-text__circle" :style="circleStyle()")
-      svg-icon(iconName="curve-center" :style="curveIconStyle")
-    span(v-for="(span, sIndex) in spans()"
-      class="nu-curve-text__span"
-      :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
-      :key="sIndex",
-      :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan, transParentStyles)") {{ span.text }}
+p(class="nu-curve-text__p" :style="pStyle()")
+  span(v-if="focus()"  class="nu-curve-text__circle" :style="circleStyle()")
+    svg-icon(iconName="curve-center" :style="curveIconStyle")
+  span(v-for="(span, sIndex) in spans()"
+    class="nu-curve-text__span"
+    :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
+    :key="sIndex",
+    :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan, transParentStyles)") {{ span.text }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters, mapState } from 'vuex'
-import TextShapeUtils from '@/utils/textShapeUtils'
-import { IGroup, ISpan } from '@/interfaces/layer'
-import tiptapUtils from '@/utils/tiptapUtils'
+import { IGroup, ISpan, IText } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
 import LayerUtils from '@/utils/layerUtils'
-import textUtils from '@/utils/textUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import TextShapeUtils from '@/utils/textShapeUtils'
+import textUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    config: Object,
-    layerIndex: Number,
-    pageIndex: Number,
-    subLayerIndex: Number,
+    config: {
+      type: Object as PropType<IText>,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
+    subLayerIndex: {
+      type: Number
+    },
+    primaryLayer: {
+      type: Object,
+      default: () => { return undefined }
+    },
     isDuplicated: {
       type: Boolean,
       default: false
@@ -47,7 +68,7 @@ export default Vue.extend({
     // textUtils.loadAllFonts(this.config, 1)
     textUtils.loadAllFonts(this.config)
   },
-  destroyed() {
+  unmounted() {
     this.isDestroyed = true
   },
   mounted() {
@@ -166,7 +187,7 @@ export default Vue.extend({
       if (typeof this.subLayerIndex === 'undefined' || this.subLayerIndex === -1) {
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
       } else {
-        const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
+        const group = this.primaryLayer as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, await TextShapeUtils.getCurveTextPropsAsync(this.config))
         textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)

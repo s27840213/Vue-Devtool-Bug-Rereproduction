@@ -4,7 +4,7 @@ div(class="popup-file")
     class="popup-file__profile")
     router-link(to="/settings/account"
         class="popup-file__option__link"
-        @click.native="closePopup")
+        @click="closePopup")
       avatar(class="mr-10"
         :textSize="14"
         :avatarSize="35")
@@ -15,7 +15,7 @@ div(class="popup-file")
   div(class="popup-file__item" @click="newDesign()")
     span {{$tc('NN0072')}}
   hr(class="popup-file__hr")
-  div(v-if="isAdmin" class="popup-file__item " @click="toggleBleed()")
+  div(class="popup-file__item " @click="toggleBleed()")
     span {{hasBleed ? `${$t('NN0779')}` : `${$t('NN0778')}`}}
   div(class="popup-file__item " @click="togglerRuler()")
     span {{$t('NN0073')}}
@@ -64,20 +64,20 @@ div(class="popup-file")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import popupUtils from '@/utils/popupUtils'
-import pageUtils from '@/utils/pageUtils'
-import rulerUtils from '@/utils/rulerUtils'
-import { mapGetters, mapMutations, mapState } from 'vuex'
-import shortcutHandler from '@/utils/shortcutUtils'
-import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
-import stepsUtils from '@/utils/stepsUtils'
+import fileUtils from '@/utils/fileUtils'
 import gtmUtils from '@/utils/gtmUtils'
-import { IPage } from '@/interfaces/page'
+import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import rulerUtils from '@/utils/rulerUtils'
+import shortcutHandler from '@/utils/shortcutUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     Avatar,
     Url
@@ -98,7 +98,8 @@ export default Vue.extend({
       account: 'user/getAccount',
       isFontLoading: 'text/getIsFontLoading',
       pagesLength: 'getPagesLength',
-      groupType: 'getGroupType'
+      groupType: 'getGroupType',
+      hasBleed: 'getHasBleed'
     }),
     pageSize(): { w: number, h: number } {
       return {
@@ -125,9 +126,6 @@ export default Vue.extend({
       } else {
         return this.uname
       }
-    },
-    hasBleed(): boolean {
-      return pageUtils.getPages.some((page: IPage) => page.isEnableBleed)
     }
   },
   methods: {
@@ -156,14 +154,10 @@ export default Vue.extend({
     },
     toggleBleed() {
       const isEnableBleed = !this.hasBleed
-      for (let idx = 0; idx < this.pagesLength; idx++) {
-        pageUtils.setIsEnableBleed(isEnableBleed, idx)
-        if (!isEnableBleed) pageUtils.resetBleeds(idx)
-      }
+      for (let idx = 0; idx < this.pagesLength; idx++) pageUtils.setIsEnableBleed(isEnableBleed, idx)
       stepsUtils.record()
     },
     newDesign() {
-      // designUtils.newDesign()
       const path = `${window.location.origin}${window.location.pathname}`
       window.open(path)
       this.closePopup()
@@ -176,7 +170,6 @@ export default Vue.extend({
     },
     exportJSON() {
       fileUtils.export()
-      // designUtils.newDesign()
     },
     toogleAdminView() {
       this.setUserState({ enableAdminView: !this.enableAdminView })
@@ -207,6 +200,9 @@ export default Vue.extend({
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'
+    },
+    gotoMobile() { // TO-DELETE
+      window.location.href = this.$router.currentRoute.value.fullPath.replace('editor', 'mobile-editor')
     }
   }
 })

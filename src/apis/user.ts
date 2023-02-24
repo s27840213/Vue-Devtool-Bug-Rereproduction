@@ -1,11 +1,9 @@
-/* eslint-disable camelcase */
 import axios from '@/apis'
 import i18n from '@/i18n'
 import { IGroupDesignInputParams, IUpdateAssetParams } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
 import store from '@/store'
 import apiUtils from '@/utils/apiUtils'
-import generalUtils from '@/utils/generalUtils'
 import { AxiosPromise } from 'axios'
 
 export default {
@@ -13,7 +11,7 @@ export default {
     return store.getters['user/getToken']
   },
   getLocale(): string {
-    return i18n.locale
+    return i18n.global.locale
   },
   getTeamId(): string {
     return store.getters['user/getTeamId']

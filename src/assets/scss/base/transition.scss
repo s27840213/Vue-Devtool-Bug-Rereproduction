@@ -41,7 +41,7 @@
       transition: all 0.2s;
     }
   }
-  &-enter {
+  &-enter-from {
     opacity: 0;
   }
   &-leave-to {
@@ -54,7 +54,7 @@
   &-leave-active {
     transition: opacity 0.5s;
   }
-  &-enter,
+  &-enter-from,
   &-leave-to {
     opacity: 0;
   }
@@ -81,7 +81,7 @@
       transition: all 0.4s;
     }
   }
-  &-enter {
+  &-enter-from {
     transform: translateY(30px);
     opacity: 0;
   }
@@ -102,7 +102,7 @@
       transition: all 0.5s;
     }
   }
-  &-enter {
+  &-enter-from {
     transform: translateY(-30px);
     opacity: 0;
   }
@@ -120,7 +120,7 @@
       &-move {
         transition: all 0.2s map-get($ease-functions, ease-in-out-quint);
       }
-      &-enter,
+      &-enter-from,
       &-leave-to {
         opacity: 0;
         transform: translateX(-24px);
@@ -136,7 +136,7 @@
         &-move {
           transition: all 0.2s map-get($ease-functions, ease-in-out-quint);
         }
-        &-enter {
+        &-enter-from {
           opacity: 0;
           transform: translateX(24px);
         }
@@ -157,7 +157,7 @@
       &-move {
         transition: all 0.2s map-get($ease-functions, ease-in-out-quint);
       }
-      &-enter,
+      &-enter-from,
       &-leave-to {
         opacity: 0;
         transform: translateX(24px);
@@ -173,7 +173,7 @@
         &-move {
           transition: all 0.2s map-get($ease-functions, ease-in-out-quint);
         }
-        &-enter {
+        &-enter-from {
           opacity: 0;
           transform: translateX(-24px);
         }
@@ -217,12 +217,12 @@
   &-enter-active {
     transition: transform 0.3s map-get($ease-functions, ease-in-out-quint);
   }
-  &-leave,
+  &-leave-from,
   &-enter-to {
     transform: translateY(0);
   }
   &-leave-to,
-  &-enter {
+  &-enter-from {
     transform: translateY(100%);
   }
 }

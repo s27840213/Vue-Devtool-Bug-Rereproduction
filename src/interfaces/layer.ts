@@ -1,11 +1,12 @@
-import { SrcObj } from './gallery'
-import { ITiptapSelection } from './text'
 import { IAdjustJsonProps } from '@/interfaces/adjust'
-import { IShadowProps, IShadowStyles } from './imgShadow'
 import { LayerProcessType } from '@/store/types'
 import { ITextBgEffect, ITextEffect, ITextShape } from './format'
+import { SrcObj } from './gallery'
+import { IShadowProps, IShadowStyles } from './imgShadow'
+import { ITiptapSelection } from './text'
 
 export const jsonVer = '1.0.7'
+
 export interface ILayerIdentifier {
   pageId: string,
   layerId: string,
@@ -49,7 +50,7 @@ export interface ILayer<T extends IStyle = IStyle> {
   dragging: boolean,
   designId: string,
   styles: T,
-  id?: string
+  id: string
 }
 
 export interface ITextStyle extends IStyle {
@@ -57,6 +58,7 @@ export interface ITextStyle extends IStyle {
   textShape: ITextShape | Record<string, never>
   textEffect: ITextEffect | Record<string, never>
   textBg: ITextBgEffect
+  align: string
 }
 
 export interface IParagraphStyle {
@@ -109,26 +111,28 @@ export interface IText extends ILayer<ITextStyle> {
 export interface IShape extends ILayer<IStyle> {
   type: 'shape'
   // svgID: string,
+  className: string,
+  ratio: number,
   category: string,
   scaleType?: number,
+  styleArray: string[],
+  color: [string],
+  size?: number[],
+  transArray?: string[],
+  markerTransArray?: string[],
   svg: string,
-  className: string,
-  path?: string,
-  ratio: number,
-  color: string[],
   vSize: number[],
   cSize?: number[],
   pSize?: number[],
   pDiff?: number[],
   point?: number[],
-  size?: number[],
+  path?: string,
   dasharray?: number[],
   linecap?: 'butt' | 'round',
   markerId?: string[],
   markerWidth?: number[],
   trimWidth?: (boolean | undefined)[],
   trimOffset?: number[],
-  styleArray: string[],
   filled?: boolean,
   shapeType?: string,
   pDiffLimits?: number[]
@@ -160,7 +164,7 @@ export interface IFrame extends ILayer<IFrameStyle> {
   type: 'frame'
   clips: Array<IImage>
   decoration?: IShape,
-  decorationTop?: IShape,
+  decorationTop?: IShape
   blendLayers?: Array<IShape>
 }
 export interface IGroup extends ILayer<IStyle> {
@@ -172,3 +176,5 @@ export interface ITmp extends ILayer<IStyle> {
   type: 'tmp'
   layers: Array<IShape | IText | IImage | IGroup | IFrame>
 }
+
+export type AllLayerTypes = IShape | IText | IImage | IGroup | IFrame | ITmp

@@ -12,14 +12,14 @@ import layerUtils from './layerUtils'
 import tiptapUtils from './tiptapUtils'
 
 export default class SubControllerUtils {
-  private component = undefined as Vue | undefined
+  // private component = undefined as Vue | undefined
+  private component = undefined as any | undefined
   private body = undefined as unknown as HTMLElement
   private _config = { config: null as unknown as ILayer }
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as IExtendLayerInfo
   private dblTapFlag = false
   private posDiff = { x: 0, y: 0 }
   private _onMouseup = null as unknown
-  private primaryActive = false
   private initTranslate = { x: 0, y: 0 }
 
   private get isControllerShown(): boolean { return this.primaryLayer.active && !store.getters['vivisticker/getControllerHidden'] }
@@ -38,27 +38,32 @@ export default class SubControllerUtils {
     return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp
   }
 
-  constructor({ _config, body, layerInfo }: { _config: { config: ILayer }, body: HTMLElement, layerInfo?: ILayerInfo, component?: Vue }) {
+  private get primaryActive(): boolean { return this.primaryLayer.active }
+
+  constructor({ _config, body, layerInfo }: { _config: { config: ILayer }, body: HTMLElement, layerInfo?: ILayerInfo, component?: any }) {
     this._config = _config
     this.body = body
     layerInfo && (this.layerInfo = layerInfo)
   }
 
   onPointerdown(e: PointerEvent) {
-    e.stopPropagation()
+    // e.stopPropagation()
     this.initTranslate = {
       x: this.primaryLayer.styles?.x || 0,
       y: this.primaryLayer.styles?.y || 0
     }
     if (this.primaryLayer.type === 'tmp') {
-      if (generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || store.getters['mobileEditor/getInMultiSelectionMode']) {
+      if (generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
         groupUtils.deselectTargetLayer(this.subLayerIdx)
+      }
+      if (groupUtils.inMultiSelecitonMode) {
+        this._onMouseup = this.onMouseup.bind(this)
+        eventUtils.addPointerEvent('pointerup', this._onMouseup)
       }
       return
     }
     if (e.button !== 0) return
 
-    this.primaryActive = this.primaryLayer.active
     if (imageUtils.isImgControl()) {
       imageUtils.setImgControlDefault()
     }
@@ -78,7 +83,9 @@ export default class SubControllerUtils {
                   layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true }, this.subLayerIdx)
                   break
                 case LayerType.frame:
-                  frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { imgControl: true })
+                  if ((this.config as IImage).srcObj.type !== 'frame') {
+                    frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { imgControl: true })
+                  }
                   break
               }
               eventUtils.emit(PanelEvent.switchTab, 'crop')
@@ -173,15 +180,10 @@ export default class SubControllerUtils {
       frameUtils.iosPhotoSelect(this.layerInfo, image as IImage)
     }
     this.onClickEvent(e)
-    this.primaryActive = false
-    this.posDiff = { x: 0, y: 0 }
   }
 
   onClickEvent(e: MouseEvent) {
     colorUtils.event.emit('closeColorPanel', false)
-    // if (!this.primaryLayer.active) {
-    //   return
-    // }
     let updateSubLayerProps = null as any
     let layers = null as any
     switch (this.primaryLayer.type) {
@@ -194,8 +196,11 @@ export default class SubControllerUtils {
         layers = (layerUtils.getCurrLayer as IFrame).clips
     }
 
-    // if (!store.getters['shadow/isHandling'] && this.primaryActive && !store.state.isMoving) {
-    if (!store.getters['shadow/isHandling'] && !store.state.isMoving) {
+    if (!store.getters['shadow/isHandling'] && this.primaryActive && !store.state.isMoving) {
+      if (groupUtils.inMultiSelecitonMode) {
+        groupUtils.deselectTargetLayer(this.subLayerIdx)
+        return
+      }
       if (layerUtils.layerIndex !== -1) {
         for (let idx = 0; idx < layers.length; idx++) {
           if (idx !== this.subLayerIdx) {
@@ -205,15 +210,16 @@ export default class SubControllerUtils {
       }
       const isFrameSub = this.primaryLayer.type === LayerType.frame && !(this.primaryLayer as IFrame).clips[this.subLayerIdx].active
       const isGroupSub = this.primaryLayer.type === LayerType.group && !(this.primaryLayer as IGroup).layers[this.subLayerIdx].active
+      console.log(isGroupSub)
       if (isFrameSub || isGroupSub) {
         if (this.isControllerShown) {
           updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIdx, { active: true })
+          layerUtils.setCurrSubSelectedInfo(this.subLayerIdx, this.config.type)
         } else {
           groupUtils.deselect()
           groupUtils.select(this.pageIndex, [this.layerIndex])
         }
       }
-      layerUtils.setCurrSubSelectedInfo(this.subLayerIdx, this.config.type)
     }
   }
 }

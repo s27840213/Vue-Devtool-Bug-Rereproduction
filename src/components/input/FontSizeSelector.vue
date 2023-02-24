@@ -1,20 +1,21 @@
 <template lang="pug">
-  div(class="font-size-selector relative")
-    div(class="font-size-selector__number")
-      div(class="pointer"
-        @pointerdown="fontSizeStepping(-step)"
-        @contextmenu.prevent)
-        svg-icon(iconName="minus-small" iconWidth="24px" iconColor="gray-2")
-      button(class="font-size-selector__range-input-button")
-        input(class="text-gray-2 center record-selection" type="text" ref="input-fontSize"
-              @change="setSize" :value="fontSize" :disabled="fontSize === '--'")
-      div(class="pointer"
-        @pointerdown="fontSizeStepping(step)"
-        @contextmenu.prevent)
-        svg-icon(iconName="plus-small" iconWidth="24px" iconColor="gray-2")
+div(class="font-size-selector relative")
+  div(class="font-size-selector__number")
+    div(class="pointer"
+      @pointerdown="fontSizeStepping(-step)"
+      @contextmenu.prevent)
+      svg-icon(iconName="minus-small" iconWidth="24px" iconColor="gray-2")
+    button(class="font-size-selector__range-input-button")
+      input(class="text-gray-2 center record-selection" type="text" ref="input-fontSize"
+            @change="setSize" :value="fontSize" :disabled="fontSize === '--'")
+    div(class="pointer"
+      @pointerdown="fontSizeStepping(step)"
+      @contextmenu.prevent)
+      svg-icon(iconName="plus-small" iconWidth="24px" iconColor="gray-2")
 </template>
 
 <script lang="ts">
+import ValueSelector from '@/components/ValueSelector.vue'
 import { IGroup, ILayer } from '@/interfaces/layer'
 import eventUtils from '@/utils/eventUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -23,13 +24,12 @@ import stepsUtils from '@/utils/stepsUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import Vue from 'vue'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
-import ValueSelector from '@/components/ValueSelector.vue'
-import vClickOutside from 'v-click-outside'
-import generalUtils from '@/utils/generalUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     ValueSelector
   },
@@ -38,7 +38,7 @@ export default Vue.extend({
       openValueSelector: false,
       fontSelectValue,
       fieldRange: {
-        fontSize: { min: 1, max: 144 },
+        fontSize: { min: 1, max: 9999 },
         lineHeight: { min: 0.5, max: 2.5 },
         fontSpacing: { min: -200, max: 800 },
         // fontSpacing: { min: -2, max: 8 },
@@ -54,8 +54,7 @@ export default Vue.extend({
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
-      layerIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer'
+      layerIndex: 'getCurrSelectedIndex'
     }),
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
     scale(): number {
@@ -107,7 +106,7 @@ export default Vue.extend({
       return value.toString()
     },
     handleValueModal() {
-      if (generalUtils.isTouchDevice()) return
+      if (this.$isTouchDevice()) return
       this.openValueSelector = !this.openValueSelector
       if (this.openValueSelector) {
         const input = this.$refs['input-fontSize'] as HTMLInputElement
@@ -117,7 +116,7 @@ export default Vue.extend({
     },
     handleValueUpdate(value: number) {
       // layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-      value = Math.round(value / this.scale * 10) / 10
+      value = value / this.scale
       tiptapUtils.spanStyleHandler('size', value)
       tiptapUtils.forceUpdate(true)
       textPropUtils.updateTextPropsState({ fontSize: value.toString() })
@@ -127,7 +126,7 @@ export default Vue.extend({
       let { value } = e.target as HTMLInputElement
       if (this.isValidFloat(value)) {
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
-        const finalValue = Math.round(parseFloat(value) / this.scale * 10) / 10
+        const finalValue = parseFloat(value) / this.scale
         window.requestAnimationFrame(() => {
           // TODO: need to deal with diff scales in group
           // if (this.props.fontSize === '--') {
@@ -144,7 +143,7 @@ export default Vue.extend({
     },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
-      const interval = setInterval(() => {
+      const interval = window.setInterval(() => {
         if (new Date().getTime() - startTime > 500) {
           try {
             textPropUtils.fontSizeStepping(step)

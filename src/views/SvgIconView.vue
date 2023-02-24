@@ -1,19 +1,21 @@
 <template lang="pug">
-  div(class="svg-icon-view bg-nav")
-    div(class="svg-icon-view__icon pointer" v-for="icon in icons" @click="copyText(icon)")
-      svg-icon(class="pointer"
-        :iconName="icon"
-        :iconWidth="'30px'"
-        :iconColor="'white'")
-      span(class="text-white") {{icon}}
+div(class="svg-icon-view bg-nav")
+  div(class="svg-icon-view__icon pointer" v-for="icon in icons" @click="copyText(icon)")
+    svg-icon(class="pointer"
+      :iconName="icon"
+      :iconWidth="'30px'"
+      :iconColor="'white'")
+    span(class="text-white") {{icon}}
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import generalUtils from '@/utils/generalUtils'
 import svgIconUtils from '@/utils/svgIconUtils'
-import Vue from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'SvgIconView',
   data() {
     const icons = svgIconUtils.icons
@@ -25,7 +27,7 @@ export default Vue.extend({
     copyText(text: string) {
       generalUtils.copyText(text)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${text} 已複製` })
+          notify({ group: 'copy', text: `${text} 已複製` })
         })
     }
   }

@@ -1,126 +1,129 @@
 <template lang="pug">
-  div(class="panel-bg" :class="{'in-category': isInCategory}")
-    tabs(v-if="!isInCategory"
-          class="panel-bg__tabs"
-          :tabs="[$tc('NN0002', 2),$t('NN0017')]"
-          v-model="tabIndex")
-    template(v-show="showImageTab")
-      search-bar(v-if="!isInCategory && showImageTab" class="panel-bg__searchbar"
-        :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
-        clear
-        :defaultKeyword="keywordLabel"
-        vivisticker="dark"
-        :color="{close: 'black-5', search: 'black-5'}"
-        @search="handleSearch")
-      div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
-      category-list(v-for="item in categoryListArray"
-                  v-show="item.show" :ref="item.key" :key="item.key"
-                  class="panel-bg__list"
-                  :list="item.content" @loadMore="handleLoadMore")
-        template(#before)
-          div(class="panel-bg__top-item")
-        template(v-slot:category-list-rows="{ list, title }")
-          category-list-rows(
-            :list="list"
-            :title="title"
-            @action="handleCategorySearch")
-            template(v-slot:preview="{ item }")
-              category-background-item(class="panel-bg__item"
-                :item="item"
-                :locked="false"
-                @share="handleShareImage")
-        template(v-slot:category-background-item="{ list, title }")
-          div(class="panel-bg__items")
-            div(v-if="title"
-              class="panel-bg__header") {{ title }}
-            category-background-item(v-for="item in list"
-              class="panel-bg__item"
-              :key="item.id"
+div(class="panel-bg" :class="{'in-category': isInCategory}")
+  tabs(v-if="!isInCategory"
+        class="panel-bg__tabs"
+        :tabs="[$tc('NN0002', 2),$t('NN0017')]"
+        v-model="tabIndex")
+  div(v-show="showImageTab" class="panel-bg__list-wrapper")
+    search-bar(v-if="!isInCategory && showImageTab" class="panel-bg__searchbar"
+      :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
+      clear
+      :defaultKeyword="keywordLabel"
+      vivisticker="dark"
+      :color="{close: 'black-5', search: 'black-5'}"
+      @search="handleSearch")
+    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+    category-list(v-for="item in categoryListArray"
+                v-show="item.show" :ref="item.key" :key="item.key"
+                class="panel-bg__list"
+                :list="item.content" @loadMore="handleLoadMore")
+      template(#before)
+        div(class="panel-bg__top-item")
+      template(v-slot:category-list-rows="{ list, title }")
+        category-list-rows(
+          :list="list"
+          :title="title"
+          @action="handleCategorySearch")
+          template(v-slot:preview="{ item }")
+            category-background-item(class="panel-bg__item"
               :item="item"
               :locked="false"
+              :style="itemStyles"
               @share="handleShareImage")
-        template(v-if="pending" #after)
-          div(class="text-center")
-            svg-icon(iconName="loading"
-              iconColor="white"
-              iconWidth="20px")
-    div(v-show="!showImageTab" class="panel-bg__color-tab")
-      div(class="panel-bg__color-tab-wrapper" :style="colorTabWrapperStyles()")
-        div(class="panel-bg__color-area")
-          div(class="panel-bg__color-row")
-            div(class="panel-bg__color-row-header py-5 text-white")
-              div(class="panel-bg__color-row-left")
-                div(v-if="showAllRecentlyBgColors" class="panel-bg__color-row-back" @click.prevent.stop="handleShowAllRecentlyBgColors(false)")
-                  svg-icon(iconName="vivisticker_back" iconColor="white" iconWidth="24px")
-                div(class="panel-bg__color-row-title") {{$t('NN0024')}}
-              div(v-if="!showAllRecentlyBgColors" class="panel-bg__color-row-more" @click.prevent.stop="handleShowAllRecentlyBgColors(true)") {{$t('NN0082')}}
-            div(class="panel-bg__colors")
-              div(class="panel-bg__color add-color" @click="handleOpenColorPicker")
-              div(v-if="newBgColor !== ''"
-                class="panel-bg__color"
-                :style="colorStyles(newBgColor)")
-              div(v-for="color in recentlyColors"
-                class="panel-bg__color"
-                :key="color"
-                v-press="() => handleShareColor(color)"
-                :style="colorStyles(color)"
-                @click="setBgColor(color)")
-          div(v-if="!showAllRecentlyBgColors" class="panel-bg__color-row")
-            div(class="panel-bg__color-row-title text-left py-5 text-white") {{$t('NN0089')}}
-            div(class="panel-bg__colors")
-              div(v-for="color in defaultBgColor"
-                class="panel-bg__color"
-                :key="color"
-                v-press="() => handleShareColor(color)"
-                :style="colorStyles(color)"
-                @click="setBgColor(color)")
-        div(class="panel-bg__color-controller")
-          mobile-slider(:title="`${$t('NN0030')}`"
-            :borderTouchArea="true"
-            :value="opacity"
-            :min="0"
-            :max="100"
-            theme="light"
-            @update="updateOpacity")
-          div(class="panel-bg__color-controller__hint")
-            p(class="panel-bg__color-controller__hint-text") {{ $t('STK0002') }}
-            p(class="panel-bg__color-controller__hint-text") {{ $t('STK0003') }}
-    div(v-if="isInBgShare" class="panel-bg__share")
-      div(class="panel-bg__share__screen" :style="bgSizeStyles")
-        div(class="panel-bg__share__screen-inner" :style="shareBgStyles()")
-      div(class="panel-bg__share__buttons")
-        div(class="panel-bg__share__button")
-          div(class="panel-bg__share__button-icon" @click.stop.prevent="handleSave")
-            svg-icon(iconName="download_flat" iconColor="white" iconWidth="24px" iconHeight="26.76px")
-          div(class="panel-bg__share__button-text") {{ $t('STK0004') }}
-        div(class="panel-bg__share__button")
-          div(class="panel-bg__share__button-icon" @click.stop.prevent="handleStory")
-            svg-icon(iconName="ig_story" iconColor="white" iconWidth="30px")
-          div(class="panel-bg__share__button-text") {{ $t('STK0005') }}
+      template(v-slot:category-background-item="{ list, title }")
+        div(class="panel-bg__items")
+          div(v-if="title"
+            class="panel-bg__header") {{ title }}
+          category-background-item(v-for="item in list"
+            class="panel-bg__item"
+            :key="item.id"
+            :item="item"
+            :locked="false"
+            @share="handleShareImage")
+      template(v-if="pending" #after)
+        div(class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
+  div(v-show="!showImageTab" class="panel-bg__color-tab")
+    div(class="panel-bg__color-tab-wrapper" :style="colorTabWrapperStyles()")
+      div(class="panel-bg__color-area")
+        div(class="panel-bg__color-row")
+          div(class="panel-bg__color-row-header py-5 text-white")
+            div(class="panel-bg__color-row-left")
+              div(v-if="showAllRecentlyBgColors" class="panel-bg__color-row-back" @click.prevent.stop="handleShowAllRecentlyBgColors(false)")
+                svg-icon(iconName="vivisticker_back" iconColor="white" iconWidth="24px")
+              div(class="panel-bg__color-row-title") {{$t('NN0024')}}
+            div(v-if="!showAllRecentlyBgColors" class="panel-bg__color-row-more" @click.prevent.stop="handleShowAllRecentlyBgColors(true)") {{$t('NN0082')}}
+          div(class="panel-bg__colors")
+            div(class="panel-bg__color add-color" @click="handleOpenColorPicker")
+            div(v-if="newBgColor !== ''"
+              class="panel-bg__color"
+              :style="colorStyles(newBgColor)")
+            div(v-for="color in recentlyColors"
+              class="panel-bg__color"
+              :key="color"
+              v-press="() => handleShareColor(color)"
+              :style="colorStyles(color)"
+              @click="setBgColor(color)")
+        div(v-if="!showAllRecentlyBgColors" class="panel-bg__color-row")
+          div(class="panel-bg__color-row-title text-left py-5 text-white") {{$t('NN0089')}}
+          div(class="panel-bg__colors")
+            div(v-for="color in defaultBgColor"
+              class="panel-bg__color"
+              :key="color"
+              v-press="() => handleShareColor(color)"
+              :style="colorStyles(color)"
+              @click="setBgColor(color)")
+      div(class="panel-bg__color-controller")
+        mobile-slider(:title="`${$t('NN0030')}`"
+          :borderTouchArea="true"
+          :value="opacity"
+          :min="0"
+          :max="100"
+          theme="light"
+          @update="updateOpacity")
+        div(class="panel-bg__color-controller__hint")
+          p(class="panel-bg__color-controller__hint-text") {{ $t('STK0002') }}
+          p(class="panel-bg__color-controller__hint-text") {{ $t('STK0003') }}
+  div(v-if="isInBgShare" class="panel-bg__share")
+    div(class="panel-bg__share__screen" :style="bgSizeStyles")
+      div(class="panel-bg__share__screen-inner" :style="shareBgStyles()")
+    div(class="panel-bg__share__buttons")
+      div(class="panel-bg__share__button")
+        div(class="panel-bg__share__button-icon" @click.stop.prevent="handleSave")
+          svg-icon(iconName="download_flat" iconColor="white" iconWidth="24px" iconHeight="26.76px")
+        div(class="panel-bg__share__button-text") {{ $t('STK0004') }}
+      div(class="panel-bg__share__button")
+        div(class="panel-bg__share__button-icon" @click.stop.prevent="handleStory")
+          svg-icon(iconName="ig_story" iconColor="white" iconWidth="30px")
+        div(class="panel-bg__share__button-text") {{ $t('STK0005') }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
-import SearchBar from '@/components/SearchBar.vue'
-import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import ColorPicker from '@/components/ColorPicker.vue'
-import CategoryList from '@/components/category/CategoryList.vue'
-import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import stepsUtils from '@/utils/stepsUtils'
-import colorUtils from '@/utils/colorUtils'
-import { ColorEventType } from '@/store/types'
-import i18n from '@/i18n'
-import generalUtils from '@/utils/generalUtils'
+import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
+import CategoryListRows from '@/components/category/CategoryListRows.vue'
+import ColorPicker from '@/components/ColorPicker.vue'
+import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import Tabs from '@/components/Tabs.vue'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import i18n from '@/i18n'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IAsset } from '@/interfaces/module'
+import { ColorEventType } from '@/store/types'
 import assetUtils from '@/utils/assetUtils'
+import colorUtils from '@/utils/colorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import generalUtils from '@/utils/generalUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
+import { round } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  name: 'panel-background',
   components: {
     SearchBar,
     MobileSlider,
@@ -145,6 +148,9 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapState({
+      isTablet: 'isTablet'
+    }),
     ...mapState('background', {
       categories: 'categories',
       rawContent: 'content',
@@ -166,9 +172,12 @@ export default Vue.extend({
       newBgColor: 'vivisticker/getNewBgColor'
     }),
     itemWidth(): number {
+      return this.isTablet ? 120 : 80
+    },
+    itemHeight(): number {
       // const basicWidth = (window.outerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
       // return basicWidth < 145 ? basicWidth : 145 // 145px is the default width
-      return 142
+      return round(this.itemWidth / 9 * 16)
     },
     isInCategory(): boolean {
       return this.isTabInCategory('background')
@@ -187,7 +196,7 @@ export default Vue.extend({
       return (categories as IListServiceContentData[])
         .filter(category => category.list.length > 0)
         .map((category, index) => ({
-          size: this.itemWidth + 10 + 46,
+          size: this.itemHeight + 10 + 46,
           id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.is_recent ? category.list.slice(0, 10) : category.list,
@@ -205,7 +214,7 @@ export default Vue.extend({
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-background-item',
             list: rowItems,
-            size: this.itemWidth + 32,
+            size: this.itemHeight + 32,
             title: ''
           }
         })
@@ -245,13 +254,19 @@ export default Vue.extend({
     emptyResultMessage(): string {
       const { keyword, pending } = this
       if (pending || !keyword || this.rawSearchResult.list.length > 0) return ''
-      return `${i18n.t('NN0393', {
+      return `${i18n.global.t('NN0393', {
           keyword: this.keywordLabel,
-          target: i18n.tc('NN0004', 1)
+          target: i18n.global.tc('NN0004', 1)
         })}`
     },
     showImageTab(): boolean {
       return this.tabIndex === 0
+    },
+    itemStyles(): {[key: string]: string} {
+      return {
+        width: this.itemWidth + 'px',
+        height: this.itemHeight + 'px'
+      }
     }
   },
   mounted() {
@@ -269,18 +284,20 @@ export default Vue.extend({
     this.recalculateSize()
   },
   activated() {
-    this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
-    this.$refs.searchResult[0].$el.scrollTop = this.scrollTop.searchResult
-    this.$refs.mainContent[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CCategoryList[])[0].$el
+      const searchResult = (this.$refs.searchResult as CCategoryList[])[0].$el
+      mainContent.scrollTop = this.scrollTop.mainContent
+      searchResult.scrollTop = this.scrollTop.searchResult
+      mainContent.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+      searchResult.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    })
     window.addEventListener('resize', this.recalculateSize)
   },
   deactivated() {
-    this.$refs.mainContent[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
     window.removeEventListener('resize', this.recalculateSize)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     colorUtils.event.off(ColorEventType.background, this.handleNewBgColor)
     eventUtils.off(PanelEvent.scrollPanelBackgroundToTop)
   },
@@ -299,14 +316,15 @@ export default Vue.extend({
     keyword(newVal: string) {
       if (!newVal) {
         this.$nextTick(() => {
+          const mainContent = (this.$refs.mainContent as CCategoryList[])[0].$el
           // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+          mainContent.scrollTop = this.scrollTop.mainContent
         })
       }
     },
     showImageTab() {
       this.$nextTick(() => {
-        const ref = this.$refs as Record<string, Vue[]>
+        const ref = this.$refs as Record<string, CCategoryList[]>
         for (const name of ['mainContent', 'searchResult']) {
           ref[name][0].$el.scrollTop = this.scrollTop[name as 'mainContent'|'searchResult']
         }
@@ -333,7 +351,7 @@ export default Vue.extend({
     scrollToTop() {
       for (const list of this.categoryListArray) {
         if (list.show) {
-          const categoryList = (this.$refs[list.key] as Vue[])[0]
+          const categoryList = (this.$refs[list.key] as CCategoryList[])[0]
           const top = categoryList.$el.querySelector('.panel-bg__top-item') as HTMLElement
           top.scrollIntoView({ behavior: 'smooth' })
         }
@@ -483,7 +501,7 @@ export default Vue.extend({
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-background-item',
             list: rowItems,
-            size: this.itemWidth + 24 + (title ? 46 : 0), // (bg height) + 24(gap) + 0/46(title)
+            size: this.itemHeight + 24 + (title ? 46 : 0), // (bg height) + 24(gap) + 0/46(title)
             title
           }
         })
@@ -512,8 +530,12 @@ export default Vue.extend({
   &__searchbar {
     margin-bottom: 14px;
   }
+  &__list-wrapper {
+    height: 100%;
+  }
   &__list {
     flex-grow: 1;
+    height: 100%;
   }
   &__item {
     width: 80px;

@@ -1,53 +1,22 @@
-import Vue from 'vue'
-import VueRouter, { RawLocation, Route, RouteConfig } from 'vue-router'
-import ViviSticker from '../views/ViviSticker.vue'
-import Screenshot from '../views/Screenshot.vue'
-import SvgIconView from '../views/SvgIconView.vue'
-import NubtnList from '@/views/NubtnList.vue'
-import CopyTool from '@/views/CopyTool.vue'
-import store from '@/store'
 import i18n from '@/i18n'
+import { CustomWindow } from '@/interfaces/customWindow'
+import store from '@/store'
+import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
-import generalUtils from '@/utils/generalUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
-import { CustomWindow } from '@/interfaces/customWindow'
 import uploadUtils from '@/utils/uploadUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
+import CopyTool from '@/views/CopyTool.vue'
+import NubtnList from '@/views/NubtnList.vue'
+import { h, resolveComponent } from 'vue'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import Screenshot from '../views/Screenshot.vue'
+import SvgIconView from '../views/SvgIconView.vue'
+import ViviSticker from '../views/ViviSticker.vue'
 
 declare let window: CustomWindow
 
-Vue.use(VueRouter)
-
-// Ingore some normal router console error
-const originalPush = VueRouter.prototype.push
-VueRouter.prototype.push = function push(location: RawLocation): Promise<Route> {
-  return (originalPush.call(this, location) as unknown as Promise<Route>)
-    .catch(err => {
-      switch (err.name) {
-        case 'NavigationDuplicated':
-          break
-        default:
-          console.error(err)
-      }
-      return err
-    })
-}
-
-const originalReplace = VueRouter.prototype.replace
-VueRouter.prototype.replace = function repalce(location: RawLocation): Promise<Route> {
-  return (originalReplace.call(this, location) as unknown as Promise<Route>)
-    .catch(err => {
-      switch (err.name) {
-        case 'NavigationDuplicated':
-          break
-        default:
-          console.error(err)
-      }
-      return err
-    })
-}
-
-const routes: Array<RouteConfig> = [
+const routes: Array<RouteRecordRaw> = [
   {
     path: '',
     name: 'ViviSticker',
@@ -64,14 +33,6 @@ const routes: Array<RouteConfig> = [
           vivistickerUtils.hasCopied = hasCopied?.data ?? false
           vivistickerUtils.setState('hasCopied', { data: vivistickerUtils.hasCopied })
           vivistickerUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
-          const tempDesign = await vivistickerUtils.fetchDesign()
-          if (tempDesign) {
-            try {
-              vivistickerUtils.initWithTempDesign(tempDesign)
-            } catch (error) {
-              logUtils.setLogAndConsoleLog(error)
-            }
-          }
         }
         next()
       } catch (error) {
@@ -124,15 +85,15 @@ if (window.location.host !== 'vivipic.com') {
   })
 }
 
-const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
+const router = createRouter({
+  history: createWebHistory(process.env.BASE_URL),
+
   routes: [
     {
       // Include the locales you support between ()
       path: `/:locale${localeUtils.getLocaleRegex()}?`,
       component: {
-        render(h) { return h('router-view') }
+        render() { return h(resolveComponent('router-view')) }
       },
       async beforeEnter(to, from, next) {
         vivistickerUtils.registerCallbacks('router')
@@ -151,17 +112,19 @@ const router = new VueRouter({
           logUtils.setLog('App Start')
         }
         const locale = userInfo.locale
-        i18n.locale = locale
+        i18n.global.locale = locale as 'jp' | 'us' | 'tw'
         localStorage.setItem('locale', locale)
         const editorBg = userInfo.editorBg
         if (editorBg) {
           store.commit('vivisticker/SET_editorBg', editorBg)
         }
+
+        document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()
-        if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.params.locale) {
+        if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
           // Delete locale in url, will be ignore by prerender.
-          delete router.currentRoute.params.locale
-          router.replace({ query: router.currentRoute.query, params: router.currentRoute.params })
+          delete router.currentRoute.value.params.locale
+          router.replace({ query: router.currentRoute.value.query, params: router.currentRoute.value.params })
         }
       },
       children: routes
@@ -170,8 +133,6 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  document.title = to.meta?.title || i18n.t('SE0001')
-
   if ((window as any).__PRERENDER_INJECTED !== undefined) {
     next()
     return
@@ -225,5 +186,35 @@ router.beforeEach(async (to, from, next) => {
 
   next()
 })
+
+// // Ingore some normal router console error
+// const originalPush = (router as any).prototype.push
+
+// router.prototype.push = function push(location: VueRouter.RouteLocationRaw): Promise<void | VueRouter.NavigationFailure | undefined> {
+//   return (originalPush.call(this, location) as unknown as Promise<void | VueRouter.NavigationFailure | undefined>)
+//     .catch(err => {
+//       switch (err.name) {
+//         case 'NavigationDuplicated':
+//           break
+//         default:
+//           console.error(err)
+//       }
+//       return err
+//     })
+// }
+
+// const originalReplace = router.prototype.replace
+// router.prototype.replace = function repalce(location: VueRouter.RouteLocationRaw): Promise<void | VueRouter.NavigationFailure | undefined> {
+//   return (originalReplace.call(this, location) as unknown as Promise<void | VueRouter.NavigationFailure | undefined>)
+//     .catch(err => {
+//       switch (err.name) {
+//         case 'NavigationDuplicated':
+//           break
+//         default:
+//           console.error(err)
+//       }
+//       return err
+//     })
+// }
 
 export default router

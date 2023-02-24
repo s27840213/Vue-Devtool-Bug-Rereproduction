@@ -1,24 +1,16 @@
 <template lang="pug">
-  div(class="category-row")
-    div(v-if="prevIcon"
-      class="category-row__move category-row__move--left")
-      div(class="category-row__icon")
-        //- svg-icon(iconName="arrow-left" iconWidth="20px" iconColor="gray-1")
-    div(v-if="nextIcon"
-      class="category-row__move category-row__move--right")
-      div(class="category-row__icon")
-        //- svg-icon(iconName="arrow-right" iconWidth="20px" iconColor="gray-1")
-    div(class="category-row__items" ref="items" @scroll.passive="handleScroll")
-      slot
+div(class="category-row")
+  div(class="category-row__items" ref="items" @scroll.passive="handleScroll")
+    slot
 </template>
 
 <script lang="ts">
-import generalUtils from '@/utils/generalUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   computed: {
-    items() {
+    items(): HTMLElement {
       return this.$refs.items as HTMLElement
     }
   },
@@ -32,20 +24,6 @@ export default Vue.extend({
     this.handleIconDisplay()
   },
   methods: {
-    handleNext() {
-      const { scrollLeft } = this.items
-      const itemWidth = parseInt(window.getComputedStyle(this.items.children[0]).width) || 145
-      const gridGap = parseInt(window.getComputedStyle(this.items).getPropertyValue('column-gap')) || 10
-      const amountInRow = (generalUtils.isTouchDevice() && window.outerWidth >= 600) ? 3 : 2
-      this.items.scrollLeft = scrollLeft + (itemWidth + gridGap) * amountInRow
-    },
-    handlePrev() {
-      const { scrollLeft } = this.items
-      const itemWidth = parseInt(window.getComputedStyle(this.items.children[0]).width) || 145
-      const gridGap = parseInt(window.getComputedStyle(this.items).getPropertyValue('column-gap')) || 10
-      const amountInRow = (generalUtils.isTouchDevice() && window.outerWidth >= 600) ? 3 : 2
-      this.items.scrollLeft = scrollLeft - (itemWidth + gridGap) * amountInRow
-    },
     handleScroll(event: Event) {
       const { scrollLeft } = event.target as HTMLElement
       this.handleIconDisplay(scrollLeft)

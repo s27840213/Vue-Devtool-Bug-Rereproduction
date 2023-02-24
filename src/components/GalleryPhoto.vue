@@ -1,59 +1,65 @@
 <template lang="pug">
-  div(class="gallery-photo" :class="{border: deletable}")
-    div(v-if="deletable"
-        class="gallery-photo__delete"
-        @click.stop.prevent="handleDeletePhoto")
-      svg-icon(iconName="close" iconColor="gray-2" iconWidth="24px")
-    circle-checkbox(v-if="inFilePanel"
-      class="gallery-photo__checkbox"
-      :class="{show: hasCheckedAssets}"
-      :value="photo.assetIndex"
-      :checkedValues="checkedAssets"
-      :disabled="isUploading"
-      @update="handleCheck")
-    svg-icon(v-if="showMoreBtn" class="pointer gallery-photo__more"
-      @click.native="showPhotoInfo"
-      :iconName="'more_vertical'"
-      :iconColor="'gray-2'"
-      :iconWidth="'20px'")
-    img(:src="previewSrc",
-      ref='img'
-      draggable="true",
-      class="gallery-photo__img pointer"
-      @dragstart="dragStart($event, photo)"
-      @dragend="dragEnd"
-      @click="onClick($event, photo)")
-    div(v-if="isUploading"
-        class="gallery-photo__progress")
-      div(class="gallery-photo__progress-bar"
-        :style="{'width': `${photo.progress}%`}")
+div(class="gallery-photo" :class="{border: deletable}")
+  div(v-if="deletable"
+      class="gallery-photo__delete"
+      @click.stop.prevent="handleDeletePhoto")
+    svg-icon(iconName="close" iconColor="gray-2" iconWidth="24px")
+  circle-checkbox(v-if="multiSelectMode !== 'off'"
+    class="gallery-photo__checkbox"
+    :class="{show: hasCheckedAssets || multiSelectMode === 'on'}"
+    :value="photo.assetIndex"
+    :checkedValues="checkedAssets"
+    :disabled="isUploading"
+    @update="handleCheck")
+  svg-icon(v-if="showMoreBtn" class="pointer gallery-photo__more"
+    @click="showPhotoInfo"
+    :iconName="'more_vertical'"
+    :iconColor="'gray-2'"
+    :iconWidth="'20px'")
+  img(:src="previewSrc",
+    ref='img'
+    draggable="true",
+    class="gallery-photo__img pointer"
+    @dragstart="dragStart($event, photo)"
+    @dragend="dragEnd"
+    @click="onClick($event, photo as IAssetPhoto)")
+  div(v-if="isUploading"
+      class="gallery-photo__progress")
+    div(class="gallery-photo__progress-bar"
+      :style="{'width': `${photo.progress}%`}")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
-import { IFrame, IImage } from '@/interfaces/layer'
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
-import AssetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
-import imageUtils from '@/utils/imageUtils'
-import pageUtils from '@/utils/pageUtils'
 import { IAssetPhoto } from '@/interfaces/api'
-import networkUtils from '@/utils/networkUtils'
-import layerUtils from '@/utils/layerUtils'
-import DragUtils from '@/utils/dragUtils'
-import generalUtils from '@/utils/generalUtils'
+import { IFrame, IImage } from '@/interfaces/layer'
 import { FunctionPanelType, LayerType } from '@/store/types'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import mouseUtils from '@/utils/mouseUtils'
+import AssetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
+import DragUtils from '@/utils/dragUtils'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import mouseUtils from '@/utils/mouseUtils'
+import networkUtils from '@/utils/networkUtils'
+import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'GalleryPhoto',
   props: {
-    photo: Object,
-    vendor: String,
+    photo: {
+      type: Object,
+      required: true
+    },
+    vendor: {
+      type: String as PropType<'unsplash' | 'myfile' | 'logo'>,
+      required: true
+    },
     inFilePanel: {
       type: Boolean,
       default: false
@@ -65,6 +71,10 @@ export default Vue.extend({
     deletable: {
       type: Boolean,
       default: false
+    },
+    multiSelectMode: {
+      type: String as PropType<'hover' | 'on' | 'off'>,
+      default: 'off'
     }
   },
   components: {
@@ -82,7 +92,6 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize',
-      getLayers: 'getLayers',
       checkedAssets: 'file/getCheckedAssets',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isAdmin: 'user/isAdmin'
@@ -92,9 +101,6 @@ export default Vue.extend({
     },
     hasCheckedAssets(): boolean {
       return this.checkedAssets.length !== 0
-    },
-    pageSize(): { width: number, height: number } {
-      return this.getPageSize(pageUtils.currFocusPageIndex)
     },
     previewSrc(): string {
       const { inFilePanel, inLogoPanel, photo, vendor } = this
@@ -114,7 +120,7 @@ export default Vue.extend({
       return imageUtils.getSrc(data, photo.width)
     },
     showMoreBtn(): boolean {
-      return !this.inFilePanel && !this.inLogoPanel && !generalUtils.isTouchDevice()
+      return !this.inFilePanel && !this.inLogoPanel && !this.$isTouchDevice()
     },
     panelPreviewSrc(): string {
       const img = this.$refs.img as HTMLImageElement
@@ -134,6 +140,9 @@ export default Vue.extend({
       setCurrDraggedPhoto: 'SET_currDraggedPhoto',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag'
     }),
+    pageSize(): { width: number, height: number } {
+      return this.getPageSize(pageUtils.currFocusPageIndex)
+    },
     dragStart(e: DragEvent, photo: any) {
       if (!networkUtils.check()) {
         networkUtils.notifyNetworkError()
@@ -145,7 +154,7 @@ export default Vue.extend({
       if (this.isUploading) {
         e.preventDefault()
       } else {
-        const pageSize = this.$store.getters.getPageSize(layerUtils.pageIndex)
+        const pageSize = this.getPageSize(layerUtils.pageIndex)
         const resizeRatio = RESIZE_RATIO_IMAGE
         const pageAspectRatio = pageSize.width / pageSize.height
         const photoAspectRatio = photo.width / photo.height
@@ -197,9 +206,9 @@ export default Vue.extend({
       })
     },
     onClick(e: MouseEvent, photo: IAssetPhoto) {
-      if (generalUtils.isTouchDevice() && this.mobilePanel === 'replace') {
+      if (this.$isTouchDevice() && this.mobilePanel === 'replace') {
         this.replaceImg(photo)
-      } else if (this.hasCheckedAssets && this.inFilePanel) {
+      } else if (this.multiSelectMode === 'on' || this.hasCheckedAssets) {
         this.modifyCheckedAssets(photo.assetIndex as number)
       } else {
         this.addImage(photo)
@@ -220,10 +229,11 @@ export default Vue.extend({
       }
 
       const resizeRatio = RESIZE_RATIO_IMAGE
-      const pageAspectRatio = this.pageSize.width / this.pageSize.height
+      const pageSize = this.pageSize()
+      const pageAspectRatio = pageSize.width / pageSize.height
       const photoAspectRatio = photo.width / photo.height
-      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
-      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
+      const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
+      const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
 
       const isPrimaryLayerFrame = layer.type === LayerType.frame
       const config = isPrimaryLayerFrame ? ((layer as IFrame).clips.find(c => c.active) ?? (layer as IFrame).clips[0]) : _config as IImage
@@ -277,7 +287,7 @@ export default Vue.extend({
           ...(this.isUploading && { isPreview: true, assetId: photo.id })
         }
       )
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice()) {
         this.setCloseMobilePanelFlag(true)
       }
     },

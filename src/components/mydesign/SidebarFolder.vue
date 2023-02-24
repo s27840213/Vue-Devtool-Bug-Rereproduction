@@ -1,62 +1,62 @@
 <template lang="pug">
-  section
-    div(class="nav-folder"
-        :class="[`nav-folder-${level}`, {'bg-blue-1': folder.isCurrLocation}]"
-        :style="draggedOverStyles()"
-        :draggable="!isNameEditing && !isTempFolder"
-        :folderid="folder.id"
-        @dragstart="handleDragStart"
-        @drag="handleDragging"
-        @dragend="handleDragEnd"
-        @dragenter="handleDragEnter"
-        @dragleave="handleDragLeave"
-        @dragover.prevent
-        @drop="handleDrop"
-        @click="handleSelection"
-        @click.right.prevent="handleNameEditStart")
-      div(class="nav-folder__expand-icon-container"
-          @click.stop="toggleExpansion")
-        svg-icon(class="nav-folder__expand-icon"
-            iconName="chevron-down"
-            iconColor="white"
-            iconWidth="15px"
-            :style="expandIconStyles()")
+section
+  div(class="nav-folder"
+      :class="[`nav-folder-${level}`, {'bg-blue-1': folder.isCurrLocation}]"
+      :style="draggedOverStyles()"
+      :draggable="!isNameEditing && !isTempFolder"
+      :folderid="folder.id"
+      @dragstart="handleDragStart"
+      @drag="handleDragging"
+      @dragend="handleDragEnd"
+      @dragenter="handleDragEnter"
+      @dragleave="handleDragLeave"
+      @dragover.prevent
+      @drop="handleDrop"
+      @click="handleSelection"
+      @click.right.prevent="handleNameEditStart")
+    div(class="nav-folder__expand-icon-container"
+        @click.stop="toggleExpansion")
+      svg-icon(class="nav-folder__expand-icon"
+          iconName="chevron-down"
+          iconColor="white"
+          iconWidth="15px"
+          :style="expandIconStyles()")
+    svg-icon(iconName="folder"
+        iconColor="white"
+        iconWidth="20px"
+        style="pointer-events: none")
+    input(ref="name"
+          :class="`nav-folder-${level}__input`"
+          v-if="isNameEditing"
+          v-model="editableName"
+          v-click-outside="handleNameEditEnd"
+          @change="handleNameEditEnd"
+          @keyup="checkNameEnter"
+          @click.stop
+          @click.right.stop)
+    div(v-else
+        :class="`nav-folder-${level}__text`"
+        style="pointer-events: none") {{ folder.name }}
+  sidebar-folder(v-for="subFolder in checkExpand(realFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.id]"
+                @moveItem="handleMoveItem"
+                @showHint="handleShowHint")
+  div(class="dragged-folder" :style="draggedFolderStyles()")
+    div(class="nav-folder-0")
       svg-icon(iconName="folder"
-          iconColor="white"
-          iconWidth="20px"
-          style="pointer-events: none")
-      input(ref="name"
-            :class="`nav-folder-${level}__input`"
-            v-if="isNameEditing"
-            v-model="editableName"
-            v-click-outside="handleNameEditEnd"
-            @change="handleNameEditEnd"
-            @keyup="checkNameEnter"
-            @click.stop
-            @click.right.stop)
-      div(v-else
-          :class="`nav-folder-${level}__text`"
+        iconColor="white"
+        iconWidth="20px"
+        style="pointer-events: none")
+      div(:class="`nav-folder-${level}__text`"
           style="pointer-events: none") {{ folder.name }}
-    sidebar-folder(v-for="subFolder in checkExpand(realFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.id]"
-                  @moveItem="handleMoveItem"
-                  @showHint="handleShowHint")
-    div(class="dragged-folder" :style="draggedFolderStyles()")
-      div(class="nav-folder-0")
-        svg-icon(iconName="folder"
-          iconColor="white"
-          iconWidth="20px"
-          style="pointer-events: none")
-        div(:class="`nav-folder-${level}__text`"
-            style="pointer-events: none") {{ folder.name }}
 </template>
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'v-click-outside'
+import vClickOutside from 'click-outside-vue3'
 import { IDesign, IFolder, IQueueItem } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'sidebar-folder',
   components: {
   },
@@ -66,14 +66,25 @@ export default Vue.extend({
       isDraggedOver: false,
       isNameEditing: false,
       editableName: '',
-      draggedFolderCoordinate: { x: 0, y: 0 }
+      draggedFolderCoordinate: { x: 0, y: 0 },
+      lastOnId: ''
     }
   },
   props: {
-    folder: Object,
-    parents: Array,
-    level: Number
+    folder: {
+      type: Object as PropType<IFolder>,
+      required: true
+    },
+    parents: {
+      type: Array,
+      required: true
+    },
+    level: {
+      type: Number,
+      required: true
+    }
   },
+  emits: ['moveItem', 'showHint'],
   directives: {
     clickOutside: vClickOutside.directive
   },
@@ -82,7 +93,23 @@ export default Vue.extend({
       if (newVal) {
         this.fetchStructuralFolders({ path: `${designUtils.appendPath(this.parents as string[], this.folder as IFolder).slice(1).join(',')}` })
       }
+    },
+    'folder.id': function(newVal) {
+      designUtils.off(`edit-sidebar-${this.lastOnId}`)
+      this.lastOnId = newVal
+      designUtils.on(`edit-sidebar-${newVal}`, () => {
+        this.handleNameEditStart()
+      })
     }
+  },
+  mounted() {
+    this.lastOnId = this.folder.id
+    designUtils.on(`edit-sidebar-${this.folder.id}`, () => {
+      this.handleNameEditStart()
+    })
+  },
+  unmounted() {
+    designUtils.off(this.lastOnId)
   },
   computed: {
     ...mapGetters('design', {
@@ -367,7 +394,7 @@ $maxLevels: 5;
   &-enter-active, &-leave-active {
     transition: .2s;
   }
-  &-enter, &-leave-to {
+  &-enter-from, &-leave-to {
     opacity: 0;
   }
 }

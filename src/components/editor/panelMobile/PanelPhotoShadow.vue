@@ -1,51 +1,52 @@
 <template lang="pug">
-  div(class="panel-shadow")
-    div(class="flex-between photo-shadow__options mb-10")
-      div(v-for="icon in shadowOptions")
-        svg-icon(
-          :key="`shadow-${icon}`"
-          :iconName="`mobile-photo-shadow-${icon}`"
-          @click.native="onEffectClick(icon)"
-          class="photo-shadow__options__option pointer"
-          :class="{ 'photo-shadow__options__option--selected': currentEffect === icon }"
-          iconWidth="60px"
-          iconColor="gray-2")
-        div(class="photo-shadow__options__option-font") {{$t(shadowPropI18nMap[icon]._effectName)}}
-    div(class="photo-shadow__attrs" :style="shadowAttrsStyles")
-      div(v-for="field in shadowFields" :key="field")
-        mobile-slider(:title="`${$t(shadowPropI18nMap[currentEffect][field])}`"
-          :borderTouchArea="true"
-          :name="field"
-          :value="getFieldValue(field)"
-          :max="fieldRange[currentEffect][field].max"
-          :min="fieldRange[currentEffect][field].min"
-          @update="handleEffectUpdate")
-      div(v-if="!['none', 'imageMatched'].includes(currentEffect)" class="photo-shadow__row-wrapper")
-        div(class="photo-shadow__row")
-          div(class="photo-shadow__color-name text-gray-3 body-2 no-wrap") {{$t('NN0017')}}
-          div(class="photo-shadow__color"
-            :style="{ backgroundColor: currentStyle.shadow.effects.color || '#000000' }"
-            @click="handleColorModal")
-      div(v-if="currentEffect !== 'none'" class="photo-shadow__row-wrapper")
-        div(class="photo-shadow__reset")
-          button(class="label-mid" @click="imageShadowPanelUtils.reset()") {{$t('NN0754')}}
+div(class="panel-shadow")
+  div(class="flex-between photo-shadow__options mb-10")
+    div(v-for="icon in shadowOptions")
+      svg-icon(
+        :key="`shadow-${icon}`"
+        :iconName="`mobile-photo-shadow-${icon}`"
+        @click="onEffectClick(icon)"
+        class="photo-shadow__options__option pointer"
+        :class="{ 'photo-shadow__options__option--selected': currentEffect === icon }"
+        iconWidth="60px"
+        iconColor="gray-2")
+      div(class="photo-shadow__options__option-font") {{$t(shadowPropI18nMap[icon]._effectName)}}
+  div(class="photo-shadow__attrs" :style="shadowAttrsStyles")
+    div(v-for="field in shadowFields" :key="field")
+      mobile-slider(:title="`${$t(shadowPropI18nMap[currentEffect][field] as string)}`"
+        :borderTouchArea="true"
+        :name="field"
+        :value="getFieldValue(field)"
+        :max="fieldRange[currentEffect][field].max"
+        :min="fieldRange[currentEffect][field].min"
+        @update="handleEffectUpdate")
+    div(v-if="!['none', 'imageMatched'].includes(currentEffect)" class="photo-shadow__row-wrapper")
+      div(class="photo-shadow__row")
+        div(class="photo-shadow__color-name text-gray-3 body-2 no-wrap") {{$t('NN0017')}}
+        div(class="photo-shadow__color"
+          :style="{ backgroundColor: currentEffect === 'frame' ? currentStyle.shadow.effects.frameColor : currentStyle.shadow.effects.color || '#000000' }"
+          @click="handleColorModal")
+    div(v-if="currentEffect !== 'none'" class="photo-shadow__row-wrapper")
+      div(class="photo-shadow__reset")
+        button(class="label-mid" @click="imageShadowPanelUtils.reset()") {{$t('NN0754')}}
 </template>
+
 <script lang="ts">
-import Vue from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
-import { mapGetters, mapMutations, mapState } from 'vuex'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle } from '@/interfaces/layer'
-import layerUtils from '@/utils/layerUtils'
-import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
-import colorUtils from '@/utils/colorUtils'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
-import generalUtils from '@/utils/generalUtils'
-export default Vue.extend({
+import colorUtils from '@/utils/colorUtils'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
+import layerUtils from '@/utils/layerUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
+export default defineComponent({
   components: {
     MobileSlider
   },
+  emits: ['openExtraColorModal', 'toggleColorPanel'],
   data() {
     return {
       imageShadowPanelUtils,
@@ -64,8 +65,8 @@ export default Vue.extend({
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedLayers: 'getCurrSelectedLayers'
     }),
-    shadowOptions(): string[] {
-      return Object.keys(this.effects)
+    shadowOptions(): ShadowEffectType[] {
+      return Object.keys(this.effects) as ShadowEffectType[]
     },
     shadowFields(): string[] {
       const { effects, currentEffect } = this
@@ -99,20 +100,33 @@ export default Vue.extend({
     }
   },
   methods: {
-    getFieldValue(field: string): number | boolean {
+    getFieldValue(field: string): number {
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     },
     onEffectClick(effectName: ShadowEffectType): void {
       const alreadySetEffect = effectName === ShadowEffectType.none || Object.keys((this.currentStyle.shadow as any).effects[effectName]).length
-      imageShadowUtils.setEffect(effectName, {
-        ...(!alreadySetEffect && imageShadowUtils.getDefaultEffect(effectName))
-      })
+      if (!alreadySetEffect) {
+        const data = imageShadowUtils.getLocalEffectAttrs(effectName) || (imageShadowUtils.getDefaultEffect(effectName) as any)[effectName]
+        const color = imageShadowUtils.getLocalEffectColor(effectName) || '#000000'
+        if (effectName === ShadowEffectType.frame) {
+          imageShadowUtils.setEffect(effectName, { [effectName]: data, frameColor: color })
+        } else {
+          imageShadowUtils.setEffect(effectName, { [effectName]: data, color })
+        }
+      } else {
+        if (effectName === ShadowEffectType.frame) {
+          const color = this.currentStyle.shadow.effects.frameColor || this.currentStyle.shadow.effects.color || '#000000'
+          imageShadowUtils.setEffect(effectName, { frameColor: color })
+        } else {
+          imageShadowUtils.setEffect(effectName, {})
+        }
+      }
     },
     handleEffectUpdate(value: string, name: string): void {
       imageShadowPanelUtils.handleEffectUpdate(name, value)
     },
     handleColorModal() {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice()) {
         colorUtils.setCurrEvent(ColorEventType.photoShadow)
         this.handleColor = true
         this.$emit('openExtraColorModal', ColorEventType.photoShadow, MobileColorPanelType.palette)

@@ -1,47 +1,47 @@
 <template lang="pug">
-  div(class="panel-vvstk-more")
-    template(v-if="inInitialState")
-      div(class="panel-vvstk-more__options")
-        div(v-for="option in mainOptions"
-            class="panel-vvstk-more__option"
-            @click.prevent.stop="handleOptionAction(option.action)")
-          div(class="panel-vvstk-more__option-icon")
-            svg-icon(:iconName="option.icon"
-                      :iconWidth="option.icon === 'settings' ? '20px' : '24px'"
-                      iconColor="gray-2")
-          div(class="panel-vvstk-more__option-title") {{ option.text }}
-      div(class="horizontal-rule")
-      div(class="panel-vvstk-more__option version" @pointerdown.prevent="handleDebugMode")
+div(class="panel-vvstk-more")
+  template(v-if="inInitialState")
+    div(class="panel-vvstk-more__options")
+      div(v-for="option in mainOptions"
+          class="panel-vvstk-more__option"
+          @click.prevent.stop="handleOptionAction(option.action)")
         div(class="panel-vvstk-more__option-icon")
-          svg-icon(iconName="vivisticker_version"
+          svg-icon(:iconName="option.icon"
+                    :iconWidth="option.icon === 'settings' ? '20px' : '24px'"
+                    iconColor="gray-2")
+        div(class="panel-vvstk-more__option-title") {{ option.text }}
+    div(class="horizontal-rule")
+    div(class="panel-vvstk-more__option version" @pointerdown.prevent="handleDebugMode")
+      div(class="panel-vvstk-more__option-icon")
+        svg-icon(iconName="vivisticker_version"
+                  iconWidth="24px"
+                  iconColor="gray-3")
+      span(class="panel-vvstk-more__option-title version") {{ `${$t('NN0743')} : v. ${appVersion} ${buildNumber}${domain} - ${hostId}` }}
+  template(v-else)
+    div(class="panel-vvstk-more__options")
+      div(v-for="option in options"
+          class="panel-vvstk-more__option"
+          :class="{selected: handleOptionSelected(option.selected)}"
+          @click.prevent.stop="handleOptionAction(option.action)")
+        div(class="panel-vvstk-more__option-icon")
+          svg-icon(:iconName="option.icon"
                     iconWidth="24px"
-                    iconColor="gray-3")
-        span(class="panel-vvstk-more__option-title version") {{ `${$t('NN0743')} : v. ${appVersion} ${buildNumber}${domain} - ${hostId}` }}
-    template(v-else)
-      div(class="panel-vvstk-more__options")
-        div(v-for="option in options"
-            class="panel-vvstk-more__option"
-            :class="{selected: handleOptionSelected(option.selected)}"
-            @click.prevent.stop="handleOptionAction(option.action)")
-          div(class="panel-vvstk-more__option-icon")
-            svg-icon(:iconName="option.icon"
-                      iconWidth="24px"
-                      iconColor="gray-2")
-          div(class="panel-vvstk-more__option-title") {{ option.text }}
-      template(v-if="lastHistory === 'subscribe'")
-        div(class="horizontal-rule")
-        div(class="panel-vvstk-more__option version")
-          i18n(class="panel-vvstk-more__option-title version" tag="span" path="STK0029")
-            template(#privacyPolicy)
-              span(class="panel-vvstk-more__option-link" @click="handleOpenUrl('privacyPolicy')") {{ $t('STK0030') }}
-            template(#termOfUse)
-              span(class="panel-vvstk-more__option-link" @click="handleOpenUrl('termOfUse')") {{ $t('STK0031') }}
+                    iconColor="gray-2")
+        div(class="panel-vvstk-more__option-title") {{ option.text }}
+    template(v-if="lastHistory === 'subscribe'")
+      div(class="horizontal-rule")
+      div(class="panel-vvstk-more__option version")
+        i18n-t(class="panel-vvstk-more__option-title version" tag="span" keypath="STK0029")
+          template(#privacyPolicy)
+            span(class="panel-vvstk-more__option-link" @click="handleOpenUrl('privacyPolicy')") {{ $t('STK0030') }}
+          template(#termOfUse)
+            span(class="panel-vvstk-more__option-link" @click="handleOpenUrl('termOfUse')") {{ $t('STK0031') }}
 </template>
 
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import Vue, { PropType } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 type OptionConfig = {
@@ -66,7 +66,7 @@ const PRICES = {
   }
 } as {[key: string]: { monthly: string, annually: string }}
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
       debugModeTimer: -1,
@@ -308,7 +308,7 @@ export default Vue.extend({
       if (this.debugModeCounter === 7) {
         this.toggleDebugMode()
       }
-      this.debugModeTimer = setTimeout(() => {
+      this.debugModeTimer = window.setTimeout(() => {
         this.debugModeCounter = 0
       }, 1000)
     },

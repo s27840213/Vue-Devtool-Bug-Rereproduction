@@ -1,19 +1,19 @@
-import LayerUtils from './layerUtils'
-import ImageUtils from './imageUtils'
-import store from '@/store'
-import { SrcObj } from '@/interfaces/gallery'
-import { IFrame, IImage, IImageStyle } from '@/interfaces/layer'
-import layerFactary from './layerFactary'
-import generalUtils from './generalUtils'
-import { IAdjustJsonProps } from '@/interfaces/adjust'
-import zindexUtils from './zindexUtils'
-import { IExtendLayerInfo, ILayerInfo } from '@/store/types'
-import stepsUtils from './stepsUtils'
-import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
-import Vue from 'vue'
 import i18n from '@/i18n'
-import mathUtils from './mathUtils'
+import { IAdjustJsonProps } from '@/interfaces/adjust'
+import { SrcObj } from '@/interfaces/gallery'
+import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import { IFrame, IImage, IImageStyle } from '@/interfaces/layer'
+import store from '@/store'
+import { IExtendLayerInfo, ILayerInfo } from '@/store/types'
+import { notify } from '@kyvg/vue3-notification'
+import generalUtils from './generalUtils'
+import ImageUtils from './imageUtils'
+import layerFactary from './layerFactary'
+import LayerUtils from './layerUtils'
+import stepsUtils from './stepsUtils'
 import vivistickerUtils from './vivistickerUtils'
+import zindexUtils from './zindexUtils'
+
 class FrameUtils {
   isImageFrame(config: IFrame): boolean {
     return config.clips.length === 1 && (config.clips[0].isFrameImg as boolean)
@@ -114,7 +114,7 @@ class FrameUtils {
       const _shadow = currLayer.styles.shadow
       if (_shadow && _shadow.currentEffect !== ShadowEffectType.none) {
         if (['', 'upload'].includes(_shadow.srcObj.type)) {
-          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           return
         } else {
           shadow = generalUtils.deepCopy(_shadow) as IShadowProps

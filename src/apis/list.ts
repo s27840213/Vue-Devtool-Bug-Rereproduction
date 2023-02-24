@@ -1,11 +1,11 @@
 import axios from '@/apis'
-import authToken from './auth-token'
-import localeUtils from '@/utils/localeUtils'
 import {
   IListServiceParams,
   IListServiceResponse
 } from '@/interfaces/api'
 import store from '@/store'
+import localeUtils from '@/utils/localeUtils'
+import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 
 class ListService {
@@ -109,9 +109,11 @@ class ListService {
   // For other usage
   addDesign(id: string, type: string, params: IListServiceParams = {}) {
     const data = {
-      token: authToken().token,
+      token: '1',
       type,
       design_id: id,
+      locale: localeUtils.currLocale(),
+      host_id: uploadUtils.hostId,
       ...params
     }
     if (!data.token) return new Promise(resolve => resolve({ flag: 1 }))
@@ -136,6 +138,17 @@ class ListService {
   }
 
   addRecentlyUsedColor(color: string) {
+    axios.request<IListServiceResponse>({
+      url: '/add-design',
+      method: 'POST',
+      data: {
+        token: '1',
+        type: 'color',
+        design_id: color,
+        locale: localeUtils.currLocale(),
+        host_id: uploadUtils.hostId
+      }
+    })
     vivistickerUtils.addAsset('color', { id: color })
   }
 }

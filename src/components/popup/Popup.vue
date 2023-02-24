@@ -1,37 +1,40 @@
 <template lang="pug">
-  div(class="popup bg-white")
-    component(:is="component"
+div(class="popup bg-white")
+  component(v-if="component"
+    :is="component"
     v-click-outside="vcoConfig"
     :updateOptions="sharedUpdateOptions"
+    :currPage="currPage"
     v-bind="props"
     @close="close")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import vClickOutside from 'v-click-outside'
-import PopupOrder from '@/components/popup/PopupOrder.vue'
 import PopupAlign from '@/components/popup/PopupAlign.vue'
-import PopupLayer from '@/components/popup/PopupLayer.vue'
-import PopupPage from '@/components/popup/PopupPage.vue'
-import PopupFlip from '@/components/popup/PopupFlip.vue'
 import PopupFile from '@/components/popup/PopupFile.vue'
-import PopupDownload from '@/components/popup/PopupDownload.vue'
-import PopupLineTemplate from '@/components/popup/PopupLineTemplate.vue'
+import PopupFlip from '@/components/popup/PopupFlip.vue'
 import PopupGuideline from '@/components/popup/PopupGuideline.vue'
-import PopupSlider from '@/components/popup/PopupSlider.vue'
-import PopupPageScale from '@/components/popup/PopupPageScale.vue'
-import PopupSubmit from '@/components/popup/PopupSubmit.vue'
-import PopupPayment from '@/components/popup/PopupPayment.vue'
 import PopupIcon from '@/components/popup/PopupIcon.vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import PopupLayer from '@/components/popup/PopupLayer.vue'
+import PopupLineTemplate from '@/components/popup/PopupLineTemplate.vue'
+import PopupOrder from '@/components/popup/PopupOrder.vue'
+import PopupPage from '@/components/popup/PopupPage.vue'
+import PopupPageScale from '@/components/popup/PopupPageScale.vue'
+import PopupPayment from '@/components/popup/PopupPayment.vue'
+import PopupSlider from '@/components/popup/PopupSlider.vue'
+import PopupSubmit from '@/components/popup/PopupSubmit.vue'
+import { IPage } from '@/interfaces/page'
 import { IPopupComponent, IPopupOptions } from '@/interfaces/popup'
+import modalUtils from '@/utils/modalUtils'
+import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import pageUtils from '@/utils/pageUtils'
-import modalUtils from '@/utils/modalUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   components: {
     PopupOrder,
     PopupLayer,
@@ -42,7 +45,6 @@ export default Vue.extend({
     PopupFile,
     PopupLineTemplate,
     PopupGuideline,
-    PopupDownload,
     PopupPageScale,
     PopupSubmit,
     PopupPayment,
@@ -84,7 +86,7 @@ export default Vue.extend({
       return (this.popupComponent as IPopupComponent).props
     },
     hasDesignId(): boolean {
-      return this.getPage(pageUtils.currFocusPageIndex)?.designId !== ''
+      return this.currPage.designId !== ''
     },
     sharedUpdateOptions(): Array<IPopupOptions> {
       return [
@@ -197,6 +199,9 @@ export default Vue.extend({
         //   }
         // }
       ]
+    },
+    currPage(): IPage {
+      return this.getPage(pageUtils.currFocusPageIndex)
     }
   },
   mounted() {

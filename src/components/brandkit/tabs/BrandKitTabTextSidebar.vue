@@ -1,27 +1,28 @@
 <template lang="pug">
-  div(class="brand-kit-tab-text")
-    div(v-for="type in Object.keys(MAPPING)"
-      class="brand-kit-tab-text__setting pointer"
-      draggable="true"
-      @dragstart="standardTextDrag($event, type)"
-      @click="handleAddText(type)")
-      span(class="brand-kit-tab-text__title" :class="type" :style="getFontStyles(type)") {{ MAPPING[type] }}
-      br
-      span(class="brand-kit-tab-text__description") {{ `${getFontFamilyName(type)} / ${getFontSize(type)}px` }}
-      span(style="display: none") {{ MAPPING[type] }}
+div(class="brand-kit-tab-text")
+  div(v-for="type in Object.keys(MAPPING)"
+    class="brand-kit-tab-text__setting pointer"
+    draggable="true"
+    @dragstart="standardTextDrag($event, type)"
+    @click="handleAddText(type)")
+    span(class="brand-kit-tab-text__title" :class="type" :style="getFontStyles(type)") {{ MAPPING[type] }}
+    br
+    span(class="brand-kit-tab-text__description") {{ `${getFontFamilyName(type)} / ${getFontSize(type)}px` }}
+    span(style="display: none") {{ MAPPING[type] }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters } from 'vuex'
-import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
+import assetUtils from '@/utils/assetUtils'
+import brandkitUtils from '@/utils/brandkitUtils'
+import DragUtils from '@/utils/dragUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import assetUtils from '@/utils/assetUtils'
-import DragUtils from '@/utils/dragUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
       MAPPING: {

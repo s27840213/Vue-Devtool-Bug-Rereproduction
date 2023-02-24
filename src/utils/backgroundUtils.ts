@@ -1,12 +1,10 @@
+import i18n from '@/i18n'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import { IBackgroundImage, IPage } from '@/interfaces/page'
-import { SidebarPanelType } from '@/store/types'
 import store from '@/store'
-import Vue from 'vue'
-import i18n from '@/i18n'
+import { notify } from '@kyvg/vue3-notification'
 import assetUtils from './assetUtils'
 import editorUtils from './editorUtils'
-import eventUtils, { PanelEvent } from './eventUtils'
 import generalUtils from './generalUtils'
 import imageUtils from './imageUtils'
 import layerFactary from './layerFactary'
@@ -64,11 +62,6 @@ class BackgroundUtils {
     return [horizontalFlip, verticalFlip]
   }
 
-  switchPanelBgTab(index: number) {
-    store.commit('SET_currSidebarPanelType', SidebarPanelType.bg)
-    Vue.nextTick(() => { eventUtils.emit(PanelEvent.switchPanelBgInnerTab, index) })
-  }
-
   handleImageFlip(flipIcon: string) {
     const [h, v] = this.backgroundImgFlip
     this.setBgImageStyles({
@@ -107,11 +100,12 @@ class BackgroundUtils {
   handleDeleteBackground() {
     if (this.backgroundLocked) return this.handleLockedNotify()
     store.commit('REMOVE_background', { pageIndex: pageUtils.currFocusPageIndex })
+    pageUtils.updateBackgroundImageStyles(pageUtils.currFocusPageIndex, { adjust: {} })
     stepsUtils.record()
   }
 
   handleLockedNotify() {
-    Vue.notify({ group: 'copy', text: i18n.tc('NN0804') })
+    notify({ group: 'copy', text: i18n.global.tc('NN0804') })
   }
 
   setBgImage(props: { pageIndex: number, config: Partial<IImage> }) {

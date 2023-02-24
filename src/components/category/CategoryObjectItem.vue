@@ -1,43 +1,46 @@
 <template lang="pug">
-  div(class="category-object-item" v-touch)
-    div(v-if="item.list" class="category-object-item__4in1" @tap="click4in1")
-      img(v-for="img, index in item.list" v-if="index < 4"
-        class="category-object-item__img"
+div(class="category-object-item" v-touch)
+  div(v-if="(item as any).list" class="category-object-item__4in1" @tap="click4in1")
+    template(v-for="img, index in (item as any).list" :key="img.id")
+      img(v-if="index < 4" class="category-object-item__img"
         draggable="false" :src="img.src || `https://template.vivipic.com/svg/${img.id}/prev?ver=${img.ver}`")
-    template(v-else)
-      img(class="category-object-item__img" draggable="false" @tap="clickObject" v-press="addSvg"
-        :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
-      //- pro-item(v-if="item.plan")
-      div(v-if="showEditor" class="category-object-item__icon" @click.stop.prevent="handleEditObject")
-        svg-icon(iconName="pen" iconColor="white" iconWidth="18px")
-      div(v-if="item.type === 16" class="category-object-item__icon" @click.stop.prevent="openGiphyMore")
-        svg-icon(iconName="more_vertical" :iconColor="'white'" iconWidth="18px")
+  template(v-else)
+    img(class="category-object-item__img" draggable="false" @tap="clickObject" v-press="addSvg"
+      :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
+    //- pro-item(v-if="item.plan")
+    div(v-if="showEditor" class="category-object-item__icon" @click.stop.prevent="handleEditObject")
+      svg-icon(iconName="pen" iconColor="white" iconWidth="18px")
+    div(v-if="item.type === 16" class="category-object-item__icon" @click.stop.prevent="openGiphyMore")
+      svg-icon(iconName="more_vertical" :iconColor="'white'" iconWidth="18px")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapActions, mapMutations } from 'vuex'
-import { IGif } from '@/interfaces/giphy'
 import ProItem from '@/components/payment/ProItem.vue'
+import { IGif } from '@/interfaces/giphy'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapMutations } from 'vuex'
 // import paymentUtils from '@/utils/paymentUtils'
-import generalUtils from '@/utils/generalUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import { IAsset } from '@/interfaces/module'
 import assetUtils from '@/utils/assetUtils'
-import editorUtils from '@/utils/editorUtils'
 import doubleTapUtils from '@/utils/doubleTapUtils'
+import editorUtils from '@/utils/editorUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: ['dbclick4in1', 'click4in1', 'dbclick'],
   components: {
     ProItem
   },
   props: {
-    src: String,
-    item: Object
+    src: {
+      type: String
+    },
+    item: {
+      type: Object as PropType<IAsset>,
+      required: true
+    }
   },
   computed: {
-    isTouchDevice(): boolean {
-      return generalUtils.isTouchDevice()
-    },
     showEditor(): boolean {
       return ![8, 16].includes(this.item.type)
     }
@@ -54,7 +57,7 @@ export default Vue.extend({
       if (this.item.type === 8) {
         this.handleEditObject()
       } else if (this.item.type === 16) { // Giphy
-        const item = this.item as IGif
+        const item = this.item as any as IGif
         vivistickerUtils.sendToIOS('COPY_IMAGE_FROM_URL', {
           type: 'gif',
           url: item.src.replace('-preview', item.has_d ? '-downsized' : '')
@@ -92,7 +95,7 @@ export default Vue.extend({
       }
     },
     openGiphyMore() {
-      this.selectGif(this.item as IGif)
+      this.selectGif(this.item as any as IGif)
       this.setCurrActivePanel('giphy-more')
       editorUtils.setShowMobilePanel(true)
     }

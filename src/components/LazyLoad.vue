@@ -1,19 +1,19 @@
 <template lang="pug">
-  div(class="lazy-load"
-      :style="styles"
-      ref="observer")
-    transition(:name="anamationEnabled && !forceRender ? 'fade-in': ''" mode="out-in")
-      slot(v-if="forceRender || shoudBeRendered")
-      slot(v-else name="placeholder")
+div(class="lazy-load"
+    :style="styles"
+    ref="observer")
+  transition(:name="anamationEnabled && !forceRender ? 'fade-in': ''" mode="out-in")
+    slot(v-if="forceRender || shoudBeRendered")
+    slot(v-else name="placeholder")
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-import { some } from 'lodash'
 import generalUtils from '@/utils/generalUtils'
 import { globalQueue } from '@/utils/queueUtils'
+import { some } from 'lodash'
+import { defineComponent, PropType } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'LazyLoad',
   props: {
     target: {
@@ -28,8 +28,12 @@ export default Vue.extend({
       default: 0,
       type: Number
     },
-    maxHeight: Number,
-    minWidth: Number,
+    maxHeight: {
+      type: Number
+    },
+    minWidth: {
+      type: Number
+    },
     threshold: {
       type: Array as PropType<number[]>,
       default: () => [0, 1]
@@ -55,6 +59,7 @@ export default Vue.extend({
       default: false
     }
   },
+  emits: ['loaded', 'intersecting'],
   data() {
     return {
       intersectionObserver: null as unknown as IntersectionObserver,
@@ -94,7 +99,7 @@ export default Vue.extend({
            *  If a component enters the viewport and also leaves it within 200ms it will not render at all.
            *  This saves work and improves performance when user scrolls very fast
            */
-          this.renderTimer = setTimeout(
+          this.renderTimer = window.setTimeout(
             () => {
               this.renderEventId = generalUtils.generateRandomString(3)
               // this.consoleLog(`push from lazyload: ${this.renderEventId}`)
@@ -110,7 +115,7 @@ export default Vue.extend({
 
           // this.consoleLog(`setup render timer: ${this.renderTimer}`)
 
-          // this.renderTimer = setTimeout(
+          // this.renderTimer = window.setTimeout(
           //   () => {
           //     this.shoudBeRendered = true
           //     this.handleLoaded()
@@ -132,7 +137,7 @@ export default Vue.extend({
             // this.consoleLog('clear render timeout')
           }
 
-          this.unrenderTimer = setTimeout(() => {
+          this.unrenderTimer = window.setTimeout(() => {
             this.unrenderEventId = generalUtils.generateRandomString(3)
             // this.consoleLog(`push from lazyload: ${this.unrenderEventId}`)
             globalQueue.push(this.unrenderEventId, async () => {
@@ -145,7 +150,7 @@ export default Vue.extend({
 
           // this.consoleLog(`setup unrender timer: ${this.unrenderTimer}`)
 
-          // this.unrenderTimer = setTimeout(() => {
+          // this.unrenderTimer = window.setTimeout(() => {
           //   this.shoudBeRendered = false
           // }, this.unrenderDelay)
         }
@@ -175,7 +180,7 @@ export default Vue.extend({
       // }
     }
   },
-  destroyed() {
+  unmounted() {
     this.intersectionObserver && this.intersectionObserver.disconnect()
   }
 })

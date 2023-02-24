@@ -1,22 +1,26 @@
-import ControlUtils from '@/utils/controlUtils'
-import store from '@/store'
-import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp, IGroup, IImage, IShape } from '@/interfaces/layer'
-import { IFont, ISelection } from '@/interfaces/text'
-import GeneralUtils from './generalUtils'
-import LayerUtils from './layerUtils'
+import {
+  IGroup, ILayer, IParagraph, IParagraphStyle, ISpan,
+  ISpanStyle, IText, ITmp
+} from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import { IFont, ISelection } from '@/interfaces/text'
+import router from '@/router'
+import store from '@/store'
+import { checkAndConvertToHex } from '@/utils/colorUtils'
+import ControlUtils from '@/utils/controlUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
-import tiptapUtils from './tiptapUtils'
-import pageUtils from './pageUtils'
-import textShapeUtils from './textShapeUtils'
-import mathUtils from './mathUtils'
-import router from '@/router'
 import _ from 'lodash'
 import cssConverter from './cssConverter'
+import GeneralUtils from './generalUtils'
+import LayerUtils from './layerUtils'
+import logUtils from './logUtils'
+import mathUtils from './mathUtils'
+import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
 import textBgUtils from './textBgUtils'
-import { checkAndConvertToHex } from '@/utils/colorUtils'
+import textShapeUtils from './textShapeUtils'
+import tiptapUtils from './tiptapUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -25,7 +29,7 @@ class TextUtils {
   get isFontLoading(): boolean { return (store.state as any).text.isFontLoading }
 
   observer: IntersectionObserver
-  observerCallbackMap: {[key: string]: (size: { width: number, height: number }) => void}
+  observerCallbackMap: { [key: string]: (size: { width: number, height: number }) => void }
   trashDivs: HTMLDivElement[] = []
   toRecordId: string
   toSetFlagId: string
@@ -868,7 +872,7 @@ class TextUtils {
     if (!group.layers) return
     group.layers
       .forEach(l => {
-        minX = Math.min(minX, mathUtils.getBounding(l).x)
+        minX = Math.min(minX, mathUtils.getBounding(l.styles).x)
       })
     for (const [idx, layer] of Object.entries(group.layers)) {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
@@ -886,7 +890,7 @@ class TextUtils {
     if (!group.layers) return
     group.layers
       .forEach(l => {
-        minY = Math.min(minY, mathUtils.getBounding(l).y)
+        minY = Math.min(minY, mathUtils.getBounding(l.styles).y)
       })
     for (const [idx, layer] of Object.entries(group.layers)) {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
@@ -1114,7 +1118,7 @@ class TextUtils {
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const limitDiff = Math.abs(widthLimit - initSize.widthLimit)
     const firstPText = config.paragraphs[0].spans.map(span => span.text).join('')
-    if (router.currentRoute.name === 'Preview') {
+    if (router.currentRoute.value.name === 'Preview') {
       const writingMode = config.styles.writingMode.includes('vertical') ? 'hw' : 'wh'
       console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText}`)
     }
@@ -1275,11 +1279,12 @@ class TextUtils {
         })
       ]) === true
     } catch (error) {
-      // console.log(error)
+      console.log(error)
+      logUtils.setLog(JSON.stringify(error))
       isError = true
     } finally {
       if (isError === true) {
-        // console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (toSetFlag && this.toSetFlagId === setFlagId) {
         this.setIsFontLoading(false)

@@ -1,24 +1,25 @@
 <template lang="pug">
-  div(class="panel-position bg-white")
-    div(v-for="(data,index) in alignDatas()"
-        :key="`popup-${index}`"
-        class="panel-position__item"
-        @click="MappingUtils.mappingIconAction(data.icon)")
-      svg-icon(
-        class="pointer"
-        :iconName="data.icon"
-        :iconWidth="'18px'"
-        :iconColor="'gray-1'")
-      span(class="ml-5 body-2") {{data.text}}
+div(class="panel-position bg-white")
+  div(v-for="(data,index) in alignDatas()"
+      :key="`popup-${index}`"
+      class="panel-position__item"
+      @click="MappingUtils.mappingIconAction(data.icon)")
+    svg-icon(
+      class="pointer"
+      :iconName="data.icon"
+      :iconWidth="'18px'"
+      :iconColor="'gray-1'")
+    span(class="ml-5 body-2") {{data.text}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters } from 'vuex'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
       MappingUtils

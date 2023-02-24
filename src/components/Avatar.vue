@@ -1,14 +1,15 @@
 <template lang="pug">
-  div(class="avatar" :style="avatarStyle()")
-    span(v-if="!hasAvatar"
-      class="avatar__shortname text-white") {{shortName}}
+div(class="avatar" :style="avatarStyle()")
+  span(v-if="!hasAvatar"
+    class="avatar__shortname text-white") {{shortName}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
     textSize: {
       type: Number,

@@ -5,10 +5,10 @@ transition(name="fade-in-out")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import popupUtils from '@/utils/popupUtils'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'PopupIcon',
   props: {
     iconName: {
@@ -22,13 +22,13 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.timeoutId = setTimeout(() => {
+    this.timeoutId = window.setTimeout(() => {
       popupUtils.closePopup()
     }, 750)
   },
   updated() { // If another PopupIcon called, clear timer and create new one.
     clearTimeout(this.timeoutId)
-    this.timeoutId = setTimeout(() => {
+    this.timeoutId = window.setTimeout(() => {
       popupUtils.closePopup()
     }, 750)
   }

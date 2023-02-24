@@ -1,34 +1,42 @@
 <template lang="pug">
-  div(class="panel-page-plus"
-    :style="styles()"
-    @mouseover="pageMoveTo($event, 'mouse')"
-    @mouseout="pageMoveBack($event)"
-    @dragover="pageMoveTo($event, 'drag')"
-    @dragleave="pageMoveBack($event)"
-    @drop="handlePageDrop($event)")
-    div(v-if="actionType === 'mouse'"
-      class="panel-page-plus-wrapper pointer"
-      @click="addPage(index)")
-        svg-icon(class="py-5"
-            :iconColor="'white'"
-            :iconName="'plus-origin'"
-            :iconWidth="'15px'")
-        span(class="text-white") {{$t('NN0139')}}
-    div(v-if="actionType === 'drag'")
-      div(class="panel-page-plus-drag")
+div(class="panel-page-plus"
+  :style="styles()"
+  @mouseover="pageMoveTo($event, 'mouse')"
+  @mouseout="pageMoveBack($event)"
+  @dragover="pageMoveTo($event, 'drag')"
+  @dragleave="pageMoveBack($event)"
+  @drop="handlePageDrop($event)")
+  div(v-if="actionType === 'mouse'"
+    class="panel-page-plus-wrapper pointer"
+    @click="addPage(index)")
+      svg-icon(class="py-5"
+          :iconColor="'white'"
+          :iconName="'plus-origin'"
+          :iconWidth="'15px'")
+      span(class="text-white") {{$t('NN0139')}}
+  div(v-if="actionType === 'drag'")
+    div(class="panel-page-plus-drag")
 </template>
+
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
-import pageUtils from '@/utils/pageUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
+import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    index: Number,
-    last: Boolean
+    index: {
+      type: Number,
+      required: true
+    },
+    last: {
+      type: Boolean,
+      required: true
+    }
   },
   data() {
     return {
@@ -49,7 +57,7 @@ export default Vue.extend({
       _setmiddlemostPageIndex: 'SET_middlemostPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
-    styles() {
+    styles(): Record<string, string> {
       if (this.isDragged) {
         return {
           'z-index': '2',

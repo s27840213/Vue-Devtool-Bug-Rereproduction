@@ -1,4 +1,4 @@
-import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
+import { ActionTree, MutationTree, GetterTree } from 'vuex'
 import unsplash from '@/apis/unsplash'
 import pexels from '@/apis/pexels'
 import { IPhoto } from '@/interfaces/api'
@@ -137,4 +137,4 @@ export default {
   getters,
   mutations,
   actions
-} as ModuleTree<IPhotoState>
+}

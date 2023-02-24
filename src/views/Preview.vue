@@ -5,14 +5,14 @@ div(class="preview" :style="containStyles")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
-import { mapGetters, mapState, mapMutations } from 'vuex'
-import uploadUtils from '@/utils/uploadUtils'
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'Preview',
   components: {
     PageContent
@@ -39,10 +39,11 @@ export default Vue.extend({
     },
     config(): IPage | undefined {
       if (this.pages.length === 0) return undefined
-      if (!this.pages[0].isEnableBleed) return this.pages[0]
+      const page = this.pages[0]
+      if (!page.isEnableBleed) return page
       return {
-        ...this.pages[0],
-        ...pageUtils.getPageSizeWithBleeds(this.pages[0])
+        ...page,
+        ...pageUtils.getPageSizeWithBleeds(page)
       }
     },
     containStyles(): any {
@@ -53,20 +54,21 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setInScreenshotPreview: 'SET_inScreenshotPreview'
+      setInScreenshotPreview: 'SET_inScreenshotPreview',
+      setIsGettingDesign: 'SET_isGettingDesign'
     })
   },
   mounted() {
-    const type = this.$router.currentRoute.query.type
-    const designId = this.$router.currentRoute.query.design_id
-    const teamId = this.$router.currentRoute.query.team_id
+    const type = this.$router.currentRoute.value.query.type
+    const designId = this.$router.currentRoute.value.query.design_id
+    const teamId = this.$router.currentRoute.value.query.team_id
     if (!type || !designId || !teamId) {
-      uploadUtils.isGettingDesign = false
+      this.setIsGettingDesign(false)
     }
 
     this.setInScreenshotPreview(true)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.setInScreenshotPreview(false)
   }
 })

@@ -1,5 +1,4 @@
 import { destroyTooltip, VTooltip } from 'floating-vue'
-import { DirectiveBinding } from 'vue/types/options'
 
 class TooltipUtils {
   themes: {
@@ -60,13 +59,13 @@ class TooltipUtils {
     }
   }
 
-  async bind(el: HTMLElement, binding: DirectiveBinding): Promise<void> {
+  async bind(el: HTMLElement, binding: any): Promise<void> {
     const options = {
       value: this.generateConfig(binding.value),
       oldValue: binding.oldValue,
       modifiers: binding.modifiers
     }
-    VTooltip.bind(el, options)
+    VTooltip.beforeMount(el, options)
   }
 
   unbind(el: HTMLElement): void {

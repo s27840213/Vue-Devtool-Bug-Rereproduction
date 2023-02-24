@@ -1,48 +1,48 @@
 <template lang="pug">
-  div(class="home")
-    nu-header(v-header-border)
-    div(class="home-content")
-      div(class="home-top")
-        div(class="home-top-text")
-          span(class="home-top-text__title" v-html="$t('NN0464')")
-          span(class="home-top-text__description") {{$t('NN0465')}}
-          animation(v-for="cb in colorBlock"
-            :key="cb"
-            :class="`home-top-text__colorBlock ${cb.replace('.json', '')}`"
-            :path="'/lottie/' + cb")
-        iframe(title="Vivipic" class="home-top__yt"
-          :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=${isMobile?0:1}&rel=0`"
-          frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
-        router-link(:to="`/editor?type=new-design-size&width=1080&height=1080`"
-            class="home-top__button rounded btn-primary-sm btn-LG")
-          span {{$t('NN0391')}}
-      div(class="home-list")
-        scroll-list(v-if="!isMobile || isLogin"
-          type="theme" @openSizePopup="openSizePopup()")
-        scroll-list(v-if="isLogin"
-          type="mydesign")
-        template(v-if="isLogin")
-          scroll-list(v-for="theme in themeList"
-            type="template" :theme="theme" :key="theme")
-      div(class="home-block")
-        ta-block(v-for="item in blocklist"
-          :content="item")
-      nu-footer(:isHome="true")
+div(class="home")
+  nu-header(v-header-border)
+  div(class="home-content")
+    div(class="home-top")
+      div(class="home-top-text")
+        span(class="home-top-text__title" v-html="$t('NN0464')")
+        span(class="home-top-text__description") {{$t('NN0465')}}
+        animation(v-for="cb in colorBlock"
+          :key="cb"
+          :class="`home-top-text__colorBlock ${cb.replace('.json', '')}`"
+          :path="'/lottie/' + cb")
+      iframe(title="Vivipic" class="home-top__yt"
+        :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=${isMobile?0:1}&rel=0`"
+        frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
+      router-link(:to="`/editor?type=new-design-size&width=1080&height=1080`"
+          class="home-top__button rounded btn-primary-sm btn-LG")
+        span {{$t('NN0391')}}
+    div(class="home-list")
+      scroll-list(v-if="!isMobile || isLogin"
+        type="theme" @openSizePopup="openSizePopup()")
+      scroll-list(v-if="isLogin"
+        type="mydesign")
+      template(v-if="isLogin")
+        scroll-list(v-for="theme in themeList"
+          type="template" :theme="theme" :key="theme")
+    div(class="home-block")
+      ta-block(v-for="item in blocklist"
+        :content="item")
+    nu-footer(:isHome="true")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters, mapState } from 'vuex'
-import i18n from '@/i18n'
-import NuHeader from '@/components/NuHeader.vue'
 import Animation from '@/components/Animation.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
 import TaBlock from '@/components/homepage/TaBlock.vue'
 import NuFooter from '@/components/NuFooter.vue'
+import NuHeader from '@/components/NuHeader.vue'
+import blocklistData, { IHomeBlockData } from '@/utils/homeBlockData'
 import _ from 'lodash'
-import blocklistData from '@/utils/homeBlockData'
+import { defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'Home',
   components: {
     NuHeader,
@@ -63,6 +63,11 @@ export default Vue.extend({
       ]
     }
   },
+  // setup() {
+  //   useMeta({
+  //     title: 'Home'
+  //   })
+  // },
   metaInfo() {
     return {
       title: `${this.$t('SE0001')}`,
@@ -108,9 +113,9 @@ export default Vue.extend({
     ...mapState({
       isMobile: 'isMobile'
     }),
-    blocklist(): ReturnType<typeof blocklistData.data> {
+    blocklist(): IHomeBlockData[] {
       const blocklist = blocklistData.data().filter((item) => {
-        return !(i18n.locale === 'us' && item.img.name === 'e-commerce.json')
+        return !(this.$i18n.locale === 'us' && item.img.name === 'e-commerce.json')
       })
       // Set align as row, row-reverse alternately.
       for (let i = 1; i < blocklist.length; i++) {
@@ -121,13 +126,13 @@ export default Vue.extend({
       return blocklist
     },
     ytId() {
-      return i18n.locale === 'us' ? 'GRSlz37Njo0'
-        : i18n.locale === 'jp' ? 'FzPHWU0O1uI'
-          : i18n.locale === 'tw' ? 'BBVAwlBk_zA' : 'GRSlz37Njo0'
+      return this.$i18n.locale === 'us' ? 'GRSlz37Njo0'
+        : this.$i18n.locale === 'jp' ? 'FzPHWU0O1uI'
+          : this.$i18n.locale === 'tw' ? 'BBVAwlBk_zA' : 'GRSlz37Njo0'
     }
   },
   created() {
-    if (i18n.locale === 'us') {
+    if (this.$i18n.locale === 'us') {
       this.themeList = _.without(this.themeList, '7')
     }
   },

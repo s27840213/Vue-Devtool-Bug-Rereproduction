@@ -1,4 +1,4 @@
-import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
+import { ActionTree, MutationTree, GetterTree } from 'vuex'
 import { captureException } from '@sentry/browser'
 import i18n from '@/i18n'
 import photos from '@/apis/photos'
@@ -29,7 +29,7 @@ const getDefaultState = (): IPhotoState => ({
 
 const actions: ActionTree<IPhotoState, unknown> = {
   async getPhotos({ commit }, params = {}) {
-    const browserLocale = i18n.locale.split('-').slice(-1)[0].toLowerCase()
+    const browserLocale = i18n.global.locale.split('-').slice(-1)[0].toLowerCase()
     let { locale = browserLocale, pageIndex = 1, keyword } = params
     // if japanese keyword
     keyword && REGEX_JAPANESE.test(keyword) && (locale = 'ja')
@@ -112,4 +112,4 @@ export default {
   getters,
   mutations,
   actions
-} as ModuleTree<IPhotoState>
+}

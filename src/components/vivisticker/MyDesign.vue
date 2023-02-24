@@ -1,45 +1,46 @@
 <template lang="pug">
-  div(class="my-design")
-    div(class="my-design__tags")
-      div(v-for="tag in tags" class="my-design__tag"
-          :class="{ selected: checkTagSelected(tag) }"
-          @click.prevent.stop="selectTag(tag)")
-        span(class="my-design__tag-name") {{ $tc(tag.name, 2) }}
-    div(v-show="list.length === 0" class="my-design__content center")
-      div(class="my-design__empty-icon")
-        svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
-      div(class="my-design__empty-title") {{ $t('STK0020') }}
-      div(class="my-design__empty-description") {{ $t('STK0021') }}
-    div(v-show="list.length !== 0" class="my-design__content")
-      category-list(class="my-design__content__list"
-                    :list="myDesignList"
-                    ref="content"
-                    @loadMore="handleLoadMore")
-        template(v-slot:my-design-text-item="{ list }")
-          div(class="my-design__texts__items")
-            my-design-text-item(v-for="item in list"
-              class="my-design__texts__item"
-              :key="item.id"
-              :item="item")
-        template(v-slot:my-design-object-item="{ list }")
-          div(class="my-design__objects__items")
-            my-design-object-item(v-for="item in list"
-              class="my-design__objects__item"
-              :key="item.id"
-              :item="item")
+div(class="my-design")
+  div(class="my-design__tags")
+    div(v-for="tag in tags" class="my-design__tag"
+        :class="{ selected: checkTagSelected(tag) }"
+        @click.prevent.stop="selectTag(tag)")
+      span(class="my-design__tag-name") {{ $tc(tag.name, 2) }}
+  div(v-show="list.length === 0" class="my-design__content center")
+    div(class="my-design__empty-icon")
+      svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
+    div(class="my-design__empty-title") {{ $t('STK0020') }}
+    div(class="my-design__empty-description") {{ $t('STK0021') }}
+  div(v-show="list.length !== 0" class="my-design__content")
+    category-list(class="my-design__content__list"
+                  :list="myDesignList"
+                  ref="content"
+                  @loadMore="handleLoadMore")
+      template(v-slot:my-design-text-item="{ list }")
+        div(class="my-design__texts__items")
+          my-design-text-item(v-for="item in list"
+            class="my-design__texts__item"
+            :key="item.id"
+            :item="item")
+      template(v-slot:my-design-object-item="{ list }")
+        div(class="my-design__objects__items")
+          my-design-object-item(v-for="item in list"
+            class="my-design__objects__item"
+            :key="item.id"
+            :item="item"
+            :style="itemStyles")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
-import CategoryList from '@/components/category/CategoryList.vue'
-import MyDesignTextItem from '@/components/vivisticker/mydesign/MyDesignTextItem.vue'
+import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import MyDesignObjectItem from '@/components/vivisticker/mydesign/MyDesignObjectItem.vue'
+import MyDesignTextItem from '@/components/vivisticker/mydesign/MyDesignTextItem.vue'
 import { IMyDesign, IMyDesignTag } from '@/interfaces/vivisticker'
-import vivistickerUtils from '@/utils/vivistickerUtils'
 import editorUtils from '@/utils/editorUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'my-design',
   data() {
     const tags = vivistickerUtils.getMyDesignTags()
@@ -54,12 +55,12 @@ export default Vue.extend({
     MyDesignTextItem
   },
   mounted() {
-    const content = this.$refs.content as Vue
+    const content = this.$refs.content as CCategoryList
     if (!content) return
     content.$el.addEventListener('scroll', this.handleScroll)
   },
-  destroyed() {
-    const content = this.$refs.content as Vue
+  unmounted() {
+    const content = this.$refs.content as CCategoryList
     if (!content) return
     content.$el.removeEventListener('scroll', this.handleScroll)
   },
@@ -72,6 +73,9 @@ export default Vue.extend({
       myDesignTab: 'vivisticker/getMyDesignTab',
       myDesignFileList: 'vivisticker/getMyDesignFileList',
       myDesignNextPage: 'vivisticker/getMyDesignNextPage'
+    }),
+    ...mapState({
+      isTablet: 'isTablet'
     }),
     list(): IMyDesign[] {
       return this.myDesignFileList(this.myDesignTab) as IMyDesign[]
@@ -103,7 +107,7 @@ export default Vue.extend({
                 id: `result_${rowItems.map(item => item.id).join('_')}`,
                 type: 'my-design-object-item',
                 list: rowItems,
-                size: 104,
+                size: this.itemHeight + 24,
                 title: '',
                 moreType: 'object'
               }
@@ -113,13 +117,22 @@ export default Vue.extend({
         Object.assign(result[result.length - 1], { sentinel: true })
       }
       return result
+    },
+    itemStyles(): {[key: string]: string} {
+      return {
+        width: this.itemHeight + 'px',
+        height: this.itemHeight + 'px'
+      }
+    },
+    itemHeight(): number {
+      return this.isTablet ? 120 : 80
     }
   },
   watch: {
     isInMyDesign(newVal) {
       if (newVal) {
         this.refreshDesigns(this.myDesignTab)
-        const content = this.$refs.content as Vue
+        const content = this.$refs.content as CCategoryList
         content.$el.scrollTop = 0
       }
     },
@@ -172,7 +185,7 @@ export default Vue.extend({
       this.scrollTops[this.myDesignTab] = (event.target as HTMLElement).scrollTop
     },
     restoreScrollTop(tab: string) {
-      const content = this.$refs.content as Vue
+      const content = this.$refs.content as CCategoryList
       if (!content) return
       content.$el.scrollTop = this.scrollTops[tab]
     }

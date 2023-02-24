@@ -1,6 +1,6 @@
-import { GetterTree, MutationTree, ActionTree } from 'vuex'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
-interface IMobileEditorState {
+export interface IMobileEditorState {
   closeMobilePanelFlag: boolean,
   mobileAllPageMode: boolean
   inMultiSelectionMode: boolean,
@@ -78,6 +78,16 @@ const mutations: MutationTree<IMobileEditorState> = {
   },
   SET_showMobilePanel(state: IMobileEditorState, bool: boolean) {
     state.showMobilePanel = bool
+  },
+  INIT_STATE(state: IMobileEditorState) {
+    state.closeMobilePanelFlag = false
+    state.mobileAllPageMode = false
+    state.inMultiSelectionMode = false
+    state.currCardIndex = 0
+    state.currActivePanel = 'none'
+    state.currActiveSubPanel = 'none'
+    state.inBgSettingMode = false
+    state.showMobilePanel = false
   }
 }
 

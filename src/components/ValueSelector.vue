@@ -1,23 +1,26 @@
 <template lang="pug">
-  div(class="value-selector")
-    div(class="value-selector__wrapper")
-      ul
-        li(v-for="i in valueArray" :key="i" :style="liStyles(i)")
-          button(@click="setValue(i)")
-            div(class="value-selector__value")
-              span {{ i }}
-
+div(class="value-selector")
+  div(class="value-selector__wrapper")
+    ul
+      li(v-for="i in valueArray" :key="i" :style="liStyles(i)")
+        button(@click="setValue(i)")
+          div(class="value-selector__value")
+            span {{ i }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
-    valueArray: Array,
+    valueArray: {
+      type: Array as PropType<number[]>,
+      required: true
+    },
     value: String
   },
+  emits: ['update'],
   data() {
     return {
       currentValue: NaN

@@ -1,26 +1,33 @@
 <template lang="pug">
-  div(class="category-text-item"
-      :style="itemStyle"
-      @click="addText")
-    img(class="category-text-item__img"
-      :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
-      @error="handleNotFound")
+div(class="category-text-item"
+    :style="itemStyle"
+    @click="addText")
+  img(class="category-text-item__img"
+    :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
+    @error="handleNotFound")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import store from '@/store'
-import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
 import textPropUtils from '@/utils/textPropUtils'
-import DragUtils from '@/utils/dragUtils'
-import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    src: String,
-    item: Object
+    src: {
+      type: String
+    },
+    item: {
+      type: Object as PropType<any>,
+      required: true
+    },
+    itemWidth: {
+      type: Number,
+      default: NaN
+    }
   },
   data() {
     return {
@@ -33,9 +40,9 @@ export default Vue.extend({
     }),
     itemStyle(): any {
       const { width } = this.item.preview || {
-        width: generalUtils.isTouchDevice()
-          ? (window.outerWidth - 68) / 3 - 10
-          : 135
+        width: !isNaN(this.itemWidth) ? this.itemWidth
+          : this.$isTouchDevice() ? (window.outerWidth - 68) / 3 - 10
+            : 135
       }
       return {
         width: `${width}px`

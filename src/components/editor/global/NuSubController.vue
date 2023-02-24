@@ -1,93 +1,111 @@
 <template lang="pug">
-  //- :style="transformStyle")
-  div(class="nu-sub-controller")
-    div(class="nu-sub-controller__wrapper" :style="positionStyles()")
-      div(class="nu-sub-controller__wrapper" :style="wrapperStyles")
-        div(class="nu-sub-controller__content"
-            ref="body"
-            :layer-index="`${layerIndex}`"
-            :style="styles")
-            div(v-if="config.type === 'text' && config.active"
-              class="text text__wrapper" :style="textWrapperStyle()" draggable="false"
-              @pointerdown="onPointerdown")
-              nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
-                :style="textBodyStyle()"
-                :pageIndex="pageIndex"
-                :layerIndex="primaryLayerIndex"
-                :subLayerIndex="layerIndex"
-                @keydown.native.37.stop
-                @keydown.native.38.stop
-                @keydown.native.39.stop
-                @keydown.native.40.stop
-                @keydown.native.ctrl.67.exact.stop.self
-                @keydown.native.meta.67.exact.stop.self
-                @keydown.native.ctrl.86.exact.stop.self
-                @keydown.native.meta.86.exact.stop.self
-                @keydown.native.ctrl.88.exact.stop.self
-                @keydown.native.meta.88.exact.stop.self
-                @keydown.native.ctrl.65.exact.stop.self
-                @keydown.native.meta.65.exact.stop.self
-                @keydown.native.ctrl.90.exact.stop.self
-                @keydown.native.meta.90.exact.stop.self
-                @keydown.native.ctrl.shift.90.exact.stop.self
-                @keydown.native.meta.shift.90.exact.stop.self
-                @update="handleTextChange"
-                @compositionend="handleTextCompositionEnd")
-        //- input(
-        //-   type="file"
-        //-   accept="image/jpeg, image/png"
-        //-   ref="fileInput"
-        //-   class="d-none"
-        //-   :id="`input-${primaryLayerIndex}-${layerIndex}`"
-        //-   :multiple="false"
-        //-   @change="onImgFileChange")
+//- :style="transformStyle")
+div(class="nu-sub-controller")
+  div(class="nu-sub-controller__wrapper" :style="positionStyles()")
+    div(class="nu-sub-controller__wrapper" :style="wrapperStyles")
+      div(class="nu-sub-controller__content"
+          ref="body"
+          :layer-index="`${layerIndex}`"
+          :style="styles")
+          div(v-if="config.type === 'text' && config.active"
+            class="text text__wrapper" :style="textWrapperStyle()" draggable="false"
+            @pointerdown="onPointerdown")
+            nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
+              :style="textBodyStyle()"
+              :pageIndex="pageIndex"
+              :page="page"
+              :layerIndex="primaryLayerIndex"
+              :config="(config as IText)"
+              :primaryLayer="primaryLayer"
+              :subLayerIndex="layerIndex"
+              @keydown.37.stop
+              @keydown.38.stop
+              @keydown.39.stop
+              @keydown.40.stop
+              @keydown.ctrl.67.exact.stop.self
+              @keydown.meta.67.exact.stop.self
+              @keydown.ctrl.86.exact.stop.self
+              @keydown.meta.86.exact.stop.self
+              @keydown.ctrl.88.exact.stop.self
+              @keydown.meta.88.exact.stop.self
+              @keydown.ctrl.65.exact.stop.self
+              @keydown.meta.65.exact.stop.self
+              @keydown.ctrl.90.exact.stop.self
+              @keydown.meta.90.exact.stop.self
+              @keydown.ctrl.shift.90.exact.stop.self
+              @keydown.meta.shift.90.exact.stop.self
+              @update="handleTextChange"
+              @compositionend="handleTextCompositionEnd")
 </template>
 <script lang="ts">
-import Vue from 'vue'
-import { mapState, mapGetters, mapMutations } from 'vuex'
-import MouseUtils from '@/utils/mouseUtils'
-import CssConveter from '@/utils/cssConverter'
+import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
+import i18n from '@/i18n'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IFrame, IGroup, IImage, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import { ILayerInfo, LayerType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
 import ControlUtils from '@/utils/controlUtils'
-import { IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
-import { ICoordinate } from '@/interfaces/frame'
-import { IControlPoints } from '@/interfaces/controller'
-import MappingUtils from '@/utils/mappingUtils'
-import TextUtils from '@/utils/textUtils'
-import TextEffectUtils from '@/utils/textEffectUtils'
-import StepsUtils from '@/utils/stepsUtils'
-import LayerUtils from '@/utils/layerUtils'
+import DragUtils from '@/utils/dragUtils'
+import eventUtils, { ImageEvent } from '@/utils/eventUtils'
+import fileUtils from '@/utils/fileUtils'
+import FrameUtils from '@/utils/frameUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
-import FrameUtils from '@/utils/frameUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
-import { FunctionPanelType, ILayerInfo, LayerType, PopupSliderEventType } from '@/store/types'
-import popupUtils from '@/utils/popupUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
-import DragUtils from '@/utils/dragUtils'
-import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
-import imageUtils from '@/utils/imageUtils'
-import SubCtrlUtils from '@/utils/subControllerUtils'
-import textShapeUtils from '@/utils/textShapeUtils'
-import colorUtils from '@/utils/colorUtils'
-import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
-import i18n from '@/i18n'
 import imageShadowUtils from '@/utils/imageShadowUtils'
-import fileUtils from '@/utils/fileUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import imageUtils from '@/utils/imageUtils'
+import LayerUtils from '@/utils/layerUtils'
+import MappingUtils from '@/utils/mappingUtils'
+import MouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
+import popupUtils from '@/utils/popupUtils'
+import ShortcutUtils from '@/utils/shortcutUtils'
+import StepsUtils from '@/utils/stepsUtils'
+import SubCtrlUtils from '@/utils/subControllerUtils'
+import TextEffectUtils from '@/utils/textEffectUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
+import TextUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
+import { notify } from '@kyvg/vue3-notification'
 import SvgPath from 'svgpath'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
-    config: Object,
-    layerIndex: Number,
-    pageIndex: Number,
-    primaryLayerIndex: Number,
-    primaryLayer: Object,
-    snapUtils: Object,
-    type: String,
-    isMoved: Boolean,
+    config: {
+      type: Object,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    page: {
+      type: Object as PropType<IPage>,
+      required: true
+    },
+    primaryLayerIndex: {
+      type: Number,
+      required: true
+    },
+    primaryLayer: {
+      type: Object,
+      required: true
+    },
+    type: {
+      type: String,
+      required: true
+    },
+    isMoved: {
+      type: Boolean,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -100,6 +118,7 @@ export default Vue.extend({
   components: {
     NuTextEditor
   },
+  emits: ['pointerDownSubController', 'clickSubController', 'dblSubController', 'onSubDrop'],
   data() {
     return {
       MappingUtils,
@@ -187,7 +206,17 @@ export default Vue.extend({
       this.parentId = this.primaryLayer.id as string
 
       if (this.type === LayerType.frame && this.config.type === LayerType.image) {
-        body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+        body.addEventListener(this.$isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+      }
+
+      if (this.config.type === LayerType.text) {
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+          editing: true
+        })
+        TextUtils.setCurrTextInfo({
+          config: this.config as IText,
+          subLayerIndex: this.layerIndex
+        })
       }
     }
   },
@@ -209,10 +238,10 @@ export default Vue.extend({
       return this.config?.active && !this.controllerHidden
     },
     wrapperStyles(): any {
-      const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      const scale = this.primaryLayer.styles.scale
       return {
         transformOrigin: '0px 0px',
-        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
+        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer as IFrame) ? scale : 1})`,
         ...this.transformStyle,
         outline: this.outlineStyles(),
         ...this.sizeStyle(),
@@ -229,7 +258,7 @@ export default Vue.extend({
     styles(): any {
       const { isFrameImg } = this.config
       const zindex = this.type === 'group' ? this.config?.active ? this.getPrimaryLayerSubLayerNum : this.primaryLayerZindex : this.config.styles.zindex
-      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
+      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
 
       return {
         ...this.sizeStyle(),
@@ -239,7 +268,7 @@ export default Vue.extend({
       }
     },
     isCurveText(): boolean {
-      return this.checkIfCurve(this.config)
+      return this.checkIfCurve(this.config as IText)
     },
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
@@ -262,38 +291,6 @@ export default Vue.extend({
   watch: {
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
-    },
-    'config.active'(val) {
-      if (!val) {
-        this.setLastSelectedLayerIndex(this.primaryLayerIndex)
-        if (this.config.type === 'text') {
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-            editing: false,
-            isTyping: false,
-            contentEditable: false
-          })
-          this.isControlling = false
-
-          if (this.currTextInfo.subLayerIndex === this.layerIndex) {
-            TextUtils.setCurrTextInfo({
-              config: LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IGroup,
-              subLayerIndex: undefined
-            })
-          }
-        }
-        popupUtils.closePopup()
-      } else {
-        if (this.config.type === 'text') {
-          LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-            editing: true
-          })
-        }
-        TextUtils.setCurrTextInfo({
-          config: this.config as IText,
-          subLayerIndex: this.layerIndex
-        })
-      }
-      TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
     },
     isTextEditing(editing) {
       if (this.config.type === 'text') {
@@ -318,15 +315,28 @@ export default Vue.extend({
           editor.setEditable(newVal)
         })
       }
-      !GeneralUtils.isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal }, this.layerIndex)
+      !this.$isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal }, this.layerIndex)
     }
   },
-  destroyed() {
+  unmounted() {
     // the condition indicates the primaryLayer transform from group-layer to tmp-layer
-    if (this.config.type === 'text' && this.primaryLayer && this.primaryLayer.id === this.parentId) {
-      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false })
-      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
+    if (this.config.type === 'text') {
+      if (this.primaryLayer && this.primaryLayer.id === this.parentId) {
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false, isTyping: false })
+      }
+      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+        contentEditable: false
+      })
+      this.isControlling = false
+
+      if (this.currTextInfo.subLayerIndex === this.layerIndex) {
+        TextUtils.setCurrTextInfo({
+          config: this.primaryLayer as IGroup,
+          subLayerIndex: undefined
+        })
+      }
     }
+    popupUtils.closePopup()
   },
   methods: {
     ...mapMutations({
@@ -358,7 +368,7 @@ export default Vue.extend({
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
         opacity: `${this.config.styles.opacity / 100}`,
-        transform: `scaleX(${this.config.styles.scale * this.contentScaleRatio}) scaleY(${this.config.styles.scale * this.contentScaleRatio})`,
+        transform: `scaleX(${this.config.styles.scale * this.contentScaleRatio * this.scaleRatio * 0.01}) scaleY(${this.config.styles.scale * this.contentScaleRatio * this.scaleRatio * 0.01})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode
       }
@@ -377,15 +387,14 @@ export default Vue.extend({
         userSelect: this.config.contentEditable ? 'text' : 'none',
         opacity: 1
       }
-      return !(this.isCurveText || this.isFlipped) ? textstyles
-        : {
-          width: `${this.config.styles.width / this.config.styles.scale}px`,
-          height: `${this.config.styles.height / this.config.styles.scale}px`,
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          opacity: this.config.contentEditable ? 1 : 0
-        }
+      return !(this.isCurveText || this.isFlipped) ? textstyles : {
+        width: `${this.config.styles.width / this.config.styles.scale}px`,
+        height: `${this.config.styles.height / this.config.styles.scale}px`,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        opacity: this.config.contentEditable ? 1 : 0
+      }
     },
     groupControllerStyle() {
       return {
@@ -396,7 +405,7 @@ export default Vue.extend({
       }
     },
     disableTouchEvent(e: TouchEvent) {
-      if (GeneralUtils.isTouchDevice()) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }
@@ -416,7 +425,7 @@ export default Vue.extend({
         } else {
           if (this.config.contentEditable) {
             LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { isTyping: true }, this.layerIndex)
-            if (GeneralUtils.isTouchDevice()) {
+            if (this.$isTouchDevice()) {
               tiptapUtils.focus({ scrollIntoView: false }, 'end')
             } else {
               tiptapUtils.focus({ scrollIntoView: false })
@@ -504,8 +513,9 @@ export default Vue.extend({
           })
         })
     },
-    positionStyles() {
+    positionStyles(): Record<string, string> {
       const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
+      const _f = this.contentScaleRatio * this.scaleRatio * 0.01
       let { x, y } = this.config.styles
 
       if (this.type === 'frame' && horizontalFlip) {
@@ -520,23 +530,24 @@ export default Vue.extend({
       }
 
       return {
-        transform: `translate(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px)` + `rotate(${this.config.styles.rotate}deg)` +
+        transform: `translate(${x * _f}px, ${y * _f}px)` + `rotate(${this.config.styles.rotate}deg)` +
           `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})`,
-        width: `${this.config.styles.width * this.contentScaleRatio}px`,
-        height: `${this.config.styles.height * this.contentScaleRatio}px`,
+        width: `${this.config.styles.width * _f}px`,
+        height: `${this.config.styles.height * _f}px`,
         'pointer-events': 'none',
         ...this.transformStyle
       }
     },
     sizeStyle() {
       const { isFrameImg } = this.config
+      const _f = this.contentScaleRatio * this.scaleRatio * 0.01
       let width, height
       if (this.type === 'frame' && !isFrameImg) {
-        width = `${this.config.styles.initWidth * this.contentScaleRatio}px`
-        height = `${this.config.styles.initHeight * this.contentScaleRatio}px`
+        width = `${this.config.styles.initWidth * _f}px`
+        height = `${this.config.styles.initHeight * _f}px`
       } else {
-        width = `${this.config.styles.width * this.contentScaleRatio}px`
-        height = `${this.config.styles.height * this.contentScaleRatio}px`
+        width = `${this.config.styles.width * _f}px`
+        height = `${this.config.styles.height * _f}px`
       }
       return { width, height }
     },
@@ -544,16 +555,16 @@ export default Vue.extend({
       const outlineColor = this.config.locked ? '#EB5757' : '#7190CC'
       if (this.isControllerShown && LayerUtils.getCurrLayer.type !== 'frame') {
         if (this.isControlling) {
-          return `${2 * (100 / this.scaleRatio) / this.primaryLayer.styles.scale * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
         } else {
-          return `${2 * (100 / this.scaleRatio) / this.primaryLayer.styles.scale * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2 / this.primaryLayer.styles.scale}px solid ${outlineColor}`
         }
       } else {
         return 'none'
       }
     },
     waitFontLoadingAndRecord() {
-      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const pageId = this.page.id
       const layerId = this.primaryLayer.id
       const subLayerId = this.config.id
       TextUtils.waitFontLoadingAndRecord(this.config.paragraphs, () => {
@@ -563,7 +574,7 @@ export default Vue.extend({
       })
     },
     waitFontLoadingAndResize() {
-      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const pageId = this.page.id
       const layerId = this.primaryLayer.id
       const subLayerId = this.config.id
       TextUtils.untilFontLoaded(this.config.paragraphs).then(() => {
@@ -583,7 +594,7 @@ export default Vue.extend({
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      this.calcSize(this.config)
+      this.calcSize(this.config as IText)
       if (payload.toRecord) {
         this.waitFontLoadingAndRecord()
       } else {
@@ -644,7 +655,7 @@ export default Vue.extend({
               this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
             } else {
-              Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+              notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
               body.removeEventListener('drop', this.onDrop)
             }
           }
@@ -748,7 +759,7 @@ export default Vue.extend({
     },
     onFrameDragLeave(e: DragEvent) {
       e.stopPropagation()
-      const primaryLayer = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IFrame
+      const primaryLayer = this.primaryLayer as IFrame
       if (this.isDraggedPanelPhoto() && !primaryLayer.locked) {
         FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.srcObj)
         FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.styles)
@@ -783,7 +794,7 @@ export default Vue.extend({
       if (LayerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
         return
       }
-      if (LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked && !this.isDraggedPanelPhoto()) {
+      if (this.primaryLayer.locked && !this.isDraggedPanelPhoto()) {
         return
       }
       if ((LayerUtils.getCurrLayer as IImage).id === this.uploadId.layerId) {
@@ -830,8 +841,8 @@ export default Vue.extend({
           imgY
         })
         const body = this.$refs.body as HTMLElement
-        body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
-        body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+        body.addEventListener(this.$isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+        body.addEventListener(this.$isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
       }
     },
     onFrameMouseLeave(e: MouseEvent) {
@@ -853,8 +864,8 @@ export default Vue.extend({
         })
       }
       const body = this.$refs.body as HTMLElement
-      body.removeEventListener(GeneralUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
-      body.removeEventListener(GeneralUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+      body.removeEventListener(this.$isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+      body.removeEventListener(this.$isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
     },
     onFrameMouseUp(e: MouseEvent) {
       if (this.isDraggedPanelPhoto()) return
@@ -862,13 +873,13 @@ export default Vue.extend({
       if (currLayer && currLayer.type === LayerType.image) {
         LayerUtils.deleteLayer(LayerUtils.pageIndex, LayerUtils.layerIndex)
         const newIndex = this.primaryLayerIndex > LayerUtils.layerIndex ? this.primaryLayerIndex - 1 : this.primaryLayerIndex
-        groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer])
+        groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer as IFrame])
         FrameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.layerIndex, { active: true })
         StepsUtils.record()
       }
       const body = this.$refs.body as HTMLElement
-      body.removeEventListener(GeneralUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
-      body.removeEventListener(GeneralUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+      body.removeEventListener(this.$isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+      body.removeEventListener(this.$isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
     }
   }
 })

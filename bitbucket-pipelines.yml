@@ -1,5 +1,4 @@
 image: node:14.16.0
-
 pipelines:
   default: #for feature
     - parallel:
@@ -13,22 +12,13 @@ pipelines:
             size: 2x
             caches: #set caches for node modules to speed up building
               - node
-            image: cypress/browsers:node14.17.0-chrome88-ff89
+            image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
             script:
               - yarn install
-              - yarn build:prerender
+              - yarn build
             artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
               - dist/**
-        # - step:
-        #     name: 'Run E2E Tests'
-        #     caches:
-        #       - node
-        #     image: cypress/browsers:node14.17.0-chrome88-ff89
-        #     script:
-        #       - npx cypress install
-        #       - yarn install
-        #       - yarn serve & npx wait-on http://localhost:8080
-        #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+              - node_modules/**
     - parallel:
         - step:
             name: "dev5 Alan"
@@ -42,7 +32,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                   S3_BUCKET: $AWS_BUCKET_STICKER_DEV5
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                  EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -50,7 +40,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                   S3_BUCKET: $AWS_BUCKET_STICKER_DEV5
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--exclude=* --include=app.html"
+                  EXTRA_ARGS: "--exclude=* --include=index.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -72,7 +62,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                   S3_BUCKET: $AWS_BUCKET_STICKER_DEV4
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                  EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -80,7 +70,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                   S3_BUCKET: $AWS_BUCKET_STICKER_DEV4
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--exclude=* --include=app.html"
+                  EXTRA_ARGS: "--exclude=* --include=index.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -102,7 +92,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                   S3_BUCKET: $AWS_BUCKET_STICKER_DEV3
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                  EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -110,7 +100,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                   S3_BUCKET: $AWS_BUCKET_STICKER_DEV3
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--exclude=* --include=app.html"
+                  EXTRA_ARGS: "--exclude=* --include=index.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -132,7 +122,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                   S3_BUCKET: $AWS_BUCKET_STICKER_DEV2
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                  EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -140,7 +130,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                   S3_BUCKET: $AWS_BUCKET_STICKER_DEV2
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--exclude=* --include=app.html"
+                  EXTRA_ARGS: "--exclude=* --include=index.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -162,7 +152,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                   S3_BUCKET: $AWS_BUCKET_STICKER_DEV1
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                  EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -170,7 +160,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                   S3_BUCKET: $AWS_BUCKET_STICKER_DEV1
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--exclude=* --include=app.html"
+                  EXTRA_ARGS: "--exclude=* --include=index.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -192,7 +182,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                   S3_BUCKET: $AWS_BUCKET_STICKER_DEV0
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                  EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -200,7 +190,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                   S3_BUCKET: $AWS_BUCKET_STICKER_DEV0
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--exclude=* --include=app.html"
+                  EXTRA_ARGS: "--exclude=* --include=index.html"
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -223,22 +213,13 @@ pipelines:
               size: 2x
               caches: #set caches for node modules to speed up building
                 - node
-              image: cypress/browsers:node14.17.0-chrome88-ff89
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
               script:
                 - yarn install
                 - yarn build:prerender
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
-          # - step:
-          #     name: 'Run E2E Tests'
-          #     caches:
-          #       - node
-          #     image: cypress/browsers:node14.17.0-chrome88-ff89
-          #     script:
-          #       - npx cypress install
-          #       - yarn install
-          #       - yarn serve & npx wait-on http://localhost:8080
-          #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+                - node_modules/**
       - step:
           name: "deploy test"
           deployment: test
@@ -343,23 +324,25 @@ pipelines:
               size: 2x
               caches: #set caches for node modules to speed up building
                 - node
-              image: cypress/browsers:node14.17.0-chrome88-ff89
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
               script:
                 - yarn install
                 - yarn build:prerender
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
-          # - step:
-          #     name: 'Run E2E Tests'
-          #     caches:
-          #       - node
-          #     image: cypress/browsers:node14.17.0-chrome88-ff89
-          #     script:
-          #       - npx cypress install
-          #       - yarn install
-          #       - yarn serve & npx wait-on http://localhost:8080
-          #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+                - node_modules/**
       - parallel:
+          - step:
+              name: "Run E2E Tests"
+              size: 2x
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+              script:
+                - npx cypress install
+                - yarn serve & npx wait-on http://localhost:8080
+                - npx cypress run --record --browser chrome || true
+              artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+                - cypress-visual-report/**
+                - cypress-visual-screenshots/**
           - step:
               name: "deploy rd"
               deployment: rd
@@ -437,23 +420,25 @@ pipelines:
               size: 2x
               caches: #set caches for node modules to speed up building
                 - node
-              image: cypress/browsers:node14.17.0-chrome88-ff89
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
               script:
                 - yarn install
                 - yarn build:prerender
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
-          # - step:
-          #     name: 'Run E2E Tests'
-          #     caches:
-          #       - node
-          #     image: cypress/browsers:node14.17.0-chrome88-ff89
-          #     script:
-          #       - npx cypress install
-          #       - yarn install
-          #       - yarn serve & npx wait-on http://localhost:8080
-          #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+                - node_modules/**
       - parallel:
+          - step:
+              name: "Run E2E Tests"
+              size: 2x
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
+              script:
+                - npx cypress install
+                - yarn serve & npx wait-on http://localhost:8080
+                - npx cypress run --record --browser chrome || true
+              artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+                - cypress-visual-report/**
+                - cypress-visual-screenshots/**
           - step:
               name: "deploy qa"
               deployment: qa
@@ -489,7 +474,7 @@ pipelines:
               trigger: manual
               script:
                 - ./bash/create_pull_request.sh
-    stk-hotfix: #for non-master and non-develop branch, i.e., feature or hotfix...
+    stk-hotfix:
       - parallel:
           - step:
               name: "Verify build environment"
@@ -501,22 +486,13 @@ pipelines:
               size: 2x
               caches: #set caches for node modules to speed up building
                 - node
-              image: cypress/browsers:node14.17.0-chrome88-ff89
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
               script:
                 - yarn install
-                - yarn build:prerender
+                - yarn build
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
-          # - step:
-          #     name: 'Run E2E Tests'
-          #     caches:
-          #       - node
-          #     image: cypress/browsers:node14.17.0-chrome88-ff89
-          #     script:
-          #       - npx cypress install
-          #       - yarn install
-          #       - yarn serve & npx wait-on http://localhost:8080
-          #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+                - node_modules/**
       - parallel:
           - step:
               name: "dev5 Alan"
@@ -530,7 +506,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                     S3_BUCKET: $AWS_BUCKET_STICKER_DEV5
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                    EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -538,7 +514,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                     S3_BUCKET: $AWS_BUCKET_STICKER_DEV5
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=* --include=app.html"
+                    EXTRA_ARGS: "--exclude=* --include=index.html"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -560,7 +536,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                     S3_BUCKET: $AWS_BUCKET_STICKER_DEV4
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                    EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -568,7 +544,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                     S3_BUCKET: $AWS_BUCKET_STICKER_DEV4
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=* --include=app.html"
+                    EXTRA_ARGS: "--exclude=* --include=index.html"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -590,7 +566,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                     S3_BUCKET: $AWS_BUCKET_STICKER_DEV3
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                    EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -598,7 +574,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                     S3_BUCKET: $AWS_BUCKET_STICKER_DEV3
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=* --include=app.html"
+                    EXTRA_ARGS: "--exclude=* --include=index.html"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -620,7 +596,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                     S3_BUCKET: $AWS_BUCKET_STICKER_DEV2
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                    EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -628,7 +604,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                     S3_BUCKET: $AWS_BUCKET_STICKER_DEV2
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=* --include=app.html"
+                    EXTRA_ARGS: "--exclude=* --include=index.html"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -650,7 +626,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                     S3_BUCKET: $AWS_BUCKET_STICKER_DEV1
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                    EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -658,7 +634,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                     S3_BUCKET: $AWS_BUCKET_STICKER_DEV1
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=* --include=app.html"
+                    EXTRA_ARGS: "--exclude=* --include=index.html"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -680,7 +656,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                     S3_BUCKET: $AWS_BUCKET_STICKER_DEV0
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=app.html --exclude=*.js.map"
+                    EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -688,7 +664,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
                     S3_BUCKET: $AWS_BUCKET_STICKER_DEV0
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=* --include=app.html"
+                    EXTRA_ARGS: "--exclude=* --include=index.html"
                 - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
@@ -710,52 +686,45 @@ pipelines:
               size: 2x
               caches: #set caches for node modules to speed up building
                 - node
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
               script:
                 - yarn install
                 - yarn build
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
-          # - step:
-          #     name: 'Run E2E Tests'
-          #     caches:
-          #       - node
-          #     image: cypress/browsers:node14.17.0-chrome88-ff89
-          #     script:
-          #       - npx cypress install
-          #       - yarn install
-          #       - yarn serve & npx wait-on http://localhost:8080
-          #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
-      - step:
-          name: "deploy prod"
-          deployment: stickerproduction
-          trigger: manual
-          script:
-            - pipe: atlassian/aws-s3-deploy:1.1.0
-              variables:
-                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
-                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
-                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                S3_BUCKET: $AWS_BUCKET_STICKER
-                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
-            - pipe: atlassian/aws-s3-deploy:1.1.0
-              variables:
-                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
-                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
-                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                S3_BUCKET: $AWS_BUCKET_STICKER
-                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                EXTRA_ARGS: "--exclude=* --include=index.html"
-            - pipe: atlassian/aws-s3-deploy:1.1.0
-              variables:
-                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
-                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
-                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                S3_BUCKET: $AWS_BUCKET_STICKER
-                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                EXTRA_ARGS: "--exclude=*.js.map"
-                DELETE_FLAG: "true"
-            - curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
+                - node_modules/**
+      - parallel:
+          - step:
+              name: "deploy prod"
+              deployment: stickerproduction
+              trigger: manual
+              script:
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                    S3_BUCKET: $AWS_BUCKET_STICKER
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                    S3_BUCKET: $AWS_BUCKET_STICKER
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=* --include=index.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                    S3_BUCKET: $AWS_BUCKET_STICKER
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
+                    DELETE_FLAG: "true"
+                - curl -k -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
     app/vivisticker-develop:
       - parallel:
           - step:
@@ -768,48 +737,41 @@ pipelines:
               size: 2x
               caches: #set caches for node modules to speed up building
                 - node
+              image: cypress/browsers:node-16.18.1-chrome-109.0.5414.74-1-ff-109.0-edge-109.0.1518.52-1
               script:
                 - yarn install
                 - yarn build
               artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
                 - dist/**
-          # - step:
-          #     name: 'Run E2E Tests'
-          #     caches:
-          #       - node
-          #     image: cypress/browsers:node14.17.0-chrome88-ff89
-          #     script:
-          #       - npx cypress install
-          #       - yarn install
-          #       - yarn serve & npx wait-on http://localhost:8080
-          #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
-      - step:
-          name: "deploy test"
-          deployment: stkrd
-          trigger: manual
-          script:
-            - pipe: atlassian/aws-s3-deploy:1.1.0
-              variables:
-                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
-                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
-                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                S3_BUCKET: $AWS_BUCKET_STICKER_RD
-                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
-            - pipe: atlassian/aws-s3-deploy:1.1.0
-              variables:
-                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
-                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
-                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                S3_BUCKET: $AWS_BUCKET_STICKER_RD
-                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                EXTRA_ARGS: "--exclude=* --include=index.html"
-            - pipe: atlassian/aws-s3-deploy:1.1.0
-              variables:
-                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
-                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
-                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                S3_BUCKET: $AWS_BUCKET_STICKER_RD
-                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                EXTRA_ARGS: "--exclude=*.js.map"
-                DELETE_FLAG: "true"
+                - node_modules/**
+      - parallel:
+          - step:
+              name: "deploy test"
+              deployment: stkrd
+              trigger: manual
+              script:
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                    S3_BUCKET: $AWS_BUCKET_STICKER_RD
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                    S3_BUCKET: $AWS_BUCKET_STICKER_RD
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=* --include=index.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                    S3_BUCKET: $AWS_BUCKET_STICKER_RD
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
+                    DELETE_FLAG: "true"

@@ -1,99 +1,101 @@
 <template lang="pug">
-  div(class="panel-template" ref="panel")
-    div(v-if="showPrompt && !currentGroup"
-      class="panel-template__prompt body-2")
-      span {{$t('NN0247')}}
-      svg-icon(class="pl-5 pointer"
-        iconColor="gray-2"
-        iconName="close"
-        iconWidth="24px"
-        @click.native="handleClosePrompt")
-    //- Group template UI
-    panel-group-template(v-if="currentGroup"
-      :showId="showAdminTool"
-      :groupItem="currentGroup"
-      @close="currentGroup = null")
-    //- Search bar and themes
-    div
-      div(class="panel-template__search")
-        search-bar(class="mb-15"
-          :placeholder="$t('NN0092', {target: $tc('NN0001',1)})"
-          clear
-          :defaultKeyword="keywordLabel"
-          @search="handleSearch")
-          nubtn(theme="icon" icon="sliders" :status="!allThemesChecked?'active':'default'"
-              @click.native="onAdvancedClicked()" :hint="$t('NN0795')")
-        popup-theme(v-if="showTheme"
-          class="panel-template__theme"
-          :style="themeStyle()"
-          :preSelected="theme.split(',')"
-          @change="handleTheme"
-          @close="showTheme = false")
-      div(v-if="showTheme" class="panel-template__wrap")
-    //- Search result empty msg
-    div(v-if="theme && emptyResultMessage") {{ emptyResultMessage }}
-    //- Search result counter (only for admin)
-    div(v-if="showAdminTool && keyword && !pending && !emptyResultMessage"
-      class="pb-10")
-      span {{sum}} {{sum === 1 ? 'item' : 'items'}} in total (not work for category search)
-    //- Search result and main content
-    category-list(v-for="item in categoryListArray"
-                  v-show="item.show" :ref="item.key" :key="item.key"
-                  :list="item.content" @loadMore="handleLoadMore")
-      template(v-slot:category-list-rows="{ list, title }")
-        category-list-rows(:list="list" :title="title"
-          @action="handleCategorySearch")
-          template(v-slot:preview="{ item }")
-            component(class="panel-template__item"
-              :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
-              :showId="showAdminTool"
-              :item="item"
-              @click="handleShowGroup")
-      template(v-slot:category-template-item="{ list, title }")
-        div(v-if="title" class="panel-template__header") {{ title }}
-        div(class="panel-template__items")
-          component(v-for="item in list"
-            class="panel-template__item"
+div(class="panel-template" ref="panel")
+  div(v-if="showPrompt && !currentGroup"
+    class="panel-template__prompt body-2")
+    span {{$t('NN0247')}}
+    svg-icon(class="pl-5 pointer"
+      iconColor="gray-2"
+      iconName="close"
+      iconWidth="24px"
+      @click="handleClosePrompt")
+  //- Group template UI
+  panel-group-template(v-if="currentGroup"
+    :showId="showAdminTool"
+    :groupItem="currentGroup"
+    @close="currentGroup = null")
+  //- Search bar and themes
+  div
+    div(class="panel-template__search")
+      search-bar(class="mb-15"
+        :placeholder="$t('NN0092', {target: $tc('NN0001',1)})"
+        clear
+        :defaultKeyword="keywordLabel"
+        @search="handleSearch")
+        nubtn(theme="icon" icon="sliders" :status="!allThemesChecked?'active':'default'"
+            @click="onAdvancedClicked()" :hint="$t('NN0795')")
+      popup-theme(v-if="showTheme"
+        class="panel-template__theme"
+        :style="themeStyle()"
+        :preSelected="theme.split(',')"
+        @change="handleTheme"
+        @close="showTheme = false")
+    div(v-if="showTheme" class="panel-template__wrap")
+  //- Search result empty msg
+  div(v-if="theme && emptyResultMessage") {{ emptyResultMessage }}
+  //- Search result counter (only for admin)
+  div(v-if="showAdminTool && keyword && !pending && !emptyResultMessage"
+    class="pb-10")
+    span {{sum}} {{sum === 1 ? 'item' : 'items'}} in total (not work for category search)
+  //- Search result and main content
+  category-list(v-for="item in categoryListArray"
+                v-show="item.show" :ref="item.key" :key="item.key"
+                :list="item.content" @loadMore="handleLoadMore"
+                @scroll.passive="handleScrollTop($event, item.key as 'mainContent'|'searchResult')")
+    template(v-slot:category-list-rows="{ list, title }")
+      category-list-rows(:list="list" :title="title"
+        @action="handleCategorySearch")
+        template(v-slot:preview="{ item }")
+          component(class="panel-template__item"
             :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
             :showId="showAdminTool"
             :item="item"
-            :key="item.group_id"
-            @click="handleShowGroup")
-      template(#after)
-        //- Loading icon
-        div(v-if="!theme || pending" class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
-        //- Template wishing pool
-        div(v-if="keyword && theme && !pending && resultGroupCounter<=10")
-          span {{$t('NN0796', {type: $tc('NN0001', 3)})}}
-          nubtn(size="mid" class="mt-30")
-            url(:url="$t('NN0791')" :newTab="true")
-              span {{$t('NN0790', {type: $tc('NN0001', 3)})}}
+            @clickGroupItem="handleShowGroup")
+    template(v-slot:category-template-item="{ list, title }")
+      div(v-if="title" class="panel-template__header") {{ title }}
+      div(class="panel-template__items")
+        component(v-for="item in list"
+          class="panel-template__item"
+          :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
+          :showId="showAdminTool"
+          :item="item"
+          :key="item.group_id"
+          @clickGroupItem="handleShowGroup")
+    template(#after)
+      //- Loading icon
+      div(v-if="!theme || pending" class="text-center")
+        svg-icon(iconName="loading"
+          iconColor="white"
+          iconWidth="20px")
+      //- Template wishing pool
+      div(v-if="keyword && theme && !pending && resultGroupCounter<=10")
+        span {{$t('NN0796', {type: $tc('NN0001', 3)})}}
+        nubtn(size="mid-center" class="mt-30")
+          url(:url="$t('NN0791')" :newTab="true")
+            span {{$t('NN0790', {type: $tc('NN0001', 3)})}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import i18n from '@/i18n'
-import { mapActions, mapState, mapMutations, mapGetters } from 'vuex'
-import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import SearchBar from '@/components/SearchBar.vue'
-import CategoryList from '@/components/category/CategoryList.vue'
+import listService from '@/apis/list'
+import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
+import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
-import PopupTheme from '@/components/popup/PopupTheme.vue'
 import PanelGroupTemplate from '@/components/editor/panelSidebar/PanelGroupTemplate.vue'
-import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
 import Url from '@/components/global/Url.vue'
-import themeUtils from '@/utils/themeUtils'
-import GalleryUtils from '@/utils/galleryUtils'
+import PopupTheme from '@/components/popup/PopupTheme.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { Itheme } from '@/interfaces/theme'
-import _ from 'lodash'
-import listService from '@/apis/list'
+import GalleryUtils from '@/utils/galleryUtils'
 import generalUtils from '@/utils/generalUtils'
+import themeUtils from '@/utils/themeUtils'
+import _ from 'lodash'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  name: 'PanelTemplate',
+  emits: [],
   components: {
     SearchBar,
     CategoryList,
@@ -135,7 +137,13 @@ export default Vue.extend({
       })
     }
 
-    // panelInit for PanelTemplate at themeUtils.fetchTemplateContent
+    themeUtils.refreshTemplateState().then(() => {
+      generalUtils.panelInit('template',
+        this.handleSearch,
+        this.handleCategorySearch,
+        this.getRecAndCate
+      )
+    })
   },
   computed: {
     ...mapState('templates', {
@@ -206,12 +214,12 @@ export default Vue.extend({
       const { keyword, pending } = this
       if (pending || !keyword || this.searchResult.length > 0) return ''
       return keyword
-        ? `${i18n.t('NN0393', {
+        ? `${this.$t('NN0393', {
           keyword: this.keywordLabel,
-          target: i18n.tc('NN0001', 1)
+          target: this.$tc('NN0001', 1)
         })}`
-        : `${i18n.t('NN0394', {
-          target: i18n.tc('NN0001', 1)
+        : `${this.$t('NN0394', {
+          target: this.$tc('NN0001', 1)
         })}`
     },
     currPageThemeIds(): number[] {
@@ -226,14 +234,12 @@ export default Vue.extend({
     }
   },
   activated() {
-    this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
-    this.$refs.searchResult[0].$el.scrollTop = this.scrollTop.searchResult
-    this.$refs.mainContent[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
-  },
-  deactivated() {
-    this.$refs.mainContent[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-    this.$refs.searchResult[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+    this.$nextTick(() => {
+      const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
+      const searchResult = (this.$refs.searchResult as CCategoryList[])[0]
+      mainContent.$el.scrollTop = this.scrollTop.mainContent
+      searchResult.$el.scrollTop = this.scrollTop.searchResult
+    })
   },
   watch: {
     currPageThemeIds(curr: number[] = []) {
@@ -250,7 +256,8 @@ export default Vue.extend({
       if (!newVal) {
         this.$nextTick(() => {
           // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+          const mainContent = (this.$refs.mainContent as CCategoryList[])[0]
+          mainContent.$el.scrollTop = this.scrollTop.mainContent
         })
       }
     }
@@ -323,8 +330,9 @@ export default Vue.extend({
       return new Set([...set, ...subset]).size === set.length
     },
     themeStyle(): Record<string, string> {
+      const gapTop = this.$isTouchDevice() ? 60 : 80
       return {
-        maxHeight: `${this.$refs.panel.clientHeight - 60}px`
+        maxHeight: `${(this.$refs.panel as HTMLElement).clientHeight - gapTop}px`
       }
     },
     processListResult(list = [] as IAssetTemplate[], isSearch: boolean): ICategoryItem[] {
@@ -332,9 +340,9 @@ export default Vue.extend({
       let galleryUtils = null
       if (this.isSubsetOf(['3', '7', '13'], theme.split(','))) {
         // 判斷如果版型為IG限時動態(3) or 電商詳情頁(7), 最小高度則為200px
-        galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.outerWidth - 30 : 300, 200, 10)
+        galleryUtils = new GalleryUtils(this.$isTouchDevice() ? window.innerWidth - 30 : 300, 200, 10)
       } else {
-        galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.outerWidth - 30 : 300, 140, 10)
+        galleryUtils = new GalleryUtils(this.$isTouchDevice() ? window.innerWidth - 30 : 300, 140, 10)
       }
       const idContainerHeight = this.showAdminTool ? 24 : 0
       const result = galleryUtils

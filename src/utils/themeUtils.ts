@@ -1,8 +1,8 @@
+import listService from '@/apis/list'
+import i18n from '@/i18n'
 import { Itheme } from '@/interfaces/theme'
 import store from '@/store'
 import PageUtils from '@/utils/pageUtils'
-import listService from '@/apis/list'
-import i18n from '@/i18n'
 import _ from 'lodash'
 import generalUtils from './generalUtils'
 
@@ -25,7 +25,7 @@ class ThemeUtils {
   checkAllThemes() { // Must be excute after get editorThemes
     const themes = store.getters.getEditThemes
       .map((it: Record<string, string>) => it.id)
-      .sort((a: number, b:number) => a - b)
+      .sort((a: number, b: number) => a - b)
       .join(',')
     store.commit('templates/SET_STATE', { theme: themes })
   }
@@ -41,20 +41,19 @@ class ThemeUtils {
       })
   }
 
-  refreshTemplateState(pageIndex?: number, newDesignType?: number) {
+  refreshTemplateState() {
     // Refresh template in sidebar panel. If pageIndex give, use its width and height to sort template.
     // If newDesignType give, it should be the first priority template result.
     this.setTemplateThemes([])
     return this.checkThemeState().then(() => {
-      this.setPageThemes(pageIndex, undefined, newDesignType)
-      this.fetchTemplateContent()
+      this.setPageThemes()
     })
   }
 
   async checkThemeState() {
     const { themes } = this
     if (!themes.length) {
-      await listService.getTheme({ locale: i18n.locale })
+      await listService.getTheme({ locale: i18n.global.locale })
         .then(response => {
           const { data } = response.data
           store.commit('SET_themes', data.content)
@@ -63,15 +62,14 @@ class ThemeUtils {
     return Promise.resolve()
   }
 
-  setPageThemes(pageIndex?: number, themes?: Itheme[], newDesignType?: number) {
+  setPageThemes() {
     const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get('themeId')) {
-      store.commit('templates/SET_STATE', {
-        theme: urlParams.get('themeId')
-      })
+    const themeId = urlParams.get('themeId')
+    if (themeId) {
+      store.commit('templates/SET_STATE', { theme: themeId })
     } else {
-      const pageSize = this.getFocusPageSize(pageIndex)
-      const pageThemes = (themes || this.getThemesBySize(pageSize.width, pageSize.height, newDesignType))
+      const pageSize = this.getFocusPageSize()
+      const pageThemes = this.getThemesBySize(pageSize.width, pageSize.height)
       this.setTemplateThemes(pageThemes)
     }
   }
@@ -87,7 +85,7 @@ class ThemeUtils {
     ]).reverse()
   }
 
-  getThemesBySize(width: number, height: number, newDesignType?: number) {
+  getThemesBySize(width: number, height: number) {
     const { themes, groupType } = this
 
     if (groupType === 1) return themes.filter(theme => theme.id === 7)
@@ -98,10 +96,13 @@ class ThemeUtils {
       theme => this.themeRatioDifference(theme, currPageRatio) < 0.2
     )
 
+    const urlParams = new URLSearchParams(window.location.search)
+    const themeId = urlParams.get('themeId')
+    const newDesignType = themeId ? parseInt(themeId) : null
     // Pick new design type to the top.
     if (newDesignType) {
-      recommendation = recommendation.filter((item) => item.id === newDesignType).concat(
-        recommendation.filter((item) => item.id !== newDesignType))
+      recommendation = recommendation.filter((item) => item.id !== newDesignType)
+        .concat(recommendation.filter((item) => item.id === newDesignType))
     }
     return recommendation.length ? recommendation : themes
   }

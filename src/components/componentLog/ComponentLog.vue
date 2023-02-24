@@ -18,7 +18,7 @@ div(class="component-log"
         iconColor="gray-1"
         iconWidth="16px"
         :style="{transform: showContent ? '' : 'rotate(180deg)'}"
-        @click.native="toggleContent(!showContent)")
+        @click="toggleContent()")
   div(v-show="showContent && logs.length > 0" class="component-log__content" ref="content")
     component-log-item(
       v-for="(log,index) in logs"
@@ -29,7 +29,7 @@ div(class="component-log"
     //-     :key="index"
     //-     class="component-log__item")
     //-   div(class="flex items-center")
-    //-     svg-icon(iconName="plus-square" iconColor="gray-3" iconWidth="16px" @click.native="toggleContent(!showContent)")
+    //-     svg-icon(iconName="plus-square" iconColor="gray-3" iconWidth="16px" @click="toggleContent(!showContent)")
     //-     span(class="component-log__component-name text-bold") {{log.component}}
     //-     span(class="component-log__time text-bold ml-5") {{`${parseFloat(log.time.toFixed(3))}  ms`}}
     //-   div(class="component-log__parent")
@@ -37,21 +37,22 @@ div(class="component-log"
 </template>
 
 <script lang="ts">
+import ComponentLogItem from '@/components/componentLog/ComponentLogItem.vue'
+import { IComponentUpdatedLog } from '@/interfaces/componentUpdateLog'
 import eventUtils from '@/utils/eventUtils'
-import generalUtils from '@/utils/generalUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import { debounce } from 'lodash'
-import Vue from 'vue'
-import ComponentLogItem from '@/components/componentLog/ComponentLogItem.vue'
+import { defineComponent, PropType } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'ComponentLog',
   components: {
     ComponentLogItem
   },
   props: {
     logs: {
-      type: Array,
+      type: Array as PropType<IComponentUpdatedLog[]>,
       default: () => []
     }
   },
@@ -110,7 +111,7 @@ export default Vue.extend({
       this.showContent = !this.showContent
     },
     disableTouchEvent(e: TouchEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }

@@ -13,7 +13,8 @@ export interface IDesign {
   ver: number,
   signedUrl?: {[key: string]: string},
   pageNum: number,
-  polling: boolean
+  polling: boolean,
+  group_type: number
 }
 
 export interface IFolder {

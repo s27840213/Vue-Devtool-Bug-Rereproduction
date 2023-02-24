@@ -1,16 +1,17 @@
 <template lang="pug">
-  span(v-if="!url")
-    slot
-  a(v-else-if="url.startsWith('http')" :href="url" :target="newTab ? '_blank' : '_self'")
-    slot
-  router-link(v-else :to="url")
-    slot
+span(v-if="!url")
+  slot
+a(v-else-if="url.startsWith('http')" :href="url" :target="newTab ? '_blank' : '_self'")
+  slot
+router-link(v-else :to="url")
+  slot
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
     url: {
       type: String

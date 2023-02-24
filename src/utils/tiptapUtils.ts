@@ -1,32 +1,35 @@
-import { Editor, EditorEvents, FocusPosition } from '@tiptap/vue-2'
+import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { checkAndConvertToHex } from '@/utils/colorUtils'
+import cssConveter from '@/utils/cssConverter'
+import generalUtils from '@/utils/generalUtils'
+import layerUtils from '@/utils/layerUtils'
+import NuTextStyle from '@/utils/nuTextStyle'
+import textBgUtils from '@/utils/textBgUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import textPropUtils from '@/utils/textPropUtils'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 import TextStyle from '@tiptap/extension-text-style'
-import NuTextStyle from '@/utils/nuTextStyle'
-import cssConveter from '@/utils/cssConverter'
-import layerUtils from '@/utils/layerUtils'
-import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { Editor, EditorEvents, FocusPosition } from '@tiptap/vue-3'
 import { EventEmitter } from 'events'
-import textPropUtils from '@/utils/textPropUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
-import textBgUtils from '@/utils/textBgUtils'
-import generalUtils from '@/utils/generalUtils'
+import { Slice } from 'prosemirror-model'
+import { EditorView } from 'prosemirror-view'
 import shortcutUtils from './shortcutUtils'
-import { checkAndConvertToHex } from '@/utils/colorUtils'
 
 class TiptapUtils {
   event: any
   eventHandler: undefined | ((toRecord: boolean, keepCenter: boolean) => void)
   editor: Editor | undefined = undefined
   prevText: string | undefined = undefined
+  prevJSON: any | undefined = undefined
 
   constructor() {
     this.event = new EventEmitter()
     this.eventHandler = undefined
   }
 
-  init(content: string, editable: boolean) {
+  init(content: any, editable: boolean) {
     this.editor = new Editor({
       content: content ?? '',
       extensions: [
@@ -44,7 +47,7 @@ class TiptapUtils {
         handleScrollToSelection: () => {
           return this.editor?.storage.nuTextStyle.pasting
         },
-        handlePaste: (view, event: ClipboardEvent, slice) => {
+        handlePaste: (view: EditorView, event: ClipboardEvent, slice: Slice) => {
           if (!event.clipboardData) return false
           const items = event.clipboardData.items
           for (let i = items.length - 1; i >= 0; i--) {
@@ -62,7 +65,7 @@ class TiptapUtils {
       },
       editable,
       onCreate: ({ editor }) => {
-        this.prevText = this.getText(editor as Editor)
+        this.updatePrevData(editor as Editor)
         editor.commands.selectAll()
       }
     })
@@ -100,7 +103,7 @@ class TiptapUtils {
     this.event.emit('update', toRecord, keepCenter)
   }
 
-  textStylesRaw(styles: any): {[key: string]: any} {
+  textStylesRaw(styles: any): { [key: string]: any } {
     const textStyles = cssConveter.convertFontStyle(styles)
     return Object.assign(textStyles, {
       '-webkit-text-decoration-line': textStyles['text-decoration-line']
@@ -118,7 +121,7 @@ class TiptapUtils {
       content: paragraphs.map(p => {
         const pObj = {
           type: 'paragraph'
-        } as {[key: string]: any}
+        } as { [key: string]: any }
         const attrs = this.makeParagraphStyle(p.styles) as any
         if (p.spanStyle) {
           attrs.spanStyle = true
@@ -289,7 +292,19 @@ class TiptapUtils {
         }
       } else {
         if (pStyles.size !== largestSize) {
+          // keep size of <p> the same as the largest size of <span>s
           pStyles.size = largestSize
+          isSetContentRequired = true
+        }
+        if (pStyles.font === 'undefined') {
+          // <p>s of pasted text may have 'undefined' font
+          // If so, use the font of the first <span>
+          const sStyles = spans[0].styles
+          pStyles.font = sStyles.font
+          pStyles.type = sStyles.type
+          pStyles.userId = sStyles.userId
+          pStyles.assetId = sStyles.assetId
+          pStyles.fontUrl = sStyles.fontUrl
           isSetContentRequired = true
         }
         if (paragraph.attrs.spanStyle) {
@@ -305,9 +320,8 @@ class TiptapUtils {
     return { paragraphs: result, isSetContentRequired }
   }
 
-  getText(editor: Editor): string {
+  getText(json: any): string {
     const lines: string[] = []
-    const json = editor.getJSON()
     const paragraphs = json.content ?? []
     for (const paragraph of paragraphs) {
       const spans = paragraph.content ?? []
@@ -322,6 +336,12 @@ class TiptapUtils {
       }
     }
     return lines.join('\n')
+  }
+
+  updatePrevData(editor: Editor) {
+    const json = editor.getJSON()
+    this.prevJSON = json
+    this.prevText = this.getText(json)
   }
 
   toText(textLayer: IText): string {
@@ -342,7 +362,7 @@ class TiptapUtils {
     return lines.join('\n')
   }
 
-  applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined, otherUpdates: {[key: string]: any} = {}) {
+  applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined, otherUpdates: { [key: string]: any } = {}) {
     const item = { [key]: value }
     Object.assign(item, otherUpdates)
     const { subLayerIdx, getCurrLayer } = layerUtils
@@ -397,7 +417,7 @@ class TiptapUtils {
   }
 
   applyParagraphStyle(key: string, value: any, setFocus = true) {
-    const item: {[string: string]: any} = {}
+    const item: { [string: string]: any } = {}
     item[key] = value
     this.agent(editor => {
       if (layerUtils.getCurrLayer.contentEditable) {

@@ -1,56 +1,58 @@
 <template lang="pug">
-  div(class="vivisticker" :style="copyingStyles()")
-    div(class="vivisticker__top" :style="topStyles()")
-      header-tabs(v-show="currActivePanel !== 'text'" :style="headerStyles()")
-      div(class="vivisticker__content"
-          @pointerdown="outerClick")
-        my-design(v-show="isInMyDesign && !isInEditor")
-        vvstk-editor(v-show="isInEditor")
-        main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
-      transition(name="panel-up")
-        mobile-panel(v-show="showMobilePanel"
-          :currActivePanel="currActivePanel"
-          @switchTab="switchTab")
-    footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
-      @switchTab="switchTab"
-      @switchMainTab="switchMainTab"
-      :currTab="isInEditor ? currActivePanel : (isInMyDesign ? 'none' : currActiveTab)"
-      :inAllPagesMode="false")
-    transition(name="slide-left")
-      component(v-if="isSlideShown" :is="slideType" class="vivisticker__slide")
-    tutorial(v-if="showTutorial")
-    full-page(v-if="fullPageType !== 'none'" class="vivisticker__full-page")
+div(class="vivisticker" :style="copyingStyles()")
+  div(class="vivisticker__top" :style="topStyles()")
+    header-tabs(v-show="currActivePanel !== 'text'" :style="headerStyles()")
+    div(class="vivisticker__content"
+        @pointerdown="outerClick")
+      my-design(v-show="isInMyDesign && !isInEditor")
+      vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor")
+      main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
+    transition(name="panel-up")
+      mobile-panel(v-show="showMobilePanel"
+        :currActivePanel="currActivePanel"
+        :currPage="currPage"
+        @switchTab="switchTab")
+  footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
+    @switchTab="switchTab"
+    @switchMainTab="switchMainTab"
+    :currTab="isInEditor ? currActivePanel : (isInMyDesign ? 'none' : currActiveTab)"
+    :inAllPagesMode="false")
+  transition(name="slide-left")
+    component(v-if="isSlideShown" :is="slideType" class="vivisticker__slide")
+  tutorial(v-if="showTutorial")
+  full-page(v-if="fullPageType !== 'none'" class="vivisticker__full-page")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import MainMenu from '@/components/vivisticker/MainMenu.vue'
-import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
-import MobilePanel from '@/components/vivisticker/MobilePanel.vue'
-import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
 import FooterTabs from '@/components/vivisticker/FooterTabs.vue'
-import Tutorial from '@/components/vivisticker/Tutorial.vue'
 import FullPage from '@/components/vivisticker/FullPage.vue'
+import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
+import MainMenu from '@/components/vivisticker/MainMenu.vue'
+import MobilePanel from '@/components/vivisticker/MobilePanel.vue'
 import MyDesign from '@/components/vivisticker/MyDesign.vue'
 import SlideUserSettings from '@/components/vivisticker/slide/SlideUserSettings.vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
-import stepsUtils from '@/utils/stepsUtils'
-import layerUtils from '@/utils/layerUtils'
-import { IGroup } from '@/interfaces/layer'
+import Tutorial from '@/components/vivisticker/Tutorial.vue'
+import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
+import { CustomWindow } from '@/interfaces/customWindow'
 import { IFooterTabProps } from '@/interfaces/editor'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import { IPage } from '@/interfaces/page'
+import { ColorEventType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import logUtils from '@/utils/logUtils'
+import modalUtils from '@/utils/modalUtils'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
 import textUtils from '@/utils/textUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import { CustomWindow } from '@/interfaces/customWindow'
-import { ColorEventType } from '@/store/types'
-import modalUtils from '@/utils/modalUtils'
-import colorUtils from '@/utils/colorUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 declare let window: CustomWindow
 
-export default Vue.extend({
+export default defineComponent({
   name: 'ViviSticker',
   components: {
     MainMenu,
@@ -78,19 +80,27 @@ export default Vue.extend({
       this.setShowTutorial(true)
     }
   },
-  mounted() {
-    /**
-     * @Note the codes below is used to prevent the zoom in/out effect of mobile phone, especially for the "IOS"
-     * Remember to set passive to "false", or the preventDefault() function won't work.
-     * check the blog below to see some method to prevent this error
-     * https://medium.com/@littleDog/%E5%A6%82%E4%BD%95%E8%A7%A3%E6%B1%BA-user-scalable-no-%E5%B1%AC%E6%80%A7%E8%A2%ABios-safari-ignore-e6a0531050ba
-     */
+  async mounted() {
+    const tempDesign = await vivistickerUtils.fetchDesign()
+    if (tempDesign) {
+      try {
+        vivistickerUtils.initWithTempDesign(tempDesign)
+      } catch (error) {
+        logUtils.setLogAndConsoleLog(error)
+      }
+    }
 
     if (!this.userInfo.isFirstOpen) {
       vivistickerUtils.sendAppLoaded()
     }
 
     stepsUtils.MAX_STORAGE_COUNT = 15
+    /**
+     * @Note the codes below is used to prevent the zoom in/out effect of mobile phone, especially for the "IOS"
+     * Remember to set passive to "false", or the preventDefault() function won't work.
+     * check the blog below to see some method to prevent this error
+     * https://medium.com/@littleDog/%E5%A6%82%E4%BD%95%E8%A7%A3%E6%B1%BA-user-scalable-no-%E5%B1%AC%E6%80%A7%E8%A2%ABios-safari-ignore-e6a0531050ba
+     */
     document.addEventListener('touchstart', (event: TouchEvent) => {
       /**
        * @param nearHrEdge - is used to prevnt the IOS navagation gesture, this is just a workaround
@@ -110,7 +120,7 @@ export default Vue.extend({
       }
       lastTouchEnd = now
     }, false)
-    window.visualViewport.addEventListener('resize', this.handleResize)
+    document.addEventListener('scroll', this.handleScroll)
 
     // parse modal info
     const exp = !vivistickerUtils.checkVersion(this.modalInfo.ver_min || '0') ? 'exp_' : ''
@@ -168,8 +178,8 @@ export default Vue.extend({
       )
     }
   },
-  destroyed() {
-    window.visualViewport.removeEventListener('resize', this.handleResize)
+  unmounted() {
+    document.removeEventListener('scroll', this.handleScroll)
   },
   computed: {
     ...mapState('mobileEditor', {
@@ -183,6 +193,7 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
+      getPage: 'getPage',
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
       currActiveTab: 'vivisticker/getCurrActiveTab',
@@ -197,34 +208,11 @@ export default Vue.extend({
       isSlideShown: 'vivisticker/getIsSlideShown',
       modalInfo: 'vivisticker/getModalInfo'
     }),
-    isLocked(): boolean {
-      return layerUtils.getTmpLayer().locked
-    },
-    groupTypes(): Set<string> {
-      const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer) => {
-        return layer.type
-      })
-      return new Set(types)
-    },
-    isGroup(): boolean {
-      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
-    },
-    hasSubSelectedLayer(): boolean {
-      return this.currSubSelectedInfo.index !== -1
-    },
-    subLayerType(): string {
-      return this.currSubSelectedInfo.type
-    },
-    showTextSetting(): boolean {
-      return this.isGroup ? (
-        this.hasSubSelectedLayer ? (
-          this.subLayerType === 'text' && !this.isLocked
-        ) : (this.groupTypes.has('text') && !this.isLocked)
-      ) : (this.currSelectedInfo.types.has('text'))
-    },
     contentEditable(): boolean {
-      return this.currSelectedInfo.layers[0]?.contentEditable
+      return this.currSubSelectedInfo.index >= 0 ? this.currSelectedInfo.layers[0]?.layers[this.currSubSelectedInfo.index]?.contentEditable : this.currSelectedInfo.layers[0]?.contentEditable
+    },
+    currPage(): IPage {
+      return this.getPage(pageUtils.currFocusPageIndex)
     }
   },
   watch: {
@@ -306,8 +294,9 @@ export default Vue.extend({
         vivistickerUtils.deselect()
       }
     },
-    handleResize() {
-      this.headerOffset = this.defaultWindowHeight - window.outerHeight - 1
+    handleScroll() {
+      // handle page scroll by mobile keyboard
+      this.headerOffset = document.documentElement.scrollTop ? document.documentElement.scrollTop - 1 : 0
     }
   }
 })
@@ -379,6 +368,6 @@ export default Vue.extend({
 }
 
 .header-bar {
-  transition: 0.2s ease;
+  transition: 0.5s cubic-bezier(0.380, 0.700, 0.125, 1.000);
 }
 </style>

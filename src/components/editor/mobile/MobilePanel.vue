@@ -1,106 +1,112 @@
 <template lang="pug">
-  div(class="mobile-panel"
-      :class="{'p-15': !noPaddingTheme}"
-      :style="panelStyle"
-      v-click-outside="vcoConfig()"
-      ref="panel")
-    div(class="mobile-panel__top-section"
-      :class="{'self-padding': noPaddingTheme}")
-      div(class="mobile-panel__drag-bar"
-        :class="{'visible-hidden': panelTitle !== ''}"
-        @pointerdown="dragPanelStart"
-        @touchstart="disableTouchEvent")
-          div
-      div
-        div(class="mobile-panel__btn mobile-panel__left-btn"
-            :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn,}")
-          svg-icon(
-            class="click-disabled"
-            :iconName="leftBtnName"
-            :iconColor="'white'"
-            :iconWidth="'20px'")
-          div(class="mobile-panel__btn-click-zone"
-            @pointerdown="leftButtonAction"
-            @touchstart="disableTouchEvent")
-        div(class="mobile-panel__title")
-          span(class="mobile-panel__title-text body-1 mr-10"
-            :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
-          div(v-if="inSelectionState" class="mobile-panel__layer-num")
-            span(class="label-sm text-white") {{selectedLayerNum}}
-        div(class="mobile-panel__btn mobile-panel__right-btn"
-            :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn}")
-          svg-icon(
-            class="click-disabled"
-            :iconName="rightBtnName"
-            :iconColor="'white'"
-            :iconWidth="'20px'")
-          div(class="mobile-panel__btn-click-zone"
-            @pointerdown="rightButtonAction"
-            @touchstart="disableTouchEvent")
-    div(class="mobile-panel__bottom-section")
-      tabs(v-if="innerTabs.label" theme="light"
-          :tabs="innerTabs.label" v-model="innerTabIndex")
-      keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
-        //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-        component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
-          class="border-box p-2"
-          v-bind="dynamicBindProps"
-          v-on="dynamicBindMethod"
-          @close="closeMobilePanel")
-    transition(name="panel-up")
-      mobile-panel(v-if="!isSubPanel && currActiveSubPanel !== 'none'"
-        :currActivePanel="currActiveSubPanel"
-        :currColorEvent="currSubColorEvent"
-        :isSubPanel="true"
-        @switchTab="switchTab"
+div(class="mobile-panel"
+    :class="{'p-15': !noPaddingTheme}"
+    :style="panelStyle"
+    v-click-outside="vcoConfig()"
+    ref="panel")
+  div(class="mobile-panel__top-section"
+    :class="{'self-padding': noPaddingTheme}")
+    div(class="mobile-panel__drag-bar"
+      :class="{'visible-hidden': panelTitle !== ''}"
+      @pointerdown="dragPanelStart"
+      @touchstart="disableTouchEvent")
+        div
+    div
+      div(class="mobile-panel__btn mobile-panel__left-btn"
+          :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn,}")
+        svg-icon(
+          class="click-disabled"
+          :iconName="leftBtnName"
+          :iconColor="'white'"
+          :iconWidth="'20px'")
+        div(class="mobile-panel__btn-click-zone"
+          @pointerdown="leftButtonAction"
+          @touchstart="disableTouchEvent")
+      div(class="mobile-panel__title")
+        span(class="mobile-panel__title-text body-1 mr-10"
+          :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
+        div(v-if="inSelectionState" class="mobile-panel__layer-num")
+          span(class="label-sm text-white") {{selectedLayerNum}}
+      div(class="mobile-panel__btn mobile-panel__right-btn"
+          :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn}")
+        svg-icon(
+          class="click-disabled"
+          :iconName="rightBtnName"
+          :iconColor="'white'"
+          :iconWidth="'20px'")
+        div(class="mobile-panel__btn-click-zone"
+          @pointerdown="rightButtonAction"
+          @touchstart="disableTouchEvent")
+  div(class="mobile-panel__bottom-section")
+    tabs(v-if="innerTabs.label" theme="light"
+      :tabs="innerTabs.label" v-model="innerTabIndex")
+    keep-alive(:include="['PanelTemplate', 'PanelPhoto', 'PanelObject', 'PanelBackground', 'PanelText', 'PanelFile']")
+      //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
+      component(v-if="dynamicBindIs && !isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
+        class="border-box p-2"
+        :is="dynamicBindIs"
+        :key="dynamicBindIs"
+        :currPage="currPage"
+        v-bind="dynamicBindProps"
+        v-on="dynamicBindMethod"
         @close="closeMobilePanel")
+  transition(name="panel-up")
+    mobile-panel(v-if="!isSubPanel && currActiveSubPanel !== 'none'"
+      :currActivePanel="currActiveSubPanel"
+      :currColorEvent="currSubColorEvent"
+      :isSubPanel="true"
+      :currPage="currPage"
+      @switchTab="switchTab"
+      @close="closeMobilePanel")
 </template>
 <script lang="ts">
-import Vue from 'vue'
-import i18n from '@/i18n'
-import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
-import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
-import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
-import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
-import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
-import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
+import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
+import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
+import PanelBleed from '@/components/editor/panelMobile/PanelBleed.vue'
 import PanelBrand from '@/components/editor/panelMobile/PanelBrand.vue'
-import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
-import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
+import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
+import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import PanelFlip from '@/components/editor/panelMobile/PanelFlip.vue'
+import PanelFontFormat from '@/components/editor/panelMobile/PanelFontFormat.vue'
+import PanelFontSize from '@/components/editor/panelMobile/PanelFontSize.vue'
+import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.vue'
+import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
+import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust.vue'
 import PanelOpacity from '@/components/editor/panelMobile/PanelOpacity.vue'
 import PanelOrder from '@/components/editor/panelMobile/PanelOrder.vue'
-import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
-import PanelFontSize from '@/components/editor/panelMobile/PanelFontSize.vue'
-import PanelFontFormat from '@/components/editor/panelMobile/PanelFontFormat.vue'
-import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.vue'
-import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
-import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
-import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
-import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
-import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
-import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust.vue'
 import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.vue'
-import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
+import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
+import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
+import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
+import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
+import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
+import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
+import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
+import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
+import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
+import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import Tabs from '@/components/Tabs.vue'
+import i18n from '@/i18n'
+import { defineComponent, PropType } from 'vue'
 
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'v-click-outside'
-import layerUtils from '@/utils/layerUtils'
-import imageUtils from '@/utils/imageUtils'
+import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IFrame } from '@/interfaces/layer'
-import frameUtils from '@/utils/frameUtils'
-import eventUtils from '@/utils/eventUtils'
-import generalUtils from '@/utils/generalUtils'
+import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
-import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import editorUtils from '@/utils/editorUtils'
+import eventUtils from '@/utils/eventUtils'
+import frameUtils from '@/utils/frameUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
+import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
 import _ from 'lodash'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'mobile-panel',
   props: {
     currActivePanel: {
@@ -110,8 +116,13 @@ export default Vue.extend({
     isSubPanel: {
       default: false,
       type: Boolean
+    },
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
+  emits: ['panelHeight', 'switchTab'],
   directives: {
     clickOutside: vClickOutside.directive
   },
@@ -141,27 +152,32 @@ export default Vue.extend({
     PanelPhotoShadow,
     PanelObjectAdjust,
     PanelBrandList,
+    PanelBleed,
     Tabs
   },
   data() {
     return {
       panelHistory: [] as Array<string>,
-      panelHeight: 0,
+      // If fixSize is true, panelDragHeight take no effect.
+      panelDragHeight: 0,
       lastPointerY: 0,
       showExtraColorPanel: false,
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
       currSubColorEvent: '',
       innerTabIndex: 0,
-      fitPage: _.debounce(() => {
+      fitPage: _.throttle(() => {
         this.$nextTick(() => {
           pageUtils.fitPage()
         })
-      }, 100),
+      }, 100, { trailing: false }),
       resizeObserver: null as unknown as ResizeObserver
     }
   },
   computed: {
+    ...mapGetters('imgControl', {
+      isImgCtrl: 'isImgCtrl'
+    }),
     ...mapGetters({
       isShowPagePreview: 'page/getIsShowPagePreview',
       showPagePanel: 'page/getShowPagePanel',
@@ -187,7 +203,7 @@ export default Vue.extend({
     },
     whiteTheme(): boolean {
       const whiteThemePanel = [
-        'replace', 'crop', 'bgRemove', 'position', 'flip',
+        'bleed', 'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list']
@@ -199,7 +215,7 @@ export default Vue.extend({
     },
     fixSize(): boolean {
       return this.inSelectionState || [
-        'crop', 'bgRemove', 'position', 'flip', 'opacity',
+        'bleed', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust', 'brand-list'].includes(this.currActivePanel)
     },
@@ -251,7 +267,7 @@ export default Vue.extend({
           'row-gap': this.noRowGap ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
-            ? 'initial' : this.panelHeight + 'px'
+            ? 'initial' : this.panelDragHeight + 'px'
         }
       )
     },
@@ -277,73 +293,80 @@ export default Vue.extend({
           }
       }
     },
+    dynamicBindIs(): string {
+      if (this.showExtraColorPanel) {
+        return 'panel-color'
+      }
+
+      const defaultVal = `panel-${this.currActivePanel}`
+
+      switch (this.currActivePanel) {
+        case 'download': {
+          return 'popup-download'
+        }
+        case 'replace': {
+          return `panel-${this.innerTab}`
+        }
+        case 'none':
+          return ''
+        default: {
+          return defaultVal
+        }
+      }
+    },
     dynamicBindProps(): { [index: string]: any } {
       if (this.showExtraColorPanel) {
         return {
-          is: 'panel-color',
           currEvent: this.extraColorEvent,
           panelHistory: this.panelHistory
         }
       }
 
-      const defaultVal = {
-        is: `panel-${this.currActivePanel}`
-      }
-
       switch (this.currActivePanel) {
         case 'fonts': {
-          return Object.assign(defaultVal, {
+          return {
             showTitle: false
-          })
+          }
         }
         case 'download': {
           return {
-            is: 'popup-download',
             hideContainer: true,
             pageIndex: pageUtils.currFocusPageIndex
           }
         }
         case 'text-effect': {
-          return Object.assign(defaultVal, {
+          return {
             panelHistory: this.panelHistory
-          })
+          }
         }
         case 'color': {
-          return Object.assign(defaultVal, {
+          return {
             panelHistory: this.panelHistory
-          })
+          }
         }
         case 'brand-list': {
-          const brandDefaultVal = Object.assign(defaultVal, {
+          const brandDefaultVal = {
             panelHistory: this.panelHistory
-          })
+          }
           if (editorUtils.currActivePanel === 'text') {
-            return Object.assign(brandDefaultVal, {
+            return {
               defaultOption: true
-            })
+            }
           }
           if (editorUtils.currActivePanel === 'brand') {
-            return Object.assign(brandDefaultVal, {
+            return {
               hasAddBrand: true
-            })
+            }
           }
           return brandDefaultVal
         }
         case 'brand': {
-          return Object.assign(defaultVal, {
-            maxheight: this.maxHeightPx()
-          })
+          return {
+            maxheight: this.panelParentHeight()
+          }
         }
-        case 'replace':
-          return {
-            is: `panel-${this.innerTab}`
-          }
-        case 'none':
-          return {
-            is: ''
-          }
         default: {
-          return defaultVal
+          return {}
         }
       }
     },
@@ -471,7 +494,7 @@ export default Vue.extend({
       this.innerTabIndex = 0
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
-      this.panelHeight = newVal === 'none' ? 0 : this.initHeightPx()
+      this.panelDragHeight = newVal === 'none' ? 0 : this.initPanelHeight()
     },
     showMobilePanel(newVal) {
       if (!newVal) {
@@ -480,14 +503,17 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.panelHeight = 0
+    this.panelDragHeight = 0
     this.resizeObserver = new ResizeObserver(() => {
-      this.$emit('panelHeight', (this.$refs.panel as HTMLElement).clientHeight)
-      this.fitPage()
+      this.$emit('panelHeight', this.currPanelHeight())
+      // Prevent fitPage when full size panel open, ex: SidebarPanel
+      if (this.fixSize || this.panelDragHeight !== this.panelParentHeight()) {
+        this.fitPage()
+      }
     })
     this.resizeObserver.observe(this.$refs.panel as Element)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.resizeObserver && this.resizeObserver.disconnect()
   },
   methods: {
@@ -502,7 +528,11 @@ export default Vue.extend({
     }),
     vcoConfig() {
       return {
-        handler: this.closeMobilePanel,
+        handler: (e: Event) => {
+          if (!this.isImgCtrl && !this.inMultiSelectionMode) {
+            this.closeMobilePanel()
+          }
+        },
         middleware: this.middleware,
         events: ['touchstart', 'pointerdown',
           ...window.location.host === 'localhost:8080' ? [] : ['contextmenu']]
@@ -521,10 +551,13 @@ export default Vue.extend({
       this.panelHistory = []
       editorUtils.setCurrActivePanel('none')
     },
-    initHeightPx() {
+    initPanelHeight() {
       return ((this.$el.parentElement as HTMLElement).clientHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
     },
-    maxHeightPx() {
+    currPanelHeight() {
+      return (this.$refs.panel as HTMLElement).clientHeight
+    },
+    panelParentHeight() {
       return (this.$el.parentElement as HTMLElement).clientHeight
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
@@ -533,36 +566,36 @@ export default Vue.extend({
       }
       this.isDraggingPanel = true
       this.lastPointerY = event.clientY
-      this.panelHeight = (this.$refs.panel as HTMLElement).clientHeight
+      this.panelDragHeight = this.currPanelHeight()
       eventUtils.addPointerEvent('pointermove', this.dragingPanel)
       eventUtils.addPointerEvent('pointerup', this.dragPanelEnd)
     },
     dragingPanel(event: MouseEvent | PointerEvent) {
-      this.panelHeight -= event.clientY - this.lastPointerY
+      this.panelDragHeight -= event.clientY - this.lastPointerY
       this.lastPointerY = event.clientY
     },
     dragPanelEnd() {
       this.isDraggingPanel = false
-      const maxHeightPx = this.maxHeightPx()
-      if (this.panelHeight < maxHeightPx * 0.25) {
+      const panelParentHeight = this.panelParentHeight()
+      if (this.panelDragHeight < panelParentHeight * 0.25) {
         this.closeMobilePanel()
-      } else if (this.panelHeight >= maxHeightPx * 0.75) {
-        this.panelHeight = maxHeightPx
+      } else if (this.panelDragHeight >= panelParentHeight * 0.75) {
+        this.panelDragHeight = panelParentHeight
       } else {
-        this.panelHeight = maxHeightPx * 0.5
+        this.panelDragHeight = panelParentHeight * 0.5
       }
 
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)
       eventUtils.removePointerEvent('pointerup', this.dragPanelEnd)
     },
     disableTouchEvent(e: TouchEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }
     },
     handleLockedNotify() {
-      this.$notify({ group: 'copy', text: i18n.tc('NN0804') })
+      notify({ group: 'copy', text: i18n.global.tc('NN0804') })
     },
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActiveSubPanel === panelType) {

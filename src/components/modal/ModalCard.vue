@@ -1,53 +1,54 @@
 <template lang="pug">
-  div(class="modal-card" :style="modalInfo.cardStyle")
-    div(v-if="modalInfo.title" class="modal-card__row modal-card__title text-H6 text-gray-2")
-      span {{modalInfo.title}}
-    div(v-if="modalInfo.imgSrc" class="modal-card__image")
-      div(v-if="modalInfo.imgSrc" class="modal-card__image__container")
-        img(v-show="isImgLoaded" :src="modalInfo.imgSrc" @load="handleImgLoad")
-        svg-icon(v-if="!isImgLoaded"
-          :iconName="'photo'"
-          :iconColor="'white'"
-          :iconWidth="'48px'")
-    div(v-if="modalInfo.content" class="modal-card__text body-SM text-gray-2")
-      template(v-if="!pending")
-        span(v-for="text in modalInfo.content"
-        @keydown.ctrl.67.exact.stop
-        @keydown.meta.67.exact.stop
-        v-html="text")
-        div(v-if="modalInfo.checkboxText !== ''" class="modal-card__checkbox-container")
-          div(class="modal-card__checkbox"
-              :class="{checked: modalInfo.checked}"
-              @click="handleToggleChecked")
-            svg-icon(v-if="modalInfo.checked" iconName="done" iconColor="white" iconWidth="20.7px")
-          span {{ $t('STK0010') }}
-      svg-icon(v-if="pending"
-        :iconName="'loading'"
-        :iconColor="'gray-2'"
-        :iconWidth="'60px'")
-    template(v-if='!pending')
-      div(class="modal-card__row modal-card__button")
-        button(class="btn-primary-mid full-width"
-          :class="modalInfo.confirmButton.class"
-          :style="modalInfo.confirmButton.style"
-          @click="confirmAction()") {{ modalInfo.confirmButton.msg || $t('NN0358') }}
-        button(v-if="modalInfo.cancelButton.msg"
-          class="btn-primary-mid full-width"
-          :class="modalInfo.cancelButton.class"
-          :style="modalInfo.cancelButton.style"
-          @click="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
-      div(v-if="!modalInfo.noClose && !modalInfo.noCloseIcon" class="modal-card__close")
-        svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'"
-                iconColor="gray-3" @click.native="closePopup()")
+div(class="modal-card" :style="modalInfo.cardStyle")
+  div(v-if="modalInfo.title" class="modal-card__row modal-card__title text-H6 text-gray-2")
+    span {{modalInfo.title}}
+  div(v-if="modalInfo.imgSrc" class="modal-card__image")
+    div(v-if="modalInfo.imgSrc" class="modal-card__image__container")
+      img(v-show="isImgLoaded" :src="modalInfo.imgSrc" @load="handleImgLoad")
+      svg-icon(v-if="!isImgLoaded"
+        :iconName="'photo'"
+        :iconColor="'white'"
+        :iconWidth="'48px'")
+  div(v-if="modalInfo.content" class="modal-card__text body-SM text-gray-2")
+    template(v-if="!pending")
+      span(v-for="text in modalInfo.content"
+      @keydown.ctrl.67.exact.stop
+      @keydown.meta.67.exact.stop
+      v-html="text")
+      div(v-if="modalInfo.checkboxText !== ''" class="modal-card__checkbox-container")
+        div(class="modal-card__checkbox"
+            :class="{checked: modalInfo.checked}"
+            @click="handleToggleChecked")
+          svg-icon(v-if="modalInfo.checked" iconName="done" iconColor="white" iconWidth="20.7px")
+        span {{ $t('STK0010') }}
+    svg-icon(v-if="pending"
+      :iconName="'loading'"
+      :iconColor="'gray-2'"
+      :iconWidth="'60px'")
+  template(v-if='!pending')
+    div(class="modal-card__row modal-card__button")
+      button(class="btn-primary-mid full-width"
+        :class="modalInfo.confirmButton.class"
+        :style="modalInfo.confirmButton.style"
+        @click="confirmAction()") {{ modalInfo.confirmButton.msg || $t('NN0358') }}
+      button(v-if="modalInfo.cancelButton.msg"
+        class="btn-primary-mid full-width"
+        :class="modalInfo.cancelButton.class"
+        :style="modalInfo.cancelButton.style"
+        @click="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
+    div(v-if="!modalInfo.noClose && !modalInfo.noCloseIcon" class="modal-card__close")
+      svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'"
+              iconColor="gray-3" @click="closePopup()")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import { IModalInfo } from '@/interfaces/modal'
-import { mapGetters, mapMutations } from 'vuex'
 import modalUtils from '@/utils/modalUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   name: 'ModalCard',
   data: () => {
     return {

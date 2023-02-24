@@ -1,76 +1,74 @@
 <template lang="pug">
-  div(class="color-panel"
-      :style="bgStyle"
-      v-click-outside="vcoConfig"
-      ref="colorPanel")
-    img(v-if="showPanelBtn" class="color-panel__btn"
-      :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
-      @click="closePanel()")
-    div(class="color-panel__scroll" :class="{'p-0': noPadding}")
-      //- Recently colors
+div(class="color-panel"
+    :style="bgStyle"
+    v-click-outside="vcoConfig"
+    ref="colorPanel")
+  img(v-if="showPanelBtn" class="color-panel__btn"
+    :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
+    @click="closePanel()")
+  div(class="color-panel__scroll" :class="{'p-0': noPadding}")
+    //- Recently colors
+    div(class="color-panel__colors"
+        :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+      div(class="text-left")
+        div(class="flex-center")
+          svg-icon(v-if="showAllRecentlyColor && mode!=='PanelColor'" iconName="chevron-left"
+                iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
+                class="mr-5" @click="lessRecently()")
+          span {{$t('NN0679')}}
+        span(v-if="!showAllRecentlyColor" class="btn-XS" @click="moreRecently()") {{$t('NN0082')}}
+      div
+        color-btn(color="add" :active="openColorPicker"
+                  @click="openColorPanel($event)")
+        color-btn(v-for="color in recentlyColors" :color="color" :key="color"
+                  :active="color === selectedColor"
+                  @click="handleColorEvent(color)")
+    template(v-if="!showAllRecentlyColor")
+      //- Document colors
       div(class="color-panel__colors"
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
         div(class="text-left")
-          div(class="flex-center")
-            svg-icon(v-if="showAllRecentlyColor && mode!=='PanelColor'" iconName="chevron-left"
-                  iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
-                  class="mr-5" @click.native="lessRecently()")
-            span {{$t('NN0679')}}
-          span(v-if="!showAllRecentlyColor" class="btn-XS" @click="moreRecently()") {{$t('NN0082')}}
+          span {{$t('NN0091')}}
         div
-          color-btn(color="add" :active="openColorPicker"
-                    @click="openColorPanel($event)")
-          color-btn(v-for="color in recentlyColors" :color="color" :key="color"
+          color-btn(v-for="color in documentColors" :color="color" :key="color"
                     :active="color === selectedColor"
                     @click="handleColorEvent(color)")
-      template(v-if="!showAllRecentlyColor")
-        //- Document colors
-        div(class="color-panel__colors"
-            :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-          div(class="text-left")
-            span {{$t('NN0091')}}
-          div
-            color-btn(v-for="color in documentColors" :color="color" :key="color"
-                      :active="color === selectedColor"
-                      @click="handleColorEvent(color)")
-        //- Preset Colors
-        div(class="color-panel__colors"
-            :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-          div(class="text-left")
-            span {{$t('NN0089')}}
-          div
-            color-btn(v-for="color in defaultColors" :color="color" :key="color"
-                      :active="color === selectedColor"
-                      @click="handleColorEvent(color)")
-            img(v-if="mode==='PanelBG'"
-              src="@/assets/img/svg/transparent.svg"
-              width="100%" height="100%"
-              @click="handleColorEvent('#ffffff00')")
-    color-picker(v-if="openColorPicker"
-      class="color-panel__color-picker"
-      ref="colorPicker"
-      v-click-outside="closeColorModal"
-      :currentColor="currentColor"
-      @update="handleDragUpdate"
-      @final="handleChangeStop")
+      //- Preset Colors
+      div(class="color-panel__colors"
+          :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
+        div(class="text-left")
+          span {{$t('NN0089')}}
+        div
+          color-btn(v-for="color in defaultColors" :color="color" :key="color"
+                    :active="color === selectedColor"
+                    @click="handleColorEvent(color)")
+          img(v-if="selectingBg"
+            class="full-width full-height"
+            src="@/assets/img/svg/transparent.svg"
+            @click="handleColorEvent('#ffffff00')")
+  color-picker(v-if="openColorPicker"
+    class="color-panel__color-picker"
+    ref="colorPicker"
+    v-click-outside="closeColorModal"
+    :currentColor="currentColor"
+    @update="handleDragUpdate"
+    @final="handleChangeStop")
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-import vClickOutside from 'v-click-outside'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
+import { IPage } from '@/interfaces/page'
+import { ColorEventType, LayerType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
 import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
-import { LayerType } from '@/store/types'
-import generalUtils from '@/utils/generalUtils'
-import pageUtils from '@/utils/pageUtils'
-import editorUtils from '@/utils/editorUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent, PropType } from 'vue'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'ColorSlips',
   props: {
     // Defind some style or logic difference.
@@ -88,6 +86,10 @@ export default Vue.extend({
     selectedColor: {
       type: String,
       default: ''
+    },
+    currPage: {
+      type: Object as PropType<IPage>,
+      required: true
     }
   },
   components: {
@@ -97,6 +99,7 @@ export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  emits: ['selectColor', 'selectColorEnd', 'toggleColorPanel', 'openColorPicker', 'openColorMore'],
   data() {
     return {
       vcoConfig: {
@@ -119,7 +122,7 @@ export default Vue.extend({
     this.setIsColorPanelOpened(true)
     this.initRecentlyColors()
   },
-  destroyed() {
+  unmounted() {
     this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
     this.setIsColorPanelOpened(false)
   },
@@ -160,7 +163,7 @@ export default Vue.extend({
     },
     currentColor(): string {
       return this.mode === 'PanelBG'
-        ? this.getBackgroundColor(pageUtils.currFocusPageIndex)
+        ? this.currPage.backgroundColor
         : colorUtils.currColor
     },
     showAllRecentlyColor(): boolean {
@@ -171,12 +174,12 @@ export default Vue.extend({
         ? this._recentlyColors
         : this._recentlyColors.slice(0, 20)
     },
-    defaultColors(): unknown {
-      return this.mode === 'PanelBG' ? this.defaultBgColor : this._defaultColors
+    selectingBg(): boolean {
+      return this.mode === 'PanelBG' || colorUtils.currEvent === ColorEventType.background
     },
-    isTouchDevice(): boolean {
-      return generalUtils.isTouchDevice()
-    }
+    defaultColors(): unknown {
+      return this.selectingBg ? this.defaultBgColor : this._defaultColors
+    },
   },
   methods: {
     ...mapMutations({
@@ -243,14 +246,14 @@ export default Vue.extend({
       editorUtils.toggleColorSlips(false)
     },
     openColorPanel(event: MouseEvent) {
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice()) {
         this.$emit('openColorPicker')
         return
       }
       this.openColorPicker = true
-      Vue.nextTick(() => {
+      this.$nextTick(() => {
         const colorPanel = this.$refs.colorPanel as HTMLElement
-        const colorPicker = (this.$refs.colorPicker as Vue).$el as HTMLElement
+        const colorPicker = (this.$refs.colorPicker as any).$el as HTMLElement
         const [width, height] = [colorPicker.offsetWidth, colorPicker.offsetHeight]
         const [vw, vh] = [window.outerWidth || document.documentElement.clientWidth, window.outerHeight || document.documentElement.clientHeight]
         const mousePos = mouseUtils.getMouseAbsPoint(event)

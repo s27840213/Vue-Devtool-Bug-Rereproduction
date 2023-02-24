@@ -1,17 +1,17 @@
-import store from '@/store'
-import i18n from '@/i18n'
 import axios from '@/apis'
+import i18n from '@/i18n'
 import { ICategoryContentApiParams, IGifResponse, ITagContentApiParams } from '@/interfaces/giphy'
+import store from '@/store'
 
 class Giphy {
-  getCategories (pageIndex: number) {
+  getCategories(pageIndex: number) {
     return axios.request<IGifResponse>({
       url: '/list-lib-gif',
       method: 'GET',
       params: {
         action: 0,
         page_index: pageIndex,
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         app: 1,
         cache: true,
         ver: store.getters['user/getVerApi']
@@ -19,7 +19,7 @@ class Giphy {
     })
   }
 
-  getCategoryContent (nextSearch: ICategoryContentApiParams) {
+  getCategoryContent(nextSearch: ICategoryContentApiParams) {
     return axios.request<IGifResponse>({
       url: '/list-lib-gif',
       method: 'GET',
@@ -28,7 +28,7 @@ class Giphy {
         category_ids: nextSearch.categoryId,
         keywords: nextSearch.keyword,
         page_index: nextSearch.nextPage,
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         app: 1,
         cache: true,
         ver: store.getters['user/getVerApi']
@@ -36,7 +36,7 @@ class Giphy {
     })
   }
 
-  getTagContent (nextSearch: ITagContentApiParams) {
+  getTagContent(nextSearch: ITagContentApiParams) {
     return axios.request<IGifResponse>({
       url: '/list-lib-gif',
       method: 'GET',
@@ -44,7 +44,7 @@ class Giphy {
         action: 3,
         keywords: `${nextSearch.keyword}:${nextSearch.type}`,
         page_index: nextSearch.nextPage,
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         app: 1,
         cache: true,
         ver: store.getters['user/getVerApi']
@@ -52,7 +52,7 @@ class Giphy {
     })
   }
 
-  getFavoritesCategories (category_ids: string, nextPage: number) {
+  getFavoritesCategories(category_ids: string, nextPage: number) {
     return axios.request<IGifResponse>({
       url: '/list-lib-gif',
       method: 'GET',
@@ -60,7 +60,7 @@ class Giphy {
         action: 0,
         category_ids: category_ids,
         page_index: nextPage,
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         app: 1,
         cache: true,
         ver: store.getters['user/getVerApi']
@@ -68,7 +68,7 @@ class Giphy {
     })
   }
 
-  getFavoritesTags (keywords: string, nextPage: number) {
+  getFavoritesTags(keywords: string, nextPage: number) {
     return axios.request<IGifResponse>({
       url: '/list-lib-gif',
       method: 'GET',
@@ -76,7 +76,7 @@ class Giphy {
         action: 2,
         keywords: keywords,
         page_index: nextPage,
-        locale: i18n.locale,
+        locale: i18n.global.locale,
         app: 1,
         cache: true,
         ver: store.getters['user/getVerApi']

@@ -1,55 +1,57 @@
 <template lang="pug">
-  div(class="panel-background-remove")
-    div(class="panel-background-remove__grid mb-5")
-      btn( class="full-width"
-        :type="clearMode ? 'gray-active-mid' :'gray-mid'"
-        ref="btn"
-        :hasIcon="true"
-        :iconName="'clear'"
-        :iconMargin="8"
-        @click.native="setClearMode(true)") {{ $t('NN0385') }}
-      btn(class="full-width"
-        :type="clearMode ? 'gray-mid' :'gray-active-mid'"
-        ref="btn"
-        :hasIcon="true"
-        :iconName="'preserve'"
-        :iconMargin="8"
-        @click.native="setClearMode(false)") {{ $t('NN0386') }}
-      div(class="panel-background-remove__slider full")
-        div(class="text-left")
-          span(class="label-mid") {{ $t('NN0387') }}
-        div(class="flex")
-          input(class="input__slider--range"
-            v-model.number="brushSize"
-            :max="maxBrushSize"
-            :min="minBrushSize"
-            type="range")
-          input(class="input__slider--text body-2 text-gray-2"
-            type="number"
-            v-model.number="brushSize")
-      div(class="full flex items-center")
-        svg-icon(class="mr-5"
-          :iconColor="showInitImage ? 'blue-1' : 'light-gray'"
-          :iconName="showInitImage ? 'checkbox-checked' : 'checkbox'"
-          :iconWidth="'16px'"
-          @click.native="toggleShowInitImage(showInitImage)")
-        span(class="label-mid") {{$t('NN0388')}}
-      btn(class="btn-recover full-width"
-        type="gray-mid"
-        ref="btn"
-        @click.native="restoreInitState()") {{$t('NN0389')}}
-      btn( class="full-width"
-        type="gray-mid"
-        ref="btn"
-        @click.native="cancel()") {{ $t('NN0203') }}
-      btn( class="full-width"
-        type="primary-mid"
-        ref="btn"
-        @click.native="save()") {{ $tc('NN0133',1) }}
+div(class="panel-background-remove")
+  div(class="panel-background-remove__grid mb-5")
+    btn( class="full-width"
+      :type="clearMode ? 'gray-active-mid' :'gray-mid'"
+      ref="btn"
+      :hasIcon="true"
+      :iconName="'clear'"
+      :iconMargin="8"
+      @click="setClearMode(true)") {{ $t('NN0385') }}
+    btn(class="full-width"
+      :type="clearMode ? 'gray-mid' :'gray-active-mid'"
+      ref="btn"
+      :hasIcon="true"
+      :iconName="'preserve'"
+      :iconMargin="8"
+      @click="setClearMode(false)") {{ $t('NN0386') }}
+    div(class="panel-background-remove__slider full")
+      div(class="text-left")
+        span(class="label-mid") {{ $t('NN0387') }}
+      div(class="flex")
+        input(class="input__slider--range"
+          v-model.number="brushSize"
+          :max="maxBrushSize"
+          :min="minBrushSize"
+          type="range")
+        input(class="input__slider--text body-2 text-gray-2"
+          type="number"
+          v-model.number="brushSize")
+    div(class="full flex items-center")
+      svg-icon(class="mr-5"
+        :iconColor="showInitImage ? 'blue-1' : 'light-gray'"
+        :iconName="showInitImage ? 'checkbox-checked' : 'checkbox'"
+        :iconWidth="'16px'"
+        @click="toggleShowInitImage(showInitImage)")
+      span(class="label-mid") {{$t('NN0388')}}
+    btn(class="btn-recover full-width"
+      type="gray-mid"
+      ref="btn"
+      @click="restoreInitState()") {{$t('NN0389')}}
+    btn( class="full-width"
+      type="gray-mid"
+      ref="btn"
+      @click="cancel()") {{ $t('NN0203') }}
+    btn( class="full-width"
+      type="primary-mid"
+      ref="btn"
+      @click="save()") {{ $tc('NN0133',1) }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import i18n from '@/i18n'
+import { defineComponent } from 'vue'
+import { notify } from '@kyvg/vue3-notification'
 import { mapGetters, mapMutations } from 'vuex'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import store from '@/store'
@@ -65,9 +67,9 @@ import { IImage } from '@/interfaces/layer'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
-import i18n from '@/i18n'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
       minBrushSize: 1,
@@ -141,7 +143,7 @@ export default Vue.extend({
               layerInfo
             }
             imageShadowPanelUtils.handleShadowUpload(layerData, true)
-            Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
           }
         }
         this.uploadMyfileImg(Object.assign({ assetId: this.autoRemoveResult.id }, this.autoRemoveResult))
@@ -199,7 +201,7 @@ export default Vue.extend({
                   layerInfo
                 }
                 imageShadowPanelUtils.handleShadowUpload(layerData, true)
-                Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+                notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
               }
             }
             stepsUtils.record()

@@ -1,36 +1,37 @@
 <template lang="pug">
-  div(class="header-bar relative" @pointerdown.stop)
-    div(class="header-bar__left" :class="{ editor: isInEditor }")
-      div(v-for="tab in leftTabs"
-          :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled, 'panel-icon': tab.isPanelIcon}"
-          :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
-          @click.prevent.stop="handleTabAction(tab.action)")
-        svg-icon(:iconName="tab.icon"
-                  :iconWidth="`${tab.width}px`"
-                  :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
-                  :iconColor="tab.disabled ? 'gray-2' : 'white'")
-    div(class="header-bar__center")
-      span(v-if="centerTitle") {{ centerTitle }}
-    div(class="header-bar__right")
-      div(v-for="tab in rightTabs"
-          :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled, 'panel-icon': tab.isPanelIcon}"
-          :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
-          @click.prevent.stop="handleTabAction(tab.action)")
-        svg-icon(:iconName="tab.icon"
-                  :iconWidth="`${tab.width}px`"
-                  :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
-                  :iconColor="tab.disabled ? 'gray-2' : 'white'")
-      div(v-if="isInMyDesign && !isInEditor" class="header-bar__right-text" @click.stop.prevent="handleSelectDesign") {{ isInSelectionMode ? $t('NN0203') : $t('STK0007') }}
+div(class="header-bar relative" @pointerdown.stop)
+  div(class="header-bar__left" :class="{ editor: isInEditor }")
+    div(v-for="tab in leftTabs"
+        :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled, 'panel-icon': tab.isPanelIcon}"
+        :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
+        @click.prevent.stop="handleTabAction(tab.action)")
+      svg-icon(:iconName="tab.icon"
+                :iconWidth="`${tab.width}px`"
+                :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
+                :iconColor="tab.disabled ? 'gray-2' : 'white'")
+  div(class="header-bar__center")
+    span(v-if="centerTitle") {{ centerTitle }}
+  div(class="header-bar__right")
+    div(v-for="tab in rightTabs"
+        :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled, 'panel-icon': tab.isPanelIcon}"
+        :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
+        @click.prevent.stop="handleTabAction(tab.action)")
+      svg-icon(:iconName="tab.icon"
+                :iconWidth="`${tab.width}px`"
+                :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
+                :iconColor="tab.disabled ? 'gray-2' : 'white'")
+    div(v-if="isInMyDesign && !isInEditor" class="header-bar__right-text" @click.stop.prevent="handleSelectDesign") {{ isInSelectionMode ? $t('NN0203') : $t('STK0007') }}
 </template>
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
+import eventUtils from '@/utils/eventUtils'
 import imageUtils from '@/utils/imageUtils'
 import modalUtils from '@/utils/modalUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import Vue from 'vue'
 import _ from 'lodash'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 type TabConfig = {
@@ -44,20 +45,19 @@ type TabConfig = {
   isPanelIcon?: boolean
 }
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
-      stepCount: stepsUtils.steps.length,
-      stepsUtils
+      stepCount: stepsUtils.steps.length
     }
   },
-  watch: {
-    'stepsUtils.steps': {
-      handler(newVal) {
-        this.stepCount = newVal.length
-      },
-      deep: true
-    }
+  mounted() {
+    eventUtils.on('stepsUpdate', (stepCount: number) => {
+      this.stepCount = stepCount
+    })
+  },
+  unmounted() {
+    eventUtils.off('stepsUpdate')
   },
   computed: {
     ...mapGetters('objects', {

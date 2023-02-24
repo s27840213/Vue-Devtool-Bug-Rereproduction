@@ -1,33 +1,36 @@
 <template lang="pug">
-  div(class="panel-objects")
-    tabs(v-if="!isInCategory"
-        class="panel-objects__tabs"
-        :tabs="[$t('NN0758'), 'GIFs', $t('NN0759')]"
-        v-model="tabIndex")
-    //- Favorites tabs
-    div(v-if="isFavorites && !isInCategory" class="panel-objects__favorites-tabs")
-      tabs(:tabs="[$t('NN0758'), 'GIFs']" theme="dark-rect"
-          v-model="favoritesTabIndex")
-      svg-icon(iconName="info-reverse" iconWidth="24px" iconColor="white"
-              @click.native="doubleTapTips")
-    keep-alive
-      panel-object-static(v-if="isStatic || isFavoritesStatic"
-        :showFav="isFavoritesStatic" ref="static")
-      panel-object-gifs(v-if="isGifs || isFavoritesGifs"
-        :showFav="isFavoritesGifs" ref="gif")
+div(class="panel-objects")
+  tabs(v-if="!isInCategory"
+      class="panel-objects__tabs"
+      :tabs="[$t('NN0758'), 'GIFs', $t('NN0759')]"
+      v-model="tabIndex")
+  //- Favorites tabs
+  div(v-if="isFavorites && !isInCategory" class="panel-objects__favorites-tabs")
+    tabs(:tabs="[$t('NN0758'), 'GIFs']" theme="dark-rect"
+        v-model="favoritesTabIndex")
+    svg-icon(iconName="info-reverse" iconWidth="24px" iconColor="white"
+            @click="doubleTapTips")
+  keep-alive
+    panel-object-static(v-if="isStatic || isFavoritesStatic"
+      :showFav="isFavoritesStatic" :itemHeight="itemHeight" ref="static")
+  keep-alive
+    panel-object-gifs(v-if="isGifs || isFavoritesGifs"
+      :showFav="isFavoritesGifs" :itemHeight="itemHeight" ref="gif")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import i18n from '@/i18n'
-import { mapGetters } from 'vuex'
 import Tabs from '@/components/Tabs.vue'
-import PanelObjectStatic from '@/components/vivisticker/PanelObjectStatic.vue'
 import PanelObjectGifs from '@/components/vivisticker/PanelObjectGifs.vue'
-import modalUtils from '@/utils/modalUtils'
+import PanelObjectStatic from '@/components/vivisticker/PanelObjectStatic.vue'
+import i18n from '@/i18n'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import modalUtils from '@/utils/modalUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
+import { CCategoryList } from '../category/CategoryList.vue'
 
-export default Vue.extend({
+export default defineComponent({
+  name: 'panel-object',
   components: {
     Tabs,
     PanelObjectStatic,
@@ -42,12 +45,15 @@ export default Vue.extend({
   mounted() {
     eventUtils.on(PanelEvent.scrollPanelObjectToTop, this.scrollToTop)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     eventUtils.off(PanelEvent.scrollPanelObjectToTop)
   },
   computed: {
     ...mapGetters({
       isTabInCategory: 'vivisticker/getIsInCategory'
+    }),
+    ...mapState({
+      isTablet: 'isTablet'
     }),
     isInCategory(): boolean {
       return this.isTabInCategory('object')
@@ -56,23 +62,26 @@ export default Vue.extend({
     isGifs(): boolean { return this.tabIndex === 1 },
     isFavorites(): boolean { return this.tabIndex === 2 },
     isFavoritesStatic(): boolean { return this.tabIndex === 2 && this.favoritesTabIndex === 0 },
-    isFavoritesGifs(): boolean { return this.tabIndex === 2 && this.favoritesTabIndex === 1 }
+    isFavoritesGifs(): boolean { return this.tabIndex === 2 && this.favoritesTabIndex === 1 },
+    itemHeight(): number {
+      return this.isTablet ? 120 : 80
+    }
   },
   methods: {
     scrollToTop() {
       if (this.isStatic || this.isFavoritesStatic) {
         // @ts-expect-error: Call vue child component method
-        (this.$refs.static as Vue[]).scrollToTop()
+        (this.$refs.static as CCategoryList[]).scrollToTop()
       } else {
         // @ts-expect-error: Call vue child component method
-        (this.$refs.gif as Vue).scrollToTop()
+        (this.$refs.gif as CCategoryList).scrollToTop()
       }
     },
     doubleTapTips() {
       modalUtils.setModalInfo(
-        i18n.tc('NN0763'),
-        i18n.tc('NN0764'),
-        { msg: i18n.tc('NN0563') }
+        i18n.global.tc('NN0763'),
+        i18n.global.tc('NN0764'),
+        { msg: i18n.global.tc('NN0563') }
       )
     }
   }

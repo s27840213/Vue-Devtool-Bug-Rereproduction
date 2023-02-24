@@ -1,16 +1,14 @@
-import store from '@/store'
-import { ITextFormat, IImageFormat, IFormat } from '@/interfaces/format'
+import { IFormat, IImageFormat, ITextFormat } from '@/interfaces/format'
 import { IGroup, IImage, ILayer, IParagraph, IText } from '@/interfaces/layer'
-import generalUtils from './generalUtils'
-import tiptapUtils from './tiptapUtils'
-import layerUtils from './layerUtils'
-import textUtils from './textUtils'
-import controlUtils from './controlUtils'
-import stepsUtils from './stepsUtils'
-import imageAdjustUtil from './imageAdjustUtil'
+import store from '@/store'
 import frameUtils from './frameUtils'
+import generalUtils from './generalUtils'
+import imageAdjustUtil from './imageAdjustUtil'
+import layerUtils from './layerUtils'
+import stepsUtils from './stepsUtils'
 import textShapeUtils from './textShapeUtils'
-import mathUtils from './mathUtils'
+import textUtils from './textUtils'
+import tiptapUtils from './tiptapUtils'
 
 class FormatUtils {
   copiedFormat: IFormat | undefined
@@ -85,6 +83,7 @@ class FormatUtils {
   }
 
   applyFormatIfCopied(pageIndex: number, layerIndex: number, subLayerIndex = -1) {
+    console.log('applyFormatIfCopied')
     if (!this.copiedFormat) return
     const type = this.copiedFormat.type
     const layer = store.getters.getLayer(pageIndex, layerIndex)

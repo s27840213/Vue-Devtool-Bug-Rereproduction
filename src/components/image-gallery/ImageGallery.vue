@@ -1,33 +1,36 @@
 <template lang="pug">
-  div(class="image-gallery")
-    recycle-scroller(class="image-gallery__content" id="recycle"
-      :items="rows")
-      template(v-slot="{ item }")
-        observer-sentinel(v-if="item.sentinel"
-          @callback="handleLoadMore(item)")
-        div(class="flex flex-between")
-          gallery-photo(v-for="photo in item.list"
-            :style="imageStyle(photo.preview)"
-            :photo="photo"
-            :vendor="vendor"
-            :inFilePanel="inFilePanel"
-            :key="photo.id")
-      template(#after)
-        slot(name="pending")
+recycle-scroller(class="image-gallery" id="recycle"
+  :items="rows")
+  template(v-slot="{ item }")
+    observer-sentinel(v-if="item.sentinel"
+      @callback="handleLoadMore(item)")
+    div(class="flex flex-between")
+      gallery-photo(v-for="photo in item.list"
+        :style="imageStyle(photo.preview)"
+        :photo="photo"
+        :vendor="vendor"
+        :inFilePanel="inFilePanel"
+        :multiSelectMode="multiSelectMode"
+        :key="photo.id")
+  template(#after)
+    slot(name="pending")
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-import GalleryUtils from '@/utils/galleryUtils'
+import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IPhotoItem } from '@/interfaces/api'
-import generalUtils from '@/utils/generalUtils'
-import { mapState } from 'vuex'
 import { GalleryImage } from '@/interfaces/gallery'
+import GalleryUtils from '@/utils/galleryUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapState } from 'vuex'
 
-export default Vue.extend({
+const component = defineComponent({
   props: {
-    vendor: String,
+    vendor: {
+      type: String as PropType<'unsplash' | 'myfile'>,
+      required: true
+    },
     images: {
       type: Array as PropType<GalleryImage[]>,
       default: () => []
@@ -39,16 +42,17 @@ export default Vue.extend({
     inFilePanel: {
       type: Boolean,
       default: false
+    },
+    multiSelectMode: {
+      type: String as PropType<'hover' | 'on' | 'off'>,
+      default: 'off'
     }
   },
   components: {
     ObserverSentinel,
-    /**
-     * I'm not sure why I need to async import this component to prevent from the following errors:
-     *  did you register the component correctly? For recursive components, make sure to provide the "name" option
-     */
-    GalleryPhoto: () => import('@/components/GalleryPhoto.vue')
+    GalleryPhoto
   },
+  emits: ['loadMore'],
   computed: {
     ...mapState('file', ['regenerateGalleryFlag']),
     margin(): number {
@@ -59,7 +63,7 @@ export default Vue.extend({
     return {
       nextIndex: 0,
       rows: [] as any[],
-      galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.outerWidth - 34 : 300, 95, 5)
+      galleryUtils: new GalleryUtils(this.$isTouchDevice() ? window.innerWidth - 34 : 300, 95, 5)
     }
   },
   watch: {
@@ -115,18 +119,17 @@ export default Vue.extend({
     }
   }
 })
+export default component
+export type CImageGallery = typeof component
 </script>
 
 <style lang="scss" scoped>
 .image-gallery {
-  overflow-x: visible;
-  &__content {
-    @include push-scrollbar10;
-    @include hover-scrollbar(dark);
-    height: 100%;
-    line-height: 0;
-    text-align: left;
-    box-sizing: border-box;
-  }
+  @include push-scrollbar10;
+  @include hover-scrollbar(dark);
+  height: 100%;
+  line-height: 0;
+  text-align: left;
+  box-sizing: border-box;
 }
 </style>

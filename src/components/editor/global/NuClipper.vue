@@ -1,29 +1,45 @@
 <template lang="pug">
-  div(class="nu-clipper layer-flip" ref="body"
-    :style="styles"
-    :id="config.type === 'frame' ? `nu-clipper-${layerIndex}` : ''")
-    slot
+div(class="nu-clipper layer-flip" ref="body"
+  :style="styles"
+  :id="config.type === 'frame' ? `nu-clipper-${layerIndex}` : ''")
+  slot
 </template>
 
 <script lang="ts">
-import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IFrame, IGroup } from '@/interfaces/layer'
+import { IFrame, IGroup, ITmp } from '@/interfaces/layer'
 import { LayerType } from '@/store/types'
 import cssConverter from '@/utils/cssConverter'
 import frameUtils from '@/utils/frameUtils'
-import layerUtils from '@/utils/layerUtils'
-import Vue from 'vue'
-import Svgpath from 'svgpath'
 import pageUtils from '@/utils/pageUtils'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   props: {
-    config: Object,
-    pageIndex: Number,
-    layerIndex: Number,
-    subLayerIndex: Number,
-    imgControl: Boolean,
+    config: {
+      type: Object,
+      required: true
+    },
+    pageIndex: {
+      type: Number,
+      required: true
+    },
+    layerIndex: {
+      type: Number,
+      required: true
+    },
+    subLayerIndex: {
+      type: Number
+    },
+    primaryLayer: {
+      type: Object as PropType<IGroup | IFrame | ITmp>,
+      default: undefined
+    },
+    imgControl: {
+      type: Boolean,
+      required: true
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -40,13 +56,6 @@ export default Vue.extend({
       isShowPagePanel: 'page/getShowPagePanel',
       isHandleShadow: 'shadow/isHandling'
     }),
-    primaryLayer(): IGroup | IFrame | undefined {
-      if (this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined') {
-        return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame
-      } else {
-        return undefined
-      }
-    },
     shapeWidth(): number {
       return (this.config.vSize?.[0] ?? 0) + (this.config.pDiff?.[0])
     },
@@ -73,7 +82,7 @@ export default Vue.extend({
           height = `${this.shapeHeight}px`
           break
         case 'frame':
-          if (frameUtils.isImageFrame(this.config)) {
+          if (frameUtils.isImageFrame(this.config as IFrame)) {
             width = `${width * this.contentScaleRatio}px`
             height = `${height * this.contentScaleRatio}px`
           } else {

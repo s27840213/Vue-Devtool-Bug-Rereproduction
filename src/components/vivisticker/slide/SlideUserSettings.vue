@@ -1,27 +1,27 @@
 <template lang="pug">
-  div(class="slide-user-settings")
-    div(class="slide-user-settings__header")
-      div(class="slide-user-settings__header__icon"
-          @click.prevent.stop="handleClose")
-        svg-icon(iconName="chevron-left"
-                  iconWidth="24px"
-                  iconColor="white")
-      div(class="slide-user-settings__header__title") {{ $t('NN0649') }}
-    div(class="slide-user-settings__list")
-      div(v-for="key in userSettingKeys" class="slide-user-settings__setting")
-        div(class="slide-user-settings__setting__description") {{ getDescription(key) }}
-        div(class="slide-user-settings__setting__checkbox"
-            :class="{checked: getChecked(key)}"
-            @click.prevent.stop="handleToggle(key)")
-          div(class="slide-user-settings__setting__checkbox-circle")
+div(class="slide-user-settings")
+  div(class="slide-user-settings__header")
+    div(class="slide-user-settings__header__icon"
+        @click.prevent.stop="handleClose")
+      svg-icon(iconName="chevron-left"
+                iconWidth="24px"
+                iconColor="white")
+    div(class="slide-user-settings__header__title") {{ $t('NN0649') }}
+  div(class="slide-user-settings__list")
+    div(v-for="key in userSettingKeys" class="slide-user-settings__setting")
+      div(class="slide-user-settings__setting__description") {{ getDescription(key) }}
+      div(class="slide-user-settings__setting__checkbox"
+          :class="{checked: getChecked(key)}"
+          @click.prevent.stop="handleToggle(key)")
+        div(class="slide-user-settings__setting__checkbox-circle")
 </template>
 
 <script lang="ts">
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   computed: {
     ...mapGetters({
       userSettings: 'vivisticker/getUserSettings'

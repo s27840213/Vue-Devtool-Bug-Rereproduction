@@ -1,15 +1,15 @@
 <template lang="pug">
-  div(class="popup-submit bg-white")
-    span(class="mr-10") ID
-    input(ref="input"
-      type="text"
-      v-model="id")
-    btn(:type="'primary-sm'" class="rounded my-5"
-      @click.native="upload()") 上傳
+div(class="popup-submit bg-white")
+  span(class="mr-10") ID
+  input(ref="input"
+    type="text"
+    v-model="id")
+  btn(:type="'primary-sm'" class="rounded my-5"
+    @click="upload()") 上傳
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
@@ -17,7 +17,8 @@ import layerUtils from '@/utils/layerUtils'
 import modalUtils from '@/utils/modalUtils'
 import popupUtils from '@/utils/popupUtils'
 
-export default Vue.extend({
+export default defineComponent({
+  emits: [],
   data() {
     return {
       MappingUtils,

@@ -1,35 +1,36 @@
 <template lang="pug">
-  div(class="panel-my-design-more")
-    div(class="panel-my-design-more__options")
-      div(class="panel-my-design-more__option"
-          @click.prevent.stop="handleEdit")
-        div(class="panel-my-design-more__option-icon")
-          svg-icon(iconName="pen"
-                    iconWidth="18px"
-                    iconColor="gray-2")
-        div(class="panel-my-design-more__option-title") {{ $t('NN0504') }}
-      div(class="panel-my-design-more__option"
-          @click.prevent.stop="handleDelete")
-        div(class="panel-my-design-more__option-icon")
-          svg-icon(iconName="trash"
-                    iconWidth="18px"
-                    iconColor="gray-2")
-        div(class="panel-my-design-more__option-title") {{ $t('NN0034') }}
+div(class="panel-my-design-more")
+  div(class="panel-my-design-more__options")
+    div(class="panel-my-design-more__option"
+        @click.prevent.stop="handleEdit")
+      div(class="panel-my-design-more__option-icon")
+        svg-icon(iconName="pen"
+                  iconWidth="18px"
+                  iconColor="gray-2")
+      div(class="panel-my-design-more__option-title") {{ $t('NN0504') }}
+    div(class="panel-my-design-more__option"
+        @click.prevent.stop="handleDelete")
+      div(class="panel-my-design-more__option-icon")
+        svg-icon(iconName="trash"
+                  iconWidth="18px"
+                  iconColor="gray-2")
+      div(class="panel-my-design-more__option-title") {{ $t('NN0034') }}
 </template>
 
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
     }
   },
-  destroyed() {
+  unmounted() {
     this.setMyDesignBuffer(undefined)
   },
   props: {
@@ -44,8 +45,11 @@ export default Vue.extend({
       setMyDesignBuffer: 'vivisticker/SET_myDesignBuffer'
     }),
     handleEdit() {
-      vivistickerUtils.initWithMyDesign(this.myDesignBuffer)
+      const mydesign = generalUtils.deepCopy(this.myDesignBuffer)
       editorUtils.setCloseMobilePanelFlag(true)
+      setTimeout(() => {
+        vivistickerUtils.initWithMyDesign(mydesign)
+      }, 300)
     },
     handleDelete() {
       modalUtils.setModalInfo(

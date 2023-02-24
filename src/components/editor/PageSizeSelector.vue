@@ -1,127 +1,127 @@
 <template lang="pug">
-  div(class="page-size-selector" :class="{isTouchDevice}")
-    div(class="page-size-selector__body-row first-row")
-      span(class="page-size-selector__body__title subtitle-2"
-        :class="defaultTextColor") {{$t('NN0023')}}
-    div(class="page-size-selector__body__custom")
+div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
+  div(class="page-size-selector__body-row first-row")
+    span(class="page-size-selector__body__title subtitle-2"
+      :class="defaultTextColor") {{$t('NN0023')}}
+  div(class="page-size-selector__body__custom")
+      radio-btn(class="page-size-selector__body__radio"
+                :isSelected="selectedFormat === 'custom'",
+                :circleColor="isDarkTheme ? 'white' : 'gray-2'"
+                formatKey="custom",
+                @select="selectFormat")
+      property-bar(class="page-size-selector__body__custom__box"
+                  :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
+        input(class="body-XS" type="number" min="0"
+              :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
+              :value="valPageSize.width"
+              @input="setPageWidth"
+              @click="selectFormat('custom')"
+              @focus="lastFocusedInput = 'width'"
+              @blur="handleInputBlur('width')")
+        span(class="body-XS"
+            :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") W
+      svg-icon(class="pointer"
+          :iconName="isLocked ? 'lock' : 'unlock'"
+          iconWidth="15px" :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'blue'"
+          @click="toggleLock()")
+      property-bar(class="page-size-selector__body__custom__box"
+                  :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
+        input(class="body-XS" type="number" min="0"
+              :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
+              :value="valPageSize.height"
+              @input="setPageHeight"
+              @click="selectFormat('custom')"
+              @focus="lastFocusedInput = 'height'"
+              @blur="() => handleInputBlur('height')")
+        span(class="body-XS"
+            :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") H
+      property-bar(v-click-outside="() => {showUnitOptions = false}"
+                  class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
+                  :class="selectedFormat === 'custom' || showUnitOptions ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`"
+          @click="showUnitOptions = !showUnitOptions")
+        span(class="page-size-selector__body__custom__unit__label body-XXS" :class="selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{selectedUnit}}
+        svg-icon(class="page-size-selector__body__custom__unit__icon"
+          iconName="chevron-down"
+          iconWidth="16px"
+          :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'gray-2'")
+        div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option bg-white")
+          div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-gray-2" :style="unitOptionStyles" @click="selectUnit($event, unit)")
+            span(class="body-XS text-gray-1") {{unit}}
+      div(v-if="selectedFormat === 'custom' && isValidate && !isCustomValid"
+        class="page-size-selector__body__custom__err body-XS text-red text-left") {{errMsg}}
+        span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{$t('NN0787')}}
+  div(class="page-size-selector__body__hr first bg-gray-4")
+  div(class="page-size-selector__container")
+      div(class="page-size-selector__body-row first-row")
+        span(class="page-size-selector__body__title subtitle-2"
+          :class="defaultTextColor") {{$t('NN0024')}}
+      div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
+        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
+      div(v-for="(format, index) in recentlyUsed" class="page-size-selector__body-row pointer"
+          @click="selectFormat(`recent-${index}`)")
         radio-btn(class="page-size-selector__body__radio"
-                  :isSelected="selectedFormat === 'custom'",
+                  :isSelected="selectedFormat === `recent-${index}`",
                   :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                  formatKey="custom",
+                  :formatKey="`recent-${index}`",
                   @select="selectFormat")
-        property-bar(class="page-size-selector__body__custom__box"
-                    :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? widthValid ? '' : ' input-invalid' : '')")
-          input(class="body-XS" type="number" min="0"
-                :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
-                :value="this.valPageSize.width"
-                @input="setPageWidth"
-                @click="selectFormat('custom')"
-                @focus="lastFocusedInput = 'width'"
-                @blur="handleInputBlur('width')")
-          span(class="body-XS"
-              :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") W
-        svg-icon(class="pointer"
-            :iconName="isLocked ? 'lock' : 'unlock'"
-            iconWidth="15px" :iconColor="selectedFormat === 'custom' ? 'blue-1' : isDarkTheme ? 'white' : 'blue'"
-            @click.native="toggleLock()")
-        property-bar(class="page-size-selector__body__custom__box"
-                    :class="(selectedFormat === 'custom' ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`) + (selectedFormat === 'custom' && isValidate ? heightValid ? '' : ' input-invalid' : '')")
-          input(class="body-XS" type="number" min="0"
-                :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor"
-                :value="this.valPageSize.height"
-                @input="setPageHeight"
-                @click="selectFormat('custom')"
-                @focus="lastFocusedInput = 'height'"
-                @blur="() => handleInputBlur('height')")
-          span(class="body-XS"
-              :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") H
-        property-bar(v-click-outside="() => {showUnitOptions = false}"
-                    class="page-size-selector__body__custom__box page-size-selector__body__custom__unit pointer"
-                    :class="selectedFormat === 'custom' || showUnitOptions ? 'border-blue-1' : `border-${isDarkTheme ? 'white' : 'gray-2'}`"
-            @click.native="showUnitOptions = !showUnitOptions")
-          span(class="page-size-selector__body__custom__unit__label body-XXS" :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") {{selectedUnit}}
-          svg-icon(class="page-size-selector__body__custom__unit__icon"
-            iconName="chevron-down"
-            iconWidth="16px"
-            :iconColor="selectedFormat === 'custom' ? 'blue-1' : this.isDarkTheme ? 'white' : 'gray-2'")
-          div(v-if="showUnitOptions" class="page-size-selector__body__custom__unit__option" :class="`bg-${this.isDarkTheme ? 'white' : 'gray-1-5'}`")
-            div(v-for="(unit, index) in unitOptions" class="page-size-selector__body__custom__unit__option__item text-gray-2" @click="selectUnit($event, unit)")
-              span(class="body-XS"
-                  :class="`text-${isDarkTheme ? 'gray-1' : 'white'}`") {{unit}}
-        div(v-if="selectedFormat === 'custom' && isValidate && !isCustomValid"
-          class="page-size-selector__body__custom__err body-XS text-red") {{errMsg}}
-          span(v-if="errMsg.slice(-1) === ' '" class="pointer" @click="fixSize()") {{$t('NN0787')}}
-    div(class="page-size-selector__body__hr first bg-gray-4")
-    div(class="page-size-selector__container")
-        div(class="page-size-selector__body-row first-row")
-          span(class="page-size-selector__body__title subtitle-2"
-            :class="defaultTextColor") {{$t('NN0024')}}
-        div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
-          svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" :iconColor="defaultTextColor")
-        div(v-for="(format, index) in recentlyUsed" class="page-size-selector__body-row pointer"
-            @click="selectFormat(`recent-${index}`)")
-          radio-btn(class="page-size-selector__body__radio"
-                    :isSelected="selectedFormat === `recent-${index}`",
-                    :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                    :formatKey="`recent-${index}`",
-                    @select="selectFormat")
-          span(class="page-size-selector__body__recently body-3 pointer"
-                :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor"
-                @click="selectFormat(`recent-${index}`)") {{ makeFormatTitle(format) }}
-        div(class="page-size-selector__body-row first-row")
-          span(class="page-size-selector__body__title subtitle-2"
-              :class="defaultTextColor") {{$t('NN0025')}}
-        div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
-          svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
-        div(v-for="(format, index) in formatList" class="page-size-selector__body-row typical-row pointer"
-            @click="selectFormat(`preset-${index}`)")
-          radio-btn(class="page-size-selector__body__radio"
-                    :isSelected="selectedFormat === `preset-${index}`",
-                    :circleColor="isDarkTheme ? 'white' : 'gray-2'"
-                    :formatKey="`preset-${index}`",
-                    @select="selectFormat")
-          span(class="page-size-selector__body__typical-name body-4"
-                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
-          span(class="page-size-selector__body__typical-size body-4"
-                :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
-    div(class="page-size-selector__body__hr second bg-gray-4")
-    div(class="page-size-selector__body__submit")
-      div(class="page-size-selector__body__submit__option body-XS")
-        checkbox(v-model="copyBeforeApply" class="pointer") {{$t('NN0211')}}
-      btn(class="page-size-selector__body__button"
-          :disabled="!isFormatApplicable"
-          @click.native="submit")
-        svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm")
-        span {{$t('NN0022')}}
+        span(class="page-size-selector__body__recently body-3 pointer"
+              :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : defaultTextColor"
+              @click="selectFormat(`recent-${index}`)") {{ makeFormatTitle(format) }}
+      div(class="page-size-selector__body-row first-row")
+        span(class="page-size-selector__body__title subtitle-2"
+            :class="defaultTextColor") {{$t('NN0025')}}
+      div(v-if="!isLayoutReady" class="page-size-selector__body-row-center")
+        svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
+      div(v-for="(format, index) in formatList" class="page-size-selector__body-row typical-row pointer"
+          @click="selectFormat(`preset-${index}`)")
+        radio-btn(class="page-size-selector__body__radio"
+                  :isSelected="selectedFormat === `preset-${index}`",
+                  :circleColor="isDarkTheme ? 'white' : 'gray-2'"
+                  :formatKey="`preset-${index}`",
+                  @select="selectFormat")
+        span(class="page-size-selector__body__typical-name body-4"
+              :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ format.title }}
+        span(class="page-size-selector__body__typical-size body-4"
+              :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : defaultTextColor") {{ makeFormatDescription(format) }}
+  div(class="page-size-selector__body__hr second bg-gray-4")
+  div(class="page-size-selector__body__submit")
+    div(class="page-size-selector__body__submit__option body-XS")
+      checkbox(v-model="copyBeforeApply" class="pointer") {{$t('NN0211')}}
+    btn(class="page-size-selector__body__button"
+        :disabled="!isFormatApplicable"
+        @click="submit")
+      svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm")
+      span {{$t('NN0022')}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import vClickOutside from 'v-click-outside'
-import SearchBar from '@/components/SearchBar.vue'
-import RadioBtn from '@/components/global/RadioBtn.vue'
-import Checkbox from '@/components/global/Checkbox.vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import { ILayout } from '@/interfaces/layout'
-import pageUtils from '@/utils/pageUtils'
-import { IListServiceContentData } from '@/interfaces/api'
-import groupUtils from '@/utils/groupUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import listApi from '@/apis/list'
-import generalUtils from '@/utils/generalUtils'
-import resizeUtils from '@/utils/resizeUtils'
-import paymentUtils from '@/utils/paymentUtils'
+import Checkbox from '@/components/global/Checkbox.vue'
+import RadioBtn from '@/components/global/RadioBtn.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import { IListServiceContentData } from '@/interfaces/api'
+import { ILayout } from '@/interfaces/layout'
 import editorUtils from '@/utils/editorUtils'
-import unitUtils, { STR_UNITS, IMapSize, PRECISION } from '@/utils/unitUtils'
-import { throttle, round, floor, ceil } from 'lodash'
+import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
+import pageUtils from '@/utils/pageUtils'
+import paymentUtils from '@/utils/paymentUtils'
+import resizeUtils from '@/utils/resizeUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import unitUtils, { IMapSize, PRECISION, STR_UNITS } from '@/utils/unitUtils'
+import vClickOutside from 'click-outside-vue3'
+import { ceil, floor, round, throttle } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   props: {
     isDarkTheme: {
       type: Boolean,
       default: true
     }
   },
+  emits: ['close'],
   directives: {
     clickOutside: vClickOutside.directive
   },
@@ -170,9 +170,6 @@ export default Vue.extend({
       pagesLength: 'getPagesLength',
       getPageSize: 'getPageSize'
     }),
-    isTouchDevice() {
-      return generalUtils.isTouchDevice()
-    },
     unitOptions(): string[] {
       return STR_UNITS
     },
@@ -222,7 +219,6 @@ export default Vue.extend({
       return unitUtils.convertSize(floor(res.width), floor(res.height), 'px', this.selectedUnit)
     },
     errMsg(): string {
-      // if (!this.pageWidth || !this.pageHeight || this.pageWidth <= 0 || this.pageHeight <= 0) return this.$t('NN0767', { num: 0 }).toString()
       const pxSize = {
         width: unitUtils.convert(this.pageWidth, this.selectedUnit, 'px'),
         height: unitUtils.convert(this.pageHeight, this.selectedUnit, 'px')
@@ -233,8 +229,7 @@ export default Vue.extend({
         this.isOverSize(pxSize.height) ||
         this.isUnderSize(pxSize.height)
       ) {
-        if (this.selectedUnit === 'px') return this.$t('NN0785', { size1: '40px', size2: '8000px' }).toString()
-
+        if (this.selectedUnit === 'px') return this.$t('NN0785', { size1: pageUtils.MIN_SIZE + 'px', size2: pageUtils.MAX_SIZE + 'px' }).toString()
         const minSize: {[index: string]: number} = {
           width: unitUtils.convert(pageUtils.MIN_SIZE, 'px', this.selectedUnit),
           height: unitUtils.convert(pageUtils.MIN_SIZE, 'px', this.selectedUnit)
@@ -285,6 +280,9 @@ export default Vue.extend({
     },
     isLayoutReady(): boolean {
       return this.formatList.length !== 0
+    },
+    unitOptionStyles(): {[key: string]: string} {
+      return { '--color-hover': this.isDarkTheme ? '#C9DBFF' : '#E7EFFF' }
     }
   },
   methods: {
@@ -471,7 +469,7 @@ export default Vue.extend({
         format
       })
 
-      if (generalUtils.isTouchDevice()) {
+      if (this.$isTouchDevice()) {
         pageUtils.fitPage()
       }
       if (record) {
@@ -537,8 +535,12 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .page-size-selector {
-  height: 100%;
   display: grid;
+  // Set height to scroll container
+  height: calc(100% - 19px);
+  &.isTouchDevice {
+    height: 100%;
+  }
   &__arrow {
     margin-left: auto;
     margin-right: 30%;
@@ -631,7 +633,7 @@ export default Vue.extend({
             box-sizing: border-box;
             border-radius: 4px;
             &:hover {
-              background-color: setColor(blue-3);
+              background-color: var(--color-hover);
             }
             > span {
               display: block;
@@ -722,10 +724,6 @@ export default Vue.extend({
     gap: 4px;
     overflow-y: auto; // overlay is not supported in Firefox
     scrollbar-width: thin;
-    :not(.isTouchDevice) > & {
-      // Set maxHeight 500px to scroll container in PC
-      max-height: 500px;
-    }
     @include firefoxOnly {
       scrollbar-width: thin;
       scrollbar-color: setColor(gray-3) transparent;
@@ -746,7 +744,7 @@ export default Vue.extend({
   transition: 0.3s ease;
 }
 
-.slide-fade-enter,
+.slide-fade-enter-from,
 .slide-fade-leave-to {
   transform: translateY(-10px);
   opacity: 0;

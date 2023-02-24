@@ -1,6 +1,5 @@
-import { IGroup, IStyle, ITextStyle, ITmp, ILayer } from '@/interfaces/layer'
+import { IStyle, ITextStyle } from '@/interfaces/layer'
 import { IBounding } from '@/interfaces/math'
-import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import Flatten from '@flatten-js/core'
 
@@ -31,10 +30,10 @@ class MathUtils {
     }
   }
 
-  getBounding(layer: ILayer | IGroup | ITmp | { styles: IStyle }): IBounding {
-    const angle = layer.styles.rotate
-    const origin = this.getCenter(layer.styles)
-    const initStyles = { x: layer.styles.x, y: layer.styles.y, width: layer.styles.width, height: layer.styles.height }
+  getBounding(styles: IStyle): IBounding {
+    const angle = styles.rotate
+    const origin = this.getCenter(styles)
+    const initStyles = { x: styles.x, y: styles.y, width: styles.width, height: styles.height }
     const points = [
       [initStyles.x, initStyles.y],
       [initStyles.x + initStyles.width, initStyles.y],
@@ -62,11 +61,10 @@ class MathUtils {
     }
   }
 
-  getActualMoveOffset(x: number, y: number) {
-    const scaleRatio = store.getters.getPageScaleRatio
+  getActualMoveOffset(x: number, y: number, scale = 100 / store.getters.getPageScaleRatio) {
     return {
-      offsetX: x * (100 / scaleRatio),
-      offsetY: y * (100 / scaleRatio)
+      offsetX: x * scale,
+      offsetY: y * scale
     }
   }
 

@@ -1,32 +1,34 @@
 <template lang="pug">
-  div(class="panel-font-format")
-    div(class="panel-font-format__bar mb-15")
-      svg-icon(v-for="(icon,index) in mappingIcons('font')"
-        class="record-selection feature-button p-5"
-        :class="{ pointer: iconClickable(icon)}"
-        :key="`gp-action-icon-${index}`"
-        :id="`icon-${icon}`"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon) ? 'gray-2' : iconClickable(icon) ? 'black-5' : 'gray-4'" @touchstart.native="onPropertyClick(icon)")
-    div(class="panel-font-format__bar")
-      svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
-        class="pointer feature-button p-5"
-        :key="`gp-action-icon-${index}`"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon) ? 'gray-2' : 'black-5'" @touchstart.native="onParaPropsClick(icon)")
+div(class="panel-font-format")
+  div(class="panel-font-format__bar mb-15")
+    svg-icon(v-for="(icon,index) in mappingIcons('font')"
+      class="record-selection feature-button p-5"
+      :class="{ pointer: iconClickable(icon)}"
+      :key="`gp-action-icon-${index}`"
+      :id="`icon-${icon}`"
+      :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon) ? 'gray-2' : iconClickable(icon) ? 'black-5' : 'gray-4'" @touchstart="onPropertyClick(icon)")
+  div(class="panel-font-format__bar")
+    svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
+      class="pointer feature-button p-5"
+      :key="`gp-action-icon-${index}`"
+      :iconName="icon" :iconWidth="'20px'" :iconColor="iconIsActived(icon) ? 'gray-2' : 'black-5'" @touchstart="onParaPropsClick(icon)")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import textShapeUtils from '@/utils/textShapeUtils'
 import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
-import { mapState } from 'vuex'
-import mappingUtils from '@/utils/mappingUtils'
-import textPropUtils from '@/utils/textPropUtils'
-import stepsUtils from '@/utils/stepsUtils'
-import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
+import layerUtils from '@/utils/layerUtils'
+import mappingUtils from '@/utils/mappingUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import textPropUtils from '@/utils/textPropUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-export default Vue.extend({
+import { defineComponent } from 'vue'
+import { mapState } from 'vuex'
+
+export default defineComponent({
+  emits: [],
   components: {
     MobileSlider
   },

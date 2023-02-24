@@ -1,52 +1,57 @@
 <template lang="pug">
-  div(class="mobile-slider")
-    div
-      span(class="mobile-slider__name no-wrap" :class="theme === 'dark' ? 'text-gray-2' : 'text-white'") {{title}}
-      div(class="mobile-slider__text")
-        input(:class="theme === 'dark' ? 'text-gray-2' : 'text-white'"
-          type="number"
-          v-model.number="propsVal"
-          :name="name"
-          @change="handleChangeStop")
-    div(class="mobile-slider__range-input-wrapper")
-      input(class="mobile-slider__range-input"
-        :class="theme"
-        :style="progressStyles()"
+div(class="mobile-slider")
+  div
+    span(class="mobile-slider__name no-wrap" :class="theme === 'dark' ? 'text-gray-2' : 'text-white'") {{title}}
+    div(class="mobile-slider__text")
+      input(:class="theme === 'dark' ? 'text-gray-2' : 'text-white'"
+        type="number"
         v-model.number="propsVal"
         :name="name"
-        :max="max"
-        :min="min"
-        :step="step"
-        v-ratio-change
-        type="range"
-        @pointerdown="!borderTouchArea ? $emit('pointerdown', $event) : null"
-        @pointerup="!borderTouchArea ? handlePointerup() : null")
-      input(v-if="borderTouchArea"
-        class="mobile-slider__range-input mobile-slider__range-input-top"
-        :class="theme"
-        v-model.number="propsVal"
-        :name="name"
-        :max="max"
-        :min="min"
-        :step="step"
-        v-ratio-change
-        type="range"
-        @pointerdown="$emit('pointerdown', $event)"
-        @pointerup="handlePointerup")
+        @change="handleChangeStop")
+  div(class="mobile-slider__range-input-wrapper")
+    input(class="mobile-slider__range-input"
+      :class="theme"
+      :style="progressStyles()"
+      v-model.number="propsVal"
+      :name="name"
+      :max="max"
+      :min="min"
+      :step="step"
+      v-ratio-change
+      type="range"
+      @pointerdown="!borderTouchArea ? $emit('pointerdown', $event) : null"
+      @pointerup="!borderTouchArea ? handlePointerup : null")
+    input(v-if="borderTouchArea"
+      class="mobile-slider__range-input mobile-slider__range-input-top"
+      :class="theme"
+      v-model.number="propsVal"
+      :name="name"
+      :max="max"
+      :min="min"
+      :step="step"
+      v-ratio-change
+      type="range"
+      @pointerdown="$emit('pointerdown', $event)"
+      @pointerup="handlePointerup")
 </template>
 
 <script lang="ts">
 import stepsUtils from '@/utils/stepsUtils'
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 
-export default Vue.extend({
+export default defineComponent({
   data() {
     return {
     }
   },
   props: {
-    title: String,
-    name: String,
+    title: {
+      type: String,
+      required: true
+    },
+    name: {
+      type: String,
+    },
     borderTouchArea: {
       type: Boolean,
       default: false
@@ -98,7 +103,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    progressStyles() {
+    progressStyles(): {[key: string]: string} {
       return {
         '--progress': (typeof this.value === 'string') ? '50%' : `${(this.value - this.min) / (this.max - this.min) * 100}%`,
         'pointer-events': this.borderTouchArea ? 'none' : 'auto'

@@ -1,46 +1,47 @@
 <template lang="pug">
-  div(class="footer-tabs" ref="tabs")
-    div(class="footer-tabs__container" :class="{main: !isInEditor}" :style="containerStyles"
-        @scroll.passive="updateContainerOverflow" ref="container")
-      template(v-for="(tab, index) in tabs")
-        div(v-if="!tab.hidden" :key="tab.icon"
-            class="footer-tabs__item"
-            :class="{'click-disabled': (tab.disabled || isLocked)}"
-            @click="handleTabAction(tab)")
-          color-btn(v-if="tab.icon === 'color'" size="22px"
-                    class="click-disabled"
-                    :color="globalSelectedColor")
-          svg-icon(v-else class="click-disabled"
-            :iconName="tab.icon"
-            :iconColor="(tab.disabled || isLocked) ? 'gray-2' : tabActive(tab) ? 'white' :'black-4'"
-            :iconWidth="'24px'"
-            :style="textIconStyle")
-          span(class="no-wrap click-disabled"
-            :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-white' : 'text-black-4'") {{tab.text}}
+div(class="footer-tabs" ref="tabs")
+  div(class="footer-tabs__container" :class="{main: !isInEditor}" :style="containerStyles"
+      @scroll.passive="updateContainerOverflow" ref="container")
+    template(v-for="(tab, index) in tabs")
+      div(v-if="!tab.hidden" :key="tab.icon"
+          class="footer-tabs__item"
+          :class="{'click-disabled': (tab.disabled || isLocked)}"
+          @click="handleTabAction(tab)")
+        color-btn(v-if="tab.icon === 'color'" size="22px"
+                  class="click-disabled"
+                  :color="globalSelectedColor")
+        svg-icon(v-else class="click-disabled"
+          :iconName="tab.icon"
+          :iconColor="(tab.disabled || isLocked) ? 'gray-2' : tabActive(tab) ? 'white' :'black-4'"
+          :iconWidth="'24px'"
+          :style="textIconStyle")
+        span(class="no-wrap click-disabled"
+          :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-white' : 'text-black-4'") {{tab.text}}
 </template>
 <script lang="ts">
-import layerUtils from '@/utils/layerUtils'
-import Vue from 'vue'
-import { mapGetters, mapState } from 'vuex'
-import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
-import stepsUtils from '@/utils/stepsUtils'
-import { ColorEventType, LayerType } from '@/store/types'
 import ColorBtn from '@/components/global/ColorBtn.vue'
-import generalUtils from '@/utils/generalUtils'
-import imageUtils from '@/utils/imageUtils'
-import frameUtils from '@/utils/frameUtils'
-import { IFooterTab } from '@/interfaces/editor'
-import groupUtils from '@/utils/groupUtils'
-import pageUtils from '@/utils/pageUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
-import mappingUtils from '@/utils/mappingUtils'
 import i18n from '@/i18n'
-import vivistickerUtils from '@/utils/vivistickerUtils'
-import eventUtils from '@/utils/eventUtils'
+import { IFooterTab } from '@/interfaces/editor'
+import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
+import { ColorEventType, LayerType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
+import eventUtils from '@/utils/eventUtils'
+import frameUtils from '@/utils/frameUtils'
+import generalUtils from '@/utils/generalUtils'
+import groupUtils from '@/utils/groupUtils'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import mappingUtils from '@/utils/mappingUtils'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { isEqual, startCase } from 'lodash'
+import Vue, { defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
+import { notify } from '@kyvg/vue3-notification'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     ColorBtn
   },
@@ -280,7 +281,7 @@ export default Vue.extend({
       return this.currSelectedInfo.layers.length
     },
     isLocked(): boolean {
-      return layerUtils.getTmpLayer().locked
+      return layerUtils.getSelectedLayer().locked
     },
     isGroup(): boolean {
       return layerUtils.getCurrLayer.type === LayerType.group
@@ -529,7 +530,7 @@ export default Vue.extend({
         }
         case 'effect': {
           if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
-            Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
             return
           }
           break

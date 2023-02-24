@@ -1,101 +1,102 @@
 <template lang="pug">
-  div(class="text-setting" ref='body'
-      @mousedown.capture="textInfoRecorder()")
-    span(class="text-setting__title text-blue-1 text-H6") {{$t('NN0062')}}
-    div(class="text-setting__row1")
-      div(class="property-bar pointer record-selection" @click="openFontsPanel")
-        img(v-if="props.font[0] !== '_'" class="text-setting__text-preview" :src="fontPrevUrl" @error="onError")
-        span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font.substr(1) }}
-        svg-icon(class="pointer"
-          :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
-      font-size-selector
-      //- div(class="size-bar relative")
-      //-   div(class="pointer"
-      //-     @mousedown="fontSizeStepping(-step)") -
-      //-   button(class="text-setting__range-input-button" @click="handleValueModal")
-      //-     input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
-      //-           @change="setSize" :value="fontSize")
-      //-   div(class="pointer"
-      //-     @mousedown="fontSizeStepping(step)") +
-      //-   value-selector(v-if="openValueSelector"
-      //-               :valueArray="fontSelectValue"
-      //-               class="text-setting__value-selector"
-      //-               v-click-outside="handleValueModal"
-      //-               @update="handleValueUpdate")
-    div(class="text-setting__row2")
-      div(class="text-setting__color"
-          v-hint="$t('NN0099')")
-        div(class="color-slip record-selection"
-          @click="handleColorModal")
-          svg-icon(iconName="text-color"
-                  iconWidth="24px"
-                  iconColor="gray-1")
-          div(class="color-slip__bar"
-              :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000', 'border': props.color === '#FFFFFF' ? '1px solid #EEEFF4' : ''}")
-        div(class="text-setting__color__hex text-left overflow-hidden")
-          button(class="text-setting__range-input-button input-color" @click="handleColorModal")
-            input(class="body-3 text-gray-2 record-selection input-color" type="text" ref="input-color"
-            :value="props.color" @change="inputColor")
-            //-  v-model.lazy="props.color v-model.lazy="props.color
-        div(class="text-setting__color__copy-wrapper")
-          svg-icon(class="text-setting__color__copy"
-                  iconName="copy"
-                  iconWidth="16px"
-                  iconColor="gray-4"
-                  @click.native="copyColor")
-      div(class="action-bar action-bar--small flex-evenly")
-        svg-icon(class="pointer record-selection btn-lh feature-button p-5"
-          :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
-          @click.native="openLineHeightSliderPopup('.btn-lh')"
-          v-hint="$t('NN0110')")
-        svg-icon(class="pointer record-selection btn-ls feature-button p-5"
-          :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
-          @click.native="openSpacingSliderPopup('.btn-ls')"
-          v-hint="$t('NN0109')")
-    div(class="action-bar flex-evenly")
-      svg-icon(v-for="(icon,index) in mappingIcons('font')"
-        class="record-selection feature-button p-5"
-        :class="{ pointer: iconClickable(icon), active: iconIsActived(icon) }"
-        :key="`gp-action-icon-${index}`"
-        :id="`icon-${icon}`"
-        v-hint="hintMap[icon]"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="iconClickable(icon) ? 'gray-2' : 'gray-4'" @mousedown.native="onPropertyClick(icon)")
-    div(class="action-bar flex-evenly")
-      svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
-        class="pointer feature-button p-5"
-        :class="{ active: iconIsActived(icon) }"
-        :key="`gp-action-icon-${index}`"
-        v-hint="hintMap[icon]"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
+div(class="text-setting" ref='body'
+    @mousedown.capture="textInfoRecorder()")
+  span(class="text-setting__title text-blue-1 text-H6") {{$t('NN0062')}}
+  div(class="text-setting__row1")
+    div(class="property-bar pointer record-selection" @click="openFontsPanel")
+      img(v-if="props.font[0] !== '_'" class="text-setting__text-preview" :src="fontPrevUrl" @error="onError")
+      span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font.substr(1) }}
+      svg-icon(class="pointer"
+        :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
+    font-size-selector
+    //- div(class="size-bar relative")
+    //-   div(class="pointer"
+    //-     @mousedown="fontSizeStepping(-step)") -
+    //-   button(class="text-setting__range-input-button" @click="handleValueModal")
+    //-     input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
+    //-           @change="setSize" :value="fontSize")
+    //-   div(class="pointer"
+    //-     @mousedown="fontSizeStepping(step)") +
+    //-   value-selector(v-if="openValueSelector"
+    //-               :valueArray="fontSelectValue"
+    //-               class="text-setting__value-selector"
+    //-               v-click-outside="handleValueModal"
+    //-               @update="handleValueUpdate")
+  div(class="text-setting__row2")
+    div(class="text-setting__color"
+        v-hint="$t('NN0099')")
+      div(class="color-slip record-selection"
+        @click="handleColorModal")
+        svg-icon(iconName="text-color"
+                iconWidth="24px"
+                iconColor="gray-1")
+        div(class="color-slip__bar"
+            :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000', 'border': props.color === '#FFFFFF' ? '1px solid #EEEFF4' : ''}")
+      div(class="text-setting__color__hex text-left overflow-hidden")
+        button(class="text-setting__range-input-button input-color" @click="handleColorModal")
+          input(class="body-3 text-gray-2 record-selection input-color" type="text" ref="input-color"
+          :value="props.color" @change="inputColor")
+          //-  v-model.lazy="props.color v-model.lazy="props.color
+      div(class="text-setting__color__copy-wrapper")
+        svg-icon(class="text-setting__color__copy"
+                iconName="copy"
+                iconWidth="16px"
+                iconColor="gray-4"
+                @click="copyColor")
+    div(class="action-bar action-bar--small flex-evenly")
+      svg-icon(class="pointer record-selection btn-lh feature-button p-5"
+        :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
+        @click="openLineHeightSliderPopup()"
+        v-hint="$t('NN0110')")
+      svg-icon(class="pointer record-selection btn-ls feature-button p-5"
+        :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
+        @click="openSpacingSliderPopup()"
+        v-hint="$t('NN0109')")
+  div(class="action-bar flex-evenly")
+    svg-icon(v-for="(icon,index) in mappingIcons('font')"
+      class="record-selection feature-button p-5"
+      :class="{ pointer: iconClickable(icon), active: iconIsActived(icon) }"
+      :key="`gp-action-icon-${index}`"
+      :id="`icon-${icon}`"
+      v-hint="hintMap[icon]"
+      :iconName="icon" :iconWidth="'20px'" :iconColor="iconClickable(icon) ? 'gray-2' : 'gray-4'" @mousedown="onPropertyClick(icon)")
+  div(class="action-bar flex-evenly")
+    svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
+      class="pointer feature-button p-5"
+      :class="{ active: iconIsActived(icon) }"
+      :key="`gp-action-icon-${index}`"
+      v-hint="hintMap[icon]"
+      :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown="onParaPropsClick(icon)")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import SearchBar from '@/components/SearchBar.vue'
-import MappingUtils from '@/utils/mappingUtils'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import TextUtils from '@/utils/textUtils'
-import { IGroup, ILayer, IParagraph, ISpan, IText, ITmp } from '@/interfaces/layer'
-import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
+import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
-import TextPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
-import { parseInt } from 'lodash'
+import { IGroup, ILayer, IParagraph, IText, ITmp } from '@/interfaces/layer'
+import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
+import brandkitUtils from '@/utils/brandkitUtils'
+import colorUtils, { checkAndConvertToHex, isValidHexColor } from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
-import StepsUtils from '@/utils/stepsUtils'
-import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
-import colorUtils, { checkAndConvertToHex, isValidHexColor } from '@/utils/colorUtils'
-import popupUtils from '@/utils/popupUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
-import textShapeUtils from '@/utils/textShapeUtils'
+import MappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
-import brandkitUtils from '@/utils/brandkitUtils'
-import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
-import editorUtils from '@/utils/editorUtils'
+import popupUtils from '@/utils/popupUtils'
+import StepsUtils from '@/utils/stepsUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import TextPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
+import TextUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
+import { parseInt } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     SearchBar,
     ColorPicker,
@@ -105,6 +106,7 @@ export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  emits: ['openFontsPanel', 'toggleColorPanel'],
   data() {
     return {
       openColorPicker: false,
@@ -129,7 +131,7 @@ export default Vue.extend({
         'text-align-center': `${this.$t('NN0106')}`,
         'text-align-right': `${this.$t('NN0107')}`,
         'text-align-justify': `${this.$t('NN0108')}`
-      },
+      } as Record<string, string>,
       fontPrevUrl: ''
     }
   },
@@ -158,7 +160,7 @@ export default Vue.extend({
       }
     })
   },
-  destroyed() {
+  unmounted() {
     this.setCurrFunctionPanel(FunctionPanelType.none)
     if (!this.isOpenFontPanel) {
       TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
@@ -170,7 +172,6 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       layerIndex: 'getCurrSelectedIndex',
-      getLayer: 'getLayer'
     }),
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
@@ -474,7 +475,7 @@ export default Vue.extend({
     },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
-      const interval = setInterval(() => {
+      const interval = window.setInterval(() => {
         if (new Date().getTime() - startTime > 500) {
           try {
             TextPropUtils.fontSizeStepping(step)
@@ -557,7 +558,7 @@ export default Vue.extend({
     copyColor() {
       GeneralUtils.copyText(this.props.color)
         .then(() => {
-          this.$notify({ group: 'copy', text: `${this.props.color} 已複製` })
+          notify({ group: 'copy', text: `${this.props.color} 已複製` })
         })
     },
     iconClickable(icon: string): boolean {

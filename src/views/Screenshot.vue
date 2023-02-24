@@ -1,29 +1,28 @@
 <template lang="pug">
-  div(class="screenshot")
-    nu-layer(v-if="config !== undefined"
-              ref="target"
-              :config="config"
-              :pageIndex="0"
-              :layerIndex="0")
-    div(v-if="backgroundImage !== ''" ref="target" class="screenshot__bg-img" :style="bgStyles()")
-      img(:src="backgroundImage" @load="onload")
-    div(v-if="backgroundColor !== ''" ref="target" class="screenshot__bg-color" :style="bgColorStyles()")
-    page-content(v-if="usingJSON" :config="pages[0]" :pageIndex="0" :noBg="true" :style="pageTransforms()")
+div(class="screenshot")
+  nu-layer(v-if="config !== undefined"
+            ref="target"
+            :config="config"
+            :pageIndex="0"
+            :layerIndex="0")
+  div(v-if="backgroundImage !== ''" ref="target" class="screenshot__bg-img" :style="bgStyles()")
+    img(:src="backgroundImage" @load="onload")
+  div(v-if="backgroundColor !== ''" ref="target" class="screenshot__bg-color" :style="bgColorStyles()")
+  page-content(v-if="usingJSON" :config="pages[0]" :pageIndex="0" :noBg="true" :style="pageTransforms()")
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mapGetters } from 'vuex'
 import PageContent from '@/components/editor/page/PageContent.vue'
-import layerFactary from '@/utils/layerFactary'
-import vivistickerUtils from '@/utils/vivistickerUtils'
 import { CustomWindow } from '@/interfaces/customWindow'
-import pageUtils from '@/utils/pageUtils'
-import { IPage } from '@/interfaces/page'
-import mathUtils from '@/utils/mathUtils'
 import { IGroup, IImageStyle } from '@/interfaces/layer'
+import { IPage } from '@/interfaces/page'
+import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
-import uploadUtils from '@/utils/uploadUtils'
+import mathUtils from '@/utils/mathUtils'
+import pageUtils from '@/utils/pageUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 declare let window: CustomWindow
 
@@ -34,7 +33,7 @@ enum ScreenShotMode {
   PAGE
 }
 
-export default Vue.extend({
+export default defineComponent({
   name: 'ScreenShot',
   data() {
     return {
@@ -313,7 +312,7 @@ export default Vue.extend({
         }
       } else if ([ScreenShotMode.BG_IMG, ScreenShotMode.BG_COLOR].includes(this.mode)) {
         const element = this.$refs.target
-        const target = (element as Vue).$el ? (element as Vue).$el : (element as HTMLElement)
+        const target: HTMLElement = (element as any).$el ? (element as any).$el : element
         const { width, height } = target.getBoundingClientRect()
         vivistickerUtils.sendDoneLoading(width, height, this.options)
       } else {

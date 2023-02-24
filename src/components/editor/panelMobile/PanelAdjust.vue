@@ -1,28 +1,30 @@
 <template lang="pug">
-  div(class="panel-adjust")
-    div(v-for="field in fields" :key="field.name")
-      mobile-slider(:title="`${field.label}`"
-        :borderTouchArea="true"
-        :name="field.name"
-        :value="adjustVal[field.name] || 0"
-        :min="field.min"
-        :max="field.max"
-        @update="handleField")
-    div(class="panel-adjust__reset")
-      button(@click="reset") {{ 'Reset' }}
+div(class="panel-adjust")
+  div(v-for="field in fields" :key="field.name")
+    mobile-slider(:title="`${field.label}`"
+      :borderTouchArea="true"
+      :name="field.name"
+      :value="adjustVal[field.name] || 0"
+      :min="field.min"
+      :max="field.max"
+      @update="handleField")
+  div(class="panel-adjust__reset")
+    button(@click="reset") {{ $t('NN0754') }}
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
-import imageAdjustUtil from '@/utils/imageAdjustUtil'
-import { mapGetters, mapState } from 'vuex'
-import frameUtils from '@/utils/frameUtils'
-import pageUtils from '@/utils/pageUtils'
 import { IFrame, IImage } from '@/interfaces/layer'
 import backgroundUtils from '@/utils/backgroundUtils'
+import frameUtils from '@/utils/frameUtils'
+import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import layerUtils from '@/utils/layerUtils'
-export default Vue.extend({
+import pageUtils from '@/utils/pageUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
+
+export default defineComponent({
+  emits: [],
   components: {
     MobileSlider
   },

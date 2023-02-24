@@ -1,14 +1,14 @@
-import store from '@/store'
 import file from '@/apis/file'
 import userApis from '@/apis/user'
-import _ from 'lodash'
-import apiUtils from '@/utils/apiUtils'
-import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
-import { captureException } from '@sentry/browser'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
-import { IFrame, IGroup, IImage } from '@/interfaces/layer'
 import { SrcObj } from '@/interfaces/gallery'
-import generalUtils from '@/utils/generalUtils'
+import { IFrame, IGroup, IImage } from '@/interfaces/layer'
+import store from '@/store'
+import apiUtils from '@/utils/apiUtils'
+import { captureException } from '@sentry/browser'
+import _ from 'lodash'
+import { ActionTree, GetterTree, ModuleTree, MutationTree } from 'vuex'
+
 interface IFileState {
   myfileImages: Array<IAssetPhoto>,
   editorViewImages: Record<string, Record<string, string>>,
@@ -35,7 +35,7 @@ const getDefaultState = (): IFileState => ({
 
 const state = getDefaultState()
 
-function isAdmin () {
+function isAdmin() {
   return store.getters['user/isAdmin']
 }
 
@@ -158,6 +158,7 @@ const actions: ActionTree<IFileState, unknown> = {
 
     imgToRequest.delete('') // delete empty asset id
     await dispatch('updateImages', { assetSet: imgToRequest })
+      .catch(e => console.log('updatePageImages', e))
   },
   async updateImages({ commit }, { assetSet }) {
     // Request unknown private image url
@@ -200,7 +201,7 @@ const actions: ActionTree<IFileState, unknown> = {
 }
 
 const mutations: MutationTree<IFileState> = {
-  SET_setLayersDone() {
+  SET_setLayersDone(state: IFileState) {
     state.setLayersDone = true
   },
   SET_STATE(state: IFileState, data: Partial<IFileState>) {
@@ -249,7 +250,7 @@ const mutations: MutationTree<IFileState> = {
         tiny: src
       }
     }
-    state.myfileImages.unshift(previewImage)
+    state.myfileImages = [previewImage, ...state.myfileImages]
   },
   DEL_PREVIEW(state: IFileState, { assetId }) {
     state.myfileImages = state.myfileImages.filter((it: IAssetPhoto) => {
@@ -332,4 +333,4 @@ export default {
   getters,
   mutations,
   actions
-} as ModuleTree<IFileState>
+} as unknown as ModuleTree<IFileState>

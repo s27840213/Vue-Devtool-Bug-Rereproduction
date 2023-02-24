@@ -1,10 +1,8 @@
-import { IPage, IPageState } from '@/interfaces/page'
-import { IShape, IText, IImage, IGroup, ITmp } from '@/interfaces/layer'
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
-import { ITextState } from './text'
-import { IAsset } from '@/interfaces/module'
 import { SrcObj } from '@/interfaces/gallery'
-import { IUserModule } from './module/user'
+import { ITmp } from '@/interfaces/layer'
+import { IAsset } from '@/interfaces/module'
+import { IPageState } from '@/interfaces/page'
 import { Itheme } from '@/interfaces/theme'
 
 /**
@@ -69,20 +67,23 @@ export interface IEditorState {
   showRuler: boolean,
   showGuideline: boolean,
   lockGuideline: boolean,
+  isDraggingGuideline: boolean,
   themes: Itheme[],
   hasCopiedFormat: boolean,
   inGestureToolMode: boolean,
   isMobile: boolean
+  isTablet: boolean,
   isLargeDesktop: boolean,
   isGlobalLoading: boolean,
   useMobileEditor: boolean,
-  defaultContentScaleRatio: number,
+  contentScaleRatio: number,
   _3dEnabledPageIndex: number,
   currFocusPageIndex: number,
   enalbleComponentLog: boolean,
   inScreenshotPreviewRoute: boolean,
   cursor: string,
-  isPageScaling: boolean
+  isPageScaling: boolean,
+  isGettingDesign: boolean
 }
 
 export enum SidebarPanelType {
