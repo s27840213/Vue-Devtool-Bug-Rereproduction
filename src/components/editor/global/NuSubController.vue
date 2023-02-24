@@ -426,7 +426,9 @@ export default defineComponent({
           if (this.config.contentEditable) {
             LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { isTyping: true }, this.layerIndex)
             if (this.$isTouchDevice()) {
-              tiptapUtils.focus({ scrollIntoView: false }, 'end')
+              this.$nextTick(() => {
+                tiptapUtils.focus({ scrollIntoView: false }, 'end')
+              })
             } else {
               tiptapUtils.focus({ scrollIntoView: false })
             }

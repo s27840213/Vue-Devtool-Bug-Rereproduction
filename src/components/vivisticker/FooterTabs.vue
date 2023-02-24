@@ -36,10 +36,10 @@ import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import { isEqual, startCase } from 'lodash'
-import Vue, { defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
 import { notify } from '@kyvg/vue3-notification'
+import { isEqual, startCase } from 'lodash'
+import { defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -507,8 +507,9 @@ export default defineComponent({
                 contentEditable: true
               })
             }
-
-            tiptapUtils.focus({ scrollIntoView: false }, currLayer.isEdited ? 'end' : null)
+            this.$nextTick(() => {
+              tiptapUtils.focus({ scrollIntoView: false }, currLayer.isEdited ? 'end' : null)
+            })
           } else {
             const { subLayerIdx } = layerUtils
             const subLayer = (currLayer as IGroup).layers[subLayerIdx]
@@ -517,8 +518,9 @@ export default defineComponent({
                 contentEditable: true
               }, subLayerIdx)
             }
-
-            tiptapUtils.focus({ scrollIntoView: false }, 'end')
+            this.$nextTick(() => {
+              tiptapUtils.focus({ scrollIntoView: false }, 'end')
+            })
           }
           break
         }
