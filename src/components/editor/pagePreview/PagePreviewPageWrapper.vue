@@ -12,7 +12,8 @@ lazy-load(
     div(class="page-preview-page-content pointer"
         :style="styles()"
         @click="clickPage"
-        @dblclick="dbclickPage()"
+        @pointerdown="handlePointerdown"
+        @dblclick="dbclickPage"
         draggable="true",
         @dragstart="handleDragStart"
         @dragend="handleDragEnd"
@@ -66,6 +67,7 @@ import PageContent from '@/components/editor/page/PageContent.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { IPage } from '@/interfaces/page'
+import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -181,7 +183,7 @@ export default defineComponent({
         pageUtils.scrollIntoPage(this.index)
       }
 
-      if (this.$isTouchDevice && clickFocusedPreview) {
+      if (this.$isTouchDevice() && clickFocusedPreview) {
         this.$nextTick(() => {
           if (pageUtils.isDetailPage) {
             pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 'auto')
@@ -194,7 +196,11 @@ export default defineComponent({
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'full') {
         this._setIsShowPagePreview(false)
+        editorUtils.setMobileAllPageMode(false)
       }
+    },
+    handlePointerdown(e: PointerEvent) {
+      doubleTapUtils.click(e, { doubleClickCallback: this.clickPage })
     },
     handleDragStart(e: DragEvent) {
       this._setIsDragged(true)
@@ -318,7 +324,7 @@ export default defineComponent({
   &-content {
     position: relative;
     box-sizing: border-box;
-    box-shadow: 0px 0px 10px setColor(gray-2, 0.4);
+    box-shadow: 0px 0px 7px setColor(gray-2, 0.4);
     transform-origin: 0 0;
     z-index: 1;
     &-more {

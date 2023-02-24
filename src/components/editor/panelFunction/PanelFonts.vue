@@ -1,9 +1,9 @@
 <template lang="pug">
 div(class="panel-fonts")
-  div(v-if="!noTitle && !$isTouchDevice" class="panel-fonts__title")
-    span(v-if="!$isTouchDevice" class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
+  div(v-if="!noTitle && !$isTouchDevice()" class="panel-fonts__title")
+    span(v-if="!$isTouchDevice()" class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
     svg-icon(
-      v-if="!$isTouchDevice"
+      v-if="!$isTouchDevice()"
       class="panel-fonts__close pointer"
       :iconName="'close'"
       :iconWidth="'30px'"

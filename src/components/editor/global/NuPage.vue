@@ -4,7 +4,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
       :id="`nu-page_${pageIndex}`"
       :style="pageStyles"
       ref="page")
-    div(v-if="!isDetailPage && !$isTouchDevice"
+    div(v-if="!isDetailPage && !$isTouchDevice()"
       class="page-title text-left pb-10"
       :style="{'width': `${config.width * (scaleRatio/100)}px`, 'transform': `translate3d(0, -100%, ${isAnyLayerActive ? 0 : 1}px)`}")
       //- span(class="pr-10") 第 {{pageIndex+1}} 頁
@@ -45,7 +45,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
           @click.native="deletePage()"
           v-hint="$t('NN0141')"
         )
-    div(v-if="isDetailPage && !$isTouchDevice" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
+    div(v-if="isDetailPage && !$isTouchDevice()" class="page-bar text-left mb-5" :style="{'height': `${config.height * (scaleRatio/100)}px`,}")
       div(class="page-bar__icons" v-if="!isBackgroundImageControl")
         div(class="body-2")
           span {{pageIndex + 1}}
@@ -67,7 +67,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
     template(v-if="!isOutOfBound || hasEditingText")
       div(class='pages-wrapper'
           :class="`nu-page-${pageIndex}`"
-          :style="wrapperStyles()"
+          :style="wrapperStyles"
           @keydown.self="handleSpecialCharacter"
           @keydown.delete.exact.self.prevent.stop="ShortcutUtils.del()"
           @keydown.ctrl.c.exact.self.prevent.stop="ShortcutUtils.copy()"
@@ -107,15 +107,15 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
           tabindex="0")
         //- command/ctrl + 61/173 for Firefox keycode, http://www.javascripter.net/faq/keycodes.htm
         lazy-load(
+            class="lazy-load"
             target=".editor-view"
             :rootMargin="'1500px 0px 1500px 0px'"
-            :minHeight="config.height * (scaleRatio / 100)"
-            :maxHeight="config.height * (scaleRatio / 100)"
+            v-bind="lazyloadSize"
             :threshold="[0,1]")
           div(:style="sizeStyles")
             div(class="scale-container relative"
                 :style="scaleContainerStyles")
-              page-content(:config="config" :pageIndex="pageIndex" :page="config" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
+              page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio" :snapUtils="snapUtils")
               div(v-if="showAllAdminTool" class="layer-num") Layer數量: {{config.layers.length}}
               dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
             div(v-if="imgControlPageIdx !== pageIndex" class="page-control" :style="styles('control')")
@@ -130,8 +130,8 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
                 @setFocus="setFocus()"
                 @isDragging="handleDraggingController")
       div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex)"
-        class="page-highlighter"
-        :style="wrapperStyles()")
+        :class="[useMobileEditor ? 'page-highlighter page-highlighter--mobile' : 'page-highlighter']"
+        :style="wrapperStyles")
       //- for ruler to get rectangle of page content (without bleeds)
       div(v-if="config.isEnableBleed" :class="`nu-page-bleed-${pageIndex}`" :style="bleedLineAreaStyles()")
       div(v-if="(currActivePageIndex === pageIndex && isDetailPage && !isImgCtrl && !isBgImgCtrl)"
@@ -147,13 +147,14 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
         div(v-show="isShownResizerHint" class="page-resizer__hint no-wrap") {{resizerHint}}
       snap-line-area(
         :config="config"
+        :contentScaleRatio="contentScaleRatio"
         :pageIndex="pageIndex"
         :snapUtils="snapUtils"
       )
     template(v-else)
       div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
-        :style="wrapperStyles()")
+        :style="wrapperStyles")
 </template>
 
 <script lang="ts">
@@ -219,10 +220,6 @@ export default defineComponent({
       coordinateWidth: 0,
       coordinateHeight: 0,
       // snapUtils: new SnapUtils(this.pageIndex),
-      closestSnaplines: {
-        v: [] as Array<number>,
-        h: [] as Array<number>
-      },
       generalUtils,
       pageUtils,
       currDraggingIndex: -1
@@ -247,6 +244,13 @@ export default defineComponent({
     isScaling: {
       type: Boolean,
       default: false
+    },
+    /**
+     * @param minContentScaleRatio - pre-calculated contentScaleRatio to prevent the size switch animation when doing swipe up/down gesture
+     */
+    minContentScaleRatio: {
+      type: Number,
+      default: 0
     }
   },
   emits: ['stepChange'],
@@ -280,7 +284,6 @@ export default defineComponent({
           if (target) {
             const layerInfo = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
             imageShadowUtils.updateShadowSrc(layerInfo, target.styles.shadow.srcObj)
-            // imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
           }
         }
       }
@@ -306,7 +309,7 @@ export default defineComponent({
       lockGuideline: 'getLockGuideline',
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing',
-      contentScaleRatio: 'getContentScaleRatio',
+      _contentScaleRatio: 'getContentScaleRatio',
       pagesLength: 'getPagesLength',
       showAllAdminTool: 'user/showAllAdminTool',
       useMobileEditor: 'getUseMobileEditor',
@@ -316,6 +319,15 @@ export default defineComponent({
       isImgCtrl: 'imgControl/isImgCtrl',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
+    contentScaleRatio(): number {
+      // return this.pageState.config.contentScaleRatio
+      // if (this.$isTouchDevice()) {
+      if (this.$isTouchDevice()) {
+        return this.minContentScaleRatio && this.useMobileEditor ? this.minContentScaleRatio : this.pageState.config.contentScaleRatio
+      } else {
+        return 1
+      }
+    },
     config(): IPage {
       if (!this.pageState.config.isEnableBleed) return this.pageState.config
       return {
@@ -323,12 +335,24 @@ export default defineComponent({
         ...pageUtils.getPageSizeWithBleeds(this.pageState.config)
       }
     },
+    lazyloadSize(): unknown {
+      if (this.$isTouchDevice()) {
+        return {
+          minHeight: this.config.height * this.contentScaleRatio,
+          maxHeight: this.config.height * this.contentScaleRatio
+        }
+      } else {
+        return {
+          minHeight: this.config.height * (this.scaleRatio / 100),
+          maxHeight: this.config.height * (this.scaleRatio / 100)
+        }
+      }
+    },
     scaleContainerStyles(): { [index: string]: string } {
-      const transform = `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`
       return {
         width: `${this.config.width * this.contentScaleRatio}px`,
         height: `${this.config.height * this.contentScaleRatio}px`,
-        transform,
+        ...(!generalUtils.isTouchDevice() && { transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})` }),
         willChange: this.isScaling ? 'transform' : ''
       }
     },
@@ -379,7 +403,7 @@ export default defineComponent({
       const transform = ''
       let margin = ''
       let position = 'relative'
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         position = 'absolute'
       } else {
         margin = this.isDetailPage ? '0px auto' : '25px auto'
@@ -392,7 +416,7 @@ export default defineComponent({
       }
     },
     isOutOfBound(): boolean {
-      return this.$isTouchDevice && !this.isDetailPage ? (this.pageIndex <= this.currCardIndex - 2 || this.pageIndex >= this.currCardIndex + 2)
+      return this.$isTouchDevice() && !this.isDetailPage ? (this.pageIndex <= this.currCardIndex - 2 || this.pageIndex >= this.currCardIndex + 2)
         : this.pageIndex <= (this.topBound - 4) || this.pageIndex >= (this.bottomBound + 4)
     },
     hasEditingText(): boolean {
@@ -433,6 +457,12 @@ export default defineComponent({
         width: `${this.config.width * this.contentScaleRatio * this.scaleRatio * 0.01}px`,
         height: `${this.config.height * this.contentScaleRatio * this.scaleRatio * 0.01}px`
       }
+    },
+    wrapperStyles(): Record<string, string> {
+      return {
+        ...this.sizeStyles,
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
+      }
     }
   },
   methods: {
@@ -445,16 +475,6 @@ export default defineComponent({
       setCurrHoveredPageIndex: 'SET_currHoveredPageIndex',
       updateSnapUtilsIndex: 'UPDATE_snapUtilsIndex'
     }),
-    handleSpecialCharacter(e: KeyboardEvent) {
-      // For those using keyCode in their codebase, we recommend converting them to their kebab-cased named equivalents.
-      // The keys for some punctuation marks can just be included literally. e.g. For the , key:
-      // Limitations of the syntax prevent certain characters from being matched, such as ", ', /, =, >, and .. For those characters you should check event.key inside the listener instead.
-      if (e.key === '=' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault()
-        e.stopPropagation()
-        ShortcutUtils.zoomIn()
-      }
-    },
     styles(type: string): Record<string, string> {
       return type === 'content' ? {
         width: `${this.config.width * this.contentScaleRatio}px`,
@@ -470,10 +490,14 @@ export default defineComponent({
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
-    wrapperStyles(): Record<string, string> {
-      return {
-        ...this.sizeStyles,
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
+    handleSpecialCharacter(e: KeyboardEvent) {
+      // For those using keyCode in their codebase, we recommend converting them to their kebab-cased named equivalents.
+      // The keys for some punctuation marks can just be included literally. e.g. For the , key:
+      // Limitations of the syntax prevent certain characters from being matched, such as ", ', /, =, >, and .. For those characters you should check event.key inside the listener instead.
+      if (e.key === '=' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault()
+        e.stopPropagation()
+        ShortcutUtils.zoomIn()
       }
     },
     snapLineStyles(dir: string, pos: number, isGuideline?: string) {
@@ -562,7 +586,6 @@ export default defineComponent({
       pageUtils.addPageToPos(pageUtils.newPage({
         width: this.pageState.config.width,
         height: this.pageState.config.height,
-        backgroundColor: this.pageState.config.backgroundColor,
         physicalWidth: this.pageState.config.physicalWidth,
         physicalHeight: this.pageState.config.physicalHeight,
         isEnableBleed: this.pageState.config.isEnableBleed,
@@ -592,7 +615,7 @@ export default defineComponent({
         return
       }
       GroupUtils.deselect()
-      const page = generalUtils.deepCopy(this.config) as IPage
+      const page = generalUtils.deepCopy(this.pageState.config) as IPage
       page.layers.forEach(l => {
         l.id = generalUtils.generateRandomString(8)
         if (l.type === LayerType.frame) {
@@ -715,7 +738,7 @@ export default defineComponent({
       }
     },
     disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }
@@ -787,9 +810,6 @@ export default defineComponent({
   position: relative;
   box-sizing: content-box;
   outline: none;
-  // &:empty {
-  //   background-color: setColor(gray-4);
-  // }
 }
 .scale-container {
   width: 0px;
@@ -801,11 +821,16 @@ export default defineComponent({
 
 .page-highlighter {
   position: absolute;
-  top: -2px;
-  left: -2px;
-  border: 2px solid setColor(blue-2);
+  top: 0px;
+  left: 0px;
+  outline: 2px solid setColor(blue-2);
   z-index: setZindex("page-highlighter");
   pointer-events: none;
+  box-sizing: border-box;
+  &--mobile {
+    outline: none;
+    box-shadow: 0px 0px 7px setColor(gray-2, 0.4);
+  }
 }
 .page-control {
   position: absolute;

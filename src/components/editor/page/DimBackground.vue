@@ -55,6 +55,7 @@ div(v-else-if="isBgImgCtrl" class="dim-background")
   //-     :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
 
 </template>
+
 <script lang="ts">
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import { IImage } from '@/interfaces/layer'
@@ -211,9 +212,9 @@ export default defineComponent({
   pointer-events: none;
   position: absolute;
   top: 0px;
-  bottom: 0px;
+  bottom: -1px; // To prevent sub-pixel, push bottom/right 1px out.
   left: 0px;
-  right: 0px;
+  right: -1px;
   transform: rotate(0deg); // for .dim-background__content-area to respect to
   &__backdrop{
     position: absolute;

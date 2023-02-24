@@ -1,18 +1,35 @@
 <template lang="pug">
-div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @pointerdown="setInBgSettingMode")
+div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
   div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
-    nu-adjust-image(v-if="isAdjustImage"
-          :src="finalSrc"
-          :styles="adjustImgStyles"
-          :page="page"
-          :contentScaleRatio="contentScaleRatio"
-          @error="onError")
-    img(v-else-if="src"
+    svg(v-if="isAdjustImage"
+      class="nu-background-image__svg"
+      :viewBox="svgViewBox"
+      preserveAspectRatio="none"
+      role="image")
+      defs
+        filter(:id="filterId"
+          color-interpolation-filters="sRGB")
+          component(v-for="(elm, idx) in svgFilterElms"
+            :key="`${filterId + idx}`"
+            :is="elm.tag"
+            v-bind="elm.attrs")
+            component(v-for="child in elm.child"
+              :key="child.tag"
+              :is="child.tag"
+              v-bind="child.attrs")
+              //- class="nu-background-image__adjust-picture"
+      image(:xlink:href="finalSrc" ref="img"
+        class="nu-background-image__adjust-image"
+        :filter="`url(#${filterId})`"
+        :width="svgImageWidth"
+        :height="svgImageHeight"
+        @error="onError"
+        @load="onLoad")
+    img(v-else-if="src" ref="img"
       :src="finalSrc"
       draggable="false"
-      class="body"
-      ref="body"
-      @error="onError")
+      @error="onError"
+      @load="onLoad")
   div(:style="filterContainerStyles()" class="filter-container")
     component(v-for="(elm, idx) in cssFilterElms"
       :key="`cssFilter${idx}`"
@@ -32,9 +49,11 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import ImageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
 import unitUtils from '@/utils/unitUtils'
+import doubleTapUtils from '@/utils/doubleTapUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
+import { IBrowserInfo } from '@/store/module/user'
 
 export default defineComponent({
   emits: [],
@@ -209,9 +228,10 @@ export default defineComponent({
     },
     isAdjustImage(): boolean {
       const { styles } = this.image.config
-      return Object
-        .values(styles.adjust || {})
-        .some(val => typeof val === 'number' && val !== 0)
+      const entries = Object
+        .entries(styles.adjust || {})
+        .filter(([key, val]) => typeof val === 'number' && val !== 0)
+      return entries.length > 1 || (entries.length === 1 && entries[0][0] !== 'halation')
     },
     adjustImgStyles(): { [key: string]: string | number } {
       return Object.assign(generalUtils.deepCopy(this.image.config.styles), {
@@ -238,6 +258,43 @@ export default defineComponent({
         elms.push(...imageAdjustUtil.getHalation(adjust.halation, position))
       }
       return elms
+    },
+    svgImageWidth(): number {
+      const { imgWidth } = this.image.config.styles
+      // return imgWidth * this.contentScaleRatio
+      return Math.round(imgWidth * this.contentScaleRatio)
+    },
+    svgImageHeight(): number {
+      const { imgHeight } = this.image.config.styles
+      // return imgHeight * this.contentScaleRatio
+      return Math.round(imgHeight * this.contentScaleRatio)
+    },
+    svgViewBox(): string {
+      return `0 0 ${this.svgImageWidth} ${this.svgImageHeight}`
+    },
+    svgFilterElms(): any[] {
+      const { adjust } = this.image.config.styles
+      return imageAdjustUtil.convertAdjustToSvgFilter(adjust || {}, { styles: this.image.config.styles } as IImage)
+    },
+    filterId(): string {
+      const browserInfo = this.$store.getters['user/getBrowserInfo'] as IBrowserInfo
+      const browserIsSafari = browserInfo.name === 'Safari' && browserInfo.version !== '16.3' && generalUtils.OSversionCheck({ greaterThen: '16.0', lessThen: '16.3' })
+      const osIsIos = browserInfo.os.family === 'iOS' && browserInfo.os.version !== '16.3' && generalUtils.OSversionCheck({ greaterThen: '16.0', lessThen: '16.3', version: browserInfo.os.version })
+      if (browserIsSafari || osIsIos) {
+        const { styles: { adjust }, id: layerId } = this.image.config
+        const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
+        const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
+        return `filter__${id}`
+      } else {
+        const randomId = generalUtils.generateRandomString(5)
+        return `filter__${randomId}`
+      }
+    },
+    imageFilter(): string {
+      if (this.svgFilterElms.length) {
+        return `url(#${this.filterId})`
+      }
+      return ''
     }
   },
   methods: {
@@ -245,7 +302,8 @@ export default defineComponent({
     ...mapActions('brandkit', ['updateLogos']),
     ...mapMutations({
       setBgImageSrc: 'SET_backgroundImageSrc',
-      setBgImgConfig: 'imgControl/SET_BG_CONFIG'
+      setBgImgConfig: 'imgControl/SET_BG_CONFIG',
+      setBgImageControl: 'SET_backgroundImageControl'
     }),
     onError() {
       let updater
@@ -270,6 +328,17 @@ export default defineComponent({
         } catch (error) {
         }
       }
+    },
+    dblTap(e: PointerEvent) {
+      doubleTapUtils.click(e, {
+        doubleClickCallback: () => {
+          this.setBgImageControl({
+            pageIndex: this.pageIndex,
+            imgControl: true
+          })
+          editorUtils.setCurrActivePanel('crop')
+        }
+      })
     },
     handleIsTransparent() {
       const img = new Image()
@@ -419,6 +488,17 @@ export default defineComponent({
       width: 100%;
       height: 100%;
     }
+  }
+
+  &__adjust-image {
+    // will-change: contents;
+  }
+
+  &__svg {
+    display: block;
+    height: 100%;
+    position: absolute;
+    width: 100%;
   }
 }
 

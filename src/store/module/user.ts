@@ -1,21 +1,31 @@
 /* eslint-disable camelcase */
-import { ActionTree, MutationTree, GetterTree } from 'vuex'
-import * as Sentry from '@sentry/browser'
 import userApis from '@/apis/user'
-import uploadUtils from '@/utils/uploadUtils'
-import { IGroupDesignInputParams, IUserAssetsData, IUserFontContentData } from '@/interfaces/api'
-import modalUtils from '@/utils/modalUtils'
-import themeUtils from '@/utils/themeUtils'
 import i18n from '@/i18n'
+import { IGroupDesignInputParams, IUserAssetsData, IUserFontContentData } from '@/interfaces/api'
 // import apiUtils from '@/utils/apiUtils'
 import logUtils from '@/utils/logUtils'
+import modalUtils from '@/utils/modalUtils'
+import themeUtils from '@/utils/themeUtils'
+import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
+import * as Sentry from '@sentry/browser'
+import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
 const SET_TOKEN = 'SET_TOKEN' as const
 const SET_STATE = 'SET_STATE' as const
 const SET_ADMIN_MODE = 'SET_ADMIN_MODE' as const
+const SET_BroswerInfo = 'SET_BroswerInfo' as const
 
+export interface IBrowserInfo {
+  name: string,
+  version: string,
+  os: {
+    family?: string,
+    version?: string
+  }
+}
 export interface IUserModule {
+  browserInfo: IBrowserInfo,
   token: string,
   uname: string,
   shortName: string,
@@ -65,6 +75,14 @@ export interface IUserModule {
 }
 
 const getDefaultState = (): IUserModule => ({
+  browserInfo: {
+    name: '',
+    version: '',
+    os: {
+      family: '',
+      version: ''
+    }
+  },
   token: '',
   uname: '',
   shortName: '',
@@ -225,6 +243,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   showAllAdminTool(state) {
     return state.role === 0 && state.enableAdminView
+  },
+  getBrowserInfo(state) {
+    return state.browserInfo
   }
 }
 
@@ -245,6 +266,12 @@ const mutations: MutationTree<IUserModule> = {
   },
   [SET_ADMIN_MODE](state: IUserModule, mode: boolean) {
     state.adminMode = mode
+  },
+  [SET_BroswerInfo](state: IUserModule, browserInfo: Partial<IBrowserInfo>) {
+    state.browserInfo = {
+      ...state.browserInfo,
+      ...browserInfo
+    }
   }
 }
 

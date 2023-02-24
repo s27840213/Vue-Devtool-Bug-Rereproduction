@@ -1,4 +1,6 @@
 <template lang="pug">
+metainfo
+  template(v-slot:title ="{ content }") {{ content ? `${content}` : `SITE_NAME` }}
 div(id="app" :style="appStyles()")
   link(rel="preconnect" href="https://fonts.googleapis.com")
   link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="")
@@ -22,6 +24,7 @@ div(id="app" :style="appStyles()")
     modal-card
   notifications(group="copy"
     position="top center"
+    :style="notificationStyles()"
     width="300px"
     :max="2"
     :duration="2000")
@@ -30,6 +33,7 @@ div(id="app" :style="appStyles()")
         v-html="item.text")
   notifications(group="error"
     position="top center"
+    :style="notificationStyles()"
     width="300px"
     :max="1"
     :duration="5000")
@@ -39,16 +43,16 @@ div(id="app" :style="appStyles()")
 </template>
 
 <script lang="ts">
+import DebugTool from '@/components/componentLog/DebugTool.vue'
+import ModalCard from '@/components/modal/ModalCard.vue'
+import ResInfo from '@/components/modal/ResInfo.vue'
+import Popup from '@/components/popup/Popup.vue'
+import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
-import Popup from '@/components/popup/Popup.vue'
-import ResInfo from '@/components/modal/ResInfo.vue'
-import ModalCard from '@/components/modal/ModalCard.vue'
-import DebugTool from '@/components/componentLog/DebugTool.vue'
-import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
+import popupUtils from './utils/popupUtils'
 
 export default defineComponent({
   emits: [],
@@ -70,6 +74,11 @@ export default defineComponent({
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
+
+    if ((window as any).__PRERENDER_INJECTED !== undefined) {
+      document.dispatchEvent(new Event('render-event'))
+      window.dispatchEvent(new Event('render-event'))
+    }
   },
   beforeMount() {
     networkUtils.registerNetworkListener()
@@ -86,7 +95,7 @@ export default defineComponent({
     }),
     currLocale(): string {
       return localeUtils.currLocale()
-    }
+    },
   },
   methods: {
     ...mapMutations('text', {
@@ -135,6 +144,12 @@ export default defineComponent({
         },
         events: ['dblclick', 'click', 'contextmenu']
         // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
+      }
+    },
+    notificationStyles() {
+      return {
+        margin: this.$isTouchDevice() ? '48px 5px 0 0' : '',
+        fontSize: this.$isTouchDevice() ? '12px' : '16px'
       }
     }
   }

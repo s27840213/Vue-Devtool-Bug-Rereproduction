@@ -17,6 +17,7 @@ div(class="page-preview-plus"
   div(v-if="actionType === 'drag'"
     class="page-preview-plus-drag")
 </template>
+
 <script lang="ts">
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -141,7 +142,6 @@ export default defineComponent({
         pageUtils.newPage(refPage ? {
           width: refPage.width,
           height: refPage.height,
-          backgroundColor: refPage.backgroundColor,
           physicalWidth: refPage.physicalWidth,
           physicalHeight: refPage.physicalHeight,
           isEnableBleed: refPage.isEnableBleed,

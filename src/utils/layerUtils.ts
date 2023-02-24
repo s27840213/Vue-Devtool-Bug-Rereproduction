@@ -22,6 +22,7 @@ import uploadUtils from './uploadUtils'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
+  get currSubSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSubSelectedInfo }
   get pageIndex(): number { return pageUtils.currFocusPageIndex }
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
@@ -212,7 +213,7 @@ class LayerUtils {
     })
   }
 
-  getSelectedLayer(): IShape | IText | IImage | IGroup | IFrame |ITmp {
+  getSelectedLayer(): IShape | IText | IImage | IGroup | IFrame | ITmp {
     return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)
   }
 
@@ -303,7 +304,7 @@ class LayerUtils {
     })
   }
 
-  getLayerPageIntersectRatio(pageIndex: number, layer: IShape | IText | IImage | IGroup | IFrame |ITmp) {
+  getLayerPageIntersectRatio(pageIndex: number, layer: IShape | IText | IImage | IGroup | IFrame | ITmp) {
     const pageInfo = store.getters.getPage(pageIndex) as IPage
 
     const pageRectInfo = { x: 0, y: 0, width: pageInfo.width, height: pageInfo.height, scale: 0, rotate: 0 }
@@ -315,8 +316,8 @@ class LayerUtils {
     return intersectArea / polygon2.area()
   }
 
-  resizeLayerConfig(pageIndex: number, layer: IShape | IText | IImage | IGroup | IFrame |ITmp, toPageCenter = false, resizeRatio = 0.8) : (IText | IShape | IImage | IGroup | ITmp | IFrame) {
-    const { width: initBoundingWidth, height: initBoundingHeight } = mathUtils.getBounding({ styles: layer.styles as IStyle })
+  resizeLayerConfig(pageIndex: number, layer: IShape | IText | IImage | IGroup | IFrame | ITmp, toPageCenter = false, resizeRatio = 0.8): (IText | IShape | IImage | IGroup | ITmp | IFrame) {
+    const { width: initBoundingWidth, height: initBoundingHeight } = mathUtils.getBounding(layer.styles as IStyle)
     const boundingboxAspectRatio = initBoundingWidth / initBoundingHeight
     const pageSize = store.getters.getPageSize(pageIndex)
     const pageAspectRatio = pageSize.width / pageSize.height
@@ -435,7 +436,7 @@ class LayerUtils {
         Object.assign(layer.styles, defaultStyles)
         break
       }
-      default : {
+      default: {
         Object.assign(layer.styles, defaultStyles)
       }
     }
@@ -452,7 +453,7 @@ class LayerUtils {
     return layer
   }
 
-  isOutOfBoundary(pageIndex?: number, layer?: IShape | IText | IImage | IGroup | IFrame |ITmp): boolean {
+  isOutOfBoundary(pageIndex?: number, layer?: IShape | IText | IImage | IGroup | IFrame | ITmp): boolean {
     const pageInfo = store.getters.getPage(pageIndex ?? this.currSelectedInfo.pageIndex) as IPage
     const targetLayer = layer ?? this.getSelectedLayer()
 

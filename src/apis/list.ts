@@ -1,11 +1,11 @@
 import axios from '@/apis'
-import authToken from './auth-token'
-import localeUtils from '@/utils/localeUtils'
 import {
   IListServiceParams,
   IListServiceResponse
 } from '@/interfaces/api'
 import store from '@/store'
+import localeUtils from '@/utils/localeUtils'
+import authToken from './auth-token'
 
 class ListService {
   getList(params: IListServiceParams) {
@@ -89,6 +89,7 @@ class ListService {
       token: authToken().token,
       type,
       design_id: id,
+      locale: localeUtils.currLocale(),
       ...params
     }
     if (!data.token) return new Promise(resolve => resolve({ flag: 1 }))
@@ -123,7 +124,8 @@ class ListService {
       data: {
         token: authToken().token || '',
         type: 'color',
-        design_id: color
+        design_id: color,
+        locale: localeUtils.currLocale()
       }
     })
   }

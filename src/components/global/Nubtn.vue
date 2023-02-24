@@ -1,5 +1,5 @@
 <template lang="pug">
-div(:class="`nubtn ${theme} ${sizeClass} ${status} ${$isTouchDevice?'mobile':'desktop'}`"
+div(:class="`nubtn ${theme} ${sizeClass} ${status} ${$isTouchDevice()?'mobile':'desktop'}`"
     v-hint="hint"
     @click="click")
   svg-icon(v-if="theme.includes('icon')"

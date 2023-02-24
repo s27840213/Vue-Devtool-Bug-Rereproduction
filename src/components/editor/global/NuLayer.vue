@@ -46,6 +46,7 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
     ref="lineMover"
     :id="`nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`")
 </template>
+
 <script lang="ts">
 import SquareLoading from '@/components/global/SqureLoading.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
@@ -254,8 +255,8 @@ export default defineComponent({
       }
     }
     if (this.primaryLayer && this.primaryLayer.type === LayerType.frame && this.config.type === LayerType.image) {
-      body.addEventListener(this.$isTouchDevice ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
-      body.addEventListener(this.$isTouchDevice ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
+      body.addEventListener(this.$isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+      body.addEventListener(this.$isTouchDevice() ? 'pointermove' : 'mousemove', this.onFrameMouseMove)
     }
   },
   unmounted() {
@@ -309,7 +310,7 @@ export default defineComponent({
       }
     },
     layerWrapperStyles(): any {
-      if (this.isImgCtrl || this.inFrame || this.$isTouchDevice || this.useMobileEditor) {
+      if (this.isImgCtrl || this.inFrame || this.$isTouchDevice() || this.useMobileEditor) {
         return {}
       }
       return { transform: `translateZ(${this.config.styles.zindex}px)`, ...this.transformStyle }
@@ -525,7 +526,7 @@ export default defineComponent({
       return this.config.locked
     },
     onRightClick(event: MouseEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         // in touch device, right click will be triggered by long click
         event.preventDefault()
         return
@@ -587,7 +588,7 @@ export default defineComponent({
       this.initPos.y = this.config.styles.y
     },
     disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }
@@ -688,8 +689,8 @@ export default defineComponent({
           imgY
         })
         const body = (this.$refs.body as HTMLElement[])[0]
-        body.addEventListener(this.$isTouchDevice ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
-        body.addEventListener(this.$isTouchDevice ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+        body.addEventListener(this.$isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+        body.addEventListener(this.$isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
       }
     },
     onFrameMouseLeave(e: MouseEvent | PointerEvent) {
@@ -712,8 +713,8 @@ export default defineComponent({
         })
       }
       const body = (this.$refs.body as HTMLElement[])[0]
-      body.removeEventListener(this.$isTouchDevice ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
-      body.removeEventListener(this.$isTouchDevice ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+      body.removeEventListener(this.$isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+      body.removeEventListener(this.$isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
     },
     onFrameMouseUp(e: MouseEvent) {
       this.hasHandledFrameMouseEnter = false
@@ -727,8 +728,8 @@ export default defineComponent({
         stepsUtils.record()
       }
       const body = (this.$refs.body as HTMLElement[])[0]
-      body.removeEventListener(this.$isTouchDevice ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
-      body.removeEventListener(this.$isTouchDevice ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+      body.removeEventListener(this.$isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+      body.removeEventListener(this.$isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
     },
     dragEnter(e: DragEvent) {
       if (this.primaryLayer && this.primaryLayer.type) {

@@ -18,6 +18,7 @@ div(class="all-pages")
           :iconName="'plus-origin'"
           :iconWidth="'25px'")
 </template>
+
 <script lang="ts">
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
@@ -84,7 +85,6 @@ export default defineComponent({
       pageUtils.addPageToPos(pageUtils.newPage(lastPage ? {
         width: lastPage.width,
         height: lastPage.height,
-        backgroundColor: lastPage.backgroundColor,
         physicalWidth: lastPage.physicalWidth,
         physicalHeight: lastPage.physicalHeight,
         isEnableBleed: lastPage.isEnableBleed,

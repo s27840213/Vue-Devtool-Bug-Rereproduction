@@ -292,7 +292,7 @@ export default defineComponent({
           const newConfig = TextPropUtils.spanParagraphPropertyHandler('fontFamily', updateItem, start, end, config as IText)
           this.updateLayerProps(layerUtils.layerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
           tiptapUtils.updateHtml(newConfig.paragraphs)
-          !this.$isTouchDevice && tiptapUtils.focus()
+          !this.$isTouchDevice() && tiptapUtils.focus()
         }
 
         AssetUtils.addAssetToRecentlyUsed({

@@ -31,15 +31,15 @@ div(class="home")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
-import NuHeader from '@/components/NuHeader.vue'
 import Animation from '@/components/Animation.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
 import TaBlock from '@/components/homepage/TaBlock.vue'
 import NuFooter from '@/components/NuFooter.vue'
+import NuHeader from '@/components/NuHeader.vue'
 import blocklistData, { IHomeBlockData } from '@/utils/homeBlockData'
 import _ from 'lodash'
+import { defineComponent } from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -63,6 +63,11 @@ export default defineComponent({
       ]
     }
   },
+  // setup() {
+  //   useMeta({
+  //     title: 'Home'
+  //   })
+  // },
   metaInfo() {
     return {
       title: `${this.$t('SE0001')}`,
@@ -177,6 +182,7 @@ export default defineComponent({
     }
   }
   &__button {
+    @include body-MD;
     margin-top: 25px;
     width: 216px;
     height: 44px;
@@ -201,9 +207,27 @@ export default defineComponent({
     height: 46px;
   }
 }
+.home-list {
+  width: 80%;
+}
 @media screen and (max-width: 768px) {
   .home-content {
-    padding: 0 24px;
+    padding: 0 5%;
+    // Always show scrollbar in mobile
+    overflow-y: overlay;
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+      visibility: visible;
+      border: none;
+    }
+    @include firefoxOnly {
+      scrollbar-color: setColor(gray-3) transparent;
+    }
+  }
+  .home-list, .home-block {
+    width: 100%;
   }
   .home-top {
     min-height: 400px;
@@ -235,7 +259,7 @@ export default defineComponent({
     }
     &__button {
       position: fixed;
-      width: 70%;
+      width: calc(90% - 40px);
       bottom: 30px;
       z-index: 1;
     }

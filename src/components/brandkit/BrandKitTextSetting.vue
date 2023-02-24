@@ -42,15 +42,15 @@ div(class="brand-kit-text-setting relative")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import ValueSelector from '@/components/ValueSelector.vue'
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
+import ValueSelector from '@/components/ValueSelector.vue'
 import { IBrandTextStyle } from '@/interfaces/brandkit'
-import { fontSelectValue } from '@/utils/textPropUtils'
-import vClickOutside from 'click-outside-vue3'
 import brandkitUtils from '@/utils/brandkitUtils'
-import { mapActions, mapState } from 'vuex'
+import { fontSelectValue } from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapState } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -209,7 +209,7 @@ export default defineComponent({
     },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
-      const interval = setInterval(() => {
+      const interval = window.setInterval(() => {
         if (new Date().getTime() - startTime > 500) {
           try {
             this.fontSizeBuffer += step

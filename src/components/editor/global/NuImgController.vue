@@ -11,9 +11,9 @@ div(class="nu-img-controller")
         class="controller-point"
         :key="`scaler-${index}`"
         :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
-        @pointerdown.prevent.stop="$isTouchDevice ? null : scaleStart($event)"
-        @touchstart="$isTouchDevice ? null : disableTouchEvent($event)")
-    div(v-if="$isTouchDevice" v-for="(scaler, index) in controlPoints.scalerTouchAreas"
+        @pointerdown.prevent.stop="$isTouchDevice() ? null : scaleStart($event)"
+        @touchstart="$isTouchDevice() ? null : disableTouchEvent($event)")
+    div(v-if="$isTouchDevice()" v-for="(scaler, index) in controlPoints.scalerTouchAreas"
         class="controller-point"
         :key="`scaler-touch-${index}`"
         :style="(Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' }) as Record<string, string>)"
@@ -126,7 +126,7 @@ export default defineComponent({
         transform: `translate(${pos.x * this.contentScaleRatio}px, ${pos.y * this.contentScaleRatio}px) rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.imgWidth * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.contentScaleRatio}px`,
-        outline: `${2 * (100 / this.scaleRatio * this.contentScaleRatio)}px solid #7190CC`,
+        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`,
         'pointer-events': this.pointerEvents ?? 'initial'
       }
     },
@@ -306,9 +306,11 @@ export default defineComponent({
         height: (this.getImgHeight - this.config.styles.height * _layerScale) * 0.5
       }
 
+      const _f = this.$isTouchDevice() ? (this.scaleRatio * 0.01 * 1 / this.contentScaleRatio) : (100 / this.scaleRatio)
+
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      offsetPos.x = (offsetPos.x * _layerScale) * (100 / this.scaleRatio)
-      offsetPos.y = (offsetPos.y * _layerScale) * (100 / this.scaleRatio)
+      offsetPos.x = (offsetPos.x * _layerScale) * _f
+      offsetPos.y = (offsetPos.y * _layerScale) * _f
 
       const currLayer = LayerUtils.getCurrLayer
       if (this.primaryLayerIndex !== -1 && currLayer.type === 'group') {
@@ -371,7 +373,7 @@ export default defineComponent({
 
       const angleInRad = this.angleInRad
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
+      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y, this.$isTouchDevice() ? 1 / this.contentScaleRatio * this.scaleRatio * 0.01 : undefined)
       if (this.primaryLayerIndex !== -1 && currLayer.type === 'group') {
         const primaryScale = currLayer.styles.scale
         diff.offsetX /= primaryScale
@@ -486,7 +488,7 @@ export default defineComponent({
       this.setCursorStyle(el.style.cursor)
     },
     disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }

@@ -6,7 +6,7 @@ div(class="list")
       class="list-title__more body-MD text-gray-2"
       :to="moreLink")
       span {{$t('NN0082')}}
-  div(class="list-content" :style="listContentSytle")
+  div(class="list-content")
     div(v-if="prevIcon"
       class="list-content__lefticon"
       @click="scroll(false)")
@@ -36,10 +36,11 @@ div(class="list")
             span(class="body-XS text-gray-1") {{$t('NN0023')}}
         div(v-for="item in themeData"
           class="list-content-items__theme-item")
-          router-link(:to="`/editor?type=new-design-size&themeId=${item.id}&width=${item.width}&height=${item.height}`")
+          router-link(:to="themeRouteInfo(item)")
             img(class="list-content-items__theme-item-preset"
               :src="item.url"
-              @error="imgOnerror")
+              @error="imgOnerror"
+              @click="openProductPageNotification(item)")
           span(class="body-XS text-gray-1") {{item.title}}
           span(class="body-XXS text-gray-3") {{item.description}}
       //- type mydesign
@@ -58,16 +59,17 @@ div(class="list")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters } from 'vuex'
 import DesignItem from '@/components/homepage/DesignItem.vue'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 import ProItem from '@/components/payment/ProItem.vue'
-import themeUtils from '@/utils/themeUtils'
-import paymentUtils from '@/utils/paymentUtils'
 import { IAssetTemplate } from '@/interfaces/api'
 import { Itheme } from '@/interfaces/theme'
+import modalUtils from '@/utils/modalUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import templateCenterUtils from '@/utils/templateCenterUtils'
-import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
+import themeUtils from '@/utils/themeUtils'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -111,9 +113,6 @@ export default defineComponent({
     ...mapGetters({
       mydesignData: 'design/getAllDesigns'
     }),
-    listContentSytle(): Record<string, string> {
-      return { width: this.type === 'theme' ? 'fit-content' : '80vw' }
-    }
   },
   created() {
     switch (this.type) {
@@ -186,6 +185,18 @@ export default defineComponent({
       }).href
     },
     clickTemplate(item: IAssetTemplate) {
+      if (this.$isTouchDevice() && this.theme === '7') {
+        modalUtils.setModalInfo(
+            `${this.$t('NN0808')}`,
+            [],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+        )
+        return
+      }
       const template = templateCenterUtils.iAssetTemplate2Template(item, 4)
       if (!paymentUtils.checkProTemplate(template)) return
       window.open(this.templateUrl(item), '_blank')
@@ -197,6 +208,26 @@ export default defineComponent({
       return {
         height: `${height}px`,
         width: `${match_cover.width / match_cover.height * height}px`
+      }
+    },
+    themeRouteInfo(theme: Itheme) {
+      if (this.$isTouchDevice() && theme.id === 7) {
+        return ''
+      } else {
+        return `/editor?type=new-design-size&themeId=${theme.id}&width=${theme.width}&height=${theme.height}`
+      }
+    },
+    openProductPageNotification(theme: Itheme) {
+      if (this.$isTouchDevice() && theme.id === 7) {
+        modalUtils.setModalInfo(
+              `${this.$t('NN0808')}`,
+              [],
+              {
+                msg: `${this.$t('NN0358')}`,
+                class: 'btn-blue-mid',
+                action: () => { return false }
+              }
+        )
       }
     }
   }
@@ -216,7 +247,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   position: relative;
-  max-width: 80vw;
+  width: 100%;
   &__lefticon,
   &__righticon {
     position: absolute;

@@ -111,7 +111,7 @@ export default defineComponent({
       this.showContent = !this.showContent
     },
     disableTouchEvent(e: TouchEvent) {
-      if (this.$isTouchDevice) {
+      if (this.$isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }

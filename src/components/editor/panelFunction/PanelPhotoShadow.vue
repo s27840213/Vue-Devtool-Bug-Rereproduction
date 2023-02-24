@@ -37,7 +37,7 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
             :style="{ backgroundColor: currentStyle.shadow.effects.color || '#000000' }"
             @click="handleColorModal")
         div(class="photo-effect-setting__reset")
-          button(@click="reset()") {{ 'Reset' }}
+          button(@click="reset()") {{ $t('NN0754') }}
     div(class="flex-between photo-effect-setting__options mb-10")
       svg-icon(v-for="(icon, idx) in shadowOption.slice(3)"
         :key="`shadow-${icon}`"
@@ -75,21 +75,21 @@ div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
           :style="{ backgroundColor: currentEffect === 'frame' ? currentStyle.shadow.effects.frameColor : currentStyle.shadow.effects.color || '#000000' }"
           @click="handleColorModal")
       div(class="photo-effect-setting__reset")
-        button(@click="reset()") {{ 'Reset' }}
+        button(@click="reset()") {{ $t('NN0754') }}
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import ColorPicker from '@/components/ColorPicker.vue'
-import colorUtils from '@/utils/colorUtils'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { ColorEventType, FunctionPanelType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
+import editorUtils from '@/utils/editorUtils'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
-import { IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
-import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
-import editorUtils from '@/utils/editorUtils'
 
 export default defineComponent({
   components: {

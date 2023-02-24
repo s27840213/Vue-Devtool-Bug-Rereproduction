@@ -7,7 +7,7 @@ div(class="snap-area"
   div(v-for="line in closestSnaplines.h"
     class="snap-area__line snap-area__line--hr"
     :style="snapLineStyles('h', line)")
-  template(v-if="isShowGuideline")
+  template(v-if="isShowGuideline && !useMobileEditor")
     div(v-for="(line,index) in guidelines.v"
       class="snap-area__line snap-area__line--vr"
       :style="snapLineStyles('v', line, true)"
@@ -44,6 +44,10 @@ export default defineComponent({
     snapUtils: {
       type: SnapUtils,
       required: true
+    },
+    contentScaleRatio: {
+      type: Number,
+      required: true
     }
   },
   data() {
@@ -68,7 +72,8 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       groupType: 'getGroupType',
-      lockGuideline: 'getLockGuideline'
+      lockGuideline: 'getLockGuideline',
+      useMobileEditor: 'getUseMobileEditor'
     }),
     isShowGuideline(): boolean {
       return rulerUtils.showGuideline
@@ -88,8 +93,8 @@ export default defineComponent({
   methods: {
     wrapperStyles(): Record<string, string> {
       return {
-        width: `${this.config.width * (this.scaleRatio / 100)}px`,
-        height: `${this.config.height * (this.scaleRatio / 100)}px`,
+        width: `${this.config.width * this.contentScaleRatio * (this.scaleRatio / 100)}px`,
+        height: `${this.config.height * this.contentScaleRatio * (this.scaleRatio / 100)}px`,
         transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
       }
     },
@@ -100,7 +105,7 @@ export default defineComponent({
           : dir === 'h' ? bleeds.top
             : 0
       }
-      pos = pos * (this.scaleRatio / 100)
+      pos = pos * (this.scaleRatio * this.contentScaleRatio / 100)
       return dir === 'v' ? {
         height: '100%',
         width: '1px',
@@ -123,7 +128,7 @@ export default defineComponent({
       this.closestSnaplines.h = []
     },
     showGuideline(pos: number, type: string, index: number) {
-      this.guidelineTimer = setTimeout(() => {
+      this.guidelineTimer = window.setTimeout(() => {
         if (!rulerUtils.isDragging) {
           rulerUtils.deleteGuideline(
             index,
@@ -143,6 +148,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .snap-area {
   @include size(100%, 100%);
+  z-index: setZindex(snap-area);
   position: absolute;
   top: 0;
   left: 0;

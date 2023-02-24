@@ -40,14 +40,13 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 :key="child.tag"
                 :is="child.tag"
                 v-bind="child.attrs")
-        g
-          g(:filter="`url(#${filterId})`")
-            image(:xlink:href="finalSrc" ref="img"
-              class="nu-image__picture"
-              draggable="false"
-              @error="onError"
-              @load="onLoad")
-      img(v-else-if="src" ref="img"
+        image(:xlink:href="finalSrc" ref="img"
+          :filter="`url(#${filterId})`"
+          class="nu-image__picture"
+          draggable="false"
+          @error="onError"
+          @load="onLoad")
+      img(v-else ref="img"
         :style="flipStyles()"
         :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation() }"
         :src="finalSrc"
@@ -68,6 +67,7 @@ import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/img
 import { IFrame, IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
+import { IBrowserInfo } from '@/store/module/user'
 import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -334,10 +334,18 @@ export default defineComponent({
       return this.src
     },
     filterId(): string {
-      const { styles: { adjust }, id: layerId } = this.config
-      const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
-      const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
-      return `filter__${id}`
+      const browserInfo = this.$store.getters['user/getBrowserInfo'] as IBrowserInfo
+      const browserIsSafari = browserInfo.name === 'Safari' && browserInfo.version !== '16.3' && generalUtils.OSversionCheck({ greaterThen: '16.0', lessThen: '16.3' })
+      const osIsIos = browserInfo.os.family === 'iOS' && browserInfo.os.version !== '16.3' && generalUtils.OSversionCheck({ greaterThen: '16.0', lessThen: '16.3', version: browserInfo.os.version })
+      if (browserIsSafari || osIsIos) {
+        const { styles: { adjust }, id: layerId } = this.config
+        const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
+        const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
+        return `filter__${id}`
+      } else {
+        const randomId = generalUtils.generateRandomString(5)
+        return `filter__${randomId}`
+      }
     },
     showCanvas(): boolean {
       const { subLayerIndex, handleId } = this
@@ -383,7 +391,7 @@ export default defineComponent({
       return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
-      return pageUtils.removeBleedsFromPageSize(this.page)
+      return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
     parentLayerDimension(): number | string {
       const { width, height } = this.config.parentLayerStyles || {}

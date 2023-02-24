@@ -16,12 +16,13 @@ div(class="design-item")
 </template>
 
 <script lang="ts">
+import { IDesign } from '@/interfaces/design'
+import designUtils from '@/utils/designUtils'
+import imageUtils from '@/utils/imageUtils'
+import modalUtils from '@/utils/modalUtils'
+import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
 import { mapMutations } from 'vuex'
-import imageUtils from '@/utils/imageUtils'
-import vClickOutside from 'click-outside-vue3'
-import designUtils from '@/utils/designUtils'
-import { IDesign } from '@/interfaces/design'
 
 export default defineComponent({
   emits: [],
@@ -91,6 +92,18 @@ export default defineComponent({
       }
     },
     handleClick() {
+      if (this.$isTouchDevice() && this.config.group_type === 1) {
+        modalUtils.setModalInfo(
+            `${this.$t('NN0808')}`,
+            [],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+        )
+        return
+      }
       designUtils.setDesign(this.config)
     },
     checkImageSize() {

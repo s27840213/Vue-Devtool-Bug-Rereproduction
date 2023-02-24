@@ -67,11 +67,11 @@ div(class="folder-item")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'click-outside-vue3'
 import { IDesign, IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   props: {
@@ -331,7 +331,7 @@ export default defineComponent({
           clearTimeout(this.messageTimer)
         }
         this.isShowHint = true
-        this.messageTimer = setTimeout(() => {
+        this.messageTimer = window.setTimeout(() => {
           this.isShowHint = false
           this.messageTimer = -1
         }, 3000)

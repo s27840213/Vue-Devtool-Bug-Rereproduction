@@ -74,6 +74,10 @@ div(ref="body"
             :class="{'selected': selectedSorting === sortingCriterium.key}"
             @click="handleSelectSorting(sortingCriterium.key)") {{ sortingCriterium.text }}
       div(class="template-center__sorter__right")
+    template-no-result(v-if="hasNoResult"
+                      :keyword="searchbarKeyword"
+                      :allHashTagAll="allHashTagAll"
+                      @updateHashTagsAll="handleSelectAll")
     template-waterfall(:waterfallTemplates="waterfallTemplates"
                       :isTemplateReady="isTemplateReady"
                       :useScrollablePreview="!isMobile"
@@ -145,21 +149,23 @@ div(ref="body"
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
-import hashtag from '@/store/module/hashtag'
-import vClickOutside from 'click-outside-vue3'
-import SearchBar from '@/components/SearchBar.vue'
-import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
+import NuHeader from '@/components/NuHeader.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import HashtagCategoryRow from '@/components/templates/HashtagCategoryRow.vue'
+import TemplateNoResult from '@/components/templates/TemplateNoResult.vue'
 import TemplateWaterfall from '@/components/templates/TemplateWaterfall.vue'
 import { IContentTemplate, ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
+import hashtag from '@/store/module/hashtag'
+import generalUtils from '@/utils/generalUtils'
+import modalUtils from '@/utils/modalUtils'
+import paymentUtils from '@/utils/paymentUtils'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import themeUtils from '@/utils/themeUtils'
-import generalUtils from '@/utils/generalUtils'
-import paymentUtils from '@/utils/paymentUtils'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 const HEADER_HEIGHT = 72
 
@@ -171,7 +177,8 @@ export default defineComponent({
     SearchBar,
     NuFooter,
     HashtagCategoryRow,
-    TemplateWaterfall
+    TemplateWaterfall,
+    TemplateNoResult
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -340,6 +347,12 @@ export default defineComponent({
       } else {
         return this.waterfallTemplatesTAB
       }
+    },
+    hasNoResult(): boolean {
+      return this.isTemplateReady && this.templates.list.length === 0
+    },
+    allHashTagAll(): boolean {
+      return !Object.values(this.hashtagSelections).some((hashtagSelection) => hashtagSelection.selection.length !== 0)
     }
   },
   methods: {
@@ -387,8 +400,26 @@ export default defineComponent({
       this.selectedSorting = sortingCriterium
       this.composeKeyword()
     },
+    handleSelectAll() {
+      for (const hashtagSelection of Object.values(this.hashtagSelections)) {
+        hashtagSelection.selection = []
+      }
+      this.composeKeyword()
+    },
     handleClickWaterfall(template: ITemplate) {
       if (template.group_type === 1) {
+        if (this.$isTouchDevice()) {
+          modalUtils.setModalInfo(
+            `${this.$t('NN0808')}`,
+            [],
+            {
+              msg: `${this.$t('NN0358')}`,
+              class: 'btn-blue-mid',
+              action: () => { return false }
+            }
+          )
+          return
+        }
         if (!paymentUtils.checkProTemplate(template)) return
         const route = this.$router.resolve({
           name: 'Editor',
@@ -446,20 +477,32 @@ export default defineComponent({
       })
     },
     composeKeyword() {
+      const query = {} as {[key: string]: string}
       const res = ['group::0']
       const tags = []
       let themes: string[] = []
       if (this.searchbarKeyword !== '') {
         tags.push(this.searchbarKeyword)
+        query.q = this.searchbarKeyword
       }
+      let queryTags = [] as string[]
       for (const hashtagSelection of Object.values(this.hashtagSelections)) {
         if (hashtagSelection.type === 'tag' && hashtagSelection.selection.length > 0) {
           tags.push(hashtagSelection.selection.join(' '))
+          queryTags = queryTags.concat(hashtagSelection.selection)
         }
         if (hashtagSelection.type === 'theme') {
           themes = themes.concat(hashtagSelection.selection)
         }
       }
+      if (queryTags.length > 0) {
+        query.tags = queryTags.join(',')
+      }
+      if (themes.length > 0) {
+        query.themes = themes.join(',')
+      }
+      query.sort = this.selectedSorting
+      this.$router.replace({ query })
       if (tags.length > 0) {
         res.push('tag::' + tags.join('&&'))
       }
