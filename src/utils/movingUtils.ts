@@ -2,6 +2,7 @@ import { ICoordinate } from '@/interfaces/frame'
 import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
+import { nextTick } from 'vue'
 import controlUtils from './controlUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
 import formatUtils from './formatUtils'
@@ -552,7 +553,9 @@ export class MovingUtils {
             }
           }
           if (this.config.contentEditable) {
-            tiptapUtils.focus({ scrollIntoView: false }, this.isTouchDevice ? 'end' : null)
+            nextTick(() => {
+              tiptapUtils.focus({ scrollIntoView: false }, this.isTouchDevice ? 'end' : null)
+            })
             if (!this.config.isEdited) {
               setTimeout(() => {
                 tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
