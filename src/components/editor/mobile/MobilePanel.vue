@@ -98,6 +98,7 @@ import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
+import formatUtils from '@/utils/formatUtils'
 import frameUtils from '@/utils/frameUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -203,23 +204,20 @@ export default defineComponent({
     inSelectionState(): boolean {
       return this.currActivePanel === 'none' && this.inMultiSelectionMode
     },
-    inCopyMode(): boolean {
-      return this.currActivePanel === 'none' && this.hasCopiedFormat
-    },
     whiteTheme(): boolean {
       const whiteThemePanel = [
         'bleed', 'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
-        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list']
+        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style']
 
-      return this.inSelectionState || this.inCopyMode || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
+      return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
       return ['brand-list'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return this.inSelectionState || this.inCopyMode || [
+      return this.inSelectionState || [
         'bleed', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust', 'brand-list'].includes(this.currActivePanel)
@@ -242,12 +240,12 @@ export default defineComponent({
         case 'crop': {
           return `${this.$t('NN0496')}`
         }
+        case 'copy-style': {
+          return `${this.$t('NN0809')}`
+        }
         case 'none': {
           if (this.inMultiSelectionMode) {
             return `${this.$t('NN0657')}`
-          }
-          if (this.hasCopiedFormat) {
-            return `${this.$t('NN0809')}`
           }
           return ''
         }
@@ -263,20 +261,23 @@ export default defineComponent({
       return this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel)
     },
     hideDynamicComp(): boolean {
-      return this.currActivePanel === 'crop' || this.inSelectionState
+      return ['crop', 'copy-style'].includes(this.currActivePanel) || this.inSelectionState
     },
     noRowGap(): boolean {
-      return this.inSelectionState || this.inCopyMode || ['crop', 'color'].includes(this.currActivePanel)
+      return this.inSelectionState || ['crop', 'color', 'copy-style'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
+      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file'].includes(this.currActivePanel)
       return Object.assign(
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
           'row-gap': this.noRowGap ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
-            ? 'initial' : this.panelDragHeight + 'px'
-        }
+            ? 'initial' : this.panelDragHeight + 'px',
+        },
+        // Prevent MobilePanel collapse
+        isSidebarPanel ? { height: '100%' } : {}
       )
     },
     innerTab(): string {
@@ -445,6 +446,7 @@ export default defineComponent({
     },
     rightButtonAction(): () => void {
       return () => {
+        console.log(this.currActivePanel)
         switch (this.currActivePanel) {
           case 'crop': {
             if (this.selectedLayerNum > 0) {
@@ -474,6 +476,11 @@ export default defineComponent({
             break
           }
 
+          case 'copy-style': {
+            formatUtils.clearCopiedFormat()
+            break
+          }
+
           case 'color': {
             if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
               this.addRecentlyColors(colorUtils.currColor)
@@ -497,12 +504,14 @@ export default defineComponent({
         editorUtils.setInMultiSelectionMode(false)
       }
     },
-    currActivePanel(newVal) {
+    currActivePanel(newVal, oldVal) {
       this.panelHistory = []
       this.innerTabIndex = 0
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
-      this.panelDragHeight = newVal === 'none' ? 0 : this.initPanelHeight()
+      if (oldVal === 'none') { // Prevent reset height when switch panel
+        this.panelDragHeight = newVal === 'none' ? 0 : this.initPanelHeight()
+      }
     },
     showMobilePanel(newVal) {
       if (!newVal) {

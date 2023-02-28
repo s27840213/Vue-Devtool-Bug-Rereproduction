@@ -69,6 +69,8 @@ export default defineComponent({
       disableTabScroll: false,
       leftOverflow: false,
       rightOverflow: false,
+      clickedTab: '',
+      clickedTabTimer: -1,
       homeTabs: [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
         { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
@@ -202,7 +204,7 @@ export default defineComponent({
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
-        { icon: 'copy-style', text: `${this.$t('NN0035')}` }
+        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
         // { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
       ]
     },
@@ -562,9 +564,6 @@ export default defineComponent({
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
-      if (tab.icon !== 'copy-style' && this.hasCopiedFormat) {
-        formatUtils.clearCopiedFormat()
-      }
       if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
         editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
       }
@@ -758,6 +757,14 @@ export default defineComponent({
       if (tab.panelType !== undefined) {
         this.$emit('switchTab', tab.panelType, tab.props)
       }
+
+      if (['copy', 'paste'].includes(tab.icon)) {
+        this.clickedTab = tab.icon
+        notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
+        this.clickedTabTimer = window.setTimeout(() => {
+          this.clickedTab = ''
+        }, 800)
+      }
     },
     targetIs(type: string): boolean {
       if (this.isGroup) {
@@ -785,11 +792,14 @@ export default defineComponent({
       }
     },
     tabActive(tab: IFooterTab): boolean {
+      if ((this.inMultiSelectionMode && tab.icon === 'multiple-select')) {
+        return true
+      }
       if (this.currTab === 'color') {
         return this.currTab === tab.panelType &&
           ((colorUtils.currEvent === 'setTextColor' && tab.icon === 'text-color-mobile') ||
           (colorUtils.currEvent !== 'setTextColor' && tab.icon === 'color'))
-      } else return this.currTab === tab.panelType
+      } else return this.currTab === tab.panelType || this.clickedTab === tab.icon
     },
     handleLockedNotify() {
       notify({ group: 'copy', text: i18n.global.tc('NN0804') })

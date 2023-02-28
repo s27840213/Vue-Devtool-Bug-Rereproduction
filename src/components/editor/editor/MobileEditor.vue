@@ -15,7 +15,7 @@ div(class="mobile-editor")
     transition(name="panel-up"
               @before-enter="beforeEnter"
               @after-leave="afterLeave")
-      mobile-panel(v-show="showMobilePanel || inMultiSelectionMode || hasCopiedFormat"
+      mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
         :currActivePanel="currActivePanel"
         :currPage="currPage"
         @switchTab="switchTab"
@@ -155,8 +155,7 @@ export default defineComponent({
       isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       currActivePanel: 'mobileEditor/getCurrActivePanel',
-      showMobilePanel: 'mobileEditor/getShowMobilePanel',
-      hasCopiedFormat: 'getHasCopiedFormat'
+      showMobilePanel: 'mobileEditor/getShowMobilePanel'
     }),
     inPagePanel(): boolean {
       return SidebarPanelType.page === this.currPanel

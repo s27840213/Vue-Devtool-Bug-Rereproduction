@@ -206,9 +206,27 @@ export default defineComponent({
     height: 46px;
   }
 }
+.home-list {
+  width: 80%;
+}
 @media screen and (max-width: 768px) {
   .home-content {
-    padding: 0 24px;
+    padding: 0 5%;
+    // Always show scrollbar in mobile
+    overflow-y: overlay;
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+      visibility: visible;
+      border: none;
+    }
+    @include firefoxOnly {
+      scrollbar-color: setColor(gray-3) transparent;
+    }
+  }
+  .home-list, .home-block {
+    width: 100%;
   }
   .home-top {
     min-height: 400px;
