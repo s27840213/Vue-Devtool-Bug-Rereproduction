@@ -132,13 +132,11 @@ export default defineComponent({
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         const finalValue = parseFloat(value) / layerUtils.getCurrLayer.styles.scale
         const compensation = textPropUtils.getScaleCompensation(finalValue)
-        window.requestAnimationFrame(() => {
-          textPropUtils.applyScaleCompensation(compensation.scale)
-          tiptapUtils.spanStyleHandler('size', compensation.size, false)
-          tiptapUtils.forceUpdate(true)
-          textPropUtils.updateTextPropsState({ fontSize: compensation.size.toString() })
-          textEffectUtils.refreshSize()
-        })
+        textPropUtils.applyScaleCompensation(compensation.scale)
+        tiptapUtils.spanStyleHandler('size', compensation.size, false)
+        tiptapUtils.forceUpdate(true)
+        textPropUtils.updateTextPropsState({ fontSize: compensation.size.toString() })
+        textEffectUtils.refreshSize()
       }
     },
     fontSizeStepping(step: number, tickInterval = 100) {
