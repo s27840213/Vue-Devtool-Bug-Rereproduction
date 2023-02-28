@@ -16,7 +16,6 @@ import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
 import { IGroup, ILayer } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
-import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
@@ -74,13 +73,14 @@ export default defineComponent({
         return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
       },
       set(value: number): void {
-        layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-        tiptapUtils.applySpanStyle('size', value)
-        tiptapUtils.agent(editor => {
-          layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-        })
+        // layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
+        value = this.boundValue(value, this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
+        const finalValue = value / layerUtils.getCurrLayer.styles.scale
+        const compensation = textPropUtils.getScaleCompensation(finalValue)
+        textPropUtils.applyScaleCompensation(compensation.scale)
+        tiptapUtils.spanStyleHandler('size', compensation.size)
         tiptapUtils.forceUpdate(true)
-        textPropUtils.updateTextPropsState({ fontSize: value.toString() })
+        textPropUtils.updateTextPropsState({ fontSize: compensation.size.toString() })
         textEffectUtils.refreshSize()
       }
     }
@@ -88,6 +88,9 @@ export default defineComponent({
   methods: {
     handleChangeStop() {
       stepsUtils.record()
+    },
+    boundValue(value: number, min: number, max: number): number {
+      return Math.max(Math.min(value, max), min)
     }
   }
 })
