@@ -936,7 +936,7 @@ class TextPropUtils {
     return isMulti ? undefined : origin
   }
 
-  fontSizeStepping(step: number) {
+  fontSizeAllModifier(modifier: (size: number, reverse?: boolean) => number) {
     const currLayer = layerUtils.getCurrLayer
     if (currLayer.type === 'text' || (['tmp', 'group'].includes(currLayer.type) && layerUtils.subLayerIdx !== -1)) {
       tiptapUtils.agent(editor => {
@@ -952,7 +952,7 @@ class TextPropUtils {
 
         if (selection.empty) {
           const sAttrs = tiptapUtils.generateSpanStyle(editor.storage.nuTextStyle.spanStyle)
-          sAttrs.size += step
+          sAttrs.size = modifier(sAttrs.size)
           editor.storage.nuTextStyle.spanStyle = tiptapUtils.textStyles(sAttrs)
           editor.chain().focus().setMark('textStyle', sAttrs).run()
           this.updateTextPropsState({ fontSize: sAttrs.size })
@@ -988,7 +988,7 @@ class TextPropUtils {
                   itemAfter.text = textAfter
                   const spanAttrsAfter = itemAfter.marks?.[0]?.attrs
                   if (spanAttrsAfter) {
-                    spanAttrsAfter.size += step
+                    spanAttrsAfter.size = modifier(spanAttrsAfter.size)
                   }
                   newSpans.splice(j, 1, itemBefore, itemAfter)
                   splitHandled = true
@@ -1002,13 +1002,13 @@ class TextPropUtils {
                   itemBefore.text = textBefore
                   const spanAttrsBefore = itemBefore.marks?.[0]?.attrs
                   if (spanAttrsBefore) {
-                    spanAttrsBefore.size += step
+                    spanAttrsBefore.size = modifier(spanAttrsBefore.size)
                   }
                   const textAfter = text.substring(to.textOffset - splitLength)
                   itemAfter.text = textAfter
                   const spanAttrsAfter = itemAfter.marks?.[0]?.attrs
                   if (spanAttrsAfter && startSplit && endSIndex === startSIndex) { // if this span has been startSplit
-                    spanAttrsAfter.size -= step
+                    spanAttrsAfter.size = modifier(spanAttrsAfter.size, true)
                   }
                   newSpans.splice(realSIndex, 1, itemBefore, itemAfter)
                   splitHandled = true
@@ -1017,7 +1017,7 @@ class TextPropUtils {
                   const realSIndex = startSplit ? j + 1 : j
                   const spanAttrs = newSpans[realSIndex].marks?.[0]?.attrs
                   if (spanAttrs) {
-                    spanAttrs.size += step
+                    spanAttrs.size = modifier(spanAttrs.size)
                   }
                 }
               }
@@ -1025,7 +1025,7 @@ class TextPropUtils {
               paragraphs[i].content = newSpans
             } else {
               const pAttrs = paragraphs[i].attrs ?? {}
-              pAttrs.size += step
+              pAttrs.size = modifier(pAttrs.size)
             }
           }
           editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
@@ -1038,14 +1038,26 @@ class TextPropUtils {
     } else if (['group', 'tmp'].includes(currLayer.type)) {
       (currLayer as IGroup | ITmp).layers
         .forEach((l, idx) => {
-          l.type === 'text' && this.propAppliedAllText(layerUtils.layerIndex, idx, 'size', step)
+          l.type === 'text' && this.propAppliedAllText(layerUtils.layerIndex, idx, 'size', 0, modifier)
           l.type === 'text' && textUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, this.layerIndex, idx)
         })
       this.updateTextPropsState()
     }
   }
 
-  propAppliedAllText(layerIndex: number, subLayerIndex: number, prop: 'size' | 'fontSpacing' | 'lineHeight', payload: number) {
+  fontSizeStepping(step: number) {
+    this.fontSizeAllModifier((size: number, reverse = false) => {
+      return reverse ? size - step : size + step
+    })
+  }
+
+  fontSizeGaining(gain: number) {
+    this.fontSizeAllModifier((size: number, reverse = false) => {
+      return reverse ? size / gain : size * gain
+    })
+  }
+
+  propAppliedAllText(layerIndex: number, subLayerIndex: number, prop: 'size' | 'fontSpacing' | 'lineHeight', payload: number, modifier?: (propValue: number) => number) {
     if (subLayerIndex === -1) return
 
     const primaryLayer = (layerUtils.getLayer(layerUtils.pageIndex, layerIndex) as IGroup)
@@ -1053,14 +1065,14 @@ class TextPropUtils {
       const targetLayer = primaryLayer.layers[subLayerIndex] as IText
       const paragraphs = GeneralUtils.deepCopy(targetLayer.paragraphs) as Array<IParagraph>
       paragraphs.forEach(p => {
-        if (prop === 'size') {
-          Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) += payload)
+        if (modifier) {
+          Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = modifier((p.styles[prop] as number)))
         } else {
           Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = payload)
         }
         p.spans.forEach(s => {
-          if (prop === 'size') {
-            Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) += payload)
+          if (modifier) {
+            Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) = modifier((p.styles[prop] as number)))
           } else {
             Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) = payload)
           }
@@ -1352,17 +1364,19 @@ class TextPropUtils {
     return res / 1.333333
   }
 
-  getScaleCompensation(size: number): { scale: number, size: number } {
+  getScaleCompensation(size: number): { scale: number, size: number, needCompensation: boolean } {
     const minimumFontSize = this.getMinimumFontSize()
     if (size < minimumFontSize) {
       return {
         size: minimumFontSize,
-        scale: size / minimumFontSize
+        scale: size / minimumFontSize,
+        needCompensation: true
       }
     } else {
       return {
         size,
-        scale: 1
+        scale: 1,
+        needCompensation: false
       }
     }
   }
