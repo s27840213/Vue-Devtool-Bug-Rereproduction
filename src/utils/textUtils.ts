@@ -1194,7 +1194,7 @@ class TextUtils {
 
   setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
     if (GeneralUtils.isValidFloat(_value.toString())) {
-      _value = parseFloat(GeneralUtils.boundValue(_value, this.fieldRange[prop].min, this.fieldRange[prop].max))
+      _value = GeneralUtils.boundValue(_value, this.fieldRange[prop].min, this.fieldRange[prop].max)
 
       let preprocessedValue: number
       switch (prop) {

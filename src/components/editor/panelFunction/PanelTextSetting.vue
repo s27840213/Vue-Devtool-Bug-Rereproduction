@@ -451,12 +451,6 @@ export default defineComponent({
         TextPropUtils.updateTextPropsState({ textAlign: prop })
       }
     },
-    isValidInt(value: string) {
-      return value.match(/^-?\d+$/)
-    },
-    isValidFloat(value: string) {
-      return value.match(/[+-]?\d+(\.\d+)?/)
-    },
     isValidHexColor(value: string) {
       return isValidHexColor(value)
     },

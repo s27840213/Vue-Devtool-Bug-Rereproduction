@@ -121,10 +121,8 @@ class GeneralUtils {
     return value.match(/[+-]?\d+(\.\d+)?/)
   }
 
-  boundValue(value: number, min: number, max: number): string {
-    if (value < min) return min.toString()
-    else if (value > max) return max.toString()
-    return value.toString()
+  boundValue(value: number, min: number, max: number): number {
+    return Math.max(Math.min(value, max), min)
   }
 
   copyText(text: string) {

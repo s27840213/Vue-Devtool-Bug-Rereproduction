@@ -20,6 +20,7 @@ div(class="font-size-selector size-bar relative")
 import ValueSelector from '@/components/ValueSelector.vue'
 import { IGroup, ILayer } from '@/interfaces/layer'
 import eventUtils from '@/utils/eventUtils'
+import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -96,17 +97,6 @@ export default defineComponent({
     }
   },
   methods: {
-    isValidInt(value: string) {
-      return value.match(/^-?\d+$/)
-    },
-    isValidFloat(value: string) {
-      return value.match(/[+-]?\d+(\.\d+)?/)
-    },
-    boundValue(value: number, min: number, max: number): string {
-      if (value < min) return min.toString()
-      else if (value > max) return max.toString()
-      return value.toString()
-    },
     handleValueModal() {
       if (this.$isTouchDevice()) return
       this.openValueSelector = !this.openValueSelector
@@ -119,24 +109,14 @@ export default defineComponent({
     handleValueUpdate(value: number) {
       // layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
       value = value / layerUtils.getCurrLayer.styles.scale
-      const compensation = textPropUtils.getScaleCompensation(value)
-      textPropUtils.applyScaleCompensation(compensation.scale)
-      tiptapUtils.spanStyleHandler('size', compensation.size)
-      tiptapUtils.forceUpdate(true)
-      textPropUtils.updateTextPropsState({ fontSize: compensation.size.toString() })
-      textEffectUtils.refreshSize()
+      textPropUtils.fontSizeHandler(value)
     },
     setSize(e: Event) {
-      let { value } = e.target as HTMLInputElement
-      if (this.isValidFloat(value)) {
-        value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
-        const finalValue = parseFloat(value) / layerUtils.getCurrLayer.styles.scale
-        const compensation = textPropUtils.getScaleCompensation(finalValue)
-        textPropUtils.applyScaleCompensation(compensation.scale)
-        tiptapUtils.spanStyleHandler('size', compensation.size, false)
-        tiptapUtils.forceUpdate(true)
-        textPropUtils.updateTextPropsState({ fontSize: compensation.size.toString() })
-        textEffectUtils.refreshSize()
+      const { value } = e.target as HTMLInputElement
+      if (generalUtils.isValidFloat(value)) {
+        const boundedValue = generalUtils.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
+        const finalValue = boundedValue / layerUtils.getCurrLayer.styles.scale
+        textPropUtils.fontSizeHandler(finalValue)
       }
     },
     fontSizeStepping(step: number, tickInterval = 100) {

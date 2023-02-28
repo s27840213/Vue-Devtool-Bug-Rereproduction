@@ -7,6 +7,7 @@ import { LayerType } from '@/store/types'
 import { nextTick } from 'vue'
 import GeneralUtils from './generalUtils'
 import layerUtils from './layerUtils'
+import textEffectUtils from './textEffectUtils'
 import textUtils from './textUtils'
 import tiptapUtils from './tiptapUtils'
 
@@ -1404,6 +1405,15 @@ class TextPropUtils {
         }, sIdx)
       }
     }
+  }
+
+  fontSizeHandler(value: number) {
+    const compensation = this.getScaleCompensation(value)
+    this.applyScaleCompensation(compensation.scale)
+    tiptapUtils.spanStyleHandler('size', compensation.size)
+    tiptapUtils.forceUpdate(true)
+    this.updateTextPropsState({ fontSize: compensation.size.toString() })
+    textEffectUtils.refreshSize()
   }
 }
 
