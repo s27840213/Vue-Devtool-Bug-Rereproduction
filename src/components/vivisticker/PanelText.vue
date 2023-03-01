@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="panel-text" :class="{'in-category': isInCategory}")
+div(class="panel-text rwd-container" :class="{'in-category': isInCategory}")
   search-bar(v-if="!isInCategory"
     class="panel-text__searchbar"
     :class="{'no-top': isInEditor}"
@@ -339,7 +339,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  padding: 0 24px;
   &__searchbar {
     margin-top: 24px;
     margin-bottom: 14px;

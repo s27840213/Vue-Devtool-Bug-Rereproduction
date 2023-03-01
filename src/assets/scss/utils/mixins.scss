@@ -19,6 +19,31 @@
   }
 }
 
+// for vivisticker
+@mixin layout-tablet {
+  @media screen and (min-width: 768px) and (orientation: portrait), screen and (min-height: 768px) and (orientation: landscape) {
+    @content;
+  }
+}
+
+// for vivisticker
+@mixin layout-landscape {
+  @media (orientation: landscape) {
+    @content;
+  }
+}
+
+// for vivisticker
+@mixin rwd-container {
+  padding: 0 24px;
+  @include layout-tablet{
+    padding: 0 5%;
+    @include layout-landscape{
+      padding: 0 18%;
+    }
+  }
+}
+
 @mixin firefoxOnly {
 
   // Only for Firefox, https://stackoverflow.com/a/32455002

@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="panel-bg" :class="{'in-category': isInCategory}")
+div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
   tabs(v-if="!isInCategory"
         class="panel-bg__tabs"
         :tabs="[$tc('NN0002', 2),$t('NN0017')]"
@@ -522,7 +522,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  padding: 0 24px;
   position: relative;
   &__tabs {
     margin-top: 24px;

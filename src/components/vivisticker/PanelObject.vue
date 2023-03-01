@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="panel-objects")
+div(class="panel-objects rwd-container")
   tabs(v-if="!isInCategory"
       class="panel-objects__tabs"
       :tabs="[$t('NN0758'), 'GIFs', $t('NN0759')]"
@@ -93,7 +93,6 @@ export default defineComponent({
   @include size(100%, 100%);
   display: grid;
   grid-template-rows: auto auto 1fr;
-  padding: 0 24px;
   &__tabs {
     margin-top: 24px;
   }
