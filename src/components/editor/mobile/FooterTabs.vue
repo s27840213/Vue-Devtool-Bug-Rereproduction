@@ -509,8 +509,8 @@ export default defineComponent({
       return {
         transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
         opacity: `${this.contentEditable ? 0 : 1}`,
-        borderTop: this.contentEditable ? 'none' : '0.5px solid #D9DBE1',
-        boxShadow: this.contentEditable ? 'none' : '0px 0px 6px 0px  #3C3C3C0D'
+        borderTop: !this.contentEditable && this.useWhiteTheme ? '0.5px solid #D9DBE1' : 'none',
+        boxShadow: !this.contentEditable && this.useWhiteTheme ? '0px 0px 6px 0px  #3C3C3C0D' : 'none'
         // maskImage: this.contentEditable ? 'none'
         //   : `linear-gradient(to right,
         //   transparent 0, black ${this.leftOverflow ? '56px' : 0},
@@ -848,7 +848,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .footer-tabs {
-  overflow: hidden;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
