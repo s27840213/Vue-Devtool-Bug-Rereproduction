@@ -55,7 +55,7 @@ Cypress.Commands.add('layerOrder', { prevSubject: 'element' }, (subjectFront, su
 Cypress.Commands.add('layerCopy', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
     .get('.nu-page .nu-layer').then((oldLayers) => {
-      cy.get('.header-bar, .funciton-panel').find('.svg-copy').click()
+      cy.get('.header-bar, .function-panel').find('.svg-copy').click()
         .get('.nu-page .nu-layer').should('have.length', oldLayers.length + 1)
         .snapshotTest('Copy layer')
         // Restore layer to original state

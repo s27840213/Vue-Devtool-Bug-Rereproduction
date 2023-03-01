@@ -150,6 +150,7 @@ div(:layer-index="`${layerIndex}`"
         @click="MappingUtils.mappingIconAction('lock')")
       svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'")
 </template>
+
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
@@ -547,17 +548,15 @@ export default defineComponent({
       const aspectRatio = this.$isTouchDevice() ? 0.24 : 0.16
 
       const isHorizon = width > height
-      const sizeForWidth = this.getLayerWidth() * this.contentScaleRatio - 10
-      const sizeForHeight = this.getLayerHeight() * this.contentScaleRatio - 10
+      const sizeForWidth = this.getLayerWidth() * this.scaleRatio / 100 * this.contentScaleRatio - 10
+      const sizeForHeight = this.getLayerHeight() * this.scaleRatio / 100 * this.contentScaleRatio - 10
 
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
         width: isHorizon && tooSmall ? `${sizeForWidth * scale}px`
-          : resizerStyle.width,
-        // : (tooSmall ? `${sizeForHeight * aspectRatio * scale}px` : resizerStyle.width),
+          : (tooSmall ? `${sizeForHeight * aspectRatio * scale}px` : resizerStyle.width),
         height: !isHorizon && tooSmall ? `${sizeForHeight * scale}px`
-          : resizerStyle.height
-        // : (tooSmall ? `${sizeForWidth * aspectRatio * scale}px` : resizerStyle.height)
+          : (tooSmall ? `${sizeForWidth * aspectRatio * scale}px` : resizerStyle.height)
       }
       return Object.assign(resizerStyle, HW)
     },

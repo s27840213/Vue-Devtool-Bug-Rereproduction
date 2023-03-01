@@ -18,6 +18,7 @@ div(class="footer-tabs" ref="tabs" :style="rootStyles")
         span(class="body-3 no-wrap click-disabled"
         :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
+
 <script lang="ts">
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import i18n from '@/i18n'
@@ -68,6 +69,8 @@ export default defineComponent({
       disableTabScroll: false,
       leftOverflow: false,
       rightOverflow: false,
+      clickedTab: '',
+      clickedTabTimer: -1,
       homeTabs: [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
         { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
@@ -93,7 +96,8 @@ export default defineComponent({
       InBgRemoveLastStep: 'bgRemove/inLastStep',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
+      hasCopiedFormat: 'getHasCopiedFormat'
     }),
     layerNum(): number {
       return this.currSelectedInfo.layers.length
@@ -200,7 +204,7 @@ export default defineComponent({
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
-        { icon: 'copy-style', text: `${this.$t('NN0035')}` }
+        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
         // { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
       ]
     },
@@ -241,7 +245,7 @@ export default defineComponent({
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        { icon: 'copy-style', text: `${this.$t('NN0035')}` }
+        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
       ]
     },
     bgSettingTab(): Array<IFooterTab> {
@@ -421,12 +425,6 @@ export default defineComponent({
       })
       return new Set(types)
     },
-    isInFirstStep(): boolean {
-      return stepsUtils.isInFirstStep
-    },
-    isInLastStep(): boolean {
-      return stepsUtils.isInLastStep
-    },
     isInFrame(): boolean {
       const layer = layerUtils.getCurrLayer
       return layer.type === LayerType.frame && (layer as IFrame).clips[0].srcObj.assetId !== ''
@@ -560,6 +558,9 @@ export default defineComponent({
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
+      if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
+        editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
+      }
       switch (tab.icon) {
         case 'crop': {
           if (this.selectedLayerNum > 0) {
@@ -716,7 +717,11 @@ export default defineComponent({
           break
         }
         case 'copy-style': {
-          this.handleCopyFormat()
+          if (this.hasCopiedFormat) {
+            formatUtils.clearCopiedFormat()
+          } else {
+            this.handleCopyFormat()
+          }
           break
         }
         case 'effect': {
@@ -746,6 +751,14 @@ export default defineComponent({
       if (tab.panelType !== undefined) {
         this.$emit('switchTab', tab.panelType, tab.props)
       }
+
+      if (['copy', 'paste'].includes(tab.icon)) {
+        this.clickedTab = tab.icon
+        notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
+        this.clickedTabTimer = window.setTimeout(() => {
+          this.clickedTab = ''
+        }, 800)
+      }
     },
     targetIs(type: string): boolean {
       if (this.isGroup) {
@@ -773,11 +786,14 @@ export default defineComponent({
       }
     },
     tabActive(tab: IFooterTab): boolean {
+      if ((this.inMultiSelectionMode && tab.icon === 'multiple-select')) {
+        return true
+      }
       if (this.currTab === 'color') {
         return this.currTab === tab.panelType &&
           ((colorUtils.currEvent === 'setTextColor' && tab.icon === 'text-color-mobile') ||
           (colorUtils.currEvent !== 'setTextColor' && tab.icon === 'color'))
-      } else return this.currTab === tab.panelType
+      } else return this.currTab === tab.panelType || this.clickedTab === tab.icon
     },
     handleLockedNotify() {
       notify({ group: 'copy', text: i18n.global.tc('NN0804') })

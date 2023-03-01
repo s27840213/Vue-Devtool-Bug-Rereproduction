@@ -1,18 +1,6 @@
 <template lang="pug">
-div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode")
+div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
   div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
-    //- nu-adjust-image(v-if="isAdjustImage"
-    //-       :src="finalSrc"
-    //-       :styles="adjustImgStyles"
-    //-       :page="page"
-    //-       :contentScaleRatio="contentScaleRatio"
-    //-       @error="onError")
-    //- img(v-else-if="src"
-    //-   :src="finalSrc"
-    //-   draggable="false"
-    //-   class="body"
-    //-   ref="body"
-    //-   @error="onError")
     svg(v-if="isAdjustImage"
       class="nu-background-image__svg"
       :viewBox="svgViewBox"
@@ -61,10 +49,11 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import ImageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
 import unitUtils from '@/utils/unitUtils'
+import doubleTapUtils from '@/utils/doubleTapUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
-import { BrowserInfo } from '@/store/module/user'
+import { IBrowserInfo } from '@/store/module/user'
 
 export default defineComponent({
   emits: [],
@@ -288,8 +277,10 @@ export default defineComponent({
       return imageAdjustUtil.convertAdjustToSvgFilter(adjust || {}, { styles: this.image.config.styles } as IImage)
     },
     filterId(): string {
-      const browserInfo = this.$store.getters['user/getBrowserInfo'] as BrowserInfo
-      if (browserInfo.name === 'Safari' && +browserInfo.version >= 16 && +browserInfo.version < 16.3) {
+      const browserInfo = this.$store.getters['user/getBrowserInfo'] as IBrowserInfo
+      const browserIsSafari = browserInfo.name === 'Safari' && browserInfo.version !== '16.3' && generalUtils.OSversionCheck({ greaterThen: '16.0', lessThen: '16.3' })
+      const osIsIos = browserInfo.os.family === 'iOS' && browserInfo.os.version !== '16.3' && generalUtils.OSversionCheck({ greaterThen: '16.0', lessThen: '16.3', version: browserInfo.os.version })
+      if (browserIsSafari || osIsIos) {
         const { styles: { adjust }, id: layerId } = this.image.config
         const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
         const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
@@ -311,7 +302,8 @@ export default defineComponent({
     ...mapActions('brandkit', ['updateLogos']),
     ...mapMutations({
       setBgImageSrc: 'SET_backgroundImageSrc',
-      setBgImgConfig: 'imgControl/SET_BG_CONFIG'
+      setBgImgConfig: 'imgControl/SET_BG_CONFIG',
+      setBgImageControl: 'SET_backgroundImageControl'
     }),
     onError() {
       let updater
@@ -336,6 +328,17 @@ export default defineComponent({
         } catch (error) {
         }
       }
+    },
+    dblTap(e: PointerEvent) {
+      doubleTapUtils.click(e, {
+        doubleClickCallback: () => {
+          this.setBgImageControl({
+            pageIndex: this.pageIndex,
+            imgControl: true
+          })
+          editorUtils.setCurrActivePanel('crop')
+        }
+      })
     },
     handleIsTransparent() {
       const img = new Image()

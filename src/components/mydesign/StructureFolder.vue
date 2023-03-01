@@ -22,10 +22,11 @@ section
                   :folder="subFolder" :level="level+1"
                   :parents="[...parents, folder.id]")
 </template>
+
 <script lang="ts">
-import { defineComponent } from 'vue'
 import { IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
+import { defineComponent } from 'vue'
 import { mapActions, mapMutations } from 'vuex'
 
 export default defineComponent({
