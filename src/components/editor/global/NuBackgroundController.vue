@@ -180,9 +180,9 @@ export default defineComponent({
           break
         }
         case 'move': {
-          const { mobilePysicalSize: { pageCenterPos, pageSize } } = this.page
+          const { contentScaleRatio, mobilePysicalSize: { pageCenterPos, pageSize } } = this.page
           const { styles } = this.config
-          const _sizeRatio = pageSize.width / styles.width
+          const _sizeRatio = contentScaleRatio
 
           if (!this.initPinchPos) {
             this.initPinchPos = { x: event.x, y: event.y }
