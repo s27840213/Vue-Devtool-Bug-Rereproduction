@@ -30,9 +30,8 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
 <script lang="ts">
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
-import { IGroup, IParagraph, ISpan, IText } from '@/interfaces/layer'
+import { IGroup, ISpan, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
-import controlUtils from '@/utils/controlUtils'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
@@ -43,7 +42,6 @@ import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import _ from 'lodash'
 import { defineComponent, PropType } from 'vue'
-import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -95,7 +93,6 @@ export default defineComponent({
       },
       isLoading: true,
       svgBG: {} as ReturnType<typeof textBgUtils.drawSvgBg>,
-      widthLimitSetDuringComposition: false
     }
   },
   created() {
@@ -108,12 +105,6 @@ export default defineComponent({
     this.resizeAfterFontLoaded()
   },
   computed: {
-    ...mapState(['isMoving']),
-    ...mapGetters({
-      scaleRatio: 'getPageScaleRatio',
-      getDefaultFontsList: 'text/getDefaultFontsList',
-      currSelectedInfo: 'getCurrSelectedInfo'
-    }),
     spanEffect(): Record<string, unknown> {
       return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
     },
@@ -142,14 +133,7 @@ export default defineComponent({
         extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody as Record<string, string>),
         extraSpan: textShadow.duplicatedSpan as Record<string, string>
       }
-      // const textBgSpan = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
-      // const duplicatedTextBgSpan = textBgSpan.duplicatedBody || textBgSpan.duplicatedSpan
-      // const textBgSpanCss = {
-      //   extraBody: Object.assign(duplicatedBodyBasicCss, textBgSpan.duplicatedBody),
-      //   extraSpan: textBgSpan.duplicatedSpan
-      // }
       return [
-        // ...(duplicatedTextBgSpan ? [textBgSpanCss] : []),
         ...(duplicatedTextShadow ? [textShadowCss] : []),
         {} // Original text, don't have extra css
       ]
@@ -187,163 +171,6 @@ export default defineComponent({
     }
   },
   methods: {
-    handleTextCompositionEnd(toRecord: boolean) {
-      if (this.widthLimitSetDuringComposition && this.subLayerIndex === -1) {
-        this.widthLimitSetDuringComposition = false
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
-        this.textSizeRefresh(this.config, false)
-      }
-      if (toRecord) {
-        this.waitFontLoadingAndRecord()
-      }
-    },
-    waitFontLoadingAndRecord() {
-      const pageId = this.page.id
-      const layerId = this.config.id
-      textUtils.waitFontLoadingAndRecord(this.config.paragraphs, () => {
-        const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
-        if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
-        textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
-      })
-    },
-    waitFontLoadingAndResize() {
-      const pageId = this.page.id
-      const layerId = this.primaryLayer ? this.primaryLayer.id : this.config.id
-      const subLayerId = this.primaryLayer ? this.config.id : ''
-      textUtils.untilFontLoaded(this.config.paragraphs).then(() => {
-        setTimeout(() => {
-          const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId, subLayerId)
-          if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
-          textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
-        }, 100)
-      })
-    },
-    checkIfCurve(config: IText): boolean {
-      const { textShape } = config.styles
-      return textShape && textShape.name === 'curve'
-    },
-    calcSize(config: IText, composing: boolean) {
-      if (this.subLayerIndex === -1) {
-        this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, composing)
-      } else {
-        this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex, this.subLayerIndex)
-      }
-    },
-    curveTextSizeRefresh(text: IText) {
-      if (this.subLayerIndex === -1) {
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textShapeUtils.getCurveTextProps(text))
-      } else {
-        const { height: heightOri } = text.styles
-        const curveTextHW = textShapeUtils.getCurveTextHW(text)
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, textShapeUtils.getCurveTextPropsByHW(text, curveTextHW))
-        textUtils.asSubLayerSizeRefresh(this.pageIndex, this.layerIndex, this.subLayerIndex, curveTextHW.areaHeight, heightOri)
-        textUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
-      }
-    },
-    textSizeRefresh(text: IText, composing: boolean) {
-      const isVertical = this.config.styles.writingMode.includes('vertical')
-      const getSize = () => isVertical ? this.config.styles.height : this.config.styles.width
-      let widthLimit = this.config.rotate ? getSize() : this.config.widthLimit
-      let textHW = textUtils.getTextHW(text, widthLimit)
-      let layerX = this.config.styles.x
-      let layerY = this.config.styles.y
-      if (widthLimit === -1) {
-        // const pageSize = (this.$parent.$el as HTMLElement)
-        //   .getBoundingClientRect()[isVertical ? 'height' : 'width'] / (this.scaleRatio * 0.01)
-        const pageSize = this.page[isVertical ? 'height' : 'width']
-        const currTextSize = textHW[isVertical ? 'height' : 'width']
-
-        let layerPos = this.config.styles[isVertical ? 'y' : 'x'] - (currTextSize - getSize()) / 2
-        const reachLeftLimit = layerPos <= 0
-        const reachRightLimit = layerPos + currTextSize >= pageSize
-
-        if (reachLeftLimit && reachRightLimit) {
-          if (composing) this.widthLimitSetDuringComposition = true
-          textHW = textUtils.getTextHW(text, pageSize)
-          layerPos = 0
-          widthLimit = pageSize
-        } else if (reachLeftLimit || reachRightLimit) {
-          if (composing) this.widthLimitSetDuringComposition = true
-          widthLimit = currTextSize
-          textHW = textUtils.getTextHW(text, widthLimit)
-          layerPos = reachLeftLimit ? 0 : pageSize - widthLimit
-        }
-        layerX = isVertical ? layerX : layerPos
-        layerY = isVertical ? layerPos : layerY
-      } else {
-        const initData = {
-          xSign: 1,
-          ySign: 1,
-          x: this.config.styles.x,
-          y: this.config.styles.y,
-          angle: this.config.styles.rotate * Math.PI / 180
-        }
-        const offsetSize = {
-          width: isVertical ? textHW.width - this.config.styles.width : 0,
-          height: isVertical ? 0 : textHW.height - this.config.styles.height
-        }
-        const trans = controlUtils.getTranslateCompensation(initData, offsetSize)
-        layerX = trans.x
-        layerY = trans.y
-      }
-
-      if (isVertical && textHW.width < 5) {
-        textHW.width = this.config.styles.width
-      } else if (!isVertical && textHW.height < 5) {
-        const config = generalUtils.deepCopy(text) as IText
-        config.paragraphs[0].spans[0].text = '|'
-        config.paragraphs.splice(1)
-        textHW.height = textUtils.getTextHW(config).height
-      }
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
-      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-        width: textHW.width,
-        height: textHW.height,
-        x: layerX,
-        y: layerY
-      })
-    },
-    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
-      const config = generalUtils.deepCopy(this.config)
-      config.paragraphs = payload.paragraphs
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs }, this.subLayerIndex)
-      this.calcSize(config, !!tiptapUtils.editor?.view?.composing)
-      if (payload.toRecord) {
-        this.waitFontLoadingAndRecord()
-      } else {
-        this.waitFontLoadingAndResize()
-      }
-      if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
-        // if composing starts from empty line, isSetContentRequired will be true in the first typing.
-        // However, setContent will break the composing, so skip setContent when composing.
-        // setContent will be done when 'composeend' (in NuTextEditor.vue)
-        this.$nextTick(() => {
-          tiptapUtils.agent(editor => {
-            editor.chain().setContent(tiptapUtils.toJSON(payload.paragraphs)).selectPrevious().run()
-          })
-        })
-      }
-    },
-    textBodyStyle() {
-      const textstyles = {
-        width: '100%',
-        height: '100%',
-        userSelect: this.config.contentEditable ? 'text' : 'none'
-        // opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
-      }
-      return !this.isCurveText ? textstyles : {
-        width: 'auto',
-        height: 'auto',
-        position: 'absolute',
-        outline: 'none',
-        top: 0,
-        left: 0
-        // opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
-      }
-    },
-    textHtml(): any {
-      return tiptapUtils.toJSON(this.config.paragraphs)
-    },
     textWrapperStyle(): Record<string, string> {
       return {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
@@ -359,17 +186,11 @@ export default defineComponent({
         this.svgBG = textBgUtils.drawSvgBg(this.config, this.$refs.body as Element[])
       })
     },
-    spans(): ISpan[] {
-      return textShapeUtils.flattenSpans(this.config)
-    },
     isAutoResizeNeeded(): boolean {
       return this.page.isAutoResizeNeeded
     },
     isLayerAutoResizeNeeded(): boolean {
       return this.config.isAutoResizeNeeded
-    },
-    styles(styles: any) {
-      return tiptapUtils.textStylesRaw(styles)
     },
     getOpacity() {
       const { active, contentEditable } = this.config
@@ -393,12 +214,7 @@ export default defineComponent({
         opacity
       }
     },
-    wrapperStyles() {
-      return {
-        writingMode: this.config.styles.writingMode
-      }
-    },
-    spanStyle(spans: any, sIndex: number): Record<string, string> {
+    spanStyle(spans: ISpan[], sIndex: number): Record<string, string> {
       const span = spans[sIndex]
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
         sIndex === spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {}
