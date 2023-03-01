@@ -102,7 +102,7 @@ div(:layer-index="`${layerIndex}`"
               :key="`resizer-text-${index}`"
               :ref="`moveStart-bar_${index}`"
               :style="resizerBarStyles(resizer.styles)")
-        div(v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalers) : []"
+        div(v-for="(scaler, index) in !isLine() ? getScaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="`scaler-${index}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
@@ -743,11 +743,9 @@ export default defineComponent({
         return 'none'
       } else if (this.isShown() || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          // return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
-          return `${2}px solid ${outlineColor}`
+          return `2px solid ${outlineColor}`
         } else {
-          // return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
-          return `${2}px solid ${outlineColor}`
+          return `2px solid ${outlineColor}`
         }
       } else {
         return 'none'

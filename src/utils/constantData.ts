@@ -39,6 +39,7 @@ class ConstantData {
   // For header.vue and mobileMenu.vue
   headerItems(mobile = false) {
     const host = window.location.host
+    const base = `http${host.startsWith('localhost') ? '' : 's'}://${host}`
     function themeItem(id: number | number[]) {
       if (id instanceof Array) {
         let templateName = _.filter(store.getters.getEditThemes, (theme: Itheme) => {
@@ -47,13 +48,13 @@ class ConstantData {
         templateName = templateName?.split('(')?.[0]
         return {
           label: templateName,
-          url: `http://${host}/templates?themes=${id.join(',')}&sort=recent`
+          url: `${base}/templates?themes=${id.join(',')}&sort=recent`
         }
       } else {
         const template = _.filter(store.getters.getEditThemes, ['id', id])?.[0]
         return {
           label: template?.title,
-          url: `http://${host}/templates?themes=${id}&sort=recent`
+          url: `${base}/templates?themes=${id}&sort=recent`
         }
       }
     }
@@ -271,7 +272,7 @@ class ConstantData {
       content: templateType[i18n.global.locale as keyof typeof templateType]
     }, {
       name: 'TemplateCenter',
-      url: `http://${host}/templates`,
+      url: `${base}/templates`,
       label: i18n.global.t('NN0145')
     }, {
       label: i18n.global.t('NN0670'),
