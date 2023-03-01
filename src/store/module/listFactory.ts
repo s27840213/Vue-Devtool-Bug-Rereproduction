@@ -126,7 +126,7 @@ export default function (this: any) {
     // For all item or single category search result.
     getContent: async ({ commit, state }, params = {}) => {
       let { theme } = state
-      const { keyword }: {keyword: string} = params
+      const { keyword }: { keyword: string } = params
       const locale = params.locale || localeUtils.currLocale()
       commit('SET_STATE', { pending: true, locale })
       if (keyword) commit('SET_STATE', { keyword })
@@ -182,9 +182,10 @@ export default function (this: any) {
       keyword = keyword.includes('::') ? keyword : `tag::${keyword}`
       commit('SET_STATE', { pending: true, keyword, locale })
       if (this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
+      const searchingId = store.getters['user/isAdmin'] && /^tag::\w{20}$/.test(keyword)
       try {
         const { data } = await this.api({
-          token: '1',
+          token: searchingId ? store.getters['user/getToken'] : '1',
           locale,
           theme,
           keyword,
