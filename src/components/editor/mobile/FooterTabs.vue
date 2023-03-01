@@ -1,36 +1,36 @@
 <template lang="pug">
 div(class="footer-tabs" ref="tabs" :style="rootStyles")
-  div(v-if="useWhiteTheme"
-      class="footer-tabs__home-tab"
-      :style="containerStyles"
-      :class="[useWhiteTheme ? 'bg-gray-6' : 'bg-nav']")
-    div(class="footer-tabs__item"
-        @click="handleTabAction(mainMenu)")
-      svg-icon(class="mb-5 click-disabled"
-        :iconName="mainMenu.icon"
-        :iconColor="tabColor(mainMenu)"
-        :iconWidth="'22px'"
-        :style="textIconStyle")
-      span(class="body-3 no-wrap click-disabled"
-        :class="`text-${tabColor(mainMenu)}`") {{mainMenu.text}}
-  div(class="footer-tabs__container" :style="containerStyles"
-      :class="[useWhiteTheme ? 'bg-gray-6' : 'bg-nav']"
-      @scroll.passive="updateContainerOverflow" ref="container")
-    template(v-for="(tab, index) in tabs")
-      div(v-if="!tab.hidden" :key="tab.icon"
-          class="footer-tabs__item"
-          :class="{'click-disabled': (tab.disabled || isLocked)}"
-          @click="handleTabAction(tab)")
-        color-btn(v-if="tab.icon === 'color'" size="22px"
-                  class="mb-5 click-disabled"
-                  :color="globalSelectedColor")
-        svg-icon(v-else class="mb-5 click-disabled"
-          :iconName="tab.icon"
-          :iconColor="tabColor(tab)"
+  div(class="footer-tabs__content"
+      :style="containerStyles")
+    div(v-if="useWhiteTheme"  class="footer-tabs__home-tab"
+        :class="[useWhiteTheme ? 'bg-gray-6' : 'bg-nav']")
+      div(class="footer-tabs__item"
+          @click="handleTabAction(mainMenu)")
+        svg-icon(class="mb-5 click-disabled"
+          :iconName="mainMenu.icon"
+          :iconColor="tabColor(mainMenu)"
           :iconWidth="'22px'"
           :style="textIconStyle")
         span(class="body-3 no-wrap click-disabled"
-        :class="`text-${tabColor(tab)}`") {{tab.text}}
+          :class="`text-${tabColor(mainMenu)}`") {{mainMenu.text}}
+    div(class="footer-tabs__container"
+        :class="[useWhiteTheme ? 'bg-gray-6' : 'bg-nav']"
+        @scroll.passive="updateContainerOverflow" ref="container")
+      template(v-for="(tab, index) in tabs")
+        div(v-if="!tab.hidden" :key="tab.icon"
+            class="footer-tabs__item"
+            :class="{'click-disabled': (tab.disabled || isLocked)}"
+            @click="handleTabAction(tab)")
+          color-btn(v-if="tab.icon === 'color'" size="22px"
+                    class="mb-5 click-disabled"
+                    :color="globalSelectedColor")
+          svg-icon(v-else class="mb-5 click-disabled"
+            :iconName="tab.icon"
+            :iconColor="tabColor(tab)"
+            :iconWidth="'22px'"
+            :style="textIconStyle")
+          span(class="body-3 no-wrap click-disabled"
+          :class="`text-${tabColor(tab)}`") {{tab.text}}
 </template>
 
 <script lang="ts">
@@ -501,14 +501,16 @@ export default defineComponent({
     },
     rootStyles(): Record<string, string> {
       return {
-        backgroundColor: this.contentEditable ? '#EEEFF4' : '#14182A'
+        backgroundColor: '#EEEFF4'
       }
     },
     containerStyles(): { [index: string]: string } {
       // Use mask-image implement fade scroll style, support Safari 14.3, https://stackoverflow.com/a/70971847
       return {
         transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
-        opacity: `${this.contentEditable ? 0 : 1}`
+        opacity: `${this.contentEditable ? 0 : 1}`,
+        borderTop: this.contentEditable ? 'none' : '0.5px solid #D9DBE1',
+        boxShadow: this.contentEditable ? 'none' : '0px 0px 6px 0px  #3C3C3C0D'
         // maskImage: this.contentEditable ? 'none'
         //   : `linear-gradient(to right,
         //   transparent 0, black ${this.leftOverflow ? '56px' : 0},
@@ -850,8 +852,12 @@ export default defineComponent({
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
-  display: grid;
-  grid-template-columns: auto 1fr;
+
+  &__content {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    transition: transform 0.3s, opacity 0.4s;
+  }
 
   &__home-tab {
     position: relative;
@@ -859,7 +865,6 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     padding: 0px 18px;
-    transition: transform 0.3s, opacity 0.4s;
 
     &::after {
       position: absolute;
@@ -882,7 +887,6 @@ export default defineComponent({
     column-gap: 16px;
     padding: 8px 12px;
     @include no-scrollbar;
-    transition: transform 0.3s, opacity 0.4s;
   }
 
   &__item {
