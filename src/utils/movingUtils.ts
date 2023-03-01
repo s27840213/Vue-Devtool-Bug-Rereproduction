@@ -234,10 +234,8 @@ export class MovingUtils {
             targetIndex = this.config.styles.zindex - 1
             this.setLastSelectedLayerIndex(this.layerIndex)
             groupUtils.select(this.pageIndex, [targetIndex])
-          } else {
-            if (this.pageIndex === pageUtils.currFocusPageIndex) {
-              groupUtils.select(this.pageIndex, [targetIndex])
-            }
+          } else if (this.pageIndex === pageUtils.currFocusPageIndex) {
+            groupUtils.select(this.pageIndex, [targetIndex])
           }
           if (!this.config.locked) {
             this.isControlling = true

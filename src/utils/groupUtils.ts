@@ -3,7 +3,7 @@ import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { LayerType } from '@/store/types'
-import GeneralUtils from '@/utils/generalUtils'
+import generalUtils from '@/utils/generalUtils'
 import LayerFactary from '@/utils/layerFactary'
 import LayerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
@@ -87,7 +87,7 @@ class GroupUtils {
   }
 
   group() {
-    const currSelectedInfo = GeneralUtils.deepCopy(store.getters.getCurrSelectedInfo)
+    const currSelectedInfo = generalUtils.deepCopy(store.getters.getCurrSelectedInfo)
     if (currSelectedInfo.layers.length < 2) {
       console.log('You need to select at least 2 layers!')
       return
@@ -153,7 +153,7 @@ class GroupUtils {
   private ungroupInnerGroup() {
     while (this.currSelectedInfo.types.has('group')) {
       const groupLayerIndex = this.currSelectedInfo.layers.findIndex((layer) => layer.type === 'group')
-      const selectedLayers = GeneralUtils.deepCopy(this.currSelectedInfo.layers)
+      const selectedLayers = generalUtils.deepCopy(this.currSelectedInfo.layers)
       selectedLayers.splice(groupLayerIndex, 1, ...this.mapGroupLayersToTmp(this.currSelectedInfo.layers[groupLayerIndex] as IGroup))
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         layers: selectedLayers
@@ -209,7 +209,6 @@ class GroupUtils {
         const topIndex = Math.max(...indexs)
         const newLayersNum = layers.length
         const currSelectedIndex = topIndex - newLayersNum + 1
-        // this.set(pageIndex, currSelectedIndex, currSelectedLayers)
         const newLayers = store.getters.getLayers(pageIndex).filter((el: IShape | IText | IImage | IGroup, index: number) => {
           return !indexs.includes(index)
         })
@@ -258,7 +257,6 @@ class GroupUtils {
 
   deselect() {
     const tmpPageIndex = this.currSelectedInfo.pageIndex
-
     if (this.currSelectedInfo.index !== -1) {
       const currSelectedLayers = store.getters.getCurrSelectedLayers
       if (currSelectedLayers.length === 1) {
@@ -315,7 +313,7 @@ class GroupUtils {
      * @param targetLayer - the layer we want to remove from tmp
      */
     const targetLayer = this.mapLayersToPage(
-      [GeneralUtils.deepCopy(this.currSelectedInfo.layers[targetIndex])],
+      [generalUtils.deepCopy(this.currSelectedInfo.layers[targetIndex])],
       tmpLayer
     )
 
@@ -380,7 +378,7 @@ class GroupUtils {
   }
 
   mapLayersToTmp(layers: Array<IShape | IText | IImage | IGroup>, styles: ICalculatedGroupStyle): Array<IShape | IText | IImage | IGroup> {
-    layers = GeneralUtils.deepCopy(layers.sort((a, b) => a.styles.zindex - b.styles.zindex))
+    layers = generalUtils.deepCopy(layers.sort((a, b) => a.styles.zindex - b.styles.zindex))
 
     layers.forEach((layer: IShape | IText | IImage | IGroup) => {
       layer.styles.x -= styles.x
