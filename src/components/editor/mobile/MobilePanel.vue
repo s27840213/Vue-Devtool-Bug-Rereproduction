@@ -176,7 +176,8 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters('imgControl', {
-      isImgCtrl: 'isImgCtrl'
+      isImgCtrl: 'isImgCtrl',
+      isBgImgCtrl: 'isBgImgCtrl'
     }),
     ...mapGetters({
       isShowPagePreview: 'page/getIsShowPagePreview',
@@ -529,7 +530,7 @@ export default defineComponent({
     vcoConfig() {
       return {
         handler: (e: Event) => {
-          if (!this.isImgCtrl && !this.inMultiSelectionMode) {
+          if (!this.isImgCtrl && !this.isBgImgCtrl && !this.inMultiSelectionMode) {
             this.closeMobilePanel()
           }
         },
