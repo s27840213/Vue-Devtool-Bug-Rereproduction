@@ -925,7 +925,7 @@ class PageUtils {
     })
   }
 
-  setMobilePysicalPage(payload: { pageIndex: number, pageSize: ISize, pageCenterPos: ICoordinate }) {
+  setMobilePysicalPage(payload: { pageIndex: number, pageSize?: ISize, pageCenterPos?: ICoordinate }) {
     store.commit('SET_pagePysicalSize', payload)
   }
 }

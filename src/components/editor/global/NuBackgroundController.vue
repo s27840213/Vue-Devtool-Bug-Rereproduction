@@ -6,7 +6,7 @@ div(class="nu-background-controller")
       @pointerdown.stop="moveStart"
       @pinch="pinchHandler")
     //- @touchstart="disableTouchEvent"
-    div(v-for="(scaler, index)  in controlPoints.scalers"
+    div(v-for="(scaler, index) in controlPoints.scalers"
         class="controller-point"
         :key="index"
         :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getPageRotate))"
@@ -21,6 +21,7 @@ import { ISize } from '@/interfaces/math'
 import { IPage } from '@/interfaces/page'
 import ControlUtils from '@/utils/controlUtils'
 import eventUtils from '@/utils/eventUtils'
+import generalUtils from '@/utils/generalUtils'
 import MathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -61,6 +62,17 @@ export default defineComponent({
       control: { xSign: 1, ySign: 1, isHorizon: false },
       ptrSet: new Set(),
       initPinchPos: null as null | { x: number, y: number }
+    }
+  },
+  mounted() {
+    if (generalUtils.isTouchDevice()) {
+      const page = document.getElementById(`nu-page-wrapper_${this.pageIndex}`) as HTMLElement
+      const rect = page.getBoundingClientRect()
+      pageUtils.setMobilePysicalPage({
+        pageIndex: this.pageIndex,
+        pageSize: { width: rect.width, height: rect.height },
+        pageCenterPos: { x: rect.left + rect.width * 0.5, y: rect.top + rect.height * 0.5 }
+      })
     }
   },
   unmounted() {
@@ -113,7 +125,7 @@ export default defineComponent({
       return {
         width: `${this.config.styles.imgWidth * this.getPageScale * this.contentScaleRatio}px`,
         height: `${this.config.styles.imgHeight * this.getPageScale * this.contentScaleRatio}px`,
-        outline: `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`
+        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`
       }
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
@@ -165,10 +177,8 @@ export default defineComponent({
       }
     },
     pinchHandler(event: AnyTouchEvent) {
-      // window.requestAnimationFrame(() => {
       switch (event.phase) {
         case 'start': {
-          console.log('start')
           this.initImgPos = {
             x: this.config.styles.imgX,
             y: this.config.styles.imgY
@@ -183,7 +193,6 @@ export default defineComponent({
           const { contentScaleRatio, mobilePysicalSize: { pageCenterPos, pageSize } } = this.page
           const { styles } = this.config
           const _sizeRatio = contentScaleRatio
-
           if (!this.initPinchPos) {
             this.initPinchPos = { x: event.x, y: event.y }
           }
@@ -191,6 +200,7 @@ export default defineComponent({
             x: (this.initPinchPos.x - pageCenterPos.x + pageSize.width * 0.5) / _sizeRatio - styles.imgX,
             y: (this.initPinchPos.y - pageCenterPos.y + pageSize.height * 0.5) / _sizeRatio - styles.imgY
           }
+          // console.log((this.initPinchPos.x - pageCenterPos.x + pageSize.width * 0.5) / _sizeRatio - styles.imgX, styles.imgWidth)
           const translationRatio = {
             x: -posInConfig.x / styles.imgWidth,
             y: -posInConfig.y / styles.imgHeight
@@ -221,10 +231,8 @@ export default defineComponent({
             width: this.config.styles.imgWidth,
             height: this.config.styles.imgHeight
           }
-          console.log('end')
         }
       }
-      // })
     },
     imgPinchScaleClamp(newSize: ISize, newPos: ICoordinate, translationRatio: { x: number, y: number }) {
       const baseLine = {
@@ -332,7 +340,6 @@ export default defineComponent({
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
         imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.pageSize.width / this.getPageScale - this.getImgWidth
       }
-      console.log(Math.abs(imgPos.y - baseLine.y), translateLimit.height)
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.pageSize.height / this.getPageScale - this.getImgHeight
       }
