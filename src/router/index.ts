@@ -356,11 +356,23 @@ router.beforeEach(async (to, from, next) => {
     }
     if (isMobile) {
       logUtils.setLog('=> as mobile')
-      if (to.name !== 'Editor' || !localStorage.getItem('not-mobile')) {
+      if (to.name === 'Editor') {
+        const isTablet = /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/.test(navigator.userAgent.toLowerCase())
+        if (isTablet) {
+          logUtils.setLog('=> as tablet')
+          if (!localStorage.getItem('not-mobile')) {
+            next({ name: 'MobileWarning', query: { width: window.screen.width.toString(), url: to.fullPath } })
+            return
+          } else {
+            store.commit('SET_useMobileEditor', true)
+          }
+        } else {
+          logUtils.setLog('=> as smartphone')
+          store.commit('SET_useMobileEditor', true)
+        }
+      } else {
         next({ name: 'MobileWarning', query: { width: window.screen.width.toString(), url: to.fullPath } })
         return
-      } else {
-        store.commit('SET_useMobileEditor', true)
       }
     } else {
       logUtils.setLog('=> as non-mobile')
