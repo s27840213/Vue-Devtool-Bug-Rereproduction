@@ -1,36 +1,46 @@
 <template lang="pug">
-div(class="footer-tabs" ref="tabs" :style="rootStyles")
+div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
   div(class="footer-tabs__content"
       :style="containerStyles")
-    div(v-if="useWhiteTheme"  class="footer-tabs__home-tab"
-        :class="[useWhiteTheme ? 'bg-gray-6' : 'bg-nav']")
-      div(class="footer-tabs__item"
-          @click="handleTabAction(mainMenu)")
-        svg-icon(class="mb-5 click-disabled"
-          :iconName="mainMenu.icon"
-          :iconColor="tabColor(mainMenu)"
-          :iconWidth="'22px'"
-          :style="textIconStyle")
-        span(class="body-3 no-wrap click-disabled"
-          :class="`text-${tabColor(mainMenu)}`") {{mainMenu.text}}
-    div(class="footer-tabs__container"
-        :class="[useWhiteTheme ? 'bg-gray-6' : 'bg-nav']"
-        @scroll.passive="updateContainerOverflow" ref="container")
-      template(v-for="(tab, index) in tabs")
+    div(class="footer-tabs__container bg-nav"
+        ref="container")
+      template(v-for="(tab, index) in homeTabs")
         div(v-if="!tab.hidden" :key="tab.icon"
             class="footer-tabs__item"
             :class="{'click-disabled': (tab.disabled || isLocked)}"
             @click="handleTabAction(tab)")
-          color-btn(v-if="tab.icon === 'color'" size="22px"
-                    class="mb-5 click-disabled"
-                    :color="globalSelectedColor")
-          svg-icon(v-else class="mb-5 click-disabled"
+          svg-icon(class="mb-5 click-disabled"
             :iconName="tab.icon"
-            :iconColor="tabColor(tab)"
+            :iconColor="homeTabColor(tab)"
             :iconWidth="'22px'"
             :style="textIconStyle")
           span(class="body-3 no-wrap click-disabled"
-          :class="`text-${tabColor(tab)}`") {{tab.text}}
+          :class="`text-${homeTabColor(tab)}`") {{tab.text}}
+    transition(name="panel-up")
+      div(v-if="isSettingTabsOpen" class="footer-tabs__sub-tabs  bg-gray-6")
+        div(class="footer-tabs__unfold"
+            @click="handleTabAction(mainMenu)")
+          svg-icon(class="click-disabled"
+            :iconName="mainMenu.icon"
+            :iconWidth="'26px'"
+            :style="textIconStyle")
+        div(class="footer-tabs__container"
+            @scroll.passive="updateContainerOverflow" ref="container")
+          template(v-for="(tab, index) in settingTabs")
+            div(v-if="!tab.hidden" :key="tab.icon"
+                class="footer-tabs__item"
+                :class="{'click-disabled': (tab.disabled || isLocked)}"
+                @click="handleTabAction(tab)")
+              color-btn(v-if="tab.icon === 'color'" size="22px"
+                        class="mb-5 click-disabled"
+                        :color="globalSelectedColor")
+              svg-icon(v-else class="mb-5 click-disabled"
+                :iconName="tab.icon"
+                :iconColor="settingTabColor(tab)"
+                :iconWidth="'22px'"
+                :style="textIconStyle")
+              span(class="body-3 no-wrap click-disabled"
+              :class="`text-${settingTabColor(tab)}`") {{tab.text}}
 </template>
 
 <script lang="ts">
@@ -75,7 +85,7 @@ export default defineComponent({
   },
   emits: ['switchTab', 'showAllPages'],
   data() {
-    const mainMenu = { icon: 'insert', text: `${this.$t('STK0006')}` }
+    const mainMenu = { icon: 'unfold', text: `${this.$t('STK0006')}` }
 
     return {
       mainMenu,
@@ -113,14 +123,14 @@ export default defineComponent({
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       hasCopiedFormat: 'getHasCopiedFormat'
     }),
-    useWhiteTheme(): boolean {
-      return this.hasSelectedLayer || this.inBgSettingMode || this.inAllPagesMode
-    },
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
     },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
+    },
+    isSettingTabsOpen(): boolean {
+      return this.settingTabs.length > 0
     },
     subLayerType(): string {
       return this.currSubSelectedInfo.type
@@ -358,7 +368,7 @@ export default defineComponent({
         { icon: 'paste', text: `${this.$t('NN0230')}` }
       ]
     },
-    tabs(): Array<IFooterTab> {
+    settingTabs(): Array<IFooterTab> {
       if (this.inAllPagesMode) {
         return this.pageTabs
       // A group that only has images
@@ -392,9 +402,9 @@ export default defineComponent({
         return this.bgSettingTab
       } else if (this.isGroupOrTmp) {
         return this.genearlLayerTabs
-      } else {
-        return this.homeTabs
       }
+
+      return []
     },
     globalSelectedColor(): string {
       return colorUtils.globalSelectedColor.color
@@ -511,8 +521,8 @@ export default defineComponent({
       return {
         transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
         opacity: `${this.contentEditable ? 0 : 1}`,
-        borderTop: !this.contentEditable && this.useWhiteTheme ? '0.5px solid #D9DBE1' : 'none',
-        boxShadow: !this.contentEditable && this.useWhiteTheme ? '0px 0px 6px 0px  #3C3C3C0D' : 'none'
+        borderTop: !this.contentEditable && this.isSettingTabsOpen ? '0.5px solid #D9DBE1' : 'none',
+        boxShadow: !this.contentEditable && this.isSettingTabsOpen ? '0px 0px 6px 0px  #3C3C3C0D' : 'none'
         // maskImage: this.contentEditable ? 'none'
         //   : `linear-gradient(to right,
         //   transparent 0, black ${this.leftOverflow ? '56px' : 0},
@@ -615,7 +625,7 @@ export default defineComponent({
           }
           break
         }
-        case 'insert': {
+        case 'unfold': {
           groupUtils.deselect()
           this.$emit('switchTab', 'none')
           if (this.inAllPagesMode) {
@@ -841,8 +851,11 @@ export default defineComponent({
         }
       }
     },
-    tabColor(icon: IFooterTab): string {
-      return (icon.disabled || this.isLocked) ? 'gray-2' : this.tabActive(icon) ? 'blue-1' : this.useWhiteTheme ? 'gray-2' : 'white'
+    homeTabColor(icon: IFooterTab): string {
+      return this.tabActive(icon) ? 'blue-1' : 'white'
+    },
+    settingTabColor(icon: IFooterTab): string {
+      return (icon.disabled || this.isLocked) ? 'gray-2' : this.tabActive(icon) ? 'blue-1' : this.isSettingTabsOpen ? 'gray-2' : 'white'
     }
   }
 })
@@ -860,23 +873,12 @@ export default defineComponent({
     transition: transform 0.3s, opacity 0.4s;
   }
 
-  &__home-tab {
+  &__unfold {
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 0px 18px;
-
-    &::after {
-      position: absolute;
-      right: 0px;
-      top: 50%;
-      transform: translate(0, -50%);
-      content: '';
-      width: 2px;
-      height: 40px;
-      background-color:setColor(gray-4);
-    }
+    padding: 0px 12px 0px 24px;
   }
 
   &__container {
@@ -901,6 +903,13 @@ export default defineComponent({
       transition: background-color 0.2s, color 0.2s;
       transform: scale(calc(10 / 12));
     }
+  }
+
+  &__sub-tabs {
+    width: 100%;
+    position: absolute;
+    display: grid;
+    grid-template-columns: auto 1fr;
   }
 }
 </style>
