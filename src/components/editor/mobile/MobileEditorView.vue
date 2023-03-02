@@ -7,6 +7,7 @@ div(class="editor-view" v-touch
     @pointerdown="selectStart"
     @mousewheel="handleWheel"
     ref="editorView")
+  //- @pinch="pinchHandler"
   div(class="editor-view__abs-container"
       :style="absContainerStyle")
     div(v-if="editorView" class="editor-view__canvas"
@@ -148,6 +149,10 @@ export default defineComponent({
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
     this.swipeDetector = new SwipeDetector(this.editorView, { targetDirection: 'vertical' }, this.handleSwipe)
+
+    const rect = this.editorView.getBoundingClientRect()
+    pageUtils.originEditorSize.width = rect.width
+    pageUtils.originEditorSize.height = rect.height
 
     this.cardHeight = this.editorView ? this.editorView.clientHeight : 0
     this.cardWidth = this.editorView ? this.editorView.clientWidth : 0
@@ -372,6 +377,23 @@ export default defineComponent({
       }
     },
     pinchHandler(event: AnyTouchEvent) {
+      console.log('pinch')
+      if (this.isBgImgCtrl) {
+        switch (event.phase) {
+          case 'start': {
+            console.log('start')
+            break
+          }
+          case 'move': {
+            console.log('move')
+            break
+          }
+          case 'end': {
+            console.log('end')
+          }
+        }
+      }
+
       // switch (event.phase) {
       //   /**
       //    * @Note the very first event won't fire start phase, it's very strange and need to pay attention

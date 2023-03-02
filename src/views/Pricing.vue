@@ -137,6 +137,18 @@ export default defineComponent({
 
 .pricing-content {
   @include hover-scrollbar();
+  // Always show scrollbar in mobile
+  overflow-y: overlay;
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    visibility: visible;
+    border: none;
+  }
+  @include firefoxOnly {
+    scrollbar-color: setColor(gray-3) transparent;
+  }
   display: flex;
   flex-direction: column;
   align-items: center;

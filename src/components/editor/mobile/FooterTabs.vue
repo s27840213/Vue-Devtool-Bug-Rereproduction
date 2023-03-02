@@ -1,22 +1,36 @@
 <template lang="pug">
 div(class="footer-tabs" ref="tabs" :style="rootStyles")
-  div(class="footer-tabs__container" :style="containerStyles"
-      @scroll.passive="updateContainerOverflow" ref="container")
-    template(v-for="(tab, index) in tabs")
-      div(v-if="!tab.hidden" :key="tab.icon"
-          class="footer-tabs__item"
-          :class="{'click-disabled': (tab.disabled || isLocked)}"
-          @click="handleTabAction(tab)")
-        color-btn(v-if="tab.icon === 'color'" size="22px"
-                  class="mb-5 click-disabled"
-                  :color="globalSelectedColor")
-        svg-icon(v-else class="mb-5 click-disabled"
-          :iconName="tab.icon"
-          :iconColor="(tab.disabled || isLocked) ? 'gray-2' : tabActive(tab) ? 'blue-1' :'white'"
+  div(class="footer-tabs__content"
+      :style="containerStyles")
+    div(v-if="useWhiteTheme"  class="footer-tabs__home-tab"
+        :class="[useWhiteTheme ? 'bg-gray-6' : 'bg-nav']")
+      div(class="footer-tabs__item"
+          @click="handleTabAction(mainMenu)")
+        svg-icon(class="mb-5 click-disabled"
+          :iconName="mainMenu.icon"
+          :iconColor="tabColor(mainMenu)"
           :iconWidth="'22px'"
           :style="textIconStyle")
         span(class="body-3 no-wrap click-disabled"
-        :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-blue-1' : 'text-white'") {{tab.text}}
+          :class="`text-${tabColor(mainMenu)}`") {{mainMenu.text}}
+    div(class="footer-tabs__container"
+        :class="[useWhiteTheme ? 'bg-gray-6' : 'bg-nav']"
+        @scroll.passive="updateContainerOverflow" ref="container")
+      template(v-for="(tab, index) in tabs")
+        div(v-if="!tab.hidden" :key="tab.icon"
+            class="footer-tabs__item"
+            :class="{'click-disabled': (tab.disabled || isLocked)}"
+            @click="handleTabAction(tab)")
+          color-btn(v-if="tab.icon === 'color'" size="22px"
+                    class="mb-5 click-disabled"
+                    :color="globalSelectedColor")
+          svg-icon(v-else class="mb-5 click-disabled"
+            :iconName="tab.icon"
+            :iconColor="tabColor(tab)"
+            :iconWidth="'22px'"
+            :style="textIconStyle")
+          span(class="body-3 no-wrap click-disabled"
+          :class="`text-${tabColor(tab)}`") {{tab.text}}
 </template>
 
 <script lang="ts">
@@ -61,7 +75,7 @@ export default defineComponent({
   },
   emits: ['switchTab', 'showAllPages'],
   data() {
-    const mainMenu = { icon: 'main-menu', text: `${this.$t('NN0489')}` }
+    const mainMenu = { icon: 'insert', text: `${this.$t('STK0006')}` }
 
     return {
       mainMenu,
@@ -69,6 +83,8 @@ export default defineComponent({
       disableTabScroll: false,
       leftOverflow: false,
       rightOverflow: false,
+      clickedTab: '',
+      clickedTabTimer: -1,
       homeTabs: [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
         { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
@@ -97,11 +113,14 @@ export default defineComponent({
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       hasCopiedFormat: 'getHasCopiedFormat'
     }),
-    layerNum(): number {
-      return this.currSelectedInfo.layers.length
+    useWhiteTheme(): boolean {
+      return this.hasSelectedLayer || this.inBgSettingMode || this.inAllPagesMode
     },
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
+    },
+    hasSelectedLayer(): boolean {
+      return this.currSelectedInfo.layers.length > 0
     },
     subLayerType(): string {
       return this.currSubSelectedInfo.type
@@ -123,7 +142,7 @@ export default defineComponent({
       return ''
     },
     isCopyFormatDisabled(): boolean {
-      if (this.layerNum === 1) { // not tmp
+      if (this.selectedLayerNum === 1) { // not tmp
         const types = this.currSelectedInfo.types
         const currLayer = layerUtils.getCurrLayer
         if (types.has('group')) {
@@ -169,7 +188,6 @@ export default defineComponent({
     },
     photoInGroupTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
@@ -186,7 +204,6 @@ export default defineComponent({
     },
     photoTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
@@ -202,7 +219,7 @@ export default defineComponent({
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
-        { icon: 'copy-style', text: `${this.$t('NN0035')}` }
+        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
         // { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
       ]
     },
@@ -212,7 +229,6 @@ export default defineComponent({
       const showReplace = frame.clips.length === 1 || frame.clips.some(c => c.active)
       const replace = showReplace ? [{ icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' }] : []
       return [
-        this.mainMenu,
         ...replace,
         {
           icon: 'color',
@@ -243,13 +259,12 @@ export default defineComponent({
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        { icon: 'copy-style', text: `${this.$t('NN0035')}` }
+        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
       ]
     },
     bgSettingTab(): Array<IFooterTab> {
       const { hasBgImage } = backgroundUtils
       return [
-        this.mainMenu,
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !hasBgImage, disabled: this.backgroundLocked },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
@@ -295,7 +310,6 @@ export default defineComponent({
     },
     objectTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -310,7 +324,6 @@ export default defineComponent({
     },
     pageTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
         { icon: 'add-page', text: `${this.$t('NN0139')}` },
         { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
         // { icon: 'select-page', text: `${this.$tc('NN0124', 2)}` },
@@ -331,7 +344,6 @@ export default defineComponent({
     },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         this.groupTab,
@@ -368,7 +380,7 @@ export default defineComponent({
       } else if (this.showPhotoTabs) {
         return this.photoTabs
       } else if (this.showFontTabs) {
-        return [this.mainMenu, ...this.fontTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
+        return [...this.fontTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
       } else if (this.showFrameTabs) {
         if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
           return this.photoTabs
@@ -422,12 +434,6 @@ export default defineComponent({
         return layer.type
       })
       return new Set(types)
-    },
-    isInFirstStep(): boolean {
-      return stepsUtils.isInFirstStep
-    },
-    isInLastStep(): boolean {
-      return stepsUtils.isInLastStep
     },
     isInFrame(): boolean {
       const layer = layerUtils.getCurrLayer
@@ -495,7 +501,7 @@ export default defineComponent({
     },
     rootStyles(): Record<string, string> {
       return {
-        backgroundColor: this.contentEditable ? '#EEEFF4' : '#14182A'
+        backgroundColor: '#EEEFF4'
       }
     },
     containerStyles(): { [index: string]: string } {
@@ -503,10 +509,12 @@ export default defineComponent({
       return {
         transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
         opacity: `${this.contentEditable ? 0 : 1}`,
-        maskImage: this.contentEditable ? 'none'
-          : `linear-gradient(to right,
-          transparent 0, black ${this.leftOverflow ? '56px' : 0},
-          black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
+        borderTop: !this.contentEditable && this.useWhiteTheme ? '0.5px solid #D9DBE1' : 'none',
+        boxShadow: !this.contentEditable && this.useWhiteTheme ? '0px 0px 6px 0px  #3C3C3C0D' : 'none'
+        // maskImage: this.contentEditable ? 'none'
+        //   : `linear-gradient(to right,
+        //   transparent 0, black ${this.leftOverflow ? '56px' : 0},
+        //   black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
       }
     },
     currLayer(): ILayer {
@@ -562,9 +570,7 @@ export default defineComponent({
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
-      if (tab.icon !== 'copy-style' && this.hasCopiedFormat) {
-        formatUtils.clearCopiedFormat()
-      }
+      console.log(tab)
       if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
         editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
       }
@@ -607,7 +613,7 @@ export default defineComponent({
           }
           break
         }
-        case 'main-menu': {
+        case 'insert': {
           groupUtils.deselect()
           this.$emit('switchTab', 'none')
           if (this.inAllPagesMode) {
@@ -758,6 +764,14 @@ export default defineComponent({
       if (tab.panelType !== undefined) {
         this.$emit('switchTab', tab.panelType, tab.props)
       }
+
+      if (['copy', 'paste'].includes(tab.icon)) {
+        this.clickedTab = tab.icon
+        notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
+        this.clickedTabTimer = window.setTimeout(() => {
+          this.clickedTab = ''
+        }, 800)
+      }
     },
     targetIs(type: string): boolean {
       if (this.isGroup) {
@@ -785,11 +799,14 @@ export default defineComponent({
       }
     },
     tabActive(tab: IFooterTab): boolean {
+      if ((this.inMultiSelectionMode && tab.icon === 'multiple-select')) {
+        return true
+      }
       if (this.currTab === 'color') {
         return this.currTab === tab.panelType &&
           ((colorUtils.currEvent === 'setTextColor' && tab.icon === 'text-color-mobile') ||
           (colorUtils.currEvent !== 'setTextColor' && tab.icon === 'color'))
-      } else return this.currTab === tab.panelType
+      } else return this.currTab === tab.panelType || this.clickedTab === tab.icon
     },
     handleLockedNotify() {
       notify({ group: 'copy', text: i18n.global.tc('NN0804') })
@@ -821,6 +838,9 @@ export default defineComponent({
           formatUtils.copyImageFormat(layer.clips[Math.max(0, this.subActiveLayerIndex)])
         }
       }
+    },
+    tabColor(icon: IFooterTab): string {
+      return (icon.disabled || this.isLocked) ? 'gray-2' : this.tabActive(icon) ? 'blue-1' : this.useWhiteTheme ? 'gray-2' : 'white'
     }
   }
 })
@@ -828,10 +848,35 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .footer-tabs {
-  overflow: hidden;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
+
+  &__content {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    transition: transform 0.3s, opacity 0.4s;
+  }
+
+  &__home-tab {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 18px;
+
+    &::after {
+      position: absolute;
+      right: 0px;
+      top: 50%;
+      transform: translate(0, -50%);
+      content: '';
+      width: 2px;
+      height: 40px;
+      background-color:setColor(gray-4);
+    }
+  }
+
   &__container {
     overflow: scroll;
     display: grid;
@@ -839,10 +884,8 @@ export default defineComponent({
     grid-auto-flow: column;
     grid-auto-columns: 56px;
     column-gap: 16px;
-    background-color: setColor(nav);
     padding: 8px 12px;
     @include no-scrollbar;
-    transition: transform 0.3s, opacity 0.4s;
   }
 
   &__item {

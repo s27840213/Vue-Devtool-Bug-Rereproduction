@@ -16,6 +16,7 @@ div(class="page-card"
 import { IPageState } from '@/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
+import pageUtils from '@/utils/pageUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -57,6 +58,12 @@ export default defineComponent({
   },
   mounted() {
     this.minContentScaleRatio = editorUtils.handleContentScaleCalc(this.config.config)
+    // let card = this.$refs.card as HTMLElement | HTMLElement[]
+    // if (Array.isArray(card)) card = card[0]
+    // const cardRect = card.getBoundingClientRect()
+    // const padding = +card.style.padding.slice(0, -2)
+    // pageUtils.pageEventPosOffset.x = cardRect.x + padding
+    // pageUtils.pageEventPosOffset.y = cardRect.y + padding
   },
   computed: {
     ...mapGetters({
