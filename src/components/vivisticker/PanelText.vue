@@ -31,6 +31,7 @@ div(class="panel-text rwd-container" :class="{'in-category': isInCategory}")
         v-if="!keyword"
         :list="list"
         :title="title"
+        :columnGap="isTablet ? 5 : 10"
         @action="handleCategorySearch")
         template(v-slot:preview="{ item }")
           category-text-item(class="panel-text__item"
@@ -87,6 +88,9 @@ export default defineComponent({
       isTabShowAllRecently: 'vivisticker/getShowAllRecently',
       editorBg: 'vivisticker/getEditorBg'
     }),
+    ...mapState({
+      isTablet: 'isTablet'
+    }),
     ...mapState('textStock', {
       categories: 'categories',
       rawContent: 'content',
@@ -116,11 +120,13 @@ export default defineComponent({
       }]
     },
     listCategories(): ICategoryItem[] {
+      const titleHeight = 46
+      const gap = this.isTablet ? 20 : 14
       const { categories } = this
       return (categories as IListServiceContentData[])
         .filter(category => category.list.length > 0)
         .map((category, index) => ({
-          size: 140,
+          size: 80 + titleHeight + gap,
           id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.is_recent ? category.list.slice(0, 10) : category.list,
@@ -184,10 +190,10 @@ export default defineComponent({
         })}`
     },
     itemWidth(): number {
-      return generalUtils.isIPadOS() ? 200 : (window.outerWidth - 68) / 3 - 10
+      return this.isTablet ? 200 : (window.outerWidth - 68) / 3 - 10
     },
     itemsStyles() {
-      return generalUtils.isIPadOS() ? {
+      return this.isTablet ? {
         gridTemplateColumns: 'repeat(3, 200px)',
         justifyContent: 'space-around'
       } : {
@@ -196,7 +202,7 @@ export default defineComponent({
       }
     },
     itemStyles() {
-      return generalUtils.isIPadOS() ? {} : {
+      return this.isTablet ? {} : {
         margin: '0 auto'
       }
     }
@@ -312,6 +318,8 @@ export default defineComponent({
       this.scrollTop[key] = (event.target as HTMLElement).scrollTop
     },
     processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
+      const titleHeight = 46
+      const gap = this.isTablet ? 20 : 24
       return new Array(Math.ceil(list.length / 3))
         .fill('')
         .map((_, idx) => {
@@ -322,7 +330,7 @@ export default defineComponent({
             type: 'category-text-item',
             list: rowItems,
             title,
-            size: 104 + (title ? 46 : 0) // 80(object height) + 24(gap) + 0/46(title)
+            size: 80 + gap + (title ? titleHeight : 0) // 80(object height) + 24(gap) + 0/46(title)
           }
         })
     }
@@ -362,6 +370,7 @@ export default defineComponent({
     width: 80px;
     height: 80px;
     padding: 0 5px;
+    box-sizing: border-box;
     // object-fit: contain;
     // vertical-align: middle;
   }

@@ -108,7 +108,7 @@ const getDefaultState = (): IEditorState => ({
   hasCopiedFormat: false,
   inGestureToolMode: false,
   isMobile: generalUtils.getWidth() <= 768,
-  isTablet: generalUtils.getWidth() >= 768,
+  isTablet: window.matchMedia('screen and (min-width: 768px) and (orientation: portrait), screen and (min-height: 768px) and (orientation: landscape)').matches,
   isLargeDesktop: generalUtils.getWidth() >= 1440,
   isGlobalLoading: false,
   useMobileEditor: false,
@@ -1049,7 +1049,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   UPDATE_RWD(state: IEditorState) {
     state.isMobile = generalUtils.getWidth() <= 768
-    state.isTablet = generalUtils.getWidth() >= 768
+    state.isTablet = window.matchMedia('screen and (min-width: 768px) and (orientation: portrait), screen and (min-height: 768px) and (orientation: landscape)').matches
     state.isLargeDesktop = generalUtils.getWidth() >= 1440
   },
   ...imgShadowMutations,

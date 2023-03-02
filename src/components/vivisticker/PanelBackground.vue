@@ -39,6 +39,7 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
             :key="item.id"
             :item="item"
             :locked="false"
+            :style="itemStyles"
             @share="handleShareImage")
       template(v-if="pending" #after)
         div(class="text-center")
@@ -192,11 +193,13 @@ export default defineComponent({
       return this.showAllRecentlyBgColors ? this.allRecentlyColors : this.allRecentlyColors.slice(0, 20)
     },
     listCategories(): ICategoryItem[] {
+      const titleHeight = 46
+      const gap = this.isTablet ? 20 : 14
       const { categories } = this
       return (categories as IListServiceContentData[])
         .filter(category => category.list.length > 0)
         .map((category, index) => ({
-          size: this.itemHeight + 10 + 46,
+          size: this.itemHeight + gap + titleHeight,
           id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.is_recent ? category.list.slice(0, 10) : category.list,
@@ -492,6 +495,8 @@ export default defineComponent({
       this.showAllRecentlyBgColors = bool
     },
     processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
+      const titleHeight = 46
+      const gap = this.isTablet ? 20 : 24
       return new Array(Math.ceil(list.length / 3))
         .fill('')
         .map((_, idx) => {
@@ -501,7 +506,7 @@ export default defineComponent({
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-background-item',
             list: rowItems,
-            size: this.itemHeight + 24 + (title ? 46 : 0), // (bg height) + 24(gap) + 0/46(title)
+            size: this.itemHeight + gap + (title ? titleHeight : 0), // (bg height) + 24(gap) + 0/46(title)
             title
           }
         })

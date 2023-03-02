@@ -12,10 +12,10 @@ div(class="panel-objects rwd-container")
             @click="doubleTapTips")
   keep-alive
     panel-object-static(v-if="isStatic || isFavoritesStatic"
-      :showFav="isFavoritesStatic" :itemHeight="itemHeight" ref="static")
+      :showFav="isFavoritesStatic" ref="static")
   keep-alive
     panel-object-gifs(v-if="isGifs || isFavoritesGifs"
-      :showFav="isFavoritesGifs" :itemHeight="itemHeight" ref="gif")
+      :showFav="isFavoritesGifs" ref="gif")
 </template>
 
 <script lang="ts">
@@ -26,7 +26,7 @@ import i18n from '@/i18n'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import modalUtils from '@/utils/modalUtils'
 import { defineComponent } from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 import { CCategoryList } from '../category/CategoryList.vue'
 
 export default defineComponent({
@@ -52,9 +52,6 @@ export default defineComponent({
     ...mapGetters({
       isTabInCategory: 'vivisticker/getIsInCategory'
     }),
-    ...mapState({
-      isTablet: 'isTablet'
-    }),
     isInCategory(): boolean {
       return this.isTabInCategory('object')
     },
@@ -63,9 +60,6 @@ export default defineComponent({
     isFavorites(): boolean { return this.tabIndex === 2 },
     isFavoritesStatic(): boolean { return this.tabIndex === 2 && this.favoritesTabIndex === 0 },
     isFavoritesGifs(): boolean { return this.tabIndex === 2 && this.favoritesTabIndex === 1 },
-    itemHeight(): number {
-      return this.isTablet ? 120 : 80
-    }
   },
   methods: {
     scrollToTop() {
