@@ -42,9 +42,10 @@ div(class="panel-text-effect")
         :borderTouchArea="true"
         :title="option.label"
         :name="option.key"
-        :value="currentStyle[option.key]"
+        :value="getInputValue(currentStyle, option)"
         :max="option.max ?? 100"
         :min="option.min ?? 0"
+        :step="option.key === 'lineHeight' ? 0.01 : 1"
         @update="(e)=>handleRangeInput(e, option)"
         @pointerdown="shapeFocus(true)"
         @pointerup="shapeFocus(false)")
@@ -59,18 +60,19 @@ div(class="panel-text-effect")
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
-import textEffectUtils from '@/utils/textEffectUtils'
+import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
+import constantData, { IEffect, IEffectCategory, IEffectOptionRange } from '@/utils/constantData'
 import stepsUtils from '@/utils/stepsUtils'
+import textBgUtils from '@/utils/textBgUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
-import { ColorEventType, MobileColorPanelType } from '@/store/types'
-import constantData, { IEffect, IEffectCategory, IEffectOption } from '@/utils/constantData'
-import textBgUtils from '@/utils/textBgUtils'
-import colorUtils from '@/utils/colorUtils'
 import _ from 'lodash'
+import { defineComponent, PropType } from 'vue'
+import { mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -90,6 +92,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapState('text', {
+      selectedTextProps: 'props'
+    }),
     currCategory(): IEffectCategory {
       return _.find(this.textEffects, ['name', _.nth(this.panelHistory, -1)]) as IEffectCategory
     },
@@ -126,6 +131,13 @@ export default defineComponent({
     },
     recordChange() {
       stepsUtils.record()
+    },
+    getInputValue(style: Record<string, string>, option: IEffectOptionRange) {
+      if (['lineHeight', 'fontSpacing'].includes(option.key)) {
+        return this.selectedTextProps[option.key]
+      } else {
+        return style[option.key]
+      }
     },
     openColorPanel(key: string) {
       if (this.currCategory.name === 'shadow') {
@@ -185,10 +197,9 @@ export default defineComponent({
       this.setEffect({ effect: { [key]: newVal } })
       this.recordChange()
     },
-    handleRangeInput(value: number, option: IEffectOption) {
-      const [max, min] = [option.max as number, option.min as number]
+    handleRangeInput(value: number, option: IEffectOptionRange) {
       const newVal = {
-        [option.key]: value > max ? max : (value < min ? min : value)
+        [option.key]: _.clamp(value, option.min, option.max)
       }
       this.setEffect({ effect: newVal })
     },

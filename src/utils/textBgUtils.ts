@@ -661,6 +661,7 @@ class TextBg {
         opacity: 100,
         color: 'fontColorL+-40/BC/00'
       },
+      // A part of additional default setting is in setAdditionalDefaultAttrs func.
       rainbow: letterBgDefault,
       'rainbow-dark': letterBgDefault,
       cloud: Object.assign({}, letterBgDefault, { fixedWidth: false }),
@@ -883,6 +884,19 @@ class TextBg {
     }
   }
 
+  setAdditionalDefaultAttrs(name: string) {
+    const defaultAttrs = {
+      rainbow: { lineHeight: 1.4, fontSpacing: 0 },
+      'rainbow-dark': { lineHeight: 1.4, fontSpacing: 0 },
+      cloud: { lineHeight: 1.4, fontSpacing: 0 },
+      'text-book': { lineHeight: 1.4, fontSpacing: 0 }
+    } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
+
+    for (const [key, val] of Object.entries(defaultAttrs[name])) {
+      textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val)
+    }
+  }
+
   syncShareAttrs(textBg: ITextBgEffect, effectName: string | null) {
     Object.assign(textBg, { name: textBg.name || effectName })
     if (textBg.name === 'none') return
@@ -921,7 +935,15 @@ class TextBg {
       const { type, styles: { textBg: layerTextBg } } = layers[idx] as IText
       if (type === 'text') {
         const textBg = {} as ITextBgEffect
-        const oldFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
+
+        // Set lineHeight and fontSpacing by call tiptap
+        for (const [key, val] of Object.entries(attrs ?? {})) {
+          if (['lineHeight', 'fontSpacing'].includes(key)) {
+            textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val as number)
+            return
+          }
+        }
+
         if (layerTextBg && layerTextBg.name === effect) { // Adjust effect option.
           Object.assign(textBg, layerTextBg, attrs)
           localStorageUtils.set('textEffectSetting', effect, textBg)
@@ -930,6 +952,7 @@ class TextBg {
           this.syncShareAttrs(textBg, effect)
           const localAttrs = localStorageUtils.get('textEffectSetting', effect)
           Object.assign(textBg, defaultAttrs, localAttrs, attrs, { name: effect })
+          this.setAdditionalDefaultAttrs(effect)
 
           // Bring original effect color to new effect.
           const oldColor = this.getEffectMainColor(layerTextBg)[1]
@@ -939,19 +962,21 @@ class TextBg {
           }
         }
 
-        store.commit('UPDATE_specLayerData', {
-          pageIndex,
-          layerIndex,
-          subLayerIndex: +idx,
-          styles: { textBg }
+        window.requestAnimationFrame(() => {
+          store.commit('UPDATE_specLayerData', {
+            pageIndex,
+            layerIndex,
+            subLayerIndex: +idx,
+            styles: { textBg }
+          })
+          const oldFixedWidth = isITextLetterBg(layerTextBg) && layerTextBg.fixedWidth
+          const newFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
+          // Fixed width setting changed, force split/unsplit span text
+          if (oldFixedWidth !== newFixedWidth) {
+            tiptapUtils.updateHtml()
+            tiptapUtils.forceUpdate()
+          }
         })
-
-        const newFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
-        // Fixed width setting changed, force split/unsplit span text
-        if (oldFixedWidth !== newFixedWidth) {
-          tiptapUtils.updateHtml()
-          tiptapUtils.forceUpdate()
-        }
       }
     }
   }
@@ -959,6 +984,7 @@ class TextBg {
   resetCurrTextEffect() {
     const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
     this.setTextBg(effectName, this.effects[effectName])
+    this.setAdditionalDefaultAttrs(effectName)
   }
 }
 

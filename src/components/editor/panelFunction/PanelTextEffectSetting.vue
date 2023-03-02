@@ -36,17 +36,19 @@ div(class="text-effect-setting mt-25")
           //- Option type range
           template(v-if="option.type === 'range'")
             input(class="text-effect-setting-options__field--number"
-              :value="currentStyle[option.key]"
+              :value="getInputValue(currentStyle, option)"
               :name="option.key"
               :max="option.max"
               :min="option.min"
+              :step="option.key === 'lineHeight' ? 0.01 : 1"
               @change="(e)=>{handleRangeInput(e, option);recordChange()}"
               type="number")
             input(class="text-effect-setting-options__field--range input__slider--range"
-              :value="currentStyle[option.key]"
+              :value="getInputValue(currentStyle, option)"
               :name="option.key"
               :max="option.max"
               :min="option.min"
+              :step="option.key === 'lineHeight' ? 0.01 : 1"
               @input="(e)=>handleRangeInput(e, option)"
               @mousedown="handleRangeMousedown()"
               @mouseup="handleRangeMouseup()"
@@ -69,7 +71,7 @@ import ColorBtn from '@/components/global/ColorBtn.vue'
 import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
-import constantData, { IEffect, IEffectCategory, IEffectOption } from '@/utils/constantData'
+import constantData, { IEffect, IEffectCategory, IEffectOptionRange } from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -79,6 +81,7 @@ import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import _ from 'lodash'
 import { defineComponent } from 'vue'
+import { mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -98,6 +101,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapState('text', {
+      selectedTextProps: 'props'
+    }),
     currCategory():IEffectCategory {
       return _.find(this.textEffects, ['name', this.currTab]) as IEffectCategory
     },
@@ -137,6 +143,13 @@ export default defineComponent({
     },
     getOptions(effects1d: IEffect[]) {
       return _.find(effects1d, ['key', this.currentStyle.name])?.options
+    },
+    getInputValue(style: Record<string, string>, option: IEffectOptionRange) {
+      if (['lineHeight', 'fontSpacing'].includes(option.key)) {
+        return this.selectedTextProps[option.key]
+      } else {
+        return style[option.key]
+      }
     },
     setEffect(options:{
       effectName?: string,
@@ -181,12 +194,11 @@ export default defineComponent({
       this.setEffect({ effect: { [key]: newVal } })
       this.recordChange()
     },
-    handleRangeInput(event: Event, option: IEffectOption) {
+    handleRangeInput(event: Event, option: IEffectOptionRange) {
       const name = (event.target as HTMLInputElement).name
-      const value = parseInt((event.target as HTMLInputElement).value)
-      const [max, min] = [option.max as number, option.min as number]
+      const value = parseFloat((event.target as HTMLInputElement).value)
       const newVal = {
-        [name]: value > max ? max : (value < min ? min : value)
+        [name]: _.clamp(value, option.min, option.max)
       }
       this.setEffect({ effect: newVal })
     },

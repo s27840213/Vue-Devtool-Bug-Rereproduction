@@ -12,14 +12,26 @@ interface BillingInfoInput {
   optional?: boolean
   error?: string
 }
-export interface IEffectOption {
+export interface IEffectOptionSelect {
   key: string
   label: string
-  type: 'range' | 'color' | 'select'
-  min?: number
-  max?: number
-  select?: { key: string, label: string }[]
+  type: 'select'
+  select: { key: string, label: string }[]
 }
+export interface IEffectOptionColor {
+  key: string
+  label: string
+  type: 'color'
+}
+export interface IEffectOptionRange {
+  key: string
+  label: string
+  type: 'range'
+  min: number
+  max: number
+  isPStyle?: boolean
+}
+export type IEffectOption = IEffectOptionSelect | IEffectOptionColor | IEffectOptionRange
 export interface IEffect {
   key: string
   label: string
@@ -340,8 +352,8 @@ class ConstantData {
         }
         switch (name) {
           case 'endpoint':
-            option.type = 'select'
-            option.select = [{
+            option.type = 'select';
+            (option as IEffectOptionSelect).select = [{
               key: 'triangle',
               label: i18n.global.tc('NN0730')
             }, {
@@ -353,22 +365,24 @@ class ConstantData {
             }]
             break
           case 'angle':
-            option.max = 180
-            option.min = -180
+            Object.assign(option, { min: -180, max: 180 })
             break
           case 'bend': // For curve
-            option.max = 100
-            option.min = -100
+            Object.assign(option, { min: -100, max: 100 })
             break
           case 'size':
-            option.max = 200
-            option.min = 50
+            Object.assign(option, { min: 50, max: 200 })
+            break
+          case 'lineHeight':
+            Object.assign(option, { min: 0.5, max: 2.5, isPStyle: true })
+            break
+          case 'fontSpacing':
+            Object.assign(option, { min: -200, max: 800, isPStyle: true })
             break
           default:
             /* distance, blur, opacity, spread, stroke,
              * bStroke, pStrokeY, bRadius, height */
-            option.max = 100
-            option.min = 0
+            Object.assign(option, { min: 0, max: 100 })
             break
         }
         return option
@@ -465,19 +479,19 @@ class ConstantData {
       }, {
         key: 'rainbow',
         label: 'svgbg',
-        options: toOptions(['xOffset', 'yOffset', 'size', 'opacity'])
+        options: toOptions(['xOffset', 'yOffset', 'size', 'lineHeight', 'fontSpacing', 'opacity'])
       }, {
         key: 'rainbow-dark',
         label: 'svgbg',
-        options: toOptions(['xOffset', 'yOffset', 'size', 'opacity'])
+        options: toOptions(['xOffset', 'yOffset', 'size', 'lineHeight', 'fontSpacing', 'opacity'])
       }, {
         key: 'cloud',
         label: 'svgbg',
-        options: toOptions(['xOffset', 'yOffset', 'size', 'opacity'])
+        options: toOptions(['xOffset', 'yOffset', 'size', 'lineHeight', 'fontSpacing', 'opacity'])
       }, {
         key: 'text-book',
         label: 'svgbg',
-        options: toOptions(['xOffset', 'yOffset', 'size', 'opacity'])
+        options: toOptions(['xOffset', 'yOffset', 'size', 'lineHeight', 'fontSpacing', 'opacity'])
       }])
     }]
     return categories as IEffectCategory[]
