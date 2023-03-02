@@ -178,14 +178,14 @@ export default defineComponent({
     async handleSearch(keyword: string) {
       this.resetSearch()
       if (keyword) {
-        this.panelParams = `http://vivipic.com/editor?panel=object&search=${keyword.replace(/&/g, '%26')}&type=new-design-size&width=1080&height=1080&themeId=1`
+        this.panelParams = `https://vivipic.com/editor?panel=object&search=${keyword.replace(/&/g, '%26')}&type=new-design-size&width=1080&height=1080&themeId=1`
         await this.getTagContent({ keyword })
       }
     },
     async handleCategorySearch(keyword: string, locale = '') {
       this.resetSearch()
       if (keyword) {
-        this.panelParams = `http://vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.global.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
+        this.panelParams = `https://vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.global.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
         await this.getContent({ keyword, locale })
       }
     },

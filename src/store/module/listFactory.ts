@@ -125,15 +125,11 @@ export default function (this: any) {
 
     // For all item or single category search result.
     getContent: async ({ commit, state }, params = {}) => {
-      let { theme } = state
-      const { keyword }: {keyword: string} = params
+      const { theme } = state
+      const { keyword }: { keyword: string } = params
       const locale = params.locale || localeUtils.currLocale()
       commit('SET_STATE', { pending: true, locale })
       if (keyword) commit('SET_STATE', { keyword })
-      if (keyword && keyword.startsWith('tag::') &&
-        this.namespace === 'templates') {
-        theme = themeUtils.sortSelectedTheme(theme)
-      }
       try {
         const needCache = !(keyword && find(state.categories, ['title', keyword])?.is_recent)
         const { data } = await this.api({
@@ -182,15 +178,16 @@ export default function (this: any) {
       keyword = keyword.includes('::') ? keyword : `tag::${keyword}`
       commit('SET_STATE', { pending: true, keyword, locale })
       if (this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
+      const isAdmin = store.getters['user/isAdmin']
       try {
         const { data } = await this.api({
-          token: '1',
+          token: isAdmin ? store.getters['user/getToken'] : '1',
           locale,
           theme,
           keyword,
           listAll: 1,
           listCategory: 0,
-          cache: true
+          cache: !isAdmin
         })
         commit('SET_CONTENT', { objects: data.data, isSearch: true })
       } catch (error) {
@@ -258,7 +255,7 @@ export default function (this: any) {
           keyword: (keyword.includes('::') ? keyword : `tag::${keyword}`).concat(';;sum::1'),
           listAll: 1,
           listCategory: 0,
-          cache: true
+          cache: false
         })
         commit('SET_STATE', { sum: data.data.sum })
       } catch (error) {
@@ -360,7 +357,9 @@ export default function (this: any) {
   const getters: GetterTree<IListModuleState, any> = {
     nextParams: (state) => {
       let { nextPage, nextSearch, keyword, theme, locale } = state
-      const needCache = !(keyword && find(state.categories, ['title', keyword])?.is_recent)
+      const isAdmin = store.getters['user/isAdmin']
+      const needCache = !(keyword && find(state.categories, ['title', keyword])?.is_recent) &&
+        !(keyword.includes('::') && isAdmin)
       if (keyword && keyword.startsWith('tag::') &&
         this.namespace === 'templates') {
         theme = themeUtils.sortSelectedTheme(theme)

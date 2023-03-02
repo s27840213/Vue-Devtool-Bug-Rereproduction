@@ -15,19 +15,20 @@ export default class SubControllerUtils {
   // private component = undefined as Vue | undefined
   private component = undefined as any | undefined
   private body = undefined as unknown as HTMLElement
-  private _config = { config: null as unknown as ILayer }
+  private _config = { config: null as unknown as ILayer, primaryLayer: null as unknown as IGroup | ITmp | IFrame }
   private layerInfo = { pageIndex: layerUtils.pageIndex, layerIndex: layerUtils.layerIndex, subLayerIdx: layerUtils.subLayerIdx } as ILayerInfo
   private dblTapFlag = false
   private posDiff = { x: 0, y: 0 }
   private _onMouseup = null as unknown
   private get config(): ILayer { return this._config.config }
+  private get primaryLayer(): IGroup | ITmp | IFrame { return this._config.primaryLayer }
   private get pageIndex(): number { return this.layerInfo.pageIndex }
   private get layerIndex(): number { return this.layerInfo.layerIndex }
   private get subLayerIdx(): number { return this.layerInfo.subLayerIdx ?? -1 }
-  private get primaryLayer(): IGroup | IFrame | ITmp { return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp }
+  // private get primaryLayer(): IGroup | IFrame | ITmp { return layerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup | IFrame | ITmp }
   private get primaryActive(): boolean { return this.primaryLayer.active }
 
-  constructor({ _config, body, layerInfo }: { _config: { config: ILayer }, body: HTMLElement, layerInfo?: ILayerInfo, component?: any }) {
+  constructor({ _config, body, layerInfo }: { _config: { config: ILayer, primaryLayer: IGroup | ITmp | IFrame }, body: HTMLElement, layerInfo?: ILayerInfo, component?: any }) {
     this._config = _config
     this.body = body
     layerInfo && (this.layerInfo = layerInfo)
@@ -83,7 +84,6 @@ export default class SubControllerUtils {
       }
       this.component && this.component.$emit('pointerDownSubController')
     }
-
     if (store.getters.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
       groupUtils.deselect()
       groupUtils.select(this.pageIndex, [this.layerIndex])
@@ -111,7 +111,9 @@ export default class SubControllerUtils {
   }
 
   onMouseup(e: PointerEvent) {
+    eventUtils.removePointerEvent('pointerup', this._onMouseup)
     e.stopPropagation()
+    if (!this.primaryLayer.active) return
     if (this.config.type === 'text') {
       this.posDiff.x = this.primaryLayer.styles.x - this.posDiff.x
       this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
@@ -128,14 +130,6 @@ export default class SubControllerUtils {
         }
       }
     }
-    eventUtils.removePointerEvent('pointerup', this._onMouseup)
-    // this.isControlling = false
-    this.onClickEvent(e)
-  }
-
-  onClickEvent(e: MouseEvent) {
-    if (!this.primaryLayer.active) return
-
     colorUtils.event.emit('closeColorPanel', false)
     let updateSubLayerProps = null as any
     let layers = null as any

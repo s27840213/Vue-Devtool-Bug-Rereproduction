@@ -72,7 +72,7 @@ Cypress.Commands.add('layerLock', { prevSubject: 'element' }, (subject) => {
     .realMouseUp()
     .snapshotTest('Lock unlocked')
     .get('.svg-unlock').click()
-    .deselectAllLayers()
+    .wait(500)
     .wrap(subject)
     .realMouseDown()
     .realMouseMove(-30, -30, { position: 'center' })
