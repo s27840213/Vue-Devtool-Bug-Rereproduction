@@ -380,6 +380,8 @@ export default defineComponent({
         return [...this.objectTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
       } else if (this.inBgSettingMode) {
         return this.bgSettingTab
+      } else if (this.isGroupOrTmp) {
+        return this.genearlLayerTabs
       } else {
         return this.homeTabs
       }
