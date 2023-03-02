@@ -161,10 +161,18 @@ export default defineComponent({
           return props.layerIndex
         }
       })
-      const _config = { config: { active: false } } as { config: ILayer }
+      const _config = {
+        config: { active: false },
+        primaryLayer: {}
+      } as { config: ILayer, primaryLayer: ITmp | IGroup | IFrame }
       Object.defineProperty(_config, 'config', {
         get() {
           return props.config
+        }
+      })
+      Object.defineProperty(_config, 'primaryLayer', {
+        get() {
+          return props.primaryLayer
         }
       })
       this.subLayerCtrlUtils = new SubCtrlUtils({
