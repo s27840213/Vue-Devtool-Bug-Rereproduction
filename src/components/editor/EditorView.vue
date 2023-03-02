@@ -256,11 +256,25 @@ export default defineComponent({
     },
     screenHeight() {
       pageUtils.findCentralPageIndexInfo()
+    },
+    isSidebarPanelOpen() {
+      this.$nextTick(() => {
+        this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
+      })
+    },
+    showPagePanel() {
+      this.$nextTick(() => {
+        this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
+      })
     }
   },
   props: {
     currPage: {
       type: Object as PropType<IPage>,
+      required: true
+    },
+    isSidebarPanelOpen: {
+      type: Boolean,
       required: true
     }
   },
@@ -290,6 +304,7 @@ export default defineComponent({
       enableComponentLog: 'getEnalbleComponentLog',
       pagesLength: 'getPagesLength',
       isImgCtrl: 'imgControl/isImgCtrl',
+      showPagePanel: 'page/getShowPagePanel'
     }),
     pages(): Array<IPage> {
       return (this.pagesState as Array<IPageState>).map(p => p.config)

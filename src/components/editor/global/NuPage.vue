@@ -130,7 +130,7 @@ div(ref="page-wrapper" :style="pageRootStyles" :id="`nu-page-wrapper_${pageIndex
                 @setFocus="setFocus()"
                 @isDragging="handleDraggingController")
       div(v-show="!isBgImgCtrl && (pageIsHover || currFocusPageIndex === pageIndex)"
-        :class="[useMobileEditor ? 'page-highlighter page-highlighter--mobile' : 'page-highlighter']"
+        :class="[useMobileEditor ? 'page-highlighter page-highlighter--mobile' : 'page-highlighter', {'page-highlighter--in-bg-settings': inBgSettingMode}]"
         :style="wrapperStyles")
       //- for ruler to get rectangle of page content (without bleeds)
       div(v-if="config.isEnableBleed" :class="`nu-page-bleed-${pageIndex}`" :style="bleedLineAreaStyles()")
@@ -258,17 +258,17 @@ export default defineComponent({
     this.initialPageHeight = (this.config as IPage).height
     this.$nextTick(() => {
       this.isShownScrollBar = !(this.overflowContainer?.scrollHeight === this.overflowContainer?.clientHeight)
-      // const el = this.$refs.page as HTMLElement
-      // const pz = new PinchZoom(el, {
-      //   minZoom: (pageUtils.mobileMinScaleRatio * 0.01),
-      //   onZoomStart: (pz, e) => {
-      //     console.log('zoom start', pz)
-      //   },
-      //   onDoubleTap: (pz, e) => {
-      //     console.log('onDoubleTap', pz, e)
-      //   }
-      // })
     })
+
+    // const page = this.$refs.page as HTMLElement
+    // const rect = page.getBoundingClientRect()
+    // console.log(rect)
+    // console.log('width: rect.width, height: rect.height', this.pageIndex, rect.width, rect.height)
+    // pageUtils.setMobilePysicalPage({
+    //   pageIndex: this.pageIndex,
+    //   pageSize: { width: rect.width, height: rect.height },
+    //   pageCenterPos: { x: rect.left + rect.width * 0.5, y: rect.top + rect.height * 0.5 }
+    // })
   },
   watch: {
     pageIndex(val) {
@@ -293,7 +293,8 @@ export default defineComponent({
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapState('shadow', ['handleId']),
     ...mapGetters({
-      imgControlPageIdx: 'imgControl/imgControlPageIdx'
+      imgControlPageIdx: 'imgControl/imgControlPageIdx',
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode'
     }),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
@@ -830,6 +831,10 @@ export default defineComponent({
   &--mobile {
     outline: none;
     box-shadow: 0px 0px 7px setColor(gray-2, 0.4);
+  }
+
+  &--in-bg-settings {
+    outline: 2px solid setColor(blue-2);
   }
 }
 .page-control {

@@ -178,7 +178,8 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters('imgControl', {
-      isImgCtrl: 'isImgCtrl'
+      isImgCtrl: 'isImgCtrl',
+      isBgImgCtrl: 'isBgImgCtrl'
     }),
     ...mapGetters({
       isShowPagePreview: 'page/getIsShowPagePreview',
@@ -267,14 +268,17 @@ export default defineComponent({
       return this.inSelectionState || ['crop', 'color', 'copy-style'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
+      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file'].includes(this.currActivePanel)
       return Object.assign(
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
           'row-gap': this.noRowGap ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
-            ? 'initial' : this.panelDragHeight + 'px'
-        }
+            ? 'initial' : this.panelDragHeight + 'px',
+        },
+        // Prevent MobilePanel collapse
+        isSidebarPanel ? { height: '100%' } : {}
       )
     },
     innerTab(): string {
@@ -443,7 +447,6 @@ export default defineComponent({
     },
     rightButtonAction(): () => void {
       return () => {
-        console.log(this.currActivePanel)
         switch (this.currActivePanel) {
           case 'crop': {
             if (this.selectedLayerNum > 0) {
@@ -501,12 +504,14 @@ export default defineComponent({
         editorUtils.setInMultiSelectionMode(false)
       }
     },
-    currActivePanel(newVal) {
+    currActivePanel(newVal, oldVal) {
       this.panelHistory = []
       this.innerTabIndex = 0
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
-      this.panelDragHeight = newVal === 'none' ? 0 : this.initPanelHeight()
+      if (oldVal === 'none') { // Prevent reset height when switch panel
+        this.panelDragHeight = newVal === 'none' ? 0 : this.initPanelHeight()
+      }
     },
     showMobilePanel(newVal) {
       if (!newVal) {
@@ -541,7 +546,7 @@ export default defineComponent({
     vcoConfig() {
       return {
         handler: (e: Event) => {
-          if (!this.isImgCtrl && !this.inMultiSelectionMode) {
+          if (!this.isImgCtrl && !this.isBgImgCtrl && !this.inMultiSelectionMode) {
             this.closeMobilePanel()
           }
         },
