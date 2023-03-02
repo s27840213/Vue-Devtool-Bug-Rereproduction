@@ -34,6 +34,13 @@ Cypress.automation('remote:debugger:protocol', {
   },
 })
 
+Cypress.on('uncaught:exception', (error) => {
+  // Vue warn/error with component will cause error to cypress LogCollectBrowserConsole.
+  if (error.message.includes('Cannot convert object to primitive value')) {
+    return false
+  }
+})
+
 after(() => {
   // Generate cypress-image-diff report after testing
   cy.task('generateReport')
