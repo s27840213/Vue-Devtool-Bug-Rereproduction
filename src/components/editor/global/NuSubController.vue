@@ -1,5 +1,4 @@
 <template lang="pug">
-//- :style="transformStyle")
 div(class="nu-sub-controller")
   div(class="nu-sub-controller__wrapper" :style="positionStyles()")
     div(class="nu-sub-controller__wrapper" :style="wrapperStyles")

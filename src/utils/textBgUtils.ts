@@ -1,7 +1,7 @@
 import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, ITextBgEffect, ITextGooey } from '@/interfaces/format'
-import { IStyle, IText } from '@/interfaces/layer'
+import { IParagraphStyle, ISpanStyle, IStyle, IText } from '@/interfaces/layer'
 import store from '@/store'
-import LayerUtils from '@/utils/layerUtils'
+import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -114,7 +114,10 @@ class Rect {
 
             const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
             spanStyleObject.textIndent = spanStyleObject['letter-spacing'] || 'initial'
-            Object.assign(span.style, spanStyleObject)
+            const fixedWidth = isITextLetterBg(config.styles.textBg) && config.styles.textBg.fixedWidth
+            Object.assign(span.style, spanStyleObject,
+              fixedWidth ? textBg.fixedWidthStyle(spanData.styles, para.styles) : {}
+            )
 
             p.appendChild(span)
           })
@@ -140,9 +143,13 @@ class Rect {
     const target = this.vertical ? 'height' : 'width'
     let resizeTimes = 1
     while (widthLimit !== -1 && resizeTimes < 100 &&
-      div.clientHeight - heightLimit > 5 * scale) {
+      Math.abs(div.clientHeight - heightLimit) > 5 * scale) {
       resizeTimes++
-      widthLimit += scale * resizeTimes
+      if (div.clientHeight > heightLimit) {
+        widthLimit += scale * resizeTimes
+      } else {
+        widthLimit -= scale * resizeTimes
+      }
       div = div.cloneNode(true) as HTMLDivElement
       div.style[target] = `${widthLimit / scale}px`
       await this.waitForRender(div)
@@ -568,7 +575,7 @@ function getLetterBgSetting(name: string, index: number) {
 
 class TextBg {
   private currColorKey = ''
-  effects = {} as Record<string, Record<string, string | number>>
+  effects = {} as Record<string, Record<string, string | number | boolean>>
   constructor() {
     this.effects = this.getDefaultEffects()
   }
@@ -582,7 +589,8 @@ class TextBg {
       yOffset: 50,
       size: 100,
       opacity: 100,
-    }
+      fixedWidth: true
+    } as const
 
     return {
       none: {},
@@ -655,7 +663,7 @@ class TextBg {
       },
       rainbow: letterBgDefault,
       'rainbow-dark': letterBgDefault,
-      cloud: letterBgDefault,
+      cloud: Object.assign({}, letterBgDefault, { fixedWidth: false }),
       'text-book': letterBgDefault
     }
   }
@@ -667,6 +675,13 @@ class TextBg {
   convertTextEffect(styles: IStyle) { // to-delete
     const effect = styles.textBg as ITextBgEffect
     if (!isITextBox(effect)) return {}
+  }
+
+  fixedWidthStyle(spanStyle: ISpanStyle, pStyle: IParagraphStyle) {
+    return {
+      display: 'inline-block',
+      width: `${spanStyle.size * 4 / 3 * (pStyle.fontSpacing + 1)}px`,
+    }
   }
 
   async drawSvgBg(config: IText): Promise<textBgSvg | null> {
@@ -808,8 +823,11 @@ class TextBg {
           if (text !== ' ') {
             pos.push({
               ...getLetterBgSetting(textBg.name, i),
+              // Because all letter svg width = height, so need to -(h-w)/2
+              // Since we put svg at center of letter, and a letter contain its letterSpacing.
+              // So we need to -letterSpacing/2 to put svg at center of letter not contain letterSpacing.
               x: x - (height - width) / 2 - span.letterSpacing / 2,
-              y: y + height / 2,
+              y,
               width,
               height,
             })
@@ -826,8 +844,11 @@ class TextBg {
             href: `#${p.href}`,
             transform,
             width: p.height * scale,
-            x: p.x - (scale - 1) / 2 * p.height + p.width * (xOffset - 50) / 50,
-            y: p.y - height / 2 + p.height * (yOffset - 50) / 50,
+            height: p.height * scale,
+            // Scale will let width be (scale-1)*p.height times larger than before,
+            // So -(scale-1)*p.height/2 to justify it to center.
+            x: p.x - (scale - 1) * p.height / 2 + p.width * (xOffset - 50) / 50,
+            y: p.y - (scale - 1) * p.height / 2 + p.height * (yOffset - 50) / 50,
             style: `color: #${p.color}`
           }
         }))
@@ -890,7 +911,7 @@ class TextBg {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
-    const subLayerIndex = LayerUtils.subLayerIdx
+    const subLayerIndex = layerUtils.subLayerIdx
     const defaultAttrs = this.effects[effect]
 
     for (const idx in layers) {
@@ -899,6 +920,7 @@ class TextBg {
       const { type, styles: { textBg: layerTextBg } } = layers[idx] as IText
       if (type === 'text') {
         const textBg = {} as ITextBgEffect
+        const oldFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
         if (layerTextBg && layerTextBg.name === effect) { // Adjust effect option.
           Object.assign(textBg, layerTextBg, attrs)
           localStorageUtils.set('textEffectSetting', effect, textBg)
@@ -922,6 +944,13 @@ class TextBg {
           subLayerIndex: +idx,
           styles: { textBg }
         })
+
+        const newFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
+        // Fixed width setting changed, force split/unsplit span text
+        if (oldFixedWidth !== newFixedWidth) {
+          tiptapUtils.updateHtml()
+          tiptapUtils.forceUpdate()
+        }
       }
     }
   }
@@ -932,4 +961,5 @@ class TextBg {
   }
 }
 
-export default new TextBg()
+const textBg = new TextBg()
+export default textBg

@@ -50,6 +50,7 @@ export interface ITextLetterBg {
   yOffset: number
   opacity: number
   size: number
+  fixedWidth: boolean
 }
 
 export type ITextBgEffect = ITextBox | ITextUnderline | ITextGooey | ITextLetterBg | {name: 'none'}

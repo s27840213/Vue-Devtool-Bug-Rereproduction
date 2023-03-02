@@ -1,19 +1,42 @@
+import { isITextLetterBg } from '@/interfaces/format'
 import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
 import cssConveter from '@/utils/cssConverter'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import NuTextStyle from '@/utils/nuTextStyle'
-import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 import TextStyle from '@tiptap/extension-text-style'
-import { Editor, EditorEvents, FocusPosition } from '@tiptap/vue-3'
+import { Editor, EditorEvents, FocusPosition, JSONContent } from '@tiptap/vue-3'
 import { EventEmitter } from 'events'
 import shortcutUtils from './shortcutUtils'
+import textBgUtils from './textBgUtils'
+
+interface ITiptapJson extends JSONContent {
+  type: 'doc'
+  content: {
+    type: 'paragraph'
+    attrs: Record<'align' | 'assetId' | 'color' | 'decoration' | 'font' |
+      'fontUrl' | 'style' | 'type' | 'userId' | 'weight', string>
+    & Record<'fontSpacing' | 'lineHeight' | 'size', number>
+    & Record<'spanStyle', boolean>
+    content: {
+      type: 'text'
+      text: string
+      marks: {
+        type: 'textStyle'
+        attrs: Record<'assetId' | 'color' | 'decoration' | 'font' | 'fontUrl' |
+          'randomId' | 'style' | 'type' | 'userId' | 'weight' | 'width', string>
+        & Record<'size', number>
+        & Record<'pre', string>
+      }[]
+    }[]
+  }[]
+}
 
 class TiptapUtils {
   event: any
@@ -111,7 +134,7 @@ class TiptapUtils {
     return Object.entries(this.textStylesRaw(styles)).map(([k, v]) => `${k}: ${v}`).join('; ')
   }
 
-  toJSON(paragraphs: IParagraph[]): any {
+  toJSON(paragraphs: IParagraph[]): ITiptapJson {
     // console.log(generalUtils.deepCopy(paragraphs))
     return {
       type: 'doc',
@@ -127,21 +150,30 @@ class TiptapUtils {
         }
         pObj.attrs = attrs
         if (p.spans.length > 1 || p.spans[0].text !== '') {
-          const spans = this.splitLastWhiteSpaces(p.spans)
-          pObj.content = spans.map(s => {
-            const layerStyles = textEffectUtils.getCurrentLayer().styles
+          let spans = this.splitLastWhiteSpaces(p.spans)
+          const textBg = textEffectUtils.getCurrentLayer().styles.textBg
+          const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
+          if (fixedWidth) {
+            spans = spans.flatMap(
+              span => [...span.text]
+                .map(t => Object.assign({}, span, { text: t }))
+            )
+          }
+          pObj.content = spans.map((s, index) => {
             return {
               type: 'text',
               text: s.text,
               marks: [{
                 type: 'textStyle',
-                attrs: this.makeSpanStyle(s.styles)
+                attrs: Object.assign(this.makeSpanStyle(s.styles),
+                  fixedWidth ? Object.assign({ randomId: `${index}` }, textBgUtils.fixedWidthStyle(s.styles, p.styles)) : {}
+                )
               }]
             }
           })
         }
         return pObj
-      })
+      }) as ITiptapJson['content']
     }
   }
 
@@ -226,9 +258,27 @@ class TiptapUtils {
     return result
   }
 
-  toIParagraph(tiptapJSON: any): { paragraphs: IParagraph[], isSetContentRequired: boolean } {
+  toIParagraph(_tiptapJSON: JSONContent): { paragraphs: IParagraph[], isSetContentRequired: boolean } {
+    const tiptapJSON = _tiptapJSON as ITiptapJson
     if (!this.editor) return { paragraphs: [], isSetContentRequired: false }
     let isSetContentRequired = false
+    // If fixedWidth, all span should split into one text per span
+    // So 1. check if some text need to be split here.
+    // 2. check if letter spacing changed
+    const textBg = (layerUtils.getCurrLayer as IText).styles.textBg
+    const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
+    if (fixedWidth) {
+      tiptapJSON.content.forEach(p => {
+        p.content.forEach(s => {
+          if (s.text.length > 1) isSetContentRequired = true
+          const width = parseFloat(s.marks[0].attrs.width)
+          if (width !== s.marks[0].attrs.size * 4 / 3 * (p.attrs.fontSpacing + 1)) {
+            isSetContentRequired = true
+          }
+        })
+      })
+    }
+
     const defaultStyle = this.editor.storage.nuTextStyle.spanStyle as string
     const result: IParagraph[] = []
     for (const paragraph of tiptapJSON.content) {

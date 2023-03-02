@@ -1,3 +1,4 @@
+import { isITextLetterBg } from '@/interfaces/format'
 import {
   IGroup, ILayer, IParagraph, IParagraphStyle, ISpan,
   ISpanStyle, IText, ITmp
@@ -18,6 +19,7 @@ import logUtils from './logUtils'
 import mathUtils from './mathUtils'
 import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
+import textBgUtils from './textBgUtils'
 import textShapeUtils from './textShapeUtils'
 import tiptapUtils from './tiptapUtils'
 
@@ -638,20 +640,15 @@ class TextUtils {
         const span = document.createElement('span')
         span.textContent = spanData.text
 
-        const spanStyleObject = {} as Record<string, string>
-        tiptapUtils.textStyles(spanData.styles)
-          .split(';')
-          .forEach(s => {
-            Object.assign(spanStyleObject, {
-              [s.split(':')[0].trim()]: s.split(': ')[1].trim()
-            })
-          })
-        const additionalStyle = Object.assign({}, spanStyleObject,
-          index === pData.spans.length - 1 && spanData.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {}
-        )
-        Object.assign(span.style, additionalStyle)
+        const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
+        const fixedWidth = isITextLetterBg(content.styles.textBg) && content.styles.textBg.fixedWidth
+        const additionalStyle = {
+          ...index === pData.spans.length - 1 && spanData.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
+          ...fixedWidth ? textBgUtils.fixedWidthStyle(spanData.styles, pData.styles) : {}
+        }
+        Object.assign(span.style, spanStyleObject, additionalStyle)
         // Set CSS var to span
-        for (const [key, value] of Object.entries(additionalStyle)) {
+        for (const [key, value] of Object.entries(spanStyleObject)) {
           if (key.startsWith('--')) {
             span.style.setProperty(key, value)
           }

@@ -192,6 +192,32 @@ export default Extension.create({
                 style: 'white-space: pre'
               }
             }
+          },
+          randomId: {
+            default: undefined,
+            parseHTML: element => {
+              return element.getAttribute('random-id')
+            },
+            renderHTML: attributes => {
+              if (!attributes.randomId) return {}
+              return {
+                randomId: attributes.randomId
+              }
+            }
+          },
+          width: {
+            default: undefined,
+            parseHTML: element => {
+              const spanStyle = element.style
+              const width = spanStyle.getPropertyValue('width')
+              return width
+            },
+            renderHTML: attributes => {
+              if (!attributes.width) return {}
+              return {
+                style: `display: inline-block; width: ${attributes.width}`
+              }
+            }
           }
         }
       }, {
