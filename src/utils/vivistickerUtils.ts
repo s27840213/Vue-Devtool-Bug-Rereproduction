@@ -350,11 +350,8 @@ class ViviStickerUtils {
   startEditing(editorType: string, assetInfo: { [key: string]: any }, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
     const elTop = document.getElementsByClassName('vivisticker__top')[0]
     const headerHeight = 44
-    const topSize = {
-      width: elTop.clientWidth,
-      height: elTop.clientHeight
-    }
-    const pageSize = Math.min(topSize.width, topSize.height - headerHeight) - 32
+    const shortEdge = Math.min(elTop.clientWidth, elTop.clientHeight - headerHeight)
+    const pageSize = Math.round(shortEdge * 0.9)
     pageUtils.setPages([pageUtils.newPage({
       width: pageSize,
       height: pageSize,
