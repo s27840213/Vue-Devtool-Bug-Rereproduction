@@ -15,7 +15,7 @@ div(class="mobile-editor")
     transition(name="panel-up"
               @before-enter="beforeEnter"
               @after-leave="afterLeave")
-      mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
+      mobile-panel(v-show="showMobilePanel"
         :currActivePanel="currActivePanel"
         :currPage="currPage"
         @switchTab="switchTab"
@@ -238,10 +238,6 @@ export default defineComponent({
         editorUtils.setCurrActivePanel(panelType)
         if (panelType === 'color' && props?.currColorEvent) {
           this.currColorEvent = props.currColorEvent
-        }
-
-        if (this.inMultiSelectionMode) {
-          editorUtils.setInMultiSelectionMode(false)
         }
       }
 

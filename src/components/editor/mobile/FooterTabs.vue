@@ -348,7 +348,7 @@ export default defineComponent({
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}` }
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select' }
         // { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true }
       ]
     },
@@ -582,9 +582,10 @@ export default defineComponent({
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
-      console.log(tab)
       if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
+        console.log(!this.inMultiSelectionMode)
         editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
+        console.log(this.inMultiSelectionMode)
       }
       switch (tab.icon) {
         case 'crop': {
@@ -811,9 +812,6 @@ export default defineComponent({
       }
     },
     tabActive(tab: IFooterTab): boolean {
-      if ((this.inMultiSelectionMode && tab.icon === 'multiple-select')) {
-        return true
-      }
       if (this.currTab === 'color') {
         return this.currTab === tab.panelType &&
           ((colorUtils.currEvent === 'setTextColor' && tab.icon === 'text-color-mobile') ||
