@@ -25,7 +25,7 @@ div(class="mobile-panel"
       div(class="mobile-panel__title")
         span(class="mobile-panel__title-text body-1 mr-10"
           :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
-        div(v-if="inSelectionState" class="mobile-panel__layer-num")
+        div(v-if="currActivePanel === 'multiple-select'" class="mobile-panel__layer-num")
           span(class="label-sm text-white") {{selectedLayerNum}}
       div(class="mobile-panel__btn mobile-panel__right-btn"
           :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn}")
@@ -202,26 +202,23 @@ export default defineComponent({
     selectedLayerNum(): number {
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
     },
-    inSelectionState(): boolean {
-      return this.currActivePanel === 'none' && this.inMultiSelectionMode
-    },
     whiteTheme(): boolean {
       const whiteThemePanel = [
         'bleed', 'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
-        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style']
+        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style', 'multiple-select']
 
-      return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
+      return this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
       return ['brand-list'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return this.inSelectionState || [
+      return [
         'bleed', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
-        'font-spacing', 'download', 'more', 'object-adjust', 'brand-list'].includes(this.currActivePanel)
+        'font-spacing', 'download', 'more', 'object-adjust', 'brand-list', 'multiple-select'].includes(this.currActivePanel)
     },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
@@ -244,10 +241,10 @@ export default defineComponent({
         case 'copy-style': {
           return `${this.$t('NN0809')}`
         }
+        case 'multiple-select': {
+          return `${this.$t('NN0657')}`
+        }
         case 'none': {
-          if (this.inMultiSelectionMode) {
-            return `${this.$t('NN0657')}`
-          }
           return ''
         }
         default: {
@@ -262,10 +259,10 @@ export default defineComponent({
       return this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel)
     },
     hideDynamicComp(): boolean {
-      return ['crop', 'copy-style'].includes(this.currActivePanel) || this.inSelectionState
+      return ['crop', 'copy-style', 'multiple-select'].includes(this.currActivePanel)
     },
     noRowGap(): boolean {
-      return this.inSelectionState || ['crop', 'color', 'copy-style'].includes(this.currActivePanel)
+      return ['crop', 'color', 'copy-style', 'multiple-select'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
       const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file'].includes(this.currActivePanel)
@@ -481,6 +478,13 @@ export default defineComponent({
             break
           }
 
+          case 'multiple-select': {
+            if (this.inMultiSelectionMode) {
+              editorUtils.setInMultiSelectionMode(false)
+            }
+            break
+          }
+
           case 'color': {
             if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
               this.addRecentlyColors(colorUtils.currColor)
@@ -491,10 +495,6 @@ export default defineComponent({
           this.addRecentlyColors(colorUtils.currColor)
         }
         this.closeMobilePanel()
-
-        if (this.inMultiSelectionMode && this.inSelectionState) {
-          editorUtils.setInMultiSelectionMode(false)
-        }
       }
     }
   },

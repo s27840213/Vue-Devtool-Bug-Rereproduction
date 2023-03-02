@@ -102,16 +102,7 @@ export default defineComponent({
     this.isDestroyed = true
   },
   mounted() {
-    // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
-    textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
-      setTimeout(() => {
-        this.resizeCallback()
-        if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
-          this.isLoading = false
-        }
-      }, 100) // for the delay between font loading and dom rendering
-    })
-    this.drawSvgBG()
+    this.resizeAfterFontLoaded()
   },
   computed: {
     spanEffect(): Record<string, unknown> {
@@ -170,6 +161,13 @@ export default defineComponent({
       handler() {
         this.drawSvgBG()
       }
+    },
+    'config.isAutoResizeNeeded': {
+      handler(newVal) {
+        if (newVal) {
+          this.resizeAfterFontLoaded()
+        }
+      }
     }
   },
   methods: {
@@ -190,6 +188,9 @@ export default defineComponent({
     },
     isAutoResizeNeeded(): boolean {
       return this.page.isAutoResizeNeeded
+    },
+    isLayerAutoResizeNeeded(): boolean {
+      return this.config.isAutoResizeNeeded
     },
     getOpacity() {
       const { active, contentEditable } = this.config
@@ -231,8 +232,9 @@ export default defineComponent({
       // console.log('resize')
 
       let widthLimit
-      if (this.isLoading && this.isAutoResizeNeeded()) {
+      if ((this.isLoading && this.isAutoResizeNeeded()) || this.isLayerAutoResizeNeeded()) {
         widthLimit = await textUtils.autoResize(config, this.initSize)
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
       } else {
         widthLimit = config.widthLimit
       }
@@ -262,6 +264,18 @@ export default defineComponent({
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
+      this.drawSvgBG()
+    },
+    resizeAfterFontLoaded() {
+      // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
+      textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
+        setTimeout(() => {
+          this.resizeCallback()
+          if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
+            this.isLoading = false
+          }
+        }, 100) // for the delay between font loading and dom rendering
+      })
       this.drawSvgBG()
     }
   }
