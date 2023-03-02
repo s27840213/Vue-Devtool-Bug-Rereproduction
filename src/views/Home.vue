@@ -182,6 +182,7 @@ export default defineComponent({
     }
   }
   &__button {
+    @include body-MD;
     margin-top: 25px;
     width: 216px;
     height: 44px;
@@ -258,7 +259,7 @@ export default defineComponent({
     }
     &__button {
       position: fixed;
-      width: 70%;
+      width: calc(90% - 40px);
       bottom: 30px;
       z-index: 1;
     }

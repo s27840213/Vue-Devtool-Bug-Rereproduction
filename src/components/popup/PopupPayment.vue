@@ -68,21 +68,21 @@ div(class="popup-window")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapActions, mapGetters, mapState } from 'vuex'
-import { createHelpers } from 'vuex-map-fields'
-import vClickOutside from 'click-outside-vue3'
-import paymentUtils from '@/utils/paymentUtils'
+import Animation from '@/components/Animation.vue'
+import RadioBtn from '@/components/global/RadioBtn.vue'
+import CardInfo from '@/components/payment/CardInfo.vue'
+import CouponInput from '@/components/payment/CouponInput.vue'
+import PaymentField from '@/components/payment/PaymentField.vue'
 import {
   IPaymentPayingView, IPaymentView, IPaymentWarningView, _IPaymentWarningView
 } from '@/interfaces/payment'
-import PaymentField from '@/components/payment/PaymentField.vue'
-import RadioBtn from '@/components/global/RadioBtn.vue'
-import Animation from '@/components/Animation.vue'
-import CardInfo from '@/components/payment/CardInfo.vue'
-import CouponInput from '@/components/payment/CouponInput.vue'
 import paymentData from '@/utils/constantData'
+import paymentUtils from '@/utils/paymentUtils'
+import { notify } from '@kyvg/vue3-notification'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapState } from 'vuex'
+import { createHelpers } from 'vuex-map-fields'
 
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',
@@ -185,11 +185,11 @@ export default defineComponent({
           return [this.$tc('NN0768'), 'page-resize.jpg']
         case 'brandkit':
           return [this.$tc('NN0583'), 'brandkit.jpg']
-        case 'bgrm':
         case 'pro-template':
           return [this.$tc('NN0653'), 'cb.jpg']
         case 'pro-object':
           return [this.$tc('NN0658'), 'pro-object.jpg']
+        case 'bgrm':
         default:
           return [this.$tc('NN0652'), 'remover.jpg']
       }
