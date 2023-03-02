@@ -212,12 +212,16 @@ export default Extension.create({
               const width = spanStyle.getPropertyValue('width')
               return width
             },
-            renderHTML: attributes => {
-              if (!attributes.width) return {}
-              return {
-                style: `display: inline-block; width: ${attributes.width}`
-              }
-            }
+            renderHTML: () => ({})
+          },
+          height: {
+            default: undefined,
+            parseHTML: element => {
+              const spanStyle = element.style
+              const height = spanStyle.getPropertyValue('height')
+              return height
+            },
+            renderHTML: () => ({})
           }
         }
       }, {

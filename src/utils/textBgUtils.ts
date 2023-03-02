@@ -116,7 +116,7 @@ class Rect {
             spanStyleObject.textIndent = spanStyleObject['letter-spacing'] || 'initial'
             const fixedWidth = isITextLetterBg(config.styles.textBg) && config.styles.textBg.fixedWidth
             Object.assign(span.style, spanStyleObject,
-              fixedWidth ? textBg.fixedWidthStyle(spanData.styles, para.styles) : {}
+              fixedWidth ? textBg.fixedWidthStyle(spanData.styles, para.styles, config) : {}
             )
 
             p.appendChild(span)
@@ -677,10 +677,11 @@ class TextBg {
     if (!isITextBox(effect)) return {}
   }
 
-  fixedWidthStyle(spanStyle: ISpanStyle, pStyle: IParagraphStyle) {
+  fixedWidthStyle(spanStyle: ISpanStyle, pStyle: IParagraphStyle, config: IText) {
+    const target = config.styles.writingMode === 'vertical-lr' ? 'height' : 'width'
     return {
       display: 'inline-block',
-      width: `${spanStyle.size * 4 / 3 * (pStyle.fontSpacing + 1)}px`,
+      [target]: `${spanStyle.size * 4 / 3 * (pStyle.fontSpacing + 1)}px`,
     }
   }
 

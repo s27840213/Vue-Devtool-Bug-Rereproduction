@@ -27,34 +27,12 @@ const styleMap = {
   decoration: 'text-decoration-line',
   style: 'font-style',
   caretColor: 'caret-color',
-  // below are not css valid properties, only for tiptap to record
-  type: 'font-type',
-  assetId: 'asset-id',
-  userId: 'user-id',
-  fontUrl: 'font-url'
 } as IStyleMap
-
-// const fontStyleMap = {
-//   'font-family': 'fontFamily',
-//   'font-weight': 'fontWeight',
-//   'font-align': 'fontAlign',
-//   'line-height': 'lineHeight',
-//   'font-spacing': 'fontSpacing',
-//   'font-size': 'fontSize',
-//   'writing-mode': 'writingMode',
-//   'font-style': 'fontStyle',
-//   'text-decoration-line': 'decoration',
-//   'text-decoration-thickness': 'decoration',
-//   'text-decoration-style': 'decoration',
-//   'text-decoration-color': 'decoration',
-//   'letter-spacing': 'letterSpacing',
-//   color: 'color'
-// } as IStyleMap
 
 const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate']
 const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
-  'type', 'assetId', 'userId', 'fontUrl'
+  'width', 'height'
 ]
 
 class CssConveter {
@@ -88,6 +66,12 @@ class CssConveter {
       } else if (prop === 'color') { // For color
         result[styleMap[prop]] = `${sourceStyles[prop]}`
         result['text-decoration-color'] = `${sourceStyles[prop]}`
+      } else if (prop === 'width' && sourceStyles.width) {
+        result.width = `${sourceStyles.width}`
+        result.display = 'inline-block'
+      } else if (prop === 'height' && sourceStyles.height) {
+        result.height = `${sourceStyles.height}`
+        result.display = 'inline-block'
       } else if (typeof sourceStyles[prop] !== 'undefined') {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}px` : `${sourceStyles[prop]}`
       }

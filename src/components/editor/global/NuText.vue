@@ -23,14 +23,14 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       span(v-for="(span, sIndex) in p.spans"
         class="nu-text__span"
         :data-sindex="sIndex"
-        :style="Object.assign(spanStyle(p.spans, sIndex, p.styles), text.extraSpan, transParentStyles)") {{ span.text }}
+        :style="Object.assign(spanStyle(sIndex, p, config), text.extraSpan, transParentStyles)") {{ span.text }}
         br(v-if="!span.text && p.spans.length === 1")
 </template>
 
 <script lang="ts">
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import { isITextLetterBg } from '@/interfaces/format'
-import { IGroup, IParagraphStyle, ISpan, IText } from '@/interfaces/layer'
+import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
@@ -212,12 +212,12 @@ export default defineComponent({
         opacity
       }
     },
-    spanStyle(spans: ISpan[], sIndex: number, pStyle: IParagraphStyle): Record<string, string> {
+    spanStyle(sIndex: number, p: IParagraph, config: IText): Record<string, string> {
       const textBg = this.config.styles.textBg
-      const span = spans[sIndex]
+      const span = p.spans[sIndex]
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
-        sIndex === spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
-        isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, pStyle) : {}
+        sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
+        isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {}
       )
     },
     pStyle(styles: any) {

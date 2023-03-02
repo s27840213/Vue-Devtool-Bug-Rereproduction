@@ -644,7 +644,7 @@ class TextUtils {
         const fixedWidth = isITextLetterBg(content.styles.textBg) && content.styles.textBg.fixedWidth
         const additionalStyle = {
           ...index === pData.spans.length - 1 && spanData.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
-          ...fixedWidth ? textBgUtils.fixedWidthStyle(spanData.styles, pData.styles) : {}
+          ...fixedWidth ? textBgUtils.fixedWidthStyle(spanData.styles, pData.styles, content) : {}
         }
         Object.assign(span.style, spanStyleObject, additionalStyle)
         // Set CSS var to span

@@ -160,13 +160,14 @@ class TiptapUtils {
             )
           }
           pObj.content = spans.map((s, index) => {
+            const config = layerUtils.getCurrLayer as IText
             return {
               type: 'text',
               text: s.text,
               marks: [{
                 type: 'textStyle',
                 attrs: Object.assign(this.makeSpanStyle(s.styles),
-                  fixedWidth ? Object.assign({ randomId: `${index}` }, textBgUtils.fixedWidthStyle(s.styles, p.styles)) : {}
+                  fixedWidth ? Object.assign({ randomId: `${index}` }, textBgUtils.fixedWidthStyle(s.styles, p.styles, config)) : {}
                 )
               }]
             }
