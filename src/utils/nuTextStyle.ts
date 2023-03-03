@@ -205,20 +205,20 @@ export default Extension.create({
               }
             }
           },
-          width: {
+          'min-width': {
             default: undefined,
             parseHTML: element => {
               const spanStyle = element.style
-              const width = spanStyle.getPropertyValue('width')
+              const width = spanStyle.getPropertyValue('min-width')
               return width
             },
             renderHTML: () => ({})
           },
-          height: {
+          'min-height': {
             default: undefined,
             parseHTML: element => {
               const spanStyle = element.style
-              const height = spanStyle.getPropertyValue('height')
+              const height = spanStyle.getPropertyValue('min-height')
               return height
             },
             renderHTML: () => ({})

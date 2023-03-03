@@ -32,7 +32,7 @@ const styleMap = {
 const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate']
 const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'writingMode', 'decoration', 'color', 'style', 'caretColor',
-  'width', 'height'
+  'min-width', 'min-height'
 ]
 
 class CssConveter {
@@ -51,7 +51,7 @@ class CssConveter {
     const result: { [key: string]: string } = {}
     fontProps.forEach(prop => {
       if (prop === 'size') {
-        result[styleMap[prop]] = `${(sourceStyles[prop] as number) * 1.333333}px`
+        result[styleMap[prop]] = `${(sourceStyles[prop] as number) * 4 / 3}px`
       } else if (prop === 'weight') {
         result[styleMap[prop]] = sourceStyles[prop] === 'bold' ? `calc(var(--base-stroke) + ${(sourceStyles.size as number) / 32}px)` : 'calc(var(--base-stroke))'
       } else if (prop === 'fontSpacing') {
@@ -66,11 +66,11 @@ class CssConveter {
       } else if (prop === 'color') { // For color
         result[styleMap[prop]] = `${sourceStyles[prop]}`
         result['text-decoration-color'] = `${sourceStyles[prop]}`
-      } else if (prop === 'width' && sourceStyles.width) {
-        result.width = `${sourceStyles.width}`
+      } else if (prop === 'min-width' && sourceStyles[prop]) {
+        result['min-width'] = `${sourceStyles[prop]}`
         result.display = 'inline-block'
-      } else if (prop === 'height' && sourceStyles.height) {
-        result.height = `${sourceStyles.height}`
+      } else if (prop === 'min-height' && sourceStyles[prop]) {
+        result['min-height'] = `${sourceStyles[prop]}`
         result.display = 'inline-block'
       } else if (typeof sourceStyles[prop] !== 'undefined') {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}px` : `${sourceStyles[prop]}`
