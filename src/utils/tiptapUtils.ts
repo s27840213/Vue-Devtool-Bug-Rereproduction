@@ -24,10 +24,10 @@ interface ITiptapJson extends JSONContent {
       'fontUrl' | 'style' | 'type' | 'userId' | 'weight', string>
     & Record<'fontSpacing' | 'lineHeight' | 'size', number>
     & Record<'spanStyle', boolean>
-    content: {
+    content?: {
       type: 'text'
       text: string
-      marks: {
+      marks?: {
         type: 'textStyle'
         attrs: Record<'assetId' | 'color' | 'decoration' | 'font' | 'fontUrl' |
           'randomId' | 'style' | 'type' | 'userId' | 'weight' | 'width', string>
@@ -150,15 +150,15 @@ class TiptapUtils {
         }
         pObj.attrs = attrs
         if (p.spans.length > 1 || p.spans[0].text !== '') {
-          let spans = this.splitLastWhiteSpaces(p.spans)
+          const spans = this.splitLastWhiteSpaces(p.spans)
           const textBg = textEffectUtils.getCurrentLayer().styles.textBg
           const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
-          if (fixedWidth) {
-            spans = spans.flatMap(
-              span => [...span.text]
-                .map(t => Object.assign({}, span, { text: t }))
-            )
-          }
+          // if (fixedWidth && !!false) {
+          //   spans = spans.flatMap(
+          //     span => [...span.text]
+          //       .map(t => Object.assign({}, span, { text: t }))
+          //   )
+          // }
           pObj.content = spans.map((s, index) => {
             const config = layerUtils.getCurrLayer as IText
             return {
@@ -262,16 +262,20 @@ class TiptapUtils {
   toIParagraph(_tiptapJSON: JSONContent): { paragraphs: IParagraph[], isSetContentRequired: boolean } {
     const tiptapJSON = _tiptapJSON as ITiptapJson
     if (!this.editor) return { paragraphs: [], isSetContentRequired: false }
+
     let isSetContentRequired = false
+
     // If fixedWidth, all span should split into one text per span
-    // So 1. check if some text need to be split here.
-    // 2. check if letter spacing changed
     const textBg = (layerUtils.getCurrLayer as IText).styles.textBg
     const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
     if (fixedWidth) {
       tiptapJSON.content.forEach(p => {
-        p.content.forEach(s => {
+        p.content && p.content.forEach(s => {
+          // Check if some text need to be split here.
           if (s.text.length > 1) isSetContentRequired = true
+
+          // Check if letter spacing changed
+          if (!s.marks || s.marks.length === 0) return
           const width = parseFloat(s.marks[0].attrs.width)
           if (width !== s.marks[0].attrs.size * 4 / 3 * (p.attrs.fontSpacing + 1)) {
             isSetContentRequired = true
@@ -286,7 +290,11 @@ class TiptapUtils {
       const pStyles = this.makeParagraphStyle(paragraph.attrs)
       let largestSize = 0
       const spans: ISpan[] = []
-      for (const span of paragraph.content ?? []) {
+      const pContent = fixedWidth && paragraph.content
+        ? paragraph.content.flatMap(span => [...span.text]
+          .map(t => Object.assign({}, span, { text: t })))
+        : paragraph.content
+      for (const span of pContent ?? []) {
         if (span.marks && span.marks.length > 0) {
           const sStyles = this.makeSpanStyle(span.marks[0].attrs)
           if (sStyles.size > largestSize) largestSize = sStyles.size
