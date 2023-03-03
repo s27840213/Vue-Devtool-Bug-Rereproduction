@@ -31,18 +31,16 @@ import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage } from '@/interfaces/layer'
 import store from '@/store'
-import { FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
+import { FunctionPanelType, LayerType } from '@/store/types'
+import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
-import paymentUtils from '@/utils/paymentUtils'
-import uploadUtils from '@/utils/uploadUtils'
-import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 
 interface IBtn {
   name: string
@@ -178,17 +176,7 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      updateLayerStyles: 'UPDATE_layerStyles',
-      setInBgRemoveMode: 'bgRemove/SET_inBgRemoveMode',
-      setAutoRemoveResult: 'bgRemove/SET_autoRemoveResult',
-      setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
-      setIsProcessing: 'bgRemove/SET_isProcessing',
-      setIdInfo: 'bgRemove/SET_idInfo',
-      reduceBgrmRemain: 'payment/REDUCE_bgrmRemain',
       updateImgCtrlConfig: 'imgControl/UPDATE_CONFIG'
-    }),
-    ...mapActions({
-      removeBg: 'user/removeBg'
     }),
     disableBtn(btn: IBtn): boolean {
       const currLayer = layerUtils.getCurrConfig as IImage
@@ -263,84 +251,7 @@ export default defineComponent({
           this.show = ''
           return
         case 'remove-bg': {
-          const { layers, pageIndex, index } = this.currSelectedInfo as ICurrSelectedInfo
-
-          this.setIsProcessing(true)
-          layerUtils.updateLayerProps(pageIndex, index, {
-            inProcess: LayerProcessType.bgRemove
-          })
-
-          const targetLayer = layers[0] as IImage
-          const targetPageId = pageUtils.currFocusPage.id
-          const targetLayerId = targetLayer.id
-
-          this.setIdInfo({
-            pageId: targetPageId,
-            layerId: targetLayerId
-          })
-
-          const type = targetLayer.srcObj.type
-
-          const { imgWidth, imgHeight } = targetLayer.styles
-          const aspect = imgWidth >= imgHeight ? 0 : 1
-          const isThirdPartyImage = type === 'unsplash' || type === 'pexels'
-          const initSrc = imageUtils.getSrc((this.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage, 'larg', undefined, true)
-          this.removeBg({ srcObj: targetLayer.srcObj, ...(isThirdPartyImage && { aspect }) }).then((data) => {
-            if (data.flag === 0) {
-              uploadUtils.polling(data.url, (json: any) => {
-                if (json.flag === 0 && json.data) {
-                  this.reduceBgrmRemain()
-                  const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
-                  const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
-
-                  if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
-                    layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-                      inProcess: LayerProcessType.none
-                    })
-                    const editorView = document.querySelector('.editor-view')
-                    const { scrollTop, scrollLeft } = editorView as HTMLElement
-
-                    this.setPrevScrollPos({
-                      top: scrollTop,
-                      left: scrollLeft
-                    })
-
-                    this.setAutoRemoveResult(imageUtils.getBgRemoveInfo(json.data, initSrc))
-                    this.setInBgRemoveMode(true)
-                  }
-                  return true
-                }
-                if (json.flag === 1) {
-                  const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
-                  const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
-
-                  if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
-                    layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-                      inProcess: LayerProcessType.none
-                    })
-
-                    notify({ group: 'error', text: `${this.$t('NN0349')}` })
-                  }
-
-                  return true
-                }
-
-                return false
-              })
-            } else {
-              const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
-              const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
-
-              if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
-                layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-                  inProcess: false
-                })
-              }
-
-              this.setIsProcessing(false)
-              paymentUtils.errorHandler(data.msg)
-            }
-          })
+          bgRemoveUtils.removeBg()
           this.show = ''
         }
       }
