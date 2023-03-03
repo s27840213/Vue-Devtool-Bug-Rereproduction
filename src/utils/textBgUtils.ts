@@ -162,18 +162,25 @@ class Rect {
     this.rows = []
 
     for (const p of div.children) {
-      const fontSize = parseFloat((p as HTMLElement).style.fontSize.match(/[\d.]+/)?.[0] ?? '0')
-      const letterSpacingEm = parseFloat((p as HTMLElement).style.letterSpacing.match(/[\d.-]+/)?.[0] ?? '0')
+      const fontSize = parseFloat((p as HTMLElement).style.fontSize)
+      const letterSpacingEm = parseFloat((p as HTMLElement).style.letterSpacing)
+      const lineHeight = parseFloat((p as HTMLElement).style.lineHeight)
       const letterSpacing = fontSize * letterSpacingEm
       for (const span of p.children) {
         const cr = span.getClientRects()[0]
+        // If span is fixedWidth, its display will be inline-block
+        // Height of inline-block span will grow with lineHeight
+        // Here calc height and y without inline-block effect
+        const isInlineBolck = (span as HTMLElement).style.display === 'inline-block'
+        const height = isInlineBolck ? cr.height / lineHeight * 1.4 : cr.height
+        const y = isInlineBolck ? cr.y + (cr.height - height) / 2 : cr.y
         this.rows.push({
           rect: cr,
           spanData: [{
             x: cr.x,
-            y: cr.y,
+            y: y,
             width: cr.width,
-            height: cr.height,
+            height: height,
             text: span.textContent ?? '',
             letterSpacing
           }]
@@ -679,10 +686,13 @@ class TextBg {
   }
 
   fixedWidthStyle(spanStyle: ISpanStyle, pStyle: IParagraphStyle, config: IText) {
-    const target = config.styles.writingMode === 'vertical-lr' ? 'height' : 'width'
+    let [w, h] = ['width', 'height']
+    if (config.styles.writingMode === 'vertical-lr') [w, h] = [h, w]
+    // const target = config.styles.writingMode === 'vertical-lr' ? 'height' : 'width'
     return {
       display: 'inline-block',
-      [target]: `${spanStyle.size * 4 / 3 * (pStyle.fontSpacing + 1)}px`,
+      [w]: `${spanStyle.size * 4 / 3 * (pStyle.fontSpacing + 1)}px`,
+      [h]: 'auto'
     }
   }
 
@@ -819,6 +829,7 @@ class TextBg {
 
       const pos = [] as (Record<'x' | 'y' | 'width' | 'height', number> & Record<'color' | 'href', string>)[]
       let i = 0
+      console.log('rows', rows)
       rows.forEach((row) => {
         row.spanData.forEach((span) => {
           const { x, y, width, height, text } = span
@@ -892,7 +903,7 @@ class TextBg {
       'text-book': { lineHeight: 1.4, fontSpacing: 0 }
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
-    for (const [key, val] of Object.entries(defaultAttrs[name])) {
+    for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
       textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val)
     }
   }

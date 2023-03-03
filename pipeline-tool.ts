@@ -101,18 +101,18 @@ function getDeploy(stepName, deployment, subdomain, AWSName = 'TEST', prod = fal
   deploy.step.deployment = deployment
   for (const index of [0, 1, 2]) {
     deploy.step.script[index].variables.S3_BUCKET =
-    deploy.step.script[index].variables.S3_BUCKET
-      .replace('$SUBDOMAIN', subdomain.toUpperCase())
+      deploy.step.script[index].variables.S3_BUCKET
+        .replace('$SUBDOMAIN', subdomain.toUpperCase())
   }
   for (const index of [0, 1, 2]) {
     for (const key of ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_DEFAULT_REGION']) {
       deploy.step.script[index].variables[key] =
-      deploy.step.script[index].variables[key]
-        .replace('$AWSName', AWSName)
+        deploy.step.script[index].variables[key]
+          .replace('$AWSName', AWSName)
     }
     if (AWSName === 'STICKER') {
       deploy.step.script[index].variables.EXTRA_ARGS =
-      deploy.step.script[index].variables.EXTRA_ARGS.replace('app.html', 'index.html')
+        deploy.step.script[index].variables.EXTRA_ARGS.replace('app.html', 'index.html')
     }
   }
   if (prod) {
@@ -120,7 +120,7 @@ function getDeploy(stepName, deployment, subdomain, AWSName = 'TEST', prod = fal
   }
   return deploy
 }
-function allDeploy() {
+function allDeploy(autoDeploy = '') {
   const deploys = [
     { sub: 'dev5', name: 'dev5 Alan' },
     { sub: 'dev4', name: 'dev4 Gary' },
@@ -139,7 +139,13 @@ function allDeploy() {
   ]
   return [
     e2e(),
-    ...deploys.map((dep) => getDeploy(dep.name, dep.sub, dep.sub)),
+    ...deploys.map((dep) => {
+      const de = getDeploy(dep.name, dep.sub, dep.sub)
+      if (dep.sub === autoDeploy) {
+        delete de.step.trigger
+      }
+      return de
+    }),
     pullRequest()
   ]
 }
@@ -179,10 +185,15 @@ const result = {
           pullRequest()
         ]
       }],
+      'featrue/text-effect': [{
+        parallel: versionCheckAndBuild()
+      }, {
+        parallel: allDeploy('dev1'),
+      }],
       // 'feature/?': [{
       //   parallel: versionCheckAndBuild()
       // }, {
-      //   parallel: allDeploy(),
+      //   parallel: allDeploy('devN that need auto deploy'),
       // }],
     },
   },
