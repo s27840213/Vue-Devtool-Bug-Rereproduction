@@ -202,8 +202,8 @@ export default defineComponent({
             this.initPinchPos = { x: event.x, y: event.y }
           }
           const posInConfig = {
-            x: (this.initPinchPos.x - pageCenterPos.x + pageSize.width * 0.5) / _sizeRatio - styles.imgX,
-            y: (this.initPinchPos.y - pageCenterPos.y + pageSize.height * 0.5) / _sizeRatio - styles.imgY
+            x: (event.x - pageCenterPos.x + pageSize.width * 0.5) / _sizeRatio - styles.imgX,
+            y: (event.y - pageCenterPos.y + pageSize.height * 0.5) / _sizeRatio - styles.imgY
           }
           const translationRatio = {
             x: -posInConfig.x / styles.imgWidth,
@@ -337,6 +337,7 @@ export default defineComponent({
       }
     },
     moveStart(event: PointerEvent) {
+      this.isPinching = false
       this.isMoving = true
       if (eventUtils.checkIsMultiTouch(event)) {
         return
