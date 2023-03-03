@@ -48,11 +48,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   openOrGoto(url: string) {
-    if (this.isBrowserMode) {
-      window.open(url, '_blank')
-    } else {
-      window.location.href = url
-    }
+    window.open(url, this.isBrowserMode ? '_blank' : '_self')
   }
 
   sendAppLoaded() {
