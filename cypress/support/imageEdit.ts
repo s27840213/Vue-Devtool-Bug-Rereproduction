@@ -89,13 +89,16 @@ Cypress.Commands.add('imageAdjust', { prevSubject: 'element' }, (subject) => {
   return cy.wrap(subject)
 })
 
-Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCrop: 'button'|'dblclick') => {
+Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCrop: 'button' | 'dblclick') => {
   cy.wrap(subject).click()
     .then(() => {
       if (enterCrop === 'button') {
         cy.togglePanel('裁切')
       } else if (enterCrop === 'dblclick') {
         cy.wrap(subject).dblclick()
+          .isMobile(() => {
+            cy.get('.mobile-panel').waitTransition()
+          })
       } else {
         throw new Error(`Unexpected enterCrop value: '${enterCrop}' in imageCrop command`)
       }

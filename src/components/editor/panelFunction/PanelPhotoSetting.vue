@@ -25,24 +25,24 @@ div(class="photo-setting")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import PopupAdjust from '@/components/popup/PopupAdjust.vue'
-import layerUtils from '@/utils/layerUtils'
-import imageUtils from '@/utils/imageUtils'
-import { IFrame, IGroup, IImage } from '@/interfaces/layer'
-import frameUtils from '@/utils/frameUtils'
-import imageAdjustUtil from '@/utils/imageAdjustUtil'
-import pageUtils from '@/utils/pageUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import uploadUtils from '@/utils/uploadUtils'
 import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
-import paymentUtils from '@/utils/paymentUtils'
+import PopupAdjust from '@/components/popup/PopupAdjust.vue'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IFrame, IGroup, IImage } from '@/interfaces/layer'
+import store from '@/store'
 import { FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
-import store from '@/store'
+import frameUtils from '@/utils/frameUtils'
+import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import imageUtils from '@/utils/imageUtils'
+import layerUtils from '@/utils/layerUtils'
+import pageUtils from '@/utils/pageUtils'
+import paymentUtils from '@/utils/paymentUtils'
+import uploadUtils from '@/utils/uploadUtils'
+import { notify } from '@kyvg/vue3-notification'
+import { defineComponent } from 'vue'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 interface IBtn {
   name: string
@@ -203,7 +203,6 @@ export default defineComponent({
             this.isUploadImgShadow ||
             this.isHandleShadow ||
             (store.state as any).file.uploadingAssets.some((e: { id: string }) => e.id === (layerUtils.getCurrConfig as IImage).tmpId)
-          // return (isCurrLayerHanlingShadow && !isShadowPanelOpen) || this.isUploadImgShadow
         } else if (['remove-bg', 'crop'].includes(btn.name) && (isLayerNeedRedraw && this.isHandleShadow)) {
           return true
         }

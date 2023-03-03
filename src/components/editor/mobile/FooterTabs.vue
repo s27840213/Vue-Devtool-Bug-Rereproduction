@@ -358,7 +358,7 @@ export default defineComponent({
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}` },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select' },
         ...this.copyPasteTabs
       ]
     },

@@ -1,8 +1,8 @@
 <template lang="pug">
-div(class="mobile-design-item")
+div(class="mobile-design-item" :data-index="config.asset_index")
   div(class="mobile-design-item__block pointer")
     div(class="mobile-design-item__img-container")
-      image-carousel(v-if="showCarousel && previewCheckReady"
+      image-carousel(v-if="showCarousel && isInView && previewCheckReady"
         :imgs="pageImages"
         :speed="2000"
         @change="handleCarouselIdx")
@@ -12,7 +12,7 @@ div(class="mobile-design-item")
               :style="imageStyles()"
               :src="url")
       img(ref="thumbnail"
-          v-if="!showCarousel && previewCheckReady"
+          v-if="!(showCarousel && isInView) && previewCheckReady"
           class="mobile-design-item__thumbnail"
           draggable="false"
           :src="appliedUrl")
@@ -35,19 +35,6 @@ div(class="mobile-design-item")
           svg-icon(iconName="more_vertical"
                   iconWidth="24px"
                   iconColor="gray-2")
-        //- div(v-if="favorable && !isMultiSelected" class="mobile-design-item__favorite" @click.stop="emitLike")
-          svg-icon(v-if="isMouseOver && !config.favorite"
-                  iconName="favorites"
-                  iconWidth="20px"
-                  iconColor="white")
-          svg-icon(v-if="isMouseOver && config.favorite"
-                  iconName="favorites-fill"
-                  iconWidth="20px"
-                  iconColor="white")
-          svg-icon(v-if="!isMouseOver && config.favorite"
-                  iconName="favorites-fill"
-                  iconWidth="20px"
-                  iconColor="gray-4")
         span(class="mobile-design-item__index") {{ carouselIdx + 1 }}/{{ config.pageNum }}
   div(class="mobile-design-item__name"
       @click.prevent.stop)
@@ -60,6 +47,7 @@ div(class="mobile-design-item")
 
 <script lang="ts">
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IDesign } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -70,9 +58,10 @@ import { round } from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
-export default defineComponent({
+const component = defineComponent({
   components: {
-    ImageCarousel
+    ImageCarousel,
+    ObserverSentinel
   },
   props: {
     config: {
@@ -112,14 +101,12 @@ export default defineComponent({
       waitTimer: 0,
       renderedWidth: 150,
       renderedHeight: 150,
-      pageImages: [] as string[]
+      pageImages: [] as string[],
+      isInView: false
     }
   },
   directives: {
     clickOutside: vClickOutside.directive
-  },
-  created() {
-    this.checkImageSize(this.startCarousel)
   },
   mounted() {
     window.addEventListener('resize', this.handleResize)
@@ -130,8 +117,10 @@ export default defineComponent({
   watch: {
     'config.asset_index': {
       handler: function () {
-        this.showCarousel = false
-        this.checkImageSize(this.startCarousel)
+        if (this.showCarousel) {
+          this.showCarousel = false
+          this.checkImageSize(this.startCarousel)
+        }
       }
     }
   },
@@ -300,11 +289,24 @@ export default defineComponent({
       return true
     },
     handleResize() {
+      if (this.showCarousel) {
+        this.showCarousel = false
+        this.checkImageSize(this.startCarousel)
+      }
+    },
+    handleEnterView() {
+      this.isInView = true
       this.showCarousel = false
       this.checkImageSize(this.startCarousel)
+    },
+    handleLeaveView() {
+      this.isInView = false
     }
   }
 })
+
+export default component
+export type CMobileDesignitem = InstanceType<typeof component>
 </script>
 
 <style lang="scss" scoped>

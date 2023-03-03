@@ -86,13 +86,13 @@ Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQue
     .invoke({ log: false }, 'prop', '__vue_app__')
     .its('config.globalProperties.$isTouchDevice', { log: false })
     .then((isMobile: () => boolean) => {
-    // If toggleMobilePanel given, close mobile panel before snapshot and re-open the panel.
+      // If toggleMobilePanel given, close mobile panel before snapshot and re-open the panel.
       if (isMobile() && toggleMobilePanel) {
         cy.togglePanel(toggleMobilePanel)
       }
 
       cy.document({ log: false }).then((document) => {
-      // Add special css that hide/remove some element during snapshot.
+        // Add special css that hide/remove some element during snapshot.
         const css = document.createElement('style')
         css.setAttribute('class', 'cy-visual-test-style')
         css.textContent = snapshotStyles
