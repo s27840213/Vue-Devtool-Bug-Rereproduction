@@ -140,7 +140,8 @@ export default defineComponent({
     ...mapState('mobileEditor', {
       closeMobilePanelFlag: 'closeMobilePanelFlag',
       inAllPagesMode: 'mobileAllPageMode',
-      mobilePanel: 'currActivePanel'
+      mobilePanel: 'currActivePanel',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     ...mapState('user', [
       'viewGuide'
@@ -226,6 +227,9 @@ export default defineComponent({
       fetchBrands: 'brandkit/fetchBrands'
     }),
     switchTab(panelType: string, props?: IFooterTabProps) {
+      if (!this.inBgRemoveMode && panelType === 'remove-bg') {
+        return
+      }
       // Switch between color and text-color panel without close panel
       if (this.currActivePanel === panelType && panelType === 'color' &&
         props?.currColorEvent && this.currColorEvent !== props.currColorEvent) {
