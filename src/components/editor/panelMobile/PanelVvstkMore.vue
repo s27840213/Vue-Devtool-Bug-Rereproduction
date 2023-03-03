@@ -120,7 +120,7 @@ export default defineComponent({
         text: `${this.$t('NN0742')}`,
         icon: 'vivisticker_mail',
         action: this.handleOpenInfo
-      }, ...vivistickerUtils.checkVersion('1.22') ? [
+      }, ...vivistickerUtils.checkVersion('1.23') ? [
         {
           text: `${this.$t('STK0025')}`,
           icon: 'vivisticker_global',
