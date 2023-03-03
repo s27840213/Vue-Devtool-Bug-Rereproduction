@@ -54,14 +54,15 @@ export default defineComponent({
     return {
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
-      initialPos: { x: 0, y: 0 },
+      initialPos: { x: 0, y: 0 } as null | ICoordinate,
       initImgPos: { x: 0, y: 0 },
       initImgControllerPos: { x: 0, y: 0 },
       initImgSize: { width: this.config.styles.imgWidth, height: this.config.styles.imgHeight },
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, isHorizon: false },
-      ptrSet: new Set(),
-      initPinchPos: null as null | { x: number, y: number }
+      initPinchPos: null as null | { x: number, y: number },
+      isPinching: false,
+      isMoving: false
     }
   },
   mounted() {
@@ -179,6 +180,8 @@ export default defineComponent({
     pinchHandler(event: AnyTouchEvent) {
       switch (event.phase) {
         case 'start': {
+          console.warn('start')
+          this.isPinching = true
           this.initImgPos = {
             x: this.config.styles.imgX,
             y: this.config.styles.imgY
@@ -187,9 +190,11 @@ export default defineComponent({
             width: this.config.styles.imgWidth,
             height: this.config.styles.imgHeight
           }
+
           break
         }
         case 'move': {
+          this.isPinching = true
           const { contentScaleRatio, mobilePysicalSize: { pageCenterPos, pageSize } } = this.page
           const { styles } = this.config
           const _sizeRatio = contentScaleRatio
@@ -200,7 +205,6 @@ export default defineComponent({
             x: (this.initPinchPos.x - pageCenterPos.x + pageSize.width * 0.5) / _sizeRatio - styles.imgX,
             y: (this.initPinchPos.y - pageCenterPos.y + pageSize.height * 0.5) / _sizeRatio - styles.imgY
           }
-          // console.log((this.initPinchPos.x - pageCenterPos.x + pageSize.width * 0.5) / _sizeRatio - styles.imgX, styles.imgWidth)
           const translationRatio = {
             x: -posInConfig.x / styles.imgWidth,
             y: -posInConfig.y / styles.imgHeight
@@ -213,15 +217,30 @@ export default defineComponent({
             width: this.initImgSize.width + sizeDiff.width,
             height: this.initImgSize.height + sizeDiff.height
           }
-          const newPos = {
-            x: this.initImgPos.x + (sizeDiff.width * translationRatio.x),
-            y: this.initImgPos.y + (sizeDiff.height * translationRatio.y),
+          const movingTraslate = {
+            x: (event.x - this.initPinchPos.x) / _sizeRatio,
+            y: (event.y - this.initPinchPos.y) / _sizeRatio
           }
-          const { imgWidth, imgHeight, imgX, imgY } = this.imgPinchScaleClamp(newSize, newPos, translationRatio)
+          const newPos = {
+            x: this.initImgPos.x + (sizeDiff.width * translationRatio.x) + movingTraslate.x,
+            y: this.initImgPos.y + (sizeDiff.height * translationRatio.y) + movingTraslate.y,
+          }
+          const { imgWidth, imgHeight, imgX, imgY } = this.imgPinchScaleClamp(newSize, newPos, translationRatio, movingTraslate)
           this.updateConfig({ imgX, imgY, imgWidth, imgHeight })
           break
         }
         case 'end': {
+          console.warn('end', this.initialPos)
+          this.isPinching = false
+          if (!this.isMoving) {
+            this.initImgControllerPos = this.getImgController
+            Object.assign(this.initImgPos, { x: this.getImgX, y: this.getImgY })
+            eventUtils.addPointerEvent('pointermove', this.moving)
+            eventUtils.addPointerEvent('pointerup', this.moveEnd)
+            this.setCursorStyle('move')
+          }
+          this.initialPos = null
+
           this.initPinchPos = null
           this.initImgPos = {
             x: this.config.styles.imgX,
@@ -234,7 +253,7 @@ export default defineComponent({
         }
       }
     },
-    imgPinchScaleClamp(newSize: ISize, newPos: ICoordinate, translationRatio: { x: number, y: number }) {
+    imgPinchScaleClamp(newSize: ISize, newPos: ICoordinate, translationRatio: { x: number, y: number }, movingTraslate: { x: number, y: number }) {
       const baseLine = {
         x: -newSize.width * 0.5 + (this.pageSize.width / this.getPageScale) * 0.5,
         y: -newSize.height * 0.5 + (this.pageSize.height / this.getPageScale) * 0.5
@@ -248,44 +267,67 @@ export default defineComponent({
         height: newSize.height - this.initImgSize.height
       }
       if (Math.abs(newPos.x - baseLine.x) > translateLimit.width) {
-        let pinchScale = -1
-        if (newPos.x - baseLine.x > 0) {
-          newPos.x = 0
-          sizeDiff.width = -this.initImgPos.x / translationRatio.x
+        /**
+         * The imgX has already been 0,
+         * or the bgImg is exact algined with the right edge limit.
+         * The new state should remain as the old one.
+         */
+        if (this.getImgX === 0 || Math.round(-this.getImgX + this.pageSize.width - this.getImgWidth) === 0) {
+          return {
+            imgWidth: this.getImgWidth,
+            imgHeight: this.getImgHeight,
+            imgX: this.getImgX,
+            imgY: this.getImgY
+          }
         } else {
-          /**
-           * Derived from.
-           * newPos.x = this.pageSize.width - (this.pageSize.width + this.initImgSize.width)
-           * newPos.x = this.initImgPos.x + (sizeDiff.width * translationRatio.x)
-           */
-          sizeDiff.width = -(this.initImgPos.x - this.pageSize.width + this.initImgSize.width) / (1 + translationRatio.x)
-          newPos.x = this.pageSize.width - (this.initImgSize.width + sizeDiff.width)
-        }
-        newSize.width = this.initImgSize.width + sizeDiff.width
-        pinchScale = (sizeDiff.width * 2 / this.initImgSize.width) + 1
-        sizeDiff.height = this.initImgSize.height * (pinchScale - 1) * 0.5
-        newSize.height = this.initImgSize.height + sizeDiff.height
-        newPos.y = this.initImgPos.y + (sizeDiff.height * translationRatio.y)
+          let pinchScale = -1
+          if (newPos.x - baseLine.x > 0) {
+            newPos.x = 0
+            sizeDiff.width = -(this.initImgPos.x + movingTraslate.x) / translationRatio.x
+          } else {
+            /**
+             * Derived from.
+             * newPos.x = this.pageSize.width - (this.pageSize.width + this.initImgSize.width)
+             * newPos.x = this.initImgPos.x + (sizeDiff.width * translationRatio.x) + (event.x - this.initPinchPos.x) / _sizeRatio
+             */
+            sizeDiff.width = -(this.initImgPos.x + movingTraslate.x - this.pageSize.width + this.initImgSize.width) / (1 + translationRatio.x)
+            newPos.x = this.pageSize.width - (this.initImgSize.width + sizeDiff.width)
+          }
+          newSize.width = this.initImgSize.width + sizeDiff.width
+          pinchScale = (sizeDiff.width * 2 / this.initImgSize.width) + 1
+          sizeDiff.height = this.initImgSize.height * (pinchScale - 1) * 0.5
+          newSize.height = this.initImgSize.height + sizeDiff.height
+          newPos.y = this.initImgPos.y + (sizeDiff.height * translationRatio.y) + movingTraslate.y
 
-        baseLine.x = -newSize.width * 0.5 + (this.pageSize.width / this.getPageScale) * 0.5
-        baseLine.y = -newSize.height * 0.5 + (this.pageSize.height / this.getPageScale) * 0.5
-        translateLimit.width = (newSize.width - this.pageSize.width / this.getPageScale) * 0.5
-        translateLimit.height = (newSize.height - this.pageSize.height / this.getPageScale) * 0.5
+          baseLine.x = -newSize.width * 0.5 + (this.pageSize.width / this.getPageScale) * 0.5
+          baseLine.y = -newSize.height * 0.5 + (this.pageSize.height / this.getPageScale) * 0.5
+          translateLimit.width = (newSize.width - this.pageSize.width / this.getPageScale) * 0.5
+          translateLimit.height = (newSize.height - this.pageSize.height / this.getPageScale) * 0.5
+        }
       }
       if (Math.abs(newPos.y - baseLine.y) > translateLimit.height) {
-        let pinchScale = -1
-        if (newPos.y - baseLine.y > 0) {
-          newPos.y = 0
-          sizeDiff.height = -this.initImgPos.y / translationRatio.y
+        if (this.getImgY === 0 || Math.round(-this.getImgY + this.pageSize.height - this.getImgHeight) === 0) {
+          return {
+            imgWidth: this.getImgWidth,
+            imgHeight: this.getImgHeight,
+            imgX: this.getImgX,
+            imgY: this.getImgY
+          }
         } else {
-          sizeDiff.height = -(this.initImgPos.y - this.pageSize.height + this.initImgSize.height) / (1 + translationRatio.y)
-          newPos.y = this.pageSize.height - (this.initImgSize.height + sizeDiff.height)
+          let pinchScale = -1
+          if (newPos.y - baseLine.y > 0) {
+            newPos.y = 0
+            sizeDiff.height = -(this.initImgPos.y + movingTraslate.y) / translationRatio.y
+          } else {
+            sizeDiff.height = -(this.initImgPos.y + movingTraslate.y - this.pageSize.height + this.initImgSize.height) / (1 + translationRatio.y)
+            newPos.y = this.pageSize.height - (this.initImgSize.height + sizeDiff.height)
+          }
+          newSize.height = this.initImgSize.height + sizeDiff.height
+          pinchScale = (sizeDiff.height * 2 / this.initImgSize.height) + 1
+          sizeDiff.width = this.initImgSize.width * (pinchScale - 1) * 0.5
+          newSize.width = this.initImgSize.width + sizeDiff.width
+          newPos.x = this.initImgPos.x + (sizeDiff.width * translationRatio.x) + movingTraslate.x
         }
-        newSize.height = this.initImgSize.height + sizeDiff.height
-        pinchScale = (sizeDiff.height * 2 / this.initImgSize.height) + 1
-        sizeDiff.width = this.initImgSize.width * (pinchScale - 1) * 0.5
-        newSize.width = this.initImgSize.width + sizeDiff.width
-        newPos.x = this.initImgPos.x + (sizeDiff.width * translationRatio.x)
       }
       return {
         imgWidth: newSize.width,
@@ -295,6 +337,7 @@ export default defineComponent({
       }
     },
     moveStart(event: PointerEvent) {
+      this.isMoving = true
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
@@ -309,19 +352,19 @@ export default defineComponent({
       this.setCursorStyle('move')
     },
     moving(event: PointerEvent) {
-      if (!this.ptrSet.has(event.pointerId)) {
-        this.ptrSet.add(event.pointerId)
-      }
-      // if (eventUtils.checkIsMultiTouch(event)) {
-      //   return
-      // }
-      if (eventUtils.checkIsMultiTouch(event) || this.ptrSet.size > 1) {
+      if (this.isPinching) {
+      // if (eventUtils.checkIsMultiTouch(event) || this.isPinching) {
         return
       }
-      // if (eventUtils.checkIsMultiTouch(event)) {
-      //   return
-      // }
-      this.setCursorStyle('move')
+      /**
+       * The initialPos might be null bcz after the pinch-scaling,
+       * the pos of the initialPos should be re-assigned
+       */
+      if (this.initialPos === null) {
+        this.initialPos = MouseUtils.getMouseAbsPoint(event)
+        this.initImgControllerPos = this.getImgController
+        Object.assign(this.initImgPos, { x: this.getImgX, y: this.getImgY })
+      }
       event.preventDefault()
       const baseLine = {
         x: -this.getImgWidth * 0.5 + (this.pageSize.width / this.getPageScale) * 0.5,
@@ -343,7 +386,6 @@ export default defineComponent({
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.pageSize.height / this.getPageScale - this.getImgHeight
       }
-      // pageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
       this.updateConfig({ imgX: imgPos.x, imgY: imgPos.y })
     },
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
@@ -354,7 +396,8 @@ export default defineComponent({
       }
     },
     moveEnd(event: PointerEvent) {
-      this.ptrSet.clear()
+      this.isMoving = false
+      console.log('move end')
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
@@ -393,7 +436,7 @@ export default defineComponent({
       eventUtils.addPointerEvent('pointerup', this.scaleEnd)
     },
     scaling(event: MouseEvent) {
-      if (eventUtils.checkIsMultiTouch(event)) {
+      if (eventUtils.checkIsMultiTouch(event) || !this.initialPos) {
         return
       }
       event.preventDefault()
