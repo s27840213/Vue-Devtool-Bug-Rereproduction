@@ -163,6 +163,7 @@ import modalUtils from '@/utils/modalUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import themeUtils from '@/utils/themeUtils'
+import webViewUtils from '@/utils/vivipicWebViewUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
@@ -429,7 +430,7 @@ export default defineComponent({
             themeId: template.content_ids[0].themes.join(',')
           }
         })
-        window.open(route.href, '_blank')
+        this.openTemplate(route.href)
         generalUtils.fbq('track', 'AddToWishlist', {
           content_ids: [template.group_id]
         })
@@ -455,7 +456,7 @@ export default defineComponent({
             height: format.height
           }
         })
-        window.open(route.href, '_blank')
+        this.openTemplate(route.href)
         generalUtils.fbq('track', 'AddToWishlist', {
           content_ids: [template.id]
         })
@@ -548,7 +549,7 @@ export default defineComponent({
               group_id: this.groupId
             }
           })
-          window.open(route.href, '_blank')
+          this.openTemplate(route.href)
           generalUtils.fbq('track', 'AddToWishlist', {
             content_ids: [content.id]
           })
@@ -576,7 +577,7 @@ export default defineComponent({
             group_id: this.groupId
           }
         })
-        window.open(route.href, '_blank')
+        this.openTemplate(route.href)
         generalUtils.fbq('track', 'AddToWishlist', {
           content_ids: [content.id]
         })
@@ -597,7 +598,7 @@ export default defineComponent({
           group_id: this.groupId
         }
       })
-      window.open(route.href, '_blank')
+      this.openTemplate(route.href)
       generalUtils.fbq('track', 'AddToWishlist', {
         content_ids: [this.contentBuffer.id]
       })
@@ -612,6 +613,9 @@ export default defineComponent({
     },
     checkSelected(theme: Itheme): boolean {
       return this.selectedTheme?.id === theme.id
+    },
+    openTemplate(url: string) {
+      webViewUtils.openOrGoto(url)
     }
   }
 })

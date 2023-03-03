@@ -35,6 +35,7 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import webViewUtils from '@/utils/vivipicWebViewUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -71,7 +72,7 @@ export default defineComponent({
     },
     newDesign() {
       const path = `${window.location.origin}${window.location.pathname}`
-      window.open(path)
+      webViewUtils.openOrGoto(path)
     },
     save() {
       shortcutHandler.save()

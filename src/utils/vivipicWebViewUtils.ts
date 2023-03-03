@@ -47,6 +47,14 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     return store.getters['webView/getUserInfo']
   }
 
+  openOrGoto(url: string) {
+    if (this.isBrowserMode) {
+      window.open(url, '_blank')
+    } else {
+      window.location.href = url
+    }
+  }
+
   sendAppLoaded() {
     if (!this.appLoadedSent) {
       this.sendToIOS('APP_LOADED', { hideReviewRequest: false })

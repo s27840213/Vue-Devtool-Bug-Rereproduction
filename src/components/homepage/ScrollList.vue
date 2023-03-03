@@ -68,6 +68,7 @@ import modalUtils from '@/utils/modalUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import themeUtils from '@/utils/themeUtils'
+import webViewUtils from '@/utils/vivipicWebViewUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 
@@ -199,7 +200,7 @@ export default defineComponent({
       }
       const template = templateCenterUtils.iAssetTemplate2Template(item, 4)
       if (!paymentUtils.checkProTemplate(template)) return
-      window.open(this.templateUrl(item), '_blank')
+      webViewUtils.openOrGoto(this.templateUrl(item))
     },
     templateImgStyle(match_cover: IAssetTemplate['match_cover']): Record<string, string> {
       const height = this.theme === '3' ? 284
