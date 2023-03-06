@@ -121,6 +121,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async changeStatusBarTextColor(routeName: string): Promise<any> {
+    if (this.isBrowserMode) return
     const statusBarColor = WHITE_STATUS_BAR_ROUTES.includes(routeName) ? 'white' : 'black'
     await this.callIOSAsAPI('UPDATE_USER_INFO', { statusBarColor }, 'update-user-info')
   }

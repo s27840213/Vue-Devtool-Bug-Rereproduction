@@ -236,7 +236,6 @@ const router = createRouter({
         render() { return h(resolveComponent('router-view')) }
       },
       async beforeEnter(to, from, next) {
-        webViewUtils.detectIfInApp()
         if (!webViewUtils.isBrowserMode) {
           webViewUtils.registerCallbacks('router')
         }
@@ -279,6 +278,7 @@ router.beforeEach(async (to, from, next) => {
     next()
     return
   }
+  webViewUtils.detectIfInApp()
   await webViewUtils.changeStatusBarTextColor(to.name?.toString() ?? '')
   // Store campaign param to local storage.
   const urlParams = new URLSearchParams(window.location.search)
