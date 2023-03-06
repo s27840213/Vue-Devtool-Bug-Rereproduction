@@ -129,6 +129,7 @@ class PageUtils {
   originEditorSize = { width: -1, height: -1 }
   pageEventPosOffset = null as unknown as { x: number, y: number }
   pageCenterPos = { x: 0, y: 0 }
+  originPageY = 0
 
   constructor() {
     this.mobileMinScaleRatio = 0
@@ -162,7 +163,7 @@ class PageUtils {
       width: 1080,
       height: 1080,
       x: 0,
-      y: 0,
+      y: this.originPageY || 0,
       physicalWidth: 1080,
       physicalHeight: 1080,
       unit: 'px',

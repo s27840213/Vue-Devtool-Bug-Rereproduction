@@ -292,6 +292,7 @@ export default defineComponent({
   computed: {
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapState('shadow', ['handleId']),
+    ...mapState({ pinchScaleRatio: 'pinchScaleRatio' }),
     ...mapGetters({
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode'
@@ -401,10 +402,11 @@ export default defineComponent({
       }
     },
     pageRootStyles(): { [index: string]: string | number } {
-      const transform = ''
+      let transform = ''
       let margin = ''
       let position = 'relative'
-      if (this.$isTouchDevice()) {
+      if (generalUtils.isTouchDevice()) {
+        transform = `translate(${this.config.x ?? 0}px, ${this.config.y ?? 0}px) scale(${this.$store.state.pinchScaleRatio * 0.01})`
         position = 'absolute'
       } else {
         margin = this.isDetailPage ? '0px auto' : '25px auto'
@@ -881,6 +883,10 @@ export default defineComponent({
 
 .skeleton {
   background-color: setColor(white);
+}
+
+.page-wrapper {
+  transform-origin: top left;
 }
 
 .layer-num {

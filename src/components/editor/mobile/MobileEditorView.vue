@@ -36,6 +36,7 @@ import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
 import PageCard from '@/components/editor/mobile/PageCard.vue'
 import PageNumber from '@/components/editor/PageNumber.vue'
+import { ICoordinate } from '@/interfaces/frame'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import { IPage, IPageState } from '@/interfaces/page'
 import store from '@/store'
@@ -113,7 +114,11 @@ export default defineComponent({
       handleWheelTransition: false,
       oriX: 0,
       oriPageSize: 0,
-      swipeDetector: null as unknown as SwipeDetector
+      swipeDetector: null as unknown as SwipeDetector,
+      initPos: { x: 0, y: 0 },
+      initPageSize: { width: 0, height: 0 },
+      initPinchPos: null as ICoordinate | null,
+      tmpPinchScaleRatio: 100
     }
   },
   created() {
@@ -168,6 +173,31 @@ export default defineComponent({
       pageUtils.mobileMinScaleRatio = this.isDetailPage ? 20 : this.tmpScaleRatio
       pageUtils.originPageSize.width = pageUtils.getPages[0].width * this.pageUtils.mobileMinScaleRatio * 0.01
       pageUtils.originPageSize.height = pageUtils.getPages[0].height * this.pageUtils.mobileMinScaleRatio * 0.01
+
+      const editorView = this.$refs.editorView as HTMLElement
+      const rect = editorView.getBoundingClientRect()
+      pageUtils.originEditorSize.width = rect.width
+      pageUtils.originEditorSize.height = rect.height
+
+      pageUtils.pageCenterPos = {
+        x: rect.width * 0.5,
+        y: rect.height * 0.5
+      }
+
+      let card = this.$refs.card as HTMLElement | HTMLElement[]
+      if (Array.isArray(card)) card = card[0]
+      const cardRect = card.getBoundingClientRect()
+      const padding = +card.style.padding.slice(0, -2)
+      pageUtils.pageEventPosOffset.x = cardRect.x + padding
+      pageUtils.pageEventPosOffset.y = cardRect.y + padding
+
+      pageUtils.originPageY = (pageUtils.originEditorSize.height - (pageUtils.getCurrPage.width * (pageUtils.scaleRatio * 0.01))) * 0.5 - padding
+      pageUtils.getPages.forEach((_, i) => {
+        pageUtils.updatePagePos(i, {
+          x: 0,
+          y: pageUtils.originPageY
+        })
+      })
     }
 
     this.$nextTick(() => {
@@ -284,7 +314,8 @@ export default defineComponent({
       setPageScaleRatio: 'SET_pageScaleRatio',
       setInBgRemoveMode: 'SET_inBgRemoveMode',
       addPage: 'ADD_page',
-      setCurrCardIndex: 'mobileEditor/SET_currCardIndex'
+      setCurrCardIndex: 'mobileEditor/SET_currCardIndex',
+      setPinchScaleRatio: 'SET_pinchScaleRatio'
     }),
     ...mapActions('layouts',
       [
@@ -352,6 +383,7 @@ export default defineComponent({
       }, 0)
     },
     handleWheel(e: WheelEvent) {
+      console.log(e.clientX, e.clientY)
       if ((e.metaKey || e.ctrlKey) && !this.handleWheelTransition) {
         if (!store.state.isPageScaling) {
           store.commit('SET_isPageScaling', true)
@@ -359,7 +391,6 @@ export default defineComponent({
         clearTimeout(this.hanleWheelTimer)
         this.hanleWheelTimer = window.setTimeout(() => {
           store.commit('SET_isPageScaling', false)
-          console.log('reach limit', pageUtils.mobileMinScaleRatio)
           if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
             const page = document.getElementById(`nu-page_${layerUtils.pageIndex}`) as HTMLElement
             page.style.transition = '0.3s linear'
@@ -369,7 +400,7 @@ export default defineComponent({
               page.style.transition = ''
               this.handleWheelTransition = false
             }, 500)
-            pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
+            pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: pageUtils.originPageY })
           }
         }, 500)
         const ratio = this.pageScaleRatio * (1 - e.deltaY * 0.005)
@@ -381,22 +412,94 @@ export default defineComponent({
       }
     },
     pinchHandler(event: AnyTouchEvent) {
-      console.log('pinch')
-      if (this.isBgImgCtrl) {
-        switch (event.phase) {
-          case 'start': {
-            console.log('start')
-            break
-          }
-          case 'move': {
-            console.log('move')
-            break
-          }
-          case 'end': {
-            console.log('end')
-          }
-        }
-      }
+      // switch (event.phase) {
+      //   /**
+      //    * @Note the very first event won't fire start phase, it's very strange and need to pay attention
+      //    */
+      //   case 'start': {
+      //     this.initPos.x = pageUtils.getCurrPage.x
+      //     this.initPos.y = pageUtils.getCurrPage.y
+      //     this.initPageSize.width = pageUtils.getCurrPage.width * (pageUtils.scaleRatio * 0.01)
+      //     this.initPageSize.height = pageUtils.getCurrPage.height * (pageUtils.scaleRatio * 0.01)
+      //     this.tmpScaleRatio = pageUtils.scaleRatio
+      //     this.isScaling = true
+      //     store.commit('SET_isPageScaling', true)
+      //     break
+      //   }
+      //   case 'move': {
+      //     if (!this.isScaling) {
+      //       this.isScaling = true
+      //       store.commit('SET_isPageScaling', true)
+      //     }
+      //     window.requestAnimationFrame(() => {
+      //       if (!this.initPinchPos) {
+      //         this.initPinchPos = { x: event.x - pageUtils.pageEventPosOffset.x, y: event.y - pageUtils.pageEventPosOffset.x }
+      //       }
+      //       const limitMultiplier = 4
+      //       // if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
+      //       //   // pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
+      //       //   this.setPinchScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
+      //       //   return
+      //       // }
+      //       console.log(event.scale)
+      //       const pinchScaleRatio = Math.min(event.scale * 100, MAX_SCALE_RATIO)
+      //       if (pinchScaleRatio) {
+      //         this.setPinchScaleRatio(pinchScaleRatio)
+
+      //         const sizeDiff = {
+      //           // width: pageUtils.getCurrPage.width * (newScaleRatio * 0.01) - this.initPageSize.width,
+      //           // height: pageUtils.getCurrPage.height * (newScaleRatio * 0.01) - this.initPageSize.height
+      //           width: (pinchScaleRatio * 0.01 - 1) * this.initPageSize.width,
+      //           height: (pinchScaleRatio * 0.01 - 1) * this.initPageSize.height
+      //         }
+
+      //         const translationRatio = {
+      //           x: (this.initPinchPos.x - pageUtils.pageCenterPos.x) / pageUtils.originPageSize.width + 0.5,
+      //           y: (this.initPinchPos.y - pageUtils.pageCenterPos.y) / pageUtils.originPageSize.height + 0.5
+      //         }
+
+      //         pageUtils.updatePagePos(0, {
+      //           x: this.initPos.x - sizeDiff.width * translationRatio.x,
+      //           y: this.initPos.y - sizeDiff.height * translationRatio.y
+      //         })
+      //       }
+      //     })
+      //     break
+      //   }
+
+      //   case 'end': {
+      //     this.initPinchPos = null
+      //     this.isScaling = false
+      //     const newScaleRatio = Math.min(this.tmpScaleRatio * event.scale, MAX_SCALE_RATIO)
+      //     const needResizeToDefault = newScaleRatio <= pageUtils.mobileMinScaleRatio
+      //     this.setPinchScaleRatio(100)
+      //     this.setPageScaleRatio(newScaleRatio)
+      //     store.commit('SET_isPageScaling', false)
+
+      //     const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
+      //     setTimeout(() => {
+      //       page.style.transition = 'transform .2s, webkit-transform .2s'
+      //       page.style.transformOrigin = 'center'
+      //     }, 0)
+
+      //     clearTimeout(this.hanleWheelTimer)
+      //     this.hanleWheelTimer = setTimeout(() => {
+      //       if (needResizeToDefault) {
+      //         this.handleWheelTransition = true
+      //         pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: pageUtils.originPageY })
+      //         this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
+      //         setTimeout(() => {
+      //           page.style.transition = ''
+      //           this.handleWheelTransition = false
+      //         }, 500)
+      //       } else {
+      //         page.style.transition = ''
+      //       }
+      //       page.style.transformOrigin = 'top left'
+      //     }, 500)
+      //     break
+      //   }
+      // }
 
       // switch (event.phase) {
       //   /**
