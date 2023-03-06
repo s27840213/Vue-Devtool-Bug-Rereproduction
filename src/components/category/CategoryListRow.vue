@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="category-row")
-  div(class="category-row__items" ref="items" @scroll.passive="handleScroll")
+  div(class="category-row__items" ref="items" :style="itemsStyles" @scroll.passive="handleScroll")
     slot
 </template>
 
@@ -9,9 +9,20 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   emits: [],
+  props: {
+    gap: {
+      type: Number,
+      default: 10
+    }
+  },
   computed: {
     items(): HTMLElement {
       return this.$refs.items as HTMLElement
+    },
+    itemsStyles(): {[key: string]: string} {
+      return {
+        columnGap: this.gap + 'px'
+      }
     }
   },
   data() {

@@ -69,7 +69,8 @@ export default defineComponent({
     return {
       currColorEvent: '',
       defaultWindowHeight: window.outerHeight,
-      headerOffset: 0
+      headerOffset: 0,
+      isKeyboardAnimation: 0
     }
   },
   created() {
@@ -242,7 +243,9 @@ export default defineComponent({
     }),
     headerStyles() {
       return {
-        transform: `translateY(${this.contentEditable ? this.headerOffset : 0}px)`
+        transform: `translateY(${this.contentEditable ? this.headerOffset : 0}px)`,
+        ...(this.isKeyboardAnimation && { height: '0px', marginBottom: '44px' }),
+        ...(!this.isKeyboardAnimation && { transition: 'height 0.2s cubic-bezier(0.380, 0.700, 0.125, 1.000), margin-bottom 0.2s cubic-bezier(0.380, 0.700, 0.125, 1.000)' })
       }
     },
     copyingStyles() {
@@ -297,6 +300,10 @@ export default defineComponent({
     handleScroll() {
       // handle page scroll by mobile keyboard
       this.headerOffset = document.documentElement.scrollTop ? document.documentElement.scrollTop - 1 : 0
+      window.clearTimeout(this.isKeyboardAnimation)
+      this.isKeyboardAnimation = window.setTimeout(() => {
+        this.isKeyboardAnimation = 0
+      }, 500)
     }
   }
 })
@@ -368,6 +375,6 @@ export default defineComponent({
 }
 
 .header-bar {
-  transition: 0.5s cubic-bezier(0.380, 0.700, 0.125, 1.000);
+  overflow-y: hidden;
 }
 </style>

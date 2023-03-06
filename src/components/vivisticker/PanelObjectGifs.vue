@@ -55,6 +55,7 @@ div(class="panel-gifs" :class="{'in-category': isInCategory}")
           :key="item.id"
           :src="item.src"
           :item="item"
+          :style="itemStyles"
           @click4in1="click4in1"
           @dbclick4in1="toggleFavorites4in1"
           @dbclick="toggleFavoritesItem")
@@ -93,10 +94,6 @@ export default defineComponent({
     showFav: {
       type: Boolean,
       required: true
-    },
-    itemHeight: {
-      type: Number,
-      default: 80
     }
   },
   data() {
@@ -114,6 +111,9 @@ export default defineComponent({
     ...mapGetters({
       isTabInCategory: 'vivisticker/getIsInCategory',
       isTabShowAllRecently: 'vivisticker/getShowAllRecently'
+    }),
+    ...mapState({
+      isTablet: 'isTablet'
     }),
     ...mapState('giphy', {
       rawCategories: 'categories',
@@ -152,7 +152,6 @@ export default defineComponent({
     listRecently(): ICategoryItem[] {
       const { rawCategories } = this
       const list = (rawCategories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
-      const gap = 10
       const result = new Array(Math.ceil(list.length / 3))
         .fill('')
         .map((_, idx) => {
@@ -161,7 +160,7 @@ export default defineComponent({
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-object-item',
             list: rowItems,
-            size: this.itemHeight + gap,
+            size: this.itemHeight + 10,
             title: ''
           }
         })
@@ -248,6 +247,9 @@ export default defineComponent({
     tags(): string[] {
       return this.showAllRecently ? []
         : this.showFav ? this.favoritesTagsBar : this.tagsBar
+    },
+    itemHeight(): number {
+      return this.isTablet ? 120 : 80
     },
     itemStyles() {
       return {
@@ -378,11 +380,12 @@ export default defineComponent({
       this.scrollTop[key] = (event.target as HTMLElement).scrollTop
     },
     processListCategory(list: IListServiceContentData[]): ICategoryItem[] {
-      const gap = 60
+      const titleHeight = 46
+      const gap = this.isTablet ? 20 : 14
       return list
         .filter(category => category.list.length > 0)
         .map((category, index) => ({
-          size: this.itemHeight + gap,
+          size: this.itemHeight + titleHeight + gap,
           id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.is_recent ? category.list.slice(0, 10) : category.list,
@@ -392,7 +395,7 @@ export default defineComponent({
         }))
     },
     processListResult(list = [] as IListServiceContentDataItem[]): ICategoryItem[] {
-      const gap = 24
+      const gap = this.isTablet ? 20 : 24
       return new Array(Math.ceil(list.length / 3))
         .fill('')
         .map((_, idx) => {

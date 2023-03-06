@@ -16,11 +16,12 @@ div(class="my-design")
                   ref="content"
                   @loadMore="handleLoadMore")
       template(v-slot:my-design-text-item="{ list }")
-        div(class="my-design__texts__items")
+        div(class="my-design__texts__items" :style="textItemsStyles")
           my-design-text-item(v-for="item in list"
             class="my-design__texts__item"
             :key="item.id"
-            :item="item")
+            :item="item"
+            :style="textItemStyles")
       template(v-slot:my-design-object-item="{ list }")
         div(class="my-design__objects__items")
           my-design-object-item(v-for="item in list"
@@ -46,7 +47,8 @@ export default defineComponent({
     const tags = vivistickerUtils.getMyDesignTags()
     return {
       tags,
-      scrollTops: Object.fromEntries(tags.map(tag => [tag.tab, 0]))
+      scrollTops: Object.fromEntries(tags.map(tag => [tag.tab, 0])),
+      textWidth: 0
     }
   },
   components: {
@@ -58,11 +60,14 @@ export default defineComponent({
     const content = this.$refs.content as CCategoryList
     if (!content) return
     content.$el.addEventListener('scroll', this.handleScroll)
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize()
   },
   unmounted() {
     const content = this.$refs.content as CCategoryList
     if (!content) return
     content.$el.removeEventListener('scroll', this.handleScroll)
+    window.removeEventListener('resize', this.handleResize)
   },
   computed: {
     ...mapGetters({
@@ -84,15 +89,15 @@ export default defineComponent({
       let result = [] as any[]
       switch (this.myDesignTab) {
         case 'text':
-          result = new Array(Math.ceil(this.list.length / 2))
+          result = new Array(Math.ceil(this.list.length / this.textColumns))
             .fill('')
             .map((_, idx) => {
-              const rowItems = this.list.slice(idx * 2, idx * 2 + 2)
+              const rowItems = this.list.slice(idx * this.textColumns, idx * this.textColumns + this.textColumns)
               return {
                 id: `result_${rowItems.map(item => item.id).join('_')}`,
                 type: 'my-design-text-item',
                 list: rowItems,
-                size: (window.outerWidth / 2 - 20),
+                size: this.isTablet ? (this.textWidth + 30) : (window.outerWidth / 2 - 20),
                 title: '',
                 moreType: 'text'
               }
@@ -107,7 +112,7 @@ export default defineComponent({
                 id: `result_${rowItems.map(item => item.id).join('_')}`,
                 type: 'my-design-object-item',
                 list: rowItems,
-                size: this.itemHeight + 24,
+                size: this.itemHeight + (this.isTablet ? 30 : 24),
                 title: '',
                 moreType: 'object'
               }
@@ -126,6 +131,21 @@ export default defineComponent({
     },
     itemHeight(): number {
       return this.isTablet ? 120 : 80
+    },
+    textColumns(): number {
+      return this.isTablet ? 3 : 2
+    },
+    textItemStyles() {
+      return this.isTablet ? {
+        width: `${this.textWidth}px`,
+        height: `${this.textWidth}px`
+      } : {}
+    },
+    textItemsStyles() {
+      return this.isTablet ? {
+        gridTemplateColumns: `repeat(${this.textColumns}, 1fr)`,
+        columnGap: '30px'
+      } : {}
     }
   },
   watch: {
@@ -188,6 +208,11 @@ export default defineComponent({
       const content = this.$refs.content as CCategoryList
       if (!content) return
       content.$el.scrollTop = this.scrollTops[tab]
+    },
+    handleResize() {
+      const gap = 30
+      const isLandscape = window.matchMedia('(orientation: landscape)').matches
+      this.textWidth = (window.outerWidth * (isLandscape ? 0.56 : 0.8) - gap * (this.textColumns - 1)) / this.textColumns
     }
   }
 })
@@ -205,6 +230,15 @@ export default defineComponent({
   display: grid;
   grid-template-rows: auto 1fr;
   gap: 24px;
+
+  @include layout-tablet{
+    padding: 0 10%;
+    padding-top: 24px;
+    @include layout-landscape{
+      padding: 0 22%;
+      padding-top: 24px;
+    }
+  }
 
   &__tags {
     display: flex;
@@ -287,10 +321,17 @@ export default defineComponent({
       width: 80px;
       height: 80px;
       margin: 0 auto;
+      @include layout-tablet{
+        margin: 0
+      }
     }
     &__items {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
+      @include layout-tablet{
+        display: flex;
+        justify-content: space-between;
+      }
     }
   }
 }
