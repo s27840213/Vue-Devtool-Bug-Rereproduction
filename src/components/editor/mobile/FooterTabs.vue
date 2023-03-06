@@ -4,7 +4,7 @@ div(class="footer-tabs" ref="tabs" :style="rootStyles")
       :style="containerStyles")
     div(v-if="useWhiteTheme"  class="footer-tabs__home-tab"
         :class="[useWhiteTheme ? 'bg-gray-6' : 'bg-nav']"
-        :style="innerContainerStyles")
+        :style="innerLeftContainerStyles")
       div(class="footer-tabs__item"
           @click="handleTabAction(mainMenu)")
         svg-icon(class="mb-5 click-disabled"
@@ -520,9 +520,14 @@ export default defineComponent({
         //   black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
       }
     },
-    innerContainerStyles(): { [index: string]: string } {
+    innerLeftContainerStyles(): { [index: string]: string } {
       return {
         paddingBottom: `${this.userInfo.homeIndicatorHeight}px`
+      }
+    },
+    innerContainerStyles(): { [index: string]: string } {
+      return {
+        paddingBottom: `${this.userInfo.homeIndicatorHeight + 8}px`
       }
     },
     currLayer(): ILayer {
@@ -876,8 +881,7 @@ export default defineComponent({
     &::after {
       position: absolute;
       right: 0px;
-      top: 50%;
-      transform: translate(0, -50%);
+      top: 10px;
       content: '';
       width: 2px;
       height: 40px;
