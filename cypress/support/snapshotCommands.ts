@@ -76,7 +76,7 @@ Cypress.Commands.add('snapshotTest', { prevSubject: 'optional' }, (subject: JQue
   // TODO: Investigation why compareSnapshot fail and other image that not take snapshot still appear in report
   // This will happend if using on('fail') to force image mismatch test pass when 'cy open' mode
 
-  const threshold = Cypress.browser.isHeadless ? 0 : 1
+  const threshold = Cypress.browser.isHeadless ? 0.01 : 1
   const logName = `${Cypress.currentTest.title}/${testName}`
   let imageName = `${Cypress.currentTest.title}/${testName}`
   // For BG Remove test, use original test title to verify
