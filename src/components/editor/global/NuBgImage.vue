@@ -41,7 +41,9 @@ div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false
 import { SrcObj } from '@/interfaces/gallery'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
+import { IBrowserInfo } from '@/store/module/user'
 import cssConverter from '@/utils/cssConverter'
+import doubleTapUtils from '@/utils/doubleTapUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
@@ -49,11 +51,9 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import ImageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
 import unitUtils from '@/utils/unitUtils'
-import doubleTapUtils from '@/utils/doubleTapUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import NuAdjustImage from './NuAdjustImage.vue'
-import { IBrowserInfo } from '@/store/module/user'
 
 export default defineComponent({
   emits: [],
