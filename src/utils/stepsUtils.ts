@@ -6,9 +6,8 @@ import store from '@/store'
 import { FunctionPanelType } from '@/store/types'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
-import { nextTick } from 'vue'
+import { nextTick, reactive } from 'vue'
 import assetUtils from './assetUtils'
-import eventUtils from './eventUtils'
 import layerFactary from './layerFactary'
 import pageUtils from './pageUtils'
 import popupUtils from './popupUtils'
@@ -238,7 +237,6 @@ class StepsUtils {
     // There's not any steps before, create the initial step first
     if (this.currStep < 0) {
       this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
-      eventUtils.emit('stepsUpdate', this.steps.length)
       // this.pageSteps.push(middlemostPageIndex)
       this.currStep++
     } else {
@@ -248,7 +246,6 @@ class StepsUtils {
         this.steps.shift()
       }
       this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
-      eventUtils.emit('stepsUpdate', this.steps.length)
       this.currStep = this.steps.length - 1
       // Don't upload the design when initialize the steps
       vivistickerUtils.saveDesign()
@@ -278,7 +275,6 @@ class StepsUtils {
       // There's not any steps before, create the initial step first
       if (this.currStep < 0) {
         this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
-        eventUtils.emit('stepsUpdate', this.steps.length)
         this.currStep++
       } else {
         // if step isn't in last step and we record new step, we need to remove all steps larger than curr step
@@ -287,7 +283,6 @@ class StepsUtils {
           this.steps.shift()
         }
         this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
-        eventUtils.emit('stepsUpdate', this.steps.length)
         this.currStep = this.steps.length - 1
         // Don't upload the design when initialize the steps
         vivistickerUtils.saveDesign(pages_2)
@@ -375,16 +370,14 @@ class StepsUtils {
   // When leave the route of editor, we may use this function alone without creating a new step
   clearSteps() {
     this.steps = []
-    eventUtils.emit('stepsUpdate', this.steps.length)
     this.currStep = -1
   }
 
   clearCurrStep() {
     this.steps.splice(this.currStep--, 1)
-    eventUtils.emit('stepsUpdate', this.steps.length)
   }
 }
 
 const stepsUtils = new StepsUtils()
 
-export default stepsUtils
+export default reactive(stepsUtils)

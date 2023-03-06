@@ -49,7 +49,8 @@ export default defineComponent({
         h: [] as Array<number>
       },
       imageUtils,
-      pageSize: 0
+      pageSize: 0,
+      marginTop: 44
     }
   },
   created() {
@@ -157,6 +158,7 @@ export default defineComponent({
             width: `${this.config.width}px`,
             height: `${this.config.height}px`,
             backgroundColor: this.isDuringCopy ? 'transparent' : this.editorBg,
+            margin: `${this.marginTop}px auto 0 auto`,
             ...(this.isDuringCopy ? { boxShadow: '0 0 0 2000px #1f1f1f', borderRadius: '0' } : {})
           }
         case 'scale':
@@ -204,12 +206,10 @@ export default defineComponent({
     handleResize() {
       const elTop = document.getElementsByClassName('vivisticker__top')[0]
       const headerHeight = 44
-      const topSize = {
-        width: elTop.clientWidth,
-        height: elTop.clientHeight
-      }
-      const pageSize = Math.min(topSize.width, topSize.height - headerHeight) - 32
+      const shortEdge = Math.min(elTop.clientWidth, elTop.clientHeight - headerHeight)
+      const pageSize = Math.round(shortEdge * 0.9)
       resizeUtils.resizePage(0, this.config, { width: pageSize, height: pageSize })
+      this.marginTop = Math.round(shortEdge * 0.05)
     }
   }
 })
@@ -224,7 +224,6 @@ export default defineComponent({
     position: relative;
     transform-style: preserve-3d;
     user-select: none;
-    margin: 16px auto 0 auto;
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     border-radius: 10px;
   }

@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="modal-card" :style="modalInfo.cardStyle")
+div(v-show="modalInfo.imgSrc ? isImgLoaded : true" class="modal-card" :style="modalInfo.cardStyle")
   div(v-if="modalInfo.title" class="modal-card__row modal-card__title text-H6 text-gray-2")
     span {{modalInfo.title}}
   div(v-if="modalInfo.imgSrc" class="modal-card__image")

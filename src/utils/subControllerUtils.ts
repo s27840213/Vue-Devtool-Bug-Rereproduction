@@ -1,6 +1,7 @@
 import { IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
 import store from '@/store'
 import { FunctionPanelType, IExtendLayerInfo, ILayerInfo, LayerType } from '@/store/types'
+import { nextTick } from 'vue'
 import colorUtils from './colorUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
 import formatUtils from './formatUtils'
@@ -143,7 +144,9 @@ export default class SubControllerUtils {
         if (this.config.contentEditable) {
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true }, this.subLayerIdx)
           if (generalUtils.isTouchDevice()) {
-            tiptapUtils.focus({ scrollIntoView: false }, 'end')
+            nextTick(() => {
+              tiptapUtils.focus({ scrollIntoView: false }, 'end')
+            })
           } else {
             tiptapUtils.focus({ scrollIntoView: false })
           }

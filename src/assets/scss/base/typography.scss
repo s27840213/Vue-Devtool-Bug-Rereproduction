@@ -275,3 +275,7 @@
 .default-input {
   @include default-input;
 }
+
+.rwd-container {
+	@include rwd-container;
+}
