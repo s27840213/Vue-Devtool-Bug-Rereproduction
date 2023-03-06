@@ -263,7 +263,7 @@ export default defineComponent({
       return this.currActivePanel !== 'none'
     },
     showLeftBtn(): boolean {
-      return this.bgRemoveMode || (this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel))
+      return (this.bgRemoveMode || (this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel))) && this.currActivePanel !== 'photo-shadow'
     },
     hideDynamicComp(): boolean {
       return ['crop', 'copy-style', 'multiple-select'].includes(this.currActivePanel)
@@ -422,7 +422,7 @@ export default defineComponent({
         return 'close-circle'
       }
     },
-    leftButtonAction(): (e: PointerEvent) => void {
+    leftButtonAction(): () => void {
       if (this.bgRemoveMode) {
         return () => {
           bgRemoveUtils.cancel()
@@ -508,6 +508,11 @@ export default defineComponent({
             if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
               this.addRecentlyColors(colorUtils.currColor)
             }
+            break
+          }
+
+          case 'photo-shadow': {
+            return this.leftButtonAction()
           }
         }
         if (this.showExtraColorPanel) {
