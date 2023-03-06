@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="bottom-menu")
+div(class="bottom-menu" :style="rootStyles")
   div(class="bottom-menu__wrapper relative")
     div(v-if="isPrevButtonNeeded" class="bottom-menu__prev pointer"
         @click.stop="handlePrevMenu")
@@ -228,6 +228,14 @@ export default defineComponent({
       folderBuffer: 'getMobileFolderBuffer',
       pathBuffer: 'getMobilePathBuffer'
     }),
+    ...mapGetters({
+      userInfo: 'webView/getUserInfo'
+    }),
+    rootStyles(): {[key: string]: string} {
+      return {
+        paddingBottom: `${this.userInfo.homeIndicatorHeight}px`
+      }
+    },
     designMenuItems(): any[] {
       switch (this.currLocation) {
         case 'a':

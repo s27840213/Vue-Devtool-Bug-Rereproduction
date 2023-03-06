@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="header-bar" @pointerdown.stop)
+div(class="header-bar" :style="rootStyles" @pointerdown.stop)
   div(class="header-bar__left")
     div(class="header-bar__feature-icon mr-20"
         @pointerdown="backBtnAction()")
@@ -94,8 +94,14 @@ export default defineComponent({
       InBgRemoveLastStep: 'bgRemove/inLastStep',
       isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
-      hasBleed: 'getHasBleed'
+      hasBleed: 'getHasBleed',
+      userInfo: 'webView/getUserInfo'
     }),
+    rootStyles(): {[key: string]: string} {
+      return {
+        paddingTop: `${this.userInfo.statusBarHeight}px`
+      }
+    },
     isCropping(): boolean {
       return imageUtils.isImgControl()
     },

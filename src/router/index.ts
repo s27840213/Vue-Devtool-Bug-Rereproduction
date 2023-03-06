@@ -262,6 +262,7 @@ const router = createRouter({
         }
 
         document.title = to.meta?.title as string || i18n.global.t('SE0001')
+        await webViewUtils.changeStatusBarTextColor(to.name?.toString() ?? '')
         next()
         if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.value.params.locale) {
           // Delete locale in url, will be ignore by prerender.

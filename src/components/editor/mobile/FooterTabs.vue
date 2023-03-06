@@ -3,7 +3,8 @@ div(class="footer-tabs" ref="tabs" :style="rootStyles")
   div(class="footer-tabs__content"
       :style="containerStyles")
     div(v-if="useWhiteTheme"  class="footer-tabs__home-tab"
-        :class="[useWhiteTheme ? 'bg-gray-6' : 'bg-nav']")
+        :class="[useWhiteTheme ? 'bg-gray-6' : 'bg-nav']"
+        :style="innerContainerStyles")
       div(class="footer-tabs__item"
           @click="handleTabAction(mainMenu)")
         svg-icon(class="mb-5 click-disabled"
@@ -15,6 +16,7 @@ div(class="footer-tabs" ref="tabs" :style="rootStyles")
           :class="`text-${tabColor(mainMenu)}`") {{mainMenu.text}}
     div(class="footer-tabs__container"
         :class="[useWhiteTheme ? 'bg-gray-6' : 'bg-nav']"
+        :style="innerContainerStyles"
         @scroll.passive="updateContainerOverflow" ref="container")
       template(v-for="(tab, index) in tabs")
         div(v-if="!tab.hidden" :key="tab.icon"
@@ -111,7 +113,8 @@ export default defineComponent({
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
-      hasCopiedFormat: 'getHasCopiedFormat'
+      hasCopiedFormat: 'getHasCopiedFormat',
+      userInfo: 'webView/getUserInfo'
     }),
     useWhiteTheme(): boolean {
       return this.hasSelectedLayer || this.inBgSettingMode || this.inAllPagesMode
@@ -515,6 +518,11 @@ export default defineComponent({
         //   : `linear-gradient(to right,
         //   transparent 0, black ${this.leftOverflow ? '56px' : 0},
         //   black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
+      }
+    },
+    innerContainerStyles(): { [index: string]: string } {
+      return {
+        paddingBottom: `${this.userInfo.homeIndicatorHeight}px`
       }
     },
     currLayer(): ILayer {

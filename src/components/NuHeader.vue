@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="nu-header")
+div(class="nu-header" :style="rootStyles")
   div(class="nu-header__container")
     div
       router-link(to="/"
@@ -90,15 +90,16 @@ div(class="nu-header")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import store from '@/store'
-import vClickOutside from 'click-outside-vue3'
-import SearchBar from '@/components/SearchBar.vue'
-import PopupAccount from '@/components/popup/PopupAccount.vue'
 import Avatar from '@/components/Avatar.vue'
-import MobileMenu from '@/components/homepage/MobileMenu.vue'
 import Url from '@/components/global/Url.vue'
+import MobileMenu from '@/components/homepage/MobileMenu.vue'
+import PopupAccount from '@/components/popup/PopupAccount.vue'
+import SearchBar from '@/components/SearchBar.vue'
+import store from '@/store'
 import constantData from '@/utils/constantData'
+import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -128,6 +129,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapGetters({
+      userInfo: 'webView/getUserInfo'
+    }),
     navItems(): any {
       return constantData.headerItems()
     },
@@ -136,6 +140,11 @@ export default defineComponent({
     },
     isLogin(): boolean {
       return store.getters['user/isLogin']
+    },
+    rootStyles(): {[key: string]: string} {
+      return {
+        paddingTop: `${this.userInfo.statusBarHeight}px`
+      }
     }
   },
   methods: {

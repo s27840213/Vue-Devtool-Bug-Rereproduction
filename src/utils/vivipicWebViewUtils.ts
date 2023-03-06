@@ -3,6 +3,10 @@ import store from '@/store'
 import { WebViewUtils } from '@/utils/webViewUtils'
 import logUtils from './logUtils'
 
+const WHITE_STATUS_BAR_ROUTES = [
+  'Editor'
+]
+
 class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   appLoadedSent = false
   STANDALONE_USER_INFO: IUserInfo = {
@@ -10,7 +14,9 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     appVer: '100.0',
     locale: 'us',
     isFirstOpen: false,
-    osVer: '100.0'
+    osVer: '100.0',
+    statusBarHeight: 0,
+    homeIndicatorHeight: 0
   }
 
   ROUTER_CALLBACKS = [
@@ -112,6 +118,11 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
 
   getStateResult(data: { key: string, value: string }) {
     this.handleCallback('getState', data.value ? JSON.parse(data.value) : undefined)
+  }
+
+  async changeStatusBarTextColor(routeName: string): Promise<any> {
+    const statusBarColor = WHITE_STATUS_BAR_ROUTES.includes(routeName) ? 'white' : 'black'
+    await this.callIOSAsAPI('UPDATE_USER_INFO', { statusBarColor }, 'update-user-info')
   }
 }
 

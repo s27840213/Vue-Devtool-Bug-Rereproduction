@@ -3,7 +3,9 @@ export interface IUserInfo {
   appVer: string,
   osVer: string,
   locale: string,
-  isFirstOpen: boolean
+  isFirstOpen: boolean,
+  statusBarHeight: number,
+  homeIndicatorHeight: number
 }
 
 export interface ILoginResult {
