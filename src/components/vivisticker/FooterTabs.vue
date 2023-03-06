@@ -400,7 +400,7 @@ export default defineComponent({
           : `linear-gradient(to right, 
           transparent 0, black ${this.leftOverflow ? '56px' : 0}, 
           black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`,
-        ...(this.isTablet && { height: '80px', justifyContent: 'center' })
+        ...(this.isTablet && this.isInEditor && { height: '80px', justifyContent: 'center' })
       }
     },
     currLayer(): ILayer {
