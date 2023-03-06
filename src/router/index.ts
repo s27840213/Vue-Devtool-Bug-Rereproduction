@@ -259,6 +259,7 @@ const router = createRouter({
           i18n.global.locale = locale
           localStorage.setItem('locale', locale)
         }
+        webViewUtils.updateLocale(locale)
 
         document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()

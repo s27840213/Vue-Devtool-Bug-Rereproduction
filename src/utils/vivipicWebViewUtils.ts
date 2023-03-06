@@ -87,10 +87,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async updateLocale(locale: string): Promise<void> {
-    if (this.isBrowserMode) {
-      localStorage.setItem('locale', locale)
-      return
-    }
+    if (this.isBrowserMode) return
     await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
   }
 
