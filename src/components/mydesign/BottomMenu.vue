@@ -27,7 +27,9 @@ div(class="bottom-menu" :style="rootStyles")
                 :placeholder="$t('NN0691')"
                 v-model="editableName"
                 @change="handleNewFolder"
-                @keyup="checkNameLength")
+                @keyup="checkNameLength"
+                @focus="isInputFocused = true"
+                @blur="isInputFocused = false")
           div(v-if="editableName.length" class="new-folder__icon" @click.stop="handleClearNewFolderName")
             svg-icon(iconName="close" iconColor="gray-3" iconWidth="24px")
         div(v-if="isShowHint" class="menu__hint in-new-folder") {{ $t('NN0226') }}
@@ -54,7 +56,9 @@ div(class="bottom-menu" :style="rootStyles")
               input(ref="name"
                     v-model="editableName"
                     @change="handleNameEditEnd"
-                    @keyup="checkNameEnter")
+                    @keyup="checkNameEnter"
+                    @focus="isInputFocused = true"
+                    @blur="isInputFocused = false")
             div(v-else class="menu__editable-name__text")
               span(:title="designBuffer.name") {{ designBuffer.name }}
             div(v-if="!isNameEditing" class="menu__editable-name__icon"
@@ -82,7 +86,9 @@ div(class="bottom-menu" :style="rootStyles")
               input(ref="name"
                     v-model="editableName"
                     @change="handleNameEditEnd"
-                    @keyup="checkNameEnter")
+                    @keyup="checkNameEnter"
+                    @focus="isInputFocused = true"
+                    @blur="isInputFocused = false")
             div(v-else class="menu__editable-name__text")
               span(:title="folderBuffer.folder.name") {{ folderBuffer.folder.name }}
             div(v-if="!isNameEditing" class="menu__editable-name__icon"
@@ -175,7 +181,8 @@ export default defineComponent({
       isNameEditing: false,
       editableName: '',
       messageTimer: -1,
-      isShowHint: false
+      isShowHint: false,
+      isInputFocused: false
     }
   },
   directives: {
@@ -232,7 +239,7 @@ export default defineComponent({
       userInfo: 'webView/getUserInfo'
     }),
     rootStyles(): {[key: string]: string} {
-      return {
+      return this.isInputFocused ? {} : {
         paddingBottom: `${this.userInfo.homeIndicatorHeight}px`
       }
     },
