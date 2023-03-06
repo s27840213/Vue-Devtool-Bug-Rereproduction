@@ -8,6 +8,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor } from '@tiptap/vue-3'
 import _ from 'lodash'
+import platform from 'platform'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
 
@@ -126,6 +127,10 @@ class Rect {
       })
     })
 
+    // const safariStyle = platform.name === 'Safari' ? { lineBreak: 'loose' } : {}
+    const safariStyle = platform.name === 'Safari' ? { lineBreak: 'normal' } : {}
+    // const safariStyle = platform.name === 'Safari' ? { lineBreak: 'strict' } : {}
+    Object.assign(div.style, safariStyle)
     div.style.writingMode = config.styles.writingMode
     const { widthLimit } = config
     // const { scale, height } = config.styles
