@@ -167,8 +167,7 @@ export default defineComponent({
   },
   props: {
     view: {
-      type: String,
-      required: true
+      type: String
     }
   },
   async created() {
