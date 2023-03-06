@@ -107,7 +107,8 @@ export default defineComponent({
           result = new Array(Math.ceil(this.list.length / 3))
             .fill('')
             .map((_, idx) => {
-              const rowItems = this.list.slice(idx * 3, idx * 3 + 3)
+              let rowItems = this.list.slice(idx * 3, idx * 3 + 3)
+              rowItems = rowItems.concat(Array(3 - rowItems.length).fill({}))
               return {
                 id: `result_${rowItems.map(item => item.id).join('_')}`,
                 type: 'my-design-object-item',
@@ -329,7 +330,7 @@ export default defineComponent({
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       @include layout-tablet{
-        display: flex;
+        grid-template-columns: repeat(3, auto);
         justify-content: space-between;
       }
     }
