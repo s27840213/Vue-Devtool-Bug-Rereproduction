@@ -186,7 +186,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .nu-header {
-  height: $header-height;
   background-size: cover;
   // background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
   background: white;
@@ -219,7 +218,7 @@ export default defineComponent({
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    height: 100%;
+    height: $header-height;
     @media screen and (max-width: 768px) {
       display: none;
     }
@@ -260,7 +259,7 @@ export default defineComponent({
     box-sizing: border-box;
     padding: 16px 24px;
     width: 100%;
-    height: 100%;
+    height: $header-height;
     svg + svg {
       margin-left: 20px;
     }
