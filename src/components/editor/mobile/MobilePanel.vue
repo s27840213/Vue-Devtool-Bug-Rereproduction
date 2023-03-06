@@ -467,7 +467,7 @@ export default defineComponent({
               if (this.backgroundLocked) return this.handleLockedNotify()
               this.setBgImageControl({
                 pageIndex: pageUtils.currFocusPageIndex,
-                imgControl: !this.backgroundImgControl
+                imgControl: false
               })
             }
             break
