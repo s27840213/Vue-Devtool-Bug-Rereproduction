@@ -122,6 +122,11 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     const statusBarColor = WHITE_STATUS_BAR_ROUTES.includes(routeName) ? 'white' : 'black'
     await this.callIOSAsAPI('UPDATE_USER_INFO', { statusBarColor }, 'update-user-info')
   }
+
+  switchDomain(domain: string): void {
+    if (this.isBrowserMode) return
+    this.sendToIOS('SWITCH_DOMAIN', { domain })
+  }
 }
 
 const webViewUtils = new VivipicWebViewUtils()

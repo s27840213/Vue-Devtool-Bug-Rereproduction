@@ -375,6 +375,11 @@ export default defineComponent({
             maxheight: this.panelParentHeight()
           }
         }
+        case 'more': {
+          return {
+            panelHistory: this.panelHistory
+          }
+        }
         default: {
           return {}
         }
@@ -391,6 +396,7 @@ export default defineComponent({
       }
       switch (this.currActivePanel) {
         case 'color':
+        case 'more':
           return { pushHistory }
         case 'background':
           return { openExtraColorModal }

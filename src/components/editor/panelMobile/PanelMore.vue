@@ -1,32 +1,41 @@
 <template lang="pug">
 div(class="panel-more")
-  div(class="panel-more__page-name")
-    input(class="body-1 text-gray-2" type="text"
-      :placeholder="`${$t('NN0079')}`"
-      maxlength="30"
-      :value="pagesName"
-      @change="setPagesName"
-      ref="pagesName")
-  hr(class="panel-more__hr")
-  div(class="panel-more__item" @click="save()")
-    span(class="body-2 pointer") {{$t('NN0009')}}
-  div(class="panel-more__item" @click="newDesign()")
-    span(class="body-2 pointer") {{$tc('NN0072')}}
-  hr(class="panel-more__hr")
-  div(class="panel-more__item " @click="toggleBleed()")
-    span(class="body-2 pointer") {{hasBleed ? `${$t('NN0779')}` : `${$t('NN0778')}`}}
-  hr(class="panel-more__hr")
-  div(class="panel-more__item" @click="goToPage('MyDesign')")
-    span(class="body-2 pointer") {{$t('NN0080')}}
-  hr(class="panel-more__hr")
-  div(class="panel-more__item"
-      @click="onLogoutClicked()")
-      span(class="body-2 pointer") {{$tc('NN0167',2)}}
-  div(class="panel-more__item"
-      @click="toggleDebugTool")
-    span Toggle admin tool
-  div(class="body-2 panel-more__item" @click="gotoDesktop")
-    span(class="text-gray-3") Version: {{buildNumber}}
+  template(v-if="inInitialState")
+    div(class="panel-more__page-name")
+      input(class="body-1 text-gray-2" type="text"
+        :placeholder="`${$t('NN0079')}`"
+        maxlength="30"
+        :value="pagesName"
+        @change="setPagesName"
+        ref="pagesName")
+    hr(class="panel-more__hr")
+    div(class="panel-more__item" @click="save()")
+      span(class="body-2 pointer") {{$t('NN0009')}}
+    div(class="panel-more__item" @click="newDesign()")
+      span(class="body-2 pointer") {{$tc('NN0072')}}
+    hr(class="panel-more__hr")
+    div(class="panel-more__item " @click="toggleBleed()")
+      span(class="body-2 pointer") {{hasBleed ? `${$t('NN0779')}` : `${$t('NN0778')}`}}
+    hr(class="panel-more__hr")
+    div(class="panel-more__item" @click="goToPage('MyDesign')")
+      span(class="body-2 pointer") {{$t('NN0080')}}
+    hr(class="panel-more__hr")
+    div(class="panel-more__item"
+        @click="onLogoutClicked()")
+        span(class="body-2 pointer") {{$tc('NN0167',2)}}
+    template(v-if="isAdmin")
+      hr(class="panel-more__hr")
+      div(class="panel-more__item"
+          @click="onDomainListClicked()")
+          span(class="body-2 pointer") domain 選單
+    div(class="panel-more__item"
+        @click="toggleDebugTool")
+      span Toggle admin tool
+    div(class="body-2 panel-more__item" @click="gotoDesktop")
+      span(class="text-gray-3") Version: {{buildNumber}}{{appVersion}}{{domain}}
+  template(v-if="lastHistory === 'domain-list'")
+    div(v-for="domain in domainList" class="panel-more__item" @click="switchDomain(domain.key)")
+        span(class="body-2 pointer") {{domain.title}}
 </template>
 
 <script lang="ts">
@@ -36,22 +45,43 @@ import pageUtils from '@/utils/pageUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import webViewUtils from '@/utils/vivipicWebViewUtils'
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   components: {
     MobileSlider
   },
-  emits: ['close'],
+  emits: ['close', 'pushHistory'],
+  props: {
+    panelHistory: {
+      type: Array as PropType<string[]>,
+      default: () => []
+    }
+  },
+  data() {
+    return {
+      domain: window.location.hostname !== 'vivipic.com' ? ` - ${window.location.hostname.replace('.vivipic.com', '')}` : '',
+    }
+  },
   computed: {
     ...mapState('user', [
       'enableAdminView'
     ]),
     ...mapGetters({
       pagesLength: 'getPagesLength',
-      hasBleed: 'getHasBleed'
+      hasBleed: 'getHasBleed',
+      isAdmin: 'user/isAdmin'
     }),
+    historySize(): number {
+      return this.panelHistory.length
+    },
+    inInitialState(): boolean {
+      return this.historySize === 0
+    },
+    lastHistory(): string {
+      return this.panelHistory[this.historySize - 1]
+    },
     opacity(): number {
       return layerUtils.getCurrOpacity
     },
@@ -61,6 +91,29 @@ export default defineComponent({
     buildNumber(): string {
       const { VUE_APP_BUILD_NUMBER: buildNumber } = process.env
       return buildNumber ? `v.${buildNumber}` : 'local'
+    },
+    appVersion(): string {
+      return webViewUtils.isBrowserMode ? '' : ` - ${webViewUtils.getUserInfoFromStore().appVer}`
+    },
+    domainList(): { key: string, title: string }[] {
+      return [
+        {
+          key: 'prod',
+          title: 'vivipic'
+        },
+        {
+          key: 'rd',
+          title: 'rd'
+        },
+        {
+          key: 'qa',
+          title: 'qa'
+        },
+        ...(new Array(6).fill(0).map((_, i) => ({
+          key: `dev${i}`,
+          title: `dev${i}`
+        })))
+      ]
     }
   },
   methods: {
@@ -104,6 +157,12 @@ export default defineComponent({
       for (let idx = 0; idx < this.pagesLength; idx++) pageUtils.setIsEnableBleed(isEnableBleed, idx)
       stepsUtils.record()
     },
+    onDomainListClicked() {
+      this.$emit('pushHistory', 'domain-list')
+    },
+    switchDomain(key: string) {
+      webViewUtils.switchDomain(key)
+    }
   }
 })
 </script>
