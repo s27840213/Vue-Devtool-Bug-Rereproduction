@@ -89,12 +89,14 @@ export default defineComponent({
   },
   mounted() {
     if (this.$isTouchDevice()) {
-      const el = this.$refs['mobile-editor__content'] as HTMLElement
-      editorUtils.setMobileHW({
-        width: el.clientWidth,
-        height: el.clientHeight
-      })
-      editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
+      // const el = this.$refs['mobile-editor__content'] as HTMLElement
+      // editorUtils.setMobilePhysicalData({
+      //   size: {
+      //     width: el.clientWidth,
+      //     height: el.clientHeight,
+      //   }
+      // })
+      // editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
     }
     // const pz = new PinchZoom(el, {
     //   minZoom: (pageUtils.mobileMinScaleRatio * 0.01)

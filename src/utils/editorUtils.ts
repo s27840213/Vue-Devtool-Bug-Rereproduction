@@ -6,15 +6,20 @@ import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
 
 class EditorUtils {
-  private _mobileWidth = 0
-  private _mobileHeight = 0
+  private _mobileSize = { width: 0, height: 0 }
+  private _mobileCenterPos = { x: 0, y: 0 }
+  private _mobileTopLeftPos = { x: 0, y: 0 }
 
-  get mobileWidth() {
-    return this._mobileWidth
+  get mobileSize() {
+    return this._mobileSize
   }
 
-  get mobileHeight() {
-    return this._mobileHeight
+  get mobileCenterPos() {
+    return this._mobileCenterPos
+  }
+
+  get mobileTopLeftPos() {
+    return this._mobileTopLeftPos
   }
 
   get mobileAllPageMode() {
@@ -45,29 +50,47 @@ class EditorUtils {
     return store.state.showColorSlips
   }
 
-  setMobileHW(size: { width?: number, height?: number }) {
-    if (size.width) {
-      this._mobileWidth = size.width
+  setMobilePhysicalData(data: { size?: { width: number, height: number }, centerPos?: { x: number, y: number }, pos?: { x: number, y: number } }) {
+    const { size, centerPos, pos } = data
+    if (size) {
+      this._mobileSize.width = size.width
+      this._mobileSize.height = size.height
     }
-    if (size.height) {
-      this._mobileHeight = size.height
+    if (centerPos) {
+      this._mobileCenterPos.x = centerPos.x
+      this._mobileCenterPos.y = centerPos.y
+    }
+    if (pos) {
+      this._mobileTopLeftPos.x = pos.x
+      this._mobileTopLeftPos.y = pos.y
+    }
+  }
+
+  setMobileCenterPos(pos: { x?: number, y?: number }) {
+    if (pos.x) {
+      this._mobileCenterPos.x = pos.x
+    }
+    if (pos.y) {
+      this._mobileCenterPos.y = pos.y
     }
   }
 
   handleContentScaleCalc(page: IPage | IBgRemoveInfo) {
     const { hasBleed } = pageUtils
     const { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
-    if (!this.mobileHeight || this.mobileWidth) {
+    if (!this.mobileSize.height || !this.mobileSize.width) {
       const mobileEditor = document.getElementById('mobile-editor__content')
       if (mobileEditor) {
-        this.setMobileHW({
-          width: mobileEditor.clientWidth,
-          height: mobileEditor.clientHeight
+        this.setMobilePhysicalData({
+          size: {
+            width: mobileEditor.clientWidth,
+            height: mobileEditor.clientHeight
+          }
         })
       }
     }
-    const PAGE_SIZE_W = (this.mobileWidth || Number.MAX_SAFE_INTEGER) * 0.926
-    const PAGE_SIZE_H = (this.mobileHeight || Number.MAX_SAFE_INTEGER) * 0.926
+    const PAGE_SIZE_W = (this.mobileSize.width || Number.MAX_SAFE_INTEGER) * 0.926
+    const PAGE_SIZE_H = (this.mobileSize.height || Number.MAX_SAFE_INTEGER) * 0.926
     if (width > PAGE_SIZE_W || height > PAGE_SIZE_H) {
       if (width >= height) {
         return PAGE_SIZE_W / width

@@ -3,9 +3,9 @@
  */
 
 interface SwipeOptions {
-  tolerance: number;
-  velocityLimit: number;
-  targetDirection: 'all' | 'horizontal' | 'vertical';
+  tolerance: number
+  velocityLimit: number
+  targetDirection: 'all' | 'horizontal' | 'vertical'
 }
 
 export default class SwipeDetector {
@@ -13,15 +13,16 @@ export default class SwipeDetector {
   private touchStartY = 0;
   private touchEndX = 0;
   private touchEndY = 0;
-  private swipeOptions: SwipeOptions;
+  private swipeOptions: SwipeOptions
   private startTime = 0
   private movedFlag = false
-  private callback: (direction: string) => void;
+  private callback: (direction: string) => void
 
   constructor(private element: HTMLElement, options?: Partial<SwipeOptions>, callback?: (direction: string) => void) {
     const defaultOptions: SwipeOptions = {
       tolerance: 20,
-      velocityLimit: 30,
+      // velocityLimit: 30,
+      velocityLimit: 500,
       targetDirection: 'all'
     }
     this.swipeOptions = { ...defaultOptions, ...options }

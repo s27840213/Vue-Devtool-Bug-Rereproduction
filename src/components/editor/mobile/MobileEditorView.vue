@@ -6,8 +6,8 @@ div(class="editor-view" v-touch
     @scroll="!inBgRemoveMode ? scrollUpdate() : null"
     @pointerdown="selectStart"
     @mousewheel="handleWheel"
+    @pinch="pinchHandler"
     ref="editorView")
-  //- @pinch="pinchHandler"
   div(class="editor-view__abs-container"
       :style="absContainerStyle")
     div(class="editor-view__canvas"
@@ -58,6 +58,8 @@ import uploadUtils from '@/utils/uploadUtils'
 import { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+
+const MAX_SCALE_RATIO = 2.5
 
 export default defineComponent({
   emits: [],
@@ -115,10 +117,12 @@ export default defineComponent({
       oriX: 0,
       oriPageSize: 0,
       swipeDetector: null as unknown as SwipeDetector,
-      initPos: { x: 0, y: 0 },
+      initPagePos: { x: 0, y: 0 },
       initPageSize: { width: 0, height: 0 },
       initPinchPos: null as ICoordinate | null,
-      tmpPinchScaleRatio: 100
+      tmpPinchScaleRatio: 100,
+      handlePinchTimer: -1,
+      isPinching: false
     }
   },
   created() {
@@ -159,10 +163,6 @@ export default defineComponent({
     this.editorCanvas = this.$refs.canvas as HTMLElement
     this.swipeDetector = new SwipeDetector(this.editorView, { targetDirection: 'vertical' }, this.handleSwipe)
 
-    const rect = this.editorView.getBoundingClientRect()
-    pageUtils.originEditorSize.width = rect.width
-    pageUtils.originEditorSize.height = rect.height
-
     this.cardHeight = this.editorView ? this.editorView.clientHeight : 0
     this.cardWidth = this.editorView ? this.editorView.clientWidth : 0
 
@@ -174,30 +174,48 @@ export default defineComponent({
       pageUtils.originPageSize.width = pageUtils.getPages[0].width * this.pageUtils.mobileMinScaleRatio * 0.01
       pageUtils.originPageSize.height = pageUtils.getPages[0].height * this.pageUtils.mobileMinScaleRatio * 0.01
 
-      const editorView = this.$refs.editorView as HTMLElement
-      const rect = editorView.getBoundingClientRect()
-      pageUtils.originEditorSize.width = rect.width
-      pageUtils.originEditorSize.height = rect.height
-
-      pageUtils.pageCenterPos = {
-        x: rect.width * 0.5,
-        y: rect.height * 0.5
-      }
-
-      let card = this.$refs.card as HTMLElement | HTMLElement[]
-      if (Array.isArray(card)) card = card[0]
-      const cardRect = card.getBoundingClientRect()
-      const padding = +card.style.padding.slice(0, -2)
-      pageUtils.pageEventPosOffset.x = cardRect.x + padding
-      pageUtils.pageEventPosOffset.y = cardRect.y + padding
-
-      pageUtils.originPageY = (pageUtils.originEditorSize.height - (pageUtils.getCurrPage.width * (pageUtils.scaleRatio * 0.01))) * 0.5 - padding
-      pageUtils.getPages.forEach((_, i) => {
-        pageUtils.updatePagePos(i, {
-          x: 0,
-          y: pageUtils.originPageY
-        })
+      const rect = this.editorView.getBoundingClientRect()
+      editorUtils.setMobilePhysicalData({
+        size: {
+          width: rect.width,
+          height: rect.height,
+        },
+        centerPos: {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        },
+        pos: {
+          x: rect.left,
+          y: rect.top
+        }
       })
+      editorUtils.handleContentScaleRatio(layerUtils.pageIndex)
+      console.log(editorUtils.mobileSize, editorUtils.mobileCenterPos, editorUtils.mobileTopLeftPos)
+
+      // const editorView = this.$refs.editorView as HTMLElement
+      // const rect = editorView.getBoundingClientRect()
+      // pageUtils.originEditorSize.width = rect.width
+      // pageUtils.originEditorSize.height = rect.height
+
+      // pageUtils.pageCenterPos = {
+      //   x: rect.width * 0.5,
+      //   y: rect.height * 0.5
+      // }
+
+      // let card = this.$refs.card as HTMLElement | HTMLElement[]
+      // if (Array.isArray(card)) card = card[0]
+      // const cardRect = card.getBoundingClientRect()
+      // const padding = +card.style.padding.slice(0, -2)
+      // pageUtils.pageEventPosOffset.x = cardRect.x + padding
+      // pageUtils.pageEventPosOffset.y = cardRect.y + padding
+
+      // pageUtils.originPageY = (pageUtils.originEditorSize.height - (pageUtils.getCurrPage.width * (pageUtils.scaleRatio * 0.01))) * 0.5 - padding
+      // pageUtils.getPages.forEach((_, i) => {
+      //   pageUtils.updatePagePos(i, {
+      //     x: 0,
+      //     y: pageUtils.originPageY
+      //   })
+      // })
     }
 
     this.$nextTick(() => {
@@ -412,13 +430,28 @@ export default defineComponent({
       }
     },
     pinchHandler(event: AnyTouchEvent) {
+      switch (event.phase) {
+        case 'start': {
+          console.log('start')
+          break
+        }
+        case 'move': {
+          this.isPinching = true
+          console.log('move')
+          break
+        }
+        case 'end': {
+          this.isPinching = false
+          console.log('end')
+        }
+      }
       // switch (event.phase) {
       //   /**
       //    * @Note the very first event won't fire start phase, it's very strange and need to pay attention
       //    */
       //   case 'start': {
-      //     this.initPos.x = pageUtils.getCurrPage.x
-      //     this.initPos.y = pageUtils.getCurrPage.y
+      //     this.initPagePos.x = pageUtils.getCurrPage.x
+      //     this.initPagePos.y = pageUtils.getCurrPage.y
       //     this.initPageSize.width = pageUtils.getCurrPage.width * (pageUtils.scaleRatio * 0.01)
       //     this.initPageSize.height = pageUtils.getCurrPage.height * (pageUtils.scaleRatio * 0.01)
       //     this.tmpScaleRatio = pageUtils.scaleRatio
@@ -459,8 +492,8 @@ export default defineComponent({
       //         }
 
       //         pageUtils.updatePagePos(0, {
-      //           x: this.initPos.x - sizeDiff.width * translationRatio.x,
-      //           y: this.initPos.y - sizeDiff.height * translationRatio.y
+      //           x: this.initPagePos.x - sizeDiff.width * translationRatio.x,
+      //           y: this.initPagePos.y - sizeDiff.height * translationRatio.y
       //         })
       //       }
       //     })
@@ -482,8 +515,8 @@ export default defineComponent({
       //       page.style.transformOrigin = 'center'
       //     }, 0)
 
-      //     clearTimeout(this.hanleWheelTimer)
-      //     this.hanleWheelTimer = setTimeout(() => {
+      //     clearTimeout(this.handlePinchTimer)
+      //     this.handlePinchTimer = window.setTimeout(() => {
       //       if (needResizeToDefault) {
       //         this.handleWheelTransition = true
       //         pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: pageUtils.originPageY })
@@ -497,63 +530,6 @@ export default defineComponent({
       //       }
       //       page.style.transformOrigin = 'top left'
       //     }, 500)
-      //     break
-      //   }
-      // }
-
-      // switch (event.phase) {
-      //   /**
-      //    * @Note the very first event won't fire start phase, it's very strange and need to pay attention
-      //    */
-      //   case 'start': {
-      //     this.oriX = pageUtils.getCurrPage.x
-      //     this.oriPageSize = (pageUtils.getCurrPage.width * (pageUtils.scaleRatio / 100))
-      //     this.tmpScaleRatio = pageUtils.scaleRatio
-      //     this.isScaling = true
-      //     store.commit('SET_isPageScaling', true)
-      //     break
-      //   }
-      //   case 'move': {
-      //     if (!this.isScaling) {
-      //       this.isScaling = true
-      //       store.commit('SET_isPageScaling', true)
-      //     }
-      //     window.requestAnimationFrame(() => {
-      //       const limitMultiplier = 4
-      //       if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
-      //         pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
-      //         return
-      //       }
-      //       const newScaleRatio = Math.min(this.tmpScaleRatio * event.scale, pageUtils.mobileMinScaleRatio * limitMultiplier)
-      //       if (newScaleRatio >= pageUtils.mobileMinScaleRatio * 0.8) {
-      //         pageUtils.setScaleRatio(newScaleRatio)
-
-      //         const baseX = (pageUtils.getCurrPage.width * (newScaleRatio / 100) - this.oriPageSize) * 0.5
-      //         pageUtils.updatePagePos(0, {
-      //           x: this.oriX - baseX
-      //         })
-      //       }
-      //       clearTimeout(this.hanleWheelTimer)
-      //       this.hanleWheelTimer = setTimeout(() => {
-      //         if (newScaleRatio <= pageUtils.mobileMinScaleRatio) {
-      //           const page = document.getElementById(`nu-page-wrapper_${layerUtils.pageIndex}`) as HTMLElement
-      //           page.style.transition = '0.2s linear'
-      //           this.handleWheelTransition = true
-      //           pageUtils.updatePagePos(layerUtils.pageIndex, { x: 0, y: 0 })
-      //           this.setPageScaleRatio(pageUtils.mobileMinScaleRatio)
-      //           setTimeout(() => {
-      //             page.style.transition = ''
-      //             this.handleWheelTransition = false
-      //           }, 500)
-      //         }
-      //       }, 500)
-      //     })
-      //     break
-      //   }
-
-      //   case 'end': {
-      //     this.isScaling = false
-      //     store.commit('SET_isPageScaling', false)
       //     break
       //   }
       // }
@@ -631,6 +607,7 @@ export default defineComponent({
       }
     },
     handleSwipe(dir: string) {
+      if (this.isPinching) return
       if (dir === 'up') {
         this.swipeUpHandler()
       } else if (dir === 'down') {
