@@ -6,6 +6,7 @@ import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import { Editor } from '@tiptap/vue-3'
 import _ from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
@@ -668,7 +669,7 @@ class TextBg {
         opacity: 100,
         color: 'fontColorL+-40/BC/00'
       },
-      // A part of additional default setting is in setAdditionalDefaultAttrs func.
+      // A part of additional default setting is in setExtraDefaultAttrs func.
       rainbow: letterBgDefault,
       'rainbow-dark': letterBgDefault,
       cloud: Object.assign({}, letterBgDefault, { fixedWidth: false }),
@@ -692,7 +693,6 @@ class TextBg {
     return {
       display: 'inline-block',
       [w]: `${spanStyle.size * 4 / 3 * (pStyle.fontSpacing + 1)}px`,
-      [h]: 'auto'
     }
   }
 
@@ -829,7 +829,6 @@ class TextBg {
 
       const pos = [] as (Record<'x' | 'y' | 'width' | 'height', number> & Record<'color' | 'href', string>)[]
       let i = 0
-      console.log('rows', rows)
       rows.forEach((row) => {
         row.spanData.forEach((span) => {
           const { x, y, width, height, text } = span
@@ -895,7 +894,7 @@ class TextBg {
     }
   }
 
-  setAdditionalDefaultAttrs(name: string) {
+  setExtraDefaultAttrs(name: string) {
     const defaultAttrs = {
       rainbow: { lineHeight: 1.4, fontSpacing: 0 },
       'rainbow-dark': { lineHeight: 1.4, fontSpacing: 0 },
@@ -963,7 +962,7 @@ class TextBg {
           this.syncShareAttrs(textBg, effect)
           const localAttrs = localStorageUtils.get('textEffectSetting', effect)
           Object.assign(textBg, defaultAttrs, localAttrs, attrs, { name: effect })
-          this.setAdditionalDefaultAttrs(effect)
+          this.setExtraDefaultAttrs(effect)
 
           // Bring original effect color to new effect.
           const oldColor = this.getEffectMainColor(layerTextBg)[1]
@@ -986,6 +985,11 @@ class TextBg {
           if (oldFixedWidth !== newFixedWidth) {
             tiptapUtils.updateHtml()
             tiptapUtils.forceUpdate()
+            // When fixedWith true => false, this can force tiptap merge span that have same attrs.
+            tiptapUtils.agent((editor: Editor) => {
+              editor.commands.selectAll()
+              editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
+            })
           }
         })
       }
@@ -995,7 +999,7 @@ class TextBg {
   resetCurrTextEffect() {
     const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
     this.setTextBg(effectName, this.effects[effectName])
-    this.setAdditionalDefaultAttrs(effectName)
+    this.setExtraDefaultAttrs(effectName)
   }
 }
 

@@ -185,11 +185,6 @@ const result = {
           pullRequest()
         ]
       }],
-      'featrue/text-effect': [{
-        parallel: versionCheckAndBuild()
-      }, {
-        parallel: allDeploy('dev1'),
-      }],
       // 'feature/?': [{
       //   parallel: versionCheckAndBuild()
       // }, {

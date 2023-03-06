@@ -135,7 +135,6 @@ class TiptapUtils {
   }
 
   toJSON(paragraphs: IParagraph[]): ITiptapJson {
-    // console.log(generalUtils.deepCopy(paragraphs))
     return {
       type: 'doc',
       content: paragraphs.map(p => {
@@ -153,12 +152,6 @@ class TiptapUtils {
           const spans = this.splitLastWhiteSpaces(p.spans)
           const textBg = textEffectUtils.getCurrentLayer().styles.textBg
           const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
-          // if (fixedWidth && !!false) {
-          //   spans = spans.flatMap(
-          //     span => [...span.text]
-          //       .map(t => Object.assign({}, span, { text: t }))
-          //   )
-          // }
           pObj.content = spans.map((s, index) => {
             const config = layerUtils.getCurrLayer as IText
             return {
