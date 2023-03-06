@@ -112,7 +112,7 @@ export default defineComponent({
                 id: `result_${rowItems.map(item => item.id).join('_')}`,
                 type: 'my-design-object-item',
                 list: rowItems,
-                size: this.itemHeight + 24,
+                size: this.itemHeight + (this.isTablet ? 30 : 24),
                 title: '',
                 moreType: 'object'
               }
