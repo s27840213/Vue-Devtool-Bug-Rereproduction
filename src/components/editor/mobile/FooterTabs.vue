@@ -29,7 +29,7 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
           template(v-for="(tab, index) in settingTabs")
             div(v-if="!tab.hidden" :key="tab.icon"
                 class="footer-tabs__item"
-                :class="{'click-disabled': (tab.disabled || isLocked)}"
+                :class="{'click-disabled': (tab.disabled || isLocked || (tab.icon !== 'remove-bg' && inBgRemoveMode))}"
                 @click="handleTabAction(tab)")
               color-btn(v-if="tab.icon === 'color'" size="22px"
                         class="mb-5 click-disabled"
@@ -50,6 +50,7 @@ import { IFooterTab } from '@/interfaces/editor'
 import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
 import backgroundUtils from '@/utils/backgroundUtils'
+import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -130,7 +131,7 @@ export default defineComponent({
       return this.currSelectedInfo.layers.length > 0
     },
     isSettingTabsOpen(): boolean {
-      return this.settingTabs.length > 0
+      return this.settingTabs.length > 0 || this.inBgRemoveMode
     },
     subLayerType(): string {
       return this.currSubSelectedInfo.type
@@ -229,8 +230,8 @@ export default defineComponent({
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
-        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
-        // { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
+        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'copy-style' },
+        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }
       ]
     },
     frameTabs(): Array<IFooterTab> {
@@ -460,8 +461,8 @@ export default defineComponent({
       return type === 'frame' && clips[0].srcObj.assetId
     },
     showPhotoTabs(): boolean {
-      return (!this.inBgRemoveMode && !this.isFontsPanelOpened &&
-        this.targetIs('image') && this.singleTargetType()) || this.hasFrameClipActive
+      return (!this.isFontsPanelOpened &&
+        this.targetIs('image') && this.singleTargetType()) || this.hasFrameClipActive || this.inBgRemoveMode
     },
     showObjectColorAndFontTabs(): boolean {
       const { subLayerIdx } = layerUtils
@@ -583,9 +584,7 @@ export default defineComponent({
     },
     handleTabAction(tab: IFooterTab) {
       if (tab.icon !== 'multiple-select' && this.inMultiSelectionMode) {
-        console.log(!this.inMultiSelectionMode)
         editorUtils.setInMultiSelectionMode(!this.inMultiSelectionMode)
-        console.log(this.inMultiSelectionMode)
       }
       switch (tab.icon) {
         case 'crop': {
@@ -626,11 +625,21 @@ export default defineComponent({
           }
           break
         }
+        case 'remove-bg': {
+          if (!this.inBgRemoveMode) {
+            bgRemoveUtils.removeBg()
+          }
+          break
+        }
         case 'unfold': {
           groupUtils.deselect()
           this.$emit('switchTab', 'none')
           if (this.inAllPagesMode) {
             this.$emit('showAllPages')
+          }
+
+          if (this.inBgRemoveMode) {
+            bgRemoveUtils.setInBgRemoveMode(false)
           }
 
           if (this.inBgSettingMode) {
@@ -853,7 +862,7 @@ export default defineComponent({
       return this.tabActive(icon) ? 'blue-1' : 'white'
     },
     settingTabColor(icon: IFooterTab): string {
-      return (icon.disabled || this.isLocked) ? 'gray-2' : this.tabActive(icon) ? 'blue-1' : this.isSettingTabsOpen ? 'gray-2' : 'white'
+      return (icon.disabled || this.isLocked || (icon.icon !== 'remove-bg' && this.inBgRemoveMode)) ? 'gray-4' : this.tabActive(icon) ? 'blue-1' : this.isSettingTabsOpen ? 'gray-2' : 'white'
     }
   }
 })
