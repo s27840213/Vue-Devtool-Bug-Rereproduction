@@ -321,10 +321,17 @@ export default defineComponent({
       width: 80px;
       height: 80px;
       margin: 0 auto;
+      @include layout-tablet{
+        margin: 0
+      }
     }
     &__items {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
+      @include layout-tablet{
+        display: flex;
+        justify-content: space-between;
+      }
     }
   }
 }
