@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="my-design rwd-container")
+div(class="my-design")
   div(class="my-design__tags")
     div(v-for="tag in tags" class="my-design__tag"
         :class="{ selected: checkTagSelected(tag) }"
@@ -212,7 +212,7 @@ export default defineComponent({
     handleResize() {
       const gap = 30
       const isLandscape = window.matchMedia('(orientation: landscape)').matches
-      this.textWidth = (window.outerWidth * (isLandscape ? 0.64 : 0.9) - gap * (this.textColumns - 1)) / this.textColumns
+      this.textWidth = (window.outerWidth * (isLandscape ? 0.56 : 0.8) - gap * (this.textColumns - 1)) / this.textColumns
     }
   }
 })
@@ -225,11 +225,20 @@ export default defineComponent({
   width: 100%;
   box-sizing: border-box;
   background-color: setColor(black-2);
-  padding-top: 24px;
+  padding: 24px;
   padding-bottom: 0;
   display: grid;
   grid-template-rows: auto 1fr;
   gap: 24px;
+
+  @include layout-tablet{
+    padding: 0 10%;
+    padding-top: 24px;
+    @include layout-landscape{
+      padding: 0 22%;
+      padding-top: 24px;
+    }
+  }
 
   &__tags {
     display: flex;
