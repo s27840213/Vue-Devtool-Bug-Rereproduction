@@ -91,11 +91,13 @@ export default defineComponent({
     this.initImageElement.onload = () => {
       this.createInitImageCtx()
     }
-    this.editorViewCanvas.addEventListener('mousedown', this.drawStart)
-    this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
-    this.editorViewCanvas.addEventListener('mouseleave', this.handleBrushLeave)
-    window.addEventListener('mousemove', this.brushMoving)
-    window.addEventListener('keydown', this.handleKeydown)
+    if (!this.$isTouchDevice()) {
+      this.editorViewCanvas.addEventListener('mousedown', this.drawStart)
+      this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
+      this.editorViewCanvas.addEventListener('mouseleave', this.handleBrushLeave)
+      window.addEventListener('mousemove', this.brushMoving)
+      window.addEventListener('keydown', this.handleKeydown)
+    }
     this.setPrevPageScaleRatio(this.scaleRatio)
     pageUtils.fitPage()
   },
@@ -122,7 +124,9 @@ export default defineComponent({
       inLastStep: 'bgRemove/inLastStep',
       inFirstStep: 'bgRemove/inFirstStep',
       loading: 'bgRemove/getLoading',
-      inGestureMode: 'getInGestureToolMode'
+      inGestureMode: 'getInGestureToolMode',
+      contentScaleRatio: 'getContentScaleRatio'
+
     }),
     size(): { width: number, height: number } {
       return {
@@ -136,21 +140,21 @@ export default defineComponent({
       return {
         width: `${width}px`,
         height: `${height}px`,
-        transform: `scale(${this.scaleRatio / 100})`
+        transform: `scale(${this.scaleRatio * this.contentScaleRatio / 100})`
       }
     },
     wrapperStyles(): { [index: string]: string } {
       return {
-        width: `${this.size.width * (this.scaleRatio / 100)}px`,
-        height: `${this.size.height * (this.scaleRatio / 100)}px`
+        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio / 100)}px`,
+        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio / 100)}px`
       }
     },
     initPhotoStyles(): { [index: string]: string } {
       const backgroundImage = this.showInitImage ? `url(${this.initImgSrc})` : ''
       const backgroundSize = this.showInitImage ? 'cover' : 'initial'
       return {
-        width: `${this.size.width * (this.scaleRatio / 100)}px`,
-        height: `${this.size.height * (this.scaleRatio / 100)}px`,
+        width: `${this.size.width * (this.scaleRatio * this.contentScaleRatio / 100)}px`,
+        height: `${this.size.height * (this.scaleRatio * this.contentScaleRatio / 100)}px`,
         backgroundImage,
         backgroundSize
       }

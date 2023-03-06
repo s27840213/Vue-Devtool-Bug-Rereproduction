@@ -10,7 +10,7 @@ import imageUtils from './imageUtils'
 import layerFactary from './layerFactary'
 import layerUtils from './layerUtils'
 import pageUtils from './pageUtils'
-import shotcutUtils from './shortcutUtils'
+import shortcutUtils from './shortcutUtils'
 import stepsUtils from './stepsUtils'
 
 class BackgroundUtils {
@@ -159,44 +159,37 @@ class BackgroundUtils {
   }
 
   setBgImageSrc() {
-    const image = layerUtils.getCurrLayer as IImage
-    const { pageIndex } = layerUtils.currSelectedInfo
-    const src = imageUtils.getSrc(image)
-    imageUtils.getImageSize(src, image.styles.imgWidth, image.styles.imgHeight).then(({ width: imgWidth, height: imgHeight }) => {
-      image.styles.imgWidth = imgWidth
-      image.styles.imgHeight = imgHeight
-      image.styles.width = imgWidth
-      image.styles.height = imgHeight
-      image.styles.initWidth = imgWidth
-      image.styles.initHeight = imgHeight
-      image.styles.rotate = 0
-      image.styles.imgX = 0
-      image.styles.imgY = 0
-      store.commit('SET_backgroundImageSrc', {
-        pageIndex: pageIndex,
-        srcObj: image.srcObj,
-        previewSrc: image.previewSrc
-      })
-      // this._setBackgroundImage({
-      //   pageIndex: pageIndex,
-      //   config: image
-      // })
-      const { width, height, posX, posY } = imageUtils.adaptToPage(image.styles, pageUtils.getPage(pageIndex))
-      const { adjust, horizontalFlip, verticalFlip } = image.styles
-      pageUtils.updateBackgroundImageStyles(pageIndex, {
-        width,
-        height,
-        adjust,
-        horizontalFlip,
-        verticalFlip,
-        imgWidth: width,
-        imgHeight: height,
-        scale: 1
-      })
-      pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
-      pageUtils.updateBackgroundImageMode(pageIndex, true)
-      shotcutUtils.del()
+    const pageIndex = layerUtils.pageIndex
+    const image = layerUtils.getCurrConfig as IImage
+    store.commit('SET_backgroundImageSrc', {
+      pageIndex: pageIndex,
+      srcObj: image.srcObj,
+      previewSrc: image.previewSrc,
+      panelPreviewSrc: image.panelPreviewSrc
     })
+    const _image = generalUtils.deepCopy(image)
+    _image.styles.width = _image.styles.imgWidth
+    _image.styles.height = _image.styles.imgHeight
+    _image.styles.initWidth = _image.styles.imgWidth
+    _image.styles.initHeight = _image.styles.imgHeight
+    _image.styles.rotate = 0
+    _image.styles.imgX = 0
+    _image.styles.imgY = 0
+    const { width, height, posX, posY } = imageUtils.adaptToPage(_image.styles, store.getters.getPage(pageIndex))
+    const { adjust, horizontalFlip, verticalFlip } = _image.styles
+    pageUtils.updateBackgroundImageStyles(pageIndex, {
+      width,
+      height,
+      adjust,
+      horizontalFlip,
+      verticalFlip,
+      imgWidth: width,
+      imgHeight: height,
+      scale: 1
+    })
+    pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
+    pageUtils.updateBackgroundImageMode(pageIndex, true)
+    shortcutUtils.del()
 
     if (generalUtils.isTouchDevice()) {
       editorUtils.setInBgSettingMode(true)
@@ -211,7 +204,8 @@ class BackgroundUtils {
     }, page)
     pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
     pageUtils.updateBackgroundImageStyles(
-      pageIndex, {
+      pageIndex,
+      {
         width,
         height,
         imgWidth: width,

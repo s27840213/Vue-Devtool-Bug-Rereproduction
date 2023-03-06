@@ -4,10 +4,13 @@ Cypress.Commands.add('layerFlip', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
     .togglePanel('翻轉')
     .get('.svg-flip-h').click()
+    .wait(200) // Wait for flip animation
     .snapshotTest('Flip h')
     .get('.svg-flip-v').click()
+    .wait(200)
     .snapshotTest('Flip hv')
     .get('.svg-flip-h').click()
+    .wait(200)
     .snapshotTest('Flip v')
     // Restore image to original state
     .get('.svg-flip-v').click()
@@ -72,7 +75,7 @@ Cypress.Commands.add('layerLock', { prevSubject: 'element' }, (subject) => {
     .realMouseUp()
     .snapshotTest('Lock unlocked')
     .get('.svg-unlock').click()
-    .deselectAllLayers()
+    .wait(500)
     .wrap(subject)
     .realMouseDown()
     .realMouseMove(-30, -30, { position: 'center' })

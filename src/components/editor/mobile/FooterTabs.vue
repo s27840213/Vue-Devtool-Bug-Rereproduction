@@ -1,22 +1,46 @@
 <template lang="pug">
-div(class="footer-tabs" ref="tabs" :style="rootStyles")
-  div(class="footer-tabs__container" :style="containerStyles"
-      @scroll.passive="updateContainerOverflow" ref="container")
-    template(v-for="(tab, index) in tabs")
-      div(v-if="!tab.hidden" :key="tab.icon"
-          class="footer-tabs__item"
-          :class="{'click-disabled': (tab.disabled || isLocked)}"
-          @click="handleTabAction(tab)")
-        color-btn(v-if="tab.icon === 'color'" size="22px"
-                  class="mb-5 click-disabled"
-                  :color="globalSelectedColor")
-        svg-icon(v-else class="mb-5 click-disabled"
-          :iconName="tab.icon"
-          :iconColor="(tab.disabled || isLocked) ? 'gray-2' : tabActive(tab) ? 'blue-1' :'white'"
-          :iconWidth="'22px'"
-          :style="textIconStyle")
-        span(class="body-3 no-wrap click-disabled"
-        :class="(tab.disabled || isLocked) ? 'text-gray-2' : tabActive(tab) ? 'text-blue-1' : 'text-white'") {{tab.text}}
+div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
+  div(class="footer-tabs__content"
+      :style="containerStyles")
+    div(class="footer-tabs__container bg-nav"
+        ref="container")
+      template(v-for="(tab, index) in homeTabs")
+        div(v-if="!tab.hidden" :key="tab.icon"
+            class="footer-tabs__item"
+            :class="{'click-disabled': (tab.disabled || isLocked)}"
+            @click="handleTabAction(tab)")
+          svg-icon(class="mb-5 click-disabled"
+            :iconName="tab.icon"
+            :iconColor="homeTabColor(tab)"
+            :iconWidth="'22px'"
+            :style="textIconStyle")
+          span(class="body-3 no-wrap click-disabled"
+          :class="`text-${homeTabColor(tab)}`") {{tab.text}}
+    transition(name="panel-up")
+      div(v-if="isSettingTabsOpen" class="footer-tabs__sub-tabs  bg-gray-6")
+        div(class="footer-tabs__unfold"
+            @click="handleTabAction(mainMenu)")
+          svg-icon(class="click-disabled"
+            :iconName="mainMenu.icon"
+            :iconWidth="'26px'"
+            :style="textIconStyle")
+        div(class="footer-tabs__container"
+            @scroll.passive="updateContainerOverflow" ref="container")
+          template(v-for="(tab, index) in settingTabs")
+            div(v-if="!tab.hidden" :key="tab.icon"
+                class="footer-tabs__item"
+                :class="{'click-disabled': (tab.disabled || isLocked || (tab.icon !== 'remove-bg' && inBgRemoveMode))}"
+                @click="handleTabAction(tab)")
+              color-btn(v-if="tab.icon === 'color'" size="22px"
+                        class="mb-5 click-disabled"
+                        :color="globalSelectedColor")
+              svg-icon(v-else class="mb-5 click-disabled"
+                :iconName="tab.icon"
+                :iconColor="settingTabColor(tab)"
+                :iconWidth="'22px'"
+                :style="textIconStyle")
+              span(class="body-3 no-wrap click-disabled"
+              :class="`text-${settingTabColor(tab)}`") {{tab.text}}
 </template>
 
 <script lang="ts">
@@ -26,6 +50,7 @@ import { IFooterTab } from '@/interfaces/editor'
 import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
 import backgroundUtils from '@/utils/backgroundUtils'
+import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
@@ -61,7 +86,7 @@ export default defineComponent({
   },
   emits: ['switchTab', 'showAllPages'],
   data() {
-    const mainMenu = { icon: 'main-menu', text: `${this.$t('NN0489')}` }
+    const mainMenu = { icon: 'unfold', text: `${this.$t('STK0006')}` }
 
     return {
       mainMenu,
@@ -99,11 +124,14 @@ export default defineComponent({
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       hasCopiedFormat: 'getHasCopiedFormat'
     }),
-    layerNum(): number {
-      return this.currSelectedInfo.layers.length
-    },
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
+    },
+    hasSelectedLayer(): boolean {
+      return this.currSelectedInfo.layers.length > 0
+    },
+    isSettingTabsOpen(): boolean {
+      return this.settingTabs.length > 0 || this.inBgRemoveMode
     },
     subLayerType(): string {
       return this.currSubSelectedInfo.type
@@ -125,7 +153,7 @@ export default defineComponent({
       return ''
     },
     isCopyFormatDisabled(): boolean {
-      if (this.layerNum === 1) { // not tmp
+      if (this.selectedLayerNum === 1) { // not tmp
         const types = this.currSelectedInfo.types
         const currLayer = layerUtils.getCurrLayer
         if (types.has('group')) {
@@ -171,7 +199,6 @@ export default defineComponent({
     },
     photoInGroupTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
@@ -188,7 +215,6 @@ export default defineComponent({
     },
     photoTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
@@ -204,8 +230,8 @@ export default defineComponent({
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
-        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
-        // { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
+        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'copy-style' },
+        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }
       ]
     },
     frameTabs(): Array<IFooterTab> {
@@ -214,7 +240,6 @@ export default defineComponent({
       const showReplace = frame.clips.length === 1 || frame.clips.some(c => c.active)
       const replace = showReplace ? [{ icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' }] : []
       return [
-        this.mainMenu,
         ...replace,
         {
           icon: 'color',
@@ -251,7 +276,6 @@ export default defineComponent({
     bgSettingTab(): Array<IFooterTab> {
       const { hasBgImage } = backgroundUtils
       return [
-        this.mainMenu,
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !hasBgImage, disabled: this.backgroundLocked },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
@@ -297,7 +321,6 @@ export default defineComponent({
     },
     objectTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -312,7 +335,6 @@ export default defineComponent({
     },
     pageTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
         { icon: 'add-page', text: `${this.$t('NN0139')}` },
         { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
         // { icon: 'select-page', text: `${this.$tc('NN0124', 2)}` },
@@ -327,18 +349,17 @@ export default defineComponent({
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}` }
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select' }
         // { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true }
       ]
     },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'multiple-select', text: `${this.$t('NN0807')}` },
+        { icon: 'multiple-select', text: `${this.$t('NN0807')}`, panelType: 'multiple-select' },
         ...this.copyPasteTabs
       ]
     },
@@ -348,7 +369,7 @@ export default defineComponent({
         { icon: 'paste', text: `${this.$t('NN0230')}` }
       ]
     },
-    tabs(): Array<IFooterTab> {
+    settingTabs(): Array<IFooterTab> {
       if (this.inAllPagesMode) {
         return this.pageTabs
       // A group that only has images
@@ -370,7 +391,7 @@ export default defineComponent({
       } else if (this.showPhotoTabs) {
         return this.photoTabs
       } else if (this.showFontTabs) {
-        return [this.mainMenu, ...this.fontTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
+        return [...this.fontTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
       } else if (this.showFrameTabs) {
         if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
           return this.photoTabs
@@ -380,9 +401,11 @@ export default defineComponent({
         return [...this.objectTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
       } else if (this.inBgSettingMode) {
         return this.bgSettingTab
-      } else {
-        return this.homeTabs
+      } else if (this.isGroupOrTmp) {
+        return this.genearlLayerTabs
       }
+
+      return []
     },
     globalSelectedColor(): string {
       return colorUtils.globalSelectedColor.color
@@ -438,8 +461,8 @@ export default defineComponent({
       return type === 'frame' && clips[0].srcObj.assetId
     },
     showPhotoTabs(): boolean {
-      return (!this.inBgRemoveMode && !this.isFontsPanelOpened &&
-        this.targetIs('image') && this.singleTargetType()) || this.hasFrameClipActive
+      return (!this.isFontsPanelOpened &&
+        this.targetIs('image') && this.singleTargetType()) || this.hasFrameClipActive || this.inBgRemoveMode
     },
     showObjectColorAndFontTabs(): boolean {
       const { subLayerIdx } = layerUtils
@@ -491,7 +514,7 @@ export default defineComponent({
     },
     rootStyles(): Record<string, string> {
       return {
-        backgroundColor: this.contentEditable ? '#EEEFF4' : '#14182A'
+        backgroundColor: '#EEEFF4'
       }
     },
     containerStyles(): { [index: string]: string } {
@@ -499,10 +522,12 @@ export default defineComponent({
       return {
         transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
         opacity: `${this.contentEditable ? 0 : 1}`,
-        maskImage: this.contentEditable ? 'none'
-          : `linear-gradient(to right,
-          transparent 0, black ${this.leftOverflow ? '56px' : 0},
-          black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
+        borderTop: !this.contentEditable && this.isSettingTabsOpen ? '0.5px solid #D9DBE1' : 'none',
+        boxShadow: !this.contentEditable && this.isSettingTabsOpen ? '0px 0px 6px 0px  #3C3C3C0D' : 'none'
+        // maskImage: this.contentEditable ? 'none'
+        //   : `linear-gradient(to right,
+        //   transparent 0, black ${this.leftOverflow ? '56px' : 0},
+        //   black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
       }
     },
     currLayer(): ILayer {
@@ -600,11 +625,21 @@ export default defineComponent({
           }
           break
         }
-        case 'main-menu': {
+        case 'remove-bg': {
+          if (!this.inBgRemoveMode) {
+            bgRemoveUtils.removeBg()
+          }
+          break
+        }
+        case 'unfold': {
           groupUtils.deselect()
           this.$emit('switchTab', 'none')
           if (this.inAllPagesMode) {
             this.$emit('showAllPages')
+          }
+
+          if (this.inBgRemoveMode) {
+            bgRemoveUtils.setInBgRemoveMode(false)
           }
 
           if (this.inBgSettingMode) {
@@ -786,9 +821,6 @@ export default defineComponent({
       }
     },
     tabActive(tab: IFooterTab): boolean {
-      if ((this.inMultiSelectionMode && tab.icon === 'multiple-select')) {
-        return true
-      }
       if (this.currTab === 'color') {
         return this.currTab === tab.panelType &&
           ((colorUtils.currEvent === 'setTextColor' && tab.icon === 'text-color-mobile') ||
@@ -825,6 +857,12 @@ export default defineComponent({
           formatUtils.copyImageFormat(layer.clips[Math.max(0, this.subActiveLayerIndex)])
         }
       }
+    },
+    homeTabColor(icon: IFooterTab): string {
+      return this.tabActive(icon) ? 'blue-1' : 'white'
+    },
+    settingTabColor(icon: IFooterTab): string {
+      return (icon.disabled || this.isLocked || (icon.icon !== 'remove-bg' && this.inBgRemoveMode)) ? 'gray-4' : this.tabActive(icon) ? 'blue-1' : this.isSettingTabsOpen ? 'gray-2' : 'white'
     }
   }
 })
@@ -832,10 +870,24 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .footer-tabs {
-  overflow: hidden;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
+
+  &__content {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    transition: transform 0.3s, opacity 0.4s;
+  }
+
+  &__unfold {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 12px 0px 24px;
+  }
+
   &__container {
     overflow: scroll;
     display: grid;
@@ -843,10 +895,8 @@ export default defineComponent({
     grid-auto-flow: column;
     grid-auto-columns: 56px;
     column-gap: 16px;
-    background-color: setColor(nav);
     padding: 8px 12px;
     @include no-scrollbar;
-    transition: transform 0.3s, opacity 0.4s;
   }
 
   &__item {
@@ -860,6 +910,13 @@ export default defineComponent({
       transition: background-color 0.2s, color 0.2s;
       transform: scale(calc(10 / 12));
     }
+  }
+
+  &__sub-tabs {
+    width: 100%;
+    position: absolute;
+    display: grid;
+    grid-template-columns: auto 1fr;
   }
 }
 </style>

@@ -26,7 +26,7 @@ div(class="desktop-editor")
                   option(v-for="locale in localeOptions" :value="locale") {{locale}}
               div(class="ml-10" @click="setEnableComponentLog(!enableComponentLog)")
                 span {{`${enableComponentLog ? '關閉' : '開啟'} Log`}}
-          editor-view(:currPage="currPage")
+          editor-view(:currPage="currPage" :isSidebarPanelOpen="isSidebarPanelOpen")
           scale-ratio-editor(v-if="!isShowPagePreview" @toggleSidebarPanel="toggleSidebarPanel")
       div(class="content__panel"
           :style="contentPanelStyles")
