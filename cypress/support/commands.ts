@@ -115,6 +115,7 @@ Cypress.Commands.add('togglePanel', (buttonText: string) => {
         cy.get('.footer-tabs').contains('div', buttonText)
           .should('not.have.class', 'click-disabled')
           .click()
+          .wait(300) // Wait for editor view transformY animation
       } else {
         cy.get('.function-panel').contains(buttonText).click()
       }
