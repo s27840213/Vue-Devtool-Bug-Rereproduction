@@ -12,13 +12,12 @@ div(class="nu-shape" :style="styles()")
 </template>
 
 <script lang="ts">
-import { IShape } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
-import generalUtils from '@/utils/generalUtils'
-import layerUtils from '@/utils/layerUtils'
-import shapeUtils from '@/utils/shapeUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent, PropType } from 'vue'
+import shapeUtils from '@/utils/shapeUtils'
+import { IShape } from '@/interfaces/layer'
+import layerUtils from '@/utils/layerUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import { IPage } from '@/interfaces/page'
 import { useRoute } from 'vue-router'
 
 const FILTER_X = '$fx'
@@ -325,7 +324,6 @@ export default defineComponent({
       if (!['D', 'E'].includes(config.category) && this.config.designId) {
         shape = await shapeUtils.fetchSvg(this.config)
         if (config.color && shape.color) {
-          console.log(generalUtils.deepCopy(config.color), generalUtils.deepCopy(shape.color))
           if (config.color.length > shape.color.length) {
             const newColor = [...config.color].slice(0, shape.color.length)
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: newColor }, this.subLayerIndex)
@@ -337,7 +335,6 @@ export default defineComponent({
             hasChanged = true
           }
         } else if (!config.color && shape.color) {
-          console.log(generalUtils.deepCopy(config.color), generalUtils.deepCopy(shape.color))
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: [...shape.color] }, this.subLayerIndex)
           hasChanged = true
         }
