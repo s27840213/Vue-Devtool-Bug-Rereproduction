@@ -679,6 +679,10 @@ class LayerUtils {
   }
 
   isOfLayerType(layer: ILayer, type: LayerType, subLayerIdx = -1, groupLikeIncluded = false): boolean {
+    // test if current selected layer is of the given type
+    // consider single layer or subLayer in group
+    // if subLayerIdx is not -1, consider the subLayer
+    // if groupLikeIncluded is true, group or tmp layers are also accepted
     if (layer.type === type) return true
     if (!['group', 'tmp'].includes(layer.type)) return false
     if (subLayerIdx !== -1) {
