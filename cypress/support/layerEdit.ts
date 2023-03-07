@@ -4,13 +4,10 @@ Cypress.Commands.add('layerFlip', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
     .togglePanel('翻轉')
     .get('.svg-flip-h').click()
-    .wait(200) // Wait for flip animation
     .snapshotTest('Flip h')
     .get('.svg-flip-v').click()
-    .wait(200)
     .snapshotTest('Flip hv')
     .get('.svg-flip-h').click()
-    .wait(200)
     .snapshotTest('Flip v')
     // Restore image to original state
     .get('.svg-flip-v').click()
@@ -45,7 +42,6 @@ Cypress.Commands.add('layerAlign', { prevSubject: 'element' }, (subject) => {
 Cypress.Commands.add('layerOrder', { prevSubject: 'element' }, (subjectFront, subjectBack) => {
   cy.wrap(subjectBack).click('topLeft')
     .get('.svg-layers-alt').realClick()
-    .isMobile(() => { cy.get('.mobile-panel').waitTransition() })
     .get('.svg-layers-forward').click()
     .snapshotTest('Oredr change')
     .get('.svg-layers-backward').click()
@@ -73,7 +69,7 @@ Cypress.Commands.add('layerLock', { prevSubject: 'element' }, (subject) => {
     .realMouseDown()
     .realMouseMove(30, 30, { position: 'center' })
     .realMouseUp()
-    .snapshotTest('Lock unlocked')
+    .snapshotTest('Lock unlocked') // Usually need to retry snapshot
     .get('.svg-unlock').click()
     .wait(500)
     .wrap(subject)
