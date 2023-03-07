@@ -332,13 +332,16 @@ class ConstantData {
         pStrokeY: i18n.global.tc('NN0319'),
         pColor: i18n.global.tc('NN0735'),
         height: i18n.global.tc('NN0319'),
-        xOffset: '水平位移',
-        yOffset: i18n.global.tc('NN0736'),
+        yOffset: i18n.global.tc('NN0736'), // For value 0~100, 0 initial
+        xOffset200: i18n.global.tc('NN0814'), // For value -100~100, 0 initial
+        yOffset200: i18n.global.tc('NN0736'), // For value -100~100, 0 initial
         distanceInverse: i18n.global.tc('NN0737'),
         textStrokeColor: i18n.global.tc('NN0739'),
         shadowStrokeColor: i18n.global.tc('NN0740'),
         endpoint: i18n.global.tc('NN0738'),
-        size: '大小',
+        size: i18n.global.tc('NN0815'),
+        lineHeight: i18n.global.tc('NN0110'),
+        fontSpacing: i18n.global.tc('NN0109'),
       }
 
       return array.map((name: string) => {
@@ -369,6 +372,8 @@ class ConstantData {
             Object.assign(option, { min: -180, max: 180 })
             break
           case 'bend': // For curve
+          case 'xOffset200':
+          case 'yOffset200':
             Object.assign(option, { min: -100, max: 100 })
             break
           case 'size':
@@ -479,20 +484,20 @@ class ConstantData {
         options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
       }, {
         key: 'rainbow',
-        label: 'svgbg',
-        options: toOptions(['xOffset', 'yOffset', 'size', 'lineHeight', 'fontSpacing', 'opacity'])
+        label: i18n.global.tc('NN0816'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
       }, {
         key: 'rainbow-dark',
-        label: 'svgbg',
-        options: toOptions(['xOffset', 'yOffset', 'size', 'lineHeight', 'fontSpacing', 'opacity'])
+        label: i18n.global.tc('NN0817'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
       }, {
         key: 'cloud',
-        label: 'svgbg',
-        options: toOptions(['xOffset', 'yOffset', 'size', 'lineHeight', 'fontSpacing', 'opacity'])
+        label: i18n.global.tc('NN0818'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
       }, {
         key: 'text-book',
-        label: 'svgbg',
-        options: toOptions(['xOffset', 'yOffset', 'size', 'lineHeight', 'fontSpacing', 'opacity'])
+        label: i18n.global.tc('NN0819'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
       }])
     }]
     return categories as IEffectCategory[]

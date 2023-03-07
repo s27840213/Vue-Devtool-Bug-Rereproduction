@@ -16,7 +16,7 @@ div(class="panel-text-effect")
         :key="`${currCategory.name}-${effect.key}`"
         :class="{ 'selected': currEffect.key === effect.key }"
         @click="onEffectClick(effect.key)")
-      svg-icon(:iconName="`text-${currCategory.name}-${effect.key}`"
+      svg-icon(:iconName="effectIcon(currCategory, effect)"
               class="panel-text-effect__effects--icon"
               iconWidth="100%" iconColor="gray-5")
       div(v-if="currEffect.key === effect.key && effect.key !== 'none'"
@@ -62,6 +62,7 @@ div(class="panel-text-effect")
 <script lang="ts">
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
+import i18n from '@/i18n'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOptionRange } from '@/utils/constantData'
@@ -126,6 +127,10 @@ export default defineComponent({
     }
   },
   methods: {
+    effectIcon(category: IEffectCategory, effect: IEffect): string {
+      const postfix = effect.key === 'text-book' ? `-${i18n.global.locale}` : ''
+      return `text-${category.name}-${effect.key}${postfix}`
+    },
     pushHistory(type: string) {
       this.$emit('pushHistory', type)
     },

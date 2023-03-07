@@ -11,7 +11,7 @@ div(class="text-effect-setting mt-25")
       div(class="text-effect-setting__effects mb-10")
         svg-icon(v-for="effect in effects1d"
           :key="`${currCategory.name}-${effect.key}`"
-          :iconName="`text-${currCategory.name}-${effect.key}`"
+          :iconName="effectIcon(currCategory, effect)"
           @click="onEffectClick(effect.key)"
           class="text-effect-setting__effect pointer"
           :class="{'selected': currentStyle.name === effect.key }"
@@ -68,6 +68,7 @@ div(class="text-effect-setting mt-25")
 <script lang="ts">
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
+import i18n from '@/i18n'
 import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
@@ -129,6 +130,10 @@ export default defineComponent({
     colorUtils.offStop(ColorEventType.textEffect, this.recordChange)
   },
   methods: {
+    effectIcon(category: IEffectCategory, effect: IEffect): string {
+      const postfix = effect.key === 'text-book' ? `-${i18n.global.locale}` : ''
+      return `text-${category.name}-${effect.key}${postfix}`
+    },
     handleColorModal(category: 'shadow'|'bg'|'shape', key: string) {
       const currColor = this.colorParser(this.currentStyle[key])
 

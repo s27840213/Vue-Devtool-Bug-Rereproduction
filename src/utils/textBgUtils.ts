@@ -1,4 +1,4 @@
-import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, ITextBgEffect, ITextGooey } from '@/interfaces/format'
+import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, ITextBgEffect, ITextGooey, ITextLetterBg } from '@/interfaces/format'
 import { IParagraphStyle, ISpanStyle, IStyle, IText } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
@@ -564,22 +564,24 @@ class Gooey {
   }
 }
 
-function getLetterBgSetting(name: string, index: number) {
+function getLetterBgSetting(textBg: ITextLetterBg, index: number) {
   let [href, color] = ['', '']
-  switch (name) {
+  switch (textBg.name) {
     case 'rainbow':
       href = 'rainbow-circle'
-      color = ['FFA19B', 'FFC89F', 'F7DE97', 'C5DFAE', 'B5D0F9', 'EDD4F6'][index % 6]
+      color = ['#FFA19B', '#FFC89F', '#F7DE97', '#C5DFAE', '#B5D0F9', '#EDD4F6'][index % 6]
       break
     case 'rainbow-dark':
       href = 'rainbow-circle'
-      color = ['D0B0B1', 'DCC9BF', 'EBDEBB', 'BECBBC', 'B0BCC5', 'D1CADF'][index % 6]
+      color = ['#D0B0B1', '#DCC9BF', '#EBDEBB', '#BECBBC', '#B0BCC5', '#D1CADF'][index % 6]
       break
     case 'cloud':
       href = `cloud${index % 4}`
+      color = textBg.color
       break
     default: // text-book
-      href = name
+      href = textBg.name
+      color = textBg.color
       break
   }
   return { href, color }
@@ -596,14 +598,6 @@ class TextBg {
     textEffectUtils.convertColor2rgba(color, opacity)
 
   getDefaultEffects() {
-    const letterBgDefault = {
-      xOffset: 50,
-      yOffset: 50,
-      size: 100,
-      opacity: 100,
-      fixedWidth: true
-    } as const
-
     return {
       none: {},
       'square-borderless': {
@@ -673,11 +667,52 @@ class TextBg {
         opacity: 100,
         color: 'fontColorL+-40/BC/00'
       },
-      // A part of additional default setting is in setExtraDefaultAttrs func.
-      rainbow: letterBgDefault,
-      'rainbow-dark': letterBgDefault,
-      cloud: Object.assign({}, letterBgDefault, { fixedWidth: false }),
-      'text-book': letterBgDefault
+      // A part of additional default ITextLetterBg setting is in setExtraDefaultAttrs func.
+      rainbow: {
+        xOffset200: 0,
+        yOffset200: 0,
+        size: 100,
+        opacity: 100,
+        fixedWidth: true,
+        color: '', // no effect
+      },
+      'rainbow-dark': {
+        xOffset200: 0,
+        yOffset200: 0,
+        size: 100,
+        opacity: 100,
+        fixedWidth: true,
+        color: '', // no effect
+      },
+      cloud: {
+        xOffset200: 0,
+        yOffset200: 0,
+        size: 180,
+        opacity: 100,
+        fixedWidth: false, //!
+        color: '#D3E2E3',
+      },
+      'text-book': {
+        xOffset200: 0,
+        yOffset200: 0,
+        size: 125,
+        opacity: 100,
+        fixedWidth: true,
+        color: '#D3E2E3',
+      },
+    }
+  }
+
+  setExtraDefaultAttrs(name: string) {
+    const defaultAttrs = {
+      rainbow: { lineHeight: 1.78, fontSpacing: 585 },
+      'rainbow-dark': { lineHeight: 1.78, fontSpacing: 585 },
+      cloud: { lineHeight: 1.54, fontSpacing: 186 },
+      'text-book': { lineHeight: 1.96, fontSpacing: 625 }
+    } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
+
+    for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
+      textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val)
     }
   }
 
@@ -828,7 +863,7 @@ class TextBg {
       }
     } else if (isITextLetterBg(textBg)) {
       const scale = textBg.size / 100
-      let { xOffset, yOffset } = textBg
+      let { xOffset200: xOffset, yOffset200: yOffset } = textBg
       if (vertical) [xOffset, yOffset] = [yOffset, xOffset]
 
       const pos = [] as (Record<'x' | 'y' | 'width' | 'height', number> & Record<'color' | 'href', string>)[]
@@ -838,7 +873,7 @@ class TextBg {
           const { x, y, width, height, text } = span
           if (text !== ' ') {
             pos.push({
-              ...getLetterBgSetting(textBg.name, i),
+              ...getLetterBgSetting(textBg, i),
               // Because all letter svg width = height, so need to -(h-w)/2
               // Since we put svg at center of letter, and a letter contain its letterSpacing.
               // So we need to -letterSpacing/2 to put svg at center of letter not contain letterSpacing.
@@ -863,9 +898,9 @@ class TextBg {
             height: p.height * scale,
             // Scale will let width be (scale-1)*p.height times larger than before,
             // So -(scale-1)*p.height/2 to justify it to center.
-            x: p.x - (scale - 1) * p.height / 2 + p.width * (xOffset - 50) / 50,
-            y: p.y - (scale - 1) * p.height / 2 + p.height * (yOffset - 50) / 50,
-            style: `color: #${p.color}`
+            x: p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100,
+            y: p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100,
+            style: `color: ${p.color}`
           }
         }))
       }
@@ -895,19 +930,6 @@ class TextBg {
       return ['color', effect.color]
     } else {
       return ['color', (effect as unknown as { color: string }).color || '']
-    }
-  }
-
-  setExtraDefaultAttrs(name: string) {
-    const defaultAttrs = {
-      rainbow: { lineHeight: 1.4, fontSpacing: 0 },
-      'rainbow-dark': { lineHeight: 1.4, fontSpacing: 0 },
-      cloud: { lineHeight: 1.4, fontSpacing: 0 },
-      'text-book': { lineHeight: 1.4, fontSpacing: 0 }
-    } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
-
-    for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
-      textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val)
     }
   }
 

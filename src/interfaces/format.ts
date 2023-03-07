@@ -16,8 +16,8 @@ export interface ITextShape {
 }
 
 export interface ITextBox {
-  name: 'square-borderless'|'rounded-borderless'|'square-hollow'|
-  'rounded-hollow'|'square-both'|'rounded-both'
+  name: 'square-borderless' | 'rounded-borderless' | 'square-hollow' |
+  'rounded-hollow' | 'square-both' | 'rounded-both'
   opacity: number
   bStroke: number
   bRadius: number
@@ -45,15 +45,16 @@ export interface ITextGooey {
 }
 
 export interface ITextLetterBg {
-  name: 'rainbow'|'rainbow-dark'|'cloud'|'text-book'
-  xOffset: number
-  yOffset: number
+  name: 'rainbow' | 'rainbow-dark' | 'cloud' | 'text-book'
+  xOffset200: number
+  yOffset200: number
   opacity: number
   size: number
   fixedWidth: boolean
+  color: string
 }
 
-export type ITextBgEffect = ITextBox | ITextUnderline | ITextGooey | ITextLetterBg | {name: 'none'}
+export type ITextBgEffect = ITextBox | ITextUnderline | ITextGooey | ITextLetterBg | { name: 'none' }
 
 export function isITextBox(object: ITextBgEffect): object is ITextBox {
   return object && object.name &&
