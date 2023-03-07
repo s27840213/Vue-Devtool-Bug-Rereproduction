@@ -220,6 +220,7 @@ export default defineComponent({
     },
     mainStyles(): any {
       return {
+        ...(this.isAdjustImage && { transform: 'translateZ(0)' }),
         margin: this.padding.split(' ').map(val => '-' + val).join(' '),
         padding: this.padding,
         opacity: this.image.config.styles.opacity / 100,
@@ -491,7 +492,6 @@ export default defineComponent({
   }
 
   &__adjust-image {
-    transform: translateZ(0);
     // will-change: contents;
   }
 
