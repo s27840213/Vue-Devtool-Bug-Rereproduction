@@ -3,6 +3,7 @@ import { IFrame, IGroup, IImage, ILayer, IShape, IStyle, IText } from '@/interfa
 import store from '@/store'
 import { FunctionPanelType, ILayerInfo, LayerType } from '@/store/types'
 import controlUtils from './controlUtils'
+import editorUtils from './editorUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
 import formatUtils from './formatUtils'
 import generalUtils from './generalUtils'
@@ -106,7 +107,7 @@ export class MovingUtils {
   }
 
   pageMoving(e: PointerEvent) {
-    // this.pageMovingHandler(e)
+    this.pageMovingHandler(e)
   }
 
   pageMoveEnd(e: PointerEvent) {
@@ -370,8 +371,13 @@ export class MovingUtils {
             return
           }
         }
-        const { pageRect, editorRect } = pageUtils.getEditorRenderSize
-        const isPageFullyInsideEditor = pageRect.width + 30 < editorRect.width
+        // const { pageRect, editorRect } = pageUtils.getEditorRenderSize
+        // const isPageFullyInsideEditor = pageRect.width + 30 < editorRect.width
+        const { mobileSize } = editorUtils
+        const { getCurrPage: page, scaleRatio } = pageUtils
+        const isPageFullyInsideEditor = page.width * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.width &&
+          page.height * scaleRatio * 0.01 * page.contentScaleRatio < mobileSize.height
+        console.log(page.width * scaleRatio * 0.01 * page.contentScaleRatio, mobileSize.width, isPageFullyInsideEditor)
         // const isPageReachEdge = pageRect.width + pageUtils.getCurrPage.x + 15
         if (layerUtils.layerIndex === -1 && !isPageFullyInsideEditor) {
           window.requestAnimationFrame(() => {
@@ -430,6 +436,7 @@ export class MovingUtils {
   }
 
   pageMovingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
+    console.log(123123, this.scaleRatio, pageUtils.mobileMinScaleRatio)
     if (store.state.isPageScaling || this.scaleRatio <= pageUtils.mobileMinScaleRatio) return
     const { originPageSize, getCurrPage: currPage } = pageUtils
     const offsetPos = mouseUtils.getMouseRelPoint(e, this.initialPos)

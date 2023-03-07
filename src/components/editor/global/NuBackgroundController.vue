@@ -69,9 +69,9 @@ export default defineComponent({
     if (generalUtils.isTouchDevice()) {
       const page = document.getElementById(`nu-page-wrapper_${this.pageIndex}`) as HTMLElement
       const rect = page.getBoundingClientRect()
-      pageUtils.setMobilePysicalPage({
+      pageUtils.setMobilePhysicalPage({
         pageIndex: this.pageIndex,
-        pageSize: { width: rect.width, height: rect.height },
+        originSize: { width: rect.width, height: rect.height },
         pageCenterPos: { x: rect.left + rect.width * 0.5, y: rect.top + rect.height * 0.5 }
       })
     }
@@ -195,15 +195,15 @@ export default defineComponent({
         }
         case 'move': {
           this.isPinching = true
-          const { contentScaleRatio, mobilePysicalSize: { pageCenterPos, pageSize } } = this.page
+          const { contentScaleRatio, mobilePhysicalSize: { pageCenterPos, originSize } } = this.page
           const { styles } = this.config
           const _sizeRatio = contentScaleRatio
           if (!this.initPinchPos) {
             this.initPinchPos = { x: event.x, y: event.y }
           }
           const posInConfig = {
-            x: (event.x - pageCenterPos.x + pageSize.width * 0.5) / _sizeRatio - styles.imgX,
-            y: (event.y - pageCenterPos.y + pageSize.height * 0.5) / _sizeRatio - styles.imgY
+            x: (event.x - pageCenterPos.x + originSize.width * 0.5) / _sizeRatio - styles.imgX,
+            y: (event.y - pageCenterPos.y + originSize.height * 0.5) / _sizeRatio - styles.imgY
           }
           const translationRatio = {
             x: -posInConfig.x / styles.imgWidth,

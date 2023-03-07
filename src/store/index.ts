@@ -1042,13 +1042,13 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, contentScaleRatio } = payload
     state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
   },
-  SET_pagePysicalSize(state: IEditorState, payload: { pageIndex: number, pageSize: ISize, pageCenterPos: ICoordinate }) {
-    const { pageIndex, pageSize, pageCenterPos } = payload
+  SET_pagePysicalSize(state: IEditorState, payload: { pageIndex: number, originSize: ISize, pageCenterPos: ICoordinate }) {
+    const { pageIndex, originSize, pageCenterPos } = payload
     if (pageCenterPos) {
-      Object.assign(state.pages[pageIndex].config.mobilePysicalSize.pageCenterPos, pageCenterPos)
+      Object.assign(state.pages[pageIndex].config.mobilePhysicalSize.pageCenterPos, pageCenterPos)
     }
-    if (pageSize) {
-      Object.assign(state.pages[pageIndex].config.mobilePysicalSize.pageSize, pageSize)
+    if (originSize) {
+      Object.assign(state.pages[pageIndex].config.mobilePhysicalSize.originSize, originSize)
     }
   },
   ...imgShadowMutations,

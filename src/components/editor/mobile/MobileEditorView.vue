@@ -401,7 +401,6 @@ export default defineComponent({
       }, 0)
     },
     handleWheel(e: WheelEvent) {
-      console.log(e.clientX, e.clientY)
       if ((e.metaKey || e.ctrlKey) && !this.handleWheelTransition) {
         if (!store.state.isPageScaling) {
           store.commit('SET_isPageScaling', true)
@@ -429,15 +428,30 @@ export default defineComponent({
         }
       }
     },
-    pinchHandler(event: AnyTouchEvent) {
-      switch (event.phase) {
+    pinchHandler(e: AnyTouchEvent) {
+      const { getCurrPage: page, scaleRatio } = pageUtils
+      switch (e.phase) {
         case 'start': {
           console.log('start')
+          this.initPagePos.x = page.x
+          this.initPagePos.y = page.y
+          // this.initPageSize.width = page.width * (scaleRatio * 0.01)
+          // this.initPageSize.height = page.height * (scaleRatio * 0.01)
+          this.tmpScaleRatio = scaleRatio
+          this.isScaling = true
+          store.commit('SET_isPageScaling', true)
           break
         }
         case 'move': {
           this.isPinching = true
-          console.log('move')
+          const pinchScaleRatio = Math.min((e.scale + 1) / 2 * 100, MAX_SCALE_RATIO)
+          console.log('move', pinchScaleRatio)
+          const sizeDiff = {
+            // width: pageUtils.getCurrPage.width * (newScaleRatio * 0.01) - this.initPageSize.width,
+            // height: pageUtils.getCurrPage.height * (newScaleRatio * 0.01) - this.initPageSize.height
+            width: (pinchScaleRatio * 0.01 - 1) * this.initPageSize.width,
+            height: (pinchScaleRatio * 0.01 - 1) * this.initPageSize.height
+          }
           break
         }
         case 'end': {

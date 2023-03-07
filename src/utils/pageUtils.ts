@@ -123,8 +123,6 @@ class PageUtils {
 
   mobileMinScaleRatio: number
   isSwitchingToEditor: boolean
-  editorSize: { width: number, height: number }
-  pageSize: { width: number, height: number }
   originPageSize = { width: -1, height: -1 }
   originEditorSize = { width: -1, height: -1 }
   pageEventPosOffset = null as unknown as { x: number, y: number }
@@ -134,8 +132,6 @@ class PageUtils {
   constructor() {
     this.mobileMinScaleRatio = 0
     this.isSwitchingToEditor = false
-    this.editorSize = { width: 0, height: 0 }
-    this.pageSize = { width: 0, height: 0 }
   }
 
   newPage(pageData: Partial<IPage>) {
@@ -197,9 +193,10 @@ class PageUtils {
         v: [],
         h: []
       },
-      mobilePysicalSize: {
+      mobilePhysicalSize: {
         pageCenterPos: { x: 0, y: 0 },
-        pageSize: { width: 0, height: 0 }
+        originSize: { width: 0, height: 0 },
+        shownSize: { width: 0, height: 0 }
       },
       isEnableBleed: false,
       bleeds: defaultBleeds,
@@ -926,7 +923,7 @@ class PageUtils {
     })
   }
 
-  setMobilePysicalPage(payload: { pageIndex: number, pageSize?: ISize, pageCenterPos?: ICoordinate }) {
+  setMobilePhysicalPage(payload: { pageIndex: number, originSize?: ISize, pageCenterPos?: ICoordinate }) {
     store.commit('SET_pagePysicalSize', payload)
   }
 }
