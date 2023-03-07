@@ -263,7 +263,7 @@ export default defineComponent({
       return this.currActivePanel !== 'none'
     },
     showLeftBtn(): boolean {
-      return (this.bgRemoveMode || (this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel))) && this.currActivePanel !== 'photo-shadow'
+      return this.bgRemoveMode || (this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel))
     },
     hideDynamicComp(): boolean {
       return ['crop', 'copy-style', 'multiple-select'].includes(this.currActivePanel)
@@ -509,10 +509,6 @@ export default defineComponent({
               this.addRecentlyColors(colorUtils.currColor)
             }
             break
-          }
-
-          case 'photo-shadow': {
-            return this.leftButtonAction()
           }
         }
         if (this.showExtraColorPanel) {
