@@ -698,7 +698,7 @@ class TextBg {
         size: 125,
         opacity: 100,
         fixedWidth: true,
-        color: '#D3E2E3',
+        color: '#93BAA6',
       },
     }
   }
@@ -708,7 +708,7 @@ class TextBg {
       rainbow: { lineHeight: 1.78, fontSpacing: 585 },
       'rainbow-dark': { lineHeight: 1.78, fontSpacing: 585 },
       cloud: { lineHeight: 1.54, fontSpacing: 186 },
-      'text-book': { lineHeight: 1.96, fontSpacing: 625 }
+      'text-book': { lineHeight: 1.96, fontSpacing: 665 }
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
     for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
