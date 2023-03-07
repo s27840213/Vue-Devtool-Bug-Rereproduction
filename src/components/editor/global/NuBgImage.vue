@@ -491,6 +491,7 @@ export default defineComponent({
   }
 
   &__adjust-image {
+    transform: translateZ(0);
     // will-change: contents;
   }
 
