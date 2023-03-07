@@ -83,7 +83,8 @@ export default defineComponent({
       if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
         return '--'
       }
-      return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
+      // return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
+      return this.props.fontSize
     },
     step(): number {
       // const config = LayerUtils.getCurrConfig

@@ -677,6 +677,16 @@ class LayerUtils {
       }
     }
   }
+
+  isOfLayerType(layer: ILayer, type: LayerType, subLayerIdx = -1, groupLikeIncluded = false): boolean {
+    if (layer.type === type) return true
+    if (!['group', 'tmp'].includes(layer.type)) return false
+    if (subLayerIdx !== -1) {
+      return (layer as IGroup).layers[subLayerIdx].type === type
+    } else {
+      return groupLikeIncluded
+    }
+  }
 }
 
 const layerUtils = new LayerUtils()

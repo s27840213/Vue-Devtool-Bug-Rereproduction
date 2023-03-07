@@ -724,9 +724,10 @@ class TextPropUtils {
     const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
     switch (currLayer.type) {
       case 'text': {
-        return this.propReadOfLayer(propName)
+        return this.propReadOfLayer(propName, currLayer as IText)
       }
       case 'group': {
+        const primaryScale = currLayer.styles.scale
         try {
           if (subLayerIdx === -1) {
             let propBuff: number | string | undefined = 'init'
@@ -743,10 +744,11 @@ class TextPropUtils {
                 }
               }
             }
-            return propBuff
+            return (propName === 'fontSize' && typeof propBuff === 'number') ? propBuff * primaryScale : propBuff
           } else {
             const layer = (currLayer as IGroup).layers[subLayerIdx]
-            return this.propReadOfLayer(propName, layer as IText)
+            const propBuff = this.propReadOfLayer(propName, layer as IText)
+            return (propName === 'fontSize' && typeof propBuff === 'number') ? propBuff * primaryScale : propBuff
           }
         } catch (error) {
           console.log(error)
@@ -755,6 +757,7 @@ class TextPropUtils {
       }
       case 'tmp': {
         const tmpLayerGroup = this.getCurrLayer as ITmp
+        const primaryScale = tmpLayerGroup.styles.scale
         let propBuff: number | string | undefined
         for (let i = 0; i < tmpLayerGroup.layers.length; i++) {
           if (tmpLayerGroup.layers[i].type === 'text') {
@@ -769,14 +772,16 @@ class TextPropUtils {
             }
           }
         }
-        return propBuff
+        return (propName === 'fontSize' && typeof propBuff === 'number') ? propBuff * primaryScale : propBuff
       }
     }
   }
 
-  propReadOfLayer(_prop: string, layer?: IText, allText = false) {
+  propReadOfLayer(_prop: string, layer: IText, allText = false) {
     let res
     const prop = fontPropsMap[_prop]
+    const scale = layer.styles.scale
+    const isFontSize = prop === 'size'
     if (!allText) {
       tiptapUtils.agent(editor => {
         let isMulti = false
@@ -865,11 +870,16 @@ class TextPropUtils {
     } else {
       return this.noEditorRead(_prop, layer)
     }
+    if (isFontSize && res !== undefined) {
+      res = res * scale
+    }
     return res
   }
 
   noEditorRead(prop: string, layer?: IText) {
     const config = GeneralUtils.deepCopy(layer ?? this.getCurrLayer) as IText
+    const scale = config.styles.scale
+    const isFontSize = prop === 'fontSize'
     const start = {
       pIndex: 0,
       sIndex: 0,
@@ -934,7 +944,7 @@ class TextPropUtils {
       }
       if (isMulti) break
     }
-    return isMulti ? undefined : origin
+    return isMulti ? undefined : ((isFontSize && typeof origin === 'number') ? origin * scale : origin)
   }
 
   fontSizeAllModifier(modifier: (size: number, reverse?: boolean) => number) {
@@ -1199,89 +1209,99 @@ class TextPropUtils {
       'decoration',
       'isVertical'
     ]
+    const propValues: { [key: string]: string | number | boolean | undefined } = {}
+    props.forEach(k => {
+      const v = this.updateTextPropState(k)
+      propValues[k] = v
+    })
+    store.commit('text/UPDATE_props', propValues)
+  }
+
+  updateTextPropState(propName: string, toCommit = false) {
     const subLayerIdx = layerUtils.subLayerIdx
     const currLayer = this.getCurrLayer
-    props.forEach(k => {
-      let value
-      switch (k) {
-        case 'textAlign': {
-          value = this.propReader('textAlign')
-          break
-        }
-        case 'fontSize': {
-          const size = this.propReader('fontSize')
-          value = typeof size === 'number' ? size.toString() : '--'
-          break
-        }
-        case 'fontSpacing': {
-          const space = this.propReader('fontSpacing')
-          value = typeof space === 'number' ? ((space as number) * 1000).toString() : '--'
-          break
-        }
-        case 'lineHeight': {
-          const height = this.propReader('lineHeight')
-          value = typeof height === 'number' && height !== -1 ? height.toString() : '--'
-          break
-        }
-        case 'font': {
-          const font = this.propReader('fontFamily')
-          // const font = this.getTextState.fontStore.find(font => font.face === this.propReader('fontFamily'))?.name
-          value = typeof font === 'string' ? font : `_${i18n.global.t('NN0341')}`
-          break
-        }
-        case 'type': {
-          const type = this.propReader('type')
-          value = typeof type === 'string' ? type : '--'
-          break
-        }
-        case 'assetId': {
-          const assetId = this.propReader('assetId')
-          value = assetId ?? ''
-          break
-        }
-        case 'userId': {
-          const userId = this.propReader('userId')
-          value = userId ?? ''
-          break
-        }
-        case 'color': {
-          value = typeof this.propReader('color') === 'string' ? (this.propReader('color') as string).toUpperCase() : '--'
-          break
-        }
-        case 'decoration': {
-          value = this.propReader('underline')
-          break
-        }
-        case 'weight': {
-          value = this.propReader('bold')
-          break
-        }
-        case 'style': {
-          value = this.propReader('italic')
-          break
-        }
-        case 'isVertical': {
-          if (currLayer.type === 'text') {
-            value = currLayer.styles.writingMode.includes('vertical')
-          } else if (subLayerIdx !== -1 && currLayer.layers[subLayerIdx].type === 'text') {
-            value = currLayer.layers[subLayerIdx].styles.writingMode.includes('vertical')
-          } else { // tmp or group w/ subLayerIdx
-            value = true
-            for (let i = 0; i < currLayer.layers.length; i++) {
-              if (currLayer.layers[i].type === 'text') {
-                const tmpLayer = currLayer.layers[i] as IText
-                value = value && tmpLayer.styles.writingMode.includes('vertical')
-              }
+    if (!layerUtils.isOfLayerType(currLayer, LayerType.text, subLayerIdx, true)) return
+    let value
+    switch (propName) {
+      case 'textAlign': {
+        value = this.propReader('textAlign')
+        break
+      }
+      case 'fontSize': {
+        const size = this.propReader('fontSize')
+        value = typeof size === 'number' ? size.toString() : '--'
+        break
+      }
+      case 'fontSpacing': {
+        const space = this.propReader('fontSpacing')
+        value = typeof space === 'number' ? ((space as number) * 1000).toString() : '--'
+        break
+      }
+      case 'lineHeight': {
+        const height = this.propReader('lineHeight')
+        value = typeof height === 'number' && height !== -1 ? height.toString() : '--'
+        break
+      }
+      case 'font': {
+        const font = this.propReader('fontFamily')
+        // const font = this.getTextState.fontStore.find(font => font.face === this.propReader('fontFamily'))?.name
+        value = typeof font === 'string' ? font : `_${i18n.global.t('NN0341')}`
+        break
+      }
+      case 'type': {
+        const type = this.propReader('type')
+        value = typeof type === 'string' ? type : '--'
+        break
+      }
+      case 'assetId': {
+        const assetId = this.propReader('assetId')
+        value = assetId ?? ''
+        break
+      }
+      case 'userId': {
+        const userId = this.propReader('userId')
+        value = userId ?? ''
+        break
+      }
+      case 'color': {
+        value = typeof this.propReader('color') === 'string' ? (this.propReader('color') as string).toUpperCase() : '--'
+        break
+      }
+      case 'decoration': {
+        value = this.propReader('underline')
+        break
+      }
+      case 'weight': {
+        value = this.propReader('bold')
+        break
+      }
+      case 'style': {
+        value = this.propReader('italic')
+        break
+      }
+      case 'isVertical': {
+        if (currLayer.type === 'text') {
+          value = currLayer.styles.writingMode.includes('vertical')
+        } else if (subLayerIdx !== -1 && currLayer.layers[subLayerIdx].type === 'text') {
+          value = currLayer.layers[subLayerIdx].styles.writingMode.includes('vertical')
+        } else { // tmp or group w/ subLayerIdx
+          value = true
+          for (let i = 0; i < currLayer.layers.length; i++) {
+            if (currLayer.layers[i].type === 'text') {
+              const tmpLayer = currLayer.layers[i] as IText
+              value = value && tmpLayer.styles.writingMode.includes('vertical')
             }
           }
-          break
         }
+        break
       }
+    }
 
-      const prop: { [key: string]: string | number | boolean | undefined } = {}
-      prop[k] = value
-      store.commit('text/UPDATE_props', prop)
-    })
+    if (toCommit) {
+      store.commit('text/UPDATE_props', { [propName]: value })
+    } else {
+      return value
+    }
   }
 
   updateSelectedLayersStyles(styles: { [key: string]: string | number | boolean }, layerIndex: number) {

@@ -69,13 +69,14 @@ export default defineComponent({
         if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
           return '--'
         }
-        return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
+        // return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
+        return this.props.fontSize
       },
       set(value: number): void {
         // layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
         value = generalUtils.boundValue(value, this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
-        const finalValue = value / layerUtils.getCurrLayer.styles.scale
-        textPropUtils.fontSizeHandler(finalValue)
+        // const finalValue = value / layerUtils.getCurrLayer.styles.scale
+        textPropUtils.fontSizeHandler(value)
       }
     }
   },
