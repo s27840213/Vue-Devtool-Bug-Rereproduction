@@ -184,7 +184,6 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -287,6 +286,9 @@ export default defineComponent({
       if (!this.config.initFromMydesign) {
         window.requestAnimationFrame(() => {
           this.iosPhotoSelect(0)
+            .then(() => {
+              FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
+            })
         })
       } else {
         delete this.config.initFromMydesign
@@ -2171,7 +2173,6 @@ export default defineComponent({
       }
 
       if (!this.isHandleShadow) {
-        // if (this.currSubSelectedInfo.index !== -1) {
         for (let idx = 0; idx < layers.length; idx++) {
           if (idx !== targetIndex) {
             updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
@@ -2180,7 +2181,6 @@ export default defineComponent({
             updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
           }
         }
-        // }
         if ((this.config.type === LayerType.frame && !(this.config as IFrame).clips[targetIndex].active) ||
           (this.config.type === LayerType.group && !(this.config as IGroup).layers[targetIndex].active)) {
           updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
@@ -2195,28 +2195,33 @@ export default defineComponent({
       this.isPointerDownFromSubController = true
     },
     iosPhotoSelect(subLayerIdx: number) {
-      vivistickerUtils.getIosImg()
-        .then(async (images: Array<string>) => {
-          if (images.length) {
-            const { imgX, imgY, imgWidth, imgHeight } = await ImageUtils.getClipImgDimension((this.config as IFrame).clips[subLayerIdx], ImageUtils.getSrc({
-              type: 'ios',
-              assetId: images[0],
-              userId: ''
-            }))
-            FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, subLayerIdx, {
-              imgWidth,
-              imgHeight,
-              imgX,
-              imgY
-            })
-            FrameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, subLayerIdx, {
-              type: 'ios',
-              assetId: images[0],
-              userId: ''
-            })
-            StepsUtils.record()
-          }
-        })
+      return FrameUtils.iosPhotoSelect({
+        pageIndex: this.pageIndex,
+        layerIndex: this.layerIndex,
+        subLayerIdx
+      }, (this.config as IFrame).clips[subLayerIdx])
+      // vivistickerUtils.getIosImg()
+      //   .then(async (images: Array<string>) => {
+      //     if (images.length) {
+      //       const { imgX, imgY, imgWidth, imgHeight } = await ImageUtils.getClipImgDimension((this.config as IFrame).clips[subLayerIdx], ImageUtils.getSrc({
+      //         type: 'ios',
+      //         assetId: images[0],
+      //         userId: ''
+      //       }))
+      //       FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, subLayerIdx, {
+      //         imgWidth,
+      //         imgHeight,
+      //         imgX,
+      //         imgY
+      //       })
+      //       FrameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, subLayerIdx, {
+      //         type: 'ios',
+      //         assetId: images[0],
+      //         userId: ''
+      //       })
+      //       StepsUtils.record()
+      //     }
+      //   })
     },
     dblSubController(e: MouseEvent, targetIndex: number) {
       e.stopPropagation()

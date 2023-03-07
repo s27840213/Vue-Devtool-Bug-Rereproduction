@@ -66,7 +66,6 @@ import TextEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import SvgPath from 'svgpath'
 import { defineComponent, PropType } from 'vue'
@@ -146,26 +145,6 @@ export default defineComponent({
     }
   },
   async mounted() {
-    // if (this.config.srcObj.type === 'frame') {
-    //   const styles = await imageUtils.getClipImgDimension((this.primaryLayer as IFrame).clips[0], imageUtils.getSrc({
-    //     type: 'unsplash',
-    //     assetId: 'photo-1665686310974-2ed1eb7f57ac',
-    //     userId: ''
-    //   }))
-    //   const { imgX, imgY, imgWidth, imgHeight } = styles
-    //   FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, 0, {
-    //     imgWidth,
-    //     imgHeight,
-    //     imgX,
-    //     imgY
-    //   })
-    //   FrameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, 0, {
-    //     type: 'unsplash',
-    //     assetId: 'photo-1665686310974-2ed1eb7f57ac',
-    //     userId: ''
-    //   })
-    // }
-
     const body = this.$refs.body as HTMLElement
     if (body) {
       const props = this.$props
@@ -452,29 +431,33 @@ export default defineComponent({
       this.onClickEvent(e)
     },
     iosPhotoSelect() {
-      vivistickerUtils.getIosImg()
-        .then(async (images: Array<string>) => {
-          if (images.length) {
-            const { imgX, imgY, imgWidth, imgHeight } = await imageUtils.getClipImgDimension((this.primaryLayer as IFrame).clips[this.layerIndex], imageUtils.getSrc({
-              type: 'ios',
-              assetId: images[0],
-              userId: ''
-            }))
-            console.log(imgX, imgY, imgWidth, imgHeight)
-            FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-              imgWidth,
-              imgHeight,
-              imgX,
-              imgY
-            })
-            FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-              type: 'ios',
-              assetId: images[0],
-              userId: ''
-            })
-            StepsUtils.record()
-          }
-        })
+      return FrameUtils.iosPhotoSelect({
+        pageIndex: this.pageIndex,
+        layerIndex: this.primaryLayerIndex,
+        subLayerIdx: this.layerIndex
+      }, (this.primaryLayer as IFrame).clips[this.layerIndex])
+      // vivistickerUtils.getIosImg()
+      //   .then(async (images: Array<string>) => {
+      //     if (images.length) {
+      //       const { imgX, imgY, imgWidth, imgHeight } = await imageUtils.getClipImgDimension((this.primaryLayer as IFrame).clips[this.layerIndex], imageUtils.getSrc({
+      //         type: 'ios',
+      //         assetId: images[0],
+      //         userId: ''
+      //       }))
+      //       FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+      //         imgWidth,
+      //         imgHeight,
+      //         imgX,
+      //         imgY
+      //       })
+      //       FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+      //         type: 'ios',
+      //         assetId: images[0],
+      //         userId: ''
+      //       })
+      //       StepsUtils.record()
+      //     }
+      //   })
     },
     onImgFileChange(e: Event) {
       const target = e.target as HTMLInputElement
