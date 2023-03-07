@@ -24,19 +24,20 @@ div(class="overflow-container"
             @mousedown.native.left="pageClickHandler()"
             :contentScaleRatio="contentScaleRatio"
             :padding="contentStyles.margin")
-        nu-layer(
-          v-for="(layer,index) in config.layers"
-          :key="layer.id"
-          :dataIndex="`${index}`"
-          :dataPindex="`${pageIndex}`"
-          :snapUtils="snapUtils"
-          :layerIndex="index"
-          :pageIndex="pageIndex"
-          :page="config"
-          :config="layer"
-          :contentScaleRatio="contentScaleRatio"
-          :forceRender="forceRender"
-          :lazyLoadTarget="lazyLoadTarget")
+        div(class="layer-wrapper")
+          nu-layer(
+            v-for="(layer,index) in config.layers"
+            :key="layer.id"
+            :dataIndex="`${index}`"
+            :dataPindex="`${pageIndex}`"
+            :snapUtils="snapUtils"
+            :layerIndex="index"
+            :pageIndex="pageIndex"
+            :page="config"
+            :config="layer"
+            :contentScaleRatio="contentScaleRatio"
+            :forceRender="forceRender"
+            :lazyLoadTarget="lazyLoadTarget")
       div(v-if="isShowBleed" class="bleed-line" :style="bleedLineStyles")
       div(v-if="userId === 'backendRendering' && backendRenderParams.isTrim" class="trim")
         div(class="trim__tl" :style="trimStyles.tl")
@@ -400,6 +401,13 @@ export default defineComponent({
   top: 0px;
   box-sizing: border-box;
   border: 1px solid white
+}
+
+.layer-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .trim {

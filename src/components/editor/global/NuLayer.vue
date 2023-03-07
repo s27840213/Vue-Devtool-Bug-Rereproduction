@@ -903,6 +903,9 @@ export default defineComponent({
   &:focus {
     background-color: rgba(168, 218, 220, 1);
   }
+  &__wrapper {
+    pointer-events: initial;
+  }
   &__line-mover {
     touch-action: none;
     position: absolute;
