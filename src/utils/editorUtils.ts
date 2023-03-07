@@ -1,3 +1,4 @@
+import { IBgRemoveInfo } from '@/interfaces/image'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import { IMobileEditorState } from '@/store/module/mobileEditor'
@@ -53,9 +54,9 @@ class EditorUtils {
     }
   }
 
-  handleContentScaleCalc(page: IPage) {
+  handleContentScaleCalc(page: IPage | IBgRemoveInfo) {
     const { hasBleed } = pageUtils
-    const { width, height } = hasBleed ? pageUtils.getPageSizeWithBleeds(page) : page
+    const { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
     if (!this.mobileHeight || this.mobileWidth) {
       const mobileEditor = document.getElementById('mobile-editor__content')
       if (mobileEditor) {
@@ -85,7 +86,7 @@ class EditorUtils {
   handleContentScaleRatio(pageIndex: number) {
     if (generalUtils.isTouchDevice()) {
       const page = pageUtils.getPage(pageIndex)
-      const contentScaleRatio = this.handleContentScaleCalc(page)
+      const contentScaleRatio = this.handleContentScaleCalc(pageUtils.inBgRemoveMode ? store.getters['bgRemove/getAutoRemoveResult'] : page)
       this.setContentScaleRatio(contentScaleRatio)
       store.commit('SET_contentScaleRatio4Page', { pageIndex, contentScaleRatio })
       return contentScaleRatio
@@ -123,7 +124,7 @@ class EditorUtils {
 
   setCurrActivePanel(panel: string): void {
     if (generalUtils.isTouchDevice()) {
-      store.commit('mobileEditor/SET_currActivePanel', panel.replace('bg', 'background'))
+      store.commit('mobileEditor/SET_currActivePanel', panel === 'bg' ? panel.replace('bg', 'background') : panel)
       if (panel === 'none') this.setShowMobilePanel(false)
       else this.setShowMobilePanel(true)
     }

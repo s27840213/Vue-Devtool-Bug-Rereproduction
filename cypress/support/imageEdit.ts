@@ -11,7 +11,7 @@ const adjustOptions = [{
     { name: 'warm', val: '32' },
   ]
 }, {
-  name: 'preset2',
+  name: 'preset2', // Usually need to retry snapshot
   options: [
     { name: 'brightness', val: '-34' },
     { name: 'contrast', val: '44' },
@@ -89,7 +89,7 @@ Cypress.Commands.add('imageAdjust', { prevSubject: 'element' }, (subject) => {
   return cy.wrap(subject)
 })
 
-Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCrop: 'button'|'dblclick') => {
+Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCrop: 'button' | 'dblclick') => {
   cy.wrap(subject).click()
     .then(() => {
       if (enterCrop === 'button') {
@@ -148,7 +148,6 @@ Cypress.Commands.add('imageShadow', { prevSubject: 'element' }, (subject) => {
         for (const option of shadow.options) {
           if (option.name === 'color') {
             cy.get('div.photo-effect-setting__value-input, .photo-shadow__color').click()
-              .get('.color-panel').waitTransition()
               .get(`.color-btn .color-${option.val}`).eq(0).click()
               .get('.color-panel__btn, .mobile-panel__left-btn').click()
           } else {

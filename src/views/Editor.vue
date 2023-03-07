@@ -69,6 +69,7 @@ export default defineComponent({
      * So if we clear the state, some component watcher and computed will update and then throw lots of errors
      */
     this.clearState()
+    this.clearBgRemoveState()
   },
   mounted() {
     const query = this.$router.currentRoute.value.query

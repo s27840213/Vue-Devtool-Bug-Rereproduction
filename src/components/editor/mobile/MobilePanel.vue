@@ -25,7 +25,7 @@ div(class="mobile-panel"
       div(class="mobile-panel__title")
         span(class="mobile-panel__title-text body-1 mr-10"
           :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
-        div(v-if="inSelectionState" class="mobile-panel__layer-num")
+        div(v-if="currActivePanel === 'multiple-select'" class="mobile-panel__layer-num")
           span(class="label-sm text-white") {{selectedLayerNum}}
       div(class="mobile-panel__btn mobile-panel__right-btn"
           :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn}")
@@ -42,7 +42,7 @@ div(class="mobile-panel"
       :tabs="innerTabs.label" v-model="innerTabIndex")
     keep-alive(:include="['PanelTemplate', 'PanelPhoto', 'PanelObject', 'PanelBackground', 'PanelText', 'PanelFile']")
       //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-      component(v-if="dynamicBindIs && !isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
+      component(v-if="dynamicBindIs && !isShowPagePreview && !hideDynamicComp"
         class="border-box p-2"
         :is="dynamicBindIs"
         :key="dynamicBindIs"
@@ -77,6 +77,7 @@ import PanelOpacity from '@/components/editor/panelMobile/PanelOpacity.vue'
 import PanelOrder from '@/components/editor/panelMobile/PanelOrder.vue'
 import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.vue'
 import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
+import PanelRemoveBg from '@/components/editor/panelMobile/PanelRemoveBg.vue'
 import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
 import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
@@ -95,6 +96,7 @@ import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import { IFrame } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import bgRemoveUtils from '@/utils/bgRemoveUtils'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
@@ -140,6 +142,7 @@ export default defineComponent({
     PanelPosition,
     PanelFlip,
     PanelOpacity,
+    PanelRemoveBg,
     PanelOrder,
     PanelFonts,
     PanelFontSize,
@@ -202,26 +205,24 @@ export default defineComponent({
     selectedLayerNum(): number {
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
     },
-    inSelectionState(): boolean {
-      return this.currActivePanel === 'none' && this.inMultiSelectionMode
-    },
     whiteTheme(): boolean {
       const whiteThemePanel = [
         'bleed', 'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
-        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style']
+        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
+        'multiple-select', 'remove-bg']
 
-      return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
+      return this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
       return ['brand-list'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return this.inSelectionState || [
+      return [
         'bleed', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
-        'font-spacing', 'download', 'more', 'object-adjust', 'brand-list'].includes(this.currActivePanel)
+        'font-spacing', 'download', 'more', 'object-adjust', 'brand-list', 'multiple-select'].includes(this.currActivePanel)
     },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
@@ -244,10 +245,13 @@ export default defineComponent({
         case 'copy-style': {
           return `${this.$t('NN0809')}`
         }
+        case 'multiple-select': {
+          return `${this.$t('NN0657')}`
+        }
+        case 'remove-bg': {
+          return `${this.$t('NN0043')}`
+        }
         case 'none': {
-          if (this.inMultiSelectionMode) {
-            return `${this.$t('NN0657')}`
-          }
           return ''
         }
         default: {
@@ -259,13 +263,13 @@ export default defineComponent({
       return this.currActivePanel !== 'none'
     },
     showLeftBtn(): boolean {
-      return this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel)
+      return this.bgRemoveMode || (this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel))
     },
     hideDynamicComp(): boolean {
-      return ['crop', 'copy-style'].includes(this.currActivePanel) || this.inSelectionState
+      return ['crop', 'copy-style', 'multiple-select'].includes(this.currActivePanel)
     },
     noRowGap(): boolean {
-      return this.inSelectionState || ['crop', 'color', 'copy-style'].includes(this.currActivePanel)
+      return ['crop', 'color', 'copy-style', 'multiple-select', 'remove-bg'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
       const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file'].includes(this.currActivePanel)
@@ -409,16 +413,22 @@ export default defineComponent({
       }
     },
     leftBtnName(): string {
-      return 'back-circle'
+      return this.bgRemoveMode ? 'close-circle' : 'back-circle'
     },
     rightBtnName(): string {
-      if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop'].includes(this.currActivePanel)) {
+      if (this.bgRemoveMode || (this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop'].includes(this.currActivePanel)) {
         return 'check-mobile-circle'
       } else {
         return 'close-circle'
       }
     },
-    leftButtonAction(): (e: PointerEvent) => void {
+    leftButtonAction(): () => void {
+      if (this.bgRemoveMode) {
+        return () => {
+          bgRemoveUtils.cancel()
+        }
+      }
+
       const colorHandler = () => {
         if (this.showExtraColorPanel || this.currActivePanel === 'color') {
           if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
@@ -470,7 +480,7 @@ export default defineComponent({
               if (this.backgroundLocked) return this.handleLockedNotify()
               this.setBgImageControl({
                 pageIndex: pageUtils.currFocusPageIndex,
-                imgControl: !this.backgroundImgControl
+                imgControl: false
               })
             }
             break
@@ -481,20 +491,30 @@ export default defineComponent({
             break
           }
 
+          case 'multiple-select': {
+            if (this.inMultiSelectionMode) {
+              editorUtils.setInMultiSelectionMode(false)
+            }
+            break
+          }
+          case 'remove-bg': {
+            if (this.bgRemoveMode) {
+              bgRemoveUtils.save()
+            }
+            break
+          }
+
           case 'color': {
             if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
               this.addRecentlyColors(colorUtils.currColor)
             }
+            break
           }
         }
         if (this.showExtraColorPanel) {
           this.addRecentlyColors(colorUtils.currColor)
         }
         this.closeMobilePanel()
-
-        if (this.inMultiSelectionMode && this.inSelectionState) {
-          editorUtils.setInMultiSelectionMode(false)
-        }
       }
     }
   },
@@ -546,7 +566,7 @@ export default defineComponent({
     vcoConfig() {
       return {
         handler: (e: Event) => {
-          if (!this.isImgCtrl && !this.isBgImgCtrl && !this.inMultiSelectionMode) {
+          if (!this.isImgCtrl && !this.isBgImgCtrl && !this.inMultiSelectionMode && !this.bgRemoveMode) {
             this.closeMobilePanel()
           }
         },

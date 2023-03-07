@@ -15,7 +15,7 @@ div(class="mobile-editor")
     transition(name="panel-up"
               @before-enter="beforeEnter"
               @after-leave="afterLeave")
-      mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
+      mobile-panel(v-show="showMobilePanel"
         :currActivePanel="currActivePanel"
         :currPage="currPage"
         @switchTab="switchTab"
@@ -140,7 +140,8 @@ export default defineComponent({
     ...mapState('mobileEditor', {
       closeMobilePanelFlag: 'closeMobilePanelFlag',
       inAllPagesMode: 'mobileAllPageMode',
-      mobilePanel: 'currActivePanel'
+      mobilePanel: 'currActivePanel',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     ...mapState('user', [
       'viewGuide'
@@ -226,6 +227,9 @@ export default defineComponent({
       fetchBrands: 'brandkit/fetchBrands'
     }),
     switchTab(panelType: string, props?: IFooterTabProps) {
+      if (!this.inBgRemoveMode && panelType === 'remove-bg') {
+        return
+      }
       // Switch between color and text-color panel without close panel
       if (this.currActivePanel === panelType && panelType === 'color' &&
         props?.currColorEvent && this.currColorEvent !== props.currColorEvent) {
@@ -238,10 +242,6 @@ export default defineComponent({
         editorUtils.setCurrActivePanel(panelType)
         if (panelType === 'color' && props?.currColorEvent) {
           this.currColorEvent = props.currColorEvent
-        }
-
-        if (this.inMultiSelectionMode) {
-          editorUtils.setInMultiSelectionMode(false)
         }
       }
 

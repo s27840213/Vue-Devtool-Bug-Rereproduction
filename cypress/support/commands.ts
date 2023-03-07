@@ -115,7 +115,6 @@ Cypress.Commands.add('togglePanel', (buttonText: string) => {
         cy.get('.footer-tabs').contains('div', buttonText)
           .should('not.have.class', 'click-disabled')
           .click()
-          .get('.mobile-panel').waitTransition()
       } else {
         cy.get('.function-panel').contains(buttonText).click()
       }

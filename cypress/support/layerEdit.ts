@@ -42,7 +42,6 @@ Cypress.Commands.add('layerAlign', { prevSubject: 'element' }, (subject) => {
 Cypress.Commands.add('layerOrder', { prevSubject: 'element' }, (subjectFront, subjectBack) => {
   cy.wrap(subjectBack).click('topLeft')
     .get('.svg-layers-alt').realClick()
-    .isMobile(() => { cy.get('.mobile-panel').waitTransition() })
     .get('.svg-layers-forward').click()
     .snapshotTest('Oredr change')
     .get('.svg-layers-backward').click()
@@ -70,9 +69,9 @@ Cypress.Commands.add('layerLock', { prevSubject: 'element' }, (subject) => {
     .realMouseDown()
     .realMouseMove(30, 30, { position: 'center' })
     .realMouseUp()
-    .snapshotTest('Lock unlocked')
+    .snapshotTest('Lock unlocked') // Usually need to retry snapshot
     .get('.svg-unlock').click()
-    .deselectAllLayers()
+    .wait(500)
     .wrap(subject)
     .realMouseDown()
     .realMouseMove(-30, -30, { position: 'center' })
