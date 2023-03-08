@@ -75,7 +75,7 @@ for (const isMobile of [true, false]) {
       })
     }
 
-    it.only(`Other image test${suffix}`, function () {
+    it(`Other image test${suffix}`, function () {
       function beforeCopyFormat() {
         cy.togglePanel('調整')
           .get('input[type="range"][name="brightness"]').eq(-1)
