@@ -65,7 +65,7 @@ export default defineComponent({
       rightOverflow: false,
       homeTabs: [
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
-        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
+        { icon: 'text', text: `${this.$tc('NN0005', 3)}`, panelType: 'text' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' }
       ] as Array<IFooterTab>
     }
