@@ -50,6 +50,8 @@ class CssConveter {
   convertFontStyle(sourceStyles: IStyle | ITextStyle | IParagraphStyle | ISpanStyle | { [key: string]: string | number }): { [key: string]: string } {
     const result: { [key: string]: string } = {}
     fontProps.forEach(prop => {
+      if (sourceStyles[prop] === undefined) return
+
       if (prop === 'size') {
         result[styleMap[prop]] = `${(sourceStyles[prop] as number) * 4 / 3}px`
       } else if (prop === 'weight') {
@@ -66,12 +68,11 @@ class CssConveter {
       } else if (prop === 'color') { // For color
         result[styleMap[prop]] = `${sourceStyles[prop]}`
         result['text-decoration-color'] = `${sourceStyles[prop]}`
-      } else if (prop === 'min-width' && sourceStyles[prop]) {
-        result['min-width'] = `${sourceStyles[prop]}`
+      } else if (['min-width', 'min-height'].includes(prop)) { // For fixedWidth LetterBg
+        result[prop] = `${sourceStyles[prop]}`
         result.display = 'inline-block'
-      } else if (prop === 'min-height' && sourceStyles[prop]) {
-        result['min-height'] = `${sourceStyles[prop]}`
-        result.display = 'inline-block'
+        result['letter-spacing'] = '0'
+        result['text-align'] = 'center'
       } else if (typeof sourceStyles[prop] !== 'undefined') {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}px` : `${sourceStyles[prop]}`
       }

@@ -728,10 +728,12 @@ class TextBg {
   fixedWidthStyle(spanStyle: ISpanStyle, pStyle: IParagraphStyle, config: IText) {
     let [w, h] = ['min-width', 'min-height']
     if (config.styles.writingMode === 'vertical-lr') [w, h] = [h, w]
-    // const target = config.styles.writingMode === 'vertical-lr' ? 'height' : 'width'
+    // If tiptap attr have min-w/h, convertFontStyle() in cssConverter.ts will add some style to tiptap.
     return {
-      display: 'inline-block',
       [w]: `${spanStyle.size * 4 / 3 * (pStyle.fontSpacing + 1)}px`,
+      display: 'inline-block',
+      letterSpacing: 0,
+      textAlign: 'center',
     }
   }
 
@@ -874,10 +876,10 @@ class TextBg {
           if (text !== ' ') {
             pos.push({
               ...getLetterBgSetting(textBg, i),
-              // Because all letter svg width = height, so need to -(h-w)/2
-              // Since we put svg at center of letter, and a letter contain its letterSpacing.
-              // So we need to -letterSpacing/2 to put svg at center of letter not contain letterSpacing.
-              x: x - (height - width) / 2 - span.letterSpacing / 2,
+              // 1. Because all letter svg width = height, so need to -(h-w)/2
+              // 2. For non-fixedWidth text, since we put svg at center of letter, and a letter contain its letterSpacing.
+              // We need to -letterSpacing/2 to put svg at center of letter not contain letterSpacing.
+              x: x - (height - width) / 2 - (!textBg.fixedWidth ? span.letterSpacing / 2 : 0),
               y,
               width,
               height,
@@ -993,7 +995,7 @@ class TextBg {
           // Bring original effect color to new effect.
           const oldColor = this.getEffectMainColor(layerTextBg)[1]
           const newColorKey = this.getEffectMainColor(textBg)[0]
-          if (oldColor.startsWith('#')) {
+          if (oldColor.startsWith('#') && !(isITextLetterBg(textBg) || isITextLetterBg(layerTextBg))) {
             Object.assign(textBg, { [newColorKey]: oldColor })
           }
         }
@@ -1005,9 +1007,10 @@ class TextBg {
             subLayerIndex: +idx,
             styles: { textBg }
           })
+
+          // If fixedWidth setting changed, force split/unsplit span text
           const oldFixedWidth = isITextLetterBg(layerTextBg) && layerTextBg.fixedWidth
           const newFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
-          // Fixed width setting changed, force split/unsplit span text
           if (oldFixedWidth !== newFixedWidth) {
             tiptapUtils.updateHtml()
             tiptapUtils.forceUpdate()
@@ -1016,6 +1019,12 @@ class TextBg {
               editor.commands.selectAll()
               editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
             })
+          }
+
+          // If user leave LetterBg, reset lineHeight and fontSpacing
+          if (isITextLetterBg(layerTextBg) && !isITextLetterBg(textBg)) {
+            textUtils.setParagraphProp('lineHeight', 1.4)
+            textUtils.setParagraphProp('fontSpacing', 0)
           }
         })
       }

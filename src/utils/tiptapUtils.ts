@@ -142,6 +142,10 @@ class TiptapUtils {
           type: 'paragraph'
         } as { [key: string]: any }
         const attrs = this.makeParagraphStyle(p.styles) as any
+        const textBg = textEffectUtils.getCurrentLayer().styles.textBg
+        const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
+
+        // If p is empty, no span exist, so need to store span style in p.spanStyle
         if (p.spanStyle) {
           attrs.spanStyle = true
           const sStyles = this.generateSpanStyle(p.spanStyle as string)
@@ -150,8 +154,6 @@ class TiptapUtils {
         pObj.attrs = attrs
         if (p.spans.length > 1 || p.spans[0].text !== '') {
           const spans = this.splitLastWhiteSpaces(p.spans)
-          const textBg = textEffectUtils.getCurrentLayer().styles.textBg
-          const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
           pObj.content = spans.map((s, index) => {
             const config = layerUtils.getCurrLayer as IText
             return {
@@ -160,7 +162,7 @@ class TiptapUtils {
               marks: [{
                 type: 'textStyle',
                 attrs: Object.assign(this.makeSpanStyle(s.styles),
-                  fixedWidth ? Object.assign({ randomId: `${index}` }, textBgUtils.fixedWidthStyle(s.styles, p.styles, config)) : {}
+                  fixedWidth ? { randomId: `${index}`, ...textBgUtils.fixedWidthStyle(s.styles, p.styles, config) } : {}
                 )
               }]
             }
