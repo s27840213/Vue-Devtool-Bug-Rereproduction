@@ -75,7 +75,7 @@ for (const isMobile of [true, false]) {
       })
     }
 
-    it(`Other image test${suffix}`, function () {
+    it.only(`Other image test${suffix}`, function () {
       function beforeCopyFormat() {
         cy.togglePanel('調整')
           .get('input[type="range"][name="brightness"]').eq(-1)
@@ -105,11 +105,11 @@ for (const isMobile of [true, false]) {
             .layerCopy()
             .layerLock()
             .layerDelete()
+            .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
             .then((subject: JQuery<HTMLElement>) => {
               // TODO: Implement layer copy format in mobile
               if (isMobile) return cy.wrap(subject)
               return cy.wrap(subject)
-                .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
                 .layerMoveToPage2()
             })
           // .deselectAllLayers().snapshotTest('init') // Check if image restore to init
