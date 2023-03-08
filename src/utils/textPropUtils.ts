@@ -1402,37 +1402,49 @@ class TextPropUtils {
     }
   }
 
-  applyScaleCompensation(compensationScale: number) {
-    const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
-    const scale = currLayer.styles.scale
+  applyScaleCompensation(compensationScale: number, subLayerIdx = -1) {
+    const { getCurrLayer: currLayer, pageIndex, layerIndex } = layerUtils
     if (currLayer.type === LayerType.text) {
+      const scale = currLayer.styles.scale
       layerUtils.updateLayerStyles(pageIndex, layerIndex, {
         scale: compensationScale * scale
       })
     } else if (currLayer.type === LayerType.group || currLayer.type === LayerType.tmp) {
-      const layers = []
-      if (subLayerIdx === -1) {
-        for (const [sIdx, subLayer] of currLayer.layers.entries()) {
-          if (subLayer.type !== LayerType.text) continue
-          layers.push(sIdx)
-        }
-      } else {
-        layers.push(subLayerIdx)
+      if (subLayerIdx === -1 || currLayer.layers[subLayerIdx].type !== LayerType.text) {
+        throw new Error(`Only text layer is valid for applyScaleCompensation. subLayerIdx: ${subLayerIdx}, currLayer.layers[subLayerIdx]?.type: ${currLayer.layers[subLayerIdx]?.type}`)
       }
-      for (const sIdx of layers) {
-        layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-          scale: compensationScale * scale
-        }, sIdx)
-      }
+      const scale = currLayer.layers[subLayerIdx].styles.scale
+      layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+        scale: compensationScale * scale
+      }, subLayerIdx)
     }
   }
 
   fontSizeHandler(value: number) {
-    const compensation = this.getScaleCompensation(value)
-    this.applyScaleCompensation(compensation.scale)
-    tiptapUtils.spanStyleHandler('size', compensation.size)
+    const { getCurrLayer: currLayer, layerIndex, subLayerIdx } = layerUtils
+    if (currLayer.type === LayerType.text || subLayerIdx !== -1) {
+      let scale = currLayer.styles.scale
+      if (subLayerIdx !== -1) {
+        scale *= (currLayer as IGroup).layers[subLayerIdx].styles.scale
+      }
+      const compensation = this.getScaleCompensation(value / scale)
+      this.applyScaleCompensation(compensation.scale, subLayerIdx)
+      tiptapUtils.spanStyleHandler('size', compensation.size)
+    } else if (currLayer.type === LayerType.group || currLayer.type === LayerType.tmp) {
+      const primaryScale = currLayer.styles.scale
+      for (const [sIdx, subLayer] of currLayer.layers.entries()) {
+        if (subLayer.type === LayerType.text) {
+          const scale = primaryScale * subLayer.styles.scale
+          const compensation = this.getScaleCompensation(value / scale)
+          this.applyScaleCompensation(compensation.scale, sIdx)
+          this.applyPropsToAll('span,paragraph', { size: compensation.size }, layerIndex, sIdx)
+          textUtils.updateTextLayerSizeByShape(layerUtils.pageIndex, layerIndex, sIdx)
+        }
+      }
+      textUtils.updateGroupLayerSize(layerUtils.pageIndex, layerIndex)
+    }
     tiptapUtils.forceUpdate(true)
-    this.updateTextPropsState({ fontSize: compensation.size.toString() })
+    this.updateTextPropsState({ fontSize: value.toString() })
     textEffectUtils.refreshSize()
   }
 }
