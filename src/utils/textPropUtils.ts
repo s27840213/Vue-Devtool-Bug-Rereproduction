@@ -1438,11 +1438,13 @@ class TextPropUtils {
         scale *= targetLayer.styles.scale
       }
       const compensation = this.getScaleCompensation(value / scale)
-      if (targetLayer.contentEditable && compensation.needCompensation) {
-        this.fontSizeGaining(1 / compensation.scale, true, layerIndex, subLayerIdx)
-        tiptapUtils.updateHtml()
+      if (compensation.needCompensation) {
+        if (targetLayer.contentEditable) {
+          this.fontSizeGaining(1 / compensation.scale, true, layerIndex, subLayerIdx)
+          tiptapUtils.updateHtml()
+        }
+        this.applyScaleCompensation(compensation.scale, subLayerIdx)
       }
-      this.applyScaleCompensation(compensation.scale, subLayerIdx)
       tiptapUtils.applySpanStyle('size', compensation.size, undefined, {}, true)
     } else if (currLayer.type === LayerType.group || currLayer.type === LayerType.tmp) {
       const primaryScale = currLayer.styles.scale
@@ -1450,7 +1452,9 @@ class TextPropUtils {
         if (subLayer.type === LayerType.text) {
           const scale = primaryScale * subLayer.styles.scale
           const compensation = this.getScaleCompensation(value / scale)
-          this.applyScaleCompensation(compensation.scale, sIdx)
+          if (compensation.needCompensation) {
+            this.applyScaleCompensation(compensation.scale, sIdx)
+          }
           this.applyPropsToAll('span,paragraph', { size: compensation.size }, layerIndex, sIdx)
           textUtils.updateTextLayerSizeByShape(layerUtils.pageIndex, layerIndex, sIdx)
         }
