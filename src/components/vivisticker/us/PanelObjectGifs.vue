@@ -1,71 +1,60 @@
 <template lang="pug">
-div(class="panel-static" :class="{'in-category': isInCategory}")
-  div(v-if="isInCategory && !showFav" class="panel-static__categorys")
-    div(class="panel-static__categorys__category" :class="{'selected': showAllRecently}" @click="handleCategorySearch($t('NN0024'))")
-      svg-icon(class="pointer"
-        iconName="clock"
-        iconColor="white"
-        iconWidth="24px")
-    div(class="panel-static__categorys__vr")
-    recycle-scroller(class="panel-static__categorys__list" :items="listCategories" direction="horizontal" @scroll-end="(nextCategory !== -1) && getCategories()")
-      template(v-slot="{ item }")
-        div(class="panel-static__categorys__category" :class="{'selected': item.title === keyword}" @click="handleCategorySearch(item.title)")
-          div(class="panel-static__categorys__category__icon" :style="iconStyles(item.list)")
-  tags(v-if="isInCategory && tags && tags.length" class="panel-static__tags"
+div(class="panel-gifs" :class="{'in-category': isInCategory}")
+  div(v-if="isInCategory && !showFav" class="panel-gifs__categorys")
+      div(class="panel-gifs__categorys__category" :class="{'selected': showAllRecently}" @click="handleCategorySearch($t('NN0024'))")
+        svg-icon(class="pointer"
+          iconName="clock"
+          iconColor="white"
+          iconWidth="24px")
+      div(class="panel-gifs__categorys__vr")
+      recycle-scroller(class="panel-gifs__categorys__list" :items="listCategories" direction="horizontal" @scroll-end="(nextCategory !== -1) && getCategories()")
+        template(v-slot="{ item }")
+          div(class="panel-gifs__categorys__category" :class="{'selected': item.title === keyword}" @click="handleCategorySearch(item.title)")
+            div(class="panel-gifs__categorys__category__icon" :style="iconStyles(item.list)")
+  tags(v-if="isInCategory && tags && tags.length" class="panel-gifs__tags"
       :tags="tags" theme="dark" @search="handleSearch")
   //- Search result and static main content
   category-list(v-for="item in categoryListArray"
                 v-show="item.show" :ref="item.key" :key="item.key"
                 :list="item.content" @loadMore="item.loadMore")
     template(#before)
-      div(class="panel-static__top-item")
-      tags(v-if="!isInCategory && tags && tags.length" class="panel-static__tags" style="margin-top: 0"
+      div(class="panel-gifs__top-item")
+      tags(v-if="!isInCategory && tags && tags.length" class="panel-gifs__tags" style="margin-top: 0"
           :tags="tags" theme="dark" @search="handleSearch")
       //- Search result empty msg
       div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
       //- Empty favorites view
       div(v-if="showFav && !item.content.length && !pending"
-          class="panel-static__favorites-empty")
+          class="panel-gifs__favorites-empty")
         svg-icon(iconName="favorites-empty" iconWidth="42px" iconColor="white")
-        span(class="panel-static__favorites-empty--title") {{$t('NN0765')}}
+        span(class="panel-gifs__favorites-empty--title") {{$t('NN0765')}}
         span(class="text-black-5") {{$t('NN0764')}}
     template(v-slot:category-list-rows="{ list, title, isFavorite }")
-      category-list-rows(v-if="showFav"
-          :list="list"
-          :title="title"
-          :isFavorite="isFavorite")
-          template(v-slot:action)
-            div(class="panel-static__list-rows-action")
-              svg-icon(v-if="isFavorite !== undefined"
-                      :iconName="isFavorite ? 'favorites-fill' : 'heart'"
-                      iconWidth="24px" iconColor="gray-2" @click="toggleFaovoritesCategoryByTitle($event, title)")
-              span(@click="item.categorySearch && item.categorySearch(title)") {{$t('NN0082')}}
-          template(v-slot:preview="{ item }")
-            category-object-item(class="panel-static__item"
-              :src="item.src"
-              :item="item"
-              :isHideEditor="true"
-              :style="itemStyles"
-              @click4in1="click4in1"
-              @dbclick4in1="toggleFavorites4in1"
-              @dbclick="toggleFavoritesItem")
-      div(v-else class="panel-static__card" @click="item.categorySearch && item.categorySearch(title)")
-        div(class="panel-static__card__cover" :style="coverStyles(list)")
-          div(class="panel-static__card__label")
-            div(class="panel-static__card__label__title caption-MD") {{ title }}
+      category-list-rows(
+        :list="list"
+        :title="title"
+        :isFavorite="isFavorite")
+        template(v-slot:action)
+          div(class="panel-gifs__list-rows-action")
             svg-icon(v-if="isFavorite !== undefined"
-              :iconName="isFavorite ? 'favorites-fill' : 'heart'"
-              iconWidth="24px"
-              :style="{color: isFavorite ? '#FC5757' : '#9C9C9C'}"
-              @click="toggleFaovoritesCategoryByTitle($event, title)")
+                    :iconName="isFavorite ? 'favorites-fill' : 'heart'"
+                    iconWidth="24px" iconColor="gray-2" @click="toggleFaovoritesCategoryByTitle(title)")
+            span(@click="item.categorySearch && item.categorySearch(title)") {{$t('NN0082')}}
+        template(v-slot:preview="{ item }")
+          category-object-item(class="panel-gifs__item"
+            :src="item.src"
+            :item="item"
+            :style="itemStyles"
+            @click4in1="click4in1"
+            @dbclick4in1="toggleFavorites4in1"
+            @dbclick="toggleFavoritesItem")
     template(v-slot:category-object-item="{ list }")
-      div(class="panel-static__items")
+      div(class="panel-gifs__items")
         category-object-item(v-for="item in list"
-          class="panel-static__item"
+          class="panel-gifs__item"
           :key="item.id"
           :src="item.src"
           :item="item"
-          :isHideEditor="true"
           :style="itemStyles"
           @click4in1="click4in1"
           @dbclick4in1="toggleFavorites4in1"
@@ -82,18 +71,20 @@ import CategoryList, { CCategoryList } from '@/components/category/CategoryList.
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import Tags from '@/components/global/Tags.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import i18n from '@/i18n'
 import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import { IAsset, ICategoryExtend, isICategory, isITag, ITagExtend } from '@/interfaces/module'
+import { IGif, IGifCategory, IGifCategoryExtend, isIGifCategory, isITag, ITagExtend } from '@/interfaces/giphy'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
-type refTarget = 'mainContent' | 'searchResult' | 'favoritesContent' | 'favoritesSearchResult'
+  type refTarget = 'mainContent' | 'searchResult' | 'favoritesContent' | 'favoritesSearchResult'
 
 export default defineComponent({
   components: {
+    SearchBar,
     CategoryList,
     CategoryListRows,
     CategoryObjectItem,
@@ -114,8 +105,7 @@ export default defineComponent({
         searchResult: 0,
         favoritesContent: 0,
         favoritesSearchResult: 0
-      },
-      windowWidth: window.outerWidth
+      }
     }
   },
   computed: {
@@ -126,22 +116,24 @@ export default defineComponent({
     ...mapState({
       isTablet: 'isTablet'
     }),
-    ...mapState('objects', {
+    ...mapState('giphy', {
       rawCategories: 'categories',
-      rawContent: 'content',
       rawSearchResult: 'searchResult',
-      keyword: 'keyword',
+      nextTagContent: 'nextTagContent',
       nextCategory: 'nextCategory'
     }),
-    ...mapGetters('objects', {
+    ...mapGetters('giphy', {
+      rawPending: 'pending',
+      isSearchingCategory: 'isSearchingCategory',
+      isSearchingTag: 'isSearchingTag',
       tagsBar: 'tagsBar',
       favoritesTagsBar: 'favoritesTagsBar',
-      favoritesItems: 'favoritesItems',
-      favoritesCategories: 'favoritesCategories',
-      favoritesTags: 'favoritesTags',
-      rawFavoritesSearchResult: 'favoritesSearchResult',
+      keyword: 'keyword',
       checkCategoryFavorite: 'checkCategoryFavorite',
-      rawPending: 'pending'
+      favoritesItems: 'favoritesItems',
+      favoritesTags: 'favoritesTags',
+      favoritesCategories: 'favoritesCategories',
+      rawFavoritesSearchResult: 'favoritesSearchResult'
     }),
     isInCategory(): boolean {
       return this.isTabInCategory('object')
@@ -180,7 +172,7 @@ export default defineComponent({
       return []
     },
     searchResult(): ICategoryItem[] {
-      const list = this.processListResult(this.rawSearchResult.list)
+      const list = this.processListResult(this.rawSearchResult.content)
       if (list.length !== 0) {
         Object.assign(list[list.length - 1], { sentinel: true })
       }
@@ -248,9 +240,9 @@ export default defineComponent({
       if (pending || this.showAllRecently) return ''
       if (!showFav && keyword && this.searchResult.length === 0) {
         return `${i18n.global.t('NN0393', {
-          keyword: this.keywordLabel,
-          target: i18n.global.tc('NN0003', 1)
-        })}`
+            keyword: this.keywordLabel,
+            target: 'GIFs'
+          })}`
       } else return ''
     },
     tags(): string[] {
@@ -265,18 +257,14 @@ export default defineComponent({
         width: this.itemHeight + 'px',
         height: this.itemHeight + 'px'
       }
-    },
-    cardHeight(): number {
-      return (this.windowWidth * (this.isTablet ? 0.9 : 1) - (this.isTablet ? 0 : 32)) * 9 / 16
-    },
+    }
   },
   mounted() {
-    generalUtils.panelInit('object',
+    generalUtils.panelInit('giphy',
       this.handleSearch,
       this.handleCategorySearch,
-      async ({ reset }: {reset: boolean}) => {
-        await this.getRecAndCate({ reset, key: 'objects' })
-        this.initFavorites()
+      async () => {
+        this.initGiphy()
       }
     )
   },
@@ -308,16 +296,16 @@ export default defineComponent({
     }
   },
   methods: {
-    ...mapActions('objects', [
-      'getContent',
-      'getTagContent',
-      'getRecently',
-      'getRecAndCate',
-      'getMoreContent',
-      'resetSearch',
+    ...mapActions('giphy', [
       'getCategories',
+      'getCategoryContent',
+      'getMoreCategoryContent',
+      'getMoreTagContent',
+      'searchTag',
+      'resetCategoryContent',
+      'resetTagContent',
       // favorites actions
-      'initFavorites',
+      'initGiphy',
       'toggleFavorite',
       'searchFavorites',
       'searchMoreFavorites',
@@ -327,7 +315,7 @@ export default defineComponent({
       for (const list of this.categoryListArray) {
         if (list.show) {
           const categoryList = (this.$refs[list.key] as CCategoryList[])[0]
-          const top = categoryList.$el.querySelector('.panel-static__top-item') as HTMLElement
+          const top = categoryList.$el.querySelector('.panel-gifs__top-item') as HTMLElement
           top.scrollIntoView({ behavior: 'smooth' })
         }
       }
@@ -336,54 +324,57 @@ export default defineComponent({
       if (this.showFav) {
         this.searchTagInFavoritesCategory(keyword)
       } else {
-        this.resetSearch({ keepSearchResult: true })
+        this.resetTagContent()
         if (keyword) {
-          this.getTagContent({ keyword })
+          this.searchTag(keyword)
         }
       }
       this.$emit('search')
     },
-    async handleCategorySearch(keyword: string, locale = '') {
+    async handleCategorySearch(categoryName: string) {
       if (this.showFav) {
-        this.searchFavorites(keyword)
-        vivistickerUtils.setIsInCategory('object', true)
+        this.searchFavorites(categoryName)
       } else {
-        this.resetSearch()
-        if (keyword) {
-          if (keyword === `${this.$t('NN0024')}`) {
-            vivistickerUtils.setShowAllRecently('object', true)
-          } else {
-            this.getContent({ keyword, locale })
-            vivistickerUtils.setShowAllRecently('object', false)
-          }
-          vivistickerUtils.setIsInCategory('object', true)
-        } else {
+        this.resetCategoryContent()
+        if (categoryName === this.$t('NN0024')) {
+          vivistickerUtils.setShowAllRecently('object', true)
+        } else if (categoryName) {
+          this.getCategoryContent(categoryName)
           vivistickerUtils.setShowAllRecently('object', false)
         }
       }
+      vivistickerUtils.setIsInCategory('object', true)
     },
     handleLoadMore() {
-      this.getMoreContent()
+      if (this.isSearchingTag) {
+        this.getMoreTagContent()
+      } else if (this.isSearchingCategory) {
+        this.getMoreCategoryContent()
+      } else {
+        this.getCategories()
+      }
     },
     click4in1(target: unknown) {
       this.searchFavorites(target)
       vivistickerUtils.setIsInCategory('object', true)
     },
-    toggleFavorites4in1(target: ITagExtend | ICategoryExtend) {
+    toggleFavorites4in1(target: ITagExtend | IGifCategoryExtend) {
       if (isITag(target)) {
-        this.toggleFavorite({ tags: target })
-      } else if (isICategory(target)) {
-        this.toggleFavorite({ categories: target })
+        this.toggleFavorite({ tags: target.id })
+      } else if (isIGifCategory(target)) {
+        this.toggleFavorite({ categories: target.id })
       }
     },
-    toggleFavoritesItem(target: IAsset) {
+    toggleFavoritesItem(target: IGif) {
       this.toggleFavorite({ items: target })
     },
-    toggleFaovoritesCategoryByTitle(evt: Event, title: string) {
-      evt.stopPropagation()
-      for (const category of this.rawCategories as IListServiceContentData[]) {
+    toggleFavoritesTag() {
+      this.toggleFavorite({ tags: `${this.nextTagContent.keyword}:${this.nextTagContent.type}` })
+    },
+    toggleFaovoritesCategoryByTitle(title: string) {
+      for (const category of this.rawCategories as IGifCategory[]) {
         if (category.title === title) {
-          this.toggleFavorite({ categories: { id: category.id, title } })
+          this.toggleFavorite({ categories: category.id })
           return
         }
       }
@@ -393,43 +384,34 @@ export default defineComponent({
     },
     processListCategory(list: IListServiceContentData[]): ICategoryItem[] {
       const titleHeight = 46
-      const gap = this.isTablet ? 20 : this.showFav ? 14 : 10
+      const gap = this.isTablet ? 20 : 14
       return list
         .filter(category => category.list.length > 0 && !category.is_recent)
         .map((category, index) => ({
-          size: this.showFav ? this.itemHeight + titleHeight + gap : this.isInCategory ? 40 + gap : this.cardHeight + gap,
+          size: this.isInCategory ? 50 : this.itemHeight + titleHeight + gap,
           id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.list,
           title: category.title,
-          isFavorite: category.id === -1 || this.checkCategoryFavorite(category.id),
-          coverId: category.cover_id,
-          coverUrl: category.cover_url,
+          isFavorite: category.id === -1 || this.checkCategoryFavorite(category.id)
         }))
     },
-    processListResult(list = [] as IListServiceContentDataItem[]|ITagExtend[]): ICategoryItem[] {
+    processListResult(list = [] as IListServiceContentDataItem[]): ICategoryItem[] {
       const gap = this.isTablet ? 20 : 24
       return new Array(Math.ceil(list.length / 4))
         .fill('')
         .map((_, idx) => {
           const rowItems = list.slice(idx * 4, idx * 4 + 4)
           return {
-            id: `result_${rowItems.map(item => isITag(item) ? item.keyword : item.id).join('_')}`,
+            id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-object-item',
-            list: rowItems as IAsset[],
+            list: rowItems,
             size: this.itemHeight + gap
           }
         })
     },
-    coverStyles(list: ICategoryItem): {[key: string]: string} {
-      const coverUrl = 'https://template.vivipic.com/template/tUlTAFoMa7dkbxrfuphe/prev_4x?ver=3'
-      return {
-        height: `${this.cardHeight}px`,
-        backgroundImage: `url(${coverUrl})`
-      }
-    },
     iconStyles(list: IListServiceContentDataItem[]): {[key: string]: string} {
-      const iconUrl = `https://template.vivipic.com/svg/${list[0].id}/prev?ver=${list[0].ver}`
+      const iconUrl = list[0].src
       return {
         backgroundImage: `url(${iconUrl})`
       }
@@ -439,7 +421,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.panel-static {
+.panel-gifs {
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
@@ -487,26 +469,6 @@ export default defineComponent({
   &__items {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-  }
-  &__card {
-    &__cover {
-      width: 100%;
-      border-radius: 10px;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: cover;
-    }
-    &__label {
-      display: flex;
-      column-gap: 10px;
-      position: absolute;
-      right: 10px;
-      bottom: 10px;
-      &__title {
-        color: white;
-        // mix-blend-mode: difference;
-      }
-    }
   }
   &.in-category::v-deep .category-list .vue-recycle-scroller__item-wrapper {
     margin-top: 24px;

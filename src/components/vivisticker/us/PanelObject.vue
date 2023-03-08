@@ -42,8 +42,8 @@ div(class="panel-objects")
     panel-object-static-us(v-if="isStatic || isFavoritesStatic"
       :showFav="isFavoritesStatic" ref="static" @search="isShowSearchBar = true")
   keep-alive
-    panel-object-gifs(v-if="isGifs || isFavoritesGifs"
-      :showFav="isFavoritesGifs" ref="gif")
+    panel-object-gifs-us(v-if="isGifs || isFavoritesGifs"
+      :showFav="isFavoritesGifs" ref="gif" @search="isShowSearchBar = true")
 </template>
 
 <script lang="ts">
@@ -54,6 +54,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import Nubtn from '../../global/Nubtn.vue'
 import PanelObject from '../PanelObject.vue'
 import PanelObjectStaticUs from './PanelObjectStatic.vue'
+import PanelObjectGifsUs from './PanelObjectGifs.vue'
 
 export default defineComponent({
   name: 'panel-object-us',
@@ -61,7 +62,8 @@ export default defineComponent({
   components: {
     SearchBar,
     Nubtn,
-    PanelObjectStaticUs
+    PanelObjectStaticUs,
+    PanelObjectGifsUs
   },
   data() {
     return {
