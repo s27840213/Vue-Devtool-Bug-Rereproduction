@@ -190,7 +190,8 @@ export default defineComponent({
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
-      hasCopiedFormat: 'getHasCopiedFormat'
+      hasCopiedFormat: 'getHasCopiedFormat',
+      userInfo: 'webView/getUserInfo'
     }),
     backgroundImgControl(): boolean {
       return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
@@ -278,7 +279,7 @@ export default defineComponent({
             ? 'initial' : this.panelDragHeight + 'px',
         },
         // Prevent MobilePanel collapse
-        isSidebarPanel ? { height: '100%' } : {}
+        isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {}
       )
     },
     innerTab(): string {
@@ -579,7 +580,7 @@ export default defineComponent({
       return (this.$refs.panel as HTMLElement).clientHeight
     },
     panelParentHeight() {
-      return (this.$el.parentElement as HTMLElement).clientHeight
+      return (this.$el.parentElement as HTMLElement).clientHeight - this.userInfo.statusBarHeight
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
       if (this.fixSize) {
