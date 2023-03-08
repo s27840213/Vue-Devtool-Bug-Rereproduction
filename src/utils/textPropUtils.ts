@@ -1083,7 +1083,7 @@ class TextPropUtils {
         }
         p.spans.forEach(s => {
           if (modifier) {
-            Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) = modifier((p.styles[prop] as number)))
+            Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) = modifier((s.styles[prop] as number)))
           } else {
             Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) = payload)
           }
@@ -1429,7 +1429,7 @@ class TextPropUtils {
       }
       const compensation = this.getScaleCompensation(value / scale)
       this.applyScaleCompensation(compensation.scale, subLayerIdx)
-      tiptapUtils.spanStyleHandler('size', compensation.size)
+      tiptapUtils.applySpanStyle('size', compensation.size, undefined, {}, true)
     } else if (currLayer.type === LayerType.group || currLayer.type === LayerType.tmp) {
       const primaryScale = currLayer.styles.scale
       for (const [sIdx, subLayer] of currLayer.layers.entries()) {
