@@ -5,7 +5,7 @@ import store from '@/store'
 import text, { ITextState } from '@/store/text/index'
 import { LayerType } from '@/store/types'
 import { nextTick } from 'vue'
-import GeneralUtils from './generalUtils'
+import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
 import textEffectUtils from './textEffectUtils'
 import textUtils from './textUtils'
@@ -133,7 +133,7 @@ class TextPropUtils {
         const config = (typeof tmpLayerIndex === 'undefined' ? this.getCurrLayer : this.getCurrLayer.layers[tmpLayerIndex]) as IText
         const writingMode = config.styles.writingMode.includes('vertical') ? 'vertical-lr' : 'initial'
         if (targetIsVertical) {
-          const paragraphs = GeneralUtils.deepCopy(config.paragraphs)
+          const paragraphs = generalUtils.deepCopy(config.paragraphs)
           this.removeInvalidStyles(paragraphs, targetIsVertical)
           paragraphHandler(paragraphs)
         }
@@ -279,7 +279,7 @@ class TextPropUtils {
   }
 
   spanPropertyHandler(propName: string, prop: { [key: string]: string | number }, start: ISelection, end: ISelection, _config: IText): IText {
-    const config = GeneralUtils.deepCopy(_config) as IText
+    const config = generalUtils.deepCopy(_config) as IText
     let isStartContainerDivided = true
     if (textUtils.isSel(end)) {
       isStartContainerDivided = this.rangedSelHandler(start, end, config, prop)
@@ -342,7 +342,7 @@ class TextPropUtils {
   }
 
   spanParagraphPropertyHandler(propName: string, prop: { [key: string]: string | number }, start: ISelection, end: ISelection, _config: IText): IText {
-    const config = GeneralUtils.deepCopy(_config) as IText
+    const config = generalUtils.deepCopy(_config) as IText
     const spIndex = start.pIndex
     const epIndex = end.pIndex
     for (let pIndex = spIndex; pIndex <= epIndex; pIndex++) {
@@ -368,9 +368,9 @@ class TextPropUtils {
 
     let config: IText
     if (isGroupLayer) {
-      config = GeneralUtils.deepCopy((layer as IGroup).layers[tmpLayerIndex as number]) as IText
+      config = generalUtils.deepCopy((layer as IGroup).layers[tmpLayerIndex as number]) as IText
     } else {
-      config = GeneralUtils.deepCopy(layer) as IText
+      config = generalUtils.deepCopy(layer) as IText
     }
 
     let start = { pIndex: 0, sIndex: 0, offset: 0 }
@@ -563,7 +563,7 @@ class TextPropUtils {
 
     if (['color', 'italic', 'underline', 'bold'].includes(propName)) {
       // TODO with subController
-      const paragraphs = GeneralUtils.deepCopy(this.getTextInfo.config.paragraphs) as IParagraph[]
+      const paragraphs = generalUtils.deepCopy(this.getTextInfo.config.paragraphs) as IParagraph[]
       const { pIndex, sIndex, offset } = this.getCurrSel.start
 
       paragraphs[pIndex].spans.splice(sIndex + 1, 0, {
@@ -677,7 +677,7 @@ class TextPropUtils {
         for (let subIdx = 0; subIdx < (currLayer as IGroup).layers.length; subIdx++) {
           const layer = (currLayer as IGroup).layers[layerIndex] as IText
           if (layer.type === 'text') {
-            const paragraphs = GeneralUtils.deepCopy(layer.paragraphs) as Array<IParagraph>
+            const paragraphs = generalUtils.deepCopy(layer.paragraphs) as Array<IParagraph>
             for (let i = 0; i < paragraphs.length; i++) {
               Object.assign(paragraphs[i].styles, prop)
             }
@@ -687,7 +687,7 @@ class TextPropUtils {
       }
 
       if (typeof subLayerIndex === 'number') {
-        const paragraphs = GeneralUtils.deepCopy(this.getTextInfo.config.paragraphs) as Array<IParagraph>
+        const paragraphs = generalUtils.deepCopy(this.getTextInfo.config.paragraphs) as Array<IParagraph>
         let pstart = start.pIndex
         let pend = Number.isNaN(end.pIndex) ? pstart : end.pIndex
         if (!textUtils.isSel(start)) {
@@ -877,7 +877,7 @@ class TextPropUtils {
   }
 
   noEditorRead(prop: string, layer?: IText) {
-    const config = GeneralUtils.deepCopy(layer ?? this.getCurrLayer) as IText
+    const config = generalUtils.deepCopy(layer ?? this.getCurrLayer) as IText
     const scale = config.styles.scale
     const isFontSize = prop === 'fontSize'
     const start = {
@@ -983,14 +983,14 @@ class TextPropUtils {
               tempEndSIndex = spans.length - 1
             }
             if (spans.length > 0) {
-              const newSpans = GeneralUtils.deepCopy(spans) as any[]
+              const newSpans = generalUtils.deepCopy(spans) as any[]
               for (let j = tempStartSIndex; j <= tempEndSIndex && j < spans.length; j++) {
                 let splitHandled = false
                 let splitLength = 0
                 if (i === startPIndex && j === startSIndex && from.textOffset !== 0) {
                   startSplit = true
-                  const itemBefore = GeneralUtils.deepCopy(spans[j])
-                  const itemAfter = GeneralUtils.deepCopy(itemBefore)
+                  const itemBefore = generalUtils.deepCopy(spans[j])
+                  const itemAfter = generalUtils.deepCopy(itemBefore)
                   const text = itemBefore.text
                   const textBefore = (text as string).substring(0, from.textOffset)
                   itemBefore.text = textBefore
@@ -1006,8 +1006,8 @@ class TextPropUtils {
                 }
                 if (i === endPIndex && j === endSIndex && to.textOffset !== 0) {
                   const realSIndex = startSplit ? j + 1 : j
-                  const itemBefore = GeneralUtils.deepCopy(newSpans[realSIndex])
-                  const itemAfter = GeneralUtils.deepCopy(itemBefore)
+                  const itemBefore = generalUtils.deepCopy(newSpans[realSIndex])
+                  const itemAfter = generalUtils.deepCopy(itemBefore)
                   const text = itemBefore.text
                   const textBefore = text.substring(0, to.textOffset - splitLength)
                   itemBefore.text = textBefore
@@ -1062,40 +1062,48 @@ class TextPropUtils {
     })
   }
 
-  fontSizeGaining(gain: number) {
-    this.fontSizeAllModifier((size: number, reverse = false) => {
+  fontSizeGaining(gain: number, byLayer = false, layerIndex = this.layerIndex, subLayerIndex = -1) {
+    const modifier = (size: number, reverse = false) => {
       return reverse ? size / gain : size * gain
-    })
+    }
+    if (byLayer) {
+      this.propAppliedAllText(layerIndex, subLayerIndex, 'size', 0, modifier)
+    } else {
+      this.fontSizeAllModifier(modifier)
+    }
   }
 
   propAppliedAllText(layerIndex: number, subLayerIndex: number, prop: 'size' | 'fontSpacing' | 'lineHeight', payload: number, modifier?: (propValue: number) => number) {
-    if (subLayerIndex === -1) return
-
-    const primaryLayer = (layerUtils.getLayer(layerUtils.pageIndex, layerIndex) as IGroup)
-    if (['group', 'tmp'].includes(primaryLayer.type) && primaryLayer.layers[subLayerIndex].type === 'text') {
-      const targetLayer = primaryLayer.layers[subLayerIndex] as IText
-      const paragraphs = GeneralUtils.deepCopy(targetLayer.paragraphs) as Array<IParagraph>
-      paragraphs.forEach(p => {
-        if (modifier) {
-          Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = modifier((p.styles[prop] as number)))
-        } else {
-          Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = payload)
-        }
-        p.spans.forEach(s => {
-          if (modifier) {
-            Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) = modifier((s.styles[prop] as number)))
-          } else {
-            Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) = payload)
-          }
-        })
-      })
-      layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs })
+    const primaryLayer = (layerUtils.getLayer(layerUtils.pageIndex, layerIndex) as IGroup | IText | ITmp)
+    let targetLayer: IText
+    if (subLayerIndex === -1 && primaryLayer.type === 'text') {
+      targetLayer = primaryLayer
+    } else if ((primaryLayer.type === 'group' || primaryLayer.type === 'tmp') && primaryLayer.layers[subLayerIndex].type === 'text') {
+      targetLayer = primaryLayer.layers[subLayerIndex] as IText
+    } else {
+      return
     }
+    const paragraphs = generalUtils.deepCopy(targetLayer.paragraphs) as Array<IParagraph>
+    paragraphs.forEach(p => {
+      if (modifier) {
+        Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = modifier((p.styles[prop] as number)))
+      } else {
+        Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = payload)
+      }
+      p.spans.forEach(s => {
+        if (modifier) {
+          Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) = modifier((s.styles[prop] as number)))
+        } else {
+          Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) = payload)
+        }
+      })
+    })
+    layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { paragraphs }, subLayerIndex)
   }
 
   propIndicator(start: { pIndex: number, sIndex: number }, end: { pIndex: number, sIndex: number }, propName: string, value: string | number, tmpLayer?: IText): { [key: string]: string | number } {
     const prop: { [key: string]: string | number } = {}
-    const config = GeneralUtils.deepCopy(tmpLayer ?? this.getCurrLayer) as IText
+    const config = generalUtils.deepCopy(tmpLayer ?? this.getCurrLayer) as IText
 
     if (!textUtils.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
@@ -1350,7 +1358,7 @@ class TextPropUtils {
     const layer = layerUtils.getLayer(layerUtils.pageIndex, layerIndex)
 
     if (subLayerIdx !== -1 && layer.type === 'group') {
-      const paragraphs = GeneralUtils.deepCopy((layer as IGroup).layers[subLayerIdx].paragraphs) as IParagraph[]
+      const paragraphs = generalUtils.deepCopy((layer as IGroup).layers[subLayerIdx].paragraphs) as IParagraph[]
       handler(paragraphs)
       layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, subLayerIdx, { paragraphs })
       return
@@ -1359,7 +1367,7 @@ class TextPropUtils {
       (layer as IGroup | ITmp).layers
         .forEach((l, idx) => {
           if (l.type === 'text') {
-            const paragraphs = GeneralUtils.deepCopy(l.paragraphs) as IParagraph[]
+            const paragraphs = generalUtils.deepCopy(l.paragraphs) as IParagraph[]
             handler(paragraphs)
             layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerIndex, idx, { paragraphs })
           }
@@ -1367,7 +1375,7 @@ class TextPropUtils {
       return
     }
     if (layer.type === 'text') {
-      const paragraphs = GeneralUtils.deepCopy(layer.paragraphs) as IParagraph[]
+      const paragraphs = generalUtils.deepCopy(layer.paragraphs) as IParagraph[]
       handler(paragraphs)
       layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { paragraphs })
     }
@@ -1423,11 +1431,17 @@ class TextPropUtils {
   fontSizeHandler(value: number, toRecord = true) {
     const { getCurrLayer: currLayer, layerIndex, subLayerIdx } = layerUtils
     if (currLayer.type === LayerType.text || subLayerIdx !== -1) {
+      let targetLayer = currLayer
       let scale = currLayer.styles.scale
       if (subLayerIdx !== -1) {
-        scale *= (currLayer as IGroup).layers[subLayerIdx].styles.scale
+        targetLayer = (currLayer as IGroup).layers[subLayerIdx]
+        scale *= targetLayer.styles.scale
       }
       const compensation = this.getScaleCompensation(value / scale)
+      if (targetLayer.contentEditable && compensation.needCompensation) {
+        this.fontSizeGaining(1 / compensation.scale, true, layerIndex, subLayerIdx)
+        tiptapUtils.updateHtml()
+      }
       this.applyScaleCompensation(compensation.scale, subLayerIdx)
       tiptapUtils.applySpanStyle('size', compensation.size, undefined, {}, true)
     } else if (currLayer.type === LayerType.group || currLayer.type === LayerType.tmp) {
