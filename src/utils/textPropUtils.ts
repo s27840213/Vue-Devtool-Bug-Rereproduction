@@ -1420,7 +1420,7 @@ class TextPropUtils {
     }
   }
 
-  fontSizeHandler(value: number) {
+  fontSizeHandler(value: number, toRecord = true) {
     const { getCurrLayer: currLayer, layerIndex, subLayerIdx } = layerUtils
     if (currLayer.type === LayerType.text || subLayerIdx !== -1) {
       let scale = currLayer.styles.scale
@@ -1443,7 +1443,7 @@ class TextPropUtils {
       }
       textUtils.updateGroupLayerSize(layerUtils.pageIndex, layerIndex)
     }
-    tiptapUtils.forceUpdate(true)
+    tiptapUtils.forceUpdate(toRecord)
     this.updateTextPropsState({ fontSize: value.toString() })
     textEffectUtils.refreshSize()
   }

@@ -52,7 +52,7 @@ export default defineComponent({
       },
       set(value: number): void {
         value = generalUtils.boundValue(value, this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
-        textPropUtils.fontSizeHandler(value)
+        textPropUtils.fontSizeHandler(value, false)
       }
     }
   },
