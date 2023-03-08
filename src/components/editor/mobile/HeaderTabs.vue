@@ -119,7 +119,9 @@ export default defineComponent({
       ]
     },
     rightTabs(): IIcon[] {
-      if (this.selectedLayerNum > 0) {
+      if (this.inBgRemoveMode) {
+        return []
+      } else if (this.selectedLayerNum > 0) {
         return this.layerTabs
       } else if (this.inBgSettingMode) {
         return this.bgSettingTabs

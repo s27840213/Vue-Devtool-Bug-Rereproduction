@@ -20,8 +20,12 @@ for (const isMobile of [true, false]) {
 
     it(`Unsplash image${suffix}`, function () {
       cy.visit('/editor')
+        .disableTransition()
         .importDesign('flower.json')
-        .get('.nu-layer .nu-image img').snapshotTest('init')
+        .get('.nu-layer .nu-image img').and(($img: JQuery<HTMLImageElement>) => {
+          // "naturalWidth" and "naturalHeight" are set when the image loads
+          expect($img[0].naturalWidth).to.be.greaterThan(0)
+        }).snapshotTest('init')
         .get('.nu-image')
         .imageAdjust()
         .layerFlip()
@@ -30,13 +34,14 @@ for (const isMobile of [true, false]) {
         .imageShadow()
         .layerAlign()
         .imageSetAsBg()
-        // TODO: Find reason why image mismatch after imageSetAsBg
-        // .deselectAllLayers().snapshotTest('init').get('.nu-image') // Check if image restore to init
+      // TODO: Find reason why image mismatch after imageSetAsBg
+      // .deselectAllLayers().snapshotTest('init').get('.nu-image') // Check if image restore to init
     })
 
     if (!isMobile) {
       it(`Auto BG remove${suffix}`, function () {
         cy.visit('/editor')
+          .disableTransition()
           .importDesign('flower.json')
           .get('.nu-image')
           .imageAutoBgRemove()
@@ -53,6 +58,7 @@ for (const isMobile of [true, false]) {
       })
       it('Manually BG remove', function () {
         cy.visit('/editor')
+          .disableTransition()
           .importDesign('flower.json')
           .get('.nu-image')
           .imageManuallyBgRemove()
@@ -69,8 +75,8 @@ for (const isMobile of [true, false]) {
       })
     }
 
-    it(`Other image test${suffix}`, function() {
-      function beforeCopyFormat () {
+    it(`Other image test${suffix}`, function () {
+      function beforeCopyFormat() {
         cy.togglePanel('調整')
           .get('input[type="range"][name="brightness"]').eq(-1)
           .invoke('val', 50).trigger('input')
@@ -78,29 +84,35 @@ for (const isMobile of [true, false]) {
           .invoke('val', 50).trigger('input')
           .togglePanel('調整')
       }
-      function afterCopyFormat () {
+      function afterCopyFormat() {
         cy.togglePanel('調整')
         cy.contains('重置效果').click()
           .togglePanel('調整')
       }
 
       cy.visit('/editor')
+        .disableTransition()
         .importDesign('2flower.json')
-        .get('.nu-layer .nu-image img').snapshotTest('init')
+        .get('.nu-layer .nu-image img').and(($img: JQuery<HTMLImageElement>) => {
+          // "naturalWidth" and "naturalHeight" are set when the image loads
+          expect($img[0].naturalWidth).to.be.greaterThan(0)
+          expect($img[1].naturalWidth).to.be.greaterThan(0)
+        })
+        .snapshotTest('init')
         .get('.nu-layer__wrapper:nth-child(2) .nu-image').then((flowerBack) => {
           cy.get('.nu-layer__wrapper:nth-child(3) .nu-image')
             .layerOrder(flowerBack)
             .layerCopy()
             .layerLock()
             .layerDelete()
+            .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
             .then((subject: JQuery<HTMLElement>) => {
               // TODO: Implement layer copy format in mobile
               if (isMobile) return cy.wrap(subject)
               return cy.wrap(subject)
-                .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
                 .layerMoveToPage2()
             })
-            // .deselectAllLayers().snapshotTest('init') // Check if image restore to init
+          // .deselectAllLayers().snapshotTest('init') // Check if image restore to init
         })
     })
   })

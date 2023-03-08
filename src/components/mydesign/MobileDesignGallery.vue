@@ -19,7 +19,8 @@ div(class="mobile-design-gallery")
         div(class="mobile-design-gallery__designs__new__name")
           span(class="text-gray-1") {{$tc('NN0072')}}
         div(class="mobile-design-gallery__designs__new__size")
-      mobile-design-item(v-for="(design, index) in allDesigns"
+      mobile-design-item(ref="designItems"
+                  v-for="(design, index) in allDesigns"
                   :key="design.asset_index"
                   :index="index"
                   :config="design"
@@ -38,12 +39,12 @@ div(class="mobile-design-gallery")
 </template>
 
 <script lang="ts">
+import MobileDesignItem, { CMobileDesignitem } from '@/components/mydesign/MobileDesignItem.vue'
+import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IDesign } from '@/interfaces/design'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import MobileDesignItem from '@/components/mydesign/MobileDesignItem.vue'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
-import BtnNewDesign from '@/components/new-design/BtnNewDesign.vue'
 
 export default defineComponent({
   components: {
@@ -53,8 +54,31 @@ export default defineComponent({
   },
   data() {
     return {
-      isExpanded: true
+      isExpanded: true,
+      intersectionObserver: null as IntersectionObserver | null,
+      designItems: {} as { [key: string]: CMobileDesignitem }
     }
+  },
+  mounted() {
+    const options = {
+      root: document.querySelector('body')
+    }
+    this.intersectionObserver = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        const asset_index = entry.target.getAttribute('data-index') ?? ''
+        const designItem = this.designItems[asset_index]
+        if (!designItem) continue
+        if (entry.isIntersecting) {
+          designItem.handleEnterView()
+        } else {
+          designItem.handleLeaveView()
+        }
+      }
+    }, options)
+    this.observeAllDesignItems()
+  },
+  unmounted() {
+    this.intersectionObserver && this.intersectionObserver.disconnect()
   },
   props: {
     allDesigns: {
@@ -94,6 +118,13 @@ export default defineComponent({
       return this.selectedNum > 1
     }
   },
+  watch: {
+    allDesigns() {
+      this.$nextTick(() => {
+        this.observeAllDesignItems()
+      })
+    }
+  },
   methods: {
     ...mapMutations('design', {
       addToSelection: 'UPDATE_addToSelection',
@@ -119,6 +150,15 @@ export default defineComponent({
     },
     deselectDesign(design: IDesign) {
       this.removeFromSelection(design)
+    },
+    observeAllDesignItems() {
+      const designItems = this.$refs.designItems as CMobileDesignitem[] | undefined
+      if (!designItems) return
+      this.designItems = {}
+      for (const designItem of designItems) {
+        this.intersectionObserver && this.intersectionObserver.observe(designItem.$el)
+        this.designItems[designItem.$el.getAttribute('data-index')] = designItem
+      }
     }
   }
 })
