@@ -38,11 +38,15 @@ export default defineComponent({
     item: {
       type: Object as PropType<IAsset>,
       required: true
+    },
+    isHideEditor: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
     showEditor(): boolean {
-      return ![8, 16].includes(this.item.type)
+      return !this.isHideEditor && ![8, 16].includes(this.item.type)
     }
   },
   methods: {
@@ -56,7 +60,9 @@ export default defineComponent({
       // if (!paymentUtils.checkPro(this.item, 'pro-object')) return
       if (this.item.type === 8) {
         this.handleEditObject()
-      } else if (this.item.type === 16) { // Giphy
+        return
+      }
+      if (this.item.type === 16) { // Giphy
         const item = this.item as any as IGif
         vivistickerUtils.sendToIOS('COPY_IMAGE_FROM_URL', {
           type: 'gif',
@@ -67,6 +73,7 @@ export default defineComponent({
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
         assetUtils.addAssetToRecentlyUsed(this.item, 'objects', 'svg')
       }
+      if (this.isHideEditor) this.handleEditObject()
     },
     click4in1(event: Event) {
       doubleTapUtils.click(event, {

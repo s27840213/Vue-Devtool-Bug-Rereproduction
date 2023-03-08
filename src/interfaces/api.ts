@@ -175,7 +175,9 @@ export interface IListServiceContentData {
   list: IListServiceContentDataItem[]
   title: string
   title_locale?: string // Category title locale
-  is_recent?: number
+  is_recent?: number,
+  cover_id?: string,
+  cover_url?: string,
 }
 
 export interface IListServiceData {
