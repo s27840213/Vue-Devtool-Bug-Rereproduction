@@ -155,7 +155,7 @@ export default defineComponent({
         })
       }
     },
-    'config.styles': {
+    'config.styles.textBg': {
       deep: true,
       handler() {
         this.drawSvgBG()

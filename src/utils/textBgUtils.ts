@@ -1007,33 +1007,31 @@ class TextBg {
           }
         }
 
-        window.requestAnimationFrame(() => {
-          store.commit('UPDATE_specLayerData', {
-            pageIndex,
-            layerIndex,
-            subLayerIndex: +idx,
-            styles: { textBg }
-          })
-
-          // If fixedWidth setting changed, force split/unsplit span text
-          const oldFixedWidth = isITextLetterBg(layerTextBg) && layerTextBg.fixedWidth
-          const newFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
-          if (oldFixedWidth !== newFixedWidth) {
-            tiptapUtils.updateHtml()
-            tiptapUtils.forceUpdate()
-            // When fixedWith true => false, this can force tiptap merge span that have same attrs.
-            tiptapUtils.agent((editor: Editor) => {
-              editor.commands.selectAll()
-              editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
-            })
-          }
-
-          // If user leave LetterBg, reset lineHeight and fontSpacing
-          if (isITextLetterBg(layerTextBg) && !isITextLetterBg(textBg)) {
-            textUtils.setParagraphProp('lineHeight', 1.4)
-            textUtils.setParagraphProp('fontSpacing', 0)
-          }
+        store.commit('UPDATE_specLayerData', {
+          pageIndex,
+          layerIndex,
+          subLayerIndex: +idx,
+          styles: { textBg }
         })
+
+        // If fixedWidth setting changed, force split/unsplit span text
+        const oldFixedWidth = isITextLetterBg(layerTextBg) && layerTextBg.fixedWidth
+        const newFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
+        if (oldFixedWidth !== newFixedWidth) {
+          tiptapUtils.updateHtml()
+          tiptapUtils.forceUpdate()
+          // When fixedWith true => false, this can force tiptap merge span that have same attrs.
+          tiptapUtils.agent((editor: Editor) => {
+            editor.commands.selectAll()
+            editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
+          })
+        }
+
+        // If user leave LetterBg, reset lineHeight and fontSpacing
+        if (isITextLetterBg(layerTextBg) && !isITextLetterBg(textBg)) {
+          textUtils.setParagraphProp('lineHeight', 1.4)
+          textUtils.setParagraphProp('fontSpacing', 0)
+        }
       }
     }
   }
