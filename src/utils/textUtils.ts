@@ -62,7 +62,7 @@ class TextUtils {
       while (divsToDelete.length) {
         const div = divsToDelete.pop()
         if (!div) break
-        document.body.removeChild(div)
+        // document.body.removeChild(div)
       }
     }, 5000)
   }

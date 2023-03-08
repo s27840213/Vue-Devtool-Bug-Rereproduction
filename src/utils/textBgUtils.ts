@@ -176,16 +176,23 @@ class Rect {
         // If span is fixedWidth, its display will be inline-block
         // Height of inline-block span will grow with lineHeight
         // Here calc height and y without inline-block effect
+        // For vertical text, modify width&x instead of height&y
         const isInlineBolck = (span as HTMLElement).style.display === 'inline-block'
-        const height = isInlineBolck ? cr.height / lineHeight * 1.4 : cr.height
-        const y = isInlineBolck ? cr.y + (cr.height - height) / 2 : cr.y
+        let { width, height, y, x } = cr
+        if (isInlineBolck && this.vertical) {
+          width = width / lineHeight * 1.4
+          x = cr.x + (cr.width - width) / 2
+        } else if (isInlineBolck) {
+          height = height / lineHeight * 1.4
+          y = cr.y + (cr.height - height) / 2
+        }
         this.rows.push({
           rect: cr,
           spanData: [{
-            x: cr.x,
-            y: y,
-            width: cr.width,
-            height: height,
+            x,
+            y,
+            width,
+            height,
             text: span.textContent ?? '',
             letterSpacing
           }]
