@@ -18,6 +18,7 @@ div(class="panel-my-design-more")
 </template>
 
 <script lang="ts">
+import { IPage } from '@/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
@@ -48,7 +49,19 @@ export default defineComponent({
       const mydesign = generalUtils.deepCopy(this.myDesignBuffer)
       editorUtils.setCloseMobilePanelFlag(true)
       setTimeout(() => {
-        vivistickerUtils.initWithMyDesign(mydesign)
+        vivistickerUtils.initWithMyDesign(mydesign, {
+          callback: (pages: Array<IPage>) => {
+            if (mydesign.assetInfo.isFrame) {
+              const page = pages[0]
+              page.layers.forEach(l => {
+                l.initFromMydesign = true
+              })
+              vivistickerUtils.initLoadingFlags(page, () => {
+                vivistickerUtils.handleFrameClipError(page, true)
+              })
+            }
+          }
+        })
       }, 300)
     },
     handleDelete() {

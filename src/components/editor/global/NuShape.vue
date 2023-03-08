@@ -437,10 +437,10 @@ export default defineComponent({
       if (primaryLayer.type === LayerType.frame) {
         let subLayerIdx = -1
         if (primaryLayer.decoration && (primaryLayer.decoration as IShape).id === this.config.id) {
-          subLayerIdx++
+          subLayerIdx = 0
         }
         if (primaryLayer.decorationTop && (primaryLayer.decorationTop as IShape).id === this.config.id) {
-          subLayerIdx += (primaryLayer as IFrame).clips.length + 1
+          subLayerIdx = primaryLayer.clips.length + (primaryLayer.decoration ? 1 : 0)
         }
         if (this.primaryLayerIndex !== -1) {
           vivistickerUtils.setLoadingFlag(this.primaryLayerIndex, this.layerIndex, subLayerIdx)

@@ -21,18 +21,18 @@ div(class="nu-frame"
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IFrame, IImage, IShape } from '@/interfaces/layer'
-import AssetUtils from '@/utils/assetUtils'
-import ImageUtils from '@/utils/imageUtils'
-import { mapGetters, mapMutations } from 'vuex'
-import layerFactary from '@/utils/layerFactary'
-import generalUtils from '@/utils/generalUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
-import frameUtils from '@/utils/frameUtils'
-import layerUtils from '@/utils/layerUtils'
 import { IPage } from '@/interfaces/page'
+import AssetUtils from '@/utils/assetUtils'
+import frameUtils from '@/utils/frameUtils'
+import generalUtils from '@/utils/generalUtils'
+import ImageUtils from '@/utils/imageUtils'
+import layerFactary from '@/utils/layerFactary'
+import layerUtils from '@/utils/layerUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
+import { defineComponent, PropType } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -159,6 +159,27 @@ export default defineComponent({
       vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
     }
   },
+  mounted() {
+    if (this.config.clips.length === 1) {
+      frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
+      if (this.config.clips[0].srcObj.type === 'frame') {
+        /**
+         * If the frame contain only one clip, and is not init from mydesign auto popping the photo-selector
+         */
+        if (!this.config.initFromMydesign) {
+          window.requestAnimationFrame(() => {
+            frameUtils.iosPhotoSelect({
+              pageIndex: this.pageIndex,
+              layerIndex: this.layerIndex,
+              subLayerIdx: 0
+            }, (this.config as IFrame).clips[0])
+          })
+        } else {
+          delete this.config.initFromMydesign
+        }
+      }
+    }
+  },
   watch: {
     'config.needFetch': function (newVal) {
       if (newVal && this.config.designId) {
@@ -203,13 +224,21 @@ export default defineComponent({
           this.config.needFetch = false
         })
       }
+    },
+    controllerHidden(val) {
+      if (!val) {
+        if (this.config.active && this.config.clips.length === 1) {
+          frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, 0, { active: true })
+        }
+      }
     }
   },
   computed: {
     ...mapGetters('user', ['getVerUni']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      isShowPagePreview: 'page/getIsShowPagePreview'
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      controllerHidden: 'vivisticker/getControllerHidden',
     }),
     layers() {
       const config = this.config as IFrame
