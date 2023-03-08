@@ -422,7 +422,7 @@ export default defineComponent({
         return 'close-circle'
       }
     },
-    leftButtonAction(): (e: PointerEvent) => void {
+    leftButtonAction(): () => void {
       if (this.bgRemoveMode) {
         return () => {
           bgRemoveUtils.cancel()
@@ -480,7 +480,7 @@ export default defineComponent({
               if (this.backgroundLocked) return this.handleLockedNotify()
               this.setBgImageControl({
                 pageIndex: pageUtils.currFocusPageIndex,
-                imgControl: !this.backgroundImgControl
+                imgControl: false
               })
             }
             break
@@ -508,6 +508,7 @@ export default defineComponent({
             if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
               this.addRecentlyColors(colorUtils.currColor)
             }
+            break
           }
         }
         if (this.showExtraColorPanel) {
