@@ -36,7 +36,7 @@ import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { IFooterTabProps } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
-import { ColorEventType } from '@/store/types'
+import { ColorEventType, LayerType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
@@ -210,7 +210,14 @@ export default defineComponent({
       modalInfo: 'vivisticker/getModalInfo'
     }),
     contentEditable(): boolean {
-      return this.currSubSelectedInfo.index >= 0 ? this.currSelectedInfo.layers[0]?.layers[this.currSubSelectedInfo.index]?.contentEditable : this.currSelectedInfo.layers[0]?.contentEditable
+      if (this.currSubSelectedInfo.index >= 0) {
+        if (this.currSelectedInfo.layers[0]?.type === LayerType.group) {
+          return this.currSelectedInfo.layers[0]?.layers[this.currSubSelectedInfo.index]?.contentEditable
+        } else {
+          return false
+        }
+      }
+      return this.currSelectedInfo.layers[0]?.contentEditable
     },
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
@@ -293,6 +300,7 @@ export default defineComponent({
       }
     },
     outerClick() {
+      console.log('outer click')
       if (this.isInEditor) {
         vivistickerUtils.deselect()
       }
