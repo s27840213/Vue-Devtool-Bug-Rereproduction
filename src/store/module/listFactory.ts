@@ -87,6 +87,7 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit('SET_STATE', { pending: true, locale })
       try {
+        const isAdmin = store.getters['user/isAdmin']
         const { data } = await this.api({
           token: '1',
           locale,
@@ -94,7 +95,7 @@ export default function (this: any) {
           listAll: 0,
           listCategory: 1,
           pageIndex: state.nextCategory,
-          cache: true
+          cache: !isAdmin
         })
         if (writeBack) commit('SET_CATEGORIES', data.data)
         else return data.data
@@ -131,7 +132,8 @@ export default function (this: any) {
       commit('SET_STATE', { pending: true, locale })
       if (keyword) commit('SET_STATE', { keyword })
       try {
-        const needCache = !(keyword && find(state.categories, ['title', keyword])?.is_recent)
+        const isAdmin = store.getters['user/isAdmin']
+        const needCache = !((keyword && find(state.categories, ['title', keyword])?.is_recent) || isAdmin)
         const { data } = await this.api({
           token: needCache ? '1' : store.getters['user/getToken'],
           locale,
@@ -358,8 +360,8 @@ export default function (this: any) {
     nextParams: (state) => {
       let { nextPage, nextSearch, keyword, theme, locale } = state
       const isAdmin = store.getters['user/isAdmin']
-      const needCache = !(keyword && find(state.categories, ['title', keyword])?.is_recent) &&
-        !(keyword.includes('::') && isAdmin)
+      const needCache = !((keyword && find(state.categories, ['title', keyword])?.is_recent) ||
+        isAdmin)
       if (keyword && keyword.startsWith('tag::') &&
         this.namespace === 'templates') {
         theme = themeUtils.sortSelectedTheme(theme)

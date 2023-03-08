@@ -56,13 +56,20 @@ class EditorUtils {
 
   handleContentScaleCalc(page: IPage | IBgRemoveInfo) {
     const { hasBleed } = pageUtils
-    const { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
+    let { width, height } = hasBleed && !pageUtils.inBgRemoveMode ? pageUtils.getPageSizeWithBleeds(page as IPage) : page
+    const aspectRatio = width / height
+
+    if (pageUtils.inBgRemoveMode) {
+      width = 1600
+      height = width / aspectRatio
+    }
+
     if (!this.mobileHeight || this.mobileWidth) {
       const mobileEditor = document.getElementById('mobile-editor__content')
       if (mobileEditor) {
         this.setMobileHW({
           width: mobileEditor.clientWidth,
-          height: mobileEditor.clientHeight
+          height: mobileEditor.clientHeight - (pageUtils.inBgRemoveMode ? 60 : 0)
         })
       }
     }

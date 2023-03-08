@@ -20,6 +20,7 @@ for (const isMobile of [true, false]) {
 
     it(`Unsplash image${suffix}`, function () {
       cy.visit('/editor')
+        .disableTransition()
         .importDesign('flower.json')
         .get('.nu-layer .nu-image img').and(($img: JQuery<HTMLImageElement>) => {
           // "naturalWidth" and "naturalHeight" are set when the image loads
@@ -40,6 +41,7 @@ for (const isMobile of [true, false]) {
     if (!isMobile) {
       it(`Auto BG remove${suffix}`, function () {
         cy.visit('/editor')
+          .disableTransition()
           .importDesign('flower.json')
           .get('.nu-image')
           .imageAutoBgRemove()
@@ -56,6 +58,7 @@ for (const isMobile of [true, false]) {
       })
       it('Manually BG remove', function () {
         cy.visit('/editor')
+          .disableTransition()
           .importDesign('flower.json')
           .get('.nu-image')
           .imageManuallyBgRemove()
@@ -88,6 +91,7 @@ for (const isMobile of [true, false]) {
       }
 
       cy.visit('/editor')
+        .disableTransition()
         .importDesign('2flower.json')
         .get('.nu-layer .nu-image img').and(($img: JQuery<HTMLImageElement>) => {
           // "naturalWidth" and "naturalHeight" are set when the image loads
