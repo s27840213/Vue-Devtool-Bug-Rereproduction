@@ -392,19 +392,18 @@ export default defineComponent({
         return this.photoTabs
       } else if (this.showFontTabs) {
         return [...this.fontTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
-      } else if (this.showFrameTabs) {
-        if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
-          return this.photoTabs
-        }
-        return this.frameTabs
       } else if (this.showShapeSetting) {
         return [...this.objectTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
       } else if (this.inBgSettingMode) {
         return this.bgSettingTab
       } else if (this.isGroupOrTmp) {
         return this.genearlLayerTabs
+      } else if (this.showFrameTabs) {
+        if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
+          return this.photoTabs
+        }
+        return this.frameTabs
       }
-
       return []
     },
     globalSelectedColor(): string {
