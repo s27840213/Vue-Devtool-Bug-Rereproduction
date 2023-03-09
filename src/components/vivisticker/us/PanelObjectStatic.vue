@@ -10,7 +10,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
     recycle-scroller(class="panel-static__categorys__list" :items="listCategories" direction="horizontal" @scroll-end="(nextCategory !== -1) && getCategories()")
       template(v-slot="{ item }")
         div(class="panel-static__categorys__category" :class="{'selected': item.title === keyword}" @click="handleCategorySearch(item.title)")
-          div(class="panel-static__categorys__category__icon" :style="iconStyles(item.list)")
+          div(class="panel-static__categorys__category__icon" :style="iconStyles(item.list, item.coverId)")
   tags(v-if="isInCategory && tags && tags.length" class="panel-static__tags"
       :tags="tags" theme="dark" @search="handleSearch")
   //- Search result and static main content
@@ -29,7 +29,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
         svg-icon(iconName="favorites-empty" iconWidth="42px" iconColor="white")
         span(class="panel-static__favorites-empty--title") {{$t('NN0765')}}
         span(class="text-black-5") {{$t('NN0764')}}
-    template(v-slot:category-list-rows="{ list, title, isFavorite }")
+    template(v-slot:category-list-rows="{ list, title, isFavorite, coverUrl }")
       category-list-rows(v-if="showFav"
           :list="list"
           :title="title"
@@ -49,14 +49,14 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
               @click4in1="click4in1"
               @dbclick4in1="toggleFavorites4in1"
               @dbclick="toggleFavoritesItem")
-      div(v-else class="panel-static__card" @click="item.categorySearch && item.categorySearch(title)")
-        div(class="panel-static__card__cover" :style="coverStyles(list)")
-          div(class="panel-static__card__label")
-            div(class="panel-static__card__label__title caption-MD") {{ title }}
-            svg-icon(v-if="isFavorite !== undefined"
-              :iconName="isFavorite ? 'favorites-fill' : 'heart'"
-              iconWidth="24px"
-              :style="{color: isFavorite ? '#FC5757' : '#9C9C9C'}"
+      div(v-else class="panel-static__card" :style="cardStyles" @click="item.categorySearch && item.categorySearch(title)")
+        img(class="panel-static__card__cover" :src="coverSrc(coverUrl)" @error="imgOnerror")
+        div(class="panel-static__card__label")
+          div(class="panel-static__card__label__title caption-MD") {{ title }}
+          svg-icon(v-if="isFavorite !== undefined"
+            :iconName="isFavorite ? 'favorites-fill' : 'heart'"
+            iconWidth="24px"
+            :style="{color: isFavorite ? '#FC5757' : '#9C9C9C'}"
               @click="toggleFaovoritesCategoryByTitle($event, title)")
     template(v-slot:category-object-item="{ list }")
       div(class="panel-static__items")
@@ -115,7 +115,8 @@ export default defineComponent({
         favoritesContent: 0,
         favoritesSearchResult: 0
       },
-      windowWidth: window.outerWidth
+      windowWidth: window.outerWidth,
+      fallbackSrc: require('@/assets/img/svg/image-preview.svg'),
     }
   },
   computed: {
@@ -269,6 +270,11 @@ export default defineComponent({
     cardHeight(): number {
       return (this.windowWidth * (this.isTablet ? 0.9 : 1) - (this.isTablet ? 0 : 32)) * 9 / 16
     },
+    cardStyles(): {[key: string]: string} {
+      return {
+        height: `${this.cardHeight}px`,
+      }
+    },
   },
   mounted() {
     generalUtils.panelInit('object',
@@ -421,19 +427,20 @@ export default defineComponent({
           }
         })
     },
-    coverStyles(list: ICategoryItem): {[key: string]: string} {
-      const coverUrl = 'https://template.vivipic.com/template/tUlTAFoMa7dkbxrfuphe/prev_4x?ver=3'
-      return {
-        height: `${this.cardHeight}px`,
-        backgroundImage: `url(${coverUrl})`
-      }
+    coverSrc(coverUrl: string): string {
+      const prevType = 'prev_4x'
+      return coverUrl ? [coverUrl, prevType].join('/') : this.fallbackSrc
     },
-    iconStyles(list: IListServiceContentDataItem[]): {[key: string]: string} {
-      const iconUrl = `https://template.vivipic.com/svg/${list[0].id}/prev?ver=${list[0].ver}`
+    iconStyles(list: IListServiceContentDataItem[], coverId?: string): {[key: string]: string} {
+      const iconUrl = `https://template.vivipic.com/svg/${coverId || list[0].id}/prev`
       return {
         backgroundImage: `url(${iconUrl})`
       }
     },
+    imgOnerror(e: Event) {
+      const target = (e.target as HTMLImageElement)
+      target.src = this.fallbackSrc
+    }
   }
 })
 </script>
@@ -489,12 +496,15 @@ export default defineComponent({
     grid-template-columns: repeat(4, 1fr);
   }
   &__card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    overflow: hidden;
     &__cover {
       width: 100%;
-      border-radius: 10px;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: cover;
+      height: 100%;
+      object-fit: cover;
     }
     &__label {
       display: flex;

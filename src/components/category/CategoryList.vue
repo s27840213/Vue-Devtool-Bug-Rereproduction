@@ -2,13 +2,15 @@
 recycle-scroller(class="category-list" id="recycle" :items="list")
   template(v-slot="{ item }")
     observer-sentinel(v-if="item.sentinel"
-      :key="item.id"
+      :key="item.id + '_sentinel'"
       :target="`.category-list_${item.type}`"
       @callback="onLoadMore(item.moreType)")
     slot(:name="item.type" :key="item.id"
       :list="item.list"
       :title="item.title"
-      :isFavorite="item.isFavorite")
+      :isFavorite="item.isFavorite"
+      :coverId="item.coverId"
+      :coverUrl="item.coverUrl")
   template(#before)
     slot(name="before")
   template(#after)
