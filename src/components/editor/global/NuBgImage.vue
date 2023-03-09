@@ -161,6 +161,9 @@ export default defineComponent({
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
       isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
+    ...mapState('mobileEditor', {
+      inAllPagesMode: 'mobileAllPageMode',
+    }),
     ...mapState('user', ['imgSizeMap', 'userId', 'dpi']),
     configStyles(): IImageStyle {
       return this.image.config.styles
@@ -220,7 +223,7 @@ export default defineComponent({
     },
     mainStyles(): any {
       return {
-        ...(this.isAdjustImage && { transform: 'translateZ(0)' }),
+        ...(this.isAdjustImage && !this.inAllPagesMode && { transform: 'translateZ(0)' }),
         margin: this.padding.split(' ').map(val => '-' + val).join(' '),
         padding: this.padding,
         opacity: this.image.config.styles.opacity / 100,

@@ -271,6 +271,9 @@ export default defineComponent({
     ...mapState('text', ['sel', 'props']),
     ...mapState('shadow', ['processId', 'handleId', 'uploadId']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
+    ...mapState('mobileEditor', {
+      inAllPagesMode: 'mobileAllPageMode',
+    }),
     ...mapState('imgControl', {
       imgCtrlConfig: 'image'
     }),
@@ -318,7 +321,11 @@ export default defineComponent({
       if (this.isImgCtrl || this.inFrame || this.$isTouchDevice() || this.useMobileEditor) {
         return {}
       }
-      return { transform: `translateZ(${this.config.styles.zindex}px)`, ...this.transformStyle }
+      return {
+        transform: `translateZ(${this.config.styles.zindex}px)`,
+        'pointer-events': this.inAllPagesMode ? 'inherit' : 'initial',
+        ...this.transformStyle
+      }
     },
     isDragging(): boolean {
       return (this.config as ILayer).dragging
@@ -902,9 +909,6 @@ export default defineComponent({
   height: 100px;
   &:focus {
     background-color: rgba(168, 218, 220, 1);
-  }
-  &__wrapper {
-    pointer-events: initial;
   }
   &__line-mover {
     touch-action: none;
