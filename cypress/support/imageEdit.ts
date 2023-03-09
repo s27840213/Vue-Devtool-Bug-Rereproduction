@@ -130,7 +130,7 @@ Cypress.Commands.add('imageCrop', { prevSubject: 'element' }, (subject, enterCro
     .realMouseUp()
     .snapshotTest('Crop init')
     .isMobile(() => { cy.togglePanel('裁切') })
-    .notMobile(() => { cy.togglePanel('取消') })
+    .notMobile(() => { cy.togglePanel('完成') })
   return cy.get(subject.selector)
 })
 
