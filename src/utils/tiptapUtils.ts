@@ -285,7 +285,7 @@ class TiptapUtils {
       const pStyles = this.makeParagraphStyle(paragraph.attrs)
       let largestSize = 0
       const spans: ISpan[] = []
-      const pContent = fixedWidth && paragraph.content
+      const pContent = fixedWidth && paragraph.content && !this.editor.view.composing
         ? paragraph.content.flatMap(span => [...span.text]
           .map(t => Object.assign({}, span, { text: t })))
         : paragraph.content

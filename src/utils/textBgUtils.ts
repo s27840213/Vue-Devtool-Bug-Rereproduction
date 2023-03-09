@@ -87,6 +87,7 @@ class Rect {
 
   async init(config: IText) {
     this.vertical = config.styles.writingMode === 'vertical-lr'
+    const fixedWidth = isITextLetterBg(config.styles.textBg) && config.styles.textBg.fixedWidth
 
     const div = document.createElement('div')
     div.classList.add('nu-text__body')
@@ -105,6 +106,12 @@ class Rect {
           p.appendChild(span)
         } else {
           [...spanData.text].forEach(t => {
+            const isComposingText = spanData.text.length > 1
+            const fixedWidthStyle = fixedWidth && isComposingText ? {
+              letterSpacing: 0,
+              display: 'inline-block',
+            } : fixedWidth ? textBgUtils.fixedWidthStyle(spanData.styles, para.styles, config) : {}
+
             const span = document.createElement('span')
             span.classList.add('nu-text__span')
             if (t === ' ') {
@@ -115,10 +122,8 @@ class Rect {
 
             const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
             spanStyleObject.textIndent = spanStyleObject['letter-spacing'] || 'initial'
-            const fixedWidth = isITextLetterBg(config.styles.textBg) && config.styles.textBg.fixedWidth
-            Object.assign(span.style, spanStyleObject,
-              fixedWidth ? textBg.fixedWidthStyle(spanData.styles, para.styles, config) : {}
-            )
+
+            Object.assign(span.style, spanStyleObject, fixedWidthStyle)
 
             p.appendChild(span)
           })
@@ -1043,5 +1048,5 @@ class TextBg {
   }
 }
 
-const textBg = new TextBg()
-export default textBg
+const textBgUtils = new TextBg()
+export default textBgUtils

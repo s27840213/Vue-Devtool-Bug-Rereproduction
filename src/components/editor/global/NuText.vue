@@ -155,12 +155,9 @@ export default defineComponent({
         })
       }
     },
-    'config.styles.textBg': {
-      deep: true,
-      handler() {
-        this.drawSvgBG()
-      }
-    },
+    'config.styles.width'() { this.drawSvgBG() },
+    'config.styles.height'() { this.drawSvgBG() },
+    'config.styles.textBg'() { this.drawSvgBG() },
     'config.isAutoResizeNeeded': {
       handler(newVal) {
         if (newVal) {

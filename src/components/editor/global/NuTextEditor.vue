@@ -109,6 +109,7 @@ export default defineComponent({
           if (tiptapUtils.toText(currLayerInPrevStep) !== tiptapUtils.getText(editor)) { // record only when the updated text has not been recorded yet
             toRecord = true
           }
+          this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()) })
           this.$emit('compositionend', toRecord)
           tiptapUtils.agent(editor => {
             // setContent will be skipped while composing even when isSetContentRequired is true in NuController/NuSubController.
