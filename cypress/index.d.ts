@@ -36,6 +36,7 @@ declare namespace Cypress {
       after: (subject: JQuery<HTMLElement>) => void): Chainable<JQuery<HTMLElement>>
     layerRotate(): Chainable<JQuery<HTMLElement>>
     layerScale(): Chainable<JQuery<HTMLElement>>
+    rotateAndResize(): Chainable<JQuery<HTMLElement>>
     layerMoveToPage2(): Chainable<JQuery<HTMLElement>>
 
     // imageEdit.ts
