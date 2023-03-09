@@ -474,7 +474,7 @@ class TextUtils {
         spanStyle = {
           font: spanEl.style.fontFamily.split(',')[0],
           weight: spanEl.style.fontWeight,
-          size: spanEl.style.fontSize ? Math.round(parseFloat(spanEl.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100
+          size: spanEl.style.fontSize ? Math.round(parseFloat(spanEl.style.fontSize.split('px')[0]) * 3 / 4 * 100) / 100
             : Math.round(parseFloat(this.getCurrTextProps?.fontSize ?? '0') / (LayerUtils.getCurrLayer as IText).styles.scale),
           decoration: spanEl.style.textDecorationLine,
           style: spanEl.style.fontStyle,
@@ -500,7 +500,7 @@ class TextUtils {
         const floatNum = /[+-]?\d+(\.\d+)?/
         const lineHeight = pEl.style.lineHeight.match(floatNum) !== null ? parseFloat(pEl.style.lineHeight.match(floatNum)![0]) : -1
         const fontSpacing = pEl.style.letterSpacing.match(floatNum) !== null ? parseFloat(pEl.style.letterSpacing.match(floatNum)![0]) : 0
-        const fontSize = Math.round(parseFloat(pEl.style.fontSize.split('px')[0]) / 1.333333 * 100) / 100
+        const fontSize = Math.round(parseFloat(pEl.style.fontSize.split('px')[0]) * 3 / 4 * 100) / 100
         const pStyle: IParagraphStyle = { lineHeight, fontSpacing, size: fontSize, align: pEl.style.textAlign.replace('text-align-', '') }
         paragraphs.push({ styles: pStyle, spans: spans, id: GeneralUtils.generateRandomString(8) })
       }

@@ -1,13 +1,13 @@
 <template lang="pug">
 div(class="font-size-selector size-bar relative")
   div(class="pointer"
-    @pointerdown="fontSizeStepping(-step)"
+    @pointerdown="fontSizeStepping(-1)"
     @contextmenu.prevent) -
   button(class="font-size-selector__range-input-button" @click="handleValueModal")
     input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
           @change="setSize" :value="fontSize" :disabled="fontSize === '--'")
   div(class="pointer"
-    @pointerdown="fontSizeStepping(step)"
+    @pointerdown="fontSizeStepping(1)"
     @contextmenu.prevent) +
   value-selector(v-if="openValueSelector"
               v-click-outside="handleValueModal"
@@ -18,7 +18,6 @@ div(class="font-size-selector size-bar relative")
 
 <script lang="ts">
 import ValueSelector from '@/components/ValueSelector.vue'
-import { IGroup } from '@/interfaces/layer'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -63,15 +62,8 @@ export default defineComponent({
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
     fontSize(): number | string {
       return this.props.fontSize === '--' ? this.props.fontSize : _.round(this.props.fontSize, 2)
+      // return this.props.fontSize
     },
-    step(): number {
-      const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
-      let scale = currLayer.styles.scale
-      if (subLayerIdx !== -1) {
-        scale *= (currLayer as IGroup).layers[subLayerIdx].styles.scale
-      }
-      return 1 / scale
-    }
   },
   methods: {
     handleValueModal() {
