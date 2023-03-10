@@ -32,8 +32,8 @@ export interface IPage extends IPageSizeWithBleeds {
   mobilePhysicalSize: {
     pageCenterPos: ICoordinate,
     originSize: ISize,
-    shownSize: ISize
-  }
+  },
+  shownSize: ISize
   id: string,
   x: number,
   y: number,

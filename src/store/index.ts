@@ -412,6 +412,7 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[pageInfo.index].config.physicalWidth = pageInfo.physicalWidth
     state.pages[pageInfo.index].config.physicalHeight = pageInfo.physicalHeight
     state.pages[pageInfo.index].config.unit = pageInfo.unit
+    state.pages[pageInfo.index].config.shownSize = { width: pageInfo.width, height: pageInfo.height }
   },
   SET_designId(state: IEditorState, designId: string) {
     state.designId = designId
@@ -1042,7 +1043,12 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, contentScaleRatio } = payload
     state.pages[pageIndex].config.contentScaleRatio = contentScaleRatio
   },
-  SET_pagePysicalSize(state: IEditorState, payload: { pageIndex: number, originSize: ISize, pageCenterPos: ICoordinate }) {
+  UPDATE_pageShownSize(state: IEditorState, payload: { pageIndex: number, shownSize: { width: number, height: number } }) {
+    const { pageIndex, shownSize } = payload
+    state.pages[pageIndex].config.shownSize.width = shownSize.width
+    state.pages[pageIndex].config.shownSize.height = shownSize.height
+  },
+  SET_pagePhysicalSize(state: IEditorState, payload: { pageIndex: number, originSize?: ISize, pageCenterPos?: ICoordinate }) {
     const { pageIndex, originSize, pageCenterPos } = payload
     if (pageCenterPos) {
       Object.assign(state.pages[pageIndex].config.mobilePhysicalSize.pageCenterPos, pageCenterPos)

@@ -149,9 +149,16 @@ class PageUtils {
       })
     }
 
+    pageData.shownSize ||= { width: 1080, height: 1080 }
     // set physical size to px size if not exist
-    if (pageData.width) pageData.physicalWidth ||= pageData.width
-    if (pageData.height) pageData.physicalHeight ||= pageData.height
+    if (pageData.width) {
+      pageData.physicalWidth ||= pageData.width
+      pageData.shownSize.width = pageData.width
+    }
+    if (pageData.height) {
+      pageData.physicalHeight ||= pageData.height
+      pageData.shownSize.height = pageData.height
+    }
     pageData.unit ||= 'px'
 
     const defaultBleeds = this.getPageDefaultBleeds()
@@ -196,15 +203,14 @@ class PageUtils {
       mobilePhysicalSize: {
         pageCenterPos: { x: 0, y: 0 },
         originSize: { width: 0, height: 0 },
-        shownSize: { width: 0, height: 0 }
       },
+      shownSize: { width: 1080, height: 1080 },
       isEnableBleed: false,
       bleeds: defaultBleeds,
       physicalBleeds: defaultBleeds,
       isAutoResizeNeeded: false,
       contentScaleRatio: 1
     }
-    // pageData.snapUtils && delete pageData.snapUtils
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))
   }
 
@@ -923,8 +929,12 @@ class PageUtils {
     })
   }
 
-  setMobilePhysicalPage(payload: { pageIndex: number, originSize?: ISize, pageCenterPos?: ICoordinate }) {
-    store.commit('SET_pagePysicalSize', payload)
+  setMobilePhysicalPage(payload: { pageIndex: number, originSize?: ISize, pageCenterPos?: ICoordinate, shownSize?: ISize }) {
+    store.commit('SET_pagePhysicalSize', payload)
+  }
+
+  updatePageShownSize(pageIndex: number, shownSize: ISize) {
+    store.commit('UPDATE_pageShownSize', { pageIndex, shownSize })
   }
 }
 
