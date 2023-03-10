@@ -1,37 +1,34 @@
 <template lang="pug">
 div(class="panel-objects")
-  div(class="panel-objects__nav" :style="navStyles")
-    template(v-if="!isInCategory")
-      template(v-if="isShowSearchBar && !isFavorites")
-        search-bar(class="panel-objects__nav__searchbar"
-            :placeholder="$t('NN0092', { target: $tc('NN0003', 1) })"
-            clear
-            :defaultKeyword="keywordLabel"
-            vivisticker="dark"
-            :color="{close: 'black-5', search: 'black-5'}"
-            :isFavorite="keywordIsFavaorites"
-            :style="{width: '100%'}"
-            @search="handleSearch"
-            @favorite="toggleFavoritesTag")
-        div(class="panel-objects__nav__btn")
-          Nubtn(theme="secondary" size="sm" @click="handleCancel" :style="{height: '100%', backgroundColor: '#D3D3D3', borderRadius: '10px'}") {{ "Cancel" }}
-      template(v-else)
-        div(v-show="!isFavorites" class="panel-objects__nav__icon")
-          svg-icon(class="pointer"
-            iconName="clock"
-            iconColor="white"
-            iconWidth="24px"
-            @click="handleRecent")
-        tabs(class="panel-objects__nav__tabs"
-            :tabs="[$t('NN0758'), 'GIFs', $t('NN0759')]"
-            v-model="tabIndex"
-            :style="{gridColumn: '2 / 3', marginBottom: '14px'}")
-        div(v-show="!isFavorites" class="panel-objects__nav__icon")
-          svg-icon(class="pointer"
-            iconName="search"
-            iconColor="white"
-            iconWidth="24px"
-            @click="isShowSearchBar = true")
+  div(v-show="!isInCategory" class="panel-objects__nav" :style="navStyles")
+    template(v-if="isShowSearchBar && !isFavorites")
+      search-bar(class="panel-objects__nav__searchbar"
+          :placeholder="$t('NN0092', { target: $tc('NN0003', 1) })"
+          clear
+          :defaultKeyword="keywordLabel"
+          vivisticker="dark"
+          :color="{close: 'black-5', search: 'black-5'}"
+          :isFavorite="keywordIsFavaorites"
+          @search="handleSearch"
+          @favorite="toggleFavoritesTag")
+      Nubtn(theme="secondary" size="sm" @click="handleCancel" :style="{height: 'fit-content', backgroundColor: '#D3D3D3', borderRadius: '10px', padding: '8px 8px'}") {{ "Cancel" }}
+    template(v-else)
+      div(v-show="!isFavorites" class="panel-objects__nav__icon")
+        svg-icon(class="pointer"
+          iconName="clock"
+          iconColor="white"
+          iconWidth="24px"
+          @click="handleRecent")
+      tabs(class="panel-objects__nav__tabs"
+          :tabs="[$t('NN0758'), 'GIFs', $t('NN0759')]"
+          v-model="tabIndex"
+          :style="{marginBottom: '0px'}")
+      div(v-show="!isFavorites" class="panel-objects__nav__icon")
+        svg-icon(class="pointer"
+          iconName="search"
+          iconColor="white"
+          iconWidth="24px"
+          @click="showSearchBar")
   //- Favorites tabs
   div(v-if="isFavorites && !isInCategory" class="panel-objects__favorites-tabs")
     tabs(:tabs="[$t('NN0758'), 'GIFs']" theme="dark-rect"
@@ -40,10 +37,10 @@ div(class="panel-objects")
             @click="doubleTapTips")
   keep-alive
     panel-object-static-us(v-if="isStatic || isFavoritesStatic"
-      :showFav="isFavoritesStatic" ref="static" @search="isShowSearchBar = true")
+      :showFav="isFavoritesStatic" ref="static" @search="showSearchBar")
   keep-alive
     panel-object-gifs-us(v-if="isGifs || isFavoritesGifs"
-      :showFav="isFavoritesGifs" ref="gif" @search="isShowSearchBar = true")
+      :showFav="isFavoritesGifs" ref="gif" @search="showSearchBar")
 </template>
 
 <script lang="ts">
@@ -53,8 +50,8 @@ import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import Nubtn from '../../global/Nubtn.vue'
 import PanelObject from '../PanelObject.vue'
-import PanelObjectStaticUs from './PanelObjectStatic.vue'
 import PanelObjectGifsUs from './PanelObjectGifs.vue'
+import PanelObjectStaticUs from './PanelObjectStatic.vue'
 
 export default defineComponent({
   name: 'panel-object-us',
@@ -94,7 +91,7 @@ export default defineComponent({
     },
     navStyles() {
       return {
-        ...(this.isShowSearchBar && { display: 'flex', columnGap: '10px', margin: '8px 0' }),
+        ...(this.isShowSearchBar && { gridTemplateColumns: '1fr auto', columnGap: '10px' }),
         ...(this.isInCategory && { gridTemplateColumns: 'auto' })
       }
     },
@@ -142,6 +139,9 @@ export default defineComponent({
       if (this.isStatic) this.toggleFavoriteStatic({ tags: { keyword: this.keywordLabel, active: false } })
       else if (this.isGifs) this.toggleFavoriteGif({ tags: `${this.nextTagContent.keyword}:${this.nextTagContent.type}` })
     },
+    showSearchBar() {
+      if (!this.isInCategory) this.isShowSearchBar = true
+    },
   }
 })
 </script>
@@ -153,20 +153,20 @@ export default defineComponent({
   display: grid;
   grid-template-rows: auto auto 1fr;
   &__nav {
+    height: 56px;
     display: grid;
+    align-items: center;
     grid-template-columns: 32px auto 32px;
     &__tabs {
-      margin-top: 14px;
+      grid-column: 2 / 3;
     }
     &__icon {
       display: flex;
       justify-content: center;
       align-items: center;
     }
-    &__btn {
-      display: flex;
-      justify-content: right;
-      align-items: center;
+    &__searchbar {
+      width: 100%;
     }
   }
   &__favorites-tabs {
