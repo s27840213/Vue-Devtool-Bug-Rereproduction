@@ -1,10 +1,10 @@
 <template lang="pug">
 div(class="overflow-container"
     :style="pageStyles")
-  div(:style="stylesWith3DPreserve")
+  div(class="full-w-h" :style="stylesWith3DPreserve")
     div(v-if="imgLoaded"
-        :class="['page-content']"
-        :style="pageStyles"
+        :class="['full-w-h', 'page-content']"
+        :style="pageContentStyles"
         ref="page-content"
         @drop.prevent="onDrop"
         @dragover.prevent
@@ -14,7 +14,7 @@ div(class="overflow-container"
         @dblclick="pageDblClickHandler()"
         @tap="tapPageContent")
       //- @dblclick will not be trigger in mobile, use @tap + doubleTapUtils instead.
-      div(class="content" :class="`nu-page-content-${pageIndex}`" :style="contentStyles")
+      div(class="content full-w-h" :class="`nu-page-content-${pageIndex}`" :style="contentStyles")
         nu-bg-image(
             :image="config.backgroundImage"
             :pageIndex="pageIndex"
@@ -135,21 +135,23 @@ export default defineComponent({
       return {
         width: `${this.config.width * this.contentScaleRatio + this.margin.right}px`,
         height: `${this.config.height * this.contentScaleRatio + this.margin.bottom}px`,
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
-        // ...(this.userId === 'backendRendering' && { paddingBottom: 8 + 'px' })
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : ''
+      }
+    },
+    pageContentStyles(): { [index: string]: string } {
+      return {
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : ''
       }
     },
     stylesWith3DPreserve(): { [index: string]: string } {
       return {
-        width: `${this.config.width * this.contentScaleRatio}px`,
-        height: `${this.config.height * this.contentScaleRatio}px`,
-        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : 'initial'
+        // width: `${this.config.width * this.contentScaleRatio}px`,
+        // height: `${this.config.height * this.contentScaleRatio}px`,
+        transformStyle: pageUtils._3dEnabledPageIndex === this.pageIndex ? 'preserve-3d' : ''
       }
     },
     layerFilter(): any {
       const filterResult = this.config.layers.filter((layer: ILayer) => {
-        // return layer.type !== LayerType.shape
-        // return layer.type !== LayerType.text
         return layer
       })
 
@@ -165,8 +167,8 @@ export default defineComponent({
     contentStyles() {
       if (!this.config.isEnableBleed) {
         return {
-          width: this.config.width * this.contentScaleRatio + 'px',
-          height: this.config.height * this.contentScaleRatio + 'px',
+          // width: this.config.width * this.contentScaleRatio + 'px',
+          // height: this.config.height * this.contentScaleRatio + 'px',
           padding: [
             '0px',
             this.margin.right + 'px',

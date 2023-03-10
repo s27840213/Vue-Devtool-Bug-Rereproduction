@@ -24,9 +24,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
         :style="flipStyles()"
         class="nu-image__svg"
         :class="{'layer-flip': flippedAnimation() }"
-        :viewBox="svgViewBox()"
-        :width="svgImageWidth()"
-        :height="svgImageHeight()"
+        :viewBox="`0 0 ${imgNaturalSize.width} ${imgNaturalSize.height}`"
         preserveAspectRatio="none"
         role="image")
         defs
@@ -42,10 +40,12 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
                 v-bind="child.attrs")
         image(:xlink:href="finalSrc" ref="img"
           :filter="`url(#${filterId})`"
+          :width="imgNaturalSize.width"
+          :height="imgNaturalSize.height"
           class="nu-image__picture"
           draggable="false"
           @error="onError"
-          @load="onLoad")
+          @load="onAdjustImgLoad")
       img(v-else ref="img"
         :style="flipStyles()"
         :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation() }"
@@ -76,7 +76,7 @@ import groupUtils from '@/utils/groupUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SIZE, CANVAS_SPACE } from '@/utils/imageShadowUtils'
-import ImageUtils from '@/utils/imageUtils'
+import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import logUtils from '@/utils/logUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -132,7 +132,7 @@ export default defineComponent({
     }
   },
   async created() {
-    this.src = this.config.panelPreviewSrc ?? ImageUtils.getSrc(this.config, this.getPreviewSize())
+    this.src = this.config.panelPreviewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
     this.handleInitLoad()
     const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
     if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender && !isPrimaryLayerFrame) {
@@ -167,8 +167,8 @@ export default defineComponent({
         img.onerror = (e) => {
           logUtils.setLog('Nu-image: img onload error in mounted hook: src:' + img.src + 'error:' + e.toString())
         }
-        const imgSize = ImageUtils.getSrcSize(this.config.srcObj, 100)
-        img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+        const imgSize = imageUtils.getSrcSize(this.config.srcObj, 100)
+        img.src = imageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       } else {
         stepsUtils.record()
       }
@@ -198,6 +198,10 @@ export default defineComponent({
         drawCanvasW: 0,
         drawCanvasH: 0,
         MAXSIZE: 0
+      },
+      imgNaturalSize: {
+        width: 0,
+        height: 0
       }
       // canvas: undefined as HTMLCanvasElement | undefined
     }
@@ -326,7 +330,7 @@ export default defineComponent({
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     finalSrc(): string {
       if (this.$route.name === 'Preview') {
-        return ImageUtils.appendCompQueryForVivipic(this.src)
+        return imageUtils.appendCompQueryForVivipic(this.src)
       }
       return this.src
     },
@@ -385,7 +389,7 @@ export default defineComponent({
           renderH *= dpi / 96
         }
       }
-      return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
+      return imageUtils.getSrcSize(srcObj, imageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio * 0.01))
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
       return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
@@ -403,7 +407,7 @@ export default defineComponent({
       this.isOnError = true
       let updater
       const { srcObj, styles: { width, height } } = this.config
-      if (ImageUtils.getSrcSize(srcObj, Math.max(width, height)) === 'xtra') {
+      if (imageUtils.getSrcSize(srcObj, Math.max(width, height)) === 'xtra') {
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
           srcObj: {
             ...srcObj,
@@ -424,7 +428,7 @@ export default defineComponent({
       if (updater !== undefined) {
         try {
           updater().then(() => {
-            this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getImgDimension))
+            this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
           })
         } catch (error) {
           if (this.src.indexOf('data:image/png;base64') !== 0) {
@@ -440,9 +444,21 @@ export default defineComponent({
         }
       }
     },
+    onAdjustImgLoad(e: Event) {
+      imageUtils.imgLoadHandler(this.src, (img) => {
+        if (this.imgNaturalSize.width !== img.width || this.imgNaturalSize.height !== img.height) {
+          this.imgNaturalSize.width = img.width
+          this.imgNaturalSize.height = img.height
+        }
+      })
+    },
     onLoad(e: Event) {
       this.isOnError = false
       const img = e.target as HTMLImageElement
+      if (this.imgNaturalSize.width !== img.width || this.imgNaturalSize.height !== img.height) {
+        this.imgNaturalSize.width = img.width
+        this.imgNaturalSize.height = img.height
+      }
       const physicalRatio = img.naturalWidth / img.naturalHeight
       const layerRatio = this.config.styles.imgWidth / this.config.styles.imgHeight
       if (physicalRatio && layerRatio && Math.abs(physicalRatio - layerRatio) > 0.1 && this.config.srcObj.type !== 'frame') {
@@ -480,19 +496,19 @@ export default defineComponent({
         return
       }
       let isPrimaryImgLoaded = false
-      const urlId = ImageUtils.getImgIdentifier(this.config.srcObj)
-      const previewSrc = this.config.panelPreviewSrc ?? ImageUtils.getSrc(this.config, this.getPreviewSize())
-      ImageUtils.imgLoadHandler(previewSrc, () => {
-        if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
+      const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
+      const previewSrc = this.config.panelPreviewSrc ?? imageUtils.getSrc(this.config, this.getPreviewSize())
+      imageUtils.imgLoadHandler(previewSrc, () => {
+        if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
           this.src = previewSrc
         }
       })
 
       const currSize = this.getImgDimension
-      const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
+      const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, currSize))
       return new Promise<void>((resolve, reject) => {
-        ImageUtils.imgLoadHandler(src, () => {
-          if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+        imageUtils.imgLoadHandler(src, () => {
+          if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
             isPrimaryImgLoaded = true
             this.src = src
             resolve()
@@ -519,10 +535,10 @@ export default defineComponent({
       if (!this.isOnError && this.config.previewSrc === undefined) {
         const { type } = this.config.srcObj
         if (type === 'background') return
-        const currUrl = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
-        const urlId = ImageUtils.getImgIdentifier(this.config.srcObj)
-        ImageUtils.imgLoadHandler(currUrl, async () => {
-          if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+        const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, currSize))
+        const urlId = imageUtils.getImgIdentifier(this.config.srcObj)
+        imageUtils.imgLoadHandler(currUrl, async () => {
+          if (imageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
             this.src = currUrl
             if (newVal > oldVal) {
               await this.preLoadImg('next', currSize)
@@ -550,14 +566,14 @@ export default defineComponent({
               this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
             })
         }
-        img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, val, preLoadType)))
+        img.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, imageUtils.getSrcSize(this.config.srcObj, val, preLoadType)))
       })
     },
     handleIsTransparent() {
       if (this.forRender || ['frame', 'tmp', 'group'].includes(this.primaryLayerType())) return
-      const imgSize = ImageUtils.getSrcSize(this.config.srcObj, 100)
-      const src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      ImageUtils.imgLoadHandler(src,
+      const imgSize = imageUtils.getSrcSize(this.config.srcObj, 100)
+      const src = imageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      imageUtils.imgLoadHandler(src,
         (img) => {
           if (!this.hasDestroyed) {
             const isTransparent = imageShadowUtils.isTransparentBg(img)
@@ -577,7 +593,7 @@ export default defineComponent({
         if (this.isAdjustImage()) {
           this.handleIsTransparent()
         }
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getImgDimension))
+        this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.config, this.getImgDimension))
       }
     },
     handleShadowInit() {
@@ -634,7 +650,7 @@ export default defineComponent({
 
       let img = new Image()
       if (!['unsplash', 'pixels'].includes(this.config.srcObj.type) && !this.shadowBuff.MAXSIZE) {
-        const res = await ImageUtils.getImgSize(this.config.srcObj, false)
+        const res = await imageUtils.getImgSize(this.config.srcObj, false)
         if (res) {
           this.shadowBuff.MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), CANVAS_MAX_SIZE)
         }
@@ -653,7 +669,7 @@ export default defineComponent({
               layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { previewSrc: '' })
             }
             img.crossOrigin = 'anonymous'
-            img.src = ImageUtils.getSrc(this.config,
+            img.src = imageUtils.getSrc(this.config,
               ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
               `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             await new Promise<void>((resolve) => {
@@ -917,17 +933,6 @@ export default defineComponent({
         transform: 'translate(0,0)'
       }
     },
-    svgImageWidth(): number {
-      const { imgWidth } = this.adjustImgStyles()
-      return imgWidth * this.contentScaleRatio
-    },
-    svgImageHeight(): number {
-      const { imgHeight } = this.adjustImgStyles()
-      return imgHeight * this.contentScaleRatio
-    },
-    svgViewBox(): string {
-      return `0 0 ${this.svgImageWidth()} ${this.svgImageHeight()}`
-    },
     cssFilterElms() {
       const { adjust, width, height } = this.adjustImgStyles()
       // @TODO: only for halation now
@@ -1014,7 +1019,7 @@ export default defineComponent({
     },
     getPreviewSize(): number | string {
       const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
-      return ImageUtils
+      return imageUtils
         .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
     },
     isAdjustImage(): boolean {
@@ -1072,9 +1077,9 @@ export default defineComponent({
       if (!this.shadow() || !this.shadow().srcObj) {
         return ''
       }
-      const src = ImageUtils.getSrc(this.shadow().srcObj, ImageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension))
+      const src = imageUtils.getSrc(this.shadow().srcObj, imageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension))
       if (this.$route.name === 'Preview') {
-        return ImageUtils.appendCompQueryForVivipic(src)
+        return imageUtils.appendCompQueryForVivipic(src)
       }
       return src
     },

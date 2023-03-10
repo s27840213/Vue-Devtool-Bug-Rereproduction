@@ -66,7 +66,21 @@ class CssConveter {
   }
 
   convertFlipStyle(horizontalFlip: boolean, verticalFlip: boolean): { transform: string } {
-    return { transform: `scale(${horizontalFlip ? -1 : 1}, ${verticalFlip ? -1 : 1})` }
+    if (horizontalFlip && verticalFlip) {
+      return {
+        transform: 'scaleX(-1) scaleY(-1)'
+      }
+    } else if (horizontalFlip) {
+      return {
+        transform: 'scaleX(-1)'
+      }
+    } else if (verticalFlip) {
+      return {
+        transform: 'scaleY(-1)'
+      }
+    } else {
+      return { transform: '' }
+    }
   }
 
   convertFontStyle(sourceStyles: IStyle | ITextStyle | IParagraphStyle | ISpanStyle | { [key: string]: string | number }): { [key: string]: string } {

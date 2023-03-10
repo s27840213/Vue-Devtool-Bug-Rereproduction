@@ -1,9 +1,9 @@
 <template lang="pug">
 div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false" :style="mainStyles"  @click="setInBgSettingMode" @tap="dblTap")
-  div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles()")
+  div(v-show="!isColorBackground && !(isBgImgCtrl && imgControlPageIdx === pageIndex)" class="nu-background-image__image" :style="imgStyles")
     svg(v-if="isAdjustImage"
       class="nu-background-image__svg"
-      :viewBox="svgViewBox"
+      :viewBox="`0 0 ${imgNaturalSize.width} ${imgNaturalSize.height}`"
       preserveAspectRatio="none"
       role="image")
       defs
@@ -21,10 +21,10 @@ div(v-if="!image.config.imgContorl" class="nu-background-image" draggable="false
       image(:xlink:href="finalSrc" ref="img"
         class="nu-background-image__adjust-image"
         :filter="`url(#${filterId})`"
-        :width="svgImageWidth"
-        :height="svgImageHeight"
+        :width="imgNaturalSize.width"
+        :height="imgNaturalSize.height"
         @error="onError"
-        @load="onLoad")
+        @load="onAdjustImgLoad")
     img(v-else-if="src" ref="img"
       :src="finalSrc"
       draggable="false"
@@ -48,7 +48,7 @@ import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageShadowUtils from '@/utils/imageShadowUtils'
-import ImageUtils from '@/utils/imageUtils'
+import imageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
 import unitUtils from '@/utils/unitUtils'
 import { defineComponent, PropType } from 'vue'
@@ -86,7 +86,11 @@ export default defineComponent({
   data() {
     return {
       src: '',
-      stylesBuff: {} as IImage
+      stylesBuff: {} as IImage,
+      imgNaturalSize: {
+        width: 0,
+        height: 0
+      }
     }
   },
   watch: {
@@ -121,8 +125,8 @@ export default defineComponent({
       const editorImg = this.getEditorViewImages
       if (!editorImg(assetId)) {
         await this.updateImages({ assetSet: new Set<string>([assetId]) })
-        const src = ImageUtils.getSrc(this.image.config)
-        ImageUtils.imgLoadHandler(src, () => {
+        const src = imageUtils.getSrc(this.image.config)
+        imageUtils.imgLoadHandler(src, () => {
           this.src = src
         })
       }
@@ -138,19 +142,19 @@ export default defineComponent({
             pageIndex: this.pageIndex,
             srcObj: { ...srcObj, userId: 'jpeg' }
           })
-          nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
+          nextImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
         }
       }
       nextImg.onload = () => {
         const preImg = new Image()
-        preImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj, this.getImgDimension, 'pre'))
+        preImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'pre'))
       }
-      nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
+      nextImg.src = imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
     } else {
       if (this.isAdjustImage) {
         this.handleIsTransparent()
       }
-      this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, this.getImgDimension))
+      this.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.getImgDimension))
     }
   },
   components: { NuAdjustImage },
@@ -168,9 +172,13 @@ export default defineComponent({
     configStyles(): IImageStyle {
       return this.image.config.styles
     },
+    imgStyles(): Record<string, string> {
+      console.log('img styles called')
+      return this.stylesConverter()
+    },
     finalSrc(): string {
       if (this.$route.name === 'Preview') {
-        return ImageUtils.appendCompQueryForVivipic(this.src)
+        return imageUtils.appendCompQueryForVivipic(this.src)
       }
       return this.src
     },
@@ -194,7 +202,7 @@ export default defineComponent({
           renderH *= dpi / 96
         }
       }
-      return ImageUtils.getSrcSize(srcObj, Math.max(renderW, renderH) * (this.scaleRatio / 100))
+      return imageUtils.getSrcSize(srcObj, Math.max(renderW, renderH) * (this.scaleRatio / 100))
     },
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
       return pageUtils.removeBleedsFromPageSize(this.page)
@@ -263,19 +271,6 @@ export default defineComponent({
       }
       return elms
     },
-    svgImageWidth(): number {
-      const { imgWidth } = this.image.config.styles
-      // return imgWidth * this.contentScaleRatio
-      return Math.round(imgWidth * this.contentScaleRatio)
-    },
-    svgImageHeight(): number {
-      const { imgHeight } = this.image.config.styles
-      // return imgHeight * this.contentScaleRatio
-      return Math.round(imgHeight * this.contentScaleRatio)
-    },
-    svgViewBox(): string {
-      return `0 0 ${this.svgImageWidth} ${this.svgImageHeight}`
-    },
     svgFilterElms(): any[] {
       const { adjust } = this.image.config.styles
       return imageAdjustUtil.convertAdjustToSvgFilter(adjust || {}, { styles: this.image.config.styles } as IImage)
@@ -324,8 +319,8 @@ export default defineComponent({
       if (updater !== undefined) {
         try {
           updater().then(() => {
-            const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, this.getImgDimension))
-            ImageUtils.imgLoadHandler(src, () => {
+            const src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, this.getImgDimension))
+            imageUtils.imgLoadHandler(src, () => {
               this.src = src
             })
           })
@@ -346,8 +341,8 @@ export default defineComponent({
     },
     handleIsTransparent() {
       const img = new Image()
-      const imgSize = ImageUtils.getSrcSize(this.image.config.srcObj, 100)
-      img.src = ImageUtils.getSrc(this.image.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      const imgSize = imageUtils.getSrcSize(this.image.config.srcObj, 100)
+      img.src = imageUtils.getSrc(this.image.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       img.crossOrigin = 'anoynous'
       img.onload = () => {
         this.$store.commit('SET_backgroundImageStyles', {
@@ -360,35 +355,32 @@ export default defineComponent({
         })
       }
     },
-    imgStyles(): Record<string, string> {
-      return this.stylesConverter()
-    },
     filterContainerStyles() {
       return { margin: this.padding }
     },
     async previewAsLoading() {
       let isPrimaryImgLoaded = false
       const config = this.image.config as IImage
-      const urlId = ImageUtils.getImgIdentifier(this.image.config.srcObj)
+      const urlId = imageUtils.getImgIdentifier(this.image.config.srcObj)
       if (config.previewSrc) {
         const previewSrc = config.previewSrc
-        ImageUtils.imgLoadHandler(previewSrc, () => {
-          if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
+        imageUtils.imgLoadHandler(previewSrc, () => {
+          if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
             this.src = previewSrc
           }
         })
       } else if (this.image.config.panelPreviewSrc) {
         const panelPreviewSrc = this.image.config.panelPreviewSrc
-        ImageUtils.imgLoadHandler(panelPreviewSrc, () => {
-          if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
+        imageUtils.imgLoadHandler(panelPreviewSrc, () => {
+          if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
             this.src = panelPreviewSrc
           }
         })
       }
-      const src = ImageUtils.getSrc(this.image.config)
+      const src = imageUtils.getSrc(this.image.config)
       return new Promise<void>((resolve, reject) => {
-        ImageUtils.imgLoadHandler(src, () => {
-          if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+        imageUtils.imgLoadHandler(src, () => {
+          if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
             isPrimaryImgLoaded = true
             this.src = src
             resolve()
@@ -409,35 +401,13 @@ export default defineComponent({
     },
     setInBgSettingMode() {
       editorUtils.setInBgSettingMode(true)
-      //   if (!this.dblTabsFlag && this.isActive) {
-      //   const touchtime = Date.now()
-      //   const interval = 500
-      //   const doubleTap = (e: PointerEvent) => {
-      //     e.preventDefault()
-      //     if (Date.now() - touchtime < interval && !this.dblTabsFlag) {
-      //       /**
-      //        * This is the dbl-click callback block
-      //        */
-      //       if (this.getLayerType === LayerType.image) {
-      //         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-      //         setTimeout(() => eventUtils.emit(PanelEvent.switchTab, 'crop'), 0)
-      //       }
-      //       this.dblTabsFlag = true
-      //     }
-      //   }
-      //   this.eventTarget.addEventListener('pointerdown', doubleTap)
-      //   setTimeout(() => {
-      //     this.eventTarget.removeEventListener('pointerdown', doubleTap)
-      //     this.dblTabsFlag = false
-      //   }, interval)
-      // }
     },
     handleDimensionUpdate(newVal: number, oldVal: number) {
       if (this.image.config.previewSrc === undefined) {
-        const currUrl = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, newVal))
-        const urlId = ImageUtils.getImgIdentifier(this.image.config.srcObj)
-        ImageUtils.imgLoadHandler(currUrl, async () => {
-          if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+        const currUrl = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, newVal))
+        const urlId = imageUtils.getImgIdentifier(this.image.config.srcObj)
+        imageUtils.imgLoadHandler(currUrl, async () => {
+          if (imageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
             this.src = currUrl
             if (newVal > oldVal) {
               await this.preLoadImg('next', newVal)
@@ -457,8 +427,23 @@ export default defineComponent({
         img.onerror = () => {
           reject(new Error(`cannot preLoad the ${preLoadType}-image`))
         }
-        img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(this.image.config.srcObj, val, preLoadType)))
+        img.src = imageUtils.appendOriginQuery(imageUtils.getSrc(this.image.config, imageUtils.getSrcSize(this.image.config.srcObj, val, preLoadType)))
       })
+    },
+    onAdjustImgLoad(e: Event) {
+      imageUtils.imgLoadHandler(this.src, (img) => {
+        if (this.imgNaturalSize.width !== img.width || this.imgNaturalSize.height !== img.height) {
+          this.imgNaturalSize.width = img.width
+          this.imgNaturalSize.height = img.height
+        }
+      })
+    },
+    onLoad(e: Event) {
+      const img = e.target as HTMLImageElement
+      if (this.imgNaturalSize.width !== img.width || this.imgNaturalSize.height !== img.height) {
+        this.imgNaturalSize.width = img.width
+        this.imgNaturalSize.height = img.height
+      }
     }
   }
 })
