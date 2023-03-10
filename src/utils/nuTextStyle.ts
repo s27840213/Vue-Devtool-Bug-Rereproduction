@@ -27,6 +27,7 @@ declare module '@tiptap/core' {
 function findCursor(direct: 'up' | 'down' | 'right' | 'left', currCursor: number, dom: HTMLElement): number | null {
   if (['right', 'left'].includes(direct)) return null
 
+  // Collect position, line number, index for each span
   const spanData = [] as Record<'line' | 'index' | 'x', number>[]
   let line = 0
   let index = 1
@@ -49,10 +50,13 @@ function findCursor(direct: 'up' | 'down' | 'right' | 'left', currCursor: number
 
   const curr = find(spanData, ['index', currCursor])
   if (!curr) return null
+  // Special case, goto head/end
   if (curr.line === 0 && direct === 'up') return 1
   if (curr.line === line - 1 && direct === 'down') return spanData[spanData.length - 1].index
+  // Find the closest next/prev line cursor position
   const targetLine = curr.line + (direct === 'up' ? -1 : 1)
   const candidates = filter(spanData, ['line', targetLine])
+  // To keep ArrowUp/Down result back and forth, add xOffect to fix the result
   const xOffect = direct === 'up' ? 1 : -1
   const newCursor = minBy(candidates, (c) => Math.abs(c.x - (curr.x + xOffect)))?.index ?? null
   return newCursor

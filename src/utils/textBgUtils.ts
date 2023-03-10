@@ -715,7 +715,7 @@ class TextBg {
     }
   }
 
-  setExtraDefaultAttrs(name: string) {
+  async setExtraDefaultAttrs(name: string) {
     const defaultAttrs = {
       rainbow: { lineHeight: 1.78, fontSpacing: 585 },
       'rainbow-dark': { lineHeight: 1.78, fontSpacing: 585 },
@@ -724,7 +724,7 @@ class TextBg {
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
     for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
-      textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val)
+      await textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val)
     }
   }
 
@@ -972,7 +972,7 @@ class TextBg {
     }
   }
 
-  setTextBg(effect: string, attrs?: Record<string, string | number | boolean>): void {
+  async setTextBg(effect: string, attrs?: Record<string, string | number | boolean>): Promise<void> {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
@@ -989,7 +989,7 @@ class TextBg {
         // Set lineHeight and fontSpacing by call tiptap
         for (const [key, val] of Object.entries(attrs ?? {})) {
           if (['lineHeight', 'fontSpacing'].includes(key)) {
-            textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val as number)
+            await textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val as number)
             return
           }
         }
@@ -1002,7 +1002,7 @@ class TextBg {
           this.syncShareAttrs(textBg, effect)
           const localAttrs = localStorageUtils.get('textEffectSetting', effect)
           Object.assign(textBg, defaultAttrs, localAttrs, attrs, { name: effect })
-          this.setExtraDefaultAttrs(effect)
+          await this.setExtraDefaultAttrs(effect)
 
           // Bring original effect color to new effect.
           const oldColor = this.getEffectMainColor(layerTextBg)[1]
@@ -1034,8 +1034,8 @@ class TextBg {
 
         // If user leave LetterBg, reset lineHeight and fontSpacing
         if (isITextLetterBg(layerTextBg) && !isITextLetterBg(textBg)) {
-          textUtils.setParagraphProp('lineHeight', 1.4)
-          textUtils.setParagraphProp('fontSpacing', 0)
+          await textUtils.setParagraphProp('lineHeight', 1.4)
+          await textUtils.setParagraphProp('fontSpacing', 0)
         }
       }
     }

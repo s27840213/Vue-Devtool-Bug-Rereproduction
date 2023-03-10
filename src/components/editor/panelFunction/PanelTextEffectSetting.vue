@@ -156,7 +156,7 @@ export default defineComponent({
         return style[option.key]
       }
     },
-    setEffect(options:{
+    async setEffect(options:{
       effectName?: string,
       effect?: Record<string, string|number|boolean>
     }) {
@@ -172,7 +172,7 @@ export default defineComponent({
             Object.assign({}, effect, { ver: 'v1' }))
           break
         case 'bg':
-          textBgUtils.setTextBg(effectName, Object.assign({}, effect))
+          await textBgUtils.setTextBg(effectName, Object.assign({}, effect))
           if (textShape.name !== 'none') {
             textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
             textPropUtils.updateTextPropsState()
@@ -181,12 +181,12 @@ export default defineComponent({
         case 'shape':
           textShapeUtils.setTextShape(effectName, Object.assign({}, effect))
           textPropUtils.updateTextPropsState()
-          textBgUtils.setTextBg('none') // Bg & shape are exclusive.
+          await textBgUtils.setTextBg('none') // Bg & shape are exclusive.
           break
       }
     },
-    onEffectClick(effectName: string): void {
-      this.setEffect({ effectName })
+    async onEffectClick(effectName: string): Promise<void> {
+      await this.setEffect({ effectName })
       this.recordChange()
     },
     resetTextEffect() {
@@ -195,8 +195,8 @@ export default defineComponent({
       target.resetCurrTextEffect()
       this.recordChange()
     },
-    handleSelectInput(key: string, newVal: string) {
-      this.setEffect({ effect: { [key]: newVal } })
+    async handleSelectInput(key: string, newVal: string) {
+      await this.setEffect({ effect: { [key]: newVal } })
       this.recordChange()
     },
     handleRangeInput(event: Event, option: IEffectOptionRange) {
