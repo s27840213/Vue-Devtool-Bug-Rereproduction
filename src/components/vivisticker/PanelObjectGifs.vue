@@ -330,15 +330,18 @@ export default defineComponent({
       }
     },
     async handleCategorySearch(categoryName: string) {
-      if (this.showFav) {
-        this.searchFavorites(categoryName)
-      } else {
+      if (this.showFav) this.searchFavorites(categoryName)
+      else {
         this.resetCategoryContent()
-        if (categoryName === this.$t('NN0024')) {
-          vivistickerUtils.setShowAllRecently('object', true)
-        } else if (categoryName) {
-          this.getCategoryContent(categoryName)
+        this.resetTagContent()
+        if (!categoryName) {
+          vivistickerUtils.setShowAllRecently('object', false)
+          return
         }
+
+        const isRecent = categoryName === this.$t('NN0024')
+        if (!isRecent) this.getCategoryContent(categoryName)
+        vivistickerUtils.setShowAllRecently('object', isRecent)
       }
       vivistickerUtils.setIsInCategory('object', true)
     },

@@ -332,10 +332,8 @@ export default defineComponent({
       }
     },
     async handleCategorySearch(keyword: string, locale = '') {
-      if (this.showFav) {
-        this.searchFavorites(keyword)
-        vivistickerUtils.setIsInCategory('object', true)
-      } else {
+      if (this.showFav) this.searchFavorites(keyword)
+      else {
         this.resetSearch()
         if (!keyword) {
           vivistickerUtils.setShowAllRecently('object', false)
@@ -345,8 +343,8 @@ export default defineComponent({
         const isRecent = keyword === `${this.$t('NN0024')}`
         if (!isRecent) this.getContent({ keyword, locale })
         vivistickerUtils.setShowAllRecently('object', isRecent)
-        vivistickerUtils.setIsInCategory('object', true)
       }
+      vivistickerUtils.setIsInCategory('object', true)
     },
     handleLoadMore() {
       this.getMoreContent()
