@@ -97,7 +97,8 @@ export default defineComponent({
       currSelectedResInfo: 'getCurrSelectedResInfo',
       isModalOpen: 'modal/getModalOpen',
       inScreenshotPreview: 'getInScreenshotPreview',
-      showAllAdminTool: 'user/showAllAdminTool'
+      showAllAdminTool: 'user/showAllAdminTool',
+      userInfo: 'webView/getUserInfo'
     }),
     currLocale(): string {
       return localeUtils.currLocale()
@@ -154,7 +155,7 @@ export default defineComponent({
     },
     notificationStyles() {
       return {
-        margin: this.$isTouchDevice() ? '48px 5px 0 0' : '',
+        margin: this.$isTouchDevice() ? `${48 + this.userInfo.statusBarHeight}px 5px 0 0` : '',
         fontSize: this.$isTouchDevice() ? '12px' : '16px'
       }
     }
