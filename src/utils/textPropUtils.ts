@@ -139,6 +139,7 @@ class TextPropUtils {
   }
 
   removeInvalidStyles(paragraphs: IParagraph[], isVertical: boolean, pHandler?: (paragraph: IParagraph) => void, spanHandler?: (span: ISpan) => void) {
+    const minimumFontSize = this.getMinimumFontSize()
     paragraphs.forEach((p) => {
       pHandler && pHandler(p)
       if (isVertical && p.spanStyle) {
@@ -152,9 +153,18 @@ class TextPropUtils {
         if (typeof pStyle.size === 'string') {
           pStyle.size = parseFloat(pStyle.size)
         }
+        if (pStyle.size < minimumFontSize) {
+          pStyle.size = minimumFontSize
+        }
         p.spanStyle = tiptapUtils.textStyles(pStyle)
       }
       const paragraphStyles = p.styles
+      if (typeof paragraphStyles.size === 'string') {
+        paragraphStyles.size = parseFloat(paragraphStyles.size)
+      }
+      if (paragraphStyles.size < minimumFontSize) {
+        paragraphStyles.size = minimumFontSize
+      }
       for (const span of p.spans) {
         spanHandler && spanHandler(span)
         if (isVertical && span.styles.style === 'italic') {
@@ -170,6 +180,9 @@ class TextPropUtils {
         span.styles.fontUrl = paragraphStyles.fontUrl as string
         if (typeof span.styles.size === 'string') {
           span.styles.size = parseFloat(span.styles.size)
+        }
+        if (span.styles.size < minimumFontSize) {
+          span.styles.size = minimumFontSize
         }
       }
     })
