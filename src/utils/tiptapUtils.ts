@@ -200,7 +200,7 @@ class TiptapUtils {
     return {
       font: spanStyle.fontFamily.split(',')[0],
       weight: spanStyle.getPropertyValue('-webkit-text-stroke-width').includes('+') ? 'bold' : 'normal',
-      size: Math.round(parseFloat(spanStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100,
+      size: Math.round(parseFloat(spanStyle.fontSize.split('px')[0]) / (4 / 3) * 100) / 100,
       decoration: spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line'),
       style: spanStyle.fontStyle,
       color: checkAndConvertToHex(spanStyle.color),
