@@ -483,55 +483,6 @@ class LayerUtils {
     }
   }
 
-  initialLayerScale(pageIndex: number, layerIndex: number) {
-    const layer = this.getLayer(pageIndex, layerIndex)
-    if (!layer) return
-    const { styles: { scale }, type: primaryType } = layer
-    const applyLayers = layer.layers ? (layer.layers as ILayer[]) : [layer]
-    const isMultipleLayer = ['tmp', 'group'].includes(primaryType)
-    for (const idx in applyLayers) {
-      const { styles: subStyles, type, paragraphs } = applyLayers[idx] as IText
-      const fixScale = isMultipleLayer ? scale * subStyles.scale : scale
-      const props = {}
-      const styles = {}
-      switch (type) {
-        case 'text':
-          Object.assign(props, { paragraphs: TextUtils.initialParagraphsScale({ scale: fixScale }, paragraphs) })
-          if (isMultipleLayer) {
-            Object.assign(styles, { scale: 1 })
-          }
-          break
-        default:
-          if (isMultipleLayer) {
-            const [newLayer] = groupUtils.mapLayersToPage([applyLayers[idx] as IText], layer as ITmp)
-            Object.assign(styles, newLayer.styles)
-            Object.assign(
-              props,
-              { clipPath: newLayer.clipPath }
-            )
-          }
-      }
-      if (isMultipleLayer) {
-        Object.assign(styles, {
-          x: subStyles.x * scale,
-          y: subStyles.y * scale
-        })
-      }
-      store.commit('UPDATE_specLayerData', {
-        pageIndex,
-        layerIndex,
-        subLayerIndex: +idx,
-        props,
-        styles
-      })
-    }
-    store.commit('UPDATE_layerStyles', {
-      pageIndex,
-      layerIndex,
-      styles: { scale: 1, initWidth: layer.styles.width }
-    })
-  }
-
   resetLayerWidth(pageIndex: number, layerIndex: number) {
     const layer = this.getLayer(pageIndex, layerIndex)
     store.commit('UPDATE_layerStyles', {
