@@ -11,7 +11,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
       template(v-slot="{ item }")
         div(class="panel-static__categorys__category" :class="{'selected': item.title === keyword}" :ref="item.title === keyword ? 'selectedCategoryIcon' : undefined" @click="handleCategorySearch(item.title)")
           div(class="panel-static__categorys__category__icon" :style="iconStyles(item.list, item.coverId)")
-  tags(v-if="isInCategory && tags && tags.length" class="panel-static__tags"
+  Tags(v-if="isInCategory && tags && tags.length" class="panel-static__tags"
       :tags="tags" theme="dark" @search="handleSearch")
   //- Search result and static main content
   category-list(v-for="item in categoryListArray"
@@ -19,7 +19,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
                 :list="item.content" @loadMore="item.loadMore")
     template(#before)
       div(class="panel-static__top-item")
-      tags(v-if="!isInCategory && tags && tags.length" class="panel-static__tags" style="margin-top: 0"
+      Tags(v-if="!isInCategory && tags && tags.length" class="panel-static__tags" style="margin-top: 0"
           :tags="tags" theme="dark" @search="handleSearch")
       //- Search result empty msg
       div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
@@ -78,87 +78,26 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
 </template>
 
 <script lang="ts">
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
-import CategoryListRows from '@/components/category/CategoryListRows.vue'
-import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
-import Tags from '@/components/global/Tags.vue'
-import i18n from '@/i18n'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import { IAsset, ICategoryExtend, isICategory, isITag, ITagExtend } from '@/interfaces/module'
-import generalUtils from '@/utils/generalUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import { CCategoryList } from '@/components/category/CategoryList.vue'
+import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { IAsset, isITag, ITagExtend } from '@/interfaces/module'
 import { defineComponent } from 'vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
-
-type refTarget = 'mainContent' | 'searchResult' | 'favoritesContent' | 'favoritesSearchResult'
+import { mapActions, mapState } from 'vuex'
+import PanelObjectStatic from '../PanelObjectStatic.vue'
 
 export default defineComponent({
-  components: {
-    CategoryList,
-    CategoryListRows,
-    CategoryObjectItem,
-    Tags
-  },
+  extends: PanelObjectStatic,
   emits: ['search'],
-  props: {
-    showFav: {
-      type: Boolean,
-      required: true
-    }
-  },
   data() {
     return {
-      targets: ['mainContent', 'searchResult', 'favoritesContent', 'favoritesSearchResult'] as refTarget[],
-      scrollTop: {
-        mainContent: 0,
-        searchResult: 0,
-        favoritesContent: 0,
-        favoritesSearchResult: 0
-      },
       windowWidth: window.outerWidth,
       fallbackSrc: require('@/assets/img/svg/image-preview.svg'),
     }
   },
   computed: {
-    ...mapGetters({
-      isTabInCategory: 'vivisticker/getIsInCategory',
-      isTabShowAllRecently: 'vivisticker/getShowAllRecently'
-    }),
-    ...mapState({
-      isTablet: 'isTablet'
-    }),
     ...mapState('objects', {
-      rawCategories: 'categories',
-      rawContent: 'content',
-      rawSearchResult: 'searchResult',
-      keyword: 'keyword',
       nextCategory: 'nextCategory'
     }),
-    ...mapGetters('objects', {
-      tagsBar: 'tagsBar',
-      favoritesTagsBar: 'favoritesTagsBar',
-      favoritesItems: 'favoritesItems',
-      favoritesCategories: 'favoritesCategories',
-      favoritesTags: 'favoritesTags',
-      rawFavoritesSearchResult: 'favoritesSearchResult',
-      checkCategoryFavorite: 'checkCategoryFavorite',
-      rawPending: 'pending'
-    }),
-    isInCategory(): boolean {
-      return this.isTabInCategory('object')
-    },
-    showAllRecently(): boolean {
-      return this.isTabShowAllRecently('object')
-    },
-    pending(): boolean {
-      return this.showFav ? this.rawPending.favorites : this.rawPending.content
-    },
-    keywordLabel(): string {
-      return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
-    },
-    listCategories(): ICategoryItem[] {
-      return this.processListCategory(this.rawCategories)
-    },
     listRecently(): ICategoryItem[] {
       const { rawCategories } = this
       const list = (rawCategories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
@@ -175,97 +114,6 @@ export default defineComponent({
           }
         })
       return result
-    },
-    listResult(): ICategoryItem[] { // Don't show all result in PanelObject
-      // return this.processListResult(this.rawContent.list)
-      return []
-    },
-    searchResult(): ICategoryItem[] {
-      const list = this.processListResult(this.rawSearchResult.list)
-      if (list.length !== 0) {
-        Object.assign(list[list.length - 1], { sentinel: true })
-      }
-      return list
-    },
-    mainContent(): ICategoryItem[] {
-      if (this.showAllRecently) {
-        return this.listRecently
-      }
-      const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
-      if (list.length !== 0) {
-        Object.assign(list[list.length - 1], { sentinel: true })
-      }
-      return list
-    },
-    favoritesContent(): ICategoryItem[] {
-      let result = [] as ICategoryItem[];
-      [{ title: i18n.global.tc('NN0762'), list: this.favoritesItems },
-        { title: i18n.global.tc('NN0761'), list: this.favoritesTags },
-        { title: i18n.global.tc('NN0760'), list: this.favoritesCategories }].forEach(({ title, list }) => {
-        result = result.concat(this.processListCategory([{
-          id: -1,
-          title,
-          list: list.slice(0, 10) as IListServiceContentDataItem[]
-        }]))
-      })
-      return result
-    },
-    favoritesSearchResult(): ICategoryItem[] {
-      const rows = this.processListResult(this.rawFavoritesSearchResult.content)
-      if (rows.length !== 0) {
-        Object.assign(rows[rows.length - 1], { sentinel: true })
-      }
-      return rows
-    },
-    categoryListArray(): ICategoryList[] {
-      return [{
-        content: this.favoritesSearchResult,
-        show: this.showFav && this.rawFavoritesSearchResult.title,
-        key: 'favoritesSearchResult',
-        loadMore: this.searchMoreFavorites,
-        categorySearch: () => { /**/ }
-      }, {
-        content: this.favoritesContent,
-        show: this.showFav && !this.rawFavoritesSearchResult.title,
-        key: 'favoritesContent',
-        loadMore: () => { /**/ },
-        categorySearch: this.handleCategorySearch
-      }, {
-        content: this.searchResult,
-        show: !this.showFav && this.keyword,
-        key: 'searchResult',
-        loadMore: this.handleLoadMore,
-        categorySearch: this.handleCategorySearch
-      }, {
-        content: this.mainContent,
-        show: !this.showFav && !this.keyword,
-        key: 'mainContent',
-        loadMore: this.handleLoadMore,
-        categorySearch: this.handleCategorySearch
-      }]
-    },
-    emptyResultMessage(): string {
-      const { showFav, keyword, pending } = this
-      if (pending || this.showAllRecently) return ''
-      if (!showFav && keyword && this.searchResult.length === 0) {
-        return `${i18n.global.t('NN0393', {
-          keyword: this.keywordLabel,
-          target: i18n.global.tc('NN0003', 1)
-        })}`
-      } else return ''
-    },
-    tags(): string[] {
-      return this.showAllRecently ? []
-        : this.showFav ? this.favoritesTagsBar : this.tagsBar
-    },
-    itemHeight(): number {
-      return this.isTablet ? 120 : 80
-    },
-    itemStyles() {
-      return {
-        width: this.itemHeight + 'px',
-        height: this.itemHeight + 'px'
-      }
     },
     cardHeight(): number {
       return (this.windowWidth * (this.isTablet ? 0.9 : 1) - (this.isTablet ? 0 : 32)) * 9 / 16
@@ -290,129 +138,22 @@ export default defineComponent({
       return iconSize + gap
     },
   },
-  mounted() {
-    generalUtils.panelInit('object',
-      this.handleSearch,
-      this.handleCategorySearch,
-      async ({ reset }: {reset: boolean}) => {
-        await this.getRecAndCate({ reset, key: 'objects' })
-        this.initFavorites()
-      }
-    )
-  },
-  activated() {
-    this.$nextTick(() => {
-      const ref = this.$refs as Record<string, CCategoryList[]>
-      for (const name of this.targets) {
-        ref[name][0].$el.scrollTop = this.scrollTop[name]
-        ref[name][0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, name))
-      }
-    })
-  },
   watch: {
-    keyword(newVal: string) {
-      if (!newVal) {
-        this.$nextTick(() => {
-          // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          (this.$refs.mainContent as CCategoryList[])[0].$el.scrollTop = this.scrollTop.mainContent
-        })
-      }
-    },
-    categoryListArray() {
-      this.$nextTick(() => {
-        const ref = this.$refs as Record<string, CCategoryList[]>
-        for (const name of this.targets) {
-          ref[name][0].$el.scrollTop = this.scrollTop[name]
-        }
-      })
-    },
     isInCategory(newVal: boolean, oldVal: boolean) {
       if (newVal && !oldVal) this.scrollCategoryIcon(this.showAllRecently ? 0 : undefined)
     }
   },
   methods: {
     ...mapActions('objects', [
-      'getContent',
-      'getTagContent',
-      'getRecently',
-      'getRecAndCate',
-      'getMoreContent',
-      'resetSearch',
       'getCategories',
-      // favorites actions
-      'initFavorites',
-      'toggleFavorite',
-      'searchFavorites',
-      'searchMoreFavorites',
-      'searchTagInFavoritesCategory'
     ]),
-    scrollToTop() {
-      for (const list of this.categoryListArray) {
-        if (list.show) {
-          const categoryList = (this.$refs[list.key] as CCategoryList[])[0]
-          const top = categoryList.$el.querySelector('.panel-static__top-item') as HTMLElement
-          top.scrollIntoView({ behavior: 'smooth' })
-        }
-      }
-    },
     async handleSearch(keyword: string) {
-      if (this.showFav) {
-        this.searchTagInFavoritesCategory(keyword)
-      } else {
-        this.resetSearch({ keepSearchResult: true })
-        if (keyword) {
-          this.getTagContent({ keyword })
-        }
-      }
+      await PanelObjectStatic.methods?.handleSearch.call(this, keyword)
       this.$emit('search')
-    },
-    async handleCategorySearch(keyword: string, locale = '') {
-      if (this.showFav) {
-        this.searchFavorites(keyword)
-        vivistickerUtils.setIsInCategory('object', true)
-      } else {
-        this.resetSearch()
-        if (keyword) {
-          if (keyword === `${this.$t('NN0024')}`) {
-            vivistickerUtils.setShowAllRecently('object', true)
-          } else {
-            this.getContent({ keyword, locale })
-            vivistickerUtils.setShowAllRecently('object', false)
-          }
-          vivistickerUtils.setIsInCategory('object', true)
-        } else {
-          vivistickerUtils.setShowAllRecently('object', false)
-        }
-      }
-    },
-    handleLoadMore() {
-      this.getMoreContent()
-    },
-    click4in1(target: unknown) {
-      this.searchFavorites(target)
-      vivistickerUtils.setIsInCategory('object', true)
-    },
-    toggleFavorites4in1(target: ITagExtend | ICategoryExtend) {
-      if (isITag(target)) {
-        this.toggleFavorite({ tags: target })
-      } else if (isICategory(target)) {
-        this.toggleFavorite({ categories: target })
-      }
-    },
-    toggleFavoritesItem(target: IAsset) {
-      this.toggleFavorite({ items: target })
     },
     toggleFaovoritesCategoryByTitle(evt: Event, title: string) {
       evt.stopPropagation()
-      for (const category of this.rawCategories as IListServiceContentData[]) {
-        if (category.title === title) {
-          this.toggleFavorite({ categories: { id: category.id, title } })
-          return
-        }
-      }
-    },
-    handleScrollTop(event: Event, key: refTarget) {
-      this.scrollTop[key] = (event.target as HTMLElement).scrollTop
+      PanelObjectStatic.methods?.toggleFaovoritesCategoryByTitle.call(this, title)
     },
     processListCategory(list: IListServiceContentData[]): ICategoryItem[] {
       return list
