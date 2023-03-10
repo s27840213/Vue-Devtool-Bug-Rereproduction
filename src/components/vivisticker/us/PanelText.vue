@@ -33,90 +33,15 @@ div(class="panel-text rwd-container" :class="{'in-category': isInCategory}")
 </template>
 
 <script lang="ts">
-import CategoryList, { CCategoryList } from '@/components/category/CategoryList.vue'
-import CategoryListRows from '@/components/category/CategoryListRows.vue'
-import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
-import SearchBar from '@/components/SearchBar.vue'
-import i18n from '@/i18n'
-import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import AssetUtils from '@/utils/assetUtils'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import generalUtils from '@/utils/generalUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
-import VueI18n from 'vue-i18n'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import PanelText from '../PanelText.vue'
 
 export default defineComponent({
   name: 'panel-text-us',
-  components: {
-    SearchBar,
-    CategoryList,
-    CategoryListRows,
-    CategoryTextItem
-  },
-  data() {
-    return {
-      scrollTop: {
-        mainContent: 0,
-        searchResult: 0
-      }
-    }
-  },
+  extends: PanelText,
   computed: {
-    ...mapGetters({
-      scaleRatio: 'getPageScaleRatio',
-      getLayersNum: 'getLayersNum',
-      isInEditor: 'vivisticker/getIsInEditor',
-      isTabInCategory: 'vivisticker/getIsInCategory',
-      isTabShowAllRecently: 'vivisticker/getShowAllRecently',
-      editorBg: 'vivisticker/getEditorBg'
-    }),
-    ...mapState({
-      isTablet: 'isTablet'
-    }),
-    ...mapState('textStock', {
-      categories: 'categories',
-      rawContent: 'content',
-      rawSearchResult: 'searchResult',
-      pending: 'pending',
-      keyword: 'keyword'
-    }),
-    isInCategory(): boolean {
-      return this.isTabInCategory('text')
-    },
-    showAllRecently(): boolean {
-      return this.isTabShowAllRecently('text')
-    },
-    keywordLabel(): string {
-      return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
-    },
-    listDefaultText(): { type: string, text: VueI18n.TranslateResult }[] {
-      return [{
-        type: 'Heading',
-        text: this.$t('NN0011')
-      }, {
-        type: 'Subheading',
-        text: this.$t('NN0012')
-      }, {
-        type: 'Body',
-        text: this.$t('NN0013')
-      }]
-    },
-    listCategories(): ICategoryItem[] {
-      const titleHeight = 46
-      const gap = this.isTablet ? 20 : 14
-      const { categories } = this
-      return (categories as IListServiceContentData[])
-        .filter(category => category.list.length > 0)
-        .map((category, index) => ({
-          size: 80 + titleHeight + gap,
-          id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
-          type: 'category-list-rows',
-          list: category.is_recent ? category.list.slice(0, 10) : category.list,
-          title: category.title
-        }))
-    },
     listRecently(): ICategoryItem[] {
       const { categories } = this
       const gap = 20
@@ -135,16 +60,6 @@ export default defineComponent({
         })
       return result
     },
-    listResult(): ICategoryItem[] {
-      return this.processListResult(this.rawContent.list, false)
-    },
-    searchResult(): ICategoryItem[] {
-      const list = this.processListResult(this.rawSearchResult.list, true)
-      if (list.length !== 0) {
-        Object.assign(list[list.length - 1], { sentinel: true })
-      }
-      return list
-    },
     mainContent(): ICategoryItem[] {
       if (this.showAllRecently) {
         return this.listRecently
@@ -154,25 +69,6 @@ export default defineComponent({
         Object.assign(list[list.length - 1], { sentinel: true })
       }
       return list
-    },
-    categoryListArray(): ICategoryList[] {
-      return [{
-        content: this.searchResult,
-        show: this.keyword,
-        key: 'searchResult'
-      }, {
-        content: this.mainContent,
-        show: !this.keyword,
-        key: 'mainContent'
-      }]
-    },
-    emptyResultMessage(): string {
-      const { keyword, pending } = this
-      if (pending || !keyword || this.searchResult.length > 0 || this.showAllRecently) return ''
-      return `${i18n.global.t('NN0393', {
-          keyword: this.keywordLabel,
-          target: i18n.global.tc('NN0005', 1)
-        })}`
     },
     itemWidth(): number {
       return this.isTablet ? 200 : (window.outerWidth - 48 - (this.textColumns - 1) * 20) / this.textColumns
@@ -191,7 +87,6 @@ export default defineComponent({
     },
   },
   mounted() {
-    if (this.categories.length !== 0 || this.rawContent.list || this.rawSearchResult.list || this.pending) return
     generalUtils.panelInit('text',
       this.handleSearch,
       this.handleCategorySearch,
@@ -199,108 +94,8 @@ export default defineComponent({
         await this.getRecently({ writeBack: true })
         await this.getContent()
       })
-    eventUtils.on(PanelEvent.scrollPanelTextToTop, this.scrollToTop)
-  },
-  beforeUnmount() {
-    eventUtils.off(PanelEvent.scrollPanelTextToTop)
-  },
-  activated() {
-    this.$nextTick(() => {
-      const mainContent = (this.$refs.mainContent as CCategoryList[])[0].$el
-      const searchResult = (this.$refs.searchResult as CCategoryList[])[0].$el
-      mainContent.scrollTop = this.scrollTop.mainContent
-      searchResult.scrollTop = this.scrollTop.searchResult
-      mainContent.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
-      searchResult.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
-    })
-  },
-  watch: {
-    keyword(newVal: string) {
-      if (!newVal) {
-        this.$nextTick(() => {
-          const mainContent = (this.$refs.mainContent as CCategoryList[])[0].$el
-          // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
-          mainContent.scrollTop = this.scrollTop.mainContent
-        })
-      }
-    }
   },
   methods: {
-    ...mapActions('textStock', [
-      'getContent',
-      'getTagContent',
-      'getRecently',
-      'getRecAndCate',
-      'getMoreContent',
-      'resetSearch'
-    ]),
-    ...mapMutations({
-      setSettingsOpen: 'brandkit/SET_isSettingsOpen'
-    }),
-    scrollToTop() {
-      for (const list of this.categoryListArray) {
-        if (list.show) {
-          const categoryList = (this.$refs[list.key] as CCategoryList[])[0]
-          const top = categoryList.$el.querySelector('.panel-text__top-item') as HTMLElement
-          top.scrollIntoView({ behavior: 'smooth' })
-        }
-      }
-    },
-    async handleSearch(keyword: string) {
-      this.resetSearch()
-      if (keyword) {
-        this.getTagContent({ keyword })
-      }
-    },
-    async handleCategorySearch(keyword: string, locale = '') {
-      this.resetSearch()
-      if (keyword) {
-        if (keyword === `${this.$t('NN0024')}`) {
-          vivistickerUtils.setShowAllRecently('text', true)
-        } else {
-          this.getContent({ keyword, locale })
-        }
-        vivistickerUtils.setIsInCategory('text', true)
-      }
-    },
-    handleLoadMore() {
-      this.getMoreContent()
-    },
-    async addStandardText() {
-      let recentFont
-      if (vivistickerUtils.checkVersion('1.5')) {
-        recentFont = await vivistickerUtils.getState('recentFont')
-      }
-      const color = vivistickerUtils.getContrastColor(this.editorBg)
-      await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.global.locale, undefined, undefined, {
-        size: 21,
-        color,
-        weight: 'normal',
-        ...(recentFont ?? {})
-      })
-    },
-    handleAddText() {
-      if (this.isInEditor) {
-        this.addStandardText()
-      } else {
-        vivistickerUtils.startEditing(
-          'text',
-          { plan: 0, assetId: '' },
-          async () => {
-            console.log('start editing standard text')
-            await this.addStandardText()
-            return true
-          },
-          vivistickerUtils.getEmptyCallback()
-        )
-      }
-    },
-    localeFont() {
-      return AssetUtils.getFontMap()[i18n.global.locale]
-    },
-    handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
-      this.scrollTop[key] = (event.target as HTMLElement).scrollTop
-    },
     processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
       const gap = 20
       const recentItem = {
@@ -329,7 +124,7 @@ export default defineComponent({
         background: item.id === 'recent' ? 'setColor(light-bg)' : 'magenta',
         ...(!this.isTablet && { margin: '0 auto' })
       }
-    }
+    },
   }
 })
 </script>
