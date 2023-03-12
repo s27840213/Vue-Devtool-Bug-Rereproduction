@@ -126,6 +126,44 @@ Cypress.Commands.add('layerScale', { prevSubject: 'element' }, (subject) => {
   return cy.wrap(subject)
 })
 
+// Special text for some layer
+
+Cypress.Commands.add('rotateAndResize', { prevSubject: 'element' }, (subject) => {
+  const resizeDir = [
+    { i: 0, x: -1, y: -1 },
+    { i: 1, x: 1, y: 1 },
+    { i: 2, x: -1, y: 1 },
+    { i: 3, x: 1, y: -1 },
+  ]
+
+  cy.wrap(subject).click()
+    .get('.svg-rotate')
+    .realMouseDown()
+    .realMouseMove(-158, -158, { position: 'center' }) // Rotate 60 degrees, counter-clockwise
+    .realMouseUp()
+    .snapshotTest('RotateAndResize before resize')
+    .then(() => {
+      for (const { i, x, y } of resizeDir) {
+        cy.get('.control-point__resize-bar-wrapper').eq(i).children().eq(1)
+          .realMouseDown()
+          .realMouseMove(x * 30, y * 30, { position: 'center' })
+          .realMouseUp()
+      }
+    })
+    .snapshotTest('RotateAndResize after resize')
+    .then(() => {
+      for (const { i, x, y } of resizeDir.reverse()) {
+        cy.get('.control-point__resize-bar-wrapper').eq(i).children().eq(1)
+          .realMouseDown()
+          .realMouseMove(x * -30, y * -30, { position: 'center' })
+          .realMouseUp()
+      }
+    })
+    // Restore layer to original state
+    .get('.svg-undo').click().click().click()
+  return cy.wrap(subject)
+})
+
 Cypress.Commands.add('layerMoveToPage2', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
     .get('.svg-add-page').click()
