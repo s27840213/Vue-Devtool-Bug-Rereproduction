@@ -161,9 +161,9 @@ import hashtag from '@/store/module/hashtag'
 import generalUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import themeUtils from '@/utils/themeUtils'
-import webViewUtils from '@/utils/vivipicWebViewUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
@@ -615,7 +615,7 @@ export default defineComponent({
       return this.selectedTheme?.id === theme.id
     },
     openTemplate(url: string) {
-      webViewUtils.openOrGoto(url)
+      picWVUtils.openOrGoto(url)
     }
   }
 })

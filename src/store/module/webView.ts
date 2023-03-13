@@ -1,33 +1,33 @@
 import { IUserInfo } from '@/interfaces/webView'
-import webViewUtils from '@/utils/vivipicWebViewUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import { GetterTree, MutationTree } from 'vuex'
 
-interface IViviStickerState {
-  userInfo: IUserInfo,
-  isBrowserMode: boolean,
+interface IWebViewState {
+  userInfo: IUserInfo
+  inBrowserMode: boolean
 }
 
-const getDefaultState = (): IViviStickerState => ({
-  userInfo: webViewUtils.getDefaultUserInfo(),
-  isBrowserMode: false
+const getDefaultState = (): IWebViewState => ({
+  userInfo: picWVUtils.getDefaultUserInfo(),
+  inBrowserMode: false
 })
 
 const state = getDefaultState()
-const getters: GetterTree<IViviStickerState, unknown> = {
-  getUserInfo(state: IViviStickerState): IUserInfo {
+const getters: GetterTree<IWebViewState, unknown> = {
+  getUserInfo(state: IWebViewState): IUserInfo {
     return state.userInfo
   },
-  getIsBrowserMode(state: IViviStickerState): boolean {
-    return state.isBrowserMode
+  getInBrowserMode(state: IWebViewState): boolean {
+    return state.inBrowserMode
   }
 }
 
-const mutations: MutationTree<IViviStickerState> = {
-  SET_userInfo(state: IViviStickerState, userInfo: IUserInfo) {
+const mutations: MutationTree<IWebViewState> = {
+  SET_userInfo(state: IWebViewState, userInfo: IUserInfo) {
     state.userInfo = userInfo
   },
-  SET_isBrowserMode(state: IViviStickerState, isBrowserMode: boolean) {
-    state.isBrowserMode = isBrowserMode
+  SET_inBrowserMode(state: IWebViewState, inBrowserMode: boolean) {
+    state.inBrowserMode = inBrowserMode
   }
 }
 

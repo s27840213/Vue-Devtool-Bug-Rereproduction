@@ -35,8 +35,8 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     main: this.MAIN_CALLBACKS
   }
 
-  get isBrowserMode(): boolean {
-    return store.getters['webView/getIsBrowserMode']
+  get inBrowserMode(): boolean {
+    return store.getters['webView/getInBrowserMode']
   }
 
   detectIfInApp() {
@@ -46,7 +46,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   enterBrowserMode() {
-    store.commit('webView/SET_isBrowserMode', true)
+    store.commit('webView/SET_inBrowserMode', true)
   }
 
   getUserInfoFromStore(): IUserInfo {
@@ -54,7 +54,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   openOrGoto(url: string) {
-    window.open(url, this.isBrowserMode ? '_blank' : '_self')
+    window.open(url, this.inBrowserMode ? '_blank' : '_self')
   }
 
   sendAppLoaded() {
@@ -65,7 +65,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async getUserInfo(): Promise<IUserInfo> {
-    if (this.isBrowserMode) return this.getUserInfoFromStore()
+    if (this.inBrowserMode) return this.getUserInfoFromStore()
     await this.callIOSAsAPI('APP_LAUNCH', this.getEmptyMessage(), 'launch')
     return this.getUserInfoFromStore()
   }
@@ -87,7 +87,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async updateLocale(locale: string): Promise<void> {
-    if (this.isBrowserMode) return
+    if (this.inBrowserMode) return
     await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
   }
 
@@ -100,7 +100,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async setState(key: string, value: any) {
-    if (this.isBrowserMode) return
+    if (this.inBrowserMode) return
     await this.callIOSAsAPI('SET_STATE', { key, value }, 'setState')
   }
 
@@ -109,7 +109,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async getState(key: string): Promise<any> {
-    if (this.isBrowserMode) return
+    if (this.inBrowserMode) return
     return await this.callIOSAsAPI('GET_STATE', { key }, 'getState')
   }
 
@@ -118,17 +118,15 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   async changeStatusBarTextColor(routeName: string): Promise<any> {
-    if (this.isBrowserMode) return
+    if (this.inBrowserMode) return
     const statusBarColor = WHITE_STATUS_BAR_ROUTES.includes(routeName) ? 'white' : 'black'
     await this.callIOSAsAPI('UPDATE_USER_INFO', { statusBarColor }, 'update-user-info')
   }
 
   switchDomain(domain: string): void {
-    if (this.isBrowserMode) return
+    if (this.inBrowserMode) return
     this.sendToIOS('SWITCH_DOMAIN', { domain })
   }
 }
 
-const webViewUtils = new VivipicWebViewUtils()
-
-export default webViewUtils
+export default new VivipicWebViewUtils()

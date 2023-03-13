@@ -52,8 +52,8 @@ import { defineComponent } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
+import picWVUtils from './utils/picWVUtils'
 import popupUtils from './utils/popupUtils'
-import webViewUtils from './utils/vivipicWebViewUtils'
 
 export default defineComponent({
   emits: [],
@@ -81,10 +81,10 @@ export default defineComponent({
       window.dispatchEvent(new Event('render-event'))
     }
 
-    if (!webViewUtils.isBrowserMode) {
-      webViewUtils.registerCallbacks('main')
+    if (!picWVUtils.inBrowserMode) {
+      picWVUtils.registerCallbacks('main')
     }
-    this.$router.isReady().then(() => { webViewUtils.sendAppLoaded() })
+    this.$router.isReady().then(() => { picWVUtils.sendAppLoaded() })
   },
   beforeMount() {
     networkUtils.registerNetworkListener()
