@@ -665,7 +665,7 @@ class ShapeUtils {
 
   setLineWidth(value: number) {
     const { min, max } = mappingUtils.mappingMinMax('lineWidth')
-    const lineWidth = _.floor(parseFloat(generalUtils.boundValue(value, min, max)), 2)
+    const lineWidth = _.floor(generalUtils.boundValue(value, min, max), 2)
     const { getCurrLayer: currLayer } = layerUtils
     const { point, styles, size } = (currLayer as IShape)
 

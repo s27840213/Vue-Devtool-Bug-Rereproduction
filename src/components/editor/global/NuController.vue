@@ -128,7 +128,6 @@ div(:layer-index="`${layerIndex}`"
             :src="require('@/assets/img/svg/move.svg')"
             :style='lineControlPointStyles()'
             @touchstart="disableTouchEvent")
-            //- @pointerdown="moveStart"
         template(v-else)
           div(class="control-point__controller-wrapper"
               ref="rotater")
@@ -143,7 +142,6 @@ div(:layer-index="`${layerIndex}`"
               :src="require('@/assets/img/svg/move.svg')"
               :style='controlPointStyles()'
               @touchstart="disableTouchEvent")
-              //- @pointerdown="moveStart"
     div(v-if="isActive && isLocked() && (scaleRatio >20)"
         class="nu-controller__lock-icon"
         :style="lockIconStyles()"
@@ -181,7 +179,7 @@ import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
-import TextPropUtils from '@/utils/textPropUtils'
+import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -281,7 +279,7 @@ export default defineComponent({
   mounted() {
     this.setLastSelectedLayerIndex(this.layerIndex)
     if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
-      TextPropUtils.updateTextPropsState()
+      textPropUtils.updateTextPropsState()
     }
     this.addMovingListener()
   },
@@ -1347,6 +1345,7 @@ export default defineComponent({
           break
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
+      textPropUtils.updateTextPropState('fontSize', true)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
       // scale from center
       if (altPressed) {

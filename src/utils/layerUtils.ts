@@ -483,55 +483,6 @@ class LayerUtils {
     }
   }
 
-  initialLayerScale(pageIndex: number, layerIndex: number) {
-    const layer = this.getLayer(pageIndex, layerIndex)
-    if (!layer) return
-    const { styles: { scale }, type: primaryType } = layer
-    const applyLayers = layer.layers ? (layer.layers as ILayer[]) : [layer]
-    const isMultipleLayer = ['tmp', 'group'].includes(primaryType)
-    for (const idx in applyLayers) {
-      const { styles: subStyles, type, paragraphs } = applyLayers[idx] as IText
-      const fixScale = isMultipleLayer ? scale * subStyles.scale : scale
-      const props = {}
-      const styles = {}
-      switch (type) {
-        case 'text':
-          Object.assign(props, { paragraphs: TextUtils.initialParagraphsScale({ scale: fixScale }, paragraphs) })
-          if (isMultipleLayer) {
-            Object.assign(styles, { scale: 1 })
-          }
-          break
-        default:
-          if (isMultipleLayer) {
-            const [newLayer] = groupUtils.mapLayersToPage([applyLayers[idx] as IText], layer as ITmp)
-            Object.assign(styles, newLayer.styles)
-            Object.assign(
-              props,
-              { clipPath: newLayer.clipPath }
-            )
-          }
-      }
-      if (isMultipleLayer) {
-        Object.assign(styles, {
-          x: subStyles.x * scale,
-          y: subStyles.y * scale
-        })
-      }
-      store.commit('UPDATE_specLayerData', {
-        pageIndex,
-        layerIndex,
-        subLayerIndex: +idx,
-        props,
-        styles
-      })
-    }
-    store.commit('UPDATE_layerStyles', {
-      pageIndex,
-      layerIndex,
-      styles: { scale: 1, initWidth: layer.styles.width }
-    })
-  }
-
   resetLayerWidth(pageIndex: number, layerIndex: number) {
     const layer = this.getLayer(pageIndex, layerIndex)
     store.commit('UPDATE_layerStyles', {
@@ -675,6 +626,20 @@ class LayerUtils {
           opacity: value
         })
       }
+    }
+  }
+
+  isOfLayerType(layer: ILayer, type: LayerType, subLayerIdx = -1, groupLikeIncluded = false): boolean {
+    // test if current selected layer is of the given type
+    // consider single layer or subLayer in group
+    // if subLayerIdx is not -1, consider the subLayer
+    // if groupLikeIncluded is true, group or tmp layers are also accepted
+    if (layer.type === type) return true
+    if (!['group', 'tmp'].includes(layer.type)) return false
+    if (subLayerIdx !== -1) {
+      return (layer as IGroup).layers[subLayerIdx].type === type
+    } else {
+      return groupLikeIncluded
     }
   }
 }
