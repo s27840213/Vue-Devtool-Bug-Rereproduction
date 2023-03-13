@@ -594,7 +594,7 @@ export default defineComponent({
       editorUtils.setShowMobilePanel(false)
     },
     initPanelHeight() {
-      return ((this.$el.parentElement as HTMLElement).clientHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
+      return ((this.$el.parentElement as HTMLElement).clientHeight - this.userInfo.statusBarHeight) * (this.halfSizeInInitState ? 0.5 : 1.0)
     },
     currPanelHeight() {
       return (this.$refs.panel as HTMLElement).clientHeight
