@@ -39,6 +39,10 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     return store.getters['webView/getInBrowserMode']
   }
 
+  get inReviewMode(): boolean {
+    return store.getters['webView/getInReviewMode']
+  }
+
   detectIfInApp() {
     if ((window as any).webkit === undefined) {
       this.enterBrowserMode()

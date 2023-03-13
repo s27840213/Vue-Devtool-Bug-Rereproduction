@@ -3,24 +3,25 @@ div(style="position: relative;")
   div(class="login-wrapper popup-window")
     div(v-if="currentPageIndex === 0"
       class="login login-p0")
-      div
+      div(class="login-p0__img")
         img(:src="require('@/assets/img/svg/signup.svg')"
           style="width: 180px; height: 133px;")
-      div(class="text-center")
+      div(class="login-p0__title text-center")
         span(class="text-blue-1 heading-5") {{$tc('NN0168',2)}}
-      div
-        btn(@click="onFacebookClicked()"
-          :type="'icon-mid-body'")
-        img(:src="require('@/assets/img/png/facebook.png')")
-        span(class="body-2") {{$t('NN0178', {media:'Facebook'})}}
-      div
-        btn(@click="onGoogleClicked()"
-          :type="'icon-mid-body'")
-        img(:src="require('@/assets/img/png/google.png')")
-        span(class="body-2") {{$t('NN0178', {media:'Google'})}}
-      div
-        span {{$t('NN0179')}}
-      div
+      template(v-if="!inReviewMode")
+        div(class="login-p0__fb")
+          btn(@click="onFacebookClicked()"
+            :type="'icon-mid-body'")
+          img(:src="require('@/assets/img/png/facebook.png')")
+          span(class="body-2") {{$t('NN0178', {media:'Facebook'})}}
+        div(class="login-p0__google")
+          btn(@click="onGoogleClicked()"
+            :type="'icon-mid-body'")
+          img(:src="require('@/assets/img/png/google.png')")
+          span(class="body-2") {{$t('NN0178', {media:'Google'})}}
+        div(class="login-p0__hr")
+          span {{$t('NN0179')}}
+      div(class="login-p0__mail")
         div
           span(class="label-mid") {{$tc('NN0173', 1)}}
           property-bar(class="mt-5"
@@ -51,21 +52,21 @@ div(style="position: relative;")
           div(v-if="!passwordValid"
             class="invalid-message")
             span {{ passwordErrorMessage }}
-      div
+      div(class="login-p0__button")
         btn(:type="'primary-mid'"
           class="bg-gray-2 text-white btn-shadow"
           @click="onLogInClicked()") {{$tc('NN0168',2)}}
-      div
+      div(class="login-p0__signup")
         span {{$t('NN0182')}}
         btn(:type="'icon'"
           class="h-link"
           @click="onSignupClicked()") {{$t('NN0183')}}
-      div(class="page-close")
+      div(class="login-p0__close page-close")
         button(@click="onCloseClicked")
           svg-icon(class="pointer"
             iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-3'")
     div(v-if="currentPageIndex === 1"
-      class="login")
+      class="login login-p1")
       div(class="text-center")
         span(class="text-blue-1 heading-5") {{$t('NN0181')}}?
       div
@@ -106,7 +107,7 @@ div(style="position: relative;")
           svg-icon(class="pointer"
             iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-3'")
     div(v-if="currentPageIndex === 2"
-      class="login")
+      class="login login-p2")
       div(class="text-center")
         span(class="text-blue-1 heading-5") {{$t('NN0284')}}
       div
@@ -139,7 +140,7 @@ div(style="position: relative;")
           svg-icon(class="pointer"
             iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-3'")
     div(v-if="currentPageIndex === 3"
-      class="login")
+      class="login login-p3")
       div(class="text-center")
         span(class="text-blue-1 heading-5") {{$t('NN0291')}}
       div
@@ -283,6 +284,9 @@ export default defineComponent({
     }
   },
   computed: {
+    inReviewMode(): boolean {
+      return picWVUtils.inReviewMode
+    },
     mailValid(): boolean {
       if (!this.isLoginClicked) {
         return true
@@ -591,113 +595,112 @@ export default defineComponent({
   border-radius: 10px;
   background-color: white;
   padding: 32px;
-  > div {
-    margin-bottom: 2.5vh;
-    .property-bar:focus-within {
-      border: 1px solid setColor(blue-1);
+  &-p1, &-p2, &-p3 {
+    > div {
+      margin-bottom: 2vh;
     }
+  }
+  .property-bar:focus-within {
+    border: 1px solid setColor(blue-1);
   }
 }
 .login-p0 {
   padding: 0 32px 20px 32px;
-  > div {
+  &__img {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1vh;
+  }
+  &__title {
     margin-bottom: 2vh;
-    &:first-child {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1vh;
+  }
+  &__fb, &__google {
+    position: relative;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    width: 80%;
+    background: linear-gradient(180deg, #ffffff 29.69%, #f9f9f9 100%);
+    border: 1px solid #d9dbe1;
+    border-radius: 3px;
+    margin-bottom: 2vh;
+    &:hover {
+      cursor: pointer;
+      background: setColor(gray-5);
     }
-    &:nth-child(3),
-    &:nth-child(4) {
-      // Facebook and Google
+    &:active {
+      background: setColor(gray-4);
+    }
+    > button {
+      width: 100%;
+      height: 100%;
+    }
+    > img {
+      position: absolute;
+      left: 15%;
+      width: 25px;
+      height: 25px;
+      pointer-events: none;
+    }
+    > span {
+      position: absolute;
+      left: 30%;
+      pointer-events: none;
+    }
+  }
+  &__hr {
+    display: block;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    > span {
       position: relative;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      height: 40px;
-      width: 80%;
-      background: linear-gradient(180deg, #ffffff 29.69%, #f9f9f9 100%);
-      border: 1px solid #d9dbe1;
-      border-radius: 3px;
-      margin-bottom: 2vh;
-      &:hover {
-        cursor: pointer;
-        background: setColor(gray-5);
-      }
-      &:active {
-        background: setColor(gray-4);
-      }
-      > button {
-        width: 100%;
-        height: 100%;
-      }
-      > img {
-        position: absolute;
-        left: 15%;
-        width: 25px;
-        height: 25px;
-        pointer-events: none;
-      }
-      > span {
-        position: absolute;
-        left: 30%;
-        pointer-events: none;
-      }
+      display: inline-block;
     }
-    &:nth-child(5) {
-      display: block;
-      text-align: center;
-      overflow: hidden;
-      white-space: nowrap;
-      > span {
-        position: relative;
-        display: inline-block;
-      }
-      > span:before,
-      > span:after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        width: 9999px;
-        height: 1px;
-        background: black;
-      }
-      > span:before {
-        right: 100%;
-        margin-right: 30px;
-      }
-      > span:after {
-        left: 100%;
-        margin-left: 30px;
-      }
-      margin-bottom: 2vh;
+    > span:before,
+    > span:after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 9999px;
+      height: 1px;
+      background: black;
     }
-    &:nth-child(6) {
-      // input fields
-      > div {
-        margin-bottom: 1.5vh;
-        .forgot-pwd {
-          text-decoration: underline;
-          &:hover {
-            color: setColor(blue-1);
-          }
+    > span:before {
+      right: 100%;
+      margin-right: 30px;
+    }
+    > span:after {
+      left: 100%;
+      margin-left: 30px;
+    }
+    margin-bottom: 2vh;
+  }
+  &__mail {
+    margin-bottom: 2vh;
+    > div {
+      margin-bottom: 1.5vh;
+      .forgot-pwd {
+        text-decoration: underline;
+        &:hover {
+          color: setColor(blue-1);
         }
       }
     }
-    &:nth-child(7) {
-      // login button
-      display: flex;
-      justify-content: center;
-      margin-bottom: 2vh;
-      button {
-        width: 60%;
-        height: 40px;
-      }
+  }
+  &__button {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2vh;
+    button {
+      width: 60%;
+      height: 40px;
     }
-    &:nth-child(8) {
-      // signup hint
-      font-size: 14px;
-    }
+  }
+  &__signup {
+    font-size: 14px;
+    margin-bottom: 2vh;
   }
 }
 .input-invalid {

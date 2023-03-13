@@ -3,31 +3,32 @@ div(style="position:relative;")
   div(class="signup-wrapper popup-window")
     div(v-if="currentPageIndex === 0"
       class="signup signup-p0")
-      div
+      div(class="signup-p0__img")
         img(:src="require('@/assets/img/svg/signup.svg')"
           style="width: 180px; height: 133px;")
-      div(class="text-center")
+      div(class="signup-p0__title text-center")
         span(class="text-blue-1 heading-5") {{$t('NN0300')}}
-      div
+      div(class="signup-p0__desc")
         div {{$t('NN0301')}}
         div {{$t('NN0302')}}
-      div
-        btn(@click="onFacebookClicked()"
-          :type="'icon-mid-body'")
-        img(:src="require('@/assets/img/png/facebook.png')")
-        span(class="body-2") {{$t('NN0303', {media:'Facebook'})}}
-      div
-        btn(@click="onGoogleClicked()" :type="'icon-mid-body'")
-        img(:src="require('@/assets/img/png/google.png')")
-        span(class="body-2") {{$t('NN0303', {media:'Google'})}}
-      div
+      template(v-if="!inReviewMode")
+        div(class="signup-p0__fb")
+          btn(@click="onFacebookClicked()"
+            :type="'icon-mid-body'")
+          img(:src="require('@/assets/img/png/facebook.png')")
+          span(class="body-2") {{$t('NN0303', {media:'Facebook'})}}
+        div(class="signup-p0__google")
+          btn(@click="onGoogleClicked()" :type="'icon-mid-body'")
+          img(:src="require('@/assets/img/png/google.png')")
+          span(class="body-2") {{$t('NN0303', {media:'Google'})}}
+      div(class="signup-p0__mail")
         btn(@click="onEmailClicked()" :type="'icon-mid-body text-white'") {{$t('NN0303', {media: $tc('NN0173', 2)})}}
-      div
+      div(class="signup-p0__login")
         span {{$t('NN0304')}}
         btn(:type="'icon'"
           class="h-link"
           @click="onLoginClicked()") {{$t('NN0305')}}
-      div
+      div(class="signup-p0__close page-close")
         button(@click="onCloseClicked")
               svg-icon(class="pointer"
               iconName="page-close" :iconWidth="'15px'" :iconColor="'gray-3'")
@@ -111,7 +112,7 @@ div(style="position:relative;")
           class="h-link"
           @click="onLoginClicked()") {{$t('NN0305')}}
     div(v-if="currentPageIndex === 2"
-      class="signup")
+      class="signup signup-p2")
       div(class="text-center")
         span(class="text-blue-1 heading-5") {{$t('NN0284')}}
       div
@@ -234,6 +235,9 @@ export default defineComponent({
     }
   },
   computed: {
+    inReviewMode(): boolean {
+      return picWVUtils.inReviewMode
+    },
     nameValid(): boolean {
       if (!this.isSignUpClicked) {
         return true
@@ -488,107 +492,104 @@ export default defineComponent({
   border-radius: 10px;
   background-color: white;
   padding: 32px;
-  > div {
-    margin-bottom: 2vh;
-    .property-bar:focus-within {
-      border: 1px solid setColor(blue-1);
+  &-p1, &-p2 {
+    > div {
+      margin-bottom: 2vh;
     }
+  }
+  .property-bar:focus-within {
+    border: 1px solid setColor(blue-1);
   }
 }
 .signup-p0 {
   padding: 0 32px 32px 32px;
-  > div {
-    &:nth-child(1) {
-      // img
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1vh;
+  &__img {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1vh;
+  }
+  &__title {
+    margin-bottom: 2vh;
+  }
+  &__desc {
+    margin: 0 auto;
+    width: 90%;
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 3vh;
+    > div {
+      margin-bottom: 0.5vh;
     }
-    &:nth-child(3) {
-      // intro text
-      margin: 0 auto;
-      width: 90%;
-      text-align: center;
-      font-size: 14px;
-      margin-bottom: 3vh;
-      > div {
-        margin-bottom: 0.5vh;
-      }
+  }
+  &__fb, &__google {
+    position: relative;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    width: 80%;
+    background: linear-gradient(180deg, #ffffff 29.69%, #f9f9f9 100%);
+    border: 1px solid #d9dbe1;
+    border-radius: 3px;
+    margin-bottom: 2vh;
+    &:hover {
+      cursor: pointer;
+      background: setColor(gray-5);
     }
-    &:nth-child(4),
-    &:nth-child(5) {
-      // fb/google buttons
-      position: relative;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      height: 40px;
-      width: 80%;
-      background: linear-gradient(180deg, #ffffff 29.69%, #f9f9f9 100%);
-      border: 1px solid #d9dbe1;
-      border-radius: 3px;
-      margin-bottom: 2vh;
-      &:hover {
-        cursor: pointer;
-        background: setColor(gray-5);
-      }
-      &:active {
-        background: setColor(gray-4);
-      }
-      > button {
-        width: 100%;
-        height: 100%;
-      }
-      > img {
-        position: absolute;
-        left: 15%;
-        width: 25px;
-        height: 25px;
-        pointer-events: none;
-      }
-      > span {
-        position: absolute;
-        left: 30%;
-        pointer-events: none;
-      }
+    &:active {
+      background: setColor(gray-4);
     }
-    &:nth-child(6) {
-      //email button
-      margin: 0 auto;
-      display: flex;
-      justify-content: center;
-      width: 80%;
-      border-radius: 3px;
-      background: linear-gradient(
-        180deg,
-        rgba(78, 171, 230, 0.817708) 0%,
-        #3ea1e0 100%
-      );
-      margin-bottom: 2vh;
-      &:hover {
-        background: #4aa2da;
-      }
-      &:active {
-        background: #4395c7;
-      }
-      > button {
-        width: 100%;
-        height: 100%;
-      }
+    > button {
+      width: 100%;
+      height: 100%;
     }
-    &:nth-child(7) {
-      // login hint
-      margin: 0 auto;
-      width: 80%;
-      font-size: 14px;
-      margin-bottom: 2vh;
-    }
-    &:nth-child(8) {
-      // close icon
+    > img {
       position: absolute;
-      right: 15px;
-      top: 15px;
+      left: 15%;
+      width: 25px;
+      height: 25px;
+      pointer-events: none;
     }
+    > span {
+      position: absolute;
+      left: 30%;
+      pointer-events: none;
+    }
+  }
+  &__mail {
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    width: 80%;
+    border-radius: 3px;
+    background: linear-gradient(
+      180deg,
+      rgba(78, 171, 230, 0.817708) 0%,
+      #3ea1e0 100%
+    );
+    margin-bottom: 2vh;
+    &:hover {
+      background: #4aa2da;
+    }
+    &:active {
+      background: #4395c7;
+    }
+    > button {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  &__login {
+    margin: 0 auto;
+    width: 80%;
+    font-size: 14px;
+    margin-bottom: 2vh;
+  }
+  &__close {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    margin-bottom: 2vh;
   }
 }
 .signup-p1 {
