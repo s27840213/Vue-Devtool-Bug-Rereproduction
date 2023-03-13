@@ -36,6 +36,7 @@ export default defineComponent({
   data() {
     return {
       cyReady: false,
+      root: undefined as unknown as HTMLElement,
       canvasWidth: 1600,
       canvasHeight: 1600,
       canvas: undefined as unknown as HTMLCanvasElement,
@@ -75,6 +76,8 @@ export default defineComponent({
     this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
   },
   mounted() {
+    this.root = this.$refs.bgRemoveArea as HTMLElement
+
     this.imageElement = new Image()
     this.imageElement.src = this.imgSrc
     this.imageElement.setAttribute('crossOrigin', 'Anonymous')
@@ -91,22 +94,23 @@ export default defineComponent({
     this.initImageElement.onload = () => {
       this.createInitImageCtx()
     }
+    this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
+    window.addEventListener('pointermove', this.brushMoving)
     if (!this.$isTouchDevice()) {
-      this.editorViewCanvas.addEventListener('mousedown', this.drawStart)
       this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
       this.editorViewCanvas.addEventListener('mouseleave', this.handleBrushLeave)
-      window.addEventListener('mousemove', this.brushMoving)
       window.addEventListener('keydown', this.handleKeydown)
     }
     this.setPrevPageScaleRatio(this.scaleRatio)
     pageUtils.fitPage()
   },
   unmounted() {
-    window.removeEventListener('mouseup', this.drawEnd)
-    window.removeEventListener('mousemove', this.brushMoving)
+    window.removeEventListener('pointerup', this.drawEnd)
+    window.removeEventListener('pointermove', this.brushMoving)
+    window.removeEventListener('pointermove', this.drawing)
     this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
     this.editorViewCanvas.removeEventListener('mouseleave', this.handleBrushLeave)
-    this.editorViewCanvas.removeEventListener('mousedown', this.drawStart)
+    this.editorViewCanvas.removeEventListener('pointerdown', this.drawStart)
     window.removeEventListener('keydown', this.handleKeydown)
   },
   computed: {
@@ -294,7 +298,7 @@ export default defineComponent({
     drawLine(e: MouseEvent, ctx: CanvasRenderingContext2D) {
       ctx.beginPath()
       ctx.moveTo(this.initPos.x, this.initPos.y)
-      const { x, y } = mouseUtils.getMousePosInPage(e, -1)
+      const { x, y } = mouseUtils.getMousePosInTarget(e, this.root)
       ctx.lineTo(x, y)
       ctx.stroke()
       Object.assign(this.initPos, {
@@ -306,7 +310,7 @@ export default defineComponent({
     },
     drawStart(e: MouseEvent) {
       if (!this.inGestureMode) {
-        const { x, y } = mouseUtils.getMousePosInPage(e, -1)
+        const { x, y } = mouseUtils.getMousePosInTarget(e, this.root)
         Object.assign(this.initPos, {
           x,
           y
@@ -316,8 +320,8 @@ export default defineComponent({
         } else {
           this.drawInRestoreMode(e)
         }
-        window.addEventListener('mouseup', this.drawEnd)
-        window.addEventListener('mousemove', this.drawing)
+        window.addEventListener('pointerup', this.drawEnd)
+        window.addEventListener('pointermove', this.drawing)
       }
     },
     drawing(e: MouseEvent) {
@@ -328,13 +332,13 @@ export default defineComponent({
       }
     },
     drawEnd() {
-      window.removeEventListener('mouseup', this.drawEnd)
-      window.removeEventListener('mousemove', this.drawing)
+      window.removeEventListener('pointerup', this.drawEnd)
+      window.removeEventListener('pointermove', this.drawing)
       this._setCanvas(this.canvas)
       this.pushStep()
     },
     brushMoving(e: MouseEvent) {
-      const { x, y } = mouseUtils.getMousePosInPage(e, -1)
+      const { x, y } = mouseUtils.getMousePosInTarget(e, this.root)
       this.brushStyle.left = `${x - (this.brushSize + this.blurPx) / 2}px`
       this.brushStyle.top = `${y - (this.brushSize + this.blurPx) / 2}px`
     },
