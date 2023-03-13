@@ -12,7 +12,7 @@ import tiptapUtils from './tiptapUtils'
 
 class FormatUtils {
   copiedFormat: IFormat | undefined
-  APPLICABLE_TYPES: {[key: string]: string[]} = {
+  APPLICABLE_TYPES: { [key: string]: string[] } = {
     image: ['image', 'frame'],
     text: ['text']
   }
