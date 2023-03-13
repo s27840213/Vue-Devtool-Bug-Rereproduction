@@ -151,16 +151,8 @@ Cypress.Commands.add('rotateAndResize', { prevSubject: 'element' }, (subject) =>
       }
     })
     .snapshotTest('RotateAndResize after resize')
-    .then(() => {
-      for (const { i, x, y } of resizeDir.reverse()) {
-        cy.get('.control-point__resize-bar-wrapper').eq(i).children().eq(1)
-          .realMouseDown()
-          .realMouseMove(x * -30, y * -30, { position: 'center' })
-          .realMouseUp()
-      }
-    })
     // Restore layer to original state
-    .get('.svg-undo').click().click().click()
+    .get('.svg-undo').click().click()
   return cy.wrap(subject)
 })
 
