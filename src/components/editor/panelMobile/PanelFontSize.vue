@@ -15,12 +15,11 @@ div(class="panel-font-size")
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
 import { IGroup, ILayer } from '@/interfaces/layer'
+import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
-import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
+import _ from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 export default defineComponent({
@@ -47,41 +46,13 @@ export default defineComponent({
       layerIndex: 'getCurrSelectedIndex'
     }),
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
-    scale(): number {
-      const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
-      if (currLayer && currLayer.layers) {
-        if (subLayerIdx === -1) {
-          const scaleSet = (currLayer as IGroup).layers.reduce((p: Set<number>, c: ILayer) => {
-            if (c.type === 'text') { p.add(c.styles.scale) }
-            return p
-          }, new Set())
-          if (scaleSet.size === 1) {
-            const [scale] = scaleSet
-            return scale * currLayer.styles.scale
-          }
-          return NaN
-        } else {
-          return currLayer.styles.scale * (currLayer as IGroup).layers[subLayerIdx].styles.scale
-        }
-      }
-      return currLayer.styles.scale
-    },
     fontSize: {
       get(): number | string {
-        if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
-          return '--'
-        }
-        return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
+        return this.props.fontSize === '--' ? this.props.fontSize : _.round(this.props.fontSize, 2)
       },
       set(value: number): void {
-        layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-        tiptapUtils.applySpanStyle('size', value)
-        tiptapUtils.agent(editor => {
-          layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-        })
-        tiptapUtils.forceUpdate(true)
-        textPropUtils.updateTextPropsState({ fontSize: value.toString() })
-        textEffectUtils.refreshSize()
+        value = generalUtils.boundValue(value, this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
+        textPropUtils.fontSizeHandler(value, false)
       }
     }
   },

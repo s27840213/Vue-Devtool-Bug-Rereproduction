@@ -406,11 +406,6 @@ export default defineComponent({
         'getCategories'
       ]
     ),
-    boundValue(value: number, min: number, max: number): string {
-      if (value < min) return min.toString()
-      else if (value > max) return max.toString()
-      return value.toString()
-    },
     groupColor(): string {
       const currLayer = this.currLayer
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
