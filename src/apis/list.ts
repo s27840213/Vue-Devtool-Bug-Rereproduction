@@ -24,7 +24,9 @@ class ListService {
       platform: params.cache ? window.location.host : null,
       ver: params.cache ? store.getters['user/getVerApi'] : null,
       // [2022.01.19] uncached: font, layout
-      all_theme: params.all_theme
+      all_theme: params.all_theme,
+      // If admin and url have 'app=1', bring app:1 to api.
+      ...store.getters['user/isAdmin'] && /app=1/.test(window.location.href) ? { app: 1 } : {}
     }
 
     return axios.request<IListServiceResponse>({

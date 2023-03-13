@@ -112,9 +112,13 @@ Cypress.Commands.add('togglePanel', (buttonText: string) => {
     .its('config.globalProperties.$isTouchDevice', silent)
     .then((isMobile: () => boolean) => {
       if (isMobile()) {
-        cy.get('.footer-tabs').contains('div', buttonText)
+        const options = ['陰影'].includes(buttonText) ? { timeout: 20000 } : {}
+
+        cy.get('.footer-tabs')
+          .contains('div', buttonText, options)
           .should('not.have.class', 'click-disabled')
           .click()
+          .wait(300) // Wait for editor view transformY animation
       } else {
         cy.get('.function-panel').contains(buttonText).click()
       }

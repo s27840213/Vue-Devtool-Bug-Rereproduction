@@ -230,7 +230,7 @@ export default defineComponent({
         { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame },
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
-        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'copy-style' },
+        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' },
         { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }
       ]
     },
@@ -270,7 +270,7 @@ export default defineComponent({
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
+        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
       ]
     },
     bgSettingTab(): Array<IFooterTab> {
@@ -392,19 +392,18 @@ export default defineComponent({
         return this.photoTabs
       } else if (this.showFontTabs) {
         return [...this.fontTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
-      } else if (this.showFrameTabs) {
-        if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
-          return this.photoTabs
-        }
-        return this.frameTabs
       } else if (this.showShapeSetting) {
         return [...this.objectTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
       } else if (this.inBgSettingMode) {
         return this.bgSettingTab
       } else if (this.isGroupOrTmp) {
         return this.genearlLayerTabs
+      } else if (this.showFrameTabs) {
+        if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
+          return this.photoTabs
+        }
+        return this.frameTabs
       }
-
       return []
     },
     globalSelectedColor(): string {
@@ -751,7 +750,7 @@ export default defineComponent({
           shortcutUtils.paste()
           break
         }
-        case 'copy-style': {
+        case 'brush': {
           if (this.hasCopiedFormat) {
             formatUtils.clearCopiedFormat()
           } else {
