@@ -49,15 +49,14 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
               @click4in1="click4in1"
               @dbclick4in1="toggleFavorites4in1"
               @dbclick="toggleFavoritesItem")
-      div(v-else class="panel-static__card" :style="cardStyles" @click="item.categorySearch && item.categorySearch(title)")
-        img(class="panel-static__card__cover" :src="coverSrc(coverUrl)" @error="imgOnerror")
-        div(class="panel-static__card__label")
-          div(class="panel-static__card__label__title caption-MD") {{ title }}
-          svg-icon(v-if="isFavorite !== undefined"
-            :iconName="isFavorite ? 'favorites-fill' : 'heart'"
-            iconWidth="24px"
-            :style="{color: isFavorite ? '#FC5757' : '#9C9C9C'}"
-              @click="toggleFaovoritesCategoryByTitle($event, title)")
+      category-object-card(v-else
+        :title="title"
+        :isFavorite="isFavorite"
+        :coverUrl="coverUrl"
+        :scrollTop="mainContentScrollTop"
+        :style="cardStyles"
+        @cardClick="item.categorySearch && item.categorySearch(title)"
+        @favClick="toggleFaovoritesCategoryByTitle($event, title)")
     template(v-slot:category-object-item="{ list }")
       div(class="panel-static__items")
         category-object-item(v-for="item in list"
@@ -84,15 +83,29 @@ import { IAsset, isITag, ITagExtend } from '@/interfaces/module'
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
 import PanelObjectStatic from '../PanelObjectStatic.vue'
+import CategoryObjectCard from './CategoryObjectCard.vue'
 
 export default defineComponent({
   extends: PanelObjectStatic,
   emits: ['search'],
+  components: {
+    CategoryObjectCard
+  },
   data() {
     return {
       windowWidth: window.outerWidth,
-      fallbackSrc: require('@/assets/img/svg/image-preview.svg'),
+      mainContentScrollTop: 0,
+      elMainContent: undefined as HTMLElement | undefined,
     }
+  },
+  activated() {
+    this.$nextTick(() => {
+      this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
+      this.elMainContent.addEventListener('scroll', this.handleMainContentScroll)
+    })
+  },
+  deactivated() {
+    this.elMainContent?.removeEventListener('scroll', this.handleMainContentScroll)
   },
   computed: {
     ...mapState('objects', {
@@ -185,19 +198,14 @@ export default defineComponent({
           }
         })
     },
-    coverSrc(coverUrl: string): string {
-      const prevType = 'prev_4x'
-      return coverUrl ? [coverUrl, prevType].join('/') : this.fallbackSrc
-    },
     iconStyles(list: IListServiceContentDataItem[], coverId?: string): {[key: string]: string} {
       const iconUrl = `https://template.vivipic.com/svg/${coverId || list[0].id}/prev`
       return {
         backgroundImage: `url(${iconUrl})`
       }
     },
-    imgOnerror(e: Event) {
-      const target = (e.target as HTMLImageElement)
-      target.src = this.fallbackSrc
+    handleMainContentScroll() {
+      this.mainContentScrollTop = this.elMainContent?.scrollTop ?? 0
     },
     scrollCategoryIcon(target?: number) {
       const categoryIconList = (this.$refs.categoryIconList as any).$el as HTMLElement
@@ -207,17 +215,17 @@ export default defineComponent({
       }
 
       // scroll category icon list to selected one
-      const scrollTop = ((this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement).scrollTop
+      const scrollTop = this.mainContentScrollTop
       categoryIconList.scrollLeft = scrollTop * (this.categoryIconWidth / this.categoryCardHeight)
       this.$nextTick(() => {
         const selectedCategoryIcon = this.$refs.selectedCategoryIcon as HTMLElement
         if (!selectedCategoryIcon || !selectedCategoryIcon.parentElement) return
 
         const transform = selectedCategoryIcon.parentElement.style.transform
-        const match = transform.match(/translateX\((\d+)px\)/)
+        const match = transform.match(/translateY\((\d+(?:[.]\d*?)?)px\)/)
         if (!match || match.length < 2) return
 
-        const scrollLeft = parseInt(match[1])
+        const scrollLeft = parseFloat(match[1])
         categoryIconList.scrollLeft = scrollLeft
       })
     }
@@ -276,29 +284,6 @@ export default defineComponent({
   &__items {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-  }
-  &__card {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    overflow: hidden;
-    &__cover {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    &__label {
-      display: flex;
-      column-gap: 10px;
-      position: absolute;
-      right: 10px;
-      bottom: 10px;
-      &__title {
-        color: white;
-        // mix-blend-mode: difference;
-      }
-    }
   }
   &.in-category::v-deep .category-list .vue-recycle-scroller__item-wrapper {
     margin-top: 24px;
