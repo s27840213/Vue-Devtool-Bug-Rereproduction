@@ -46,9 +46,11 @@ import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import ValueSelector from '@/components/ValueSelector.vue'
 import { IBrandTextStyle } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
+import generalUtils from '@/utils/generalUtils'
 import { fontSelectValue } from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import vClickOutside from 'click-outside-vue3'
+import _ from 'lodash'
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
 
@@ -189,20 +191,12 @@ export default defineComponent({
         this.refreshFontSizeBuffer()
       })
     },
-    isValidFloat(value: string) {
-      return value.match(/[+-]?\d+(\.\d+)?/)
-    },
-    boundValue(value: number, min: number, max: number): string {
-      if (value < min) return min.toString()
-      else if (value > max) return max.toString()
-      return value.toString()
-    },
     setSize(e: Event) {
-      let { value } = e.target as HTMLInputElement
-      if (this.isValidFloat(value)) {
-        value = this.boundValue(parseFloat(value), 6, 800)
-        this.fontSizeBuffer = parseInt(value)
-        brandkitUtils.updateTextStyle(this.type, { size: parseInt(value) }).then(() => {
+      const { value } = e.target as HTMLInputElement
+      if (generalUtils.isValidFloat(value)) {
+        const boundedValue = generalUtils.boundValue(parseFloat(value), 6, 800)
+        this.fontSizeBuffer = _.round(boundedValue, 2)
+        brandkitUtils.updateTextStyle(this.type, { size: this.fontSizeBuffer }).then(() => {
           this.refreshFontSizeBuffer()
         })
       }

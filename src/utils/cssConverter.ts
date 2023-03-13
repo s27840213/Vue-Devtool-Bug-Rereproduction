@@ -73,7 +73,7 @@ class CssConveter {
     const result: { [key: string]: string } = {}
     fontProps.forEach(prop => {
       if (prop === 'size') {
-        result[styleMap[prop]] = `${(sourceStyles[prop] as number) * 1.333333}px`
+        result[styleMap[prop]] = `${(sourceStyles[prop] as number) * 4 / 3}px`
       } else if (prop === 'weight') {
         result[styleMap[prop]] = sourceStyles[prop] === 'bold' ? `calc(var(--base-stroke) + ${(sourceStyles.size as number) / 32}px)` : 'calc(var(--base-stroke))'
       } else if (prop === 'fontSpacing') {
