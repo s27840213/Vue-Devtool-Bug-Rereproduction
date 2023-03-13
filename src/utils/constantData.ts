@@ -491,6 +491,10 @@ class ConstantData {
         label: i18n.global.tc('NN0817'),
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
       }, {
+        key: 'circle',
+        label: i18n.global.tc('NN0820'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
         key: 'cloud',
         label: i18n.global.tc('NN0818'),
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])

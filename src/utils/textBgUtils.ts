@@ -587,6 +587,10 @@ function getLetterBgSetting(textBg: ITextLetterBg, index: number) {
       href = 'rainbow-circle'
       color = ['#D0B0B1', '#DCC9BF', '#EBDEBB', '#BECBBC', '#B0BCC5', '#D1CADF'][index % 6]
       break
+    case 'circle':
+      href = 'rainbow-circle'
+      color = textBg.color
+      break
     case 'cloud':
       href = `cloud${index % 4}`
       color = textBg.color
@@ -696,6 +700,14 @@ class TextBg {
         fixedWidth: true,
         color: '', // no effect
       },
+      circle: {
+        xOffset200: 0,
+        yOffset200: 0,
+        size: 100,
+        opacity: 100,
+        fixedWidth: true,
+        color: '#EEDFD1',
+      },
       cloud: {
         xOffset200: 0,
         yOffset200: 0,
@@ -719,6 +731,7 @@ class TextBg {
     const defaultAttrs = {
       rainbow: { lineHeight: 1.78, fontSpacing: 585 },
       'rainbow-dark': { lineHeight: 1.78, fontSpacing: 585 },
+      circle: { lineHeight: 1.78, fontSpacing: 585 },
       cloud: { lineHeight: 1.54, fontSpacing: 186 },
       'text-book': { lineHeight: 1.96, fontSpacing: 665 }
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
@@ -947,6 +960,7 @@ class TextBg {
     }
   }
 
+  // Read/write text effect setting from local storage
   syncShareAttrs(textBg: ITextBgEffect, effectName: string | null) {
     Object.assign(textBg, { name: textBg.name || effectName })
     if (textBg.name === 'none') return
@@ -1004,11 +1018,18 @@ class TextBg {
           Object.assign(textBg, defaultAttrs, localAttrs, attrs, { name: effect })
           await this.setExtraDefaultAttrs(effect)
 
+          // Sync setting between different name effect:
           // Bring original effect color to new effect.
           const oldColor = this.getEffectMainColor(layerTextBg)[1]
           const newColorKey = this.getEffectMainColor(textBg)[0]
           if (oldColor.startsWith('#') && !(isITextLetterBg(textBg) || isITextLetterBg(layerTextBg))) {
             Object.assign(textBg, { [newColorKey]: oldColor })
+          }
+          // Sync setting between TextLetterBg: rainbow, rainbow-dark, circle
+          if (isITextLetterBg(textBg) && isITextLetterBg(layerTextBg) && textBg.name !== layerTextBg.name &&
+            ['rainbow', 'rainbow-dark', 'circle'].includes(textBg.name) &&
+            ['rainbow', 'rainbow-dark', 'circle'].includes(layerTextBg.name)) {
+            Object.assign(textBg, layerTextBg, { name: textBg.name, color: textBg.color })
           }
         }
 

@@ -45,7 +45,7 @@ export interface ITextGooey {
 }
 
 export interface ITextLetterBg {
-  name: 'rainbow' | 'rainbow-dark' | 'cloud' | 'text-book'
+  name: 'rainbow' | 'rainbow-dark' | 'circle' | 'cloud' | 'text-book'
   xOffset200: number
   yOffset200: number
   opacity: number
@@ -69,7 +69,7 @@ export function isITextGooey(object: ITextBgEffect): object is ITextGooey {
 }
 export function isITextLetterBg(object: ITextBgEffect): object is ITextLetterBg {
   return object && object.name &&
-    ['rainbow', 'rainbow-dark', 'cloud', 'text-book'].includes(object.name)
+    ['rainbow', 'rainbow-dark', 'circle', 'cloud', 'text-book'].includes(object.name)
 }
 
 export interface ITextFormat {
