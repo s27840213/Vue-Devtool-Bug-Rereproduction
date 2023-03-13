@@ -110,12 +110,13 @@ export default defineComponent({
   },
   created() {
     this.inputLocale = this.$i18n.locale as 'us' | 'tw' | 'jp'
-    // this.$root.$on('on-re-rendering', (component: IComponentUpdatedLog) => {
-    //   if (this.componentLogs.length >= 50) {
-    //     this.componentLogs.shift()
-    //   }
-    //   this.componentLogs.push(component)
-    // })
+    const self = this as any
+    self.$eventBus.on('on-re-rendering', (component: IComponentUpdatedLog) => {
+      if (this.componentLogs.length >= 50) {
+        this.componentLogs.shift()
+      }
+      this.componentLogs.push(component)
+    })
   },
   watch: {
     isShowPagePreview() {
