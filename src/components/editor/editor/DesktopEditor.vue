@@ -23,7 +23,7 @@ div(class="desktop-editor")
               svg-icon(
                 iconName="vivisticker_logo"
                 iconWidth="20px"
-                :iconColor="appMode ? 'black' : 'blue-1'"
+                :iconColor="stkMode ? 'black' : 'blue-1'"
                 @click="switchApp")
               div(class="flex flex-column")
                 select(class="locale-select" v-model="inputLocale")
@@ -98,7 +98,7 @@ export default defineComponent({
       FunctionPanelType,
       isSidebarPanelOpen: true,
       inputLocale: i18n.global.locale,
-      appMode: /app=1/.test(window.location.href),
+      stkMode: /app=1/.test(window.location.href),
       componentLogs: [] as Array<IComponentUpdatedLog>
     }
   },
@@ -235,9 +235,9 @@ export default defineComponent({
       this._setAdminMode(!this.adminMode)
     },
     switchApp() {
-      this.appMode = !this.appMode
+      this.stkMode = !this.stkMode
       const url = new URL(window.location.href)
-      this.appMode ? url.searchParams.append('app', '1') : url.searchParams.delete('app')
+      this.stkMode ? url.searchParams.append('app', '1') : url.searchParams.delete('app')
       window.location.href = url.toString()
     },
     setPanelType(type: number) {
