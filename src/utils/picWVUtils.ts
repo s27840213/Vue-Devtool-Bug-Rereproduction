@@ -1,6 +1,7 @@
 import { ILoginResult, IUserInfo } from '@/interfaces/webView'
 import store from '@/store'
 import { WebViewUtils } from '@/utils/webViewUtils'
+import generalUtils from './generalUtils'
 import logUtils from './logUtils'
 
 const WHITE_STATUS_BAR_ROUTES = [
@@ -74,9 +75,11 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     return this.getUserInfoFromStore()
   }
 
-  launchResult(info: IUserInfo) {
+  async launchResult(info: IUserInfo) {
     logUtils.setLogAndConsoleLog(JSON.stringify(info))
-    store.commit('webView/SET_userInfo', info)
+    const appCaps = await fetch(`https://template.vivipic.com/static/appCaps.json?ver=${generalUtils.generateRandomString(6)}`)
+    const jsonCaps = await appCaps.json() as { review_ver: string }
+    store.commit('webView/SET_userInfo', { userInfo: info, reviewVer: jsonCaps.review_ver })
     this.handleCallback('launch')
   }
 

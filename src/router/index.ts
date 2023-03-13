@@ -342,11 +342,6 @@ router.beforeEach(async (to, from, next) => {
         }
         store.commit('text/UPDATE_DEFAULT_FONT', { font })
       })
-
-    // Fetch appCaps
-    const appCaps = await fetch(`https://template.vivipic.com/static/appCaps.json?ver=${generalUtils.generateRandomString(6)}`)
-    const jsonCaps = await appCaps.json() as { review_ver: string }
-    store.commit('webView/SET_inReviewMode', jsonCaps.review_ver)
   }
   if (!MOBILE_ROUTES.includes(String(to.name) ?? '') && (to.name === 'Editor' || !localStorage.getItem('not-mobile'))) {
     let isMobile = false

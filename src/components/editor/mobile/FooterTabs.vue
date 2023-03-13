@@ -65,6 +65,7 @@ import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -235,7 +236,7 @@ export default defineComponent({
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' },
-        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }
+        ...!picWVUtils.inReviewMode ? [{ icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }] : []
       ]
     },
     frameTabs(): Array<IFooterTab> {
