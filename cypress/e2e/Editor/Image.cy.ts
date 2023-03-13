@@ -106,13 +106,15 @@ for (const isMobile of [true, false]) {
             .layerLock()
             .layerDelete()
             .layerCopyFormat(flowerBack, beforeCopyFormat, afterCopyFormat)
+            .rotateAndResize()
+            .deselectAllLayers().snapshotTest('init') // Check if image restore to init
+            .get('.nu-layer__wrapper:nth-child(3) .nu-image')
             .then((subject: JQuery<HTMLElement>) => {
               // TODO: Implement layer copy format in mobile
               if (isMobile) return cy.wrap(subject)
               return cy.wrap(subject)
                 .layerMoveToPage2()
             })
-          // .deselectAllLayers().snapshotTest('init') // Check if image restore to init
         })
     })
   })
