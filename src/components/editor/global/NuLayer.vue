@@ -1,40 +1,34 @@
 <template lang="pug">
-div(class="nu-layer__wrapper" :style="layerWrapperStyles")
+div(:class="['nu-layer', 'nu-layer__wrapper', inAllPagesMode ? 'click-disabled' : '']"
+    :style="layerWrapperStyles"
+    :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
+    ref="body")
+  //- class="nu-layer"
+  //- :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : ''"
+  //- :ref="div.main ? 'body' : ''"
   div(v-for="div in layerDivs"
-      class="nu-layer"
       :class="!config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : ''"
       :style="layerStyles(div.noShadow, div.isTransparent)"
-      :ref="div.main ? 'body' : ''"
-      :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : ''"
-      :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
-      :data-p-index="pageIndex"
       @pointerdown="div.main ? onPointerDown($event) : null"
       @pointerup="div.main ? onPointerUp($event) : null"
       @contextmenu.prevent
       @click.right.stop="div.main ? onRightClick($event) : null"
       @dragenter="div.main ? dragEnter($event) : null"
       @dblclick="div.main ? dblClick($event) : null")
-    div(class="layer-translate posAbs"
-        :style="translateStyles()")
-      div(class="layer-scale posAbs" :ref="div.main ? 'scale' : ''"
-          :style="scaleStyles()")
-        nu-clipper(:config="config"
-            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-            :primaryLayer="primaryLayer"
-            :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
-          component(:is="`nu-${config.type}`"
-            class="transition-none"
-            :config="config"
-            :imgControl="imgControl"
-            :contentScaleRatio="contentScaleRatio"
-            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-            :page="page"
-            :scaleRatio="scaleRatio"
-            :primaryLayer="primaryLayer"
-            :forRender="forRender"
-            :isTransparent="div.isTransparent"
-            :noShadow="div.noShadow")
-            //- v-bind="$attrs")
+    div(class="nu-layer__scale" :ref="div.main ? 'scale' : ''"
+        :style="scaleStyles()")
+        component(:is="`nu-${config.type}`"
+          class="transition-none"
+          :config="config"
+          :imgControl="imgControl"
+          :contentScaleRatio="contentScaleRatio"
+          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+          :page="page"
+          :scaleRatio="scaleRatio"
+          :primaryLayer="primaryLayer"
+          :forRender="forRender"
+          :isTransparent="div.isTransparent"
+          :noShadow="div.noShadow")
         svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
           :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
           g(v-html="frameClipFormatter(config.clipPath)"
@@ -203,7 +197,7 @@ export default defineComponent({
      * Use definedProperty to bind some props of the vue.$props with the movingUtils
      * thus, we are unnecessary to watching these props and update them manually
      */
-    const body = (this.$refs.body as HTMLElement[])[0]
+    const body = this.$refs.body as HTMLElement
     const lineMover = this.$refs.lineMover as HTMLElement
     const props = this.$props
     const layerInfo = {} as ILayerInfo
@@ -318,14 +312,25 @@ export default defineComponent({
       }
     },
     layerWrapperStyles(): any {
+      const clipPath = !this.forRender && this.config.clipPath &&
+        !this.config.isFrameImg && this.primaryLayer?.type === 'frame'
+        ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
+      const pointerEvents = this.getPointerEvents
+      const outline = this.outlineStyles()
+      const styles = Object.assign(
+        CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
+        {
+          outline,
+          willChange: !this.isSubLayer && this.isDragging && !this.useMobileEditor ? 'transform' : '',
+          pointerEvents,
+          clipPath,
+          ...this.transformStyle
+        }
+      )
       if (this.isImgCtrl || this.inFrame || this.$isTouchDevice() || this.useMobileEditor) {
-        return {}
+        styles.transform += `translateZ(${this.config.styles.zindex}px)`
       }
-      return {
-        transform: `translateZ(${this.config.styles.zindex}px)`,
-        'pointer-events': this.inAllPagesMode ? 'inherit' : 'initial',
-        ...this.transformStyle
-      }
+      return styles
     },
     isDragging(): boolean {
       return (this.config as ILayer).dragging
@@ -410,50 +415,27 @@ export default defineComponent({
       return frameUtils.frameClipFormatter(clippath)
     },
     layerStyles(noShadow: boolean, isTransparent: boolean): any {
-      const clipPath = !this.forRender && this.config.clipPath &&
-        !this.config.isFrameImg && this.primaryLayer?.type === 'frame'
-        ? `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')` : ''
-      const pointerEvents = this.getPointerEvents
-      const outline = this.outlineStyles()
-      const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles, pageUtils._3dEnabledPageIndex !== this.pageIndex, this.contentScaleRatio),
-        {
-          outline,
-          willChange: !this.isSubLayer && this.isDragging && !this.useMobileEditor ? 'transform' : '',
-          pointerEvents,
-          clipPath,
-          ...this.transformStyle
-        }
-      )
       switch (this.config.type) {
         case LayerType.text: {
           const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
           const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
-          Object.assign(
-            styles,
-            textEffectStyles,
-            textBgStyles,
-            {
-              willChange: this.useMobileEditor ? '' : ('text-shadow' + (this.isDragging ? ', transform' : '')),
-              '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
-            }
-          )
           if (noShadow) {
-            styles.textShadow = 'none'
+            textEffectStyles.textShadow = 'none'
           }
-          if (isTransparent) {
-            styles['-webkit-filter'] = 'opacity(1)'
+          return {
+            willChange: this.useMobileEditor ? '' : ('text-shadow' + (this.isDragging ? ', transform' : '')),
+            '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`,
+            ...(isTransparent && { '-webkit-filter': 'opacity(1)' }),
+            ...textEffectStyles,
+            ...textBgStyles,
           }
-          break
         }
         case LayerType.shape: {
-          Object.assign(
-            styles,
-            { 'mix-blend-mode': this.config.styles.blendMode }
-          )
+          return {
+            'mix-blend-mode': this.config.styles.blendMode
+          }
         }
       }
-      return styles
     },
     lineMoverStyles(): { [key: string]: string } {
       if (!this.isLine) return {}
@@ -527,10 +509,13 @@ export default defineComponent({
       const { scale, scaleX, scaleY } = this.config.styles
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config as IFrame))
-
+      let transform = isImgType ? `scale(${this.compensationRatio()})` : `scale(${scale * (this.contentScaleRatio)})`
+      if (!isImgType && this.compensationRatio() !== 1 && scaleX !== 1 && scaleY !== 1) {
+        transform += `scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`
+      }
       const styles = {
-        transform: isImgType ? `scale(${this.compensationRatio()})` : `scale(${scale * (this.contentScaleRatio)}) scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`,
-        'transform-style': pageUtils._3dEnabledPageIndex !== this.pageIndex ? 'initial' : type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
+        ...(transform !== 'scale(1)' && { transform }),
+        ...(pageUtils._3dEnabledPageIndex === this.pageIndex && { transformStyle: type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d' })
       }
       return styles
     },
@@ -898,17 +883,20 @@ export default defineComponent({
 .nu-layer {
   touch-action: none;
   position: absolute;
-  top: 0;
-  left: 0;
-  display: flex;
+  // top: 0;
+  // left: 0;
+  // display: flex;
+  // width: 100px;
+  // height: 100px;
   align-items: center;
   justify-content: center;
   // content-visibility: auto;
   // box-shadow: inset 0px 0px 0px 7px rgba(136, 136, 136, 0.5);
-  width: 100px;
-  height: 100px;
   &:focus {
     background-color: rgba(168, 218, 220, 1);
+  }
+  &__wrapper {
+    pointer-events: initial;
   }
   &__line-mover {
     touch-action: none;
@@ -936,6 +924,12 @@ export default defineComponent({
     align-items: center;
     justify-content: center;
   }
+  &__scale {
+    transform-origin: top left;
+  }
+  &__flip {
+    transition: transform 0.2s linear;
+  }
 }
 
 .img-shadow-effect {
@@ -943,13 +937,6 @@ export default defineComponent({
   pointer-events: none;
   display: block;
   border-radius: 100px/50px;
-}
-
-.posAbs {
-  position: absolute;
-  transform-origin: top left;
-  top: 0;
-  left: 0;
 }
 
 .test-index {

@@ -24,7 +24,7 @@ div(class="overflow-container"
             @mousedown.native.left="pageClickHandler()"
             :contentScaleRatio="contentScaleRatio"
             :padding="contentStyles.margin")
-        div(class="layer-wrapper")
+        div(class="layers-wrapper")
           nu-layer(
             v-for="(layer,index) in config.layers"
             :key="layer.id"
@@ -405,7 +405,7 @@ export default defineComponent({
   border: 1px solid white
 }
 
-.layer-wrapper {
+.layers-wrapper {
   position: absolute;
   width: 100%;
   height: 100%;
