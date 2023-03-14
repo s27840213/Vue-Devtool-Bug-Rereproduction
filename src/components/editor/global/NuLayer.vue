@@ -17,7 +17,8 @@ div(class="nu-layer"
       @click.right.stop="div.main ? onRightClick($event) : null"
       @dragenter="div.main ? dragEnter($event) : null"
       @dblclick="div.main ? dblClick($event) : null")
-    div(:class="{'nu-layer__scale': applyLayerScale}" :ref="div.main ? 'scale' : ''"
+    div(class="full-size"
+        :class="{'nu-layer__scale': applyLayerScale}" :ref="div.main ? 'scale' : ''"
         :style="scaleStyles()")
       div(class="nu-layer__flip full-size" :style="flipStyles")
           component(:is="`nu-${config.type}`"

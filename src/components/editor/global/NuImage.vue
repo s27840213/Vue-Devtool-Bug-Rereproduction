@@ -16,12 +16,12 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
       draggable="false"
       :src="shadowSrc()"
       @error="onError")
-  div(class="img-wrapper"
-    :style="imgWrapperstyle()")
+  div(:class="{'nu-image__clipper': !imgControl}")
+    //- :style="imgWrapperstyle()")
     div(class='nu-image__picture'
       :style="imgStyles()")
       svg(v-if="isAdjustImage()"
-        :style="flipStyles()"
+        :style="flipStyles"
         class="nu-image__svg"
         :class="{'layer-flip': flippedAnimation() }"
         :viewBox="`0 0 ${imgNaturalSize.width} ${imgNaturalSize.height}`"
@@ -42,13 +42,14 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
           :filter="`url(#${filterId})`"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
-          class="nu-image__picture"
+          class="full-size"
           draggable="false"
           @error="onError"
           @load="onAdjustImgLoad")
       img(v-else ref="img"
-        :style="flipStyles()"
-        :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation() }"
+        :style="flipStyles"
+        class="full-size"
+        :class="{'layer-flip': flippedAnimation() }"
         :src="finalSrc"
         draggable="false"
         @error="onError"
@@ -333,6 +334,25 @@ export default defineComponent({
         return imageUtils.appendCompQueryForVivipic(this.src)
       }
       return this.src
+    },
+    flipStyles(): any {
+      const { horizontalFlip, verticalFlip } = this.config.styles
+      let scaleX = horizontalFlip ? -1 : 1
+      let scaleY = verticalFlip ? -1 : 1
+
+      if (typeof this.subLayerIndex !== 'undefined' && this.subLayerIndex !== -1) {
+        const primaryLayer = this.primaryLayer ? this.primaryLayer : this.config
+        if (primaryLayer.type === 'frame' && this.config.srcObj.type === 'frame') {
+          scaleX = primaryLayer.styles.horizontalFlip ? -1 : 1
+          scaleY = primaryLayer.styles.verticalFlip ? -1 : 1
+        }
+      }
+      if (scaleX !== 1 || scaleY !== 1) {
+        return {
+          transform: `scale(${scaleX}, ${scaleY})`
+        }
+      }
+      return {}
     },
     filterId(): string {
       const browserInfo = this.$store.getters['user/getBrowserInfo'] as IBrowserInfo
@@ -930,7 +950,7 @@ export default defineComponent({
         height: `${height}px`
       } : {
         // Fix the safari rendering bug, add the following code can fix it...
-        transform: 'translate(0,0)'
+        // transform: 'translate(0,0)'
       }
     },
     cssFilterElms() {
@@ -949,23 +969,6 @@ export default defineComponent({
     svgFilterElms() {
       const { adjust } = this.adjustImgStyles()
       return imageAdjustUtil.convertAdjustToSvgFilter(adjust || {}, this.config as IImage)
-    },
-    flipStyles() {
-      const { horizontalFlip, verticalFlip } = this.config.styles
-      let scaleX = horizontalFlip ? -1 : 1
-      let scaleY = verticalFlip ? -1 : 1
-
-      if (typeof this.subLayerIndex !== 'undefined' && this.subLayerIndex !== -1) {
-        const primaryLayer = this.primaryLayer ? this.primaryLayer : this.config
-        if (primaryLayer.type === 'frame' && this.config.srcObj.type === 'frame') {
-          scaleX = primaryLayer.styles.horizontalFlip ? -1 : 1
-          scaleY = primaryLayer.styles.verticalFlip ? -1 : 1
-        }
-      }
-      return {
-        transform: `scale(${scaleX}, ${scaleY})`
-        // ...(this.isAdjustImage && this.svgFilterElms.length && { filter: `url(#${this.filterId})` })
-      }
     },
     canvasWrapperStyle() {
       if (this.forRender) {
@@ -1097,14 +1100,21 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .nu-image {
-  position: absolute;
-  top: 0px;
-  left: 0px;
+  // position: absolute;
+  // top: 0px;
+  // left: 0px;
   width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+
+  &__clipper {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+  }
 
   &__picture {
     touch-action: none;
@@ -1135,14 +1145,6 @@ export default defineComponent({
 
   &__adjust {
     pointer-events: none;
-  }
-
-  .img-wrapper {
-    position: absolute;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
   }
 }
 
