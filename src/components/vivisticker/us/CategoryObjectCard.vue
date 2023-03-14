@@ -78,7 +78,7 @@ export default defineComponent({
       if (!this.scrollableParent) return
       const cardOffsetTop = this.$el.parentElement.parentElement.offsetTop
       const scrollPos = this.translateY() - (this.scrollTop - cardOffsetTop)
-      this.coverPos = ((scrollPos + this.$el.clientHeight * 0.5) / this.scrollableParent.clientHeight) * 100
+      this.coverPos = (scrollPos / (this.scrollableParent.clientHeight - this.$el.clientHeight)) * 100
     }
   }
 })
