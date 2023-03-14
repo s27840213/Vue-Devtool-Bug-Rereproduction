@@ -1476,11 +1476,12 @@ class UploadUtils {
       }
       case 'text': {
         const text = layer as IText
-        const { type, widthLimit, isEdited, paragraphs, styles } = text
+        const { type, widthLimit, isEdited, paragraphs, styles, isCompensated } = text
         return {
           type,
           widthLimit,
           isEdited,
+          isCompensated,
           paragraphs: paragraphs,
           styles: this.styleFilter(styles, 'text')
         }
