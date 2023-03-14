@@ -99,7 +99,7 @@ export default defineComponent({
     }),
     rootStyles(): {[key: string]: string} {
       return {
-        paddingTop: `${this.userInfo.statusBarHeight}px`
+        paddingTop: `${this.userInfo.statusBarHeight + 8}px`
       }
     },
     isCropping(): boolean {
