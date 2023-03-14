@@ -6,7 +6,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
               :key="`textSvgBg${idx}`"
               :is="elm.tag"
               v-bind="elm.attrs")
-  div(v-for="text, idx in duplicatedText" class="nu-text__body" ref="body"
+  div(v-for="text, idx in duplicatedText" class="nu-text__body"
       :style="Object.assign(bodyStyles(), text.extraBody)")
     nu-curve-text(v-if="isCurveText"
       :config="config"
@@ -23,19 +23,19 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
       span(v-for="(span, sIndex) in p.spans"
         class="nu-text__span"
         :data-sindex="sIndex"
-        :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan, transParentStyles)") {{ span.text }}
+        :style="Object.assign(spanStyle(sIndex, p, config), text.extraSpan, transParentStyles)") {{ span.text }}
         br(v-if="!span.text && p.spans.length === 1")
 </template>
 
 <script lang="ts">
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
-import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
-import { IGroup, ISpan, IText } from '@/interfaces/layer'
+import { isITextLetterBg } from '@/interfaces/format'
+import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
-import textBgUtils from '@/utils/textBgUtils'
+import textBgUtils, { textBgSvg } from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
@@ -46,7 +46,6 @@ import { defineComponent, PropType } from 'vue'
 export default defineComponent({
   components: {
     NuCurveText,
-    NuTextEditor
   },
   props: {
     config: {
@@ -92,7 +91,7 @@ export default defineComponent({
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
       isLoading: true,
-      svgBG: {} as ReturnType<typeof textBgUtils.drawSvgBg>,
+      svgBG: {} as textBgSvg|null,
     }
   },
   created() {
@@ -105,8 +104,8 @@ export default defineComponent({
     this.resizeAfterFontLoaded()
   },
   computed: {
-    spanEffect(): Record<string, unknown> {
-      return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
+    spanEffect() {
+      return textBgUtils.convertTextEffect(this.config.styles)
     },
     isCurveText(): any {
       const { textShape } = this.config.styles
@@ -156,12 +155,9 @@ export default defineComponent({
         })
       }
     },
-    'config.styles': {
-      deep: true,
-      handler() {
-        this.drawSvgBG()
-      }
-    },
+    'config.styles.width'() { this.drawSvgBG() },
+    'config.styles.height'() { this.drawSvgBG() },
+    'config.styles.textBg'() { this.drawSvgBG() },
     'config.isAutoResizeNeeded': {
       handler(newVal) {
         if (newVal) {
@@ -182,8 +178,8 @@ export default defineComponent({
       }
     },
     drawSvgBG() {
-      this.$nextTick(() => {
-        this.svgBG = textBgUtils.drawSvgBg(this.config, this.$refs.body as Element[])
+      this.$nextTick(async () => {
+        this.svgBG = await textBgUtils.drawSvgBg(this.config)
       })
     },
     isAutoResizeNeeded(): boolean {
@@ -214,10 +210,12 @@ export default defineComponent({
         opacity
       }
     },
-    spanStyle(spans: ISpan[], sIndex: number): Record<string, string> {
-      const span = spans[sIndex]
+    spanStyle(sIndex: number, p: IParagraph, config: IText): Record<string, string> {
+      const textBg = this.config.styles.textBg
+      const span = p.spans[sIndex]
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
-        sIndex === spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {}
+        sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
+        isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {}
       )
     },
     pStyle(styles: any) {
