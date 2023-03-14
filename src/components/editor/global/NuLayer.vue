@@ -1,6 +1,7 @@
 <template lang="pug">
-div(class="nu-layer nu-layer__wrapper"
+div(class="nu-layer"
     :class="[inAllPagesMode ? 'click-disabled' : '', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '']"
+    :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
     :style="layerWrapperStyles"
     :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
     ref="body")
@@ -16,7 +17,7 @@ div(class="nu-layer nu-layer__wrapper"
       @click.right.stop="div.main ? onRightClick($event) : null"
       @dragenter="div.main ? dragEnter($event) : null"
       @dblclick="div.main ? dblClick($event) : null")
-    div(class="nu-layer__scale" :ref="div.main ? 'scale' : ''"
+    div(:class="{'nu-layer__scale': applyLayerScale}" :ref="div.main ? 'scale' : ''"
         :style="scaleStyles()")
       div(class="nu-layer__flip full-size" :style="flipStyles")
           component(:is="`nu-${config.type}`"
@@ -38,7 +39,7 @@ div(class="nu-layer nu-layer__wrapper"
               :style="frameClipStyles")
     div(v-if="showSpinner" class="nu-layer__inProcess")
       square-loading
-  div(class="nu-layer__line-mover"
+  div(v-if="isLine" class="nu-layer__line-mover"
     :style="lineMoverStyles()"
     ref="lineMover"
     :id="`nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`")
@@ -63,6 +64,7 @@ import groupUtils from '@/utils/groupUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
+import mathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
@@ -292,6 +294,11 @@ export default defineComponent({
       renderForPDF: 'user/getRenderForPDF',
       useMobileEditor: 'getUseMobileEditor'
     }),
+    applyLayerScale(): boolean {
+      const isImg = this.config.type === 'image'
+      const isUnscalableShape = this.config.type === 'shape' && ['D', 'E'].includes(this.config.category)
+      return !isImg && !isUnscalableShape
+    },
     lazyloadSize(): { height: number, width: number } {
       const { config, contentScaleRatio } = this
       switch (config.type) {
@@ -468,7 +475,12 @@ export default defineComponent({
     },
     lineMoverStyles(): { [key: string]: string } {
       if (!this.isLine) return {}
-      const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
+      // const { x, y, width, height, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
+      const { width: lineW, height: lineH, rotate } = controlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
+      const { width, height } = this.config.styles
+      const lineLength = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
+      const x = width * 0.5 - lineLength * 0.5
+      const y = height * 0.5 - Math.abs(lineH * mathUtils.cos(rotate) * 0.5)
       const page = this.page
       const { bleeds } = pageUtils.getPageSizeWithBleeds(page)
       let transform = `translate(${(page.isEnableBleed ? x + bleeds.left : x) * this.contentScaleRatio}px, ${(page.isEnableBleed ? y + bleeds.top : y) * this.contentScaleRatio}px)`
@@ -477,8 +489,8 @@ export default defineComponent({
       }
       return {
         transform,
-        width: `${width * this.contentScaleRatio}px`,
-        height: `${height * this.contentScaleRatio}px`
+        width: `${lineW * this.contentScaleRatio}px`,
+        height: `${lineH * this.contentScaleRatio}px`
       }
     },
     outlineStyles() {
@@ -909,6 +921,7 @@ export default defineComponent({
 .nu-layer {
   touch-action: none;
   position: absolute;
+  pointer-events: initial;
   // top: 0;
   // left: 0;
   // display: flex;
@@ -920,9 +933,6 @@ export default defineComponent({
   // box-shadow: inset 0px 0px 0px 7px rgba(136, 136, 136, 0.5);
   &:focus {
     background-color: rgba(168, 218, 220, 1);
-  }
-  &__wrapper {
-    pointer-events: initial;
   }
   &__line-mover {
     touch-action: none;
