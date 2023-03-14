@@ -107,7 +107,6 @@ import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
-import _ from 'lodash'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
@@ -171,12 +170,13 @@ export default defineComponent({
       isDraggingPanel: false,
       currSubColorEvent: '',
       innerTabIndex: 0,
-      fitPage: _.throttle(() => {
-        this.$nextTick(() => {
-          pageUtils.fitPage()
-        })
-      }, 100, { trailing: false }),
-      resizeObserver: null as unknown as ResizeObserver
+      // No fit page in mobile now
+      // fitPage: _.throttle(() => {
+      //   this.$nextTick(() => {
+      //     pageUtils.fitPage()
+      //   })
+      // }, 100, { trailing: false }),
+      // resizeObserver: null as unknown as ResizeObserver
     }
   },
   computed: {
@@ -541,18 +541,19 @@ export default defineComponent({
   },
   mounted() {
     this.panelDragHeight = 0
-    this.resizeObserver = new ResizeObserver(() => {
-      this.$emit('panelHeight', this.currPanelHeight())
-      // Prevent fitPage when full size panel open, ex: SidebarPanel
-      if (this.fixSize || this.panelDragHeight !== this.panelParentHeight()) {
-        this.fitPage()
-      }
-    })
-    this.resizeObserver.observe(this.$refs.panel as Element)
+    // No fit page in mobile now
+    // this.resizeObserver = new ResizeObserver(() => {
+    //   this.$emit('panelHeight', this.currPanelHeight())
+    //   // Prevent fitPage when full size panel open, ex: SidebarPanel
+    //   if (this.fixSize || this.panelDragHeight !== this.panelParentHeight()) {
+    //     this.fitPage()
+    //   }
+    // })
+    // this.resizeObserver.observe(this.$refs.panel as Element)
   },
-  beforeUnmount() {
-    this.resizeObserver && this.resizeObserver.disconnect()
-  },
+  // beforeUnmount() {
+  //   this.resizeObserver && this.resizeObserver.disconnect()
+  // },
   methods: {
     ...mapMutations({
       setBgImageControl: 'SET_backgroundImageControl',
@@ -616,8 +617,10 @@ export default defineComponent({
         this.closeMobilePanel()
       } else if (this.panelDragHeight >= panelParentHeight * 0.75) {
         this.panelDragHeight = panelParentHeight
+        this.$emit('panelHeight', this.panelDragHeight + 30) // 30 = 15 padding * 2
       } else {
         this.panelDragHeight = panelParentHeight * 0.5
+        this.$emit('panelHeight', this.panelDragHeight + 30)
       }
 
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)

@@ -126,7 +126,6 @@ export default defineComponent({
       loading: 'bgRemove/getLoading',
       inGestureMode: 'getInGestureToolMode',
       contentScaleRatio: 'getContentScaleRatio'
-
     }),
     size(): { width: number, height: number } {
       return {
