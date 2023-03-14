@@ -9,19 +9,6 @@ div(class="text-setting" ref='body'
       svg-icon(class="pointer"
         :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
     font-size-selector
-    //- div(class="size-bar relative")
-    //-   div(class="pointer"
-    //-     @mousedown="fontSizeStepping(-step)") -
-    //-   button(class="text-setting__range-input-button" @click="handleValueModal")
-    //-     input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
-    //-           @change="setSize" :value="fontSize")
-    //-   div(class="pointer"
-    //-     @mousedown="fontSizeStepping(step)") +
-    //-   value-selector(v-if="openValueSelector"
-    //-               :valueArray="fontSelectValue"
-    //-               class="text-setting__value-selector"
-    //-               v-click-outside="handleValueModal"
-    //-               @update="handleValueUpdate")
   div(class="text-setting__row2")
     div(class="text-setting__color"
         v-hint="$t('NN0099')")
@@ -82,10 +69,8 @@ import editorUtils from '@/utils/editorUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
-import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
 import TextPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
@@ -307,13 +292,6 @@ export default defineComponent({
         input.select()
       }
     },
-    handleValueUpdate(value: number) {
-      LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-      tiptapUtils.spanStyleHandler('size', value)
-      tiptapUtils.forceUpdate(true)
-      TextPropUtils.updateTextPropsState({ fontSize: value.toString() })
-      textEffectUtils.refreshSize()
-    },
     handleSliderModal(modalName = '') {
       this.openSliderBar = modalName
       if (modalName === 'lineHeight' || modalName === 'fontSpacing' || modalName === 'opacity') {
@@ -473,71 +451,11 @@ export default defineComponent({
         TextPropUtils.updateTextPropsState({ textAlign: prop })
       }
     },
-    fontSizeStepping(step: number, tickInterval = 100) {
-      const startTime = new Date().getTime()
-      const interval = window.setInterval(() => {
-        if (new Date().getTime() - startTime > 500) {
-          try {
-            TextPropUtils.fontSizeStepping(step)
-            textEffectUtils.refreshSize()
-          } catch (error) {
-            console.error(error)
-            window.removeEventListener('mouseup', onmouseup)
-            clearInterval(interval)
-          }
-        }
-      }, tickInterval)
-
-      const onmouseup = () => {
-        window.removeEventListener('mouseup', onmouseup)
-        if (new Date().getTime() - startTime < 500) {
-          TextPropUtils.fontSizeStepping(step)
-          textEffectUtils.refreshSize()
-        }
-        clearInterval(interval)
-        tiptapUtils.agent(editor => {
-          if (!editor.state.selection.empty) {
-            LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-            StepsUtils.record()
-          }
-        })
-      }
-
-      window.addEventListener('mouseup', onmouseup)
-    },
-    isValidInt(value: string) {
-      return value.match(/^-?\d+$/)
-    },
-    isValidFloat(value: string) {
-      return value.match(/[+-]?\d+(\.\d+)?/)
-    },
     isValidHexColor(value: string) {
       return isValidHexColor(value)
     },
-    boundValue(value: number, min: number, max: number): string {
-      if (value < min) return min.toString()
-      else if (value > max) return max.toString()
-      return value.toString()
-    },
-    setSize(e: Event) {
-      let { value } = e.target as HTMLInputElement
-      if (this.isValidFloat(value)) {
-        LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-        value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
-        window.requestAnimationFrame(() => {
-          tiptapUtils.spanStyleHandler('size', parseFloat(value))
-          tiptapUtils.forceUpdate(true)
-          TextPropUtils.updateTextPropsState({ fontSize: value })
-          textEffectUtils.refreshSize()
-        })
-      }
-    },
     setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
       TextUtils.setParagraphProp(prop, _value)
-    },
-    onBlur() {
-      TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
-      TextPropUtils.updateTextPropsState()
     },
     openLineHeightSliderPopup() {
       popupUtils.setCurrEvent(PopupSliderEventType.lineHeight)

@@ -26,7 +26,7 @@ export interface ICurveTextPostParams {
   hDiff1: number,
   hDiff2: number,
   rotate: number,
-  oldPos: { x: number, y: number},
+  oldPos: { x: number, y: number },
   oldSize: { width: number, height: number },
-  newSize: { width: number, height: number}
+  newSize: { width: number, height: number }
 }

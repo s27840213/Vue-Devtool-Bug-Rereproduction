@@ -15,6 +15,7 @@ import { Editor, EditorEvents, FocusPosition, JSONContent } from '@tiptap/vue-3'
 import { EventEmitter } from 'events'
 import shortcutUtils from './shortcutUtils'
 import textBgUtils from './textBgUtils'
+import textUtils from './textUtils'
 
 interface ITiptapJson extends JSONContent {
   type: 'doc'
@@ -412,7 +413,7 @@ class TiptapUtils {
     return lines.join('\n')
   }
 
-  applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined, otherUpdates: { [key: string]: any } = {}) {
+  applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined, otherUpdates: { [key: string]: any } = {}, toFocus = true) {
     const item = { [key]: value }
     Object.assign(item, otherUpdates)
     const { subLayerIdx, getCurrLayer } = layerUtils
@@ -427,13 +428,19 @@ class TiptapUtils {
             Object.assign(attr, otherUpdates)
             editor.storage.nuTextStyle.spanStyle = this.textStyles(attr)
             editor.chain().setMark('textStyle', attr).run()
-            setTimeout(() => {
-              editor.commands.focus()
-            }, 10)
+            if (toFocus) {
+              setTimeout(() => {
+                editor.commands.focus()
+              }, 10)
+            }
           } else {
             editor.chain().updateAttributes('textStyle', item).updateAttributes('paragraph', item).run()
             setTimeout(() => {
-              editor.chain().focus().selectPrevious().run()
+              if (toFocus) {
+                editor.chain().focus().selectPrevious().run()
+              } else {
+                editor.chain().selectPrevious().run()
+              }
             }, 10)
           }
         }
@@ -444,23 +451,30 @@ class TiptapUtils {
     })
   }
 
-  spanStyleHandler(updateKey: string, updateValue: string | boolean | number) {
+  spanStyleHandler(updateKey: string, updateValue: string | boolean | number, toFocus = true) {
     const item = { [updateKey]: updateValue }
     const { subLayerIdx, getCurrLayer: currLayer, layerIndex } = layerUtils
 
     switch (currLayer.type) {
       case 'text':
-        this.applySpanStyle(updateKey, updateValue)
+        this.applySpanStyle(updateKey, updateValue, undefined, {}, toFocus)
         break
       case 'tmp':
       case 'group':
-        if (subLayerIdx === -1 || !(currLayer as IGroup).layers[subLayerIdx].contentEditable) {
+        if (subLayerIdx === -1 || !currLayer.layers[subLayerIdx].contentEditable) {
           textPropUtils.applyPropsToAll('span,paragraph', item, layerIndex, subLayerIdx)
           if (subLayerIdx !== -1) {
             this.updateHtml()
+            textUtils.updateTextLayerSizeByShape(layerUtils.pageIndex, layerIndex, subLayerIdx)
+          } else {
+            for (const [i, subLayer] of currLayer.layers.entries()) {
+              if (subLayer.type !== 'text') continue
+              textUtils.updateTextLayerSizeByShape(layerUtils.pageIndex, layerIndex, i)
+            }
           }
+          textUtils.updateGroupLayerSize(layerUtils.pageIndex, layerIndex)
         } else {
-          this.applySpanStyle(updateKey, updateValue)
+          this.applySpanStyle(updateKey, updateValue, undefined, {}, toFocus)
         }
     }
     textPropUtils.updateTextPropsState(item)
