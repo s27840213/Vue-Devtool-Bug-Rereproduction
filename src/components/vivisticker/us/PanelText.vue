@@ -13,18 +13,15 @@ div(class="panel-text rwd-container" :class="{'in-category': isInCategory}")
           div(class="panel-text__item" :style="itemStyles")
     template(v-slot:category-text-item="{ list }")
       div(class="panel-text__items" :style="itemsStyles")
-        div(class="panel-text__item" :class="{recent: item.id === 'recent'}" v-for="item in list" :style="itemStyles(item)")
-          div(v-if="item.id === 'recent'" class="panel-text__item__recent"
+        div(class="panel-text__card" :class="{recent: item.id === 'recent'}" v-for="item in list" :style="itemStyles()")
+          div(v-if="item.id === 'recent'" class="panel-text__card__recent"
                 @click="handleCategorySearch($t('NN0024'))")
             svg-icon(class="pointer"
               iconName="clock"
               iconColor="balck-1"
               iconWidth="24px")
             div(class="overline-SM") {{ "RECENTLY USED" }}
-          category-text-item(v-else class="panel-text__item__text"
-            :key="item.id"
-            :item="item"
-            style="width: 100%; height: 100%;")
+          img(v-else class="panel-text__card__bg" :src="cardBgSrc(item)" @click="addText(item)" @error="imgOnerror")
   div(v-if="!showAllRecently" class="panel-text__text-button-wrapper"
       :style="`font-family: ${localeFont()}`"
       @click="handleAddText")
@@ -34,7 +31,10 @@ div(class="panel-text rwd-container" :class="{'in-category': isInCategory}")
 
 <script lang="ts">
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import AssetUtils from '@/utils/assetUtils'
 import generalUtils from '@/utils/generalUtils'
+import textPropUtils from '@/utils/textPropUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import PanelText from '../PanelText.vue'
 
@@ -117,14 +117,32 @@ export default defineComponent({
           }
         })
     },
-    itemStyles(item: IListServiceContentDataItem) {
+    cardBgSrc(item: IListServiceContentDataItem):string {
+      return item.id === 'recent' ? '' : `https://template.vivipic.com/text/${item.id}/bg_prev_2x?ver=${item.ver}`
+    },
+    itemStyles() {
       return {
         width: this.itemWidth + 'px',
         height: this.itemWidth + 'px',
-        background: item.id === 'recent' ? 'setColor(light-bg)' : 'magenta',
         ...(!this.isTablet && { margin: '0 auto' })
       }
     },
+    imgOnerror(e: Event) {
+      const target = (e.target as HTMLImageElement)
+      target.src = require('@/assets/img/svg/image-preview.svg')
+    },
+    addText(item: any) {
+      if (this.isInEditor) {
+        AssetUtils.addAsset(item).then(() => {
+          textPropUtils.updateTextPropsState()
+        })
+      } else {
+        vivistickerUtils.startEditing('text', {
+          plan: item.plan,
+          assetId: item.id
+        }, vivistickerUtils.getAssetInitiator(item), vivistickerUtils.getAssetCallback(item))
+      }
+    }
   }
 })
 </script>
@@ -159,7 +177,7 @@ export default defineComponent({
     right: 0;
     transform: translateY(-50%);
   }
-  &__item {
+  &__card {
     width: 80px;
     height: 80px;
     display: flex;
@@ -167,9 +185,9 @@ export default defineComponent({
     justify-content: center;
     border-radius: 10px;
     overflow: hidden;
-    &__text {
-      padding: 30px;
-      box-sizing: border-box;
+    &__bg {
+      @include size(100%, 100%);
+      object-position: center center;
     }
     &__recent {
       @include size(100%, 100%);

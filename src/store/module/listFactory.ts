@@ -204,7 +204,8 @@ export default function (this: any) {
           theme,
           listAll: 1,
           listCategory: 0,
-          cache: needCache
+          cache: needCache,
+          colNum: store.state.isTablet ? 3 : 2
         })
         commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
