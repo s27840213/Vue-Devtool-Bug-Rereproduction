@@ -1,5 +1,6 @@
 <template lang="pug">
-div(:class="['nu-layer', 'nu-layer__wrapper', inAllPagesMode ? 'click-disabled' : '']"
+div(class="nu-layer nu-layer__wrapper"
+    :class="[inAllPagesMode ? 'click-disabled' : '', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '']"
     :style="layerWrapperStyles"
     :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
     ref="body")
@@ -7,7 +8,7 @@ div(:class="['nu-layer', 'nu-layer__wrapper', inAllPagesMode ? 'click-disabled' 
   //- :id="div.main ? `nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}` : ''"
   //- :ref="div.main ? 'body' : ''"
   div(v-for="div in layerDivs"
-      :class="!config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : ''"
+      class="full-size"
       :style="layerStyles(div.noShadow, div.isTransparent)"
       @pointerdown="div.main ? onPointerDown($event) : null"
       @pointerup="div.main ? onPointerUp($event) : null"
@@ -15,25 +16,27 @@ div(:class="['nu-layer', 'nu-layer__wrapper', inAllPagesMode ? 'click-disabled' 
       @click.right.stop="div.main ? onRightClick($event) : null"
       @dragenter="div.main ? dragEnter($event) : null"
       @dblclick="div.main ? dblClick($event) : null")
-    div(class="nu-layer__scale" :ref="div.main ? 'scale' : ''"
-        :style="scaleStyles()")
-        component(:is="`nu-${config.type}`"
-          class="transition-none"
-          :config="config"
-          :imgControl="imgControl"
-          :contentScaleRatio="contentScaleRatio"
-          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-          :page="page"
-          :scaleRatio="scaleRatio"
-          :primaryLayer="primaryLayer"
-          :forRender="forRender"
-          :isTransparent="div.isTransparent"
-          :noShadow="div.noShadow")
-        svg(class="clip-contour full-width" v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
-          :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
-          g(v-html="frameClipFormatter(config.clipPath)"
-            :style="frameClipStyles")
-    div(v-if="showSpinner()" class="nu-layer__inProcess")
+    div(class="nu-layer__flip full-size" :style="flipStyles")
+      div(class="nu-layer__scale full-size" :ref="div.main ? 'scale' : ''"
+          :style="scaleStyles()")
+          component(:is="`nu-${config.type}`"
+            class="transition-none"
+            :config="config"
+            :imgControl="imgControl"
+            :contentScaleRatio="contentScaleRatio"
+            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+            :page="page"
+            :scaleRatio="scaleRatio"
+            :primaryLayer="primaryLayer"
+            :forRender="forRender"
+            :isTransparent="div.isTransparent"
+            :noShadow="div.noShadow")
+          svg(v-if="config.isFrame && !config.isFrameImg && config.type === 'image' && config.active && !forRender"
+            class="clip-contour full-size"
+            :viewBox="`0 0 ${config.styles.initWidth} ${config.styles.initHeight}`")
+            g(v-html="frameClipFormatter(config.clipPath)"
+              :style="frameClipStyles")
+    div(v-if="showSpinner" class="nu-layer__inProcess")
       square-loading
   div(class="nu-layer__line-mover"
     :style="lineMoverStyles()"
@@ -311,6 +314,24 @@ export default defineComponent({
         layerIndex: this.layerIndex
       }
     },
+    flipStyles(): any {
+      if (this.config.type === LayerType.image) {
+        return {}
+      }
+      const { horizontalFlip, verticalFlip } = this.config.styles
+      let transform = ''
+      if (horizontalFlip) {
+        transform += 'scaleX(-1)'
+      }
+      if (verticalFlip) {
+        transform += 'scaleY(-1)'
+      }
+      if (transform) {
+        return { transform }
+      } else {
+        return {}
+      }
+    },
     layerWrapperStyles(): any {
       const clipPath = !this.forRender && this.config.clipPath &&
         !this.config.isFrameImg && this.primaryLayer?.type === 'frame'
@@ -331,6 +352,14 @@ export default defineComponent({
         styles.transform += `translateZ(${this.config.styles.zindex}px)`
       }
       return styles
+    },
+    showSpinner(): boolean {
+      const { config } = this
+      const shadow = this.config.styles.shadow
+      const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj.type && shadow.srcObj.type !== 'upload'
+      const isHandleShadow = config.inProcess === 'imgShadow' && !hasShadowSrc
+      const isHandleBgRemove = config.inProcess === 'bgRemove'
+      return isHandleBgRemove || isHandleShadow
     },
     isDragging(): boolean {
       return (this.config as ILayer).dragging
@@ -415,6 +444,7 @@ export default defineComponent({
       return frameUtils.frameClipFormatter(clippath)
     },
     layerStyles(noShadow: boolean, isTransparent: boolean): any {
+      console.log('layerStyles(noShadow: boolean, isTransparent: boolean): any {')
       switch (this.config.type) {
         case LayerType.text: {
           const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
@@ -481,14 +511,6 @@ export default defineComponent({
     },
     compensationRatio(): number {
       return Math.max(1, this.pageScaleRatio())
-    },
-    showSpinner(): boolean {
-      const { config } = this
-      const shadow = this.config.styles.shadow
-      const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj.type && shadow.srcObj.type !== 'upload'
-      const isHandleShadow = config.inProcess === 'imgShadow' && !hasShadowSrc
-      const isHandleBgRemove = config.inProcess === 'bgRemove'
-      return isHandleBgRemove || isHandleShadow
     },
     translateStyles(): { [index: string]: string } {
       const { zindex } = this.config.styles

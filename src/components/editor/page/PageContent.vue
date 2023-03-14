@@ -1,9 +1,9 @@
 <template lang="pug">
 div(class="overflow-container"
     :style="pageStyles")
-  div(class="full-w-h" :style="stylesWith3DPreserve")
+  div(class="full-size" :style="stylesWith3DPreserve")
     div(v-if="imgLoaded"
-        :class="['full-w-h', 'page-content']"
+        :class="['full-size', 'page-content']"
         :style="pageContentStyles"
         ref="page-content"
         @drop.prevent="onDrop"
@@ -14,7 +14,7 @@ div(class="overflow-container"
         @dblclick="pageDblClickHandler()"
         @tap="tapPageContent")
       //- @dblclick will not be trigger in mobile, use @tap + doubleTapUtils instead.
-      div(class="content full-w-h" :class="`nu-page-content-${pageIndex}`" :style="contentStyles")
+      div(class="content full-size" :class="`nu-page-content-${pageIndex}`" :style="contentStyles")
         nu-bg-image(
             :image="config.backgroundImage"
             :pageIndex="pageIndex"
