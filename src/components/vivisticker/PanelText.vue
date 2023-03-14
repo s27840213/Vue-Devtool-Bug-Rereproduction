@@ -86,8 +86,7 @@ export default defineComponent({
       isInEditor: 'vivisticker/getIsInEditor',
       isTabInCategory: 'vivisticker/getIsInCategory',
       isTabShowAllRecently: 'vivisticker/getShowAllRecently',
-      editorBg: 'vivisticker/getEditorBg',
-      pending: 'textStock/pending'
+      editorBg: 'vivisticker/getEditorBg'
     }),
     ...mapState({
       isTablet: 'isTablet'
@@ -96,6 +95,7 @@ export default defineComponent({
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
+      pending: 'pending',
       keyword: 'keyword'
     }),
     isInCategory(): boolean {

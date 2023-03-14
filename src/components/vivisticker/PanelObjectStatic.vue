@@ -119,8 +119,7 @@ export default defineComponent({
       rawCategories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      keyword: 'keyword',
-      rawPending: 'pending'
+      keyword: 'keyword'
     }),
     ...mapGetters('objects', {
       tagsBar: 'tagsBar',
@@ -130,7 +129,8 @@ export default defineComponent({
       favoritesTags: 'favoritesTags',
       rawFavoritesSearchResult: 'favoritesSearchResult',
       checkCategoryFavorite: 'checkCategoryFavorite',
-      checkTagFavorite: 'checkTagFavorite'
+      checkTagFavorite: 'checkTagFavorite',
+      rawPending: 'pending'
     }),
     isInCategory(): boolean {
       return this.isTabInCategory('object')
@@ -139,10 +139,7 @@ export default defineComponent({
       return this.isTabShowAllRecently('object')
     },
     pending(): boolean {
-      if (this.showFav) return this.rawPending.favorites
-      if (this.showAllRecently) return this.rawPending.recently
-      if (this.isInCategory) return this.rawPending.content
-      return this.rawPending.categories || this.rawPending.content
+      return this.showFav ? this.rawPending.favorites : this.rawPending.content
     },
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword

@@ -17,7 +17,7 @@ const mutations = font.mutations as MutationTree<IListModuleState>
 
 actions.getMoreCategory = async ({ commit, getters, state }) => {
   const { nextParams, hasNextPage } = getters
-  const pending = state.pending.categories
+  const { pending } = state
   if (!hasNextPage || pending) { return }
   commit('SET_STATE', { pending: true })
   nextParams.keyword = undefined
@@ -34,7 +34,7 @@ mutations[SET_MORE_CATEGORY] = function (state: IListModuleState, objects: IList
   for (let idx = 0; idx < objects.content.length; idx++) {
     state.categories[idx].list = state.categories[idx].list.concat(objects.content[idx].list)
   }
-  state.pending.categories = false
+  state.pending = false
   state.nextPage = objects.next_page
 }
 

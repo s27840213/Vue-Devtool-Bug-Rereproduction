@@ -117,13 +117,13 @@ export default defineComponent({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       isDefaultSelected: 'brandkit/getIsDefaultSelected',
-      currentBrand: 'brandkit/getCurrentBrand',
-      pending: 'textStock/pending'
+      currentBrand: 'brandkit/getCurrentBrand'
     }),
     ...mapState('textStock', {
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
+      pending: 'pending',
       keyword: 'keyword'
     }),
     keywordLabel():string {

@@ -87,11 +87,12 @@ export default defineComponent({
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
+      pending: 'pending',
       keyword: 'keyword'
     }),
     ...mapState('fontTag', ['tags', 'showMore']),
     ...mapState('text', ['sel', 'props', 'fontPreset']),
-    ...mapGetters('font', ['hasNextPage', 'pending']),
+    ...mapGetters('font', ['hasNextPage']),
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
     }),
