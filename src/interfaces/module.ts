@@ -81,6 +81,13 @@ export type IFavoriteCategoryContent = Record<string, {
   next: number
 }>
 
+export type IPending = {
+  categories: boolean
+  content: boolean
+  recently: boolean
+  favorites: boolean
+}
+
 export interface IListModuleState {
   content: Partial<IListServiceContentData>
   categories: IListServiceContentData[]
@@ -98,7 +105,7 @@ export interface IListModuleState {
   nextPage: number | undefined
   nextSearch: number
   perPage: number
-  pending: boolean
+  pending: IPending
   // host: string
   // data: string
   // preview: string
@@ -119,7 +126,6 @@ export interface IListModuleState {
     tagsContent: IFavoriteTagContent
     categoriesContent: IFavoriteCategoryContent
     searchTarget: string | ITag | ICategory
-    pending: boolean
   }
 }
 

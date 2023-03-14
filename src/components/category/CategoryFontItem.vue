@@ -58,7 +58,8 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapState('text', ['sel', 'props', 'fontStore', 'pending']),
+    ...mapState('text', ['sel', 'props', 'fontStore']),
+    ...mapGetters('text', ['pending']),
     ...mapGetters('brandkit', {
       isSettingsOpen: 'getIsSettingsOpen'
     }),
