@@ -156,7 +156,6 @@ export default defineComponent({
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      pending: 'pending',
       keyword: 'keyword'
     }),
     ...mapGetters({
@@ -170,7 +169,8 @@ export default defineComponent({
       shareColor: 'vivisticker/getShareColor',
       allRecentlyColors: 'vivisticker/getRecentlyBgColors',
       currActivePanel: 'mobileEditor/getCurrActivePanel',
-      newBgColor: 'vivisticker/getNewBgColor'
+      newBgColor: 'vivisticker/getNewBgColor',
+      pending: 'background/pending'
     }),
     itemWidth(): number {
       return this.isTablet ? 120 : 80

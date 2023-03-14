@@ -72,7 +72,7 @@ import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'PanelBackground',
@@ -106,9 +106,9 @@ export default defineComponent({
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      pending: 'pending',
       keyword: 'keyword'
     }),
+    ...mapGetters('background', ['pending']),
     itemWidth(): number {
       const basicWidth = (window.outerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
       return basicWidth < 145 ? basicWidth : 145 // 145px is the default width

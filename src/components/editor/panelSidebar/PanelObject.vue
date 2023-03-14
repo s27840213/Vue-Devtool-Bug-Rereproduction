@@ -80,13 +80,13 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      showAdminTool: 'user/showAdminTool'
+      showAdminTool: 'user/showAdminTool',
+      pending: 'objects/pending',
     }),
     ...mapState('objects', {
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      pending: 'pending',
       keyword: 'keyword'
     }),
     keywordLabel():string {
@@ -134,7 +134,7 @@ export default defineComponent({
     },
     emptyResultMessage(): string {
       const { keyword, pending } = this
-      if (pending || !keyword || this.searchResult.length > 0) return ''
+      if (pending.content || !keyword || this.searchResult.length > 0) return ''
       return `${this.$t('NN0393', {
           keyword: this.keywordLabel,
           target: this.$tc('NN0003', 1)
