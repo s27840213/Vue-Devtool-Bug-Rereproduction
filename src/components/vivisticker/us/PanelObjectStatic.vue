@@ -29,6 +29,10 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
         svg-icon(iconName="favorites-empty" iconWidth="42px" iconColor="white")
         span(class="panel-static__favorites-empty--title") {{$t('NN0765')}}
         span(class="text-black-5") {{$t('NN0764')}}
+      //- Empty recently used view
+      div(v-if="showAllRecently && !item.content.length && !pending" class="panel-static__recent-empty")
+        svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
+        div(class="panel-static__recent-empty--title") No content in Recently Used
     template(v-slot:category-list-rows="{ list, title, isFavorite, coverUrl }")
       category-list-rows(v-if="showFav"
           :list="list"
@@ -303,6 +307,16 @@ export default defineComponent({
     justify-content: center;
     align-items: center;
     height: calc((100vh - 229px) * 0.8);
+    &--title {
+      margin: 12px 0 24px 0;
+    }
+  }
+  &__recent-empty {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: calc((100vh - 161px) * 0.8);
     &--title {
       margin: 12px 0 24px 0;
     }
