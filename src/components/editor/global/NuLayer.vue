@@ -16,9 +16,9 @@ div(class="nu-layer nu-layer__wrapper"
       @click.right.stop="div.main ? onRightClick($event) : null"
       @dragenter="div.main ? dragEnter($event) : null"
       @dblclick="div.main ? dblClick($event) : null")
-    div(class="nu-layer__flip full-size" :style="flipStyles")
-      div(class="nu-layer__scale full-size" :ref="div.main ? 'scale' : ''"
-          :style="scaleStyles()")
+    div(class="nu-layer__scale" :ref="div.main ? 'scale' : ''"
+        :style="scaleStyles()")
+      div(class="nu-layer__flip full-size" :style="flipStyles")
           component(:is="`nu-${config.type}`"
             class="transition-none"
             :config="config"
@@ -444,7 +444,6 @@ export default defineComponent({
       return frameUtils.frameClipFormatter(clippath)
     },
     layerStyles(noShadow: boolean, isTransparent: boolean): any {
-      console.log('layerStyles(noShadow: boolean, isTransparent: boolean): any {')
       switch (this.config.type) {
         case LayerType.text: {
           const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
@@ -535,8 +534,13 @@ export default defineComponent({
       if (!isImgType && this.compensationRatio() !== 1 && scaleX !== 1 && scaleY !== 1) {
         transform += `scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`
       }
+      const hasActualScale = transform !== 'scale(1)'
       const styles = {
-        ...(transform !== 'scale(1)' && { transform }),
+        ...(hasActualScale && {
+          width: `${this.config.styles.initWidth}px`,
+          height: `${this.config.styles.initHeight}px`,
+          transform
+        }),
         ...(pageUtils._3dEnabledPageIndex === this.pageIndex && { transformStyle: type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d' })
       }
       return styles
