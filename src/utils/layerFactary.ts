@@ -308,18 +308,28 @@ class LayerFactary {
      * 2: underline or italic w/ vertical (vertical text cannot be underlined or italic)
      * 3: span style that has only font but no type
      * 4: font size smaller than browser minimum font size setting
+     * 5: span has no text and is the only span in the paragraph
+     * 6: font is in wrong format (e.g. contains a comma)
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
       // some paragraphs contain empty spans.
       for (let pidx = 0; pidx < paragraphs.length; pidx++) {
-        if (paragraphs[pidx].spans.length === 0) {
+        const spans = paragraphs[pidx].spans
+        if (spans.length === 0) {
           paragraphs.splice(pidx, 1)
           pidx--
-        } else if (paragraphs[pidx].spans.length > 1) {
-          for (let sidx = 0; sidx < paragraphs[pidx].spans.length; sidx++) {
-            if (!paragraphs[pidx].spans[sidx].text && paragraphs[pidx].spans.length > 1) {
-              paragraphs[pidx].spans.splice(sidx, 1)
+        } else if (spans.length === 1) {
+          const span = spans[0]
+          if (span.text === undefined) {
+            paragraphs.splice(pidx, 1)
+            pidx--
+          }
+        } else {
+          for (let sidx = 0; sidx < spans.length; sidx++) {
+            const span = spans[sidx]
+            if (!span.text && spans.length > 1) {
+              spans.splice(sidx, 1)
               sidx--
             }
           }
@@ -344,12 +354,18 @@ class LayerFactary {
               paragraph.styles.assetId = ''
               paragraph.styles.fontUrl = ''
             }
+            if (paragraph.styles.font.includes(',')) {
+              paragraph.styles.font = paragraph.styles.font.split(',')[0]
+            }
             if ((paragraph.spans.length > 1 || paragraph.spans[0].text !== '') && paragraph.spanStyle) {
               delete paragraph.spanStyle
             }
           }
         },
         (span) => {
+          if (span.styles.font.includes(',')) {
+            span.styles.font = span.styles.font.split(',')[0]
+          }
           span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '')
         }
       )
