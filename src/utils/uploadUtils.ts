@@ -1265,7 +1265,12 @@ class UploadUtils {
       .catch((err) => {
         router.replace({ query: Object.assign({}) })
         store.commit('SET_isGettingDesign', false)
-        type === GetDesignType.ASSET_DESIGN && themeUtils.refreshTemplateState()
+        if (type === GetDesignType.ASSET_DESIGN) {
+          notify({ group: 'error', text: i18n.global.t('SKT0019') })
+          store.commit('SET_assetId', '')
+          store.commit('file/SET_setLayersDone')
+          themeUtils.refreshTemplateState()
+        }
         logUtils.setLog(`Fetch error: ${err}`)
         console.error('fetch failed', err)
       })
