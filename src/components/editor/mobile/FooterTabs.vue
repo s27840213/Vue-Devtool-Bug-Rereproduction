@@ -3,6 +3,7 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
   div(class="footer-tabs__content"
       :style="containerStyles")
     div(class="footer-tabs__container bg-nav"
+        :style="innerContainerStyles"
         ref="container")
       template(v-for="(tab, index) in homeTabs")
         div(v-if="!tab.hidden" :key="tab.icon"
@@ -19,12 +20,14 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
     transition(name="panel-up")
       div(v-if="isSettingTabsOpen" class="footer-tabs__sub-tabs  bg-gray-6")
         div(class="footer-tabs__unfold"
+            :style="innerContainerStyles"
             @click="handleTabAction(mainMenu)")
           svg-icon(class="click-disabled"
             :iconName="mainMenu.icon"
             :iconWidth="'26px'"
             :style="textIconStyle")
         div(class="footer-tabs__container"
+            :style="innerContainerStyles"
             @scroll.passive="updateContainerOverflow" ref="container")
           template(v-for="(tab, index) in settingTabs")
             div(v-if="!tab.hidden" :key="tab.icon"
@@ -62,6 +65,7 @@ import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -122,7 +126,8 @@ export default defineComponent({
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
-      hasCopiedFormat: 'getHasCopiedFormat'
+      hasCopiedFormat: 'getHasCopiedFormat',
+      userInfo: 'webView/getUserInfo'
     }),
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
@@ -231,7 +236,7 @@ export default defineComponent({
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' },
-        { icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }
+        ...!picWVUtils.inReviewMode ? [{ icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }] : []
       ]
     },
     frameTabs(): Array<IFooterTab> {
@@ -527,6 +532,11 @@ export default defineComponent({
         //   : `linear-gradient(to right,
         //   transparent 0, black ${this.leftOverflow ? '56px' : 0},
         //   black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
+      }
+    },
+    innerContainerStyles(): { [index: string]: string } {
+      return {
+        paddingBottom: `${this.userInfo.homeIndicatorHeight + 8}px`
       }
     },
     currLayer(): ILayer {
