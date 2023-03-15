@@ -72,7 +72,10 @@ export default defineComponent({
     }
   },
   mounted() {
-    if (this.forceRender) return
+    if (this.forceRender) {
+      this.$emit('loaded')
+      return
+    }
     const options = {
       root: document.querySelector(this.target),
       rootMargin: this.rootMargin,
