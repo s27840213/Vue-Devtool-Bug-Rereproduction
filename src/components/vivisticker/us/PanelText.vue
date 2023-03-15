@@ -22,14 +22,16 @@ div(class="panel-text rwd-container" :class="{'in-category': isInCategory}")
               iconWidth="24px")
             div(class="overline-SM") {{ "RECENTLY USED" }}
           img(v-else class="panel-text__card__bg" :src="cardBgSrc(item)" @click="addText(item)" @error="imgOnerror")
-  div(v-if="!showAllRecently" class="panel-text__text-button-wrapper"
+  div(v-if="!showAllRecently" class="panel-text__text-button-wrapper" ref="btnAddText"
       :style="`font-family: ${localeFont()}`"
       @click="handleAddText")
-    span {{ $t('STK0001') }}
-    svg-icon(iconName="plus-square" iconWidth="22px" iconColor="white")
+    span(ref="txtAddText") {{ $t('STK0001') }}
+    div(class="panel-text__text-button-wrapper__icon" ref="iconAddText")
+      svg-icon(iconName="plus-small" iconWidth="24px" iconColor="white")
 </template>
 
 <script lang="ts">
+import { CCategoryList } from '@/components/category/CategoryList.vue'
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -41,6 +43,49 @@ import PanelText from '../PanelText.vue'
 export default defineComponent({
   name: 'panel-text-us',
   extends: PanelText,
+  data() {
+    return {
+      elMainContent: undefined as HTMLElement | undefined,
+      iconAddText: 'plus-square',
+      scrollRate: 0
+    }
+  },
+  mounted() {
+    generalUtils.panelInit('text',
+      this.handleSearch,
+      this.handleCategorySearch,
+      async ({ reset }: {reset: boolean}) => {
+        await this.getRecently({ writeBack: true })
+        await this.getContent()
+      })
+  },
+  activated() {
+    this.$nextTick(() => {
+      this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
+      this.elMainContent.addEventListener('scroll', this.handleMainContentScroll)
+    })
+  },
+  deactivated() {
+    this.elMainContent?.removeEventListener('scroll', this.handleMainContentScroll)
+  },
+  watch: {
+    scrollRate(newVal) {
+      const scrollRate = newVal
+      const rScrollRate = 1 - scrollRate
+      const btn = this.$refs.btnAddText as HTMLElement
+      const txt = this.$refs.txtAddText as HTMLElement
+      const icon = this.$refs.iconAddText as HTMLElement
+
+      const btnWidth = Math.max(Math.min(255, 255 * rScrollRate), btn.clientHeight)
+      btn.style.width = btnWidth + 'px'
+      btn.style.marginLeft = -btnWidth / 2 + 'px'
+      txt.style.opacity = (1 - Math.min(scrollRate * 2, 1)).toString()
+
+      const targetIconPosLeft = btnWidth / 2 - icon.clientWidth / 2
+      icon.style.left = targetIconPosLeft + 52 * rScrollRate + 'px'
+      icon.style.transform = `rotate(${360 * rScrollRate}deg)`
+    }
+  },
   computed: {
     listRecently(): ICategoryItem[] {
       const { categories } = this
@@ -84,16 +129,7 @@ export default defineComponent({
     },
     textColumns(): number {
       return this.isTablet ? 3 : 2
-    },
-  },
-  mounted() {
-    generalUtils.panelInit('text',
-      this.handleSearch,
-      this.handleCategorySearch,
-      async ({ reset }: {reset: boolean}) => {
-        await this.getRecently({ writeBack: true })
-        await this.getContent()
-      })
+    }
   },
   methods: {
     processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
@@ -142,6 +178,10 @@ export default defineComponent({
           assetId: item.id
         }, vivistickerUtils.getAssetInitiator(item), vivistickerUtils.getAssetCallback(item))
       }
+    },
+    handleMainContentScroll() {
+      const el = this.elMainContent as HTMLElement
+      this.scrollRate = Math.max(Math.min(el.scrollTop / this.itemWidth, 1), 0)
     }
   }
 })
@@ -221,27 +261,38 @@ export default defineComponent({
     text-align: left;
   }
   &__text-button-wrapper {
-    position: fixed;
+    position: absolute;
     left: 50%;
-    bottom: 11px;
+    bottom: 24px;
     width: 255px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
-    padding: 14px 0;
+    padding: 7px 0;
     margin-left: -127.5px;
     box-sizing: border-box;
-    background-color: setColor(black-3);
+    background: rgba(46, 46, 46, 0.8);
     border-radius: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    box-shadow: 0px 0px 2px 2px rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
     &:active {
       background-color: setColor(black-1-5);
     }
     & > span {
+      position: relative;
+      left: -12px;
       font-weight: 600;
       font-size: 20px;
       line-height: 28px;
       color: white;
+    }
+    &__icon {
+      display: flex;
+      position: absolute;
+      left: 168px;
     }
   }
 }
