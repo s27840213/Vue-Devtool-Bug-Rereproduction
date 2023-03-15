@@ -1,12 +1,12 @@
 // Doc: https://docs.cypress.io/guides/tooling/typescript-support#Types-for-Custom-Commands
 
 interface ISidebarData {
-  icon: string;
-  panelName: string;
-  componentName: string;
-  apiUrl: string;
-  apiType: string;
-  testCategory: string;
+  icon: string
+  panelName: string
+  componentName: string
+  apiUrl: string
+  apiType: string
+  testCategory: string
 }
 
 declare namespace Cypress {
@@ -32,15 +32,16 @@ declare namespace Cypress {
     layerLock(): Chainable<JQuery<HTMLElement>>
     layerDelete(): Chainable<JQuery<HTMLElement>>
     layerCopyFormat(subjectBack: JQuery<HTMLElement>,
-                  before: (subject: JQuery<HTMLElement>) => void,
-                  after: (subject: JQuery<HTMLElement>) => void): Chainable<JQuery<HTMLElement>>
+      before: (subject: JQuery<HTMLElement>) => void,
+      after: (subject: JQuery<HTMLElement>) => void): Chainable<JQuery<HTMLElement>>
     layerRotate(): Chainable<JQuery<HTMLElement>>
     layerScale(): Chainable<JQuery<HTMLElement>>
+    rotateAndResize(): Chainable<JQuery<HTMLElement>>
     layerMoveToPage2(): Chainable<JQuery<HTMLElement>>
 
     // imageEdit.ts
     imageAdjust(): Chainable<JQuery<HTMLElement>>
-    imageCrop(enterCrop: 'button'|'dblclick'): Chainable<JQuery<HTMLElement>>
+    imageCrop(enterCrop: 'button' | 'dblclick'): Chainable<JQuery<HTMLElement>>
     imageShadow(): Chainable<JQuery<HTMLElement>>
     imageSetAsBg(): Chainable<JQuery<HTMLElement>>
     imageAutoBgRemove(): Chainable<JQuery<HTMLElement>>
@@ -55,6 +56,7 @@ declare namespace Cypress {
 
     // snapshotCommands.ts
     // Modified CompareSnapshot command in cypress-image-diff-js
+    disableTransition(): Chainable<void>
     myCompareSnapshot(
       name: string,
       logName: string,

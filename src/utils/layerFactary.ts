@@ -294,7 +294,9 @@ class LayerFactary {
       selection: {
         from: 0,
         to: 0
-      }
+      },
+      isAutoResizeNeeded: false,
+      isCompensated: true
     }
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
@@ -305,6 +307,7 @@ class LayerFactary {
      * 1: empty span
      * 2: underline or italic w/ vertical (vertical text cannot be underlined or italic)
      * 3: span style that has only font but no type
+     * 4: font size smaller than browser minimum font size setting
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
@@ -324,7 +327,7 @@ class LayerFactary {
       }
       const isVertical = basicConfig.styles.writingMode.includes('vertical')
       const defaultFont = (Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale())) ? STANDARD_TEXT_FONT[localeUtils.currLocale()] : STANDARD_TEXT_FONT.tw
-      textPropUtils.removeInvalidStyles(config.paragraphs, isVertical,
+      textPropUtils.removeInvalidStyles(config.paragraphs, isVertical, config.isCompensated,
         (paragraph) => {
           if (paragraph.spans.length > 0) {
             const firstSpanStyles = paragraph.spans[0].styles
@@ -350,6 +353,16 @@ class LayerFactary {
           span.text = span.text.replace(/[\ufe0e\ufe0f]/g, '')
         }
       )
+      if (config.isCompensated) {
+        const baseFontSize = textPropUtils.getBaseFontSizeOfParagraphs(config.paragraphs)
+        const compensation = textPropUtils.getScaleCompensation(baseFontSize)
+        if (compensation.needCompensation) {
+          basicConfig.styles.scale *= compensation.scale
+          config.paragraphs = textPropUtils.propAppliedParagraphs(config.paragraphs, 'size', 0, (size) => {
+            return size / compensation.scale
+          })
+        }
+      }
     }
     return Object.assign(basicConfig, config)
   }

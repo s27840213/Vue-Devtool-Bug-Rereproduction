@@ -134,6 +134,7 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit('SET_STATE', { pending: true, locale })
       try {
+        const isAdmin = store.getters['user/isAdmin']
         const { data } = await this.api({
           token: '1',
           locale,
@@ -141,7 +142,7 @@ export default function (this: any) {
           listAll: 0,
           listCategory: 1,
           pageIndex: state.nextCategory,
-          cache: true
+          cache: !isAdmin
         })
         if (writeBack) commit('SET_CATEGORIES', data.data)
         else return data.data
@@ -176,17 +177,14 @@ export default function (this: any) {
 
     // For all item or single category search result.
     getContent: async ({ commit, state }, params = {}) => {
-      let { theme } = state
+      const { theme } = state
       const { keyword }: { keyword: string } = params
       const locale = params.locale || localeUtils.currLocale()
       commit('SET_STATE', { pending: true, locale })
       if (keyword) commit('SET_STATE', { keyword })
-      if (keyword && keyword.startsWith('tag::') &&
-        this.namespace === 'templates') {
-        theme = themeUtils.sortSelectedTheme(theme)
-      }
       try {
-        const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
+        const isAdmin = store.getters['user/isAdmin']
+        const needCache = !((keyword && find(state.categories, ['title', keyword])?.is_recent) || isAdmin)
         const { data } = await this.api({
           token: needCache ? '1' : store.getters['user/getToken'],
           locale,
@@ -209,15 +207,14 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit('SET_STATE', { pending: true, keyword, theme, locale, content: {} })
       try {
-        const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
-          token: needCache ? '1' : store.getters['user/getToken'],
+          token: '1',
           locale,
           keyword,
           theme,
           listAll: 1,
           listCategory: 0,
-          cache: needCache
+          cache: true
         })
         commit('SET_CONTENT', { objects: data.data, isSearch: !!keyword })
       } catch (error) {
@@ -236,20 +233,18 @@ export default function (this: any) {
         : keyword.includes('::') ? keyword : `tag::${keyword}`
       commit('SET_STATE', { pending: true, keyword, locale })
       if (this.namespace === 'templates') theme = themeUtils.sortSelectedTheme(theme)
+      const isAdmin = store.getters['user/isAdmin']
       try {
         // Search tags and set as active.
         commit('UPDATE_tag', keyword)
-
-        // Call api and write back.
-        const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
-          token: needCache ? '1' : store.getters['user/getToken'],
+          token: isAdmin ? store.getters['user/getToken'] : '1',
           locale,
           theme,
           keyword,
           listAll: 1,
           listCategory: 0,
-          cache: needCache
+          cache: !isAdmin
         })
         commit('SET_CONTENT', { objects: data.data, isSearch: true })
       } catch (error) {
@@ -328,7 +323,8 @@ export default function (this: any) {
           theme,
           keyword: (keyword.includes('::') ? keyword : `tag::${keyword}`).concat(';;sum::1'),
           listAll: 1,
-          listCategory: 0
+          listCategory: 0,
+          cache: false
         })
         commit('SET_STATE', { sum: data.data.sum })
       } catch (error) {
@@ -737,7 +733,9 @@ export default function (this: any) {
     },
     nextParams: (state) => {
       let { nextPage, nextSearch, keyword, theme, locale } = state
-      const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
+      const isAdmin = store.getters['user/isAdmin']
+      const needCache = !((keyword && find(state.categories, ['title', keyword])?.is_recent) ||
+        isAdmin)
       if (keyword && keyword.startsWith('tag::') &&
         this.namespace === 'templates') {
         theme = themeUtils.sortSelectedTheme(theme)

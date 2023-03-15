@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="header-bar" @pointerdown.stop)
+div(class="header-bar" :style="rootStyles" @pointerdown.stop)
   div(class="header-bar__left")
     div(class="header-bar__feature-icon mr-20"
         @pointerdown="backBtnAction()")
@@ -8,16 +8,16 @@ div(class="header-bar" @pointerdown.stop)
         :iconColor="'white'"
         :iconWidth="'22px'")
     div(class="header-bar__feature-icon mr-15"
-        :class="{'click-disabled': stepsUtils.isInFirstStep || isCropping}"
+        :class="{'click-disabled': isInFirstStep || isCropping}"
         @pointerdown="undo()")
       svg-icon(:iconName="'undo'"
-        :iconColor="(!stepsUtils.isInFirstStep && !isCropping) ? 'white' : 'gray-2'"
+        :iconColor="(!isInFirstStep && !isCropping) ? 'white' : 'gray-2'"
         :iconWidth="'22px'")
     div(class="header-bar__feature-icon"
-        :class="{'click-disabled': stepsUtils.isInLastStep || isCropping}"
+        :class="{'click-disabled': isInLastStep || isCropping}"
         @pointerdown="redo()")
       svg-icon(:iconName="'redo'"
-        :iconColor="(!stepsUtils.isInLastStep && !isCropping) ? 'white' : 'gray-2'"
+        :iconColor="(!isInLastStep && !isCropping) ? 'white' : 'gray-2'"
         :iconWidth="'22px'")
   div(class="header-bar__right")
     div(v-for="tab in rightTabs")
@@ -28,6 +28,7 @@ div(class="header-bar" @pointerdown.stop)
           :iconColor="iconColor(tab)"
           :iconWidth="'22px'")
 </template>
+
 <script lang="ts">
 import i18n from '@/i18n'
 import { IFrame, IGroup } from '@/interfaces/layer'
@@ -38,7 +39,7 @@ import mappingUtils from '@/utils/mappingUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { notify } from '@kyvg/vue3-notification'
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
 interface IIcon {
@@ -62,6 +63,14 @@ export default defineComponent({
     }
   },
   emits: ['switchTab', 'showAllPages'],
+  setup() {
+    const isInFirstStep = computed(() => stepsUtils.isInFirstStep)
+    const isInLastStep = computed(() => stepsUtils.isInLastStep)
+    return {
+      isInFirstStep,
+      isInLastStep
+    }
+  },
   data() {
     return {
       homeTabs: [
@@ -85,8 +94,14 @@ export default defineComponent({
       InBgRemoveLastStep: 'bgRemove/inLastStep',
       isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
-      hasBleed: 'getHasBleed'
+      hasBleed: 'getHasBleed',
+      userInfo: 'webView/getUserInfo'
     }),
+    rootStyles(): {[key: string]: string} {
+      return {
+        paddingTop: `${this.userInfo.statusBarHeight + 8}px`
+      }
+    },
     isCropping(): boolean {
       return imageUtils.isImgControl()
     },
@@ -104,7 +119,9 @@ export default defineComponent({
       ]
     },
     rightTabs(): IIcon[] {
-      if (this.selectedLayerNum > 0) {
+      if (this.inBgRemoveMode) {
+        return []
+      } else if (this.selectedLayerNum > 0) {
         return this.layerTabs
       } else if (this.inBgSettingMode) {
         return this.bgSettingTabs

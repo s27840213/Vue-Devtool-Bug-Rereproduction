@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="nu-footer text-black")
+div(class="nu-footer text-black" :style="rootStyles")
   div(class="nu-footer__wrapper label-lg")
     svg-icon(:iconName="'logo'"
       :iconWidth="'100px'"
@@ -160,15 +160,21 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapGetters('user', {
-      token: 'getToken',
-      isLogin: 'isLogin'
+    ...mapGetters({
+      token: 'user/getToken',
+      isLogin: 'user/isLogin',
+      userInfo: 'webView/getUserInfo'
     }),
     themeList(): Itheme[] {
       return themeUtils.themesMainHidden
     },
     currLocale(): string {
       return this.$i18n.locale
+    },
+    rootStyles(): {[key: string]: string} {
+      return {
+        paddingBottom: `${this.userInfo.homeIndicatorHeight}px`
+      }
     }
   },
   methods: {

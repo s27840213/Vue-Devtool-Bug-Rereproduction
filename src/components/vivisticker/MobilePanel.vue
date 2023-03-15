@@ -44,7 +44,7 @@ div(class="mobile-panel"
   div(class="mobile-panel__bottom-section")
     //- keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-file']")
     //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-    component(v-if="dynamicBindIs && !bgRemoveMode && !hideDynamicComp"
+    component(v-if="dynamicBindIs && !hideDynamicComp"
       class="border-box"
       :is="dynamicBindIs"
       :key="dynamicBindIs"
@@ -181,7 +181,6 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      bgRemoveMode: 'bgRemove/getInBgRemoveMode',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       currSelectedInfo: 'getCurrSelectedInfo',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',

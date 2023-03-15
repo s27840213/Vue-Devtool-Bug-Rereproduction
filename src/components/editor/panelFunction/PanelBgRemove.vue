@@ -49,24 +49,11 @@ div(class="panel-background-remove")
 </template>
 
 <script lang="ts">
-import i18n from '@/i18n'
-import { defineComponent } from 'vue'
-import { notify } from '@kyvg/vue3-notification'
-import { mapGetters, mapMutations } from 'vuex'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import store from '@/store'
-import layerUtils from '@/utils/layerUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { IBgRemoveInfo } from '@/interfaces/image'
-import stepsUtils from '@/utils/stepsUtils'
-import pageUtils from '@/utils/pageUtils'
-import { IUploadAssetResponse } from '@/interfaces/upload'
-import uploadUtils from '@/utils/uploadUtils'
-import { LayerType, SidebarPanelType } from '@/store/types'
-import { IImage } from '@/interfaces/layer'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
-import imageShadowUtils from '@/utils/imageShadowUtils'
-import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import bgRemoveUtils from '@/utils/bgRemoveUtils'
+import { defineComponent } from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -83,7 +70,6 @@ export default defineComponent({
     ...mapGetters({
       clearMode: 'bgRemove/getClearMode',
       showInitImage: 'bgRemove/getShowInitImage',
-      canvas: 'bgRemove/getCanvas',
       modifiedFlag: 'bgRemove/getModifiedFlag',
       currSelectedInfo: 'getCurrSelectedInfo',
       autoRemoveResult: 'bgRemove/getAutoRemoveResult',
@@ -103,17 +89,10 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations({
-      setPageScaleRatio: 'SET_pageScaleRatio',
-      setInBgRemoveMode: 'bgRemove/SET_inBgRemoveMode',
       setBrushSize: 'bgRemove/SET_brushSize',
       setRestoreInitState: 'bgRemove/SET_restoreInitState',
       setClearMode: 'bgRemove/SET_clearMode',
       setShowInitImage: 'bgRemove/SET_showInitImage',
-      setLoading: 'bgRemove/SET_loading',
-      setIsProcessing: 'bgRemove/SET_isProcessing',
-      setCurrSidebarPanel: 'SET_currSidebarPanelType',
-      uploadMyfileImg: 'file/UPDATE_IMAGE_URLS',
-      deletePreviewSrc: 'DELETE_previewSrc'
     }),
     toggleShowInitImage(val: boolean): void {
       this.setShowInitImage(!val)
@@ -122,101 +101,10 @@ export default defineComponent({
       this.setRestoreInitState(true)
     },
     save() {
-      const { index, pageIndex } = this.currSelectedInfo as ICurrSelectedInfo
-      imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex: index }, { type: 'after-bg-remove', userId: '', assetId: '' })
-      imageShadowUtils.updateEffectProps({ pageIndex, layerIndex: index }, { isTransparent: true })
-      if (!this.modifiedFlag) {
-        layerUtils.updateLayerProps(pageIndex, index, {
-          srcObj: {
-            type: this.isAdmin ? 'public' : 'private',
-            userId: (this.autoRemoveResult as IBgRemoveInfo).teamId,
-            assetId: this.isAdmin ? (this.autoRemoveResult as IBgRemoveInfo).id : (this.autoRemoveResult as IBgRemoveInfo).assetIndex
-          },
-          trace: 1
-        })
-        const image = layerUtils.getLayer(pageIndex, index) as IImage
-        if (image.type === LayerType.image) {
-          if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
-            const layerInfo = { pageIndex, layerIndex: index }
-            const layerData = {
-              config: image,
-              layerInfo
-            }
-            imageShadowPanelUtils.handleShadowUpload(layerData, true)
-            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
-          }
-        }
-        this.uploadMyfileImg(Object.assign({ assetId: this.autoRemoveResult.id }, this.autoRemoveResult))
-        this.setInBgRemoveMode(false)
-        this.setIsProcessing(false)
-        this.setPageScaleRatio(this.prevPageScaleRatio)
-        stepsUtils.record()
-      } else {
-        const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
-        const privateId = (this.autoRemoveResult as IBgRemoveInfo).urls.larg.match(/asset\/image\/([\w]+)\/larg/)?.[1]
-        const previewSrc = this.canvas.toDataURL('image/png;base64')
-        const { pageId, layerId } = this.bgRemoveIdInfo
-        layerUtils.updateLayerProps(pageIndex, index, {
-          previewSrc,
-          trace: 1
-        })
-        this.setInBgRemoveMode(false)
-        this.setPageScaleRatio(this.prevPageScaleRatio)
-        // If the result image is still uploading, we need to prevent the bg-remove btn from being clicked.
-        // The reason is if the image is still uploading, then the image in the page is dataUrl.
-        // So we need to set isProcessing to true
-        this.setIsProcessing(true)
-        this.setCurrSidebarPanel(SidebarPanelType.file)
-        const targetPageIndex = pageUtils.getPageIndexById(pageId)
-        const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
-        layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-          tmpId: id
-        })
-        uploadUtils.uploadAsset('image', [previewSrc], {
-          addToPage: false,
-          pollingCallback: (json: IUploadAssetResponse) => {
-            const targetPageIndex = pageUtils.getPageIndexById(pageId)
-            const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
-            const srcObj = {
-              type: this.isAdmin ? 'public' : 'private',
-              userId: teamId,
-              assetId: this.isAdmin ? json.data.id : json.data.asset_index
-            }
-            layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-              srcObj,
-              trace: 1
-            })
-            this.deletePreviewSrc({
-              type: this.isAdmin ? 'public' : 'private',
-              userId: teamId,
-              assetId: this.isAdmin ? json.data.id : json.data.asset_index,
-              assetIndex: json.data.asset_index
-            })
-            const image = layerUtils.getLayer(pageIndex, index) as IImage
-            if (image.type === LayerType.image) {
-              if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
-                const layerInfo = { pageIndex: targetPageIndex, layerIndex: targetLayerIndex }
-                const layerData = {
-                  config: image,
-                  layerInfo
-                }
-                imageShadowPanelUtils.handleShadowUpload(layerData, true)
-                notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
-              }
-            }
-            stepsUtils.record()
-            this.setLoading(false)
-            this.setIsProcessing(false)
-          },
-          id: id ?? privateId,
-          needCompressed: false
-        })
-      }
+      bgRemoveUtils.save()
     },
     cancel() {
-      this.setIsProcessing(false)
-      this.setInBgRemoveMode(false)
-      this.setPageScaleRatio(this.prevPageScaleRatio)
+      bgRemoveUtils.cancel()
     }
   }
 })

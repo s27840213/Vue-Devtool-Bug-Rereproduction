@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="menu")
+div(class="menu" :style="rootStyles")
   div(class="menu-top")
     template(v-for="item in navItems")
       details(v-if="!item.hidden" :class="{'text-blue-1': currentPage === item.name}")
@@ -39,11 +39,11 @@ div(class="menu")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
 import constantData from '@/utils/constantData'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -60,7 +60,8 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      isLogin: 'user/isLogin'
+      isLogin: 'user/isLogin',
+      userInfo: 'webView/getUserInfo'
     }),
     navItems(): any {
       return constantData.headerItems(true)
@@ -73,6 +74,11 @@ export default defineComponent({
     },
     currPath(): string {
       return this.$route.path || '/'
+    },
+    rootStyles(): {[key: string]: string} {
+      return {
+        paddingTop: `${50 + this.userInfo.statusBarHeight}px`
+      }
     }
   },
   methods: {

@@ -1,5 +1,4 @@
 <template lang="pug">
-//- :style="transformStyle")
 div(class="nu-sub-controller")
   div(class="nu-sub-controller__wrapper" :style="positionStyles()")
     div(class="nu-sub-controller__wrapper" :style="wrapperStyles")
@@ -37,6 +36,7 @@ div(class="nu-sub-controller")
               @update="handleTextChange"
               @compositionend="handleTextCompositionEnd")
 </template>
+
 <script lang="ts">
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import i18n from '@/i18n'
@@ -163,10 +163,18 @@ export default defineComponent({
           return props.layerIndex
         }
       })
-      const _config = { config: { active: false } } as { config: ILayer }
+      const _config = {
+        config: { active: false },
+        primaryLayer: {}
+      } as { config: ILayer, primaryLayer: ITmp | IGroup | IFrame }
       Object.defineProperty(_config, 'config', {
         get() {
           return props.config
+        }
+      })
+      Object.defineProperty(_config, 'primaryLayer', {
+        get() {
+          return props.primaryLayer
         }
       })
       this.subLayerCtrlUtils = new SubCtrlUtils({

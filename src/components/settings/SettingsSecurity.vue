@@ -26,11 +26,12 @@ div(class="settings-security")
       :account="account"
       @close="closePopup()")
 </template>
+
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapGetters } from 'vuex'
 import PopupVerify from '@/components/popup/PopupVerify.vue'
 import localeUtils from '@/utils/localeUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],
