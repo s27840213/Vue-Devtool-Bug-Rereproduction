@@ -168,7 +168,7 @@ export default Extension.create({
             parseHTML: element => {
               const spanStyle = element.style
               if (!spanStyle.fontSize.includes('px')) return null
-              return Math.round(parseFloat(spanStyle.fontSize.split('px')[0]) / (4 / 3) * 100) / 100
+              return Math.round(parseFloat(spanStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100
             },
             renderHTML: () => ({})
           },
@@ -346,7 +346,7 @@ export default Extension.create({
             parseHTML: element => {
               const paragraphStyle = element.style
               if (!paragraphStyle.fontSize.includes('px')) return null
-              return Math.round(parseFloat(paragraphStyle.fontSize.split('px')[0]) / (4 / 3) * 100) / 100
+              return Math.round(parseFloat(paragraphStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100
             },
             renderHTML: () => ({})
           },

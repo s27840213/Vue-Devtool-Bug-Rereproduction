@@ -755,7 +755,7 @@ class TextBg {
     if (config.styles.writingMode === 'vertical-lr') [w, h] = [h, w]
     // If tiptap attr have min-w/h, convertFontStyle() in cssConverter.ts will add some style to tiptap.
     return {
-      [w]: `${spanStyle.size * 4 / 3 * (pStyle.fontSpacing + 1)}px`,
+      [w]: `${spanStyle.size * 1.333333 * (pStyle.fontSpacing + 1)}px`,
       display: 'inline-block',
       letterSpacing: 0,
       textAlign: 'center',
