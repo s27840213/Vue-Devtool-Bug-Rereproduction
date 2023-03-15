@@ -3,6 +3,7 @@ div(class="screenshot")
   nu-layer(v-if="config !== undefined"
             ref="target"
             :config="config"
+            :page="pages[0]"
             :pageIndex="0"
             :layerIndex="0")
   div(v-if="backgroundImage !== ''" ref="target" class="screenshot__bg-img" :style="bgStyles()")
@@ -14,7 +15,7 @@ div(class="screenshot")
 <script lang="ts">
 import PageContent from '@/components/editor/page/PageContent.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
-import { IGroup, IImageStyle } from '@/interfaces/layer'
+import { IGroup, IImageStyle, ILayer, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import layerFactary from '@/utils/layerFactary'
 import layerUtils from '@/utils/layerUtils'
@@ -97,7 +98,7 @@ export default defineComponent({
         this.extraData = { thumbType, designId, key }
         switch (type) {
           case 'svg': {
-            const json = await (await fetch(`https://template.vivipic.com/${type}/${id}/config.json?ver=${ver}`)).json()
+            const json = await (await fetch(`https://template.vivipic.com/${type}/${id}/config.json?ver=${ver}`)).json() as ILayer
             let vSize = json.vSize as number[] | undefined
             if (!vSize) {
               vSize = [json.styles.width, json.styles.height]
@@ -154,10 +155,10 @@ export default defineComponent({
             break
           }
           case 'svgImage2': {
-            const json = await (await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)).json()
+            const json = await (await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)).json() as ILayer
             const { srcObj, styles } = json
 
-            const { width: boundingWidth, height: boundingHeight } = mathUtils.getBounding(json)
+            const { width: boundingWidth, height: boundingHeight } = mathUtils.getBounding(json.styles)
             const xDiff = (boundingWidth - styles.width) / 2
             const yDiff = (boundingHeight - styles.height) / 2
 
@@ -193,7 +194,7 @@ export default defineComponent({
             break
           }
           case 'text': {
-            const json = await (await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)).json()
+            const json = await (await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)).json() as IText | IGroup
             const page = pageUtils.newPage({ width: window.outerWidth, height: window.outerHeight })
             page.isAutoResizeNeeded = true
             pageUtils.setPages([page])
@@ -206,22 +207,29 @@ export default defineComponent({
             const textAspectRatio = width / height
             const textWidth = textAspectRatio > pageAspectRatio ? window.outerWidth : window.outerHeight * textAspectRatio
             const textHeight = textAspectRatio > pageAspectRatio ? window.outerWidth / textAspectRatio : window.outerHeight
+            const rescaleFactor = textWidth / width
+
             const config = {
               ...json,
-              widthLimit: json.widthLimit === -1 ? -1 : json.widthLimit * (textWidth / width),
               styles: {
                 ...json.styles,
                 width: textWidth,
                 height: textHeight,
-                scale: scale * (textWidth / width),
+                scale: scale * rescaleFactor,
                 x: 0,
                 y: 0
               }
             }
 
+            if (config.type === 'text') {
+              Object.assign(config, {
+                widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor
+              })
+            }
+
             const newLayer = config.type === 'group'
               ? layerFactary.newGroup(config, (config as IGroup).layers)
-              : layerFactary.newText(config)
+              : layerFactary.newText(config as IText)
             layerUtils.addLayers(0, [newLayer])
 
             this.JSONcontentSize = {
