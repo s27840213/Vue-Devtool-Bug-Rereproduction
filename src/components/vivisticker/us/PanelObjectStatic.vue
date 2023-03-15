@@ -226,7 +226,7 @@ export default defineComponent({
         if (!selectedCategoryIcon || !selectedCategoryIcon.parentElement) return
 
         const transform = selectedCategoryIcon.parentElement.style.transform
-        const match = transform.match(/translateY\((\d+(?:[.]\d*?)?)px\)/)
+        const match = transform.match(/translateX\((\d+(?:[.]\d*?)?)px\)/)
         if (!match || match.length < 2) return
 
         const scrollLeft = parseFloat(match[1])
