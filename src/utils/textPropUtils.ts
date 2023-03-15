@@ -1367,7 +1367,7 @@ class TextPropUtils {
     document.body.appendChild(element)
     const res = parseInt(getComputedStyle(element).fontSize.replace('px', ''))
     document.body.removeChild(element)
-    return res * 3 / 4
+    return res / 1.333333
   }
 
   getScaleCompensation(size: number): { scale: number, size: number, needCompensation: boolean } {

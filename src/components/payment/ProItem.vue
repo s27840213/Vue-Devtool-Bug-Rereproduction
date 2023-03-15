@@ -1,13 +1,20 @@
 <template lang="pug">
-img(class="pro" :src="require('@/assets/img/svg/pricing/pro.svg')" loading="lazy")
+img(v-if="!inReviewMode" class="pro" loading="lazy"
+    :src="require('@/assets/img/svg/pricing/pro.svg')" )
 </template>
 
 <script lang="ts">
+import picWVUtils from '@/utils/picWVUtils'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
   emits: [],
-  name: 'ProItem'
+  name: 'ProItem',
+  computed: {
+    inReviewMode(): boolean {
+      return picWVUtils.inReviewMode
+    },
+  },
 })
 </script>
 

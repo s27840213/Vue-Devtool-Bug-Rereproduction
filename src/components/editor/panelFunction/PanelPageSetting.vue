@@ -12,7 +12,8 @@ div(class="page-setting")
     span(class="body-XS text-gray-3") H
   div(class="page-setting-row page-setting__apply text-white bg-blue-1 pointer"
       @click="toggleSuggestionPanel()")
-    svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm" class="mr-10")
+    svg-icon(v-if="!inReviewMode" class="mr-10"
+            iconName="pro" iconWidth="22px" iconColor="alarm")
     span(class="page-setting__apply__text") {{$t('NN0022')}}
   transition(name="slide-fade")
     div(v-if="isPanelOpen"
@@ -221,6 +222,7 @@ import { IPage } from '@/interfaces/page'
 import { ICoverTheme, Itheme, IThemeTemplate } from '@/interfaces/theme'
 import GeneralUtils from '@/utils/generalUtils'
 import pageUtils from '@/utils/pageUtils'
+import picWVUtils from '@/utils/picWVUtils'
 import { PRECISION } from '@/utils/unitUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
@@ -346,6 +348,9 @@ export default defineComponent({
       groupId: 'getGroupId',
       showAdminTool: 'user/showAdminTool'
     }),
+    inReviewMode(): boolean {
+      return picWVUtils.inReviewMode
+    },
     sizeToShow(): {width: number, height: number, unit: string} {
       const { width, height, physicalWidth, physicalHeight, unit } = pageUtils.currFocusPageSize
       return {
