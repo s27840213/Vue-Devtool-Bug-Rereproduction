@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="my-design-object-item"
+div(v-if="item.id" class="my-design-object-item"
     @click="copySvg"
     v-press="copySvg")
   img(class="my-design-object-item__img"
@@ -13,6 +13,7 @@ div(class="my-design-object-item"
     svg-icon(v-if="checkSelected()" iconName="check" iconColor="white" iconWidth="20.7px")
   div(v-else class="my-design-object-item__more" @click.stop.prevent="handleMoreActions")
     svg-icon(iconName="more" iconColor="white" iconWidth="24px")
+div(v-else class="my-design-object-item")
 </template>
 
 <script lang="ts">

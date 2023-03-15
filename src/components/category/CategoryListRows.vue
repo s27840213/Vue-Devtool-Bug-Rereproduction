@@ -5,7 +5,7 @@ div(class="category-list-rows")
     div(class="category-list-rows__action pointer"
       @click="onAction(title)")
       slot(name="action") {{$t('NN0082')}}
-  category-list-row
+  category-list-row(:gap="columnGap")
     div(v-for="item in list" :key="item.id")
       slot(name="preview" :item="item")
         img(:src="require('@/assets/img/svg/image-preview.svg')")
@@ -29,6 +29,10 @@ export default defineComponent({
     },
     isFavorite: {
       type: Boolean
+    },
+    columnGap: {
+      type: Number,
+      default: 10
     }
   },
   components: {

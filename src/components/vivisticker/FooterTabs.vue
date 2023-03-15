@@ -71,6 +71,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapState({
+      isTablet: 'isTablet'
+    }),
     ...mapState('mobileEditor', { mobilePanel: 'currActivePanel' }),
     ...mapGetters({
       currSidebarPanel: 'getCurrFunctionPanelType',
@@ -394,9 +397,10 @@ export default defineComponent({
         transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
         opacity: `${this.contentEditable ? 0 : 1}`,
         maskImage: this.contentEditable ? 'none'
-          : `linear-gradient(to right, 
-          transparent 0, black ${this.leftOverflow ? '56px' : 0}, 
-          black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`
+          : `linear-gradient(to right,
+          transparent 0, black ${this.leftOverflow ? '56px' : 0},
+          black calc(100% - ${this.rightOverflow ? '56px' : '0px'}), transparent 100%)`,
+        ...(this.isTablet && this.isInEditor && { height: '80px', justifyContent: 'center' })
       }
     },
     currLayer(): ILayer {
@@ -445,10 +449,8 @@ export default defineComponent({
       this.rightOverflow = scrollLeft + 0.5 < (scrollWidth - offsetWidth) && scrollWidth > offsetWidth
     },
     handleTabAction(tab: IFooterTab) {
-      if (tab.icon !== 'crop') {
-        if (this.isCropping) {
-          imageUtils.setImgControlDefault()
-        }
+      if (tab.icon !== 'crop' && this.isCropping) {
+        imageUtils.setImgControlDefault()
       }
 
       switch (tab.icon) {

@@ -3,7 +3,7 @@ div(class="vivisticker" :style="copyingStyles()")
   div(class="vivisticker__top" :style="topStyles()")
     header-tabs(v-show="currActivePanel !== 'text'" :style="headerStyles()")
     div(class="vivisticker__content"
-        @pointerdown="outerClick")
+        @pointerdown.self="outerClick")
       my-design(v-show="isInMyDesign && !isInEditor")
       vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor")
       main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
@@ -36,7 +36,7 @@ import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
 import { CustomWindow } from '@/interfaces/customWindow'
 import { IFooterTabProps } from '@/interfaces/editor'
 import { IPage } from '@/interfaces/page'
-import { ColorEventType } from '@/store/types'
+import { ColorEventType, LayerType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
@@ -69,7 +69,8 @@ export default defineComponent({
     return {
       currColorEvent: '',
       defaultWindowHeight: window.outerHeight,
-      headerOffset: 0
+      headerOffset: 0,
+      isKeyboardAnimation: 0
     }
   },
   created() {
@@ -209,7 +210,14 @@ export default defineComponent({
       modalInfo: 'vivisticker/getModalInfo'
     }),
     contentEditable(): boolean {
-      return this.currSubSelectedInfo.index >= 0 ? this.currSelectedInfo.layers[0]?.layers[this.currSubSelectedInfo.index]?.contentEditable : this.currSelectedInfo.layers[0]?.contentEditable
+      if (this.currSubSelectedInfo.index >= 0) {
+        if (this.currSelectedInfo.layers[0]?.type === LayerType.group) {
+          return this.currSelectedInfo.layers[0]?.layers[this.currSubSelectedInfo.index]?.contentEditable
+        } else {
+          return false
+        }
+      }
+      return this.currSelectedInfo.layers[0]?.contentEditable
     },
     currPage(): IPage {
       return this.getPage(pageUtils.currFocusPageIndex)
@@ -242,7 +250,9 @@ export default defineComponent({
     }),
     headerStyles() {
       return {
-        transform: `translateY(${this.contentEditable ? this.headerOffset : 0}px)`
+        transform: `translateY(${this.contentEditable ? this.headerOffset : 0}px)`,
+        ...(this.isKeyboardAnimation && { height: '0px', marginBottom: '44px' }),
+        ...(!this.isKeyboardAnimation && { transition: 'height 0.2s cubic-bezier(0.380, 0.700, 0.125, 1.000), margin-bottom 0.2s cubic-bezier(0.380, 0.700, 0.125, 1.000)' })
       }
     },
     copyingStyles() {
@@ -290,6 +300,7 @@ export default defineComponent({
       }
     },
     outerClick() {
+      console.log('outer click')
       if (this.isInEditor) {
         vivistickerUtils.deselect()
       }
@@ -297,6 +308,10 @@ export default defineComponent({
     handleScroll() {
       // handle page scroll by mobile keyboard
       this.headerOffset = document.documentElement.scrollTop ? document.documentElement.scrollTop - 1 : 0
+      window.clearTimeout(this.isKeyboardAnimation)
+      this.isKeyboardAnimation = window.setTimeout(() => {
+        this.isKeyboardAnimation = 0
+      }, 500)
     }
   }
 })
@@ -368,6 +383,6 @@ export default defineComponent({
 }
 
 .header-bar {
-  transition: 0.5s cubic-bezier(0.380, 0.700, 0.125, 1.000);
+  overflow-y: hidden;
 }
 </style>

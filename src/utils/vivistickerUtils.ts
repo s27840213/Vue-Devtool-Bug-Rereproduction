@@ -350,11 +350,8 @@ class ViviStickerUtils {
   startEditing(editorType: string, assetInfo: { [key: string]: any }, initiator: () => Promise<any>, callback: (jsonData: any) => void, designId?: string) {
     const elTop = document.getElementsByClassName('vivisticker__top')[0]
     const headerHeight = 44
-    const topSize = {
-      width: elTop.clientWidth,
-      height: elTop.clientHeight
-    }
-    const pageSize = Math.min(topSize.width, topSize.height - headerHeight) - 32
+    const shortEdge = Math.min(elTop.clientWidth, elTop.clientHeight - headerHeight)
+    const pageSize = Math.round(shortEdge * 0.9)
     pageUtils.setPages([pageUtils.newPage({
       width: pageSize,
       height: pageSize,
@@ -438,7 +435,6 @@ class ViviStickerUtils {
     if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
       this.loadingFlags[key] = true
     }
-    // console.warn(generalUtils.deepCopy(this.loadingFlags))
     if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
       this.loadingCallback()
       this.loadingFlags = {}
@@ -844,7 +840,8 @@ class ViviStickerUtils {
           const firstObject = (pages[0] as IPage).layers[0]
           if (firstObject.type === 'shape' && ((firstObject as IShape).color?.length ?? 0) > 0) {
             eventUtils.emit(PanelEvent.switchTab, 'color', { currColorEvent: ColorEventType.shape })
-          } else {
+            // not shows the tab only as the frame got one clip
+          } else if (firstObject.type !== 'frame' || (firstObject as IFrame).clips.length > 1) {
             tab && eventUtils.emit(PanelEvent.switchTab, tab)
           }
         }
@@ -1030,6 +1027,7 @@ class ViviStickerUtils {
     // console.log('init loading flag', frames)
     const missingClips = frames
       .flatMap((f: IFrame) => f.clips.filter(c => c.srcObj.type === 'frame'))
+    console.log('missingClips.length', missingClips.length)
     if (missingClips.length) {
       const action = missingClips.length !== 1 ? undefined : () => {
         let subLayerIdx = -1
@@ -1059,7 +1057,7 @@ class ViviStickerUtils {
         let options
         if (showCheckContent) {
           options = {
-            checkboxText: USER_SETTINGS_CONFIG.mydesignShowMissingPhotoAsk.description as string,
+            checkboxText: i18n.global.t(`${USER_SETTINGS_CONFIG.mydesignShowMissingPhotoAsk.description}`) as string,
             checked: false,
             onCheckedChange: (val: boolean) => {
               USER_SETTINGS_CONFIG.mydesignShowMissingPhotoAsk.val = !val

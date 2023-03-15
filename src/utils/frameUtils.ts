@@ -164,7 +164,7 @@ class FrameUtils {
 
   iosPhotoSelect(layerInfo: IExtendLayerInfo, config: IImage) {
     const { pageIndex, layerIndex, subLayerIdx = 0, priPrimaryLayerIndex = -1 } = layerInfo
-    vivistickerUtils.getIosImg()
+    return vivistickerUtils.getIosImg()
       .then(async (images: Array<string>) => {
         if (images.length) {
           const { imgX, imgY, imgWidth, imgHeight } = await ImageUtils.getClipImgDimension(config, ImageUtils.getSrc({

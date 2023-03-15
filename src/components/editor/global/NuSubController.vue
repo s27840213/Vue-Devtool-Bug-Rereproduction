@@ -48,7 +48,6 @@ import colorUtils from '@/utils/colorUtils'
 import ControlUtils from '@/utils/controlUtils'
 import DragUtils from '@/utils/dragUtils'
 import eventUtils, { ImageEvent } from '@/utils/eventUtils'
-import fileUtils from '@/utils/fileUtils'
 import FrameUtils from '@/utils/frameUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
@@ -66,7 +65,6 @@ import TextEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import SvgPath from 'svgpath'
 import { defineComponent, PropType } from 'vue'
@@ -146,26 +144,6 @@ export default defineComponent({
     }
   },
   async mounted() {
-    // if (this.config.srcObj.type === 'frame') {
-    //   const styles = await imageUtils.getClipImgDimension((this.primaryLayer as IFrame).clips[0], imageUtils.getSrc({
-    //     type: 'unsplash',
-    //     assetId: 'photo-1665686310974-2ed1eb7f57ac',
-    //     userId: ''
-    //   }))
-    //   const { imgX, imgY, imgWidth, imgHeight } = styles
-    //   FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, 0, {
-    //     imgWidth,
-    //     imgHeight,
-    //     imgX,
-    //     imgY
-    //   })
-    //   FrameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, 0, {
-    //     type: 'unsplash',
-    //     assetId: 'photo-1665686310974-2ed1eb7f57ac',
-    //     userId: ''
-    //   })
-    // }
-
     const body = this.$refs.body as HTMLElement
     if (body) {
       const props = this.$props
@@ -374,13 +352,6 @@ export default defineComponent({
       }
     },
     textBodyStyle() {
-      // const isVertical = this.config.styles.writingMode.includes('vertical')
-      // return {
-      //   width: `${this.config.styles.width / this.config.styles.scale}px`,
-      //   height: `${this.config.styles.height / this.config.styles.scale}px`,
-      //   userSelect: this.config.contentEditable ? 'text' : 'none',
-      //   opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
-      // }
       const textstyles = {
         width: `${this.config.styles.width / this.config.styles.scale}px`,
         height: `${this.config.styles.height / this.config.styles.scale}px`,
@@ -411,8 +382,6 @@ export default defineComponent({
       }
     },
     onPointerdown(e: PointerEvent) {
-      // const
-      // e.stopPropagation()
       this.subLayerCtrlUtils.onPointerdown(e)
     },
     onMouseup(e: PointerEvent) {
@@ -452,68 +421,11 @@ export default defineComponent({
       this.onClickEvent(e)
     },
     iosPhotoSelect() {
-      vivistickerUtils.getIosImg()
-        .then(async (images: Array<string>) => {
-          if (images.length) {
-            const { imgX, imgY, imgWidth, imgHeight } = await imageUtils.getClipImgDimension((this.primaryLayer as IFrame).clips[this.layerIndex], imageUtils.getSrc({
-              type: 'ios',
-              assetId: images[0],
-              userId: ''
-            }))
-            console.log(imgX, imgY, imgWidth, imgHeight)
-            FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-              imgWidth,
-              imgHeight,
-              imgX,
-              imgY
-            })
-            FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-              type: 'ios',
-              assetId: images[0],
-              userId: ''
-            })
-            StepsUtils.record()
-          }
-        })
-    },
-    onImgFileChange(e: Event) {
-      const target = e.target as HTMLInputElement
-      const [file] = target.files || []
-      fileUtils.getFileImageByByte(file)
-        .then(imageBlob => {
-          const src = window.URL.createObjectURL(imageBlob)
-          imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
-            const clips = GeneralUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
-            const clip = clips[this.layerIndex]
-            const imgData = {
-              srcObj: {
-                type: 'local',
-                userId: '',
-                assetId: src
-              },
-              styles: {
-                width: img.width,
-                height: img.height
-              }
-            }
-            const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
-              // .clipperHandler(imgData as unknown as IImage, this.config.clipPath, this.config.styles).styles
-              .clipperHandler(imgData as IImage, clip.clipPath, clip.styles).styles
-
-            if (this.config.srcObj.type === 'local') {
-              // URL.revokeObjectURL(this.config.srcObj.assetId)
-            }
-
-            FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-              imgWidth,
-              imgHeight,
-              imgX,
-              imgY
-            })
-            FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { ...imgData.srcObj })
-            StepsUtils.record()
-          })
-        })
+      return FrameUtils.iosPhotoSelect({
+        pageIndex: this.pageIndex,
+        layerIndex: this.primaryLayerIndex,
+        subLayerIdx: this.layerIndex
+      }, (this.primaryLayer as IFrame).clips[this.layerIndex])
     },
     positionStyles(): Record<string, string> {
       const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
@@ -820,8 +732,6 @@ export default defineComponent({
             imgWidth: clip.styles.imgWidth,
             imgHeight: clip.styles.imgHeight,
             adjust: clip.styles.adjust
-            // horizontalFlip: clip.styles.horizontalFlip,
-            // verticalFlip: clip.styles.verticalFlip
           }
         })
 
