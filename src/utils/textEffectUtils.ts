@@ -12,7 +12,7 @@ class Controller {
   private shadowScale = 0.2
   private strokeScale = 0.1
   private currColorKey = ''
-  effects = {} as { [key: string]: any }
+  effects = {} as Record<string, Record<string, string | number>>
   constructor() {
     this.effects = this.getDefaultEffects()
   }
@@ -309,8 +309,8 @@ class Controller {
 
       const { type, styles: { textEffect: layerTextEffect }, paragraphs } = layers[idx] as IText
       if (type === 'text') {
-        const textEffect = {} as any
-        if (layerTextEffect && (layerTextEffect as any).name === effect) {
+        const textEffect = {} as ITextEffect
+        if (layerTextEffect && layerTextEffect.name === effect) {
           Object.assign(textEffect, layerTextEffect, attrs)
           localStorageUtils.set('textEffectSetting', effect, textEffect)
           // this.syncShareAttrs(textEffect, null)
@@ -344,7 +344,7 @@ class Controller {
 
     for (const idx in layers) {
       const { type, styles: { textEffect: layerTextEffect }, paragraphs } = layers[idx] as IText
-      const textEffect = layerTextEffect as any
+      const textEffect = layerTextEffect
       if (type === 'text') {
         const mainFontSize = this.getLayerFontSize(paragraphs)
         Object.assign(textEffect, {

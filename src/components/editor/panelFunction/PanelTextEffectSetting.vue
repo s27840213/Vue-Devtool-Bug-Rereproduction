@@ -11,7 +11,7 @@ div(class="text-effect-setting mt-25")
       div(class="text-effect-setting__effects mb-10")
         svg-icon(v-for="effect in effects1d"
           :key="`${currCategory.name}-${effect.key}`"
-          :iconName="`text-${currCategory.name}-${effect.key}`"
+          :iconName="effectIcon(currCategory, effect)"
           @click="onEffectClick(effect.key)"
           class="text-effect-setting__effect pointer"
           :class="{'selected': currentStyle.name === effect.key }"
@@ -36,17 +36,19 @@ div(class="text-effect-setting mt-25")
           //- Option type range
           template(v-if="option.type === 'range'")
             input(class="text-effect-setting-options__field--number"
-              :value="currentStyle[option.key]"
+              :value="getInputValue(currentStyle, option)"
               :name="option.key"
               :max="option.max"
               :min="option.min"
+              :step="option.key === 'lineHeight' ? 0.01 : 1"
               @change="(e)=>{handleRangeInput(e, option);recordChange()}"
               type="number")
             input(class="text-effect-setting-options__field--range input__slider--range"
-              :value="currentStyle[option.key]"
+              :value="getInputValue(currentStyle, option)"
               :name="option.key"
               :max="option.max"
               :min="option.min"
+              :step="option.key === 'lineHeight' ? 0.01 : 1"
               @input="(e)=>handleRangeInput(e, option)"
               @mousedown="handleRangeMousedown()"
               @mouseup="handleRangeMouseup()"
@@ -64,21 +66,23 @@ div(class="text-effect-setting mt-25")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import textEffectUtils from '@/utils/textEffectUtils'
-import textShapeUtils from '@/utils/textShapeUtils'
-import textBgUtils from '@/utils/textBgUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
-import colorUtils from '@/utils/colorUtils'
-import { ColorEventType } from '@/store/types'
-import stepsUtils from '@/utils/stepsUtils'
-import textPropUtils from '@/utils/textPropUtils'
-import constantData, { IEffect, IEffectCategory, IEffectOption } from '@/utils/constantData'
+import i18n from '@/i18n'
 import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
-import localStorageUtils from '@/utils/localStorageUtils'
+import { ColorEventType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
+import constantData, { IEffect, IEffectCategory, IEffectOptionRange } from '@/utils/constantData'
 import editorUtils from '@/utils/editorUtils'
+import localStorageUtils from '@/utils/localStorageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import textBgUtils from '@/utils/textBgUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import textPropUtils from '@/utils/textPropUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 import _ from 'lodash'
+import { defineComponent } from 'vue'
+import { mapState } from 'vuex'
 
 export default defineComponent({
   components: {
@@ -98,6 +102,9 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapState('text', {
+      selectedTextProps: 'props'
+    }),
     currCategory():IEffectCategory {
       return _.find(this.textEffects, ['name', this.currTab]) as IEffectCategory
     },
@@ -123,6 +130,10 @@ export default defineComponent({
     colorUtils.offStop(ColorEventType.textEffect, this.recordChange)
   },
   methods: {
+    effectIcon(category: IEffectCategory, effect: IEffect): string {
+      const postfix = effect.key === 'text-book' ? `-${i18n.global.locale}` : ''
+      return `text-${category.name}-${effect.key}${postfix}`
+    },
     handleColorModal(category: 'shadow'|'bg'|'shape', key: string) {
       const currColor = this.colorParser(this.currentStyle[key])
 
@@ -136,10 +147,16 @@ export default defineComponent({
       localStorageUtils.set('textEffectSetting', 'tab', category)
     },
     getOptions(effects1d: IEffect[]) {
-      return _.find(effects1d, ['key',
-        this.currentStyle.name])?.options
+      return _.find(effects1d, ['key', this.currentStyle.name])?.options
     },
-    setEffect(options:{
+    getInputValue(style: Record<string, string>, option: IEffectOptionRange) {
+      if (['lineHeight', 'fontSpacing'].includes(option.key)) {
+        return this.selectedTextProps[option.key]
+      } else {
+        return style[option.key]
+      }
+    },
+    async setEffect(options:{
       effectName?: string,
       effect?: Record<string, string|number|boolean>
     }) {
@@ -155,7 +172,7 @@ export default defineComponent({
             Object.assign({}, effect, { ver: 'v1' }))
           break
         case 'bg':
-          textBgUtils.setTextBg(effectName, Object.assign({}, effect))
+          await textBgUtils.setTextBg(effectName, Object.assign({}, effect))
           if (textShape.name !== 'none') {
             textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
             textPropUtils.updateTextPropsState()
@@ -164,12 +181,12 @@ export default defineComponent({
         case 'shape':
           textShapeUtils.setTextShape(effectName, Object.assign({}, effect))
           textPropUtils.updateTextPropsState()
-          textBgUtils.setTextBg('none') // Bg & shape are exclusive.
+          await textBgUtils.setTextBg('none') // Bg & shape are exclusive.
           break
       }
     },
-    onEffectClick(effectName: string): void {
-      this.setEffect({ effectName })
+    async onEffectClick(effectName: string): Promise<void> {
+      await this.setEffect({ effectName })
       this.recordChange()
     },
     resetTextEffect() {
@@ -178,16 +195,15 @@ export default defineComponent({
       target.resetCurrTextEffect()
       this.recordChange()
     },
-    handleSelectInput(key: string, newVal: string) {
-      this.setEffect({ effect: { [key]: newVal } })
+    async handleSelectInput(key: string, newVal: string) {
+      await this.setEffect({ effect: { [key]: newVal } })
       this.recordChange()
     },
-    handleRangeInput(event: Event, option: IEffectOption) {
+    handleRangeInput(event: Event, option: IEffectOptionRange) {
       const name = (event.target as HTMLInputElement).name
-      const value = parseInt((event.target as HTMLInputElement).value)
-      const [max, min] = [option.max as number, option.min as number]
+      const value = parseFloat((event.target as HTMLInputElement).value)
       const newVal = {
-        [name]: value > max ? max : (value < min ? min : value)
+        [name]: _.clamp(value, option.min, option.max)
       }
       this.setEffect({ effect: newVal })
     },

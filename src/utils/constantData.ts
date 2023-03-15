@@ -12,14 +12,26 @@ interface BillingInfoInput {
   optional?: boolean
   error?: string
 }
-export interface IEffectOption {
+export interface IEffectOptionSelect {
   key: string
   label: string
-  type: 'range' | 'color' | 'select'
-  min?: number
-  max?: number
-  select?: { key: string, label: string }[]
+  type: 'select'
+  select: { key: string, label: string }[]
 }
+export interface IEffectOptionColor {
+  key: string
+  label: string
+  type: 'color'
+}
+export interface IEffectOptionRange {
+  key: string
+  label: string
+  type: 'range'
+  min: number
+  max: number
+  isPStyle?: boolean
+}
+export type IEffectOption = IEffectOptionSelect | IEffectOptionColor | IEffectOptionRange
 export interface IEffect {
   key: string
   label: string
@@ -320,11 +332,16 @@ class ConstantData {
         pStrokeY: i18n.global.tc('NN0319'),
         pColor: i18n.global.tc('NN0735'),
         height: i18n.global.tc('NN0319'),
-        yOffset: i18n.global.tc('NN0736'),
+        yOffset: i18n.global.tc('NN0736'), // For value 0~100, 0 initial
+        xOffset200: i18n.global.tc('NN0814'), // For value -100~100, 0 initial
+        yOffset200: i18n.global.tc('NN0736'), // For value -100~100, 0 initial
         distanceInverse: i18n.global.tc('NN0737'),
         textStrokeColor: i18n.global.tc('NN0739'),
         shadowStrokeColor: i18n.global.tc('NN0740'),
-        endpoint: i18n.global.tc('NN0738')
+        endpoint: i18n.global.tc('NN0738'),
+        size: i18n.global.tc('NN0815'),
+        lineHeight: i18n.global.tc('NN0110'),
+        fontSpacing: i18n.global.tc('NN0109'),
       }
 
       return array.map((name: string) => {
@@ -339,8 +356,8 @@ class ConstantData {
         }
         switch (name) {
           case 'endpoint':
-            option.type = 'select'
-            option.select = [{
+            option.type = 'select';
+            (option as IEffectOptionSelect).select = [{
               key: 'triangle',
               label: i18n.global.tc('NN0730')
             }, {
@@ -352,18 +369,26 @@ class ConstantData {
             }]
             break
           case 'angle':
-            option.max = 180
-            option.min = -180
+            Object.assign(option, { min: -180, max: 180 })
             break
           case 'bend': // For curve
-            option.max = 100
-            option.min = -100
+          case 'xOffset200':
+          case 'yOffset200':
+            Object.assign(option, { min: -100, max: 100 })
+            break
+          case 'size':
+            Object.assign(option, { min: 50, max: 200 })
+            break
+          case 'lineHeight':
+            Object.assign(option, { min: 0.5, max: 2.5, isPStyle: true })
+            break
+          case 'fontSpacing':
+            Object.assign(option, { min: -200, max: 800, isPStyle: true })
             break
           default:
             /* distance, blur, opacity, spread, stroke,
              * bStroke, pStrokeY, bRadius, height */
-            option.max = 100
-            option.min = 0
+            Object.assign(option, { min: 0, max: 100 })
             break
         }
         return option
@@ -457,6 +482,26 @@ class ConstantData {
         key: 'underline',
         label: i18n.global.tc('NN0727'),
         options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
+      }, {
+        key: 'rainbow',
+        label: i18n.global.tc('NN0816'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'rainbow-dark',
+        label: i18n.global.tc('NN0817'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight'])
+      }, {
+        key: 'circle',
+        label: i18n.global.tc('NN0820'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
+        key: 'cloud',
+        label: i18n.global.tc('NN0818'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
+        key: 'text-book',
+        label: i18n.global.tc('NN0819'),
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
       }])
     }]
     return categories as IEffectCategory[]
