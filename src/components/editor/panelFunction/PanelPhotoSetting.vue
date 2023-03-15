@@ -124,8 +124,7 @@ export default defineComponent({
       isProcessing: 'bgRemove/getIsProcessing',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
-      isHandleShadow: 'shadow/isHandling',
-      isUploadingImg: 'file/getIsUploadingImg'
+      isHandleShadow: 'shadow/isHandling'
     }),
     ...mapState('shadow', {
       handleId: 'handleId'
@@ -191,7 +190,7 @@ export default defineComponent({
           return (isCurrLayerHanlingShadow && !isShadowPanelOpen) ||
             this.isUploadImgShadow ||
             this.isHandleShadow ||
-            this.isUploadingImg ||
+            currLayer.previewSrc?.includes('data:image/png;base64') ||
             (store.state as any).file.uploadingAssets.some((e: { id: string }) => e.id === (layerUtils.getCurrConfig as IImage).tmpId)
         } else if (['remove-bg', 'crop'].includes(btn.name) && (isLayerNeedRedraw && this.isHandleShadow)) {
           return true
