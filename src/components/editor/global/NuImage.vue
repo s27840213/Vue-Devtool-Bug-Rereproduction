@@ -42,13 +42,13 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
           :filter="`url(#${filterId})`"
           :width="imgNaturalSize.width"
           :height="imgNaturalSize.height"
-          class="full-size"
+          class="nu-image__img full-size"
           draggable="false"
           @error="onError"
           @load="onAdjustImgLoad")
       img(v-else ref="img"
         :style="flipStyles"
-        class="full-size"
+        class="nu-image__img full-size"
         :class="{'layer-flip': flippedAnimation() }"
         :src="finalSrc"
         draggable="false"
@@ -1116,9 +1116,12 @@ export default defineComponent({
     height: 100%;
   }
 
+  &__img {
+    object-fit: cover;
+  }
+
   &__picture {
     touch-action: none;
-    object-fit: cover;
     -webkit-touch-callout: none;
     user-select: none;
     position: absolute;
