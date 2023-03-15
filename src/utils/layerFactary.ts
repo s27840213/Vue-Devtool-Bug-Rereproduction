@@ -208,7 +208,7 @@ class LayerFactary {
           initHeight: initHeight
         } as IStyle
         return decoration
-      })()) : undefined,
+      })(), { decoration: true }) : undefined,
       decorationTop: decorationTop && !clips[0].isFrameImg ? this.newShape((() => {
         decorationTop.vSize = [initWidth, initHeight]
         decorationTop.styles = {
@@ -218,7 +218,7 @@ class LayerFactary {
           initHeight: initHeight
         } as IStyle
         return decorationTop
-      })()) : undefined
+      })(), { decorationTop: true }) : undefined
     } as IFrame
     frame.clips.forEach(i => (i.parentLayerStyles = frame.styles))
     if (frame.decoration && !frame.decoration.svg) {
@@ -436,7 +436,7 @@ class LayerFactary {
     return tmp
   }
 
-  newShape(config?: any): IShape {
+  newShape(config?: any, options?: { decoration?: boolean, decorationTop?: boolean }): IShape {
     config = config || {}
     const { styles = {} } = GeneralUtils.deepCopy(config)
     const basicConfig = {
@@ -462,6 +462,8 @@ class LayerFactary {
       dragging: false,
       designId: config.designId || '',
       ...(config.category === 'E' && { filled: false }),
+      ...(options && options.decoration && { decoration: true }),
+      ...(options && options.decorationTop && { decorationTop: true }),
       styles: {
         x: styles.x ?? 0,
         y: styles.y ?? 0,

@@ -184,7 +184,6 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import vivistickerUtils from '@/utils/vivistickerUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -283,15 +282,15 @@ export default defineComponent({
     /**
      * If the frame contain only one clip, auto popping the photo-selector
      */
-    if (this.config.type === LayerType.frame && (this.config as IFrame).clips.length === 1 && this.config.clips[0].srcObj.type === 'frame') {
-      if (!this.config.initFromMydesign) {
-        window.requestAnimationFrame(() => {
-          this.iosPhotoSelect(0)
-        })
-      } else {
-        delete this.config.initFromMydesign
-      }
-    }
+    // if (this.config.type === LayerType.frame && (this.config as IFrame).clips.length === 1 && this.config.clips[0].srcObj.type === 'frame') {
+    //   if (!this.config.initFromMydesign) {
+    //     window.requestAnimationFrame(() => {
+    //       this.iosPhotoSelect(0)
+    //     })
+    //   } else {
+    //     delete this.config.initFromMydesign
+    //   }
+    // }
     if (['text', 'group', 'tmp'].includes(this.getLayerType)) {
       textPropUtils.updateTextPropsState()
     }
@@ -1763,7 +1762,6 @@ export default defineComponent({
       this.isRotating = false
       this.isControlling = false
       this.initCornerRotate = -1
-      // StepsUtils.record()
       StepsUtils.asyncRecord()
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.rotating)
@@ -1832,7 +1830,6 @@ export default defineComponent({
     lineRotateEnd() {
       this.isRotating = false
       this.isControlling = false
-      // StepsUtils.record()
       StepsUtils.asyncRecord()
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.lineRotating)
@@ -2031,8 +2028,6 @@ export default defineComponent({
 
       if (widthLimit === -1) {
         const pageSize = (pageUtils.getPage(this.pageIndex) as IPage)[isVertical ? 'height' : 'width']
-        const _pageSize = (this.$parent?.$el as HTMLElement)
-          .getBoundingClientRect()[isVertical ? 'height' : 'width'] / (this.scaleRatio * 0.01)
         const currTextSize = textHW[isVertical ? 'height' : 'width']
 
         let layerPos = this.getLayerPos()[isVertical ? 'y' : 'x'] - (currTextSize - getSize()) / 2
@@ -2133,24 +2128,6 @@ export default defineComponent({
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
     },
-    // onPress() {
-    //   // 'long-press' when contentEditable has default behaviors on iOS.
-    //   // To avoid breaking such behaviors, don't run handler in such state.
-    //   if (this.contentEditable) {
-    //     return
-    //   }
-    //   if (!this.isActive) {
-    //     GroupUtils.deselect()
-    //     GroupUtils.select(this.pageIndex, [this.layerIndex])
-    //   }
-    //   if (this.getLayerType === 'text') {
-    //     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { shown: false, contentEditable: false, isTyping: false })
-    //   }
-
-    //   eventUtils.removePointerEvent('pointermove', this.moving)
-    //   eventUtils.removePointerEvent('pointerup', this.moveEnd)
-    //   editorUtils.setInMultiSelectionMode(true)
-    // },
     clickSubController(targetIndex: number, type: string, selectionMode: boolean) {
       if (!this.isControllerShown) {
         // moveStart will handle the following:
@@ -2171,7 +2148,6 @@ export default defineComponent({
       }
 
       if (!this.isHandleShadow) {
-        // if (this.currSubSelectedInfo.index !== -1) {
         for (let idx = 0; idx < layers.length; idx++) {
           if (idx !== targetIndex) {
             updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
@@ -2180,7 +2156,6 @@ export default defineComponent({
             updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
           }
         }
-        // }
         if ((this.config.type === LayerType.frame && !(this.config as IFrame).clips[targetIndex].active) ||
           (this.config.type === LayerType.group && !(this.config as IGroup).layers[targetIndex].active)) {
           updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
@@ -2195,28 +2170,11 @@ export default defineComponent({
       this.isPointerDownFromSubController = true
     },
     iosPhotoSelect(subLayerIdx: number) {
-      vivistickerUtils.getIosImg()
-        .then(async (images: Array<string>) => {
-          if (images.length) {
-            const { imgX, imgY, imgWidth, imgHeight } = await ImageUtils.getClipImgDimension((this.config as IFrame).clips[subLayerIdx], ImageUtils.getSrc({
-              type: 'ios',
-              assetId: images[0],
-              userId: ''
-            }))
-            FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, subLayerIdx, {
-              imgWidth,
-              imgHeight,
-              imgX,
-              imgY
-            })
-            FrameUtils.updateFrameClipSrc(this.pageIndex, this.layerIndex, subLayerIdx, {
-              type: 'ios',
-              assetId: images[0],
-              userId: ''
-            })
-            StepsUtils.record()
-          }
-        })
+      return FrameUtils.iosPhotoSelect({
+        pageIndex: this.pageIndex,
+        layerIndex: this.layerIndex,
+        subLayerIdx
+      }, (this.config as IFrame).clips[subLayerIdx])
     },
     dblSubController(e: MouseEvent, targetIndex: number) {
       e.stopPropagation()
