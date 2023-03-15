@@ -28,8 +28,10 @@ const getters: GetterTree<IWebViewState, unknown> = {
 }
 
 const mutations: MutationTree<IWebViewState> = {
-  SET_userInfo(state: IWebViewState, { userInfo, reviewVer }: { userInfo: IUserInfo, reviewVer: string }) {
+  SET_userInfo(state: IWebViewState, userInfo: IUserInfo) {
     state.userInfo = userInfo
+  },
+  UPDATE_detectIfInReviewMode(state: IWebViewState, reviewVer: string) {
     state.inReviewMode = reviewVer === state.userInfo.appVer
   },
   SET_inBrowserMode(state: IWebViewState, inBrowserMode: boolean) {
