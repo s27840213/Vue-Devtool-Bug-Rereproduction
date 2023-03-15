@@ -173,7 +173,6 @@ export default defineComponent({
       return this.image.config.styles
     },
     imgStyles(): Record<string, string> {
-      console.log('img styles called')
       return this.stylesConverter()
     },
     finalSrc(): string {

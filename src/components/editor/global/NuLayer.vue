@@ -724,7 +724,7 @@ export default defineComponent({
           imgX,
           imgY
         })
-        const body = (this.$refs.body as HTMLElement[])[0]
+        const body = this.$refs.body as HTMLElement
         body.addEventListener(this.$isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
         body.addEventListener(this.$isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
       }
@@ -748,7 +748,7 @@ export default defineComponent({
           ...this.imgBuff.styles
         })
       }
-      const body = (this.$refs.body as HTMLElement[])[0]
+      const body = this.$refs.body as HTMLElement
       body.removeEventListener(this.$isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
       body.removeEventListener(this.$isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
     },
@@ -763,7 +763,7 @@ export default defineComponent({
         frameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.subLayerIndex, { active: true })
         stepsUtils.record()
       }
-      const body = (this.$refs.body as HTMLElement[])[0]
+      const body = this.$refs.body as HTMLElement
       body.removeEventListener(this.$isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
       body.removeEventListener(this.$isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
     },
@@ -783,7 +783,7 @@ export default defineComponent({
       }
       const { primaryLayer } = this
       if (primaryLayer && !primaryLayer.locked) {
-        const body = (this.$refs.body as HTMLElement[])[0]
+        const body = this.$refs.body as HTMLElement
         body.addEventListener('dragleave', this.onFrameDragLeave)
         body.addEventListener('drop', this.onFrameDrop)
         e.stopPropagation()
@@ -823,7 +823,7 @@ export default defineComponent({
     onFrameDragLeave(e: DragEvent) {
       if (!e.target || !['IMG', 'image'].includes((e.target as HTMLElement).tagName)) return
       e.stopPropagation()
-      const body = (this.$refs.body as HTMLElement[])[0]
+      const body = this.$refs.body as HTMLElement
       body.removeEventListener('dragleave', this.onFrameDragLeave)
       body.removeEventListener('drop', this.onFrameDrop)
       const primaryLayer = this.primaryLayer as IFrame
@@ -835,7 +835,7 @@ export default defineComponent({
     },
     onFrameDrop(e: DragEvent) {
       e.stopPropagation()
-      const body = (this.$refs.body as HTMLElement[])[0]
+      const body = this.$refs.body as HTMLElement
       body.removeEventListener('dragleave', this.onFrameDragLeave)
       body.removeEventListener('drop', this.onFrameDrop)
       stepsUtils.record()
@@ -852,7 +852,7 @@ export default defineComponent({
     },
     onLayerDragEnter(e: DragEvent) {
       if (!e.target || !['IMG', 'image'].includes((e.target as HTMLElement).tagName)) return
-      const body = (this.$refs.body as HTMLElement[])[0]
+      const body = this.$refs.body as HTMLElement
       const dragSrcObj = this.$store.state.currDraggedPhoto.srcObj
       if (this.getLayerType === 'image' && dragSrcObj.assetId !== this.config.srcObj.assetId) {
         body.addEventListener('dragleave', this.layerDragLeave)
@@ -872,7 +872,7 @@ export default defineComponent({
     },
     layerDragLeave(e: DragEvent) {
       if (!e.target || !['IMG', 'image'].includes((e.target as HTMLElement).tagName)) return
-      const body = (this.$refs.body as HTMLElement[])[0]
+      const body = this.$refs.body as HTMLElement
       body.removeEventListener('dragleave', this.layerDragLeave)
       body.removeEventListener('drop', this.layerOnDrop)
       if (this.getLayerType === 'image') {
@@ -881,7 +881,7 @@ export default defineComponent({
     },
     layerOnDrop(e: DragEvent) {
       e.stopPropagation()
-      const body = (this.$refs.body as HTMLElement[])[0]
+      const body = this.$refs.body as HTMLElement
       body.removeEventListener('dragleave', this.layerDragLeave)
       body.removeEventListener('drop', this.layerOnDrop)
 
