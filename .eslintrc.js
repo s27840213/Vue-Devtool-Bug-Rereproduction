@@ -13,7 +13,8 @@ module.exports = {
   ],
   env: {
     'cypress/globals': true,
-    node: true
+    node: true,
+    'vue/setup-compiler-macros': true
   },
 
   extends: [
