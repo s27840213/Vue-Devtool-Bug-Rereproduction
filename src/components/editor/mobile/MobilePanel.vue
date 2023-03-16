@@ -176,7 +176,7 @@ export default defineComponent({
       //     pageUtils.fitPage()
       //   })
       // }, 100, { trailing: false }),
-      // resizeObserver: null as unknown as ResizeObserver
+      resizeObserver: null as unknown as ResizeObserver
     }
   },
   computed: {
@@ -280,7 +280,7 @@ export default defineComponent({
           'row-gap': this.noRowGap ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
-            ? 'initial' : this.panelDragHeight + 'px',
+            ? '100%' : this.panelDragHeight + 'px',
         },
         // Prevent MobilePanel collapse
         isSidebarPanel ? { height: `calc(100% - ${this.userInfo.statusBarHeight}px)` } : {}
@@ -547,20 +547,19 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.panelDragHeight = 0
-    // No fit page in mobile now
-    // this.resizeObserver = new ResizeObserver(() => {
-    //   this.$emit('panelHeight', this.currPanelHeight())
-    //   // Prevent fitPage when full size panel open, ex: SidebarPanel
-    //   if (this.fixSize || this.panelDragHeight !== this.panelParentHeight()) {
-    //     this.fitPage()
-    //   }
-    // })
-    // this.resizeObserver.observe(this.$refs.panel as Element)
+    this.resizeObserver = new ResizeObserver(() => {
+      this.$emit('panelHeight', this.currPanelHeight())
+      // No fit page in mobile now
+      // Prevent fitPage when full size panel open, ex: SidebarPanel
+      // if (this.fixSize || this.panelDragHeight !== this.panelParentHeight()) {
+      //   this.fitPage()
+      // }
+    })
+    this.resizeObserver.observe(this.$refs.panel as Element)
   },
-  // beforeUnmount() {
-  //   this.resizeObserver && this.resizeObserver.disconnect()
-  // },
+  beforeUnmount() {
+    this.resizeObserver && this.resizeObserver.disconnect()
+  },
   methods: {
     ...mapMutations({
       setBgImageControl: 'SET_backgroundImageControl',
