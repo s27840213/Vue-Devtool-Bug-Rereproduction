@@ -16,7 +16,8 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
   //- Search result and static main content
   category-list(v-for="item in categoryListArray"
                 v-show="item.show" :ref="item.key" :key="item.key"
-                :list="item.content" @loadMore="item.loadMore")
+                :list="item.key === 'mainContent' && !showFav ? reshapeCategoryList2D(item.content) : item.content"
+                @loadMore="item.loadMore")
     template(#before)
       div(class="panel-static__top-item")
       Tags(v-if="!isInCategory && tags && tags.length" class="panel-static__tags" style="margin-top: 0"
@@ -33,8 +34,8 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
       div(v-if="showAllRecently && !item.content.length && !pending" class="panel-static__recent-empty")
         svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
         div(class="panel-static__recent-empty--title") No content in Recently Used
-    template(v-slot:category-list-rows="{ list, title, isFavorite, coverUrl }")
-      category-list-rows(v-if="showFav"
+    template(v-slot:category-list-rows="{ list, title, isFavorite }")
+      category-list-rows(
           :list="list"
           :title="title"
           :isFavorite="isFavorite")
@@ -53,14 +54,16 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
               @click4in1="click4in1"
               @dbclick4in1="toggleFavorites4in1"
               @dbclick="toggleFavoritesItem")
-      category-object-card(v-else
-        :title="title"
-        :isFavorite="isFavorite"
-        :coverUrl="coverUrl"
-        :scrollTop="mainContentScrollTop"
-        :style="cardStyles"
-        @cardClick="item.categorySearch && item.categorySearch(title)"
-        @favClick="toggleFaovoritesCategoryByTitle($event, title)")
+    template(v-slot:category-object-card="{ list }")
+      div(class="panel-static__card-row")
+        category-object-card(v-for="catItem in list"
+          :title="catItem.title"
+          :isFavorite="catItem.isFavorite"
+          :coverUrl="catItem.coverUrl"
+          :scrollTop="mainContentScrollTop"
+          :style="cardStyles"
+          @cardClick="item.categorySearch && item.categorySearch(catItem.title)"
+          @favClick="toggleFaovoritesCategoryByTitle($event, catItem.title)")
     template(v-slot:category-object-item="{ list }")
       div(class="panel-static__items")
         category-object-item(v-for="item in list"
@@ -100,18 +103,25 @@ export default defineComponent({
       windowWidth: window.outerWidth,
       mainContentScrollTop: 0,
       elMainContent: undefined as HTMLElement | undefined,
+      numCardColumns: 1,
+      cardGap: 10,
+      cardHeight: 0
     }
   },
   activated() {
     this.$nextTick(() => {
       this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
       this.elMainContent.addEventListener('scroll', this.handleMainContentScroll)
+      this.updateLayout()
     })
   },
   deactivated() {
     this.elMainContent?.removeEventListener('scroll', this.handleMainContentScroll)
   },
   computed: {
+    ...mapState({
+      isLandscape: 'isLandscape'
+    }),
     ...mapState('objects', {
       nextCategory: 'nextCategory'
     }),
@@ -132,9 +142,6 @@ export default defineComponent({
         })
       return result
     },
-    cardHeight(): number {
-      return (this.windowWidth * (this.isTablet ? 0.9 : 1) - (this.isTablet ? 0 : 32)) * 9 / 16
-    },
     cardStyles(): {[key: string]: string} {
       return {
         height: `${this.cardHeight}px`,
@@ -146,8 +153,7 @@ export default defineComponent({
       return this.itemHeight + titleHeight + gap
     },
     categoryCardHeight(): number {
-      const gap = this.isTablet ? 20 : 10
-      return this.cardHeight + gap
+      return this.cardHeight + this.cardGap
     },
     categoryIconWidth(): number {
       const iconSize = 40
@@ -158,6 +164,11 @@ export default defineComponent({
   watch: {
     isInCategory(newVal: boolean, oldVal: boolean) {
       if (newVal && !oldVal) this.scrollCategoryIcon(this.showAllRecently ? 0 : undefined)
+    },
+    isLandscape() {
+      this.$nextTick(() => {
+        this.updateLayout()
+      })
     }
   },
   methods: {
@@ -232,6 +243,31 @@ export default defineComponent({
         const scrollLeft = parseFloat(match[1])
         categoryIconList.scrollLeft = scrollLeft
       })
+    },
+    reshapeCategoryList2D(list: ICategoryItem[]): any[] {
+      return list.reduce((acc: any[], _: ICategoryItem, i: number): any[] => {
+        return i % this.numCardColumns ? acc : [...acc, {
+          id: list[i].id,
+          type: 'category-object-card',
+          list: list.slice(i, i + this.numCardColumns),
+          size: list[i].size
+        }]
+      }, [])
+    },
+    updateLayout() {
+      const { isTablet, isLandscape } = this
+      if (isTablet) {
+        this.numCardColumns = 2
+        this.cardGap = 20
+      } else {
+        this.numCardColumns = 1
+        this.cardGap = 10
+      }
+
+      const containerWidthRatio = isTablet ? isLandscape ? 0.64 : 0.9 : 1
+      const containerPadding = isTablet ? 0 : 32
+      const cardAspectRatio = 16 / 9
+      this.cardHeight = ((window.outerWidth * containerWidthRatio - containerPadding) / cardAspectRatio - this.cardGap * this.numCardColumns) / this.numCardColumns
     }
   }
 })
@@ -288,6 +324,11 @@ export default defineComponent({
   &__items {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
+  }
+  &__card-row {
+    display: grid;
+    grid-template-columns: repeat(v-bind(numCardColumns), 1fr);
+    column-gap: 20px;
   }
   &.in-category::v-deep .category-list .vue-recycle-scroller__item-wrapper {
     margin-top: 24px;

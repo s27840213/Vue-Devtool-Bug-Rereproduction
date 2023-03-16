@@ -73,6 +73,7 @@ export interface IEditorState {
   inGestureToolMode: boolean,
   isMobile: boolean
   isTablet: boolean,
+  isLandscape: boolean,
   isLargeDesktop: boolean,
   isGlobalLoading: boolean,
   useMobileEditor: boolean,

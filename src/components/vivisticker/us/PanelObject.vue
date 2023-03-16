@@ -149,7 +149,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .panel-objects {
   @include size(100%, 100%);
-  @include rwd-container(16px, 16px, 16px);
+  @include rwd-container(16px);
   display: grid;
   grid-template-rows: auto auto 1fr;
   &__nav {

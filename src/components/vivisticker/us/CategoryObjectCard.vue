@@ -1,6 +1,6 @@
 <template lang="pug">
-div(class="category-object-card" @click="$emit('cardClick', $event)")
-  img(class="category-object-card__cover" :src="coverSrc(coverUrl)" :style="coverStyles" @error="imgOnerror")
+div(v-show="isShow" class="category-object-card" @click="$emit('cardClick', $event)")
+  img(class="category-object-card__cover" :src="coverSrc(coverUrl)" :style="coverStyles" @load="isShow = true" @error="imgOnerror")
   div(class="category-object-card__label")
     div(class="category-object-card__label__title caption-MD") {{ title }}
     svg-icon(v-if="isFavorite !== undefined"
@@ -35,7 +35,8 @@ export default defineComponent({
   data() {
     return {
       fallbackSrc: require('@/assets/img/svg/image-preview.svg'),
-      coverPos: 50
+      coverPos: 50,
+      isShow: false
     }
   },
   mounted() {
@@ -47,11 +48,14 @@ export default defineComponent({
     }
   },
   computed: {
-    scrollableParent() {
-      const grandGrandParent = this.$el.parentElement.parentElement.parentElement as HTMLElement
-      return grandGrandParent && grandGrandParent.classList.contains('vue-recycle-scroller')
-        ? grandGrandParent
-        : undefined
+    elRecycleScrollerView(): HTMLElement | null {
+      return (this.$el as HTMLElement).closest('.vue-recycle-scroller__item-view')
+    },
+    elRecycleScrollerWrapper(): HTMLElement | null {
+      return this.elRecycleScrollerView?.parentElement ?? null
+    },
+    elRecycleScroller(): HTMLElement | null {
+      return this.elRecycleScrollerWrapper?.parentElement ?? null
     },
     coverStyles() {
       return {
@@ -67,18 +71,20 @@ export default defineComponent({
     imgOnerror(e: Event) {
       const target = (e.target as HTMLImageElement)
       target.src = this.fallbackSrc
+      this.isShow = true
     },
-    translateY() {
-      const transform = this.$el.parentElement.style.transform
+    translateY(): number {
+      if (!this.elRecycleScrollerView) return 0
+      const transform = this.elRecycleScrollerView.style.transform
       const match = transform.match(/translateY\((\d+(?:[.]\d*?)?)px\)/)
       if (!match || match.length < 2) return 0
       return parseFloat(match[1])
     },
     handleScroll() {
-      if (!this.scrollableParent) return
-      const cardOffsetTop = this.$el.parentElement.parentElement.offsetTop
+      if (!this.elRecycleScroller) return
+      const cardOffsetTop = this.elRecycleScrollerWrapper?.offsetTop ?? 0
       const scrollPos = this.translateY() - (this.scrollTop - cardOffsetTop)
-      this.coverPos = (scrollPos / (this.scrollableParent.clientHeight - this.$el.clientHeight)) * 100
+      this.coverPos = (scrollPos / (this.elRecycleScroller.clientHeight - this.$el.clientHeight)) * 100
     }
   }
 })
@@ -91,6 +97,7 @@ export default defineComponent({
   justify-content: center;
   border-radius: 10px;
   overflow: hidden;
+  position: relative;
   &__cover {
     @include size(100%, 100%);
     object-fit: cover;

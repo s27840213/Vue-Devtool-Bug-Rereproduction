@@ -8,9 +8,7 @@ recycle-scroller(class="category-list" id="recycle" :items="list")
     slot(:name="item.type" :key="item.id"
       :list="item.list"
       :title="item.title"
-      :isFavorite="item.isFavorite"
-      :coverId="item.coverId"
-      :coverUrl="item.coverUrl")
+      :isFavorite="item.isFavorite")
   template(#before)
     slot(name="before")
   template(#after)
