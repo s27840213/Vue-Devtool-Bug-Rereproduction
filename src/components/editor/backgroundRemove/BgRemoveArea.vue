@@ -8,6 +8,7 @@ div(class="bg-remove-area"
   div(class="bg-remove-area__scale-area"
       :style="areaStyles"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
+    canvas(class="magnify-area" ref="magnify" :cy-ready="cyReady")
     canvas(class="bg-remove-area" ref="canvas" :cy-ready="cyReady")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
@@ -19,6 +20,7 @@ div(class="bg-remove-area"
 
 <script lang="ts">
 import { IBgRemoveInfo } from '@/interfaces/image'
+import MagnifyUtils from '@/utils/magnifyUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
@@ -39,14 +41,16 @@ export default defineComponent({
       root: undefined as unknown as HTMLElement,
       canvasWidth: 1600,
       canvasHeight: 1600,
-      canvas: undefined as unknown as HTMLCanvasElement,
-      ctx: undefined as unknown as CanvasRenderingContext2D,
+      contentCanvas: undefined as unknown as HTMLCanvasElement,
+      contentCtx: undefined as unknown as CanvasRenderingContext2D,
       initImgCanvas: undefined as unknown as HTMLCanvasElement,
       initImgCtx: undefined as unknown as CanvasRenderingContext2D,
       blurCanvas: undefined as unknown as HTMLCanvasElement,
       blurCtx: undefined as unknown as CanvasRenderingContext2D,
       clearModeCanvas: undefined as unknown as HTMLCanvasElement,
       clearModeCtx: undefined as unknown as CanvasRenderingContext2D,
+      magnifyCanvas: undefined as unknown as HTMLCanvasElement,
+      magnifyCtx: undefined as unknown as CanvasRenderingContext2D,
       initImageElement: undefined as unknown as HTMLImageElement,
       imageElement: undefined as unknown as HTMLImageElement,
       initPos: { x: 0, y: 0 },
@@ -85,6 +89,7 @@ export default defineComponent({
       this.initCanvas()
       this.initBlurCanvas()
       this.initClearModeCanvas()
+      this.initMagnifyCanvas()
       this.cyReady = true
     }
 
@@ -168,14 +173,14 @@ export default defineComponent({
   },
   watch: {
     brushSize(newVal: number) {
-      this.ctx.lineWidth = newVal
+      this.contentCtx.lineWidth = newVal
       this.blurCtx.lineWidth = newVal
       this.clearModeCtx.lineWidth = newVal
       this.brushStyle.width = `${newVal + this.blurPx}px`
       this.brushStyle.height = `${newVal + this.blurPx}px`
       if (this.clearMode) {
         this.blurPx = 1
-        this.ctx.filter = `blur(${this.blurPx}px)`
+        this.contentCtx.filter = `blur(${this.blurPx}px)`
       }
     },
     restoreInitState(newVal) {
@@ -183,11 +188,11 @@ export default defineComponent({
         this.clearCtx()
         this.initClearModeCanvas()
         if (this.clearMode) {
-          this.ctx.filter = 'none'
+          this.contentCtx.filter = 'none'
           this.drawImageToCtx()
-          this.ctx.filter = `blur(${this.blurPx}px)`
+          this.contentCtx.filter = `blur(${this.blurPx}px)`
         } else {
-          this.ctx.filter = 'none'
+          this.contentCtx.filter = 'none'
           this.drawImageToCtx()
         }
         this.clearSteps()
@@ -200,13 +205,13 @@ export default defineComponent({
     },
     clearMode(newVal) {
       if (newVal) {
-        this.ctx.globalCompositeOperation = 'destination-out'
-        this.ctx.filter = `blur(${this.blurPx}px)`
+        this.contentCtx.globalCompositeOperation = 'destination-out'
+        this.contentCtx.filter = `blur(${this.blurPx}px)`
         this.initClearModeCanvas()
         this.updateCurrCanvasImageElement()
       } else {
-        this.ctx.globalCompositeOperation = 'source-over'
-        this.ctx.filter = 'none'
+        this.contentCtx.globalCompositeOperation = 'source-over'
+        this.contentCtx.filter = 'none'
       }
     },
     brushColor(newVal) {
@@ -242,19 +247,19 @@ export default defineComponent({
       clearSteps: 'bgRemove/CLEAR_steps'
     }),
     initCanvas() {
-      this.canvas = this.$refs.canvas as HTMLCanvasElement
-      this.canvas.width = this.canvasWidth
-      this.canvas.height = this.canvasHeight
-      const ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
+      this.contentCanvas = this.$refs.canvas as HTMLCanvasElement
+      this.contentCanvas.width = this.canvasWidth
+      this.contentCanvas.height = this.canvasHeight
+      const ctx = this.contentCanvas.getContext('2d') as CanvasRenderingContext2D
       ctx.strokeStyle = 'red'
       ctx.lineWidth = this.brushSize
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
-      this.ctx = ctx
+      this.contentCtx = ctx
       // this.ctx.globalCompositeOperation = 'destination-out'
 
       this.drawImageToCtx()
-      this.ctx.filter = `blur(${this.blurPx}px)`
+      this.contentCtx.filter = `blur(${this.blurPx}px)`
       this.pushStep()
     },
     initBlurCanvas() {
@@ -281,6 +286,21 @@ export default defineComponent({
       ctx.lineWidth = this.brushSize
 
       this.clearModeCtx = ctx
+    },
+    initMagnifyCanvas() {
+      this.magnifyCanvas = this.$refs.magnify as HTMLCanvasElement
+      this.magnifyCanvas.width = this.size.width
+      this.magnifyCanvas.height = this.size.height
+      const ctx = this.magnifyCanvas.getContext('2d') as CanvasRenderingContext2D
+      // set up drawing settings
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      ctx.lineWidth = this.brushSize
+      ctx.filter = `blur(${this.blurPx}px)`
+
+      this.magnifyCtx = ctx
+
+      const magnifyCanvas = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root)
     },
     createInitImageCtx() {
       this.initImgCanvas = document.createElement('canvas') as HTMLCanvasElement
@@ -334,7 +354,7 @@ export default defineComponent({
     drawEnd() {
       window.removeEventListener('pointerup', this.drawEnd)
       window.removeEventListener('pointermove', this.drawing)
-      this._setCanvas(this.canvas)
+      this._setCanvas(this.contentCanvas)
       this.pushStep()
     },
     brushMoving(e: MouseEvent) {
@@ -344,8 +364,8 @@ export default defineComponent({
     },
     drawImageToCtx(img?: HTMLImageElement) {
       this.setCompositeOperationMode('source-over')
-      this.ctx.drawImage(img ?? this.imageElement, 0, 0, this.size.width, this.size.height)
-      this._setCanvas(this.canvas)
+      this.contentCtx.drawImage(img ?? this.imageElement, 0, 0, this.size.width, this.size.height)
+      this._setCanvas(this.contentCanvas)
       if (this.clearMode) {
         this.setCompositeOperationMode('destination-out')
       } else {
@@ -354,16 +374,16 @@ export default defineComponent({
     },
     drawInClearMode(e: MouseEvent) {
       this.cyReady = false
-      this.setCompositeOperationMode('source-over', this.ctx)
-      this.ctx.filter = 'none'
-      this.clearCtx(this.ctx)
-      this.ctx.drawImage(this.currCanvasImageElement ?? this.imageElement, 0, 0, this.size.width, this.size.height)
+      this.setCompositeOperationMode('source-over', this.contentCtx)
+      this.contentCtx.filter = 'none'
+      this.clearCtx(this.contentCtx)
+      this.contentCtx.drawImage(this.currCanvasImageElement ?? this.imageElement, 0, 0, this.size.width, this.size.height)
       // this.ctx.drawImage(this.imageElement, 0, 0, this.size.width, this.size.height)
 
       this.drawLine(e, this.clearModeCtx)
       this.setCompositeOperationMode('destination-out')
-      this.ctx.filter = `blur(${this.blurPx}px)`
-      this.ctx.drawImage(this.clearModeCanvas, 0, 0, this.size.width, this.size.height)
+      this.contentCtx.filter = `blur(${this.blurPx}px)`
+      this.contentCtx.drawImage(this.clearModeCanvas, 0, 0, this.size.width, this.size.height)
       this.cyReady = true
     },
     drawInRestoreMode(e: MouseEvent) {
@@ -375,10 +395,10 @@ export default defineComponent({
 
       this.setCompositeOperationMode('source-over', this.blurCtx)
       this.blurCtx.filter = `blur(${this.blurPx}px)`
-      this.ctx.drawImage(this.blurCanvas, 0, 0, this.size.width, this.size.height)
+      this.contentCtx.drawImage(this.blurCanvas, 0, 0, this.size.width, this.size.height)
     },
     clearCtx(ctx?: CanvasRenderingContext2D) {
-      const targetCtx = ctx ?? this.ctx
+      const targetCtx = ctx ?? this.contentCtx
 
       targetCtx.clearRect(0, 0, this.size.width, this.size.height)
     },
@@ -393,7 +413,7 @@ export default defineComponent({
       if (ctx) {
         ctx.globalCompositeOperation = mode as any
       } else {
-        this.ctx.globalCompositeOperation = mode as any
+        this.contentCtx.globalCompositeOperation = mode as any
       }
     },
     getCanvasBlob(mycanvas: HTMLCanvasElement) {
@@ -409,7 +429,7 @@ export default defineComponent({
        */
       // const base64 = this.canvas.toDataURL('image/png', 0.3)
       // this.addStep(base64)
-      const blob = this.getCanvasBlob(this.canvas)
+      const blob = this.getCanvasBlob(this.contentCanvas)
 
       this.stepsQueue.push(blob)
     },
@@ -450,10 +470,10 @@ export default defineComponent({
         this.currCanvasImageElement.onload = () => {
           this.clearCtx()
           this.clearModeCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
-          this.ctx.filter = 'none'
+          this.contentCtx.filter = 'none'
           this.drawImageToCtx(this.currCanvasImageElement)
           if (this.clearMode) {
-            this.ctx.filter = `blur(${this.blurPx}px)`
+            this.contentCtx.filter = `blur(${this.blurPx}px)`
           }
 
           URL.revokeObjectURL(url)
@@ -467,10 +487,10 @@ export default defineComponent({
 
         this.currCanvasImageElement.onload = () => {
           this.clearCtx()
-          this.ctx.filter = 'none'
+          this.contentCtx.filter = 'none'
           this.drawImageToCtx(this.currCanvasImageElement)
           if (this.clearMode) {
-            this.ctx.filter = `blur(${this.blurPx}px)`
+            this.contentCtx.filter = `blur(${this.blurPx}px)`
           }
         }
       }
@@ -544,6 +564,14 @@ export default defineComponent({
     justify-content: center;
     background-color: setColor(gray-1, 0.3);
   }
+}
+
+.magnify-area {
+  position: absolute;
+  top: -40px;
+  left: -40px;
+  transform: scale(0.2);
+  transform-origin: top left;
 }
 
 .spiner {
