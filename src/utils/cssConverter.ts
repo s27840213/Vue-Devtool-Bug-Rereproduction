@@ -60,9 +60,6 @@ class CssConveter {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}em` : `${sourceStyles[prop]}`
       } else if (prop === 'lineHeight') {
         result[styleMap[prop]] = `${sourceStyles[prop]}`
-      } else if (['boxDecorationBreak'].includes(prop)) { // For -webkit CSS
-        result[styleMap[prop]] = `${sourceStyles[prop]}`
-        result[`-webkit-${styleMap[prop]}`] = `${sourceStyles[prop]}`
       } else if (prop === 'font') {
         result[styleMap[prop]] = this.getFontFamily(sourceStyles[prop] as string)
       } else if (prop === 'color') { // For color

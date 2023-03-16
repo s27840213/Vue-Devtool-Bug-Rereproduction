@@ -510,6 +510,19 @@ class TiptapUtils {
     })
   }
 
+  applyDivStyle() { // If you need to add some css to div of tiptap, use it.
+    const style = Object.entries({
+    }).map(([k, v]) => `${k}: ${v}`).join('; ')
+
+    this.agent(editor => {
+      editor.setOptions({
+        editorProps: {
+          attributes: { style },
+        },
+      })
+    })
+  }
+
   focus(options = {} as { scrollIntoView?: boolean }, pos?: FocusPosition) {
     if (this.editor) {
       this.editor.commands.focus(pos, options)

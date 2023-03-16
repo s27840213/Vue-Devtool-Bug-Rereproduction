@@ -156,6 +156,12 @@ export default defineComponent({
         return style[option.key]
       }
     },
+    async resetTextEffect() {
+      const target = this.currTab === 'shadow' ? textEffectUtils
+        : this.currTab === 'shape' ? textShapeUtils : textBgUtils
+      await target.resetCurrTextEffect()
+      this.recordChange()
+    },
     async setEffect(options:{
       effectName?: string,
       effect?: Record<string, string|number|boolean>
@@ -189,12 +195,6 @@ export default defineComponent({
       await this.setEffect({ effectName })
       this.recordChange()
     },
-    resetTextEffect() {
-      const target = this.currTab === 'shadow' ? textEffectUtils
-        : this.currTab === 'shape' ? textShapeUtils : textBgUtils
-      target.resetCurrTextEffect()
-      this.recordChange()
-    },
     async handleSelectInput(key: string, newVal: string) {
       await this.setEffect({ effect: { [key]: newVal } })
       this.recordChange()
@@ -208,13 +208,13 @@ export default defineComponent({
       this.setEffect({ effect: newVal })
     },
     handleRangeMouseup() {
-      if (this.currTab === 'shape') {
+      if (['curve', 'text-fill-img'].includes(this.currentStyle.name)) {
         this.setEffect({ effect: { focus: false } })
       }
       this.recordChange()
     },
     handleRangeMousedown() {
-      if (this.currTab === 'shape') {
+      if (['curve', 'text-fill-img'].includes(this.currentStyle.name)) {
         this.setEffect({ effect: { focus: true } })
       }
     },

@@ -54,7 +54,16 @@ export interface ITextLetterBg {
   color: string
 }
 
-export type ITextBgEffect = ITextBox | ITextUnderline | ITextGooey | ITextLetterBg | { name: 'none' }
+export interface ITextFillImg {
+  name: 'text-fill-img'
+  xOffset200: number
+  yOffset200: number
+  size: number
+  opacity: number
+  focus: boolean
+}
+
+export type ITextBgEffect = ITextBox | ITextUnderline | ITextGooey | ITextLetterBg | ITextFillImg | { name: 'none' }
 
 export function isITextBox(object: ITextBgEffect): object is ITextBox {
   return object && object.name &&
@@ -70,6 +79,9 @@ export function isITextGooey(object: ITextBgEffect): object is ITextGooey {
 export function isITextLetterBg(object: ITextBgEffect): object is ITextLetterBg {
   return object && object.name &&
     ['rainbow', 'rainbow-dark', 'circle', 'cloud', 'text-book'].includes(object.name)
+}
+export function isITextFillImg(object: ITextBgEffect): object is ITextFillImg {
+  return object && object.name && ['text-fill-img'].includes(object.name)
 }
 
 export interface ITextFormat {

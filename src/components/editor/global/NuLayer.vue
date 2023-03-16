@@ -72,7 +72,6 @@ import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import SubControllerUtils from '@/utils/subControllerUtils'
-import textBgUtils from '@/utils/textBgUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { AnyTouchEvent } from '@any-touch/shared'
@@ -421,11 +420,9 @@ export default defineComponent({
       switch (this.config.type) {
         case LayerType.text: {
           const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
-          const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
           Object.assign(
             styles,
             textEffectStyles,
-            textBgStyles,
             {
               willChange: this.useMobileEditor ? '' : ('text-shadow' + (this.isDragging ? ', transform' : '')),
               '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`

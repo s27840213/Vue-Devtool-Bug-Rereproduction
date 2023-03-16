@@ -1,5 +1,5 @@
-import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, ITextBgEffect, ITextGooey, ITextLetterBg } from '@/interfaces/format'
-import { IParagraphStyle, ISpanStyle, IStyle, IText } from '@/interfaces/layer'
+import { isITextBox, isITextFillImg, isITextGooey, isITextLetterBg, isITextUnderline, ITextBgEffect, ITextGooey, ITextLetterBg } from '@/interfaces/format'
+import { IParagraphStyle, ISpanStyle, IText } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
@@ -724,6 +724,13 @@ class TextBg {
         fixedWidth: true,
         color: '#93BAA6',
       },
+      'text-fill-img': {
+        xOffset200: 0,
+        yOffset200: 0,
+        size: 100,
+        opacity: 100,
+        focus: false,
+      },
     }
   }
 
@@ -745,9 +752,18 @@ class TextBg {
     return svg.replace(/\n[ ]*/g, '').replace(/#/g, '%23')
   }
 
-  convertTextEffect(styles: IStyle) { // to-delete
-    const effect = styles.textBg as ITextBgEffect
-    if (!isITextBox(effect)) return {}
+  convertTextEffect(textBg: ITextBgEffect): Partial<Record<'div' | 'p' | 'span', Record<string, string>>> {
+    if (isITextFillImg(textBg)) {
+      return {
+        div: {
+          background: 'url("https://www.depal.com.tw/img/css/body2.png")',
+          ...!textBg.focus ? {
+            '-webkit-background-clip': 'text',
+            '-webkit-text-fill-color': 'transparent',
+          } : {}
+        },
+      }
+    } else return {}
   }
 
   fixedWidthStyle(spanStyle: ISpanStyle, pStyle: IParagraphStyle, config: IText) {
@@ -764,7 +780,7 @@ class TextBg {
 
   async drawSvgBg(config: IText): Promise<textBgSvg | null> {
     const textBg = config.styles.textBg
-    if (textBg.name === 'none') return null
+    if (textBg.name === 'none' || isITextFillImg(textBg)) return null
 
     const opacity = textBg.opacity * 0.01
     const myRect = new Rect()
@@ -1062,10 +1078,10 @@ class TextBg {
     }
   }
 
-  resetCurrTextEffect() {
+  async resetCurrTextEffect() {
     const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
-    this.setTextBg(effectName, this.effects[effectName])
-    this.setExtraDefaultAttrs(effectName)
+    await this.setTextBg(effectName, this.effects[effectName])
+    await this.setExtraDefaultAttrs(effectName)
   }
 }
 

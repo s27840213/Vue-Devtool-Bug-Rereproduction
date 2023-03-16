@@ -5,6 +5,7 @@ import { Extension } from '@tiptap/core'
 import { Editor as CoreEditor } from '@tiptap/core/dist/packages/core/src/'
 import { Editor } from '@tiptap/vue-3'
 import { filter, find, minBy } from 'lodash'
+import { ResolvedPos } from 'prosemirror-model'
 import { TextSelection } from 'prosemirror-state'
 import { nextTick } from 'vue'
 import { GapCursor } from './GapCursor'
@@ -87,7 +88,7 @@ function arrow(axis: 'vert' | 'horiz', dir: 1 | -1) {
     }
     const $found = GapCursor.findGapCursorFrom($start, dir, mustMove)
     if (!$found) { return false }
-    if (dispatch) { dispatch(state.tr.setSelection(new GapCursor($found as any))) }
+    if (dispatch) { dispatch(state.tr.setSelection(new GapCursor($found as unknown as ResolvedPos))) }
     return true
   }
 }
@@ -134,6 +135,17 @@ export default Extension.create({
     }
   },
   addGlobalAttributes() {
+    function cssBaseAttr(name: string) {
+      return {
+        default: undefined,
+        parseHTML: (element: HTMLElement) => {
+          const spanStyle = element.style
+          const css = spanStyle.getPropertyValue(name)
+          return css
+        },
+        renderHTML: () => ({})
+      }
+    }
     return [
       {
         types: ['textStyle'],
@@ -276,24 +288,8 @@ export default Extension.create({
               }
             }
           },
-          'min-width': {
-            default: undefined,
-            parseHTML: element => {
-              const spanStyle = element.style
-              const width = spanStyle.getPropertyValue('min-width')
-              return width
-            },
-            renderHTML: () => ({})
-          },
-          'min-height': {
-            default: undefined,
-            parseHTML: element => {
-              const spanStyle = element.style
-              const height = spanStyle.getPropertyValue('min-height')
-              return height
-            },
-            renderHTML: () => ({})
-          }
+          'min-width': cssBaseAttr('min-width'),
+          'min-height': cssBaseAttr('min-height'),
         }
       }, {
         types: ['paragraph'],

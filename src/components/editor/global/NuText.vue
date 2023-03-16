@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="nu-text" :style="textWrapperStyle()" draggable="false")
-  //- Svg BG for text effex gooey.
+  //- Svg for textBG.
   svg(v-if="svgBG && !noShadow" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
     component(v-for="(elm, idx) in svgBG.content"
               :key="`textSvgBg${idx}`"
@@ -30,7 +30,7 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
 <script lang="ts">
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import { isITextLetterBg } from '@/interfaces/format'
-import { IGroup, IParagraph, IText } from '@/interfaces/layer'
+import { IGroup, IParagraph, IParagraphStyle, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
@@ -104,10 +104,7 @@ export default defineComponent({
     this.resizeAfterFontLoaded()
   },
   computed: {
-    spanEffect() {
-      return textBgUtils.convertTextEffect(this.config.styles)
-    },
-    isCurveText(): any {
+    isCurveText() {
       const { textShape } = this.config.styles
       return textShape && textShape.name === 'curve'
     },
@@ -137,7 +134,7 @@ export default defineComponent({
         {} // Original text, don't have extra css
       ]
     },
-    transParentStyles(): {[key: string]: any} {
+    transParentStyles(): {[key: string]: string} {
       return this.isTransparent ? {
         color: 'rgba(0, 0, 0, 0)',
         '-webkit-text-stroke-color': 'rgba(0, 0, 0, 0)',
@@ -203,22 +200,26 @@ export default defineComponent({
     bodyStyles(): Record<string, string|number> {
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
+      const textBGStyle = textBgUtils.convertTextEffect(this.config.styles.textBg)
       return {
         width: isVertical ? 'auto' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
-        opacity
+        opacity,
+        ...textBGStyle.div
       }
     },
     spanStyle(sIndex: number, p: IParagraph, config: IText): Record<string, string> {
       const textBg = this.config.styles.textBg
       const span = p.spans[sIndex]
+      const textBGStyle = textBgUtils.convertTextEffect(this.config.styles.textBg)
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
-        isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {}
+        isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {},
+        textBGStyle.span,
       )
     },
-    pStyle(styles: any) {
+    pStyle(styles: IParagraphStyle) {
       return _.omit(tiptapUtils.textStylesRaw(styles), [
         'text-decoration-line', '-webkit-text-decoration-line'
       ])
@@ -303,7 +304,7 @@ export default defineComponent({
   &__span {
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    position: relative;
+    // position: relative;
   }
   &__curve-text-in-editing {
     pointer-events: none;

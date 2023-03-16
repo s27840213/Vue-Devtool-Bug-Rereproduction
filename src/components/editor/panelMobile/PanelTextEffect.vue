@@ -155,6 +155,12 @@ export default defineComponent({
         textBgUtils.setColorKey(key)
       }
     },
+    async resetTextEffect() {
+      const target = this.currCategory.name === 'shadow' ? textEffectUtils
+        : this.currCategory.name === 'shape' ? textShapeUtils : textBgUtils
+      await target.resetCurrTextEffect()
+      this.recordChange()
+    },
     async setEffect(options:{
       effectName?: string,
       effect?: Record<string, string|number|boolean>
@@ -184,12 +190,6 @@ export default defineComponent({
           break
       }
     },
-    resetTextEffect() {
-      const target = this.currCategory.name === 'shadow' ? textEffectUtils
-        : this.currCategory.name === 'shape' ? textShapeUtils : textBgUtils
-      target.resetCurrTextEffect()
-      this.recordChange()
-    },
     async onEffectClick(effectName: string): Promise<void> {
       if (effectName !== this.currentStyle.name) {
         await this.setEffect({ effectName })
@@ -209,7 +209,7 @@ export default defineComponent({
       this.setEffect({ effect: newVal })
     },
     shapeFocus(focus: boolean) {
-      if (this.currCategory.name === 'shape') {
+      if (['curve', 'text-fill-img'].includes(this.currCategory.name)) {
         this.setEffect({ effect: { focus } })
       }
     },

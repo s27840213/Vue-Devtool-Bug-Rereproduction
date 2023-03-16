@@ -1,5 +1,5 @@
 <template lang="pug">
-editor-content(:editor="(editor as Editor)")
+editor-content(:editor="(editor as Editor)" :style="layerStyles")
 </template>
 
 <script lang="ts">
@@ -7,6 +7,7 @@ import { IGroup, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import layerUtils from '@/utils/layerUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import textBgUtils from '@/utils/textBgUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import { isEqual } from 'lodash'
@@ -66,6 +67,7 @@ export default defineComponent({
     const contentEditable = this.config.contentEditable
 
     tiptapUtils.init(this.initText, contentEditable)
+    // tiptapUtils.applyDivStyle()
     /**
      * @Note why I use as any is bcz when I update the tiptap from vue2 ver to vue 3 ver, it throw some weird error
      * If TingAn is avalible, maybe we could discuss and fix the error.
@@ -135,6 +137,14 @@ export default defineComponent({
     }
     this.layerInfo = undefined
   },
+  computed: {
+    layerStyles() {
+      const layer = layerUtils.getCurrLayer as IText
+      return {
+        ...textBgUtils.convertTextEffect(layer.styles.textBg).div
+      }
+    }
+  },
   methods: {
     updateLayerProps(props: { [key: string]: string | number | boolean }) {
       if (this.layerInfo) {
@@ -161,6 +171,10 @@ export default defineComponent({
   -ms-user-select: none;
   -o-user-select: none;
   user-select: none;
+}
+
+.ProseMirror:hover, .ProseMirror:not(:hover)  {
+  position: initial; // Overwrite 'position: relative' css rule
 }
 
 .ProseMirror.non-selectable {

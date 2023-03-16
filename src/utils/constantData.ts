@@ -502,6 +502,10 @@ class ConstantData {
         key: 'text-book',
         label: i18n.global.tc('NN0819'),
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }, {
+        key: 'text-fill-img',
+        label: 'text-fill-img',
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity'])
       }])
     }]
     return categories as IEffectCategory[]

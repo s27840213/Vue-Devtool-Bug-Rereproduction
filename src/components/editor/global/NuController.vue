@@ -177,7 +177,6 @@ import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import textBgUtils from '@/utils/textBgUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
@@ -359,7 +358,6 @@ export default defineComponent({
     },
     contentStyles(): any {
       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config as IText)
-      const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
       const pointerEvents = this.getPointerEvents
       return {
         ...this.sizeStyles,
@@ -374,7 +372,6 @@ export default defineComponent({
          */
         // touchAction: this.isActive ? 'none' : 'initial',
         ...textEffectStyles,
-        ...textBgStyles,
         '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
