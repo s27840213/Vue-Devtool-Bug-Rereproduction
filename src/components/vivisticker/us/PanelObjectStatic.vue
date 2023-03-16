@@ -200,7 +200,7 @@ export default defineComponent({
           type: 'category-list-rows',
           list: category.list,
           title: category.title,
-          isFavorite: category.id === -1 || this.checkCategoryFavorite(category.id),
+          isFavorite: category.id === -1 ? undefined : this.checkCategoryFavorite(category.id),
           coverId: category.cover_id,
           coverUrl: category.cover_url,
         }))
