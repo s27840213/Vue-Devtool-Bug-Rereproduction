@@ -103,6 +103,7 @@ import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
+import formatUtils from '@/utils/formatUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -210,7 +211,7 @@ export default defineComponent({
         'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
-        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list',
+        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
         'vvstk-more', 'giphy-more', 'color-picker', 'my-design-more', 'select-design']
 
       return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
@@ -251,6 +252,9 @@ export default defineComponent({
         case 'crop': {
           return `${this.$t('NN0496')}`
         }
+        case 'copy-style': {
+          return `${this.$t('NN0809')}`
+        }
         case 'none': {
           if (this.inMultiSelectionMode) {
             return '已選取'
@@ -272,10 +276,10 @@ export default defineComponent({
       return (this.whiteTheme && (this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel)) || (this.insertTheme && this.isTextInCategory)
     },
     hideDynamicComp(): boolean {
-      return this.currActivePanel === 'crop' || this.inSelectionState
+      return ['crop', 'copy-style'].includes(this.currActivePanel) || this.inSelectionState
     },
     noRowGap(): boolean {
-      return this.inSelectionState || ['crop', 'color', 'vvstk-more', 'select-design'].includes(this.currActivePanel)
+      return ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design'].includes(this.currActivePanel) || this.inSelectionState
     },
     panelStyle(): { [index: string]: string } {
       return Object.assign(
@@ -556,6 +560,11 @@ export default defineComponent({
                 }
               }
             }
+            break
+          }
+
+          case 'copy-style': {
+            formatUtils.clearCopiedFormat()
             break
           }
 
