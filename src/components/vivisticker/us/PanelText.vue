@@ -1,5 +1,5 @@
 <template lang="pug">
-div(class="panel-text rwd-container" :class="{'in-category': isInCategory}")
+div(class="panel-text" :class="{'in-category': isInCategory}")
   category-list(v-for="item in categoryListArray"
     v-show="item.show" :ref="item.key" :key="item.key"
     :list="item.content" @loadMore="handleLoadMore")
@@ -38,7 +38,10 @@ import generalUtils from '@/utils/generalUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
+import { mapState } from 'vuex'
 import PanelText from '../PanelText.vue'
+
+const MAX_BTN_WIDTH = 310
 
 export default defineComponent({
   name: 'panel-text-us',
@@ -63,38 +66,35 @@ export default defineComponent({
     this.$nextTick(() => {
       this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
       this.elMainContent.addEventListener('scroll', this.handleMainContentScroll)
+      this.updateBtnStyles()
     })
   },
   deactivated() {
     this.elMainContent?.removeEventListener('scroll', this.handleMainContentScroll)
   },
   watch: {
-    scrollRate(newVal) {
-      const scrollRate = newVal
-      const rScrollRate = 1 - scrollRate
-      const btn = this.$refs.btnAddText as HTMLElement
-      const txt = this.$refs.txtAddText as HTMLElement
-      const icon = this.$refs.iconAddText as HTMLElement
-
-      const btnWidth = Math.max(Math.min(255, 255 * rScrollRate), btn.clientHeight)
-      btn.style.width = btnWidth + 'px'
-      btn.style.marginLeft = -btnWidth / 2 + 'px'
-      txt.style.opacity = (1 - Math.min(scrollRate * 2, 1)).toString()
-
-      const targetIconPosLeft = btnWidth / 2 - icon.clientWidth / 2
-      icon.style.left = targetIconPosLeft + 52 * rScrollRate + 'px'
-      icon.style.transform = `rotate(${360 * rScrollRate}deg)`
+    scrollOrResize() {
+      this.updateBtnStyles()
     }
   },
   computed: {
+    ...mapState({
+      windowSize: 'windowSize'
+    }),
+    btnMaxWidth() {
+      return Math.min(this.windowSize.width - 80, MAX_BTN_WIDTH)
+    },
+    scrollOrResize() {
+      return { scrollRate: this.scrollRate, btnMaxWidth: this.btnMaxWidth }
+    },
     listRecently(): ICategoryItem[] {
       const { categories } = this
       const gap = 20
       const list = (categories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
-      const result = new Array(Math.ceil(list.length / this.textColumns))
+      const result = new Array(Math.ceil(list.length / this.numTextColumns))
         .fill('')
         .map((_, idx) => {
-          const rowItems = list.slice(idx * this.textColumns, idx * this.textColumns + this.textColumns)
+          const rowItems = list.slice(idx * this.numTextColumns, idx * this.numTextColumns + this.numTextColumns)
           return {
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-text-item',
@@ -115,41 +115,42 @@ export default defineComponent({
       }
       return list
     },
+    itemGap(): number {
+      return this.isTablet ? 30 : 20
+    },
     itemWidth(): number {
-      return this.isTablet ? 200 : (window.outerWidth - 48 - (this.textColumns - 1) * 20) / this.textColumns
+      return Math.min((this.windowSize.width - 48 - (this.numTextColumns - 1) * this.itemGap) / this.numTextColumns, 200)
     },
     itemsStyles() {
       return this.isTablet ? {
-        gridTemplateColumns: `repeat(${this.textColumns}, 200px)`,
-        justifyContent: 'space-around'
+        gridTemplateColumns: `repeat(${this.numTextColumns}, 200px)`
       } : {
-        gridTemplateColumns: `repeat(${this.textColumns}, 1fr)`,
+        gridTemplateColumns: `repeat(${this.numTextColumns}, ${this.itemWidth}px)`,
         columnGap: '20px'
       }
     },
-    textColumns(): number {
+    numTextColumns(): number {
       return this.isTablet ? 3 : 2
     }
   },
   methods: {
     processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
-      const gap = 20
       const recentItem = {
         id: 'recent',
         type: NaN,
         ver: NaN
       } as IListServiceContentDataItem
       if (list.length > 0) list = [recentItem].concat(list)
-      return new Array(Math.ceil(list.length / this.textColumns))
+      return new Array(Math.ceil(list.length / this.numTextColumns))
         .fill('')
         .map((_, idx) => {
-          const rowItems = list.slice(idx * this.textColumns, (idx + 1) * this.textColumns)
+          const rowItems = list.slice(idx * this.numTextColumns, (idx + 1) * this.numTextColumns)
           return {
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-text-item',
             list: rowItems,
             title: '',
-            size: this.itemWidth + gap // 80(object height) + 24(gap) + 0/46(title)
+            size: this.itemWidth + this.itemGap
           }
         })
     },
@@ -181,7 +182,22 @@ export default defineComponent({
     },
     handleMainContentScroll() {
       const el = this.elMainContent as HTMLElement
-      this.scrollRate = Math.max(Math.min(el.scrollTop / this.itemWidth, 1), 0)
+      this.scrollRate = Math.max(Math.min(el.scrollTop / ((this.itemWidth + this.itemGap) * 2), 1), 0)
+    },
+    updateBtnStyles() {
+      const scrollRate = this.scrollRate
+      const rScrollRate = 1 - scrollRate
+      const btn = this.$refs.btnAddText as HTMLElement
+      const txt = this.$refs.txtAddText as HTMLElement
+      const icon = this.$refs.iconAddText as HTMLElement
+
+      const btnWidth = Math.max(Math.min(this.btnMaxWidth, this.btnMaxWidth * rScrollRate), btn.clientHeight)
+      btn.style.maxWidth = btnWidth + 'px'
+      txt.style.opacity = (1 - Math.min(scrollRate * 2, 1)).toString()
+
+      const targetIconPosLeft = btnWidth / 2 - icon.clientWidth / 2
+      icon.style.left = targetIconPosLeft + 52 * rScrollRate + 'px'
+      icon.style.transform = `rotate(${360 * rScrollRate}deg)`
     }
   }
 })
@@ -196,7 +212,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  transform: rotate(0deg);
   padding-top: 10px;
   &__searchbar {
     margin-top: 24px;
@@ -247,8 +262,9 @@ export default defineComponent({
   }
   &__items {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    column-gap: 10px;
+    grid-template-columns: repeat(3, auto);
+    column-gap: 30px;
+    justify-content: center;
   }
   &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
     margin-top: 24px;
@@ -261,16 +277,15 @@ export default defineComponent({
     text-align: left;
   }
   &__text-button-wrapper {
-    position: absolute;
-    left: 50%;
-    bottom: 24px;
-    width: 255px;
+    position: fixed;
+    inset: auto 40px 81px 40px;
+    max-width: 310px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
     padding: 7px 0;
-    margin-left: -127.5px;
+    margin: 0 auto;
     box-sizing: border-box;
     background: rgba(46, 46, 46, 0.8);
     border-radius: 10px;
