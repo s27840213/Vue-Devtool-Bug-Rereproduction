@@ -899,7 +899,7 @@ class TextPropUtils {
           editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).selectPrevious().run()
           // nextTick removed becuz seems not required and messing up the update timing
           // but needs attension for if there are problems occurring after this and review would be needed for the necessity
-          tiptapUtils.forceUpdate()
+          tiptapUtils.forceUpdate(false, true)
           this.updateTextPropsState()
         }
       })
@@ -1436,7 +1436,7 @@ class TextPropUtils {
       }
       textUtils.updateGroupLayerSize(layerUtils.pageIndex, layerIndex)
     }
-    tiptapUtils.forceUpdate(toRecord)
+    tiptapUtils.forceUpdate(toRecord, true)
     this.updateTextPropsState({ fontSize: value.toString() })
     textEffectUtils.refreshSize()
   }
