@@ -111,6 +111,10 @@ const getDefaultState = (): IEditorState => ({
   isTablet: window.matchMedia('screen and (min-width: 768px) and (orientation: portrait), screen and (min-height: 768px) and (orientation: landscape)').matches,
   isLandscape: window.matchMedia('(orientation: landscape)').matches,
   isLargeDesktop: generalUtils.getWidth() >= 1440,
+  windowSize: {
+    width: window.outerWidth,
+    height: window.outerHeight
+  },
   isGlobalLoading: false,
   useMobileEditor: false,
   contentScaleRatio: 1,
@@ -1053,6 +1057,8 @@ const mutations: MutationTree<IEditorState> = {
     state.isTablet = window.matchMedia('screen and (min-width: 768px) and (orientation: portrait), screen and (min-height: 768px) and (orientation: landscape)').matches
     state.isLandscape = window.matchMedia('(orientation: landscape)').matches
     state.isLargeDesktop = generalUtils.getWidth() >= 1440
+    state.windowSize.width = window.outerWidth
+    state.windowSize.height = window.outerHeight
   },
   ...imgShadowMutations,
   ADD_subLayer

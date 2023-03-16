@@ -100,19 +100,14 @@ export default defineComponent({
   },
   data() {
     return {
-      windowWidth: window.outerWidth,
       mainContentScrollTop: 0,
-      elMainContent: undefined as HTMLElement | undefined,
-      numCardColumns: 1,
-      cardGap: 10,
-      cardHeight: 0
+      elMainContent: undefined as HTMLElement | undefined
     }
   },
   activated() {
     this.$nextTick(() => {
       this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
       this.elMainContent.addEventListener('scroll', this.handleMainContentScroll)
-      this.updateLayout()
     })
   },
   deactivated() {
@@ -120,7 +115,8 @@ export default defineComponent({
   },
   computed: {
     ...mapState({
-      isLandscape: 'isLandscape'
+      isLandscape: 'isLandscape',
+      windowSize: 'windowSize'
     }),
     ...mapState('objects', {
       nextCategory: 'nextCategory'
@@ -141,6 +137,21 @@ export default defineComponent({
           }
         })
       return result
+    },
+    numCardColumns(): number {
+      if (this.isTablet) return 2
+      return 1
+    },
+    cardGap(): number {
+      if (this.isTablet) return 20
+      return 10
+    },
+    cardHeight(): number {
+      const { isTablet, isLandscape } = this
+      const containerWidthRatio = isTablet ? isLandscape ? 0.64 : 0.9 : 1
+      const containerPadding = isTablet ? 0 : 32
+      const cardAspectRatio = 16 / 9
+      return ((this.windowSize.width * containerWidthRatio - containerPadding) / cardAspectRatio - this.cardGap * (this.numCardColumns - 1)) / this.numCardColumns
     },
     cardStyles(): {[key: string]: string} {
       return {
@@ -164,11 +175,6 @@ export default defineComponent({
   watch: {
     isInCategory(newVal: boolean, oldVal: boolean) {
       if (newVal && !oldVal) this.scrollCategoryIcon(this.showAllRecently ? 0 : undefined)
-    },
-    isLandscape() {
-      this.$nextTick(() => {
-        this.updateLayout()
-      })
     }
   },
   methods: {
@@ -253,21 +259,6 @@ export default defineComponent({
           size: list[i].size
         }]
       }, [])
-    },
-    updateLayout() {
-      const { isTablet, isLandscape } = this
-      if (isTablet) {
-        this.numCardColumns = 2
-        this.cardGap = 20
-      } else {
-        this.numCardColumns = 1
-        this.cardGap = 10
-      }
-
-      const containerWidthRatio = isTablet ? isLandscape ? 0.64 : 0.9 : 1
-      const containerPadding = isTablet ? 0 : 32
-      const cardAspectRatio = 16 / 9
-      this.cardHeight = ((window.outerWidth * containerWidthRatio - containerPadding) / cardAspectRatio - this.cardGap * this.numCardColumns) / this.numCardColumns
     }
   }
 })

@@ -75,6 +75,10 @@ export interface IEditorState {
   isTablet: boolean,
   isLandscape: boolean,
   isLargeDesktop: boolean,
+  windowSize: {
+    width: number,
+    height: number
+  }
   isGlobalLoading: boolean,
   useMobileEditor: boolean,
   contentScaleRatio: number,
