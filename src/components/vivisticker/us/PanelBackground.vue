@@ -137,6 +137,9 @@ export default defineComponent({
       isShowSearchBar: false
     }
   },
+  activated() {
+    this.handleCancel()
+  },
   computed: {
     navStyles() {
       return {

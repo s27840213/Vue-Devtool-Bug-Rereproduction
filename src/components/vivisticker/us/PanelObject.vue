@@ -67,6 +67,9 @@ export default defineComponent({
       isShowSearchBar: false
     }
   },
+  activated() {
+    this.handleCancel()
+  },
   computed: {
     ...mapState('objects', {
       keywordStatic: 'keyword'
