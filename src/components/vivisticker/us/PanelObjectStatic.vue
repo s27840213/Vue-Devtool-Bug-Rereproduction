@@ -14,26 +14,26 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
   Tags(v-if="isInCategory && tags && tags.length" class="panel-static__tags"
       :tags="tags" theme="dark" @search="handleSearch")
   //- Search result and static main content
-  category-list(v-for="item in categoryListArray"
-                v-show="item.show" :ref="item.key" :key="item.key"
+  category-list(v-for="item in categoryListArray" :class="{invisible: !item.show}"
+                :ref="item.key" :key="item.key"
                 :list="item.content"
                 @loadMore="item.loadMore")
     template(#before)
       div(class="panel-static__top-item")
       Tags(v-if="!isInCategory && tags && tags.length" class="panel-static__tags" style="margin-top: 0"
-          :tags="tags" theme="dark" @search="handleSearch")
+          :tags="tags" :scrollLeft="tagScrollLeft" theme="dark" @search="handleSearch" @scroll="(scrollLeft: number) => tagScrollLeft = scrollLeft")
       //- Search result empty msg
       div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
       //- Empty favorites view
       div(v-if="showFav && !item.content.length && !pending"
-          class="panel-static__favorites-empty")
-        svg-icon(iconName="favorites-empty" iconWidth="42px" iconColor="white")
-        span(class="panel-static__favorites-empty--title") {{$t('NN0765')}}
-        span(class="text-black-5") {{$t('NN0764')}}
+            class="panel-static__favorites-empty")
+          svg-icon(iconName="favorites-empty" iconWidth="42px" iconColor="white")
+          span(class="panel-static__favorites-empty--title") {{$t('NN0765')}}
+          span(class="text-black-5") {{$t('NN0764')}}
       //- Empty recently used view
       div(v-if="showAllRecently && !item.content.length && !pending" class="panel-static__recent-empty")
-        svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
-        div(class="panel-static__recent-empty--title") No content in Recently Used
+          svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
+          div(class="panel-static__recent-empty--title") No content in Recently Used
     template(v-slot:category-list-rows="{ list, title, isFavorite }")
       category-list-rows(
           :list="list"
@@ -375,6 +375,11 @@ export default defineComponent({
   }
   .category-list {
     overflow-x: hidden;
+  }
+  .invisible {
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
   }
 }
 </style>

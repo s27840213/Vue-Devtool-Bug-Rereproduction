@@ -14,13 +14,13 @@ div(class="panel-gifs" :class="{'in-category': isInCategory}")
   tags(v-if="isInCategory && tags && tags.length" class="panel-gifs__tags"
       :tags="tags" theme="dark" @search="handleSearch")
   //- Search result and static main content
-  category-list(v-for="item in categoryListArray"
-                v-show="item.show" :ref="item.key" :key="item.key"
+  category-list(v-for="item in categoryListArray" :class="{invisible: !item.show}"
+                :ref="item.key" :key="item.key"
                 :list="item.content" @loadMore="item.loadMore")
     template(#before)
       div(class="panel-gifs__top-item")
       tags(v-if="!isInCategory && tags && tags.length" class="panel-gifs__tags" style="margin-top: 0"
-          :tags="tags" theme="dark" @search="handleSearch")
+          :tags="tags" :scrollLeft="tagScrollLeft" theme="dark" @search="handleSearch" @scroll="(scrollLeft: number) => tagScrollLeft = scrollLeft")
       //- Search result empty msg
       div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
       //- Empty favorites view
@@ -104,7 +104,8 @@ export default defineComponent({
         searchResult: 0,
         favoritesContent: 0,
         favoritesSearchResult: 0
-      }
+      },
+      tagScrollLeft: 0
     }
   },
   computed: {
@@ -462,6 +463,11 @@ export default defineComponent({
   }
   .category-list {
     overflow-x: hidden;
+  }
+  .invisible {
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
   }
 }
 </style>

@@ -11,7 +11,7 @@ div(class="tags" v-click-outside="clickOutsideHandler")
         @click="onClickMore")
         div(class="tags__tag") {{ `${$t('NN0082')}...` }}
   template(v-else)
-    div(class="tags__container-mobile")
+    div(class="tags__container-mobile" ref="container")
       div(class="tags__flex-container-mobile")
         div(v-for="tag in tags" :active="typeof tag === 'string' ? undefined : (tag.active ? 'true' : undefined)"
             class="tags__tag-wrapper pointer" :class="{[theme]: true}"
@@ -42,6 +42,10 @@ export default defineComponent({
     theme: {
       type: String,
       default: 'light'
+    },
+    scrollLeft: {
+      type: Number,
+      default: 0
     }
   },
   data() {
@@ -49,7 +53,24 @@ export default defineComponent({
       showMore: false
     }
   },
-  emits: ['search', 'showMore'],
+  emits: ['search', 'showMore', 'scroll'],
+  mounted() {
+    const elContainer = this.$refs.container as HTMLElement
+    elContainer.scrollLeft = this.scrollLeft
+    elContainer.onscroll = () => {
+      this.$emit('scroll', elContainer.scrollLeft)
+    }
+  },
+  beforeUnmount() {
+    const elContainer = this.$refs.container as HTMLElement
+    elContainer.onscroll = null
+  },
+  watch: {
+    scrollLeft() {
+      const elContainer = this.$refs.container as HTMLElement
+      elContainer.scrollTo(this.scrollLeft, 0)
+    }
+  },
   computed: {
     containerStyle(): Record<string, string|number> {
       return this.showMore ? {
