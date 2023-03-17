@@ -200,23 +200,22 @@ export default defineComponent({
     bodyStyles(): Record<string, string|number> {
       const opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
-      const textBGStyle = textBgUtils.convertTextEffect(this.config.styles.textBg)
+      const textBGStyle = textBgUtils.convertTextEffect(this.config.styles)
       return {
         width: isVertical ? 'auto' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
         opacity,
-        ...textBGStyle.div
+        ...textBGStyle.div,
+        ...opacity === 0 ? { opacity } : {}, // Re-overwrite for opacity 0
       }
     },
     spanStyle(sIndex: number, p: IParagraph, config: IText): Record<string, string> {
       const textBg = this.config.styles.textBg
       const span = p.spans[sIndex]
-      const textBGStyle = textBgUtils.convertTextEffect(this.config.styles.textBg)
       return Object.assign(tiptapUtils.textStylesRaw(span.styles),
         sIndex === p.spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {},
         isITextLetterBg(textBg) && textBg.fixedWidth ? textBgUtils.fixedWidthStyle(span.styles, p.styles, config) : {},
-        textBGStyle.span,
       )
     },
     pStyle(styles: IParagraphStyle) {

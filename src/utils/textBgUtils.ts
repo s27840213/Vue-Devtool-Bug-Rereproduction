@@ -1,5 +1,6 @@
+import { IAssetPhoto } from '@/interfaces/api'
 import { isITextBox, isITextFillImg, isITextGooey, isITextLetterBg, isITextUnderline, ITextBgEffect, ITextGooey, ITextLetterBg } from '@/interfaces/format'
-import { IParagraphStyle, ISpanStyle, IText } from '@/interfaces/layer'
+import { IParagraphStyle, ISpanStyle, IStyle, IText } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
@@ -752,11 +753,19 @@ class TextBg {
     return svg.replace(/\n[ ]*/g, '').replace(/#/g, '%23')
   }
 
-  convertTextEffect(textBg: ITextBgEffect): Partial<Record<'div' | 'p' | 'span', Record<string, string>>> {
+  convertTextEffect(styles: IStyle): Partial<Record<'div' | 'p' | 'span', Record<string, string>>> {
+    const textBg = styles.textBg as ITextBgEffect
     if (isITextFillImg(textBg)) {
+      const img = store.getters['file/getImages'][0] as IAssetPhoto
+      const widthRatio = img.width / styles.width
+      const heightRatio = img.height / styles.height
+
       return {
         div: {
-          background: 'url("https://www.depal.com.tw/img/css/body2.png")',
+          background: `url("${img.urls.original}")`,
+          backgroundSize: widthRatio < heightRatio ? `${textBg.size}% auto` : `auto ${textBg.size}%`,
+          backgroundPosition: `${textBg.xOffset200 / 2 + 50}% ${textBg.yOffset200 / 2 + 50}%`,
+          opacity: `${textBg.opacity / 100}`,
           ...!textBg.focus ? {
             '-webkit-background-clip': 'text',
             '-webkit-text-fill-color': 'transparent',

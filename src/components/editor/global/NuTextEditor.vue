@@ -1,5 +1,5 @@
 <template lang="pug">
-editor-content(:editor="(editor as Editor)" :style="layerStyles")
+editor-content(:editor="(editor as Editor)")
 </template>
 
 <script lang="ts">
@@ -7,7 +7,6 @@ import { IGroup, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import layerUtils from '@/utils/layerUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import textBgUtils from '@/utils/textBgUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import { isEqual } from 'lodash'
@@ -138,12 +137,6 @@ export default defineComponent({
     this.layerInfo = undefined
   },
   computed: {
-    layerStyles() {
-      const layer = layerUtils.getCurrLayer as IText
-      return {
-        ...textBgUtils.convertTextEffect(layer.styles.textBg).div
-      }
-    }
   },
   methods: {
     updateLayerProps(props: { [key: string]: string | number | boolean }) {
