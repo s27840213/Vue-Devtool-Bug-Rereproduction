@@ -1,5 +1,6 @@
 <template lang="pug">
 div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
+  :class="{ 'nu-image__shadow-container': shadowSrc || showCanvas}"
   :id="`nu-image-${config.id}`"
   :style="containerStyles()"
   draggable="false")
@@ -7,14 +8,14 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
     class="shadow__canvas-wrapper"
     :style="canvasWrapperStyle()")
     canvas(ref="canvas" :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
-  div(v-if="shadowSrc() && !config.isFrameImg"
+  div(v-if="shadowSrc && !config.isFrameImg"
     :id="`nu-image-${config.id}__shadow`"
     class="shadow__picture"
     :style="imgShadowStyles()")
     img(ref="shadow-img"
       class="nu-image__picture-shadow"
       draggable="false"
-      :src="shadowSrc()"
+      :src="shadowSrc"
       @error="onError")
   div(:class="{'nu-image__clipper': !imgControl}")
     //- :style="imgWrapperstyle()")
@@ -334,6 +335,16 @@ export default defineComponent({
         return imageUtils.appendCompQueryForVivipic(this.src)
       }
       return this.src
+    },
+    shadowSrc(): string {
+      if (!this.shadow() || !this.shadow().srcObj) {
+        return ''
+      }
+      const src = imageUtils.getSrc(this.shadow().srcObj, imageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension))
+      if (this.$route.name === 'Preview') {
+        return imageUtils.appendCompQueryForVivipic(src)
+      }
+      return src
     },
     flipStyles(): any {
       const { horizontalFlip, verticalFlip } = this.config.styles
@@ -1076,16 +1087,6 @@ export default defineComponent({
     // uploadingImagePreviewSrc(): string {
     //   return this.config.previewSrc
     // },
-    shadowSrc(): string {
-      if (!this.shadow() || !this.shadow().srcObj) {
-        return ''
-      }
-      const src = imageUtils.getSrc(this.shadow().srcObj, imageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension))
-      if (this.$route.name === 'Preview') {
-        return imageUtils.appendCompQueryForVivipic(src)
-      }
-      return src
-    },
     id(): ILayerIdentifier {
       return {
         pageId: this.page.id,
@@ -1100,14 +1101,14 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .nu-image {
-  // position: absolute;
-  // top: 0px;
-  // left: 0px;
   width: 100%;
   height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+
+  &__shadow-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
   &__clipper {
     position: relative;

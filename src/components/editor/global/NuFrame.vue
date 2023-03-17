@@ -1,6 +1,5 @@
 <template lang="pug">
-div(class="nu-frame"
-    :class="{ 'nu-frame__custom': !isFrameImg }"
+div(:class="{ 'nu-frame__custom': !isFrameImg }"
     :style="styles")
   div(v-if="shadowSrc()" class="shadow__wrapper" :style="shadowWrapperStyles")
     img(class="shadow__img"

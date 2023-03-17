@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="nu-layer"
-    :class="[inAllPagesMode ? 'click-disabled' : '', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '']"
+    :class="[inAllPagesMode ? 'click-disabled' : 'clickable', !config.locked && subLayerIndex === -1 && !isSubLayer ? `nu-layer--p${pageIndex}` : '']"
     :data-index="dataIndex === '-1' ? `${subLayerIndex}` : dataIndex"
     :style="layerWrapperStyles"
     :id="`nu-layer_${pageIndex}_${layerIndex}_${subLayerIndex}`"
@@ -356,7 +356,7 @@ export default defineComponent({
           ...this.transformStyle
         }
       )
-      if (this.isImgCtrl || this.inFrame || this.$isTouchDevice() || this.useMobileEditor) {
+      if (!this.isImgCtrl && !this.inFrame && !this.$isTouchDevice() && !this.useMobileEditor) {
         styles.transform += `translateZ(${this.config.styles.zindex}px)`
       }
       return styles
@@ -549,12 +549,17 @@ export default defineComponent({
       }
       const hasActualScale = transform !== 'scale(1)'
       const styles = {
-        ...(hasActualScale && {
-          width: `${this.config.styles.initWidth}px`,
-          height: `${this.config.styles.initHeight}px`,
-          transform
-        }),
         ...(pageUtils._3dEnabledPageIndex === this.pageIndex && { transformStyle: type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d' })
+      } as Record<string, string>
+      if (hasActualScale) {
+        if (this.config.type === LayerType.text) {
+          styles.width = `${this.config.styles.width / this.config.styles.scale}px`
+          styles.height = `${this.config.styles.height / this.config.styles.scale}px`
+        } else {
+          styles.width = `${this.config.styles.initWidth}px`
+          styles.height = `${this.config.styles.initHeight}px`
+        }
+        styles.transform = transform
       }
       return styles
     },
@@ -922,7 +927,7 @@ export default defineComponent({
 .nu-layer {
   touch-action: none;
   position: absolute;
-  pointer-events: initial;
+  // pointer-events: initial;
   // top: 0;
   // left: 0;
   // display: flex;
@@ -967,6 +972,10 @@ export default defineComponent({
   &__flip {
     transition: transform 0.2s linear;
   }
+}
+
+.clickable {
+  pointer-events: initial;
 }
 
 .img-shadow-effect {
