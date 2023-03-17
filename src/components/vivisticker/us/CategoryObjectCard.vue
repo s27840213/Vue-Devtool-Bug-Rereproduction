@@ -1,6 +1,6 @@
 <template lang="pug">
 div(v-show="isShow" class="category-object-card" @click="$emit('cardClick', $event)")
-  img(class="category-object-card__cover" :src="coverSrc(coverUrl)" :style="coverStyles" @load="isShow = true" @error="imgOnerror")
+  img(class="category-object-card__cover" :src="coverSrc" :style="coverStyles" @load="isShow = true" @error="imgOnerror")
   div(class="category-object-card__label")
     div(class="category-object-card__label__title caption-MD") {{ title }}
     svg-icon(v-if="isFavorite !== undefined"
@@ -57,6 +57,10 @@ export default defineComponent({
     elRecycleScroller(): HTMLElement | null {
       return this.elRecycleScrollerWrapper?.parentElement ?? null
     },
+    coverSrc(): string {
+      const prevType = 'prev_4x'
+      return this.coverUrl ? [this.coverUrl, prevType].join('/') : this.fallbackSrc
+    },
     coverStyles() {
       return {
         'object-position': `center ${this.coverPos}%`
@@ -64,10 +68,6 @@ export default defineComponent({
     },
   },
   methods: {
-    coverSrc(coverUrl: string): string {
-      const prevType = 'prev_4x'
-      return coverUrl ? [coverUrl, prevType].join('/') : this.fallbackSrc
-    },
     imgOnerror(e: Event) {
       const target = (e.target as HTMLImageElement)
       target.src = this.fallbackSrc

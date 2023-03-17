@@ -7,7 +7,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
         iconColor="white"
         iconWidth="24px")
     div(class="panel-static__categorys__vr")
-    recycle-scroller(class="panel-static__categorys__list" :items="listCategories" direction="horizontal" @scroll-end="(nextCategory !== -1) && getCategories()" ref="categoryIconList")
+    recycle-scroller(class="panel-static__categorys__list" :items="listCategoryItems" direction="horizontal" @scroll-end="(nextCategory !== -1) && getCategories()" ref="categoryIconList")
       template(v-slot="{ item }")
         div(class="panel-static__categorys__category" :class="{'selected': item.title === keyword}" :ref="item.title === keyword ? 'selectedCategoryIcon' : undefined" @click="handleCategorySearch(item.title)")
           div(class="panel-static__categorys__category__icon" :style="iconStyles(item.list, item.coverId)")
@@ -16,7 +16,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
   //- Search result and static main content
   category-list(v-for="item in categoryListArray"
                 v-show="item.show" :ref="item.key" :key="item.key"
-                :list="item.key === 'mainContent' && !showFav && !showAllRecently ? getCategoryCardList(item.content) : item.content"
+                :list="item.content"
                 @loadMore="item.loadMore")
     template(#before)
       div(class="panel-static__top-item")
@@ -56,14 +56,15 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
               @dbclick="toggleFavoritesItem")
     template(v-slot:category-object-card="{ list }")
       div(class="panel-static__card-row")
-        category-object-card(v-for="catItem in list"
-          :title="catItem.title"
-          :isFavorite="catItem.isFavorite"
-          :coverUrl="catItem.coverUrl"
+        category-object-card(v-for="card in list"
+          :key="card.id"
+          :title="card.title"
+          :isFavorite="card.isFavorite"
+          :coverUrl="card.coverUrl"
           :scrollTop="mainContentScrollTop"
           :style="cardStyles"
-          @cardClick="item.categorySearch && item.categorySearch(catItem.title)"
-          @favClick="toggleFaovoritesCategoryByTitle($event, catItem.title)")
+          @cardClick="item.categorySearch && item.categorySearch(card.title)"
+          @favClick="toggleFaovoritesCategoryByTitle($event, card.title)")
     template(v-slot:category-object-item="{ list }")
       div(class="panel-static__items")
         category-object-item(v-for="item in list"
@@ -171,6 +172,16 @@ export default defineComponent({
       const gap = 10
       return iconSize + gap
     },
+    listCategoryItems() {
+      return this.processListCategory(this.rawCategories)
+    },
+    listCategoryCards() {
+      return this.processListCategoryCard(this.rawCategories)
+    },
+    listCategories(): ICategoryItem[] {
+      if (!this.showFav && !this.isInCategory && !this.showAllRecently) return this.listCategoryCards
+      return this.listCategoryItems
+    },
   },
   watch: {
     isInCategory(newVal: boolean, oldVal: boolean) {
@@ -204,6 +215,25 @@ export default defineComponent({
           coverId: category.cover_id,
           coverUrl: category.cover_url,
         }))
+    },
+    processListCategoryCard(list: IListServiceContentData[]): {id: string, type: string, size: number, list: any[]}[] {
+      list = list.filter(category => category.list.length > 0 && !category.is_recent)
+      return new Array<ICategoryItem>(Math.ceil(list.length / this.numCardColumns))
+        .fill({} as ICategoryItem)
+        .map((_, idx) => {
+          const rowItems = list.slice(idx * this.numCardColumns, idx * this.numCardColumns + this.numCardColumns)
+          return {
+            id: `rows_${idx}_${rowItems.map(item => item.id).join('_')}`,
+            type: 'category-object-card',
+            size: this.categoryCardHeight,
+            list: rowItems.map(category => ({
+              id: category.id,
+              title: category.title,
+              isFavorite: category.id === -1 ? undefined : this.checkCategoryFavorite(category.id),
+              coverUrl: category.cover_url,
+            }))
+          }
+        })
     },
     processListResult(list = [] as IListServiceContentDataItem[]|ITagExtend[]): ICategoryItem[] {
       const gap = this.isTablet ? 20 : 24
@@ -249,16 +279,6 @@ export default defineComponent({
         const scrollLeft = parseFloat(match[1])
         categoryIconList.scrollLeft = scrollLeft
       })
-    },
-    getCategoryCardList(list: ICategoryItem[]): any[] {
-      return list.reduce((acc: any[], _: ICategoryItem, i: number): any[] => {
-        return i % this.numCardColumns ? acc : [...acc, {
-          id: list[i].id,
-          type: 'category-object-card',
-          list: list.slice(i, i + this.numCardColumns),
-          size: list[i].size
-        }]
-      }, [])
     }
   }
 })
