@@ -132,15 +132,6 @@ export default defineComponent({
       this.handleIsTransparent()
       this.previewAsLoading()
       const nextImg = new Image()
-      nextImg.onerror = () => {
-        if (srcObj.type === 'pexels') {
-          this.setBgImageSrc({
-            pageIndex: this.pageIndex,
-            srcObj: { ...srcObj, userId: 'jpeg' }
-          })
-          nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
-        }
-      }
       nextImg.onload = () => {
         const preImg = new Image()
         preImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj, this.getImgDimension, 'pre'))
