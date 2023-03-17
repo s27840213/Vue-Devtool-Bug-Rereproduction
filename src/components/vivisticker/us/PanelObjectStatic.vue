@@ -8,7 +8,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
         iconWidth="24px")
     div(class="panel-static__categorys__vr")
     recycle-scroller(class="panel-static__categorys__list"
-      :key="'panel-static__categorys-icon-list' + (hideCategoryIconList ? '-hide' : '')"
+      :key="'panel-static__categorys-icon-list' + (isInCategory ? '--cat' : '')"
       :items="listCategoryItems"
       direction="horizontal"
       @scroll-end="(nextCategory !== -1) && getCategories()"
