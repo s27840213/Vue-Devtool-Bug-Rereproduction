@@ -11,6 +11,7 @@ div(v-show="isShow" class="category-object-card" @click="$emit('cardClick', $eve
 </template>
 
 <script lang="ts">
+import { throttle } from 'lodash'
 import { defineComponent } from 'vue'
 export default defineComponent({
   emits: ['cardClick', 'favClick'],
@@ -36,11 +37,23 @@ export default defineComponent({
     return {
       fallbackSrc: require('@/assets/img/svg/image-preview.svg'),
       coverPos: 50,
+      elRecycleScrollerView: null as HTMLElement | null,
+      elRecycleScrollerWrapper: null as HTMLElement | null,
+      elRecycleScroller: null as HTMLElement | null,
       isShow: false
     }
   },
   mounted() {
-    this.handleScroll()
+    this.elRecycleScrollerView = (this.$el as HTMLElement).closest('.vue-recycle-scroller__item-view')
+    this.elRecycleScrollerWrapper = this.elRecycleScrollerView?.parentElement ?? null
+    this.elRecycleScroller = this.elRecycleScrollerWrapper?.parentElement ?? null
+    if (this.elRecycleScrollerView) {
+      const observer = new MutationObserver(throttle((mutations: MutationRecord[]) => {
+        mutations.forEach(this.handleScroll)
+      }, 500))
+      observer.observe(this.elRecycleScrollerView, { attributes: true, attributeFilter: ['style'] })
+      this.handleScroll()
+    }
   },
   watch: {
     scrollTop() {
@@ -48,15 +61,6 @@ export default defineComponent({
     }
   },
   computed: {
-    elRecycleScrollerView(): HTMLElement | null {
-      return (this.$el as HTMLElement).closest('.vue-recycle-scroller__item-view')
-    },
-    elRecycleScrollerWrapper(): HTMLElement | null {
-      return this.elRecycleScrollerView?.parentElement ?? null
-    },
-    elRecycleScroller(): HTMLElement | null {
-      return this.elRecycleScrollerWrapper?.parentElement ?? null
-    },
     coverSrc(): string {
       const prevType = 'prev_4x'
       return this.coverUrl ? [this.coverUrl, prevType].join('/') : this.fallbackSrc
