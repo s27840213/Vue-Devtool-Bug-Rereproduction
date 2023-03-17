@@ -540,7 +540,7 @@ export default defineComponent({
       this.innerTabIndex = 0
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
-      if (oldVal === 'none') { // Prevent reset height when switch panel
+      if (oldVal === 'none' || newVal === 'text') { // Prevent reset height when switch panel
         this.panelDragHeight = newVal === 'none' ? 0 : this.initPanelHeight()
       }
     },
