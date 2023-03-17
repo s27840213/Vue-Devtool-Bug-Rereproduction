@@ -16,7 +16,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
   //- Search result and static main content
   category-list(v-for="item in categoryListArray"
                 v-show="item.show" :ref="item.key" :key="item.key"
-                :list="item.key === 'mainContent' && !showFav ? reshapeCategoryList2D(item.content) : item.content"
+                :list="item.key === 'mainContent' && !showFav && !showAllRecently ? getCategoryCardList(item.content) : item.content"
                 @loadMore="item.loadMore")
     template(#before)
       div(class="panel-static__top-item")
@@ -250,7 +250,7 @@ export default defineComponent({
         categoryIconList.scrollLeft = scrollLeft
       })
     },
-    reshapeCategoryList2D(list: ICategoryItem[]): any[] {
+    getCategoryCardList(list: ICategoryItem[]): any[] {
       return list.reduce((acc: any[], _: ICategoryItem, i: number): any[] => {
         return i % this.numCardColumns ? acc : [...acc, {
           id: list[i].id,
