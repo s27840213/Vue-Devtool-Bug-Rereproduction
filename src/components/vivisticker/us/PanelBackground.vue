@@ -37,6 +37,10 @@ div(class="panel-bg rwd-container" :class="{'in-category': isInCategory}")
                 :list="item.content" @loadMore="handleLoadMore")
       template(#before)
         div(class="panel-bg__top-item")
+        //- Empty recently used view
+        div(v-if="showAllRecently && !item.content.length && !pending" class="panel-bg__recent-empty")
+          svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
+          div(class="panel-bg__recent-empty--title") No content in Recently Used
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
           :list="list"
@@ -424,6 +428,17 @@ export default defineComponent({
       @include body-XS;
       color: white;
       white-space: nowrap;
+    }
+  }
+  &__recent-empty {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: calc((100vh - 161px) * 0.8);
+    &--title {
+      margin: 12px 0 24px 0;
+      color: white;
     }
   }
 }

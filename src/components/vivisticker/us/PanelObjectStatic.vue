@@ -371,6 +371,7 @@ export default defineComponent({
     height: calc((100vh - 161px) * 0.8);
     &--title {
       margin: 12px 0 24px 0;
+      color: white;
     }
   }
   .category-list {

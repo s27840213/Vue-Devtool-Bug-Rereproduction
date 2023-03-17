@@ -5,6 +5,10 @@ div(class="panel-text" :class="{'in-category': isInCategory}")
     :list="item.content" @loadMore="handleLoadMore")
     template(#before)
       div(class="panel-text__top-item")
+      //- Empty recently used view
+      div(v-if="showAllRecently && !item.content.length && !pending" class="panel-text__recent-empty")
+        svg-icon(iconName="vivisticker_design" iconWidth="42px" iconColor="white")
+        div(class="panel-text__recent-empty--title") No content in Recently Used
     template(v-if="pending" #after)
       div(class="text-center")
         svg-icon(iconName="loading"
@@ -308,6 +312,17 @@ export default defineComponent({
       display: flex;
       position: absolute;
       left: 168px;
+    }
+  }
+  &__recent-empty {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: calc((100vh - 161px) * 0.8);
+    &--title {
+      margin: 12px 0 24px 0;
+      color: white;
     }
   }
 }
