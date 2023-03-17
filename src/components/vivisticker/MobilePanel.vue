@@ -240,9 +240,6 @@ export default defineComponent({
     halfSizeInInitState(): boolean {
       return this.showExtraColorPanel || ['fonts', 'adjust', 'photo-shadow', 'color', 'text-effect'].includes(this.currActivePanel)
     },
-    minHalfSize(): boolean {
-      return ['fonts'].includes(this.currActivePanel)
-    },
     panelTitle(): string {
       switch (this.currActivePanel) {
         case 'crop': {
@@ -275,6 +272,7 @@ export default defineComponent({
       return ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
+      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
       return Object.assign(
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
@@ -282,11 +280,10 @@ export default defineComponent({
           backgroundColor: this.whiteTheme ? 'white' : '#1F1F1F',
           maxHeight: this.isDuringCopy ? '0' : (
             this.fixSize || this.extraFixSizeCondition
-              ? 'initial'
-              : this.panelDragHeight + 'px'
+              ? '100%' : Math.min(this.panelDragHeight, this.panelParentHeight()) + 'px'
           ),
-          minHeight: (this.minHalfSize && !this.isDraggingPanel && !this.isDuringCopy) ? this.panelDragHeight + 'px' : 'unset'
         },
+        isSidebarPanel ? { height: '100%' } : {},
         this.isDuringCopy ? { padding: '0' } : {}
       )
     },
@@ -594,6 +591,7 @@ export default defineComponent({
       return (this.$refs.panel as HTMLElement).clientHeight
     },
     panelParentHeight() {
+      if (!this.$el) return window.innerHeight
       return (this.$el.parentElement as HTMLElement).clientHeight - (this.trueWholeSize ? 0 : 40)
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
@@ -653,7 +651,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .mobile-panel {
-  position: relative;
+  position: absolute;
+  bottom: 0;
   width: 100%;
   box-sizing: border-box;
   z-index: setZindex(mobile-panel);
