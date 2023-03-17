@@ -315,7 +315,7 @@ class ConstantData {
       return newArr
     }
 
-    function toOptions(array: string[]) {
+    function toOptions(array: string[], effectName = '') {
       const effectI18nMap = {
         distance: i18n.global.tc('NN0063'),
         angle: i18n.global.tc('NN0064'),
@@ -377,7 +377,8 @@ class ConstantData {
             Object.assign(option, { min: -100, max: 100 })
             break
           case 'size':
-            Object.assign(option, { min: 50, max: 200 })
+            if (effectName === 'text-fill-img') Object.assign(option, { min: 100, max: 200 })
+            else Object.assign(option, { min: 50, max: 200 })
             break
           case 'lineHeight':
             Object.assign(option, { min: 0.5, max: 2.5, isPStyle: true })
@@ -505,7 +506,7 @@ class ConstantData {
       }, {
         key: 'text-fill-img',
         label: 'text-fill-img',
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity'])
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity'], 'text-fill-img')
       }])
     }]
     return categories as IEffectCategory[]

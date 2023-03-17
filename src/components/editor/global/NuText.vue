@@ -1,11 +1,7 @@
 <template lang="pug">
 div(class="nu-text" :style="textWrapperStyle()" draggable="false")
   //- Svg for textBG.
-  svg(v-if="svgBG && !noShadow" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
-    component(v-for="(elm, idx) in svgBG.content"
-              :key="`textSvgBg${idx}`"
-              :is="elm.tag"
-              v-bind="elm.attrs")
+  custom-element(v-if="textBg && !noShadow" :config="textBg" class="nu-text__BG" ref="svg")
   div(v-for="text, idx in duplicatedText" class="nu-text__body"
       :style="Object.assign(bodyStyles(), text.extraBody)")
     nu-curve-text(v-if="isCurveText"
@@ -28,14 +24,16 @@ div(class="nu-text" :style="textWrapperStyle()" draggable="false")
 </template>
 
 <script lang="ts">
+import CustomElement from '@/components/editor/global/CustomElement.vue'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
+import { CustomElementConfig } from '@/interfaces/editor'
 import { isITextLetterBg } from '@/interfaces/format'
 import { IGroup, IParagraph, IParagraphStyle, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import generalUtils from '@/utils/generalUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
-import textBgUtils, { textBgSvg } from '@/utils/textBgUtils'
+import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
@@ -46,6 +44,7 @@ import { defineComponent, PropType } from 'vue'
 export default defineComponent({
   components: {
     NuCurveText,
+    CustomElement,
   },
   props: {
     config: {
@@ -91,7 +90,7 @@ export default defineComponent({
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
       isLoading: true,
-      svgBG: {} as textBgSvg|null,
+      textBg: {} as CustomElementConfig | null,
     }
   },
   created() {
@@ -146,15 +145,15 @@ export default defineComponent({
     'config.paragraphs': {
       handler(newVal) {
         this.isLoading = false
-        this.drawSvgBG()
+        this.drawTextBg()
         textUtils.untilFontLoaded(newVal).then(() => {
-          this.drawSvgBG()
+          this.drawTextBg()
         })
       }
     },
-    'config.styles.width'() { this.drawSvgBG() },
-    'config.styles.height'() { this.drawSvgBG() },
-    'config.styles.textBg'() { this.drawSvgBG() },
+    'config.styles.width'() { this.drawTextBg() },
+    'config.styles.height'() { this.drawTextBg() },
+    'config.styles.textBg'() { this.drawTextBg() },
     'config.isAutoResizeNeeded': {
       handler(newVal) {
         if (newVal) {
@@ -174,9 +173,9 @@ export default defineComponent({
         writingMode: this.config.styles.writingMode
       }
     },
-    drawSvgBG() {
+    drawTextBg() {
       this.$nextTick(async () => {
-        this.svgBG = await textBgUtils.drawSvgBg(this.config)
+        this.textBg = await textBgUtils.drawTextBg(this.config)
       })
     },
     isAutoResizeNeeded(): boolean {
@@ -262,7 +261,7 @@ export default defineComponent({
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
-      this.drawSvgBG()
+      this.drawTextBg()
     },
     resizeAfterFontLoaded() {
       // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
@@ -274,7 +273,7 @@ export default defineComponent({
           }
         }, 100) // for the delay between font loading and dom rendering
       })
-      this.drawSvgBG()
+      this.drawTextBg()
     }
   }
 })

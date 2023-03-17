@@ -1,4 +1,5 @@
 import { IAssetPhoto } from '@/interfaces/api'
+import { CustomElementConfig } from '@/interfaces/editor'
 import { isITextBox, isITextFillImg, isITextGooey, isITextLetterBg, isITextUnderline, ITextBgEffect, ITextGooey, ITextLetterBg } from '@/interfaces/format'
 import { IParagraphStyle, ISpanStyle, IStyle, IText } from '@/interfaces/layer'
 import store from '@/store'
@@ -11,14 +12,6 @@ import { Editor } from '@tiptap/vue-3'
 import _ from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
-
-export interface textBgSvg {
-  attrs: Record<string, string | number>
-  content: {
-    tag: string
-    attrs: Record<string, string | number>
-  }[]
-}
 
 // For text effect gooey
 export class Point {
@@ -766,9 +759,10 @@ class TextBg {
           backgroundSize: widthRatio < heightRatio ? `${textBg.size}% auto` : `auto ${textBg.size}%`,
           backgroundPosition: `${textBg.xOffset200 / 2 + 50}% ${textBg.yOffset200 / 2 + 50}%`,
           opacity: `${textBg.opacity / 100}`,
-          ...!textBg.focus ? {
-            '-webkit-background-clip': 'text',
-            '-webkit-text-fill-color': 'transparent',
+          '-webkit-text-fill-color': 'transparent',
+          '-webkit-background-clip': 'text',
+          ...textBg.focus ? {
+            '--base-stroke': '1px',
           } : {}
         },
       }
@@ -787,9 +781,9 @@ class TextBg {
     }
   }
 
-  async drawSvgBg(config: IText): Promise<textBgSvg | null> {
+  async drawTextBg(config: IText): Promise<CustomElementConfig | null> {
     const textBg = config.styles.textBg
-    if (textBg.name === 'none' || isITextFillImg(textBg)) return null
+    if (textBg.name === 'none') return null
 
     const opacity = textBg.opacity * 0.01
     const myRect = new Rect()
@@ -815,6 +809,7 @@ class TextBg {
       const d = cps.process()
 
       return {
+        tag: 'svg',
         attrs: { width, height, fill },
         content: [{
           tag: 'path',
@@ -828,7 +823,7 @@ class TextBg {
     } else if (isITextUnderline(textBg)) {
       const color = textEffectUtils.colorParser(textBg.color, config)
       const fill = this.rgba(color, opacity)
-      const paths = [] as textBgSvg['content']
+      const paths = [] as CustomElementConfig[]
       rects.forEach(rect => {
         const capWidth = rect.height * 0.005 * textBg.height
         const yOffset = (rect.height - capWidth * 2) * 0.01 * (100 - textBg.yOffset)
@@ -864,6 +859,7 @@ class TextBg {
       })
 
       return {
+        tag: 'svg',
         attrs: { width, height, fill },
         content: paths
       }
@@ -897,6 +893,7 @@ class TextBg {
       path.a(boxRadius, boxRadius, 1, -boxRadius, -boxRadius)
 
       return {
+        tag: 'svg',
         attrs: {
           width: boxWidth + textBg.bStroke,
           height: boxHeight + textBg.bStroke,
@@ -940,6 +937,7 @@ class TextBg {
       })
 
       return {
+        tag: 'svg',
         attrs: { width, height, style: `opacity: ${opacity}` },
         content: pos.map(p => ({
           tag: 'use',
@@ -956,6 +954,26 @@ class TextBg {
           }
         }))
       }
+    } else if (isITextFillImg(textBg)) {
+      const img = store.getters['file/getImages'][0] as IAssetPhoto
+      const widthRatio = img.width / config.styles.width
+      const heightRatio = img.height / config.styles.height
+      // If true and textBg.size is 100, that mean img width === layer width
+      const scaleByWidth = widthRatio < heightRatio
+      const imgRatio = textBg.size / 100 / (scaleByWidth ? widthRatio : heightRatio)
+
+      return textBg.focus ? {
+        tag: 'img',
+        attrs: {
+          src: img.urls.prev,
+          style: `
+            ${scaleByWidth ? 'width' : 'height'}: ${textBg.size}%;
+            top: -${(textBg.yOffset200 / 2 + 50) / 100 * (img.height * imgRatio - config.styles.height)}px;
+            left: -${(textBg.xOffset200 / 2 + 50) / 100 * (img.width * imgRatio - config.styles.width)}px;
+            opacity: ${textBg.opacity / 200};
+          `
+        },
+      } : null
     } else return null
   }
 

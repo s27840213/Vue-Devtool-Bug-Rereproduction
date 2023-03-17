@@ -1,4 +1,4 @@
-import { IFrame, IGroup, IImage, IShape, IText, ITmp } from './layer'
+import { IFrame, IGroup, IImage, IShape, IText } from './layer'
 
 export interface ICurrSelectedInfo {
   pageIndex: number,
@@ -24,4 +24,11 @@ export interface IFooterTab {
   hidden?: boolean,
   disabled?: boolean,
   props?: IFooterTabProps
+}
+
+export interface CustomElementConfig {
+  tag: string
+  attrs?: Record<string, string | number>
+  content?: CustomElementConfig[]
+  style?: Record<string, string | number>
 }
