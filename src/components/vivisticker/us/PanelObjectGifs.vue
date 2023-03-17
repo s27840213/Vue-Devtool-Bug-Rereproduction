@@ -1,16 +1,23 @@
 <template lang="pug">
 div(class="panel-gifs" :class="{'in-category': isInCategory}")
-  div(:style="{...((!isInCategory || showFav) && {visibility: 'hidden', height: 0, minHeight: 0, margin: 0})}" class="panel-gifs__categorys")
-      div(class="panel-gifs__categorys__category" :class="{'selected': showAllRecently}" @click="handleCategorySearch($t('NN0024'))")
-        svg-icon(class="pointer"
-          iconName="clock"
-          iconColor="white"
-          iconWidth="24px")
-      div(class="panel-gifs__categorys__vr")
-      recycle-scroller(class="panel-gifs__categorys__list" :items="listCategories" direction="horizontal" @scroll-end="(nextCategory !== -1) && getCategories()" ref="categoryIconList")
-        template(v-slot="{ item }")
-          div(class="panel-gifs__categorys__category" :class="{'selected': item.title === keyword}" :ref="item.title === keyword ? 'selectedCategoryIcon' : undefined" @click="handleCategorySearch(item.title)")
-            div(class="panel-gifs__categorys__category__icon" :style="iconStyles(item.list)")
+  div(class="panel-gifs__categorys" :class="{invisible: hideCategoryIconList}")
+    div(class="panel-gifs__categorys__category" :class="{'selected': showAllRecently}" @click="handleCategorySearch($t('NN0024'))")
+      svg-icon(class="pointer"
+        iconName="clock"
+        iconColor="white"
+        iconWidth="24px")
+    div(class="panel-gifs__categorys__vr")
+    recycle-scroller(class="panel-gifs__categorys__list"
+      :key="'panel-gifs__categorys-icon-list' + (hideCategoryIconList ? '-hide' : '')"
+      :items="listCategories"
+      direction="horizontal"
+      @scroll-end="(nextCategory !== -1) && getCategories()"
+      :ref="!hideCategoryIconList ? 'categoryIconList' : undefined")
+      template(v-slot="{ item }")
+        div(class="panel-gifs__categorys__category" :class="{'selected': item.title === keyword}"
+        :ref="!hideCategoryIconList && item.title === keyword ? 'selectedCategoryIcon' : undefined"
+        @click="handleCategorySearch(item.title)")
+          div(class="panel-gifs__categorys__category__icon" :style="iconStyles(item.list)")
   Tags(v-if="isInCategory && tags && tags.length" class="panel-gifs__tags"
       :tags="tags" theme="dark" @search="handleSearch")
   //- Search result and static main content
@@ -84,6 +91,9 @@ export default defineComponent({
     ...mapState('giphy', {
       nextCategory: 'nextCategory'
     }),
+    hideCategoryIconList(): boolean {
+      return !this.isInCategory || this.showFav
+    },
     listRecently(): ICategoryItem[] {
       const { rawCategories } = this
       const list = (rawCategories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
@@ -155,25 +165,28 @@ export default defineComponent({
       }
     },
     scrollCategoryIcon(target?: number) {
-      const categoryIconList = (this.$refs.categoryIconList as any).$el as HTMLElement
-      if (target !== undefined) {
-        categoryIconList.scrollLeft = target
-        return
-      }
-
-      // scroll category icon list to selected one
-      const scrollTop = ((this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement).scrollTop
-      categoryIconList.scrollLeft = scrollTop * (this.categoryIconWidth / this.categoryHeight)
       this.$nextTick(() => {
-        const selectedCategoryIcon = this.$refs.selectedCategoryIcon as HTMLElement
-        if (!selectedCategoryIcon || !selectedCategoryIcon.parentElement) return
+        const categoryIconList = (this.$refs.categoryIconList as any).$el as HTMLElement
+        if (target !== undefined) {
+          categoryIconList.scrollLeft = target
+          return
+        }
 
-        const transform = selectedCategoryIcon.parentElement.style.transform
-        const match = transform.match(/translateX\((\d+)px\)/)
-        if (!match || match.length < 2) return
+        // scroll category icon list to selected one
+        categoryIconList.onscroll = () => {
+          const selectedCategoryIcon = this.$refs.selectedCategoryIcon as HTMLElement
+          if (!selectedCategoryIcon || !selectedCategoryIcon.parentElement) return
 
-        const scrollLeft = parseInt(match[1])
-        categoryIconList.scrollLeft = scrollLeft
+          const transform = selectedCategoryIcon.parentElement.style.transform
+          const match = transform.match(/translateX\((\d+)px\)/)
+          if (!match || match.length < 2) return
+
+          const scrollLeft = parseInt(match[1])
+          categoryIconList.scrollLeft = scrollLeft
+          categoryIconList.onscroll = null
+        }
+        const scrollTop = ((this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement).scrollTop
+        categoryIconList.scrollLeft = scrollTop * (this.categoryIconWidth / this.categoryHeight)
       })
     }
   }
@@ -271,6 +284,8 @@ export default defineComponent({
   .invisible {
     visibility: hidden;
     height: 0;
+    min-height: 0;
+    margin: 0;
     overflow: hidden;
   }
 }

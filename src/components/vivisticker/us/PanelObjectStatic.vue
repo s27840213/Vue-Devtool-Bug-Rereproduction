@@ -1,15 +1,22 @@
 <template lang="pug">
 div(class="panel-static" :class="{'in-category': isInCategory}")
-  div(:style="{...((!isInCategory || showFav) && {visibility: 'hidden', height: 0, minHeight: 0, margin: 0})}" class="panel-static__categorys")
+  div(class="panel-static__categorys" :class="{invisible: hideCategoryIconList}")
     div(class="panel-static__categorys__category" :class="{'selected': showAllRecently}" @click="handleCategorySearch($t('NN0024'))")
       svg-icon(class="pointer"
         iconName="clock"
         iconColor="white"
         iconWidth="24px")
     div(class="panel-static__categorys__vr")
-    recycle-scroller(class="panel-static__categorys__list" :items="listCategoryItems" direction="horizontal" @scroll-end="(nextCategory !== -1) && getCategories()" ref="categoryIconList")
+    recycle-scroller(class="panel-static__categorys__list"
+      :key="'panel-static__categorys-icon-list' + (hideCategoryIconList ? '-hide' : '')"
+      :items="listCategoryItems"
+      direction="horizontal"
+      @scroll-end="(nextCategory !== -1) && getCategories()"
+      :ref="!hideCategoryIconList ? 'categoryIconList' : undefined")
       template(v-slot="{ item }")
-        div(class="panel-static__categorys__category" :class="{'selected': item.title === keyword}" :ref="item.title === keyword ? 'selectedCategoryIcon' : undefined" @click="handleCategorySearch(item.title)")
+        div(class="panel-static__categorys__category" :class="{'selected': item.title === keyword}"
+        :ref="!hideCategoryIconList && item.title === keyword ? 'selectedCategoryIcon' : undefined"
+        @click="handleCategorySearch(item.title)")
           div(class="panel-static__categorys__category__icon" :style="iconStyles(item.list, item.coverId)")
   Tags(v-if="isInCategory && tags && tags.length" class="panel-static__tags"
       :tags="tags" theme="dark" @search="handleSearch")
@@ -122,6 +129,9 @@ export default defineComponent({
     ...mapState('objects', {
       nextCategory: 'nextCategory'
     }),
+    hideCategoryIconList(): boolean {
+      return !this.isInCategory || this.showFav
+    },
     listRecently(): ICategoryItem[] {
       const { rawCategories } = this
       const list = (rawCategories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
@@ -259,25 +269,28 @@ export default defineComponent({
       this.mainContentScrollTop = this.elMainContent?.scrollTop ?? 0
     },
     scrollCategoryIcon(target?: number) {
-      const categoryIconList = (this.$refs.categoryIconList as any).$el as HTMLElement
-      if (target !== undefined) {
-        categoryIconList.scrollLeft = target
-        return
-      }
-
-      // scroll category icon list to selected one
-      const scrollTop = this.mainContentScrollTop
-      categoryIconList.scrollLeft = (scrollTop / this.numCardColumns) * (this.categoryIconWidth / this.categoryCardHeight)
       this.$nextTick(() => {
-        const selectedCategoryIcon = this.$refs.selectedCategoryIcon as HTMLElement
-        if (!selectedCategoryIcon || !selectedCategoryIcon.parentElement) return
+        const categoryIconList = (this.$refs.categoryIconList as any).$el as HTMLElement
+        if (target !== undefined) {
+          categoryIconList.scrollLeft = target
+          return
+        }
 
-        const transform = selectedCategoryIcon.parentElement.style.transform
-        const match = transform.match(/translateX\((\d+(?:[.]\d*?)?)px\)/)
-        if (!match || match.length < 2) return
+        // scroll category icon list to selected one
+        categoryIconList.onscroll = () => {
+          const selectedCategoryIcon = this.$refs.selectedCategoryIcon as HTMLElement
+          if (!selectedCategoryIcon || !selectedCategoryIcon.parentElement) return
 
-        const scrollLeft = parseFloat(match[1])
-        categoryIconList.scrollLeft = scrollLeft
+          const transform = selectedCategoryIcon.parentElement.style.transform
+          const match = transform.match(/translateX\((\d+(?:[.]\d*?)?)px\)/)
+          if (!match || match.length < 2) return
+
+          const scrollLeft = parseFloat(match[1])
+          categoryIconList.scrollLeft = scrollLeft
+          categoryIconList.onscroll = null
+        }
+        const scrollTop = this.mainContentScrollTop
+        categoryIconList.scrollLeft = (scrollTop / this.numCardColumns) * (this.categoryIconWidth / this.categoryCardHeight)
       })
     }
   }
@@ -380,6 +393,8 @@ export default defineComponent({
   .invisible {
     visibility: hidden;
     height: 0;
+    min-height: 0;
+    margin: 0;
     overflow: hidden;
   }
 }
