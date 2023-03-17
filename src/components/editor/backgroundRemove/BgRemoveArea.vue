@@ -8,7 +8,6 @@ div(class="bg-remove-area"
   div(class="bg-remove-area__scale-area"
       :style="areaStyles"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
-    canvas(class="magnify-area" ref="magnify" :cy-ready="cyReady")
     canvas(class="bg-remove-area" ref="canvas" :cy-ready="cyReady")
     div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
@@ -16,6 +15,7 @@ div(class="bg-remove-area"
       :iconName="'spiner'"
       :iconColor="'white'"
       :iconWidth="'150px'")
+canvas(class="magnify-area" ref="magnify" :cy-ready="cyReady")
 </template>
 
 <script lang="ts">
@@ -290,14 +290,7 @@ export default defineComponent({
     },
     initMagnifyCanvas() {
       this.magnifyCanvas = this.$refs.magnify as HTMLCanvasElement
-      this.magnifyCanvas.width = this.size.width
-      this.magnifyCanvas.height = this.size.height
       const ctx = this.magnifyCanvas.getContext('2d') as CanvasRenderingContext2D
-      // set up drawing settings
-      ctx.lineCap = 'round'
-      ctx.lineJoin = 'round'
-      ctx.lineWidth = this.brushSize
-      ctx.filter = `blur(${this.blurPx}px)`
 
       this.magnifyCtx = ctx
 
@@ -569,9 +562,9 @@ export default defineComponent({
 
 .magnify-area {
   position: absolute;
-  top: -40px;
-  left: -40px;
-  transform: scale(0.2);
+  top: 0px;
+  left: 0px;
+  overflow:hidden;
   transform-origin: top left;
 }
 
