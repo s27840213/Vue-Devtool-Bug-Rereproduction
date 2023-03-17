@@ -237,7 +237,7 @@ export default defineComponent({
 
       // scroll category icon list to selected one
       const scrollTop = this.mainContentScrollTop
-      categoryIconList.scrollLeft = scrollTop * (this.categoryIconWidth / this.categoryCardHeight)
+      categoryIconList.scrollLeft = (scrollTop / this.numCardColumns) * (this.categoryIconWidth / this.categoryCardHeight)
       this.$nextTick(() => {
         const selectedCategoryIcon = this.$refs.selectedCategoryIcon as HTMLElement
         if (!selectedCategoryIcon || !selectedCategoryIcon.parentElement) return
