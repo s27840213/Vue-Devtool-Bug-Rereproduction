@@ -68,7 +68,7 @@ export default defineComponent({
   watch: {
     scrollLeft() {
       const elContainer = this.$refs.container as HTMLElement
-      elContainer.scrollTo(this.scrollLeft, 0)
+      if (this.scrollLeft >= 0 && this.scrollLeft <= elContainer.scrollWidth - elContainer.clientWidth) elContainer.scrollLeft = this.scrollLeft
     }
   },
   computed: {
