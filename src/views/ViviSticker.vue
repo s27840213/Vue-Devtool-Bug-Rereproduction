@@ -261,7 +261,7 @@ export default defineComponent({
     topStyles() {
       return {
         ...this.isDuringCopy ? { background: 'transparent' } : {},
-        gridTemplateRows: this.currActivePanel === 'text' ? '1fr auto' : 'auto 1fr auto'
+        gridTemplateRows: this.currActivePanel === 'text' ? '1fr' : 'auto 1fr'
       }
     },
     handleSwitchTab(panelType: string, props?: IFooterTabProps) {
