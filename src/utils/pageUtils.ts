@@ -203,7 +203,6 @@ class PageUtils {
       isEnableBleed: false,
       bleeds: defaultBleeds,
       physicalBleeds: defaultBleeds,
-      isAutoResizeNeeded: false,
       contentScaleRatio: 1
     }
     // pageData.snapUtils && delete pageData.snapUtils
@@ -663,16 +662,6 @@ class PageUtils {
 
   hasDesignId(pageIndex: number) {
     return this.getPage(pageIndex).designId !== ''
-  }
-
-  setAutoResizeNeededForPages(pages: IPage[], isAutoResizeNeeded: boolean) {
-    for (const page of pages) {
-      this.setAutoResizeNeededForPage(page, isAutoResizeNeeded)
-    }
-  }
-
-  setAutoResizeNeededForPage(page: IPage, isAutoResizeNeeded: boolean) {
-    page.isAutoResizeNeeded = isAutoResizeNeeded
   }
 
   /**

@@ -237,10 +237,6 @@ export default defineComponent({
       this.loadLayerImg()
       // this.handleSequentially ? queueUtils.push(this.loadLayerImg) : this.loadLayerImg()
     }
-    if (this.config.isAutoResizeNeeded) {
-      this.handleFontLoading()
-      // this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
-    }
   },
   watch: {
     setLayersDone(newVal: boolean) {
@@ -251,12 +247,6 @@ export default defineComponent({
         // this.handleSequentially ? queueUtils.push(this.loadLayerImg) : this.loadLayerImg()
       }
     },
-    'config.isAutoResizeNeeded'(newVal) {
-      if (newVal) {
-        this.handleFontLoading()
-        // this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
-      }
-    }
   },
   methods: {
     ...mapMutations({
@@ -351,18 +341,6 @@ export default defineComponent({
         notify({ group: 'copy', text: i18n.global.tc('NN0804') })
       }
     },
-    async handleFontLoading() {
-      if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
-        textUtils.untilFontLoadedForPage(this.config, true).then(() => {
-          setTimeout(() => {
-            this.updatePageProps({
-              pageIndex: this.pageIndex,
-              props: { isAutoResizeNeeded: false }
-            })
-          }, 200) // for the delay between font loading and dom rendering
-        })
-      }
-    }
   }
 })
 </script>

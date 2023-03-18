@@ -1,6 +1,6 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
-import { IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ITiptapSelection } from '@/interfaces/text'
 import store from '@/store'
@@ -17,7 +17,6 @@ import pageUtils from './pageUtils'
 import shapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
-import TextUtils from './textUtils'
 import uploadUtils from './uploadUtils'
 
 class LayerUtils {
@@ -641,6 +640,37 @@ class LayerUtils {
     } else {
       return groupLikeIncluded
     }
+  }
+
+  setAutoResizeNeededForLayersInPages(pages: IPage[], isAutoResizeNeeded: boolean) {
+    for (const page of pages) {
+      this.setAutoResizeNeededForLayersInPage(page, isAutoResizeNeeded)
+    }
+  }
+
+  setAutoResizeNeededForLayersInPage(page: IPage, isAutoResizeNeeded: boolean) {
+    const layers = page.layers
+    for (const layer of layers) {
+      this.setAutoResizeNeededForLayer(layer, isAutoResizeNeeded)
+    }
+  }
+
+  setAutoResizeNeededForLayer(layer: AllLayerTypes, isAutoResizeNeeded: boolean) {
+    switch (layer.type) {
+      case LayerType.text:
+        this.setAutoResizeNeededForTextLayer(layer, isAutoResizeNeeded)
+        break
+      case LayerType.group:
+      case LayerType.tmp:
+        for (const subLayer of layer.layers) {
+          this.setAutoResizeNeededForLayer(subLayer, isAutoResizeNeeded)
+        }
+        break
+    }
+  }
+
+  setAutoResizeNeededForTextLayer(layer: IText, isAutoResizeNeeded: boolean) {
+    layer.isAutoResizeNeeded = isAutoResizeNeeded
   }
 }
 
