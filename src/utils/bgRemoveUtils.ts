@@ -164,7 +164,7 @@ class BgRemoveUtils {
   }
 
   save() {
-    console.log(this.autoRemoveResult)
+    console.log(generalUtils.deepCopy(this.autoRemoveResult))
     console.log(store.getters['bgRemove/getAutoRemoveResult'])
     const { index, pageIndex } = pageUtils.currSelectedInfo as ICurrSelectedInfo
     imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex: index }, { type: 'after-bg-remove', userId: '', assetId: '' })
@@ -176,7 +176,7 @@ class BgRemoveUtils {
           userId: (this.autoRemoveResult as IBgRemoveInfo).teamId,
           assetId: this.isAdmin ? (this.autoRemoveResult as IBgRemoveInfo).id : (this.autoRemoveResult as IBgRemoveInfo).assetIndex
         },
-        panelPreviewSrc: '',
+        panelPreviewSrc: (this.autoRemoveResult as IBgRemoveInfo).urls.larg,
         trace: 1
       })
       const image = layerUtils.getLayer(pageIndex, index) as IImage

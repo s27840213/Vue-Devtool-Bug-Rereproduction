@@ -364,7 +364,7 @@ export default defineComponent({
             this.src = previewSrc
           }
         })
-      } else if (this.image.config.panelPreviewSrc) {
+      } else if (config.panelPreviewSrc) {
         const panelPreviewSrc = this.image.config.panelPreviewSrc
         ImageUtils.imgLoadHandler(panelPreviewSrc, () => {
           if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
