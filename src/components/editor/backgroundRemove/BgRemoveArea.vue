@@ -15,9 +15,10 @@ div(class="bg-remove-area"
       :iconName="'spiner'"
       :iconColor="'white'"
       :iconWidth="'150px'")
-div(class="magnify-area" :style="magnifyAreaStyle")
-  canvas(class="magnify-area__canvas"  ref="magnify")
-  div(class="magnify-area__brush" :style="{backgroundColor: brushColor}")
+teleport(v-if="useMobileEditor" to=".mobile-panel")
+  div(class="magnify-area" :style="magnifyAreaStyle")
+    canvas(class="magnify-area__canvas"  ref="magnify")
+    div(class="magnify-area__brush" :style="{backgroundColor: brushColor}")
 </template>
 
 <script lang="ts">
@@ -136,7 +137,8 @@ export default defineComponent({
       inFirstStep: 'bgRemove/inFirstStep',
       loading: 'bgRemove/getLoading',
       inGestureMode: 'getInGestureToolMode',
-      contentScaleRatio: 'getContentScaleRatio'
+      contentScaleRatio: 'getContentScaleRatio',
+      useMobileEditor: 'getUseMobileEditor'
     }),
     size(): { width: number, height: number } {
       return {
@@ -177,8 +179,8 @@ export default defineComponent({
         top: '10px',
         left: '80px'
       } : {
-        bottom: `${this.root ? parseInt((this.root as HTMLElement).style.height) - 60 : 0}px`,
-        left: '40px'
+        top: '-70px',
+        left: '20px'
       }
     }
   },
@@ -193,8 +195,6 @@ export default defineComponent({
         this.blurPx = 1
         this.contentCtx.filter = `blur(${this.blurPx}px)`
       }
-
-      this.magnifyUtils.render()
     },
     restoreInitState(newVal) {
       if (newVal) {
@@ -212,7 +212,7 @@ export default defineComponent({
         this.setRestoreInitState(false)
         this.setModifiedFlag(false)
         this.pushStep()
-
+        this.magnifyUtils.reset()
         this.currCanvasImageElement = undefined as unknown as HTMLImageElement
       }
     },
@@ -334,21 +334,22 @@ export default defineComponent({
 
       this.setModifiedFlag(true)
     },
-    drawStart(e: MouseEvent) {
+    drawStart(e: PointerEvent) {
       if (!this.inGestureMode) {
         const { x, y } = mouseUtils.getMousePosInTarget(e, this.root)
         Object.assign(this.initPos, {
           x,
           y
         })
-        if (this.$isTouchDevice()) {
-          this.showBrush = true
-          this.setBrushPos(e)
-        }
         if (this.clearMode) {
           this.drawInClearMode(e)
         } else {
           this.drawInRestoreMode(e)
+        }
+        if (this.$isTouchDevice()) {
+          this.showBrush = true
+          this.setBrushPos(e)
+          this.magnifyUtils.render(e)
         }
         window.addEventListener('pointerup', this.drawEnd)
         window.addEventListener('pointermove', this.drawing)
@@ -581,7 +582,7 @@ export default defineComponent({
 }
 
 .magnify-area {
-  position: fixed;
+  position: absolute;
   width: 60px;
   height: 60px;
   overflow:hidden;
@@ -589,6 +590,8 @@ export default defineComponent({
   border: 1px solid setColor(gray-2);
   border-radius: 8px;
   box-sizing: border-box;
+  pointer-events: none;
+  background-color: setColor(gray-6);
 
   &__brush {
     position: absolute;

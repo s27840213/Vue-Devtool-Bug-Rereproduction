@@ -28,10 +28,11 @@ class MagnifyUtils {
   }
 
   private bind(): void {
-    window.addEventListener('pointermove', this.onMouseMove.bind(this))
+    window.addEventListener('pointermove', this.render.bind(this))
   }
 
-  render(): void {
+  render(event: PointerEvent): void {
+    this.posInMagnifierCanvas = mouseUtils.getMousePosInTarget(event, this.targetEl)
     this.clear()
     // this.context.save()
 
@@ -44,17 +45,6 @@ class MagnifyUtils {
     this.magnifyContext.drawImage(this.contentCanvas, -this.posInMagnifierCanvas.x + (this.MAGNIFY_RADIUS * scale), -this.posInMagnifierCanvas.y + (this.MAGNIFY_RADIUS * scale), this.contentCanvas.width, this.contentCanvas.height)
 
     this.magnifyContext.restore()
-  }
-
-  private onMouseMove(ev: MouseEvent): void {
-    // const rect = this.canvas.getBoundingClientRect()
-    // this.point = {
-    //   x: (ev.clientX - 7) - rect.left,
-    //   y: (ev.clientY - 7) - rect.top
-    // }
-    this.posInMagnifierCanvas = mouseUtils.getMousePosInTarget(ev, this.targetEl)
-
-    this.render()
   }
 
   clear(): void {
