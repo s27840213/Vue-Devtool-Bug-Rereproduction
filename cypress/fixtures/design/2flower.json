@@ -11,7 +11,11 @@
     "backgroundImage": {
       "config": {
         "type": "image",
-        "srcObj": { "type": "", "userId": "", "assetId": "" },
+        "srcObj": {
+          "type": "",
+          "userId": "",
+          "assetId": ""
+        },
         "id": "hBZPKrVs",
         "clipPath": "M0,0h0v0h0z",
         "active": false,
@@ -57,8 +61,17 @@
               "floating": {},
               "blur": {}
             },
-            "srcObj": { "type": "", "assetId": "", "userId": "" },
-            "styles": { "imgWidth": 0, "imgHeight": 0, "imgX": 0, "imgY": 0 },
+            "srcObj": {
+              "type": "",
+              "assetId": "",
+              "userId": ""
+            },
+            "styles": {
+              "imgWidth": 0,
+              "imgHeight": 0,
+              "imgX": 0,
+              "imgY": 0
+            },
             "old": {}
           }
         }
@@ -120,8 +133,17 @@
               "floating": {},
               "blur": {}
             },
-            "srcObj": { "type": "", "assetId": "", "userId": "" },
-            "styles": { "imgWidth": 0, "imgHeight": 0, "imgX": 0, "imgY": 0 },
+            "srcObj": {
+              "type": "",
+              "assetId": "",
+              "userId": ""
+            },
+            "styles": {
+              "imgWidth": 0,
+              "imgHeight": 0,
+              "imgX": 0,
+              "imgY": 0
+            },
             "old": {},
             "isTransparent": false
           }
@@ -180,8 +202,17 @@
               "floating": {},
               "blur": {}
             },
-            "srcObj": { "type": "", "assetId": "", "userId": "" },
-            "styles": { "imgWidth": 0, "imgHeight": 0, "imgX": 0, "imgY": 0 },
+            "srcObj": {
+              "type": "",
+              "assetId": "",
+              "userId": ""
+            },
+            "styles": {
+              "imgWidth": 0,
+              "imgHeight": 0,
+              "imgX": 0,
+              "imgY": 0
+            },
             "old": {},
             "isTransparent": false
           }
@@ -189,14 +220,28 @@
         "panelPreviewSrc": "https://images.unsplash.com/photo-1558816280-dee9521ff364?cs=tinysrgb&q=80&h=320&origin=true&ver=OsZD5g"
       }
     ],
-    "documentColors": ["#ffffff"],
+    "documentColors": [
+      "#ffffff"
+    ],
     "designId": "",
     "id": "CtlnEYHK",
-    "guidelines": { "v": [], "h": [] },
+    "guidelines": {
+      "v": [],
+      "h": []
+    },
     "isEnableBleed": false,
-    "bleeds": { "top": 35, "bottom": 35, "left": 35, "right": 35 },
-    "physicalBleeds": { "top": 35, "bottom": 35, "left": 35, "right": 35 },
-    "isAutoResizeNeeded": false,
+    "bleeds": {
+      "top": 35,
+      "bottom": 35,
+      "left": 35,
+      "right": 35
+    },
+    "physicalBleeds": {
+      "top": 35,
+      "bottom": 35,
+      "left": 35,
+      "right": 35
+    },
     "appVer_origin": "2023-02-08T03:08:02.180Z",
     "jsonVer_origin": "1.0.7",
     "appVer": "2023-02-15T03:04:44.201Z",

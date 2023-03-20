@@ -2,7 +2,7 @@ import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { LayerProcessType, LayerType } from '@/store/types'
-import GeneralUtils from '@/utils/generalUtils'
+import generalUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import localeUtils from './localeUtils'
@@ -21,7 +21,7 @@ class LayerFactary {
       srcObj: {
         ...config.srcObj
       },
-      id: config.id || GeneralUtils.generateRandomString(8),
+      id: config.id || generalUtils.generateRandomString(8),
       clipPath: config.clipPath ?? `M0,0h${width}v${height}h${-width}z`,
       active: false,
       shown: false,
@@ -98,7 +98,7 @@ class LayerFactary {
   }
 
   newFrame(config: IFrame): IFrame {
-    const { designId, clips, decoration, decorationTop, styles, locked, blendLayers: _blendLayers } = GeneralUtils.deepCopy(config) as IFrame
+    const { designId, clips, decoration, decorationTop, styles, locked, blendLayers: _blendLayers } = generalUtils.deepCopy(config) as IFrame
     let { width, height, initWidth, initHeight } = styles
     initWidth = initWidth || width
     initHeight = initHeight || height
@@ -129,7 +129,7 @@ class LayerFactary {
       clips[0].styles.initHeight = styles.initHeight
       clips[0].styles.initWidth = styles.initWidth
       clips[0] = this.newImage(clips[0])
-      // clips[0] = this.newImage(Object.assign(GeneralUtils.deepCopy(clips[0])))
+      // clips[0] = this.newImage(Object.assign(generalUtils.deepCopy(clips[0])))
       clips[0].isFrameImg = true
     } else {
       // New image-frame no image info need to be resored
@@ -161,18 +161,20 @@ class LayerFactary {
     }
     const blendLayers = _blendLayers ? (_blendLayers as Array<unknown>)
       .map((l: any) => {
-        l.styles = {}
-        l.styles.width = width / styles.scale
-        l.styles.height = height / styles.scale
-        l.styles.initWidth = width / styles.scale
-        l.styles.initHeight = height / styles.scale
-        l.vSize = [l.styles.width, l.styles.height]
+        const newStyles = {} as any
+        newStyles.width = width / styles.scale
+        newStyles.height = height / styles.scale
+        newStyles.initWidth = width / styles.scale
+        newStyles.initHeight = height / styles.scale
+        newStyles.blendMode = l.blendMode
+        l.styles = newStyles
+        l.vSize = [newStyles.width, newStyles.height]
         return this.newShape(l)
       }) : undefined
 
     const frame = {
       type: 'frame',
-      id: config.id || GeneralUtils.generateRandomString(8),
+      id: config.id || generalUtils.generateRandomString(8),
       active: false,
       shown: false,
       locked: locked ?? false,
@@ -232,7 +234,7 @@ class LayerFactary {
   newText(config: Partial<IText>): IText {
     const basicConfig = {
       type: 'text',
-      id: config.id || GeneralUtils.generateRandomString(8),
+      id: config.id || generalUtils.generateRandomString(8),
       widthLimit: -1,
       isTyping: false,
       active: false,
@@ -386,7 +388,7 @@ class LayerFactary {
   newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IFrame>): IGroup {
     const group: IGroup = {
       type: 'group',
-      id: config.id || GeneralUtils.generateRandomString(8),
+      id: config.id || generalUtils.generateRandomString(8),
       active: false,
       shown: false,
       locked: config.locked ?? false,
@@ -435,7 +437,7 @@ class LayerFactary {
   newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup | IFrame>) {
     const tmp: ITmp = {
       type: 'tmp',
-      id: GeneralUtils.generateRandomString(8),
+      id: generalUtils.generateRandomString(8),
       active: true,
       shown: false,
       locked: false,
@@ -467,10 +469,10 @@ class LayerFactary {
 
   newShape(config?: any): IShape {
     config = config || {}
-    const { styles = {} } = GeneralUtils.deepCopy(config)
+    const { styles = {} } = generalUtils.deepCopy(config)
     const basicConfig = {
       type: 'shape',
-      id: GeneralUtils.generateRandomString(8),
+      id: generalUtils.generateRandomString(8),
       active: false,
       shown: false,
       path: '',
@@ -506,7 +508,7 @@ class LayerFactary {
         opacity: styles.opacity ?? 100,
         horizontalFlip: styles.horizontalFlip || false,
         verticalFlip: styles.verticalFlip || false,
-        blendMode: config.blendMode || ''
+        blendMode: styles.blendMode || ''
       }
     }
     if (config.category === 'A' && styles.scale && styles.initWidth && styles.initHeight) {
@@ -514,7 +516,7 @@ class LayerFactary {
       basicConfig.styles.height = styles.initHeight * styles.scale
     }
     delete config.styles
-    delete config.blendMode
+    // delete config.blendMode
     return Object.assign(basicConfig, config)
   }
 
@@ -555,7 +557,7 @@ class LayerFactary {
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
     const bgImgConfig = config.backgroundImage.config
-    bgImgConfig.id = GeneralUtils.generateRandomString(8)
+    bgImgConfig.id = generalUtils.generateRandomString(8)
     if (bgImgConfig.srcObj.type) {
       if (!bgImgConfig.srcObj.userId && !bgImgConfig.srcObj.assetId) {
         config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
