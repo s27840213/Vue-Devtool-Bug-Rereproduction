@@ -44,7 +44,7 @@ import { defineComponent } from 'vue'
 import { ILayout } from '@/interfaces/layout'
 import eventUtils from '@/utils/eventUtils'
 import vClickOutside from 'click-outside-vue3'
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
   name: 'panel-size',
@@ -73,13 +73,16 @@ export default defineComponent({
       'currLocation',
       'folders'
     ]),
+    ...mapGetters({
+      userInfo: 'webView/getUserInfo'
+    }),
     panelStyle(): { [index: string]: string } {
       return Object.assign(
         {
           'row-gap': '10px',
           backgroundColor: 'white',
-          top: this.panelTop + 'px',
-          paddingBottom: (this.panelPaddingBottom + 15) + 'px'
+          top: this.panelTop + this.userInfo.statusBarHeight + 'px',
+          paddingBottom: (this.panelPaddingBottom + this.userInfo.homeIndicatorHeight + this.userInfo.statusBarHeight + 15) + 'px'
         }
       )
     },

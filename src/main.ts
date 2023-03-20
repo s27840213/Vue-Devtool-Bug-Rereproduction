@@ -50,7 +50,8 @@ const app = createApp(App).use(i18n).use(router).use(store)
 
 store.commit('user/SET_BroswerInfo', {
   name: platform.name,
-  version: platform.version
+  version: platform.version,
+  os: platform.os
 })
 
 // Add variable that bind in vue this and its type define

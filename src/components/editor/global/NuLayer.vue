@@ -254,6 +254,11 @@ export default defineComponent({
         body.addEventListener('pointerdown', moveStart)
       }
     } else {
+      Object.defineProperty(_config, 'primaryLayer', {
+        get() {
+          return props.primaryLayer
+        }
+      })
       const subCtrlUtils = new SubControllerUtils(data as any)
       const pointerdown = subCtrlUtils.onPointerdown.bind(subCtrlUtils)
       if (this.isLine) {

@@ -7,21 +7,25 @@ div(class="editor-view" v-touch
     @pointerdown="selectStart"
     @mousewheel="handleWheel"
     ref="editorView")
+  //- @pinch="pinchHandler"
   div(class="editor-view__abs-container"
       :style="absContainerStyle")
-    div(v-if="editorView" class="editor-view__canvas"
+    div(class="editor-view__canvas"
         ref="canvas"
         :style="canvasStyle")
-      page-card(v-for="(page,index) in pagesState"
-          :key="`page-${page.config.id}`"
-          :config="page"
-          :cardWidth="cardWidth"
-          :cardHeight="cardHeight"
-          :pageIndex="index"
-          :editorView="editorView"
-          :isAnyBackgroundImageControl="isBackgroundImageControl"
-          @pointerdown="selectStart"
-          @pointerdown.self.prevent="outerClick($event)")
+      template(v-if="!inBgRemoveMode")
+        page-card(v-for="(page,index) in pagesState"
+            :key="`page-${page.config.id}`"
+            :config="page"
+            :cardWidth="cardWidth"
+            :cardHeight="cardHeight"
+            :pageIndex="index"
+            :editorView="editorView"
+            :isAnyBackgroundImageControl="isBackgroundImageControl"
+            @pointerdown="selectStart"
+            @pointerdown.self.prevent="outerClick($event)")
+      div(v-else class="editor-view__bg-remove-area")
+        bg-remove-area(:editorViewCanvas="editorCanvas")
   page-number(v-if="!hasSelectedLayer"
     :pageNum="pageNum"
     :currCardIndex="currCardIndex")
@@ -147,7 +151,12 @@ export default defineComponent({
 
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
+    this.editorCanvas = this.$refs.canvas as HTMLElement
     this.swipeDetector = new SwipeDetector(this.editorView, { targetDirection: 'vertical' }, this.handleSwipe)
+
+    const rect = this.editorView.getBoundingClientRect()
+    pageUtils.originEditorSize.width = rect.width
+    pageUtils.originEditorSize.height = rect.height
 
     this.cardHeight = this.editorView ? this.editorView.clientHeight : 0
     this.cardWidth = this.editorView ? this.editorView.clientWidth : 0
@@ -372,6 +381,23 @@ export default defineComponent({
       }
     },
     pinchHandler(event: AnyTouchEvent) {
+      console.log('pinch')
+      if (this.isBgImgCtrl) {
+        switch (event.phase) {
+          case 'start': {
+            console.log('start')
+            break
+          }
+          case 'move': {
+            console.log('move')
+            break
+          }
+          case 'end': {
+            console.log('end')
+          }
+        }
+      }
+
       // switch (event.phase) {
       //   /**
       //    * @Note the very first event won't fire start phase, it's very strange and need to pay attention
@@ -543,6 +569,12 @@ $REULER_SIZE: 20px;
     // transform-style: preserve-3d;
     transform: scale(1);
     box-sizing: border-box;
+  }
+
+  &__bg-remove-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }
 

@@ -2,22 +2,22 @@
 div(class="font-size-selector relative")
   div(class="font-size-selector__number")
     div(class="pointer"
-      @pointerdown="fontSizeStepping(-step)"
+      @pointerdown="fontSizeStepping(-1)"
       @contextmenu.prevent)
       svg-icon(iconName="minus-small" iconWidth="24px" iconColor="gray-2")
     button(class="font-size-selector__range-input-button")
       input(class="text-gray-2 center record-selection" type="text" ref="input-fontSize"
             @change="setSize" :value="fontSize" :disabled="fontSize === '--'")
     div(class="pointer"
-      @pointerdown="fontSizeStepping(step)"
+      @pointerdown="fontSizeStepping(1)"
       @contextmenu.prevent)
       svg-icon(iconName="plus-small" iconWidth="24px" iconColor="gray-2")
 </template>
 
 <script lang="ts">
 import ValueSelector from '@/components/ValueSelector.vue'
-import { IGroup, ILayer } from '@/interfaces/layer'
 import eventUtils from '@/utils/eventUtils'
+import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -25,6 +25,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import textPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import vClickOutside from 'click-outside-vue3'
+import _ from 'lodash'
 import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
@@ -57,54 +58,12 @@ export default defineComponent({
       layerIndex: 'getCurrSelectedIndex'
     }),
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
-    scale(): number {
-      const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
-      if (currLayer && currLayer.layers) {
-        if (subLayerIdx === -1) {
-          const scaleSet = (currLayer as IGroup).layers.reduce((p: Set<number>, c: ILayer) => {
-            if (c.type === 'text') { p.add(c.styles.scale) }
-            return p
-          }, new Set())
-          if (scaleSet.size === 1) {
-            const [scale] = scaleSet
-            return scale * currLayer.styles.scale
-          }
-          return NaN
-        } else {
-          return currLayer.styles.scale * (currLayer as IGroup).layers[subLayerIdx].styles.scale
-        }
-      }
-      return currLayer.styles.scale
-    },
     fontSize(): number | string {
-      if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
-        return '--'
-      }
-      return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
+      return this.props.fontSize === '--' ? this.props.fontSize : _.round(this.props.fontSize, 2)
+      // return this.props.fontSize
     },
-    step(): number {
-      // const config = LayerUtils.getCurrConfig
-      // return 1 / config.styles.scale
-      const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
-      let scale = currLayer.styles.scale
-      if (subLayerIdx !== -1) {
-        scale *= (currLayer as IGroup).layers[subLayerIdx].styles.scale
-      }
-      return 1 / scale
-    }
   },
   methods: {
-    isValidInt(value: string) {
-      return value.match(/^-?\d+$/)
-    },
-    isValidFloat(value: string) {
-      return value.match(/[+-]?\d+(\.\d+)?/)
-    },
-    boundValue(value: number, min: number, max: number): string {
-      if (value < min) return min.toString()
-      else if (value > max) return max.toString()
-      return value.toString()
-    },
     handleValueModal() {
       if (this.$isTouchDevice()) return
       this.openValueSelector = !this.openValueSelector
@@ -115,30 +74,13 @@ export default defineComponent({
       }
     },
     handleValueUpdate(value: number) {
-      // layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-      value = value / this.scale
-      tiptapUtils.spanStyleHandler('size', value)
-      tiptapUtils.forceUpdate(true)
-      textPropUtils.updateTextPropsState({ fontSize: value.toString() })
-      textEffectUtils.refreshSize()
+      textPropUtils.fontSizeHandler(value)
     },
     setSize(e: Event) {
-      let { value } = e.target as HTMLInputElement
-      if (this.isValidFloat(value)) {
-        value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
-        const finalValue = parseFloat(value) / this.scale
-        window.requestAnimationFrame(() => {
-          // TODO: need to deal with diff scales in group
-          // if (this.props.fontSize === '--') {
-          //   tiptapUtils.spanStyleHandler('size', parseFloat(value))
-          //   tiptapUtils.forceUpdate(true)
-          //   textPropUtils.updateTextPropsState({ fontSize: value.toString() })
-          // } else {
-          //   textPropUtils.fontSizeStepping(Math.round(parseFloat(value) / this.scale * 10) / 10 - parseFloat(this.props.fontSize))
-          // }
-          textPropUtils.fontSizeStepping(Math.round(parseFloat(value) / this.scale * 10) / 10 - parseFloat(this.props.fontSize))
-          textEffectUtils.refreshSize()
-        })
+      const { value } = e.target as HTMLInputElement
+      if (generalUtils.isValidFloat(value)) {
+        const boundedValue = generalUtils.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
+        textPropUtils.fontSizeHandler(boundedValue)
       }
     },
     fontSizeStepping(step: number, tickInterval = 100) {

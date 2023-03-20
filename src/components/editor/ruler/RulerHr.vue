@@ -15,8 +15,8 @@ div(class="ruler-hr"
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
-import { defineComponent } from 'vue'
 import unitUtils from '@/utils/unitUtils'
+import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
@@ -88,6 +88,9 @@ export default defineComponent({
       this.scale = rulerUtils.adjRulerScale(this.scale)
     },
     showPagePanel() {
+      this.calcRulerBodyOffset()
+    },
+    canvasRect() {
       this.calcRulerBodyOffset()
     }
   },

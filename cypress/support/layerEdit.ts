@@ -42,7 +42,6 @@ Cypress.Commands.add('layerAlign', { prevSubject: 'element' }, (subject) => {
 Cypress.Commands.add('layerOrder', { prevSubject: 'element' }, (subjectFront, subjectBack) => {
   cy.wrap(subjectBack).click('topLeft')
     .get('.svg-layers-alt').realClick()
-    .isMobile(() => { cy.get('.mobile-panel').waitTransition() })
     .get('.svg-layers-forward').click()
     .snapshotTest('Oredr change')
     .get('.svg-layers-backward').click()
@@ -55,7 +54,7 @@ Cypress.Commands.add('layerOrder', { prevSubject: 'element' }, (subjectFront, su
 Cypress.Commands.add('layerCopy', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
     .get('.nu-page .nu-layer').then((oldLayers) => {
-      cy.get('.header-bar, .funciton-panel').find('.svg-copy').click()
+      cy.get('.header-bar, .function-panel').find('.svg-copy').click()
         .get('.nu-page .nu-layer').should('have.length', oldLayers.length + 1)
         .snapshotTest('Copy layer')
         // Restore layer to original state
@@ -70,9 +69,9 @@ Cypress.Commands.add('layerLock', { prevSubject: 'element' }, (subject) => {
     .realMouseDown()
     .realMouseMove(30, 30, { position: 'center' })
     .realMouseUp()
-    .snapshotTest('Lock unlocked')
+    .snapshotTest('Lock unlocked') // Usually need to retry snapshot
     .get('.svg-unlock').click()
-    .deselectAllLayers()
+    .wait(500)
     .wrap(subject)
     .realMouseDown()
     .realMouseMove(-30, -30, { position: 'center' })
@@ -107,12 +106,12 @@ Cypress.Commands.add('layerCopyFormat', { prevSubject: 'element' }, (subjectFron
   cy.wrap(subjectFront).click()
     .then(before)
     .snapshotTest('Copy format before')
-    .get('.panel-group .svg-brush').click()
+    .get('.panel-group, .footer-tabs').find('.svg-brush').click({ force: true })
     .wrap(subjectBack).click('topLeft')
     .snapshotTest('Copy format after')
     // Restore layer to original state
     .then(after)
-    .get('.panel-group .svg-brush').click()
+    .get('.panel-group, .footer-tabs').find('.svg-brush').click({ force: true })
     .wrap(subjectFront).click('topLeft')
   return cy.wrap(subjectFront)
 })
@@ -124,6 +123,36 @@ Cypress.Commands.add('layerRotate', { prevSubject: 'element' }, (subject) => {
 
 Cypress.Commands.add('layerScale', { prevSubject: 'element' }, (subject) => {
   cy.wrap(subject).click()
+  return cy.wrap(subject)
+})
+
+// Special text for some layer
+
+Cypress.Commands.add('rotateAndResize', { prevSubject: 'element' }, (subject) => {
+  const resizeDir = [
+    { i: 0, x: -1, y: -1 },
+    { i: 1, x: 1, y: 1 },
+    { i: 2, x: -1, y: 1 },
+    { i: 3, x: 1, y: -1 },
+  ]
+
+  cy.wrap(subject).click()
+    .get('.svg-rotate')
+    .realMouseDown()
+    .realMouseMove(-158, -158, { position: 'center' }) // Rotate 60 degrees, counter-clockwise
+    .realMouseUp()
+    .snapshotTest('RotateAndResize before resize')
+    .then(() => {
+      for (const { i, x, y } of resizeDir) {
+        cy.get('.control-point__resize-bar-wrapper').eq(i).children().eq(1)
+          .realMouseDown()
+          .realMouseMove(x * 30, y * 30, { position: 'center' })
+          .realMouseUp()
+      }
+    })
+    .snapshotTest('RotateAndResize after resize')
+    // Restore layer to original state
+    .get('.svg-undo').click().click()
   return cy.wrap(subject)
 })
 

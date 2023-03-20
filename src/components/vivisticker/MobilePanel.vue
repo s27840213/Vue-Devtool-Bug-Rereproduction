@@ -26,7 +26,7 @@ div(class="mobile-panel"
       div(class="mobile-panel__title")
         span(class="mobile-panel__title-text body-1 mr-10"
           :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
-        div(v-if="inSelectionState" class="mobile-panel__layer-num")
+        div(v-if="currActivePanel === 'multiple-select'" class="mobile-panel__layer-num")
           span(class="label-sm text-white") {{selectedLayerNum}}
       div(class="mobile-panel__btn mobile-panel__right-btn"
           :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn, 'insert': insertTheme}")
@@ -44,7 +44,7 @@ div(class="mobile-panel"
   div(class="mobile-panel__bottom-section")
     //- keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-file']")
     //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-    component(v-if="dynamicBindIs && !bgRemoveMode && !hideDynamicComp"
+    component(v-if="dynamicBindIs && !hideDynamicComp"
       class="border-box"
       :is="dynamicBindIs"
       :key="dynamicBindIs"
@@ -103,6 +103,7 @@ import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
+import formatUtils from '@/utils/formatUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -169,20 +170,18 @@ export default defineComponent({
   data() {
     return {
       panelHistory: [] as Array<string>,
-      panelHeight: 0,
+      // If fixSize is true, panelDragHeight take no effect.
+      panelDragHeight: 0,
       lastPointerY: 0,
       showExtraColorPanel: false,
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
       currSubColorEvent: '',
-      innerTabIndex: 0,
-      draggedPanelHeight: 0
+      innerTabIndex: 0
     }
   },
   computed: {
     ...mapGetters({
-      bgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       currSelectedInfo: 'getCurrSelectedInfo',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel',
@@ -203,18 +202,15 @@ export default defineComponent({
     selectedLayerNum(): number {
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
     },
-    inSelectionState(): boolean {
-      return this.currActivePanel === 'none' && this.inMultiSelectionMode
-    },
     whiteTheme(): boolean {
       const whiteThemePanel = [
         'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
-        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list',
+        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'copy-style',
         'vvstk-more', 'giphy-more', 'color-picker', 'my-design-more', 'select-design']
 
-      return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
+      return this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
       return ['brand-list', 'text', 'vvstk-more', 'my-design-more', 'select-design'].includes(this.currActivePanel)
@@ -223,7 +219,7 @@ export default defineComponent({
       return ['select-design'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return this.inSelectionState || [
+      return [
         'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust', 'brand-list', 'vvstk-more', 'select-design'].includes(this.currActivePanel)
@@ -244,18 +240,15 @@ export default defineComponent({
     halfSizeInInitState(): boolean {
       return this.showExtraColorPanel || ['fonts', 'adjust', 'photo-shadow', 'color', 'text-effect'].includes(this.currActivePanel)
     },
-    minHalfSize(): boolean {
-      return ['fonts'].includes(this.currActivePanel)
-    },
     panelTitle(): string {
       switch (this.currActivePanel) {
         case 'crop': {
           return `${this.$t('NN0496')}`
         }
+        case 'copy-style': {
+          return `${this.$t('NN0809')}`
+        }
         case 'none': {
-          if (this.inMultiSelectionMode) {
-            return '已選取'
-          }
           return ''
         }
         default: {
@@ -267,18 +260,19 @@ export default defineComponent({
       return this.currActivePanel === 'text'
     },
     showRightBtn(): boolean {
-      return this.whiteTheme || this.insertTheme
+      return this.currActivePanel !== 'none'
     },
     showLeftBtn(): boolean {
-      return (this.whiteTheme && (this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel)) || (this.insertTheme && this.isTextInCategory)
+      return (this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel)) || (this.insertTheme && this.isTextInCategory)
     },
     hideDynamicComp(): boolean {
-      return this.currActivePanel === 'crop' || this.inSelectionState
+      return ['crop', 'copy-style'].includes(this.currActivePanel)
     },
     noRowGap(): boolean {
-      return this.inSelectionState || ['crop', 'color', 'vvstk-more', 'select-design'].includes(this.currActivePanel)
+      return ['crop', 'color', 'copy-style', 'vvstk-more', 'select-design'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
+      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
       return Object.assign(
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
@@ -286,11 +280,10 @@ export default defineComponent({
           backgroundColor: this.whiteTheme ? 'white' : '#1F1F1F',
           maxHeight: this.isDuringCopy ? '0' : (
             this.fixSize || this.extraFixSizeCondition
-              ? 'initial'
-              : this.isDraggingPanel ? this.panelHeight + 'px' : this.panelHeight + 'px'
+              ? '100%' : Math.min(this.panelDragHeight, this.panelParentHeight()) + 'px'
           ),
-          minHeight: (this.minHalfSize && !this.isDraggingPanel && !this.isDuringCopy) ? this.draggedPanelHeight + 'px' : 'unset'
         },
+        isSidebarPanel ? { height: '100%' } : {},
         this.isDuringCopy ? { padding: '0' } : {}
       )
     },
@@ -340,143 +333,92 @@ export default defineComponent({
     dynamicBindProps(): { [index: string]: any } {
       if (this.showExtraColorPanel) {
         return {
-          is: 'panel-color',
           currEvent: this.extraColorEvent,
           panelHistory: this.panelHistory
         }
       }
 
-      const defaultVal = {
-        is: this.currActivePanel ? `panel-${this.currActivePanel}` : ''
-      }
-
       switch (this.currActivePanel) {
         case 'fonts': {
-          return Object.assign(defaultVal, {
+          return {
             showTitle: false
-          })
+          }
         }
         case 'download': {
           return {
-            is: 'popup-download',
-            hideContainer: true
+            hideContainer: true,
+            pageIndex: pageUtils.currFocusPageIndex
           }
         }
         case 'text-effect': {
-          return Object.assign(defaultVal, {
+          return {
             panelHistory: this.panelHistory
-          })
+          }
         }
         case 'color': {
-          return Object.assign(defaultVal, {
+          return {
             panelHistory: this.panelHistory
-          })
-        }
-        case 'color-picker': {
-          return Object.assign(defaultVal, {
-            currEvent: colorUtils.currEvent
-          })
+          }
         }
         case 'brand-list': {
-          const brandDefaultVal = Object.assign(defaultVal, {
+          const brandDefaultVal = {
             panelHistory: this.panelHistory
-          })
+          }
           if (editorUtils.currActivePanel === 'text') {
-            return Object.assign(brandDefaultVal, {
+            return {
               defaultOption: true
-            })
+            }
           }
           if (editorUtils.currActivePanel === 'brand') {
-            return Object.assign(brandDefaultVal, {
+            return {
               hasAddBrand: true
-            })
+            }
           }
           return brandDefaultVal
         }
-        case 'vvstk-more': {
-          return Object.assign(defaultVal, {
-            panelHistory: this.panelHistory
-          })
-        }
         case 'brand': {
-          return Object.assign(defaultVal, {
-            maxheight: this.maxHeightPx()
-          })
-        }
-        case 'replace':
           return {
-            is: this.innerTab ? `panel-${this.innerTab}` : ''
-          }
-        case 'adjust':
-          return {
-            is: 'panel-adjust'
-          }
-        case 'none':
-          return {
-            is: ''
-          }
-        default: {
-          return defaultVal
-        }
-      }
-    },
-    dynamicBindMethod(): { [index: string]: any } {
-      switch (this.currActivePanel) {
-        case 'color': {
-          return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            }
-          }
-        }
-        case 'text-effect':
-        case 'photo-shadow': {
-          return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            },
-            openExtraColorModal: (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
-              this.showExtraColorPanel = true
-              this.extraColorEvent = colorEventType
-              this.panelHistory.push(initColorPanelType)
-            }
-          }
-        }
-        case 'background': {
-          // bind listener to let the parent access the grandchild's event
-          // return this.$listeners
-
-          return {
-            openExtraColorModal: (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
-              this.showExtraColorPanel = true
-              this.extraColorEvent = colorEventType
-              this.panelHistory.push(initColorPanelType)
-            }
-          }
-        }
-        case 'brand-list': {
-          return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            },
-            back: () => {
-              this.panelHistory.pop()
-            }
+            maxheight: this.panelParentHeight()
           }
         }
         case 'vvstk-more': {
           return {
-            pushHistory: (history: string) => {
-              this.panelHistory.push(history)
-            },
-            back: () => {
-              this.panelHistory.pop()
-            }
+            panelHistory: this.panelHistory
           }
         }
         default: {
           return {}
         }
+      }
+    },
+    dynamicBindMethod(): { [index: string]: any } {
+      const pushHistory = (history: string) => {
+        this.panelHistory.push(history)
+      }
+      const openExtraColorModal = (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
+        this.showExtraColorPanel = true
+        this.extraColorEvent = colorEventType
+        this.panelHistory.push(initColorPanelType)
+      }
+      switch (this.currActivePanel) {
+        case 'color':
+          return { pushHistory }
+        case 'background':
+          return { openExtraColorModal }
+        case 'text-effect':
+        case 'photo-shadow': {
+          return { pushHistory, openExtraColorModal }
+        }
+        case 'brand-list':
+        case 'vvstk-more':
+          return {
+            pushHistory,
+            back: () => {
+              this.panelHistory.pop()
+            }
+          }
+        default:
+          return {}
       }
     },
     leftBtnName(): string {
@@ -560,6 +502,11 @@ export default defineComponent({
             break
           }
 
+          case 'copy-style': {
+            formatUtils.clearCopiedFormat()
+            break
+          }
+
           case 'color': {
             if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
               this.addRecentlyColors(colorUtils.currColor)
@@ -576,10 +523,6 @@ export default defineComponent({
           this.addRecentlyColors(colorUtils.currColor)
         }
         this.closeMobilePanel()
-
-        if (this.inMultiSelectionMode && this.inSelectionState) {
-          editorUtils.setInMultiSelectionMode(false)
-        }
       }
     }
   },
@@ -589,13 +532,14 @@ export default defineComponent({
         editorUtils.setInMultiSelectionMode(false)
       }
     },
-    currActivePanel(newVal) {
+    currActivePanel(newVal, oldVal) {
       this.panelHistory = []
       this.innerTabIndex = 0
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
-      this.panelHeight = this.initHeightPx()
-      this.draggedPanelHeight = this.panelHeight
+      if (oldVal === 'none' || newVal === 'text') { // Prevent reset height when switch panel
+        this.panelDragHeight = newVal === 'none' ? 0 : this.initPanelHeight()
+      }
     },
     showMobilePanel(newVal) {
       if (!newVal) {
@@ -604,8 +548,7 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.panelHeight = this.initHeightPx()
-    this.draggedPanelHeight = this.panelHeight
+    this.panelDragHeight = 0
   },
   methods: {
     ...mapMutations({
@@ -640,12 +583,16 @@ export default defineComponent({
       this.panelHistory = []
       editorUtils.setCurrActivePanel('none')
     },
-    initHeightPx() {
+    initPanelHeight() {
       // 40 = HeaderTabs height
       return ((this.$el.parentElement as HTMLElement).clientHeight - (this.trueWholeSize ? 0 : 40)) * (this.halfSizeInInitState ? 0.5 : 1.0)
     },
-    maxHeightPx() {
-      return ((this.$el.parentElement as HTMLElement).clientHeight - (this.trueWholeSize ? 0 : 40)) * 1.0
+    currPanelHeight() {
+      return (this.$refs.panel as HTMLElement).clientHeight
+    },
+    panelParentHeight() {
+      if (!this.$el) return window.innerHeight
+      return (this.$el.parentElement as HTMLElement).clientHeight - (this.trueWholeSize ? 0 : 40)
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
       if (this.fixSize) {
@@ -653,31 +600,25 @@ export default defineComponent({
       }
       this.isDraggingPanel = true
       this.lastPointerY = event.clientY
-      this.panelHeight = (this.$refs.panel as HTMLElement).clientHeight
+      this.panelDragHeight = this.currPanelHeight()
       eventUtils.addPointerEvent('pointermove', this.dragingPanel)
       eventUtils.addPointerEvent('pointerup', this.dragPanelEnd)
     },
     dragingPanel(event: MouseEvent | PointerEvent) {
-      this.panelHeight -= event.clientY - this.lastPointerY
+      this.panelDragHeight -= event.clientY - this.lastPointerY
       this.lastPointerY = event.clientY
     },
     dragPanelEnd() {
       this.isDraggingPanel = false
-      const maxHeightPx = this.maxHeightPx()
-      if (this.panelHeight < maxHeightPx * 0.25) {
+      const panelParentHeight = this.panelParentHeight()
+      if (this.panelDragHeight < panelParentHeight * 0.25) {
         this.closeMobilePanel()
-      } else if (this.panelHeight >= maxHeightPx * 0.75) {
-        this.panelHeight = maxHeightPx
-        this.draggedPanelHeight = this.panelHeight
-        this.$nextTick(() => {
-          pageUtils.fitPage()
-        })
+      } else if (this.panelDragHeight >= panelParentHeight * 0.75) {
+        this.panelDragHeight = panelParentHeight
+        this.$emit('panelHeight', this.panelDragHeight + 30) // 30 = 15 padding * 2
       } else {
-        this.panelHeight = maxHeightPx * 0.5
-        this.draggedPanelHeight = this.panelHeight
-        this.$nextTick(() => {
-          pageUtils.fitPage()
-        })
+        this.panelDragHeight = panelParentHeight * 0.5
+        this.$emit('panelHeight', this.panelDragHeight + 30)
       }
 
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)
@@ -710,7 +651,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .mobile-panel {
-  position: relative;
+  position: absolute;
+  bottom: 0;
   width: 100%;
   box-sizing: border-box;
   z-index: setZindex(mobile-panel);

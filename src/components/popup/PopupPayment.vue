@@ -183,11 +183,11 @@ export default defineComponent({
           return [this.$tc('NN0768'), 'page-resize.jpg']
         case 'brandkit':
           return [this.$tc('NN0583'), 'brandkit.jpg']
-        case 'bgrm':
         case 'pro-template':
           return [this.$tc('NN0653'), 'cb.jpg']
         case 'pro-object':
           return [this.$tc('NN0658'), 'pro-object.jpg']
+        case 'bgrm':
         default:
           return [this.$tc('NN0652'), 'remover.jpg']
       }

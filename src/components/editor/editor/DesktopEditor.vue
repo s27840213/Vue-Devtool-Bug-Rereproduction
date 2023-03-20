@@ -16,17 +16,21 @@ div(class="desktop-editor")
                 span(class="ml-10 text-bold text-orange") {{templateText}}
                 span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
               svg-icon(
-                class="mr-10"
                 :iconName="`user-admin${getAdminModeText}`"
                 :iconWidth="'20px'"
                 :iconColor="'gray-2'"
                 @click="setAdminMode()")
+              svg-icon(
+                iconName="vivisticker_logo"
+                iconWidth="20px"
+                :iconColor="stkMode ? 'black' : 'blue-1'"
+                @click="switchApp")
               div(class="flex flex-column")
                 select(class="locale-select" v-model="inputLocale")
                   option(v-for="locale in localeOptions" :value="locale") {{locale}}
               div(class="ml-10" @click="setEnableComponentLog(!enableComponentLog)")
                 span {{`${enableComponentLog ? '關閉' : '開啟'} Log`}}
-          editor-view(:currPage="currPage")
+          editor-view(:currPage="currPage" :isSidebarPanelOpen="isSidebarPanelOpen")
           scale-ratio-editor(v-if="!isShowPagePreview" @toggleSidebarPanel="toggleSidebarPanel")
       div(class="content__panel"
           :style="contentPanelStyles")
@@ -94,6 +98,7 @@ export default defineComponent({
       FunctionPanelType,
       isSidebarPanelOpen: true,
       inputLocale: i18n.global.locale,
+      stkMode: /app=1/.test(window.location.href),
       componentLogs: [] as Array<IComponentUpdatedLog>
     }
   },
@@ -117,22 +122,22 @@ export default defineComponent({
       this.toggleSidebarPanel = this.isShowPagePreview
     },
     async inputLocale() {
-      // this.$emit('setIsLoading', true)
-      // const updateValue: { [key: string]: string } = {}
-      // updateValue.token = this.token
-      // updateValue.locale = this.inputLocale
+      this.$emit('setIsLoading', true)
+      const updateValue: { [key: string]: string } = {}
+      updateValue.token = this.token
+      updateValue.locale = this.inputLocale
 
-      // await store.dispatch('user/updateUser', updateValue)
-      //   .then((value) => {
-      //     if (!value.data.flag) {
-      //       localStorage.setItem('locale', value.data.locale)
-      //       this.$router.go(0)
-      //     } else {
-      //       this.networkError()
-      //     }
-      //   }, () => {
-      //     this.networkError()
-      //   })
+      await store.dispatch('user/updateUser', updateValue)
+        .then((value) => {
+          if (!value.data.flag) {
+            localStorage.setItem('locale', value.data.locale)
+            this.$router.go(0)
+          } else {
+            this.networkError()
+          }
+        }, () => {
+          this.networkError()
+        })
     }
   },
   computed: {
@@ -228,6 +233,12 @@ export default defineComponent({
     },
     setAdminMode() {
       this._setAdminMode(!this.adminMode)
+    },
+    switchApp() {
+      this.stkMode = !this.stkMode
+      const url = new URL(window.location.href)
+      this.stkMode ? url.searchParams.append('app', '1') : url.searchParams.delete('app')
+      window.location.href = url.toString()
     },
     setPanelType(type: number) {
       this.setCurrFunctionPanel(type)

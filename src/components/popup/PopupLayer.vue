@@ -84,15 +84,12 @@ div(class=" popup-layer bg-gray-6"
 </template>
 
 <script lang="ts">
-import { IImage } from '@/interfaces/layer'
 import { IPopupOptions } from '@/interfaces/popup'
+import backgroundUtils from '@/utils/backgroundUtils'
 import frameUtils from '@/utils/frameUtils'
-import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
-import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
-import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -351,71 +348,7 @@ export default defineComponent({
       }
     },
     setBackgroundImage() {
-      const pageIndex = this.currSelectedInfo.pageIndex
-      const image = this.currSelectedInfo.layers[0] as IImage
-      const src = imageUtils.getSrc(image)
-      this._setBgImgSrc({
-        pageIndex: pageIndex,
-        srcObj: image.srcObj,
-        previewSrc: image.previewSrc,
-        panelPreviewSrc: image.panelPreviewSrc
-      })
-      const _image = generalUtils.deepCopy(image)
-      _image.styles.width = _image.styles.imgWidth
-      _image.styles.height = _image.styles.imgHeight
-      _image.styles.initWidth = _image.styles.imgWidth
-      _image.styles.initHeight = _image.styles.imgHeight
-      _image.styles.rotate = 0
-      _image.styles.imgX = 0
-      _image.styles.imgY = 0
-      const { width, height, posX, posY } = imageUtils.adaptToPage(_image.styles, this.getPage(pageIndex))
-      const { adjust, horizontalFlip, verticalFlip } = _image.styles
-      pageUtils.updateBackgroundImageStyles(pageIndex, {
-        width,
-        height,
-        adjust,
-        horizontalFlip,
-        verticalFlip,
-        imgWidth: width,
-        imgHeight: height,
-        scale: 1
-      })
-      pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
-      pageUtils.updateBackgroundImageMode(pageIndex, true)
-      ShortcutUtils.del()
-
-      // imageUtils.getImageSize(src, image.styles.imgWidth, image.styles.imgHeight).then(({ width: imgWidth, height: imgHeight }) => {
-      //   image.styles.imgWidth = imgWidth
-      //   image.styles.imgHeight = imgHeight
-      //   image.styles.width = imgWidth
-      //   image.styles.height = imgHeight
-      //   image.styles.initWidth = imgWidth
-      //   image.styles.initHeight = imgHeight
-      //   image.styles.rotate = 0
-      //   image.styles.imgX = 0
-      //   image.styles.imgY = 0
-      //   // this._setBgImgSrc({
-      //   //   pageIndex: pageIndex,
-      //   //   srcObj: image.srcObj,
-      //   //   previewSrc: image.previewSrc,
-      //   //   panelPreviewSrc: image.panelPreviewSrc
-      //   // })
-      //   const { width, height, posX, posY } = imageUtils.adaptToSize(image.styles, this.getPage(pageIndex))
-      //   const { adjust, horizontalFlip, verticalFlip } = image.styles
-      //   pageUtils.updateBackgroundImageStyles(pageIndex, {
-      //     width,
-      //     height,
-      //     adjust,
-      //     horizontalFlip,
-      //     verticalFlip,
-      //     imgWidth: width,
-      //     imgHeight: height,
-      //     scale: 1
-      //   })
-      //   pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
-      //   pageUtils.updateBackgroundImageMode(pageIndex, true)
-      //   ShortcutUtils.del()
-      // })
+      backgroundUtils.setBgImageSrc()
     },
     closePopup() {
       popupUtils.closePopup()

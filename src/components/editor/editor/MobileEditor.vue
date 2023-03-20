@@ -14,8 +14,9 @@ div(class="mobile-editor")
           :showMobilePanel="showMobilePanelAfterTransitoin")
     transition(name="panel-up"
               @before-enter="beforeEnter"
+              @after-enter="afterEnter"
               @after-leave="afterLeave")
-      mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
+      mobile-panel(v-show="showMobilePanel" ref="mobilePanel"
         :currActivePanel="currActivePanel"
         :currPage="currPage"
         @switchTab="switchTab"
@@ -50,6 +51,7 @@ import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import { find } from 'lodash'
 import { defineComponent, PropType } from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -72,7 +74,7 @@ export default defineComponent({
       currColorEvent: '',
       ColorEventType,
       showMobilePanelAfterTransitoin: false,
-      panelHeight: 0
+      marginBottom: 0
     }
   },
   props: {
@@ -140,7 +142,8 @@ export default defineComponent({
     ...mapState('mobileEditor', {
       closeMobilePanelFlag: 'closeMobilePanelFlag',
       inAllPagesMode: 'mobileAllPageMode',
-      mobilePanel: 'currActivePanel'
+      mobilePanel: 'currActivePanel',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     ...mapState('user', [
       'viewGuide'
@@ -149,6 +152,7 @@ export default defineComponent({
       groupId: 'getGroupId',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      contentScaleRatio: 'getContentScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
@@ -161,7 +165,7 @@ export default defineComponent({
       return SidebarPanelType.page === this.currPanel
     },
     contentStyle(): Record<string, string> {
-      return { transform: `translateY(-${this.panelHeight / 2}px)` }
+      return { transform: `translateY(-${this.marginBottom}px)` }
     },
     scaleRatioEditorPos(): { [index: string]: string } {
       return this.inPagePanel ? {
@@ -226,6 +230,9 @@ export default defineComponent({
       fetchBrands: 'brandkit/fetchBrands'
     }),
     switchTab(panelType: string, props?: IFooterTabProps) {
+      if (!this.inBgRemoveMode && panelType === 'remove-bg') {
+        return
+      }
       // Switch between color and text-color panel without close panel
       if (this.currActivePanel === panelType && panelType === 'color' &&
         props?.currColorEvent && this.currColorEvent !== props.currColorEvent) {
@@ -238,10 +245,6 @@ export default defineComponent({
         editorUtils.setCurrActivePanel(panelType)
         if (panelType === 'color' && props?.currColorEvent) {
           this.currColorEvent = props.currColorEvent
-        }
-
-        if (this.inMultiSelectionMode) {
-          editorUtils.setInMultiSelectionMode(false)
         }
       }
 
@@ -259,13 +262,31 @@ export default defineComponent({
       }
     },
     setPanelHeight(height: number) {
-      this.panelHeight = height
+      if (height === 0) {
+        this.marginBottom = 0
+        return
+      }
+
+      const content = this.$refs['mobile-editor__content'] as HTMLElement
+      const contentHeight = content?.clientHeight ?? 0
+      const activeLayer = find(this.currPage.layers, ['active', true])
+      let offset = 0
+      if (activeLayer && contentHeight) {
+        const layerMiddleY = activeLayer.styles.y +
+          activeLayer.styles.height / 2 - this.currPage.height / 2
+        offset = layerMiddleY * this.contentScaleRatio
+      }
+      this.marginBottom = Math.max(height / 2 + offset, 0)
     },
     beforeEnter() {
       this.showMobilePanelAfterTransitoin = true
     },
+    afterEnter() {
+      this.setPanelHeight((this.$refs.mobilePanel as {$el: HTMLElement}).$el.clientHeight)
+    },
     afterLeave() {
       editorUtils.setCurrActivePanel('none')
+      this.setPanelHeight(0)
       setTimeout(() => {
         this.showMobilePanelAfterTransitoin = false
       }, 300)

@@ -7,6 +7,7 @@ div(class="radio-btn relative pointer"
   svg-icon(v-else class="radio-btn__svg" iconName="radio" iconWidth="12px" :iconColor="circleColor || 'white'")
   div(v-if="isHovered" class="radio-btn__hover-effect")
 </template>
+
 <script lang="ts">
 import { defineComponent } from 'vue'
 
