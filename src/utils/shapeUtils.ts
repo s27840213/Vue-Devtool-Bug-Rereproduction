@@ -1,6 +1,6 @@
 import store from '@/store'
 import { IListServiceContentDataItem } from '@/interfaces/api'
-import { IGroup, ILayer, IShape } from '@/interfaces/layer'
+import { AllLayerTypes, IGroup, ILayer, IShape } from '@/interfaces/layer'
 import { IMarker } from '@/interfaces/shape'
 import AssetUtils from './assetUtils'
 import layerUtils from './layerUtils'
@@ -687,6 +687,14 @@ class ShapeUtils {
         }
       )
     }
+  }
+
+  isLine(config: AllLayerTypes): boolean {
+    return config.type === 'shape' && config.category === 'D'
+  }
+
+  isBasicShape(config: AllLayerTypes): boolean {
+    return config.type === 'shape' && config.category === 'E'
   }
 }
 

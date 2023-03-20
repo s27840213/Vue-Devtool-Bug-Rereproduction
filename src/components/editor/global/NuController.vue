@@ -156,7 +156,7 @@ import i18n from '@/i18n'
 import { IResizer } from '@/interfaces/controller'
 import { ICoordinate } from '@/interfaces/frame'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import ControlUtils from '@/utils/controlUtils'
@@ -2237,7 +2237,7 @@ export default defineComponent({
       return this.config.locked
     },
     isLine(): boolean {
-      return this.config.type === 'shape' && this.config.category === 'D'
+      return shapeUtils.isLine(this.config as AllLayerTypes)
     },
     getLayerWidth(): number {
       return this.config.styles.width
