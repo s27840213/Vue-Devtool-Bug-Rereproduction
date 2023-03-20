@@ -117,12 +117,12 @@ export default defineComponent({
       isTablet: 'isTablet'
     }),
     ...mapState('giphy', {
+      rawPending: 'pending',
       rawCategories: 'categories',
       rawSearchResult: 'searchResult',
       nextTagContent: 'nextTagContent'
     }),
     ...mapGetters('giphy', {
-      rawPending: 'pending',
       isSearchingCategory: 'isSearchingCategory',
       isSearchingTag: 'isSearchingTag',
       tagsBar: 'tagsBar',
@@ -142,7 +142,9 @@ export default defineComponent({
       return this.isTabShowAllRecently('object')
     },
     pending(): boolean {
-      return this.showFav ? this.rawPending.favorites : this.rawPending.content
+      if (this.showFav) return this.rawPending.favorites
+      if (this.isInCategory) return this.rawPending.content
+      return this.rawPending.categories || this.rawPending.content
     },
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword

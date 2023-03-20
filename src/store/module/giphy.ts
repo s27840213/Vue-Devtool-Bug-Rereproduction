@@ -12,6 +12,12 @@ import vivistickerUtils from '@/utils/vivistickerUtils'
 import { cloneDeep, filter, find, map, pull } from 'lodash'
 import { ActionTree, GetterTree, MutationTree } from 'vuex'
 
+type IPending = {
+  categories: boolean
+  content: boolean
+  favorites: boolean
+}
+
 interface IGiphyState {
   categories: IGifCategory[]
   searchResult: IGifCategoryContent
@@ -20,7 +26,7 @@ interface IGiphyState {
   nextCategoryContent: ICategoryContentApiParams
   nextTagContent: ITagContentApiParams
   selectedGif: IGif
-  pending: boolean
+  pending: IPending
   favorites: {
     // Should sync with local storage:
     items: IGiphyFavorite<IGif>
@@ -32,7 +38,6 @@ interface IGiphyState {
     tagsContent: IGiphyFavoriteTagContent
     categoriesContent: IGiphyFavoriteCategoryContent
     searchTarget: string | ITagExtend | IGifCategoryExtend
-    pending: boolean
   }
 }
 
@@ -64,7 +69,11 @@ const getDefaultState = (): IGiphyState => ({
     has_d: 0,
     src: ''
   },
-  pending: false,
+  pending: {
+    categories: false,
+    content: false,
+    favorites: false
+  },
   favorites: {
     items: {
       order: [],
@@ -83,7 +92,6 @@ const getDefaultState = (): IGiphyState => ({
     tagsContent: {},
     categoriesContent: {},
     searchTarget: '',
-    pending: false
   }
 })
 const state = getDefaultState()
@@ -151,7 +159,7 @@ const actions: ActionTree<IGiphyState, unknown> = {
   async getCategories({ commit }) {
     const { nextCategory } = state
     if (nextCategory === -1) return
-    commit('SET_pending', { giphy: true })
+    commit('SET_pending', { categories: true })
 
     await giphyApi.getCategories(nextCategory).then((response) => {
       const data = response.data.data
@@ -169,9 +177,9 @@ const actions: ActionTree<IGiphyState, unknown> = {
       }
       commit('SET_STATE', {
         categories: oldCategories.concat(data.content),
-        nextCategory: data.next_page,
-        pending: false
+        nextCategory: data.next_page
       })
+      commit('SET_pending', { categories: false })
     })
   },
   // Set category content search target, and do search.
@@ -191,9 +199,10 @@ const actions: ActionTree<IGiphyState, unknown> = {
   },
   // Category search.
   getMoreCategoryContent({ commit }) {
-    const { nextCategoryContent, pending } = state
+    const { nextCategoryContent } = state
+    const pending = state.pending.content
     if (pending || nextCategoryContent.nextPage === -1) return
-    commit('SET_pending', { giphy: true })
+    commit('SET_pending', { content: true })
 
     giphyApi.getCategoryContent(nextCategoryContent).then((response) => {
       const data = response.data.data
@@ -241,9 +250,10 @@ const actions: ActionTree<IGiphyState, unknown> = {
     dispatch('getMoreTagContent')
   },
   getMoreTagContent({ commit }) {
-    const { nextTagContent, pending } = state
+    const { nextTagContent } = state
+    const pending = state.pending.content
     if (pending || nextTagContent.nextPage === -1) return
-    commit('SET_pending', { giphy: true })
+    commit('SET_pending', { content: true })
 
     giphyApi.getTagContent(nextTagContent).then((response) => {
       const data = response.data.data
@@ -296,7 +306,8 @@ const actions: ActionTree<IGiphyState, unknown> = {
   },
   // Favorites actions
   async getFavoritesCategories({ commit }) {
-    const { nextCategories, pending } = state.favorites
+    const { nextCategories } = state.favorites
+    const pending = state.pending.favorites
     if (pending || nextCategories.length === 0) return
     commit('SET_pending', { favorites: true })
     const toRequest = nextCategories.slice(0, 12)
@@ -327,7 +338,8 @@ const actions: ActionTree<IGiphyState, unknown> = {
     })
   },
   async getFavoritesTags({ commit }) {
-    const { nextTags, pending } = state.favorites
+    const { nextTags } = state.favorites
+    const pending = state.pending.favorites
     if (pending || nextTags.length === 0) return
     commit('SET_pending', { favorites: true })
     const toRequest = nextTags.slice(0, 12)
@@ -356,7 +368,7 @@ const actions: ActionTree<IGiphyState, unknown> = {
     })
   },
   getFavoritesCategoriesContent({ commit }, id: string) {
-    const { pending } = state.favorites
+    const pending = state.pending.favorites
     const categoriesContent = cloneDeep(state.favorites.categoriesContent)
     const { next, gifs, tags } = categoriesContent[id] ?? { next: { categoryId: id }, gifs: [], tags: [] }
     const { categoryId, nextPage } = next
@@ -390,7 +402,7 @@ const actions: ActionTree<IGiphyState, unknown> = {
     })
   },
   getFavoritesTagsContent({ commit }, id: string) {
-    const { pending } = state.favorites
+    const pending = state.pending.favorites
     const tagsContent = cloneDeep(state.favorites.tagsContent)
     const { next, gifs } = tagsContent[id] ?? { next: keyword2tag(id), gifs: [] }
     const { keyword, type, nextPage } = next
@@ -506,16 +518,9 @@ const mutations: MutationTree<IGiphyState> = {
         }
       })
   },
-  SET_pending(state: IGiphyState, data: Record<'giphy' | 'favorites', boolean>) {
+  SET_pending(state: IGiphyState, data: Record<keyof IPending, boolean>) {
     for (const item of Object.entries(data)) {
-      switch (item[0]) {
-        case 'giphy':
-          state.pending = item[1]
-          break
-        case 'favorites':
-          state.favorites.pending = item[1]
-          break
-      }
+      state.pending[item[0] as keyof IPending] = item[1]
     }
   },
   UPDATE_searchResult(state: IGiphyState, result: { tags?: ITag[], content: IGif[] }) {
@@ -528,17 +533,17 @@ const mutations: MutationTree<IGiphyState> = {
   UPDATE_nextCategoryContent(state: IGiphyState, next: { keyword: string, nextPage: number }) {
     state.nextCategoryContent.keyword = next.keyword
     state.nextCategoryContent.nextPage = next.nextPage
-    state.pending = false
+    state.pending.content = false
   },
   UPDATE_nextTagContent(state: IGiphyState, next: { nextPage: number }) {
     state.nextTagContent.nextPage = next.nextPage
-    state.pending = false
+    state.pending.content = false
   },
   UPDATE_favorites(state: IGiphyState, obj: Record<string, unknown>) {
     for (const item of Object.entries(obj)) {
       Object.assign(state.favorites, { [item[0]]: item[1] })
     }
-    state.favorites.pending = false
+    state.pending.favorites = false
   }
 }
 
@@ -556,7 +561,7 @@ function processTags(tag: ITag) {
 
 const getters: GetterTree<IGiphyState, unknown> = {
   pending(state: IGiphyState) {
-    return { content: state.pending, favorites: state.favorites.pending }
+    return Object.entries(state.pending).some(([key, value]) => value)
   },
   isSearchingCategory(state: IGiphyState) {
     return state.nextCategoryContent.categoryId !== -1
