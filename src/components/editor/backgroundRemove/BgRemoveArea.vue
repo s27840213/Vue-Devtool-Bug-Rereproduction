@@ -15,7 +15,9 @@ div(class="bg-remove-area"
       :iconName="'spiner'"
       :iconColor="'white'"
       :iconWidth="'150px'")
-canvas(class="magnify-area" ref="magnify" :cy-ready="cyReady")
+div(class="magnify-area" :style="magnifyAreaStyle")
+  canvas(class="magnify-area__canvas"  ref="magnify")
+  div(class="magnify-area__brush" :style="{backgroundColor: brushColor}")
 </template>
 
 <script lang="ts">
@@ -55,11 +57,10 @@ export default defineComponent({
       imageElement: undefined as unknown as HTMLImageElement,
       initPos: { x: 0, y: 0 },
       brushStyle: {
-        top: '0px',
-        left: '0px',
         backgroundColor: '#fcaea9',
         width: '16px',
-        height: '16px'
+        height: '16px',
+        transform: 'translate(0,0)'
       },
       isMouseDown: false,
       initImgSrc: '',
@@ -69,7 +70,8 @@ export default defineComponent({
       stepsQueue: [] as Array<Promise<unknown>>,
       isProcessingStepsQueue: false,
       currCanvasImageElement: undefined as unknown as HTMLImageElement,
-      brushSteps: []
+      brushSteps: [],
+      magnifyUtils: null as unknown as MagnifyUtils
     }
   },
   created() {
@@ -100,7 +102,7 @@ export default defineComponent({
       this.createInitImageCtx()
     }
     this.editorViewCanvas.addEventListener('pointerdown', this.drawStart)
-    window.addEventListener('pointermove', this.brushMoving)
+    window.addEventListener('pointermove', this.setBrushPos)
     if (!this.$isTouchDevice()) {
       this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
       this.editorViewCanvas.addEventListener('mouseleave', this.handleBrushLeave)
@@ -111,7 +113,7 @@ export default defineComponent({
   },
   unmounted() {
     window.removeEventListener('pointerup', this.drawEnd)
-    window.removeEventListener('pointermove', this.brushMoving)
+    window.removeEventListener('pointermove', this.setBrushPos)
     window.removeEventListener('pointermove', this.drawing)
     this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
     this.editorViewCanvas.removeEventListener('mouseleave', this.handleBrushLeave)
@@ -170,6 +172,15 @@ export default defineComponent({
     },
     brushColor(): string {
       return this.clearMode ? '#fcaea9' : '#fdd033'
+    },
+    magnifyAreaStyle() {
+      return !this.$isTouchDevice() ? {
+        top: '10px',
+        left: '80px'
+      } : {
+        bottom: `${this.root ? parseInt((this.root as HTMLElement).style.height) - 60 : 0}px`,
+        left: '40px'
+      }
     }
   },
   watch: {
@@ -183,6 +194,8 @@ export default defineComponent({
         this.blurPx = 1
         this.contentCtx.filter = `blur(${this.blurPx}px)`
       }
+
+      this.magnifyUtils.render()
     },
     restoreInitState(newVal) {
       if (newVal) {
@@ -294,7 +307,7 @@ export default defineComponent({
 
       this.magnifyCtx = ctx
 
-      const magnifyCanvas = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root)
+      this.magnifyUtils = new MagnifyUtils(this.magnifyCanvas, this.magnifyCtx, this.contentCanvas, this.root)
     },
     createInitImageCtx() {
       this.initImgCanvas = document.createElement('canvas') as HTMLCanvasElement
@@ -329,6 +342,10 @@ export default defineComponent({
           x,
           y
         })
+        if (this.$isTouchDevice()) {
+          this.showBrush = true
+          this.setBrushPos(e)
+        }
         if (this.clearMode) {
           this.drawInClearMode(e)
         } else {
@@ -350,11 +367,13 @@ export default defineComponent({
       window.removeEventListener('pointermove', this.drawing)
       this._setCanvas(this.contentCanvas)
       this.pushStep()
+      if (this.$isTouchDevice()) {
+        this.showBrush = false
+      }
     },
-    brushMoving(e: MouseEvent) {
+    setBrushPos(e: MouseEvent) {
       const { x, y } = mouseUtils.getMousePosInTarget(e, this.root)
-      this.brushStyle.left = `${x - (this.brushSize + this.blurPx) / 2}px`
-      this.brushStyle.top = `${y - (this.brushSize + this.blurPx) / 2}px`
+      this.brushStyle.transform = `translate(${x - (this.brushSize + this.blurPx) / 2}px, ${y - (this.brushSize + this.blurPx) / 2}px)`
     },
     drawImageToCtx(img?: HTMLImageElement) {
       this.setCompositeOperationMode('source-over')
@@ -541,6 +560,8 @@ export default defineComponent({
 
   &__brush {
     position: absolute;
+    top: 0px;
+    left: 0px;
     pointer-events: none;
     border-radius: 50%;
     opacity: 0.6;
@@ -561,11 +582,27 @@ export default defineComponent({
 }
 
 .magnify-area {
-  position: absolute;
-  top: 0px;
-  left: 0px;
+  position: fixed;
+  width: 60px;
+  height: 60px;
   overflow:hidden;
   transform-origin: top left;
+  border: 1px solid setColor(gray-2);
+  border-radius: 8px;
+  box-sizing: border-box;
+
+  &__brush {
+    position: absolute;
+    width: calc(100% *  (2/3) + 3px);
+    height: calc(100% *  (2/3) + 3px);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    opacity: 0.7;
+    box-sizing: border-box;
+    border-radius: 50%;
+    z-index: setZindex('popup');
+  }
 }
 
 .spiner {
