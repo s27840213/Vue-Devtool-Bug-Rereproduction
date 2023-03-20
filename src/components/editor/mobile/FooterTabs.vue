@@ -65,7 +65,7 @@ import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
-import picWVUtils from '@/utils/picWVUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -128,7 +128,7 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       hasCopiedFormat: 'getHasCopiedFormat',
-      userInfo: 'webView/getUserInfo'
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
     }),
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
@@ -237,7 +237,7 @@ export default defineComponent({
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' },
-        ...!picWVUtils.inReviewMode ? [{ icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: this.isInFrame }] : []
+        ...!webViewUtils.inReviewMode ? [{ icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: this.isInFrame }] : []
       ]
     },
     frameTabs(): Array<IFooterTab> {

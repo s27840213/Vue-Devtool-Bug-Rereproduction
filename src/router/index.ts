@@ -4,10 +4,9 @@ import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import picWVUtils from '@/utils/picWVUtils'
-import BrandKit from '@/views/BrandKit.vue'
 import CopyTool from '@/views/CopyTool.vue'
 import NubtnList from '@/views/NubtnList.vue'
 import { h, resolveComponent } from 'vue'
@@ -120,7 +119,7 @@ const router = createRouter({
         if (editorBg) {
           store.commit('vivisticker/SET_editorBg', editorBg)
         }
-        picWVUtils.updateLocale(locale)
+        webViewUtils.updateLocale(locale)
 
         document.title = to.meta?.title as string || i18n.global.t('SE0001')
         next()
@@ -140,8 +139,8 @@ router.beforeEach(async (to, from, next) => {
     next()
     return
   }
-  picWVUtils.detectIfInApp()
-  await picWVUtils.changeStatusBarTextColor(to.name?.toString() ?? '')
+  webViewUtils.detectIfInApp()
+  await webViewUtils.changeStatusBarTextColor(to.name?.toString() ?? '')
   // Store campaign param to local storage.
   const urlParams = new URLSearchParams(window.location.search)
   const campaign = urlParams.get('campaign')

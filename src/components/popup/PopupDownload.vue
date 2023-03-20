@@ -190,7 +190,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import picWVUtils from '@/utils/picWVUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import vClickOutside from 'click-outside-vue3'
@@ -312,7 +312,7 @@ export default defineComponent({
       isAdmin: 'isAdmin'
     }),
     inReviewMode(): boolean {
-      return picWVUtils.inReviewMode
+      return webViewUtils.inReviewMode
     },
     selectedType(): ITypeOption {
       const { selectedTypeVal, typeOptions } = this

@@ -139,6 +139,7 @@ div(class="bottom-menu" :style="rootStyles")
 import MobileStructureFolder from '@/components/mydesign/MobileStructureFolder.vue'
 import { IDesign, IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent } from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
@@ -236,7 +237,7 @@ export default defineComponent({
       pathBuffer: 'getMobilePathBuffer'
     }),
     ...mapGetters({
-      userInfo: 'webView/getUserInfo'
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
     }),
     rootStyles(): {[key: string]: string} {
       return this.isInputFocused ? {} : {
