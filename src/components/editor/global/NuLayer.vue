@@ -44,7 +44,9 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
   div(class="nu-layer__line-mover"
     :style="lineMoverStyles()"
     ref="lineMover"
-    :id="`nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`")
+    :id="`nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`"
+    @contextmenu.prevent
+    @click.right.stop="onRightClick($event)")
 </template>
 
 <script lang="ts">

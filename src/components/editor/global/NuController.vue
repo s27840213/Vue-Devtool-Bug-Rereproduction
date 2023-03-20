@@ -2086,7 +2086,6 @@ export default defineComponent({
       }
     },
     onRightClick(event: MouseEvent) {
-      console.log('onRightClick')
       if (this.$isTouchDevice()) {
         // in touch device, right click will be triggered by long click
         event.preventDefault()
