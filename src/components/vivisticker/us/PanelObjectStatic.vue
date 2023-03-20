@@ -269,6 +269,7 @@ export default defineComponent({
       this.mainContentScrollTop = this.elMainContent?.scrollTop ?? 0
     },
     scrollCategoryIcon(target?: number) {
+      if (this.hideCategoryIconList) return
       this.$nextTick(() => {
         const categoryIconList = (this.$refs.categoryIconList as any).$el as HTMLElement
         if (target !== undefined) {
