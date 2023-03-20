@@ -270,7 +270,7 @@ export default defineComponent({
             if (tiptapUtils.isCurrLayerContenteditable()) {
               ShortcutUtils.textCopy()
             } else {
-              ShortcutUtils.copy()
+              ShortcutUtils.duplicate()
             }
           }
         },
