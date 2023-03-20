@@ -29,7 +29,6 @@ export class Page implements IPage {
     v: Array<number>
     h: Array<number>
   }
-  mobilePysicalSize: { pageCenterPos: ICoordinate; pageSize: ISize }
 
   mobilePysicalSize: { pageCenterPos: ICoordinate; pageSize: ISize }
 

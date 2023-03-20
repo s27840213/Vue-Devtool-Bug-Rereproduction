@@ -27,6 +27,7 @@ import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
 import textShapeUtils from './textShapeUtils'
 import TextUtils from './textUtils'
+import tiptapUtils from './tiptapUtils'
 import unitUtils, { PRECISION } from './unitUtils'
 import vivistickerUtils from './vivistickerUtils'
 import ZindexUtils from './zindexUtils'
@@ -528,7 +529,7 @@ class AssetUtils {
       }
 
       TextUtils.resetTextField(textLayer, targetPageIndex, field)
-      LayerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false, contentEditable: true, isCompensated: true }))])
+      layerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false, contentEditable: true, isCompensated: true }))])
       editorUtils.setCloseMobilePanelFlag(true)
       setTimeout(() => {
         tiptapUtils.agent(editor => editor.commands.selectAll())
