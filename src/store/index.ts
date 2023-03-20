@@ -867,6 +867,21 @@ const mutations: MutationTree<IEditorState> = {
     }
   },
   DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex }) {
+    // check every pages background image
+    for (const page of state.pages) {
+      const bgImg = page.config.backgroundImage
+      if (bgImg.config.previewSrc && bgImg.config.srcObj.assetId === assetId) {
+        delete bgImg.config.previewSrc
+        Object.assign(bgImg.config.srcObj, {
+          type,
+          userId,
+          assetId: uploadUtils.isAdmin ? assetId : assetIndex
+        })
+        return
+      }
+    }
+
+    // check layers image
     const handler = (l: IShape | IText | IImage | IGroup | IFrame | ITmp) => {
       switch (l.type) {
         case LayerType.image:
