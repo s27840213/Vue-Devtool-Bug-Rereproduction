@@ -174,20 +174,19 @@ export default defineComponent({
         }
 
         // scroll category icon list to selected one
-        categoryIconList.onscroll = () => {
+        const scrollTop = ((this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement).scrollTop
+        setTimeout(() => {
+          categoryIconList.scrollLeft = scrollTop * (this.categoryIconWidth / this.categoryHeight)
           const selectedCategoryIcon = this.$refs.selectedCategoryIcon as HTMLElement
           if (!selectedCategoryIcon || !selectedCategoryIcon.parentElement) return
 
           const transform = selectedCategoryIcon.parentElement.style.transform
-          const match = transform.match(/translateX\((\d+)px\)/)
+          const match = transform.match(/translateX\((\d+(?:[.]\d*?)?)px\)/)
           if (!match || match.length < 2) return
 
-          const scrollLeft = parseInt(match[1])
+          const scrollLeft = parseFloat(match[1])
           categoryIconList.scrollLeft = scrollLeft
-          categoryIconList.onscroll = null
-        }
-        const scrollTop = ((this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement).scrollTop
-        categoryIconList.scrollLeft = scrollTop * (this.categoryIconWidth / this.categoryHeight)
+        }, 2)
       })
     }
   }

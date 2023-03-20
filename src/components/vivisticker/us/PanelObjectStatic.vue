@@ -278,7 +278,9 @@ export default defineComponent({
         }
 
         // scroll category icon list to selected one
-        categoryIconList.onscroll = () => {
+        const scrollTop = this.mainContentScrollTop
+        setTimeout(() => {
+          categoryIconList.scrollLeft = (scrollTop / this.numCardColumns) * (this.categoryIconWidth / this.categoryCardHeight)
           const selectedCategoryIcon = this.$refs.selectedCategoryIcon as HTMLElement
           if (!selectedCategoryIcon || !selectedCategoryIcon.parentElement) return
 
@@ -288,10 +290,7 @@ export default defineComponent({
 
           const scrollLeft = parseFloat(match[1])
           categoryIconList.scrollLeft = scrollLeft
-          categoryIconList.onscroll = null
-        }
-        const scrollTop = this.mainContentScrollTop
-        categoryIconList.scrollLeft = (scrollTop / this.numCardColumns) * (this.categoryIconWidth / this.categoryCardHeight)
+        }, 2)
       })
     }
   }
