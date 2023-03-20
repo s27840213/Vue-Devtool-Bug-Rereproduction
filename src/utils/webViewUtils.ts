@@ -1,3 +1,4 @@
+import generalUtils from './generalUtils'
 import logUtils from './logUtils'
 
 export abstract class WebViewUtils<T extends { [key: string]: any }> {
@@ -34,7 +35,7 @@ export abstract class WebViewUtils<T extends { [key: string]: any }> {
       if (!messageHandler) {
         throw new Error(`message type: ${messageType} does not exist!`)
       }
-      messageHandler.postMessage(message)
+      messageHandler.postMessage(generalUtils.unproxify(message))
     } catch (error) {
       logUtils.setLogAndConsoleLog(error)
     }
