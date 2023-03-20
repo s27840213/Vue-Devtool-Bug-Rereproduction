@@ -15,14 +15,14 @@ div(class="overflow-container"
       //- @dblclick will not be trigger in mobile, use @tap + doubleTapUtils instead.
       div(class="content" :class="`nu-page-content-${pageIndex}`" :style="contentStyles")
         div(v-if="noBg" class="page-content__pseudo-bg"
-          @mousedown.left.stop="pageClickHandler()")
+          @mousedown.left.stop="pageClickHandler($event)")
         nu-bg-image(v-else
           :image="config.backgroundImage"
           :pageIndex="pageIndex"
           :page="config"
           :color="config.backgroundColor"
           :key="config.backgroundImage.config.id"
-          @mousedown.left="pageClickHandler()"
+          @mousedown.left="pageClickHandler($event)"
           :contentScaleRatio="contentScaleRatio"
           :padding="contentStyles.margin")
         nu-layer(
@@ -273,7 +273,7 @@ export default defineComponent({
         }
       }
     },
-    pageClickHandler(): void {
+    pageClickHandler(e: PointerEvent): void {
       vivistickerUtils.deselect()
     },
     onRightClick(event: MouseEvent) {

@@ -21,6 +21,7 @@ import PageContent from '@/components/editor/page/PageContent.vue'
 import { IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ISnapline } from '@/interfaces/snap'
+import { LayerType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -31,6 +32,7 @@ import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import SnapUtils from '@/utils/snapUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -81,7 +83,8 @@ export default defineComponent({
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
       contentScaleRatio: 'getContentScaleRatio',
       isDuringCopy: 'vivisticker/getIsDuringCopy',
-      isImgCtrl: 'imgControl/isImgCtrl'
+      isImgCtrl: 'imgControl/isImgCtrl',
+      isBgImgCtrl: 'imgControl/isBgImgCtrl'
     }),
     config(): IPage {
       return this.pagesState[this.pageIndex].config
@@ -181,25 +184,36 @@ export default defineComponent({
     },
     selectStart(e: PointerEvent) {
       if (e.pointerType === 'mouse' && e.button !== 0) return
-      if (this.isImgCtrl) return
-
+      const isClickOnController = controlUtils.isClickOnController(e)
+      if (this.isImgCtrl && !isClickOnController) {
+        const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+        switch (currLayer.type) {
+          case LayerType.image:
+          case LayerType.group:
+            layerUtils.updateLayerProps(pageIndex, layerIndex, { imgControl: false }, subLayerIdx)
+            break
+          case LayerType.frame:
+            frameUtils.updateFrameLayerProps(pageIndex, layerIndex, subLayerIdx, { imgControl: false })
+            break
+        }
+        return
+      }
       if (layerUtils.layerIndex !== -1) {
         /**
          * when the user click the control-region outsize the page,
          * the moving logic should be applied to the EditorView.
          */
-        if (controlUtils.isClickOnController(e)) {
+        if (isClickOnController) {
           const movingUtils = new MovingUtils({
             _config: { config: layerUtils.getCurrLayer },
             snapUtils: pageUtils.getPageState(layerUtils.pageIndex).modules.snapUtils,
             body: document.getElementById(`nu-layer_${layerUtils.pageIndex}_${layerUtils.layerIndex}_-1`) as HTMLElement
           })
           movingUtils.moveStart(e)
-          return
-        }
-
-        if (imageUtils.isImgControl()) {
-          controlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+        } else {
+          if (this.isInEditor) {
+            vivistickerUtils.deselect()
+          }
         }
       }
     },

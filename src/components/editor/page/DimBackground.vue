@@ -1,5 +1,5 @@
 <template lang="pug">
-div(v-if="isImgCtrl" class="dim-background" @pointerdown="onBgClick")
+div(v-if="isImgCtrl" class="dim-background")
   div(class="dim-background__backdrop")
   div(class="dim-background__content-area" :style="contentAreaStyles")
     div
@@ -158,20 +158,6 @@ export default defineComponent({
         left: this.config.bleeds.left * this.contentScaleRatio + 'px',
         right: this.config.bleeds.right * this.contentScaleRatio + 'px'
       }
-    }
-  },
-  methods: {
-    onBgClick(e: PointerEvent) {
-      /**
-       *  Use setTimeout bcz the page click would set the layer to non-active,
-       *  setTimeout can make the click order ideally
-       */
-      // e.stopPropagation()
-      // setTimeout(() => {
-      //   imageUtils.setImgControlDefault()
-      //   editorUtils.setShowMobilePanel(false)
-      //   // editorUtils.setCurrActivePanel('none')
-      // }, 0)
     }
   }
 })

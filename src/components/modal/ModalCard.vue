@@ -20,7 +20,7 @@ div(v-show="modalInfo.imgSrc ? isImgLoaded : true" class="modal-card" :style="mo
             :class="{checked: modalInfo.checked}"
             @click="handleToggleChecked")
           svg-icon(v-if="modalInfo.checked" iconName="done" iconColor="white" iconWidth="20.7px")
-        span {{ $t('STK0010') }}
+        span {{ modalInfo.checkboxText || $t('STK0010') }}
     svg-icon(v-if="pending"
       :iconName="'loading'"
       :iconColor="'gray-2'"
