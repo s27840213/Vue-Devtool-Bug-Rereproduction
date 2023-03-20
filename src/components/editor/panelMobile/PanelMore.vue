@@ -42,7 +42,7 @@ div(class="panel-more")
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
-import picWVUtils from '@/utils/picWVUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import shortcutHandler from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent, PropType } from 'vue'
@@ -93,7 +93,7 @@ export default defineComponent({
       return buildNumber ? `v.${buildNumber}` : 'local'
     },
     appVersion(): string {
-      return picWVUtils.inBrowserMode ? '' : ` - ${picWVUtils.getUserInfoFromStore().appVer}`
+      return webViewUtils.inBrowserMode ? '' : ` - ${webViewUtils.getUserInfoFromStore().appVer}`
     },
     domainList(): { key: string, title: string }[] {
       return [
@@ -125,7 +125,7 @@ export default defineComponent({
     },
     newDesign() {
       const path = `${window.location.origin}${window.location.pathname}`
-      picWVUtils.openOrGoto(path)
+      webViewUtils.openOrGoto(path)
     },
     save() {
       shortcutHandler.save()
@@ -161,7 +161,7 @@ export default defineComponent({
       this.$emit('pushHistory', 'domain-list')
     },
     switchDomain(key: string) {
-      picWVUtils.switchDomain(key)
+      webViewUtils.switchDomain(key)
     }
   }
 })
