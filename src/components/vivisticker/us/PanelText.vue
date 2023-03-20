@@ -186,7 +186,9 @@ export default defineComponent({
     },
     handleMainContentScroll() {
       const el = this.elMainContent as HTMLElement
-      this.scrollRate = Math.max(Math.min(el.scrollTop / ((this.itemWidth + this.itemGap) * 2), 1), 0)
+      const destScrollTop = (this.itemWidth + this.itemGap) * 2
+      const maxDestScrollTop = (el.scrollHeight - el.clientHeight)
+      this.scrollRate = Math.max(Math.min(el.scrollTop / Math.min(destScrollTop, maxDestScrollTop), 1), 0)
     },
     updateBtnStyles() {
       const scrollRate = this.scrollRate
