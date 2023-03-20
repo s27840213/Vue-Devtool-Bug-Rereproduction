@@ -544,9 +544,11 @@ export default defineComponent({
     this.resizeObserver = new ResizeObserver(() => {
       this.$emit('panelHeight', this.currPanelHeight())
       // Prevent fitPage when full size panel open, ex: SidebarPanel
-      if (this.fixSize || this.panelDragHeight !== this.panelParentHeight()) {
-        this.fitPage()
-      }
+      this.$nextTick(() => {
+        if (this.fixSize || this.panelDragHeight !== this.panelParentHeight()) {
+          this.fitPage()
+        }
+      })
     })
     this.resizeObserver.observe(this.$refs.panel as Element)
   },
