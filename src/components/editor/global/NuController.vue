@@ -116,7 +116,7 @@ div(:layer-index="`${layerIndex}`"
             @touchstart="disableTouchEvent")
         div(class="control-point__line-controller-wrapper"
             v-if="isLine()"
-            :style="`transform: scale(${100/scaleRatio * contentScaleRatio})`")
+            :style="`transform: scale(${contentScaleRatio})`")
           svg-icon(class="control-point__rotater"
             :iconName="'rotate'" :iconWidth="`${20}px`"
             :src="require('@/assets/img/svg/rotate.svg')"
