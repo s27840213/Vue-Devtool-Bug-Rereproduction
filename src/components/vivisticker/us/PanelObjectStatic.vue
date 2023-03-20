@@ -56,7 +56,6 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
             category-object-item(class="panel-static__item"
               :src="item.src"
               :item="item"
-              :isHideEditor="true"
               :style="itemStyles"
               @click4in1="click4in1"
               @dbclick4in1="toggleFavorites4in1"
@@ -79,7 +78,6 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
           :key="item.id"
           :src="item.src"
           :item="item"
-          :isHideEditor="true"
           :style="itemStyles"
           @click4in1="click4in1"
           @dbclick4in1="toggleFavorites4in1"
@@ -135,10 +133,10 @@ export default defineComponent({
     listRecently(): ICategoryItem[] {
       const { rawCategories } = this
       const list = (rawCategories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
-      const result = new Array(Math.ceil(list.length / 4))
+      const result = new Array(Math.ceil(list.length / 3))
         .fill('')
         .map((_, idx) => {
-          const rowItems = list.slice(idx * 4, idx * 4 + 4)
+          const rowItems = list.slice(idx * 3, idx * 3 + 3)
           return {
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-object-item',
@@ -247,10 +245,10 @@ export default defineComponent({
     },
     processListResult(list = [] as IListServiceContentDataItem[]|ITagExtend[]): ICategoryItem[] {
       const gap = this.isTablet ? 20 : 24
-      return new Array(Math.ceil(list.length / 4))
+      return new Array(Math.ceil(list.length / 3))
         .fill('')
         .map((_, idx) => {
-          const rowItems = list.slice(idx * 4, idx * 4 + 4)
+          const rowItems = list.slice(idx * 3, idx * 3 + 3)
           return {
             id: `result_${rowItems.map(item => isITag(item) ? item.keyword : item.id).join('_')}`,
             type: 'category-object-item',
@@ -347,7 +345,7 @@ export default defineComponent({
   }
   &__items {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
   &__card-row {
     display: grid;
