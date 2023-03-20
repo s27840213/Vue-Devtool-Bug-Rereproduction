@@ -25,15 +25,7 @@ import stepsUtils from './stepsUtils'
 import textPropUtils from './textPropUtils'
 import textUtils from './textUtils'
 import uploadUtils from './uploadUtils'
-
-const STANDALONE_USER_INFO: IUserInfo = {
-  hostId: '',
-  appVer: '100.0',
-  locale: 'us',
-  isFirstOpen: false,
-  editorBg: '',
-  osVer: '100.0'
-}
+import { WebViewUtils } from './webViewUtils'
 
 /**
  * shown prop indicates if the user-setting-config is shown in the setting page
@@ -59,36 +51,6 @@ export const MODULE_TYPE_MAPPING: { [key: string]: string } = {
   font: 'font'
 }
 
-const ROUTER_CALLBACKS = [
-  'loginResult',
-  'getStateResult',
-  'setStateDone'
-]
-
-const VVSTK_CALLBACKS = [
-  'updateInfoDone',
-  'listAssetResult',
-  'copyDone',
-  'thumbDone',
-  'addAssetDone',
-  'deleteAssetDone',
-  'getAssetResult',
-  'uploadImageURL',
-  'informWebResult'
-]
-
-const SCREENSHOT_CALLBACKS = [
-  'thumbDone',
-  'updateFileDone',
-  'informWebResult'
-]
-
-const CALLBACK_MAPS = {
-  router: ROUTER_CALLBACKS,
-  vvstk: VVSTK_CALLBACKS,
-  screenshot: SCREENSHOT_CALLBACKS
-}
-
 const MYDESIGN_TAGS = [{
   name: 'NN0005',
   tab: 'text'
@@ -112,16 +74,53 @@ const DOCUMENT_URLS = {
   }
 } as { [key: string]: { [key: string]: string } }
 
-class ViviStickerUtils {
+class ViviStickerUtils extends WebViewUtils<IUserInfo> {
   appLoadedSent = false
   isAnyIOSImgOnError = false
   hasCopied = false
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
-  callbackMap = {} as { [key: string]: (data?: any) => void }
-  errorMessageMap = {} as { [key: string]: string }
   editorStateBuffer = {} as { [key: string]: any }
   designDeletionQueue = [] as { key: string, id: string, thumbType: string }[]
+
+  STANDALONE_USER_INFO: IUserInfo = {
+    hostId: '',
+    appVer: '100.0',
+    locale: 'us',
+    isFirstOpen: false,
+    editorBg: '',
+    osVer: '100.0'
+  }
+
+  ROUTER_CALLBACKS = [
+    'loginResult',
+    'getStateResult',
+    'setStateDone'
+  ]
+
+  VVSTK_CALLBACKS = [
+    'updateInfoDone',
+    'listAssetResult',
+    'copyDone',
+    'thumbDone',
+    'addAssetDone',
+    'deleteAssetDone',
+    'getAssetResult',
+    'uploadImageURL',
+    'informWebResult'
+  ]
+
+  SCREENSHOT_CALLBACKS = [
+    'thumbDone',
+    'updateFileDone',
+    'informWebResult'
+  ]
+
+  CALLBACK_MAPS = {
+    router: this.ROUTER_CALLBACKS,
+    vvstk: this.VVSTK_CALLBACKS,
+    screenshot: this.SCREENSHOT_CALLBACKS
+  }
 
   get editorType(): string {
     return store.getters['vivisticker/getEditorType']
@@ -143,14 +142,12 @@ class ViviStickerUtils {
     return store.getters['vivisticker/getUserSettings']
   }
 
-  registerCallbacks(type: 'router' | 'vvstk' | 'screenshot') {
-    for (const callbackName of CALLBACK_MAPS[type]) {
-      (window as any)[callbackName] = (vivistickerUtils as any)[callbackName]
-    }
+  getUserInfoFromStore(): IUserInfo {
+    return store.getters['vivisticker/getUserInfo']
   }
 
-  getDefaultUserInfo(): IUserInfo {
-    return STANDALONE_USER_INFO
+  appendModuleName(identifier: string): string {
+    return `vivisticker/${identifier}`
   }
 
   getDefaultUserSettings(): IUserSettings {
@@ -191,16 +188,12 @@ class ViviStickerUtils {
     return DOCUMENT_URLS[locale][key]
   }
 
-  getEmptyMessage(): { [key: string]: string } {
-    return { empty: '' }
-  }
-
   setDefaultLocale() {
     let locale = localStorage.getItem('locale')
     if (locale === '' || !locale) {
       locale = localeUtils.getBrowserLang()
     }
-    STANDALONE_USER_INFO.locale = locale
+    this.STANDALONE_USER_INFO.locale = locale
   }
 
   setCurrActiveTab(tab: string) {
@@ -208,7 +201,6 @@ class ViviStickerUtils {
   }
 
   sendToIOS(messageType: string, message: any) {
-    logUtils.setLogAndConsoleLog(messageType, message)
     if (messageType === 'SCREENSHOT' && !this.hasCopied && this.checkOSVersion('16.0')) {
       this.hasCopied = true
       this.setState('hasCopied', { data: this.hasCopied })
@@ -226,17 +218,7 @@ class ViviStickerUtils {
         noCloseIcon: true
       })
     }
-    try {
-      const webkit = (window as any).webkit
-      if (!webkit) return
-      const messageHandler = webkit.messageHandlers[messageType]
-      if (!messageHandler) {
-        throw new Error(`message type: ${messageType} does not exist!`)
-      }
-      messageHandler.postMessage(generalUtils.unproxify(message))
-    } catch (error) {
-      logUtils.setLogAndConsoleLog(error)
-    }
+    super.sendToIOS(messageType, message)
   }
 
   appToast(msg: string) {
@@ -491,21 +473,6 @@ class ViviStickerUtils {
     }
   }
 
-  checkVersion(targetVersion: string) {
-    // targetVersion must be in format: <main>.<sub> e.g. 1.18
-    const [targetMain, targetSub] = targetVersion.split('.')
-    const [currMain, currSub] = store.getters['vivisticker/getUserInfo'].appVer.split('.')
-    return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
-  }
-
-  checkOSVersion(targetVersion: string) {
-    // targetVersion must be in format: <main>.<sub> e.g. 1.18
-    const [targetMain, targetSub] = targetVersion.split('.')
-    const [currMain, currSubRaw] = (store.getters['vivisticker/getUserInfo'].osVer ?? '0.0').split('.')
-    const currSub = currSubRaw ?? '0'
-    return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
-  }
-
   copyEditor(callback?: (flag: string) => void) {
     const executor = () => {
       nextTick(() => {
@@ -578,49 +545,28 @@ class ViviStickerUtils {
     }
   }
 
-  setNewBgColor(color: string) {
-    store.commit('vivisticker/SET_newBgColor', color)
+  setHasNewBgColor(hasNewBgColor: boolean) {
+    store.commit('vivisticker/SET_hasNewBgColor', hasNewBgColor)
   }
 
   commitNewBgColor() {
-    const newBgColor = store.getters['vivisticker/getNewBgColor']
-    if (newBgColor === '') return
+    const hasNewBgColor = store.getters['vivisticker/getHasNewBgColor']
+    const newBgColor = store.getters['color/currColor']
+    if (!hasNewBgColor || newBgColor === '') return
     this.addAsset('backgroundColor', { id: newBgColor.replace('#', '') })
     store.commit('vivisticker/UPDATE_addRecentlyBgColor', newBgColor)
   }
 
-  async callIOSAsAPI(type: string, message: any, event: string, timeout = 5000): Promise<any> {
-    this.sendToIOS(type, message)
-    const result = await Promise.race([
-      new Promise<any>(resolve => {
-        this.callbackMap[event] = resolve
-      }),
-      new Promise<undefined>(resolve => {
-        setTimeout(() => {
-          resolve(undefined)
-        }, timeout)
-      })
-    ])
-    delete this.callbackMap[event]
-    return result
-  }
-
-  handleCallback(event: string, data?: any) {
-    if (this.callbackMap[event]) {
-      this.callbackMap[event](data)
-    }
-  }
-
   async getUserInfo(): Promise<IUserInfo> {
-    if (this.isStandaloneMode) return store.getters['vivisticker/getUserInfo']
+    if (this.isStandaloneMode) return this.getUserInfoFromStore()
     await this.callIOSAsAPI('LOGIN', this.getEmptyMessage(), 'login')
-    return store.getters['vivisticker/getUserInfo']
+    return this.getUserInfoFromStore()
   }
 
   loginResult(info: IUserInfo) {
     logUtils.setLogAndConsoleLog(JSON.stringify(info))
     store.commit('vivisticker/SET_userInfo', info)
-    vivistickerUtils.handleCallback('login')
+    this.handleCallback('login')
   }
 
   async updateLocale(locale: string): Promise<void> {
@@ -636,7 +582,7 @@ class ViviStickerUtils {
       logUtils.setLogAndConsoleLog(data.msg)
       this.errorMessageMap.locale = data.msg ?? ''
     }
-    vivistickerUtils.handleCallback('update-user-info')
+    this.handleCallback('update-user-info')
   }
 
   async listAsset(key: string): Promise<void> {
@@ -652,27 +598,27 @@ class ViviStickerUtils {
 
   listAssetResult(data: { key: string, assets: any[], nextPage: string }) {
     if (data.key.startsWith('mydesign')) {
-      vivistickerUtils.processMydesignList(data.key, data.assets)
-      vivistickerUtils.handleCallback(`list-asset-${data.key}`)
+      this.processMydesignList(data.key, data.assets)
+      this.handleCallback(`list-asset-${data.key}`)
       store.commit('vivisticker/SET_myDesignNextPage', {
-        tab: vivistickerUtils.myDesignKey2Tab(data.key),
+        tab: this.myDesignKey2Tab(data.key),
         nextPage: parseInt(data.nextPage)
       })
       return
     }
     if (['color', 'backgroundColor', 'giphy'].includes(data.key)) {
       assetUtils.setRecentlyUsed(data.key, data.assets)
-      vivistickerUtils.handleCallback(`list-asset-${data.key}`)
+      this.handleCallback(`list-asset-${data.key}`)
       return
     }
     const designIds = data.assets.map(asset => asset.id)
     listApis.getInfoList(MODULE_TYPE_MAPPING[data.key], designIds).then((response) => {
       if (response.data.data.content.length !== 0) {
         const updateList = response.data.data.content[0].list
-        data.assets = vivistickerUtils.updateAssetContent(data.assets, updateList)
+        data.assets = this.updateAssetContent(data.assets, updateList)
         assetUtils.setRecentlyUsed(data.key, data.assets)
       }
-      vivistickerUtils.handleCallback(`list-asset-${data.key}`)
+      this.handleCallback(`list-asset-${data.key}`)
     })
   }
 
@@ -723,7 +669,7 @@ class ViviStickerUtils {
   }
 
   addAssetDone() {
-    vivistickerUtils.handleCallback('addAsset')
+    this.handleCallback('addAsset')
   }
 
   async setState(key: string, value: any) {
@@ -736,16 +682,16 @@ class ViviStickerUtils {
   }
 
   setStateDone() {
-    vivistickerUtils.handleCallback('setState')
+    this.handleCallback('setState')
   }
 
   async getState(key: string): Promise<any> {
     if (this.isStandaloneMode) return
-    return await vivistickerUtils.callIOSAsAPI('GET_STATE', { key }, 'getState')
+    return await this.callIOSAsAPI('GET_STATE', { key }, 'getState')
   }
 
   getStateResult(data: { key: string, value: string }) {
-    vivistickerUtils.handleCallback('getState', data.value ? JSON.parse(data.value) : undefined)
+    this.handleCallback('getState', data.value ? JSON.parse(data.value) : undefined)
   }
 
   async sendCopyEditor(): Promise<string> {
@@ -767,7 +713,7 @@ class ViviStickerUtils {
   }
 
   copyDone(data: { flag: string }) {
-    vivistickerUtils.handleCallback('copy-editor', data)
+    this.handleCallback('copy-editor', data)
   }
 
   saveDesign(pages_?: IPage[]) {
@@ -888,7 +834,7 @@ class ViviStickerUtils {
   }
 
   thumbDone(data: { flag: string }) {
-    vivistickerUtils.handleCallback('gen-thumb', data)
+    this.handleCallback('gen-thumb', data)
   }
 
   async deleteAsset(key: string, id: string, thumbType: string): Promise<void> {
@@ -910,7 +856,7 @@ class ViviStickerUtils {
   }
 
   deleteAssetDone() {
-    vivistickerUtils.handleCallback('delete-asset')
+    this.handleCallback('delete-asset')
   }
 
   async saveDesignJson(id: string): Promise<IMyDesign | undefined> {
@@ -935,7 +881,7 @@ class ViviStickerUtils {
   }
 
   getAssetResult(data: { key: string, id: string, json: any }) {
-    vivistickerUtils.handleCallback('get-asset', data.json)
+    this.handleCallback('get-asset', data.json)
   }
 
   getEditorDimensions(): { x: number, y: number, width: number, height: number } {
@@ -971,11 +917,11 @@ class ViviStickerUtils {
   }
 
   uploadImageURL(data: any) {
-    vivistickerUtils.handleCallback('upload-image', data)
+    this.handleCallback('upload-image', data)
   }
 
   updateFileDone() {
-    vivistickerUtils.handleCallback('update-file')
+    this.handleCallback('update-file')
   }
 
   informWebResult(data: { info: any }) {
@@ -983,7 +929,7 @@ class ViviStickerUtils {
     const { event } = info
     switch (event) {
       case 'missing-image':
-        vivistickerUtils.handleMissingImage(info)
+        this.handleMissingImage(info)
         break
     }
   }
@@ -1106,6 +1052,4 @@ class ViviStickerUtils {
   }
 }
 
-const vivistickerUtils = new ViviStickerUtils()
-
-export default vivistickerUtils
+export default new ViviStickerUtils()

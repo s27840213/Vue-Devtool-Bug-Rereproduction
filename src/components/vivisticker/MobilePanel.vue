@@ -263,7 +263,7 @@ export default defineComponent({
       return this.currActivePanel !== 'none'
     },
     showLeftBtn(): boolean {
-      return (this.whiteTheme && (this.panelHistory.length > 0 || this.showExtraColorPanel)) || (this.insertTheme && this.isTextInCategory)
+      return (this.whiteTheme && (this.panelHistory.length > 0 || ['color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel)) || (this.insertTheme && this.isTextInCategory)
     },
     hideDynamicComp(): boolean {
       return ['crop', 'copy-style'].includes(this.currActivePanel)
@@ -461,7 +461,7 @@ export default defineComponent({
       }
       if (this.currActivePanel === 'color-picker') {
         return () => {
-          vivistickerUtils.setNewBgColor('')
+          vivistickerUtils.setHasNewBgColor(false)
           this.closeMobilePanel()
         }
       }
