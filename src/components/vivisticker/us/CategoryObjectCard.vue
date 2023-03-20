@@ -2,11 +2,11 @@
 div(v-show="isShow" class="category-object-card" @click="$emit('cardClick', $event)")
   img(class="category-object-card__cover" :src="coverSrc" :style="coverStyles" @load="isShow = true" @error="imgOnerror")
   div(class="category-object-card__label")
-    div(class="category-object-card__label__title caption-MD") {{ title }}
+    div(class="category-object-card__label__title text-H6") {{ title }}
     svg-icon(v-if="isFavorite !== undefined"
       :iconName="isFavorite ? 'favorites-fill' : 'heart'"
       iconWidth="24px"
-      :style="{color: isFavorite ? '#FC5757' : '#9C9C9C'}"
+      :style="{color: isFavorite ? '#FC5757' : 'white'}"
         @click="$emit('favClick', $event)")
 </template>
 
