@@ -12,7 +12,7 @@ div(class="panel-page")
       div(class="panel-page__plus")
         panel-page-plus(:index="idx" :last="false"
           :class="{'pt-10': idx === 0}")
-      page-preview-page-wrapper(:index="idx" :pagename="page.name" type="panel" :config="wrappedPage(page)" :lazyLoadTarget="'.panel-page'")
+      page-preview-page-wrapper(:index="idx" :pagename="page.name" type="panel" :config="page" :lazyLoadTarget="'.panel-page'")
       div(v-if="idx+1 === getPageCount"
         class="panel-page__plus")
         panel-page-plus(:index="idx+1" :last="false")
@@ -21,7 +21,6 @@ div(class="panel-page")
 <script lang="ts">
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PanelPagePlus from '@/components/editor/pagePreview/PanelPagePlus.vue'
-import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { defineComponent } from 'vue'
@@ -64,9 +63,6 @@ export default defineComponent({
         position
       )
       stepsUtils.record()
-    },
-    wrappedPage(page: IPage) {
-      return { ...page, isAutoResizeNeeded: false }
     }
   }
 })
