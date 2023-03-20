@@ -237,7 +237,7 @@ export default defineComponent({
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' },
-        ...!picWVUtils.inReviewMode ? [{ icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }] : []
+        ...!picWVUtils.inReviewMode ? [{ icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: this.isInFrame }] : []
       ]
     },
     frameTabs(): Array<IFooterTab> {
