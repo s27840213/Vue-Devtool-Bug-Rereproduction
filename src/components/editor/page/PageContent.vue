@@ -64,7 +64,6 @@ import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
-import textUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent, PropType } from 'vue'
@@ -348,7 +347,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .overflow-container {
   position: relative;
-  overflow: hidden;
+  overflow: clip; // Clip can prevent any scroll, include programing scroll.
   transform-origin: 0 0;
 }
 

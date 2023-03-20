@@ -161,7 +161,6 @@ class BackgroundUtils {
   setBgImageSrc() {
     const pageIndex = layerUtils.pageIndex
     const image = layerUtils.getCurrConfig as IImage
-    console.log(generalUtils.deepCopy(image))
     store.commit('SET_backgroundImageSrc', {
       pageIndex: pageIndex,
       srcObj: image.srcObj,

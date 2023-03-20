@@ -625,12 +625,22 @@ const mutations: MutationTree<IEditorState> = {
       targetLayer[k] = v
     })
   },
-  UPDATE_frameLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | SrcObj } }) {
-    const frame = state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex] as IFrame
-    const targetLayer = frame.clips[updateInfo.targetIndex]
-    Object.entries(updateInfo.props).forEach(([k, v]) => {
-      targetLayer[k] = v
-    })
+  UPDATE_frameLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | SrcObj }, preprimaryLayerIndex: number }) {
+    const { pageIndex, layerIndex, targetIndex, props, preprimaryLayerIndex } = updateInfo
+    let frame
+    if (preprimaryLayerIndex !== -1) {
+      if (state.pages[pageIndex].config.layers[preprimaryLayerIndex].type === LayerType.group) {
+        frame = (state.pages[pageIndex].config.layers[preprimaryLayerIndex] as IGroup).layers[layerIndex]
+      }
+    } else {
+      frame = state.pages[pageIndex].config.layers[layerIndex]
+    }
+    if (frame && frame.type === LayerType.frame) {
+      const targetLayer = frame.clips[targetIndex]
+      Object.entries(props).forEach(([k, v]) => {
+        targetLayer[k] = v
+      })
+    }
   },
   UPDATE_groupLayerProps(state: IEditorState, updateInfo: { props: { [key: string]: string | number | boolean | number[] } }) {
     Object.entries(updateInfo.props).forEach(([k, v]) => {
