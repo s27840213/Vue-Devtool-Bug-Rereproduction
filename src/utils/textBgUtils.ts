@@ -746,7 +746,7 @@ class TextBg {
     return svg.replace(/\n[ ]*/g, '').replace(/#/g, '%23')
   }
 
-  convertTextEffect(styles: IStyle): Partial<Record<'div' | 'p' | 'span', Record<string, string>>> {
+  convertTextEffect(styles: IStyle): Partial<Record<'div' | 'p' | 'span', Record<string, string | number>>> {
     const textBg = styles.textBg as ITextBgEffect
     if (isITextFillImg(textBg)) {
       const img = store.getters['file/getImages'][0] as IAssetPhoto
@@ -758,12 +758,9 @@ class TextBg {
           background: `url("${img.urls.original}")`,
           backgroundSize: widthRatio < heightRatio ? `${textBg.size}% auto` : `auto ${textBg.size}%`,
           backgroundPosition: `${textBg.xOffset200 / 2 + 50}% ${textBg.yOffset200 / 2 + 50}%`,
-          opacity: `${textBg.opacity / 100}`,
+          opacity: textBg.opacity / 100,
           '-webkit-text-fill-color': 'transparent',
           '-webkit-background-clip': 'text',
-          ...textBg.focus ? {
-            '--base-stroke': '1px',
-          } : {}
         },
       }
     } else return {}
@@ -864,8 +861,8 @@ class TextBg {
         content: paths
       }
     } else if (isITextBox(textBg)) {
-      const pColor = textEffectUtils.colorParser(textBg.pColor, config)
-      const bColor = textEffectUtils.colorParser(textBg.bColor, config)
+      const fill = textEffectUtils.colorParser(textBg.pColor, config)
+      const stroke = textEffectUtils.colorParser(textBg.bColor, config)
       let boxWidth = (width + textBg.bStroke)
       let boxHeight = (height + textBg.bStroke)
       let top = -textBg.bStroke
@@ -897,16 +894,18 @@ class TextBg {
         attrs: {
           width: boxWidth + textBg.bStroke,
           height: boxHeight + textBg.bStroke,
-          style: `left: ${left}px;
-            top: ${top}px;`
+        },
+        style: {
+          left: `${left}px`,
+          top: `${top}px`
         },
         content: [{
           tag: 'path',
           attrs: {
-            style: `fill:${pColor}; stroke:${bColor}; opacity:${opacity}`,
             'stroke-width': textBg.bStroke,
             d: path.result()
-          }
+          },
+          style: { fill, stroke, opacity }
         }]
         // .concat(path.toCircle() as any) // Show control point
       }
@@ -938,7 +937,8 @@ class TextBg {
 
       return {
         tag: 'svg',
-        attrs: { width, height, style: `opacity: ${opacity}` },
+        attrs: { width, height },
+        style: { opacity },
         content: pos.map(p => ({
           tag: 'use',
           attrs: {
@@ -950,29 +950,28 @@ class TextBg {
             // So -(scale-1)*p.height/2 to justify it to center.
             x: p.x - (scale - 1) * p.height / 2 + p.width * xOffset / 100,
             y: p.y - (scale - 1) * p.height / 2 + p.height * yOffset / 100,
-            style: `color: ${p.color}`
-          }
+          },
+          style: { color: p.color }
         }))
       }
     } else if (isITextFillImg(textBg)) {
       const img = store.getters['file/getImages'][0] as IAssetPhoto
       const widthRatio = img.width / config.styles.width
       const heightRatio = img.height / config.styles.height
+      const layerScale = config.styles.scale
       // If true and textBg.size is 100, that mean img width === layer width
       const scaleByWidth = widthRatio < heightRatio
       const imgRatio = textBg.size / 100 / (scaleByWidth ? widthRatio : heightRatio)
 
       return textBg.focus ? {
         tag: 'img',
-        attrs: {
-          src: img.urls.prev,
-          style: `
-            ${scaleByWidth ? 'width' : 'height'}: ${textBg.size}%;
-            top: -${(textBg.yOffset200 / 2 + 50) / 100 * (img.height * imgRatio - config.styles.height)}px;
-            left: -${(textBg.xOffset200 / 2 + 50) / 100 * (img.width * imgRatio - config.styles.width)}px;
-            opacity: ${textBg.opacity / 200};
-          `
-        },
+        attrs: { src: img.urls.prev },
+        style: {
+          [scaleByWidth ? 'width' : 'height']: `${textBg.size}%`,
+          top: `-${(textBg.yOffset200 / 2 + 50) / 100 * (img.height * imgRatio - config.styles.height) / layerScale}px`,
+          left: `-${(textBg.xOffset200 / 2 + 50) / 100 * (img.width * imgRatio - config.styles.width) / layerScale}px`,
+          opacity: textBg.opacity / 200
+        }
       } : null
     } else return null
   }

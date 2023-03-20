@@ -646,23 +646,23 @@ export default defineComponent({
     },
     textBodyStyle() {
       const layer = LayerUtils.getCurrLayer as IText
-      const textBgDivStyle = textBgUtils.convertTextEffect(layer.styles).div
-      const textstyles = {
-        width: '100%',
-        height: '100%',
-        userSelect: this.contentEditable ? 'text' : 'none',
-        opacity: 1
-      }
-      return Object.assign(!(this.isCurveText || this.isFlipped) ? textstyles : {
-        width: 'auto',
-        height: 'auto',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        opacity: this.contentEditable ? 1 : 0
-      },
-      textBgDivStyle,
-      )
+      const textBgDivStyle = textBgUtils.convertTextEffect(layer.styles).div ?? {}
+      const returnedStyles = Object.assign({}, textBgDivStyle,
+        !(this.isCurveText || this.isFlipped) ? {
+          width: '100%',
+          height: '100%',
+          userSelect: this.contentEditable ? 'text' : 'none',
+          opacity: 1
+        } : {
+          width: 'auto',
+          height: 'auto',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          opacity: this.contentEditable ? 1 : 0
+        })
+      returnedStyles.opacity *= textBgDivStyle?.opacity as number ?? 1
+      return returnedStyles
     },
     groupControllerStyle() {
       return {

@@ -355,23 +355,23 @@ export default defineComponent({
     },
     textBodyStyle() {
       const layer = LayerUtils.getCurrLayer as IText
-      const textBgDivStyle = textBgUtils.convertTextEffect(layer.styles).div
-      const textstyles = {
-        width: `${this.config.styles.width / this.config.styles.scale}px`,
-        height: `${this.config.styles.height / this.config.styles.scale}px`,
-        userSelect: this.config.contentEditable ? 'text' : 'none',
-        opacity: 1
-      }
-      return Object.assign(!(this.isCurveText || this.isFlipped) ? textstyles : {
-        width: `${this.config.styles.width / this.config.styles.scale}px`,
-        height: `${this.config.styles.height / this.config.styles.scale}px`,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        opacity: this.config.contentEditable ? 1 : 0
-      },
-      textBgDivStyle,
-      )
+      const textBgDivStyle = textBgUtils.convertTextEffect(layer.styles).div ?? {}
+      const returnedStyles = Object.assign({}, textBgDivStyle,
+        !(this.isCurveText || this.isFlipped) ? {
+          width: `${this.config.styles.width / this.config.styles.scale}px`,
+          height: `${this.config.styles.height / this.config.styles.scale}px`,
+          userSelect: this.config.contentEditable ? 'text' : 'none',
+          opacity: 1
+        } : {
+          width: `${this.config.styles.width / this.config.styles.scale}px`,
+          height: `${this.config.styles.height / this.config.styles.scale}px`,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          opacity: this.config.contentEditable ? 1 : 0
+        })
+      returnedStyles.opacity *= textBgDivStyle.opacity as number ?? 1
+      return returnedStyles
     },
     textStyles(styles: any) {
       const textStyles = CssConveter.convertFontStyle(styles)

@@ -13,26 +13,12 @@ div(class="popup-order")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   emits: [],
-  props: {
-    hasImage: {
-      type: Boolean,
-      default: true
-    },
-    type: {
-      type: String,
-      required: true
-    },
-    datas: {
-      type: Array,
-      required: true
-    }
-  },
   directives: {
     clickOutside: vClickOutside.directive
   },
@@ -58,9 +44,6 @@ export default defineComponent({
     }
   },
   methods: {
-    mappingIcons(type: string): string[] {
-      return MappingUtils.mappingIconSet(type)
-    },
     popupDatas() {
       return this.orderSets.map((set) => {
         return {

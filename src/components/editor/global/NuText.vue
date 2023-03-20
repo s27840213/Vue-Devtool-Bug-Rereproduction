@@ -197,16 +197,16 @@ export default defineComponent({
       }
     },
     bodyStyles(): Record<string, string|number> {
-      const opacity = this.getOpacity()
+      let opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
       const textBGStyle = textBgUtils.convertTextEffect(this.config.styles)
+      opacity *= textBGStyle.div?.opacity as number ?? 1
       return {
         width: isVertical ? 'auto' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
-        opacity,
         ...textBGStyle.div,
-        ...opacity === 0 ? { opacity } : {}, // Re-overwrite for opacity 0
+        opacity,
       }
     },
     spanStyle(sIndex: number, p: IParagraph, config: IText): Record<string, string> {
