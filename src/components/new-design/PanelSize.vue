@@ -38,12 +38,12 @@ div(class="mobile-panel p-15"
 
 <script lang="ts">
 import PageSizeSelector from '@/components/new-design/PageSizeSelector.vue'
-import designUtils from '@/utils/designUtils'
-import { defineComponent } from 'vue'
-
 import { ILayout } from '@/interfaces/layout'
+import designUtils from '@/utils/designUtils'
 import eventUtils from '@/utils/eventUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import vClickOutside from 'click-outside-vue3'
+import { defineComponent } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 
 export default defineComponent({
@@ -74,7 +74,7 @@ export default defineComponent({
       'folders'
     ]),
     ...mapGetters({
-      userInfo: 'webView/getUserInfo'
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
     }),
     panelStyle(): { [index: string]: string } {
       return Object.assign(

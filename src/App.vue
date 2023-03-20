@@ -98,7 +98,7 @@ export default defineComponent({
       isModalOpen: 'modal/getModalOpen',
       inScreenshotPreview: 'getInScreenshotPreview',
       showAllAdminTool: 'user/showAllAdminTool',
-      userInfo: 'webView/getUserInfo'
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
     }),
     currLocale(): string {
       return localeUtils.currLocale()

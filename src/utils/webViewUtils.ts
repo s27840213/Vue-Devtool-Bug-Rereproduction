@@ -1,15 +1,15 @@
 import logUtils from './logUtils'
 
-export class WebViewUtils<T extends { [key: string]: any }> {
-  STANDALONE_USER_INFO: T = {} as T
-  CALLBACK_MAPS = {} as { [key: string]: string[] }
+export abstract class WebViewUtils<T extends { [key: string]: any }> {
+  abstract STANDALONE_USER_INFO: T
+  abstract CALLBACK_MAPS: { [key: string]: string[] }
 
   callbackMap = {} as { [key: string]: (data?: any) => void }
   errorMessageMap = {} as { [key: string]: string }
 
-  getUserInfoFromStore(): T {
-    return {} as T
-  }
+  abstract getUserInfoFromStore(): T
+
+  abstract appendModuleName(identifier: string): string
 
   registerCallbacks(type: string) {
     for (const callbackName of this.CALLBACK_MAPS[type]) {

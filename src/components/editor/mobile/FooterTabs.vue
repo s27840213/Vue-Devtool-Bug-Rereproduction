@@ -128,7 +128,7 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       hasCopiedFormat: 'getHasCopiedFormat',
-      userInfo: 'webView/getUserInfo'
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
     }),
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
