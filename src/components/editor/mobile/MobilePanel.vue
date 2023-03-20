@@ -273,7 +273,7 @@ export default defineComponent({
       return ['crop', 'color', 'copy-style', 'multiple-select', 'remove-bg'].includes(this.currActivePanel)
     },
     panelStyle(): { [index: string]: string } {
-      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file'].includes(this.currActivePanel)
+      const isSidebarPanel = ['template', 'photo', 'object', 'background', 'text', 'file', 'fonts'].includes(this.currActivePanel)
       return Object.assign(
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {

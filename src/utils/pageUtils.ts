@@ -87,7 +87,7 @@ class PageUtils {
     const windowHeight = window.innerHeight
     const topInView = Math.max(rect.top, 0)
     const bottomInView = Math.min(rect.bottom, windowHeight)
-    return (bottomInView - topInView) / windowHeight
+    return (bottomInView - topInView) / rect.height
   }
 
   get addAssetTargetPageIndex(): number {
