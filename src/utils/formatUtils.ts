@@ -12,7 +12,7 @@ import tiptapUtils from './tiptapUtils'
 
 class FormatUtils {
   copiedFormat: IFormat | undefined
-  APPLICABLE_TYPES: {[key: string]: string[]} = {
+  APPLICABLE_TYPES: { [key: string]: string[] } = {
     image: ['image', 'frame'],
     text: ['text']
   }
@@ -83,7 +83,6 @@ class FormatUtils {
   }
 
   applyFormatIfCopied(pageIndex: number, layerIndex: number, subLayerIndex = -1) {
-    console.log('applyFormatIfCopied')
     if (!this.copiedFormat) return
     const type = this.copiedFormat.type
     const layer = store.getters.getLayer(pageIndex, layerIndex)

@@ -102,7 +102,7 @@ div(:layer-index="`${layerIndex}`"
               :key="`resizer-text-${index}`"
               :ref="`moveStart-bar_${index}`"
               :style="resizerBarStyles(resizer.styles)")
-        div(v-for="(scaler, index) in (!isLine()) ? getScaler(controlPoints.scalers) : []"
+        div(v-for="(scaler, index) in !isLine() ? getScaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="`scaler-${index}`"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate()))"
@@ -567,8 +567,9 @@ export default defineComponent({
       const aspectRatio = this.$isTouchDevice() ? 0.24 : 0.16
 
       const isHorizon = width > height
-      const sizeForWidth = this.getLayerWidth() * this.contentScaleRatio - 10
-      const sizeForHeight = this.getLayerHeight() * this.contentScaleRatio - 10
+      const sizeForWidth = this.getLayerWidth() * this.scaleRatio / 100 * this.contentScaleRatio - 10
+      const sizeForHeight = this.getLayerHeight() * this.scaleRatio / 100 * this.contentScaleRatio - 10
+
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
         width: isHorizon && tooSmall ? `${sizeForWidth * scale}px`
@@ -761,11 +762,9 @@ export default defineComponent({
         return 'none'
       } else if (this.isShown() || this.isControllerShown) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          // return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
-          return `${2}px solid ${outlineColor}`
+          return `2px solid ${outlineColor}`
         } else {
-          // return `${2 * this.contentScaleRatio}px solid ${outlineColor}`
-          return `${2}px solid ${outlineColor}`
+          return `2px solid ${outlineColor}`
         }
       } else {
         return 'none'
@@ -1366,6 +1365,7 @@ export default defineComponent({
           break
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
+      textPropUtils.updateTextPropState('fontSize', true)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
       // scale from center
       if (altPressed) {

@@ -324,6 +324,9 @@ const getters: GetterTree<IFileState, any> = {
   },
   getUploadingImgs(state): Array<{ id: string, pageIndex: number }> {
     return state.uploadingAssets
+  },
+  getIsUploadingImg(state): boolean {
+    return state.uploadingAssets.length > 0
   }
 }
 

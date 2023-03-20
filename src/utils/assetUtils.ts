@@ -25,6 +25,7 @@ import resizeUtils from './resizeUtils'
 import ShapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
+import textShapeUtils from './textShapeUtils'
 import TextUtils from './textUtils'
 import tiptapUtils from './tiptapUtils'
 import unitUtils, { PRECISION } from './unitUtils'
@@ -164,6 +165,7 @@ class AssetUtils {
   }
 
   async addTemplate(json: any, attrs?: { pageIndex?: number, width?: number, height?: number, physicalWidth?: number, physicalHeight?: number, unit?: string }, recordStep = true) {
+    console.log('addTemplate')
     const targetPageIndex = attrs?.pageIndex ?? pageUtils.addAssetTargetPageIndex
     const targetPage: IPage = this.getPage(targetPageIndex)
     json = await this.updateBackground(generalUtils.deepCopy(json))
@@ -463,17 +465,31 @@ class AssetUtils {
     const textAspectRatio = width / height
     const textWidth = textAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * textAspectRatio
     const textHeight = textAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / textAspectRatio : currentPage.height * resizeRatio
+    const rescaleFactor = textWidth / width
 
     const config = {
       ...json,
-      widthLimit: json.widthLimit === -1 ? -1 : json.widthLimit * (textWidth / width),
       styles: {
         ...json.styles,
         width: textWidth,
         height: textHeight,
-        scale: scale * (textWidth / width)
+        scale: scale * rescaleFactor
       }
     }
+
+    if (config.type === 'text') {
+      Object.assign(config, {
+        widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
+        isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles),
+      })
+    } else if (config.type === 'group') {
+      for (const subLayer of config.layers) {
+        Object.assign(subLayer, {
+          isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles)
+        })
+      }
+    }
+
     Object.assign(
       config.styles,
       typeof y === 'undefined' || typeof x === 'undefined'
@@ -512,12 +528,13 @@ class AssetUtils {
       }
 
       TextUtils.resetTextField(textLayer, targetPageIndex, field)
-      LayerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false, contentEditable: true }))])
+      LayerUtils.addLayers(targetPageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false, contentEditable: true, isCompensated: true }))])
       editorUtils.setCloseMobilePanelFlag(true)
       setTimeout(() => {
         tiptapUtils.agent(editor => editor.commands.selectAll())
       }, 100)
-    } catch {
+    } catch (error) {
+      console.log(error)
       console.log('Cannot find the file')
     }
   }
@@ -621,9 +638,11 @@ class AssetUtils {
   }
 
   addGroupTemplate(item: IListServiceContentDataItem, childId?: string, resize?: { width: number, height: number, physicalWidth?: number, physicalHeight?: number, unit?: string }) {
+    console.log('add group template ')
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
     const currGroupType = store.getters.getGroupType
     const isDetailPage = groupType === 1 || currGroupType === 1
+
     store.commit('SET_groupId', groupId)
     store.commit('SET_mobileSidebarPanelOpen', false)
     // groupType: -1 normal/0 group/1 detail

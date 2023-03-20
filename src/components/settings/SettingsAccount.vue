@@ -61,6 +61,7 @@ div(class="settings-account")
       @close="closePopup()")
   spinner(v-if="isLoading")
 </template>
+
 <script lang="ts">
 import Avatar from '@/components/Avatar.vue'
 import PopupVerify from '@/components/popup/PopupVerify.vue'

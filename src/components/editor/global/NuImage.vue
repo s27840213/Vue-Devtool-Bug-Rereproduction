@@ -46,7 +46,7 @@ div(v-if="!config.imgControl || forRender || isBgImgControl" class="nu-image"
           draggable="false"
           @error="onError"
           @load="onLoad($event, 'main')")
-      img(v-else-if="src" ref="img"
+      img(v-else ref="img"
         :style="flipStyles()"
         :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation() }"
         :src="finalSrc"
@@ -67,7 +67,7 @@ import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/img
 import { IFrame, IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
-import { BrowserInfo } from '@/store/module/user'
+import { IBrowserInfo } from '@/store/module/user'
 import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -112,9 +112,6 @@ export default defineComponent({
       type: Number,
       default: -1
     },
-    inheritStyle: {
-      type: Object
-    },
     isBgImgControl: {
       type: Boolean,
       default: false
@@ -140,6 +137,7 @@ export default defineComponent({
     }
   },
   async created() {
+    this.src = this.config.panelPreviewSrc ?? ImageUtils.getSrc(this.config, this.getPreviewSize())
     this.handleInitLoad()
     const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
     if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender && !isPrimaryLayerFrame) {
@@ -202,7 +200,6 @@ export default defineComponent({
       hasDestroyed: false,
       isOnError: false,
       src: '',
-      initFlag: false,
       shadowBuff: {
         canvasShadowImg: undefined as undefined | HTMLImageElement,
         canvasSize: { width: 0, height: 0 },
@@ -240,7 +237,7 @@ export default defineComponent({
       },
       deep: true
     },
-    'config.styles.shadow.currentEffect'(val) {
+    'config.styles.shadow.currentEffect'() {
       if (this.forRender || this.shadow().srcObj.type === 'upload' || this.getCurrFunctionPanelType !== FunctionPanelType.photoShadow) {
         return
       }
@@ -361,8 +358,10 @@ export default defineComponent({
       return src
     },
     filterId(): string {
-      const browserInfo = this.$store.getters['user/getBrowserInfo'] as BrowserInfo
-      if (browserInfo.name === 'Safari' && +browserInfo.version >= 16 && +browserInfo.version < 16.3) {
+      const browserInfo = this.$store.getters['user/getBrowserInfo'] as IBrowserInfo
+      const browserIsSafari = browserInfo.name === 'Safari' && browserInfo.version !== '16.3' && generalUtils.OSversionCheck({ greaterThen: '16.0', lessThen: '16.3' })
+      const osIsIos = browserInfo.os.family === 'iOS' && browserInfo.os.version !== '16.3' && generalUtils.OSversionCheck({ greaterThen: '16.0', lessThen: '16.3', version: browserInfo.os.version })
+      if (browserIsSafari || osIsIos) {
         const { styles: { adjust }, id: layerId } = this.config
         const { blur = 0, brightness = 0, contrast = 0, halation = 0, hue = 0, saturate = 0, warm = 0 } = adjust
         const id = layerId + blur.toString() + brightness.toString() + contrast.toString() + halation.toString() + hue.toString() + saturate.toString() + warm.toString()
@@ -418,13 +417,6 @@ export default defineComponent({
     pageSize(): { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string } {
       return this.page.isEnableBleed ? pageUtils.removeBleedsFromPageSize(this.page) : this.page
     },
-    parentLayerDimension(): number | string {
-      const { width, height } = this.config.parentLayerStyles || {}
-      const { imgWidth, imgHeight } = this.config.styles
-      const imgRatio = imgWidth / imgHeight
-      const maxSize = imgRatio > 1 ? height * imgRatio : width / imgRatio
-      return ImageUtils.getSrcSize(this.config.srcObj, maxSize * (this.scaleRatio / 100))
-    }
   },
   methods: {
     ...mapActions('file', ['updateImages']),
@@ -540,14 +532,6 @@ export default defineComponent({
         }
       }
     },
-    onLoadShadow() {
-      this.isOnError = false
-      const shadowImg = this.$refs['shadow-img'] as HTMLImageElement
-      if (!this.initFlag && !this.forRender && (!shadowImg.width || !shadowImg.height)) {
-        imageShadowUtils.updateShadowSrc(this.layerInfo(), { type: '', assetId: '', userId: '' })
-        imageShadowUtils.setEffect(ShadowEffectType.none, {}, this.layerInfo())
-      }
-    },
     logImgError(error: unknown, ...infos: Array<string>) {
       if (this.src.indexOf('data:image/png;base64') !== 0) return
 
@@ -568,21 +552,13 @@ export default defineComponent({
       }
       let isPrimaryImgLoaded = false
       const urlId = ImageUtils.getImgIdentifier(this.config.srcObj)
-      const panelPreviewSrc = this.config.panelPreviewSrc
-      if (panelPreviewSrc) {
-        ImageUtils.imgLoadHandler(panelPreviewSrc, () => {
-          if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
-            this.src = panelPreviewSrc
-          }
-        })
-      } else {
-        const previewSrc = ImageUtils.getSrc(this.config, this.getPreviewSize())
-        ImageUtils.imgLoadHandler(previewSrc, () => {
-          if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
-            this.src = previewSrc
-          }
-        })
-      }
+      const previewSrc = this.config.panelPreviewSrc ?? ImageUtils.getSrc(this.config, this.getPreviewSize())
+      ImageUtils.imgLoadHandler(previewSrc, () => {
+        if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
+          this.src = previewSrc
+        }
+      })
+
       const currSize = this.getImgDimension
       const src = ImageUtils.getSrc(this.config, currSize)
       return new Promise<void>((resolve, reject) => {
@@ -687,41 +663,9 @@ export default defineComponent({
       )
     },
     async handleInitLoad() {
-      const { type } = this.config.srcObj
       if (this.userId !== 'backendRendering') {
         this.handleIsTransparent()
         await this.previewAsLoading()
-        const preImg = new Image()
-        preImg.onerror = (error) => {
-          if (type === 'pexels') {
-            const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
-            switch (layerUtils.getLayer(this.pageIndex, this.layerIndex).type) {
-              case 'group':
-                layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { srcObj })
-                break
-              case 'frame':
-                frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { srcObj })
-                break
-              default:
-                layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj })
-            }
-          }
-          fetch(preImg.src)
-            .then(res => {
-              const { status, statusText } = res
-              this.logImgError(error, 'img src:', preImg.src, 'fetch result: ' + status + statusText)
-            })
-            .catch((e) => {
-              if (preImg.src.indexOf('data:image/png;base64') !== 0) {
-                this.logImgError(error, 'img src:', preImg.src, 'fetch result: ' + e)
-              }
-            })
-        }
-        preImg.onload = () => {
-          const nextImg = new Image()
-          nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'next'))
-        }
-        preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'pre'))
       } else {
         if (this.isAdjustImage()) {
           this.handleIsTransparent()
@@ -1056,17 +1000,14 @@ export default defineComponent({
         imgY: imgY * this.contentScaleRatio
       }
     },
-    containerStyles(): any {
+    containerStyles() {
       const { width, height } = this.scaledConfig()
-      const { inheritStyle = {} } = this
       return this.showCanvas ? {
         width: `${width}px`,
         height: `${height}px`
-        // ...inheritStyle
       } : {
         // Fix the safari rendering bug, add the following code can fix it...
         transform: 'translate(0,0)'
-        // ...inheritStyle
       }
     },
     svgImageWidth(): number {
@@ -1080,7 +1021,7 @@ export default defineComponent({
     svgViewBox(): string {
       return `0 0 ${this.svgImageWidth()} ${this.svgImageHeight()}`
     },
-    cssFilterElms(): any[] {
+    cssFilterElms() {
       const { adjust, width, height } = this.adjustImgStyles()
       // @TODO: only for halation now
       if (Number.isNaN(adjust.halation) || !adjust.halation) {
@@ -1093,11 +1034,11 @@ export default defineComponent({
       }
       return imageAdjustUtil.getHalation(adjust.halation, position)
     },
-    svgFilterElms(): any[] {
+    svgFilterElms() {
       const { adjust } = this.adjustImgStyles()
       return imageAdjustUtil.convertAdjustToSvgFilter(adjust || {}, this.config as IImage)
     },
-    flipStyles(): any {
+    flipStyles() {
       const { horizontalFlip, verticalFlip } = this.config.styles
       let scaleX = horizontalFlip ? -1 : 1
       let scaleY = verticalFlip ? -1 : 1
@@ -1114,7 +1055,7 @@ export default defineComponent({
         // ...(this.isAdjustImage && this.svgFilterElms.length && { filter: `url(#${this.filterId})` })
       }
     },
-    canvasWrapperStyle(): any {
+    canvasWrapperStyle() {
       if (this.forRender) {
         return {}
       }
@@ -1128,7 +1069,7 @@ export default defineComponent({
         transform: `scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
       }
     },
-    imgWrapperstyle(): any {
+    imgWrapperstyle() {
       const { height, width } = this.scaledConfig()
       let clipPath = ''
       if (!this.imgControl && !this.isBgImgControl) {
@@ -1138,7 +1079,7 @@ export default defineComponent({
         clipPath
       }
     },
-    imgStyles(): any {
+    imgStyles() {
       let { imgX, imgY, imgHeight, imgWidth } = this.scaledConfig()
       if (this.isBgImgControl) {
         imgX = 0
@@ -1150,13 +1091,7 @@ export default defineComponent({
         height: `${imgHeight}px`
       }
     },
-    imgShadowFlipStyle(): any {
-      const { horizontalFlip, verticalFlip } = this.config.styles
-      return {
-        transform: `scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1})`
-      }
-    },
-    imgShadowStyles(): any {
+    imgShadowStyles() {
       if (this.forRender) {
         return {}
       }
@@ -1176,17 +1111,17 @@ export default defineComponent({
         .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
     },
     isAdjustImage(): boolean {
-      const { styles: { adjust = {} }, srcObj } = this.config
-      const arr = Object.entries(adjust).filter(([_, v]) => typeof v === 'number' && v !== 0)
+      const { styles: { adjust = {} } } = this.config
+      const arr = Object.entries(adjust).filter(([, v]) => typeof v === 'number' && v !== 0)
       return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
     },
     hasHalation(): boolean {
       return this.config.styles.adjust?.halation
     },
-    srcObj(): any {
+    srcObj() {
       return (this.config as IImage).srcObj
     },
-    adjustImgStyles(): any {
+    adjustImgStyles() {
       let styles = this.config.styles
       if (this.isBgImgControl) {
         styles = generalUtils.deepCopy(this.config.styles)
@@ -1263,7 +1198,7 @@ export default defineComponent({
     touch-action: none;
     object-fit: cover;
     -webkit-touch-callout: none;
-    -webkit-user-select: none;
+    user-select: none;
     position: absolute;
     top: 0px;
     left: 0px;
@@ -1274,7 +1209,7 @@ export default defineComponent({
   &__picture-shadow {
     touch-action: none;
     -webkit-touch-callout: none;
-    -webkit-user-select: none;
+    user-select: none;
     position: absolute;
     top: 0px;
     left: 0px;

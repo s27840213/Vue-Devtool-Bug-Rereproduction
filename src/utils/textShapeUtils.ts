@@ -1,18 +1,18 @@
-import textEffectUtils from '@/utils/textEffectUtils'
-import TextUtils from '@/utils/textUtils'
 import { ISpan, IText } from '@/interfaces/layer'
+import { ICurveTextPostParams, ICurveTextPreParams } from '@/interfaces/text'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
-import mathUtils from '@/utils/mathUtils'
-import { ICurveTextPostParams, ICurveTextPreParams } from '@/interfaces/text'
 import localStorageUtils from '@/utils/localStorageUtils'
+import mathUtils from '@/utils/mathUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import TextUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 class Controller {
   shapes = {} as { [key: string]: any }
   observer: IntersectionObserver
-  observerCallbackMap: {[key: string]: () => void}
+  observerCallbackMap: { [key: string]: () => void }
   trashDivs: HTMLDivElement[] = []
 
   constructor() {
@@ -395,30 +395,30 @@ class Controller {
     const bendOri: number = +((config.styles as any).textShape?.bend ?? 0)
     const { scale, height } = config.styles
     const wasCurveText = this.isCurvedText(config.styles)
-    let minHeight = height
-    let hDiff1 = (minHeight * scale - height) / 2
+    let minHeight = height * scale
+    let hDiff1 = (minHeight - height) / 2
     if (wasCurveText) {
-      minHeight = this.getCurveTextHW(config).minHeight
-      hDiff1 = bendOri < 0 ? (height - minHeight * scale) / 2 : (minHeight * scale - height) / 2
+      minHeight = this.getCurveTextHW(config).minHeight * scale
+      hDiff1 = bendOri < 0 ? (height - minHeight) / 2 : (minHeight - height) / 2
     }
     return { wasCurveText, bendOri, hDiff1, minHeight }
   }
 
   getPostParams(config: IText, preParams: ICurveTextPreParams, newSize: { width: number, height: number }): ICurveTextPostParams {
     const { wasCurveText, bendOri, hDiff1, minHeight } = preParams
-    const { x, y, width, height, rotate, scale } = config.styles
+    const { x, y, width, height, rotate } = config.styles
     if (this.isCurvedText(config.styles)) {
       const bend = +(config.styles as any).textShape?.bend
-      const hDiff2 = bend < 0 ? (minHeight * scale - newSize.height) / 2 : (newSize.height - minHeight * scale) / 2
+      const hDiff2 = bend < 0 ? (minHeight - newSize.height) / 2 : (newSize.height - minHeight) / 2
       return {
         hDiff1, hDiff2, rotate, oldPos: { x, y }, oldSize: { width, height }, newSize
       }
     } else {
       let hDiff2
       if (wasCurveText) {
-        hDiff2 = +bendOri < 0 ? (minHeight * scale - newSize.height) / 2 : (newSize.height - minHeight * scale) / 2
+        hDiff2 = +bendOri < 0 ? (minHeight - newSize.height) / 2 : (newSize.height - minHeight) / 2
       } else {
-        hDiff2 = (newSize.height - minHeight * scale) / 2
+        hDiff2 = (newSize.height - minHeight) / 2
       }
       return {
         hDiff1, hDiff2, rotate, oldPos: { x, y }, oldSize: { width, height }, newSize

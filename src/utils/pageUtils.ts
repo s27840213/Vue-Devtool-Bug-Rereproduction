@@ -1,7 +1,9 @@
 import i18n from '@/i18n'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { ICoordinate } from '@/interfaces/frame'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
+import { ISize } from '@/interfaces/math'
 import { IBleed, IPage, IPageSizeWithBleeds, IPageState } from '@/interfaces/page'
 import store from '@/store'
 import { LayerType } from '@/store/types'
@@ -126,6 +128,9 @@ class PageUtils {
   editorSize: { width: number, height: number }
   pageSize: { width: number, height: number }
   originPageSize = { width: -1, height: -1 }
+  originEditorSize = { width: -1, height: -1 }
+  pageEventPosOffset = null as unknown as { x: number, y: number }
+  pageCenterPos = { x: 0, y: 0 }
 
   constructor() {
     this.mobileMinScaleRatio = 0
@@ -191,6 +196,10 @@ class PageUtils {
       guidelines: {
         v: [],
         h: []
+      },
+      mobilePysicalSize: {
+        pageCenterPos: { x: 0, y: 0 },
+        pageSize: { width: 0, height: 0 }
       },
       isEnableBleed: false,
       bleeds: defaultBleeds,
@@ -912,6 +921,10 @@ class PageUtils {
         ...((typeof y !== 'undefined') && { y })
       }
     })
+  }
+
+  setMobilePysicalPage(payload: { pageIndex: number, pageSize?: ISize, pageCenterPos?: ICoordinate }) {
+    store.commit('SET_pagePysicalSize', payload)
   }
 }
 

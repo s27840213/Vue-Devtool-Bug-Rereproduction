@@ -26,13 +26,14 @@ import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import eventUtils from '@/utils/eventUtils'
+import formatUtils from '@/utils/formatUtils'
 import frameUtils from '@/utils/frameUtils'
 import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
-import pageUtils from '@/utils/pageUtils'
+import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -63,6 +64,8 @@ export default defineComponent({
       disableTabScroll: false,
       leftOverflow: false,
       rightOverflow: false,
+      clickedTab: '',
+      clickedTabTimer: -1,
       homeTabs: [
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
@@ -87,14 +90,71 @@ export default defineComponent({
       editorType: 'vivisticker/getEditorType',
       editorTypeTextLike: 'vivisticker/getEditorTypeTextLike',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
-      controllerHidden: 'vivisticker/getControllerHidden'
+      controllerHidden: 'vivisticker/getControllerHidden',
+      hasCopiedFormat: 'getHasCopiedFormat'
     }),
-    backgroundLocked(): boolean {
-      const { locked } = pageUtils.currFocusPage.backgroundImage.config
-      return locked
+    hasSubSelectedLayer(): boolean {
+      return this.currSubSelectedInfo.index !== -1
+    },
+    hasSelectedLayer(): boolean {
+      return this.currSelectedInfo.layers.length > 0
+    },
+    subLayerType(): string {
+      return this.currSubSelectedInfo.type
+    },
+    subActiveLayerIndex(): number {
+      return layerUtils.subLayerIdx
+    },
+    subActiveLayer(): any {
+      if (this.subActiveLayerIndex !== -1) {
+        return (layerUtils.getCurrLayer as IGroup).layers[this.subActiveLayerIndex]
+      }
+      return undefined
+    },
+    subActiveLayerType(): string {
+      const currLayer = layerUtils.getCurrLayer
+      if (currLayer.type === 'group' && this.subActiveLayerIndex !== -1) {
+        return (currLayer as IGroup).layers[this.subActiveLayerIndex].type
+      }
+      return ''
+    },
+    isCopyFormatDisabled(): boolean {
+      if (this.selectedLayerNum === 1) { // not tmp
+        const types = this.currSelectedInfo.types
+        const currLayer = layerUtils.getCurrLayer
+        if (types.has('group')) {
+          if (this.subActiveLayerIndex !== -1) {
+            if (['text', 'image'].includes(this.subActiveLayerType)) {
+              return this.isLocked
+            }
+            if (this.subActiveLayerType === 'frame') {
+              const frame = this.subActiveLayer as IFrame
+              if (frame.clips.length === 1) {
+                return this.isLocked
+              }
+            }
+          }
+        } else if (types.has('frame')) {
+          const frame = currLayer as IFrame
+          if (frame.clips.length === 1) {
+            return this.isLocked
+          } else {
+            if (this.subActiveLayerIndex !== -1 && frame.clips[this.subActiveLayerIndex].type === 'image') {
+              return this.isLocked
+            }
+          }
+        } else {
+          if (types.has('text') || types.has('image')) {
+            return this.isLocked
+          }
+        }
+      }
+      return true
     },
     groupTab(): IFooterTab {
-      return { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1 }
+      return {
+        icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1
+      }
     },
     photoInGroupTabs(): Array<IFooterTab> {
       return [
@@ -112,7 +172,9 @@ export default defineComponent({
         { icon: 'photo', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isSvgImage },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: this.isSvgImage },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
-        ...this.genearlLayerTabs
+        ...this.genearlLayerTabs,
+        ...this.copyPasteTabs,
+        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
       ]
     },
     fontTabs(): Array<IFooterTab> {
@@ -131,7 +193,8 @@ export default defineComponent({
         },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
-        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
+        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
+        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
       ]
     },
     multiPhotoTabs(): Array<IFooterTab> {
@@ -177,11 +240,10 @@ export default defineComponent({
       const currLayer = layerUtils.getCurrLayer
       if (currLayer.type !== 'frame') return []
       const showAdjust = currLayer.clips.some(i => !['frame', 'svg'].includes(i.srcObj.type))
-      const result = [] as Array<IFooterTab>
-      if (showAdjust) {
-        result.push({ icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage })
-      }
-      return result
+      return [
+        ...showAdjust ? [{ icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage }] : [],
+        ...this.copyPasteTabs
+      ]
     },
     showEmptyFrameTabs(): boolean {
       const currLayer = layerUtils.getCurrLayer as IFrame
@@ -209,8 +271,15 @@ export default defineComponent({
         this.groupTab,
         // { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         // { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
+        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        ...this.copyPasteTabs
       ]
+    },
+    copyPasteTabs(): Array<IFooterTab> {
+      return this.editorTypeTextLike ? [
+        { icon: 'copy', text: `${this.$t('NN0032')}` },
+        { icon: 'paste', text: `${this.$t('NN0230')}` }
+      ] : []
     },
     tabs(): Array<IFooterTab> {
       const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
@@ -246,9 +315,9 @@ export default defineComponent({
       } else if ((this.showPhotoTabs || targetType === LayerType.image) && !controllerHidden) {
         return this.photoTabs
       } else if (this.showFontTabs) {
-        return [...this.fontTabs, ...this.genearlLayerTabs]
+        return [...this.fontTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
       } else if (this.showShapeSetting) {
-        return this.objectTabs.concat(this.genearlLayerTabs)
+        return [...this.objectTabs, ...this.genearlLayerTabs, ...this.copyPasteTabs]
       } else if (this.showGeneralTabs) {
         return [...this.genearlLayerTabs]
       } else if (!this.isInEditor) {
@@ -299,18 +368,6 @@ export default defineComponent({
         return layer.type
       })
       return new Set(types)
-    },
-    hasSubSelectedLayer(): boolean {
-      return this.currSubSelectedInfo.index !== -1
-    },
-    subLayerType(): string {
-      return this.currSubSelectedInfo.type
-    },
-    isInFirstStep(): boolean {
-      return stepsUtils.isInFirstStep
-    },
-    isInLastStep(): boolean {
-      return stepsUtils.isInLastStep
     },
     isInFrame(): boolean {
       const layer = layerUtils.getCurrLayer
@@ -532,11 +589,28 @@ export default defineComponent({
           mappingUtils.mappingIconAction(tab.icon)
           break
         }
-        case 'effect': {
-          if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
-            notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
-            return
+        case 'copy': {
+          shortcutUtils.copy()
+          break
+        }
+        case 'paste': {
+          shortcutUtils.paste()
+          break
+        }
+        case 'brush': {
+          if (this.hasCopiedFormat) {
+            formatUtils.clearCopiedFormat()
+          } else {
+            this.handleCopyFormat()
           }
+          break
+        }
+        case 'effect': {
+          // Unreachable, becaues button is disabled
+          // if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
+          //   notify({ group: 'copy', text: `${i18n.global.t('NN0665')}` })
+          //   return
+          // }
           break
         }
         case 'photo':
@@ -574,6 +648,12 @@ export default defineComponent({
         }
       }
 
+      if (tab.icon !== 'crop') {
+        if (this.isCropping) {
+          imageUtils.setImgControlDefault()
+        }
+      }
+
       if (tab.panelType !== undefined) {
         if (this.isInEditor) {
           this.$emit('switchTab', tab.panelType, tab.props)
@@ -583,6 +663,14 @@ export default defineComponent({
             eventUtils.emit(`scrollPanel${startCase(this.currTab)}ToTop`)
           }
         }
+      }
+
+      if (['copy', 'paste'].includes(tab.icon)) {
+        this.clickedTab = tab.icon
+        notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
+        this.clickedTabTimer = window.setTimeout(() => {
+          this.clickedTab = ''
+        }, 800)
       }
     },
     targetIs(type: string): boolean {
@@ -615,8 +703,36 @@ export default defineComponent({
         return this.currTab === tab.panelType &&
           ((colorUtils.currEvent === 'setTextColor' && tab.icon === 'text-color-mobile') ||
           (colorUtils.currEvent !== 'setTextColor' && tab.icon === 'color'))
-      } else return this.currTab === tab.panelType
-    }
+      } else return this.currTab === tab.panelType || this.clickedTab === tab.icon
+    },
+    handleCopyFormat() {
+      if (this.isCopyFormatDisabled) return
+      const types = this.currSelectedInfo.types
+      const layer = this.currSelectedInfo.layers[0]
+      if (types.has('group')) {
+        const type = this.subActiveLayerType
+        const subLayer = this.subActiveLayer
+        if (type === 'text') {
+          formatUtils.copyTextFormat(subLayer)
+        }
+        if (type === 'image') {
+          formatUtils.copyImageFormat(subLayer)
+        }
+        if (type === 'frame') {
+          formatUtils.copyImageFormat(subLayer.clips[0])
+        }
+      } else {
+        if (types.has('text')) {
+          formatUtils.copyTextFormat(layer)
+        }
+        if (types.has('image')) {
+          formatUtils.copyImageFormat(layer)
+        }
+        if (types.has('frame')) {
+          formatUtils.copyImageFormat(layer.clips[Math.max(0, this.subActiveLayerIndex)])
+        }
+      }
+    },
   }
 })
 </script>

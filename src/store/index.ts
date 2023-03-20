@@ -1,6 +1,8 @@
 import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
+import { ICoordinate } from '@/interfaces/frame'
 import { SrcObj } from '@/interfaces/gallery'
 import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IShape, IText, ITmp } from '@/interfaces/layer'
+import { ISize } from '@/interfaces/math'
 import { IBleed, IPage, IPageState } from '@/interfaces/page'
 import { Itheme } from '@/interfaces/theme'
 import background from '@/store/module/background'
@@ -20,6 +22,7 @@ import shadow from '@/store/module/shadow'
 import textStock from '@/store/module/text'
 import user from '@/store/module/user'
 import vivisticker from '@/store/module/vivisticker'
+import webView from '@/store/module/webView'
 import photos from '@/store/photos'
 import text from '@/store/text'
 import imgShadowMutations from '@/store/utils/imgShadow'
@@ -1052,6 +1055,15 @@ const mutations: MutationTree<IEditorState> = {
     state.isTablet = window.matchMedia('screen and (min-width: 768px) and (orientation: portrait), screen and (min-height: 768px) and (orientation: landscape)').matches
     state.isLargeDesktop = generalUtils.getWidth() >= 1440
   },
+  SET_pagePysicalSize(state: IEditorState, payload: { pageIndex: number, pageSize: ISize, pageCenterPos: ICoordinate }) {
+    const { pageIndex, pageSize, pageCenterPos } = payload
+    if (pageCenterPos) {
+      Object.assign(state.pages[pageIndex].config.mobilePysicalSize.pageCenterPos, pageCenterPos)
+    }
+    if (pageSize) {
+      Object.assign(state.pages[pageIndex].config.mobilePysicalSize.pageSize, pageSize)
+    }
+  },
   ...imgShadowMutations,
   ADD_subLayer
 }
@@ -1080,7 +1092,8 @@ const store = createStore({
     shadow,
     vivisticker,
     fontTag,
-    imgControl
+    imgControl,
+    webView
   }
 })
 export default store

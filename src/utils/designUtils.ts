@@ -4,6 +4,7 @@ import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api
 import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
 import router from '@/router'
 import store from '@/store'
+import { notify } from '@kyvg/vue3-notification'
 import { EventEmitter } from 'events'
 import _ from 'lodash'
 import { nextTick } from 'vue'
@@ -13,6 +14,7 @@ import generalUtils from './generalUtils'
 import pageUtils from './pageUtils'
 import resizeUtils from './resizeUtils'
 import stepsUtils from './stepsUtils'
+import themeUtils from './themeUtils'
 import unitUtils from './unitUtils'
 import uploadUtils from './uploadUtils'
 
@@ -748,13 +750,36 @@ class DesignUtils {
 
   async fetchDesign(teamId: string, assetId: string, params?: { [index: string]: any }) {
     const designData = await store.dispatch('design/fetchDesign', { teamId, assetId })
-    store.commit('SET_folderInfo', {
-      isRoot: designData.is_root,
-      parentFolder: designData.parent_folder,
-      path: designData.path
-    })
-    store.commit('SET_pagesName', designData.name)
-    store.commit('SET_assetIndex', designData.asset_index)
+    const isSelfDesign = teamId === this.teamId
+    const noUrl = designData.url_map['config.json'] === undefined
+    if (!store.getters['user/isAdmin']) {
+      if (isSelfDesign) {
+        if (noUrl) { // cannot find self-owning design
+          notify({ group: 'error', text: i18n.global.t('SKT0019') })
+          store.commit('SET_assetId', '')
+          store.commit('file/SET_setLayersDone')
+          await router.replace({ query: Object.assign({}) })
+          await themeUtils.refreshTemplateState()
+          return
+        }
+      } else { // have no access to the design
+        notify({ group: 'error', text: i18n.global.t('SHR0020') })
+        store.commit('SET_assetId', '')
+        store.commit('file/SET_setLayersDone')
+        await router.replace({ query: Object.assign({}) })
+        await themeUtils.refreshTemplateState()
+        return
+      }
+    }
+    if (isSelfDesign) {
+      store.commit('SET_folderInfo', {
+        isRoot: designData.is_root,
+        parentFolder: designData.parent_folder,
+        path: designData.path
+      })
+      store.commit('SET_pagesName', designData.name)
+      store.commit('SET_assetIndex', designData.asset_index)
+    }
     await uploadUtils.getDesign('design', { designId: assetId, teamId, fetchTarget: designData.url_map['config.json'] }, params)
   }
 
