@@ -3,7 +3,7 @@ div(class="vivisticker" :style="copyingStyles()")
   div(class="vivisticker__top" :style="topStyles()")
     header-tabs(v-show="currActivePanel !== 'text'" :style="headerStyles()")
     div(class="vivisticker__content"
-        @pointerdown.self="outerClick")
+        @click.self="outerClick")
       my-design(v-show="isInMyDesign && !isInEditor")
       vvstk-editor(v-show="isInEditor" :isInEditor="isInEditor")
       main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
