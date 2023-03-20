@@ -92,7 +92,6 @@ export default defineComponent({
         height: this.config.styles.height,
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
-      isLoading: true,
       svgBG: {} as textBgSvg|null,
     }
   },
@@ -153,7 +152,7 @@ export default defineComponent({
   watch: {
     'config.paragraphs': {
       handler(newVal) {
-        this.isLoading = false
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
         this.drawSvgBG()
         textUtils.untilFontLoaded(newVal).then(() => {
           this.drawSvgBG()
@@ -163,13 +162,6 @@ export default defineComponent({
     'config.styles.width'() { this.drawSvgBG() },
     'config.styles.height'() { this.drawSvgBG() },
     'config.styles.textBg'() { this.drawSvgBG() },
-    'config.isAutoResizeNeeded': {
-      handler(newVal) {
-        if (newVal) {
-          this.resizeAfterFontLoaded()
-        }
-      }
-    }
   },
   methods: {
     textWrapperStyle(): Record<string, string> {
@@ -186,9 +178,6 @@ export default defineComponent({
       this.$nextTick(async () => {
         this.svgBG = await textBgUtils.drawSvgBg(this.config)
       })
-    },
-    isAutoResizeNeeded(): boolean {
-      return this.page.isAutoResizeNeeded
     },
     isLayerAutoResizeNeeded(): boolean {
       return this.config.isAutoResizeNeeded
@@ -236,7 +225,7 @@ export default defineComponent({
       // console.log('resize')
 
       let widthLimit
-      if ((this.isLoading && this.isAutoResizeNeeded()) || this.isLayerAutoResizeNeeded()) {
+      if (this.isLayerAutoResizeNeeded()) {
         widthLimit = await textUtils.autoResize(config, this.initSize)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
       } else {
@@ -276,7 +265,6 @@ export default defineComponent({
         setTimeout(() => {
           this.resizeCallback()
           if (this.$route.name === 'Screenshot') {
-            this.isLoading = false
             vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
           }
         }, 100) // for the delay between font loading and dom rendering

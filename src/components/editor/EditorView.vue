@@ -61,7 +61,9 @@ import DiskWarning from '@/components/payment/DiskWarning.vue'
 import i18n from '@/i18n'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import { IPage, IPageState } from '@/interfaces/page'
+import app from '@/main'
 import ControlUtils from '@/utils/controlUtils'
+import editorUtils from '@/utils/editorUtils'
 import eventUtils from '@/utils/eventUtils'
 import formatUtils from '@/utils/formatUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -120,47 +122,47 @@ export default defineComponent({
     }
   },
   created() {
-    // Vue.mixin({
-    //   data() {
-    //     return {
-    //       timeStart: 0
-    //     }
-    //   },
-    //   beforeUpdate() {
-    //     const self = this as any
-    //     if (!editorUtils.enalbleComponentLog) return
-    //     self.timeStart = performance.now()
-    //   },
-    //   updated() {
-    //     // tiny workaround for typescript errors
-    //     const self = this as any
-    //     if (!editorUtils.enalbleComponentLog) return
-    //     const timeSpent = performance.now() - self.timeStart
-    //     const omitTarget = ['ComponentLog', 'ComponentLogItem', 'DesktopEditor', 'LazyLoad']
-    //     if (omitTarget.includes(self.$options.name)) return
+    app.mixin({
+      data() {
+        return {
+          timeStart: 0
+        }
+      },
+      beforeUpdate() {
+        const self = this as any
+        if (!editorUtils.enalbleComponentLog) return
+        self.timeStart = performance.now()
+      },
+      updated() {
+        // tiny workaround for typescript errors
+        if (!editorUtils.enalbleComponentLog) return
+        const self = this as any
+        const timeSpent = performance.now() - self.timeStart
+        const omitTarget = ['ComponentLog', 'ComponentLogItem', 'DesktopEditor', 'LazyLoad']
+        if (omitTarget.includes(self.$options.name)) return
 
-    //     const tmpArr = String(Object.getPrototypeOf(self.$options).__file).split('/')
-    //     const componentName = tmpArr[tmpArr.length - 1]
+        const tmpArr = String(self.$options.__file).split('/')
+        const componentName = tmpArr[tmpArr.length - 1]
 
-    //     // undefined means it's Vue built-in component
-    //     if (componentName === 'undefined') return
+        // undefined means it's Vue built-in component
+        if (componentName === 'undefined') return
 
-    //     window.requestAnimationFrame(() => {
-    //       self.$root.$emit('on-re-rendering', {
-    //         component: componentName,
-    //         name: self.$options.name,
-    //         __name: self.$options.__name,
-    //         parent: self.$options.parent?._name ?? 'no parent',
-    //         time: timeSpent,
-    //         propsData: {
-    //           index: self.$options.propsData?.index,
-    //           pageIndex: self.$options.propsData?.pageIndex,
-    //           layerIndex: self.$options.propsData?.layerIndex
-    //         }
-    //       })
-    //     })
-    //   }
-    // })
+        window.requestAnimationFrame(() => {
+          self.$eventBus.emit('on-re-rendering', {
+            component: componentName,
+            name: self.$options.name,
+            __name: self.$options.__name,
+            parent: self.$options.parent?._name ?? 'no parent',
+            time: timeSpent,
+            propsData: {
+              index: self.$options.propsData?.index,
+              pageIndex: self.$options.propsData?.pageIndex,
+              layerIndex: self.$options.propsData?.layerIndex
+            }
+          })
+        })
+      }
+    })
 
     // check and auto resize pages oversized on design loaded
     const unwatchPages = this.$watch('isGettingDesign', (newVal) => {

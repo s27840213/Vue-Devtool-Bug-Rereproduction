@@ -508,9 +508,7 @@ export class MovingUtils {
 
     if (this.isControllerShown) {
       if (hasActualMove) {
-        if (shortcutUtils.prevLayerId === this.config.id) {
-          shortcutUtils.offsetCount = 0
-        }
+        shortcutUtils.offsetCount = 0
         if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex === -1) {
           layerUtils.deleteSelectedLayer()
         } else if (layerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {

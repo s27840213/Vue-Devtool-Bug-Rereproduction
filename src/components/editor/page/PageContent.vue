@@ -231,20 +231,6 @@ export default defineComponent({
       return (this.userId === 'backendRendering' ? this.backendRenderParams.margin : { bottom: 0, right: 0 })
     }
   },
-  mounted() {
-    if (this.config.isAutoResizeNeeded) {
-      this.handleFontLoading()
-      // this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
-    }
-  },
-  watch: {
-    'config.isAutoResizeNeeded'(newVal) {
-      if (newVal) {
-        this.handleFontLoading()
-        // this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
-      }
-    }
-  },
   methods: {
     ...mapMutations({
       ADD_newLayers: 'ADD_newLayers',
@@ -273,7 +259,7 @@ export default defineComponent({
         }
       }
     },
-    pageClickHandler(e: PointerEvent): void {
+    pageClickHandler(e: MouseEvent): void {
       vivistickerUtils.deselect()
     },
     onRightClick(event: MouseEvent) {
@@ -317,7 +303,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .overflow-container {
   position: relative;
-  overflow: hidden;
+  overflow: clip; // Clip can prevent any scroll, include programing scroll.
   transform-origin: 0 0;
 }
 

@@ -262,13 +262,14 @@ export default defineComponent({
       }
     },
     setPanelHeight(height: number) {
-      if (height === 0) {
+      const content = this.$refs['mobile-editor__content'] as HTMLElement
+      const contentHeight = content?.clientHeight ?? 0
+      if (height === 0 || height > contentHeight) {
         this.marginBottom = 0
         return
       }
 
-      const content = this.$refs['mobile-editor__content'] as HTMLElement
-      const contentHeight = content?.clientHeight ?? 0
+      // Calc additional page card translation by layer position
       const activeLayer = find(this.currPage.layers, ['active', true])
       let offset = 0
       if (activeLayer && contentHeight) {

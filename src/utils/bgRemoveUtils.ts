@@ -19,30 +19,27 @@ import stepsUtils from './stepsUtils'
 import uploadUtils from './uploadUtils'
 
 class BgRemoveUtils {
-  get prevPageScaleRatio ():number {
+  get prevPageScaleRatio(): number {
     return store.getters['bgRemove/getPrevPageScaleRatio']
   }
 
-  get canvas ():HTMLCanvasElement {
+  get canvas(): HTMLCanvasElement {
     return store.getters['bgRemove/getCanvas']
   }
 
-  get modifiedFlag ():boolean {
+  get modifiedFlag(): boolean {
     return store.getters['bgRemove/getModifiedFlag']
   }
 
-  get autoRemoveResult ():IBgRemoveInfo {
+  get autoRemoveResult(): IBgRemoveInfo {
     return store.getters['bgRemove/getAutoRemoveResult']
   }
 
-  get bgRemoveIdInfo ():{
-    pageId: string,
-    layerId: string
-    } {
+  get bgRemoveIdInfo(): { pageId: string, layerId: string } {
     return store.getters['bgRemove/getIdInfo']
   }
 
-  get isAdmin ():boolean {
+  get isAdmin(): boolean {
     return store.getters['user/isAdmin']
   }
 
@@ -167,7 +164,7 @@ class BgRemoveUtils {
   }
 
   save() {
-    console.log(this.autoRemoveResult)
+    console.log(generalUtils.deepCopy(this.autoRemoveResult))
     console.log(store.getters['bgRemove/getAutoRemoveResult'])
     const { index, pageIndex } = pageUtils.currSelectedInfo as ICurrSelectedInfo
     imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex: index }, { type: 'after-bg-remove', userId: '', assetId: '' })
@@ -179,6 +176,7 @@ class BgRemoveUtils {
           userId: (this.autoRemoveResult as IBgRemoveInfo).teamId,
           assetId: this.isAdmin ? (this.autoRemoveResult as IBgRemoveInfo).id : (this.autoRemoveResult as IBgRemoveInfo).assetIndex
         },
+        panelPreviewSrc: (this.autoRemoveResult as IBgRemoveInfo).urls.larg,
         trace: 1
       })
       const image = layerUtils.getLayer(pageIndex, index) as IImage
@@ -204,6 +202,7 @@ class BgRemoveUtils {
       const previewSrc = this.canvas.toDataURL('image/png;base64')
       const { pageId, layerId } = this.bgRemoveIdInfo
       layerUtils.updateLayerProps(pageIndex, index, {
+        panelPreviewSrc: '',
         previewSrc,
         trace: 1
       })

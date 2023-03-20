@@ -31,6 +31,8 @@ export class Page implements IPage {
   }
   mobilePysicalSize: { pageCenterPos: ICoordinate; pageSize: ISize }
 
+  mobilePysicalSize: { pageCenterPos: ICoordinate; pageSize: ISize }
+
   isEnableBleed: boolean
   bleeds: {
     top: number
@@ -46,7 +48,6 @@ export class Page implements IPage {
     right: number
   }
 
-  isAutoResizeNeeded: boolean
   contentScaleRatio: number
 
   constructor() {
@@ -104,7 +105,6 @@ export class Page implements IPage {
       left: 11,
       right: 11
     }
-    this.isAutoResizeNeeded = false
     this.contentScaleRatio = 1
   }
 }

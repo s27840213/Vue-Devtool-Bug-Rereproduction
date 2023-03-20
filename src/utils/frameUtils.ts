@@ -220,12 +220,13 @@ class FrameUtils {
     })
   }
 
-  updateFrameLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean | SrcObj }) {
+  updateFrameLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean | SrcObj }, preprimaryLayerIndex = -1) {
     if (targetIndex === -1) return
     store.commit('UPDATE_frameLayerProps', {
       pageIndex,
       layerIndex,
       targetIndex,
+      preprimaryLayerIndex,
       props
     })
   }

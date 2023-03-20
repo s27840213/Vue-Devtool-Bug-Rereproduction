@@ -72,7 +72,6 @@ export default defineComponent({
       } as IListServiceContentDataItem
 
       const json = (await AssetUtils.get(asset)).jsonData as IFrame
-
       // this.config.styles.initWidth = json.width as number
       // this.config.styles.initHeight = json.height as number
       layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
@@ -82,7 +81,11 @@ export default defineComponent({
 
       config.clips.forEach((img, idx) => {
         if (json.clips[idx]) {
-          frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, idx, { clipPath: json.clips[idx].clipPath })
+          if (this.subLayerIndex !== -1) {
+            frameUtils.updateFrameLayerProps(this.pageIndex, this.subLayerIndex, idx, { clipPath: json.clips[idx].clipPath }, this.layerIndex)
+          } else {
+            frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, idx, { clipPath: json.clips[idx].clipPath })
+          }
         }
       })
       if (config.decoration && json.decoration) {

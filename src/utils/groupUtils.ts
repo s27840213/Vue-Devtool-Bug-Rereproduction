@@ -389,9 +389,9 @@ class GroupUtils {
     }
   }
 
-  reset() {
+  reset(pageIndexReset = true) {
     store.commit('SET_currSelectedInfo', {
-      pageIndex: -1,
+      ...(pageIndexReset && { pageIndex: -1 }),
       index: -1,
       layers: [],
       types: new Set<string>(),

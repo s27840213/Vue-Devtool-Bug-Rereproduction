@@ -212,10 +212,10 @@ export default defineComponent({
       return this.currPage.layers[this.currSelectedIndex]
     },
     isLine(): boolean {
-      return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
+      return shapeUtils.isLine(this.currLayer)
     },
     isBasicShape(): boolean {
-      return this.currLayer.type === 'shape' && this.currLayer.category === 'E'
+      return shapeUtils.isBasicShape(this.currLayer)
     },
     isNormalDash(): boolean {
       return (this.currLayer as IShape).dasharray?.length === 0

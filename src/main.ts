@@ -23,6 +23,7 @@ import swipe from '@any-touch/swipe'
 import Notifications from '@kyvg/vue3-notification'
 import AnyTouch from 'any-touch'
 import FloatingVue from 'floating-vue'
+import mitt, { Emitter, EventType } from 'mitt'
 import platform from 'platform'
 import { createApp, nextTick } from 'vue'
 import { createMetaManager, plugin as metaPlugin } from 'vue-meta'
@@ -37,6 +38,7 @@ import longpress from './utils/longpress'
 import svgIconUtils from './utils/svgIconUtils'
 import TooltipUtils from './utils/tooltipUtils'
 
+const eventBus = mitt()
 window.onerror = function (msg, url, line) {
   const message = [
     'Message: ' + msg,
@@ -59,10 +61,12 @@ store.commit('user/SET_BroswerInfo', {
 // Ex: if (this.$isTouchDevice()) in .vue ts
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
-    $isTouchDevice: () => boolean
+    $isTouchDevice: () => boolean,
+    $eventBus: Emitter<Record<EventType, unknown>>
   }
 }
 app.config.globalProperties.$isTouchDevice = () => generalUtils.isTouchDevice()
+app.config.globalProperties.$eventBus = eventBus
 
 const tooltipUtils = new TooltipUtils()
 
@@ -271,3 +275,4 @@ if (window.location.href.indexOf('logout') > -1) {
 //   // app.config.devtools = false
 // }
 app.mount('#app')
+export default app

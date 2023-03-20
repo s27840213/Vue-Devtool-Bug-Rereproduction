@@ -513,6 +513,10 @@ export default Extension.create({
         shortcutUtils.zoomIn()
         return true
       },
+      'Mod-s': () => {
+        shortcutUtils.save()
+        return true
+      },
       ArrowUp: arrow('vert', -1),
       ArrowDown: arrow('vert', 1),
     }
