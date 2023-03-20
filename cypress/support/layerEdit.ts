@@ -128,7 +128,7 @@ Cypress.Commands.add('layerScale', { prevSubject: 'element' }, (subject) => {
 
 // Special text for some layer
 
-Cypress.Commands.add('rotateAndResize', { prevSubject: 'element' }, (subject) => {
+Cypress.Commands.add('layerRotateAndResize', { prevSubject: 'element' }, (subject) => {
   const resizeDir = [
     { i: 0, x: -1, y: -1 },
     { i: 1, x: 1, y: 1 },
@@ -156,13 +156,70 @@ Cypress.Commands.add('rotateAndResize', { prevSubject: 'element' }, (subject) =>
   return cy.wrap(subject)
 })
 
-Cypress.Commands.add('layerMoveToPage2', { prevSubject: 'element' }, (subject) => {
+Cypress.Commands.add('layerMultipleCopyAndMove', { prevSubject: 'element' }, (subject, method, isMobile) => {
+  if (isMobile && ['shortcut', 'rightclick'].includes(method)) return cy.wrap(subject)
+  const moveDir = [
+    { i: 0, x: 1, y: 0 },
+    { i: 1, x: 1, y: -1 },
+    { i: 2, x: 1, y: 1 },
+    { i: 3, x: -1, y: 1 },
+    { i: 4, x: -1, y: -1 },
+  ]
+  const moveDistance = isMobile ? 150 : 200
+  cy.wrap(subject).click()
+    .get('.nu-page .nu-layer').then((oldLayers) => {
+      switch (method) {
+        case 'functionalPanel':
+          cy.get('.header-bar, .function-panel')
+            .find('.svg-copy').click().click().click().click().click()
+          break
+        case 'shortcut':
+          cy.realPress(['Meta', 'c']).realPress(['Meta', 'v'])
+            .realPress(['Meta', 'v']).realPress(['Meta', 'v'])
+            .realPress(['Meta', 'v']).realPress(['Meta', 'v'])
+          break
+        case 'rightclick':
+          cy.wrap(subject).rightclick()
+            .get('.popup').contains('複製').realClick().then(() => {
+              for (let i = 0; i < 5; i++) {
+                cy.wrap(subject).realClick({ button: 'right' })
+                  .get('.popup .svg-paste').realClick()
+                  .get('.nu-page .nu-layer').should('have.length', oldLayers.length + i + 1)
+              }
+            })
+          break
+      }
+      cy.get('.nu-page .nu-layer').should('have.length', oldLayers.length + 5)
+        .get('.nu-page .nu-layer').then((layers) => {
+          const newLayers = layers.not(oldLayers).toArray().reverse()
+          cy.isMobile(() => { cy.deselectAllLayers() }) // Prevent img clip mode
+          for (const { i, x, y } of moveDir) {
+            cy.wrap(newLayers[i]).click({ force: true })
+              .wrap(newLayers[i])
+              .realMouseDown()
+              .realMouseMove(x * moveDistance, y * moveDistance, { position: 'center' })
+              .realMouseUp({ scrollBehavior: false })
+              .isMobile(() => { cy.wait(100) }) // Wait page card go back to original position
+          }
+          cy.snapshotTest('MultipleCopyAndMove')
+          // Restore layer to original state
+          for (const layer of newLayers) {
+            cy.wrap(layer).click().type('{del}')
+          }
+        })
+        .get('.nu-page .nu-layer').should('have.length', oldLayers.length)
+    })
+  return cy.wrap(subject)
+})
+
+Cypress.Commands.add('layerMoveToPage2', { prevSubject: 'element' }, (subject, isMobile) => {
+  if (isMobile) return cy.wrap(subject)
   cy.wrap(subject).click()
     .get('.svg-add-page').click()
     .wrap(subject)
     .realMouseDown()
     .realMouseMove(100, 600, { position: 'center' })
-    .realMouseUp({ scrollBehavior: false })
+    .realMouseUp()
     .get('.editor-view').scrollTo(0, 0, { ensureScrollable: false })
     .snapshotTest('Move to page 2 - p1')
     .scrollTo(0, 9999, { ensureScrollable: false })
@@ -172,7 +229,7 @@ Cypress.Commands.add('layerMoveToPage2', { prevSubject: 'element' }, (subject) =
     .get('#nu-page_1 .nu-image').click({ scrollBehavior: false })
     .realMouseDown({ scrollBehavior: false })
     .realMouseMove(-100, -600, { position: 'center', scrollBehavior: false })
-    .realMouseUp({ scrollBehavior: false })
+    .realMouseUp()
     .get('.nu-page-content-1').children().should('have.length', 1)
     .get('.page-title .svg-trash').eq(-1).click()
     .get('.editor-view__canvas').children().should('have.length', 2)
