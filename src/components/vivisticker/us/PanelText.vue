@@ -307,7 +307,7 @@ export default defineComponent({
     &__icon {
       display: flex;
       position: absolute;
-      left: 168px;
+      left: calc(50% + 40px);
     }
   }
   &__recent-empty {
