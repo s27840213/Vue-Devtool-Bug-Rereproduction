@@ -24,7 +24,7 @@ div(class="overflow-container"
             @mousedown.native.left="pageClickHandler()"
             :contentScaleRatio="contentScaleRatio"
             :padding="contentStyles.margin")
-        div(class="layers-wrapper")
+        div(class="layers-wrapper" :class="{'preserve3D': !isTouchDevice}")
           nu-layer(
             v-for="(layer,index) in config.layers"
             :key="layer.id"
@@ -58,6 +58,7 @@ import { SidebarPanelType } from '@/store/types'
 import doubleTapUtils from '@/utils/doubleTapUtils'
 import DragUtils from '@/utils/dragUtils'
 import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -233,6 +234,9 @@ export default defineComponent({
     margin() {
       // additional margin for backend render
       return (this.userId === 'backendRendering' ? this.backendRenderParams.margin : { bottom: 0, right: 0 })
+    },
+    isTouchDevice(): boolean {
+      return generalUtils.isTouchDevice()
     }
   },
   mounted() {

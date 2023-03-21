@@ -222,3 +222,7 @@ $spacer: 5;
     pointer-events: none;
     visibility: hidden;
 }
+
+.preserve3D {
+    transform-style: preserve-3d;
+}

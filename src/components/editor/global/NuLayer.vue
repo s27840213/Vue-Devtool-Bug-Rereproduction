@@ -10,6 +10,7 @@ div(class="nu-layer"
   //- :ref="div.main ? 'body' : ''"
   div(v-for="div in layerDivs"
       class="full-size"
+      :class="{'preserve3D': !isTouchDevice}"
       :style="layerStyles(div.noShadow, div.isTransparent)"
       @pointerdown="div.main ? onPointerDown($event) : null"
       @pointerup="div.main ? onPointerUp($event) : null"
@@ -18,11 +19,12 @@ div(class="nu-layer"
       @dragenter="div.main ? dragEnter($event) : null"
       @dblclick="div.main ? dblClick($event) : null")
     div(class="full-size"
-        :class="{'nu-layer__scale': applyLayerScale}" :ref="div.main ? 'scale' : ''"
+        :class="{'nu-layer__scale': applyLayerScale, 'preserve3D': !isTouchDevice}" :ref="div.main ? 'scale' : ''"
         :style="scaleStyles()")
-      div(class="nu-layer__flip full-size" :style="flipStyles")
+      div(class="nu-layer__flip full-size" :class="{'preserve3D': !isTouchDevice}" :style="flipStyles")
           component(:is="`nu-${config.type}`"
             class="transition-none"
+            :class="{'preserve3D': !isTouchDevice}"
             :config="config"
             :imgControl="imgControl"
             :contentScaleRatio="contentScaleRatio"
@@ -436,6 +438,9 @@ export default defineComponent({
         return false
       }
       return layerUtils.getCurrLayer.type === LayerType.image && this.isMoving
+    },
+    isTouchDevice(): boolean {
+      return generalUtils.isTouchDevice()
     }
   },
   methods: {
