@@ -9,7 +9,7 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
     div(class="panel-static__categorys__vr")
     recycle-scroller(class="panel-static__categorys__list"
       :key="'panel-static__categorys-icon-list' + (isInCategory ? '--cat' : '')"
-      :items="listCategoryItems"
+      :items="listCategories"
       direction="horizontal"
       @scroll-end="(nextCategory !== -1) && getCategories()"
       :ref="!hideCategoryIconList ? 'categoryIconList' : undefined")
@@ -91,8 +91,9 @@ div(class="panel-static" :class="{'in-category': isInCategory}")
 
 <script lang="ts">
 import { CCategoryList } from '@/components/category/CategoryList.vue'
-import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IAsset, isITag, ITagExtend } from '@/interfaces/module'
+import generalUtils from '@/utils/generalUtils'
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'vuex'
 import PanelObjectStatic from '../PanelObjectStatic.vue'
@@ -107,17 +108,17 @@ export default defineComponent({
   data() {
     return {
       mainContentScrollTop: 0,
-      elMainContent: undefined as HTMLElement | undefined
+      elCategoryCardList: undefined as HTMLElement | undefined
     }
   },
   activated() {
     this.$nextTick(() => {
-      this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
-      this.elMainContent.addEventListener('scroll', this.handleMainContentScroll)
+      this.elCategoryCardList = (this.$refs as Record<string, CCategoryList[]>).categoryCardList[0].$el as HTMLElement
+      this.elCategoryCardList.addEventListener('scroll', this.handleMainContentScroll)
     })
   },
   deactivated() {
-    this.elMainContent?.removeEventListener('scroll', this.handleMainContentScroll)
+    this.elCategoryCardList?.removeEventListener('scroll', this.handleMainContentScroll)
   },
   computed: {
     ...mapState({
@@ -180,15 +181,55 @@ export default defineComponent({
       const gap = 10
       return iconSize + gap
     },
-    listCategoryItems() {
-      return this.processListCategory(this.rawCategories)
+    mainContent(): ICategoryItem[] {
+      if (this.showAllRecently) {
+        return this.listRecently
+      }
+      const list = generalUtils.deepCopy(this.listResult)
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: true })
+      }
+      return list
     },
-    listCategoryCards() {
-      return this.processListCategoryCard(this.rawCategories)
+    categoryCardList(): ICategoryItem[] {
+      const list = generalUtils.deepCopy(this.processListCategoryCard(this.rawCategories))
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: true })
+      }
+      return list
     },
-    listCategories(): ICategoryItem[] {
-      if (!this.showFav && !this.isInCategory && !this.showAllRecently) return this.listCategoryCards
-      return this.listCategoryItems
+    categoryListArray(): ICategoryList[] {
+      return [{
+        content: this.favoritesSearchResult,
+        show: this.showFav && this.rawFavoritesSearchResult.title,
+        key: 'favoritesSearchResult',
+        loadMore: this.searchMoreFavorites,
+        categorySearch: () => { /**/ }
+      }, {
+        content: this.favoritesContent,
+        show: this.showFav && !this.rawFavoritesSearchResult.title,
+        key: 'favoritesContent',
+        loadMore: () => { /**/ },
+        categorySearch: this.handleCategorySearch
+      }, {
+        content: this.searchResult,
+        show: !this.showFav && this.keyword,
+        key: 'searchResult',
+        loadMore: this.handleLoadMore,
+        categorySearch: this.handleCategorySearch
+      }, {
+        content: this.mainContent,
+        show: !this.showFav && !this.keyword && this.isInCategory,
+        key: 'mainContent',
+        loadMore: this.handleLoadMore,
+        categorySearch: this.handleCategorySearch
+      }, {
+        content: this.categoryCardList,
+        show: !this.showFav && !this.keyword && !this.isInCategory,
+        key: 'categoryCardList',
+        loadMore: this.handleLoadMore,
+        categorySearch: this.handleCategorySearch
+      }]
     },
   },
   watch: {
@@ -264,7 +305,7 @@ export default defineComponent({
       }
     },
     handleMainContentScroll() {
-      this.mainContentScrollTop = this.elMainContent?.scrollTop ?? 0
+      this.mainContentScrollTop = this.elCategoryCardList?.scrollTop ?? 0
     },
     scrollCategoryIcon(target?: number) {
       if (this.hideCategoryIconList) return

@@ -164,7 +164,7 @@ export interface ICategoryItem {
   sentinel?: boolean
 }
 export interface ICategoryList {
-  key: 'mainContent' | 'searchResult' | 'favoritesContent' | 'favoritesSearchResult'
+  key: 'mainContent' | 'searchResult' | 'favoritesContent' | 'favoritesSearchResult' | 'categoryCardList'
   show: boolean
   content: ICategoryItem[]
   loadMore?: () => void
