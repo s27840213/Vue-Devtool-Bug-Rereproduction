@@ -48,12 +48,6 @@ div(v-else-if="isBgImgCtrl" class="dim-background")
       :pageIndex="pageIndex"
       :page="config"
       :contentScaleRatio="contentScaleRatio")
-  //- div(:style="backgroundContorlClipStyles")
-  //-   nu-image(:config="image" :inheritStyle="backgroundFlipStyles" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
-  //- div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
-  //-     class="dim-background"
-  //-     :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
-
 </template>
 
 <script lang="ts">
@@ -242,7 +236,6 @@ export default defineComponent({
 
 .background-control {
   position: absolute;
-
   color: white;
 }
 </style>
