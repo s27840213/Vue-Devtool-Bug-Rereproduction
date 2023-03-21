@@ -691,7 +691,7 @@ export default defineComponent({
         }
         case 'trash': {
           groupUtils.deselect()
-          const tmpIndex = pageUtils.currActivePageIndex
+          const tmpIndex = pageUtils.currFocusPageIndex
           this._setCurrActivePageIndex(pageUtils.isLastPage ? tmpIndex - 1 : tmpIndex)
           editorUtils.setCurrCardIndex(pageUtils.currActivePageIndex)
           pageUtils.deletePage(tmpIndex)
