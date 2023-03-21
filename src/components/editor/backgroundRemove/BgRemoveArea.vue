@@ -107,8 +107,8 @@ export default defineComponent({
     if (!this.$isTouchDevice()) {
       this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
       this.editorViewCanvas.addEventListener('mouseleave', this.handleBrushLeave)
-      window.addEventListener('keydown', this.handleKeydown)
     }
+    window.addEventListener('keydown', this.handleKeydown)
     this.setPrevPageScaleRatio(this.scaleRatio)
     pageUtils.fitPage()
   },
@@ -174,13 +174,14 @@ export default defineComponent({
     brushColor(): string {
       return this.clearMode ? '#fcaea9' : '#fdd033'
     },
-    magnifyAreaStyle() {
+    magnifyAreaStyle(): { [index: string]: string } {
       return !this.$isTouchDevice() ? {
         top: '10px',
         left: '80px'
       } : {
         top: '-70px',
-        left: '20px'
+        left: '20px',
+        visibility: this.showBrush ? 'visible' : 'hidden'
       }
     }
   },

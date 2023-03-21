@@ -9,16 +9,16 @@ div(class="header-bar" :style="rootStyles" @pointerdown.stop)
         :iconWidth="'22px'")
     template(v-if="!isShowDownloadPanel")
       div(class="header-bar__feature-icon mr-15"
-          :class="{'click-disabled': isInFirstStep || isCropping}"
+          :class="{'click-disabled': (inBgRemoveMode ? inBgRemoveFirstStep :isInFirstStep) || isCropping}"
           @pointerdown="undo()")
         svg-icon(:iconName="'undo'"
-          :iconColor="(!isInFirstStep && !isCropping) ? 'white' : 'gray-2'"
+          :iconColor="(inBgRemoveMode ? inBgRemoveFirstStep :isInFirstStep) || isCropping ? 'gray-2' :'white' "
           :iconWidth="'22px'")
       div(class="header-bar__feature-icon"
-          :class="{'click-disabled': isInLastStep || isCropping}"
+          :class="{'click-disabled': (inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping}"
           @pointerdown="redo()")
         svg-icon(:iconName="'redo'"
-          :iconColor="(!isInLastStep && !isCropping) ? 'white' : 'gray-2'"
+          :iconColor="(inBgRemoveMode ? inBgRemoveLastStep :isInLastStep) || isCropping ? 'gray-2' : 'white'"
           :iconWidth="'22px'")
   div(class="header-bar__right")
     div(v-for="tab in rightTabs")
@@ -93,8 +93,8 @@ export default defineComponent({
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      InBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      InBgRemoveLastStep: 'bgRemove/inLastStep',
+      inBgRemoveFirstStep: 'bgRemove/inFirstStep',
+      inBgRemoveLastStep: 'bgRemove/inLastStep',
       isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       hasBleed: 'getHasBleed',
