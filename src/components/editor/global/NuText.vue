@@ -285,7 +285,7 @@ export default defineComponent({
 .nu-text {
   width: 100%;
   height: 100%;
-  position: relative;
+  // position: relative;
   &__BG {
     position: absolute;
     left: 0;
