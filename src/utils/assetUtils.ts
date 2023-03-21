@@ -478,29 +478,42 @@ class AssetUtils {
       }
     }
 
-    if (config.type === 'text') {
-      Object.assign(config, {
-        widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
-        isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles),
-      })
-    } else if (config.type === 'group') {
-      for (const subLayer of config.layers) {
-        Object.assign(subLayer, {
-          isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles)
-        })
-      }
-    }
-
     Object.assign(
       config.styles,
       typeof y === 'undefined' || typeof x === 'undefined'
         ? TextUtils.getAddPosition(textWidth, textHeight, targetPageIndex)
         : { x, y }
     )
-    const newLayer = config.type === 'group'
-      ? LayerFactary.newGroup(config, (config as IGroup).layers)
-      : LayerFactary.newText(config)
-    layerUtils.addLayers(targetPageIndex, [newLayer])
+
+    let newLayer = null
+    let isText = false
+
+    if (config.type === 'text') {
+      Object.assign(config, {
+        widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
+        isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles),
+        contentEditable: true
+      })
+      newLayer = LayerFactary.newText(config)
+      isText = true
+    } else if (config.type === 'group') {
+      for (const subLayer of config.layers) {
+        Object.assign(subLayer, {
+          isAutoResizeNeeded: !textShapeUtils.isCurvedText(subLayer.styles)
+        })
+      }
+      newLayer = LayerFactary.newGroup(config, (config as IGroup).layers)
+    }
+
+    if (isText) {
+      setTimeout(() => {
+        tiptapUtils.agent(editor => editor.commands.selectAll())
+      }, 100)
+    }
+
+    if (newLayer !== null) {
+      layerUtils.addLayers(targetPageIndex, [newLayer])
+    }
   }
 
   async addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}, spanStyles: Partial<ISpanStyle> = {}) {
