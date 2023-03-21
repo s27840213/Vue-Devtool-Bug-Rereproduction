@@ -24,8 +24,8 @@ div(class="panel-text" :class="{'in-category': isInCategory}")
               iconName="clock"
               iconColor="balck-1"
               iconWidth="24px")
-            div(class="overline-SM") {{ "RECENTLY USED" }}
-          img(v-else class="panel-text__card__bg" :src="cardBgSrc(item)" @click="addText(item)" @error="imgOnerror")
+            div(class="overline-SM") RECENTLY USED
+          CategoryTextPrev(v-else :item="item" @click="addText(item)")
   div(v-if="!showAllRecently" class="panel-text__text-button-wrapper" ref="btnAddText"
       :style="`font-family: ${localeFont()}`"
       @click="handleAddText")
@@ -36,6 +36,7 @@ div(class="panel-text" :class="{'in-category': isInCategory}")
 
 <script lang="ts">
 import { CCategoryList } from '@/components/category/CategoryList.vue'
+import CategoryTextPrev from '@/components/vivisticker/us/CategoryTextPrev.vue'
 import { ICategoryItem, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -50,6 +51,9 @@ const MAX_BTN_WIDTH = 310
 export default defineComponent({
   name: 'panel-text-us',
   extends: PanelText,
+  components: {
+    CategoryTextPrev
+  },
   data() {
     return {
       elMainContent: undefined as HTMLElement | undefined,
@@ -158,19 +162,12 @@ export default defineComponent({
           }
         })
     },
-    cardBgSrc(item: IListServiceContentDataItem):string {
-      return item.id === 'recent' ? '' : `https://template.vivipic.com/text/${item.id}/bg_prev_2x?ver=${item.ver}`
-    },
     itemStyles() {
       return {
         width: this.itemWidth + 'px',
         height: this.itemWidth + 'px',
         ...(!this.isTablet && { margin: '0 auto' })
       }
-    },
-    imgOnerror(e: Event) {
-      const target = (e.target as HTMLImageElement)
-      target.src = require('@/assets/img/svg/image-preview.svg')
     },
     addText(item: any) {
       if (this.isInEditor) {
@@ -246,10 +243,7 @@ export default defineComponent({
     justify-content: center;
     border-radius: 10px;
     overflow: hidden;
-    &__bg {
-      @include size(100%, 100%);
-      object-position: center center;
-    }
+    background: rgba(255, 255, 255, 0.1);
     &__recent {
       @include size(100%, 100%);
       display: flex;
