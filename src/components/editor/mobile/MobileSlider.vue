@@ -75,6 +75,10 @@ export default defineComponent({
     propKey: {
       type: String,
       default: ''
+    },
+    autoRecord: {
+      type: Boolean,
+      default: true,
     }
   },
   computed: {
@@ -97,10 +101,9 @@ export default defineComponent({
   },
   methods: {
     handleChangeStop() {
-      stepsUtils.record()
+      if (this.autoRecord)stepsUtils.record()
     },
-    handlePointerup(e: Event) {
-      this.$emit('pointerup', e)
+    handlePointerup() {
       this.handleChangeStop()
     }
   }

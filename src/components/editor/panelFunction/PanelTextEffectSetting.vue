@@ -10,7 +10,7 @@ div(class="text-effect-setting mt-25")
       //- To choose effect, ex: hollow, splice or echo.
       div(class="text-effect-setting__effects mb-10")
         svg-icon(v-for="effect in effects1d"
-          :key="`${currCategory.name}-${effect.key}`"
+          :key="`${currCategoryName}-${effect.key}`"
           :iconName="effectIcon(currCategory, effect)"
           @click="onEffectClick(effect.key)"
           class="text-effect-setting__effect pointer"
@@ -41,7 +41,7 @@ div(class="text-effect-setting mt-25")
               :max="option.max"
               :min="option.min"
               :step="option.key === 'lineHeight' ? 0.01 : 1"
-              @change="(e)=>{handleRangeInput(e, option);recordChange()}"
+              @change="(e)=>{handleRangeInputEvent(e, option);recordChange()}"
               type="number")
             input(class="text-effect-setting-options__field--range input__slider--range"
               :value="getInputValue(currentStyle, option)"
@@ -49,16 +49,16 @@ div(class="text-effect-setting mt-25")
               :max="option.max"
               :min="option.min"
               :step="option.key === 'lineHeight' ? 0.01 : 1"
-              @input="(e)=>handleRangeInput(e, option)"
-              @mousedown="handleRangeMousedown()"
-              @mouseup="handleRangeMouseup()"
+              @input="(e)=>handleRangeInputEvent(e, option)"
+              @mousedown="setEffectFocus(true)"
+              @mouseup="setEffectFocus(false)"
               v-ratio-change
               type="range")
           //- Option type color
           color-btn(v-if="option.type === 'color'" size="25px"
             :color="colorParser(currentStyle[option.key])"
             :active="option.key === colorTarget.key && settingTextEffect"
-            @click="handleColorModal(currCategory.name, option.key)")
+            @click="handleColorModal(currCategoryName, option.key)")
         div(class="text-effect-setting-options__field")
           span
           span(class="text-effect-setting-options__field--reset"
@@ -69,7 +69,6 @@ div(class="text-effect-setting mt-25")
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import i18n from '@/i18n'
-import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOptionRange } from '@/utils/constantData'
@@ -85,6 +84,7 @@ import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 
 export default defineComponent({
+  name: 'PanelTextEffectSetting',
   components: {
     ColorPicker,
     ColorBtn
@@ -105,16 +105,20 @@ export default defineComponent({
     ...mapState('text', {
       selectedTextProps: 'props'
     }),
-    currCategory():IEffectCategory {
-      return _.find(this.textEffects, ['name', this.currTab]) as IEffectCategory
+    currCategoryName(): 'shadow'|'bg'|'shape' {
+      return this.currTab
+    },
+    currCategory(): IEffectCategory {
+      return _.find(this.textEffects, ['name', this.currCategoryName]) as IEffectCategory
     },
     currentStyle(): Record<string, string> {
       const { styles } = textEffectUtils.getCurrentLayer()
+      if (!this.currCategory || !styles) return { name: 'none' }
       return {
-        shadow: Object.assign({ name: 'none' }, styles.textEffect as ITextEffect),
-        bg: styles.textBg as ITextBgEffect,
-        shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
-      }[this.currTab] as Record<string, string>
+        shadow: Object.assign({ name: 'none' }, styles.textEffect),
+        bg: styles.textBg,
+        shape: Object.assign({ name: 'none' }, styles.textShape)
+      }[this.currCategoryName] as Record<string, string>
     },
     settingTextEffect(): boolean {
       return colorUtils.currEvent === 'setTextEffectColor' &&
@@ -157,8 +161,8 @@ export default defineComponent({
       }
     },
     async resetTextEffect() {
-      const target = this.currTab === 'shadow' ? textEffectUtils
-        : this.currTab === 'shape' ? textShapeUtils : textBgUtils
+      const target = this.currCategoryName === 'shadow' ? textEffectUtils
+        : this.currCategoryName === 'shape' ? textShapeUtils : textBgUtils
       await target.resetCurrTextEffect()
       this.recordChange()
     },
@@ -172,7 +176,7 @@ export default defineComponent({
         effectName = this.currentStyle.name || 'none'
       }
 
-      switch (this.currTab) {
+      switch (this.currCategoryName) {
         case 'shadow':
           textEffectUtils.setTextEffect(effectName,
             Object.assign({}, effect, { ver: 'v1' }))
@@ -199,23 +203,19 @@ export default defineComponent({
       await this.setEffect({ effect: { [key]: newVal } })
       this.recordChange()
     },
-    handleRangeInput(event: Event, option: IEffectOptionRange) {
-      const name = (event.target as HTMLInputElement).name
-      const value = parseFloat((event.target as HTMLInputElement).value)
+    handleRangeInputEvent(event: Event, option: IEffectOptionRange) {
+      this.handleRangeInput(parseFloat((event.target as HTMLInputElement).value), option)
+    },
+    handleRangeInput(value: number, option: IEffectOptionRange) {
       const newVal = {
-        [name]: _.clamp(value, option.min, option.max)
+        [option.key]: _.clamp(value, option.min, option.max)
       }
       this.setEffect({ effect: newVal })
     },
-    handleRangeMouseup() {
+    async setEffectFocus(focus: boolean) {
       if (['curve', 'text-fill-img'].includes(this.currentStyle.name)) {
-        this.setEffect({ effect: { focus: false } })
-      }
-      this.recordChange()
-    },
-    handleRangeMousedown() {
-      if (['curve', 'text-fill-img'].includes(this.currentStyle.name)) {
-        this.setEffect({ effect: { focus: true } })
+        await this.setEffect({ effect: { focus } })
+        if (!focus) this.recordChange()
       }
     },
     handleColorUpdate(color: string): void {
@@ -227,7 +227,7 @@ export default defineComponent({
     },
     recordChange() {
       stepsUtils.record()
-    }
+    },
   }
 })
 </script>

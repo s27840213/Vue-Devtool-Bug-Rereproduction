@@ -13,7 +13,7 @@ div(class="panel-text-effect")
   div(v-if="state === 'effects' && currEffect !== null"
       class="panel-text-effect__effects")
     div(v-for="effect in effectList"
-        :key="`${currCategory.name}-${effect.key}`"
+        :key="`${currCategoryName}-${effect.key}`"
         :class="{ 'selected': currEffect.key === effect.key }"
         @click="onEffectClick(effect.key)")
       svg-icon(:iconName="effectIcon(currCategory, effect)"
@@ -46,9 +46,10 @@ div(class="panel-text-effect")
         :max="option.max ?? 100"
         :min="option.min ?? 0"
         :step="option.key === 'lineHeight' ? 0.01 : 1"
+        :autoRecord="false"
         @update="(e)=>handleRangeInput(e, option)"
-        @pointerdown="shapeFocus(true)"
-        @pointerup="shapeFocus(false)")
+        @pointerdown="setEffectFocus(true)"
+        @pointerup="setEffectFocus(false)")
       //- Option type color
       div(v-if="option.type === 'color'"
         class="panel-text-effect__color")
@@ -76,6 +77,7 @@ import { defineComponent, PropType } from 'vue'
 import { mapState } from 'vuex'
 
 export default defineComponent({
+  name: 'MobilePanelTextEffectSetting',
   components: {
     MobileSlider,
     ColorBtn
@@ -89,15 +91,18 @@ export default defineComponent({
   emits: ['pushHistory', 'openExtraColorModal'],
   data() {
     return {
-      textEffects: constantData.textEffects()
+      textEffects: constantData.textEffects(),
     }
   },
   computed: {
     ...mapState('text', {
       selectedTextProps: 'props'
     }),
+    currCategoryName(): 'shadow'|'bg'|'shape' {
+      return this.panelHistory[this.panelHistory.length - 1] as 'shadow'|'bg'|'shape'
+    },
     currCategory(): IEffectCategory {
-      return _.find(this.textEffects, ['name', _.nth(this.panelHistory, -1)]) as IEffectCategory
+      return _.find(this.textEffects, ['name', this.currCategoryName]) as IEffectCategory
     },
     effectList(): IEffect[] | null {
       if (!this.currCategory) return null
@@ -110,12 +115,12 @@ export default defineComponent({
     },
     currentStyle(): Record<string, string> {
       const { styles } = textEffectUtils.getCurrentLayer()
-      if (!this.currCategory) return { name: 'none' }
+      if (!this.currCategory || !styles) return { name: 'none' }
       return {
-        shadow: Object.assign({ name: 'none' }, styles?.textEffect),
+        shadow: Object.assign({ name: 'none' }, styles.textEffect),
         bg: styles.textBg,
         shape: Object.assign({ name: 'none' }, styles.textShape)
-      }[this.currCategory.name] as Record<string, string>
+      }[this.currCategoryName] as Record<string, string>
     },
     historySize(): number {
       return this.panelHistory.length
@@ -126,6 +131,8 @@ export default defineComponent({
           : 'options'
     }
   },
+  mounted() { /**/ },
+  beforeUnmount() { /**/ },
   methods: {
     effectIcon(category: IEffectCategory, effect: IEffect): string {
       const postfix = effect.key === 'text-book' ? `-${i18n.global.locale}` : ''
@@ -133,9 +140,6 @@ export default defineComponent({
     },
     pushHistory(type: string) {
       this.$emit('pushHistory', type)
-    },
-    recordChange() {
-      stepsUtils.record()
     },
     getInputValue(style: Record<string, string>, option: IEffectOptionRange) {
       if (['lineHeight', 'fontSpacing'].includes(option.key)) {
@@ -145,7 +149,7 @@ export default defineComponent({
       }
     },
     openColorPanel(key: string) {
-      if (this.currCategory.name === 'shadow') {
+      if (this.currCategoryName === 'shadow') {
         colorUtils.setCurrEvent(ColorEventType.textEffect)
         this.$emit('openExtraColorModal', ColorEventType.textEffect, MobileColorPanelType.palette)
         textEffectUtils.setColorKey(key)
@@ -156,8 +160,8 @@ export default defineComponent({
       }
     },
     async resetTextEffect() {
-      const target = this.currCategory.name === 'shadow' ? textEffectUtils
-        : this.currCategory.name === 'shape' ? textShapeUtils : textBgUtils
+      const target = this.currCategoryName === 'shadow' ? textEffectUtils
+        : this.currCategoryName === 'shape' ? textShapeUtils : textBgUtils
       await target.resetCurrTextEffect()
       this.recordChange()
     },
@@ -168,10 +172,10 @@ export default defineComponent({
       let { effectName, effect } = options
       const { textShape } = textEffectUtils.getCurrentLayer().styles
       if (!effectName) {
-        effectName = this.currEffect?.key || 'none'
+        effectName = this.currentStyle.name || 'none'
       }
 
-      switch (this.currCategory.name) {
+      switch (this.currCategoryName) {
         case 'shadow':
           textEffectUtils.setTextEffect(effectName,
             Object.assign({}, effect, { ver: 'v1' }))
@@ -195,7 +199,7 @@ export default defineComponent({
         await this.setEffect({ effectName })
         this.recordChange()
       } else if (effectName !== 'none') {
-        this.pushHistory(this.currCategory.name)
+        this.pushHistory(this.currCategoryName)
       }
     },
     async handleSelectInput(key: string, newVal: string) {
@@ -208,14 +212,18 @@ export default defineComponent({
       }
       this.setEffect({ effect: newVal })
     },
-    shapeFocus(focus: boolean) {
-      if (['curve', 'text-fill-img'].includes(this.currCategory.name)) {
-        this.setEffect({ effect: { focus } })
+    async setEffectFocus(focus: boolean) {
+      if (['curve', 'text-fill-img'].includes(this.currentStyle.name)) {
+        await this.setEffect({ effect: { focus } })
+        if (!focus) this.recordChange()
       }
     },
     colorParser(color: string) {
       return textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer())
-    }
+    },
+    recordChange() {
+      stepsUtils.record()
+    },
   }
 })
 </script>
