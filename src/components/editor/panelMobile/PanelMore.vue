@@ -23,7 +23,7 @@ div(class="panel-more")
     div(class="panel-more__item"
         @click="onLogoutClicked()")
         span(class="body-2 pointer") {{$tc('NN0167',2)}}
-    template(v-if="isAdmin")
+    template(v-if="debugMode")
       hr(class="panel-more__hr")
       div(class="panel-more__item"
           @click="onDomainListClicked()")
@@ -31,10 +31,12 @@ div(class="panel-more")
     div(class="panel-more__item"
         @click="toggleDebugTool")
       span Toggle admin tool
-    div(class="body-2 panel-more__item" @click="gotoDesktop")
+    div(class="body-2 panel-more__item" @pointerdown.prevent="handleDebugMode")
       span(class="text-gray-3") Version: {{buildNumber}}{{appVersion}}{{domain}}
   template(v-if="lastHistory === 'domain-list'")
-    div(v-for="domain in domainList" class="panel-more__item" @click="switchDomain(domain.key)")
+    div(v-for="domain in domainList" class="panel-more__item"
+        :class="{ selected: handleDomainSelected(domain.selected) }"
+        @click="switchDomain(domain.key)")
         span(class="body-2 pointer") {{domain.title}}
 </template>
 
@@ -61,8 +63,15 @@ export default defineComponent({
   },
   data() {
     return {
+      debugModeTimer: -1,
+      debugModeCounter: 0,
       domain: window.location.hostname !== 'vivipic.com' ? ` - ${window.location.hostname.replace('.vivipic.com', '')}` : '',
+      debugMode: false
     }
+  },
+  async mounted() {
+    const debugMode = (await webViewUtils.getState('debugMode'))?.value ?? false
+    this.debugMode = debugMode
   },
   computed: {
     ...mapState('user', [
@@ -71,7 +80,6 @@ export default defineComponent({
     ...mapGetters({
       pagesLength: 'getPagesLength',
       hasBleed: 'getHasBleed',
-      isAdmin: 'user/isAdmin'
     }),
     historySize(): number {
       return this.panelHistory.length
@@ -95,23 +103,35 @@ export default defineComponent({
     appVersion(): string {
       return webViewUtils.inBrowserMode ? '' : ` - ${webViewUtils.getUserInfoFromStore().appVer}`
     },
-    domainList(): { key: string, title: string }[] {
+    domainList(): { key: string, title: string, selected: () => boolean }[] {
       return [
         {
           key: 'prod',
-          title: 'vivipic'
+          title: 'vivipic',
+          selected: () => {
+            return window.location.hostname === 'vivipic.com'
+          },
         },
         {
           key: 'rd',
-          title: 'rd'
+          title: 'rd',
+          selected: () => {
+            return window.location.hostname === 'rd.vivipic.com'
+          },
         },
         {
           key: 'qa',
-          title: 'qa'
+          title: 'qa',
+          selected: () => {
+            return window.location.hostname === 'qa.vivipic.com'
+          },
         },
         ...(new Array(6).fill(0).map((_, i) => ({
           key: `dev${i}`,
-          title: `dev${i}`
+          title: `dev${i}`,
+          selected: () => {
+            return window.location.hostname === `dev${i}.vivipic.com`
+          },
         })))
       ]
     }
@@ -120,6 +140,9 @@ export default defineComponent({
     ...mapMutations({
       setUserState: 'user/SET_STATE'
     }),
+    handleDomainSelected(selected: () => boolean): boolean {
+      return selected()
+    },
     updateLayerOpacity(val: number) {
       layerUtils.updateLayerOpacity(val)
     },
@@ -146,9 +169,6 @@ export default defineComponent({
       const { value } = event.target as HTMLInputElement
       pageUtils.setPagesName(value)
     },
-    gotoDesktop() { // TO-DELETE
-      this.$router.push(this.$router.currentRoute.value.fullPath.replace('mobile-editor', 'editor'))
-    },
     toggleDebugTool() {
       this.setUserState({ enableAdminView: !this.enableAdminView })
     },
@@ -162,7 +182,23 @@ export default defineComponent({
     },
     switchDomain(key: string) {
       webViewUtils.switchDomain(key)
-    }
+    },
+    handleDebugMode() {
+      if (this.debugModeTimer) {
+        clearTimeout(this.debugModeTimer)
+      }
+      this.debugModeCounter++
+      if (this.debugModeCounter === 7) {
+        this.toggleDebugMode()
+      }
+      this.debugModeTimer = window.setTimeout(() => {
+        this.debugModeCounter = 0
+      }, 1000)
+    },
+    toggleDebugMode() {
+      this.debugMode = !this.debugMode
+      webViewUtils.setState('debugMode', { value: this.debugMode })
+    },
   }
 })
 </script>
@@ -190,6 +226,10 @@ export default defineComponent({
       &:active {
         color: setColor(blue-1);
       }
+    }
+    &.selected {
+      text-decoration: underline;
+      -webkit-text-docoration: underline;
     }
   }
 
