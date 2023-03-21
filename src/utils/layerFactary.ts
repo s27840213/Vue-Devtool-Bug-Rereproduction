@@ -263,7 +263,8 @@ class LayerFactary {
         verticalFlip: false,
         textEffect: { name: 'none' },
         textBg: { name: 'none' },
-        textShape: { name: 'none' }
+        textShape: { name: 'none' },
+        textFill: { name: 'none' },
       },
       paragraphs: [
         {

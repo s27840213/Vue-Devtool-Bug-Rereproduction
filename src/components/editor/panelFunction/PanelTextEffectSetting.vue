@@ -77,6 +77,7 @@ import localStorageUtils from '@/utils/localStorageUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import textFillUtils from '@/utils/textFillUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import _ from 'lodash'
@@ -93,7 +94,7 @@ export default defineComponent({
   data() {
     return {
       openColorPicker: false,
-      currTab: localStorageUtils.get('textEffectSetting', 'tab') as 'shadow'|'bg'|'shape',
+      currTab: localStorageUtils.get('textEffectSetting', 'tab') as 'shadow'|'bg'|'shape'|'fill',
       textEffects: constantData.textEffects(),
       colorTarget: {
         category: '',
@@ -105,7 +106,7 @@ export default defineComponent({
     ...mapState('text', {
       selectedTextProps: 'props'
     }),
-    currCategoryName(): 'shadow'|'bg'|'shape' {
+    currCategoryName(): 'shadow'|'bg'|'shape'|'fill' {
       return this.currTab
     },
     currCategory(): IEffectCategory {
@@ -117,7 +118,8 @@ export default defineComponent({
       return {
         shadow: Object.assign({ name: 'none' }, styles.textEffect),
         bg: styles.textBg,
-        shape: Object.assign({ name: 'none' }, styles.textShape)
+        shape: Object.assign({ name: 'none' }, styles.textShape),
+        fill: Object.assign({ name: 'none' }, styles.textFill),
       }[this.currCategoryName] as Record<string, string>
     },
     settingTextEffect(): boolean {
@@ -138,7 +140,7 @@ export default defineComponent({
       const postfix = effect.key === 'text-book' ? `-${i18n.global.locale}` : ''
       return `text-${category.name}-${effect.key}${postfix}`
     },
-    handleColorModal(category: 'shadow'|'bg'|'shape', key: string) {
+    handleColorModal(category: 'shadow'|'bg'|'shape'|'fill', key: string) {
       const currColor = this.colorParser(this.currentStyle[key])
 
       this.colorTarget = { category, key }
@@ -146,7 +148,7 @@ export default defineComponent({
       colorUtils.setCurrEvent(ColorEventType.textEffect)
       colorUtils.setCurrColor(currColor)
     },
-    switchTab(category: 'shadow'|'bg'|'shape') {
+    switchTab(category: 'shadow'|'bg'|'shape'|'fill') {
       this.currTab = category
       localStorageUtils.set('textEffectSetting', 'tab', category)
     },
@@ -162,7 +164,8 @@ export default defineComponent({
     },
     async resetTextEffect() {
       const target = this.currCategoryName === 'shadow' ? textEffectUtils
-        : this.currCategoryName === 'shape' ? textShapeUtils : textBgUtils
+        : this.currCategoryName === 'shape' ? textShapeUtils
+          : this.currCategoryName === 'bg' ? textBgUtils : textFillUtils
       await target.resetCurrTextEffect()
       this.recordChange()
     },
@@ -182,16 +185,19 @@ export default defineComponent({
             Object.assign({}, effect, { ver: 'v1' }))
           break
         case 'bg':
-          await textBgUtils.setTextBg(effectName, Object.assign({}, effect))
+          await textBgUtils.setTextBg(effectName, effect)
           if (textShape.name !== 'none') {
             textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
             textPropUtils.updateTextPropsState()
           }
           break
         case 'shape':
-          textShapeUtils.setTextShape(effectName, Object.assign({}, effect))
+          textShapeUtils.setTextShape(effectName, effect)
           textPropUtils.updateTextPropsState()
           await textBgUtils.setTextBg('none') // Bg & shape are exclusive.
+          break
+        case 'fill':
+          textFillUtils.setTextFill(effectName, effect)
           break
       }
     },
@@ -213,7 +219,7 @@ export default defineComponent({
       this.setEffect({ effect: newVal })
     },
     async setEffectFocus(focus: boolean) {
-      if (['curve', 'text-fill-img'].includes(this.currentStyle.name)) {
+      if (['curve', 'fill-img'].includes(this.currentStyle.name)) {
         await this.setEffect({ effect: { focus } })
         if (!focus) this.recordChange()
       }

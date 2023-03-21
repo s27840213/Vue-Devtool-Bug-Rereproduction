@@ -54,8 +54,26 @@ export interface ITextLetterBg {
   color: string
 }
 
-export interface ITextFillImg {
-  name: 'text-fill-img'
+export type ITextBg = ITextBox | ITextUnderline | ITextGooey | ITextLetterBg | { name: 'none' }
+
+export function isITextBox(object: ITextBg): object is ITextBox {
+  return object && object.name &&
+    ['square-borderless', 'rounded-borderless', 'square-hollow',
+      'rounded-hollow', 'square-both', 'rounded-both'].includes(object.name)
+}
+export function isITextUnderline(object: ITextBg): object is ITextUnderline {
+  return object && object.name && object.name === 'underline'
+}
+export function isITextGooey(object: ITextBg): object is ITextGooey {
+  return object && object.name && ['gooey'].includes(object.name)
+}
+export function isITextLetterBg(object: ITextBg): object is ITextLetterBg {
+  return object && object.name &&
+    ['rainbow', 'rainbow-dark', 'circle', 'cloud', 'text-book'].includes(object.name)
+}
+
+export interface ITextFillConfig {
+  name: 'fill-img'
   xOffset200: number
   yOffset200: number
   size: number
@@ -63,30 +81,15 @@ export interface ITextFillImg {
   focus: boolean
 }
 
-export type ITextBgEffect = ITextBox | ITextUnderline | ITextGooey | ITextLetterBg | ITextFillImg | { name: 'none' }
+export type ITextFill = ITextFillConfig | { name: 'none' }
 
-export function isITextBox(object: ITextBgEffect): object is ITextBox {
-  return object && object.name &&
-    ['square-borderless', 'rounded-borderless', 'square-hollow',
-      'rounded-hollow', 'square-both', 'rounded-both'].includes(object.name)
-}
-export function isITextUnderline(object: ITextBgEffect): object is ITextUnderline {
-  return object && object.name && object.name === 'underline'
-}
-export function isITextGooey(object: ITextBgEffect): object is ITextGooey {
-  return object && object.name && ['gooey'].includes(object.name)
-}
-export function isITextLetterBg(object: ITextBgEffect): object is ITextLetterBg {
-  return object && object.name &&
-    ['rainbow', 'rainbow-dark', 'circle', 'cloud', 'text-book'].includes(object.name)
-}
-export function isITextFillImg(object: ITextBgEffect): object is ITextFillImg {
-  return object && object.name && ['text-fill-img'].includes(object.name)
+export function isITextFillConfig(object: ITextFill): object is ITextFillConfig {
+  return object && object.name && ['fill-img'].includes(object.name)
 }
 
 export interface ITextFormat {
   textEffect: ITextEffect | {},
-  textBg: ITextBgEffect,
+  textBg: ITextBg,
   textShape: ITextShape | {},
   scale: number,
   paragraphStyle: IParagraphStyle,

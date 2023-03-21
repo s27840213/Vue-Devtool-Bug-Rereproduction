@@ -1,4 +1,4 @@
-import { isITextLetterBg, ITextBgEffect } from '@/interfaces/format'
+import { isITextLetterBg, ITextBg } from '@/interfaces/format'
 import { IGroup, IText } from '@/interfaces/layer'
 import { checkAndConvertToHex } from '@/utils/colorUtils'
 import { Extension } from '@tiptap/core'
@@ -71,7 +71,7 @@ function arrow(axis: 'vert' | 'horiz', dir: 1 | -1) {
     const dispatch = editor.view.dispatch
     const view = editor.view
 
-    const textBg = layerUtils.getCurrLayer.styles.textBg as ITextBgEffect
+    const textBg = layerUtils.getCurrLayer.styles.textBg as ITextBg
     const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
     if (fixedWidth) {
       const nextCursor = findCursor(dirStr, editor.state.selection.anchor, view.dom)

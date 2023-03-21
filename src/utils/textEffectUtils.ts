@@ -1,11 +1,11 @@
-import LayerUtils from '@/utils/layerUtils'
-import { IParagraph, IText } from '@/interfaces/layer'
-import CssConverter from '@/utils/cssConverter'
-import store from '@/store'
-import mathUtils from '@/utils/mathUtils'
-import localStorageUtils from '@/utils/localStorageUtils'
 import { ITextEffect } from '@/interfaces/format'
+import { AllLayerTypes, IParagraph, IText } from '@/interfaces/layer'
+import store from '@/store'
 import { lab2rgb, rgb2lab } from '@/utils/colorUtils'
+import CssConverter from '@/utils/cssConverter'
+import LayerUtils from '@/utils/layerUtils'
+import localStorageUtils from '@/utils/localStorageUtils'
+import mathUtils from '@/utils/mathUtils'
 import _ from 'lodash'
 
 class Controller {
@@ -300,40 +300,42 @@ class Controller {
   setTextEffect(effect: string, attrs = {} as any): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
-    const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
+    const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
     const subLayerIndex = LayerUtils.subLayerIdx
     const defaultAttrs = this.effects[effect]
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
 
-      const { type, styles: { textEffect: layerTextEffect }, paragraphs } = layers[idx] as IText
-      if (type === 'text') {
-        const textEffect = {} as ITextEffect
-        if (layerTextEffect && layerTextEffect.name === effect) {
-          Object.assign(textEffect, layerTextEffect, attrs)
-          localStorageUtils.set('textEffectSetting', effect, textEffect)
-          // this.syncShareAttrs(textEffect, null)
-        } else {
-          // this.syncShareAttrs(textEffect, effect)
-          let localAttrs = localStorageUtils.get('textEffectSetting', effect) as ITextEffect
-          localAttrs = _.omit(localAttrs, ['color']) as ITextEffect
-          Object.assign(textEffect, defaultAttrs, localAttrs, attrs, { name: effect })
-        }
-        const mainColor = this.getLayerMainColor(paragraphs)
-        const mainFontSize = this.getLayerFontSize(paragraphs)
-        Object.assign(textEffect, {
-          color: textEffect.color || mainColor,
-          strokeColor: textEffect.strokeColor || mainColor,
-          fontSize: mainFontSize
-        })
-        store.commit('UPDATE_specLayerData', {
-          pageIndex,
-          layerIndex,
-          subLayerIndex: +idx,
-          styles: { textEffect }
-        })
+      const layer = layers[idx]
+      if (layer.type !== 'text') continue
+      const paragraphs = layer.paragraphs
+      const oldTextEffect = layer.styles.textBg
+      const newTextEffect = {} as ITextEffect
+
+      if (oldTextEffect && oldTextEffect.name === effect) {
+        Object.assign(newTextEffect, oldTextEffect, attrs)
+        localStorageUtils.set('textEffectSetting', effect, newTextEffect)
+        // this.syncShareAttrs(textEffect, null)
+      } else {
+        // this.syncShareAttrs(textEffect, effect)
+        let localAttrs = localStorageUtils.get('textEffectSetting', effect) as ITextEffect
+        localAttrs = _.omit(localAttrs, ['color']) as ITextEffect
+        Object.assign(newTextEffect, defaultAttrs, localAttrs, attrs, { name: effect })
       }
+      const mainColor = this.getLayerMainColor(paragraphs)
+      const mainFontSize = this.getLayerFontSize(paragraphs)
+      Object.assign(newTextEffect, {
+        color: newTextEffect.color || mainColor,
+        strokeColor: newTextEffect.strokeColor || mainColor,
+        fontSize: mainFontSize
+      })
+      store.commit('UPDATE_specLayerData', {
+        pageIndex,
+        layerIndex,
+        subLayerIndex: +idx,
+        styles: { textEffect: newTextEffect }
+      })
     }
   }
 

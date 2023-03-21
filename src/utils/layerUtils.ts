@@ -1,6 +1,6 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
-import { IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IShape, IStyle, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ITiptapSelection } from '@/interfaces/text'
 import store from '@/store'
@@ -17,7 +17,6 @@ import pageUtils from './pageUtils'
 import shapeUtils from './shapeUtils'
 import stepsUtils from './stepsUtils'
 import TemplateUtils from './templateUtils'
-import TextUtils from './textUtils'
 import uploadUtils from './uploadUtils'
 
 class LayerUtils {
@@ -26,10 +25,10 @@ class LayerUtils {
   get pageIndex(): number { return pageUtils.currFocusPageIndex }
   get scaleRatio(): number { return store.getters.getPageScaleRatio }
   get layerIndex(): number { return store.getters.getCurrSelectedIndex }
-  get getCurrLayer(): IImage | IText | IShape | IGroup | IFrame | ITmp { return this.getLayer(this.pageIndex, this.layerIndex) }
+  get getCurrLayer(): AllLayerTypes { return this.getLayer(this.pageIndex, this.layerIndex) }
   get getPage(): (pageInde: number) => IPage { return store.getters.getPage }
   get getCurrPage(): IPage { return this.getPage(this.pageIndex) }
-  get getLayer(): (pageIndex: number, layerIndex: number) => IImage | IText | IShape | IGroup | IFrame | ITmp {
+  get getLayer(): (pageIndex: number, layerIndex: number) => AllLayerTypes {
     return store.getters.getLayer
   }
 
@@ -76,8 +75,8 @@ class LayerUtils {
     return -1
   }
 
-  get getCurrConfig(): ILayer {
-    return this.subLayerIdx === -1 ? this.getCurrLayer as IText | IImage | IShape : (() => {
+  get getCurrConfig(): AllLayerTypes {
+    return this.subLayerIdx === -1 ? this.getCurrLayer : (() => {
       if (this.getCurrLayer.type === 'group') {
         return (this.getCurrLayer as IGroup).layers[this.subLayerIdx]
       }

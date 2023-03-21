@@ -177,8 +177,8 @@ import popupUtils from '@/utils/popupUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import textBgUtils from '@/utils/textBgUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
+import textFillUtils from '@/utils/textFillUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import TextUtils from '@/utils/textUtils'
@@ -645,9 +645,9 @@ export default defineComponent({
       }
     },
     textBodyStyle() {
-      const layer = LayerUtils.getCurrLayer as IText
-      const textBgDivStyle = textBgUtils.convertTextEffect(layer.styles).div ?? {}
-      const returnedStyles = Object.assign({}, textBgDivStyle,
+      const layer = LayerUtils.getCurrConfig as IText
+      const textFillDivStyle = textFillUtils.convertTextEffect(layer.styles).div ?? {}
+      const returnedStyles = Object.assign({}, textFillDivStyle,
         !(this.isCurveText || this.isFlipped) ? {
           width: '100%',
           height: '100%',
@@ -661,7 +661,7 @@ export default defineComponent({
           left: 0,
           opacity: this.contentEditable ? 1 : 0
         })
-      returnedStyles.opacity *= textBgDivStyle?.opacity as number ?? 1
+      returnedStyles.opacity *= textFillDivStyle?.opacity as number ?? 1
       return returnedStyles
     },
     groupControllerStyle() {

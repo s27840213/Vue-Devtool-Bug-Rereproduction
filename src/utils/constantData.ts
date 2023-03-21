@@ -377,7 +377,7 @@ class ConstantData {
             Object.assign(option, { min: -100, max: 100 })
             break
           case 'size':
-            if (effectName === 'text-fill-img') Object.assign(option, { min: 100, max: 200 })
+            if (effectName === 'fill-img') Object.assign(option, { min: 100, max: 200 })
             else Object.assign(option, { min: 50, max: 200 })
             break
           case 'lineHeight':
@@ -402,7 +402,7 @@ class ConstantData {
       effects2d: arrTo2darr([{
         key: 'none',
         label: i18n.global.t('NN0111'),
-        options: toOptions([])
+        options: [],
       }, {
         key: 'shadow',
         label: i18n.global.t('NN0112'),
@@ -438,7 +438,7 @@ class ConstantData {
       effects2d: arrTo2darr([{
         key: 'none',
         label: i18n.global.t('NN0117'),
-        options: toOptions([])
+        options: [],
       }, {
         key: 'curve',
         label: i18n.global.t('NN0118'),
@@ -450,7 +450,7 @@ class ConstantData {
       effects2d: arrTo2darr([{
         key: 'none',
         label: i18n.global.t('NN0111'),
-        options: toOptions([])
+        options: [],
       }, {
         key: 'square-borderless',
         label: i18n.global.tc('NN0720'),
@@ -503,10 +503,18 @@ class ConstantData {
         key: 'text-book',
         label: i18n.global.tc('NN0819'),
         options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity', 'fontSpacing', 'lineHeight', 'color'])
+      }])
+    }, {
+      name: 'fill',
+      label: '文字填滿',
+      effects2d: arrTo2darr([{
+        key: 'none',
+        label: i18n.global.t('NN0111'),
+        options: [],
       }, {
-        key: 'text-fill-img',
-        label: 'text-fill-img',
-        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity'], 'text-fill-img')
+        key: 'fill-img',
+        label: 'fill-img',
+        options: toOptions(['xOffset200', 'yOffset200', 'size', 'opacity'], 'fill-img')
       }])
     }]
     return categories as IEffectCategory[]

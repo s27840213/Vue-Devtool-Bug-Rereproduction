@@ -1,7 +1,6 @@
-import { IAssetPhoto } from '@/interfaces/api'
 import { CustomElementConfig } from '@/interfaces/editor'
-import { isITextBox, isITextFillImg, isITextGooey, isITextLetterBg, isITextUnderline, ITextBgEffect, ITextGooey, ITextLetterBg } from '@/interfaces/format'
-import { IParagraphStyle, ISpanStyle, IStyle, IText } from '@/interfaces/layer'
+import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, ITextBg, ITextGooey, ITextLetterBg } from '@/interfaces/format'
+import { AllLayerTypes, IParagraphStyle, ISpanStyle, IText } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
@@ -718,13 +717,6 @@ class TextBg {
         fixedWidth: true,
         color: '#93BAA6',
       },
-      'text-fill-img': {
-        xOffset200: 0,
-        yOffset200: 0,
-        size: 100,
-        opacity: 100,
-        focus: false,
-      },
     }
   }
 
@@ -746,24 +738,9 @@ class TextBg {
     return svg.replace(/\n[ ]*/g, '').replace(/#/g, '%23')
   }
 
-  convertTextEffect(styles: IStyle): Partial<Record<'div' | 'p' | 'span', Record<string, string | number>>> {
-    const textBg = styles.textBg as ITextBgEffect
-    if (isITextFillImg(textBg)) {
-      const img = store.getters['file/getImages'][0] as IAssetPhoto
-      const widthRatio = img.width / styles.width
-      const heightRatio = img.height / styles.height
-
-      return {
-        div: {
-          background: `url("${img.urls.original}")`,
-          backgroundSize: widthRatio < heightRatio ? `${textBg.size}% auto` : `auto ${textBg.size}%`,
-          backgroundPosition: `${textBg.xOffset200 / 2 + 50}% ${textBg.yOffset200 / 2 + 50}%`,
-          opacity: textBg.opacity / 100,
-          '-webkit-text-fill-color': 'transparent',
-          '-webkit-background-clip': 'text',
-        },
-      }
-    } else return {}
+  convertTextEffect(/* styles: ITextStyle */): Partial<Record<'div' | 'p' | 'span', Record<string, string | number>>> {
+    // const textBg = styles.textBg
+    return {}
   }
 
   fixedWidthStyle(spanStyle: ISpanStyle, pStyle: IParagraphStyle, config: IText) {
@@ -954,25 +931,6 @@ class TextBg {
           style: { color: p.color }
         }))
       }
-    } else if (isITextFillImg(textBg)) {
-      const img = store.getters['file/getImages'][0] as IAssetPhoto
-      const widthRatio = img.width / config.styles.width
-      const heightRatio = img.height / config.styles.height
-      const layerScale = config.styles.scale
-      // If true and textBg.size is 100, that mean img width === layer width
-      const scaleByWidth = widthRatio < heightRatio
-      const imgRatio = textBg.size / 100 / (scaleByWidth ? widthRatio : heightRatio)
-
-      return textBg.focus ? {
-        tag: 'img',
-        attrs: { src: img.urls.prev },
-        style: {
-          [scaleByWidth ? 'width' : 'height']: `${textBg.size}%`,
-          top: `-${(textBg.yOffset200 / 2 + 50) / 100 * (img.height * imgRatio - config.styles.height) / layerScale}px`,
-          left: `-${(textBg.xOffset200 / 2 + 50) / 100 * (img.width * imgRatio - config.styles.width) / layerScale}px`,
-          opacity: textBg.opacity / 200
-        }
-      } : null
     } else return null
   }
 
@@ -989,7 +947,7 @@ class TextBg {
     return (textEffectUtils.getCurrentLayer().styles.textBg as Record<string, string>)[this.currColorKey]
   }
 
-  getEffectMainColor(effect: ITextBgEffect) {
+  getEffectMainColor(effect: ITextBg) {
     if (isITextBox(effect) &&
       ['square-hollow', 'rounded-hollow'].includes(effect.name)) {
       return ['bColor', effect.bColor]
@@ -1003,7 +961,7 @@ class TextBg {
   }
 
   // Read/write text effect setting from local storage
-  syncShareAttrs(textBg: ITextBgEffect, effectName: string | null) {
+  syncShareAttrs(textBg: ITextBg, effectName: string | null) {
     Object.assign(textBg, { name: textBg.name || effectName })
     if (textBg.name === 'none') return
 
@@ -1030,76 +988,76 @@ class TextBg {
 
   async setTextBg(effect: string, attrs?: Record<string, string | number | boolean>): Promise<void> {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
-    const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
-    const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
+    const targetLayer = store.getters.getLayer(pageIndex, layerIndex) as AllLayerTypes
+    const layers = (targetLayer.layers ? targetLayer.layers : [targetLayer]) as AllLayerTypes[]
     const subLayerIndex = layerUtils.subLayerIdx
     const defaultAttrs = this.effects[effect]
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
 
-      const { type, styles: { textBg: layerTextBg } } = layers[idx] as IText
-      if (type === 'text') {
-        const textBg = {} as ITextBgEffect
+      const layer = layers[idx]
+      if (layer.type !== 'text') continue
+      const oldTextBg = layer.styles.textBg
+      const newTextBg = {} as ITextBg
 
-        // Set lineHeight and fontSpacing by call tiptap
-        for (const [key, val] of Object.entries(attrs ?? {})) {
-          if (['lineHeight', 'fontSpacing'].includes(key)) {
-            await textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val as number)
-            return
-          }
+      // Set lineHeight and fontSpacing by call tiptap
+      for (const [key, val] of Object.entries(attrs ?? {})) {
+        if (['lineHeight', 'fontSpacing'].includes(key)) {
+          await textUtils.setParagraphProp(key as 'lineHeight' | 'fontSpacing', val as number)
+          return
         }
+      }
 
-        if (layerTextBg && layerTextBg.name === effect) { // Adjust effect option.
-          Object.assign(textBg, layerTextBg, attrs)
-          localStorageUtils.set('textEffectSetting', effect, textBg)
-          this.syncShareAttrs(textBg, null)
-        } else { // Switch to other effect.
-          this.syncShareAttrs(textBg, effect)
-          const localAttrs = localStorageUtils.get('textEffectSetting', effect)
-          Object.assign(textBg, defaultAttrs, localAttrs, attrs, { name: effect })
-          await this.setExtraDefaultAttrs(effect)
+      if (oldTextBg && oldTextBg.name === effect) { // Adjust effect option.
+        Object.assign(newTextBg, oldTextBg, attrs)
+        localStorageUtils.set('textEffectSetting', effect, newTextBg)
+        this.syncShareAttrs(newTextBg, null)
+      } else { // Switch to other effect.
+        this.syncShareAttrs(newTextBg, effect)
+        const localAttrs = localStorageUtils.get('textEffectSetting', effect)
+        Object.assign(newTextBg, defaultAttrs, localAttrs, attrs, { name: effect })
+        await this.setExtraDefaultAttrs(effect)
 
-          // Sync setting between different name effect:
-          // Bring original effect color to new effect.
-          const oldColor = this.getEffectMainColor(layerTextBg)[1]
-          const newColorKey = this.getEffectMainColor(textBg)[0]
-          if (oldColor.startsWith('#') && !(isITextLetterBg(textBg) || isITextLetterBg(layerTextBg))) {
-            Object.assign(textBg, { [newColorKey]: oldColor })
-          }
-          // Sync setting between TextLetterBg: rainbow, rainbow-dark, circle
-          if (isITextLetterBg(textBg) && isITextLetterBg(layerTextBg) && textBg.name !== layerTextBg.name &&
-            ['rainbow', 'rainbow-dark', 'circle'].includes(textBg.name) &&
-            ['rainbow', 'rainbow-dark', 'circle'].includes(layerTextBg.name)) {
-            Object.assign(textBg, layerTextBg, { name: textBg.name, color: textBg.color })
-          }
+        // Sync setting between different name effect:
+        // Bring original effect color to new effect.
+        const oldColor = this.getEffectMainColor(oldTextBg)[1]
+        const newColorKey = this.getEffectMainColor(newTextBg)[0]
+        if (oldColor.startsWith('#') && !(isITextLetterBg(newTextBg) || isITextLetterBg(oldTextBg))) {
+          Object.assign(newTextBg, { [newColorKey]: oldColor })
         }
+        // Sync setting between TextLetterBg: rainbow, rainbow-dark, circle
+        if (isITextLetterBg(newTextBg) && isITextLetterBg(oldTextBg) && newTextBg.name !== oldTextBg.name &&
+          ['rainbow', 'rainbow-dark', 'circle'].includes(newTextBg.name) &&
+          ['rainbow', 'rainbow-dark', 'circle'].includes(oldTextBg.name)) {
+          Object.assign(newTextBg, oldTextBg, { name: newTextBg.name, color: newTextBg.color })
+        }
+      }
 
-        store.commit('UPDATE_specLayerData', {
-          pageIndex,
-          layerIndex,
-          subLayerIndex: +idx,
-          styles: { textBg }
+      store.commit('UPDATE_specLayerData', {
+        pageIndex,
+        layerIndex,
+        subLayerIndex: +idx,
+        styles: { textBg: newTextBg }
+      })
+
+      // If fixedWidth setting changed, force split/unsplit span text
+      const oldFixedWidth = isITextLetterBg(oldTextBg) && oldTextBg.fixedWidth
+      const newFixedWidth = isITextLetterBg(newTextBg) && newTextBg.fixedWidth
+      if (oldFixedWidth !== newFixedWidth) {
+        tiptapUtils.updateHtml()
+        tiptapUtils.forceUpdate()
+        // When fixedWith true => false, this can force tiptap merge span that have same attrs.
+        tiptapUtils.agent((editor: Editor) => {
+          editor.commands.selectAll()
+          editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
         })
+      }
 
-        // If fixedWidth setting changed, force split/unsplit span text
-        const oldFixedWidth = isITextLetterBg(layerTextBg) && layerTextBg.fixedWidth
-        const newFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
-        if (oldFixedWidth !== newFixedWidth) {
-          tiptapUtils.updateHtml()
-          tiptapUtils.forceUpdate()
-          // When fixedWith true => false, this can force tiptap merge span that have same attrs.
-          tiptapUtils.agent((editor: Editor) => {
-            editor.commands.selectAll()
-            editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
-          })
-        }
-
-        // If user leave LetterBg, reset lineHeight and fontSpacing
-        if (isITextLetterBg(layerTextBg) && !isITextLetterBg(textBg)) {
-          await textUtils.setParagraphProp('lineHeight', 1.4)
-          await textUtils.setParagraphProp('fontSpacing', 0)
-        }
+      // If user leave LetterBg, reset lineHeight and fontSpacing
+      if (isITextLetterBg(oldTextBg) && !isITextLetterBg(newTextBg)) {
+        await textUtils.setParagraphProp('lineHeight', 1.4)
+        await textUtils.setParagraphProp('fontSpacing', 0)
       }
     }
   }

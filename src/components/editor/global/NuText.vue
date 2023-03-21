@@ -1,7 +1,8 @@
 <template lang="pug">
 div(class="nu-text" :style="textWrapperStyle()" draggable="false")
-  //- Svg for textBG.
-  custom-element(v-if="textBg && !noShadow" :config="textBg" class="nu-text__BG" ref="svg")
+  //- NuText BGs.
+  template(v-for="bgConfig in [textFillBg, textBg]")
+    custom-element(v-if="bgConfig && !noShadow" class="nu-text__BG" :config="bgConfig" )
   div(v-for="text, idx in duplicatedText" class="nu-text__body"
       :style="Object.assign(bodyStyles(), text.extraBody)")
     nu-curve-text(v-if="isCurveText"
@@ -35,6 +36,7 @@ import { calcTmpProps } from '@/utils/groupUtils'
 import LayerUtils from '@/utils/layerUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import textFillUtils from '@/utils/textFillUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -91,6 +93,7 @@ export default defineComponent({
       },
       isLoading: true,
       textBg: {} as CustomElementConfig | null,
+      textFillBg: {} as CustomElementConfig | null,
     }
   },
   created() {
@@ -154,6 +157,7 @@ export default defineComponent({
     'config.styles.width'() { this.drawTextBg() },
     'config.styles.height'() { this.drawTextBg() },
     'config.styles.textBg'() { this.drawTextBg() },
+    'config.styles.textFill'() { this.textFillBg = textFillUtils.drawTextFill(this.config) },
     'config.isAutoResizeNeeded': {
       handler(newVal) {
         if (newVal) {
@@ -199,13 +203,13 @@ export default defineComponent({
     bodyStyles(): Record<string, string|number> {
       let opacity = this.getOpacity()
       const isVertical = this.config.styles.writingMode.includes('vertical')
-      const textBGStyle = textBgUtils.convertTextEffect(this.config.styles)
-      opacity *= textBGStyle.div?.opacity as number ?? 1
+      const textFillStyle = textFillUtils.convertTextEffect(this.config.styles)
+      opacity *= textFillStyle.div?.opacity as number ?? 1
       return {
         width: isVertical ? 'auto' : '',
         height: isVertical ? '' : '100%',
         textAlign: this.config.styles.align,
-        ...textBGStyle.div,
+        ...textFillStyle.div,
         opacity,
       }
     },
