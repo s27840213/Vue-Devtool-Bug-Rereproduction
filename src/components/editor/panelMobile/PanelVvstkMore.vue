@@ -87,7 +87,8 @@ export default defineComponent({
   },
   computed: {
     ...mapGetters({
-      userInfo: 'vivisticker/getUserInfo'
+      userInfo: 'vivisticker/getUserInfo',
+      inReviewMode: 'webView/getInReviewMode'
     }),
     hostId(): string {
       return this.userInfo.hostId
@@ -120,7 +121,7 @@ export default defineComponent({
         text: `${this.$t('NN0742')}`,
         icon: 'vivisticker_mail',
         action: this.handleOpenInfo
-      }, ...vivistickerUtils.checkVersion('1.23') ? [
+      }, ...this.inReviewMode ? [
         {
           text: `${this.$t('STK0025')}`,
           icon: 'vivisticker_global',
