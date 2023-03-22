@@ -13,7 +13,7 @@ div(class="tags" v-click-outside="clickOutsideHandler")
   template(v-else)
     div(class="tags__container-mobile")
       div(class="tags__flex-container-mobile")
-        div(v-for="tag in tags" :active="tag.active ?? undefined"
+        div(v-for="tag in tags" :active="tag.active || undefined"
           :class="`tags__tag-wrapper ${theme}`"
           @click="onClick(tag.value)")
           div(class="tags__tag") {{ tag.label }}
