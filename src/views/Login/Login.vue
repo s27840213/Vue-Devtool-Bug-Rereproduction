@@ -209,7 +209,7 @@ import fbPixelUtils from '@/utils/fbPixelUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import localeUtils from '@/utils/localeUtils'
 import loginUtils from '@/utils/loginUtils'
-import picWVUtils from '@/utils/picWVUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import { notify } from '@kyvg/vue3-notification'
 import { defineComponent } from 'vue'
 
@@ -285,7 +285,7 @@ export default defineComponent({
   },
   computed: {
     inReviewMode(): boolean {
-      return picWVUtils.inReviewMode
+      return webViewUtils.inReviewMode
     },
     mailValid(): boolean {
       if (!this.isLoginClicked) {
@@ -561,21 +561,21 @@ export default defineComponent({
       this.isLoading = false
     },
     async onFacebookClicked() {
-      if (picWVUtils.inBrowserMode) {
+      if (webViewUtils.inBrowserMode) {
         loginUtils.onFacebookClicked(this.redirect)
       } else {
         this.isLoading = true
-        const data = await picWVUtils.login('Facebook', this.$i18n.locale)
+        const data = await webViewUtils.login('Facebook', this.$i18n.locale)
         this.isLoading = false
         this.handleLoginResult(data, 'Facebook', 'fb')
       }
     },
     async onGoogleClicked() {
-      if (picWVUtils.inBrowserMode) {
+      if (webViewUtils.inBrowserMode) {
         loginUtils.onGoogleClicked(this.redirect)
       } else {
         this.isLoading = true
-        const data = await picWVUtils.login('Google', this.$i18n.locale)
+        const data = await webViewUtils.login('Google', this.$i18n.locale)
         this.isLoading = false
         this.handleLoginResult(data, 'Google', 'google')
       }

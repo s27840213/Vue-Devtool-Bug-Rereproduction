@@ -3,7 +3,7 @@ import { Itheme } from '@/interfaces/theme'
 import store from '@/store'
 import _ from 'lodash'
 import { TranslateResult } from 'vue-i18n'
-import picWVUtils from './picWVUtils'
+import webViewUtils from './picWVUtils'
 import themeUtils from './themeUtils'
 
 interface BillingInfoInput {
@@ -291,7 +291,7 @@ class ConstantData {
       label: i18n.global.t('NN0670'),
       content: resource[i18n.global.locale as keyof typeof resource]
     },
-    ...!picWVUtils.inReviewMode ? [pricing] : [],
+    ...!webViewUtils.inReviewMode ? [pricing] : [],
     {
       hidden: !this.isLogin,
       name: 'MyDesign',
@@ -518,7 +518,7 @@ class ConstantData {
       name: 'security',
       label: i18n.global.tc('NN0166', 1),
       icon: 'lock'
-    }, ...!picWVUtils.inReviewMode ? [{
+    }, ...!webViewUtils.inReviewMode ? [{
       name: 'hr'
     }, {
       name: 'payment',
