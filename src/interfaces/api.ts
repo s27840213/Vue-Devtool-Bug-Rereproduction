@@ -163,11 +163,11 @@ export interface ICategoryItem {
   sentinel?: boolean
 }
 export interface ICategoryList {
-  key: 'mainContent'|'searchResult'
+  key: 'mainContent' | 'searchResult'
   show: boolean
   content: ICategoryItem[]
-  loadMore?: ()=>void
-  categorySearch?: (arg0: string)=>void
+  loadMore?: () => void
+  categorySearch?: (arg0: string) => void
 }
 
 export interface IListServiceContentData {
@@ -217,15 +217,17 @@ export interface IUserDesignContentData {
 }
 
 export interface IAssetDesignParams {
+  asset_index: number,
+  color_map: number[][],
   flag: 0,
-  is_root: true,
+  font_map: string,
+  is_root: boolean,
+  name: string,
   parent_folder: string,
   path: string,
+  status: number,
   url_map: {
-    '0_prev': string
-    '0_prev_2x': string
-    '0_prev_4x': string
-    'config.json': string
+    [key: string]: string
   }
 }
 

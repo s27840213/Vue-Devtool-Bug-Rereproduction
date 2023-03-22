@@ -1,26 +1,33 @@
 <template lang="pug">
-div(class="font-tag" v-click-outside="clickOutsideHandler")
+div(class="tags" v-click-outside="clickOutsideHandler")
   template(v-if="!$isTouchDevice()")
-    div(class="font-tag__flex-container"
+    div(class="tags__flex-container"
         :style="containerStyle")
-      div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
-        @click="onClick(tag)")
-        div(class="font-tag__tag") {{ tag }}
-    div(v-if="!showMore" class="font-tag__more-wrapper")
-      div(class="font-tag__tag-wrapper pointer"
+      div(:class="`tags__tag-wrapper ${theme}`" v-for="tag in tags"
+        @click="onClick( tag.value )")
+        div(class="tags__tag") {{ tag.label }}
+    div(v-if="!showMore" class="tags__more-wrapper")
+      div(class="tags__tag-wrapper"
         @click="onClickMore")
-        div(class="font-tag__tag") {{ `${$t('NN0082')}...` }}
+        div(class="tags__tag") {{ `${$t('NN0082')}...` }}
   template(v-else)
-    div(class="font-tag__container-mobile")
-      div(class="font-tag__flex-container-mobile")
-        div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
-          @click="onClick(tag)")
-          div(class="font-tag__tag") {{ tag }}
+    div(class="tags__container-mobile")
+      div(class="tags__flex-container-mobile")
+        div(v-for="tag in tags" :active="tag.active ?? undefined"
+          :class="`tags__tag-wrapper ${theme}`"
+          @click="onClick(tag.value)")
+          div(class="tags__tag") {{ tag.label }}
 </template>
 
 <script lang="ts">
 import vClickOutside from 'click-outside-vue3'
 import { defineComponent, PropType } from 'vue'
+
+interface ITag {
+  label: string,
+  value: string,
+  active: boolean
+}
 
 export default defineComponent({
   directives: {
@@ -28,8 +35,12 @@ export default defineComponent({
   },
   props: {
     tags: {
-      type: Array as PropType<string[]>,
+      type: Array as PropType<ITag[]>,
       required: true
+    },
+    theme: {
+      type: String,
+      default: 'light'
     }
   },
   data() {
@@ -74,7 +85,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.font-tag {
+.tags {
   position: relative;
   font-size: 14px;
   &__flex-container {
@@ -92,9 +103,17 @@ export default defineComponent({
   &__tag-wrapper {
     flex-shrink: 0;
     padding: 6px;
-    border-radius: 12px;
+    margin: 4px 0;
+    border-radius: 10px;
     border: 1px solid #E0E0E0;
-    margin: 4px
+    cursor: pointer;
+    &.light {
+      color: black;
+      background-color: white;
+    }
+  }
+  &__tag-wrapper + &__tag-wrapper {
+    margin-left: 8px;
   }
   // mobile layout
   &__container-mobile {
