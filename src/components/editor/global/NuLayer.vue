@@ -943,7 +943,7 @@ export default defineComponent({
   left: 0;
   display: flex;
   align-items: center;
-  // justify-content: center;
+  justify-content: center;
   // content-visibility: auto;
   // box-shadow: inset 0px 0px 0px 7px rgba(136, 136, 136, 0.5);
   &:focus {

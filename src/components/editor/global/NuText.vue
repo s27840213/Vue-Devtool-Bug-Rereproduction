@@ -286,6 +286,7 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   position: absolute;
+  left: 0;
   &__BG {
     position: absolute;
     left: 0;
