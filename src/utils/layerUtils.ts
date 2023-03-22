@@ -161,7 +161,7 @@ class LayerUtils {
      * The action of adding layer will trigger record function; so if we also record delete step, we will record two steps at once.
      */
     if (record) {
-      groupUtils.reset()
+      groupUtils.reset(false)
       stepsUtils.record()
     }
   }
@@ -640,6 +640,37 @@ class LayerUtils {
     } else {
       return groupLikeIncluded
     }
+  }
+
+  setAutoResizeNeededForLayersInPages(pages: IPage[], isAutoResizeNeeded: boolean) {
+    for (const page of pages) {
+      this.setAutoResizeNeededForLayersInPage(page, isAutoResizeNeeded)
+    }
+  }
+
+  setAutoResizeNeededForLayersInPage(page: IPage, isAutoResizeNeeded: boolean) {
+    const layers = page.layers
+    for (const layer of layers) {
+      this.setAutoResizeNeededForLayer(layer, isAutoResizeNeeded)
+    }
+  }
+
+  setAutoResizeNeededForLayer(layer: AllLayerTypes, isAutoResizeNeeded: boolean) {
+    switch (layer.type) {
+      case LayerType.text:
+        this.setAutoResizeNeededForTextLayer(layer, isAutoResizeNeeded)
+        break
+      case LayerType.group:
+      case LayerType.tmp:
+        for (const subLayer of layer.layers) {
+          this.setAutoResizeNeededForLayer(subLayer, isAutoResizeNeeded)
+        }
+        break
+    }
+  }
+
+  setAutoResizeNeededForTextLayer(layer: IText, isAutoResizeNeeded: boolean) {
+    layer.isAutoResizeNeeded = isAutoResizeNeeded
   }
 }
 

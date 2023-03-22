@@ -91,7 +91,6 @@ export default defineComponent({
         height: this.config.styles.height,
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
-      isLoading: true,
       textBg: {} as CustomElementConfig | null,
       textFillBg: {} as CustomElementConfig | null,
     }
@@ -147,7 +146,7 @@ export default defineComponent({
   watch: {
     'config.paragraphs': {
       handler(newVal) {
-        this.isLoading = false
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
         this.drawTextBg()
         textUtils.untilFontLoaded(newVal).then(() => {
           this.drawTextBg()
@@ -158,13 +157,6 @@ export default defineComponent({
     'config.styles.height'() { this.drawTextBg() },
     'config.styles.textBg'() { this.drawTextBg() },
     'config.styles.textFill'() { this.textFillBg = textFillUtils.drawTextFill(this.config) },
-    'config.isAutoResizeNeeded': {
-      handler(newVal) {
-        if (newVal) {
-          this.resizeAfterFontLoaded()
-        }
-      }
-    }
   },
   methods: {
     textWrapperStyle(): Record<string, string> {
@@ -181,9 +173,6 @@ export default defineComponent({
       this.$nextTick(async () => {
         this.textBg = await textBgUtils.drawTextBg(this.config)
       })
-    },
-    isAutoResizeNeeded(): boolean {
-      return this.page.isAutoResizeNeeded
     },
     isLayerAutoResizeNeeded(): boolean {
       return this.config.isAutoResizeNeeded
@@ -233,7 +222,7 @@ export default defineComponent({
       // console.log('resize')
 
       let widthLimit
-      if ((this.isLoading && this.isAutoResizeNeeded()) || this.isLayerAutoResizeNeeded()) {
+      if (this.isLayerAutoResizeNeeded()) {
         widthLimit = await textUtils.autoResize(config, this.initSize)
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isAutoResizeNeeded: false }, this.subLayerIndex)
       } else {
@@ -272,9 +261,6 @@ export default defineComponent({
       textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
         setTimeout(() => {
           this.resizeCallback()
-          if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
-            this.isLoading = false
-          }
         }, 100) // for the delay between font loading and dom rendering
       })
       this.drawTextBg()

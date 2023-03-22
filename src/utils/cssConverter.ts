@@ -53,7 +53,7 @@ class CssConveter {
       if (sourceStyles[prop] === undefined) return
 
       if (prop === 'size') {
-        result[styleMap[prop]] = `${(sourceStyles[prop] as number) * 4 / 3}px`
+        result[styleMap[prop]] = `${(sourceStyles[prop] as number) * 1.333333}px`
       } else if (prop === 'weight') {
         result[styleMap[prop]] = sourceStyles[prop] === 'bold' ? `calc(var(--base-stroke) + ${(sourceStyles.size as number) / 32}px)` : 'calc(var(--base-stroke))'
       } else if (prop === 'fontSpacing') {

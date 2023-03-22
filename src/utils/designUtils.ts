@@ -750,19 +750,28 @@ class DesignUtils {
 
   async fetchDesign(teamId: string, assetId: string, params?: { [index: string]: any }) {
     const designData = await store.dispatch('design/fetchDesign', { teamId, assetId })
-    if (designData.url_map['config.json'] === undefined) {
-      if (this.teamId === teamId) { // cannot find self-owning design
-        notify({ group: 'error', text: i18n.global.t('SKT0019') })
+    const isSelfDesign = teamId === this.teamId
+    const noUrl = designData.url_map['config.json'] === undefined
+    if (!store.getters['user/isAdmin']) {
+      if (isSelfDesign) {
+        if (noUrl) { // cannot find self-owning design
+          notify({ group: 'error', text: i18n.global.t('SKT0019') })
+          store.commit('SET_assetId', '')
+          store.commit('file/SET_setLayersDone')
+          await router.replace({ query: Object.assign({}) })
+          await themeUtils.refreshTemplateState()
+          return
+        }
       } else { // have no access to the design
         notify({ group: 'error', text: i18n.global.t('SHR0020') })
+        store.commit('SET_assetId', '')
+        store.commit('file/SET_setLayersDone')
+        await router.replace({ query: Object.assign({}) })
+        await themeUtils.refreshTemplateState()
+        return
       }
-      store.commit('SET_assetId', '')
-      store.commit('file/SET_setLayersDone')
-      await router.replace({ query: Object.assign({}) })
-      await themeUtils.refreshTemplateState()
-      return
     }
-    if (this.teamId === teamId) {
+    if (isSelfDesign) {
       store.commit('SET_folderInfo', {
         isRoot: designData.is_root,
         parentFolder: designData.parent_folder,

@@ -12,7 +12,7 @@ div(class="photo-setting")
         :key="btn.name"
         v-hint="disableBtn(btn) ? btn.hint : ''"
         @click="handleShow(btn.show)") {{ btn.label }}
-    btn(v-if="isImage && !isFrame"
+    btn(v-if="isImage && !isFrame && !inReviewMode"
       class="full-width"
       type="gray-mid"
       ref="btn"
@@ -39,6 +39,7 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import pageUtils from '@/utils/pageUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 
@@ -124,8 +125,7 @@ export default defineComponent({
       isProcessing: 'bgRemove/getIsProcessing',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
-      isHandleShadow: 'shadow/isHandling',
-      isUploadingImg: 'file/getIsUploadingImg'
+      isHandleShadow: 'shadow/isHandling'
     }),
     ...mapState('shadow', {
       handleId: 'handleId'
@@ -143,6 +143,9 @@ export default defineComponent({
     isImage(): boolean {
       const { layers, types } = this.currSelectedInfo as ICurrSelectedInfo
       return types.has('image') && layers.length === 1
+    },
+    inReviewMode(): boolean {
+      return webViewUtils.inReviewMode
     },
     currLayer(): any {
       const layers = this.currSelectedLayers as any[]
@@ -191,7 +194,7 @@ export default defineComponent({
           return (isCurrLayerHanlingShadow && !isShadowPanelOpen) ||
             this.isUploadImgShadow ||
             this.isHandleShadow ||
-            this.isUploadingImg ||
+            currLayer.previewSrc?.includes('data:image/png;base64') ||
             (store.state as any).file.uploadingAssets.some((e: { id: string }) => e.id === (layerUtils.getCurrConfig as IImage).tmpId)
         } else if (['remove-bg', 'crop'].includes(btn.name) && (isLayerNeedRedraw && this.isHandleShadow)) {
           return true

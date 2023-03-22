@@ -201,7 +201,7 @@ class TiptapUtils {
     return {
       font: spanStyle.fontFamily.split(',')[0],
       weight: spanStyle.getPropertyValue('-webkit-text-stroke-width').includes('+') ? 'bold' : 'normal',
-      size: Math.round(parseFloat(spanStyle.fontSize.split('px')[0]) / (4 / 3) * 100) / 100,
+      size: Math.round(parseFloat(spanStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100,
       decoration: spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line'),
       style: spanStyle.fontStyle,
       color: checkAndConvertToHex(spanStyle.color),
@@ -262,8 +262,10 @@ class TiptapUtils {
     let isSetContentRequired = false
 
     // If fixedWidth, all span should split into one text per span
-    const textBg = (layerUtils.getCurrLayer as IText).styles.textBg
-    const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
+    const fixedWidth = _tiptapJSON.content?.some(p => {
+      return p.content?.some(span => span.marks?.[0].attrs?.['min-width'] !== undefined ||
+        span.marks?.[0].attrs?.['min-height'] !== undefined)
+    })
     if (fixedWidth) {
       tiptapJSON.content.forEach(p => {
         p.content && p.content.forEach(s => {
@@ -273,7 +275,7 @@ class TiptapUtils {
           // Check if letter spacing changed
           if (!s.marks || s.marks.length === 0) return
           const width = parseFloat(s.marks[0].attrs.width)
-          if (width !== s.marks[0].attrs.size * 4 / 3 * (p.attrs.fontSpacing + 1)) {
+          if (width !== s.marks[0].attrs.size * 1.333333 * (p.attrs.fontSpacing + 1)) {
             isSetContentRequired = true
           }
         })

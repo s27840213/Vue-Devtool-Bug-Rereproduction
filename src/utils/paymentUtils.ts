@@ -1,11 +1,12 @@
 /* eslint-disable indent */
-import store from '@/store'
 import i18n from '@/i18n'
 import { IPaymentView, IPaymentWarningView } from '@/interfaces/payment'
-import modalUtils from './modalUtils'
-import popupUtils from './popupUtils'
 import router from '@/router'
+import store from '@/store'
 import { notify } from '@kyvg/vue3-notification'
+import modalUtils from './modalUtils'
+import webViewUtils from './picWVUtils'
+import popupUtils from './popupUtils'
 
 class PaymentUtils {
   get status(): string { return store.getters['payment/getStatus'] }
@@ -22,7 +23,7 @@ class PaymentUtils {
   }
 
   checkPro(item: { plan: number }, target: IPaymentWarningView) {
-    if (this.isAdmin) return true
+    if (this.isAdmin || webViewUtils.inReviewMode) return true
     if (item.plan === 1 && !this.isPro) {
       this.openPayment(target)
       return false
@@ -44,7 +45,7 @@ class PaymentUtils {
   }
 
   private _checkProTemplate(plan: number, url: string) {
-    if (this.isAdmin) return true
+    if (this.isAdmin || webViewUtils.inReviewMode) return true
     if (plan === 1 && !this.isPro) {
       this.openPayment('pro-template', url)
       return false

@@ -27,6 +27,7 @@ import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
 import unsplash from '@/store/module/unsplash'
 import user from '@/store/module/user'
+import webView from '@/store/module/webView'
 import photos from '@/store/photos'
 import text from '@/store/text'
 import imgShadowMutations from '@/store/utils/imgShadow'
@@ -624,12 +625,22 @@ const mutations: MutationTree<IEditorState> = {
       targetLayer[k] = v
     })
   },
-  UPDATE_frameLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | SrcObj } }) {
-    const frame = state.pages[updateInfo.pageIndex].config.layers[updateInfo.layerIndex] as IFrame
-    const targetLayer = frame.clips[updateInfo.targetIndex]
-    Object.entries(updateInfo.props).forEach(([k, v]) => {
-      targetLayer[k] = v
-    })
+  UPDATE_frameLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | SrcObj }, preprimaryLayerIndex: number }) {
+    const { pageIndex, layerIndex, targetIndex, props, preprimaryLayerIndex } = updateInfo
+    let frame
+    if (preprimaryLayerIndex !== -1) {
+      if (state.pages[pageIndex].config.layers[preprimaryLayerIndex].type === LayerType.group) {
+        frame = (state.pages[pageIndex].config.layers[preprimaryLayerIndex] as IGroup).layers[layerIndex]
+      }
+    } else {
+      frame = state.pages[pageIndex].config.layers[layerIndex]
+    }
+    if (frame && frame.type === LayerType.frame) {
+      const targetLayer = frame.clips[targetIndex]
+      Object.entries(props).forEach(([k, v]) => {
+        targetLayer[k] = v
+      })
+    }
   },
   UPDATE_groupLayerProps(state: IEditorState, updateInfo: { props: { [key: string]: string | number | boolean | number[] } }) {
     Object.entries(updateInfo.props).forEach(([k, v]) => {
@@ -866,6 +877,21 @@ const mutations: MutationTree<IEditorState> = {
     }
   },
   DELETE_previewSrc(state: IEditorState, { type, userId, assetId, assetIndex }) {
+    // check every pages background image
+    for (const page of state.pages) {
+      const bgImg = page.config.backgroundImage
+      if (bgImg.config.previewSrc && bgImg.config.srcObj.assetId === assetId) {
+        delete bgImg.config.previewSrc
+        Object.assign(bgImg.config.srcObj, {
+          type,
+          userId,
+          assetId: uploadUtils.isAdmin ? assetId : assetIndex
+        })
+        return
+      }
+    }
+
+    // check layers image
     const handler = (l: IShape | IText | IImage | IGroup | IFrame | ITmp) => {
       switch (l.type) {
         case LayerType.image:
@@ -1087,7 +1113,8 @@ const store = createStore({
     payment,
     shadow,
     fontTag,
-    imgControl
+    imgControl,
+    webView
   }
 })
 export default store

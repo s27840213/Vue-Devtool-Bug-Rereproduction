@@ -22,7 +22,7 @@ import designUtils from './designUtils'
 import editorUtils from './editorUtils'
 import generalUtils from './generalUtils'
 import groupUtils from './groupUtils'
-import LayerUtils from './layerUtils'
+import layerUtils from './layerUtils'
 import logUtils from './logUtils'
 import modalUtils from './modalUtils'
 import networkUtils from './networkUtils'
@@ -262,7 +262,7 @@ class UploadUtils {
                     this.uploadDesign()
                   } else if (json.flag === 1) {
                     store.commit('file/DEL_PREVIEW', { assetId })
-                    LayerUtils.deleteLayerByAssetId(assetId)
+                    layerUtils.deleteLayerByAssetId(assetId)
                     paymentUtils.errorHandler(json.msg)
                   }
                 })
@@ -416,7 +416,7 @@ class UploadUtils {
                         }
                       } else {
                         store.commit('file/DEL_PREVIEW', { assetId })
-                        LayerUtils.deleteLayerByAssetId(assetId)
+                        layerUtils.deleteLayerByAssetId(assetId)
                         paymentUtils.errorHandler(json.msg)
                       }
                     })
@@ -772,7 +772,7 @@ class UploadUtils {
     const designId = id ?? generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo
 
-    LayerUtils.updateLayerProps(currSelectedInfo.pageIndex, currSelectedInfo.index, {
+    layerUtils.updateLayerProps(currSelectedInfo.pageIndex, currSelectedInfo.index, {
       designId: designId
     })
 
@@ -1117,7 +1117,6 @@ class UploadUtils {
     }
     page.appVer = new Date().toISOString()
     page.jsonVer = jsonVer
-    page.isAutoResizeNeeded = false
     return page
   }
 
@@ -1238,7 +1237,7 @@ class UploadUtils {
                  */
                 // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
                 router.replace({ query: Object.assign(currentQuery, { export_ids: json.exportIds }) })
-                pageUtils.setAutoResizeNeededForPages(json.pages, true)
+                layerUtils.setAutoResizeNeededForLayersInPages(json.pages, true)
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
                 stepsUtils.reset() // make sure to record and upload json right away after json fetched, so that no temp state is uploaded.
                 store.commit('file/SET_setLayersDone')
@@ -1265,7 +1264,12 @@ class UploadUtils {
       .catch((err) => {
         router.replace({ query: Object.assign({}) })
         store.commit('SET_isGettingDesign', false)
-        type === GetDesignType.ASSET_DESIGN && themeUtils.refreshTemplateState()
+        if (type === GetDesignType.ASSET_DESIGN) {
+          notify({ group: 'error', text: i18n.global.t('SKT0019') })
+          store.commit('SET_assetId', '')
+          store.commit('file/SET_setLayersDone')
+          themeUtils.refreshTemplateState()
+        }
         logUtils.setLog(`Fetch error: ${err}`)
         console.error('fetch failed', err)
       })
