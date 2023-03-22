@@ -262,8 +262,10 @@ class TiptapUtils {
     let isSetContentRequired = false
 
     // If fixedWidth, all span should split into one text per span
-    const textBg = (layerUtils.getCurrLayer as IText).styles.textBg
-    const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
+    const fixedWidth = _tiptapJSON.content?.some(p => {
+      return p.content?.some(span => span.marks?.[0].attrs?.['min-width'] !== undefined ||
+        span.marks?.[0].attrs?.['min-height'] !== undefined)
+    })
     if (fixedWidth) {
       tiptapJSON.content.forEach(p => {
         p.content && p.content.forEach(s => {
