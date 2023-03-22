@@ -239,7 +239,8 @@ export default defineComponent({
       required: true
     },
     overflowContainer: {
-      type: HTMLElement
+      type: null as unknown as PropType<HTMLElement | null>,
+      required: true
     },
     isScaling: {
       type: Boolean,

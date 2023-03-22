@@ -265,8 +265,10 @@ class TiptapUtils {
     let isSetContentRequired = false
 
     // If fixedWidth, all span should split into one text per span
-    const textBg = (layerUtils.getCurrLayer as IText).styles.textBg
-    const fixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
+    const fixedWidth = _tiptapJSON.content?.some(p => {
+      return p.content?.some(span => span.marks?.[0].attrs?.['min-width'] !== undefined ||
+        span.marks?.[0].attrs?.['min-height'] !== undefined)
+    })
     if (fixedWidth) {
       tiptapJSON.content.forEach(p => {
         p.content && p.content.forEach(s => {
@@ -289,11 +291,7 @@ class TiptapUtils {
       const pStyles = this.makeParagraphStyle(paragraph.attrs)
       let largestSize = 0
       const spans: ISpan[] = []
-      const pContent = fixedWidth && paragraph.content && !this.editor.view.composing
-        ? paragraph.content.flatMap(span => [...span.text]
-          .map(t => Object.assign({}, span, { text: t })))
-        : paragraph.content
-      for (const span of pContent ?? []) {
+      for (const span of paragraph.content ?? []) {
         if (span.marks && span.marks.length > 0) {
           const sStyles = this.makeSpanStyle(span.marks[0].attrs)
           if (sStyles.size > largestSize) largestSize = sStyles.size
