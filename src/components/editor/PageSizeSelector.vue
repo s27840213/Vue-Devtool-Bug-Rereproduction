@@ -491,10 +491,10 @@ export default defineComponent({
         pos: pageUtils.currFocusPageIndex + 1
       })
       groupUtils.deselect()
-      this.applySelectedFormat(false, pageUtils.currFocusPageIndex + 1)
       this.setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
+      this.applySelectedFormat(false, pageUtils.currFocusPageIndex)
       stepsUtils.record()
-      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex + 1) })
+      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex) })
     },
     submit: throttle(function(this: any) {
       // Use throttle to prevent submit multiple times.
