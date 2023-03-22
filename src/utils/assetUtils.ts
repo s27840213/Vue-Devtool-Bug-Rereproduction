@@ -492,7 +492,7 @@ class AssetUtils {
       Object.assign(config, {
         widthLimit: config.widthLimit === -1 ? -1 : config.widthLimit * rescaleFactor,
         isAutoResizeNeeded: !textShapeUtils.isCurvedText(config.styles),
-        contentEditable: true
+        // contentEditable: true
       })
       newLayer = LayerFactary.newText(config)
       isText = true
@@ -505,11 +505,11 @@ class AssetUtils {
       newLayer = LayerFactary.newGroup(config, (config as IGroup).layers)
     }
 
-    if (isText) {
-      setTimeout(() => {
-        tiptapUtils.agent(editor => editor.commands.selectAll())
-      }, 100)
-    }
+    // if (isText) {
+    //   setTimeout(() => {
+    //     tiptapUtils.agent(editor => editor.commands.selectAll())
+    //   }, 100)
+    // }
 
     if (newLayer !== null) {
       layerUtils.addLayers(targetPageIndex, [newLayer])
