@@ -1043,13 +1043,20 @@ class TextBg {
         const oldFixedWidth = isITextLetterBg(layerTextBg) && layerTextBg.fixedWidth
         const newFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
         if (oldFixedWidth !== newFixedWidth) {
-          tiptapUtils.updateHtml()
-          tiptapUtils.forceUpdate()
-          // When fixedWith true => false, this can force tiptap merge span that have same attrs.
-          tiptapUtils.agent((editor: Editor) => {
-            editor.commands.selectAll()
-            editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
-          })
+          if (document.querySelector('.ProseMirror')) {
+            tiptapUtils.updateHtml()
+            tiptapUtils.forceUpdate()
+            // When fixedWith true => false, this can force tiptap merge span that have same attrs.
+            tiptapUtils.agent((editor: Editor) => {
+              if (!document.querySelector('.ProseMirror')) return
+              editor.commands.selectAll()
+              editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
+            })
+          } else {
+            layerUtils.updateLayerProps(pageIndex, layerIndex, {
+              paragraphs: tiptapUtils.toIParagraph(tiptapUtils.toJSON(layers[idx].paragraphs)).paragraphs
+            }, +idx)
+          }
         }
 
         // If user leave LetterBg, reset lineHeight and fontSpacing

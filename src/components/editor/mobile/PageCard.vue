@@ -16,7 +16,6 @@ div(class="page-card"
 import { IPageState } from '@/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
-import pageUtils from '@/utils/pageUtils'
 import { defineComponent, PropType } from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -43,7 +42,7 @@ export default defineComponent({
       default: false
     },
     editorView: {
-      type: HTMLElement,
+      type: null as unknown as PropType<HTMLElement | null>,
       required: true
     },
     isAnyBackgroundImageControl: {
@@ -88,7 +87,7 @@ export default defineComponent({
   watch: {
     pageScaleRatio() {
       if (this.isDetailPage) {
-        generalUtils.scaleFromCenter(this.editorView)
+        generalUtils.scaleFromCenter(this.editorView as HTMLElement)
       } else {
         const card = (this.$refs.card as HTMLElement[])[this.currCardIndex]
         generalUtils.scaleFromCenter(card)
