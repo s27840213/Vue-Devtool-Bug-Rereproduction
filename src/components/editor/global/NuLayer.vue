@@ -931,13 +931,17 @@ export default defineComponent({
 <style lang="scss" scoped>
 .nu-layer {
   touch-action: none;
-  position: absolute;
+  // position: absolute;
   // pointer-events: initial;
   // top: 0;
   // left: 0;
   // display: flex;
   // width: 100px;
   // height: 100px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
   align-items: center;
   justify-content: center;
   // content-visibility: auto;
