@@ -691,7 +691,7 @@ export default defineComponent({
         }
         case 'trash': {
           groupUtils.deselect()
-          const tmpIndex = pageUtils.currActivePageIndex
+          const tmpIndex = pageUtils.currFocusPageIndex
           this._setCurrActivePageIndex(pageUtils.isLastPage ? tmpIndex - 1 : tmpIndex)
           editorUtils.setCurrCardIndex(pageUtils.currActivePageIndex)
           pageUtils.deletePage(tmpIndex)
@@ -797,12 +797,12 @@ export default defineComponent({
         this.$emit('switchTab', tab.panelType, tab.props)
       }
 
-      if (['copy', 'paste'].includes(tab.icon)) {
+      if (['copy', 'paste', 'add-page', 'remove-bg', 'trash', 'duplicate-page'].includes(tab.icon)) {
         this.clickedTab = tab.icon
         notify({ group: 'copy', text: tab.icon === 'copy' ? i18n.global.tc('NN0688') : i18n.global.tc('NN0813') })
         this.clickedTabTimer = window.setTimeout(() => {
           this.clickedTab = ''
-        }, 800)
+        }, 400)
       }
     },
     targetIs(type: string): boolean {

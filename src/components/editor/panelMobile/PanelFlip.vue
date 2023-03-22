@@ -13,11 +13,11 @@ div(class="panel-flip bg-white")
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters } from 'vuex'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import backgroundUtils from '@/utils/backgroundUtils'
+import MappingUtils from '@/utils/mappingUtils'
+import { defineComponent } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default defineComponent({
   emits: [],
@@ -68,13 +68,7 @@ export default defineComponent({
   column-gap: 16px;
   padding-bottom: 16px;
   &__item {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.1s ease-in;
-    padding: 8px 16px;
-    border-radius: 0.25rem;
-    background-color: setColor(gray-5);
+    @include btn-action-mobile;
   }
 }
 </style>

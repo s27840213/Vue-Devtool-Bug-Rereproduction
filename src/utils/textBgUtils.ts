@@ -1,5 +1,5 @@
 import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, ITextBgEffect, ITextGooey, ITextLetterBg } from '@/interfaces/format'
-import { IParagraphStyle, ISpanStyle, IStyle, IText } from '@/interfaces/layer'
+import { IParagraph, IParagraphStyle, ISpanStyle, IStyle, IText } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
@@ -7,7 +7,7 @@ import mathUtils from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor } from '@tiptap/vue-3'
-import _ from 'lodash'
+import _, { cloneDeep, isEqual } from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
 
@@ -1043,13 +1043,38 @@ class TextBg {
         const oldFixedWidth = isITextLetterBg(layerTextBg) && layerTextBg.fixedWidth
         const newFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
         if (oldFixedWidth !== newFixedWidth) {
-          tiptapUtils.updateHtml()
-          tiptapUtils.forceUpdate()
+          const paragraphs = cloneDeep(layers[idx].paragraphs as IParagraph[])
+          if (newFixedWidth) { // Split span
+            paragraphs.forEach(p => {
+              p.spans = p.spans.flatMap(span =>
+                [...span.text].map(t => ({ text: t, styles: span.styles }))
+              )
+            })
+          } else { // Merge span
+            paragraphs.forEach(p => {
+              for (let i = 0; i + 1 < p.spans.length;) {
+                const curr = p.spans[i]
+                const next = p.spans[i + 1]
+                if (isEqual(curr.styles, next.styles)) {
+                  curr.text += next.text
+                  p.spans.splice(i + 1, 1)
+                } else { i++ }
+              }
+            })
+          }
+
+          layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs },
+            targetLayer.layers ? +idx : subLayerIndex
+          )
+          tiptapUtils.updateHtml() // Vuex config => tiptap
+
           // When fixedWith true => false, this can force tiptap merge span that have same attrs.
-          tiptapUtils.agent((editor: Editor) => {
-            editor.commands.selectAll()
-            editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
-          })
+          if (document.querySelector('.ProseMirror') && !newFixedWidth) {
+            tiptapUtils.agent((editor: Editor) => {
+              editor.commands.selectAll()
+              editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
+            })
+          }
         }
 
         // If user leave LetterBg, reset lineHeight and fontSpacing
