@@ -360,10 +360,10 @@ export default defineComponent({
       return colorUtils.globalSelectedColor.colors
     },
     isLine(): boolean {
-      return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
+      return shapeUtils.isLine(this.currLayer)
     },
     isBasicShape(): boolean {
-      return this.currLayer.type === 'shape' && this.currLayer.category === 'E'
+      return shapeUtils.isBasicShape(this.currLayer)
     },
     startMarker(): string {
       return this.markerListReady ? (this.currLayer as IShape).markerId?.[0] ?? 'none' : 'none'

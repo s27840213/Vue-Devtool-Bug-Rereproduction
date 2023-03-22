@@ -22,7 +22,7 @@ div(class="footer-tabs" ref="tabs")
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import i18n from '@/i18n'
 import { IFooterTab } from '@/interfaces/editor'
-import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import eventUtils from '@/utils/eventUtils'
@@ -33,6 +33,7 @@ import groupUtils from '@/utils/groupUtils'
 import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
+import shapeUtils from '@/utils/shapeUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -174,7 +175,7 @@ export default defineComponent({
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: this.isSvgImage },
         ...this.genearlLayerTabs,
         ...this.copyPasteTabs,
-        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' }
+        { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style', hidden: this.isSvgImage },
       ]
     },
     fontTabs(): Array<IFooterTab> {
@@ -464,10 +465,10 @@ export default defineComponent({
       return layerUtils.getCurrLayer
     },
     isLine(): boolean {
-      return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
+      return shapeUtils.isLine(this.currLayer as AllLayerTypes)
     },
     isBasicShape(): boolean {
-      return this.currLayer.type === 'shape' && this.currLayer.category === 'E'
+      return shapeUtils.isBasicShape(this.currLayer as AllLayerTypes)
     },
     showShapeAdjust(): boolean {
       return this.isLine || this.isBasicShape

@@ -43,7 +43,9 @@ div(class="nu-layer__wrapper" :style="layerWrapperStyles")
   div(class="nu-layer__line-mover"
     :style="lineMoverStyles()"
     ref="lineMover"
-    :id="`nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`")
+    :id="`nu-layer__line-mover_${pageIndex}_${layerIndex}_${subLayerIndex}`"
+    @contextmenu.prevent
+    @click.right.stop="onRightClick($event)")
 </template>
 
 <script lang="ts">
@@ -51,7 +53,7 @@ import SquareLoading from '@/components/global/SqureLoading.vue'
 import LazyLoad from '@/components/LazyLoad.vue'
 import i18n from '@/i18n'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { IFrame, IGroup, IImage, ILayer, IText, ITmp } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import { ILayerInfo, LayerType, SidebarPanelType } from '@/store/types'
 import controlUtils from '@/utils/controlUtils'
@@ -69,6 +71,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import { MovingUtils } from '@/utils/movingUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
+import shapeUtils from '@/utils/shapeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import SubControllerUtils from '@/utils/subControllerUtils'
 import textBgUtils from '@/utils/textBgUtils'
@@ -350,7 +353,7 @@ export default defineComponent({
       return this.config.type
     },
     isLine(): boolean {
-      return this.config.type === 'shape' && this.config.category === 'D'
+      return shapeUtils.isLine(this.config as AllLayerTypes)
     },
     frameClipStyles(): any {
       return {
@@ -451,7 +454,8 @@ export default defineComponent({
         case LayerType.shape: {
           Object.assign(
             styles,
-            { 'mix-blend-mode': this.config.styles.blendMode }
+            { 'mix-blend-mode': this.config.styles.blendMode },
+            shapeUtils.isLine(this.config as AllLayerTypes) ? { pointerEvents: 'none' } : {}
           )
         }
       }

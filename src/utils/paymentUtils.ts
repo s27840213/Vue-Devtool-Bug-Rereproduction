@@ -5,7 +5,7 @@ import router from '@/router'
 import store from '@/store'
 import { notify } from '@kyvg/vue3-notification'
 import modalUtils from './modalUtils'
-import picWVUtils from './picWVUtils'
+import webViewUtils from './picWVUtils'
 import popupUtils from './popupUtils'
 
 class PaymentUtils {
@@ -23,7 +23,7 @@ class PaymentUtils {
   }
 
   checkPro(item: { plan: number }, target: IPaymentWarningView) {
-    if (this.isAdmin || picWVUtils.inReviewMode) return true
+    if (this.isAdmin || webViewUtils.inReviewMode) return true
     if (item.plan === 1 && !this.isPro) {
       this.openPayment(target)
       return false
@@ -45,7 +45,7 @@ class PaymentUtils {
   }
 
   private _checkProTemplate(plan: number, url: string) {
-    if (this.isAdmin || picWVUtils.inReviewMode) return true
+    if (this.isAdmin || webViewUtils.inReviewMode) return true
     if (plan === 1 && !this.isPro) {
       this.openPayment('pro-template', url)
       return false

@@ -50,7 +50,7 @@ div(class="footer-tabs" ref="settingTabs" :style="rootStyles")
 import ColorBtn from '@/components/global/ColorBtn.vue'
 import i18n from '@/i18n'
 import { IFooterTab } from '@/interfaces/editor'
-import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
+import { AllLayerTypes, IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import { ColorEventType, LayerType } from '@/store/types'
 import backgroundUtils from '@/utils/backgroundUtils'
 import bgRemoveUtils from '@/utils/bgRemoveUtils'
@@ -65,7 +65,8 @@ import imageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import pageUtils from '@/utils/pageUtils'
-import picWVUtils from '@/utils/picWVUtils'
+import webViewUtils from '@/utils/picWVUtils'
+import shapeUtils from '@/utils/shapeUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -127,7 +128,7 @@ export default defineComponent({
       isHandleShadow: 'shadow/isHandling',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       hasCopiedFormat: 'getHasCopiedFormat',
-      userInfo: 'webView/getUserInfo'
+      userInfo: webViewUtils.appendModuleName('getUserInfo')
     }),
     hasSubSelectedLayer(): boolean {
       return this.currSubSelectedInfo.index !== -1
@@ -236,7 +237,7 @@ export default defineComponent({
         ...this.copyPasteTabs,
         ...(!this.isInFrame ? [{ icon: 'set-as-frame', text: `${this.$t('NN0706')}` }] : []),
         { icon: 'brush', text: `${this.$t('NN0035')}`, panelType: 'copy-style' },
-        ...!picWVUtils.inReviewMode ? [{ icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg' }] : []
+        ...!webViewUtils.inReviewMode ? [{ icon: 'remove-bg', text: `${this.$t('NN0043')}`, panelType: 'remove-bg', hidden: this.isInFrame }] : []
       ]
     },
     frameTabs(): Array<IFooterTab> {
@@ -543,10 +544,10 @@ export default defineComponent({
       return layerUtils.getCurrLayer
     },
     isLine(): boolean {
-      return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
+      return shapeUtils.isLine(this.currLayer as AllLayerTypes)
     },
     isBasicShape(): boolean {
-      return this.currLayer.type === 'shape' && this.currLayer.category === 'E'
+      return shapeUtils.isBasicShape(this.currLayer as AllLayerTypes)
     },
     showShapeAdjust(): boolean {
       return this.isLine || this.isBasicShape
