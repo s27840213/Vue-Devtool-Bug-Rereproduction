@@ -1155,11 +1155,15 @@ class UploadUtils {
           this.getDesignInfo.type = GetDesignType.ASSET_DESIGN
           return
         }
-        /**
-         * @Note isAdmin -> fetch the public design, else fetch the private design
-         */
-        jsonName = 'config.json'
-        fetchTarget = designParams.fetchTarget ? `${designParams.fetchTarget}&ver=${generalUtils.generateRandomString(6)}` : `https://template.vivipic.com/admin/${teamId}/asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
+        // /**
+        //  * @Note isAdmin -> fetch the public design, else fetch the private design
+        //  */
+        // jsonName = 'config.json'
+        if (!designParams.fetchTarget) {
+          throw new Error('design url is not provided')
+        }
+        // ? `${designParams.fetchTarget}&ver=${generalUtils.generateRandomString(6)}` : `https://template.vivipic.com/admin/${teamId}/asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
+        fetchTarget = designParams.fetchTarget
         break
       }
 

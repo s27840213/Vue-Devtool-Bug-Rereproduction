@@ -3,21 +3,20 @@ div(class="tags" v-click-outside="clickOutsideHandler")
   template(v-if="!$isTouchDevice()")
     div(class="tags__flex-container"
         :style="containerStyle")
-      div(class="tags__tag-wrapper pointer" v-for="tag in tags"
-        @click="onClick(typeof tag === 'string' ? tag : tag.value)")
-        div(class="tags__tag") {{ typeof tag === 'string' ? tag : tag.label}}
+      div(:class="`tags__tag-wrapper ${theme}`" v-for="tag in tags"
+        @click="onClick( tag.value )")
+        div(class="tags__tag") {{ tag.label }}
     div(v-if="!showMore" class="tags__more-wrapper")
-      div(class="tags__tag-wrapper pointer"
+      div(class="tags__tag-wrapper"
         @click="onClickMore")
         div(class="tags__tag") {{ `${$t('NN0082')}...` }}
   template(v-else)
     div(class="tags__container-mobile")
       div(class="tags__flex-container-mobile")
-        div(v-for="tag in tags" :active="typeof tag === 'string' ? undefined : (tag.active ? 'true' : undefined)"
-            class="tags__tag-wrapper pointer" :class="{[theme]: true}"
-            @click="onClick(typeof tag === 'string' ? tag : tag.value)")
-          div(class="tags__tag") {{ typeof tag === 'string' ? tag : tag.label }}
-
+        div(v-for="tag in tags" :active="tag.active || undefined"
+          :class="`tags__tag-wrapper ${theme}`"
+          @click="onClick(tag.value)")
+          div(class="tags__tag") {{ tag.label }}
 </template>
 
 <script lang="ts">
@@ -36,7 +35,7 @@ export default defineComponent({
   },
   props: {
     tags: {
-      type: Array as PropType<string[] | ITag[]>,
+      type: Array as PropType<ITag[]>,
       required: true
     },
     theme: {
@@ -106,6 +105,21 @@ export default defineComponent({
     padding: 6px;
     margin: 4px 0;
     border-radius: 10px;
+    border: 1px solid #E0E0E0;
+    cursor: pointer;
+    &.light {
+      color: black;
+      background-color: white;
+    }
+    &.dark {
+      color: setColor(black-5);
+      background-color: setColor(black-3);
+      border: none;
+      &[active] {
+        color: setColor(gray-1);
+        background-color: setColor(gray-4);
+      }
+    }
   }
   &__tag-wrapper + &__tag-wrapper {
     margin-left: 8px;
@@ -117,21 +131,6 @@ export default defineComponent({
   }
   &__flex-container-mobile {
     display: flex;
-  }
-}
-
-.light {
-  color: black;
-  background-color: white;
-  border: 1px solid #E0E0E0;
-}
-
-.dark {
-  color: setColor(black-5);
-  background-color: setColor(black-3);
-  &[active] {
-    color: setColor(gray-1);
-    background-color: setColor(gray-4);
   }
 }
 </style>

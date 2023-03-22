@@ -45,9 +45,7 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
   }
 
   detectIfInApp() {
-    if ((window as any).webkit === undefined) {
-      this.enterBrowserMode()
-    }
+    this.enterBrowserMode()
   }
 
   enterBrowserMode() {
@@ -66,7 +64,18 @@ class VivipicWebViewUtils extends WebViewUtils<IUserInfo> {
     window.open(url, this.inBrowserMode ? '_blank' : '_self')
   }
 
+  sendToIOS(messageType: string, message: any): void {
+    if (this.inBrowserMode) return
+    super.sendToIOS(messageType, message)
+  }
+
+  async callIOSAsAPI(type: string, message: any, event: string, timeout?: number): Promise<any> {
+    if (this.inBrowserMode) return
+    return super.callIOSAsAPI(type, message, event, timeout)
+  }
+
   sendAppLoaded() {
+    if (this.inBrowserMode) return
     if (!this.appLoadedSent) {
       this.sendToIOS('APP_LOADED', { hideReviewRequest: false })
       this.appLoadedSent = true
