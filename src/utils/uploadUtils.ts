@@ -1198,7 +1198,7 @@ class UploadUtils {
         break
       }
     }
-    fetch(fetchTarget)
+    await fetch(fetchTarget)
       .then((response) => {
         if (!response.ok) {
           /**
@@ -1210,7 +1210,7 @@ class UploadUtils {
           router.replace({ query: Object.assign({}) })
           store.commit('SET_isGettingDesign', false)
         } else {
-          response.json().then(async (json) => {
+          return response.json().then(async (json) => {
             switch (type) {
               case GetDesignType.TEMPLATE: {
                 assetUtils.addTemplate(json)
