@@ -594,6 +594,10 @@ function getLetterBgSetting(textBg: ITextLetterBg, index: number) {
       href = `cloud${index % 4}`
       color = textBg.color
       break
+    case 'penguin':
+      href = `penguin${index % 5}`
+      color = textBg.color
+      break
     default: // text-book
       href = textBg.name
       color = textBg.color
@@ -723,6 +727,14 @@ class TextBg {
         fixedWidth: true,
         color: '#93BAA6',
       },
+      penguin: {
+        xOffset200: 0,
+        yOffset200: 0,
+        size: 125,
+        opacity: 100,
+        fixedWidth: true,
+        color: '', // no effect
+      }
     }
   }
 
@@ -732,7 +744,8 @@ class TextBg {
       'rainbow-dark': { lineHeight: 1.78, fontSpacing: 585 },
       circle: { lineHeight: 1.78, fontSpacing: 585 },
       cloud: { lineHeight: 1.54, fontSpacing: 186 },
-      'text-book': { lineHeight: 1.96, fontSpacing: 665 }
+      'text-book': { lineHeight: 1.96, fontSpacing: 665 },
+      penguin: { lineHeight: 1.96, fontSpacing: 665 },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
     for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
