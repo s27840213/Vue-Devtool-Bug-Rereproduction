@@ -14,7 +14,6 @@ div(class="mobile-editor")
           :showMobilePanel="showMobilePanelAfterTransitoin")
     transition(name="panel-up"
               @before-enter="beforeEnter"
-              @after-enter="afterEnter"
               @after-leave="afterLeave")
       mobile-panel(v-show="showMobilePanel" ref="mobilePanel"
         :currActivePanel="currActivePanel"
@@ -262,13 +261,14 @@ export default defineComponent({
       }
     },
     setPanelHeight(height: number) {
-      if (height === 0) {
+      const content = this.$refs['mobile-editor__content'] as HTMLElement
+      const contentHeight = content?.clientHeight ?? 0
+      if (height === 0 || height > contentHeight) {
         this.marginBottom = 0
         return
       }
 
-      const content = this.$refs['mobile-editor__content'] as HTMLElement
-      const contentHeight = content?.clientHeight ?? 0
+      // Calc additional page card translation by layer position
       const activeLayer = find(this.currPage.layers, ['active', true])
       let offset = 0
       if (activeLayer && contentHeight) {
@@ -281,12 +281,8 @@ export default defineComponent({
     beforeEnter() {
       this.showMobilePanelAfterTransitoin = true
     },
-    afterEnter() {
-      this.setPanelHeight((this.$refs.mobilePanel as {$el: HTMLElement}).$el.clientHeight)
-    },
     afterLeave() {
       editorUtils.setCurrActivePanel('none')
-      this.setPanelHeight(0)
       setTimeout(() => {
         this.showMobilePanelAfterTransitoin = false
       }, 300)

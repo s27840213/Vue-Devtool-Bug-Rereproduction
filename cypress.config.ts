@@ -17,7 +17,7 @@ export default defineConfig({
     baseUrl: 'http://localhost:8080/',
     experimentalRunAllSpecs: true,
     setupNodeEvents(on, config) {
-      require('cypress-terminal-report/src/installLogsPrinter')(on)
+      require('cypress-terminal-report/src/installLogsPrinter')(on, { compactLogs: 20 })
       require('cypress-image-diff-js/dist/plugin')(on, config)
 
       // Because set on event will overwrite plugin event.

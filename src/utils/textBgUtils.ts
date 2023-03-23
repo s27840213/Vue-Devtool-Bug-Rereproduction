@@ -1,5 +1,5 @@
 import { isITextBox, isITextGooey, isITextLetterBg, isITextUnderline, ITextBgEffect, ITextGooey, ITextLetterBg } from '@/interfaces/format'
-import { IParagraphStyle, ISpanStyle, IStyle, IText } from '@/interfaces/layer'
+import { IParagraph, IParagraphStyle, ISpanStyle, IStyle, IText } from '@/interfaces/layer'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
@@ -7,7 +7,7 @@ import mathUtils from '@/utils/mathUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import { Editor } from '@tiptap/vue-3'
-import _ from 'lodash'
+import _, { cloneDeep, isEqual } from 'lodash'
 import generalUtils from './generalUtils'
 import textUtils from './textUtils'
 
@@ -89,7 +89,7 @@ class Rect {
     this.vertical = config.styles.writingMode === 'vertical-lr'
     const fixedWidth = isITextLetterBg(config.styles.textBg) && config.styles.textBg.fixedWidth
 
-    const div = document.createElement('div')
+    let div = document.createElement('div')
     div.classList.add('nu-text__body')
     config.paragraphs.forEach(para => {
       const p = document.createElement('p')
@@ -136,9 +136,8 @@ class Rect {
     // const safariStyle = platform.name === 'Safari' ? { lineBreak: 'strict' } : {}
     Object.assign(div.style, safariStyle)
     div.style.writingMode = config.styles.writingMode
-    const { widthLimit } = config
-    // const { scale, height } = config.styles
-    // if (widthLimit !== -1) widthLimit += scale
+    let { widthLimit } = config
+    const { scale, height } = config.styles
     if (this.vertical) {
       div.style.width = 'max-content'
       div.style.height = widthLimit === -1 ? 'max-content' : `${widthLimit / config.styles.scale}px`
@@ -149,21 +148,21 @@ class Rect {
     await this.waitForRender(div)
 
     // Add width limit to try to fit element height with config height.
-    // const heightLimit = height / scale
-    // const target = this.vertical ? 'height' : 'width'
-    // let resizeTimes = 1
-    // while (widthLimit !== -1 && resizeTimes < 100 &&
-    //   Math.abs(div.clientHeight - heightLimit) > 5 * scale) {
-    //   resizeTimes++
-    //   if (div.clientHeight > heightLimit) {
-    //     widthLimit += scale * resizeTimes
-    //   } else {
-    //     widthLimit -= scale * resizeTimes
-    //   }
-    //   div = div.cloneNode(true) as HTMLDivElement
-    //   div.style[target] = `${widthLimit / scale}px`
-    //   await this.waitForRender(div)
-    // }
+    const heightLimit = height / scale
+    const target = this.vertical ? 'height' : 'width'
+    let resizeTimes = 1
+    while (widthLimit !== -1 && resizeTimes < 100 &&
+      Math.abs(div.clientHeight - heightLimit) > 5 * scale) {
+      resizeTimes++
+      if (div.clientHeight > heightLimit) {
+        widthLimit += scale * resizeTimes
+      } else {
+        widthLimit -= scale * resizeTimes
+      }
+      div = div.cloneNode(true) as HTMLDivElement
+      div.style[target] = `${widthLimit / scale}px`
+      await this.waitForRender(div)
+    }
 
     this.bodyRect = div.getClientRects()[0]
     this.width = this.bodyRect.width
@@ -755,7 +754,7 @@ class TextBg {
     if (config.styles.writingMode === 'vertical-lr') [w, h] = [h, w]
     // If tiptap attr have min-w/h, convertFontStyle() in cssConverter.ts will add some style to tiptap.
     return {
-      [w]: `${spanStyle.size * 4 / 3 * (pStyle.fontSpacing + 1)}px`,
+      [w]: `${spanStyle.size * 1.333333 * (pStyle.fontSpacing + 1)}px`,
       display: 'inline-block',
       letterSpacing: 0,
       textAlign: 'center',
@@ -1044,13 +1043,38 @@ class TextBg {
         const oldFixedWidth = isITextLetterBg(layerTextBg) && layerTextBg.fixedWidth
         const newFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
         if (oldFixedWidth !== newFixedWidth) {
-          tiptapUtils.updateHtml()
-          tiptapUtils.forceUpdate()
+          const paragraphs = cloneDeep(layers[idx].paragraphs as IParagraph[])
+          if (newFixedWidth) { // Split span
+            paragraphs.forEach(p => {
+              p.spans = p.spans.flatMap(span =>
+                [...span.text].map(t => ({ text: t, styles: span.styles }))
+              )
+            })
+          } else { // Merge span
+            paragraphs.forEach(p => {
+              for (let i = 0; i + 1 < p.spans.length;) {
+                const curr = p.spans[i]
+                const next = p.spans[i + 1]
+                if (isEqual(curr.styles, next.styles)) {
+                  curr.text += next.text
+                  p.spans.splice(i + 1, 1)
+                } else { i++ }
+              }
+            })
+          }
+
+          layerUtils.updateLayerProps(pageIndex, layerIndex, { paragraphs },
+            targetLayer.layers ? +idx : subLayerIndex
+          )
+          tiptapUtils.updateHtml() // Vuex config => tiptap
+
           // When fixedWith true => false, this can force tiptap merge span that have same attrs.
-          tiptapUtils.agent((editor: Editor) => {
-            editor.commands.selectAll()
-            editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
-          })
+          if (document.querySelector('.ProseMirror') && !newFixedWidth) {
+            tiptapUtils.agent((editor: Editor) => {
+              editor.commands.selectAll()
+              editor.chain().updateAttributes('textStyle', { randomId: -1 }).run()
+            })
+          }
         }
 
         // If user leave LetterBg, reset lineHeight and fontSpacing

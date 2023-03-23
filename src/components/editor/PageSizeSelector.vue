@@ -90,7 +90,7 @@ div(class="page-size-selector" :class="{isTouchDevice: $isTouchDevice()}")
     btn(class="page-size-selector__body__button"
         :disabled="!isFormatApplicable"
         @click="submit")
-      svg-icon(iconName="pro" iconWidth="22px" iconColor="alarm")
+      svg-icon(v-if="!inReviewMode" iconName="pro" iconWidth="22px" iconColor="alarm")
       span {{$t('NN0022')}}
 </template>
 
@@ -106,6 +106,7 @@ import generalUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import webViewUtils from '@/utils/picWVUtils'
 import resizeUtils from '@/utils/resizeUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import unitUtils, { IMapSize, PRECISION, STR_UNITS } from '@/utils/unitUtils'
@@ -170,6 +171,9 @@ export default defineComponent({
       pagesLength: 'getPagesLength',
       getPageSize: 'getPageSize'
     }),
+    inReviewMode(): boolean {
+      return webViewUtils.inReviewMode
+    },
     unitOptions(): string[] {
       return STR_UNITS
     },
@@ -412,20 +416,21 @@ export default defineComponent({
       // this.fixSize(false)
       this.isValidate = true
     },
-    applySelectedFormat(record = true) {
+    applySelectedFormat(record = true, currPageIndex = -1) {
       if (!this.isFormatApplicable) return
       const format = this.getSelectedFormat()
       if (!format) return
       if (this.groupType !== 1) {
         // resize page with px size
         const { width, height } = this.pageSizes.px
+        currPageIndex = currPageIndex === -1 ? this.currFocusPageIndex : currPageIndex
         this.resizePage({
           width,
           height,
           physicalWidth: format.width,
           physicalHeight: format.height,
           unit: format.unit
-        })
+        }, currPageIndex)
       } else {
         // resize電商詳情頁時 其他頁面要依width做resize
         const { pagesLength, getPageSize } = this
@@ -487,7 +492,7 @@ export default defineComponent({
       })
       groupUtils.deselect()
       this.setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
-      this.applySelectedFormat(false)
+      this.applySelectedFormat(false, pageUtils.currFocusPageIndex)
       stepsUtils.record()
       this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex) })
     },
@@ -502,8 +507,8 @@ export default defineComponent({
       editorUtils.setShowMobilePanel(false) // For mobile
       this.$emit('close') // For PC
     }, 2000, { trailing: false }),
-    resizePage(format: { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string}) {
-      resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
+    resizePage(format: { width: number, height: number, physicalWidth: number, physicalHeight: number, unit: string}, pageIndex = pageUtils.currFocusPageIndex) {
+      resizeUtils.resizePage(pageIndex, this.getPage(pageIndex), format)
     },
     handleInputBlur(target: string) {
       this.isValidate = true
