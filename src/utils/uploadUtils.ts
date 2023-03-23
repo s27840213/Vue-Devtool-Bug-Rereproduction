@@ -1163,7 +1163,7 @@ class UploadUtils {
           throw new Error('design url is not provided')
         }
         // ? `${designParams.fetchTarget}&ver=${generalUtils.generateRandomString(6)}` : `https://template.vivipic.com/admin/${teamId}/asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
-        fetchTarget = designParams.fetchTarget
+        fetchTarget = `${designParams.fetchTarget}&ver=${generalUtils.generateRandomString(6)}`
         break
       }
 
