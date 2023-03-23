@@ -42,6 +42,7 @@ import AssetUtils from '@/utils/assetUtils'
 import generalUtils from '@/utils/generalUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 import PanelText from '../PanelText.vue'
@@ -57,8 +58,19 @@ export default defineComponent({
   data() {
     return {
       elMainContent: undefined as HTMLElement | undefined,
-      iconAddText: 'plus-square',
-      scrollRate: 0
+      scrollProgress: -1,
+      scrollProgressStart: 0,
+      scrollProgressToFinish: 0,
+      scrollTopStart: 0,
+      destScrollProgress: -1 as -1 | 1, // -1 for full button, 1 for mini button
+      btnAniStartTime: null as number | null,
+      scrollAniStartTime: null as number | null,
+      scrollVelocity: 0,
+      isPan: false,
+      isTouch: false,
+      touchStartY: 0,
+      touchStartTime: null as number | null,
+      touchStartScrollTop: 0,
     }
   },
   mounted() {
@@ -69,20 +81,53 @@ export default defineComponent({
         await this.getRecently({ writeBack: true })
         await this.getContent()
       })
-  },
-  activated() {
-    this.$nextTick(() => {
-      this.elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
-      this.elMainContent.addEventListener('scroll', this.handleMainContentScroll)
-      this.updateBtnStyles()
+    const elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
+    this.elMainContent = elMainContent
+    const atMainContent = new AnyTouch(this.elMainContent, { preventDefault: false })
+    atMainContent.on('panstart', (e: AnyTouchEvent) => {
+      if (this.isPan) return // because this event will trigger when pan direction changes
+      this.isPan = true
+      this.scrollTopStart = elMainContent.scrollTop
+      this.scrollProgressStart = this.destScrollProgress
     })
-  },
-  deactivated() {
-    this.elMainContent?.removeEventListener('scroll', this.handleMainContentScroll)
+    atMainContent.on(['panup', 'pandown'], (e: AnyTouchEvent) => {
+      this.handleMainContentScroll()
+    })
+    atMainContent.on('panend', (e: AnyTouchEvent) => {
+      this.isPan = false
+    })
+    // elMainContent.ontouchstart = (e: TouchEvent) => {
+    //   console.log('ontouchstart', e)
+    //   e.preventDefault()
+    //   this.isTouch = true
+    //   this.touchStartY = e.touches[0].pageY
+    //   this.touchStartTime = performance.now()
+    //   this.touchStartScrollTop = elMainContent.scrollTop
+    // }
+    // elMainContent.ontouchmove = (e: TouchEvent) => {
+    //   e.preventDefault()
+    //   const distY = e.touches[0].pageY - this.touchStartY
+    //   elMainContent.scrollTop = this.touchStartScrollTop - distY
+    //   // elMainContent.scrollTo({
+    //   //   top: this.touchStartScrollTop - distY,
+    //   //   behavior: 'auto'
+    //   // })
+    // }
+    // elMainContent.ontouchend = (e: TouchEvent) => {
+    //   e.preventDefault()
+    //   this.isTouch = false
+    //   const dist = e.changedTouches[0].pageY - this.touchStartY
+    //   const time = performance.now() - this.touchStartTime!
+    //   this.scrollVelocity = dist / time * 30
+    //   this.playMomentumScrollAnimation()
+    // }
   },
   watch: {
     scrollOrResize() {
       this.updateBtnStyles()
+    },
+    isPan(isPan) {
+      if (!isPan) this.playBtnAnimation()
     }
   },
   computed: {
@@ -93,7 +138,7 @@ export default defineComponent({
       return Math.min(this.windowSize.width - 80, MAX_BTN_WIDTH)
     },
     scrollOrResize() {
-      return { scrollRate: this.scrollRate, btnMaxWidth: this.btnMaxWidth }
+      return { scrollProgress: this.scrollProgress, btnMaxWidth: this.btnMaxWidth }
     },
     listRecently(): ICategoryItem[] {
       const { categories } = this
@@ -182,13 +227,46 @@ export default defineComponent({
       }
     },
     handleMainContentScroll() {
+      // unlink scroll with animation when animation is playing
+      if (this.btnAniStartTime !== null) return
+
+      // define scroll destination for animation
       const el = this.elMainContent as HTMLElement
-      const destScrollTop = (this.itemWidth + this.itemGap) * 2
       const maxDestScrollTop = (el.scrollHeight - el.clientHeight)
-      this.scrollRate = Math.max(Math.min(el.scrollTop / Math.min(destScrollTop, maxDestScrollTop), 1), 0)
+      const destScrollTop = Math.min(el.clientHeight / 2, maxDestScrollTop)
+
+      // displacement from start scroll position
+      let dispScroll = el.scrollTop - this.scrollTopStart
+
+      // threshold to trigger animation
+      const thScroll = 0
+      if (Math.abs(dispScroll) <= thScroll) return
+      if (dispScroll > 0) dispScroll -= thScroll
+      if (dispScroll < 0) dispScroll += thScroll
+
+      // check for over scroll (scroll up when button is already mini or scroll down when button is already full)
+      const newScrollProgress = Math.max(Math.min(dispScroll / destScrollTop, 1), -1)
+      if (this.scrollProgressStart === 1 && newScrollProgress > 0) {
+        this.scrollProgress = 1
+        this.destScrollProgress = 1
+        return
+      } else if (this.scrollProgressStart === -1 && newScrollProgress < 0) {
+        this.scrollProgress = -1
+        this.destScrollProgress = -1
+        return
+      }
+
+      // update scroll progress
+      this.scrollProgress = newScrollProgress
+
+      // update destination scroll progress
+      if (dispScroll > 0 && this.scrollProgressStart === -1) this.destScrollProgress = 1
+      else if (dispScroll < 0 && this.scrollProgressStart === 1) this.destScrollProgress = -1
+      // console.log(dispScroll, newScrollProgress, this.scrollRateStart, this.destScrollProgress)
     },
     updateBtnStyles() {
-      const scrollRate = this.scrollRate
+      this.scrollProgressToFinish = this.destScrollProgress - this.scrollProgress
+      const scrollRate = this.destScrollProgress > 0 ? this.scrollProgress : (1 + this.scrollProgress)
       const rScrollRate = 1 - scrollRate
       const btn = this.$refs.btnAddText as HTMLElement
       const txt = this.$refs.txtAddText as HTMLElement
@@ -201,6 +279,45 @@ export default defineComponent({
       const targetIconPosLeft = btnWidth / 2 - icon.clientWidth / 2
       icon.style.left = targetIconPosLeft + 52 * rScrollRate + 'px'
       icon.style.transform = `rotate(${360 * rScrollRate}deg)`
+    },
+    btnAnimation(timestamp: number) {
+      // cancel animation if already finished
+      if (this.scrollProgress === this.destScrollProgress) {
+        this.btnAniStartTime = null
+        return
+      }
+
+      // get relative progress
+      if (!this.btnAniStartTime) this.btnAniStartTime = timestamp
+      const duration = 200
+      const runtime = timestamp - this.btnAniStartTime
+      const relativeProgress = Math.max(Math.min(runtime / duration, 1), 0)
+
+      // update scroll progress
+      this.scrollProgress += this.scrollProgressToFinish * relativeProgress
+
+      // request next frame if not finished, otherwise reset animation
+      if (runtime < duration) {
+        this.playBtnAnimation()
+      } else this.btnAniStartTime = null
+    },
+    playBtnAnimation() {
+      window.requestAnimationFrame(this.btnAnimation)
+    },
+    momentumScrollAnimation(timestamp: number) {
+      if (!this.scrollAniStartTime) this.scrollAniStartTime = timestamp
+      const el = this.elMainContent as HTMLElement
+      this.scrollVelocity = this.scrollVelocity * 0.96
+      if (this.isTouch || el.scrollTop <= 0 || el.scrollTop >= el.scrollHeight - el.clientHeight) {
+        this.scrollAniStartTime = null
+        return
+      }
+      if (Math.abs(this.scrollVelocity) < 0.01) return
+      el.scrollTop = el.scrollTop - this.scrollVelocity
+      this.playMomentumScrollAnimation()
+    },
+    playMomentumScrollAnimation() {
+      window.requestAnimationFrame(this.momentumScrollAnimation)
     }
   }
 })
