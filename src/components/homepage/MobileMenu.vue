@@ -8,12 +8,14 @@ div(class="menu" :style="rootStyles")
           svg-icon(v-if="l1.content" iconName="chevron-down"
                   iconColor="gray-1" iconWidth="16px")
         div(v-if="l1.content")
-          details(v-for="l2 in l1.content")
-            summary
-              url(:url="l2.url") {{l2.label}}
-              svg-icon(v-if="l2.content" iconName="chevron-down"
-                iconColor="gray-1" iconWidth="16px")
-            url(v-for="l3 in l2.content" :url="l3.url" :newTab="l3.newTab") {{l3.label}}
+          template(v-for="l2 in l1.content")
+            url(v-if="l2.url" :url="l2.url") {{l2.label}}
+            details(v-else-if="l2.content")
+              summary
+                span {{l2.label}}
+                svg-icon(iconName="chevron-down"
+                  iconColor="gray-1" iconWidth="16px")
+              url(v-for="l3 in l2.content" :url="l3.url" :newTab="l3.newTab") {{l3.label}}
   div(class="menu-bottom")
     template(v-if="!isLogin")
       div(class="menu-bottom__link")
@@ -115,13 +117,14 @@ export default defineComponent({
   a {
     display: block;
     width: 100%;
-    text-decoration: unset;
-    color: inherit;
   }
 }
 
 .menu-top,
 .menu-bottom {
+  summary {
+    outline: none; // For Safari 14.3, which have a summary outline by default.
+  }
   details {
     display: flex;
     flex-direction: column;
@@ -144,10 +147,9 @@ export default defineComponent({
     transform: scaleY(-1);
   }
   summary:focus,
-  summary:focus > svg {
-    // Set color when user click summary
+  details[open] > summary,
+  details[open] > summary > svg {
     color: setColor(blue-hover);
-    outline: none; // For Safari 14.3, which have a summary outline by default.
   }
   span,
   a {
