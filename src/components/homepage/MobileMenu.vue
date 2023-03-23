@@ -1,19 +1,19 @@
 <template lang="pug">
 div(class="menu" :style="rootStyles")
   div(class="menu-top")
-    template(v-for="item in navItems")
-      details(v-if="!item.hidden" :class="{'text-blue-1': currentPage === item.name}")
+    template(v-for="l1 in navItems")
+      details(v-if="!l1.hidden" :class="{'text-blue-1': currentPage === l1.name}")
         summary
-          url(:url="item.url") {{item.label}}
-          svg-icon(v-if="item.content" iconName="chevron-down"
+          url(:url="l1.url") {{l1.label}}
+          svg-icon(v-if="l1.content" iconName="chevron-down"
                   iconColor="gray-1" iconWidth="16px")
-        div(v-if="item.content")
-          details(v-for="it in item.content")
+        div(v-if="l1.content")
+          details(v-for="l2 in l1.content")
             summary
-              url(:url="it.url") {{it.label}}
-              svg-icon(v-if="it.content" iconName="chevron-down"
+              url(:url="l2.url") {{l2.label}}
+              svg-icon(v-if="l2.content" iconName="chevron-down"
                 iconColor="gray-1" iconWidth="16px")
-            url(v-for="i in it.content" :url="i.url" :newTab="i.newTab") {{i.label}}
+            url(v-for="l3 in l2.content" :url="l3.url" :newTab="l3.newTab") {{l3.label}}
   div(class="menu-bottom")
     template(v-if="!isLogin")
       div(class="menu-bottom__link")
@@ -41,7 +41,7 @@ div(class="menu" :style="rootStyles")
 <script lang="ts">
 import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
-import constantData from '@/utils/constantData'
+import constantData, { IHeaderL1 } from '@/utils/constantData'
 import webViewUtils from '@/utils/picWVUtils'
 import { defineComponent } from 'vue'
 import { mapGetters } from 'vuex'
@@ -64,11 +64,11 @@ export default defineComponent({
       isLogin: 'user/isLogin',
       userInfo: webViewUtils.appendModuleName('getUserInfo')
     }),
-    navItems(): any {
+    navItems(): IHeaderL1[] {
       return constantData.headerItems(true)
     },
     currentPage(): string {
-      const { name, params } = this.$router.currentRoute.value
+      const { name } = this.$router.currentRoute.value
       return (name as string) === 'Settings'
         ? this.$route.params.view as string
         : (name as string) || ''
