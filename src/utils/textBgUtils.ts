@@ -169,31 +169,32 @@ class Rect {
       const lineHeight = parseFloat((p as HTMLElement).style.lineHeight)
       const letterSpacing = fontSize * letterSpacingEm
       for (const span of p.children) {
-        const cr = span.getClientRects()[0]
-        // If span is fixedWidth, its display will be inline-block
-        // Height of inline-block span will grow with lineHeight
-        // Here calc height and y without inline-block effect
-        // For vertical text, modify width&x instead of height&y
-        const isInlineBolck = (span as HTMLElement).style.display === 'inline-block'
-        let { width, height, y, x } = cr
-        if (isInlineBolck && this.vertical) {
-          width = width / lineHeight * 1.4
-          x = cr.x + (cr.width - width) / 2
-        } else if (isInlineBolck) {
-          height = height / lineHeight * 1.4
-          y = cr.y + (cr.height - height) / 2
+        for (const cr of span.getClientRects()) {
+          // If span is fixedWidth, its display will be inline-block
+          // Height of inline-block span will grow with lineHeight
+          // Here calc height and y without inline-block effect
+          // For vertical text, modify width&x instead of height&y
+          const isInlineBolck = (span as HTMLElement).style.display === 'inline-block'
+          let { width, height, y, x } = cr
+          if (isInlineBolck && this.vertical) {
+            width = width / lineHeight * 1.4
+            x = cr.x + (cr.width - width) / 2
+          } else if (isInlineBolck) {
+            height = height / lineHeight * 1.4
+            y = cr.y + (cr.height - height) / 2
+          }
+          this.rows.push({
+            rect: cr,
+            spanData: [{
+              x,
+              y,
+              width,
+              height,
+              text: span.textContent ?? '',
+              letterSpacing
+            }]
+          })
         }
-        this.rows.push({
-          rect: cr,
-          spanData: [{
-            x,
-            y,
-            width,
-            height,
-            text: span.textContent ?? '',
-            letterSpacing
-          }]
-        })
       }
     }
   }
