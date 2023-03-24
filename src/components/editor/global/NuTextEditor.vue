@@ -84,7 +84,9 @@ export default defineComponent({
         const selectionRanges = editor.view.state.selection.ranges
         if (selectionRanges.length > 0) {
           const to = selectionRanges[0].$to.pos
-          editor.commands.setTextSelection({ from: to, to })
+          setTimeout(() => {
+            editor.commands.setTextSelection({ from: to, to })
+          }, 100)
         }
         console.log('composing after', editor.view.composing)
       }
