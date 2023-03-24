@@ -85,7 +85,7 @@ class Rect {
     })
   }
 
-  async init(config: IText) {
+  async init(config: IText, { splitSpan } = { splitSpan: false }) {
     this.vertical = config.styles.writingMode === 'vertical-lr'
     const fixedWidth = isITextLetterBg(config.styles.textBg) && config.styles.textBg.fixedWidth
 
@@ -105,7 +105,7 @@ class Rect {
           span.appendChild(document.createElement('br'))
           p.appendChild(span)
         } else {
-          [...spanData.text].forEach(t => {
+          (splitSpan ? [...spanData.text] : [spanData.text]).forEach(t => {
             const isComposingText = spanData.text.length > 1
             const fixedWidthStyle = fixedWidth && isComposingText ? {
               letterSpacing: 0,
@@ -780,7 +780,7 @@ class TextBg {
 
     const opacity = textBg.opacity * 0.01
     const myRect = new Rect()
-    await myRect.init(config)
+    await myRect.init(config, { splitSpan: isITextLetterBg(textBg) })
     myRect.preprocess()
     const { vertical, width, height, transform, rects, rows } = myRect.get()
 
