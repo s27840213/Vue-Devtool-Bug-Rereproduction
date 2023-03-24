@@ -89,6 +89,7 @@ export default defineComponent({
   },
   beforeMount() {
     networkUtils.registerNetworkListener()
+    // Overwrite overflow clip for localhost text debug use
     if (/http:/.test(window.location.href)) {
       document.body.style.overflow = 'hidden'
     }
