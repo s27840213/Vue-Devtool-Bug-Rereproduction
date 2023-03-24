@@ -66,13 +66,7 @@ export default defineComponent({
       scrollDirPrev: -1 as -1 | 1, // -1 for scroll up, 1 for scroll down
       destScrollProgress: -1 as -1 | 1, // -1 for expanded button, 1 for minimized button
       btnAniStartTime: null as number | null,
-      scrollAniStartTime: null as number | null,
-      scrollVelocity: 0,
       isPan: false,
-      isTouch: false,
-      touchStartY: 0,
-      touchStartTime: null as number | null,
-      touchStartScrollTop: 0,
     }
   },
   mounted() {
@@ -83,8 +77,10 @@ export default defineComponent({
         await this.getRecently({ writeBack: true })
         await this.getContent()
       })
+
     const elMainContent = (this.$refs as Record<string, CCategoryList[]>).mainContent[0].$el as HTMLElement
     this.elMainContent = elMainContent
+
     const atMainContent = new AnyTouch(this.elMainContent, { preventDefault: false })
     atMainContent.on('panstart', (e: AnyTouchEvent) => {
       if (this.isPan) return // because this event will trigger when pan direction changes
@@ -101,31 +97,6 @@ export default defineComponent({
     elMainContent.onscroll = (e: Event) => {
       this.handleMainContentScroll()
     }
-    // elMainContent.ontouchstart = (e: TouchEvent) => {
-    //   console.log('ontouchstart', e)
-    //   e.preventDefault()
-    //   this.isTouch = true
-    //   this.touchStartY = e.touches[0].pageY
-    //   this.touchStartTime = performance.now()
-    //   this.touchStartScrollTop = elMainContent.scrollTop
-    // }
-    // elMainContent.ontouchmove = (e: TouchEvent) => {
-    //   e.preventDefault()
-    //   const distY = e.touches[0].pageY - this.touchStartY
-    //   elMainContent.scrollTop = this.touchStartScrollTop - distY
-    //   // elMainContent.scrollTo({
-    //   //   top: this.touchStartScrollTop - distY,
-    //   //   behavior: 'auto'
-    //   // })
-    // }
-    // elMainContent.ontouchend = (e: TouchEvent) => {
-    //   e.preventDefault()
-    //   this.isTouch = false
-    //   const dist = e.changedTouches[0].pageY - this.touchStartY
-    //   const time = performance.now() - this.touchStartTime!
-    //   this.scrollVelocity = dist / time * 30
-    //   this.playMomentumScrollAnimation()
-    // }
   },
   watch: {
     scrollOrResize() {
@@ -328,21 +299,6 @@ export default defineComponent({
     },
     playBtnAnimation() {
       window.requestAnimationFrame(this.btnAnimation)
-    },
-    momentumScrollAnimation(timestamp: number) {
-      if (!this.scrollAniStartTime) this.scrollAniStartTime = timestamp
-      const el = this.elMainContent as HTMLElement
-      this.scrollVelocity = this.scrollVelocity * 0.96
-      if (this.isTouch || el.scrollTop <= 0 || el.scrollTop >= el.scrollHeight - el.clientHeight) {
-        this.scrollAniStartTime = null
-        return
-      }
-      if (Math.abs(this.scrollVelocity) < 0.01) return
-      el.scrollTop = el.scrollTop - this.scrollVelocity
-      this.playMomentumScrollAnimation()
-    },
-    playMomentumScrollAnimation() {
-      window.requestAnimationFrame(this.momentumScrollAnimation)
     }
   }
 })
