@@ -89,6 +89,9 @@ export default defineComponent({
   },
   beforeMount() {
     networkUtils.registerNetworkListener()
+    if (/http:/.test(window.location.href)) {
+      document.body.style.overflow = 'hidden'
+    }
   },
   beforeUnmount() {
     networkUtils.unregisterNetworkListener()
