@@ -29,7 +29,9 @@ class ListService {
       // [2022.01.19] uncached: font, layout
       all_theme: params.all_theme,
       // app: 0: vivipic (default), 1: vivisticker
-      app: 1
+      app: 1,
+      // for text panel of US version
+      col_num: params.colNum,
     }
 
     return axios.request<IListServiceResponse>({

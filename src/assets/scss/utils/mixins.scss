@@ -34,12 +34,12 @@
 }
 
 // for vivisticker
-@mixin rwd-container {
-  padding: 0 24px;
+@mixin rwd-container($pd: 24px, $pt: 5%, $pl: 18%) {
+  padding: 0 $pd;
   @include layout-tablet{
-    padding: 0 5%;
+    padding: 0 $pt;
     @include layout-landscape{
-      padding: 0 18%;
+      padding: 0 $pl;
     }
   }
 }

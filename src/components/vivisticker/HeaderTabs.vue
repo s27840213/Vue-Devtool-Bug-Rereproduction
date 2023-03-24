@@ -20,6 +20,12 @@ div(class="header-bar relative" @pointerdown.stop)
                 :iconWidth="`${tab.width}px`"
                 :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
                 :iconColor="tab.disabled ? 'gray-2' : 'white'")
+    div(v-if="isInEditor && isUsVer" class="header-bar__feature-icon body-XS text-black-1 copy-us" @click.prevent.stop="handleCopy")
+        svg-icon(iconName="copy"
+                  iconWidth="18px"
+                  iconHeight="18px"
+                  iconColor="black-1")
+        span Copy
     div(v-if="isInMyDesign && !isInEditor" class="header-bar__right-text" @click.stop.prevent="handleSelectDesign") {{ isInSelectionMode ? $t('NN0203') : $t('STK0007') }}
 </template>
 
@@ -86,10 +92,14 @@ export default defineComponent({
     },
     leftTabs(): TabConfig[] {
       if (this.isInEditor) {
-        return this.stepCount > 1 ? [
+        const retTabs = []
+        const stepTabs = [
           { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: shortcutUtils.undo },
           { icon: 'redo', disabled: stepsUtils.isInLastStep || this.isCropping, width: 24, action: shortcutUtils.redo }
-        ] : []
+        ]
+        if (this.isUsVer) retTabs.push({ icon: 'vivisticker_close', disabled: false, width: 24, action: this.handleEndEditing })
+        if (this.stepCount > 1) retTabs.push(...stepTabs)
+        return retTabs
       } else if (this.isInMyDesign) {
         return [
           { icon: 'chevron-left', width: 24, action: this.leaveMyDesign }
@@ -142,8 +152,10 @@ export default defineComponent({
         return [
           { icon: 'bg', width: 24, action: this.handleSwitchBg },
           ...(this.editorTypeTextLike ? [{ icon: 'trash', width: 24, action: shortcutUtils.del }] : []),
-          { icon: 'copy', width: 24, action: this.handleCopy },
-          { icon: 'vivisticker_close', width: 24, action: this.handleEndEditing }
+          ...(!this.isUsVer ? [
+            { icon: 'copy', width: 24, action: this.handleCopy },
+            { icon: 'vivisticker_close', width: 24, action: this.handleEndEditing }
+          ] : [])
         ]
       } else if (this.isInMyDesign) {
         return []
@@ -159,6 +171,9 @@ export default defineComponent({
           { icon: 'more', width: 24, action: this.handleMore, isPanelIcon: true }
         ]
       }
+    },
+    isUsVer(): boolean {
+      return this.$i18n.locale === 'us'
     }
   },
   methods: {
@@ -346,6 +361,20 @@ export default defineComponent({
     border-radius: 3px;
     &:active {
       background-color: setColor(gray-2);
+    }
+    &.copy-us{
+      display: flex;
+      align-items: center;
+      padding: 4px 8px;
+      gap: 4px;
+      background-color: white;
+      border-radius: 100px;
+      >svg {
+        padding: 2px;
+      }
+      &:active {
+        background-color: setColor(black-6);
+      }
     }
   }
 

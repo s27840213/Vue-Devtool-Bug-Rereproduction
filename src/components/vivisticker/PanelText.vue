@@ -45,7 +45,7 @@ div(class="panel-text rwd-container" :class="{'in-category': isInCategory}")
           :key="item.id"
           :item="item"
           :itemWidth="itemWidth"
-          :style="itemStyles")
+          :style="{margin: isTablet ? 0 : '0 auto'}")
 </template>
 
 <script lang="ts">
@@ -86,7 +86,8 @@ export default defineComponent({
       isInEditor: 'vivisticker/getIsInEditor',
       isTabInCategory: 'vivisticker/getIsInCategory',
       isTabShowAllRecently: 'vivisticker/getShowAllRecently',
-      editorBg: 'vivisticker/getEditorBg'
+      editorBg: 'vivisticker/getEditorBg',
+      pending: 'textStock/pending'
     }),
     ...mapState({
       isTablet: 'isTablet'
@@ -95,7 +96,6 @@ export default defineComponent({
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      pending: 'pending',
       keyword: 'keyword'
     }),
     isInCategory(): boolean {
@@ -199,11 +199,6 @@ export default defineComponent({
       } : {
         gridTemplateColumns: 'repeat(3, 1fr)',
         columnGap: '10px'
-      }
-    },
-    itemStyles() {
-      return this.isTablet ? {} : {
-        margin: '0 auto'
       }
     }
   },

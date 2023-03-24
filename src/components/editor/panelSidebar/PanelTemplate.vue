@@ -150,7 +150,6 @@ export default defineComponent({
       categories: 'categories',
       rawContent: 'content',
       rawSearchResult: 'searchResult',
-      pending: 'pending',
       keyword: 'keyword',
       theme: 'theme',
       sum: 'sum'
@@ -160,7 +159,8 @@ export default defineComponent({
       editorThemes: 'getEditThemes'
     }),
     ...mapGetters({
-      showAdminTool: 'user/showAdminTool'
+      showAdminTool: 'user/showAdminTool',
+      pending: 'templates/pending'
     }),
     keywordLabel():string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword

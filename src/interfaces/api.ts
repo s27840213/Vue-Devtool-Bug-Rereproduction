@@ -123,6 +123,7 @@ export interface IListServiceParams {
   cache?: boolean
   platform?: string
   all_theme?: number
+  colNum?: number
 }
 
 export interface IGroupDesignInputParams {
@@ -163,7 +164,7 @@ export interface ICategoryItem {
   sentinel?: boolean
 }
 export interface ICategoryList {
-  key: 'mainContent' | 'searchResult' | 'favoritesContent' | 'favoritesSearchResult'
+  key: 'mainContent' | 'searchResult' | 'favoritesContent' | 'favoritesSearchResult' | 'categoryCardList'
   show: boolean
   content: ICategoryItem[]
   loadMore?: () => void
@@ -175,7 +176,9 @@ export interface IListServiceContentData {
   list: IListServiceContentDataItem[]
   title: string
   title_locale?: string // Category title locale
-  is_recent?: number
+  is_recent?: number,
+  cover_id?: string,
+  cover_url?: string,
 }
 
 export interface IListServiceData {

@@ -14,7 +14,8 @@ class Giphy {
         locale: i18n.global.locale,
         app: 1,
         cache: true,
-        ver: store.getters['user/getVerApi']
+        ver: store.getters['user/getVerApi'],
+        platform: window.location.host
       }
     })
   }
@@ -31,7 +32,8 @@ class Giphy {
         locale: i18n.global.locale,
         app: 1,
         cache: true,
-        ver: store.getters['user/getVerApi']
+        ver: store.getters['user/getVerApi'],
+        platform: window.location.host
       }
     })
   }
@@ -47,7 +49,8 @@ class Giphy {
         locale: i18n.global.locale,
         app: 1,
         cache: true,
-        ver: store.getters['user/getVerApi']
+        ver: store.getters['user/getVerApi'],
+        platform: window.location.host
       }
     })
   }
@@ -63,7 +66,8 @@ class Giphy {
         locale: i18n.global.locale,
         app: 1,
         cache: true,
-        ver: store.getters['user/getVerApi']
+        ver: store.getters['user/getVerApi'],
+        platform: window.location.host
       }
     })
   }
@@ -79,7 +83,8 @@ class Giphy {
         locale: i18n.global.locale,
         app: 1,
         cache: true,
-        ver: store.getters['user/getVerApi']
+        ver: store.getters['user/getVerApi'],
+        platform: window.location.host
       }
     })
   }

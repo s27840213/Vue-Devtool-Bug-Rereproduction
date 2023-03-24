@@ -83,7 +83,7 @@ export default defineComponent({
   position: relative;
   background: rgba(255, 255, 255, 0.1);
   box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
-  border-radius: 5px;
+  border-radius: 10px;
   &__img {
     width: 100%;
     height: 100%;
