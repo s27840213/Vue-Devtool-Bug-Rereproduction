@@ -729,8 +729,8 @@ class TextBg {
       },
       penguin: {
         xOffset200: 0,
-        yOffset200: 0,
-        size: 125,
+        yOffset200: -1,
+        size: 200,
         opacity: 100,
         fixedWidth: true,
         color: '', // no effect
@@ -745,7 +745,7 @@ class TextBg {
       circle: { lineHeight: 1.78, fontSpacing: 585 },
       cloud: { lineHeight: 1.54, fontSpacing: 186 },
       'text-book': { lineHeight: 1.96, fontSpacing: 665 },
-      penguin: { lineHeight: 1.96, fontSpacing: 665 },
+      penguin: { lineHeight: 1.96, fontSpacing: 800 },
     } as Record<string, Record<'lineHeight' | 'fontSpacing', number>>
 
     for (const [key, val] of Object.entries(defaultAttrs[name] ?? {})) {
