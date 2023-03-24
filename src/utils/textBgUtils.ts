@@ -1057,7 +1057,7 @@ class TextBg {
         const newFixedWidth = isITextLetterBg(textBg) && textBg.fixedWidth
         if (oldFixedWidth !== newFixedWidth) {
           const paragraphs = cloneDeep(layers[idx].paragraphs as IParagraph[])
-          if (newFixedWidth) { // Split span
+          if (newFixedWidth) { // Split span, another one in tiptapUtils.toIParagraph
             paragraphs.forEach(p => {
               p.spans = p.spans.flatMap(span =>
                 [...span.text].map(t => ({ text: t, styles: span.styles }))
@@ -1080,6 +1080,9 @@ class TextBg {
             targetLayer.layers ? +idx : subLayerIndex
           )
           tiptapUtils.updateHtml() // Vuex config => tiptap
+          textUtils.updateTextLayerSizeByShape(pageIndex, layerIndex,
+            targetLayer.layers ? +idx : subLayerIndex
+          )
 
           // When fixedWith true => false, this can force tiptap merge span that have same attrs.
           if (document.querySelector('.ProseMirror') && !newFixedWidth) {
