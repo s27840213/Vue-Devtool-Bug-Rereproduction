@@ -13,7 +13,7 @@ class ThemeUtils {
   get getPageSize() { return store.getters.getPageSize }
 
   getFocusPageSize(pageIndex = PageUtils.currFocusPageIndex): { width: number, height: number } {
-    return this.getPageSize(pageIndex === -1 ? PageUtils.currFocusPageIndex : pageIndex)
+    return this.getPageSize(pageIndex === -1 ? PageUtils.middlemostPageIndex : pageIndex)
   }
 
   setTemplateThemes(themes: Itheme[]) {
